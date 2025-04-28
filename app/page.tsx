@@ -95,13 +95,15 @@ export default function Home() {
     savePolygonToFile(polygon);
 
     // Add listener for changes to save updated polygon
-    window.google.maps.event.addListener(polygon.getPath(), 'set_at', () => {
-      savePolygonToFile(polygon);
-    });
-    
-    window.google.maps.event.addListener(polygon.getPath(), 'insert_at', () => {
-      savePolygonToFile(polygon);
-    });
+    if (typeof google !== 'undefined') {
+      google.maps.event.addListener(polygon.getPath(), 'set_at', () => {
+        savePolygonToFile(polygon);
+      });
+      
+      google.maps.event.addListener(polygon.getPath(), 'insert_at', () => {
+        savePolygonToFile(polygon);
+      });
+    }
   };
 
   // Handle map load
@@ -120,6 +122,30 @@ export default function Home() {
     setIsGoogleLoaded(true);
   };
 
+  // Create drawing manager options with client-side safety
+  const [drawingManagerOptions, setDrawingManagerOptions] = useState({
+    drawingControl: true,
+    drawingControlOptions: {
+      position: 1, // TOP_CENTER
+      drawingModes: ['polygon']
+    },
+    polygonOptions
+  });
+
+  // Update drawing manager options when Google is loaded
+  useEffect(() => {
+    if (isGoogleLoaded && typeof google !== 'undefined') {
+      setDrawingManagerOptions({
+        drawingControl: true,
+        drawingControlOptions: {
+          position: google.maps.ControlPosition.TOP_CENTER,
+          drawingModes: [google.maps.drawing.OverlayType.POLYGON]
+        },
+        polygonOptions
+      });
+    }
+  }, [isGoogleLoaded]);
+
   return (
     <LoadScript 
       googleMapsApiKey={apiKey}
@@ -135,18 +161,13 @@ export default function Home() {
         }}
         onLoad={onMapLoad}
       >
-        <DrawingManager
-          onLoad={onDrawingManagerLoad}
-          onPolygonComplete={onPolygonComplete}
-          options={{
-            drawingControl: true,
-            drawingControlOptions: {
-              position: window.google?.maps?.ControlPosition?.TOP_CENTER,
-              drawingModes: [window.google?.maps?.drawing?.OverlayType?.POLYGON]
-            },
-            polygonOptions
-          }}
-        />
+        {isGoogleLoaded && (
+          <DrawingManager
+            onLoad={onDrawingManagerLoad}
+            onPolygonComplete={onPolygonComplete}
+            options={drawingManagerOptions}
+          />
+        )}
       </GoogleMap>
     </LoadScript>
   );
