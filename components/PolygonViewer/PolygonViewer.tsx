@@ -63,10 +63,10 @@ export default function PolygonViewer() {
 
     // Initialize Three.js
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color('#1e3a8a'); // Blue background
+    scene.background = new THREE.Color('#1e5799'); // Brighter blue background
     
     // Create a fog effect for depth
-    scene.fog = new THREE.FogExp2('#1e3a8a', 0.002);
+    scene.fog = new THREE.FogExp2('#1e5799', 0.001); // Reduced fog density
     
     const camera = new THREE.PerspectiveCamera(
       75, 
@@ -85,6 +85,7 @@ export default function PolygonViewer() {
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.2;
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
     
     // Create textures
     const textureLoader = new THREE.TextureLoader();
@@ -108,12 +109,16 @@ export default function PolygonViewer() {
     sandRoughnessMap.repeat.set(5, 5);
     
     // Add lights
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6); // Increased from 0.3 to 0.6
     scene.add(ambientLight);
     
+    // Add a hemisphere light for better overall illumination
+    const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x0044ff, 0.6);
+    scene.add(hemisphereLight);
+    
     // Main directional light (sun)
-    const sunLight = new THREE.DirectionalLight(0xffffeb, 1.2);
-    sunLight.position.set(50, 100, 50);
+    const sunLight = new THREE.DirectionalLight(0xffffff, 1.5); // Changed from yellowish to white, increased intensity
+    sunLight.position.set(30, 100, 30); // Adjusted position
     sunLight.castShadow = true;
     
     // Improve shadow quality
@@ -137,14 +142,14 @@ export default function PolygonViewer() {
     // Add water plane with animated normal map
     const waterGeometry = new THREE.PlaneGeometry(200, 200, 50, 50);
     const waterMaterial = new THREE.MeshStandardMaterial({ 
-      color: '#0077be',
+      color: '#0066cc', // More blue, less green
       transparent: true,
-      opacity: 0.8,
-      metalness: 0.1,
-      roughness: 0.2,
+      opacity: 0.7,
+      metalness: 0.2,
+      roughness: 0.1,
       normalMap: waterNormalMap,
-      normalScale: new THREE.Vector2(0.3, 0.3),
-      envMapIntensity: 0.5
+      normalScale: new THREE.Vector2(0.4, 0.4),
+      envMapIntensity: 0.8
     });
     
     const waterPlane = new THREE.Mesh(waterGeometry, waterMaterial);
@@ -236,11 +241,11 @@ export default function PolygonViewer() {
             
             // Create a realistic sand material
             const sandMaterial = new THREE.MeshStandardMaterial({ 
-              color: '#e6c587', // Base sand color
+              color: '#e6d2a8', // More yellow/tan color
               map: sandBaseColor,
               normalMap: sandNormalMap,
               roughnessMap: sandRoughnessMap,
-              roughness: 0.8,
+              roughness: 0.7,
               metalness: 0.1,
               side: THREE.DoubleSide
             });
@@ -287,11 +292,11 @@ export default function PolygonViewer() {
       sampleGeometry.rotateX(Math.PI / 2);
       
       const sampleMaterial = new THREE.MeshStandardMaterial({
-        color: '#e6c587',
+        color: '#e6d2a8', // More yellow/tan color
         map: sandBaseColor,
         normalMap: sandNormalMap,
         roughnessMap: sandRoughnessMap,
-        roughness: 0.8,
+        roughness: 0.7,
         metalness: 0.1,
         side: THREE.DoubleSide
       });
