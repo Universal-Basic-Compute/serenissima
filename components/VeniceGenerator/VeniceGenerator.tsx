@@ -4,7 +4,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { generateCanals } from './canals';
 import { generateIslands } from './islands';
 import { placeBridges } from './bridges';
-import { VeniceConfig } from './utils';
+import { VeniceConfig, islandsOverlap, canalIntersectsIsland, Island, Canal } from './utils';
 
 interface VeniceGeneratorProps {
   width: number;
