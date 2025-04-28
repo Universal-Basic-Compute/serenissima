@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { generateCanals } from './canals';
 import { generateIslands } from './islands';
 import { placeBridges } from './bridges';
@@ -18,13 +18,30 @@ const VeniceGenerator: React.FC<VeniceGeneratorProps> = ({
   config = {} 
 }) => {
   const [svgContent, setSvgContent] = useState<string>('');
+  const configRef = useRef(config);
+  const isInitialRender = useRef(true);
+  
+  // Store previous values to detect changes
+  const prevWidth = useRef(width);
+  const prevHeight = useRef(height);
   
   useEffect(() => {
-    // Generate the Venice map
-    generateVeniceMap(width, height, config);
-  }, [width, height, config]);
+    // Only generate the map on initial render or when width/height changes
+    // Avoid regenerating when svgContent changes
+    if (isInitialRender.current || 
+        width !== prevWidth.current || 
+        height !== prevHeight.current) {
+      
+      isInitialRender.current = false;
+      prevWidth.current = width;
+      prevHeight.current = height;
+      
+      // Generate the Venice map
+      generateVeniceMap(width, height, configRef.current);
+    }
+  }, [width, height]);
   
-  const generateVeniceMap = async (width: number, height: number, config: Partial<VeniceConfig>) => {
+  const generateVeniceMap = (width: number, height: number, config: Partial<VeniceConfig>) => {
     // Merge default config with provided config
     const fullConfig: VeniceConfig = {
       canalDensity: 0.6,
