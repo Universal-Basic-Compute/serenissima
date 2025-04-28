@@ -8,6 +8,7 @@ export default function PolygonViewer() {
   const [polygons, setPolygons] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [highQuality, setHighQuality] = useState(false);
   
   // Load saved polygons
   useEffect(() => {
@@ -66,7 +67,7 @@ export default function PolygonViewer() {
     scene.background = new THREE.Color('#1e5799'); // Brighter blue background
     
     // Create a fog effect for depth
-    scene.fog = new THREE.FogExp2('#1e5799', 0.001); // Reduced fog density
+    scene.fog = new THREE.FogExp2('#1e5799', 0.0005); // Further reduced fog density for performance
     
     const camera = new THREE.PerspectiveCamera(
       75, 
@@ -81,6 +82,7 @@ export default function PolygonViewer() {
       antialias: true 
     });
     renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio > 1 ? 2 : 1); // Limit pixel ratio for performance
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -122,9 +124,9 @@ export default function PolygonViewer() {
     sunLight.position.set(30, 100, 30); // Adjusted position
     sunLight.castShadow = true;
     
-    // Improve shadow quality
-    sunLight.shadow.mapSize.width = 2048;
-    sunLight.shadow.mapSize.height = 2048;
+    // Reduced shadow map resolution for better performance
+    sunLight.shadow.mapSize.width = 1024;
+    sunLight.shadow.mapSize.height = 1024;
     sunLight.shadow.camera.near = 0.5;
     sunLight.shadow.camera.far = 500;
     sunLight.shadow.camera.left = -100;
@@ -140,8 +142,8 @@ export default function PolygonViewer() {
     fillLight.position.set(-50, 50, -50);
     scene.add(fillLight);
     
-    // Add water plane with animated normal map
-    const waterGeometry = new THREE.PlaneGeometry(200, 200, 50, 50);
+    // Add water plane with animated normal map - reduced complexity
+    const waterGeometry = new THREE.PlaneGeometry(200, 200, 20, 20);
     const waterMaterial = new THREE.MeshStandardMaterial({ 
       color: '#0066cc', // More blue, less green
       transparent: true,
@@ -224,15 +226,15 @@ export default function PolygonViewer() {
               shape.lineTo(normalizedCoords[i].x, normalizedCoords[i].y);
             }
             
-            // Create extruded geometry for the island with a slight height
+            // Create extruded geometry for the island with a slight height - simplified for performance
             const extrudeSettings = {
               steps: 1,
               depth: 0.5 + Math.random() * 0.5, // Random height variation
               bevelEnabled: true,
-              bevelThickness: 0.2,
-              bevelSize: 0.2,
+              bevelThickness: 0.1, // Reduced from 0.2
+              bevelSize: 0.1, // Reduced from 0.2
               bevelOffset: 0,
-              bevelSegments: 3
+              bevelSegments: 2 // Reduced from 3
             };
             
             const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
@@ -283,10 +285,10 @@ export default function PolygonViewer() {
         steps: 1,
         depth: 0.8,
         bevelEnabled: true,
-        bevelThickness: 0.2,
-        bevelSize: 0.2,
+        bevelThickness: 0.1, // Reduced from 0.2
+        bevelSize: 0.1, // Reduced from 0.2
         bevelOffset: 0,
-        bevelSegments: 3
+        bevelSegments: 2 // Reduced from 3
       };
       
       const sampleGeometry = new THREE.ExtrudeGeometry(sampleShape, extrudeSettings);
@@ -386,30 +388,34 @@ export default function PolygonViewer() {
     window.addEventListener('mouseup', handleMouseUp);
     window.addEventListener('wheel', handleWheel, { passive: false });
     
+    // Add a frame counter for less frequent updates
+    let frameCount = 0;
+    
     // Animation loop
     const animate = () => {
       requestAnimationFrame(animate);
       
-      // Animate water normal map
-      const time = Date.now() * 0.001;
+      // Animate water normal map with less frequent updates
+      const time = Date.now() * 0.0005; // Reduced animation speed
       waterMaterial.normalMap.offset.x = time * 0.05;
       waterMaterial.normalMap.offset.y = time * 0.05;
       
-      // Animate subtle water waves
-      if (waterVertices) {
-        for (let i = 0; i < waterVertexCount; i++) {
+      // Animate water waves less frequently (every 3 frames)
+      if (waterVertices && frameCount % 3 === 0) {
+        for (let i = 0; i < waterVertexCount; i += 2) { // Process every other vertex
           const x = waterVertices.getX(i);
           const z = waterVertices.getZ(i);
-          const waveHeight = 0.1;
+          const waveHeight = 0.05; // Reduced wave height
           
-          // Create gentle waves
-          const y = Math.sin(x * 0.5 + time) * Math.cos(z * 0.5 + time) * waveHeight;
+          // Create gentle waves with simpler math
+          const y = Math.sin(x * 0.3 + time) * Math.cos(z * 0.3 + time) * waveHeight;
           waterVertices.setY(i, y);
         }
         
         waterGeometry.attributes.position.needsUpdate = true;
       }
       
+      frameCount++;
       renderer.render(scene, camera);
     };
     
@@ -470,6 +476,12 @@ export default function PolygonViewer() {
           <p>Found {polygons.length} polygon(s)</p>
         )}
       </div>
+      <button 
+        onClick={() => setHighQuality(!highQuality)}
+        className="absolute bottom-4 right-4 z-10 bg-white px-4 py-2 rounded shadow"
+      >
+        {highQuality ? 'Performance Mode' : 'Quality Mode'}
+      </button>
       <canvas ref={canvasRef} className="w-full h-full" />
     </div>
   );
