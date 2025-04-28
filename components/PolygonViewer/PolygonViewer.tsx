@@ -250,7 +250,13 @@ export default function PolygonViewer() {
               roughnessMap: sandRoughnessMap,
               roughness: 0.7,
               metalness: 0.1,
-              side: THREE.DoubleSide
+              side: THREE.DoubleSide,
+              flatShading: false,
+              wireframe: false,
+              // Remove polygon edges by setting these properties:
+              polygonOffset: true,
+              polygonOffsetFactor: 1,
+              polygonOffsetUnits: 1
             });
             
             const mesh = new THREE.Mesh(geometry, sandMaterial);
@@ -301,7 +307,13 @@ export default function PolygonViewer() {
         roughnessMap: sandRoughnessMap,
         roughness: 0.7,
         metalness: 0.1,
-        side: THREE.DoubleSide
+        side: THREE.DoubleSide,
+        flatShading: false,
+        wireframe: false,
+        // Remove polygon edges by setting these properties:
+        polygonOffset: true,
+        polygonOffsetFactor: 1,
+        polygonOffsetUnits: 1
       });
       
       const sampleMesh = new THREE.Mesh(sampleGeometry, sampleMaterial);
