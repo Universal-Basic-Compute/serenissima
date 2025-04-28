@@ -19,6 +19,113 @@ export function generateCanals(width: number, height: number, config: VeniceConf
   const quaternaryCanals = createQuaternaryCanals(width, height, [...tertiaryCanals, ...secondaryCanals, grandCanal], config);
   canals.push(...quaternaryCanals);
   
+  // Add even more fine canals (new)
+  const fineCanals = createFineCanals(width, height, [...quaternaryCanals, ...tertiaryCanals, ...secondaryCanals, grandCanal], config);
+  canals.push(...fineCanals);
+  
+  return canals;
+}
+
+// Add a new function to create even finer canals
+function createFineCanals(
+  width: number,
+  height: number,
+  existingCanals: Canal[],
+  config: VeniceConfig
+): Canal[] {
+  const canals: Canal[] = [];
+  const numCanals = Math.floor(30 + config.canalDensity * 20); // Many fine canals
+  
+  // Create a grid of potential canal start points focused on the center
+  const gridSize = width / 12; // Smaller grid for more potential points
+  const potentialPoints: Point[] = [];
+  
+  // Calculate center of the map
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  existingCanals.forEach(canal => {
+    canal.points.forEach(point => {
+      minX = Math.min(minX, point.x);
+      minY = Math.min(minY, point.y);
+      maxX = Math.max(maxX, point.x);
+      maxY = Math.max(maxY, point.y);
+    });
+  });
+  
+  const centerX = (minX + maxX) / 2;
+  const centerY = (minY + maxY) / 2;
+  
+  // Focus heavily on the center area
+  for (let x = centerX - width * 0.4; x < centerX + width * 0.4; x += gridSize) {
+    for (let y = centerY - height * 0.4; y < centerY + height * 0.4; y += gridSize) {
+      // Calculate distance from center (normalized 0-1)
+      const distFromCenter = Math.sqrt(
+        Math.pow((x - centerX) / (width * 0.4), 2) + 
+        Math.pow((y - centerY) / (height * 0.4), 2)
+      );
+      
+      // Higher probability near center
+      if (Math.random() > distFromCenter * 0.7) {
+        potentialPoints.push({
+          x: x + (Math.random() * gridSize * 0.8),
+          y: y + (Math.random() * gridSize * 0.8)
+        });
+      }
+    }
+  }
+  
+  // For each potential point, try to create a small canal
+  for (let i = 0; i < Math.min(numCanals, potentialPoints.length); i++) {
+    const startPoint = potentialPoints[i];
+    
+    // Find the closest canal
+    let closestCanal: Canal | null = null;
+    let closestPoint: Point | null = null;
+    let minDistance = Infinity;
+    
+    for (const canal of existingCanals) {
+      for (const point of canal.points) {
+        const distance = Math.sqrt(
+          Math.pow(startPoint.x - point.x, 2) + Math.pow(startPoint.y - point.y, 2)
+        );
+        
+        if (distance < minDistance) {
+          minDistance = distance;
+          closestCanal = canal;
+          closestPoint = point;
+        }
+      }
+    }
+    
+    // If we found a close canal and the distance is reasonable
+    if (closestCanal && closestPoint && minDistance < width * 0.12 && minDistance > width * 0.02) {
+      // Create a small canal from the point to the closest canal
+      const angle = Math.atan2(
+        closestPoint.y - startPoint.y,
+        closestPoint.x - startPoint.x
+      );
+      
+      // Create a slightly curved path
+      const midPoint = {
+        x: startPoint.x + (closestPoint.x - startPoint.x) * 0.5 + (Math.random() * 2 - 1) * width * 0.015,
+        y: startPoint.y + (closestPoint.y - startPoint.y) * 0.5 + (Math.random() * 2 - 1) * height * 0.015
+      };
+      
+      const canalPoints = [
+        startPoint,
+        midPoint,
+        closestPoint
+      ];
+      
+      const pathString = createSmoothPath(canalPoints);
+      
+      canals.push({
+        points: canalPoints,
+        width: width * 0.003, // Very thin canals
+        svgPath: `<path d="${pathString}" stroke="#a4cbe8" stroke-width="${width * 0.003}" fill="none" />`
+      });
+    }
+  }
+  
   return canals;
 }
 
@@ -58,8 +165,8 @@ function createGrandCanal(width: number, height: number, config: VeniceConfig): 
   
   return {
     points,
-    width: width * 0.02, // Reduce from 0.03 to 0.02
-    svgPath: `<path d="${pathString}" stroke="#a4cbe8" stroke-width="${width * 0.02}" fill="none" />`
+    width: width * 0.015, // Reduced from 0.02 to 0.015
+    svgPath: `<path d="${pathString}" stroke="#a4cbe8" stroke-width="${width * 0.015}" fill="none" />`
   };
 }
 
@@ -70,7 +177,7 @@ function createSecondaryCanals(
   config: VeniceConfig
 ): Canal[] {
   const canals: Canal[] = [];
-  const numCanals = Math.floor(6 + Math.random() * 4);
+  const numCanals = Math.floor(8 + Math.random() * 4); // Increased from 6 to 8
   
   // Create canals that branch off from the grand canal
   for (let i = 0; i < numCanals; i++) {
@@ -114,8 +221,8 @@ function createSecondaryCanals(
     
     canals.push({
       points: canalPoints,
-      width: width * 0.01, // Reduce from 0.015 to 0.01
-      svgPath: `<path d="${pathString}" stroke="#a4cbe8" stroke-width="${width * 0.01}" fill="none" />`
+      width: width * 0.008, // Reduced from 0.01 to 0.008
+      svgPath: `<path d="${pathString}" stroke="#a4cbe8" stroke-width="${width * 0.008}" fill="none" />`
     });
   }
   
@@ -129,7 +236,7 @@ function createTertiaryCanals(
   config: VeniceConfig
 ): Canal[] {
   const canals: Canal[] = [];
-  const numCanals = Math.floor(15 + config.canalDensity * 15);
+  const numCanals = Math.floor(20 + config.canalDensity * 15); // Increased from 15 to 20
   
   for (let i = 0; i < numCanals; i++) {
     // Select two random points from existing canals to connect
@@ -178,8 +285,8 @@ function createTertiaryCanals(
     
     canals.push({
       points: canalPoints,
-      width: width * 0.007, // Reduce from 0.01 to 0.007
-      svgPath: `<path d="${pathString}" stroke="#a4cbe8" stroke-width="${width * 0.007}" fill="none" />`
+      width: width * 0.005, // Reduced from 0.007 to 0.005
+      svgPath: `<path d="${pathString}" stroke="#a4cbe8" stroke-width="${width * 0.005}" fill="none" />`
     });
   }
   
@@ -193,7 +300,7 @@ function createQuaternaryCanals(
   config: VeniceConfig
 ): Canal[] {
   const canals: Canal[] = [];
-  const numCanals = Math.floor(15 + config.canalDensity * 15); // Fewer small canals
+  const numCanals = Math.floor(25 + config.canalDensity * 15); // Increased from 15 to 25
   
   // Create a grid of potential canal start points
   const gridSize = width / 8;
@@ -270,8 +377,8 @@ function createQuaternaryCanals(
       
       canals.push({
         points: canalPoints,
-        width: width * 0.005, // Reduce from 0.008 to 0.005
-        svgPath: `<path d="${pathString}" stroke="#a4cbe8" stroke-width="${width * 0.005}" fill="none" />`
+        width: width * 0.004, // Reduced from 0.005 to 0.004
+        svgPath: `<path d="${pathString}" stroke="#a4cbe8" stroke-width="${width * 0.004}" fill="none" />`
       });
     }
   }

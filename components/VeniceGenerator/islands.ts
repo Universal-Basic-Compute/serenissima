@@ -39,11 +39,19 @@ export function generateIslands(canals: Canal[], config: VeniceConfig): Island[]
       );
       
       // Much higher probability of islands near the center, almost none at edges
-      if (Math.random() > Math.pow(distFromCenter, 0.5) * 0.9) { // Exponential falloff from center
-        // Add some randomness to grid positions
-        const jitteredX = x + (Math.random() * gridSize * 0.7);
-        const jitteredY = y + (Math.random() * gridSize * 0.7);
-        potentialCenters.push({ x: jitteredX, y: jitteredY });
+      // Use a steeper falloff function to concentrate islands more in the center
+      if (Math.random() > Math.pow(distFromCenter, 0.3) * 0.8) { // Changed from 0.5 to 0.3 for steeper falloff
+        // Add some randomness to grid positions but keep closer to center
+        const jitterAmount = gridSize * 0.5 * (1 - distFromCenter); // Less jitter for points near center
+        const jitteredX = x + (Math.random() * jitterAmount * 2 - jitterAmount);
+        const jitteredY = y + (Math.random() * jitterAmount * 2 - jitterAmount);
+        
+        // Add bias toward the center for all points
+        const centerBias = 0.2; // Strength of pull toward center
+        const biasedX = jitteredX + (centerX - jitteredX) * centerBias * (1 - distFromCenter);
+        const biasedY = jitteredY + (centerY - jitteredY) * centerBias * (1 - distFromCenter);
+        
+        potentialCenters.push({ x: biasedX, y: biasedY });
       }
     }
   }

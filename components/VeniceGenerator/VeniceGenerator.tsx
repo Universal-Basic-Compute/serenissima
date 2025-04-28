@@ -40,13 +40,13 @@ const VeniceGenerator: React.FC<VeniceGeneratorProps> = ({
   const generateVeniceMap = (width: number, height: number, config: Partial<VeniceConfig>) => {
     // Merge default config with provided config
     const fullConfig: VeniceConfig = {
-      canalDensity: 0.7, // Increased from 0.6
+      canalDensity: 0.8, // Increased from 0.7 to 0.8
       merchantDistrictDensity: 0.8,
       residentialDistrictDensity: 0.4,
-      bridgeDensity: 0.6, // Increased from 0.5
-      campoFrequency: 0.15, // Reduced from 0.2
-      erosionFactor: 0.4, // Increased from 0.3
-      islandDensity: 0.6,
+      bridgeDensity: 0.6,
+      campoFrequency: 0.15,
+      erosionFactor: 0.4,
+      islandDensity: 0.7, // Increased from 0.6 to 0.7
       buildingDensity: 0.7,
       ...config
     };
