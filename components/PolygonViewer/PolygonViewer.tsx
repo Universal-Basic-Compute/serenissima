@@ -99,10 +99,6 @@ export default function PolygonViewer() {
     waterPlane.position.y = -0.1;
     scene.add(waterPlane);
     
-    // Add a grid helper for reference
-    const gridHelper = new THREE.GridHelper(100, 100);
-    scene.add(gridHelper);
-    
     // Calculate bounds to normalize coordinates
     let minLat = Infinity;
     let maxLat = -Infinity;
