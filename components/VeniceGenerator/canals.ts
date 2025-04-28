@@ -165,8 +165,8 @@ function createGrandCanal(width: number, height: number, config: VeniceConfig): 
   
   return {
     points,
-    width: width * 0.015, // Reduced from 0.02 to 0.015
-    svgPath: `<path d="${pathString}" stroke="#a4cbe8" stroke-width="${width * 0.015}" fill="none" />`
+    width: width * 0.035, // Increased from 0.015 to 0.035 (more than doubled)
+    svgPath: `<path d="${pathString}" stroke="#a4cbe8" stroke-width="${width * 0.035}" fill="none" />`
   };
 }
 

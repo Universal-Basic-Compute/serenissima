@@ -3,8 +3,8 @@ import { Island, Canal, Point, VeniceConfig, createSmoothPath } from './utils';
 export function generateIslands(canals: Canal[], config: VeniceConfig): Island[] {
   const islands: Island[] = [];
   
-  // Create a grid of potential island centers - larger grid for fewer, larger islands
-  const gridSize = 80; // Increase from 60 to 80
+  // Create a grid of potential island centers - much larger grid for fewer, bigger islands
+  const gridSize = 120; // Increase from 80 to 120 for fewer islands
   const potentialCenters: Point[] = [];
   
   // Get the bounds from canals
@@ -39,15 +39,15 @@ export function generateIslands(canals: Canal[], config: VeniceConfig): Island[]
       );
       
       // Much higher probability of islands near the center, almost none at edges
-      // Use a steeper falloff function to concentrate islands more in the center
-      if (Math.random() > Math.pow(distFromCenter, 0.3) * 0.8) { // Changed from 0.5 to 0.3 for steeper falloff
+      // Use a much steeper falloff function to concentrate islands more in the center
+      if (Math.random() > Math.pow(distFromCenter, 0.2) * 0.7) { // Changed from 0.3 to 0.2 for steeper falloff
         // Add some randomness to grid positions but keep closer to center
-        const jitterAmount = gridSize * 0.5 * (1 - distFromCenter); // Less jitter for points near center
+        const jitterAmount = gridSize * 0.4 * (1 - distFromCenter); // Less jitter for points near center
         const jitteredX = x + (Math.random() * jitterAmount * 2 - jitterAmount);
         const jitteredY = y + (Math.random() * jitterAmount * 2 - jitterAmount);
         
         // Add bias toward the center for all points
-        const centerBias = 0.2; // Strength of pull toward center
+        const centerBias = 0.4; // Increased from 0.2 to 0.4 for stronger pull toward center
         const biasedX = jitteredX + (centerX - jitteredX) * centerBias * (1 - distFromCenter);
         const biasedY = jitteredY + (centerY - jitteredY) * centerBias * (1 - distFromCenter);
         
@@ -134,7 +134,7 @@ export function generateIslands(canals: Canal[], config: VeniceConfig): Island[]
       ) / Math.sqrt(Math.pow(maxX - minX, 2) + Math.pow(maxY - minY, 2));
       
       // Larger islands in the center, smaller on the edges
-      const sizeMultiplier = 1.8 - distFromCenter; // Increased from 1.5 to 1.8
+      const sizeMultiplier = 2.2 - distFromCenter; // Increased from 1.8 to 2.2
       
       const island = createIsland(center, canals, isCampo, config, sizeMultiplier, nearestCanal, nearestCanalDist);
       islands.push(island);
@@ -155,8 +155,8 @@ function createIsland(
 ): Island {
   // Much more size variation with larger base sizes
   const baseSize = isCampo ? 
-    45 + Math.random() * 30 : // Campos are larger (increased from 35 to 45)
-    15 + Math.pow(Math.random(), 0.6) * 45;  // More small islands, fewer large ones (increased max from 35 to 45)
+    60 + Math.random() * 40 : // Campos are larger (increased from 45 to 60)
+    20 + Math.pow(Math.random(), 0.4) * 70;  // More extreme size variation (increased max from 45 to 70)
   
   const size = baseSize * sizeMultiplier;
   
@@ -167,7 +167,7 @@ function createIsland(
     4 + Math.floor(Math.random() * 3);  // Regular islands have fewer points for smoother shapes
   
   // Create different island shape types
-  const shapeType = Math.floor(Math.random() * 4); // 0-3 different shape types
+  const shapeType = Math.floor(Math.random() * 6); // 0-5 different shape types (increased from 4)
   let points: Point[] = [];
   
   if (shapeType === 0) {
@@ -229,7 +229,7 @@ function createIsland(
         y: center.y + rotatedY
       });
     }
-  } else {
+  } else if (shapeType === 3) {
     // Irregular blob shape
     for (let i = 0; i < numPoints; i++) {
       const angle = (i / numPoints) * Math.PI * 2;
@@ -239,6 +239,45 @@ function createIsland(
       points.push({
         x: center.x + Math.cos(angle) * radius,
         y: center.y + Math.sin(angle) * radius
+      });
+    }
+  } else if (shapeType === 4) {
+    // Triangular shape with rounded corners
+    const angle = Math.random() * Math.PI * 2; // Random orientation
+    const points1 = Math.floor(numPoints / 3);
+    const points2 = Math.floor(numPoints / 3);
+    const points3 = numPoints - points1 - points2;
+    
+    // Create three segments with different radii
+    for (let i = 0; i < numPoints; i++) {
+      const pointAngle = (i / numPoints) * Math.PI * 2 + angle;
+      let radius;
+      
+      if (i < points1) {
+        radius = size * (1.1 + Math.random() * 0.2);
+      } else if (i < points1 + points2) {
+        radius = size * (0.9 + Math.random() * 0.2);
+      } else {
+        radius = size * (1.0 + Math.random() * 0.2);
+      }
+      
+      points.push({
+        x: center.x + Math.cos(pointAngle) * radius,
+        y: center.y + Math.sin(pointAngle) * radius
+      });
+    }
+  } else if (shapeType === 5) {
+    // Complex multi-lobe shape
+    const lobes = 2 + Math.floor(Math.random() * 3); // 2-4 lobes
+    
+    for (let i = 0; i < numPoints; i++) {
+      const pointAngle = (i / numPoints) * Math.PI * 2;
+      // Create a shape with multiple lobes
+      const radius = size * (0.7 + 0.6 * Math.pow(Math.abs(Math.cos(pointAngle * lobes)), 0.7));
+      
+      points.push({
+        x: center.x + Math.cos(pointAngle) * radius,
+        y: center.y + Math.sin(pointAngle) * radius
       });
     }
   }
