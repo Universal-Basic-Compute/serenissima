@@ -88,7 +88,7 @@ export default function PolygonViewer() {
     scene.add(directionalLight);
     
     // Add water plane
-    const waterGeometry = new THREE.PlaneGeometry(20, 20);
+    const waterGeometry = new THREE.PlaneGeometry(100, 100);
     const waterMaterial = new THREE.MeshStandardMaterial({ 
       color: '#1e3a8a',
       transparent: true,
@@ -100,8 +100,41 @@ export default function PolygonViewer() {
     scene.add(waterPlane);
     
     // Add a grid helper for reference
-    const gridHelper = new THREE.GridHelper(20, 20);
+    const gridHelper = new THREE.GridHelper(100, 100);
     scene.add(gridHelper);
+    
+    // Calculate bounds to normalize coordinates
+    let minLat = Infinity;
+    let maxLat = -Infinity;
+    let minLng = Infinity;
+    let maxLng = -Infinity;
+    
+    // Find the bounds of all polygon coordinates
+    polygons.forEach(polygon => {
+      if (polygon.coordinates && polygon.coordinates.length > 0) {
+        polygon.coordinates.forEach(coord => {
+          minLat = Math.min(minLat, coord.lat);
+          maxLat = Math.max(maxLat, coord.lat);
+          minLng = Math.min(minLng, coord.lng);
+          maxLng = Math.max(maxLng, coord.lng);
+        });
+      }
+    });
+    
+    console.log('Coordinate bounds:', { minLat, maxLat, minLng, maxLng });
+    
+    // Calculate center and scale
+    const centerLat = (minLat + maxLat) / 2;
+    const centerLng = (minLng + maxLng) / 2;
+    
+    // Calculate scale to fit polygons in a reasonable size
+    // (normalize to roughly -50 to 50 units)
+    const latRange = maxLat - minLat;
+    const lngRange = maxLng - minLng;
+    const maxRange = Math.max(latRange, lngRange);
+    const scale = maxRange > 0 ? 100 / maxRange : 1;
+    
+    console.log('Center and scale:', { centerLat, centerLng, scale });
     
     // Add polygons
     if (polygons.length > 0) {
@@ -112,12 +145,18 @@ export default function PolygonViewer() {
           try {
             const shape = new THREE.Shape();
             
+            // Normalize coordinates relative to center and apply scale
+            const normalizedCoords = polygon.coordinates.map(coord => ({
+              x: (coord.lng - centerLng) * scale,
+              y: (coord.lat - centerLat) * scale
+            }));
+            
             // Start the shape with the first point
-            shape.moveTo(polygon.coordinates[0].lng, polygon.coordinates[0].lat);
+            shape.moveTo(normalizedCoords[0].x, normalizedCoords[0].y);
             
             // Add the rest of the points
-            for (let i = 1; i < polygon.coordinates.length; i++) {
-              shape.lineTo(polygon.coordinates[i].lng, polygon.coordinates[i].lat);
+            for (let i = 1; i < normalizedCoords.length; i++) {
+              shape.lineTo(normalizedCoords[i].x, normalizedCoords[i].y);
             }
             
             // Create geometry from the shape
@@ -133,9 +172,8 @@ export default function PolygonViewer() {
             
             const mesh = new THREE.Mesh(geometry, material);
             
-            // Scale the mesh if coordinates are in lat/lng (which are very small numbers)
-            // This helps make them visible in the scene
-            mesh.scale.set(10, 10, 10);
+            // Position at ground level
+            mesh.position.y = 0;
             
             scene.add(mesh);
             console.log(`Added polygon ${index} to scene`);
@@ -151,10 +189,10 @@ export default function PolygonViewer() {
       
       // Add a sample polygon for testing
       const sampleShape = new THREE.Shape();
-      sampleShape.moveTo(-1, -1);
-      sampleShape.lineTo(-1, 1);
-      sampleShape.lineTo(1, 1);
-      sampleShape.lineTo(1, -1);
+      sampleShape.moveTo(-10, -10);
+      sampleShape.lineTo(-10, 10);
+      sampleShape.lineTo(10, 10);
+      sampleShape.lineTo(10, -10);
       
       const sampleGeometry = new THREE.ShapeGeometry(sampleShape);
       sampleGeometry.rotateX(Math.PI / 2);
@@ -168,6 +206,10 @@ export default function PolygonViewer() {
       scene.add(sampleMesh);
       console.log('Added sample polygon to scene');
     }
+    
+    // Position camera to view all polygons
+    camera.position.set(0, 50, 50);
+    camera.lookAt(0, 0, 0);
     
     // Simple controls for rotation
     let isDragging = false;
@@ -203,10 +245,31 @@ export default function PolygonViewer() {
       isDragging = false;
     };
     
+    // Add mouse wheel zoom
+    const handleWheel = (event) => {
+      event.preventDefault();
+      
+      // Adjust camera position based on wheel direction
+      const zoomSpeed = 0.1;
+      const delta = event.deltaY > 0 ? 1 : -1;
+      
+      // Move camera closer or further
+      const direction = new THREE.Vector3();
+      camera.getWorldDirection(direction);
+      
+      camera.position.addScaledVector(direction, delta * zoomSpeed * -10);
+      
+      // Ensure camera doesn't go below the ground
+      if (camera.position.y < 1) {
+        camera.position.y = 1;
+      }
+    };
+    
     // Add event listeners
     window.addEventListener('mousedown', handleMouseDown);
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('mouseup', handleMouseUp);
+    window.addEventListener('wheel', handleWheel, { passive: false });
     
     // Animation loop
     const animate = () => {
@@ -230,6 +293,7 @@ export default function PolygonViewer() {
       window.removeEventListener('mousedown', handleMouseDown);
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('wheel', handleWheel);
       window.removeEventListener('resize', handleResize);
       
       // Dispose of Three.js resources
