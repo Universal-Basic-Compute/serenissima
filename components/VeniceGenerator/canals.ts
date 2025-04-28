@@ -58,8 +58,8 @@ function createGrandCanal(width: number, height: number, config: VeniceConfig): 
   
   return {
     points,
-    width: width * 0.03, // Reduce from 0.05 to 0.03
-    svgPath: `<path d="${pathString}" stroke="#6ba4c9" stroke-width="${width * 0.03}" fill="none" />`
+    width: width * 0.02, // Reduce from 0.03 to 0.02
+    svgPath: `<path d="${pathString}" stroke="#6ba4c9" stroke-width="${width * 0.02}" fill="none" />`
   };
 }
 
@@ -114,8 +114,8 @@ function createSecondaryCanals(
     
     canals.push({
       points: canalPoints,
-      width: width * 0.015,
-      svgPath: `<path d="${pathString}" stroke="#6ba4c9" stroke-width="${width * 0.015}" fill="none" />`
+      width: width * 0.01, // Reduce from 0.015 to 0.01
+      svgPath: `<path d="${pathString}" stroke="#6ba4c9" stroke-width="${width * 0.01}" fill="none" />`
     });
   }
   
@@ -179,8 +179,8 @@ function createTertiaryCanals(
     
     canals.push({
       points: canalPoints,
-      width: width * 0.01,
-      svgPath: `<path d="${pathString}" stroke="#6ba4c9" stroke-width="${width * 0.01}" fill="none" />`
+      width: width * 0.007, // Reduce from 0.01 to 0.007
+      svgPath: `<path d="${pathString}" stroke="#6ba4c9" stroke-width="${width * 0.007}" fill="none" />`
     });
   }
   
@@ -271,8 +271,8 @@ function createQuaternaryCanals(
       
       canals.push({
         points: canalPoints,
-        width: width * 0.008, // Very narrow canals
-        svgPath: `<path d="${pathString}" stroke="#6ba4c9" stroke-width="${width * 0.008}" fill="none" />`
+        width: width * 0.005, // Reduce from 0.008 to 0.005
+        svgPath: `<path d="${pathString}" stroke="#6ba4c9" stroke-width="${width * 0.005}" fill="none" />`
       });
     }
   }
