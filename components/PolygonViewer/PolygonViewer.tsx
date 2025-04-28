@@ -333,16 +333,17 @@ export default function PolygonViewer() {
         y: event.clientY - previousMousePosition.y
       };
       
-      // Rotate scene based on mouse movement
+      // Rotate scene based on mouse movement (horizontal rotation is fine)
       scene.rotation.y += deltaMove.x * 0.01;
       
-      // Calculate the new rotation angle
+      // Calculate the new rotation angle for vertical tilt
       const newRotationX = scene.rotation.x + deltaMove.y * 0.01;
       
-      // Limit rotation to between 10° and 90° from the horizon
-      // Convert to radians
-      const minAngle = -Math.PI / 2 + Math.PI / 18; // -90° + 10° = -80°
-      const maxAngle = -Math.PI / 2 + Math.PI / 2;  // -90° + 90° = 0° (horizon)
+      // Limit rotation to prevent looking under the map
+      // We want to allow looking from above (negative values in our coordinate system)
+      // but not allow looking from below (positive values would see underside)
+      const minAngle = -Math.PI / 2; // -90 degrees (looking straight down)
+      const maxAngle = -Math.PI / 18; // -10 degrees (shallow angle)
       
       // Apply rotation only if it's within the allowed range
       if (newRotationX >= minAngle && newRotationX <= maxAngle) {
