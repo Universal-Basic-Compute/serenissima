@@ -40,12 +40,14 @@ const VeniceGenerator: React.FC<VeniceGeneratorProps> = ({
   const generateVeniceMap = (width: number, height: number, config: Partial<VeniceConfig>) => {
     // Merge default config with provided config
     const fullConfig: VeniceConfig = {
-      canalDensity: 0.6,
+      canalDensity: 0.7, // Increased from 0.6
       merchantDistrictDensity: 0.8,
       residentialDistrictDensity: 0.4,
-      bridgeDensity: 0.5,
-      campoFrequency: 0.2,
-      erosionFactor: 0.3,
+      bridgeDensity: 0.6, // Increased from 0.5
+      campoFrequency: 0.15, // Reduced from 0.2
+      erosionFactor: 0.4, // Increased from 0.3
+      islandDensity: 0.6,
+      buildingDensity: 0.7,
       ...config
     };
     
@@ -80,24 +82,39 @@ const VeniceGenerator: React.FC<VeniceGeneratorProps> = ({
             <path d="M0,15 Q5,10 10,15 T20,15" fill="none" stroke="#8bbad4" stroke-width="0.5"/>
           </pattern>
           
-          <!-- Add a subtle texture for islands -->
+          <!-- Improved texture for islands -->
           <pattern id="islandTexture" patternUnits="userSpaceOnUse" width="10" height="10">
             <rect width="10" height="10" fill="#d4cebf"/>
             <circle cx="5" cy="5" r="0.5" fill="#c4baa8" fill-opacity="0.3"/>
           </pattern>
           
-          <!-- Add a subtle texture for campos -->
+          <!-- Improved texture for campos -->
           <pattern id="campoTexture" patternUnits="userSpaceOnUse" width="10" height="10">
             <rect width="10" height="10" fill="#e9e5dc"/>
             <path d="M0,0 L10,10 M10,0 L0,10" stroke="#d8d4cb" stroke-width="0.3"/>
           </pattern>
+          
+          <!-- Add a subtle shadow effect -->
+          <filter id="dropShadow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur in="SourceAlpha" stdDeviation="2" />
+            <feOffset dx="1" dy="1" result="offsetblur" />
+            <feComponentTransfer>
+              <feFuncA type="linear" slope="0.3" />
+            </feComponentTransfer>
+            <feMerge>
+              <feMergeNode />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
         </defs>
         
         <!-- Background water -->
         <rect width="${width}" height="${height}" fill="url(#water)"/>
         
-        <!-- Islands -->
-        ${islands.map(island => island.svgPath).join('\n')}
+        <!-- Islands with shadow -->
+        <g filter="url(#dropShadow)">
+          ${islands.map(island => island.svgPath).join('\n')}
+        </g>
         
         <!-- Canals -->
         ${canals.map(canal => canal.svgPath).join('\n')}
@@ -105,8 +122,18 @@ const VeniceGenerator: React.FC<VeniceGeneratorProps> = ({
         <!-- Bridges -->
         ${bridges.map(bridge => bridge.svgPath).join('\n')}
         
-        <!-- Add a title -->
-        <text x="20" y="30" font-family="Arial" font-size="16" fill="#555">Venezia</text>
+        <!-- Add a title and compass -->
+        <text x="20" y="30" font-family="Arial" font-size="16" fill="#555" font-weight="bold">Venezia</text>
+        
+        <!-- Simple compass rose -->
+        <g transform="translate(${width - 50}, 50)">
+          <circle cx="0" cy="0" r="15" fill="#f5f2e8" stroke="#8c7e6b" stroke-width="0.5" />
+          <path d="M0,-12 L0,12 M-12,0 L12,0" stroke="#8c7e6b" stroke-width="1" />
+          <text x="0" y="-16" font-family="Arial" font-size="8" fill="#555" text-anchor="middle">N</text>
+          <text x="16" y="0" font-family="Arial" font-size="8" fill="#555" dominant-baseline="middle">E</text>
+          <text x="0" y="20" font-family="Arial" font-size="8" fill="#555" text-anchor="middle">S</text>
+          <text x="-16" y="0" font-family="Arial" font-size="8" fill="#555" dominant-baseline="middle">W</text>
+        </g>
       </svg>
     `;
   };

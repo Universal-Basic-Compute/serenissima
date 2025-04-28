@@ -29,6 +29,8 @@ export interface VeniceConfig {
   bridgeDensity: number;
   campoFrequency: number;
   erosionFactor: number;
+  islandDensity?: number; // New option
+  buildingDensity?: number; // New option
 }
 
 // Utility function to create a smooth path from points
