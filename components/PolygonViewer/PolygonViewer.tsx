@@ -65,6 +65,9 @@ export default function PolygonViewer() {
     const scene = new THREE.Scene();
     scene.background = new THREE.Color('#1e3a8a'); // Blue background
     
+    // Create a fog effect for depth
+    scene.fog = new THREE.FogExp2('#1e3a8a', 0.002);
+    
     const camera = new THREE.PerspectiveCamera(
       75, 
       window.innerWidth / window.innerHeight, 
@@ -78,26 +81,86 @@ export default function PolygonViewer() {
       antialias: true 
     });
     renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.2;
+    
+    // Create textures
+    const textureLoader = new THREE.TextureLoader();
+    
+    // Water textures
+    const waterNormalMap = textureLoader.load('https://threejs.org/examples/textures/waternormals.jpg');
+    waterNormalMap.wrapS = waterNormalMap.wrapT = THREE.RepeatWrapping;
+    waterNormalMap.repeat.set(10, 10);
+    
+    // Sand textures
+    const sandBaseColor = textureLoader.load('https://threejs.org/examples/textures/terrain/grasslight-big.jpg');
+    const sandNormalMap = textureLoader.load('https://threejs.org/examples/textures/terrain/grasslight-big-nm.jpg');
+    const sandRoughnessMap = textureLoader.load('https://threejs.org/examples/textures/terrain/grasslight-big-ao.jpg');
+    
+    sandBaseColor.wrapS = sandBaseColor.wrapT = THREE.RepeatWrapping;
+    sandNormalMap.wrapS = sandNormalMap.wrapT = THREE.RepeatWrapping;
+    sandRoughnessMap.wrapS = sandRoughnessMap.wrapT = THREE.RepeatWrapping;
+    
+    sandBaseColor.repeat.set(5, 5);
+    sandNormalMap.repeat.set(5, 5);
+    sandRoughnessMap.repeat.set(5, 5);
     
     // Add lights
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
     scene.add(ambientLight);
     
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-    directionalLight.position.set(10, 10, 5);
-    scene.add(directionalLight);
+    // Main directional light (sun)
+    const sunLight = new THREE.DirectionalLight(0xffffeb, 1.2);
+    sunLight.position.set(50, 100, 50);
+    sunLight.castShadow = true;
     
-    // Add water plane
-    const waterGeometry = new THREE.PlaneGeometry(100, 100);
+    // Improve shadow quality
+    sunLight.shadow.mapSize.width = 2048;
+    sunLight.shadow.mapSize.height = 2048;
+    sunLight.shadow.camera.near = 0.5;
+    sunLight.shadow.camera.far = 500;
+    sunLight.shadow.camera.left = -100;
+    sunLight.shadow.camera.right = 100;
+    sunLight.shadow.camera.top = 100;
+    sunLight.shadow.camera.bottom = -100;
+    sunLight.shadow.bias = -0.0001;
+    
+    scene.add(sunLight);
+    
+    // Add a secondary light for better illumination
+    const fillLight = new THREE.DirectionalLight(0xadd8e6, 0.5);
+    fillLight.position.set(-50, 50, -50);
+    scene.add(fillLight);
+    
+    // Add water plane with animated normal map
+    const waterGeometry = new THREE.PlaneGeometry(200, 200, 50, 50);
     const waterMaterial = new THREE.MeshStandardMaterial({ 
-      color: '#1e3a8a',
+      color: '#0077be',
       transparent: true,
-      opacity: 0.8
+      opacity: 0.8,
+      metalness: 0.1,
+      roughness: 0.2,
+      normalMap: waterNormalMap,
+      normalScale: new THREE.Vector2(0.3, 0.3),
+      envMapIntensity: 0.5
     });
+    
     const waterPlane = new THREE.Mesh(waterGeometry, waterMaterial);
     waterPlane.rotation.x = -Math.PI / 2;
-    waterPlane.position.y = -0.1;
+    waterPlane.position.y = -0.2;
+    waterPlane.receiveShadow = true;
     scene.add(waterPlane);
+    
+    // Add subtle waves to the water
+    const waterVertices = waterGeometry.attributes.position;
+    const waterVertexCount = waterVertices.count;
+    const waterWaves = new Float32Array(waterVertexCount);
+    
+    for (let i = 0; i < waterVertexCount; i++) {
+      waterWaves[i] = Math.random();
+    }
     
     // Calculate bounds to normalize coordinates
     let minLat = Infinity;
@@ -155,21 +218,41 @@ export default function PolygonViewer() {
               shape.lineTo(normalizedCoords[i].x, normalizedCoords[i].y);
             }
             
-            // Create geometry from the shape
-            const geometry = new THREE.ShapeGeometry(shape);
+            // Create extruded geometry for the island with a slight height
+            const extrudeSettings = {
+              steps: 1,
+              depth: 0.5 + Math.random() * 0.5, // Random height variation
+              bevelEnabled: true,
+              bevelThickness: 0.2,
+              bevelSize: 0.2,
+              bevelOffset: 0,
+              bevelSegments: 3
+            };
+            
+            const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
             
             // Rotate to lay flat on the "ground"
             geometry.rotateX(Math.PI / 2);
             
-            const material = new THREE.MeshStandardMaterial({ 
-              color: '#e6c587', // Sand color
+            // Create a realistic sand material
+            const sandMaterial = new THREE.MeshStandardMaterial({ 
+              color: '#e6c587', // Base sand color
+              map: sandBaseColor,
+              normalMap: sandNormalMap,
+              roughnessMap: sandRoughnessMap,
+              roughness: 0.8,
+              metalness: 0.1,
               side: THREE.DoubleSide
             });
             
-            const mesh = new THREE.Mesh(geometry, material);
+            const mesh = new THREE.Mesh(geometry, sandMaterial);
             
             // Position at ground level
             mesh.position.y = 0;
+            
+            // Enable shadows
+            mesh.castShadow = true;
+            mesh.receiveShadow = true;
             
             scene.add(mesh);
             console.log(`Added polygon ${index} to scene`);
@@ -190,15 +273,32 @@ export default function PolygonViewer() {
       sampleShape.lineTo(10, 10);
       sampleShape.lineTo(10, -10);
       
-      const sampleGeometry = new THREE.ShapeGeometry(sampleShape);
+      const extrudeSettings = {
+        steps: 1,
+        depth: 0.8,
+        bevelEnabled: true,
+        bevelThickness: 0.2,
+        bevelSize: 0.2,
+        bevelOffset: 0,
+        bevelSegments: 3
+      };
+      
+      const sampleGeometry = new THREE.ExtrudeGeometry(sampleShape, extrudeSettings);
       sampleGeometry.rotateX(Math.PI / 2);
       
       const sampleMaterial = new THREE.MeshStandardMaterial({
         color: '#e6c587',
+        map: sandBaseColor,
+        normalMap: sandNormalMap,
+        roughnessMap: sandRoughnessMap,
+        roughness: 0.8,
+        metalness: 0.1,
         side: THREE.DoubleSide
       });
       
       const sampleMesh = new THREE.Mesh(sampleGeometry, sampleMaterial);
+      sampleMesh.castShadow = true;
+      sampleMesh.receiveShadow = true;
       scene.add(sampleMesh);
       console.log('Added sample polygon to scene');
     }
@@ -270,6 +370,27 @@ export default function PolygonViewer() {
     // Animation loop
     const animate = () => {
       requestAnimationFrame(animate);
+      
+      // Animate water normal map
+      const time = Date.now() * 0.001;
+      waterMaterial.normalMap.offset.x = time * 0.05;
+      waterMaterial.normalMap.offset.y = time * 0.05;
+      
+      // Animate subtle water waves
+      if (waterVertices) {
+        for (let i = 0; i < waterVertexCount; i++) {
+          const x = waterVertices.getX(i);
+          const z = waterVertices.getZ(i);
+          const waveHeight = 0.1;
+          
+          // Create gentle waves
+          const y = Math.sin(x * 0.5 + time) * Math.cos(z * 0.5 + time) * waveHeight;
+          waterVertices.setY(i, y);
+        }
+        
+        waterGeometry.attributes.position.needsUpdate = true;
+      }
+      
       renderer.render(scene, camera);
     };
     
