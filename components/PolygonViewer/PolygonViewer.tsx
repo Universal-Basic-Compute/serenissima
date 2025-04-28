@@ -334,7 +334,19 @@ export default function PolygonViewer() {
       
       // Rotate scene based on mouse movement
       scene.rotation.y += deltaMove.x * 0.01;
-      scene.rotation.x += deltaMove.y * 0.01;
+      
+      // Calculate the new rotation angle
+      const newRotationX = scene.rotation.x + deltaMove.y * 0.01;
+      
+      // Limit rotation to prevent looking under the scene
+      // Convert 10 degrees to radians (Math.PI / 18)
+      const minAngle = -Math.PI / 2 + Math.PI / 18; // -90° + 10° = -80°
+      const maxAngle = 0; // Don't allow rotation below the horizon
+      
+      // Apply rotation only if it's within the allowed range
+      if (newRotationX >= minAngle && newRotationX <= maxAngle) {
+        scene.rotation.x = newRotationX;
+      }
       
       previousMousePosition = {
         x: event.clientX,
