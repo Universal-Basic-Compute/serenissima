@@ -46,10 +46,10 @@ export function generateIslands(canals: Canal[], config: VeniceConfig): Island[]
         const jitteredX = x + (Math.random() * jitterAmount * 2 - jitterAmount);
         const jitteredY = y + (Math.random() * jitterAmount * 2 - jitterAmount);
         
-        // Add bias toward the center for all points
-        const centerBias = 0.4; // Increased from 0.2 to 0.4 for stronger pull toward center
-        const biasedX = jitteredX + (centerX - jitteredX) * centerBias * (1 - distFromCenter);
-        const biasedY = jitteredY + (centerY - jitteredY) * centerBias * (1 - distFromCenter);
+        // Add stronger bias toward the center for all points
+        const centerBias = 0.4; // Increased from 0.2 to 0.4
+        const biasedX = jitteredX + (centerX - jitteredX) * centerBias;
+        const biasedY = jitteredY + (centerY - jitteredY) * centerBias;
         
         potentialCenters.push({ x: biasedX, y: biasedY });
       }
