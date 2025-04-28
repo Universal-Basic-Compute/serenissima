@@ -104,9 +104,10 @@ export default function PolygonViewer() {
     sandNormalMap.wrapS = sandNormalMap.wrapT = THREE.RepeatWrapping;
     sandRoughnessMap.wrapS = sandRoughnessMap.wrapT = THREE.RepeatWrapping;
     
-    sandBaseColor.repeat.set(5, 5);
-    sandNormalMap.repeat.set(5, 5);
-    sandRoughnessMap.repeat.set(5, 5);
+    // Make the texture 4x bigger by reducing the repeat value to 1/4 of the original
+    sandBaseColor.repeat.set(1.25, 1.25);  // 5 ÷ 4 = 1.25
+    sandNormalMap.repeat.set(1.25, 1.25);
+    sandRoughnessMap.repeat.set(1.25, 1.25);
     
     // Add lights
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.6); // Increased from 0.3 to 0.6
