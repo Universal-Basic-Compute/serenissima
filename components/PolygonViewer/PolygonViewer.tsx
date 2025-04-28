@@ -119,10 +119,33 @@ export default function PolygonViewer() {
     const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x0044ff, 0.6);
     scene.add(hemisphereLight);
     
-    // Main directional light (sun)
-    const sunLight = new THREE.DirectionalLight(0xffffff, 1.5); // Changed from yellowish to white, increased intensity
+    // Main directional light (sun) - bigger and more yellow
+    const sunLight = new THREE.DirectionalLight(0xffffcc, 1.8); // More yellow tint and higher intensity
     sunLight.position.set(30, 100, 30); // Adjusted position
     sunLight.castShadow = true;
+    
+    // Create a sun sphere for visual effect
+    const sunGeometry = new THREE.SphereGeometry(5, 16, 16);
+    const sunMaterial = new THREE.MeshBasicMaterial({ 
+      color: 0xffffaa, 
+      transparent: true,
+      opacity: 0.8
+    });
+    const sunSphere = new THREE.Mesh(sunGeometry, sunMaterial);
+    sunSphere.position.copy(sunLight.position);
+    scene.add(sunSphere);
+    
+    // Add a subtle glow effect to the sun
+    const sunGlowGeometry = new THREE.SphereGeometry(7, 16, 16);
+    const sunGlowMaterial = new THREE.MeshBasicMaterial({ 
+      color: 0xffffdd, 
+      transparent: true,
+      opacity: 0.4,
+      side: THREE.BackSide
+    });
+    const sunGlow = new THREE.Mesh(sunGlowGeometry, sunGlowMaterial);
+    sunGlow.position.copy(sunLight.position);
+    scene.add(sunGlow);
     
     // Reduced shadow map resolution for better performance
     sunLight.shadow.mapSize.width = 1024;
