@@ -23,17 +23,17 @@ export function generateCanals(width: number, height: number, config: VeniceConf
 }
 
 function createGrandCanal(width: number, height: number, config: VeniceConfig): Canal {
-  // Create an S-shaped grand canal
+  // Create an S-shaped grand canal that spans more of the map
   const controlPoints: Point[] = [
-    { x: width * 0.1, y: height * 0.5 },
-    { x: width * 0.3, y: height * 0.4 },
-    { x: width * 0.5, y: height * 0.6 },
-    { x: width * 0.7, y: height * 0.4 },
-    { x: width * 0.9, y: height * 0.5 }
+    { x: width * 0.05, y: height * 0.5 }, // Start further left
+    { x: width * 0.25, y: height * 0.35 },
+    { x: width * 0.5, y: height * 0.65 },
+    { x: width * 0.75, y: height * 0.35 },
+    { x: width * 0.95, y: height * 0.5 }  // End further right
   ];
   
-  // Add some noise to make it more organic
-  const noisyPoints = addNoise(controlPoints, width * 0.03);
+  // Less noise for smoother curves
+  const noisyPoints = addNoise(controlPoints, width * 0.02); // Reduced from 0.03
   
   // Interpolate more points for smoother curve
   const points: Point[] = [];
@@ -43,9 +43,9 @@ function createGrandCanal(width: number, height: number, config: VeniceConfig): 
     
     points.push(p1);
     
-    // Add intermediate points
-    for (let j = 1; j < 5; j++) {
-      const t = j / 5;
+    // Add more intermediate points for smoother curves
+    for (let j = 1; j < 8; j++) { // Increased from 5 to 8
+      const t = j / 8;
       points.push({
         x: p1.x + (p2.x - p1.x) * t,
         y: p1.y + (p2.y - p1.y) * t
@@ -70,7 +70,7 @@ function createSecondaryCanals(
   config: VeniceConfig
 ): Canal[] {
   const canals: Canal[] = [];
-  const numCanals = Math.floor(6 + Math.random() * 4); // Increase number of secondary canals
+  const numCanals = Math.floor(6 + Math.random() * 4);
   
   // Create canals that branch off from the grand canal
   for (let i = 0; i < numCanals; i++) {
@@ -96,13 +96,13 @@ function createSecondaryCanals(
     
     // Create canal points
     const canalPoints: Point[] = [startPoint];
-    const canalLength = width * (0.2 + Math.random() * 0.3); // Longer canals
-    const segments = 6 + Math.floor(Math.random() * 4); // More segments for more detail
+    const canalLength = width * (0.25 + Math.random() * 0.35); // Longer canals
+    const segments = 8 + Math.floor(Math.random() * 4); // More segments for smoother curves
     
     for (let j = 1; j <= segments; j++) {
       const t = j / segments;
-      // More noise for more organic shapes
-      const noise = (Math.random() * 2 - 1) * width * 0.04;
+      // Less noise for smoother shapes
+      const noise = (Math.random() * 2 - 1) * width * 0.02; // Reduced from 0.04
       
       canalPoints.push({
         x: startPoint.x + dirX * side * canalLength * t + noise,
@@ -129,7 +129,7 @@ function createTertiaryCanals(
   config: VeniceConfig
 ): Canal[] {
   const canals: Canal[] = [];
-  const numCanals = Math.floor(15 + config.canalDensity * 15); // More tertiary canals
+  const numCanals = Math.floor(15 + config.canalDensity * 15);
   
   for (let i = 0; i < numCanals; i++) {
     // Select two random points from existing canals to connect
@@ -153,27 +153,26 @@ function createTertiaryCanals(
       Math.pow(point2.x - point1.x, 2) + Math.pow(point2.y - point1.y, 2)
     );
     
-    if (distance < width * 0.1 || distance > width * 0.4) continue;
+    if (distance < width * 0.1 || distance > width * 0.5) continue; // Allow longer canals
     
-    // Create a curved path between the points
-    const midPoint = {
-      x: (point1.x + point2.x) / 2 + (Math.random() * 2 - 1) * width * 0.1,
-      y: (point1.y + point2.y) / 2 + (Math.random() * 2 - 1) * height * 0.1
-    };
+    // Create a curved path between the points with more control points for smoothness
+    const canalPoints = [point1];
     
-    const canalPoints = [
-      point1,
-      {
-        x: (point1.x + midPoint.x) / 2 + (Math.random() * 2 - 1) * width * 0.03,
-        y: (point1.y + midPoint.y) / 2 + (Math.random() * 2 - 1) * height * 0.03
-      },
-      midPoint,
-      {
-        x: (midPoint.x + point2.x) / 2 + (Math.random() * 2 - 1) * width * 0.03,
-        y: (midPoint.y + point2.y) / 2 + (Math.random() * 2 - 1) * height * 0.03
-      },
-      point2
-    ];
+    // Add more intermediate points for smoother curves
+    const numIntermediatePoints = 3 + Math.floor(Math.random() * 2);
+    for (let j = 1; j <= numIntermediatePoints; j++) {
+      const t = j / (numIntermediatePoints + 1);
+      // Less noise for smoother curves
+      const noiseX = (Math.random() * 2 - 1) * width * 0.03;
+      const noiseY = (Math.random() * 2 - 1) * height * 0.03;
+      
+      canalPoints.push({
+        x: point1.x + (point2.x - point1.x) * t + noiseX,
+        y: point1.y + (point2.y - point1.y) * t + noiseY
+      });
+    }
+    
+    canalPoints.push(point2);
     
     const pathString = createSmoothPath(canalPoints);
     

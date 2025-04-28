@@ -37,20 +37,34 @@ export interface VeniceConfig {
 export function createSmoothPath(points: Point[]): string {
   if (points.length < 2) return '';
   
+  if (points.length === 2) {
+    return `M ${points[0].x} ${points[0].y} L ${points[1].x} ${points[1].y}`;
+  }
+  
   let path = `M ${points[0].x} ${points[0].y}`;
   
-  for (let i = 1; i < points.length - 1; i++) {
-    const p0 = points[i-1];
-    const p1 = points[i];
-    const p2 = points[i+1];
-    
-    // Calculate control points for smooth curve
-    const cp1x = p1.x - (p1.x - p0.x) / 3;
-    const cp1y = p1.y - (p1.y - p0.y) / 3;
-    const cp2x = p1.x + (p2.x - p1.x) / 3;
-    const cp2y = p1.y + (p2.y - p1.y) / 3;
-    
-    path += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${p2.x} ${p2.y}`;
+  // Use a more sophisticated curve algorithm for smoother results
+  if (points.length === 3) {
+    // For 3 points, use a quadratic curve
+    const controlX = (points[0].x + points[1].x * 2 + points[2].x) / 4;
+    const controlY = (points[0].y + points[1].y * 2 + points[2].y) / 4;
+    path += ` Q ${controlX},${controlY} ${points[2].x},${points[2].y}`;
+  } else {
+    // For more points, use a series of cubic bezier curves
+    for (let i = 0; i < points.length - 1; i++) {
+      const p0 = points[Math.max(0, i - 1)];
+      const p1 = points[i];
+      const p2 = points[i + 1];
+      const p3 = points[Math.min(points.length - 1, i + 2)];
+      
+      // Calculate control points using Catmull-Rom to Bezier conversion
+      const cp1x = p1.x + (p2.x - p0.x) / 6;
+      const cp1y = p1.y + (p2.y - p0.y) / 6;
+      const cp2x = p2.x - (p3.x - p1.x) / 6;
+      const cp2y = p2.y - (p3.y - p1.y) / 6;
+      
+      path += ` C ${cp1x},${cp1y} ${cp2x},${cp2y} ${p2.x},${p2.y}`;
+    }
   }
   
   return path;

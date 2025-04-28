@@ -125,7 +125,7 @@ const VeniceGenerator: React.FC<VeniceGeneratorProps> = ({
           ${islands.map(island => island.svgPath).join('\n')}
         </g>
         
-        <!-- Canals - now using the same pattern as water -->
+        <!-- Canals - now using the same pattern as water with improved rendering -->
         ${canals.map(canal => {
           // Extract the path data and width from the svgPath
           const pathMatch = canal.svgPath.match(/d="([^"]+)"/);
@@ -136,7 +136,7 @@ const VeniceGenerator: React.FC<VeniceGeneratorProps> = ({
             const strokeWidth = widthMatch[1];
             
             // Return a path with the water pattern as stroke
-            return `<path d="${pathData}" stroke="url(#canalPattern)" stroke-width="${strokeWidth}" fill="none" />`;
+            return `<path d="${pathData}" stroke="url(#canalPattern)" stroke-width="${strokeWidth}" fill="none" stroke-linecap="round" stroke-linejoin="round" />`;
           }
           return canal.svgPath;
         }).join('\n')}
