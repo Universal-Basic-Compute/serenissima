@@ -24,12 +24,16 @@ const polygonOptions = {
   draggable: true
 };
 
+// Libraries we need to load
+const libraries = ['drawing'];
+
 export default function Home() {
   // Get API key from environment variable
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '';
-  const [savedPolygons, setSavedPolygons] = useState<google.maps.Polygon[]>([]);
-  const mapRef = useRef<google.maps.Map | null>(null);
-  const drawingManagerRef = useRef<google.maps.drawing.DrawingManager | null>(null);
+  const [savedPolygons, setSavedPolygons] = useState([]);
+  const mapRef = useRef(null);
+  const drawingManagerRef = useRef(null);
+  const [isGoogleLoaded, setIsGoogleLoaded] = useState(false);
   
   if (!apiKey) {
     return <div className="w-screen h-screen flex items-center justify-center">
@@ -52,16 +56,16 @@ export default function Home() {
     // Add to our local state
     setSavedPolygons(prev => [...prev, polygon]);
 
-    // You could implement an API call here:
-    // fetch('/api/save-polygon', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify({ coordinates })
-    // });
+    // Send polygon data to the API
+    fetch('/api/save-polygon', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ coordinates })
+    });
   };
 
   // Handle polygon complete event
-  const onPolygonComplete = (polygon: google.maps.Polygon) => {
+  const onPolygonComplete = (polygon) => {
     // Apply rounded corners (this is a visual effect only)
     polygon.setOptions({
       ...polygonOptions,
@@ -91,29 +95,36 @@ export default function Home() {
     savePolygonToFile(polygon);
 
     // Add listener for changes to save updated polygon
-    google.maps.event.addListener(polygon.getPath(), 'set_at', () => {
+    window.google.maps.event.addListener(polygon.getPath(), 'set_at', () => {
       savePolygonToFile(polygon);
     });
     
-    google.maps.event.addListener(polygon.getPath(), 'insert_at', () => {
+    window.google.maps.event.addListener(polygon.getPath(), 'insert_at', () => {
       savePolygonToFile(polygon);
     });
   };
 
   // Handle map load
-  const onMapLoad = (map: google.maps.Map) => {
+  const onMapLoad = (map) => {
     mapRef.current = map;
   };
 
   // Handle drawing manager load
-  const onDrawingManagerLoad = (drawingManager: google.maps.drawing.DrawingManager) => {
+  const onDrawingManagerLoad = (drawingManager) => {
     drawingManagerRef.current = drawingManager;
+    setIsGoogleLoaded(true);
+  };
+  
+  // Handle script load
+  const handleScriptLoad = () => {
+    setIsGoogleLoaded(true);
   };
 
   return (
     <LoadScript 
       googleMapsApiKey={apiKey}
-      libraries={['drawing']}
+      libraries={libraries}
+      onLoad={handleScriptLoad}
     >
       <GoogleMap
         mapContainerStyle={mapContainerStyle}
@@ -130,10 +141,10 @@ export default function Home() {
           options={{
             drawingControl: true,
             drawingControlOptions: {
-              position: google.maps.ControlPosition.TOP_CENTER,
-              drawingModes: [google.maps.drawing.OverlayType.POLYGON]
+              position: window.google?.maps?.ControlPosition?.TOP_CENTER,
+              drawingModes: [window.google?.maps?.drawing?.OverlayType?.POLYGON]
             },
-            polygonOptions: polygonOptions
+            polygonOptions
           }}
         />
       </GoogleMap>
