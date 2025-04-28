@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { GoogleMap, LoadScript } from '@react-google-maps/api';
 
 // Venice coordinates
@@ -15,17 +14,13 @@ const mapContainerStyle = {
 };
 
 export default function Home() {
-  const [apiKey, setApiKey] = useState('');
-
-  useEffect(() => {
-    // You should set up your Google Maps API key in your environment variables
-    // For development, you can use this approach, but for production,
-    // make sure to properly secure your API key
-    setApiKey(process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '');
-  }, []);
-
+  // Get API key from environment variable
+  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '';
+  
   if (!apiKey) {
-    return <div className="w-screen h-screen flex items-center justify-center">Loading map...</div>;
+    return <div className="w-screen h-screen flex items-center justify-center">
+      <p>Google Maps API key is missing. Please add it to your .env.local file.</p>
+    </div>;
   }
 
   return (
