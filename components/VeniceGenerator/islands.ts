@@ -29,7 +29,7 @@ export function generateIslands(canals: Canal[], config: VeniceConfig): Island[]
   maxX += 50;
   maxY += 50;
   
-  // Create grid of potential island centers with higher density near the center
+  // Create grid of potential island centers with much higher density near the center
   for (let x = minX; x <= maxX; x += gridSize) {
     for (let y = minY; y <= maxY; y += gridSize) {
       // Calculate distance from center (normalized 0-1)
@@ -38,8 +38,8 @@ export function generateIslands(canals: Canal[], config: VeniceConfig): Island[]
         Math.pow((y - centerY) / (maxY - minY), 2)
       );
       
-      // Higher probability of islands near the center
-      if (Math.random() > distFromCenter * 0.7) { // Increased center bias (0.8 to 0.7)
+      // Much higher probability of islands near the center, almost none at edges
+      if (Math.random() > Math.pow(distFromCenter, 0.5) * 0.9) { // Exponential falloff from center
         // Add some randomness to grid positions
         const jitteredX = x + (Math.random() * gridSize * 0.7);
         const jitteredY = y + (Math.random() * gridSize * 0.7);

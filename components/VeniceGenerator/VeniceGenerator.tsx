@@ -83,6 +83,14 @@ const VeniceGenerator: React.FC<VeniceGeneratorProps> = ({
             <path d="M0,15 Q7.5,12 15,15 T30,15" fill="none" stroke="#8bbad4" stroke-width="0.5" opacity="0.6"/>
           </pattern>
           
+          <!-- Canal pattern that matches water -->
+          <pattern id="canalPattern" patternUnits="userSpaceOnUse" width="30" height="20">
+            <rect width="30" height="20" fill="#a4cbe8"/>
+            <path d="M0,5 Q7.5,2 15,5 T30,5" fill="none" stroke="#8bbad4" stroke-width="0.5" opacity="0.6"/>
+            <path d="M0,10 Q7.5,7 15,10 T30,10" fill="none" stroke="#8bbad4" stroke-width="0.5" opacity="0.6"/>
+            <path d="M0,15 Q7.5,12 15,15 T30,15" fill="none" stroke="#8bbad4" stroke-width="0.5" opacity="0.6"/>
+          </pattern>
+          
           <!-- Improved texture for islands -->
           <pattern id="islandTexture" patternUnits="userSpaceOnUse" width="10" height="10">
             <rect width="10" height="10" fill="#d4cebf"/>
@@ -117,8 +125,21 @@ const VeniceGenerator: React.FC<VeniceGeneratorProps> = ({
           ${islands.map(island => island.svgPath).join('\n')}
         </g>
         
-        <!-- Canals -->
-        ${canals.map(canal => canal.svgPath).join('\n')}
+        <!-- Canals - now using the same pattern as water -->
+        ${canals.map(canal => {
+          // Extract the path data and width from the svgPath
+          const pathMatch = canal.svgPath.match(/d="([^"]+)"/);
+          const widthMatch = canal.svgPath.match(/stroke-width="([^"]+)"/);
+          
+          if (pathMatch && widthMatch) {
+            const pathData = pathMatch[1];
+            const strokeWidth = widthMatch[1];
+            
+            // Return a path with the water pattern as stroke
+            return `<path d="${pathData}" stroke="url(#canalPattern)" stroke-width="${strokeWidth}" fill="none" />`;
+          }
+          return canal.svgPath;
+        }).join('\n')}
         
         <!-- Bridges -->
         ${bridges.map(bridge => bridge.svgPath).join('\n')}
