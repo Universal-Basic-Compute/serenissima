@@ -1,8 +1,13 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import PolygonViewer from '../components/PolygonViewer/PolygonViewer';
+import dynamic from 'next/dynamic';
 import { GoogleMap, LoadScript, DrawingManager } from '@react-google-maps/api';
+
+// Import PolygonViewer with no SSR to avoid hydration issues
+const PolygonViewer = dynamic(() => import('../components/PolygonViewer/PolygonViewer'), {
+  ssr: false
+});
 
 // Venice coordinates
 const center = {
