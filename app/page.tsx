@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import PolygonViewer from '../components/PolygonViewer/PolygonViewer';
 import { GoogleMap, LoadScript, DrawingManager } from '@react-google-maps/api';
 
 // Venice coordinates
@@ -28,6 +29,9 @@ const polygonOptions = {
 const libraries = ['drawing'];
 
 export default function Home() {
+  // State to toggle between map and 3D view
+  const [showMap, setShowMap] = useState(false);
+  
   // Get API key from environment variable
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '';
   const [savedPolygons, setSavedPolygons] = useState([]);
@@ -35,7 +39,7 @@ export default function Home() {
   const drawingManagerRef = useRef(null);
   const [isGoogleLoaded, setIsGoogleLoaded] = useState(false);
   
-  if (!apiKey) {
+  if (!apiKey && showMap) {
     return <div className="w-screen h-screen flex items-center justify-center">
       <p>Google Maps API key is missing. Please add it to your .env.local file.</p>
     </div>;
@@ -147,28 +151,44 @@ export default function Home() {
   }, [isGoogleLoaded]);
 
   return (
-    <LoadScript 
-      googleMapsApiKey={apiKey}
-      libraries={libraries}
-      onLoad={handleScriptLoad}
-    >
-      <GoogleMap
-        mapContainerStyle={mapContainerStyle}
-        center={center}
-        zoom={14}
-        options={{
-          fullscreenControl: false,
-        }}
-        onLoad={onMapLoad}
+    <div className="relative w-screen h-screen">
+      {/* Toggle button */}
+      <button 
+        onClick={() => setShowMap(!showMap)}
+        className="absolute top-4 right-4 z-10 bg-white px-4 py-2 rounded shadow"
       >
-        {isGoogleLoaded && (
-          <DrawingManager
-            onLoad={onDrawingManagerLoad}
-            onPolygonComplete={onPolygonComplete}
-            options={drawingManagerOptions}
-          />
-        )}
-      </GoogleMap>
-    </LoadScript>
+        {showMap ? 'Show 3D View' : 'Show Map'}
+      </button>
+      
+      {showMap ? (
+        // Google Maps view
+        <LoadScript 
+          googleMapsApiKey={apiKey}
+          libraries={libraries}
+          onLoad={handleScriptLoad}
+        >
+          <GoogleMap
+            mapContainerStyle={mapContainerStyle}
+            center={center}
+            zoom={14}
+            options={{
+              fullscreenControl: false,
+            }}
+            onLoad={onMapLoad}
+          >
+            {isGoogleLoaded && (
+              <DrawingManager
+                onLoad={onDrawingManagerLoad}
+                onPolygonComplete={onPolygonComplete}
+                options={drawingManagerOptions}
+              />
+            )}
+          </GoogleMap>
+        </LoadScript>
+      ) : (
+        // 3D Polygon Viewer
+        <PolygonViewer />
+      )}
+    </div>
   );
 }
