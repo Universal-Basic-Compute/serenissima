@@ -72,6 +72,12 @@ const VeniceGenerator: React.FC<VeniceGeneratorProps> = ({
     islands: any[], 
     bridges: any[]
   ): string => {
+    // Process islands to handle overlaps
+    const processedIslands = processIslandsForOverlap(islands);
+    
+    // Process canals to handle island intersections
+    const processedCanals = processCanalIslandIntersections(canals, islands);
+    
     // Create SVG content
     return `
       <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg" style="max-width: 100%; height: auto;">
@@ -122,24 +128,11 @@ const VeniceGenerator: React.FC<VeniceGeneratorProps> = ({
         
         <!-- Islands with shadow -->
         <g filter="url(#dropShadow)">
-          ${islands.map(island => island.svgPath).join('\n')}
+          ${processedIslands.join('\n')}
         </g>
         
         <!-- Canals - now using the same pattern as water with improved rendering -->
-        ${canals.map(canal => {
-          // Extract the path data and width from the svgPath
-          const pathMatch = canal.svgPath.match(/d="([^"]+)"/);
-          const widthMatch = canal.svgPath.match(/stroke-width="([^"]+)"/);
-          
-          if (pathMatch && widthMatch) {
-            const pathData = pathMatch[1];
-            const strokeWidth = widthMatch[1];
-            
-            // Return a path with the water pattern as stroke
-            return `<path d="${pathData}" stroke="url(#canalPattern)" stroke-width="${strokeWidth}" fill="none" stroke-linecap="round" stroke-linejoin="round" />`;
-          }
-          return canal.svgPath;
-        }).join('\n')}
+        ${processedCanals.join('\n')}
         
         <!-- Bridges -->
         ${bridges.map(bridge => bridge.svgPath).join('\n')}
@@ -158,6 +151,111 @@ const VeniceGenerator: React.FC<VeniceGeneratorProps> = ({
         </g>
       </svg>
     `;
+  };
+  
+  // Add these helper functions to process islands and canals
+  const processIslandsForOverlap = (islands: Island[]): string[] => {
+    const processedSvgPaths: string[] = [];
+    const overlapPairs: [number, number][] = [];
+    
+    // Find all overlapping island pairs
+    for (let i = 0; i < islands.length; i++) {
+      for (let j = i + 1; j < islands.length; j++) {
+        if (islandsOverlap(islands[i], islands[j])) {
+          overlapPairs.push([i, j]);
+        }
+      }
+    }
+    
+    // Process each island's SVG path
+    for (let i = 0; i < islands.length; i++) {
+      const island = islands[i];
+      
+      // Extract the path data and fill from the svgPath
+      const pathMatch = island.svgPath.match(/<path d="([^"]+)" fill="([^"]+)" stroke="[^"]+" stroke-width="[^"]+" \/>/);
+      
+      if (pathMatch) {
+        const pathData = pathMatch[1];
+        const fill = pathMatch[2];
+        
+        // Check if this island overlaps with any other
+        const overlaps = overlapPairs.filter(pair => pair.includes(i));
+        
+        if (overlaps.length > 0) {
+          // This island overlaps with others, don't draw the stroke
+          processedSvgPaths.push(`<path d="${pathData}" fill="${fill}" stroke="none" />${island.svgPath.split('/>')[1]}`);
+        } else {
+          // No overlaps, keep the original path
+          processedSvgPaths.push(island.svgPath);
+        }
+      } else {
+        // If we can't parse the path, use the original
+        processedSvgPaths.push(island.svgPath);
+      }
+    }
+    
+    return processedSvgPaths;
+  };
+  
+  const processCanalIslandIntersections = (canals: Canal[], islands: Island[]): string[] => {
+    const processedCanals: string[] = [];
+    
+    for (const canal of canals) {
+      // Check if this canal intersects with any island
+      let intersectsWithIsland = false;
+      let intersectingIslands: Island[] = [];
+      
+      for (const island of islands) {
+        if (canalIntersectsIsland(canal, island)) {
+          intersectsWithIsland = true;
+          intersectingIslands.push(island);
+        }
+      }
+      
+      if (intersectsWithIsland) {
+        // Extract the path data and width from the svgPath
+        const pathMatch = canal.svgPath.match(/d="([^"]+)"/);
+        const widthMatch = canal.svgPath.match(/stroke-width="([^"]+)"/);
+        
+        if (pathMatch && widthMatch) {
+          const pathData = pathMatch[1];
+          const strokeWidth = widthMatch[1];
+          
+          // Add the canal with the water pattern
+          processedCanals.push(`<path d="${pathData}" stroke="url(#canalPattern)" stroke-width="${strokeWidth}" fill="none" stroke-linecap="round" stroke-linejoin="round" />`);
+          
+          // For each intersecting island, add a stroke along the island edge
+          for (const island of intersectingIslands) {
+            const islandPathMatch = island.svgPath.match(/d="([^"]+)"/);
+            
+            if (islandPathMatch) {
+              const islandPathData = islandPathMatch[1];
+              
+              // Add a stroke along the island edge
+              processedCanals.push(`<path d="${islandPathData}" stroke="#b3aa94" stroke-width="1.2" fill="none" />`);
+            }
+          }
+        } else {
+          processedCanals.push(canal.svgPath);
+        }
+      } else {
+        // Extract the path data and width from the svgPath
+        const pathMatch = canal.svgPath.match(/d="([^"]+)"/);
+        const widthMatch = canal.svgPath.match(/stroke-width="([^"]+)"/);
+        
+        if (pathMatch && widthMatch) {
+          const pathData = pathMatch[1];
+          const strokeWidth = widthMatch[1];
+          
+          // Return a path with the water pattern as stroke
+          processedCanals.push(`<path d="${pathData}" stroke="url(#canalPattern)" stroke-width="${strokeWidth}" fill="none" stroke-linecap="round" stroke-linejoin="round" />`);
+        } else {
+          processedCanals.push(canal.svgPath);
+        }
+      }
+    }
+    
+    return processedCanals;
   };
   
   return (

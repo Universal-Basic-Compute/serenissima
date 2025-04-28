@@ -93,3 +93,75 @@ export function linesIntersect(a1: Point, a2: Point, b1: Point, b2: Point): bool
   
   return (0 < lambda && lambda < 1) && (0 < gamma && gamma < 1);
 }
+
+export function pointInsidePolygon(point: Point, polygon: Point[]): boolean {
+  let inside = false;
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+    const xi = polygon[i].x, yi = polygon[i].y;
+    const xj = polygon[j].x, yj = polygon[j].y;
+    
+    const intersect = ((yi > point.y) !== (yj > point.y))
+        && (point.x < (xj - xi) * (point.y - yi) / (yj - yi) + xi);
+    if (intersect) inside = !inside;
+  }
+  return inside;
+}
+
+export function canalIntersectsIsland(canal: Canal, island: Island): boolean {
+  // Check if any canal point is inside the island
+  for (const canalPoint of canal.points) {
+    if (pointInsidePolygon(canalPoint, island.points)) {
+      return true;
+    }
+  }
+  
+  // Check if any canal segment intersects with any island segment
+  for (let i = 0; i < canal.points.length - 1; i++) {
+    const canalP1 = canal.points[i];
+    const canalP2 = canal.points[i + 1];
+    
+    for (let j = 0; j < island.points.length; j++) {
+      const islandP1 = island.points[j];
+      const islandP2 = island.points[(j + 1) % island.points.length];
+      
+      if (linesIntersect(canalP1, canalP2, islandP1, islandP2)) {
+        return true;
+      }
+    }
+  }
+  
+  return false;
+}
+
+export function islandsOverlap(island1: Island, island2: Island): boolean {
+  // Check if any point of island1 is inside island2
+  for (const point of island1.points) {
+    if (pointInsidePolygon(point, island2.points)) {
+      return true;
+    }
+  }
+  
+  // Check if any point of island2 is inside island1
+  for (const point of island2.points) {
+    if (pointInsidePolygon(point, island1.points)) {
+      return true;
+    }
+  }
+  
+  // Check if any edge of island1 intersects with any edge of island2
+  for (let i = 0; i < island1.points.length; i++) {
+    const p1 = island1.points[i];
+    const p2 = island1.points[(i + 1) % island1.points.length];
+    
+    for (let j = 0; j < island2.points.length; j++) {
+      const p3 = island2.points[j];
+      const p4 = island2.points[(j + 1) % island2.points.length];
+      
+      if (linesIntersect(p1, p2, p3, p4)) {
+        return true;
+      }
+    }
+  }
+  
+  return false;
+}

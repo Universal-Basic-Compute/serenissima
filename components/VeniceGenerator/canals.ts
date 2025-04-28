@@ -130,17 +130,17 @@ function createFineCanals(
 }
 
 function createGrandCanal(width: number, height: number, config: VeniceConfig): Canal {
-  // Create an S-shaped grand canal that spans more of the map
+  // Create a more curved S-shaped grand canal
   const controlPoints: Point[] = [
-    { x: width * 0.05, y: height * 0.5 }, // Start further left
-    { x: width * 0.25, y: height * 0.35 },
-    { x: width * 0.5, y: height * 0.65 },
-    { x: width * 0.75, y: height * 0.35 },
-    { x: width * 0.95, y: height * 0.5 }  // End further right
+    { x: width * 0.05, y: height * 0.5 },
+    { x: width * 0.2, y: height * 0.3 },  // More extreme curve
+    { x: width * 0.5, y: height * 0.7 },  // More extreme curve
+    { x: width * 0.8, y: height * 0.3 },  // More extreme curve
+    { x: width * 0.95, y: height * 0.5 }
   ];
   
   // Less noise for smoother curves
-  const noisyPoints = addNoise(controlPoints, width * 0.02); // Reduced from 0.03
+  const noisyPoints = addNoise(controlPoints, width * 0.01); // Reduced noise further
   
   // Interpolate more points for smoother curve
   const points: Point[] = [];
@@ -151,8 +151,8 @@ function createGrandCanal(width: number, height: number, config: VeniceConfig): 
     points.push(p1);
     
     // Add more intermediate points for smoother curves
-    for (let j = 1; j < 8; j++) { // Increased from 5 to 8
-      const t = j / 8;
+    for (let j = 1; j < 12; j++) { // Increased from 8 to 12 for smoother curves
+      const t = j / 12;
       points.push({
         x: p1.x + (p2.x - p1.x) * t,
         y: p1.y + (p2.y - p1.y) * t
