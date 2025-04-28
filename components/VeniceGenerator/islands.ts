@@ -3,8 +3,8 @@ import { Island, Canal, Point, VeniceConfig, createSmoothPath } from './utils';
 export function generateIslands(canals: Canal[], config: VeniceConfig): Island[] {
   const islands: Island[] = [];
   
-  // Create a grid of potential island centers - much larger grid for fewer, bigger islands
-  const gridSize = 120; // Increase from 80 to 120 for fewer islands
+  // Create a grid of potential island centers - smaller grid for more islands
+  const gridSize = 80; // Reduced from 120 to 80 for more islands
   const potentialCenters: Point[] = [];
   
   // Get the bounds from canals
@@ -29,31 +29,47 @@ export function generateIslands(canals: Canal[], config: VeniceConfig): Island[]
   maxX += 50;
   maxY += 50;
   
+  // Calculate a central area radius
+  const width = maxX - minX;
+  const height = maxY - minY;
+  const centerRadius = Math.min(width, height) * 0.4;
+  
   // Create grid of potential island centers with much higher density near the center
-  for (let x = minX; x <= maxX; x += gridSize) {
-    for (let y = minY; y <= maxY; y += gridSize) {
+  for (let x = centerX - centerRadius; x <= centerX + centerRadius; x += gridSize) {
+    for (let y = centerY - centerRadius; y <= centerY + centerRadius; y += gridSize) {
       // Calculate distance from center (normalized 0-1)
       const distFromCenter = Math.sqrt(
-        Math.pow((x - centerX) / (maxX - minX), 2) + 
-        Math.pow((y - centerY) / (maxY - minY), 2)
+        Math.pow((x - centerX) / centerRadius, 2) + 
+        Math.pow((y - centerY) / centerRadius, 2)
       );
       
-      // Much higher probability of islands near the center, almost none at edges
-      // Use a much steeper falloff function to concentrate islands more in the center
-      if (Math.random() > Math.pow(distFromCenter, 0.2) * 0.7) { // Changed from 0.3 to 0.2 for steeper falloff
+      // Much higher probability of islands near the center
+      // Use a gentler falloff to ensure more islands are created
+      if (Math.random() > distFromCenter * 0.5) {
         // Add some randomness to grid positions but keep closer to center
-        const jitterAmount = gridSize * 0.4 * (1 - distFromCenter); // Less jitter for points near center
+        const jitterAmount = gridSize * 0.4;
         const jitteredX = x + (Math.random() * jitterAmount * 2 - jitterAmount);
         const jitteredY = y + (Math.random() * jitterAmount * 2 - jitterAmount);
         
-        // Add stronger bias toward the center for all points
-        const centerBias = 0.4; // Increased from 0.2 to 0.4
+        // Add bias toward the center for all points
+        const centerBias = 0.2; // Reduced from 0.4 to allow more spread
         const biasedX = jitteredX + (centerX - jitteredX) * centerBias;
         const biasedY = jitteredY + (centerY - jitteredY) * centerBias;
         
         potentialCenters.push({ x: biasedX, y: biasedY });
       }
     }
+  }
+  
+  // Add a guaranteed set of islands in the center
+  const guaranteedIslands = 10;
+  for (let i = 0; i < guaranteedIslands; i++) {
+    const angle = (i / guaranteedIslands) * Math.PI * 2;
+    const distance = centerRadius * 0.5 * Math.random();
+    potentialCenters.push({
+      x: centerX + Math.cos(angle) * distance,
+      y: centerY + Math.sin(angle) * distance
+    });
   }
   
   // Track campos separately to ensure they don't overlap
@@ -77,7 +93,7 @@ export function generateIslands(canals: Canal[], config: VeniceConfig): Island[]
           nearestCanal = canal;
         }
         
-        if (distance < canal.width * 1.5) { // Reduced from 1.8 to allow islands closer to canals
+        if (distance < canal.width * 1.2) { // Reduced from 1.5 to allow islands closer to canals
           tooClose = true;
           break;
         }
@@ -96,7 +112,7 @@ export function generateIslands(canals: Canal[], config: VeniceConfig): Island[]
         
         // Prevent islands from being too close to each other
         // Allow smaller distances for smaller islands
-        const minDistance = 50 + (island.points.length > 10 ? 30 : 0); // Increased from 40 to 50
+        const minDistance = 40 + (island.points.length > 10 ? 20 : 0); // Reduced from 50 to 40 and from 30 to 20
         if (distance < minDistance) {
           tooClose = true;
           break;
@@ -155,8 +171,8 @@ function createIsland(
 ): Island {
   // Much more size variation with larger base sizes
   const baseSize = isCampo ? 
-    60 + Math.random() * 40 : // Campos are larger (increased from 45 to 60)
-    20 + Math.pow(Math.random(), 0.4) * 70;  // More extreme size variation (increased max from 45 to 70)
+    70 + Math.random() * 40 : // Campos are larger (increased from 60 to 70)
+    30 + Math.pow(Math.random(), 0.5) * 60;  // Larger minimum size (increased from 20 to 30)
   
   const size = baseSize * sizeMultiplier;
   
