@@ -76,30 +76,31 @@ const VeniceGenerator: React.FC<VeniceGeneratorProps> = ({
     return `
       <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg" style="max-width: 100%; height: auto;">
         <defs>
-          <pattern id="water" patternUnits="userSpaceOnUse" width="20" height="20">
-            <rect width="20" height="20" fill="#a4cbe8"/>
-            <path d="M0,10 Q5,5 10,10 T20,10" fill="none" stroke="#8bbad4" stroke-width="0.5"/>
-            <path d="M0,15 Q5,10 10,15 T20,15" fill="none" stroke="#8bbad4" stroke-width="0.5"/>
+          <pattern id="water" patternUnits="userSpaceOnUse" width="30" height="20">
+            <rect width="30" height="20" fill="#a4cbe8"/>
+            <path d="M0,5 Q7.5,2 15,5 T30,5" fill="none" stroke="#8bbad4" stroke-width="0.5" opacity="0.6"/>
+            <path d="M0,10 Q7.5,7 15,10 T30,10" fill="none" stroke="#8bbad4" stroke-width="0.5" opacity="0.6"/>
+            <path d="M0,15 Q7.5,12 15,15 T30,15" fill="none" stroke="#8bbad4" stroke-width="0.5" opacity="0.6"/>
           </pattern>
           
           <!-- Improved texture for islands -->
           <pattern id="islandTexture" patternUnits="userSpaceOnUse" width="10" height="10">
             <rect width="10" height="10" fill="#d4cebf"/>
-            <circle cx="5" cy="5" r="0.5" fill="#c4baa8" fill-opacity="0.3"/>
+            <circle cx="5" cy="5" r="0.5" fill="#c4baa8" fill-opacity="0.2"/>
           </pattern>
           
           <!-- Improved texture for campos -->
           <pattern id="campoTexture" patternUnits="userSpaceOnUse" width="10" height="10">
             <rect width="10" height="10" fill="#e9e5dc"/>
-            <path d="M0,0 L10,10 M10,0 L0,10" stroke="#d8d4cb" stroke-width="0.3"/>
+            <path d="M0,0 L10,10 M10,0 L0,10" stroke="#d8d4cb" stroke-width="0.3" opacity="0.3"/>
           </pattern>
           
           <!-- Add a subtle shadow effect -->
           <filter id="dropShadow" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur in="SourceAlpha" stdDeviation="2" />
+            <feGaussianBlur in="SourceAlpha" stdDeviation="1.5" />
             <feOffset dx="1" dy="1" result="offsetblur" />
             <feComponentTransfer>
-              <feFuncA type="linear" slope="0.3" />
+              <feFuncA type="linear" slope="0.2" />
             </feComponentTransfer>
             <feMerge>
               <feMergeNode />

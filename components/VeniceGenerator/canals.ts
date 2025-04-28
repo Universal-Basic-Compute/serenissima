@@ -194,14 +194,29 @@ function createQuaternaryCanals(
   config: VeniceConfig
 ): Canal[] {
   const canals: Canal[] = [];
-  const numCanals = Math.floor(20 + config.canalDensity * 20); // Many small canals
+  const numCanals = Math.floor(15 + config.canalDensity * 15); // Fewer small canals
   
   // Create a grid of potential canal start points
-  const gridSize = width / 10;
+  const gridSize = width / 8;
   const potentialPoints: Point[] = [];
   
-  for (let x = width * 0.1; x < width * 0.9; x += gridSize) {
-    for (let y = height * 0.1; y < height * 0.9; y += gridSize) {
+  // Calculate center of the map
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  existingCanals.forEach(canal => {
+    canal.points.forEach(point => {
+      minX = Math.min(minX, point.x);
+      minY = Math.min(minY, point.y);
+      maxX = Math.max(maxX, point.x);
+      maxY = Math.max(maxY, point.y);
+    });
+  });
+  
+  const centerX = (minX + maxX) / 2;
+  const centerY = (minY + maxY) / 2;
+  
+  // Focus more on the center area
+  for (let x = centerX - width * 0.3; x < centerX + width * 0.3; x += gridSize) {
+    for (let y = centerY - height * 0.3; y < centerY + height * 0.3; y += gridSize) {
       potentialPoints.push({
         x: x + (Math.random() * gridSize * 0.8),
         y: y + (Math.random() * gridSize * 0.8)
@@ -233,7 +248,7 @@ function createQuaternaryCanals(
     }
     
     // If we found a close canal and the distance is reasonable
-    if (closestCanal && closestPoint && minDistance < width * 0.2 && minDistance > width * 0.05) {
+    if (closestCanal && closestPoint && minDistance < width * 0.15 && minDistance > width * 0.03) {
       // Create a small canal from the point to the closest canal
       const angle = Math.atan2(
         closestPoint.y - startPoint.y,

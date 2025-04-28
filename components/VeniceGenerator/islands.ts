@@ -4,7 +4,7 @@ export function generateIslands(canals: Canal[], config: VeniceConfig): Island[]
   const islands: Island[] = [];
   
   // Create a grid of potential island centers
-  const gridSize = 50; // Increase grid size to reduce island density
+  const gridSize = 60; // Larger grid size for fewer islands
   const potentialCenters: Point[] = [];
   
   // Get the bounds from canals
@@ -19,19 +19,32 @@ export function generateIslands(canals: Canal[], config: VeniceConfig): Island[]
     });
   });
   
+  // Calculate center of the map
+  const centerX = (minX + maxX) / 2;
+  const centerY = (minY + maxY) / 2;
+  
   // Add some padding
   minX -= 50;
   minY -= 50;
   maxX += 50;
   maxY += 50;
   
-  // Create grid of potential island centers
+  // Create grid of potential island centers with higher density near the center
   for (let x = minX; x <= maxX; x += gridSize) {
     for (let y = minY; y <= maxY; y += gridSize) {
-      // Add some randomness to grid positions
-      const jitteredX = x + (Math.random() * gridSize * 0.5);
-      const jitteredY = y + (Math.random() * gridSize * 0.5);
-      potentialCenters.push({ x: jitteredX, y: jitteredY });
+      // Calculate distance from center (normalized 0-1)
+      const distFromCenter = Math.sqrt(
+        Math.pow((x - centerX) / (maxX - minX), 2) + 
+        Math.pow((y - centerY) / (maxY - minY), 2)
+      );
+      
+      // Higher probability of islands near the center
+      if (Math.random() > distFromCenter * 0.8) {
+        // Add some randomness to grid positions
+        const jitteredX = x + (Math.random() * gridSize * 0.7);
+        const jitteredY = y + (Math.random() * gridSize * 0.7);
+        potentialCenters.push({ x: jitteredX, y: jitteredY });
+      }
     }
   }
   
@@ -39,6 +52,8 @@ export function generateIslands(canals: Canal[], config: VeniceConfig): Island[]
   potentialCenters.forEach(center => {
     // Check distance to nearest canal
     let tooClose = false;
+    let nearestCanalDist = Infinity;
+    let nearestCanal = null;
     
     for (const canal of canals) {
       for (const point of canal.points) {
@@ -46,7 +61,12 @@ export function generateIslands(canals: Canal[], config: VeniceConfig): Island[]
           Math.pow(center.x - point.x, 2) + Math.pow(center.y - point.y, 2)
         );
         
-        if (distance < canal.width * 2.5) { // Increased minimum distance from canals
+        if (distance < nearestCanalDist) {
+          nearestCanalDist = distance;
+          nearestCanal = canal;
+        }
+        
+        if (distance < canal.width * 1.8) { // Reduced minimum distance from canals
           tooClose = true;
           break;
         }
@@ -64,7 +84,9 @@ export function generateIslands(canals: Canal[], config: VeniceConfig): Island[]
         );
         
         // Prevent islands from being too close to each other
-        if (distance < 60) {
+        // Allow smaller distances for smaller islands
+        const minDistance = 40 + (island.points.length > 10 ? 30 : 0);
+        if (distance < minDistance) {
           tooClose = true;
           break;
         }
@@ -74,7 +96,16 @@ export function generateIslands(canals: Canal[], config: VeniceConfig): Island[]
     if (!tooClose) {
       // Create an island around this center
       const isCampo = Math.random() < config.campoFrequency;
-      const island = createIsland(center, canals, isCampo, config);
+      
+      // Size variation based on distance from center
+      const distFromCenter = Math.sqrt(
+        Math.pow(center.x - centerX, 2) + Math.pow(center.y - centerY, 2)
+      ) / Math.sqrt(Math.pow(maxX - minX, 2) + Math.pow(maxY - minY, 2));
+      
+      // Larger islands in the center, smaller on the edges
+      const sizeMultiplier = 1.5 - distFromCenter;
+      
+      const island = createIsland(center, canals, isCampo, config, sizeMultiplier, nearestCanal, nearestCanalDist);
       islands.push(island);
     }
   });
@@ -86,24 +117,28 @@ function createIsland(
   center: Point, 
   canals: Canal[], 
   isCampo: boolean, 
-  config: VeniceConfig
+  config: VeniceConfig,
+  sizeMultiplier: number = 1,
+  nearestCanal: Canal | null = null,
+  nearestCanalDist: number = Infinity
 ): Island {
-  // Determine island size with more variety
+  // Much more size variation
   const baseSize = isCampo ? 
-    30 + Math.random() * 15 : // Campos are larger
-    15 + Math.random() * 20;  // Regular islands have more size variety
+    35 + Math.random() * 25 : // Campos are larger
+    10 + Math.pow(Math.random(), 0.7) * 35;  // More small islands, fewer large ones
   
-  const size = baseSize * (0.8 + Math.random() * 0.4);
+  const size = baseSize * sizeMultiplier;
   
   // Create a polygon with random points around the center
-  const numPoints = 6 + Math.floor(Math.random() * 6); // More variety in point count
+  // Fewer points for smoother islands
+  const numPoints = 5 + Math.floor(Math.random() * 4);
   const points: Point[] = [];
   
-  // Create more varied island shapes
+  // Create smoother island shapes with less variation in radius
   for (let i = 0; i < numPoints; i++) {
     const angle = (i / numPoints) * Math.PI * 2;
-    // More variation in radius to create more irregular shapes
-    const radius = size * (0.7 + Math.random() * 0.6);
+    // Less variation in radius for smoother shapes
+    const radius = size * (0.85 + Math.random() * 0.3);
     
     points.push({
       x: center.x + Math.cos(angle) * radius,
@@ -111,8 +146,8 @@ function createIsland(
     });
   }
   
-  // Apply erosion to the edges
-  const erodedPoints = applyErosion(points, config.erosionFactor * 1.5); // More erosion
+  // Apply erosion to the edges - more points but less noise
+  const erodedPoints = applyErosion(points, config.erosionFactor * 0.8);
   
   // Create SVG path
   let pathString = `M ${erodedPoints[0].x} ${erodedPoints[0].y}`;
@@ -123,47 +158,50 @@ function createIsland(
   
   pathString += ' Z';
   
-  // Different fill for campos vs regular islands with more variety
-  // Use the pattern textures we defined
+  // Different fill for campos vs regular islands
   const fill = isCampo ? 'url(#campoTexture)' : 'url(#islandTexture)';
   
   // Add building details with more variety
   let buildingDetails = '';
   
+  // Determine building density based on island size
+  const buildingDensity = Math.min(1, size / 30) * (config.buildingDensity || 0.7);
+  
   if (!isCampo) {
     // Add some building rectangles with more variety
-    const buildingCount = Math.floor(3 + Math.random() * 5);
+    const buildingCount = Math.floor(2 + buildingDensity * 6);
     const buildingColors = ['#c4baa8', '#b3aa94', '#d4cebf', '#a39b8c'];
     
     for (let i = 0; i < buildingCount; i++) {
-      const bWidth = 4 + Math.random() * 10;
-      const bHeight = 4 + Math.random() * 10;
+      // Smaller buildings
+      const bWidth = 3 + Math.random() * 8;
+      const bHeight = 3 + Math.random() * 8;
       
-      // Distribute buildings better across the island
-      const distFromCenter = Math.random() * size * 0.6;
+      // Distribute buildings better across the island - more towards the center
+      const distFromCenter = Math.random() * size * 0.5;
       const angle = Math.random() * Math.PI * 2;
       const bx = center.x + Math.cos(angle) * distFromCenter;
       const by = center.y + Math.sin(angle) * distFromCenter;
       
-      // Random rotation for buildings
-      const rotation = Math.floor(Math.random() * 360);
+      // Random rotation for buildings - align somewhat with island shape
+      const rotation = Math.floor(Math.random() * 45) * (Math.random() > 0.5 ? 1 : -1);
       const colorIndex = Math.floor(Math.random() * buildingColors.length);
       
       buildingDetails += `<rect x="${bx - bWidth/2}" y="${by - bHeight/2}" 
                           width="${bWidth}" height="${bHeight}" 
                           fill="${buildingColors[colorIndex]}" 
-                          stroke="#a39b8c" stroke-width="0.5"
+                          stroke="#a39b8c" stroke-width="0.3"
                           transform="rotate(${rotation} ${bx} ${by})" />`;
     }
   } else if (isCampo) {
     // Add a central feature for campos with more detail
-    buildingDetails += `<circle cx="${center.x}" cy="${center.y}" r="${size/5}" 
+    buildingDetails += `<circle cx="${center.x}" cy="${center.y}" r="${size/6}" 
                         fill="#c4baa8" stroke="#a39b8c" stroke-width="0.5" />`;
     
     // Add some decorative elements to the campo
-    const smallFeatures = Math.floor(2 + Math.random() * 4);
+    const smallFeatures = Math.floor(3 + Math.random() * 5);
     for (let i = 0; i < smallFeatures; i++) {
-      const featureSize = 2 + Math.random() * 4;
+      const featureSize = 2 + Math.random() * 3;
       const angle = Math.random() * Math.PI * 2;
       const distance = size * 0.3 + Math.random() * (size * 0.2);
       const fx = center.x + Math.cos(angle) * distance;
@@ -177,7 +215,7 @@ function createIsland(
   return {
     points: erodedPoints,
     isCampo,
-    svgPath: `<path d="${pathString}" fill="${fill}" stroke="#b3aa94" stroke-width="1" />${buildingDetails}`
+    svgPath: `<path d="${pathString}" fill="${fill}" stroke="#b3aa94" stroke-width="0.8" />${buildingDetails}`
   };
 }
 
@@ -191,12 +229,13 @@ function applyErosion(points: Point[], erosionFactor: number): Point[] {
     
     result.push(p1);
     
-    // Add 2-4 intermediate points with noise for more detailed coastlines
-    const numIntermediatePoints = 2 + Math.floor(Math.random() * 3);
+    // Add 2-3 intermediate points with less noise for smoother coastlines
+    const numIntermediatePoints = 2 + Math.floor(Math.random() * 2);
     
     for (let j = 1; j <= numIntermediatePoints; j++) {
       const t = j / (numIntermediatePoints + 1);
-      const noise = erosionFactor * (Math.random() * 2 - 1) * 10;
+      // Less noise for smoother coastlines
+      const noise = erosionFactor * (Math.random() * 2 - 1) * 5;
       
       result.push({
         x: p1.x + (p2.x - p1.x) * t + noise,
