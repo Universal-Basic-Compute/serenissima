@@ -85,8 +85,9 @@ export function placeBridges(
         end: potential.end,
         width: bridgeWidth,
         svgPath: `
-          <path d="${pathString}" stroke="#d4cebf" stroke-width="${bridgeWidth}" fill="none" stroke-linecap="round" />
-          <path d="${pathString}" stroke="#8c7e6b" stroke-width="${bridgeWidth * 0.8}" fill="none" stroke-opacity="0.5" stroke-linecap="round" />
+          <path d="${pathString}" stroke="#d4cebf" stroke-width="${bridgeWidth + 2}" fill="none" stroke-linecap="round" />
+          <path d="${pathString}" stroke="#8c7e6b" stroke-width="${bridgeWidth}" fill="none" stroke-opacity="0.8" stroke-linecap="round" />
+          <path d="${pathString}" stroke="#f5f2e8" stroke-width="${bridgeWidth * 0.5}" fill="none" stroke-opacity="0.6" stroke-linecap="round" />
         `
       });
     }

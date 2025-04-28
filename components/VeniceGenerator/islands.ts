@@ -4,7 +4,7 @@ export function generateIslands(canals: Canal[], config: VeniceConfig): Island[]
   const islands: Island[] = [];
   
   // Create a grid of potential island centers
-  const gridSize = 50;
+  const gridSize = 30; // Smaller grid for more islands
   const potentialCenters: Point[] = [];
   
   // Get the bounds from canals
@@ -70,8 +70,8 @@ function createIsland(
   config: VeniceConfig
 ): Island {
   // Determine island size
-  const baseSize = isCampo ? 40 : 30;
-  const size = baseSize + Math.random() * 20;
+  const baseSize = isCampo ? 30 : 20; // Smaller islands
+  const size = baseSize + Math.random() * 15;
   
   // Create a polygon with random points around the center
   const numPoints = 8 + Math.floor(Math.random() * 5);
@@ -102,10 +102,30 @@ function createIsland(
   // Different fill for campos vs regular islands
   const fill = isCampo ? '#e9e5dc' : '#d4cebf';
   
+  // Add building details for larger islands
+  let buildingDetails = '';
+  if (size > 25 && !isCampo) {
+    // Add some building rectangles
+    const buildingCount = Math.floor(2 + Math.random() * 4);
+    for (let i = 0; i < buildingCount; i++) {
+      const bWidth = 5 + Math.random() * 8;
+      const bHeight = 5 + Math.random() * 8;
+      const bx = center.x - bWidth/2 + (Math.random() * 10 - 5);
+      const by = center.y - bHeight/2 + (Math.random() * 10 - 5);
+      
+      buildingDetails += `<rect x="${bx}" y="${by}" width="${bWidth}" height="${bHeight}" 
+                          fill="#c4baa8" stroke="#a39b8c" stroke-width="0.5" />`;
+    }
+  } else if (isCampo) {
+    // Add a central feature for campos
+    buildingDetails += `<circle cx="${center.x}" cy="${center.y}" r="${size/6}" 
+                        fill="#c4baa8" stroke="#a39b8c" stroke-width="0.5" />`;
+  }
+  
   return {
     points: erodedPoints,
     isCampo,
-    svgPath: `<path d="${pathString}" fill="${fill}" stroke="#b3aa94" stroke-width="1" />`
+    svgPath: `<path d="${pathString}" fill="${fill}" stroke="#b3aa94" stroke-width="1" />${buildingDetails}`
   };
 }
 

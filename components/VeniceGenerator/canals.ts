@@ -54,8 +54,8 @@ function createGrandCanal(width: number, height: number, config: VeniceConfig): 
   
   return {
     points,
-    width: width * 0.05, // Grand Canal is wider
-    svgPath: `<path d="${pathString}" stroke="#6ba4c9" stroke-width="${width * 0.05}" fill="none" />`
+    width: width * 0.03, // Reduce from 0.05 to 0.03
+    svgPath: `<path d="${pathString}" stroke="#6ba4c9" stroke-width="${width * 0.03}" fill="none" />`
   };
 }
 
@@ -109,8 +109,8 @@ function createSecondaryCanals(
     
     canals.push({
       points: canalPoints,
-      width: width * 0.025, // Secondary canals are narrower
-      svgPath: `<path d="${pathString}" stroke="#6ba4c9" stroke-width="${width * 0.025}" fill="none" />`
+      width: width * 0.015, // Reduce from 0.025 to 0.015
+      svgPath: `<path d="${pathString}" stroke="#6ba4c9" stroke-width="${width * 0.015}" fill="none" />`
     });
   }
   
@@ -167,8 +167,8 @@ function createTertiaryCanals(
     
     canals.push({
       points: canalPoints,
-      width: width * 0.015, // Tertiary canals are the narrowest
-      svgPath: `<path d="${pathString}" stroke="#6ba4c9" stroke-width="${width * 0.015}" fill="none" />`
+      width: width * 0.01, // Reduce from 0.015 to 0.01
+      svgPath: `<path d="${pathString}" stroke="#6ba4c9" stroke-width="${width * 0.01}" fill="none" />`
     });
   }
   
