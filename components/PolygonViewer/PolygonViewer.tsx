@@ -338,10 +338,10 @@ export default function PolygonViewer() {
       // Calculate the new rotation angle
       const newRotationX = scene.rotation.x + deltaMove.y * 0.01;
       
-      // Limit rotation to prevent looking under the scene
-      // Convert 10 degrees to radians (Math.PI / 18)
+      // Limit rotation to between 10° and 90° from the horizon
+      // Convert to radians
       const minAngle = -Math.PI / 2 + Math.PI / 18; // -90° + 10° = -80°
-      const maxAngle = 0; // Don't allow rotation below the horizon
+      const maxAngle = -Math.PI / 2 + Math.PI / 2;  // -90° + 90° = 0° (horizon)
       
       // Apply rotation only if it's within the allowed range
       if (newRotationX >= minAngle && newRotationX <= maxAngle) {
