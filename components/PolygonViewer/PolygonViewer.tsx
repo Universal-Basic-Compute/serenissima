@@ -403,8 +403,9 @@ export default function PolygonViewer() {
       cameraTheta -= deltaMove.x * 0.01;
       
       // Limit vertical rotation to prevent going upside down
-      // Only allow phi between 0.1 and 1.4 radians (about 5 to 80 degrees from vertical)
-      cameraPhi = Math.max(0.1, Math.min(1.4, cameraPhi + deltaMove.y * 0.01));
+      // Allow phi between 0.1 and 0.9 radians (about 5 to 50 degrees from vertical)
+      // This prevents the camera from going below the horizon
+      cameraPhi = Math.max(0.1, Math.min(0.9, cameraPhi + deltaMove.y * 0.01));
       
       // Convert spherical to cartesian coordinates
       camera.position.x = cameraRadius * Math.sin(cameraPhi) * Math.cos(cameraTheta);
@@ -452,7 +453,7 @@ export default function PolygonViewer() {
       // Reset camera position using spherical coordinates
       cameraRadius = 120; // Distance from center
       cameraTheta = Math.PI / 4; // Horizontal angle (45 degrees)
-      cameraPhi = Math.PI / 3; // Vertical angle (60 degrees from vertical)
+      cameraPhi = 0.6; // Vertical angle (about 35 degrees from vertical)
       
       // Convert to cartesian coordinates
       camera.position.x = cameraRadius * Math.sin(cameraPhi) * Math.cos(cameraTheta);
@@ -502,6 +503,16 @@ export default function PolygonViewer() {
       }
       
       frameCount++;
+      
+      // Ensure camera is never upside down
+      if (camera.position.y < 10) {
+        cameraPhi = 0.6;
+        camera.position.x = cameraRadius * Math.sin(cameraPhi) * Math.cos(cameraTheta);
+        camera.position.y = cameraRadius * Math.cos(cameraPhi);
+        camera.position.z = cameraRadius * Math.sin(cameraPhi) * Math.sin(cameraTheta);
+        camera.lookAt(0, 0, 0);
+      }
+      
       renderer.render(scene, camera);
     };
     
