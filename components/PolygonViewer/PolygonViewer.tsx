@@ -279,11 +279,7 @@ export default function PolygonViewer() {
             const extrudeSettings = {
               steps: 1,
               depth: 0.5 + Math.random() * 0.5, // Random height variation
-              bevelEnabled: true,
-              bevelThickness: 0.1, // Reduced from 0.2
-              bevelSize: 0.1, // Reduced from 0.2
-              bevelOffset: 0,
-              bevelSegments: 2 // Reduced from 3
+              bevelEnabled: false // Disable bevel completely to remove space between islands
             };
             
             const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
@@ -339,11 +335,7 @@ export default function PolygonViewer() {
       const extrudeSettings = {
         steps: 1,
         depth: 0.8,
-        bevelEnabled: true,
-        bevelThickness: 0.1, // Reduced from 0.2
-        bevelSize: 0.1, // Reduced from 0.2
-        bevelOffset: 0,
-        bevelSegments: 2 // Reduced from 3
+        bevelEnabled: false // Disable bevel completely to remove space between islands
       };
       
       const sampleGeometry = new THREE.ExtrudeGeometry(sampleShape, extrudeSettings);
