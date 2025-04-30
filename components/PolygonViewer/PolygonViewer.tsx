@@ -372,7 +372,17 @@ export default function PolygonViewer() {
     camera.lookAt(0, 0, 0);
     
     // Set initial scene rotation for a good viewing angle
-    scene.rotation.x = -Math.PI / 6; // Slight downward angle
+    scene.rotation.x = -Math.PI / 4; // More pronounced downward angle
+    
+    // Ensure camera is never upside down
+    const ensureCameraOrientation = () => {
+      if (scene.rotation.x > -Math.PI / 12) {
+        scene.rotation.x = -Math.PI / 4; // Reset to a good viewing angle
+      }
+    };
+    
+    // Call this function initially
+    ensureCameraOrientation();
     
     // Simple controls for rotation
     let isDragging = false;
@@ -400,11 +410,10 @@ export default function PolygonViewer() {
       // Calculate the new rotation angle for vertical tilt
       const newRotationX = scene.rotation.x + deltaMove.y * 0.01;
       
-      // Limit rotation to prevent looking under the map
-      // We want to allow looking from above (negative values in our coordinate system)
-      // but not allow looking from below (positive values would see underside)
+      // More restrictive limits to prevent looking under the map
+      // Only allow looking from above, never from below
       const minAngle = -Math.PI / 2; // -90 degrees (looking straight down)
-      const maxAngle = 0; // 0 degrees (looking horizontally)
+      const maxAngle = -Math.PI / 12; // -15 degrees (slight downward angle)
       
       // Apply rotation only if it's within the allowed range
       if (newRotationX >= minAngle && newRotationX <= maxAngle) {
@@ -449,13 +458,13 @@ export default function PolygonViewer() {
     
     // Function to reset camera to a good viewing position
     const resetCamera = () => {
-      // Reset scene rotation
-      scene.rotation.x = -Math.PI / 6; // Slight downward angle
+      // Reset scene rotation - ensure we're looking from above
+      scene.rotation.x = -Math.PI / 4; // More pronounced downward angle
       scene.rotation.y = 0;
       scene.rotation.z = 0;
       
-      // Reset camera position
-      camera.position.set(0, 50, 50);
+      // Reset camera position - position it higher and further back
+      camera.position.set(0, 70, 70);
       camera.lookAt(0, 0, 0);
     };
     
@@ -471,6 +480,9 @@ export default function PolygonViewer() {
     // Animation loop
     const animate = () => {
       requestAnimationFrame(animate);
+      
+      // Ensure camera orientation is always correct
+      ensureCameraOrientation();
       
       // Animate water normal map with less frequent updates
       const time = Date.now() * 0.0005; // Reduced animation speed
