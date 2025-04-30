@@ -379,7 +379,7 @@ export default function PolygonViewer() {
     // Track mouse state
     let isDragging = false;
     let previousMousePosition = { x: 0, y: 0 };
-    const cameraRadius = Math.sqrt(camera.position.x**2 + camera.position.y**2 + camera.position.z**2);
+    let cameraRadius = Math.sqrt(camera.position.x**2 + camera.position.y**2 + camera.position.z**2);
     let cameraTheta = Math.atan2(camera.position.z, camera.position.x);
     let cameraPhi = Math.acos(camera.position.y / cameraRadius);
 
