@@ -91,12 +91,16 @@ export default function PolygonViewer() {
     scene.fog = new THREE.FogExp2('#1e5799', 0.0005); // Further reduced fog density for performance
     
     const camera = new THREE.PerspectiveCamera(
-      75, 
+      60, // Slightly narrower FOV for better control
       window.innerWidth / window.innerHeight, 
       0.1, 
       1000
     );
-    camera.position.set(0, 5, 5); // Position camera above and back
+    
+    // Position camera above the scene looking down at an angle
+    camera.position.set(0, 80, 80);
+    camera.up.set(0, 1, 0); // Ensure "up" is the Y axis
+    camera.lookAt(0, 0, 0);
     
     const renderer = new THREE.WebGLRenderer({ 
       canvas: canvasRef.current,
@@ -367,33 +371,18 @@ export default function PolygonViewer() {
       console.log('Added sample polygon to scene');
     }
     
-    // Position camera to view all polygons - higher and further back
-    camera.position.set(0, 100, 100);
-    camera.lookAt(0, 0, 0);
+    // Don't rotate the scene at all initially
+    scene.rotation.x = 0;
+    scene.rotation.y = 0;
+    scene.rotation.z = 0;
     
-    // Set initial scene rotation for a good viewing angle
-    scene.rotation.x = -Math.PI / 3; // More pronounced downward angle (60 degrees)
-    
-    // Ensure camera is never upside down
-    const ensureCameraOrientation = () => {
-      // Force the rotation to always be negative (looking from above)
-      if (scene.rotation.x > -Math.PI / 6) {
-        scene.rotation.x = -Math.PI / 3; // Reset to a good viewing angle
-      }
-      
-      // Prevent extreme angles that could cause flipping
-      if (scene.rotation.x < -Math.PI * 0.8) {
-        scene.rotation.x = -Math.PI * 0.8;
-      }
-    };
-    
-    // Call this function initially
-    ensureCameraOrientation();
-    
-    // Simple controls for rotation
+    // Track mouse state
     let isDragging = false;
     let previousMousePosition = { x: 0, y: 0 };
-    
+    const cameraRadius = Math.sqrt(camera.position.x**2 + camera.position.y**2 + camera.position.z**2);
+    let cameraTheta = Math.atan2(camera.position.z, camera.position.x);
+    let cameraPhi = Math.acos(camera.position.y / cameraRadius);
+
     const handleMouseDown = (event) => {
       isDragging = true;
       previousMousePosition = {
@@ -401,7 +390,7 @@ export default function PolygonViewer() {
         y: event.clientY
       };
     };
-    
+
     const handleMouseMove = (event) => {
       if (!isDragging) return;
       
@@ -410,21 +399,20 @@ export default function PolygonViewer() {
         y: event.clientY - previousMousePosition.y
       };
       
-      // Rotate scene based on mouse movement (horizontal rotation is fine)
-      scene.rotation.y += deltaMove.x * 0.01;
+      // Update spherical coordinates based on mouse movement
+      cameraTheta -= deltaMove.x * 0.01;
       
-      // Calculate the new rotation angle for vertical tilt
-      const newRotationX = scene.rotation.x + deltaMove.y * 0.01;
+      // Limit vertical rotation to prevent going upside down
+      // Only allow phi between 0.1 and 1.4 radians (about 5 to 80 degrees from vertical)
+      cameraPhi = Math.max(0.1, Math.min(1.4, cameraPhi + deltaMove.y * 0.01));
       
-      // Very restrictive limits to prevent looking under the map
-      // Only allow looking from above, never from below
-      const minAngle = -Math.PI * 0.8; // -144 degrees (steep downward angle)
-      const maxAngle = -Math.PI / 6; // -30 degrees (shallow downward angle)
+      // Convert spherical to cartesian coordinates
+      camera.position.x = cameraRadius * Math.sin(cameraPhi) * Math.cos(cameraTheta);
+      camera.position.y = cameraRadius * Math.cos(cameraPhi);
+      camera.position.z = cameraRadius * Math.sin(cameraPhi) * Math.sin(cameraTheta);
       
-      // Apply rotation only if it's within the allowed range
-      if (newRotationX >= minAngle && newRotationX <= maxAngle) {
-        scene.rotation.x = newRotationX;
-      }
+      // Always look at the center
+      camera.lookAt(0, 0, 0);
       
       previousMousePosition = {
         x: event.clientX,
@@ -440,20 +428,17 @@ export default function PolygonViewer() {
     const handleWheel = (event) => {
       event.preventDefault();
       
-      // Adjust camera position based on wheel direction
-      const zoomSpeed = 0.1;
+      // Adjust camera radius based on wheel direction
+      const zoomSpeed = 5;
       const delta = event.deltaY > 0 ? 1 : -1;
       
-      // Move camera closer or further
-      const direction = new THREE.Vector3();
-      camera.getWorldDirection(direction);
+      // Update radius (distance from center)
+      cameraRadius = Math.max(20, Math.min(200, cameraRadius + delta * zoomSpeed));
       
-      camera.position.addScaledVector(direction, delta * zoomSpeed * -10);
-      
-      // Ensure camera doesn't go below the ground
-      if (camera.position.y < 1) {
-        camera.position.y = 1;
-      }
+      // Update camera position using current angles and new radius
+      camera.position.x = cameraRadius * Math.sin(cameraPhi) * Math.cos(cameraTheta);
+      camera.position.y = cameraRadius * Math.cos(cameraPhi);
+      camera.position.z = cameraRadius * Math.sin(cameraPhi) * Math.sin(cameraTheta);
     };
     
     // Add event listeners
@@ -464,14 +449,23 @@ export default function PolygonViewer() {
     
     // Function to reset camera to a good viewing position
     const resetCamera = () => {
-      // Reset scene rotation - ensure we're looking from above with a steeper angle
-      scene.rotation.x = -Math.PI / 3; // Even more pronounced downward angle (60 degrees)
+      // Reset camera position using spherical coordinates
+      cameraRadius = 120; // Distance from center
+      cameraTheta = Math.PI / 4; // Horizontal angle (45 degrees)
+      cameraPhi = Math.PI / 3; // Vertical angle (60 degrees from vertical)
+      
+      // Convert to cartesian coordinates
+      camera.position.x = cameraRadius * Math.sin(cameraPhi) * Math.cos(cameraTheta);
+      camera.position.y = cameraRadius * Math.cos(cameraPhi);
+      camera.position.z = cameraRadius * Math.sin(cameraPhi) * Math.sin(cameraTheta);
+      
+      // Look at center
+      camera.lookAt(0, 0, 0);
+      
+      // Reset scene rotation (shouldn't be needed anymore)
+      scene.rotation.x = 0;
       scene.rotation.y = 0;
       scene.rotation.z = 0;
-      
-      // Reset camera position - position it much higher and further back
-      camera.position.set(0, 100, 100);
-      camera.lookAt(0, 0, 0);
     };
     
     // Store the resetCamera function in our ref so it can be called from outside
@@ -486,9 +480,6 @@ export default function PolygonViewer() {
     // Animation loop
     const animate = () => {
       requestAnimationFrame(animate);
-      
-      // Ensure camera orientation is always correct
-      ensureCameraOrientation();
       
       // Animate water normal map with less frequent updates
       const time = Date.now() * 0.0005; // Reduced animation speed
