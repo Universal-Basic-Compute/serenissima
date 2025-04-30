@@ -367,17 +367,23 @@ export default function PolygonViewer() {
       console.log('Added sample polygon to scene');
     }
     
-    // Position camera to view all polygons
-    camera.position.set(0, 50, 50);
+    // Position camera to view all polygons - higher and further back
+    camera.position.set(0, 100, 100);
     camera.lookAt(0, 0, 0);
     
     // Set initial scene rotation for a good viewing angle
-    scene.rotation.x = -Math.PI / 4; // More pronounced downward angle
+    scene.rotation.x = -Math.PI / 3; // More pronounced downward angle (60 degrees)
     
     // Ensure camera is never upside down
     const ensureCameraOrientation = () => {
-      if (scene.rotation.x > -Math.PI / 12) {
-        scene.rotation.x = -Math.PI / 4; // Reset to a good viewing angle
+      // Force the rotation to always be negative (looking from above)
+      if (scene.rotation.x > -Math.PI / 6) {
+        scene.rotation.x = -Math.PI / 3; // Reset to a good viewing angle
+      }
+      
+      // Prevent extreme angles that could cause flipping
+      if (scene.rotation.x < -Math.PI * 0.8) {
+        scene.rotation.x = -Math.PI * 0.8;
       }
     };
     
@@ -410,10 +416,10 @@ export default function PolygonViewer() {
       // Calculate the new rotation angle for vertical tilt
       const newRotationX = scene.rotation.x + deltaMove.y * 0.01;
       
-      // More restrictive limits to prevent looking under the map
+      // Very restrictive limits to prevent looking under the map
       // Only allow looking from above, never from below
-      const minAngle = -Math.PI / 2; // -90 degrees (looking straight down)
-      const maxAngle = -Math.PI / 12; // -15 degrees (slight downward angle)
+      const minAngle = -Math.PI * 0.8; // -144 degrees (steep downward angle)
+      const maxAngle = -Math.PI / 6; // -30 degrees (shallow downward angle)
       
       // Apply rotation only if it's within the allowed range
       if (newRotationX >= minAngle && newRotationX <= maxAngle) {
@@ -458,13 +464,13 @@ export default function PolygonViewer() {
     
     // Function to reset camera to a good viewing position
     const resetCamera = () => {
-      // Reset scene rotation - ensure we're looking from above
-      scene.rotation.x = -Math.PI / 4; // More pronounced downward angle
+      // Reset scene rotation - ensure we're looking from above with a steeper angle
+      scene.rotation.x = -Math.PI / 3; // Even more pronounced downward angle (60 degrees)
       scene.rotation.y = 0;
       scene.rotation.z = 0;
       
-      // Reset camera position - position it higher and further back
-      camera.position.set(0, 70, 70);
+      // Reset camera position - position it much higher and further back
+      camera.position.set(0, 100, 100);
       camera.lookAt(0, 0, 0);
     };
     
