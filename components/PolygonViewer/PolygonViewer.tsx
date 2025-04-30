@@ -142,7 +142,7 @@ export default function PolygonViewer() {
     
     // Main directional light (sun) - bigger and more yellow
     const sunLight = new THREE.DirectionalLight(0xffffcc, 1.8); // More yellow tint and higher intensity
-    sunLight.position.set(30, 100, 30); // Adjusted position
+    sunLight.position.set(-30, 100, -30); // Changed from (30, 100, 30) to (-30, 100, -30)
     sunLight.castShadow = true;
     
     // Create a sun sphere for visual effect
