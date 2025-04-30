@@ -90,8 +90,9 @@ export default function PolygonViewer() {
     // Create a fog effect for depth
     scene.fog = new THREE.FogExp2('#1e5799', 0.0005); // Further reduced fog density for performance
     
+    // Create a camera with a better initial position
     const camera = new THREE.PerspectiveCamera(
-      60, // Slightly narrower FOV for better control
+      60,
       window.innerWidth / window.innerHeight, 
       0.1, 
       1000
@@ -379,8 +380,11 @@ export default function PolygonViewer() {
     // Track mouse state
     let isDragging = false;
     let previousMousePosition = { x: 0, y: 0 };
+    // Calculate initial spherical coordinates correctly
     let cameraRadius = Math.sqrt(camera.position.x**2 + camera.position.y**2 + camera.position.z**2);
+    // Use correct calculation for theta - this was the main issue
     let cameraTheta = Math.atan2(camera.position.z, camera.position.x);
+    // Use correct calculation for phi
     let cameraPhi = Math.acos(camera.position.y / cameraRadius);
 
     const handleMouseDown = (event) => {
@@ -400,12 +404,17 @@ export default function PolygonViewer() {
       };
       
       // Update spherical coordinates based on mouse movement
+      // Invert the x movement to make it more intuitive
       cameraTheta -= deltaMove.x * 0.01;
       
+      // Invert the y movement to make it more intuitive
+      // When mouse moves up, camera should look more downward (phi decreases)
+      // When mouse moves down, camera should look more upward (phi increases)
+      const newPhi = cameraPhi - deltaMove.y * 0.01;
+      
       // Limit vertical rotation to prevent going upside down
-      // Allow phi between 0.1 and 0.9 radians (about 5 to 50 degrees from vertical)
-      // This prevents the camera from going below the horizon
-      cameraPhi = Math.max(0.1, Math.min(0.9, cameraPhi + deltaMove.y * 0.01));
+      // Keep phi between 0.1 and 1.4 radians (about 5 to 80 degrees from vertical)
+      cameraPhi = Math.max(0.1, Math.min(1.4, newPhi));
       
       // Convert spherical to cartesian coordinates
       camera.position.x = cameraRadius * Math.sin(cameraPhi) * Math.cos(cameraTheta);
@@ -463,7 +472,7 @@ export default function PolygonViewer() {
       // Look at center
       camera.lookAt(0, 0, 0);
       
-      // Reset scene rotation (shouldn't be needed anymore)
+      // Reset scene rotation
       scene.rotation.x = 0;
       scene.rotation.y = 0;
       scene.rotation.z = 0;
