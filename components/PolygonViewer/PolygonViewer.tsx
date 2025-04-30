@@ -350,6 +350,9 @@ export default function PolygonViewer() {
     camera.position.set(0, 50, 50);
     camera.lookAt(0, 0, 0);
     
+    // Set initial scene rotation for a good viewing angle
+    scene.rotation.x = -Math.PI / 6; // Slight downward angle
+    
     // Simple controls for rotation
     let isDragging = false;
     let previousMousePosition = { x: 0, y: 0 };
@@ -380,7 +383,7 @@ export default function PolygonViewer() {
       // We want to allow looking from above (negative values in our coordinate system)
       // but not allow looking from below (positive values would see underside)
       const minAngle = -Math.PI / 2; // -90 degrees (looking straight down)
-      const maxAngle = -Math.PI / 18; // -10 degrees (shallow angle)
+      const maxAngle = 0; // 0 degrees (looking horizontally)
       
       // Apply rotation only if it's within the allowed range
       if (newRotationX >= minAngle && newRotationX <= maxAngle) {
@@ -422,6 +425,21 @@ export default function PolygonViewer() {
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('mouseup', handleMouseUp);
     window.addEventListener('wheel', handleWheel, { passive: false });
+    
+    // Function to reset camera to a good viewing position
+    const resetCamera = () => {
+      // Reset scene rotation
+      scene.rotation.x = -Math.PI / 6; // Slight downward angle
+      scene.rotation.y = 0;
+      scene.rotation.z = 0;
+      
+      // Reset camera position
+      camera.position.set(0, 50, 50);
+      camera.lookAt(0, 0, 0);
+    };
+    
+    // Call this initially to set a good starting view
+    resetCamera();
     
     // Add a frame counter for less frequent updates
     let frameCount = 0;
@@ -473,6 +491,11 @@ export default function PolygonViewer() {
       window.removeEventListener('wheel', handleWheel);
       window.removeEventListener('resize', handleResize);
       
+      // Make resetCamera available to the component
+      if (typeof window !== 'undefined') {
+        window.resetCameraView = undefined;
+      }
+      
       // Dispose of Three.js resources
       scene.traverse((object) => {
         if (object.geometry) object.geometry.dispose();
@@ -502,6 +525,26 @@ export default function PolygonViewer() {
     );
   }
   
+  // Function to reset camera view from component
+  const resetView = () => {
+    if (typeof window !== 'undefined' && window.resetCameraView) {
+      window.resetCameraView();
+    }
+  };
+  
+  // Store the resetCamera function on window for access
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.resetCameraView = resetCamera;
+    }
+    
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.resetCameraView = undefined;
+      }
+    };
+  }, []);
+  
   return (
     <div className="w-screen h-screen">
       <div className="absolute top-4 left-4 z-10 bg-white p-2 rounded shadow">
@@ -511,12 +554,20 @@ export default function PolygonViewer() {
           <p>Found {polygons.length} polygon(s)</p>
         )}
       </div>
-      <button 
-        onClick={() => setHighQuality(!highQuality)}
-        className="absolute bottom-4 right-4 z-10 bg-white px-4 py-2 rounded shadow"
-      >
-        {highQuality ? 'Performance Mode' : 'Quality Mode'}
-      </button>
+      <div className="absolute bottom-4 right-4 z-10 flex gap-2">
+        <button 
+          onClick={resetView}
+          className="bg-white px-4 py-2 rounded shadow"
+        >
+          Reset View
+        </button>
+        <button 
+          onClick={() => setHighQuality(!highQuality)}
+          className="bg-white px-4 py-2 rounded shadow"
+        >
+          {highQuality ? 'Performance Mode' : 'Quality Mode'}
+        </button>
+      </div>
       <canvas ref={canvasRef} className="w-full h-full" />
     </div>
   );
