@@ -525,13 +525,6 @@ export default function PolygonViewer() {
     );
   }
   
-  // Function to reset camera view from component
-  const resetView = () => {
-    if (typeof window !== 'undefined' && window.resetCameraView) {
-      window.resetCameraView();
-    }
-  };
-  
   // Store the resetCamera function on window for access
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -544,6 +537,13 @@ export default function PolygonViewer() {
       }
     };
   }, []);
+  
+  // Function to reset camera view from component
+  const resetView = () => {
+    if (typeof window !== 'undefined' && window.resetCameraView) {
+      window.resetCameraView();
+    }
+  };
   
   return (
     <div className="w-screen h-screen">
