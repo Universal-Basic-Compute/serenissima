@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import * as THREE from 'three';
 
 export default function PolygonViewer() {
@@ -9,6 +9,27 @@ export default function PolygonViewer() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [highQuality, setHighQuality] = useState(false);
+  
+  // Define resetCamera at component level using useRef to store the function
+  const resetCameraRef = useRef(() => {});
+  
+  // Define resetView at component level
+  const resetView = useCallback(() => {
+    resetCameraRef.current();
+  }, []);
+  
+  // Store the resetCamera function on window for access
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.resetCameraView = resetView;
+    }
+    
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.resetCameraView = undefined;
+      }
+    };
+  }, [resetView]);
   
   // Load saved polygons
   useEffect(() => {
@@ -438,6 +459,9 @@ export default function PolygonViewer() {
       camera.lookAt(0, 0, 0);
     };
     
+    // Store the resetCamera function in our ref so it can be called from outside
+    resetCameraRef.current = resetCamera;
+    
     // Call this initially to set a good starting view
     resetCamera();
     
@@ -525,25 +549,6 @@ export default function PolygonViewer() {
     );
   }
   
-  // Store the resetCamera function on window for access
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      window.resetCameraView = resetCamera;
-    }
-    
-    return () => {
-      if (typeof window !== 'undefined') {
-        window.resetCameraView = undefined;
-      }
-    };
-  }, []);
-  
-  // Function to reset camera view from component
-  const resetView = () => {
-    if (typeof window !== 'undefined' && window.resetCameraView) {
-      window.resetCameraView();
-    }
-  };
   
   return (
     <div className="w-screen h-screen">
