@@ -205,7 +205,7 @@ export default function PolygonViewer() {
     });
     
     const waterPlane = new THREE.Mesh(waterGeometry, waterMaterial);
-    waterPlane.rotation.x = -Math.PI / 2;
+    waterPlane.rotation.x = Math.PI / 2;
     waterPlane.position.y = -0.2;
     waterPlane.receiveShadow = true;
     scene.add(waterPlane);
@@ -288,8 +288,8 @@ export default function PolygonViewer() {
             
             const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
             
-            // Rotate to lay flat on the "ground"
-            geometry.rotateX(Math.PI / 2);
+            // Rotate to lay flat on the "ground" but facing upward
+            geometry.rotateX(-Math.PI / 2);
             
             // Create a realistic sand material
             const sandMaterial = new THREE.MeshStandardMaterial({ 
@@ -347,7 +347,7 @@ export default function PolygonViewer() {
       };
       
       const sampleGeometry = new THREE.ExtrudeGeometry(sampleShape, extrudeSettings);
-      sampleGeometry.rotateX(Math.PI / 2);
+      sampleGeometry.rotateX(-Math.PI / 2);
       
       const sampleMaterial = new THREE.MeshStandardMaterial({
         color: '#e6d2a8', // More yellow/tan color
@@ -462,7 +462,7 @@ export default function PolygonViewer() {
       // Reset camera position using spherical coordinates
       cameraRadius = 120; // Distance from center
       cameraTheta = Math.PI / 4; // Horizontal angle (45 degrees)
-      cameraPhi = 0.6; // Vertical angle (about 35 degrees from vertical)
+      cameraPhi = Math.PI / 4; // Vertical angle (45 degrees from vertical)
       
       // Convert to cartesian coordinates
       camera.position.x = cameraRadius * Math.sin(cameraPhi) * Math.cos(cameraTheta);
