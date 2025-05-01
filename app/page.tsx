@@ -486,12 +486,9 @@ export default function Home() {
   
   // Add effect to update market panel visibility based on active view
   useEffect(() => {
+    // Make sure this is properly set when activeView changes
     setMarketPanelVisible(activeView === 'markets');
-  }, [activeView]);
-  
-  // Add effect to update market panel visibility based on active view
-  useEffect(() => {
-    setMarketPanelVisible(activeView === 'markets');
+    console.log('Active view changed to:', activeView, 'Market panel visible:', activeView === 'markets');
   }, [activeView]);
 
   // Handle compute transfer

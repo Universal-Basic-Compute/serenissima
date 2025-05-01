@@ -41,8 +41,8 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
   setLoading: (loading) => set({ loading }),
   setError: (error) => set({ error }),
   setActiveView: (view: ViewMode) => {
-    // Only allow switching to buildings or land view
-    if (view === 'buildings' || view === 'land') {
+    // Allow switching to buildings, land, or markets view
+    if (view === 'buildings' || view === 'land' || view === 'markets') {
       set({ activeView: view });
     } else {
       console.log(`View mode ${view} is not yet available`);
