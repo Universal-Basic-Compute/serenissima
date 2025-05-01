@@ -410,6 +410,8 @@ export default class PolygonRenderer {
       
       // Start processing the first batch
       processBatch(0);
+    } catch (error) {
+      console.error('Error rendering polygons:', error);
     }
   } else {
     console.warn('No polygons to display');
