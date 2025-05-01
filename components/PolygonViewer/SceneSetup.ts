@@ -63,14 +63,17 @@ export default class SceneSetup {
     // Set up OrbitControls
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     
-    // Configure controls for this specific application
-    this.controls.enableDamping = !this.performanceMode;
-    this.controls.dampingFactor = 0.1;
+    // Disable auto rotate
+    this.controls.autoRotate = false;
     
-    // Make controls less sensitive to prevent accidental camera resets
-    this.controls.rotateSpeed = 0.7;
-    this.controls.zoomSpeed = 0.7;
-    this.controls.panSpeed = 0.7;
+    // Configure controls for stability
+    this.controls.enableDamping = true;
+    this.controls.dampingFactor = 0.05;
+    
+    // Make controls less sensitive
+    this.controls.rotateSpeed = 0.5;
+    this.controls.zoomSpeed = 0.5;
+    this.controls.panSpeed = 0.5;
     
     // Ensure controls are explicitly enabled
     this.controls.enablePan = true;
@@ -94,6 +97,10 @@ export default class SceneSetup {
     
     // Make panning parallel to the ground plane
     this.controls.screenSpacePanning = false;
+    
+    // IMPORTANT: Remove any event listeners that might reset the camera
+    this.controls.removeEventListener('change', this.resetCamera);
+    this.controls.removeEventListener('change', this.handleCameraChange);
     
     // Set initial target to center of scene
     this.controls.target.set(0, 0, 0);

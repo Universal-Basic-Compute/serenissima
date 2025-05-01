@@ -61,6 +61,13 @@ export default class InteractionManager {
   }
   
   private onMouseMove(event: MouseEvent) {
+    // Add a check to prevent handling events when controls are being used
+    if (event.buttons !== 0) {
+      // If any mouse button is pressed, this is likely a camera control operation
+      // Don't process for polygon interaction
+      return;
+    }
+    
     // Calculate mouse position in normalized device coordinates (-1 to +1)
     this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
@@ -193,6 +200,11 @@ export default class InteractionManager {
   }
   
   private onMouseClick(event: MouseEvent) {
+    // Only handle left-click (button 0)
+    if (event.button !== 0) {
+      return;
+    }
+    
     // Update the raycaster with the camera and mouse position
     this.raycaster.setFromCamera(this.mouse, this.camera);
     

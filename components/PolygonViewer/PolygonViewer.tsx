@@ -129,10 +129,22 @@ export default function PolygonViewer() {
     
     // Animation loop
     const animate = () => {
+      // Prevent any camera resets
+      if (typeof window !== 'undefined') {
+        window.resetCameraTriggeredByUser = false;
+        if (window.resetCameraView) {
+          window.resetCameraView = () => {
+            console.log("Camera reset prevented");
+          };
+        }
+      }
+      
       const animationId = requestAnimationFrame(animate);
       
-      // Update controls each frame for smooth damping effect
-      scene.controls.update();
+      // IMPORTANT: Only update controls, don't reset camera
+      if (scene.controls) {
+        scene.controls.update();
+      }
       
       // Update water effect
       waterEffect.update(frameCount, !highQuality);
