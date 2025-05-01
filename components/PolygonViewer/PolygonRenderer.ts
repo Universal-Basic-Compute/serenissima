@@ -461,13 +461,16 @@ export default class PolygonRenderer {
       this.textureLoader.load(
         coatOfArmsUrl,
         (texture) => {
-          // Create a flat plane for the coat of arms
-          const planeSize = 4; // Size of the plane
+          // Create a circular texture from the loaded image
+          const circularTexture = this.createCircularTexture(texture, ownerColor);
+          
+          // Create a flat plane for the coat of arms - 50% smaller
+          const planeSize = 2; // Reduced size by 50%
           const geometry = new THREE.PlaneGeometry(planeSize, planeSize);
           
           // Create material with the texture
           const material = new THREE.MeshBasicMaterial({ 
-            map: texture,
+            map: circularTexture,
             transparent: true,
             side: THREE.DoubleSide,
             depthWrite: true
@@ -485,8 +488,8 @@ export default class PolygonRenderer {
             this.bounds.latCorrectionFactor
           )[0];
           
-          // Position slightly above the land to avoid z-fighting
-          plane.position.set(normalizedCoords.x, 0.05, -normalizedCoords.y);
+          // Position higher above the land to avoid z-fighting (0.1 instead of 0.05)
+          plane.position.set(normalizedCoords.x, 0.1, -normalizedCoords.y);
           
           // Rotate to lay flat on the ground (90 degrees around X axis)
           plane.rotation.x = -Math.PI / 2;
@@ -496,7 +499,7 @@ export default class PolygonRenderer {
           this.coatOfArmSprites[polygon.id] = plane;
           
           console.log(`Added flat coat of arms for ${polygon.id} at position:`, 
-            normalizedCoords.x, 0.05, -normalizedCoords.y);
+            normalizedCoords.x, 0.1, -normalizedCoords.y);
         },
         undefined,
         (error) => {
@@ -568,7 +571,7 @@ export default class PolygonRenderer {
       ctx.arc(size/2, size/2, size/2 - 4, 0, Math.PI * 2);
       ctx.fillStyle = ownerColor;
       ctx.fill();
-      ctx.strokeStyle = '#000000';
+      ctx.strokeStyle = '#FFFFFF';
       ctx.lineWidth = 8;
       ctx.stroke();
       
@@ -601,29 +604,29 @@ export default class PolygonRenderer {
       ctx.fill();
       
       // Add a stroke around the circle
-      ctx.strokeStyle = '#000000';
+      ctx.strokeStyle = '#FFFFFF';
       ctx.lineWidth = 8;
       ctx.stroke();
       
       // Create a new clipping path for the image
       ctx.save();
       ctx.beginPath();
-      ctx.arc(size/2, size/2, size/2 - 8, 0, Math.PI * 2);
+      ctx.arc(size/2, size/2, size/2 - 12, 0, Math.PI * 2);
       ctx.clip();
       
       // Calculate dimensions to maintain aspect ratio
-      let drawWidth = size;
-      let drawHeight = size;
-      let offsetX = 0;
-      let offsetY = 0;
+      let drawWidth = size - 24;
+      let drawHeight = size - 24;
+      let offsetX = 12;
+      let offsetY = 12;
       
       if (texture.image.width > texture.image.height) {
         // Landscape image
-        drawHeight = (texture.image.height / texture.image.width) * size;
+        drawHeight = (texture.image.height / texture.image.width) * (size - 24);
         offsetY = (size - drawHeight) / 2;
       } else if (texture.image.height > texture.image.width) {
         // Portrait image
-        drawWidth = (texture.image.width / texture.image.height) * size;
+        drawWidth = (texture.image.width / texture.image.height) * (size - 24);
         offsetX = (size - drawWidth) / 2;
       }
       
@@ -648,7 +651,7 @@ export default class PolygonRenderer {
       ctx.arc(size/2, size/2, size/2 - 4, 0, Math.PI * 2);
       ctx.fillStyle = ownerColor;
       ctx.fill();
-      ctx.strokeStyle = '#000000';
+      ctx.strokeStyle = '#FFFFFF';
       ctx.lineWidth = 8;
       ctx.stroke();
       
@@ -682,8 +685,8 @@ export default class PolygonRenderer {
     const texture = new THREE.Texture(canvas);
     texture.needsUpdate = true;
     
-    // Create a flat plane for the colored circle
-    const planeSize = 4; // Size of the plane
+    // Create a flat plane for the colored circle - 50% smaller
+    const planeSize = 2; // Reduced size by 50%
     const geometry = new THREE.PlaneGeometry(planeSize, planeSize);
     
     // Create material with the texture
@@ -706,8 +709,8 @@ export default class PolygonRenderer {
       this.bounds.latCorrectionFactor
     )[0];
     
-    // Position slightly above the land to avoid z-fighting
-    plane.position.set(normalizedCoords.x, 0.05, -normalizedCoords.y);
+    // Position higher above the land to avoid z-fighting (0.1 instead of 0.05)
+    plane.position.set(normalizedCoords.x, 0.1, -normalizedCoords.y);
     
     // Rotate to lay flat on the ground (90 degrees around X axis)
     plane.rotation.x = -Math.PI / 2;
