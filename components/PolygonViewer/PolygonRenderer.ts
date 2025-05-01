@@ -516,31 +516,10 @@ export default class PolygonRenderer {
     console.log('Combined coat of arms map now has', Object.keys(this.ownerCoatOfArmsMap).length, 'entries');
     console.log('Owner color map now has', Object.keys(this.ownerColorMap).length, 'entries');
     
-    // If we're in land view, apply the new coat of arms textures and colors
+    // If we're in land view, apply the new coat of arms textures directly to the land shapes
     if (this.activeView === 'land') {
-      this.polygons.forEach((polygon) => {
-        if (polygon.owner) {
-          const lodPolygon = this.lodPolygons.find(lp => 
-            lp.getMesh() === this.polygonMeshesRef.current[polygon.id]
-          );
-          
-          if (lodPolygon) {
-            // Get the owner's color
-            const ownerColor = this.ownerColorMap[polygon.owner];
-            
-            // Update the polygon with the owner's color and coat of arms
-            lodPolygon.updateOwner(polygon.owner, ownerColor);
-            
-            if (this.ownerCoatOfArmsMap[polygon.owner]) {
-              lodPolygon.updateCoatOfArmsTexture(this.ownerCoatOfArmsMap[polygon.owner]);
-            }
-          }
-        }
-      });
+      this.updateCoatOfArmsSprites();
     }
-    
-    // Update the sprites
-    this.updateCoatOfArmsSprites();
   }
   
   // This method is replaced by createColoredCircleOnLand
@@ -575,7 +554,7 @@ export default class PolygonRenderer {
 
     // Process each polygon with an owner
     this.polygons.forEach(polygon => {
-      if (!polygon.owner || !polygon.centroid) return;
+      if (!polygon.owner) return;
       
       // Get the coat of arms URL
       const coatOfArmsUrl = this.ownerCoatOfArmsMap[polygon.owner];
@@ -586,66 +565,20 @@ export default class PolygonRenderer {
         ownerColor = this.users[polygon.owner].color;
       }
       
-      if (!coatOfArmsUrl) {
+      // Find the corresponding LOD polygon
+      const lodPolygon = this.lodPolygons.find(lp => 
+        lp.getMesh() === this.polygonMeshesRef.current[polygon.id]
+      );
+      
+      if (!lodPolygon) return;
+      
+      if (coatOfArmsUrl) {
+        // Apply the coat of arms texture directly to the land shape
+        lodPolygon.updateCoatOfArmsTexture(coatOfArmsUrl);
+      } else if (polygon.centroid) {
         // Create a colored circle texture on the land as fallback
         this.createColoredCircleOnLand(polygon, ownerColor);
-        return;
       }
-      
-      // Load the texture
-      this.textureLoader.load(
-        coatOfArmsUrl,
-        (texture) => {
-          // Create a circular texture from the loaded image
-          const circularTexture = this.createCircularTexture(texture);
-          
-          // Create a flat plane for the coat of arms - increase size for better visibility
-          const planeSize = 2.5; // Increased for better visibility
-          const geometry = new THREE.PlaneGeometry(planeSize, planeSize);
-          
-          // Create material with the texture
-          const material = new THREE.MeshBasicMaterial({ 
-            map: circularTexture,
-            transparent: true,
-            side: THREE.DoubleSide,
-            depthWrite: true
-          });
-          
-          // Create mesh
-          const plane = new THREE.Mesh(geometry, material);
-          
-          // Position at the centroid
-          const normalizedCoords = normalizeCoordinates(
-            [polygon.centroid],
-            this.bounds.centerLat,
-            this.bounds.centerLng,
-            this.bounds.scale,
-            this.bounds.latCorrectionFactor
-          )[0];
-          
-          // Position higher above the land to avoid z-fighting - INCREASE THIS VALUE
-          plane.position.set(normalizedCoords.x, 0.25, -normalizedCoords.y); // Increased height
-          
-          // Rotate to lay flat on the ground (90 degrees around X axis)
-          plane.rotation.x = -Math.PI / 2;
-          
-          // Set a high renderOrder to ensure it's always on top
-          plane.renderOrder = 10;
-          
-          // Add to scene and store reference
-          this.scene.add(plane);
-          this.coatOfArmSprites[polygon.id] = plane;
-          
-          console.log(`Added flat coat of arms for ${polygon.id} at position:`, 
-            normalizedCoords.x, 0.25, -normalizedCoords.y);
-        },
-        undefined,
-        (error) => {
-          console.error(`Error loading texture for ${polygon.owner}:`, error);
-          // Create a colored circle as fallback
-          this.createColoredCircleOnLand(polygon, ownerColor);
-        }
-      );
     });
   }
 

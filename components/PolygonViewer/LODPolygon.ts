@@ -146,10 +146,20 @@ export default class LODPolygon {
       UVGenerator: { // Add a custom UV generator for better texture mapping
         generateTopUV: function(geometry, vertices, indexA, indexB, indexC) {
           // Create UVs that map the entire texture to the face
+          const a = vertices[indexA];
+          const b = vertices[indexB];
+          const c = vertices[indexC];
+          
+          // Calculate bounding box of the polygon
+          const bounds = new THREE.Box3().setFromPoints([a, b, c]);
+          const size = new THREE.Vector3();
+          bounds.getSize(size);
+          
+          // Normalize UVs based on the bounding box
           return [
-            new THREE.Vector2(0, 0),
-            new THREE.Vector2(1, 0),
-            new THREE.Vector2(0.5, 1)
+            new THREE.Vector2((a.x - bounds.min.x) / size.x, (a.z - bounds.min.z) / size.z),
+            new THREE.Vector2((b.x - bounds.min.x) / size.x, (b.z - bounds.min.z) / size.z),
+            new THREE.Vector2((c.x - bounds.min.x) / size.x, (c.z - bounds.min.z) / size.z)
           ];
         },
         generateSideWallUV: function(geometry, vertices, indexA, indexB, indexC, indexD) {
@@ -304,9 +314,72 @@ export default class LODPolygon {
   
   // Add method to apply coat of arms texture to the land
   public updateCoatOfArmsTexture(coatOfArmsUrl: string | null) {
-    // We're not applying textures to the polygons anymore
-    // This method is kept for compatibility but doesn't do anything
-    return;
+    if (!coatOfArmsUrl || !this.highDetailMesh) return;
+    
+    // Load the texture
+    this.textureLoader.load(
+      coatOfArmsUrl,
+      (texture) => {
+        // Create a new material that uses the coat of arms texture
+        const material = new THREE.MeshBasicMaterial({
+          map: texture,
+          transparent: true,
+          side: THREE.FrontSide,
+          opacity: 1.0
+        });
+        
+        // Only apply the texture to the top face of the extruded geometry
+        if (this.highDetailMesh) {
+          // Get the current material
+          const currentMaterial = this.highDetailMesh.material as THREE.MeshBasicMaterial;
+          
+          // Create a multi-material: coat of arms for top, original color for sides
+          const materials = [
+            material, // Top face (index 0)
+            currentMaterial // All other faces
+          ];
+          
+          // Apply materials to specific faces
+          const geometry = this.highDetailMesh.geometry;
+          const normalAttribute = geometry.getAttribute('normal');
+          
+          // Create groups for top face (y normal = 1) and side faces
+          const topFaces = [];
+          const sideFaces = [];
+          
+          // Identify top faces by their normal
+          for (let i = 0; i < geometry.index.count / 3; i++) {
+            const a = geometry.index.getX(i * 3);
+            const normalY = normalAttribute.getY(a);
+            
+            // If normal points up, it's a top face
+            if (Math.abs(normalY - 1.0) < 0.1) {
+              topFaces.push(i);
+            } else {
+              sideFaces.push(i);
+            }
+          }
+          
+          // Set material groups
+          geometry.clearGroups();
+          
+          if (topFaces.length > 0) {
+            geometry.addGroup(0, topFaces.length * 3, 0); // Top faces use material 0
+          }
+          
+          if (sideFaces.length > 0) {
+            geometry.addGroup(topFaces.length * 3, sideFaces.length * 3, 1); // Side faces use material 1
+          }
+          
+          // Apply the multi-material
+          this.highDetailMesh.material = materials;
+        }
+      },
+      undefined,
+      (error) => {
+        console.error('Error loading coat of arms texture:', error);
+      }
+    );
   }
 
   public updateQuality(performanceMode: boolean) {
