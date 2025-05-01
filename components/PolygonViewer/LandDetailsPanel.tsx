@@ -172,10 +172,11 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
   useEffect(() => {
     if (selectedPolygonId) {
       setIsVisible(true);
-    } else {
+    } else if (!preventAutoClose) {
+      // Only hide the panel if preventAutoClose is false
       setIsVisible(false);
     }
-  }, [selectedPolygonId]);
+  }, [selectedPolygonId, preventAutoClose]);
   
   // Early return if not visible or no selected polygon
   if (!visible || !selectedPolygonId) return null;
