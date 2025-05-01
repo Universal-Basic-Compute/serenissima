@@ -3,6 +3,7 @@ import { useRouter } from 'next/navigation';
 import ActionButton from '../UI/ActionButton';
 import WalletStatus from '../UI/WalletStatus';
 import PlayerProfile from '../UI/PlayerProfile';
+import LandPurchaseConfirmation from '../UI/LandPurchaseConfirmation';
 import { Polygon } from './types';
 
 interface LandDetailsPanelProps {
@@ -21,6 +22,8 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
   const [offerAmount, setOfferAmount] = useState<number>(10000000); // Default offer of 10M COMPUTE
   const [showOfferInput, setShowOfferInput] = useState<boolean>(false);
   const [offers, setOffers] = useState<any[]>([]);
+  const [showPurchaseConfirmation, setShowPurchaseConfirmation] = useState(false);
+  const [isPurchasing, setIsPurchasing] = useState(false);
   
   // Find the selected polygon
   const selectedPolygon = selectedPolygonId 
@@ -218,7 +221,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
               
               {/* Add Acquire Land button with improved styling */}
               <button
-                onClick={async () => {
+                onClick={() => {
                   // Get the current wallet address
                   const walletAddress = sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress') || '';
                   
@@ -227,137 +230,8 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
                     return;
                   }
                   
-                  // Show confirmation dialog styled as an official document
-                  if (!confirm(
-                    `\n╔══════════════════════════════════════════════════╗
-                    \n║        REPUBLIC OF VENICE - OFFICIAL DECREE        ║
-                    \n╠══════════════════════════════════════════════════╣
-                    \n║                                                  ║
-                    \n║  By the authority of the Council of Ten,         ║
-                    \n║  this document confirms the acquisition of:      ║
-                    \n║                                                  ║
-                    \n║  PROPERTY: ${selectedPolygon?.historicalName || selectedPolygonId}    ║
-                    \n║  LOCATION: ${selectedPolygon?.englishName || 'Venezia'}                ║
-                    \n║  PRICE: ${transaction.price.toLocaleString()} ducats                  ║
-                    \n║  SELLER: ${transaction.seller}                   ║
-                    \n║  BUYER: ${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}     ║
-                    \n║                                                  ║
-                    \n║  Do you confirm this transaction?                ║
-                    \n║                                                  ║
-                    \n╚══════════════════════════════════════════════════╝`
-                  )) {
-                    return; // User cancelled the transaction
-                  }
-                  
-                  try {
-                    // Call the backend API to execute the transaction
-                    const response = await fetch(`http://localhost:8000/api/transaction/${transaction.id}/execute`, {
-                      method: 'POST',
-                      headers: {
-                        'Content-Type': 'application/json',
-                      },
-                      body: JSON.stringify({
-                        buyer: walletAddress  // Make sure this is included
-                      }),
-                    });
-                  
-                    // Parse the response data regardless of status
-                    const data = await response.json();
-                  
-                    if (!response.ok) {
-                      // Check if this is a "transaction already executed" error
-                      if (data.detail && data.detail.includes("already executed")) {
-                        alert(`This land has already been acquired. The information will be updated.`);
-                      
-                        // Fetch updated land data
-                        const landResponse = await fetch(`http://localhost:8000/api/land/${selectedPolygonId}`);
-                        if (landResponse.ok) {
-                          const landData = await landResponse.json();
-                        
-                          // Update local state
-                          if (landData && landData.user) {
-                            // Update the owner in the local state
-                            const updatedPolygons = polygons.map(p => 
-                              p.id === selectedPolygonId ? { ...p, owner: landData.user } : p
-                            );
-                          
-                            // Dispatch a custom event to notify other components
-                            window.dispatchEvent(new CustomEvent('landOwnershipChanged', {
-                              detail: { 
-                                landId: selectedPolygonId, 
-                                newOwner: landData.user
-                              }
-                            }));
-                          }
-                        }
-                      
-                        return;
-                      }
-                    
-                      throw new Error(data.detail || 'Failed to execute transaction');
-                    }
-                  
-                    // Show success message styled as an official document
-                    alert(
-                      `\n╔══════════════════════════════════════════════════╗
-                      \n║        REPUBLIC OF VENICE - DEED OF OWNERSHIP      ║
-                      \n╠══════════════════════════════════════════════════╣
-                      \n║                                                  ║
-                      \n║  ACQUISITION COMPLETE                            ║
-                      \n║                                                  ║
-                      \n║  The property known as:                          ║
-                      \n║  "${selectedPolygon?.historicalName || selectedPolygonId}"          ║
-                      \n║                                                  ║
-                      \n║  Has been successfully transferred to your       ║
-                      \n║  possession for the sum of:                      ║
-                      \n║  ${transaction.price.toLocaleString()} ducats                       ║
-                      \n║                                                  ║
-                      \n║  Sealed by the authority of the Most Serene      ║
-                      \n║  Republic of Venice on this day.                 ║
-                      \n║                                                  ║
-                      \n╚══════════════════════════════════════════════════╝`
-                    );
-                  
-                    // Update local state without page reload
-                    // 1. Update the owner in the local state
-                    const updatedPolygons = polygons.map(p => 
-                      p.id === selectedPolygonId ? { ...p, owner: walletAddress } : p
-                    );
-                  
-                    // 2. Update the transaction to mark it as executed
-                    const updatedTransaction = {
-                      ...transaction,
-                      buyer: walletAddress,
-                      executed_at: new Date().toISOString()
-                    };
-                    setTransaction(updatedTransaction);
-                  
-                    // 3. Clear offers since the land has been sold
-                    setOffers([]);
-                  
-                    // 4. Dispatch a custom event to notify other components
-                    window.dispatchEvent(new CustomEvent('landOwnershipChanged', {
-                      detail: { 
-                        landId: selectedPolygonId, 
-                        newOwner: walletAddress,
-                        transaction: updatedTransaction
-                      }
-                    }));
-                  
-                    // 5. Fetch updated user data to reflect new compute balance
-                    const userResponse = await fetch(`http://localhost:8000/api/wallet/${walletAddress}`);
-                    if (userResponse.ok) {
-                      const userData = await userResponse.json();
-                    
-                      // Dispatch event to update user profile with new compute amount
-                      window.dispatchEvent(new CustomEvent('userProfileUpdated', {
-                        detail: userData
-                      }));
-                    }
-                  } catch (error) {
-                    console.error('Error executing transaction:', error);
-                    alert('Failed to acquire land. Please try again.');
-                  }
+                  // Show the purchase confirmation dialog
+                  setShowPurchaseConfirmation(true);
                 }}
                 className="mt-4 w-full px-4 py-3 bg-amber-600 text-white text-base font-medium rounded-lg hover:bg-amber-700 transition-colors flex items-center justify-center"
               >
@@ -599,6 +473,125 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
           </div>
         </div>
       </div>
+      
+      {showPurchaseConfirmation && transaction && (
+        <LandPurchaseConfirmation
+          landId={selectedPolygonId || ''}
+          landName={selectedPolygon?.historicalName || selectedPolygon?.englishName}
+          price={transaction.price}
+          onConfirm={handleConfirmPurchase}
+          onCancel={() => setShowPurchaseConfirmation(false)}
+          isLoading={isPurchasing}
+        />
+      )}
     </div>
   );
+  
+  // Function to handle the purchase confirmation
+  async function handleConfirmPurchase() {
+    try {
+      setIsPurchasing(true);
+      
+      // Get the current wallet address
+      const walletAddress = sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress') || '';
+      
+      if (!walletAddress) {
+        alert('Please connect your wallet first');
+        return;
+      }
+      
+      // Call the backend API to execute the transaction
+      const response = await fetch(`http://localhost:8000/api/transaction/${transaction.id}/execute`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          buyer: walletAddress  // Make sure this is included
+        }),
+      });
+    
+      // Parse the response data regardless of status
+      const data = await response.json();
+    
+      if (!response.ok) {
+        // Check if this is a "transaction already executed" error
+        if (data.detail && data.detail.includes("already executed")) {
+          alert(`This land has already been acquired. The information will be updated.`);
+        
+          // Fetch updated land data
+          const landResponse = await fetch(`http://localhost:8000/api/land/${selectedPolygonId}`);
+          if (landResponse.ok) {
+            const landData = await landResponse.json();
+          
+            // Update local state
+            if (landData && landData.user) {
+              // Update the owner in the local state
+              const updatedPolygons = polygons.map(p => 
+                p.id === selectedPolygonId ? { ...p, owner: landData.user } : p
+              );
+            
+              // Dispatch a custom event to notify other components
+              window.dispatchEvent(new CustomEvent('landOwnershipChanged', {
+                detail: { 
+                  landId: selectedPolygonId, 
+                  newOwner: landData.user
+                }
+              }));
+            }
+          }
+        
+          return;
+        }
+      
+        throw new Error(data.detail || 'Failed to execute transaction');
+      }
+    
+      // Show success message
+      alert(`Acquisition complete! The property "${selectedPolygon?.historicalName || selectedPolygonId}" has been successfully transferred to your possession.`);
+    
+      // Update local state without page reload
+      // 1. Update the owner in the local state
+      const updatedPolygons = polygons.map(p => 
+        p.id === selectedPolygonId ? { ...p, owner: walletAddress } : p
+      );
+    
+      // 2. Update the transaction to mark it as executed
+      const updatedTransaction = {
+        ...transaction,
+        buyer: walletAddress,
+        executed_at: new Date().toISOString()
+      };
+      setTransaction(updatedTransaction);
+    
+      // 3. Clear offers since the land has been sold
+      setOffers([]);
+    
+      // 4. Dispatch a custom event to notify other components
+      window.dispatchEvent(new CustomEvent('landOwnershipChanged', {
+        detail: { 
+          landId: selectedPolygonId, 
+          newOwner: walletAddress,
+          transaction: updatedTransaction
+        }
+      }));
+    
+      // 5. Fetch updated user data to reflect new compute balance
+      const userResponse = await fetch(`http://localhost:8000/api/wallet/${walletAddress}`);
+      if (userResponse.ok) {
+        const userData = await userResponse.json();
+      
+        // Dispatch event to update user profile with new compute amount
+        window.dispatchEvent(new CustomEvent('userProfileUpdated', {
+          detail: userData
+        }));
+      }
+    } catch (error) {
+      console.error('Error executing transaction:', error);
+      alert('Failed to acquire land. Please try again.');
+    } finally {
+      setIsPurchasing(false);
+      setShowPurchaseConfirmation(false);
+    }
+  }
 }
