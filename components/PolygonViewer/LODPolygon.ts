@@ -141,7 +141,26 @@ export default class LODPolygon {
       bevelEnabled: true, // Enable bevels for more realistic edges
       bevelThickness: 0.01,
       bevelSize: 0.01,
-      bevelSegments: 2
+      bevelSegments: 2,
+      UVGenerator: { // Add a custom UV generator for better texture mapping
+        generateTopUV: function(geometry, vertices, indexA, indexB, indexC) {
+          // Create UVs that map the entire texture to the face
+          return [
+            new THREE.Vector2(0, 0),
+            new THREE.Vector2(1, 0),
+            new THREE.Vector2(0.5, 1)
+          ];
+        },
+        generateSideWallUV: function(geometry, vertices, indexA, indexB, indexC, indexD) {
+          // For side walls, use a simpler mapping
+          return [
+            new THREE.Vector2(0, 0),
+            new THREE.Vector2(1, 0),
+            new THREE.Vector2(1, 1),
+            new THREE.Vector2(0, 1)
+          ];
+        }
+      }
     };
     
     const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
@@ -270,6 +289,30 @@ export default class LODPolygon {
     });
   }
   
+  // Alternative method using projection mapping for coat of arms
+  private applyProjectionMapping(texture: THREE.Texture) {
+    if (!this.highDetailMesh) return;
+    
+    const material = this.highDetailMesh.material as THREE.MeshStandardMaterial;
+    
+    // Use a matrix to project the texture from above
+    const matrix = new THREE.Matrix4();
+    matrix.makeRotationX(-Math.PI / 2); // Rotate to project from above
+    
+    // Create a projection matrix that maps the texture to cover the entire polygon
+    texture.matrixAutoUpdate = false;
+    texture.matrix.copy(matrix);
+    
+    // Set texture parameters
+    texture.wrapS = texture.wrapT = THREE.ClampToEdgeWrapping;
+    texture.minFilter = THREE.LinearFilter;
+    texture.magFilter = THREE.LinearFilter;
+    
+    // Apply the texture to the material
+    material.map = texture;
+    material.needsUpdate = true;
+  }
+  
   // Add method to apply coat of arms texture to the land
   public updateCoatOfArmsTexture(coatOfArmsUrl: string | null) {
     if (!coatOfArmsUrl || this.activeView !== 'land') return;
@@ -283,9 +326,12 @@ export default class LODPolygon {
     this.textureLoader.load(
       coatOfArmsUrl,
       (texture) => {
-        // Set texture properties
-        texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-        texture.repeat.set(1, 1);
+        // Change texture wrapping to ClampToEdge instead of RepeatWrapping
+        texture.wrapS = texture.wrapT = THREE.ClampToEdgeWrapping;
+        
+        // Don't set repeat - we want one image per land
+        // Set texture to cover the entire polygon
+        texture.mapping = THREE.UVMapping;
         
         // Apply the texture to the material
         material.map = texture;
