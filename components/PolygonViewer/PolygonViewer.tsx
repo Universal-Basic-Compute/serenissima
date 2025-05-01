@@ -30,6 +30,25 @@ export default function PolygonViewer() {
   const hasLoadedDataRef = useRef<boolean>(false);
   const hasUpdatedCoatOfArmsRef = useRef<boolean>(false);
   
+  // Get state from store
+  const {
+    polygons,
+    loading,
+    error,
+    activeView,
+    highQuality,
+    selectedPolygonId,
+    landOwners,
+    users,
+    setActiveView,
+    toggleQuality,
+    setHoveredPolygonId,
+    setSelectedPolygonId,
+    loadPolygons,
+    loadLandOwners,
+    loadUsers
+  } = usePolygonStore();
+  
   // Function to update polygon colors
   const updatePolygonColors = useCallback(() => {
     if (polygonRendererRef.current && users && Object.keys(users).length > 0) {
@@ -87,25 +106,6 @@ export default function PolygonViewer() {
       }
     }
   }, [users]);
-  
-  // Get state from store
-  const {
-    polygons,
-    loading,
-    error,
-    activeView,
-    highQuality,
-    selectedPolygonId,
-    landOwners,
-    users,
-    setActiveView,
-    toggleQuality,
-    setHoveredPolygonId,
-    setSelectedPolygonId,
-    loadPolygons,
-    loadLandOwners,
-    loadUsers
-  } = usePolygonStore();
   
   // References to our scene components
   const sceneRef = useRef<SceneSetup | null>(null);
