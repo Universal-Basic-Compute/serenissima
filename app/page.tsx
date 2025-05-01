@@ -88,12 +88,16 @@ export default function Home() {
   
   // Initialize wallet adapter
   useEffect(() => {
+    console.log("Initializing wallet adapter...");
     const adapter = new PhantomWalletAdapter();
     setWalletAdapter(adapter);
     
     // Check if wallet is already connected in session or local storage
     const storedWallet = sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress');
+    console.log("Stored wallet address:", storedWallet);
+    
     if (storedWallet) {
+      console.log("Found stored wallet address, setting as connected");
       setWalletAddress(storedWallet);
       
       // Also fetch user profile data if wallet is connected
@@ -119,17 +123,22 @@ export default function Home() {
         });
     } else if (adapter.connected) {
       // If adapter is connected but not in storage, update both
+      console.log("Adapter is connected but not in storage");
       const address = adapter.publicKey?.toString() || null;
       if (address) {
+        console.log("Setting wallet address from adapter:", address);
         setWalletAddress(address);
         sessionStorage.setItem('walletAddress', address);
         localStorage.setItem('walletAddress', address);
       }
+    } else {
+      console.log("No stored wallet address and adapter not connected");
     }
     
     return () => {
       // Clean up adapter when component unmounts
       if (adapter) {
+        console.log("Cleaning up wallet adapter");
         adapter.disconnect();
       }
     };
@@ -148,6 +157,31 @@ export default function Home() {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+  
+  // Add this useEffect to check wallet connection status
+  useEffect(() => {
+    const checkWalletConnection = async () => {
+      if (walletAdapter) {
+        console.log("Checking wallet connection status...");
+        console.log("Wallet adapter ready state:", walletAdapter.readyState);
+        console.log("Wallet connected:", walletAdapter.connected);
+        
+        if (walletAdapter.connected) {
+          const address = walletAdapter.publicKey?.toString() || null;
+          console.log("Wallet is connected with address:", address);
+          
+          if (address && !walletAddress) {
+            console.log("Setting wallet address from connected adapter");
+            setWalletAddress(address);
+            sessionStorage.setItem('walletAddress', address);
+            localStorage.setItem('walletAddress', address);
+          }
+        }
+      }
+    };
+    
+    checkWalletConnection();
+  }, [walletAdapter, walletAddress]);
 
   // Functions to interact with the backend
   const storeWalletInAirtable = async (walletAddress: string) => {
@@ -332,42 +366,56 @@ export default function Home() {
 
   // Handle wallet connection
   const connectWallet = useCallback(async () => {
-    if (!walletAdapter) return;
+    if (!walletAdapter) {
+      console.log("Wallet adapter not initialized");
+      return;
+    }
+    
+    console.log("Connecting wallet, current state:", walletAdapter.connected ? "connected" : "disconnected");
     
     if (walletAdapter.connected) {
       // If already connected, disconnect
+      console.log("Disconnecting wallet...");
       await walletAdapter.disconnect();
       setWalletAddress(null);
+      setUserProfile(null); // Also clear the user profile
       // Clear wallet from both storages
       sessionStorage.removeItem('walletAddress');
       localStorage.removeItem('walletAddress');
+      console.log("Wallet disconnected");
       return;
     }
     
     // Check if Phantom is installed
     if (walletAdapter.readyState !== WalletReadyState.Installed) {
+      console.log("Phantom wallet not installed, opening website");
       window.open('https://phantom.app/', '_blank');
       return;
     }
     
     try {
+      console.log("Attempting to connect to wallet...");
       await walletAdapter.connect();
       const address = walletAdapter.publicKey?.toString() || null;
-      setWalletAddress(address);
-      console.log('Connected to wallet:', address);
+      console.log("Wallet connected, address:", address);
       
-      // Store wallet in both session and local storage
       if (address) {
+        setWalletAddress(address);
+        // Store wallet in both session and local storage
         sessionStorage.setItem('walletAddress', address);
         localStorage.setItem('walletAddress', address);
+        console.log("Wallet address stored in session and local storage");
+        
         // Store wallet in Airtable and check for username
         const userData = await storeWalletInAirtable(address);
-        console.log('User profile after wallet connection:', userProfile);
-        
-        // If the user doesn't have a username, the prompt will be shown by storeWalletInAirtable
+        console.log("User data from Airtable:", userData);
+        console.log("User profile after wallet connection:", userProfile);
+      } else {
+        console.log("No wallet address returned after connection");
       }
     } catch (error) {
       console.error('Error connecting to wallet:', error);
+      alert(`Failed to connect wallet: ${error.message}`);
     }
   }, [walletAdapter]);
 
