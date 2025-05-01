@@ -471,26 +471,55 @@ export default class LODPolygon {
     // Clean up coat of arms sprite if it exists
     if (this.coatOfArmsSprite) {
       this.scene.remove(this.coatOfArmsSprite);
-      (this.coatOfArmsSprite.material as THREE.SpriteMaterial).map?.dispose();
-      (this.coatOfArmsSprite.material as THREE.SpriteMaterial).dispose();
+      if (this.coatOfArmsSprite.material) {
+        // Check if material has a map before trying to dispose it
+        if ((this.coatOfArmsSprite.material as THREE.SpriteMaterial).map) {
+          (this.coatOfArmsSprite.material as THREE.SpriteMaterial).map.dispose();
+        }
+        (this.coatOfArmsSprite.material as THREE.SpriteMaterial).dispose();
+      }
     }
     
-    // Dispose of geometries
+    // Dispose of geometries and materials with proper type checking
     if (this.highDetailMesh) {
-      this.highDetailMesh.geometry.dispose();
+      if (this.highDetailMesh.geometry) {
+        this.highDetailMesh.geometry.dispose();
+      }
+      
+      // Check if material is an array
       if (Array.isArray(this.highDetailMesh.material)) {
-        this.highDetailMesh.material.forEach(m => m.dispose());
-      } else {
-        (this.highDetailMesh.material as THREE.Material).dispose();
+        this.highDetailMesh.material.forEach(m => {
+          // Check if m exists and has a dispose method
+          if (m && typeof m.dispose === 'function') {
+            m.dispose();
+          }
+        });
+      } else if (this.highDetailMesh.material) {
+        // Check if material exists and has a dispose method
+        if (typeof this.highDetailMesh.material.dispose === 'function') {
+          (this.highDetailMesh.material as THREE.Material).dispose();
+        }
       }
     }
     
     if (this.lowDetailMesh) {
-      this.lowDetailMesh.geometry.dispose();
+      if (this.lowDetailMesh.geometry) {
+        this.lowDetailMesh.geometry.dispose();
+      }
+      
+      // Check if material is an array
       if (Array.isArray(this.lowDetailMesh.material)) {
-        this.lowDetailMesh.material.forEach(m => m.dispose());
-      } else {
-        (this.lowDetailMesh.material as THREE.Material).dispose();
+        this.lowDetailMesh.material.forEach(m => {
+          // Check if m exists and has a dispose method
+          if (m && typeof m.dispose === 'function') {
+            m.dispose();
+          }
+        });
+      } else if (this.lowDetailMesh.material) {
+        // Check if material exists and has a dispose method
+        if (typeof this.lowDetailMesh.material.dispose === 'function') {
+          (this.lowDetailMesh.material as THREE.Material).dispose();
+        }
       }
     }
     
