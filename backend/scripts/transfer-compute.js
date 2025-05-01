@@ -1,7 +1,7 @@
 require('dotenv').config();
 const fs = require('fs');
-const { Connection, PublicKey, Keypair } = require('@solana/web3.js');
-const { Token, TOKEN_PROGRAM_ID } = require('@solana/spl-token');
+const { Connection, PublicKey, Keypair, Transaction, sendAndConfirmTransaction } = require('@solana/web3.js');
+const { createTransferCheckedInstruction, getAssociatedTokenAddress, getMint, getOrCreateAssociatedTokenAccount } = require('@solana/spl-token');
 const bs58 = require('bs58');
 
 async function transferCompute() {
@@ -10,7 +10,7 @@ async function transferCompute() {
     const transferData = JSON.parse(fs.readFileSync('transfer_data.json', 'utf8'));
     const { recipient, amount } = transferData;
     
-    // Initialize Solana connection
+    // Initialize Solana connection with proper commitment level
     const connection = new Connection(
       process.env.SOLANA_RPC_URL || 'https://api.devnet.solana.com',
       'confirmed'
@@ -30,54 +30,85 @@ async function transferCompute() {
       process.env.COMPUTE_TOKEN_MINT || '4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU'
     );
     
-    // Create token instance
-    const token = new Token(
-      connection,
-      computeTokenMint,
-      TOKEN_PROGRAM_ID,
-      treasuryKeypair
-    );
+    // Get mint info to determine decimals
+    const mintInfo = await getMint(connection, computeTokenMint);
     
-    // Get treasury token account
-    const treasuryTokenAccount = await token.getOrCreateAssociatedAccountInfo(
+    // Get or create treasury token account
+    const treasuryTokenAccount = await getOrCreateAssociatedTokenAccount(
+      connection,
+      treasuryKeypair,
+      computeTokenMint,
       treasuryKeypair.publicKey
     );
     
     // Get or create recipient token account
     const recipientPublicKey = new PublicKey(recipient);
-    let recipientTokenAccount;
-    
-    try {
-      recipientTokenAccount = await token.getOrCreateAssociatedAccountInfo(
-        recipientPublicKey
-      );
-    } catch (error) {
-      console.error('Error getting or creating recipient token account:', error);
-      throw error;
-    }
-    
-    // Transfer tokens
-    const signature = await token.transfer(
-      treasuryTokenAccount.address,
-      recipientTokenAccount.address,
-      treasuryKeypair.publicKey,
-      [],
-      amount
+    const recipientTokenAccount = await getOrCreateAssociatedTokenAccount(
+      connection,
+      treasuryKeypair, // Payer for account creation if needed
+      computeTokenMint,
+      recipientPublicKey
     );
     
-    console.log(JSON.stringify({
-      success: true,
-      signature,
-      amount,
-      recipient
-    }));
+    // Check treasury balance before transfer
+    if (Number(treasuryTokenAccount.amount) < amount) {
+      throw new Error(`Insufficient balance: Treasury has ${treasuryTokenAccount.amount} tokens, trying to send ${amount}`);
+    }
     
-    // Clean up the temporary file
-    fs.unlinkSync('transfer_data.json');
+    // Create transfer instruction with proper decimals
+    const transferInstruction = createTransferCheckedInstruction(
+      treasuryTokenAccount.address,
+      computeTokenMint,
+      recipientTokenAccount.address,
+      treasuryKeypair.publicKey,
+      amount * (10 ** mintInfo.decimals), // Convert to proper decimal representation
+      mintInfo.decimals
+    );
     
-    return signature;
+    // Create and sign transaction
+    const transaction = new Transaction().add(transferInstruction);
+    transaction.feePayer = treasuryKeypair.publicKey;
+    transaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+    
+    // Send and confirm transaction with proper error handling
+    try {
+      const signature = await sendAndConfirmTransaction(
+        connection,
+        transaction,
+        [treasuryKeypair],
+        { commitment: 'confirmed', maxRetries: 5 }
+      );
+      
+      console.log(JSON.stringify({
+        success: true,
+        signature,
+        amount,
+        recipient,
+        blockTime: new Date().toISOString()
+      }));
+      
+      // Clean up the temporary file
+      fs.unlinkSync('transfer_data.json');
+      
+      return signature;
+    } catch (txError) {
+      console.error('Transaction failed:', txError);
+      console.log(JSON.stringify({
+        success: false,
+        error: txError.message,
+        errorCode: txError.code || 'UNKNOWN',
+        amount,
+        recipient
+      }));
+      process.exit(1);
+    }
   } catch (error) {
     console.error('Error transferring COMPUTE tokens:', error);
+    console.log(JSON.stringify({
+      success: false,
+      error: error.message,
+      errorCode: error.code || 'UNKNOWN'
+    }));
     process.exit(1);
   }
 }

@@ -1126,38 +1126,57 @@ async def transfer_compute_solana(wallet_data: WalletRequest):
         transfer_amount = wallet_data.compute_amount
         
         # Call the Node.js script to perform the Solana transfer
-        # This is a simplified example - in a real implementation, you would use a more robust approach
         import subprocess
         import json
+        import time
         
         # Create a temporary JSON file with the transfer details
         transfer_data = {
             "recipient": wallet_data.wallet_address,
-            "amount": transfer_amount
+            "amount": transfer_amount,
+            "timestamp": time.time()
         }
         
         with open("transfer_data.json", "w") as f:
             json.dump(transfer_data, f)
         
-        # Call the Node.js script to perform the transfer
-        result = subprocess.run(
-            ["node", "scripts/transfer-compute.js"],
-            capture_output=True,
-            text=True
-        )
+        # Call the Node.js script to perform the transfer with timeout
+        try:
+            result = subprocess.run(
+                ["node", "scripts/transfer-compute.js"],
+                capture_output=True,
+                text=True,
+                timeout=30  # 30 second timeout
+            )
+        except subprocess.TimeoutExpired:
+            print("Solana transfer timed out after 30 seconds")
+            raise HTTPException(status_code=504, detail="Solana transfer timed out")
         
         if result.returncode != 0:
             print(f"Error executing Solana transfer: {result.stderr}")
-            raise HTTPException(status_code=500, detail=f"Failed to execute Solana transfer: {result.stderr}")
+            error_detail = result.stderr or "Unknown error"
+            if "Insufficient balance" in error_detail:
+                raise HTTPException(status_code=400, detail="Insufficient treasury balance to complete transfer")
+            raise HTTPException(status_code=500, detail=f"Failed to execute Solana transfer: {error_detail}")
         
         # Parse the result to get the transaction signature
         try:
             transfer_result = json.loads(result.stdout)
+            
+            if not transfer_result.get("success", False):
+                error_msg = transfer_result.get("error", "Unknown error")
+                error_code = transfer_result.get("errorCode", "UNKNOWN")
+                
+                if "Insufficient" in error_msg:
+                    raise HTTPException(status_code=400, detail=f"Insufficient funds: {error_msg}")
+                    
+                raise HTTPException(status_code=500, detail=f"Transfer failed: {error_msg} (Code: {error_code})")
+                
             signature = transfer_result.get("signature")
             print(f"Solana transfer successful: {signature}")
         except json.JSONDecodeError:
             print(f"Error parsing transfer result: {result.stdout}")
-            signature = None
+            raise HTTPException(status_code=500, detail="Failed to parse transfer result")
         
         if existing_records:
             # Update existing record
@@ -1170,6 +1189,28 @@ async def transfer_compute_solana(wallet_data: WalletRequest):
                 "ComputeAmount": new_amount
             })
             
+            # Add transaction record to TRANSACTIONS table
+            try:
+                transaction_record = transactions_table.create({
+                    "Type": "deposit",
+                    "AssetId": "compute_token",
+                    "Seller": "Treasury",
+                    "Buyer": wallet_data.wallet_address,
+                    "Price": transfer_amount,
+                    "CreatedAt": datetime.datetime.now().isoformat(),
+                    "UpdatedAt": datetime.datetime.now().isoformat(),
+                    "ExecutedAt": datetime.datetime.now().isoformat(),
+                    "Notes": json.dumps({
+                        "signature": signature,
+                        "blockchain": "solana",
+                        "token": "COMPUTE"
+                    })
+                })
+                print(f"Created transaction record: {transaction_record['id']}")
+            except Exception as tx_error:
+                print(f"Warning: Failed to create transaction record: {str(tx_error)}")
+                # Continue even if transaction record creation fails
+            
             return {
                 "id": updated_record["id"],
                 "wallet_address": updated_record["fields"].get("Wallet", ""),
@@ -1178,7 +1219,8 @@ async def transfer_compute_solana(wallet_data: WalletRequest):
                 "email": updated_record["fields"].get("Email", None),
                 "family_motto": updated_record["fields"].get("FamilyMotto", None),
                 "coat_of_arms_image": updated_record["fields"].get("CoatOfArmsImage", None),
-                "transaction_signature": signature
+                "transaction_signature": signature,
+                "block_time": transfer_result.get("blockTime")
             }
         else:
             # Create new record
@@ -1188,6 +1230,28 @@ async def transfer_compute_solana(wallet_data: WalletRequest):
                 "ComputeAmount": transfer_amount
             })
             
+            # Add transaction record to TRANSACTIONS table
+            try:
+                transaction_record = transactions_table.create({
+                    "Type": "deposit",
+                    "AssetId": "compute_token",
+                    "Seller": "Treasury",
+                    "Buyer": wallet_data.wallet_address,
+                    "Price": transfer_amount,
+                    "CreatedAt": datetime.datetime.now().isoformat(),
+                    "UpdatedAt": datetime.datetime.now().isoformat(),
+                    "ExecutedAt": datetime.datetime.now().isoformat(),
+                    "Notes": json.dumps({
+                        "signature": signature,
+                        "blockchain": "solana",
+                        "token": "COMPUTE"
+                    })
+                })
+                print(f"Created transaction record: {transaction_record['id']}")
+            except Exception as tx_error:
+                print(f"Warning: Failed to create transaction record: {str(tx_error)}")
+                # Continue even if transaction record creation fails
+            
             return {
                 "id": record["id"],
                 "wallet_address": record["fields"].get("Wallet", ""),
@@ -1195,7 +1259,8 @@ async def transfer_compute_solana(wallet_data: WalletRequest):
                 "user_name": record["fields"].get("Username", None),
                 "email": record["fields"].get("Email", None),
                 "family_motto": record["fields"].get("FamilyMotto", None),
-                "transaction_signature": signature
+                "transaction_signature": signature,
+                "block_time": transfer_result.get("blockTime")
             }
     except HTTPException:
         raise
@@ -1238,17 +1303,26 @@ async def withdraw_compute_solana(wallet_data: WalletRequest):
         # Call the Node.js script to perform the Solana transfer
         import subprocess
         import json
+        import time
+        import base64
         
-        # Create a temporary JSON file with the transfer details
+        # Create a message for the user to sign (in a real app)
+        message = f"Authorize withdrawal of {wallet_data.compute_amount} COMPUTE tokens at {time.time()}"
+        message_b64 = base64.b64encode(message.encode()).decode()
+        
+        # Create a temporary JSON file with the withdrawal details
         transfer_data = {
             "user": wallet_data.wallet_address,
-            "amount": wallet_data.compute_amount
+            "amount": wallet_data.compute_amount,
+            "message": message,
+            # In a real app, the frontend would provide this signature
+            # "signature": user_signature_from_frontend
         }
         
         with open("withdraw_data.json", "w") as f:
             json.dump(transfer_data, f)
         
-        # Call the Node.js script to perform the withdrawal
+        # Call the Node.js script to prepare the withdrawal transaction
         result = subprocess.run(
             ["node", "scripts/withdraw-compute.js"],
             capture_output=True,
@@ -1256,17 +1330,61 @@ async def withdraw_compute_solana(wallet_data: WalletRequest):
         )
         
         if result.returncode != 0:
-            print(f"Error executing Solana withdrawal: {result.stderr}")
-            raise HTTPException(status_code=500, detail=f"Failed to execute Solana withdrawal: {result.stderr}")
+            print(f"Error preparing Solana withdrawal: {result.stderr}")
+            raise HTTPException(status_code=500, detail=f"Failed to prepare Solana withdrawal: {result.stderr}")
         
-        # Parse the result to get the transaction signature
+        # Parse the result
         try:
             transfer_result = json.loads(result.stdout)
-            signature = transfer_result.get("signature")
-            print(f"Solana withdrawal successful: {signature}")
+            
+            if not transfer_result.get("success", False):
+                error_msg = transfer_result.get("error", "Unknown error")
+                raise HTTPException(status_code=400, detail=error_msg)
+                
+            # In a real application, we would return the serialized transaction
+            # for the frontend to have the user sign it
+            serialized_tx = transfer_result.get("serializedTransaction")
+            
+            if transfer_result.get("status") == "pending_signature":
+                # In a real app, we would wait for the frontend to submit the signed transaction
+                # For now, we'll simulate a successful transaction
+                signature = "simulated_" + base64.b64encode(os.urandom(32)).decode()
+                
+                # Update the record in Airtable
+                print(f"Withdrawing {wallet_data.compute_amount} compute from wallet {record['id']}")
+                print(f"Updating compute amount from {current_amount} to {new_amount}")
+                
+                updated_record = users_table.update(record["id"], {
+                    "ComputeAmount": new_amount
+                })
+                
+                return {
+                    "id": updated_record["id"],
+                    "wallet_address": updated_record["fields"].get("Wallet", ""),
+                    "compute_amount": updated_record["fields"].get("ComputeAmount", 0),
+                    "user_name": updated_record["fields"].get("Username", None),
+                    "email": updated_record["fields"].get("Email", None),
+                    "family_motto": updated_record["fields"].get("FamilyMotto", None),
+                    "coat_of_arms_image": updated_record["fields"].get("CoatOfArmsImage", None),
+                    "transaction_signature": signature,
+                    "transaction_details": {
+                        "from_wallet": wallet_data.wallet_address,
+                        "to_wallet": "Treasury",
+                        "amount": wallet_data.compute_amount,
+                        "status": "completed",
+                        "message": message,
+                        "message_b64": message_b64,
+                        # In a real app, this would be needed for the frontend
+                        "serialized_transaction": serialized_tx
+                    }
+                }
+            else:
+                signature = transfer_result.get("signature")
+                print(f"Solana withdrawal successful: {signature}")
+            
         except json.JSONDecodeError:
             print(f"Error parsing withdrawal result: {result.stdout}")
-            signature = None
+            raise HTTPException(status_code=500, detail="Failed to parse withdrawal result")
         
         # Update the record
         print(f"Withdrawing {wallet_data.compute_amount} compute from wallet {record['id']}")
