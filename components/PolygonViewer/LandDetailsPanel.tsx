@@ -27,6 +27,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
   const [offers, setOffers] = useState<any[]>([]);
   const [showPurchaseConfirmation, setShowPurchaseConfirmation] = useState(false);
   const [isPurchasing, setIsPurchasing] = useState(false);
+  const [justCompletedTransaction, setJustCompletedTransaction] = useState(false);
   
   // Find the selected polygon
   const selectedPolygon = selectedPolygonId 
@@ -92,6 +93,22 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
       setIsVisible(true);
     }
   }, [preventAutoClose, selectedPolygonId]);
+  
+  // Add this useEffect to listen for the custom event to keep panel open
+  useEffect(() => {
+    const handleKeepOpen = (event: CustomEvent) => {
+      if (event.detail.polygonId === selectedPolygonId) {
+        console.log('Keeping land details panel open for', selectedPolygonId);
+        setIsVisible(true);
+      }
+    };
+    
+    window.addEventListener('keepLandDetailsPanelOpen', handleKeepOpen as EventListener);
+    
+    return () => {
+      window.removeEventListener('keepLandDetailsPanelOpen', handleKeepOpen as EventListener);
+    };
+  }, [selectedPolygonId]);
   
   // Add this useEffect to listen for the custom event to keep panel open
   useEffect(() => {
