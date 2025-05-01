@@ -361,6 +361,12 @@ export default class PolygonRenderer {
         return;
       }
       
+      // Get the owner's color from the users data
+      let ownerColor = '#8B4513'; // Default brown color
+      if (polygon.owner && this.users[polygon.owner] && this.users[polygon.owner].color) {
+        ownerColor = this.users[polygon.owner].color;
+      }
+      
       // Load texture if not already in cache
       if (!textureCache[polygon.owner]) {
         console.log(`Loading texture for ${polygon.owner}`);
@@ -370,13 +376,7 @@ export default class PolygonRenderer {
             console.log(`Texture loaded successfully for ${polygon.owner}`);
             texture.minFilter = THREE.LinearFilter; // Improve texture quality
             
-            // Get the owner's color from the users data
-            let ownerColor = '#8B4513'; // Default brown color
-            if (polygon.owner && this.users[polygon.owner] && this.users[polygon.owner].color) {
-              ownerColor = this.users[polygon.owner].color;
-            }
-          
-            // Create circular texture with owner's color
+            // Always create a circular texture with the owner's color
             const circularTexture = this.createCircularTexture(texture, ownerColor);
             
             // Create sprite after texture is loaded
@@ -390,18 +390,13 @@ export default class PolygonRenderer {
           }
         );
       } else {
-        // Use cached texture
+        // Use cached texture but still apply circular mask
         console.log(`Using cached texture for ${polygon.owner}`);
-        // Get the owner's color from the users data
-        let ownerColor = '#8B4513'; // Default brown color
-        if (polygon.owner && this.users[polygon.owner] && this.users[polygon.owner].color) {
-          ownerColor = this.users[polygon.owner].color;
-        }
         
-        // Create circular texture with owner's color
+        // Always create a new circular texture with the owner's color
         const circularTexture = this.createCircularTexture(textureCache[polygon.owner], ownerColor);
         
-        // Create sprite with cached texture
+        // Create sprite with circular texture
         this.createSpriteForPolygon(polygon, circularTexture);
       }
     });
@@ -409,17 +404,8 @@ export default class PolygonRenderer {
 
   // Add this helper method to create a sprite for a polygon
   private createSpriteForPolygon(polygon: Polygon, texture: THREE.Texture) {
-    // Get the owner's color from the users data
-    let ownerColor = '#8B4513'; // Default brown color
-    if (polygon.owner && this.users[polygon.owner] && this.users[polygon.owner].color) {
-      ownerColor = this.users[polygon.owner].color;
-    }
-    
-    // Always apply the circular mask with the owner's color
-    const circularTexture = this.createCircularTexture(texture, ownerColor);
-    
     const material = new THREE.SpriteMaterial({ 
-      map: circularTexture,
+      map: texture, // The texture should already be circular at this point
       transparent: true,
       depthTest: true,
       depthWrite: false,
