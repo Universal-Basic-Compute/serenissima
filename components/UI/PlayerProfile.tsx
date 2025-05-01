@@ -63,14 +63,17 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
     
     // Listen for profile updates
     const handleProfileUpdate = (event: CustomEvent) => {
-      if (event.detail && event.detail.user_name === username) {
-        console.log(`Received profile update for ${username} with compute: ${event.detail.compute_amount}`);
+      if (event.detail && (
+          (username && event.detail.user_name === username) || 
+          (walletAddress && event.detail.wallet_address === walletAddress)
+        )) {
+        console.log(`Received profile update for ${username || walletAddress} with compute: ${event.detail.compute_amount}`);
         setUserData({
-          username: event.detail.user_name,
-          firstName: event.detail.first_name || event.detail.user_name?.split(' ')[0] || 'Unknown',
-          lastName: event.detail.last_name || event.detail.user_name?.split(' ').slice(1).join(' ') || 'User',
-          coatOfArmsImage: event.detail.coat_of_arms_image,
-          familyMotto: event.detail.family_motto,
+          username: event.detail.user_name || username || 'Unknown',
+          firstName: event.detail.first_name || event.detail.user_name?.split(' ')[0] || firstName || 'Unknown',
+          lastName: event.detail.last_name || event.detail.user_name?.split(' ').slice(1).join(' ') || lastName || 'User',
+          coatOfArmsImage: event.detail.coat_of_arms_image || coatOfArmsImage,
+          familyMotto: event.detail.family_motto || familyMotto,
           computeAmount: event.detail.compute_amount
         });
       }
