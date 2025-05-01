@@ -59,95 +59,141 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
       console.log('Starting to load polygons...');
       set({ loading: true, error: null });
       
-      // Use a timeout to ensure the loading state is rendered
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // Create a flag to track if we've already shown some data
+      let hasDisplayedInitialData = false;
       
-      // First load a minimal set of polygons for immediate display
-      console.log('Fetching initial essential polygons for quick display');
+      // First try to load from cache to avoid the loading spinner
+      const cacheKey = 'polygons_cache';
+      const cacheTimestampKey = 'polygons_cache_timestamp';
+      const currentTime = Date.now();
+      const cacheTime = 5 * 60 * 1000; // 5 minutes in milliseconds
       
-      try {
-        const initialResponse = await fetch('/api/get-polygons?limit=20&essential=true');
-        const initialData = await initialResponse.json();
-        
-        if (initialData.polygons && initialData.polygons.length > 0) {
-          // Update state with initial polygons
-          console.log(`Loaded ${initialData.polygons.length} initial polygons`);
-          set({ polygons: initialData.polygons, loading: false });
-          
-          // Then load the rest in the background
-          setTimeout(async () => {
-            try {
-              console.log('Loading full polygon data in background');
-              // Create a cache key based on timestamp (cache for 5 minutes)
-              const cacheKey = 'polygons_cache';
-              const cacheTimestampKey = 'polygons_cache_timestamp';
-              const currentTime = Date.now();
-              const cacheTime = 5 * 60 * 1000; // 5 minutes in milliseconds
-              
-              // Check if we have cached data
-              const cachedTimestamp = localStorage.getItem(cacheTimestampKey);
-              const isCacheValid = cachedTimestamp && (currentTime - parseInt(cachedTimestamp)) < cacheTime;
-              
-              let data;
-              
-              if (isCacheValid) {
-                // Use cached data
-                const cachedData = localStorage.getItem(cacheKey);
-                if (cachedData) {
-                  console.log('Using cached polygon data');
-                  data = JSON.parse(cachedData);
-                }
-              }
-              
-              // If no valid cache, fetch from API
-              if (!data) {
-                try {
-                  const fullResponse = await fetch('/api/get-polygons');
-                  data = await fullResponse.json();
-                  
-                  // Cache the response
-                  localStorage.setItem(cacheKey, JSON.stringify(data));
-                  localStorage.setItem(cacheTimestampKey, currentTime.toString());
-                } catch (fetchError) {
-                  console.error('Error fetching full polygon data:', fetchError);
-                  // Don't throw here, just continue with the initial polygons
-                  return;
-                }
-              }
-              
-              if (data.polygons && data.polygons.length > 0) {
-                console.log(`Loaded ${data.polygons.length} full polygons`);
-                set({ polygons: data.polygons });
-              }
-            } catch (backgroundError) {
-              console.error('Error loading full polygon data:', backgroundError);
-              // Don't update error state since we already have initial polygons
-            }
-          }, 1000);
-          
-          return;
+      // Check if we have cached data
+      const cachedTimestamp = localStorage.getItem(cacheTimestampKey);
+      const isCacheValid = cachedTimestamp && (currentTime - parseInt(cachedTimestamp)) < cacheTime;
+      
+      if (isCacheValid) {
+        // Use cached data
+        const cachedData = localStorage.getItem(cacheKey);
+        if (cachedData) {
+          console.log('Using cached polygon data');
+          const data = JSON.parse(cachedData);
+          if (data.polygons && data.polygons.length > 0) {
+            console.log(`Loaded ${data.polygons.length} polygons from cache`);
+            set({ polygons: data.polygons, loading: false });
+            hasDisplayedInitialData = true;
+            
+            // Still fetch fresh data in the background, but don't show loading spinner again
+            setTimeout(() => fetchFreshData(false), 2000);
+            return;
+          }
         }
-      } catch (initialFetchError) {
-        console.error('Error loading initial polygons:', initialFetchError);
-        // Continue to fallback sample polygon
       }
       
-      console.warn('No initial polygons found or fetch failed, using sample polygon');
-      // If no polygons or fetch failed, create a sample one for testing
-      set({
-        polygons: [{
-          id: 'sample',
-          coordinates: [
-            { lat: 0, lng: 0 },
-            { lat: 0, lng: 1 },
-            { lat: 1, lng: 1 },
-            { lat: 1, lng: 0 }
-          ]
-        }],
-        loading: false
-      });
+      // If no cache, fetch initial data
+      await fetchInitialData();
+      
+      // Helper function to fetch initial essential data
+      async function fetchInitialData() {
+        try {
+          console.log('Fetching initial essential polygons for quick display');
+          const initialResponse = await fetch('/api/get-polygons?limit=20&essential=true');
+          
+          if (!initialResponse.ok) {
+            throw new Error(`Failed to fetch initial polygons: ${initialResponse.status}`);
+          }
+          
+          const initialData = await initialResponse.json();
+          
+          if (initialData.polygons && initialData.polygons.length > 0) {
+            // Update state with initial polygons
+            console.log(`Loaded ${initialData.polygons.length} initial polygons`);
+            set({ polygons: initialData.polygons, loading: false });
+            hasDisplayedInitialData = true;
+            
+            // Then load the rest in the background
+            setTimeout(() => fetchFreshData(false), 1000);
+            return true;
+          }
+          return false;
+        } catch (error) {
+          console.error('Error loading initial polygons:', error);
+          return false;
+        }
+      }
+      
+      // Helper function to fetch full data
+      async function fetchFreshData(showLoading = true) {
+        // Don't show loading indicator if we already have data displayed
+        if (showLoading && !hasDisplayedInitialData) {
+          set({ loading: true });
+        }
+        
+        try {
+          console.log('Loading full polygon data');
+          const fullResponse = await fetch('/api/get-polygons');
+          
+          if (!fullResponse.ok) {
+            throw new Error(`Failed to fetch full polygons: ${fullResponse.status}`);
+          }
+          
+          const data = await fullResponse.json();
+          
+          if (data.polygons && data.polygons.length > 0) {
+            console.log(`Loaded ${data.polygons.length} full polygons`);
+            
+            // Cache the response
+            localStorage.setItem(cacheKey, JSON.stringify(data));
+            localStorage.setItem(cacheTimestampKey, currentTime.toString());
+            
+            // Only update state if we got more polygons than we already have
+            const currentPolygons = get().polygons;
+            if (data.polygons.length > currentPolygons.length) {
+              set({ polygons: data.polygons, loading: false });
+            } else {
+              // Just ensure loading is false
+              set({ loading: false });
+            }
+            return true;
+          }
+          
+          // Ensure loading is false even if no polygons were found
+          set({ loading: false });
+          return false;
+        } catch (error) {
+          console.error('Error loading full polygon data:', error);
+          // Don't update error state if we already have some data
+          if (!hasDisplayedInitialData) {
+            set({ 
+              error: 'Failed to load polygons',
+              loading: false 
+            });
+          } else {
+            // Just ensure loading is false
+            set({ loading: false });
+          }
+          return false;
+        }
+      }
+      
+      // If we get here and haven't displayed any data yet, show a sample polygon
+      if (!hasDisplayedInitialData) {
+        console.warn('No polygons found or fetch failed, using sample polygon');
+        set({
+          polygons: [{
+            id: 'sample',
+            coordinates: [
+              { lat: 0, lng: 0 },
+              { lat: 0, lng: 1 },
+              { lat: 1, lng: 1 },
+              { lat: 1, lng: 0 }
+            ]
+          }],
+          loading: false
+        });
+      }
     } catch (error) {
-      console.error('Error loading polygons:', error);
+      console.error('Error in loadPolygons:', error);
       set({ 
         error: 'Failed to load polygons',
         polygons: [{
