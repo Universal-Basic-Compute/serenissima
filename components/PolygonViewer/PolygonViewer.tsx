@@ -801,7 +801,7 @@ export default function PolygonViewer() {
       interactionManagerRef.current = null;
       bridgeRendererRef.current = null;
     };
-  }, [polygons, loading, activeView, highQuality, bridges, ownerCoatOfArmsMap, users, setHoveredPolygonId, handleContextLost, handlePolygonAdded, handlePolygonDeleted]); // Removed selectedPolygonId from dependencies
+  }, [polygons, loading, bridges, ownerCoatOfArmsMap, users, setHoveredPolygonId, handleContextLost, handlePolygonAdded, handlePolygonDeleted]); // Removed activeView, highQuality, selectedPolygonId from dependencies
   
   // We've removed the separate controls update loop to prevent camera resets
   
@@ -864,6 +864,9 @@ export default function PolygonViewer() {
             polygonRendererRef.current.updateViewMode(activeView);
           }
         }
+        
+        // Update market panel visibility based on active view
+        setMarketPanelVisible(activeView === 'markets');
         
         // Update water effect
         if (waterEffectRef.current) {

@@ -484,11 +484,12 @@ export default function Home() {
     console.log('transferMenuOpen state changed:', transferMenuOpen);
   }, [transferMenuOpen]);
   
-  // Add effect to update market panel visibility based on active view
+  // Add a dedicated effect to ensure market panel visibility is properly updated
   useEffect(() => {
     // Make sure this is properly set when activeView changes
-    setMarketPanelVisible(activeView === 'markets');
-    console.log('Active view changed to:', activeView, 'Market panel visible:', activeView === 'markets');
+    const isMarketView = activeView === 'markets';
+    setMarketPanelVisible(isMarketView);
+    console.log('Active view changed to:', activeView, 'Market panel visible:', isMarketView);
   }, [activeView]);
 
   // Handle compute transfer

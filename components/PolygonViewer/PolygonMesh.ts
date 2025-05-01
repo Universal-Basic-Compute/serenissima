@@ -192,6 +192,9 @@ class PolygonMesh {
   
   // Update view mode
   public updateViewMode(activeView: ViewMode) {
+    // Skip update if view hasn't changed
+    if (this.activeView === activeView) return;
+    
     this.activeView = activeView;
     
     if (!this.mesh) return;
