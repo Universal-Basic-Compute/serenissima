@@ -78,6 +78,12 @@ export default class InteractionManager {
   }
   
   private onMouseClick(event: MouseEvent) {
+    // Log camera position before click processing
+    console.log('Camera position BEFORE click:', {
+      position: this.camera.position.clone(),
+      quaternion: this.camera.quaternion.clone()
+    });
+    
     // Prevent processing if already handling a click
     if (this.isProcessingClick) return;
     
@@ -116,15 +122,31 @@ export default class InteractionManager {
         );
         
         if (clickedId) {
+          // Log that we're selecting a polygon
+          console.log(`Selecting polygon: ${clickedId}`);
+          
           // Toggle selection state
           const newSelectedId = clickedId === this.selectedPolygonId ? null : clickedId;
           
           // CRITICAL: Use a zero-timeout to defer the state update
           // This completely separates it from the current event loop
           setTimeout(() => {
+            // Log camera position before state update
+            console.log('Camera position BEFORE state update:', {
+              position: this.camera.position.clone(),
+              quaternion: this.camera.quaternion.clone()
+            });
+            
             // Update selection state
             this.setSelectedPolygonId(newSelectedId);
             this.selectedPolygonId = newSelectedId;
+            
+            // Log camera position after state update
+            console.log('Camera position AFTER state update:', {
+              position: this.camera.position.clone(),
+              quaternion: this.camera.quaternion.clone()
+            });
+            
             this.isProcessingClick = false;
           }, 0);
           return;
@@ -135,8 +157,21 @@ export default class InteractionManager {
       if (this.selectedPolygonId) {
         // CRITICAL: Use a zero-timeout to defer the state update
         setTimeout(() => {
+          // Log camera position before deselection
+          console.log('Camera position BEFORE deselection:', {
+            position: this.camera.position.clone(),
+            quaternion: this.camera.quaternion.clone()
+          });
+          
           this.setSelectedPolygonId(null);
           this.selectedPolygonId = null;
+          
+          // Log camera position after deselection
+          console.log('Camera position AFTER deselection:', {
+            position: this.camera.position.clone(),
+            quaternion: this.camera.quaternion.clone()
+          });
+          
           this.isProcessingClick = false;
         }, 0);
         return;
@@ -148,6 +183,12 @@ export default class InteractionManager {
       console.error("Error in polygon interaction:", error);
       this.isProcessingClick = false;
     }
+    
+    // Log camera position after click processing
+    console.log('Camera position AFTER click:', {
+      position: this.camera.position.clone(),
+      quaternion: this.camera.quaternion.clone()
+    });
   }
   
   public cleanup() {

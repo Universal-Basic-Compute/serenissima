@@ -86,6 +86,11 @@ export default function PolygonViewer() {
     });
     sceneRef.current = scene;
     
+    // Add camera reference to window for debugging
+    if (typeof window !== 'undefined') {
+      (window as any).threeJsCamera = scene.camera;
+    }
+    
     // Initialize polygon renderer
     const polygonRenderer = new PolygonRenderer({
       scene: scene.scene,
@@ -132,7 +137,18 @@ export default function PolygonViewer() {
       
       // Update controls to enable camera movement
       if (sceneRef.current && sceneRef.current.controls) {
+        // Store camera position before controls update
+        const cameraPosBeforeUpdate = sceneRef.current.camera.position.clone();
+        
         sceneRef.current.controls.update();
+        
+        // Check if camera position changed during controls update
+        if (!cameraPosBeforeUpdate.equals(sceneRef.current.camera.position)) {
+          console.log('Camera position changed during controls update:', {
+            before: cameraPosBeforeUpdate,
+            after: sceneRef.current.camera.position.clone()
+          });
+        }
       }
       
       // Update water effect
@@ -149,8 +165,19 @@ export default function PolygonViewer() {
       
       // Use composer instead of renderer directly to include post-processing effects
       if (sceneRef.current && sceneRef.current.composer) {
+        // Store camera position before render
+        const cameraPosBeforeRender = sceneRef.current.camera.position.clone();
+        
         // Render the scene
         sceneRef.current.composer.render();
+        
+        // Check if camera position changed during render
+        if (!cameraPosBeforeRender.equals(sceneRef.current.camera.position)) {
+          console.log('Camera position changed during render:', {
+            before: cameraPosBeforeRender,
+            after: sceneRef.current.camera.position.clone()
+          });
+        }
       }
     };
     

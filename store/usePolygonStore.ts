@@ -37,7 +37,19 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
   toggleQuality: () => set((state) => ({ highQuality: !state.highQuality })),
   // Make hover a no-op function
   setHoveredPolygonId: () => {},
-  setSelectedPolygonId: (id) => set({ selectedPolygonId: id }),
+  setSelectedPolygonId: (id) => {
+    console.log('setSelectedPolygonId called with:', id);
+    
+    // If we have access to the camera, log its position
+    if (typeof window !== 'undefined' && (window as any).threeJsCamera) {
+      console.log('Camera position in setSelectedPolygonId:', {
+        position: (window as any).threeJsCamera.position.clone(),
+        quaternion: (window as any).threeJsCamera.quaternion.clone()
+      });
+    }
+    
+    set({ selectedPolygonId: id });
+  },
   
   loadPolygons: async () => {
     try {
