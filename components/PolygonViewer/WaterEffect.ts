@@ -213,19 +213,26 @@ export default class WaterEffect {
           // Calculate distance to land - use all channels for better detection
           float landDistance = 1.0 - max(max(landColor.r, landColor.g), landColor.b);
           
-          // Create more dynamic wave patterns - reduced frequency to slow down waves
+          // Create more dynamic wave patterns with varying frequencies
           float wave1 = sin(time * 0.5 + vUv.x * 10.0 + vUv.y * 8.0) * 0.5 + 0.5;
           float wave2 = cos(time * 0.75 - vUv.x * 8.0 + vUv.y * 6.0) * 0.5 + 0.5;
-          float wave = mix(wave1, wave2, 0.5);
+          float wave3 = sin(time * 0.3 + vUv.x * 5.0 - vUv.y * 7.0) * 0.5 + 0.5;
+          
+          // Mix waves for more natural look
+          float wave = mix(mix(wave1, wave2, 0.5), wave3, 0.3);
           
           // Create a wider, more visible shore effect with foam
-          float shoreMask = smoothstep(0.0, 0.3, landDistance) * (1.0 - smoothstep(0.3, 0.6, landDistance));
+          // Adjusted parameters for more pronounced shore effect
+          float shoreMask = smoothstep(0.0, 0.25, landDistance) * (1.0 - smoothstep(0.25, 0.5, landDistance));
           
-          // Add foam color with more white
-          vec3 foamColor = mix(waterColor, vec3(1.0, 1.0, 1.0), 0.8);
+          // Add foam color with more white and slight blue tint
+          vec3 foamColor = mix(waterColor, vec3(0.95, 0.98, 1.0), 0.85);
           
-          // Final color with higher opacity for visibility
-          gl_FragColor = vec4(foamColor, shoreMask * wave * 0.7);
+          // Add subtle variation to foam based on position
+          float foamVariation = sin(vUv.x * 30.0) * sin(vUv.y * 30.0) * 0.1 + 0.9;
+          
+          // Final color with higher opacity for visibility and variation
+          gl_FragColor = vec4(foamColor * foamVariation, shoreMask * wave * 0.8);
         }
       `,
       transparent: true,
@@ -323,7 +330,14 @@ export default class WaterEffect {
         }
       }, 1000);
       
-      // Skip shore interaction completely - it's causing too many issues
+      // Add shore interaction with a delay to ensure water is properly initialized
+      setTimeout(() => {
+        try {
+          this.createShoreInteraction();
+        } catch (error) {
+          console.error('Error creating shore interaction:', error);
+        }
+      }, 1500);
     } catch (error) {
       console.error('Error initializing water:', error);
     }
@@ -432,7 +446,7 @@ export default class WaterEffect {
       case 'governance':
         return 0x483d8b; // Dark slate blue for governance
       case 'land':
-        return 0x20b2aa; // Light sea green for tropical island feel
+        return 0x1ec3d4; // Enhanced light sea green for tropical island feel
       default:
         return 0x0088cc; // Deeper turquoise
     }
@@ -496,10 +510,18 @@ export default class WaterEffect {
         }
       }
       
-      // Update shore interaction VERY infrequently to reduce errors
-      if (this.shoreMesh && this.landRenderTarget && this.shoreMesh.material && frameCount % 300 === 0) {
-        // Skip shore rendering completely - it's causing too many issues
-        return;
+      // Update shore interaction with better error handling
+      if (this.shoreMesh && this.landRenderTarget && this.shoreMesh.material && frameCount % 60 === 0) {
+        try {
+          // Update shore material time uniform for wave animation
+          const shoreMaterial = this.shoreMesh.material as THREE.ShaderMaterial;
+          if (shoreMaterial.userData && shoreMaterial.userData.uniforms && shoreMaterial.userData.uniforms.time) {
+            shoreMaterial.userData.uniforms.time.value = frameCount * 0.01;
+            shoreMaterial.needsUpdate = true;
+          }
+        } catch (error) {
+          console.warn('Error updating shore material:', error);
+        }
       }
     } catch (error) {
       // Silent fail for the entire update method
@@ -520,6 +542,19 @@ export default class WaterEffect {
         waterUniforms.waterColor.value.setHex(waterColor);
       } catch (error) {
         console.error('Error updating water color in view mode change:', error);
+      }
+    }
+    
+    // Update shore interaction color if it exists
+    if (this.shoreMesh && this.shoreMesh.material) {
+      try {
+        const shoreMaterial = this.shoreMesh.material as THREE.ShaderMaterial;
+        if (shoreMaterial.userData && shoreMaterial.userData.uniforms && shoreMaterial.userData.uniforms.waterColor) {
+          shoreMaterial.userData.uniforms.waterColor.value = new THREE.Color(waterColor);
+          shoreMaterial.needsUpdate = true;
+        }
+      } catch (error) {
+        console.error('Error updating shore material color:', error);
       }
     }
     
