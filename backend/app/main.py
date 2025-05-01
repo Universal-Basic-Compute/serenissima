@@ -166,7 +166,8 @@ async def store_wallet(wallet_data: WalletRequest):
                 "user_name": record["fields"].get("Username", None),
                 "email": record["fields"].get("Email", None),
                 "family_coat_of_arms": record["fields"].get("FamilyCoatOfArms", None),
-                "family_motto": record["fields"].get("FamilyMotto", None)
+                "family_motto": record["fields"].get("FamilyMotto", None),
+                "coat_of_arms_image": record["fields"].get("CoatOfArmsImage", None)
             }
         
         # Create new record
@@ -188,6 +189,9 @@ async def store_wallet(wallet_data: WalletRequest):
             
         if wallet_data.family_motto:
             fields["FamilyMotto"] = wallet_data.family_motto
+            
+        if wallet_data.coat_of_arms_image:
+            fields["CoatOfArmsImage"] = wallet_data.coat_of_arms_image
             
         if wallet_data.coat_of_arms_image:
             fields["CoatOfArmsImage"] = wallet_data.coat_of_arms_image
@@ -276,7 +280,8 @@ async def invest_compute(wallet_data: WalletRequest):
                 "compute_amount": updated_record["fields"].get("ComputeAmount", 0),
                 "user_name": updated_record["fields"].get("Username", None),
                 "email": updated_record["fields"].get("Email", None),
-                "family_motto": updated_record["fields"].get("FamilyMotto", None)
+                "family_motto": updated_record["fields"].get("FamilyMotto", None),
+                "coat_of_arms_image": updated_record["fields"].get("CoatOfArmsImage", None)
             }
         else:
             # Create new record
