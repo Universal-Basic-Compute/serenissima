@@ -16,6 +16,7 @@ import TransferComputeMenu from '../UI/TransferComputeMenu';
 import BackgroundMusic from '../UI/BackgroundMusic';
 import usePolygonStore from '@/store/usePolygonStore';
 import BridgeRenderer from './BridgeRenderer';
+import LandPurchaseModal from '../UI/LandPurchaseModal';
 
 export default function PolygonViewer() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
