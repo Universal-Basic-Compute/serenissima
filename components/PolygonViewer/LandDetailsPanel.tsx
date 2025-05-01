@@ -20,6 +20,16 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
   // Get the owner for the selected polygon
   const owner = selectedPolygonId ? landOwners[selectedPolygonId] : null;
   
+  // Debug logging
+  useEffect(() => {
+    if (selectedPolygonId) {
+      console.log('Selected polygon ID:', selectedPolygonId);
+      console.log('Selected polygon data:', selectedPolygon);
+      console.log('Land owners data:', landOwners);
+      console.log('Owner for selected polygon:', owner);
+    }
+  }, [selectedPolygonId, selectedPolygon, landOwners, owner]);
+  
   // Show panel with animation when a polygon is selected
   useEffect(() => {
     if (selectedPolygonId) {

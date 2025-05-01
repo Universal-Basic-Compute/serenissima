@@ -325,3 +325,32 @@ async def get_land(land_id: str):
         print(f"ERROR: {error_msg}")
         traceback.print_exc(file=sys.stdout)
         raise HTTPException(status_code=500, detail=error_msg)
+
+@app.get("/api/lands")
+async def get_lands():
+    """Get all lands with their owners from Airtable."""
+    try:
+        print("Fetching all lands from Airtable...")
+        # Fetch all records from the LANDS table
+        records = lands_table.all()
+        
+        # Format the response
+        lands = []
+        for record in records:
+            fields = record['fields']
+            land_data = {
+                'id': fields.get('LandId', ''),
+                'owner': fields.get('Wallet', ''),  # Using Wallet field as owner
+                'historicalName': fields.get('HistoricalName', ''),
+                'englishName': fields.get('EnglishName', ''),
+                'description': fields.get('Description', '')
+            }
+            lands.append(land_data)
+        
+        print(f"Found {len(lands)} land records")
+        return lands
+    except Exception as e:
+        error_msg = f"Error fetching lands: {str(e)}"
+        print(f"ERROR: {error_msg}")
+        traceback.print_exc(file=sys.stdout)
+        raise HTTPException(status_code=500, detail=error_msg)

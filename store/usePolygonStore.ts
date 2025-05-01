@@ -106,20 +106,45 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
   
   loadLandOwners: async () => {
     try {
+      console.log('Loading land owners...');
       const response = await fetch('/api/get-land-owners');
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch land owners: ${response.status}`);
+      }
+      
       const data = await response.json();
+      console.log('Land owners API response:', data);
       
       if (data.success && data.lands) {
         // Create a map of land ID to owner
         const ownerMap = {};
+        
+        // Get current polygons to check ID formats
+        const currentPolygons = get().polygons;
+        console.log('Current polygon IDs:', currentPolygons.map(p => p.id));
+        
         data.lands.forEach(land => {
           if (land.id && land.owner) {
+            // Try different ID formats
             ownerMap[land.id] = land.owner;
+            
+            // Also try with "polygon-" prefix if the ID doesn't have it
+            if (!land.id.startsWith('polygon-')) {
+              ownerMap[`polygon-${land.id}`] = land.owner;
+            }
+            
+            // Also try without "polygon-" prefix if the ID has it
+            if (land.id.startsWith('polygon-')) {
+              ownerMap[land.id.replace('polygon-', '')] = land.owner;
+            }
           }
         });
         
+        console.log('Processed land owners map:', ownerMap);
         set({ landOwners: ownerMap });
-        console.log('Loaded land owners:', ownerMap);
+      } else {
+        console.error('Invalid response format from land owners API:', data);
       }
     } catch (error) {
       console.error('Error loading land owners:', error);

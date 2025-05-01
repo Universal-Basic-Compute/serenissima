@@ -24,7 +24,12 @@ export async function GET() {
         return {
           id,
           coordinates: data.coordinates,
-          centroid: data.centroid || calculateCentroid(data.coordinates)
+          centroid: data.centroid || calculateCentroid(data.coordinates),
+          // Include historical information if available
+          historicalName: data.historicalName,
+          englishName: data.englishName,
+          historicalDescription: data.historicalDescription,
+          nameConfidence: data.nameConfidence
         };
       } else {
         console.warn(`Invalid data format in ${file}`);
