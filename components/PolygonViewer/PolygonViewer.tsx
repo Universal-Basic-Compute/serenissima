@@ -224,7 +224,9 @@ export default function PolygonViewer() {
     // Add water plane with animated normal map - reduced complexity
     const waterGeometry = new THREE.PlaneGeometry(200, 200, 20, 20);
     const waterMaterial = new THREE.MeshStandardMaterial({ 
-      color: activeView === 'transport' ? '#00aaff' : '#0066cc', // Different blue for transport view
+      color: activeView === 'transport' ? '#00aaff' : 
+             activeView === 'land' ? '#004488' : 
+             '#0066cc', // Different blue for each view
       transparent: true,
       opacity: 0.7,
       metalness: 0.2,
