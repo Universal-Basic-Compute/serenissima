@@ -877,5 +877,5 @@ class LODPolygon {
   }
 }
 
-export default LODPolygon;
+export { LODPolygon as default };
 
