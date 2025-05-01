@@ -94,7 +94,7 @@ export default class PolygonRenderer {
       }
     );
   }
-  private coatOfArmSprites: Record<string, THREE.Sprite> = {};
+  private coatOfArmSprites: Record<string, THREE.Object3D> = {};
   private ownerColorMap: Record<string, string> = {}; // Map of owner to color
   private users: Record<string, any> = {}; // Store users data
   private PolygonMeshs: PolygonMesh[] = []; // Store PolygonMesh instances
@@ -294,10 +294,12 @@ export default class PolygonRenderer {
         // Create a frustum for culling
         const frustum = new THREE.Frustum();
         const projScreenMatrix = new THREE.Matrix4();
-        projScreenMatrix.multiplyMatrices(
-          this.camera.projectionMatrix, 
-          this.camera.matrixWorldInverse
-        );
+        if (this.camera) {
+          projScreenMatrix.multiplyMatrices(
+            this.camera.projectionMatrix, 
+            this.camera.matrixWorldInverse
+          );
+        }
         frustum.setFromProjectionMatrix(projScreenMatrix);
         
         // Process polygons in smaller batches with longer delays to prevent UI freezing
@@ -736,7 +738,7 @@ export default class PolygonRenderer {
         this.bounds.scale,
         this.bounds.latCorrectionFactor
       )[0];
-      
+        
       // Position slightly above the land to avoid z-fighting
       plane.position.set(normalizedCoords.x, 0.05, -normalizedCoords.y);
     } else {
@@ -909,7 +911,7 @@ export default class PolygonRenderer {
         this.bounds.scale,
         this.bounds.latCorrectionFactor
       )[0];
-      
+        
       // Position higher above the land to avoid z-fighting
       plane.position.set(normalizedCoords.x, 0.25, -normalizedCoords.y); // Increased height
     } else {

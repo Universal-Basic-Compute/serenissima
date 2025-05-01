@@ -70,7 +70,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('Error updating centroid:', error);
     return NextResponse.json(
-      { success: false, error: `Failed to update centroid: ${error.message}` },
+      { success: false, error: `Failed to update centroid: ${String(error)}` },
       { status: 500 }
     );
   }

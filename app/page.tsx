@@ -86,14 +86,17 @@ export default function Home() {
     lastName: string;
     coatOfArmsImage: string | null;
     familyMotto?: string;
+    familyCoatOfArms?: string;
     color?: string;
+    computeAmount?: number;
+    walletAddress?: string;
   } | null>(null);
   
   // Get API key from environment variable
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '';
-  const [savedPolygons, setSavedPolygons] = useState([]);
-  const mapRef = useRef(null);
-  const drawingManagerRef = useRef(null);
+  const [savedPolygons, setSavedPolygons] = useState<any[]>([]);
+  const mapRef = useRef<google.maps.Map | null>(null);
+  const drawingManagerRef = useRef<google.maps.drawing.DrawingManager | null>(null);
   const [isGoogleLoaded, setIsGoogleLoaded] = useState(false);
   
   // Add these states to the Home component
@@ -536,7 +539,7 @@ export default function Home() {
       return data;
     } catch (error) {
       console.error('Error transferring compute:', error);
-      alert(`Failed to transfer compute: ${error.message}`);
+      alert(`Failed to transfer compute: ${error instanceof Error ? error.message : String(error)}`);
       throw error;
     }
   };
@@ -752,7 +755,7 @@ export default function Home() {
   };
 
   // Handle polygon complete event
-  const onPolygonComplete = (polygon) => {
+  const onPolygonComplete = (polygon: google.maps.Polygon) => {
     // Apply rounded corners (this is a visual effect only)
     polygon.setOptions({
       ...polygonOptions,
@@ -1063,7 +1066,7 @@ export default function Home() {
   };
 
   // Add this function to save bridge to file
-  const saveBridgeToFile = (bridge) => {
+  const saveBridgeToFile = (bridge: any) => {
     // Send bridge data to the API
     fetch('/api/save-bridge', {
       method: 'POST',
@@ -1087,7 +1090,7 @@ export default function Home() {
   };
 
   // Handle map load
-  const onMapLoad = (map) => {
+  const onMapLoad = (map: google.maps.Map) => {
     console.log('Google Map loaded');
     mapRef.current = map;
     
@@ -1102,7 +1105,7 @@ export default function Home() {
   };
 
   // Handle drawing manager load
-  const onDrawingManagerLoad = (drawingManager) => {
+  const onDrawingManagerLoad = (drawingManager: google.maps.drawing.DrawingManager) => {
     drawingManagerRef.current = drawingManager;
     setIsGoogleLoaded(true);
   };
@@ -1183,11 +1186,11 @@ export default function Home() {
           return;
         }
         
-        data.polygons.forEach((polygon, index) => {
+        data.polygons.forEach((polygon: any, index: number) => {
           if (polygon.coordinates && polygon.coordinates.length > 2) {
             console.log(`Creating polygon ${index} (${polygon.id}) on map`);
             
-            const path = polygon.coordinates.map(coord => ({
+            const path = polygon.coordinates.map((coord: any) => ({
               lat: coord.lat,
               lng: coord.lng
             }));
@@ -1776,8 +1779,8 @@ export default function Home() {
                       ? 'opacity-50 cursor-not-allowed bg-amber-400'
                       : 'hover:bg-amber-700'
                   }`}
-                  disabled={(!userProfile && (!usernameInput.trim() || !firstName.trim() || !lastName.trim() || !familyCoatOfArms.trim() || !familyMotto.trim())) ||
-                    (userProfile && (!firstName.trim() || !lastName.trim() || !familyCoatOfArms.trim() || !familyMotto.trim()))}
+                  disabled={Boolean((!userProfile && (!usernameInput.trim() || !firstName.trim() || !lastName.trim() || !familyCoatOfArms.trim() || !familyMotto.trim())) ||
+                    (userProfile && (!firstName.trim() || !lastName.trim() || !familyCoatOfArms.trim() || !familyMotto.trim())))}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M20 2v20h-2v-8h-2v8h-2v-8h-2v8h-2v-8h-2v8H8v-8H6v8H4v-8H2V2h18z" />
@@ -2003,6 +2006,7 @@ export default function Home() {
         </div>
       )}
       
+      {/* Success message alert */}
       {/* Success message alert */}
       {successMessage && (
         <SuccessAlert 

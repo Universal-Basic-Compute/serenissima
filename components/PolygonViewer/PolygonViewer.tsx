@@ -24,8 +24,8 @@ export default function PolygonViewer() {
   const [isFlushing, setIsFlushing] = useState(false);
   
   // Add refs at the top level of the component
-  const hasLoadedDataRef = useRef(false);
-  const hasUpdatedCoatOfArmsRef = useRef(false);
+  const hasLoadedDataRef = useRef<boolean>(false);
+  const hasUpdatedCoatOfArmsRef = useRef<boolean>(false);
   
   // Get state from store
   const {
@@ -467,7 +467,11 @@ export default function PolygonViewer() {
       window.addEventListener('polygonAdded', () => {
         if (waterEffectRef.current) {
           console.log('Polygon added, updating water effects');
-          setTimeout(() => waterEffectRef.current.update(0, !highQuality), 500);
+          setTimeout(() => {
+            if (waterEffectRef.current) {
+              waterEffectRef.current.update(0, !highQuality);
+            }
+          }, 500);
         }
       });
       

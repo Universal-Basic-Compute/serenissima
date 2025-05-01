@@ -21,7 +21,7 @@ export async function GET(request: Request) {
       const batch = filesToProcess.slice(i, i + batchSize);
       
       // Process this batch
-      const batchPromises = batch.map(async file => {
+      const batchPromises = batch.map(async (file: string) => {
         const data = serverUtils.readJsonFromFile(file);
         const id = file.replace('.json', '');
         

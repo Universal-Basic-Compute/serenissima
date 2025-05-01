@@ -41,7 +41,7 @@ export default function MapPage() {
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '';
   const [savedPolygons, setSavedPolygons] = useState<google.maps.Polygon[]>([]);
   const mapRef = useRef<google.maps.Map | null>(null);
-  const drawingManagerRef = useRef(null);
+  const drawingManagerRef = useRef<google.maps.drawing.DrawingManager | null>(null);
   const [isGoogleLoaded, setIsGoogleLoaded] = useState(false);
   
   // Add these states to the Home component

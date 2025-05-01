@@ -95,7 +95,7 @@ export async function GET(request: Request) {
     }
     
     return NextResponse.json(
-      { success: false, error: 'Failed to fetch land ownership data', message: error.message },
+      { success: false, error: 'Failed to fetch land ownership data', message: String(error) },
       { status: 500 }
     );
   }

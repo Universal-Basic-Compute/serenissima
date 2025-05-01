@@ -326,7 +326,7 @@ export default class WaterEffect {
         (xhr: ProgressEvent) => {
           console.log(`Water normal map loading: ${(xhr.loaded / xhr.total) * 100}% loaded`);
         },
-        (error: Error) => {
+        (error: unknown) => {
           console.warn('Could not load water normal map from primary path:', error);
           // Try alternative path without leading slash
           this.textureLoader.load(
@@ -343,7 +343,7 @@ export default class WaterEffect {
               }
             },
             undefined,
-            (secondError: Error) => {
+            (secondError: unknown) => {
               console.warn('Could not load water normal map from alternative path, using fallback:', secondError);
               // We already have the fallback texture set, so no need to do anything here
             }
