@@ -59,6 +59,11 @@ export default function Home() {
   const [deleteMode, setDeleteMode] = useState(false);
   const [selectedMapPolygon, setSelectedMapPolygon] = useState<google.maps.Polygon | null>(null);
   const [selectedMapPolygonId, setSelectedMapPolygonId] = useState<string | null>(null);
+  // Add state to track selected polygon in normal mode
+  const [selectedPolygon, setSelectedPolygon] = useState<{
+    id: string;
+    polygon: google.maps.Polygon;
+  } | null>(null);
   
   // Initialize wallet adapter
   useEffect(() => {
@@ -288,6 +293,17 @@ export default function Home() {
       setSelectedMapPolygonId(null);
     }
     
+    // Reset selected polygon when entering bridge mode
+    if (selectedPolygon) {
+      selectedPolygon.polygon.setOptions({
+        strokeColor: '#3388ff',
+        strokeOpacity: 0.8,
+        fillColor: '#3388ff',
+        fillOpacity: 0.35
+      });
+      setSelectedPolygon(null);
+    }
+    
     setBridgeMode(!bridgeMode);
     
     // Reset bridge start if turning off bridge mode
@@ -425,6 +441,56 @@ export default function Home() {
         
         bridgeLine.setMap(mapRef.current);
       }
+    } else {
+      // Normal mode - select polygon on click
+      let clickedPolygonId = null;
+      let clickedPolygon = null;
+      
+      for (const [id, polygon] of Object.entries(activeLandPolygons)) {
+        if (google.maps.geometry.poly.containsLocation(event.latLng, polygon)) {
+          clickedPolygonId = id;
+          clickedPolygon = polygon;
+          break;
+        }
+      }
+      
+      // If we clicked on a polygon, select it
+      if (clickedPolygonId && clickedPolygon) {
+        // If we already had a selected polygon, reset its style
+        if (selectedPolygon && selectedPolygon.polygon !== clickedPolygon) {
+          selectedPolygon.polygon.setOptions({
+            strokeColor: '#3388ff',
+            strokeOpacity: 0.8,
+            fillColor: '#3388ff',
+            fillOpacity: 0.35
+          });
+        }
+        
+        // Select the clicked polygon
+        setSelectedPolygon({
+          id: clickedPolygonId,
+          polygon: clickedPolygon
+        });
+        
+        // Highlight the selected polygon
+        clickedPolygon.setOptions({
+          strokeColor: '#ff0000',
+          strokeOpacity: 1.0,
+          fillColor: '#ff0000',
+          fillOpacity: 0.5
+        });
+      } else {
+        // If we clicked on empty space, deselect the current polygon
+        if (selectedPolygon) {
+          selectedPolygon.polygon.setOptions({
+            strokeColor: '#3388ff',
+            strokeOpacity: 0.8,
+            fillColor: '#3388ff',
+            fillOpacity: 0.35
+          });
+          setSelectedPolygon(null);
+        }
+      }
     }
   };
   
@@ -543,6 +609,11 @@ export default function Home() {
     Object.values(activeLandPolygons).forEach(polygon => {
       polygon.setMap(null);
     });
+    
+    // Reset selected polygon
+    if (selectedPolygon) {
+      setSelectedPolygon(null);
+    }
     
     // Reset active polygons
     const newActiveLandPolygons = {};
@@ -730,7 +801,50 @@ export default function Home() {
       {isGoogleLoaded && (
         <div className="absolute bottom-4 left-36 z-10">
           <button
-            onClick={handleDeleteMode}
+            onClick={() => {
+              // Turn off bridge mode if it's on
+              if (bridgeMode) {
+                setBridgeMode(false);
+                setBridgeStart(null);
+                setBridgeStartLandId(null);
+              }
+              
+              // Reset selected polygon when entering delete mode
+              if (selectedPolygon) {
+                selectedPolygon.polygon.setOptions({
+                  strokeColor: '#3388ff',
+                  strokeOpacity: 0.8,
+                  fillColor: '#3388ff',
+                  fillOpacity: 0.35
+                });
+                setSelectedPolygon(null);
+              }
+              
+              // Toggle delete mode
+              setDeleteMode(!deleteMode);
+              
+              // Reset selection when turning off delete mode
+              if (deleteMode) {
+                if (selectedMapPolygon) {
+                  // Reset the polygon style
+                  selectedMapPolygon.setOptions({
+                    strokeColor: '#3388ff',
+                    strokeOpacity: 0.8,
+                    fillColor: '#3388ff',
+                    fillOpacity: 0.35
+                  });
+                }
+                setSelectedMapPolygon(null);
+                setSelectedMapPolygonId(null);
+              }
+              
+              // Change cursor style based on delete mode
+              if (mapRef.current) {
+                mapRef.current.setOptions({
+                  draggableCursor: !deleteMode ? 'crosshair' : ''
+                });
+              }
+            }}
             className={`px-4 py-2 rounded shadow ${
               deleteMode ? 'bg-red-500 text-white' : 'bg-white'
             }`}
@@ -750,6 +864,64 @@ export default function Home() {
           >
             Confirm Delete
           </button>
+        </div>
+      )}
+      
+      {/* Delete button - only show when a polygon is selected in normal mode */}
+      {selectedPolygon && !deleteMode && !bridgeMode && (
+        <div className="absolute top-16 right-4 z-10 bg-white p-3 rounded shadow">
+          <div className="flex flex-col items-start">
+            <p className="mb-2 font-medium">Selected: {selectedPolygon.id}</p>
+            <button
+              onClick={async () => {
+                if (!selectedPolygon) return;
+                
+                // Confirm deletion
+                if (!confirm(`Are you sure you want to delete this polygon: ${selectedPolygon.id}?`)) {
+                  return;
+                }
+                
+                try {
+                  const response = await fetch('/api/delete-polygon', {
+                    method: 'DELETE',
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ id: selectedPolygon.id }),
+                  });
+                  
+                  if (!response.ok) {
+                    throw new Error('Failed to delete polygon');
+                  }
+                  
+                  const data = await response.json();
+                  
+                  if (data.success) {
+                    // Remove the polygon from the map
+                    selectedPolygon.polygon.setMap(null);
+                    
+                    // Remove from active polygons
+                    const newActiveLandPolygons = { ...activeLandPolygons };
+                    delete newActiveLandPolygons[selectedPolygon.id];
+                    setActiveLandPolygons(newActiveLandPolygons);
+                    
+                    // Reset selection
+                    setSelectedPolygon(null);
+                    
+                    alert('Polygon deleted successfully');
+                  } else {
+                    alert(`Failed to delete polygon: ${data.error}`);
+                  }
+                } catch (error) {
+                  console.error('Error deleting polygon:', error);
+                  alert('An error occurred while deleting the polygon');
+                }
+              }}
+              className="px-4 py-2 bg-red-500 text-white rounded shadow hover:bg-red-600 w-full"
+            >
+              Delete Polygon
+            </button>
+          </div>
         </div>
       )}
       
