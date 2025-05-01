@@ -95,6 +95,28 @@ export default function Home() {
     const storedWallet = sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress');
     if (storedWallet) {
       setWalletAddress(storedWallet);
+      
+      // Also fetch user profile data if wallet is connected
+      fetch(`http://localhost:8000/api/wallet/${storedWallet}`)
+        .then(response => {
+          if (response.ok) return response.json();
+          throw new Error('Failed to fetch user profile');
+        })
+        .then(data => {
+          console.log('Fetched user profile on init:', data);
+          if (data.user_name) {
+            setUserProfile({
+              username: data.user_name,
+              firstName: data.first_name || data.user_name.split(' ')[0] || '',
+              lastName: data.last_name || data.user_name.split(' ').slice(1).join(' ') || '',
+              coatOfArmsImage: data.coat_of_arms_image,
+              familyMotto: data.family_motto
+            });
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching user profile:', error);
+        });
     } else if (adapter.connected) {
       // If adapter is connected but not in storage, update both
       const address = adapter.publicKey?.toString() || null;
@@ -153,6 +175,7 @@ export default function Home() {
         setShowUsernamePrompt(true);
       } else {
         // Store the user profile information
+        console.log('Setting user profile with data:', data);
         setUserProfile({
           username: data.user_name,
           firstName: data.first_name || data.user_name.split(' ')[0] || '',
@@ -332,6 +355,7 @@ export default function Home() {
         localStorage.setItem('walletAddress', address);
         // Store wallet in Airtable and check for username
         const userData = await storeWalletInAirtable(address);
+        console.log('User profile after wallet connection:', userProfile);
         
         // If the user doesn't have a username, the prompt will be shown by storeWalletInAirtable
       }
@@ -888,7 +912,7 @@ export default function Home() {
                 familyMotto={userProfile.familyMotto || familyMotto}
                 size="small"
                 className="mr-2"
-                showMotto={true}
+                showMotto={false}
               />
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
