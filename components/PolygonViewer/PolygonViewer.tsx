@@ -640,21 +640,6 @@ export default function PolygonViewer() {
     );
   }
   
-  // Create memoized components
-  const ViewModeMenuMemo = useMemo(() => (
-    <ViewModeMenu activeView={activeView} setActiveView={setActiveView} />
-  ), [activeView, setActiveView]);
-  
-  const LandDetailsPanelMemo = useMemo(() => (
-    <LandDetailsPanel 
-      selectedPolygonId={selectedPolygonId} 
-      onClose={handleCloseLandDetails}
-      polygons={polygons}
-      landOwners={landOwners}
-      visible={activeView === 'land'} // Pass visibility as a prop instead
-    />
-  ), [activeView, selectedPolygonId, handleCloseLandDetails, polygons, landOwners]);
-  
   return (
     <div className="w-screen h-screen">
       {/* View mode menu */}
