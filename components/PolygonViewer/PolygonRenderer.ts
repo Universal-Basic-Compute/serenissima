@@ -479,7 +479,7 @@ export default class PolygonRenderer {
           const circularTexture = this.createCircularTexture(texture);
           
           // Create a flat plane for the coat of arms - 20% smaller
-          const planeSize = 1.6;
+          const planeSize = 1.28; // Reduced by 20% from 1.6
           const geometry = new THREE.PlaneGeometry(planeSize, planeSize);
           
           // Create material with the texture
