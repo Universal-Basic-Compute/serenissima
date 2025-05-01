@@ -1,0 +1,211 @@
+import * as THREE from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
+import { ViewMode } from './types';
+
+interface SceneSetupProps {
+  canvas: HTMLCanvasElement;
+  activeView: ViewMode;
+  highQuality: boolean;
+}
+
+export default class SceneSetup {
+  public scene: THREE.Scene;
+  public camera: THREE.PerspectiveCamera;
+  public renderer: THREE.WebGLRenderer;
+  public controls: OrbitControls;
+  public composer: EffectComposer;
+  private performanceMode: boolean;
+  private sunLight: THREE.DirectionalLight;
+  private sunSphere: THREE.Mesh;
+  private sunGlow: THREE.Mesh;
+  
+  constructor({ canvas, activeView, highQuality }: SceneSetupProps) {
+    this.performanceMode = !highQuality;
+    
+    // Initialize scene
+    this.scene = new THREE.Scene();
+    this.scene.background = new THREE.Color('#1e5799'); // Brighter blue background
+    
+    // Create a fog effect for depth
+    this.scene.fog = new THREE.FogExp2('#1e5799', 0.0005); // Further reduced fog density for performance
+    
+    // Create a camera with a better initial position
+    this.camera = new THREE.PerspectiveCamera(
+      60,
+      window.innerWidth / window.innerHeight, 
+      0.1, 
+      1000
+    );
+    
+    // Initial camera position - higher up and further back for a good overview
+    this.camera.position.set(0, 80, 80);
+    
+    // Initialize renderer
+    this.renderer = new THREE.WebGLRenderer({ 
+      canvas,
+      antialias: true // Always enable antialiasing for better visual quality
+    });
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.renderer.setPixelRatio(this.performanceMode ? 1 : (window.devicePixelRatio > 1 ? 2 : 1));
+    this.renderer.shadowMap.enabled = !this.performanceMode;
+    this.renderer.shadowMap.type = this.performanceMode ? THREE.BasicShadowMap : THREE.PCFSoftShadowMap;
+    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    this.renderer.toneMappingExposure = 1.2;
+    this.renderer.outputColorSpace = THREE.SRGBColorSpace;
+    
+    // Set up EffectComposer for post-processing effects
+    this.composer = new EffectComposer(this.renderer);
+    const renderPass = new RenderPass(this.scene, this.camera);
+    this.composer.addPass(renderPass);
+    
+    // Set up OrbitControls
+    this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+    
+    // Configure controls for this specific application
+    this.controls.enableDamping = !this.performanceMode;
+    this.controls.dampingFactor = 0.1;
+    
+    // Limit vertical rotation to prevent going under the map
+    this.controls.minPolarAngle = 0;
+    this.controls.maxPolarAngle = Math.PI / 2 - 0.1;
+    
+    // Limit zoom range
+    this.controls.minDistance = 10;
+    this.controls.maxDistance = 300;
+    
+    // Enable panning with right mouse button
+    this.controls.mouseButtons = {
+      LEFT: THREE.MOUSE.ROTATE,
+      MIDDLE: THREE.MOUSE.DOLLY,
+      RIGHT: THREE.MOUSE.PAN
+    };
+    
+    // Make panning parallel to the ground plane
+    this.controls.screenSpacePanning = false;
+    
+    // Set initial target to center of scene
+    this.controls.target.set(0, 0, 0);
+    this.controls.update();
+    
+    // Add lights
+    this.setupLights(activeView);
+    
+    // Add window resize handler
+    window.addEventListener('resize', this.handleResize);
+  }
+  
+  private setupLights(activeView: ViewMode) {
+    // Add ambient light
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+    this.scene.add(ambientLight);
+    
+    // Add a hemisphere light for better overall illumination
+    const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x0044ff, 0.6);
+    this.scene.add(hemisphereLight);
+    
+    // Main directional light (sun) - bigger and more yellow
+    this.sunLight = new THREE.DirectionalLight(0xffffcc, 1.8);
+    this.sunLight.position.set(50, 100, 50);
+    this.sunLight.castShadow = true;
+    
+    // Create a sun sphere for visual effect
+    const sunGeometry = new THREE.SphereGeometry(5, 16, 16);
+    const sunMaterial = new THREE.MeshBasicMaterial({ 
+      color: 0xffffaa, 
+      transparent: true,
+      opacity: 0.8
+    });
+    this.sunSphere = new THREE.Mesh(sunGeometry, sunMaterial);
+    this.sunSphere.position.copy(this.sunLight.position);
+    this.scene.add(this.sunSphere);
+    
+    // Add a subtle glow effect to the sun
+    const sunGlowGeometry = new THREE.SphereGeometry(7, 16, 16);
+    const sunGlowMaterial = new THREE.MeshBasicMaterial({ 
+      color: 0xffffdd, 
+      transparent: true,
+      opacity: 0.4,
+      side: THREE.BackSide
+    });
+    this.sunGlow = new THREE.Mesh(sunGlowGeometry, sunGlowMaterial);
+    this.sunGlow.position.copy(this.sunLight.position);
+    this.scene.add(this.sunGlow);
+    
+    // Reduced shadow map resolution for better performance
+    this.sunLight.shadow.mapSize.width = this.performanceMode ? 512 : 1024;
+    this.sunLight.shadow.mapSize.height = this.performanceMode ? 512 : 1024;
+    this.sunLight.shadow.camera.near = 0.5;
+    this.sunLight.shadow.camera.far = 500;
+    this.sunLight.shadow.camera.left = -100;
+    this.sunLight.shadow.camera.right = 100;
+    this.sunLight.shadow.camera.top = 100;
+    this.sunLight.shadow.camera.bottom = -100;
+    this.sunLight.shadow.bias = -0.0001;
+    
+    this.scene.add(this.sunLight);
+    
+    // Add a secondary light for better illumination
+    const fillLight = new THREE.DirectionalLight(0xadd8e6, 0.5);
+    fillLight.position.set(-50, 50, -50);
+    this.scene.add(fillLight);
+  }
+  
+  public resetCamera = () => {
+    // Smoothly animate to the default position
+    const startPosition = this.camera.position.clone();
+    const startTarget = this.controls.target.clone();
+    const endPosition = new THREE.Vector3(0, 80, 80);
+    const endTarget = new THREE.Vector3(0, 0, 0);
+    
+    // Animation duration in milliseconds
+    const duration = 1000;
+    const startTime = Date.now();
+    
+    const animateReset = () => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      
+      // Use easeOutCubic easing function for smooth deceleration
+      const easeProgress = 1 - Math.pow(1 - progress, 3);
+      
+      // Interpolate position and target
+      this.camera.position.lerpVectors(startPosition, endPosition, easeProgress);
+      this.controls.target.lerpVectors(startTarget, endTarget, easeProgress);
+      this.controls.update();
+      
+      if (progress < 1) {
+        requestAnimationFrame(animateReset);
+      }
+    };
+    
+    animateReset();
+  };
+  
+  private handleResize = () => {
+    this.camera.aspect = window.innerWidth / window.innerHeight;
+    this.camera.updateProjectionMatrix();
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.composer.setSize(window.innerWidth, window.innerHeight);
+  };
+  
+  public cleanup() {
+    // Remove event listeners
+    window.removeEventListener('resize', this.handleResize);
+    
+    // Dispose of controls
+    this.controls.dispose();
+    
+    // Dispose of Three.js resources
+    this.scene.remove(this.sunSphere);
+    this.scene.remove(this.sunGlow);
+    this.scene.remove(this.sunLight);
+    
+    // Dispose of geometries and materials
+    this.sunSphere.geometry.dispose();
+    (this.sunSphere.material as THREE.Material).dispose();
+    this.sunGlow.geometry.dispose();
+    (this.sunGlow.material as THREE.Material).dispose();
+  }
+}
