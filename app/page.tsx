@@ -1154,13 +1154,49 @@ export default function Home() {
                 </div>
               </div>
               
-              <div className="mt-6 border-2 border-amber-600 rounded-lg p-4 bg-amber-50">
+            </div>
+            
+            {/* Right side - Coat of Arms Image and Oath */}
+            <div className="md:w-1/2 mt-6 md:mt-0 flex flex-col items-center justify-center">
+              {/* Coat of Arms Image */}
+              <div className="flex-1 flex flex-col items-center justify-center w-full">
+                {coatOfArmsImage ? (
+                  <div className="flex flex-col items-center">
+                    <div className="border-8 border-amber-700 rounded-lg shadow-xl p-2 bg-amber-50">
+                      <img 
+                        src={coatOfArmsImage} 
+                        alt="Family Coat of Arms" 
+                        className="w-full h-auto max-h-[400px] object-contain"
+                      />
+                    </div>
+                    <p className="mt-4 text-center italic text-amber-800 font-medium">
+                      The Coat of Arms of the House of {lastName || "Your Family"}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center">
+                    <div className="w-64 h-64 border-4 border-dashed border-amber-300 rounded-lg flex items-center justify-center bg-amber-50">
+                      <p className="text-amber-700 text-center p-4">
+                        {isGeneratingImage 
+                          ? "Creating your family's coat of arms..." 
+                          : "Describe your family's coat of arms and click 'Generate Image' to visualize it"}
+                      </p>
+                    </div>
+                    <p className="mt-4 text-center italic text-amber-800">
+                      Every noble Venetian family is known by its distinctive emblem
+                    </p>
+                  </div>
+                )}
+              </div>
+        
+              {/* Oath Section - Moved below the image */}
+              <div className="mt-6 border-2 border-amber-600 rounded-lg p-4 bg-amber-50 w-full">
                 <h4 className="text-lg font-medium text-amber-800 mb-2">Swear Your Oath to Venice</h4>
-                
+          
                 <p className="text-sm text-amber-700 mb-4 italic">
                   "I solemnly pledge my loyalty to the Most Serene Republic of Venice, to uphold her laws, defend her interests, and increase her glory. May my family prosper under the wings of the Lion of Saint Mark."
                 </p>
-                
+          
                 <button
                   onClick={handleUsernameSubmit}
                   className="w-full px-6 py-3 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors font-medium flex items-center justify-center"
@@ -1173,42 +1209,11 @@ export default function Home() {
                   </svg>
                   Sign and Seal Your Oath
                 </button>
-                
+          
                 <p className="mt-3 text-xs text-center text-amber-600">
                   By signing this oath, you will be granted the rights and privileges of a Venetian noble, including the ability to own property and conduct trade within the Republic.
                 </p>
               </div>
-            </div>
-            
-            {/* Right side - Coat of Arms Image */}
-            <div className="md:w-1/2 mt-6 md:mt-0 flex flex-col items-center justify-center">
-              {coatOfArmsImage ? (
-                <div className="flex flex-col items-center">
-                  <div className="border-8 border-amber-700 rounded-lg shadow-xl p-2 bg-amber-50">
-                    <img 
-                      src={coatOfArmsImage} 
-                      alt="Family Coat of Arms" 
-                      className="w-full h-auto max-h-[500px] object-contain"
-                    />
-                  </div>
-                  <p className="mt-4 text-center italic text-amber-800 font-medium">
-                    The Coat of Arms of the House of {lastName || "Your Family"}
-                  </p>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center h-full">
-                  <div className="w-64 h-64 border-4 border-dashed border-amber-300 rounded-lg flex items-center justify-center bg-amber-50">
-                    <p className="text-amber-700 text-center p-4">
-                      {isGeneratingImage 
-                        ? "Creating your family's coat of arms..." 
-                        : "Describe your family's coat of arms and click 'Generate Image' to visualize it"}
-                    </p>
-                  </div>
-                  <p className="mt-4 text-center italic text-amber-800">
-                    Every noble Venetian family is known by its distinctive emblem
-                  </p>
-                </div>
-              )}
             </div>
           </div>
         </div>
