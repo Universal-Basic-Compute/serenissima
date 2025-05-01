@@ -55,6 +55,7 @@ export default function Home() {
   const [isGeneratingImage, setIsGeneratingImage] = useState<boolean>(false);
   // Add user profile state
   const [userProfile, setUserProfile] = useState<{
+    username: string;
     firstName: string;
     lastName: string;
     coatOfArmsImage: string | null;
@@ -205,15 +206,15 @@ export default function Home() {
   };
 
   const handleUsernameSubmit = async () => {
-    if (!firstName.trim() || !lastName.trim() || !walletAddress) {
-      alert('Please enter both first and last name');
+    if (!usernameInput.trim() || !firstName.trim() || !lastName.trim() || !walletAddress) {
+      alert('Please enter a username, first name, and last name');
       return;
     }
     
     try {
       console.log('Submitting profile data to backend:', {
         wallet_address: walletAddress,
-        user_name: `${firstName.trim()} ${lastName.trim()}`,
+        user_name: usernameInput.trim(),
         first_name: firstName.trim(),
         last_name: lastName.trim(),
         family_coat_of_arms: familyCoatOfArms.trim(),
@@ -221,7 +222,7 @@ export default function Home() {
         coat_of_arms_image: coatOfArmsImage
       });
       
-      // Update the user record with the first name, last name, coat of arms, family motto, and image URL
+      // Update the user record with the username, first name, last name, coat of arms, family motto, and image URL
       const response = await fetch('http://localhost:8000/api/wallet', {
         method: 'POST',
         headers: {
@@ -229,7 +230,7 @@ export default function Home() {
         },
         body: JSON.stringify({
           wallet_address: walletAddress,
-          user_name: `${firstName.trim()} ${lastName.trim()}`,  // Keep this for backward compatibility
+          user_name: usernameInput.trim(),
           first_name: firstName.trim(),
           last_name: lastName.trim(),
           family_coat_of_arms: familyCoatOfArms.trim(),
@@ -248,6 +249,7 @@ export default function Home() {
       
       // Update the user profile state
       setUserProfile({
+        username: usernameInput.trim(),
         firstName: firstName.trim(),
         lastName: lastName.trim(),
         coatOfArmsImage: coatOfArmsImage
@@ -886,7 +888,7 @@ export default function Home() {
                   </span>
                 </div>
               )}
-              <span className="font-medium">{userProfile.firstName} {userProfile.lastName}</span>
+              <span className="font-medium">{userProfile.username}</span>
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
@@ -982,6 +984,21 @@ export default function Home() {
                 <h3 className="text-lg font-medium text-amber-700 mb-2">Your Noble Identity</h3>
                 
                 <div className="flex flex-col space-y-4">
+                  <div className="flex items-center">
+                    <div className="w-1/3">
+                      <label className="block text-gray-700">Username</label>
+                    </div>
+                    <div className="w-2/3">
+                      <input
+                        type="text"
+                        value={usernameInput}
+                        onChange={(e) => setUsernameInput(e.target.value)}
+                        placeholder="Enter your username..."
+                        className="w-full px-3 py-2 border border-amber-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-500"
+                      />
+                    </div>
+                  </div>
+                  
                   <div className="flex items-center">
                     <div className="w-1/3">
                       <label className="block text-gray-700">First Name</label>
@@ -1147,7 +1164,7 @@ export default function Home() {
                 <button
                   onClick={handleUsernameSubmit}
                   className="w-full px-6 py-3 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors font-medium flex items-center justify-center"
-                  disabled={!firstName.trim() || !lastName.trim()}
+                  disabled={!usernameInput.trim() || !firstName.trim() || !lastName.trim()}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M20 2v20h-2v-8h-2v8h-2v-8h-2v8h-2v-8h-2v8H8v-8H6v8H4v-8H2V2h18z" />
