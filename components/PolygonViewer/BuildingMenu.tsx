@@ -85,7 +85,12 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
   if (!visible) return null;
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-30 transform transition-transform duration-300 ease-in-out" onClick={(e) => e.stopPropagation()}>
+    <div className="fixed inset-x-0 bottom-0 z-30 transform transition-transform duration-300 ease-in-out" 
+      onClick={(e) => {
+        // Only stop propagation, don't close the menu when clicking inside
+        e.stopPropagation();
+      }}
+    >
       <div className="bg-amber-50 border-t-4 border-amber-600 shadow-lg max-h-[70vh] overflow-hidden flex flex-col">
         {/* Header */}
         <div className="flex justify-between items-center p-4 border-b border-amber-300">
@@ -120,7 +125,10 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
                           : 'text-amber-800 hover:bg-amber-200 hover:text-amber-900'
                       }`
                     }
-                    onClick={(e) => e.stopPropagation()}
+                    onClick={(e) => {
+                      // Ensure the click is properly handled
+                      e.stopPropagation();
+                    }}
                   >
                     {category.name}
                   </Tab>
@@ -138,7 +146,7 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
                           key={index} 
                           className="bg-amber-50 rounded-lg p-4 border border-amber-200 hover:border-amber-400 cursor-pointer transition-colors"
                           onClick={(e) => {
-                            e.stopPropagation();
+                            e.stopPropagation(); // Ensure the click doesn't bubble up
                             setSelectedBuilding(building);
                           }}
                         >
@@ -155,7 +163,7 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
                             <button 
                               className="text-xs bg-amber-600 text-white px-2 py-1 rounded hover:bg-amber-700"
                               onClick={(e) => {
-                                e.stopPropagation();
+                                e.stopPropagation(); // Prevent the parent div's onClick from firing
                                 setSelectedBuilding(building);
                               }}
                             >
