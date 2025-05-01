@@ -430,14 +430,15 @@ export default function PolygonViewer() {
     
     // Step 2: Initialize water effect
     const initWaterEffect = () => {
-      // Create a dummy water effect that does nothing
-      const waterEffect = {
-        update: () => {},
-        updateViewMode: () => {},
-        updateQuality: () => {},
-        cleanup: () => {}
-      };
-      waterEffectRef.current = waterEffect as any;
+      const waterEffect = new WaterEffect({
+        scene: scene.scene,
+        activeView,
+        performanceMode: !highQuality,
+        width: bounds.scale * 200,
+        height: bounds.scale * 200,
+        renderer: scene.renderer  // Pass the renderer
+      });
+      waterEffectRef.current = waterEffect;
     };
     
     // Step 3: Initialize interaction manager
