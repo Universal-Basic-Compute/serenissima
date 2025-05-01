@@ -418,7 +418,7 @@ export default class PolygonRenderer {
   private createColoredCircleSprite(polygon: Polygon, color: string) {
     // Create a canvas
     const canvas = document.createElement('canvas');
-    const size = 128;
+    const size = 256; // Larger canvas for better quality
     canvas.width = size;
     canvas.height = size;
     
@@ -427,19 +427,46 @@ export default class PolygonRenderer {
     
     // Draw a colored circle with border
     ctx.beginPath();
-    ctx.arc(size/2, size/2, size/2 - 4, 0, Math.PI * 2);
+    ctx.arc(size/2, size/2, size/2 - 8, 0, Math.PI * 2);
     ctx.fillStyle = color;
     ctx.fill();
     ctx.strokeStyle = '#FFFFFF';
-    ctx.lineWidth = 4;
+    ctx.lineWidth = 8;
     ctx.stroke();
     
     // Create a texture from the canvas
     const texture = new THREE.Texture(canvas);
     texture.needsUpdate = true;
     
-    // Create a sprite with the texture
-    this.createSpriteForPolygon(polygon, texture);
+    // Create a sprite material
+    const material = new THREE.SpriteMaterial({ 
+      map: texture,
+      transparent: true,
+      depthTest: true,
+      depthWrite: true,
+      sizeAttenuation: true
+    });
+    
+    const sprite = new THREE.Sprite(material);
+    
+    // Position at the centroid
+    const normalizedCoords = normalizeCoordinates(
+      [polygon.centroid],
+      this.bounds.centerLat,
+      this.bounds.centerLng,
+      this.bounds.scale,
+      this.bounds.latCorrectionFactor
+    )[0];
+    
+    // Position higher above the land
+    sprite.position.set(normalizedCoords.x, 0.5, -normalizedCoords.y);
+    
+    // Make sprites larger
+    sprite.scale.set(4, 4, 1);
+    
+    // Add to scene and store reference
+    this.scene.add(sprite);
+    this.coatOfArmSprites[polygon.id] = sprite;
   }
 
   // Create and update coat of arms sprites with texture caching
@@ -485,11 +512,38 @@ export default class PolygonRenderer {
       this.textureLoader.load(
         coatOfArmsUrl,
         (texture) => {
-          // Create circular texture
-          const circularTexture = this.createCircularTexture(texture, ownerColor);
+          // Create sprite with the texture directly (no circular masking)
+          const material = new THREE.SpriteMaterial({ 
+            map: texture,
+            transparent: true,
+            depthTest: true,
+            depthWrite: true,
+            sizeAttenuation: true
+          });
           
-          // Create sprite
-          this.createSpriteForPolygon(polygon, circularTexture);
+          const sprite = new THREE.Sprite(material);
+          
+          // Position at the centroid
+          const normalizedCoords = normalizeCoordinates(
+            [polygon.centroid],
+            this.bounds.centerLat,
+            this.bounds.centerLng,
+            this.bounds.scale,
+            this.bounds.latCorrectionFactor
+          )[0];
+          
+          // Position higher above the land to ensure visibility
+          sprite.position.set(normalizedCoords.x, 0.5, -normalizedCoords.y);
+          
+          // Make sprites larger
+          sprite.scale.set(4, 4, 1);
+          
+          // Add to scene and store reference
+          this.scene.add(sprite);
+          this.coatOfArmSprites[polygon.id] = sprite;
+          
+          console.log(`Added coat of arms sprite for ${polygon.id} at position:`, 
+            normalizedCoords.x, 0.5, -normalizedCoords.y);
         },
         undefined,
         (error) => {
@@ -506,8 +560,8 @@ export default class PolygonRenderer {
     const material = new THREE.SpriteMaterial({ 
       map: texture, // The texture should already be circular at this point
       transparent: true,
-      depthTest: false, // Change to false to ensure visibility
-      depthWrite: false,
+      depthTest: true, // Changed to true for proper depth sorting
+      depthWrite: true,
       sizeAttenuation: true
     });
     
@@ -522,18 +576,18 @@ export default class PolygonRenderer {
       this.bounds.latCorrectionFactor
     )[0];
     
-    // Position slightly above the land to avoid z-fighting
-    sprite.position.set(normalizedCoords.x, 0.1, -normalizedCoords.y);
+    // Position higher above the land to avoid z-fighting and ensure visibility
+    sprite.position.set(normalizedCoords.x, 0.5, -normalizedCoords.y);
   
-    // Make sprites a consistent size
-    sprite.scale.set(2, 2, 1);
+    // Make sprites larger for better visibility
+    sprite.scale.set(4, 4, 1);
   
     // Add to scene and store reference
     this.scene.add(sprite);
     this.coatOfArmSprites[polygon.id] = sprite;
     
     console.log(`Added coat of arms sprite for ${polygon.id} owned by ${polygon.owner} at position:`, 
-      normalizedCoords.x, 0.1, -normalizedCoords.y);
+      normalizedCoords.x, 0.5, -normalizedCoords.y);
   }
   
   // Add helper function to create a circular texture
