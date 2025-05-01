@@ -201,6 +201,9 @@ export default class PolygonRenderer {
     this.lodPolygons.forEach(lodPolygon => {
       lodPolygon.updateViewMode(activeView);
     });
+    
+    // Update coat of arms sprites - show in land view, hide in other views
+    this.updateCoatOfArmsSprites();
   }
 
   public updateQuality(performanceMode: boolean) {
@@ -225,11 +228,16 @@ export default class PolygonRenderer {
     });
     this.coatOfArmSprites = {};
 
+    // Only create sprites if we're in land view
+    if (this.activeView !== 'land') return;
+
     // Create new sprites for each polygon with an owner
     this.polygons.forEach(polygon => {
       if (polygon.owner && polygon.centroid && this.ownerCoatOfArmsMap[polygon.owner]) {
         // Create a sprite for this owner's coat of arms
         const texture = new THREE.TextureLoader().load(this.ownerCoatOfArmsMap[polygon.owner]);
+        
+        // Create a circular mask for the texture
         const material = new THREE.SpriteMaterial({ 
           map: texture,
           transparent: true,
@@ -249,12 +257,17 @@ export default class PolygonRenderer {
           this.bounds.latCorrectionFactor
         )[0];
         
-        sprite.position.set(normalizedCoords.x, 1.5, -normalizedCoords.y); // Slightly above the land
-        sprite.scale.set(3, 3, 1); // Adjust size as needed
+        // Position slightly above the land
+        sprite.position.set(normalizedCoords.x, 2.5, -normalizedCoords.y);
+        
+        // Make the sprite a good size - adjust as needed
+        sprite.scale.set(4, 4, 1);
         
         // Add to scene and store reference
         this.scene.add(sprite);
         this.coatOfArmSprites[polygon.id] = sprite;
+        
+        console.log(`Added coat of arms sprite for ${polygon.id} owned by ${polygon.owner}`);
       }
     });
   }
