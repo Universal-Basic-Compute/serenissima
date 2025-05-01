@@ -629,6 +629,30 @@ export async function POST(
                 }
               } catch (createLandError) {
                 console.error(`Failed to create/update land record: ${createLandError}`);
+                
+                // Try one more approach - direct API call
+                try {
+                  const directApiResponse = await fetch(`${apiBaseUrl}/api/direct-land-update`, {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                      land_id: transaction.asset_id,
+                      owner: ownerToSet,
+                      wallet: buyer
+                    }),
+                    signal: AbortSignal.timeout(10000)
+                  });
+                  
+                  if (directApiResponse.ok) {
+                    console.log(`Successfully updated land owner via direct API for ${transaction.asset_id}`);
+                  } else {
+                    throw new Error(`Failed with status: ${directApiResponse.status}`);
+                  }
+                } catch (directApiError) {
+                  console.error(`All attempts to update land ownership in backend failed: ${directApiError}`);
+                }
                         
                 // Try one more approach - direct API call
                 try {
