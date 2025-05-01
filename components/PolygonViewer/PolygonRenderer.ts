@@ -66,6 +66,9 @@ export default class PolygonRenderer {
     // Store users data
     this.users = users || {};
     
+    // Initialize texture loader explicitly
+    this.textureLoader = new THREE.TextureLoader();
+    
     // Process users data to create coat of arms map
     if (users) {
       Object.values(users).forEach(user => {
@@ -362,7 +365,8 @@ export default class PolygonRenderer {
 
     // Log the polygons with owners
     const polygonsWithOwners = this.polygons.filter(p => p.owner && p.centroid);
-    console.log(`Found ${polygonsWithOwners.length} polygons with owners`);
+    console.log(`Found ${polygonsWithOwners.length} polygons with owners:`, 
+      polygonsWithOwners.map(p => `${p.id} (owner: ${p.owner})`));
     
     // Process each polygon with an owner
     polygonsWithOwners.forEach(polygon => {
@@ -370,6 +374,7 @@ export default class PolygonRenderer {
       
       // Get the coat of arms URL directly from the map
       const coatOfArmsUrl = this.ownerCoatOfArmsMap[polygon.owner];
+      console.log(`Coat of arms URL for ${polygon.owner}:`, coatOfArmsUrl);
       
       // Get the owner's color from the users data
       let ownerColor = '#8B4513'; // Default brown color

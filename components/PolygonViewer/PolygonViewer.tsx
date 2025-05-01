@@ -196,7 +196,7 @@ export default function PolygonViewer() {
   // Add this useEffect to ensure coat of arms are updated when users data changes
   useEffect(() => {
     if (polygonRendererRef.current && users && Object.keys(users).length > 0) {
-      console.log('Updating coat of arms from users data:', users);
+      console.log('Updating coat of arms from users data in PolygonViewer:', users);
       
       // Create a map of username to coat of arms URL
       const coatOfArmsMap: Record<string, string> = {};
@@ -212,8 +212,11 @@ export default function PolygonViewer() {
       
       // Update the renderer with the coat of arms map
       polygonRendererRef.current.updateOwnerCoatOfArms(coatOfArmsMap);
+      
+      // Force an update of the view mode to trigger sprite creation
+      polygonRendererRef.current.updateViewMode(activeView);
     }
-  }, [users]);
+  }, [users, activeView]);
   
   // Add an effect to listen for polygon deletion events
   useEffect(() => {
@@ -290,6 +293,17 @@ export default function PolygonViewer() {
         console.log('Initializing with existing coat of arms data:', ownerCoatOfArmsMap);
         polygonRenderer.updateOwnerCoatOfArms(ownerCoatOfArmsMap);
       }
+      
+      // Force an update of the coat of arms sprites
+      if (Object.keys(users).length > 0) {
+        const coatOfArmsMap: Record<string, string> = {};
+        Object.values(users).forEach(user => {
+          if (user.user_name && user.coat_of_arms_image) {
+            coatOfArmsMap[user.user_name] = user.coat_of_arms_image;
+          }
+        });
+        polygonRenderer.updateOwnerCoatOfArms(coatOfArmsMap);
+      }
     };
     
     // Step 2: Initialize water effect
@@ -339,6 +353,21 @@ export default function PolygonViewer() {
     setTimeout(initWaterEffect, 100);
     setTimeout(initInteractionManager, 200);
     setTimeout(initBridgeRenderer, 300);
+    
+    // Add a delayed update for coat of arms
+    setTimeout(() => {
+      if (polygonRendererRef.current && users && Object.keys(users).length > 0) {
+        console.log('Forcing coat of arms update after initialization');
+        const coatOfArmsMap: Record<string, string> = {};
+        Object.values(users).forEach(user => {
+          if (user.user_name && user.coat_of_arms_image) {
+            coatOfArmsMap[user.user_name] = user.coat_of_arms_image;
+          }
+        });
+        polygonRendererRef.current.updateOwnerCoatOfArms(coatOfArmsMap);
+        polygonRendererRef.current.updateViewMode(activeView);
+      }
+    }, 2000); // Delay by 2 seconds to ensure everything is loaded
     
     // Add a frame counter for less frequent updates
     let frameCount = 0;
