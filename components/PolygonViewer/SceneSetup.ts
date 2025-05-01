@@ -185,6 +185,9 @@ export default class SceneSetup {
     
     this.scene.add(this.sunLight);
     
+    // Log to verify light setup
+    console.log('Sun light added at position:', this.sunLight.position);
+    
     // Add a secondary light for fill
     const fillLight = new THREE.DirectionalLight(0xadd8e6, 0.3); // Light blue fill light
     fillLight.position.set(-50, 30, -50);

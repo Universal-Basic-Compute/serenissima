@@ -12,9 +12,10 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
 }) => {
   const [loadingImage, setLoadingImage] = useState<string>('');
   const [progress, setProgress] = useState(0);
+  const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
-    // List of loading images
+    // List of loading images - make sure these paths are correct
     const loadingImages = [
       '/loading/venice1.jpg',
       '/loading/venice2.jpg',
@@ -23,8 +24,12 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
       '/loading/venice5.jpg',
     ];
 
+    // Log the available images to verify paths
+    console.log('Available loading images:', loadingImages);
+
     // Select a random image
     const randomImage = loadingImages[Math.floor(Math.random() * loadingImages.length)];
+    console.log('Selected loading image:', randomImage);
     setLoadingImage(randomImage);
 
     // Set up progress animation
@@ -60,8 +65,21 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
             fill
             style={{ objectFit: 'cover' }}
             priority
+            onError={(e) => {
+              console.error('Error loading image:', loadingImage);
+              setImageError(true);
+              // Try to load a fallback image
+              setLoadingImage('/loading/fallback.jpg');
+            }}
           />
           <div className="absolute inset-0 bg-black bg-opacity-40"></div>
+        </div>
+      )}
+      
+      {/* Fallback background if no image loads */}
+      {(!loadingImage || imageError) && (
+        <div className="absolute inset-0 bg-amber-900">
+          {/* Fallback background */}
         </div>
       )}
       

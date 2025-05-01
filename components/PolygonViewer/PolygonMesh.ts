@@ -100,6 +100,7 @@ class PolygonMesh {
       this.textureLoader.load(
         '/textures/sand.jpg',
         (texture) => {
+          console.log('Sand texture loaded successfully');
           if (texture && material) {
             texture.wrapS = THREE.RepeatWrapping;
             texture.wrapT = THREE.RepeatWrapping;
@@ -110,9 +111,30 @@ class PolygonMesh {
             material.needsUpdate = true;
           }
         },
-        undefined,
+        (xhr) => {
+          console.log(`Sand texture loading: ${(xhr.loaded / xhr.total) * 100}% loaded`);
+        },
         (error) => {
           console.error('Error loading sand texture:', error);
+          // Try alternative path
+          this.textureLoader.load(
+            'textures/sand.jpg', // Try without leading slash
+            (texture) => {
+              console.log('Sand texture loaded from alternative path');
+              if (texture && material) {
+                texture.wrapS = THREE.RepeatWrapping;
+                texture.wrapT = THREE.RepeatWrapping;
+                texture.repeat.set(5, 5);
+                texture.offset.set(0.5, 0.5);
+                material.map = texture;
+                material.needsUpdate = true;
+              }
+            },
+            undefined,
+            (secondError) => {
+              console.error('Error loading sand texture from alternative path:', secondError);
+            }
+          );
         }
       );
       

@@ -311,6 +311,7 @@ export default class WaterEffect {
       this.textureLoader.load(
         '/textures/waternormals.jpg',
         (texture) => {
+          console.log('Water normal map loaded successfully');
           texture.wrapS = THREE.RepeatWrapping;
           texture.wrapT = THREE.RepeatWrapping;
           texture.repeat.set(10, 10);
@@ -321,10 +322,31 @@ export default class WaterEffect {
             this.water.material.uniforms.normalSampler.value = texture;
           }
         },
-        undefined,
+        (xhr) => {
+          console.log(`Water normal map loading: ${(xhr.loaded / xhr.total) * 100}% loaded`);
+        },
         (error) => {
-          console.warn('Could not load water normal map, using fallback:', error);
-          // We already have the fallback texture set, so no need to do anything here
+          console.warn('Could not load water normal map from primary path:', error);
+          // Try alternative path without leading slash
+          this.textureLoader.load(
+            'textures/waternormals.jpg',
+            (texture) => {
+              console.log('Water normal map loaded from alternative path');
+              texture.wrapS = THREE.RepeatWrapping;
+              texture.wrapT = THREE.RepeatWrapping;
+              texture.repeat.set(10, 10);
+              this.waterNormalMap = texture;
+              
+              if (this.water && this.water.material && this.water.material.uniforms && this.water.material.uniforms.normalSampler) {
+                this.water.material.uniforms.normalSampler.value = texture;
+              }
+            },
+            undefined,
+            (secondError) => {
+              console.warn('Could not load water normal map from alternative path, using fallback:', secondError);
+              // We already have the fallback texture set, so no need to do anything here
+            }
+          );
         }
       );
       
