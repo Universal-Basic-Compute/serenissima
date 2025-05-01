@@ -1,6 +1,8 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
+import { PhantomWalletAdapter } from '@solana/wallet-adapter-phantom';
+import { WalletReadyState } from '@solana/wallet-adapter-base';
 import dynamic from 'next/dynamic';
 import { GoogleMap, LoadScript, DrawingManager } from '@react-google-maps/api';
 
@@ -34,8 +36,9 @@ const polygonOptions = {
 const libraries = ['drawing'];
 
 export default function Home() {
-  // State to toggle between map and 3D view
-  const [showMap, setShowMap] = useState(false);
+  // State for wallet connection
+  const [walletAddress, setWalletAddress] = useState<string | null>(null);
+  const [walletAdapter, setWalletAdapter] = useState<PhantomWalletAdapter | null>(null);
   
   // Get API key from environment variable
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '';
@@ -44,7 +47,51 @@ export default function Home() {
   const drawingManagerRef = useRef(null);
   const [isGoogleLoaded, setIsGoogleLoaded] = useState(false);
   
-  if (!apiKey && showMap) {
+  // Initialize wallet adapter
+  useEffect(() => {
+    const adapter = new PhantomWalletAdapter();
+    setWalletAdapter(adapter);
+    
+    // Check if wallet is already connected
+    if (adapter.connected) {
+      setWalletAddress(adapter.publicKey?.toString() || null);
+    }
+    
+    return () => {
+      // Clean up adapter when component unmounts
+      if (adapter) {
+        adapter.disconnect();
+      }
+    };
+  }, []);
+
+  // Handle wallet connection
+  const connectWallet = useCallback(async () => {
+    if (!walletAdapter) return;
+    
+    if (walletAdapter.connected) {
+      // If already connected, disconnect
+      await walletAdapter.disconnect();
+      setWalletAddress(null);
+      return;
+    }
+    
+    // Check if Phantom is installed
+    if (walletAdapter.readyState !== WalletReadyState.Installed) {
+      window.open('https://phantom.app/', '_blank');
+      return;
+    }
+    
+    try {
+      await walletAdapter.connect();
+      setWalletAddress(walletAdapter.publicKey?.toString() || null);
+      console.log('Connected to wallet:', walletAdapter.publicKey?.toString());
+    } catch (error) {
+      console.error('Error connecting to wallet:', error);
+    }
+  }, [walletAdapter]);
+
+  if (!apiKey && walletAddress) {
     return <div className="w-screen h-screen flex items-center justify-center">
       <p>Google Maps API key is missing. Please add it to your .env.local file.</p>
     </div>;
@@ -157,15 +204,15 @@ export default function Home() {
 
   return (
     <div className="relative w-screen h-screen">
-      {/* Toggle button */}
+      {/* Connect Wallet button */}
       <button 
-        onClick={() => setShowMap(!showMap)}
-        className="absolute top-4 right-4 z-10 bg-white px-4 py-2 rounded shadow"
+        onClick={connectWallet}
+        className="absolute top-4 right-4 z-10 bg-white px-4 py-2 rounded shadow hover:bg-purple-100 transition-colors"
       >
-        {showMap ? 'Show 3D View' : 'Show Map'}
+        {walletAddress ? `Disconnect ${walletAddress.slice(0, 4)}...${walletAddress.slice(-4)}` : 'Connect Wallet'}
       </button>
       
-      {showMap ? (
+      {walletAddress ? (
         // Google Maps view
         <LoadScript 
           googleMapsApiKey={apiKey}
