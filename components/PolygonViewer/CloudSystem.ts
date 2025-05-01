@@ -65,17 +65,23 @@ export default class CloudSystem {
     const size = Math.max(this.width, this.height) * 0.5;
     const height = size * 0.5;
     
+    // Create clouds at different heights for more depth
+    const heightLevels = [height, height + 10, height + 20];
+    
     for (let i = 0; i < cloudCount; i++) {
       // Create a plane for each cloud
       const cloudSize = Math.random() * 20 + 20;
       const cloudGeometry = new THREE.PlaneGeometry(cloudSize, cloudSize);
       
-      const cloud = new THREE.Mesh(cloudGeometry, cloudMaterial);
+      const cloud = new THREE.Mesh(cloudGeometry, cloudMaterial.clone()); // Clone material for individual opacity
       
       // Position clouds randomly in a large area above the scene
+      // Choose a random height level
+      const cloudHeight = heightLevels[Math.floor(Math.random() * heightLevels.length)];
+      
       cloud.position.set(
         (Math.random() - 0.5) * size * 2,
-        height + Math.random() * 20,
+        cloudHeight,
         (Math.random() - 0.5) * size * 2
       );
       
@@ -88,6 +94,9 @@ export default class CloudSystem {
       // Scale randomly for variety
       const scale = Math.random() * 0.5 + 0.5;
       cloud.scale.set(scale, scale, scale);
+      
+      // Add random opacity for more depth
+      (cloud.material as THREE.MeshLambertMaterial).opacity = 0.3 + Math.random() * 0.3;
       
       this.clouds.add(cloud);
       this.cloudParticles.push(cloud);
@@ -103,9 +112,14 @@ export default class CloudSystem {
       // Gentle rotation
       cloud.rotation.z += 0.0001;
       
-      // Gentle movement
-      cloud.position.x += Math.sin(time * 0.0001 + i) * 0.01;
-      cloud.position.z += Math.cos(time * 0.0001 + i * 0.5) * 0.01;
+      // Gentle movement with unique patterns for each cloud
+      cloud.position.x += Math.sin(time * 0.0001 + i * 0.1) * 0.01;
+      cloud.position.z += Math.cos(time * 0.0001 + i * 0.05) * 0.01;
+      
+      // Subtle vertical movement for some clouds
+      if (i % 3 === 0) {
+        cloud.position.y += Math.sin(time * 0.00005 + i) * 0.005;
+      }
       
       // Wrap around if clouds drift too far
       const limit = Math.max(this.width, this.height);

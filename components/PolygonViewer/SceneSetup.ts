@@ -150,10 +150,15 @@ export default class SceneSetup {
       // Create cloud system with a delay to prioritize initial scene loading
       this.cloudSystem = new CloudSystem({
         scene: this.scene,
-        width: 200, // Make clouds cover a wide area
-        height: 200,
+        width: 300, // Increased width for wider cloud coverage
+        height: 300, // Increased height for wider cloud coverage
         performanceMode: this.performanceMode
       });
+      
+      // Force an initial update to position clouds
+      if (this.cloudSystem) {
+        this.cloudSystem.update(0);
+      }
     }, 3000); // Delay cloud creation by 3 seconds
   }
   
