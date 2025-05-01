@@ -656,7 +656,9 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
     } finally {
       setIsPurchasing(false);
       setShowPurchaseConfirmation(false);
-      // We don't close the panel here to allow the user to see the acquisition decree
+      // Explicitly set the panel to visible to ensure it stays open
+      // so the user can see the acquisition decree
+      setIsVisible(true);
     }
   }
 }
