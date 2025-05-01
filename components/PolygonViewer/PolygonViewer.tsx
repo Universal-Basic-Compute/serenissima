@@ -667,8 +667,21 @@ export default function PolygonViewer() {
                 duration: 0.5
               });
               
-              // Remove outline effect
-              composer.passes = composer.passes.filter(pass => !(pass instanceof OutlinePass));
+              // Fade out the outline mesh if it exists
+              if (object.userData.outlineMesh) {
+                gsap.to(object.userData.outlineMesh.material, {
+                  opacity: 0,
+                  duration: 0.3,
+                  onComplete: () => {
+                    // Remove the outline mesh from the scene
+                    scene.remove(object.userData.outlineMesh);
+                    // Clean up
+                    object.userData.outlineMesh.geometry.dispose();
+                    object.userData.outlineMesh.material.dispose();
+                    object.userData.outlineMesh = null;
+                  }
+                });
+              }
             }
           } else {
             // Deselect previous selection if any
@@ -687,6 +700,22 @@ export default function PolygonViewer() {
                   emissiveIntensity: previousSelected.userData.originalEmissiveIntensity || 0,
                   duration: 0.5
                 });
+                
+                // Fade out the outline mesh if it exists
+                if (previousSelected.userData.outlineMesh) {
+                  gsap.to(previousSelected.userData.outlineMesh.material, {
+                    opacity: 0,
+                    duration: 0.3,
+                    onComplete: () => {
+                      // Remove the outline mesh from the scene
+                      scene.remove(previousSelected.userData.outlineMesh);
+                      // Clean up
+                      previousSelected.userData.outlineMesh.geometry.dispose();
+                      previousSelected.userData.outlineMesh.material.dispose();
+                      previousSelected.userData.outlineMesh = null;
+                    }
+                  });
+                }
               }
             }
             
@@ -714,41 +743,37 @@ export default function PolygonViewer() {
                 duration: 0.5
               });
               
-              // Add outline effect with animation
-              if (composer && typeof OutlinePass !== 'undefined') {
-                // Remove any existing outline passes first
-                composer.passes = composer.passes.filter(pass => !(pass instanceof OutlinePass));
+              // Instead of using OutlinePass, let's create a simple outline effect
+              // by duplicating the mesh and scaling it slightly larger
+              if (!object.userData.outlineMesh) {
+                // Clone the geometry
+                const outlineGeometry = object.geometry.clone();
                 
-                // Create new outline pass
-                const outlinePass = new OutlinePass(
-                  new THREE.Vector2(window.innerWidth, window.innerHeight),
-                  scene,
-                  camera
-                );
-                
-                // Set up the outline pass with initial values
-                outlinePass.edgeStrength = 0;
-                outlinePass.edgeGlow = 0;
-                outlinePass.edgeThickness = 0;
-                outlinePass.pulsePeriod = 0;
-                outlinePass.visibleEdgeColor.set(0x00ff00);
-                outlinePass.hiddenEdgeColor.set(0x00ff00);
-                
-                // Add the object to be outlined
-                outlinePass.selectedObjects = [object];
-                
-                // Add the pass to the composer
-                composer.addPass(outlinePass);
-                
-                // Animate the outline properties
-                gsap.to(outlinePass, {
-                  edgeStrength: 1.5,
-                  edgeGlow: 0.2,
-                  edgeThickness: 1.0,
-                  duration: 1.0,
-                  ease: "power2.out"
+                // Create outline material
+                const outlineMaterial = new THREE.MeshBasicMaterial({
+                  color: 0x00ff00,
+                  side: THREE.BackSide,
+                  transparent: true,
+                  opacity: 0,
+                  depthTest: true
                 });
+                
+                // Create outline mesh
+                const outlineMesh = new THREE.Mesh(outlineGeometry, outlineMaterial);
+                outlineMesh.scale.multiplyScalar(1.01); // Make it slightly larger
+                outlineMesh.position.copy(object.position);
+                outlineMesh.rotation.copy(object.rotation);
+                scene.add(outlineMesh);
+                
+                // Store reference to outline mesh
+                object.userData.outlineMesh = outlineMesh;
               }
+              
+              // Animate the outline opacity
+              gsap.to(object.userData.outlineMesh.material, {
+                opacity: 0.3,
+                duration: 0.5
+              });
             }
           }
         }
@@ -764,28 +789,29 @@ export default function PolygonViewer() {
               b: previousSelected.userData.originalEmissive?.b || 0,
               duration: 0.5
             });
-            
+              
             gsap.to(previousSelected.material, {
               emissiveIntensity: previousSelected.userData.originalEmissiveIntensity || 0,
               duration: 0.5
             });
+              
+            // Fade out the outline mesh if it exists
+            if (previousSelected.userData.outlineMesh) {
+              gsap.to(previousSelected.userData.outlineMesh.material, {
+                opacity: 0,
+                duration: 0.3,
+                onComplete: () => {
+                  // Remove the outline mesh from the scene
+                  scene.remove(previousSelected.userData.outlineMesh);
+                  // Clean up
+                  previousSelected.userData.outlineMesh.geometry.dispose();
+                  previousSelected.userData.outlineMesh.material.dispose();
+                  previousSelected.userData.outlineMesh = null;
+                }
+              });
+            }
           }
-          
-          // Remove outline passes with fade-out animation
-          const outlinePasses = composer.passes.filter(pass => pass instanceof OutlinePass);
-          if (outlinePasses.length > 0) {
-            const outlinePass = outlinePasses[0];
-            gsap.to(outlinePass, {
-              edgeStrength: 0,
-              edgeGlow: 0,
-              edgeThickness: 0,
-              duration: 0.3,
-              onComplete: () => {
-                composer.passes = composer.passes.filter(pass => !(pass instanceof OutlinePass));
-              }
-            });
-          }
-          
+            
           setSelectedPolygonId(null);
         }
       }
@@ -864,6 +890,16 @@ export default function PolygonViewer() {
       // Remove event listeners
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('click', handleMouseClick);
+      
+      // Clean up any outline meshes
+      Object.values(polygonMeshesRef.current).forEach(mesh => {
+        if (mesh.userData.outlineMesh) {
+          scene.remove(mesh.userData.outlineMesh);
+          mesh.userData.outlineMesh.geometry.dispose();
+          mesh.userData.outlineMesh.material.dispose();
+          mesh.userData.outlineMesh = null;
+        }
+      });
       
       // Dispose of Three.js resources
       scene.traverse((object) => {
