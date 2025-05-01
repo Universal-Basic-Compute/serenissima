@@ -1,5 +1,10 @@
 import React, { useState } from 'react';
 
+// Add function to format the number with commas
+const formatNumberWithCommas = (num: number): string => {
+  return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+};
+
 interface InvestComputeMenuProps {
   onClose: () => void;
   onInvest: (amount: number) => Promise<void>;
@@ -73,9 +78,13 @@ const InvestComputeMenu: React.FC<InvestComputeMenuProps> = ({ onClose, onInvest
           {/* Custom amount input */}
           <div className="flex items-center">
             <input
-              type="number"
-              value={amount}
-              onChange={(e) => setAmount(parseInt(e.target.value) || 0)}
+              type="text"
+              value={formatNumberWithCommas(amount)}
+              onChange={(e) => {
+                // Remove commas before parsing
+                const value = e.target.value.replace(/,/g, '');
+                setAmount(parseInt(value) || 0);
+              }}
               className="w-full px-4 py-3 text-xl border border-amber-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-500"
               min="1"
             />
