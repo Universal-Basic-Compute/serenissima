@@ -526,7 +526,7 @@ export default class PolygonRenderer {
   }
   
   // Add method to update all polygon owner colors
-  private updatePolygonOwnerColors() {
+  public updatePolygonOwnerColors() {
     console.log('Updating all polygon owner colors with', Object.keys(this.ownerColorMap).length, 'colors');
     
     // Vérifier si nous avons des couleurs de propriétaires
@@ -667,7 +667,7 @@ export default class PolygonRenderer {
   // This method is replaced by createColoredCircleOnLand
 
   // Create and update coat of arms as flat textures on the land
-  private updateCoatOfArmsSprites() {
+  public updateCoatOfArmsSprites() {
     console.log('Updating coat of arms sprites, active view:', this.activeView);
     
     // Remove existing coat of arms objects

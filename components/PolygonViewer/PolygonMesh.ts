@@ -449,6 +449,11 @@ class PolygonMesh {
       this.originalColor = landColor.clone();
     }
     
+    // Force a render to apply the changes
+    if (this.scene.userData.forceRender) {
+      this.scene.userData.forceRender();
+    }
+    
     console.log(`Owner updated for polygon ${this.polygon.id}`);
   }
   

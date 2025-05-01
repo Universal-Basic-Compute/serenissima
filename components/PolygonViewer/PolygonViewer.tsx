@@ -609,12 +609,41 @@ export default function PolygonViewer() {
       // Force an update of the coat of arms sprites
       if (Object.keys(users).length > 0) {
         const coatOfArmsMap: Record<string, string> = {};
+        const colorMap: Record<string, string> = {};
+        
         Object.values(users).forEach(user => {
-          if (user.user_name && user.coat_of_arms_image) {
-            coatOfArmsMap[user.user_name] = user.coat_of_arms_image;
+          if (user.user_name) {
+            // Add coat of arms if available
+            if (user.coat_of_arms_image) {
+              coatOfArmsMap[user.user_name] = user.coat_of_arms_image;
+            }
+            
+            // Add color if available
+            if (user.color) {
+              colorMap[user.user_name] = user.color;
+            }
           }
         });
-        polygonRenderer.updateOwnerCoatOfArms(coatOfArmsMap);
+        
+        // Apply coat of arms and colors
+        if (Object.keys(coatOfArmsMap).length > 0) {
+          polygonRenderer.updateOwnerCoatOfArms(coatOfArmsMap);
+          polygonRenderer.updateCoatOfArmsSprites();
+        }
+        
+        if (Object.keys(colorMap).length > 0) {
+          polygonRenderer.updateOwnerColors(colorMap);
+          polygonRenderer.updatePolygonOwnerColors();
+        }
+      }
+      
+      // Apply updates immediately if we have the update functions
+      if (typeof updatePolygonColors === 'function') {
+        updatePolygonColors();
+      }
+      
+      if (typeof updateCoatOfArms === 'function') {
+        updateCoatOfArms();
       }
     };
     

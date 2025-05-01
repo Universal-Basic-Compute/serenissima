@@ -443,6 +443,9 @@ export default function Home() {
           });
           setUsers(usersMap);
           console.log('Loaded users data:', Object.keys(usersMap).length, 'users');
+          
+          // Dispatch event to notify components that users data is loaded
+          window.dispatchEvent(new CustomEvent('usersDataLoaded'));
         }
       }
     } catch (error) {
@@ -475,9 +478,13 @@ export default function Home() {
       if (polygonRendererRef.current) {
         console.log('Updating polygon renderer with users data');
         polygonRendererRef.current.updateViewMode(activeView);
+        
+        // Explicitly update colors and coat of arms
+        updatePolygonColors();
+        updateCoatOfArms();
       }
     }
-  }, [users, activeView]);
+  }, [users, activeView, updatePolygonColors, updateCoatOfArms]);
 
   // Add effect to log when transferMenuOpen changes
   useEffect(() => {
@@ -491,6 +498,58 @@ export default function Home() {
     setMarketPanelVisible(isMarketView);
     console.log('Active view changed to:', activeView, 'Market panel visible:', isMarketView);
   }, [activeView]);
+  
+  // Add function to update polygon colors
+  const updatePolygonColors = useCallback(() => {
+    if (polygonRendererRef.current && users && Object.keys(users).length > 0) {
+      console.log('Updating polygon colors with user data:', users);
+      
+      // Create a map of user colors
+      const colorMap: Record<string, string> = {};
+      Object.values(users).forEach(user => {
+        if (user.user_name && user.color) {
+          colorMap[user.user_name] = user.color;
+          console.log(`Added color for ${user.user_name}: ${user.color}`);
+        }
+      });
+      
+      // Update colors in the renderer
+      if (Object.keys(colorMap).length > 0) {
+        polygonRendererRef.current.updateOwnerColors(colorMap);
+        // Force an update of owner colors
+        polygonRendererRef.current.updatePolygonOwnerColors();
+      }
+    }
+  }, [users]);
+  
+  // Add function to update coat of arms
+  const updateCoatOfArms = useCallback(() => {
+    if (polygonRendererRef.current && users && Object.keys(users).length > 0) {
+      console.log('Updating coat of arms with user data:', users);
+      
+      // Create a map of user coat of arms
+      const coatOfArmsMap: Record<string, string> = {};
+      Object.values(users).forEach(user => {
+        if (user.user_name && user.coat_of_arms_image) {
+          coatOfArmsMap[user.user_name] = user.coat_of_arms_image;
+          console.log(`Added coat of arms for ${user.user_name}:`, user.coat_of_arms_image);
+        }
+      });
+      
+      // Update coat of arms in the renderer
+      if (Object.keys(coatOfArmsMap).length > 0) {
+        polygonRendererRef.current.updateOwnerCoatOfArms(coatOfArmsMap);
+        // Force an update of coat of arms sprites
+        polygonRendererRef.current.updateCoatOfArmsSprites();
+      }
+    }
+  }, [users]);
+  
+  // Add effect to trigger color and coat of arms updates when users data changes
+  useEffect(() => {
+    updatePolygonColors();
+    updateCoatOfArms();
+  }, [updatePolygonColors, updateCoatOfArms]);
 
   // Handle compute transfer
   const handleTransferCompute = async (amount: number) => {
@@ -1280,36 +1339,20 @@ export default function Home() {
     }
   }, [mapRef.current, isGoogleLoaded, loadPolygonsOnMap]);
   
-  // Add this useEffect to ensure coat of arms are updated when users data changes
+  // Add this useEffect to listen for usersDataLoaded events
   useEffect(() => {
-    if (users && Object.keys(users).length > 0) {
-      console.log('Users data loaded:', users);
-      
-      // Check if ConsiglioDeiDieci is in the users data
-      if (users['ConsiglioDeiDieci']) {
-        console.log('ConsiglioDeiDieci user data:', users['ConsiglioDeiDieci']);
-        console.log('ConsiglioDeiDieci color:', users['ConsiglioDeiDieci'].color);
-      }
-      
-      // Create a map of username to coat of arms URL
-      const coatOfArmsMap: Record<string, string> = {};
-      
-      Object.values(users).forEach(user => {
-        if (user.user_name && user.coat_of_arms_image) {
-          coatOfArmsMap[user.user_name] = user.coat_of_arms_image;
-          console.log(`Added coat of arms for ${user.user_name}`);
-        }
-      });
-      
-      console.log('Created coat of arms map with', Object.keys(coatOfArmsMap).length, 'entries');
-      
-      // Force an update of the polygon renderer with the users data
-      if (polygonRendererRef.current) {
-        console.log('Updating polygon renderer with users data');
-        polygonRendererRef.current.updateViewMode(activeView);
-      }
-    }
-  }, [users, activeView]);
+    const handleUsersLoaded = () => {
+      console.log('Users data loaded event detected');
+      updatePolygonColors();
+      updateCoatOfArms();
+    };
+    
+    window.addEventListener('usersDataLoaded', handleUsersLoaded);
+    
+    return () => {
+      window.removeEventListener('usersDataLoaded', handleUsersLoaded);
+    };
+  }, [updatePolygonColors, updateCoatOfArms]);
 
   // Also add this to ensure polygons are loaded when the component mounts
   useEffect(() => {
