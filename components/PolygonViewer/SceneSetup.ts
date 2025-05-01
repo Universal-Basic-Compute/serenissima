@@ -75,6 +75,10 @@ export default class SceneSetup {
     // Disable all automatic behaviors
     this.controls.autoRotate = false;
     this.controls.enableDamping = false;
+    
+    // Prevent automatic camera resets
+    this.controls.saveState = function() {}; // Override with empty function
+    this.controls.reset = function() {}; // Override with empty function
 
     // Make controls very simple
     this.controls.rotateSpeed = 0.5;

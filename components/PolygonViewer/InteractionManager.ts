@@ -23,7 +23,12 @@ export default class InteractionManager {
   private raycaster: THREE.Raycaster;
   private mouse: THREE.Vector2;
   private handleMouseClick: (event: MouseEvent) => void;
+  private handleMouseDown: (event: MouseEvent) => void;
+  private handleMouseMove: (event: MouseEvent) => void;
   private isProcessingClick: boolean = false;
+  private isDragging: boolean = false;
+  private mouseDownPosition = { x: 0, y: 0 };
+  private cameraPositionOnClick = new THREE.Vector3();
 
   constructor({
     camera,
@@ -48,21 +53,51 @@ export default class InteractionManager {
     
     // Bind methods to this instance
     this.handleMouseClick = this.onMouseClick.bind(this);
+    this.handleMouseDown = this.onMouseDown.bind(this);
+    this.handleMouseMove = this.onMouseMove.bind(this);
     
     // Add event listeners
     window.addEventListener('click', this.handleMouseClick);
+    window.addEventListener('mousedown', this.handleMouseDown);
+    window.addEventListener('mousemove', this.handleMouseMove);
+  }
+  
+  private onMouseDown(event: MouseEvent) {
+    this.mouseDownPosition = { x: event.clientX, y: event.clientY };
+    this.isDragging = false;
+    
+    // Store camera position at click start
+    this.cameraPositionOnClick.copy(this.camera.position);
+  }
+  
+  private onMouseMove(event: MouseEvent) {
+    // If mouse is down and has moved more than a few pixels, consider it a drag
+    if (event.buttons > 0) {
+      const dx = Math.abs(event.clientX - this.mouseDownPosition.x);
+      const dy = Math.abs(event.clientY - this.mouseDownPosition.y);
+      if (dx > 3 || dy > 3) {
+        this.isDragging = true;
+      }
+    }
   }
   
   private onMouseClick(event: MouseEvent) {
     // Prevent processing if already handling a click
     if (this.isProcessingClick) return;
-    this.isProcessingClick = true;
     
     // Only handle left-click with no modifier keys
     if (event.button !== 0 || event.ctrlKey || event.shiftKey || event.altKey || event.metaKey) {
-      this.isProcessingClick = false;
       return;
     }
+    
+    // CRITICAL: Check if this is a drag end event rather than a true click
+    // This helps distinguish between camera panning and actual clicks
+    if (this.isDragging) {
+      this.isDragging = false;
+      return;
+    }
+    
+    this.isProcessingClick = true;
     
     try {
       // Calculate mouse position in normalized device coordinates (-1 to +1)
@@ -88,23 +123,42 @@ export default class InteractionManager {
           // Toggle selection state
           const newSelectedId = clickedId === this.selectedPolygonId ? null : clickedId;
           
-          // Use setTimeout to defer state update to next tick
-          setTimeout(() => {
+          // Update the selection state in a way that doesn't affect the camera
+          // Use requestAnimationFrame to defer the update to the next frame
+          requestAnimationFrame(() => {
+            // Preserve camera position
+            const currentPosition = this.camera.position.clone();
+            
+            // Update selection state
             this.setSelectedPolygonId(newSelectedId);
             this.selectedPolygonId = newSelectedId;
-            this.isProcessingClick = false;
-          }, 0);
+            
+            // Restore camera position after a short delay to ensure it's not reset
+            setTimeout(() => {
+              this.camera.position.copy(currentPosition);
+              this.isProcessingClick = false;
+            }, 10);
+          });
           return;
         }
       } 
       
       // Clicking on empty space, deselect current selection
       if (this.selectedPolygonId) {
-        setTimeout(() => {
+        requestAnimationFrame(() => {
+          // Preserve camera position
+          const currentPosition = this.camera.position.clone();
+          
+          // Update selection state
           this.setSelectedPolygonId(null);
           this.selectedPolygonId = null;
-          this.isProcessingClick = false;
-        }, 0);
+          
+          // Restore camera position after a short delay
+          setTimeout(() => {
+            this.camera.position.copy(currentPosition);
+            this.isProcessingClick = false;
+          }, 10);
+        });
         return;
       }
     } catch (error) {
@@ -117,5 +171,7 @@ export default class InteractionManager {
   public cleanup() {
     // Remove event listeners
     window.removeEventListener('click', this.handleMouseClick);
+    window.removeEventListener('mousedown', this.handleMouseDown);
+    window.removeEventListener('mousemove', this.handleMouseMove);
   }
 }

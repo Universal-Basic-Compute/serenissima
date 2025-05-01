@@ -149,7 +149,14 @@ export default function PolygonViewer() {
       
       // Use composer instead of renderer directly to include post-processing effects
       if (sceneRef.current && sceneRef.current.composer) {
+        // Store camera position before rendering
+        const cameraPosition = sceneRef.current.camera.position.clone();
+        
+        // Render the scene
         sceneRef.current.composer.render();
+        
+        // Ensure camera position is preserved after rendering
+        sceneRef.current.camera.position.copy(cameraPosition);
       }
     };
     
