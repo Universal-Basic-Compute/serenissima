@@ -571,19 +571,19 @@ export default function PolygonViewer() {
     
     // Step 2: Initialize water effect
     const initWaterEffect = () => {
-      // Create fallback objects
-      const fallbackScene = new THREE.Scene();
-      const fallbackRenderer = new THREE.WebGLRenderer({ antialias: false });
-      
-      const waterEffect = new WaterEffect({
-        scene: sceneRef.current?.scene || fallbackScene,
-        activeView,
-        performanceMode: !highQuality,
-        width: bounds.scale * 200,
-        height: bounds.scale * 200,
-        renderer: sceneRef.current?.renderer || fallbackRenderer
-      });
-      waterEffectRef.current = waterEffect;
+      if (sceneRef.current) {
+        console.log('Creating water effect...');
+        sceneRef.current.createWater();
+        const waterEffect = new WaterEffect({
+          scene: sceneRef.current.scene,
+          activeView,
+          performanceMode: !highQuality,
+          width: bounds.scale * 200,
+          height: bounds.scale * 200,
+          renderer: sceneRef.current.renderer  // Pass the renderer
+        });
+        waterEffectRef.current = waterEffect;
+      }
     };
     
     // Step 3: Initialize interaction manager

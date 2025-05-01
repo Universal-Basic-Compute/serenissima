@@ -1,6 +1,5 @@
 import * as THREE from 'three';
 import { ViewMode } from './types';
-import { Water } from 'three/examples/jsm/objects/Water.js';
 
 interface WaterEffectProps {
   scene: THREE.Scene;
@@ -15,33 +14,18 @@ export default class WaterEffect {
   private scene: THREE.Scene;
   private activeView: ViewMode;
   private performanceMode: boolean;
-  private water: Water | null = null;
-  private waterGeometry: THREE.PlaneGeometry;
-  private waterNormalMap: THREE.Texture;
-  private waterDUDVMap: THREE.Texture | null = null;
   private width: number;
   private height: number;
-  private sunPosition: THREE.Vector3;
-  private sunDirection: THREE.Vector3;
-  private waterFoam: THREE.Mesh | null = null;
-  private foamTexture: THREE.Texture | null = null;
-  private causticTextures: THREE.Texture[] = [];
-  private causticLight: THREE.DirectionalLight | null = null;
-  private causticIndex: number = 0;
-  private causticMesh: THREE.Mesh | null = null;
-  private sunReflection: THREE.Mesh | null = null;
-  private shoreMesh: THREE.Mesh | null = null;
-  private landRenderTarget: THREE.WebGLRenderTarget | null = null;
-  private landCamera: THREE.OrthographicCamera | null = null;
   private renderer: THREE.WebGLRenderer;
-
-  // Static texture loader and cache for water textures
-  private static waterNormalMapTexture: THREE.Texture | null = null;
-  private static waterDUDVMapTexture: THREE.Texture | null = null;
-  private static foamTexture: THREE.Texture | null = null;
-  private static textureLoader: THREE.TextureLoader | null = null;
-  private textureLoader: THREE.TextureLoader;
-  private static causticTextures: THREE.Texture[] | null = null;
+  private waterMesh: THREE.Mesh | null = null;
+  private waterGeometry: THREE.PlaneBufferGeometry;
+  private waterMaterial: THREE.ShaderMaterial;
+  private landPolygons: THREE.Mesh[] = [];
+  private time: number = 0;
+  private landPositions: Float32Array = new Float32Array();
+  private landBuffer: THREE.BufferAttribute;
+  private clock: THREE.Clock;
+  private sunReflection: THREE.Mesh | null = null;
 
   constructor({
     scene,
