@@ -217,7 +217,7 @@ export default class LODPolygon {
     if (!this.performanceMode) {
       // Use shared texture loader
       this.textureLoader.load(
-        'https://threejs.org/examples/textures/terrain/grasslight-big.jpg', // Use existing texture
+        '/textures/sand.jpg', // Use custom sand texture
         (texture) => {
           texture.wrapS = THREE.RepeatWrapping;
           texture.wrapT = THREE.RepeatWrapping;
@@ -229,7 +229,7 @@ export default class LODPolygon {
       
       // Load normal map for sand texture
       this.textureLoader.load(
-        'https://threejs.org/examples/textures/terrain/grasslight-big-nm.jpg', // Use existing texture
+        '/textures/sand_normal.jpg', // Use custom normal map
         (texture) => {
           texture.wrapS = THREE.RepeatWrapping;
           texture.wrapT = THREE.RepeatWrapping;

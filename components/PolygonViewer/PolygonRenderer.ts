@@ -223,7 +223,7 @@ export default class PolygonRenderer {
       
       // Use optimized texture loading for better performance
       PolygonRenderer.sharedTextures.sandBaseColor = PolygonRenderer.loadOptimizedTexture(
-        'https://threejs.org/examples/textures/terrain/grasslight-big.jpg',
+        '/textures/sand.jpg',
         (texture) => {
           // Configure texture settings once loaded
           texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
@@ -233,7 +233,7 @@ export default class PolygonRenderer {
       );
       
       PolygonRenderer.sharedTextures.sandNormalMap = PolygonRenderer.loadOptimizedTexture(
-        'https://threejs.org/examples/textures/terrain/grasslight-big-nm.jpg',
+        '/textures/sand_normal.jpg',
         (texture) => {
           texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
           texture.repeat.set(1.25, 1.25);
@@ -242,7 +242,7 @@ export default class PolygonRenderer {
       );
       
       PolygonRenderer.sharedTextures.sandRoughnessMap = PolygonRenderer.loadOptimizedTexture(
-        'https://threejs.org/examples/textures/terrain/grasslight-big-ao.jpg',
+        '/textures/sand_roughness.jpg',
         (texture) => {
           texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
           texture.repeat.set(1.25, 1.25);
@@ -909,6 +909,15 @@ export default class PolygonRenderer {
         transparent: true,
         opacity: 0.7,
         side: THREE.FrontSide
+      });
+      
+      // Load custom sand texture for the shore
+      this.textureLoader.load('/textures/sand.jpg', (texture) => {
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.set(8, 8);  // More repetition for smaller detail
+        shoreMaterial.map = texture;
+        shoreMaterial.needsUpdate = true;
       });
       
       const shoreMesh = new THREE.Mesh(shoreGeometry, shoreMaterial);
