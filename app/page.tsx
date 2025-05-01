@@ -1365,7 +1365,7 @@ export default function Home() {
           <div className="absolute top-4 right-4 z-10" ref={dropdownRef}>
             <button 
               onClick={() => setDropdownOpen(!dropdownOpen)}
-              className="bg-white px-4 py-2 rounded shadow hover:bg-gray-100 transition-colors flex items-center"
+              className="bg-amber-50 px-6 py-3 rounded-lg shadow-md hover:bg-amber-100 transition-colors flex items-center border-2 border-amber-300"
             >
               <PlayerProfile
                 username={userProfile.username || usernameInput}
@@ -1373,19 +1373,19 @@ export default function Home() {
                 lastName={userProfile.lastName || lastName}
                 coatOfArmsImage={userProfile.coatOfArmsImage || coatOfArmsImage}
                 familyMotto={userProfile.familyMotto || familyMotto}
-                computeAmount={userProfile.computeAmount} // Add this line
-                size="small"
-                className="mr-2"
+                computeAmount={userProfile.computeAmount}
+                size="medium" // Change from small to medium
+                className="mr-3" // Increase margin
                 showMotto={false}
-                showDucats={true} // Explicitly show ducats
+                showDucats={true}
               />
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-amber-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
             </button>
             
             {dropdownOpen && (
-              <div className="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-xl py-1 z-20 border border-amber-200 overflow-hidden">
+              <div className="absolute right-0 mt-2 w-72 bg-white rounded-lg shadow-xl py-1 z-20 border-2 border-amber-300 overflow-hidden">
                 <div className="px-4 py-3 border-b border-amber-100 bg-amber-50">
                   <p className="text-xs text-amber-700">Wallet</p>
                   <p className="text-sm truncate font-medium">{walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}</p>

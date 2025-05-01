@@ -113,25 +113,25 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
   // Determine sizes based on the size prop
   const dimensions = {
     small: {
-      container: 'w-16',
-      image: 'w-12 h-12',
-      initials: 'w-12 h-12 text-xs',
-      username: 'text-xs',
+      container: 'w-20', // Increased from w-16
+      image: 'w-16 h-16', // Increased from w-12 h-12
+      initials: 'w-16 h-16 text-sm', // Increased from w-12 h-12 text-xs
+      username: 'text-sm', // Increased from text-xs
       name: 'text-xs'
     },
     medium: {
-      container: 'w-24',
-      image: 'w-20 h-20',
-      initials: 'w-20 h-20 text-base',
-      username: 'text-sm',
-      name: 'text-xs'
+      container: 'w-32', // Increased from w-24
+      image: 'w-24 h-24', // Increased from w-20 h-20
+      initials: 'w-24 h-24 text-lg', // Increased from w-20 h-20 text-base
+      username: 'text-base font-semibold', // Added font-semibold
+      name: 'text-sm'
     },
     large: {
-      container: 'w-32',
-      image: 'w-28 h-28',
-      initials: 'w-28 h-28 text-xl',
-      username: 'text-base',
-      name: 'text-sm'
+      container: 'w-40', // Increased from w-32
+      image: 'w-32 h-32', // Increased from w-28 h-28
+      initials: 'w-32 h-32 text-2xl', // Increased from w-28 h-28 text-xl
+      username: 'text-lg font-semibold', // Added font-semibold
+      name: 'text-base'
     }
   };
 
@@ -171,7 +171,7 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
     >
       {/* Coat of Arms or Initials */}
       {displayData.coatOfArmsImage ? (
-        <div className="rounded-full border-2 border-amber-600 overflow-hidden bg-amber-50 flex items-center justify-center">
+        <div className="rounded-full border-3 border-amber-600 overflow-hidden bg-amber-50 flex items-center justify-center shadow-md">
           <img 
             src={displayData.coatOfArmsImage} 
             alt={`${displayData.username}'s Coat of Arms`}
@@ -179,7 +179,7 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
           />
         </div>
       ) : (
-        <div className={`${dim.initials} rounded-full border-2 border-amber-600 bg-amber-100 flex items-center justify-center`}>
+        <div className={`${dim.initials} rounded-full border-3 border-amber-600 bg-amber-100 flex items-center justify-center shadow-md`}>
           <span className="text-amber-800 font-bold">
             {displayData.firstName.charAt(0)}{displayData.lastName.charAt(0)}
           </span>
@@ -191,9 +191,9 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
         {displayData.username}
       </div>
       
-      {/* Ducats (Compute Amount) - New section */}
+      {/* Ducats (Compute Amount) */}
       {showDucats && displayData.computeAmount !== undefined && (
-        <div className={`${dim.name} text-amber-600 font-semibold text-center w-full flex items-center justify-center`}>
+        <div className={`${dim.name} text-amber-700 font-semibold text-center w-full flex items-center justify-center mt-1 bg-amber-50 py-1 px-2 rounded-full border border-amber-200`}>
           <span className="mr-1">⚜️</span> {formatDucats(displayData.computeAmount)} ducats
         </div>
       )}
