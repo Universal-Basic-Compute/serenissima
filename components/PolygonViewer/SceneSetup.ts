@@ -27,7 +27,6 @@ export default class SceneSetup {
   private zoomThreshold: number = 40; // Changed from 70 to 40 - Threshold for showing clouds
   public water: SimpleWater | null = null; // Reference to water effect
   private activeView: ViewMode;
-  public water: SimpleWater | null = null; // Reference to water effect
   
   constructor({ canvas, activeView, highQuality }: SceneSetupProps) {
     this.performanceMode = !highQuality;
