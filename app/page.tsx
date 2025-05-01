@@ -212,35 +212,8 @@ export default function Home() {
         {walletAddress ? `Disconnect ${walletAddress.slice(0, 4)}...${walletAddress.slice(-4)}` : 'Connect Wallet'}
       </button>
       
-      {walletAddress ? (
-        // Google Maps view
-        <LoadScript 
-          googleMapsApiKey={apiKey}
-          libraries={libraries}
-          onLoad={handleScriptLoad}
-        >
-          <GoogleMap
-            mapContainerStyle={mapContainerStyle}
-            center={center}
-            zoom={14}
-            options={{
-              fullscreenControl: false,
-            }}
-            onLoad={onMapLoad}
-          >
-            {isGoogleLoaded && (
-              <DrawingManager
-                onLoad={onDrawingManagerLoad}
-                onPolygonComplete={onPolygonComplete}
-                options={drawingManagerOptions}
-              />
-            )}
-          </GoogleMap>
-        </LoadScript>
-      ) : (
-        // 3D Polygon Viewer
-        <PolygonViewer />
-      )}
+      {/* Always show the 3D Polygon Viewer regardless of wallet connection status */}
+      <PolygonViewer />
     </div>
   );
 }
