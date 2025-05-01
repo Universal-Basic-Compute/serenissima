@@ -340,7 +340,7 @@ async def get_lands():
             fields = record['fields']
             land_data = {
                 'id': fields.get('LandId', ''),
-                'owner': fields.get('Wallet', ''),  # Using Wallet field as owner
+                'owner': fields.get('User', ''),  # Use User field instead of Wallet
                 'historicalName': fields.get('HistoricalName', ''),
                 'englishName': fields.get('EnglishName', ''),
                 'description': fields.get('Description', '')

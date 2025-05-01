@@ -67,7 +67,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
           <div>
             <h3 className="text-sm font-medium text-gray-500">Owner</h3>
             <p className="mt-1 font-semibold">
-              {owner ? owner : 'Available'}
+              {owner && owner !== "" ? owner : 'Available'}
             </p>
           </div>
           
