@@ -6,7 +6,9 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "backend:install": "pip install -r backend/requirements.txt",
+    "backend:dev": "cd backend && python run.py"
   },
   "dependencies": {
     "@react-google-maps/api": "^2.19.2",

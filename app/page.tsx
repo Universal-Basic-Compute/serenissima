@@ -81,6 +81,58 @@ export default function Home() {
     };
   }, []);
 
+  // Functions to interact with the backend
+  const storeWalletInAirtable = async (walletAddress: string) => {
+    try {
+      const response = await fetch('http://localhost:8000/api/wallet', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          wallet_address: walletAddress,
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to store wallet');
+      }
+      
+      const data = await response.json();
+      console.log('Wallet stored in Airtable:', data);
+      return data;
+    } catch (error) {
+      console.error('Error storing wallet:', error);
+      return null;
+    }
+  };
+
+  const investCompute = async (walletAddress: string, amount: number) => {
+    try {
+      const response = await fetch('http://localhost:8000/api/invest-compute', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          wallet_address: walletAddress,
+          compute_amount: amount,
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to invest compute');
+      }
+      
+      const data = await response.json();
+      console.log('Compute invested:', data);
+      return data;
+    } catch (error) {
+      console.error('Error investing compute:', error);
+      return null;
+    }
+  };
+
   // Handle wallet connection
   const connectWallet = useCallback(async () => {
     if (!walletAdapter) return;
@@ -100,8 +152,14 @@ export default function Home() {
     
     try {
       await walletAdapter.connect();
-      setWalletAddress(walletAdapter.publicKey?.toString() || null);
-      console.log('Connected to wallet:', walletAdapter.publicKey?.toString());
+      const address = walletAdapter.publicKey?.toString() || null;
+      setWalletAddress(address);
+      console.log('Connected to wallet:', address);
+      
+      // Store wallet in Airtable
+      if (address) {
+        await storeWalletInAirtable(address);
+      }
     } catch (error) {
       console.error('Error connecting to wallet:', error);
     }
@@ -236,8 +294,20 @@ export default function Home() {
           {dropdownOpen && (
             <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-20">
               <button
-                onClick={() => {
-                  alert('Investing compute resources...');
+                onClick={async () => {
+                  if (walletAddress) {
+                    // Ask for compute amount using a prompt
+                    const amountStr = prompt('Enter compute amount to invest:', '1');
+                    if (amountStr) {
+                      const amount = parseFloat(amountStr);
+                      if (!isNaN(amount) && amount > 0) {
+                        await investCompute(walletAddress, amount);
+                        alert(`Successfully invested ${amount} compute resources!`);
+                      } else {
+                        alert('Please enter a valid amount greater than 0');
+                      }
+                    }
+                  }
                   setDropdownOpen(false);
                 }}
                 className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-blue-500 hover:text-white transition-colors"

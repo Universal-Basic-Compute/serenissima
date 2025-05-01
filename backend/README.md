@@ -1,0 +1,31 @@
+# Wallet Storage Backend
+
+This is a Python FastAPI backend for storing wallet addresses and compute investments in Airtable.
+
+## Setup
+
+1. Install dependencies:
+   ```
+   pip install -r requirements.txt
+   ```
+
+2. Create a `.env` file with your Airtable credentials:
+   ```
+   AIRTABLE_API_KEY=your_airtable_api_key
+   AIRTABLE_BASE_ID=your_airtable_base_id
+   AIRTABLE_USERS_TABLE=Users
+   ```
+
+3. Run the server:
+   ```
+   python run.py
+   ```
+
+The server will start at http://localhost:8000
+
+## API Endpoints
+
+- `GET /`: Check if the API is running
+- `POST /api/wallet`: Store a wallet address
+- `GET /api/wallet/{wallet_address}`: Get wallet information
+- `POST /api/invest-compute`: Invest compute resources for a wallet
