@@ -141,15 +141,23 @@ export default class WaterEffect {
       const combinedWaves = wave1 + wave2 + wave3;
       
       // Apply to distortion scale with null check
-      if (waterUniforms.distortionScale && waterUniforms.distortionScale.value !== undefined) {
-        waterUniforms.distortionScale.value = baseDistortion + combinedWaves;
+      if (waterUniforms.distortionScale && typeof waterUniforms.distortionScale.value !== 'undefined') {
+        try {
+          waterUniforms.distortionScale.value = baseDistortion + combinedWaves;
+        } catch (error) {
+          console.error('Error updating distortionScale uniform:', error);
+        }
       }
       
       // Also modify the normal map scale for more variation with null check
-      if (waterUniforms.size && waterUniforms.size.value !== undefined) {
-        const baseSize = 4.0;
-        const sizeVariation = Math.sin(time * 0.015) * 0.5;
-        waterUniforms.size.value = baseSize + sizeVariation;
+      if (waterUniforms.size && typeof waterUniforms.size.value !== 'undefined') {
+        try {
+          const baseSize = 4.0;
+          const sizeVariation = Math.sin(time * 0.015) * 0.5;
+          waterUniforms.size.value = baseSize + sizeVariation;
+        } catch (error) {
+          console.error('Error updating size uniform:', error);
+        }
       }
     } catch (error) {
       console.error('Error in applyGerstnerWaves:', error);
@@ -415,8 +423,12 @@ export default class WaterEffect {
       }
       
       // Animate water with null checks for each uniform
-      if (waterUniforms.time && waterUniforms.time.value !== undefined) {
-        waterUniforms.time.value += performanceMode ? 0.0005 : 0.001;
+      if (waterUniforms.time && typeof waterUniforms.time.value !== 'undefined') {
+        try {
+          waterUniforms.time.value += performanceMode ? 0.0005 : 0.001;
+        } catch (error) {
+          console.error('Error updating water time uniform:', error);
+        }
       }
       
       // Apply Gerstner waves with additional checks
@@ -430,8 +442,12 @@ export default class WaterEffect {
       
       // Animate foam with additional checks
       if (this.waterFoam && this.foamTexture && this.foamTexture.offset) {
-        this.foamTexture.offset.x += 0.00005;
-        this.foamTexture.offset.y += 0.000025;
+        try {
+          this.foamTexture.offset.x += 0.00005;
+          this.foamTexture.offset.y += 0.000025;
+        } catch (error) {
+          console.error('Error updating foam texture offset:', error);
+        }
       }
       
       // Animate sun reflection with additional checks
@@ -458,7 +474,7 @@ export default class WaterEffect {
       
       // Update shore interaction much less frequently to reduce flickering
       // CRITICAL: Reduce frequency even further and add more robust checks
-      if (this.shoreMesh && this.landRenderTarget && this.shoreMesh.material && frameCount % 60 === 0) {
+      if (this.shoreMesh && this.landRenderTarget && this.shoreMesh.material && frameCount % 120 === 0) {
         try {
           // Add a check for the uniforms
           const shoreUniforms = (this.shoreMesh.material as THREE.ShaderMaterial).uniforms;
@@ -468,8 +484,13 @@ export default class WaterEffect {
           }
           
           // Update time uniform with slower rate and check if it exists
-          if (shoreUniforms.time && shoreUniforms.time.value !== undefined) {
-            shoreUniforms.time.value = frameCount * 0.01;
+          if (shoreUniforms.time && typeof shoreUniforms.time.value !== 'undefined') {
+            try {
+              shoreUniforms.time.value = frameCount * 0.01;
+            } catch (error) {
+              console.error('Error updating shore time uniform:', error);
+              return;
+            }
           }
           
           // Only proceed if all required objects exist
@@ -479,7 +500,7 @@ export default class WaterEffect {
           }
           
           // Skip shore rendering if we've had errors before
-          if (this.shoreMesh.userData.hasRenderingError) {
+          if (this.shoreMesh.userData && this.shoreMesh.userData.hasRenderingError) {
             return;
           }
           
@@ -518,16 +539,25 @@ export default class WaterEffect {
             
             // Update land texture uniform - add null checks
             if (shoreUniforms.landTexture && this.landRenderTarget && this.landRenderTarget.texture) {
-              shoreUniforms.landTexture.value = this.landRenderTarget.texture;
+              try {
+                shoreUniforms.landTexture.value = this.landRenderTarget.texture;
+              } catch (error) {
+                console.error('Error updating landTexture uniform:', error);
+              }
             }
             
             // Update water color uniform in shore material - add null checks
             if (shoreUniforms.waterColor && shoreUniforms.waterColor.value) {
-              shoreUniforms.waterColor.value.setHex(this.getWaterColorForView());
+              try {
+                shoreUniforms.waterColor.value.setHex(this.getWaterColorForView());
+              } catch (error) {
+                console.error('Error updating waterColor uniform:', error);
+              }
             }
           } catch (error) {
             console.error('Error rendering shore interaction:', error);
             // Mark that we've had an error so we can skip future attempts
+            if (!this.shoreMesh.userData) this.shoreMesh.userData = {};
             this.shoreMesh.userData.hasRenderingError = true;
           }
         } catch (error) {
@@ -542,27 +572,43 @@ export default class WaterEffect {
   public updateViewMode(activeView: ViewMode) {
     this.activeView = activeView;
     
-    if (!this.water) return;
+    if (!this.water || !this.water.material || !this.water.material.uniforms) return;
     
     // Update water color based on view mode
     const waterColor = this.getWaterColorForView();
     const waterUniforms = this.water.material.uniforms;
     
-    if (waterUniforms.waterColor) {
-      waterUniforms.waterColor.value.setHex(waterColor);
+    if (waterUniforms.waterColor && waterUniforms.waterColor.value) {
+      try {
+        waterUniforms.waterColor.value.setHex(waterColor);
+      } catch (error) {
+        console.error('Error updating water color in view mode change:', error);
+      }
     }
     
     // Keep foam and caustics disabled regardless of view mode
     if (this.waterFoam) {
-      (this.waterFoam.material as THREE.MeshBasicMaterial).opacity = 0;
+      try {
+        (this.waterFoam.material as THREE.MeshBasicMaterial).opacity = 0;
+      } catch (error) {
+        console.error('Error updating water foam opacity:', error);
+      }
     }
     
     if (this.causticMesh) {
-      (this.causticMesh.material as THREE.MeshBasicMaterial).opacity = 0;
+      try {
+        (this.causticMesh.material as THREE.MeshBasicMaterial).opacity = 0;
+      } catch (error) {
+        console.error('Error updating caustic mesh opacity:', error);
+      }
     }
     
     if (this.causticLight) {
-      this.causticLight.intensity = 0;
+      try {
+        this.causticLight.intensity = 0;
+      } catch (error) {
+        console.error('Error updating caustic light intensity:', error);
+      }
     }
   }
 
