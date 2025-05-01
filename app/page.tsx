@@ -428,6 +428,52 @@ export default function Home() {
     }
   };
 
+  // Add function to update polygon colors
+  const updatePolygonColors = useCallback(() => {
+    if (polygonRendererRef.current && users && Object.keys(users).length > 0) {
+      console.log('Updating polygon colors with user data:', users);
+      
+      // Create a map of user colors
+      const colorMap: Record<string, string> = {};
+      Object.values(users).forEach(user => {
+        if (user.user_name && user.color) {
+          colorMap[user.user_name] = user.color;
+          console.log(`Added color for ${user.user_name}: ${user.color}`);
+        }
+      });
+      
+      // Update colors in the renderer
+      if (Object.keys(colorMap).length > 0) {
+        polygonRendererRef.current.updateOwnerColors(colorMap);
+        // Force an update of owner colors
+        polygonRendererRef.current.updatePolygonOwnerColors();
+      }
+    }
+  }, [users]);
+  
+  // Add function to update coat of arms
+  const updateCoatOfArms = useCallback(() => {
+    if (polygonRendererRef.current && users && Object.keys(users).length > 0) {
+      console.log('Updating coat of arms with user data:', users);
+      
+      // Create a map of user coat of arms
+      const coatOfArmsMap: Record<string, string> = {};
+      Object.values(users).forEach(user => {
+        if (user.user_name && user.coat_of_arms_image) {
+          coatOfArmsMap[user.user_name] = user.coat_of_arms_image;
+          console.log(`Added coat of arms for ${user.user_name}:`, user.coat_of_arms_image);
+        }
+      });
+      
+      // Update coat of arms in the renderer
+      if (Object.keys(coatOfArmsMap).length > 0) {
+        polygonRendererRef.current.updateOwnerCoatOfArms(coatOfArmsMap);
+        // Force an update of coat of arms sprites
+        polygonRendererRef.current.updateCoatOfArmsSprites();
+      }
+    }
+  }, [users]);
+
   // Add function to load users data
   const loadUsers = useCallback(async () => {
     try {
@@ -485,52 +531,6 @@ export default function Home() {
       }
     }
   }, [users, activeView, updatePolygonColors, updateCoatOfArms]);
-
-  // Add function to update polygon colors
-  const updatePolygonColors = useCallback(() => {
-    if (polygonRendererRef.current && users && Object.keys(users).length > 0) {
-      console.log('Updating polygon colors with user data:', users);
-      
-      // Create a map of user colors
-      const colorMap: Record<string, string> = {};
-      Object.values(users).forEach(user => {
-        if (user.user_name && user.color) {
-          colorMap[user.user_name] = user.color;
-          console.log(`Added color for ${user.user_name}: ${user.color}`);
-        }
-      });
-      
-      // Update colors in the renderer
-      if (Object.keys(colorMap).length > 0) {
-        polygonRendererRef.current.updateOwnerColors(colorMap);
-        // Force an update of owner colors
-        polygonRendererRef.current.updatePolygonOwnerColors();
-      }
-    }
-  }, [users]);
-  
-  // Add function to update coat of arms
-  const updateCoatOfArms = useCallback(() => {
-    if (polygonRendererRef.current && users && Object.keys(users).length > 0) {
-      console.log('Updating coat of arms with user data:', users);
-      
-      // Create a map of user coat of arms
-      const coatOfArmsMap: Record<string, string> = {};
-      Object.values(users).forEach(user => {
-        if (user.user_name && user.coat_of_arms_image) {
-          coatOfArmsMap[user.user_name] = user.coat_of_arms_image;
-          console.log(`Added coat of arms for ${user.user_name}:`, user.coat_of_arms_image);
-        }
-      });
-      
-      // Update coat of arms in the renderer
-      if (Object.keys(coatOfArmsMap).length > 0) {
-        polygonRendererRef.current.updateOwnerCoatOfArms(coatOfArmsMap);
-        // Force an update of coat of arms sprites
-        polygonRendererRef.current.updateCoatOfArmsSprites();
-      }
-    }
-  }, [users]);
   
   // Add effect to log when transferMenuOpen changes
   useEffect(() => {
