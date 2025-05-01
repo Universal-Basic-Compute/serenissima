@@ -2,9 +2,11 @@ import * as THREE from 'three';
 import { MutableRefObject } from 'react';
 import { Polygon, ViewMode } from './types';
 import { normalizeCoordinates, createPolygonShape } from './utils';
+import LODPolygon from './LODPolygon';
 
 interface PolygonRendererProps {
   scene: THREE.Scene;
+  camera: THREE.PerspectiveCamera;
   polygons: Polygon[];
   bounds: {
     centerLat: number;
@@ -19,6 +21,7 @@ interface PolygonRendererProps {
 
 export default class PolygonRenderer {
   private scene: THREE.Scene;
+  private camera: THREE.PerspectiveCamera;
   private polygons: Polygon[];
   private bounds: any;
   private activeView: ViewMode;
@@ -28,10 +31,11 @@ export default class PolygonRenderer {
   private sandBaseColor: THREE.Texture;
   private sandNormalMap: THREE.Texture;
   private sandRoughnessMap: THREE.Texture;
-  private meshes: THREE.Mesh[] = [];
+  private lodPolygons: LODPolygon[] = [];
 
   constructor({
     scene,
+    camera,
     polygons,
     bounds,
     activeView,
@@ -39,6 +43,7 @@ export default class PolygonRenderer {
     polygonMeshesRef
   }: PolygonRendererProps) {
     this.scene = scene;
+    this.camera = camera;
     this.polygons = polygons;
     this.bounds = bounds;
     this.activeView = activeView;
@@ -72,73 +77,25 @@ export default class PolygonRenderer {
         
         if (polygon.coordinates && polygon.coordinates.length > 2) {
           try {
-            // Normalize coordinates relative to center and apply scale
-            const normalizedCoords = normalizeCoordinates(
-              polygon.coordinates,
-              this.bounds.centerLat,
-              this.bounds.centerLng,
-              this.bounds.scale,
-              this.bounds.latCorrectionFactor
+            const lodPolygon = new LODPolygon(
+              this.scene,
+              polygon,
+              this.bounds,
+              this.activeView,
+              this.performanceMode,
+              this.textureLoader,
+              {
+                sandBaseColor: this.sandBaseColor,
+                sandNormalMap: this.sandNormalMap,
+                sandRoughnessMap: this.sandRoughnessMap
+              }
             );
             
-            // Create shape from normalized coordinates
-            const shape = createPolygonShape(normalizedCoords);
-            
-            // Create extruded geometry for the island with a slight height
-            const extrudeSettings = {
-              steps: this.performanceMode ? 1 : 2,
-              depth: 0.025 + Math.random() * 0.025, // 75% thinner
-              bevelEnabled: false // Disable bevel completely
-            };
-            
-            const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
-            
-            // Rotate to lay flat on the "ground" but facing upward
-            geometry.rotateX(-Math.PI / 2);
-            
-            // Create a realistic sand material
-            const sandMaterial = new THREE.MeshStandardMaterial({ 
-              color: '#e6d2a8', // More yellow/tan color
-              map: this.performanceMode ? null : this.sandBaseColor,
-              normalMap: this.performanceMode ? null : this.sandNormalMap,
-              roughnessMap: this.performanceMode ? null : this.sandRoughnessMap,
-              roughness: 0.7,
-              metalness: 0.1,
-              side: this.performanceMode ? THREE.FrontSide : THREE.DoubleSide,
-              flatShading: this.performanceMode,
-              wireframe: false,
-              // Remove polygon edges by setting these properties:
-              polygonOffset: true,
-              polygonOffsetFactor: 1,
-              polygonOffsetUnits: 1
-            });
-            
-            // Modify the material based on the active view
-            if (this.activeView === 'land') {
-              // For land view, use a more terrain-like material
-              sandMaterial.color.set('#7cac6a'); // More green for land view
-              sandMaterial.roughness = 0.9;
-              sandMaterial.metalness = 0.0;
-            }
-            
-            const mesh = new THREE.Mesh(geometry, sandMaterial);
+            this.lodPolygons.push(lodPolygon);
             
             // Store reference to the mesh
-            this.polygonMeshesRef.current[polygon.id] = mesh;
-            this.meshes.push(mesh);
+            this.polygonMeshesRef.current[polygon.id] = lodPolygon.getMesh();
             
-            // Store the original material properties explicitly on creation
-            mesh.userData.originalEmissive = new THREE.Color(0, 0, 0);
-            mesh.userData.originalEmissiveIntensity = 0;
-            
-            // Position at ground level
-            mesh.position.y = 0;
-            
-            // Enable shadows
-            mesh.castShadow = true;
-            mesh.receiveShadow = true;
-            
-            this.scene.add(mesh);
             console.log(`Added polygon ${index} to scene`);
           } catch (error) {
             console.error(`Error creating polygon ${index}:`, error);
@@ -208,18 +165,17 @@ export default class PolygonRenderer {
     console.log('Added sample polygon to scene');
   }
   
+  public update() {
+    // Update LOD for all polygons
+    this.lodPolygons.forEach(lodPolygon => {
+      lodPolygon.updateLOD(this.camera.position);
+    });
+  }
+  
   public cleanup() {
-    // Remove all meshes from the scene and dispose of resources
-    this.meshes.forEach(mesh => {
-      this.scene.remove(mesh);
-      if (mesh.geometry) mesh.geometry.dispose();
-      if (mesh.material) {
-        if (Array.isArray(mesh.material)) {
-          mesh.material.forEach(material => material.dispose());
-        } else {
-          mesh.material.dispose();
-        }
-      }
+    // Clean up all LOD polygons
+    this.lodPolygons.forEach(lodPolygon => {
+      lodPolygon.cleanup();
     });
     
     // Dispose of textures
