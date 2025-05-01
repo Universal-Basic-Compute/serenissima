@@ -16,6 +16,8 @@ import {
 const COMPUTE_TOKEN_MINT = new PublicKey('B1N1HcMm4RysYz4smsXwmk2UnS8NziqKCM6Ho8i62vXo');
 // The treasury wallet address
 const TREASURY_WALLET = new PublicKey('BECGjgNwEnaaxvK84or6vWvbR1xcX6wQc5Zmy9vvqZ2V');
+// Token decimals - COMPUTE token has 6 decimals
+const COMPUTE_TOKEN_DECIMALS = 6;
 
 export async function transferComputeTokens(
   walletAdapter: any,
@@ -35,6 +37,12 @@ export async function transferComputeTokens(
     }
 
     console.log('Starting token transfer with wallet:', walletAdapter.publicKey.toString());
+    console.log(`Original amount: ${amount} COMPUTE`);
+    
+    // Convert the amount to the correct decimal representation
+    // For example, if amount is 10 and decimals is 6, this becomes 10 * 10^6 = 10,000,000
+    const adjustedAmount = amount * Math.pow(10, COMPUTE_TOKEN_DECIMALS);
+    console.log(`Adjusted amount with decimals: ${adjustedAmount}`);
     
     // Connect to Solana network using the Helius RPC URL from environment variables
     const SOLANA_RPC_URL = process.env.NEXT_PUBLIC_HELIUS_RPC_URL || 'https://solana-mainnet.g.alchemy.com/v2/demo';
@@ -56,12 +64,12 @@ export async function transferComputeTokens(
     
     console.log('Treasury token account:', treasuryTokenAccount.toString());
     
-    // Create the transfer instruction
+    // Create the transfer instruction with the adjusted amount
     const transferInstruction = createTransferInstruction(
       senderTokenAccount,
       treasuryTokenAccount,
       walletAdapter.publicKey,
-      amount,
+      BigInt(Math.floor(adjustedAmount)), // Convert to BigInt and ensure it's an integer
       [],
       TOKEN_PROGRAM_ID
     );

@@ -51,12 +51,13 @@ const InvestComputeMenu: React.FC<InvestComputeMenuProps> = ({ onClose, onInvest
             <p className="text-md font-medium text-amber-800">About Ducats in La Serenissima</p>
             <p className="mt-2">Ducats in La Serenissima are backed by real $COMPUTE tokens on the Solana blockchain.</p>
             <p className="mt-1">Each 1 ducat you earn in-game can be withdrawn as 1 $COMPUTE token to your wallet.</p>
+            <p className="mt-1 text-amber-700">Please enter whole numbers only - no decimals or fractions.</p>
             <p className="mt-1 font-semibold">Investing $COMPUTE helps build the Republic and earns you rewards over time, increasing your wealth and influence in Venice.</p>
           </div>
         </div>
         
         <div className="mb-8">
-          <label className="block text-xl text-gray-700 mb-3">Amount (in ducats)</label>
+          <label className="block text-xl text-gray-700 mb-3">Amount (in whole ducats)</label>
           
           {/* Quick selection buttons */}
           <div className="grid grid-cols-3 gap-4 mb-4">

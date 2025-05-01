@@ -1,6 +1,7 @@
 export async function transferComputeInAirtable(walletAddress: string, amount: number) {
   try {
-    // Ensure we're sending the full amount without any conversion
+    // We're working with whole tokens in the UI, so we send the amount as is to Airtable
+    // The blockchain transaction in tokenUtils.ts will handle the decimal conversion
     console.log(`Transferring ${amount.toLocaleString()} COMPUTE for wallet ${walletAddress}`);
     
     const response = await fetch('http://localhost:8000/api/transfer-compute', {
@@ -10,7 +11,7 @@ export async function transferComputeInAirtable(walletAddress: string, amount: n
       },
       body: JSON.stringify({
         wallet_address: walletAddress,
-        compute_amount: amount, // Send the full amount as entered by the user
+        compute_amount: amount, // Send the whole token amount as entered by the user
       }),
     });
     
