@@ -156,6 +156,7 @@ async function namePolygons() {
   console.log(`Found ${files.length} polygon files`);
   
   let namedCount = 0;
+  let skippedCount = 0;
   let errorCount = 0;
   
   // Process files in batches to avoid rate limiting
@@ -169,8 +170,15 @@ async function namePolygons() {
         const data = readJsonFromFile(file);
         
         // Skip if no centroid or already has a name
-        if (!data || !data.centroid || data.historicalName) {
-          return { file, skipped: true };
+        if (!data || !data.centroid) {
+          console.log(`Skipping ${file}: No centroid data`);
+          return { file, skipped: true, reason: 'No centroid data' };
+        }
+        
+        // Skip if already has a historical name
+        if (data.historicalName) {
+          console.log(`Skipping ${file}: Already has name "${data.historicalName}"`);
+          return { file, skipped: true, reason: 'Already named' };
         }
         
         console.log(`Processing ${file}...`);
@@ -209,10 +217,11 @@ async function namePolygons() {
     // Wait for batch to complete
     const results = await Promise.all(batchPromises);
     
-    // Count successes and errors
+    // Count successes, skips, and errors
     results.forEach(result => {
       if (result.success) namedCount++;
-      if (result.error) errorCount++;
+      else if (result.skipped) skippedCount++;
+      else if (result.error) errorCount++;
     });
     
     // Wait between batches to avoid rate limiting
@@ -224,6 +233,7 @@ async function namePolygons() {
   
   console.log(`Naming complete!`);
   console.log(`Successfully named ${namedCount} polygons`);
+  console.log(`Skipped ${skippedCount} polygons`);
   console.log(`Encountered errors with ${errorCount} polygons`);
 }
 
