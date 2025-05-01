@@ -278,7 +278,7 @@ export default function PolygonViewer() {
             // Create extruded geometry for the island with a slight height - simplified for performance
             const extrudeSettings = {
               steps: 1,
-              depth: 0.5 + Math.random() * 0.5, // Random height variation
+              depth: 0.25 + Math.random() * 0.25, // 50% flatter with random height variation
               bevelEnabled: false // Disable bevel completely to remove space between islands
             };
             
@@ -334,7 +334,7 @@ export default function PolygonViewer() {
       
       const extrudeSettings = {
         steps: 1,
-        depth: 0.8,
+        depth: 0.4, // 50% flatter
         bevelEnabled: false // Disable bevel completely to remove space between islands
       };
       
@@ -505,14 +505,6 @@ export default function PolygonViewer() {
       
       frameCount++;
       
-      // Ensure camera is never upside down
-      if (camera.position.y < 10) {
-        cameraPhi = 0.6;
-        camera.position.x = cameraRadius * Math.sin(cameraPhi) * Math.cos(cameraTheta);
-        camera.position.y = cameraRadius * Math.cos(cameraPhi);
-        camera.position.z = cameraRadius * Math.sin(cameraPhi) * Math.sin(cameraTheta);
-        camera.lookAt(0, 0, 0);
-      }
       
       renderer.render(scene, camera);
     };
