@@ -123,6 +123,7 @@ export default function Home() {
   // Add state for users data and active view
   const [users, setUsers] = useState<Record<string, any>>({});
   const [activeView, setActiveView] = useState<'buildings' | 'land'>('land');
+  const [marketPanelVisible, setMarketPanelVisible] = useState(false);
   const polygonRendererRef = useRef<any>(null);
   
   // Initialize wallet adapter
@@ -482,6 +483,11 @@ export default function Home() {
   useEffect(() => {
     console.log('transferMenuOpen state changed:', transferMenuOpen);
   }, [transferMenuOpen]);
+  
+  // Add effect to update market panel visibility based on active view
+  useEffect(() => {
+    setMarketPanelVisible(activeView === 'markets');
+  }, [activeView]);
   
   // Add effect to update market panel visibility based on active view
   useEffect(() => {
