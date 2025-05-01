@@ -682,8 +682,22 @@ export default class PolygonRenderer {
         this.bounds.latCorrectionFactor
       )[0];
           
-      // Position slightly above the land to avoid z-fighting
-      plane.position.set(normalizedCoords.x, 0.05, -normalizedCoords.y);
+      // Position at the centroid
+      if (polygon.centroid) {
+        const normalizedCoords = normalizeCoordinates(
+          [polygon.centroid],
+          this.bounds.centerLat,
+          this.bounds.centerLng,
+          this.bounds.scale,
+          this.bounds.latCorrectionFactor
+        )[0];
+                
+        // Position slightly above the land to avoid z-fighting
+        plane.position.set(normalizedCoords.x, 0.05, -normalizedCoords.y);
+      } else {
+        // Default position if no centroid
+        plane.position.set(0, 0.05, 0);
+      }
     } else {
       // Default position if no centroid
       plane.position.set(0, 0.05, 0);
