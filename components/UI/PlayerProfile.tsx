@@ -5,10 +5,12 @@ interface PlayerProfileProps {
   firstName?: string;
   lastName?: string;
   coatOfArmsImage?: string | null;
+  familyMotto?: string;
   walletAddress?: string; // Add wallet address prop
   size?: 'small' | 'medium' | 'large';
   onClick?: () => void;
   className?: string;
+  showMotto?: boolean;
 }
 
 // Add a cache for user profiles to avoid redundant fetches
@@ -19,10 +21,12 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
   firstName,
   lastName,
   coatOfArmsImage,
+  familyMotto,
   walletAddress, // New prop
   size = 'medium',
   onClick,
-  className = ''
+  className = '',
+  showMotto = false
 }) => {
   // Add state for user data
   const [userData, setUserData] = useState<{
@@ -178,9 +182,9 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
       </div>
       
       {/* Family Motto (optional) */}
-      {userData?.familyMotto && (
+      {(showMotto && (userData?.familyMotto || familyMotto)) && (
         <div className={`${dim.name} italic text-amber-600 text-center mt-1 w-full`}>
-          "{userData.familyMotto}"
+          "{userData?.familyMotto || familyMotto}"
         </div>
       )}
     </div>

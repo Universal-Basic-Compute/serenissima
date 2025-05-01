@@ -60,6 +60,7 @@ export default function Home() {
     firstName: string;
     lastName: string;
     coatOfArmsImage: string | null;
+    familyMotto?: string;
   } | null>(null);
   
   // Get API key from environment variable
@@ -156,7 +157,8 @@ export default function Home() {
           username: data.user_name,
           firstName: data.first_name || data.user_name.split(' ')[0] || '',
           lastName: data.last_name || data.user_name.split(' ').slice(1).join(' ') || '',
-          coatOfArmsImage: data.coat_of_arms_image
+          coatOfArmsImage: data.coat_of_arms_image,
+          familyMotto: data.family_motto
         });
       }
       
@@ -254,7 +256,8 @@ export default function Home() {
         username: usernameInput.trim(),
         firstName: firstName.trim(),
         lastName: lastName.trim(),
-        coatOfArmsImage: coatOfArmsImage
+        coatOfArmsImage: coatOfArmsImage,
+        familyMotto: familyMotto.trim()
       });
       
       // Close the prompt
@@ -882,8 +885,10 @@ export default function Home() {
                 firstName={userProfile.firstName || firstName}
                 lastName={userProfile.lastName || lastName}
                 coatOfArmsImage={userProfile.coatOfArmsImage || coatOfArmsImage}
+                familyMotto={userProfile.familyMotto || familyMotto}
                 size="small"
                 className="mr-2"
+                showMotto={true}
               />
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
