@@ -47,10 +47,8 @@ export default function Home() {
   const [computeModalOpen, setComputeModalOpen] = useState(false);
   const [showUsernamePrompt, setShowUsernamePrompt] = useState(false);
   const [usernameInput, setUsernameInput] = useState('');
-  const [firstNameOptions, setFirstNameOptions] = useState<string[]>([]);
-  const [lastNameOptions, setLastNameOptions] = useState<string[]>([]);
-  const [selectedFirstName, setSelectedFirstName] = useState<string>('');
-  const [selectedLastName, setSelectedLastName] = useState<string>('');
+  const [firstName, setFirstName] = useState<string>('');
+  const [lastName, setLastName] = useState<string>('');
   const [familyCoatOfArms, setFamilyCoatOfArms] = useState<string>('');
   
   // Get API key from environment variable
@@ -150,80 +148,13 @@ export default function Home() {
     }
   };
   
-  // Generate Venetian-style names
-  const generateNameOptions = useCallback(() => {
-    // Historical Venetian first names - male
-    const venetianMaleFirstNames = [
-      "Antonio", "Marco", "Giovanni", "Francesco", "Pietro", "Alvise", "Domenico", "Nicolò", 
-      "Giacomo", "Lorenzo", "Andrea", "Bartolomeo", "Tommaso", "Marino", "Sebastiano", 
-      "Bernardo", "Vincenzo", "Filippo", "Daniele", "Matteo", "Paolo", "Vittorio", "Enrico", 
-      "Leonardo", "Ludovico", "Alessandro", "Gabriele", "Marcantonio", "Girolamo", "Tiziano", 
-      "Benedetto", "Carlo", "Stefano", "Guido", "Roberto", "Silvio", "Emilio", "Cesare", 
-      "Dario", "Fabio", "Giulio", "Massimo", "Ottavio", "Renato", "Salvatore", "Umberto", 
-      "Valerio", "Zaccaria", "Aldo", "Bruno"
-    ];
-    
-    // Historical Venetian first names - female
-    const venetianFemaleFirstNames = [
-      "Maria", "Caterina", "Lucia", "Isabella", "Elena", "Beatrice", "Chiara", "Francesca",
-      "Giovanna", "Laura", "Paola", "Bianca", "Cecilia", "Elisabetta", "Vittoria", "Angela",
-      "Maddalena", "Margherita", "Adriana", "Antonia", "Camilla", "Cassandra", "Costanza", "Diana",
-      "Eleonora", "Felicita", "Ginevra", "Giulia", "Lucrezia", "Marina", "Olimpia", "Ortensia",
-      "Renata", "Rosa", "Silvia", "Sofia", "Teresa", "Valentina", "Veronica", "Viola",
-      "Agnese", "Alessandra", "Barbara", "Claudia", "Dorotea", "Faustina", "Fiammetta", "Gasparina",
-      "Lavinia", "Zenobia"
-    ];
-    
-    // Combine male and female names
-    const venetianFirstNames = [...venetianMaleFirstNames, ...venetianFemaleFirstNames];
-    
-    // Historical Venetian last names
-    const venetianLastNames = [
-      "Contarini", "Morosini", "Dandolo", "Foscari", "Grimani", "Barbarigo", "Mocenigo", 
-      "Venier", "Loredan", "Gritti", "Donà", "Priuli", "Bembo", "Corner", "Tron", 
-      "Tiepolo", "Malipiero", "Soranzo", "Pisani", "Querini", "Zorzi", "Gradenigo", 
-      "Trevisan", "Michiel", "Giustinian", "Zane", "Marcello", "Dolfin", "Valier", "Molin", 
-      "Foscarini", "Bragadin", "Vendramin", "Zen", "Memmo", "Sanudo", "Falier", "Erizzo", 
-      "Badoer", "Barozzi", "Canal", "Diedo", "Emo", "Lando", "Moro", "Nani", "Pesaro", 
-      "Sagredo", "Trevisan", "Ziani"
-    ];
-    
-    // Shuffle arrays to get random selections each time
-    const shuffledFirstNames = [...venetianFirstNames].sort(() => 0.5 - Math.random());
-    const shuffledLastNames = [...venetianLastNames].sort(() => 0.5 - Math.random());
-    
-    setFirstNameOptions(shuffledFirstNames);
-    setLastNameOptions(shuffledLastNames);
-    
-    // Set initial selections
-    setSelectedFirstName(shuffledFirstNames[0]);
-    setSelectedLastName(shuffledLastNames[0]);
-  }, []);
-
-  // Call this function when the username prompt is shown
-  useEffect(() => {
-    if (showUsernamePrompt) {
-      generateNameOptions();
-    }
-  }, [showUsernamePrompt, generateNameOptions]);
-
-  // Add these functions to handle dice rolls
-  const rollFirstName = () => {
-    const randomIndex = Math.floor(Math.random() * firstNameOptions.length);
-    setSelectedFirstName(firstNameOptions[randomIndex]);
-  };
-
-  const rollLastName = () => {
-    const randomIndex = Math.floor(Math.random() * lastNameOptions.length);
-    setSelectedLastName(lastNameOptions[randomIndex]);
-  };
 
   const handleUsernameSubmit = async () => {
     // Combine names to create the username
-    const fullUsername = `${selectedFirstName} ${selectedLastName}`;
+    const fullUsername = `${firstName} ${lastName}`;
     
-    if (!fullUsername.trim() || !walletAddress) {
-      alert('Please select a valid name');
+    if (!firstName.trim() || !lastName.trim() || !walletAddress) {
+      alert('Please enter both first and last name');
       return;
     }
     
@@ -250,8 +181,8 @@ export default function Home() {
       
       // Close the prompt
       setShowUsernamePrompt(false);
-      setSelectedFirstName('');
-      setSelectedLastName('');
+      setFirstName('');
+      setLastName('');
       setFamilyCoatOfArms('');
       
       // Show success message
@@ -921,51 +852,29 @@ export default function Home() {
                   <div className="w-1/3">
                     <label className="block text-gray-700">First Name</label>
                   </div>
-                  <div className="w-2/3 flex items-center space-x-2">
-                    <select
-                      value={selectedFirstName}
-                      onChange={(e) => setSelectedFirstName(e.target.value)}
-                      className="flex-grow px-3 py-2 border border-amber-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-500"
-                    >
-                      {firstNameOptions.map((name, index) => (
-                        <option key={`first-${index}`} value={name}>{name}</option>
-                      ))}
-                    </select>
-                    <button
-                      onClick={rollFirstName}
-                      className="bg-amber-600 text-white p-2 rounded hover:bg-amber-700 transition-colors"
-                      title="Roll the dice for a random name"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
-                      </svg>
-                    </button>
+                  <div className="w-2/3">
+                    <input
+                      type="text"
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      placeholder="Enter your first name..."
+                      className="w-full px-3 py-2 border border-amber-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    />
                   </div>
                 </div>
                 
-                <div className="flex items-center">
+                <div className="flex items-center mt-4">
                   <div className="w-1/3">
                     <label className="block text-gray-700">Family Name</label>
                   </div>
-                  <div className="w-2/3 flex items-center space-x-2">
-                    <select
-                      value={selectedLastName}
-                      onChange={(e) => setSelectedLastName(e.target.value)}
-                      className="flex-grow px-3 py-2 border border-amber-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-500"
-                    >
-                      {lastNameOptions.map((name, index) => (
-                        <option key={`last-${index}`} value={name}>{name}</option>
-                      ))}
-                    </select>
-                    <button
-                      onClick={rollLastName}
-                      className="bg-amber-600 text-white p-2 rounded hover:bg-amber-700 transition-colors"
-                      title="Roll the dice for a random family name"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
-                      </svg>
-                    </button>
+                  <div className="w-2/3">
+                    <input
+                      type="text"
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      placeholder="Enter your family name..."
+                      className="w-full px-3 py-2 border border-amber-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    />
                   </div>
                 </div>
                 
@@ -990,7 +899,7 @@ export default function Home() {
               <button
                 onClick={handleUsernameSubmit}
                 className="px-6 py-3 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors font-medium"
-                disabled={!selectedFirstName || !selectedLastName}
+                disabled={!firstName.trim() || !lastName.trim()}
               >
                 Register with the Council
               </button>
