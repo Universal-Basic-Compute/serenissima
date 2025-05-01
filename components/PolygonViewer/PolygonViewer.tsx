@@ -573,8 +573,12 @@ export default function PolygonViewer() {
     const initWaterEffect = () => {
       console.log('Creating water effect...');
       if (sceneRef.current) {
-        // First call createWater on the scene
-        sceneRef.current.createWater();
+        // First check if createWater method exists
+        if (sceneRef.current && typeof sceneRef.current.createWater === 'function') {
+          sceneRef.current.createWater();
+        } else {
+          console.warn('createWater method not found on sceneRef.current');
+        }
         
         // Then create our own water effect reference
         const waterEffect = new WaterEffect({
@@ -615,7 +619,7 @@ export default function PolygonViewer() {
     // Step 4: Initialize bridge renderer (least important)
     const initBridgeRenderer = () => {
       const bridgeRenderer = new BridgeRenderer({
-        scene: sceneRef.current?.scene,
+        scene: sceneRef.current?.scene || new THREE.Scene(),
         bridges,
         polygons,
         bounds,

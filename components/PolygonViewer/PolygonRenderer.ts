@@ -643,16 +643,18 @@ export default class PolygonRenderer {
     // Remove existing coat of arms objects
     Object.values(this.coatOfArmSprites).forEach(obj => {
       this.scene.remove(obj);
-      if (obj.geometry) obj.geometry.dispose();
-      if (obj.material) {
-        if (Array.isArray(obj.material)) {
-          obj.material.forEach(mat => {
-            if (mat.map) mat.map.dispose();
-            mat.dispose();
-          });
-        } else {
-          if (obj.material.map) obj.material.map.dispose();
-          obj.material.dispose();
+      if (obj instanceof THREE.Mesh) {
+        if (obj.geometry) obj.geometry.dispose();
+        if (obj.material) {
+          if (Array.isArray(obj.material)) {
+            obj.material.forEach((mat: THREE.Material) => {
+              if ((mat as any).map) (mat as any).map.dispose();
+              mat.dispose();
+            });
+          } else {
+            if ((obj.material as any).map) (obj.material as any).map.dispose();
+            obj.material.dispose();
+          }
         }
       }
     });

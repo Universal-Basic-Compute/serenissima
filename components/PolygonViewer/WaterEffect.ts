@@ -17,14 +17,13 @@ export default class WaterEffect {
   private width: number;
   private height: number;
   private renderer: THREE.WebGLRenderer;
-  private waterMesh: THREE.Mesh | null = null;
-  private waterGeometry: THREE.PlaneBufferGeometry;
-  private waterMaterial: THREE.ShaderMaterial;
+  private waterGeometry: THREE.PlaneGeometry;
+  private waterMaterial: THREE.ShaderMaterial = new THREE.ShaderMaterial();
   private landPolygons: THREE.Mesh[] = [];
   private time: number = 0;
   private landPositions: Float32Array = new Float32Array();
-  private landBuffer: THREE.BufferAttribute;
-  private clock: THREE.Clock;
+  private landBuffer: THREE.BufferAttribute = new THREE.BufferAttribute(new Float32Array(), 3);
+  private clock: THREE.Clock = new THREE.Clock();
   private sunReflection: THREE.Mesh | null = null;
   private water: any = null;
   private waterMesh: THREE.Mesh | null = null;
