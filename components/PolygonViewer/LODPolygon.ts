@@ -188,12 +188,8 @@ export default class LODPolygon {
     // Create a detailed material with enhanced land view appearance
     const material = new THREE.MeshStandardMaterial({ 
       color: landColor,
-      // Only use textures in non-land view
-      map: this.activeView !== 'land' ? this.sandBaseColor : null,
-      normalMap: this.activeView !== 'land' ? this.sandNormalMap : null,
-      roughnessMap: this.activeView !== 'land' ? this.sandRoughnessMap : null,
-      roughness: this.activeView === 'land' ? 0.7 : 0.7,
-      metalness: this.activeView === 'land' ? 0.1 : 0.1,
+      roughness: 0.7,
+      metalness: 0.1,
       side: THREE.DoubleSide,
       flatShading: false, // Smooth shading for better quality
       polygonOffset: true,
@@ -266,28 +262,13 @@ export default class LODPolygon {
         }
         material.roughness = 0.7;
         material.metalness = 0.1;
-        
-        // Remove textures in land view (coat of arms textures will be applied separately)
-        material.map = null;
-        material.normalMap = null;
-        material.roughnessMap = null;
       } else {
-        // For other views, use sand color and textures
+        // For other views, use sand color
         if (!this.isSelected) {
           material.color.set('#e6d2a8');
         }
         material.roughness = 0.7;
         material.metalness = 0.1;
-        
-        // Add textures back for non-land views
-        material.map = this.sandBaseColor;
-        material.normalMap = this.sandNormalMap;
-        material.roughnessMap = this.sandRoughnessMap;
-        
-        // Hide coat of arms sprite in non-land views
-        if (this.coatOfArmsSprite) {
-          this.coatOfArmsSprite.visible = false;
-        }
       }
       
       // Update material to apply changes
@@ -341,48 +322,9 @@ export default class LODPolygon {
   
   // Add method to apply coat of arms texture to the land
   public updateCoatOfArmsTexture(coatOfArmsUrl: string | null) {
-    if (!coatOfArmsUrl || this.activeView !== 'land') return;
-    
-    // Only apply to high detail mesh
-    if (!this.highDetailMesh) return;
-    
-    const material = this.highDetailMesh.material as THREE.MeshStandardMaterial;
-    
-    // Load the coat of arms texture
-    this.textureLoader.load(
-      coatOfArmsUrl,
-      (texture) => {
-        // Set texture to not repeat and use clamp to edge
-        texture.wrapS = texture.wrapT = THREE.ClampToEdgeWrapping;
-        
-        // Important: Use a mapping mode that preserves aspect ratio
-        texture.mapping = THREE.EquirectangularReflectionMapping;
-        
-        // Apply the texture to the material
-        material.map = texture;
-        
-        // Add a slight tint with the owner's color for better identification
-        if (this.ownerColor) {
-          material.color.set(this.ownerColor);
-          // Use a lighter tint to let the image show through more clearly
-          material.color.multiplyScalar(1.5);
-        } else if (this.polygon.owner) {
-          material.color.copy(this.generateColorFromUsername(this.polygon.owner));
-          material.color.multiplyScalar(1.5);
-        }
-        
-        // Adjust material properties for textured appearance
-        material.roughness = 0.4; // Less rough for better image clarity
-        material.metalness = 0.1;
-        
-        // Update material to apply changes
-        material.needsUpdate = true;
-      },
-      undefined,
-      (error) => {
-        console.error('Error loading coat of arms texture:', error);
-      }
-    );
+    // We're not applying textures to the polygons anymore
+    // This method is kept for compatibility but doesn't do anything
+    return;
   }
 
   public updateQuality(performanceMode: boolean) {

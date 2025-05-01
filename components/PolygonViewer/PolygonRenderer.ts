@@ -418,20 +418,20 @@ export default class PolygonRenderer {
   private createColoredCircleSprite(polygon: Polygon, color: string) {
     // Create a canvas
     const canvas = document.createElement('canvas');
-    const size = 256;
+    const size = 128;
     canvas.width = size;
     canvas.height = size;
     
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     
-    // Draw a colored circle
+    // Draw a colored circle with border
     ctx.beginPath();
     ctx.arc(size/2, size/2, size/2 - 4, 0, Math.PI * 2);
     ctx.fillStyle = color;
     ctx.fill();
-    ctx.strokeStyle = '#000000';
-    ctx.lineWidth = 8;
+    ctx.strokeStyle = '#FFFFFF';
+    ctx.lineWidth = 4;
     ctx.stroke();
     
     // Create a texture from the canvas
@@ -451,6 +451,8 @@ export default class PolygonRenderer {
     // Remove existing sprites
     Object.values(this.coatOfArmSprites).forEach(sprite => {
       this.scene.remove(sprite);
+      (sprite.material as THREE.SpriteMaterial).map?.dispose();
+      (sprite.material as THREE.SpriteMaterial).dispose();
     });
     this.coatOfArmSprites = {};
 
@@ -460,53 +462,36 @@ export default class PolygonRenderer {
       return;
     }
 
-    // Log the polygons with owners
-    const polygonsWithOwners = this.polygons.filter(p => p.owner && p.centroid);
-    console.log(`Found ${polygonsWithOwners.length} polygons with owners:`, 
-      polygonsWithOwners.map(p => `${p.id} (owner: ${p.owner})`));
-    
     // Process each polygon with an owner
-    polygonsWithOwners.forEach(polygon => {
-      console.log(`Processing polygon ${polygon.id} with owner ${polygon.owner}`);
+    this.polygons.forEach(polygon => {
+      if (!polygon.owner || !polygon.centroid) return;
       
-      // Get the coat of arms URL directly from the map
+      // Get the coat of arms URL
       const coatOfArmsUrl = this.ownerCoatOfArmsMap[polygon.owner];
-      console.log(`Coat of arms URL for ${polygon.owner}:`, coatOfArmsUrl);
       
       // Get the owner's color from the users data
       let ownerColor = '#8B4513'; // Default brown color
-      if (polygon.owner && this.users[polygon.owner] && this.users[polygon.owner].color) {
+      if (this.users[polygon.owner] && this.users[polygon.owner].color) {
         ownerColor = this.users[polygon.owner].color;
       }
       
       if (!coatOfArmsUrl) {
-        console.warn(`No coat of arms found for owner ${polygon.owner}, using color circle`);
-        // Create a colored circle sprite instead
+        // Create a colored circle sprite as fallback
         this.createColoredCircleSprite(polygon, ownerColor);
         return;
-      }
-      
-      // Create a texture loader if needed
-      if (!this.textureLoader) {
-        this.textureLoader = new THREE.TextureLoader();
       }
       
       // Load the texture
       this.textureLoader.load(
         coatOfArmsUrl,
-        // Success callback
         (texture) => {
-          console.log(`Texture loaded successfully for ${polygon.owner}`);
-          
           // Create circular texture
           const circularTexture = this.createCircularTexture(texture, ownerColor);
           
           // Create sprite
           this.createSpriteForPolygon(polygon, circularTexture);
         },
-        // Progress callback
         undefined,
-        // Error callback
         (error) => {
           console.error(`Error loading texture for ${polygon.owner}:`, error);
           // Create a colored circle as fallback
@@ -537,18 +522,18 @@ export default class PolygonRenderer {
       this.bounds.latCorrectionFactor
     )[0];
     
-    // Position AT the center (y=0) instead of hovering above
-    sprite.position.set(normalizedCoords.x, 0, -normalizedCoords.y);
+    // Position slightly above the land to avoid z-fighting
+    sprite.position.set(normalizedCoords.x, 0.1, -normalizedCoords.y);
   
-    // Make sprites 50% smaller than before
-    sprite.scale.set(1.25, 1.25, 1); // Reduced from 2.5 to 1.25
+    // Make sprites a consistent size
+    sprite.scale.set(2, 2, 1);
   
     // Add to scene and store reference
     this.scene.add(sprite);
     this.coatOfArmSprites[polygon.id] = sprite;
     
     console.log(`Added coat of arms sprite for ${polygon.id} owned by ${polygon.owner} at position:`, 
-      normalizedCoords.x, 0, -normalizedCoords.y);
+      normalizedCoords.x, 0.1, -normalizedCoords.y);
   }
   
   // Add helper function to create a circular texture
