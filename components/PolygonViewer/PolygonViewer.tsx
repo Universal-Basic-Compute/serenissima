@@ -291,7 +291,8 @@ export default function PolygonViewer() {
       {activeView === 'land' && (
         <LandDetailsPanel 
           selectedPolygonId={selectedPolygonId} 
-          onClose={handleCloseLandDetails} 
+          onClose={handleCloseLandDetails}
+          polygons={polygons}
         />
       )}
 

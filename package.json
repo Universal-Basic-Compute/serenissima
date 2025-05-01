@@ -10,7 +10,8 @@
     "backend:install": "pip install -r backend/requirements.txt",
     "backend:dev": "cd backend && python run.py",
     "calculate-centroids": "node scripts/calculate-centroids.js",
-    "cleanup-polygons": "node scripts/cleanup-polygons.js"
+    "cleanup-polygons": "node scripts/cleanup-polygons.js",
+    "name-polygons": "node scripts/name-polygons.js"
   },
   "dependencies": {
     "@react-google-maps/api": "^2.19.2",
@@ -19,6 +20,8 @@
     "@solana/wallet-adapter-base": "^0.9.26",
     "@solana/wallet-adapter-phantom": "^0.9.27",
     "@solana/web3.js": "^1.98.2",
+    "axios": "^1.6.7",
+    "dotenv": "^16.4.5",
     "gsap": "^3.13.0",
     "next": "15.3.1",
     "react": "18.2.0",

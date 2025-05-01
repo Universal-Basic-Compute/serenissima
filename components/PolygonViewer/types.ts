@@ -9,4 +9,8 @@ export interface Polygon {
   id: string;
   coordinates: Coordinate[];
   centroid?: Coordinate;
+  historicalName?: string;
+  englishName?: string;
+  historicalDescription?: string;
+  nameConfidence?: string;
 }
