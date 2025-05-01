@@ -262,6 +262,7 @@ export default class PolygonRenderer {
         let processedCount = 0;
       
       const processBatch = (startIdx: number) => {
+        const renderOrderBase = 20; // Base value to ensure it's above water
         const endIdx = Math.min(startIdx + batchSize, totalPolygons);
         
         for (let i = startIdx; i < endIdx; i++) {
@@ -340,8 +341,7 @@ export default class PolygonRenderer {
                 polygonMesh.updateCoatOfArmsTexture(ownerCoatOfArmsUrl);
               }
               
-              // Add this line to set a consistent render order based on polygon ID:
-              const renderOrderBase = 20; // Base value to ensure it's above water
+              // Set a consistent render order based on polygon ID
               const renderOrderOffset = parseInt(polygon.id.replace(/\D/g, '')) % 100 || 0; // Get a stable number from the ID
               const mesh = polygonMesh.getMesh();
               if (mesh) {
