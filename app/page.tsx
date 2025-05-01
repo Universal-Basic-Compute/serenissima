@@ -299,6 +299,11 @@ export default function Home() {
     }
   };
 
+  // Add effect to log when investMenuOpen changes
+  useEffect(() => {
+    console.log('investMenuOpen state changed:', investMenuOpen);
+  }, [investMenuOpen]);
+
   // Handle compute investment
   const handleInvestCompute = async (amount: number) => {
     if (!walletAdapter || !walletAddress) {
@@ -307,11 +312,10 @@ export default function Home() {
     }
     
     try {
-      // First, transfer the tokens on Solana
-      const signature = await transferComputeTokens(walletAdapter, amount);
-      console.log('Token transfer successful:', signature);
+      console.log('Starting compute investment process...');
       
-      // Then, update the compute amount in Airtable
+      // For testing, let's skip the actual token transfer
+      // Just update the Airtable record
       const airtableResponse = await investComputeInAirtable(walletAddress, amount);
       console.log('Airtable update successful:', airtableResponse);
       
@@ -319,7 +323,6 @@ export default function Home() {
     } catch (error) {
       console.error('Error investing compute:', error);
       alert(`Failed to invest compute: ${error.message}`);
-      throw error;
     }
   };
 
@@ -888,6 +891,14 @@ export default function Home() {
 
   return (
     <div className="relative w-screen h-screen">
+      {/* Invest Compute Menu - moved to top level */}
+      {investMenuOpen && (
+        <InvestComputeMenu
+          onClose={() => setInvestMenuOpen(false)}
+          onInvest={handleInvestCompute}
+        />
+      )}
+      
       {/* View Map button */}
       <a 
         href="/map"
@@ -930,8 +941,10 @@ export default function Home() {
                 </div>
                 <button
                   onClick={() => {
+                    console.log('Invest button clicked, current state:', investMenuOpen);
                     setInvestMenuOpen(true);
                     setDropdownOpen(false);
+                    console.log('State after setting:', true);
                   }}
                   className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-blue-500 hover:text-white transition-colors"
                 >

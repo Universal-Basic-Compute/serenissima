@@ -411,13 +411,7 @@ export default function PolygonViewer() {
         className="w-full h-full"
       />
       
-      {/* Invest Compute Menu */}
-      {investMenuOpen && (
-        <InvestComputeMenu
-          onClose={() => setInvestMenuOpen(false)}
-          onInvest={handleInvestCompute}
-        />
-      )}
+      {/* Removed duplicate Invest Compute Menu */}
     </div>
   );
 }
