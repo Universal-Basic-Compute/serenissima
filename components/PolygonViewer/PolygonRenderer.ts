@@ -470,6 +470,12 @@ export default class PolygonRenderer {
   }
   
   public updateViewMode(activeView: ViewMode) {
+    // Skip update if view hasn't changed
+    if (this.activeView === activeView) {
+      console.log(`View mode ${activeView} already active, skipping update`);
+      return;
+    }
+    
     this.activeView = activeView;
     
     // Update all LOD polygons with the new view mode

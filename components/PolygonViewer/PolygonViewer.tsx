@@ -801,40 +801,47 @@ export default function PolygonViewer() {
   
   // Add a separate effect to handle view mode changes
   useEffect(() => {
-    // Update view mode when activeView changes
-    if (sceneRef.current) {
-      console.log(`Updating view mode to ${activeView}`);
+    // Store previous view to check if it actually changed
+    const prevViewRef = useRef(activeView);
+    
+    // Only update if the view actually changed
+    if (prevViewRef.current !== activeView) {
+      prevViewRef.current = activeView;
       
-      // Load land owners when switching to land view
-      if (activeView === 'land') {
-        console.log('Switching to land view, loading land owners and coat of arms');
-        loadLandOwners();
+      if (sceneRef.current) {
+        console.log(`Updating view mode to ${activeView}`);
         
-        // Force an update of coat of arms
+        // Load land owners when switching to land view
+        if (activeView === 'land') {
+          console.log('Switching to land view, loading land owners and coat of arms');
+          loadLandOwners();
+          
+          // Force an update of coat of arms
+          if (polygonRendererRef.current) {
+            console.log('Forcing coat of arms update for land view');
+            polygonRendererRef.current.updateViewMode(activeView);
+          }
+        }
+        
+        // Update water effect
+        if (waterEffectRef.current) {
+          waterEffectRef.current.updateViewMode(activeView);
+        }
+        
+        // Update polygon renderer
         if (polygonRendererRef.current) {
-          console.log('Forcing coat of arms update for land view');
           polygonRendererRef.current.updateViewMode(activeView);
         }
-      }
-      
-      // Update water effect
-      if (waterEffectRef.current) {
-        waterEffectRef.current.updateViewMode(activeView);
-      }
-      
-      // Update polygon renderer
-      if (polygonRendererRef.current) {
-        polygonRendererRef.current.updateViewMode(activeView);
-      }
-      
-      // Update interaction manager
-      if (interactionManagerRef.current) {
-        interactionManagerRef.current.updateViewMode(activeView);
-      }
-      
-      // Update bridge renderer
-      if (bridgeRendererRef.current) {
-        bridgeRendererRef.current.updateViewMode(activeView);
+        
+        // Update interaction manager
+        if (interactionManagerRef.current) {
+          interactionManagerRef.current.updateViewMode(activeView);
+        }
+        
+        // Update bridge renderer
+        if (bridgeRendererRef.current) {
+          bridgeRendererRef.current.updateViewMode(activeView);
+        }
       }
     }
   }, [activeView, loadLandOwners]);

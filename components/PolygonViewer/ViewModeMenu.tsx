@@ -90,7 +90,7 @@ export default function ViewModeMenu({ activeView, setActiveView }: ViewModeMenu
       </IconButton>
       
       <IconButton 
-        onClick={() => setActiveView('buildings')}
+        onClick={() => activeView !== 'buildings' ? setActiveView('buildings') : null}
         active={activeView === 'buildings'}
         title={viewDescriptions.buildings}
         activeColor="amber"
@@ -105,7 +105,7 @@ export default function ViewModeMenu({ activeView, setActiveView }: ViewModeMenu
       </IconButton>
       
       <IconButton 
-        onClick={() => setActiveView('land')}
+        onClick={() => activeView !== 'land' ? setActiveView('land') : null}
         active={activeView === 'land'}
         title={viewDescriptions.land}
         activeColor="amber"
