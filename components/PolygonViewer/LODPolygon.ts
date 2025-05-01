@@ -110,16 +110,10 @@ export default class LODPolygon {
     const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
     geometry.rotateX(-Math.PI / 2);
     
-    // Create a simple material
-    const material = new THREE.MeshStandardMaterial({ 
+    // Create a simple material - CHANGED to MeshBasicMaterial
+    const material = new THREE.MeshBasicMaterial({ 
       color: this.activeView === 'land' ? '#7cac6a' : '#e6d2a8',
-      roughness: 0.7,
-      metalness: 0.1,
-      side: THREE.FrontSide,
-      flatShading: true,
-      // Explicitly disable shadows
-      castShadow: false,
-      receiveShadow: false
+      side: THREE.FrontSide
     });
     
     this.lowDetailMesh = new THREE.Mesh(geometry, material);
@@ -128,6 +122,9 @@ export default class LODPolygon {
     this.lowDetailMesh.userData.originalEmissive = new THREE.Color(0, 0, 0);
     this.lowDetailMesh.userData.originalEmissiveIntensity = 0;
     this.lowDetailMesh.userData.isLowDetail = true;
+    
+    // Remove bottom faces from low detail mesh too
+    this.removeBottomFaces(geometry);
   }
   
   private createHighDetailMesh() {
@@ -171,53 +168,29 @@ export default class LODPolygon {
     geometry.rotateX(-Math.PI / 2);
     
     // Determine the color to use
-    let landColor;
-    if (this.activeView === 'land') {
-      if (this.ownerColor) {
-        // Use the owner's color if available
-        landColor = new THREE.Color(this.ownerColor);
-      } else if (this.polygon.owner) {
-        // Generate a color based on the owner's username - no random component
-        landColor = this.generateColorFromUsername(this.polygon.owner);
-      } else {
-        // Default green color for unowned land
-        landColor = new THREE.Color(0x7cac6a);
-      }
-    } else {
-      // For other views, use sand color
-      landColor = new THREE.Color(0xe6d2a8);
-    }
+    const landColor = this.determineLandColor();
     
-    // Create a detailed material with enhanced land view appearance
-    const material = new THREE.MeshStandardMaterial({ 
+    // Create a material that explicitly doesn't cast shadows
+    // CRITICAL CHANGE: Use MeshBasicMaterial instead of MeshStandardMaterial
+    const material = new THREE.MeshBasicMaterial({ 
       color: landColor,
-      roughness: 0.7,
-      metalness: 0.1,
-      side: THREE.FrontSide, // Use FrontSide instead of DoubleSide to prevent shadow artifacts
-      flatShading: false, // Smooth shading for better quality
-      polygonOffset: true,
-      polygonOffsetFactor: 1,
-      polygonOffsetUnits: 1,
-      shadowSide: THREE.FrontSide, // Ensure shadows are only cast from front face
-      // Explicitly disable shadows
-      castShadow: false,
-      receiveShadow: false
+      side: THREE.FrontSide, // Only render front side
+      // Remove all shadow-related properties
+      transparent: false,
+      opacity: 1.0
     });
     
-    // If we're in land view and the polygon has an owner with a coat of arms,
-    // prepare to apply the coat of arms texture after mesh creation
-    const hasCoatOfArms = this.activeView === 'land' && 
-                          this.polygon.owner && 
-                          this.ownerCoatOfArmsMap && 
-                          this.ownerCoatOfArmsMap[this.polygon.owner];
-    
     this.highDetailMesh = new THREE.Mesh(geometry, material);
-    // Explicitly disable shadows on the mesh
+    
+    // IMPORTANT: Disable shadows completely
     this.highDetailMesh.castShadow = false;
     this.highDetailMesh.receiveShadow = false;
     this.highDetailMesh.userData.originalEmissive = new THREE.Color(0, 0, 0);
     this.highDetailMesh.userData.originalEmissiveIntensity = 0;
     this.highDetailMesh.userData.isLowDetail = false;
+    
+    // CRITICAL ADDITION: Remove bottom faces completely
+    this.removeBottomFaces(geometry);
   }
   
   public updateLOD(cameraPosition: THREE.Vector3) {
@@ -447,7 +420,7 @@ export default class LODPolygon {
     meshes.forEach(mesh => {
       if (!mesh) return;
       
-      const material = mesh.material as THREE.MeshStandardMaterial;
+      const material = mesh.material as THREE.MeshBasicMaterial;
       
       if (isSelected) {
         // Store original color if not already stored
@@ -457,8 +430,6 @@ export default class LODPolygon {
         
         // Highlight the selected polygon with a bright color
         material.color.set('#ffcc00'); // Bright yellow
-        material.emissive.set('#ff6600'); // Orange glow
-        material.emissiveIntensity = 0.3;
         
         // IMPORTANT: Adjust the polygon's position to prevent z-fighting
         // Move the mesh slightly up when selected - but not too high
@@ -473,8 +444,6 @@ export default class LODPolygon {
         // Restore original color
         if (this.originalColor) {
           material.color.copy(this.originalColor);
-          material.emissive.set('#000000');
-          material.emissiveIntensity = 0;
           
           // IMPORTANT: Restore the original position
           // Move the mesh back to its original position
@@ -551,5 +520,67 @@ export default class LODPolygon {
         this.highDetailMesh.renderOrder = 0;
       }
     }
+  }
+  // Add helper method to determine land color
+  private determineLandColor(): THREE.Color {
+    if (this.activeView === 'land') {
+      if (this.ownerColor) {
+        return new THREE.Color(this.ownerColor);
+      } else if (this.polygon.owner) {
+        return this.generateColorFromUsername(this.polygon.owner);
+      } else {
+        return new THREE.Color(0x7cac6a);
+      }
+    } else {
+      return new THREE.Color(0xe6d2a8);
+    }
+  }
+  
+  // Add this new helper method to remove bottom faces
+  private removeBottomFaces(geometry: THREE.ExtrudeGeometry) {
+    // Get the position attribute from the geometry
+    const position = geometry.getAttribute('position');
+    const count = position.count;
+    
+    // Create an array to store which faces to keep
+    const keepFace = [];
+    
+    // Loop through all faces (triangles)
+    for (let i = 0; i < count / 3; i++) {
+      // Get the three vertices of this face
+      const a = new THREE.Vector3().fromBufferAttribute(position, i * 3);
+      const b = new THREE.Vector3().fromBufferAttribute(position, i * 3 + 1);
+      const c = new THREE.Vector3().fromBufferAttribute(position, i * 3 + 2);
+      
+      // Calculate the normal of this face
+      const ab = new THREE.Vector3().subVectors(b, a);
+      const ac = new THREE.Vector3().subVectors(c, a);
+      const normal = new THREE.Vector3().crossVectors(ab, ac).normalize();
+      
+      // If the normal points downward (y component is negative), don't keep this face
+      keepFace[i] = normal.y >= -0.1; // Allow slightly downward-facing faces
+    }
+    
+    // Create a new index array that only includes the faces we want to keep
+    const index = [];
+    for (let i = 0; i < count / 3; i++) {
+      if (keepFace[i]) {
+        index.push(i * 3, i * 3 + 1, i * 3 + 2);
+      }
+    }
+    
+    // Create a new BufferGeometry with only the faces we want to keep
+    const newGeometry = new THREE.BufferGeometry();
+    
+    // Copy all attributes from the original geometry
+    for (const name in geometry.attributes) {
+      newGeometry.setAttribute(name, geometry.attributes[name]);
+    }
+    
+    newGeometry.setIndex(index);
+    
+    // Replace the geometry in the mesh
+    this.highDetailMesh.geometry.dispose();
+    this.highDetailMesh.geometry = newGeometry;
   }
 }
