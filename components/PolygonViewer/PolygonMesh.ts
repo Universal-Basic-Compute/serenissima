@@ -94,9 +94,8 @@ class PolygonMesh {
         // Further enhanced polygon offset to completely eliminate z-fighting
         polygonOffset: true,
         polygonOffsetFactor: 3.0, // Increased from 2.0 to 3.0
-        polygonOffsetUnits: 3.0,  // Increased from 2.0 to 3.0
-        // Disable all edge highlighting
-        flatShading: false
+        polygonOffsetUnits: 3.0   // Increased from 2.0 to 3.0
+        // Note: flatShading is not available on MeshBasicMaterial
       });
       
       // Immediately load and apply the sand texture
