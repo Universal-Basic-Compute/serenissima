@@ -827,11 +827,11 @@ export default function PolygonViewer() {
     };
   }, [activeView]);
   
+  // Create a ref at the top level of the component to track previous view
+  const prevViewRef = useRef(activeView);
+  
   // Add a separate effect to handle view mode changes
   useEffect(() => {
-    // Store previous view to check if it actually changed
-    const prevViewRef = useRef(activeView);
-    
     // Only update if the view actually changed
     if (prevViewRef.current !== activeView) {
       prevViewRef.current = activeView;
