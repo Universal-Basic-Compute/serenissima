@@ -136,6 +136,12 @@ export default class PolygonRenderer {
           
           if (polygon.coordinates && polygon.coordinates.length > 2) {
             try {
+              // Get the owner's color from the users data
+              let ownerColor = null;
+              if (polygon.owner && this.users[polygon.owner] && this.users[polygon.owner].color) {
+                ownerColor = this.users[polygon.owner].color;
+              }
+            
               const lodPolygon = new LODPolygon(
                 this.scene,
                 polygon,
@@ -147,9 +153,10 @@ export default class PolygonRenderer {
                   sandBaseColor: this.sandBaseColor,
                   sandNormalMap: this.sandNormalMap,
                   sandRoughnessMap: this.sandRoughnessMap
-                }
+                },
+                ownerColor // Pass the owner's color
               );
-              
+            
               this.lodPolygons.push(lodPolygon);
               
               // Store reference to the mesh
@@ -201,10 +208,10 @@ export default class PolygonRenderer {
     sampleGeometry.rotateX(-Math.PI / 2);
     
     const sampleMaterial = new THREE.MeshStandardMaterial({
-      color: '#e6d2a8', // More yellow/tan color
-      map: this.sandBaseColor,
-      normalMap: this.sandNormalMap,
-      roughnessMap: this.sandRoughnessMap,
+      color: this.activeView === 'land' ? '#7cac6a' : '#e6d2a8', // More yellow/tan color
+      map: this.activeView !== 'land' ? this.sandBaseColor : null,
+      normalMap: this.activeView !== 'land' ? this.sandNormalMap : null,
+      roughnessMap: this.activeView !== 'land' ? this.sandRoughnessMap : null,
       roughness: 0.7,
       metalness: 0.1,
       side: THREE.DoubleSide,
@@ -215,13 +222,6 @@ export default class PolygonRenderer {
       polygonOffsetFactor: 1,
       polygonOffsetUnits: 1
     });
-    
-    if (this.activeView === 'land') {
-      // For land view, use a more terrain-like material
-      sampleMaterial.color.set('#7cac6a'); // More green for land view
-      sampleMaterial.roughness = 0.9;
-      sampleMaterial.metalness = 0.0;
-    }
     
     const sampleMesh = new THREE.Mesh(sampleGeometry, sampleMaterial);
     sampleMesh.castShadow = true;
@@ -243,7 +243,8 @@ export default class PolygonRenderer {
         sandBaseColor: this.sandBaseColor,
         sandNormalMap: this.sandNormalMap,
         sandRoughnessMap: this.sandRoughnessMap
-      }
+      },
+      '#7cac6a' // Default green color for sample
     );
     
     this.lodPolygons.push(lodPolygon);

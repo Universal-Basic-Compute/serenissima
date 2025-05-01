@@ -18,6 +18,7 @@ export default class LODPolygon {
   private distanceThreshold: number = 150;
   private isSelected: boolean = false;
   private originalColor: THREE.Color | null = null;
+  private ownerColor: string | null = null;
 
   constructor(
     scene: THREE.Scene,
@@ -30,7 +31,8 @@ export default class LODPolygon {
       sandBaseColor: THREE.Texture;
       sandNormalMap: THREE.Texture;
       sandRoughnessMap: THREE.Texture;
-    }
+    },
+    ownerColor: string | null = null
   ) {
     this.scene = scene;
     this.polygon = polygon;
@@ -41,6 +43,7 @@ export default class LODPolygon {
     this.sandBaseColor = textures.sandBaseColor;
     this.sandNormalMap = textures.sandNormalMap;
     this.sandRoughnessMap = textures.sandRoughnessMap;
+    this.ownerColor = ownerColor;
     
     // Create high detail mesh directly
     this.createHighDetailMesh();
@@ -126,16 +129,33 @@ export default class LODPolygon {
     const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
     geometry.rotateX(-Math.PI / 2);
     
+    // Determine the color to use
+    let landColor;
+    if (this.activeView === 'land') {
+      if (this.ownerColor) {
+        // Use the owner's color if available
+        landColor = new THREE.Color(this.ownerColor);
+      } else if (this.polygon.owner) {
+        // Generate a random color based on the owner's username
+        landColor = this.generateColorFromUsername(this.polygon.owner);
+      } else {
+        // Default green color for unowned land
+        landColor = new THREE.Color(0x7cac6a);
+      }
+    } else {
+      // For other views, use sand color
+      landColor = new THREE.Color(0xe6d2a8);
+    }
+    
     // Create a detailed material with enhanced land view appearance
     const material = new THREE.MeshStandardMaterial({ 
-      color: this.activeView === 'land' 
-        ? new THREE.Color(0x7cac6a).lerp(new THREE.Color(0x8fbc8f), Math.random() * 0.3) // Varied green colors
-        : '#e6d2a8',
-      map: this.sandBaseColor,
-      normalMap: this.sandNormalMap,
-      roughnessMap: this.sandRoughnessMap,
-      roughness: this.activeView === 'land' ? 0.9 : 0.7,
-      metalness: this.activeView === 'land' ? 0.0 : 0.1,
+      color: landColor,
+      // Only use textures in non-land view
+      map: this.activeView !== 'land' ? this.sandBaseColor : null,
+      normalMap: this.activeView !== 'land' ? this.sandNormalMap : null,
+      roughnessMap: this.activeView !== 'land' ? this.sandRoughnessMap : null,
+      roughness: this.activeView === 'land' ? 0.7 : 0.7,
+      metalness: this.activeView === 'land' ? 0.1 : 0.1,
       side: THREE.DoubleSide,
       flatShading: false, // Smooth shading for better quality
       polygonOffset: true,
@@ -160,6 +180,22 @@ export default class LODPolygon {
     return this.mesh;
   }
   
+  // Add a method to generate a color from a username
+  private generateColorFromUsername(username: string): THREE.Color {
+    // Simple hash function to generate a number from a string
+    let hash = 0;
+    for (let i = 0; i < username.length; i++) {
+      hash = username.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    
+    // Convert the hash to a color
+    const r = (hash & 0xFF) / 255;
+    const g = ((hash >> 8) & 0xFF) / 255;
+    const b = ((hash >> 16) & 0xFF) / 255;
+    
+    return new THREE.Color(r, g, b);
+  }
+
   public updateViewMode(activeView: ViewMode) {
     this.activeView = activeView;
     
@@ -173,19 +209,35 @@ export default class LODPolygon {
       
       // Update material based on view mode
       if (activeView === 'land') {
-        // For land view, use green colors
+        // For land view, use owner's color or generate one
         if (!this.isSelected) {
-          material.color.set(new THREE.Color(0x7cac6a).lerp(new THREE.Color(0x8fbc8f), Math.random() * 0.3));
+          if (this.ownerColor) {
+            material.color.set(this.ownerColor);
+          } else if (this.polygon.owner) {
+            material.color.copy(this.generateColorFromUsername(this.polygon.owner));
+          } else {
+            material.color.set(new THREE.Color(0x7cac6a));
+          }
         }
-        material.roughness = 0.9;
-        material.metalness = 0.0;
+        material.roughness = 0.7;
+        material.metalness = 0.1;
+        
+        // Remove textures in land view
+        material.map = null;
+        material.normalMap = null;
+        material.roughnessMap = null;
       } else {
-        // For other views, use sand color
+        // For other views, use sand color and textures
         if (!this.isSelected) {
           material.color.set('#e6d2a8');
         }
         material.roughness = 0.7;
         material.metalness = 0.1;
+        
+        // Add textures back for non-land views
+        material.map = this.sandBaseColor;
+        material.normalMap = this.sandNormalMap;
+        material.roughnessMap = this.sandRoughnessMap;
       }
       
       // Update material to apply changes
