@@ -153,6 +153,7 @@ export default function Home() {
       } else {
         // Store the user profile information
         setUserProfile({
+          username: data.user_name,
           firstName: data.first_name || data.user_name.split(' ')[0] || '',
           lastName: data.last_name || data.user_name.split(' ').slice(1).join(' ') || '',
           coatOfArmsImage: data.coat_of_arms_image
@@ -877,10 +878,10 @@ export default function Home() {
               className="bg-white px-4 py-2 rounded shadow hover:bg-gray-100 transition-colors flex items-center"
             >
               <PlayerProfile
-                username={userProfile.username}
-                firstName={userProfile.firstName}
-                lastName={userProfile.lastName}
-                coatOfArmsImage={userProfile.coatOfArmsImage}
+                username={userProfile.username || usernameInput}
+                firstName={userProfile.firstName || firstName}
+                lastName={userProfile.lastName || lastName}
+                coatOfArmsImage={userProfile.coatOfArmsImage || coatOfArmsImage}
                 size="small"
                 className="mr-2"
               />
