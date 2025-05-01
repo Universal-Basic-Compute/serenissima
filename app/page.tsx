@@ -204,13 +204,22 @@ export default function Home() {
 
   return (
     <div className="relative w-screen h-screen">
-      {/* Connect Wallet button */}
-      <button 
-        onClick={connectWallet}
-        className="absolute top-4 right-4 z-10 bg-white px-4 py-2 rounded shadow hover:bg-purple-100 transition-colors"
-      >
-        {walletAddress ? `Disconnect ${walletAddress.slice(0, 4)}...${walletAddress.slice(-4)}` : 'Connect Wallet'}
-      </button>
+      {/* Wallet button */}
+      {walletAddress ? (
+        <button 
+          onClick={() => alert('Investing compute resources...')}
+          className="absolute top-4 right-4 z-10 bg-blue-500 text-white px-4 py-2 rounded shadow hover:bg-blue-600 transition-colors"
+        >
+          Invest Compute
+        </button>
+      ) : (
+        <button 
+          onClick={connectWallet}
+          className="absolute top-4 right-4 z-10 bg-white px-4 py-2 rounded shadow hover:bg-purple-100 transition-colors"
+        >
+          Connect Wallet
+        </button>
+      )}
       
       {/* Always show the 3D Polygon Viewer regardless of wallet connection status */}
       <PolygonViewer />
