@@ -669,9 +669,18 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
       
       // Force the panel to stay visible even if selectedPolygonId changes
       if (preventAutoClose) {
+        // Make multiple attempts to keep the panel visible
         setTimeout(() => {
           setIsVisible(true);
         }, 100);
+        
+        setTimeout(() => {
+          setIsVisible(true);
+        }, 200);
+        
+        setTimeout(() => {
+          setIsVisible(true);
+        }, 500);
       }
     }
   }
