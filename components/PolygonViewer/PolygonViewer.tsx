@@ -393,6 +393,10 @@ export default function PolygonViewer() {
             // Store reference to the mesh
             polygonMeshesRef.current[polygon.id] = mesh;
             
+            // Store the original material properties explicitly on creation
+            mesh.userData.originalEmissive = new THREE.Color(0, 0, 0);
+            mesh.userData.originalEmissiveIntensity = 0;
+            
             // Position at ground level
             mesh.position.y = 0;
             
@@ -456,6 +460,11 @@ export default function PolygonViewer() {
       const sampleMesh = new THREE.Mesh(sampleGeometry, sampleMaterial);
       sampleMesh.castShadow = true;
       sampleMesh.receiveShadow = true;
+      
+      // Store the original material properties explicitly
+      sampleMesh.userData.originalEmissive = new THREE.Color(0, 0, 0);
+      sampleMesh.userData.originalEmissiveIntensity = 0;
+      
       scene.add(sampleMesh);
       console.log('Added sample polygon to scene');
     }
@@ -503,12 +512,12 @@ export default function PolygonViewer() {
     
     // Handle mouse move for hover effect
     const handleMouseMove = (event) => {
+      // Only process hover in land view
+      if (activeView !== 'land') return;
+      
       // Calculate mouse position in normalized device coordinates (-1 to +1)
       mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
       mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-      
-      // Only process hover in land view
-      if (activeView !== 'land') return;
       
       // Update the raycaster with the camera and mouse position
       raycaster.setFromCamera(mouse, camera);
@@ -516,10 +525,9 @@ export default function PolygonViewer() {
       // Get objects intersecting the ray
       const intersects = raycaster.intersectObjects(scene.children, false);
       
-      // Track if we found a hoverable object
-      let foundHoverable = false;
+      // Find the currently hovered polygon
+      let currentHoveredId = null;
       
-      // Check if we're hovering over a polygon
       if (intersects.length > 0) {
         const object = intersects[0].object;
         
@@ -529,89 +537,51 @@ export default function PolygonViewer() {
         );
         
         if (hoveredId && hoveredId !== selectedPolygonId) {
-          foundHoverable = true;
-          
-          // If we're hovering over a new object
-          if (hoveredId !== hoveredPolygonId) {
-            // Remove hover effect from previously hovered polygon
-            if (hoveredPolygonId && hoveredPolygonId !== selectedPolygonId) {
-              const previousHovered = polygonMeshesRef.current[hoveredPolygonId];
-              if (previousHovered && previousHovered.material) {
-                // Kill any existing tweens
-                gsap.killTweensOf(previousHovered.material.emissive);
-                gsap.killTweensOf(previousHovered.material);
-                
-                // Animate back to original material properties
-                gsap.to(previousHovered.material.emissive, {
-                  r: previousHovered.userData.originalEmissive?.r || 0,
-                  g: previousHovered.userData.originalEmissive?.g || 0,
-                  b: previousHovered.userData.originalEmissive?.b || 0,
-                  duration: 0.3
-                });
-                
-                gsap.to(previousHovered.material, {
-                  emissiveIntensity: previousHovered.userData.originalEmissiveIntensity || 0,
-                  duration: 0.3
-                });
-              }
-            }
-            
-            setHoveredPolygonId(hoveredId);
-            
-            // Apply glow effect to the hovered polygon
-            if (object.material) {
-              // Store original material properties if not already stored
-              if (!object.userData.originalEmissive) {
-                object.userData.originalEmissive = object.material.emissive.clone();
-                object.userData.originalEmissiveIntensity = object.material.emissiveIntensity;
-              }
-              
-              // Kill any existing tweens
-              gsap.killTweensOf(object.material.emissive);
-              gsap.killTweensOf(object.material);
-              
-              // Animate glow effect
-              gsap.to(object.material.emissive, {
-                r: 0.53,
-                g: 1.0,
-                b: 0.53,
-                duration: 0.3
-              });
-              
-              gsap.to(object.material, {
-                emissiveIntensity: 0.5,
-                duration: 0.3
-              });
-            }
-          }
+          currentHoveredId = hoveredId;
         }
       }
       
-      // If we didn't find a hoverable object but we have a previously hovered one,
-      // remove the hover effect
-      if (!foundHoverable && hoveredPolygonId !== null && hoveredPolygonId !== selectedPolygonId) {
-        const previousHovered = polygonMeshesRef.current[hoveredPolygonId];
-        if (previousHovered && previousHovered.material) {
-          // Kill any existing tweens
-          gsap.killTweensOf(previousHovered.material.emissive);
-          gsap.killTweensOf(previousHovered.material);
-          
-          // Animate back to original material properties
-          gsap.to(previousHovered.material.emissive, {
-            r: previousHovered.userData.originalEmissive?.r || 0,
-            g: previousHovered.userData.originalEmissive?.g || 0,
-            b: previousHovered.userData.originalEmissive?.b || 0,
-            duration: 0.3
-          });
-          
-          gsap.to(previousHovered.material, {
-            emissiveIntensity: previousHovered.userData.originalEmissiveIntensity || 0,
-            duration: 0.3
-          });
+      // If the hovered polygon has changed
+      if (currentHoveredId !== hoveredPolygonId) {
+        // Remove hover effect from previously hovered polygon
+        if (hoveredPolygonId && hoveredPolygonId !== selectedPolygonId) {
+          const previousHovered = polygonMeshesRef.current[hoveredPolygonId];
+          if (previousHovered && previousHovered.material) {
+            // Cancel any ongoing animations
+            gsap.killTweensOf(previousHovered.material.emissive);
+            gsap.killTweensOf(previousHovered.material);
+            
+            // Reset to original values immediately
+            previousHovered.material.emissive.set(0, 0, 0);
+            previousHovered.material.emissiveIntensity = 0;
+          }
         }
         
-        // Clear the hovered polygon ID
-        setHoveredPolygonId(null);
+        // Apply hover effect to newly hovered polygon
+        if (currentHoveredId) {
+          const newHovered = polygonMeshesRef.current[currentHoveredId];
+          if (newHovered && newHovered.material) {
+            // Cancel any ongoing animations
+            gsap.killTweensOf(newHovered.material.emissive);
+            gsap.killTweensOf(newHovered.material);
+            
+            // Apply hover effect
+            gsap.to(newHovered.material.emissive, {
+              r: 0.53,
+              g: 1.0,
+              b: 0.53,
+              duration: 0.3
+            });
+            
+            gsap.to(newHovered.material, {
+              emissiveIntensity: 0.5,
+              duration: 0.3
+            });
+          }
+        }
+        
+        // Update the hovered polygon ID
+        setHoveredPolygonId(currentHoveredId);
       }
     };
 
