@@ -96,7 +96,7 @@ export default class SceneSetup {
     
     // Basic limits
     this.controls.minDistance = 10;
-    this.controls.maxDistance = 192; // Reduced from 240 by another 20% (total 36% reduction from original 300)
+    this.controls.maxDistance = 115; // Reduced from 192 by 40% (total 62% reduction from original 300)
     
     // Enable panning with right mouse button and rotation with middle mouse button
     this.controls.mouseButtons = {
