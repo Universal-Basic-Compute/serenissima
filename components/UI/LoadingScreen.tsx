@@ -18,13 +18,17 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
     // Function to get random loading image
     const getRandomLoadingImage = async () => {
       try {
+        console.log('Fetching loading images from API...');
         // Fetch the list of files from the loading directory
         const response = await fetch('/api/list-loading-images');
+        console.log('API response status:', response.status);
+        
         if (!response.ok) {
-          throw new Error('Failed to fetch loading images');
+          throw new Error(`Failed to fetch loading images: ${response.status}`);
         }
         
         const data = await response.json();
+        console.log('API response data:', data);
         
         if (data.success && data.images && data.images.length > 0) {
           // Select a random image from the returned list
@@ -33,15 +37,29 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
           
           // Précharger l'image pour s'assurer qu'elle est disponible
           const img = new window.Image(); // Use the browser's native Image constructor
+          console.log('Created Image object, starting to load:', randomImage);
+          
           img.onload = () => {
+            console.log('Image loaded successfully:', randomImage);
             setLoadingImage(randomImage);
             setImageError(false);
           };
-          img.onerror = () => {
-            console.error('Error preloading image:', randomImage);
+          
+          img.onerror = (e) => {
+            console.error('Error preloading image:', randomImage, e);
             setImageError(true);
             setLoadingImage('/loading/fallback.jpg');
           };
+          
+          // Add a timeout to detect if image loading takes too long
+          const timeoutId = setTimeout(() => {
+            console.warn('Image loading timeout for:', randomImage);
+            if (!loadingImage) {
+              setImageError(true);
+              setLoadingImage('/loading/fallback.jpg');
+            }
+          }, 5000);
+          
           img.src = randomImage;
         } else {
           // Fallback to a default image if no images are found
@@ -87,6 +105,13 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
     // Start the animation
     requestAnimationFrame(updateProgress);
   }, [duration, onLoadingComplete]);
+
+  // Log render state
+  console.log('Rendering LoadingScreen with:', {
+    loadingImage,
+    imageError,
+    progress
+  });
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black">

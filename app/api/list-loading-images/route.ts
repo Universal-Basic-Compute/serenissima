@@ -6,6 +6,7 @@ export async function GET() {
   try {
     // Path to the loading images directory
     const loadingDir = path.join(process.cwd(), 'public', 'loading');
+    console.log('Looking for loading images in directory:', loadingDir);
     
     // Check if directory exists
     if (!fs.existsSync(loadingDir)) {
@@ -18,17 +19,19 @@ export async function GET() {
     
     // Read all files in the directory
     const files = fs.readdirSync(loadingDir);
+    console.log('All files in loading directory:', files);
     
     // Filter for image files (jpg, jpeg, png, webp)
     const imageFiles = files.filter(file => {
       const ext = path.extname(file).toLowerCase();
       return ['.jpg', '.jpeg', '.png', '.webp', '.gif'].includes(ext);
     });
+    console.log('Filtered image files:', imageFiles);
     
     // Format the file paths to be usable in the frontend
     const imagePaths = imageFiles.map(file => `/loading/${file}`);
     
-    console.log(`Found ${imagePaths.length} loading images`);
+    console.log(`Found ${imagePaths.length} loading images:`, imagePaths);
     
     return NextResponse.json({ 
       success: true, 
