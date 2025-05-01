@@ -349,8 +349,12 @@ export default class PolygonRenderer {
             console.log(`Texture loaded successfully for ${polygon.owner}`);
             texture.minFilter = THREE.LinearFilter; // Improve texture quality
             
+            // Create circular texture
+            const circularTexture = this.createCircularTexture(texture);
+            circularTexture.userData.isCircular = true;
+            
             // Create sprite after texture is loaded
-            this.createSpriteForPolygon(polygon, texture);
+            this.createSpriteForPolygon(polygon, circularTexture);
           },
           // Progress callback
           undefined,
@@ -362,6 +366,12 @@ export default class PolygonRenderer {
       } else {
         // Use cached texture
         console.log(`Using cached texture for ${polygon.owner}`);
+        // Apply circular mask to cached texture if not already applied
+        if (!textureCache[polygon.owner].userData.isCircular) {
+          const circularTexture = this.createCircularTexture(textureCache[polygon.owner]);
+          circularTexture.userData.isCircular = true;
+          textureCache[polygon.owner] = circularTexture;
+        }
         this.createSpriteForPolygon(polygon, textureCache[polygon.owner]);
       }
     });
@@ -389,10 +399,10 @@ export default class PolygonRenderer {
     )[0];
     
     // Position higher above the land for better visibility
-    sprite.position.set(normalizedCoords.x, 10, -normalizedCoords.y); // Increased height from 5 to 10
+    sprite.position.set(normalizedCoords.x, 10, -normalizedCoords.y);
     
-    // Make the sprite larger for better visibility
-    sprite.scale.set(12, 12, 1); // Increased from 8 to 12
+    // Make the sprite 5 times smaller (from 12 to 2.4)
+    sprite.scale.set(2.4, 2.4, 1);
     
     // Add to scene and store reference
     this.scene.add(sprite);
@@ -400,6 +410,42 @@ export default class PolygonRenderer {
     
     console.log(`Added coat of arms sprite for ${polygon.id} owned by ${polygon.owner} at position:`, 
       normalizedCoords.x, 10, -normalizedCoords.y);
+  }
+  
+  // Add helper function to create a circular texture
+  private createCircularTexture(texture: THREE.Texture): THREE.Texture {
+    // Create a canvas to draw the circular mask
+    const canvas = document.createElement('canvas');
+    const size = 256; // Use a power of 2 for better performance
+    canvas.width = size;
+    canvas.height = size;
+    
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return texture; // Fallback if context creation fails
+    
+    // Draw a circular clipping path
+    ctx.beginPath();
+    ctx.arc(size/2, size/2, size/2, 0, Math.PI * 2);
+    ctx.closePath();
+    ctx.clip();
+    
+    // Create a temporary image to draw the texture
+    const img = new Image();
+    img.src = texture.image.src;
+    
+    // Draw the image inside the circle
+    ctx.drawImage(img, 0, 0, size, size);
+    
+    // Add a circular border
+    ctx.strokeStyle = '#8B4513'; // Brown border
+    ctx.lineWidth = 8;
+    ctx.stroke();
+    
+    // Create a new texture from the canvas
+    const circularTexture = new THREE.Texture(canvas);
+    circularTexture.needsUpdate = true;
+    
+    return circularTexture;
   }
 
   public cleanup() {
