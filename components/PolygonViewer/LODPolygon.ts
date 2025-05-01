@@ -430,8 +430,8 @@ export default class LODPolygon {
         material.emissiveIntensity = 0.3;
         
         // IMPORTANT: Adjust the polygon's position to prevent z-fighting
-        // Move the mesh slightly up when selected - increase this value
-        mesh.position.y += 0.1; // Increase from 0.02 to 0.1 (higher than hover)
+        // Move the mesh slightly up when selected - but not too high
+        mesh.position.y += 0.05; // Reduced from 0.1
         
         // Also increase the renderOrder to ensure it renders on top
         mesh.renderOrder = 2; // Higher than hover
@@ -447,7 +447,7 @@ export default class LODPolygon {
           
           // IMPORTANT: Restore the original position
           // Move the mesh back to its original position
-          mesh.position.y -= 0.1; // Match the increase above
+          mesh.position.y -= 0.05; // Reduced from 0.1
           
           // Reset the renderOrder
           mesh.renderOrder = 0;

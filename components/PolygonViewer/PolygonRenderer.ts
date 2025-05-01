@@ -561,9 +561,7 @@ export default class PolygonRenderer {
 
   // Create and update coat of arms as flat textures on the land
   private updateCoatOfArmsSprites() {
-    console.log('Updating coat of arms textures, active view:', this.activeView);
-    console.log('Owner coat of arms map has', Object.keys(this.ownerCoatOfArmsMap).length, 'entries');
-    console.log('Users data has', Object.keys(this.users).length, 'entries');
+    console.log('Updating coat of arms sprites, active view:', this.activeView);
     
     // Remove existing coat of arms objects
     Object.values(this.coatOfArmSprites).forEach(obj => {
@@ -615,8 +613,8 @@ export default class PolygonRenderer {
           // Create a circular texture from the loaded image
           const circularTexture = this.createCircularTexture(texture);
           
-          // Create a flat plane for the coat of arms - larger for better interaction
-          const planeSize = 2.0; // Increased size for better interaction
+          // Create a flat plane for the coat of arms - 20% smaller
+          const planeSize = 1.6;
           const geometry = new THREE.PlaneGeometry(planeSize, planeSize);
           
           // Create material with the texture
@@ -639,11 +637,14 @@ export default class PolygonRenderer {
             this.bounds.latCorrectionFactor
           )[0];
           
-          // Position higher above the land to avoid z-fighting (0.15 instead of 0.1)
+          // Position higher above the land to avoid z-fighting - INCREASE THIS VALUE
           plane.position.set(normalizedCoords.x, 0.15, -normalizedCoords.y);
           
           // Rotate to lay flat on the ground (90 degrees around X axis)
           plane.rotation.x = -Math.PI / 2;
+          
+          // Set a high renderOrder to ensure it's always on top
+          plane.renderOrder = 10;
           
           // Add to scene and store reference
           this.scene.add(plane);
@@ -832,8 +833,8 @@ export default class PolygonRenderer {
     const texture = new THREE.Texture(canvas);
     texture.needsUpdate = true;
     
-    // Create a flat plane for the colored circle - larger for better interaction
-    const planeSize = 2.0; // Increased size for better interaction
+    // Create a flat plane for the colored circle - 20% smaller
+    const planeSize = 1.6; // Reduced size by 20% from 2.0
     const geometry = new THREE.PlaneGeometry(planeSize, planeSize);
     
     // Create material with the texture
@@ -856,11 +857,14 @@ export default class PolygonRenderer {
       this.bounds.latCorrectionFactor
     )[0];
     
-    // Position higher above the land to avoid z-fighting (0.15 instead of 0.1)
+    // Position higher above the land to avoid z-fighting - INCREASE THIS VALUE
     plane.position.set(normalizedCoords.x, 0.15, -normalizedCoords.y);
     
     // Rotate to lay flat on the ground (90 degrees around X axis)
     plane.rotation.x = -Math.PI / 2;
+    
+    // Set a high renderOrder to ensure it's always on top
+    plane.renderOrder = 10;
     
     // Add to scene and store reference
     this.scene.add(plane);
