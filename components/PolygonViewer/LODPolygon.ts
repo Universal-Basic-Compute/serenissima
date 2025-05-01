@@ -358,6 +358,8 @@ export default class LODPolygon {
     this.polygon.owner = newOwner;
     this.ownerColor = ownerColor;
     
+    console.log(`Updating owner for polygon to ${newOwner} with color ${ownerColor}`);
+    
     // Only update if we're in land view
     if (this.activeView !== 'land') return;
     
@@ -371,9 +373,11 @@ export default class LODPolygon {
     if (ownerColor) {
       // Use the owner's color if available
       landColor = new THREE.Color(ownerColor);
+      console.log(`Using provided color for ${newOwner}: ${ownerColor}`);
     } else if (newOwner) {
       // Generate a random color based on the owner's username
       landColor = this.generateColorFromUsername(newOwner);
+      console.log(`Generated color for ${newOwner}: ${landColor.getHexString()}`);
     } else {
       // Default green color for unowned land
       landColor = new THREE.Color(0x7cac6a);

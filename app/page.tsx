@@ -1183,7 +1183,13 @@ export default function Home() {
   // Add this useEffect to ensure coat of arms are updated when users data changes
   useEffect(() => {
     if (users && Object.keys(users).length > 0) {
-      console.log('Users data loaded, ready for coat of arms updates:', Object.keys(users).length, 'users');
+      console.log('Users data loaded:', users);
+      
+      // Check if ConsiglioDeiDieci is in the users data
+      if (users['ConsiglioDeiDieci']) {
+        console.log('ConsiglioDeiDieci user data:', users['ConsiglioDeiDieci']);
+        console.log('ConsiglioDeiDieci color:', users['ConsiglioDeiDieci'].color);
+      }
       
       // Create a map of username to coat of arms URL
       const coatOfArmsMap: Record<string, string> = {};
@@ -1196,8 +1202,14 @@ export default function Home() {
       });
       
       console.log('Created coat of arms map with', Object.keys(coatOfArmsMap).length, 'entries');
+      
+      // Force an update of the polygon renderer with the users data
+      if (polygonRendererRef.current) {
+        console.log('Updating polygon renderer with users data');
+        polygonRendererRef.current.updateViewMode(activeView);
+      }
     }
-  }, [users]);
+  }, [users, activeView]);
 
   // Also add this to ensure polygons are loaded when the component mounts
   useEffect(() => {

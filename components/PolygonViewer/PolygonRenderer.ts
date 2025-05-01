@@ -401,18 +401,35 @@ export default class PolygonRenderer {
       }
     });
     
-    console.log('Combined coat of arms map now has', Object.keys(this.ownerCoatOfArmsMap).length, 'entries');
+    // Also update the owner color map from users data
+    Object.entries(this.users).forEach(([username, userData]) => {
+      if (userData.color) {
+        this.ownerColorMap[username] = userData.color;
+        console.log(`Updated color for ${username}: ${userData.color}`);
+      }
+    });
     
-    // If we're in land view, apply the new coat of arms textures
+    console.log('Combined coat of arms map now has', Object.keys(this.ownerCoatOfArmsMap).length, 'entries');
+    console.log('Owner color map now has', Object.keys(this.ownerColorMap).length, 'entries');
+    
+    // If we're in land view, apply the new coat of arms textures and colors
     if (this.activeView === 'land') {
       this.polygons.forEach((polygon) => {
-        if (polygon.owner && this.ownerCoatOfArmsMap[polygon.owner]) {
+        if (polygon.owner) {
           const lodPolygon = this.lodPolygons.find(lp => 
             lp.getMesh() === this.polygonMeshesRef.current[polygon.id]
           );
           
           if (lodPolygon) {
-            lodPolygon.updateCoatOfArmsTexture(this.ownerCoatOfArmsMap[polygon.owner]);
+            // Get the owner's color
+            const ownerColor = this.ownerColorMap[polygon.owner];
+            
+            // Update the polygon with the owner's color and coat of arms
+            lodPolygon.updateOwner(polygon.owner, ownerColor);
+            
+            if (this.ownerCoatOfArmsMap[polygon.owner]) {
+              lodPolygon.updateCoatOfArmsTexture(this.ownerCoatOfArmsMap[polygon.owner]);
+            }
           }
         }
       });
