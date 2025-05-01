@@ -191,6 +191,17 @@ export default function Home() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ coordinates })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        console.log(`Polygon ${data.isNew ? 'created' : 'updated'}: ${data.filename}`);
+      } else {
+        console.error('Failed to save polygon:', data.error);
+      }
+    })
+    .catch(error => {
+      console.error('Error saving polygon:', error);
     });
   };
 
@@ -225,14 +236,20 @@ export default function Home() {
     savePolygonToFile(polygon);
 
     // Add listener for changes to save updated polygon
+    // Use a debounce to prevent saving on every small change
     if (typeof google !== 'undefined') {
-      google.maps.event.addListener(polygon.getPath(), 'set_at', () => {
-        savePolygonToFile(polygon);
-      });
+      let saveTimeout: NodeJS.Timeout | null = null;
       
-      google.maps.event.addListener(polygon.getPath(), 'insert_at', () => {
-        savePolygonToFile(polygon);
-      });
+      const debouncedSave = () => {
+        if (saveTimeout) clearTimeout(saveTimeout);
+        saveTimeout = setTimeout(() => {
+          savePolygonToFile(polygon);
+          saveTimeout = null;
+        }, 1000); // Wait 1 second after changes stop before saving
+      };
+      
+      google.maps.event.addListener(polygon.getPath(), 'set_at', debouncedSave);
+      google.maps.event.addListener(polygon.getPath(), 'insert_at', debouncedSave);
     }
   };
 

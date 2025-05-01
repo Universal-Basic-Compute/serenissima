@@ -9,7 +9,8 @@
     "lint": "next lint",
     "backend:install": "pip install -r backend/requirements.txt",
     "backend:dev": "cd backend && python run.py",
-    "calculate-centroids": "node scripts/calculate-centroids.js"
+    "calculate-centroids": "node scripts/calculate-centroids.js",
+    "cleanup-polygons": "node scripts/cleanup-polygons.js"
   },
   "dependencies": {
     "@react-google-maps/api": "^2.19.2",
