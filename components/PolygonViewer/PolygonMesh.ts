@@ -69,45 +69,10 @@ class PolygonMesh {
       
       const shape = createPolygonShape(normalizedCoords);
       
-      // Create extruded geometry with minimal settings
-      const extrudeSettings = {
-        steps: 1,
-        depth: 0.0005, // Further reduced to make it even flatter
-        bevelEnabled: false, // Keep bevels disabled
-        bevelThickness: 0,
-        bevelSize: 0,
-        bevelSegments: 0,
-        UVGenerator: {
-          generateTopUV: function(geometry, vertices, indexA, indexB, indexC) {
-            const a = vertices[indexA];
-            const b = vertices[indexB];
-            const c = vertices[indexC];
-            
-            const bounds = new THREE.Box3().setFromPoints([a, b, c]);
-            const size = new THREE.Vector3();
-            bounds.getSize(size);
-            
-            return [
-              new THREE.Vector2((a.x - bounds.min.x) / size.x, (a.z - bounds.min.z) / size.z),
-              new THREE.Vector2((b.x - bounds.min.x) / size.x, (b.z - bounds.min.z) / size.z),
-              new THREE.Vector2((c.x - bounds.min.x) / size.x, (c.z - bounds.min.z) / size.z)
-            ];
-          },
-          generateSideWallUV: function(geometry, vertices, indexA, indexB, indexC, indexD) {
-            return [
-              new THREE.Vector2(0, 0),
-              new THREE.Vector2(1, 0),
-              new THREE.Vector2(1, 1),
-              new THREE.Vector2(0, 1)
-            ];
-          }
-        }
-      };
-      
-      const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+      // Create a COMPLETELY FLAT geometry with NO extrusion
+      // Instead of using ExtrudeGeometry, use ShapeGeometry for a completely flat shape
+      const geometry = new THREE.ShapeGeometry(shape);
       geometry.rotateX(-Math.PI / 2);
-      
-      // REMOVED height variation code to make the surface completely flat
       
       // Update normals
       geometry.computeVertexNormals();
@@ -117,16 +82,16 @@ class PolygonMesh {
       // Determine the color to use
       const landColor = this.determineLandColor();
       
-      // Create a completely flat material with NO transparency or edges
-      const material = new THREE.MeshBasicMaterial({ // Change from MeshLambertMaterial to MeshBasicMaterial
+      // Create a completely flat material with NO transparency
+      const material = new THREE.MeshBasicMaterial({ 
         color: landColor,
         side: THREE.FrontSide,
         wireframe: false,
-        transparent: false, // Ensure transparency is disabled
+        transparent: false,
         opacity: 1.0,
         depthTest: true,
         depthWrite: true,
-        // Add these properties to ensure no edge rendering
+        // Remove ALL special properties that might cause edge artifacts
         polygonOffset: false,
         flatShading: false
       });
@@ -139,6 +104,8 @@ class PolygonMesh {
             texture.wrapS = THREE.RepeatWrapping;
             texture.wrapT = THREE.RepeatWrapping;
             texture.repeat.set(5, 5);
+            // Add texture offset to avoid edge artifacts
+            texture.offset.set(0.5, 0.5);
             material.map = texture;
             material.needsUpdate = true;
           }
@@ -155,16 +122,16 @@ class PolygonMesh {
       this.mesh.castShadow = false;
       this.mesh.receiveShadow = false;
       
-      // Set a consistent render order
-      this.mesh.renderOrder = 1;
+      // Set a high render order to ensure it renders on top
+      this.mesh.renderOrder = 5;
       
       // Add to user data to ensure shadows stay disabled
       this.mesh.userData.disableShadows = true;
       this.mesh.userData.noShadow = true;
       this.mesh.userData.ignoreLight = true;
       
-      // Remove bottom faces to improve performance
-      this.removeBottomFaces(geometry);
+      // Position slightly above water to avoid z-fighting
+      this.mesh.position.y = 0.01;
     } catch (error) {
       console.error('Error creating mesh:', error);
     }
@@ -548,46 +515,8 @@ class PolygonMesh {
     }
   }
   
-  // Modify the removeBottomFaces method to be more aggressive
-  private removeBottomFaces(geometry: THREE.ExtrudeGeometry) {
-    const position = geometry.getAttribute('position');
-    const count = position.count;
-    
-    const keepFace = [];
-    
-    for (let i = 0; i < count / 3; i++) {
-      const a = new THREE.Vector3().fromBufferAttribute(position, i * 3);
-      const b = new THREE.Vector3().fromBufferAttribute(position, i * 3 + 1);
-      const c = new THREE.Vector3().fromBufferAttribute(position, i * 3 + 2);
-      
-      const ab = new THREE.Vector3().subVectors(b, a);
-      const ac = new THREE.Vector3().subVectors(c, a);
-      const normal = new THREE.Vector3().crossVectors(ab, ac).normalize();
-      
-      // Only keep faces that are pointing exactly upward (top faces)
-      keepFace[i] = normal.y > 0.99; // Even more strict threshold (was 0.9)
-    }
-    
-    const index = [];
-    for (let i = 0; i < count / 3; i++) {
-      if (keepFace[i]) {
-        index.push(i * 3, i * 3 + 1, i * 3 + 2);
-      }
-    }
-    
-    const newGeometry = new THREE.BufferGeometry();
-    
-    for (const name in geometry.attributes) {
-      newGeometry.setAttribute(name, geometry.attributes[name]);
-    }
-    
-    newGeometry.setIndex(index);
-    
-    if (this.mesh) {
-      this.mesh.geometry.dispose();
-      this.mesh.geometry = newGeometry;
-    }
-  }
+  // This method is no longer needed since we're using ShapeGeometry
+  // which is already completely flat with no bottom faces
 }
 
 export default PolygonMesh;
