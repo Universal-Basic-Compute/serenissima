@@ -241,45 +241,24 @@ class PolygonMesh {
         console.log(`Coat of arms texture loaded successfully for ${this.polygon.id}`);
         const circularTexture = this.createCircularTexture(texture);
         
-        // Create a material with enhanced settings to completely avoid edge artifacts
-        const material = new THREE.MeshBasicMaterial({
-          map: circularTexture,
-          transparent: true,
-          side: THREE.FrontSide,
-          opacity: 1.0,
-          depthTest: true,
-          depthWrite: true,
-          // Enhanced polygon offset to completely prevent z-fighting
-          polygonOffset: true,
-          polygonOffsetFactor: 3.0,
-          polygonOffsetUnits: 3.0
-        });
-        
+        // Instead of creating new geometry, just update the material of the existing mesh
         if (this.mesh) {
-          // Save the original material
-          const originalMaterial = this.mesh.material;
-          
-          // Create a material for the sides
-          const sidesMaterial = new THREE.MeshBasicMaterial({
-            color: this.determineLandColor(),
+          // Create a material with the coat of arms texture
+          const material = new THREE.MeshBasicMaterial({
+            map: circularTexture,
+            transparent: true,
             side: THREE.FrontSide,
-            transparent: false,
             opacity: 1.0,
             depthTest: true,
             depthWrite: true,
-            // Match polygon offset settings for consistency
             polygonOffset: true,
             polygonOffsetFactor: 3.0,
-            polygonOffsetUnits: 3.0
+            polygonOffsetUnits: 3.0,
+            color: this.determineLandColor() // Apply the land color to tint the texture
           });
           
-          // Apply the new materials
-          this.mesh.material = [material, sidesMaterial];
-          
-          // Set material groups
-          const geometry = this.mesh.geometry;
-          geometry.clearGroups();
-          geometry.addGroup(0, Infinity, 0); // All of the polygon uses the first material
+          // Simply replace the material instead of creating new geometry
+          this.mesh.material = material;
           
           // Increase render order to ensure it renders above other elements
           this.mesh.renderOrder = 20;
