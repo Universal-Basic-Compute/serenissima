@@ -188,6 +188,10 @@ export default class WaterEffect {
     this.scene.remove(this.waterPlane);
     this.waterGeometry.dispose();
     this.waterMaterial.dispose();
-    this.waterNormalMap.dispose();
+    
+    // Only dispose of the normal map if it exists
+    if (this.waterNormalMap) {
+      this.waterNormalMap.dispose();
+    }
   }
 }
