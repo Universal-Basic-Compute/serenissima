@@ -90,8 +90,8 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
 
   // Initialize audio and play first track
   useEffect(() => {
-    if (!isLoading && tracks.length > 0 && isPlaying && !currentTrack) {
-      // Instead of immediately trying to play, set up the audio element first
+    if (!isLoading && tracks.length > 0) {
+      // Always set up a track, even if we're not sure we can play it yet
       const randomIndex = Math.floor(Math.random() * tracks.length);
       const firstTrack = tracks[randomIndex];
       setCurrentTrack(firstTrack);
@@ -99,28 +99,60 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
       if (audioRef.current) {
         audioRef.current.src = firstTrack;
         audioRef.current.volume = volume;
+        audioRef.current.loop = false; // Ensure it's not looping
         
-        // Try to play, but handle the autoplay restriction gracefully
-        const playPromise = audioRef.current.play();
+        // Add a listener for when the user interacts with the page
+        const handleUserInteraction = () => {
+          if (!isPlaying && audioRef.current) {
+            // Try to play on first user interaction
+            audioRef.current.play()
+              .then(() => {
+                setIsPlaying(true);
+                // Remove the event listeners once we've successfully started playing
+                document.removeEventListener('click', handleUserInteraction);
+                document.removeEventListener('keydown', handleUserInteraction);
+                document.removeEventListener('touchstart', handleUserInteraction);
+              })
+              .catch(error => {
+                console.error('Still could not play audio after user interaction:', error);
+              });
+          }
+        };
         
-        if (playPromise !== undefined) {
-          playPromise.catch(error => {
-            // This will happen if autoplay is blocked
-            console.log('Autoplay prevented by browser:', error);
-            // Update state to show the correct play/pause button
-            setIsPlaying(false);
-            // Show a visual indicator that music is available
-            setShowControls(true); // Automatically show controls when autoplay is blocked
-            
-            // Hide controls after a few seconds
-            setTimeout(() => {
-              setShowControls(false);
-            }, 5000);
-          });
+        // Try to play immediately (this will likely fail due to autoplay restrictions)
+        if (autoplay) {
+          audioRef.current.play()
+            .then(() => {
+              setIsPlaying(true);
+              console.log('Autoplay successful');
+            })
+            .catch(error => {
+              // This is expected - autoplay is often blocked
+              console.log('Autoplay prevented by browser (expected):', error);
+              setIsPlaying(false);
+              
+              // Add event listeners to start playing on first user interaction
+              document.addEventListener('click', handleUserInteraction);
+              document.addEventListener('keydown', handleUserInteraction);
+              document.addEventListener('touchstart', handleUserInteraction);
+              
+              // Show controls briefly to indicate music is available
+              setShowControls(true);
+              setTimeout(() => {
+                setShowControls(false);
+              }, 3000);
+            });
         }
       }
     }
-  }, [isLoading, tracks, isPlaying, currentTrack, volume]);
+    
+    // Cleanup function to remove event listeners
+    return () => {
+      document.removeEventListener('click', () => {});
+      document.removeEventListener('keydown', () => {});
+      document.removeEventListener('touchstart', () => {});
+    };
+  }, [isLoading, tracks, volume, autoplay]); // Remove isPlaying and currentTrack from dependencies
 
   // Handle track ending - play next random track
   useEffect(() => {
