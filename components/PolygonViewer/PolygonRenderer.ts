@@ -249,12 +249,8 @@ export default class PolygonRenderer {
   }
   
   public update(selectedPolygonId: string | null = null) {
-    // Update LOD for all polygons
-    this.lodPolygons.forEach(lodPolygon => {
-      lodPolygon.updateLOD(this.camera.position);
-    });
-    
-    // Update selection state
+    // No need to update LOD anymore
+    // Just update selection state
     this.updateSelectionState(selectedPolygonId);
   }
   

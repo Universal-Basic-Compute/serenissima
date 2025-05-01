@@ -42,28 +42,16 @@ export default class LODPolygon {
     this.sandNormalMap = textures.sandNormalMap;
     this.sandRoughnessMap = textures.sandRoughnessMap;
     
-    // Create low detail mesh first
-    this.createLowDetailMesh();
+    // Create high detail mesh directly
+    this.createHighDetailMesh();
     
     // Make sure we have a valid mesh before adding to scene
-    if (this.lowDetailMesh) {
-      this.mesh = this.lowDetailMesh;
+    if (this.highDetailMesh) {
+      this.mesh = this.highDetailMesh;
       this.scene.add(this.mesh);
-      
-      // Create high detail mesh after a short delay
-      setTimeout(() => {
-        this.createHighDetailMesh();
-        
-        // Only switch to high detail if it was created successfully
-        if (this.highDetailMesh && this.distanceThreshold > 150) {
-          this.scene.remove(this.mesh);
-          this.mesh = this.highDetailMesh;
-          this.scene.add(this.mesh);
-        }
-      }, 500); // 500ms delay
     } else {
-      // If we couldn't create a low detail mesh, log an error
-      console.error('Failed to create low detail mesh for polygon:', polygon.id);
+      // If we couldn't create a high detail mesh, log an error
+      console.error('Failed to create high detail mesh for polygon:', polygon.id);
     }
   }
   
@@ -125,11 +113,14 @@ export default class LODPolygon {
     
     const shape = createPolygonShape(normalizedCoords);
     
-    // Create extruded geometry with full settings
+    // Create extruded geometry with enhanced settings for better quality
     const extrudeSettings = {
-      steps: this.performanceMode ? 1 : 2,
-      depth: 0.025 + Math.random() * 0.025,
-      bevelEnabled: false
+      steps: 2, // Increase steps for smoother extrusion
+      depth: 0.05 + Math.random() * 0.03, // Slightly taller with some variation
+      bevelEnabled: true, // Enable bevels for more realistic edges
+      bevelThickness: 0.01,
+      bevelSize: 0.01,
+      bevelSegments: 2
     };
     
     const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
@@ -140,13 +131,13 @@ export default class LODPolygon {
       color: this.activeView === 'land' 
         ? new THREE.Color(0x7cac6a).lerp(new THREE.Color(0x8fbc8f), Math.random() * 0.3) // Varied green colors
         : '#e6d2a8',
-      map: this.performanceMode ? null : this.sandBaseColor,
-      normalMap: this.performanceMode ? null : this.sandNormalMap,
-      roughnessMap: this.performanceMode ? null : this.sandRoughnessMap,
+      map: this.sandBaseColor,
+      normalMap: this.sandNormalMap,
+      roughnessMap: this.sandRoughnessMap,
       roughness: this.activeView === 'land' ? 0.9 : 0.7,
       metalness: this.activeView === 'land' ? 0.0 : 0.1,
-      side: this.performanceMode ? THREE.FrontSide : THREE.DoubleSide,
-      flatShading: this.performanceMode,
+      side: THREE.DoubleSide,
+      flatShading: false, // Smooth shading for better quality
       polygonOffset: true,
       polygonOffsetFactor: 1,
       polygonOffsetUnits: 1
@@ -161,21 +152,8 @@ export default class LODPolygon {
   }
   
   public updateLOD(cameraPosition: THREE.Vector3) {
-    // Calculate distance to camera
-    const distance = cameraPosition.distanceTo(this.mesh.position);
-    
-    // Switch based on distance
-    if (distance > this.distanceThreshold && this.mesh !== this.lowDetailMesh && this.lowDetailMesh) {
-      // Switch to low detail
-      this.scene.remove(this.mesh);
-      this.mesh = this.lowDetailMesh;
-      this.scene.add(this.mesh);
-    } else if (distance <= this.distanceThreshold && this.mesh !== this.highDetailMesh && this.highDetailMesh) {
-      // Switch to high detail
-      this.scene.remove(this.mesh);
-      this.mesh = this.highDetailMesh;
-      this.scene.add(this.mesh);
-    }
+    // No LOD switching needed anymore
+    return;
   }
   
   public getMesh() {
@@ -239,11 +217,6 @@ export default class LODPolygon {
   
   public cleanup() {
     this.scene.remove(this.mesh);
-    
-    if (this.lowDetailMesh) {
-      this.lowDetailMesh.geometry.dispose();
-      (this.lowDetailMesh.material as THREE.Material).dispose();
-    }
     
     if (this.highDetailMesh) {
       this.highDetailMesh.geometry.dispose();
