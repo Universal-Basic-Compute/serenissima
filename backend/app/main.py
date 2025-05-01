@@ -10,7 +10,7 @@ import json
 import requests
 from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
-from user_utils import find_user_by_identifier, update_compute_balance, transfer_compute
+from .user_utils import find_user_by_identifier, update_compute_balance, transfer_compute
 
 # Load environment variables
 load_dotenv()
