@@ -436,11 +436,23 @@ export default function Home() {
       // Create a map of user colors
       const colorMap: Record<string, string> = {};
       Object.values(users).forEach(user => {
-        if (user.user_name && user.color) {
-          colorMap[user.user_name] = user.color;
-          console.log(`Added color for ${user.user_name}: ${user.color}`);
+        if (user.user_name) {
+          if (user.color) {
+            colorMap[user.user_name] = user.color;
+            console.log(`Added color for ${user.user_name}: ${user.color}`);
+          } else if (user.user_name === 'ConsiglioDeiDieci') {
+            // Special case for ConsiglioDeiDieci
+            colorMap[user.user_name] = '#8B0000'; // Dark red
+            console.log(`Added default color for ConsiglioDeiDieci: #8B0000`);
+          }
         }
       });
+      
+      // Always add ConsiglioDeiDieci if not present
+      if (!colorMap['ConsiglioDeiDieci']) {
+        colorMap['ConsiglioDeiDieci'] = '#8B0000'; // Dark red
+        console.log('Added missing ConsiglioDeiDieci with default color #8B0000');
+      }
       
       // Update colors in the renderer
       if (Object.keys(colorMap).length > 0) {
@@ -514,10 +526,19 @@ export default function Home() {
         console.log('ConsiglioDeiDieci user data:', users['ConsiglioDeiDieci']);
         console.log('ConsiglioDeiDieci color:', users['ConsiglioDeiDieci'].color);
         
-        // If ConsiglioDeiDieci has no color, log a warning
+        // If ConsiglioDeiDieci has no color, add a default color
         if (!users['ConsiglioDeiDieci'].color) {
-          console.warn('ConsiglioDeiDieci has no color defined in user data!');
+          console.warn('ConsiglioDeiDieci has no color defined in user data! Adding default color.');
+          users['ConsiglioDeiDieci'].color = '#8B0000'; // Dark red
         }
+      } else {
+        // If ConsiglioDeiDieci is missing, add it with default values
+        console.warn('ConsiglioDeiDieci not found in users data! Adding default entry.');
+        users['ConsiglioDeiDieci'] = {
+          user_name: 'ConsiglioDeiDieci',
+          color: '#8B0000', // Dark red
+          coat_of_arms_image: null
+        };
       }
       
       // Force an update of the polygon renderer with the users data
@@ -528,6 +549,12 @@ export default function Home() {
         // Explicitly update colors and coat of arms
         updatePolygonColors();
         updateCoatOfArms();
+        
+        // Force additional updates for land view
+        if (activeView === 'land') {
+          polygonRendererRef.current.updatePolygonOwnerColors();
+          polygonRendererRef.current.updateCoatOfArmsSprites();
+        }
       }
     }
   }, [users, activeView, updatePolygonColors, updateCoatOfArms]);
@@ -1343,8 +1370,30 @@ export default function Home() {
   useEffect(() => {
     const handleUsersLoaded = () => {
       console.log('Users data loaded event detected');
+      
+      // Add ConsiglioDeiDieci if not present
+      if (!users['ConsiglioDeiDieci']) {
+        console.log('Adding ConsiglioDeiDieci to users data');
+        const updatedUsers = {
+          ...users,
+          'ConsiglioDeiDieci': {
+            user_name: 'ConsiglioDeiDieci',
+            color: '#8B0000', // Dark red
+            coat_of_arms_image: null
+          }
+        };
+        // Update the store with the modified users data
+        usePolygonStore.setState({ users: updatedUsers });
+      }
+      
       updatePolygonColors();
       updateCoatOfArms();
+      
+      // Force additional updates for land view
+      if (activeView === 'land' && polygonRendererRef.current) {
+        polygonRendererRef.current.updatePolygonOwnerColors();
+        polygonRendererRef.current.updateCoatOfArmsSprites();
+      }
     };
     
     window.addEventListener('usersDataLoaded', handleUsersLoaded);
@@ -1352,7 +1401,7 @@ export default function Home() {
     return () => {
       window.removeEventListener('usersDataLoaded', handleUsersLoaded);
     };
-  }, [updatePolygonColors, updateCoatOfArms]);
+  }, [updatePolygonColors, updateCoatOfArms, users, activeView]);
 
   // Also add this to ensure polygons are loaded when the component mounts
   useEffect(() => {

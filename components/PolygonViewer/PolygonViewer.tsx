@@ -325,11 +325,8 @@ export default function PolygonViewer() {
   
   // Add this useEffect to ensure coat of arms are updated when users data changes
   useEffect(() => {
-    if (polygonRendererRef.current && users && Object.keys(users).length > 0 && !hasUpdatedCoatOfArmsRef.current) {
+    if (polygonRendererRef.current && users && Object.keys(users).length > 0) {
       console.log('Updating coat of arms from users data in PolygonViewer:', users);
-      
-      // Set the flag to true to prevent multiple updates
-      hasUpdatedCoatOfArmsRef.current = true;
       
       // Create a map of username to coat of arms URL
       const coatOfArmsMap: Record<string, string> = {};
@@ -349,6 +346,10 @@ export default function PolygonViewer() {
           if (user.color) {
             colorMap[user.user_name] = user.color;
             console.log(`Added color for ${user.user_name}:`, user.color);
+          } else if (user.user_name === 'ConsiglioDeiDieci') {
+            // Special case for ConsiglioDeiDieci
+            colorMap[user.user_name] = '#8B0000'; // Dark red
+            console.log(`Added default color for ConsiglioDeiDieci: #8B0000`);
           }
         }
       });
@@ -364,14 +365,18 @@ export default function PolygonViewer() {
       // Update the renderer with the color map
       if (Object.keys(colorMap).length > 0) {
         polygonRendererRef.current.updateOwnerColors(colorMap);
+        // Force an update of owner colors
+        polygonRendererRef.current.updatePolygonOwnerColors();
       }
       
       // Force an update of the view mode to trigger sprite creation
       if (activeView === 'land') {
         polygonRendererRef.current.updateViewMode(activeView);
+        // Force an update of coat of arms sprites
+        polygonRendererRef.current.updateCoatOfArmsSprites();
       }
     }
-  }, [users]); // Only depend on users
+  }, [users, activeView]); // Depend on users and activeView
   
   // Add an effect to listen for polygon deletion events
   useEffect(() => {
@@ -498,6 +503,21 @@ export default function PolygonViewer() {
     // Calculate bounds for all polygons outside the try block to make it accessible to all nested functions
     const bounds = calculateBounds(polygons);
     console.log('Calculated bounds:', bounds);
+    
+    // Ensure ConsiglioDeiDieci exists in users data
+    if (!users['ConsiglioDeiDieci']) {
+      console.warn('ConsiglioDeiDieci not found in users data during scene setup! Adding default entry.');
+      const updatedUsers = {
+        ...users,
+        'ConsiglioDeiDieci': {
+          user_name: 'ConsiglioDeiDieci',
+          color: '#8B0000', // Dark red
+          coat_of_arms_image: null
+        }
+      };
+      // Update the store with the modified users data
+      usePolygonStore.setState({ users: updatedUsers });
+    }
 
     try {
       // Initialize scene
@@ -914,6 +934,38 @@ export default function PolygonViewer() {
           if (polygonRendererRef.current) {
             console.log('Forcing coat of arms update for land view');
             polygonRendererRef.current.updateViewMode(activeView);
+            
+            // Force an update of owner colors
+            polygonRendererRef.current.updatePolygonOwnerColors();
+            
+            // Force an update of coat of arms sprites
+            polygonRendererRef.current.updateCoatOfArmsSprites();
+            
+            // If we have users data, apply it again to ensure it's displayed
+            if (users && Object.keys(users).length > 0) {
+              const coatOfArmsMap: Record<string, string> = {};
+              const colorMap: Record<string, string> = {};
+              
+              Object.values(users).forEach(user => {
+                if (user.user_name) {
+                  if (user.coat_of_arms_image) {
+                    coatOfArmsMap[user.user_name] = user.coat_of_arms_image;
+                  }
+                  if (user.color) {
+                    colorMap[user.user_name] = user.color;
+                  } else if (user.user_name === 'ConsiglioDeiDieci') {
+                    colorMap[user.user_name] = '#8B0000'; // Dark red
+                  }
+                }
+              });
+              
+              if (Object.keys(coatOfArmsMap).length > 0) {
+                polygonRendererRef.current.updateOwnerCoatOfArms(coatOfArmsMap);
+              }
+              if (Object.keys(colorMap).length > 0) {
+                polygonRendererRef.current.updateOwnerColors(colorMap);
+              }
+            }
           }
         }
         
@@ -941,7 +993,7 @@ export default function PolygonViewer() {
         }
       }
     }
-  }, [activeView, loadLandOwners]);
+  }, [activeView, loadLandOwners, users]);
 
   // Add a separate effect to handle quality changes
   useEffect(() => {
@@ -966,8 +1018,17 @@ export default function PolygonViewer() {
       if (bridgeRendererRef.current) {
         bridgeRendererRef.current.updateQuality(!highQuality);
       }
+      
+      // Force visual updates after quality change
+      setTimeout(() => {
+        if (activeView === 'land' && polygonRendererRef.current) {
+          console.log('Forcing visual updates after quality change');
+          polygonRendererRef.current.updatePolygonOwnerColors();
+          polygonRendererRef.current.updateCoatOfArmsSprites();
+        }
+      }, 500);
     }
-  }, [highQuality]);
+  }, [highQuality, activeView]);
   
   // Create memoized components before any conditional returns
   const ViewModeMenuMemo = useMemo(() => (

@@ -529,49 +529,49 @@ export default class PolygonRenderer {
   public updatePolygonOwnerColors() {
     console.log('Updating all polygon owner colors with', Object.keys(this.ownerColorMap).length, 'colors');
     
-    // Vérifier si nous avons des couleurs de propriétaires
+    // Check if we have owner colors
     if (Object.keys(this.ownerColorMap).length === 0) {
       console.warn('No owner colors available');
       return;
     }
     
-    // Parcourir tous les polygones
+    // Process all polygons
     this.polygons.forEach(polygon => {
       if (polygon.owner) {
         console.log(`Processing polygon ${polygon.id} owned by ${polygon.owner}`);
         
-        // Trouver le PolygonMesh correspondant
+        // Find the corresponding PolygonMesh
         const polygonMesh = this.PolygonMeshs.find(pm => {
           const mesh = pm.getMesh();
           return mesh && this.polygonMeshesRef.current[polygon.id] === mesh;
         });
         
         if (polygonMesh) {
-          // Obtenir la couleur du propriétaire
+          // Get the owner's color
           let ownerColor = null;
           if (this.ownerColorMap[polygon.owner]) {
             ownerColor = this.ownerColorMap[polygon.owner];
             console.log(`Using stored color for ${polygon.owner}: ${ownerColor}`);
           } else if (this.users[polygon.owner] && this.users[polygon.owner].color) {
             ownerColor = this.users[polygon.owner].color;
-            // Stocker pour une utilisation future
+            // Store for future use
             this.ownerColorMap[polygon.owner] = ownerColor;
             console.log(`Found color for ${polygon.owner} in users data: ${ownerColor}`);
           } else if (polygon.owner === 'ConsiglioDeiDieci') {
-            // Cas spécial pour ConsiglioDeiDieci
-            ownerColor = '#8B0000'; // Rouge foncé
+            // Special case for ConsiglioDeiDieci
+            ownerColor = '#8B0000'; // Dark red
             this.ownerColorMap[polygon.owner] = ownerColor;
             console.log(`Using hardcoded color for ConsiglioDeiDieci: ${ownerColor}`);
           } else {
-            // Utiliser une couleur par défaut si aucune couleur de propriétaire n'est spécifiée
-            ownerColor = '#7cac6a'; // Couleur verte par défaut
+            // Use default color if no owner color is specified
+            ownerColor = '#7cac6a'; // Default green color
           }
           
           if (ownerColor) {
             console.log(`Applying color ${ownerColor} to polygon ${polygon.id} owned by ${polygon.owner}`);
             polygonMesh.updateOwner(polygon.owner, ownerColor);
             
-            // Forcer une mise à jour du matériau
+            // Force material update
             const mesh = polygonMesh.getMesh();
             if (mesh) {
               if (Array.isArray(mesh.material)) {
@@ -591,7 +591,7 @@ export default class PolygonRenderer {
       }
     });
     
-    // Forcer un rendu pour appliquer les changements
+    // Force a render to apply changes
     if (this.scene.userData.forceRender) {
       this.scene.userData.forceRender();
     }
@@ -718,6 +718,11 @@ export default class PolygonRenderer {
         // Cache the color for future use
         this.ownerColorMap[polygon.owner] = ownerColor;
         console.log(`Using color from users data for ${polygon.owner}: ${ownerColor}`);
+      } else if (polygon.owner === 'ConsiglioDeiDieci') {
+        // Special case for ConsiglioDeiDieci
+        ownerColor = '#8B0000'; // Dark red
+        this.ownerColorMap[polygon.owner] = ownerColor;
+        console.log(`Using hardcoded color for ConsiglioDeiDieci: ${ownerColor}`);
       }
       
       // Find the corresponding PolygonMesh
@@ -749,9 +754,6 @@ export default class PolygonRenderer {
     if (this.scene.userData.forceRender) {
       this.scene.userData.forceRender();
     }
-    
-    // Mark that we have updated coat of arms
-    this.hasUpdatedCoatOfArms = true;
   }
 
   // Add this helper method to create a flat texture on the land for a polygon

@@ -184,6 +184,10 @@ class PolygonMesh {
         return new THREE.Color().lerpColors(sandColor, ownerColor, 0.7);
       } else if (this.polygon.owner) {
         // If we have an owner but no color, use a default color
+        if (this.polygon.owner === 'ConsiglioDeiDieci') {
+          // Special case for ConsiglioDeiDieci
+          return new THREE.Color(0x8B0000); // Dark red
+        }
         return new THREE.Color(0x7cac6a);
       } else {
         return new THREE.Color(0xe6d2a8);
