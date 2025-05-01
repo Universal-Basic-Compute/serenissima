@@ -95,28 +95,42 @@ export default class InteractionManager {
     // Update the raycaster with the camera and mouse position
     this.raycaster.setFromCamera(this.mouse, this.camera);
     
-    // Get objects intersecting the ray
-    const intersects = this.raycaster.intersectObjects(Object.values(this.polygonMeshesRef.current), true);
+    // IMPORTANT CHANGE: Use recursive=true to check all children of objects
+    // This ensures we detect all meshes, including those in LOD groups
+    const intersects = this.raycaster.intersectObjects(this.scene.children, true);
     
     // Check if we're hovering over a polygon
     if (intersects.length > 0) {
-      // Find the first intersected object that is a polygon mesh
-      const intersectedObject = intersects[0].object;
-      
-      // Find the polygon ID from our ref
-      const hoveredId = Object.keys(this.polygonMeshesRef.current).find(
-        id => this.polygonMeshesRef.current[id] === intersectedObject || 
-             (intersectedObject.parent && this.polygonMeshesRef.current[id] === intersectedObject.parent)
-      );
-      
-      if (hoveredId && this.hoveredPolygonId !== hoveredId) {
-        // Update hover state
-        this.setHoveredPolygonId(hoveredId);
-        this.hoveredPolygonId = hoveredId;
-        return;
+      // Find the first intersected object that is a polygon mesh or its child
+      for (const intersect of intersects) {
+        // Get the object or its parent if it's a child mesh
+        const object = intersect.object;
+        let targetObject = object;
+        
+        // Traverse up the parent chain to find the root mesh
+        while (targetObject.parent && !(targetObject instanceof THREE.Mesh)) {
+          targetObject = targetObject.parent;
+        }
+        
+        // Find the polygon ID from our ref
+        const hoveredId = Object.keys(this.polygonMeshesRef.current).find(
+          id => this.polygonMeshesRef.current[id] === targetObject || 
+               this.polygonMeshesRef.current[id] === object
+        );
+        
+        if (hoveredId) {
+          if (this.hoveredPolygonId !== hoveredId) {
+            // Update hover state
+            this.setHoveredPolygonId(hoveredId);
+            this.hoveredPolygonId = hoveredId;
+          }
+          return; // Exit after finding the first valid polygon
+        }
       }
-    } else if (this.hoveredPolygonId) {
-      // Clear hover state when not hovering over any polygon
+    }
+    
+    // If we get here, we're not hovering over any polygon
+    if (this.hoveredPolygonId) {
       this.setHoveredPolygonId(null);
       this.hoveredPolygonId = null;
     }
@@ -132,7 +146,6 @@ export default class InteractionManager {
     }
     
     // CRITICAL: Check if this is a drag end event rather than a true click
-    // This helps distinguish between camera panning and actual clicks
     if (this.isDragging) {
       this.isDragging = false;
       return;
@@ -148,47 +161,52 @@ export default class InteractionManager {
       // Update the raycaster with the camera and mouse position
       this.raycaster.setFromCamera(this.mouse, this.camera);
       
-      // Get objects intersecting the ray
-      const intersects = this.raycaster.intersectObjects(this.scene.children, false);
+      // IMPORTANT CHANGE: Use recursive=true to check all children of objects
+      const intersects = this.raycaster.intersectObjects(this.scene.children, true);
       
       // Check if we're clicking on a polygon
       if (intersects.length > 0) {
-        const object = intersects[0].object;
-        
-        // Find the polygon ID from our ref
-        const clickedId = Object.keys(this.polygonMeshesRef.current).find(
-          id => this.polygonMeshesRef.current[id] === object
-        );
-        
-        if (clickedId) {
-          // Log that we're selecting a polygon
-          console.log(`Selecting polygon: ${clickedId}`);
+        // Find the first intersected object that is a polygon mesh or its child
+        for (const intersect of intersects) {
+          // Get the object or its parent if it's a child mesh
+          const object = intersect.object;
+          let targetObject = object;
           
-          // Only toggle selection if clicking the same polygon
-          // Otherwise, always select the new polygon
-          const newSelectedId = clickedId === this.selectedPolygonId ? null : clickedId;
+          // Traverse up the parent chain to find the root mesh
+          while (targetObject.parent && !(targetObject instanceof THREE.Mesh)) {
+            targetObject = targetObject.parent;
+          }
           
-          // Update selection state directly without setTimeout
-          // This avoids unnecessary re-renders
-          this.setSelectedPolygonId(newSelectedId);
-          this.selectedPolygonId = newSelectedId;
+          // Find the polygon ID from our ref
+          const clickedId = Object.keys(this.polygonMeshesRef.current).find(
+            id => this.polygonMeshesRef.current[id] === targetObject || 
+                 this.polygonMeshesRef.current[id] === object
+          );
           
-          this.isProcessingClick = false;
-          return;
+          if (clickedId) {
+            // Log that we're selecting a polygon
+            console.log(`Selecting polygon: ${clickedId}`);
+            
+            // Only toggle selection if clicking the same polygon
+            // Otherwise, always select the new polygon
+            const newSelectedId = clickedId === this.selectedPolygonId ? null : clickedId;
+            
+            // Update selection state
+            this.setSelectedPolygonId(newSelectedId);
+            this.selectedPolygonId = newSelectedId;
+            
+            this.isProcessingClick = false;
+            return; // Exit after finding the first valid polygon
+          }
         }
       } 
       
       // Clicking on empty space, deselect current selection
       if (this.selectedPolygonId) {
-        // Update selection state directly without setTimeout
         this.setSelectedPolygonId(null);
         this.selectedPolygonId = null;
-        
-        this.isProcessingClick = false;
-        return;
       }
       
-      // If we get here, we didn't click on anything
       this.isProcessingClick = false;
     } catch (error) {
       console.error("Error in polygon interaction:", error);

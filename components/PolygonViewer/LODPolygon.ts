@@ -429,6 +429,10 @@ export default class LODPolygon {
         material.emissive.set('#ff6600'); // Orange glow
         material.emissiveIntensity = 0.3;
         
+        // IMPORTANT: Adjust the polygon's position to prevent z-fighting
+        // Move the mesh slightly up when selected
+        mesh.position.y += 0.02; // Move selected polygons higher than hovered ones
+        
         // Make sure the material update is applied
         material.needsUpdate = true;
       } else {
@@ -437,6 +441,10 @@ export default class LODPolygon {
           material.color.copy(this.originalColor);
           material.emissive.set('#000000');
           material.emissiveIntensity = 0;
+          
+          // IMPORTANT: Restore the original position
+          // Move the mesh back to its original position
+          mesh.position.y -= 0.02;
           
           // Make sure the material update is applied
           material.needsUpdate = true;
@@ -479,6 +487,10 @@ export default class LODPolygon {
         // Reduce roughness for a more shiny appearance
         material.roughness = 0.2; // Decrease from 0.3 to 0.2 for more shine
         
+        // IMPORTANT: Adjust the polygon's position to prevent z-fighting
+        // Move the mesh slightly up when hovered
+        this.highDetailMesh.position.y += 0.01;
+        
         // Update material
         material.needsUpdate = true;
       }
@@ -490,6 +502,10 @@ export default class LODPolygon {
         material.color.copy(this.originalMaterial.color);
         material.roughness = this.originalMaterial.roughness;
         material.needsUpdate = true;
+        
+        // IMPORTANT: Restore the original position
+        // Move the mesh back to its original position
+        this.highDetailMesh.position.y -= 0.01;
       }
     }
   }
