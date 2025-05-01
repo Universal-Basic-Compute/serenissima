@@ -160,9 +160,43 @@ async def store_wallet(wallet_data: WalletRequest):
         existing_records = users_table.all(formula=formula)
         
         if existing_records:
-            # Return existing record
+            # Update existing record with new data
             record = existing_records[0]
             print(f"Found existing wallet record: {record['id']}")
+            
+            # Create update fields dictionary
+            update_fields = {}
+            
+            if wallet_data.compute_amount is not None:
+                update_fields["ComputeAmount"] = wallet_data.compute_amount
+                
+            if wallet_data.user_name:
+                update_fields["Username"] = wallet_data.user_name
+                
+            if wallet_data.first_name:
+                update_fields["FirstName"] = wallet_data.first_name
+                
+            if wallet_data.last_name:
+                update_fields["LastName"] = wallet_data.last_name
+                
+            if wallet_data.email:
+                update_fields["Email"] = wallet_data.email
+                
+            if wallet_data.family_coat_of_arms:
+                update_fields["FamilyCoatOfArms"] = wallet_data.family_coat_of_arms
+                
+            if wallet_data.family_motto:
+                update_fields["FamilyMotto"] = wallet_data.family_motto
+                
+            if wallet_data.coat_of_arms_image:
+                update_fields["CoatOfArmsImage"] = wallet_data.coat_of_arms_image
+            
+            # Only update if there are fields to update
+            if update_fields:
+                print(f"Updating wallet record with fields: {update_fields}")
+                record = users_table.update(record["id"], update_fields)
+                print(f"Updated wallet record: {record['id']}")
+            
             return {
                 "id": record["id"],
                 "wallet_address": record["fields"].get("Wallet", ""),
@@ -206,6 +240,12 @@ async def store_wallet(wallet_data: WalletRequest):
             fields["CoatOfArmsImage"] = wallet_data.coat_of_arms_image
         
         print(f"Creating new wallet record with fields: {fields}")
+        # Print the actual values for debugging
+        print(f"First Name: '{wallet_data.first_name}'")
+        print(f"Last Name: '{wallet_data.last_name}'")
+        print(f"Family Coat of Arms: '{wallet_data.family_coat_of_arms}'")
+        print(f"Family Motto: '{wallet_data.family_motto}'")
+        print(f"Coat of Arms Image URL length: {len(wallet_data.coat_of_arms_image or '')}")
         record = users_table.create(fields)
         print(f"Created new wallet record: {record['id']}")
         

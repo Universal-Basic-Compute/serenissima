@@ -211,6 +211,16 @@ export default function Home() {
     }
     
     try {
+      console.log('Submitting profile data to backend:', {
+        wallet_address: walletAddress,
+        user_name: `${firstName.trim()} ${lastName.trim()}`,
+        first_name: firstName.trim(),
+        last_name: lastName.trim(),
+        family_coat_of_arms: familyCoatOfArms.trim(),
+        family_motto: familyMotto.trim(),
+        coat_of_arms_image: coatOfArmsImage
+      });
+      
       // Update the user record with the first name, last name, coat of arms, family motto, and image URL
       const response = await fetch('http://localhost:8000/api/wallet', {
         method: 'POST',
@@ -229,11 +239,12 @@ export default function Home() {
       });
       
       if (!response.ok) {
-        throw new Error('Failed to update profile');
+        const errorData = await response.json();
+        throw new Error(`Failed to update profile: ${errorData.detail || response.statusText}`);
       }
       
       const data = await response.json();
-      console.log('Profile updated:', data);
+      console.log('Profile updated successfully:', data);
       
       // Update the user profile state
       setUserProfile({
@@ -254,7 +265,7 @@ export default function Home() {
       alert(`Welcome to La Serenissima, ${firstName} ${lastName}!`);
     } catch (error) {
       console.error('Error updating profile:', error);
-      alert('Failed to update profile. Please try again.');
+      alert(`Failed to update profile. Please try again. Error: ${error.message}`);
     }
   };
 
