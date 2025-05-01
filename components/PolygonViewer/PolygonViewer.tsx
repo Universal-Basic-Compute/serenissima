@@ -224,6 +224,7 @@ export default function PolygonViewer() {
       
       // Update controls to enable camera movement
       if (sceneRef.current && sceneRef.current.controls) {
+        // Store camera position before update to avoid unnecessary logging
         sceneRef.current.controls.update();
       }
       
