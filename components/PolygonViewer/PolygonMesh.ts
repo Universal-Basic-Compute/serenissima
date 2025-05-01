@@ -149,6 +149,19 @@ class PolygonMesh {
       
       this.mesh = new THREE.Mesh(geometry, material);
       
+      // Create a wireframe outline for the polygon
+      const edgesGeometry = new THREE.EdgesGeometry(geometry);
+      const edgesMaterial = new THREE.LineBasicMaterial({ 
+        color: 0x000000, 
+        transparent: true,
+        opacity: 0.1,
+        linewidth: 1
+      });
+      const edges = new THREE.LineSegments(edgesGeometry, edgesMaterial);
+      
+      // Add the edges as a child of the mesh
+      this.mesh.add(edges);
+      
       // EXPLICITLY disable shadows
       this.mesh.castShadow = false;
       this.mesh.receiveShadow = false;
@@ -161,12 +174,12 @@ class PolygonMesh {
       this.mesh.userData.noShadow = true;
       this.mesh.userData.ignoreLight = true;
       
-      // Position ALL polygons at EXACTLY the same height to eliminate any z-fighting between adjacent polygons
-      this.mesh.position.y = 0.0; // Set to exactly 0.0 to ensure all polygons are at identical height
+      // Position ALL polygons at a very slightly elevated height to prevent z-fighting with water
+      this.mesh.position.y = 0.001; // Set to a very small positive value to ensure all polygons are slightly above water
       
       // Completely flat with no edges or borders
-      // Apply a very slight inset to each polygon to create tiny gaps between them
-      geometry.scale(0.999, 1, 0.999); // Scale slightly inward while maintaining height
+      // Apply a more significant inset to each polygon to create small gaps between them
+      geometry.scale(0.998, 1, 0.998); // Scale even more inward to create small gaps between polygons
     } catch (error) {
       console.error('Error creating mesh:', error);
     }
