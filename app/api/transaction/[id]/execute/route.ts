@@ -18,7 +18,8 @@ function ensureTransactionsDirExists() {
 function isAirtableFormulaError(error: any): boolean {
   const errorStr = String(error);
   return errorStr.includes('INVALID_FILTER_BY_FORMULA') || 
-         errorStr.includes('Invalid formula');
+         errorStr.includes('Invalid formula') ||
+         errorStr.includes('OR');
 }
 
 export async function POST(
@@ -66,7 +67,7 @@ export async function POST(
       
       // Handle the specific Airtable formula error
       const errorData = await response.json().catch(() => ({}));
-      if (response.status === 500 && isAirtableFormulaError(errorData.detail || '')) {
+      if (response.status === 500 && (isAirtableFormulaError(errorData.detail || '') || String(errorData.detail || '').includes('OR'))) {
         console.log('Detected Airtable formula error, falling back to local execution');
         // Fall through to local execution
       } else if (response.status !== 404) {
