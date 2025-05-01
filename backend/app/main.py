@@ -10,7 +10,10 @@ import json
 import requests
 from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
-from .user_utils import find_user_by_identifier, update_compute_balance, transfer_compute
+
+# Add the current directory to the Python path
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+from user_utils import find_user_by_identifier, update_compute_balance, transfer_compute
 
 # Load environment variables
 load_dotenv()
