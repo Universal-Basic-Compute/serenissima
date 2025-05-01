@@ -107,8 +107,10 @@ export default function Home() {
     polygon: google.maps.Polygon;
   } | null>(null);
   
-  // Add state for users data
+  // Add state for users data and active view
   const [users, setUsers] = useState<Record<string, any>>({});
+  const [activeView, setActiveView] = useState<'buildings' | 'transport' | 'land'>('land');
+  const polygonRendererRef = useRef<any>(null);
   
   // Initialize wallet adapter
   useEffect(() => {
