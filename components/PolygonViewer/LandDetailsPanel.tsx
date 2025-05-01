@@ -1,13 +1,20 @@
 import { useEffect, useState } from 'react';
 import ActionButton from '../UI/ActionButton';
+import { Polygon } from './types';
 
 interface LandDetailsPanelProps {
   selectedPolygonId: string | null;
   onClose: () => void;
+  polygons: Polygon[];
 }
 
-export default function LandDetailsPanel({ selectedPolygonId, onClose }: LandDetailsPanelProps) {
+export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons }: LandDetailsPanelProps) {
   const [isVisible, setIsVisible] = useState(false);
+  
+  // Find the selected polygon
+  const selectedPolygon = selectedPolygonId 
+    ? polygons.find(p => p.id === selectedPolygonId)
+    : null;
   
   // Show panel with animation when a polygon is selected
   useEffect(() => {
@@ -28,7 +35,9 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose }: LandDet
     >
       <div className="p-6">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-semibold">Land Details</h2>
+          <h2 className="text-xl font-semibold">
+            {selectedPolygon?.historicalName || 'Land Details'}
+          </h2>
           <button 
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700"
@@ -40,6 +49,23 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose }: LandDet
         </div>
         
         <div className="space-y-4">
+          {selectedPolygon?.historicalName && (
+            <div>
+              <h3 className="text-sm font-medium text-gray-500">Historical Name</h3>
+              <p className="mt-1 font-semibold">{selectedPolygon.historicalName}</p>
+              {selectedPolygon.englishName && (
+                <p className="mt-1 text-sm italic text-gray-600">{selectedPolygon.englishName}</p>
+              )}
+            </div>
+          )}
+          
+          {selectedPolygon?.historicalDescription && (
+            <div>
+              <h3 className="text-sm font-medium text-gray-500">Historical Description</h3>
+              <p className="mt-1 text-sm">{selectedPolygon.historicalDescription}</p>
+            </div>
+          )}
+          
           <div>
             <h3 className="text-sm font-medium text-gray-500">Land ID</h3>
             <p className="mt-1">{selectedPolygonId}</p>
@@ -50,15 +76,14 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose }: LandDet
             <p className="mt-1">Available</p>
           </div>
           
-          <div>
-            <h3 className="text-sm font-medium text-gray-500">Size</h3>
-            <p className="mt-1">0.25 acres</p>
-          </div>
-          
-          <div>
-            <h3 className="text-sm font-medium text-gray-500">Location</h3>
-            <p className="mt-1">Venice, Italy</p>
-          </div>
+          {selectedPolygon?.centroid && (
+            <div>
+              <h3 className="text-sm font-medium text-gray-500">Location</h3>
+              <p className="mt-1">
+                {selectedPolygon.centroid.lat.toFixed(6)}, {selectedPolygon.centroid.lng.toFixed(6)}
+              </p>
+            </div>
+          )}
           
           <div className="pt-4">
             <ActionButton onClick={() => alert('Purchase action')} variant="primary">
