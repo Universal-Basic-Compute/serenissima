@@ -432,7 +432,55 @@ export async function POST(
     // Update the transaction
     transaction.buyer = buyer;
     transaction.executed_at = new Date().toISOString();
-    
+      
+    // Update the land ownership if it's a land transaction
+    if (transaction.type === 'land' && transaction.asset_id) {
+      try {
+        const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+          
+        // Update the land owner in Airtable
+        const landUpdateResponse = await fetch(`${apiBaseUrl}/api/land/${transaction.asset_id}/update-owner`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ 
+            owner: buyer,
+            wallet: buyer
+          }),
+          signal: AbortSignal.timeout(10000)
+        });
+          
+        if (landUpdateResponse.ok) {
+          console.log(`Successfully updated land owner in Airtable for ${transaction.asset_id}`);
+        } else {
+          console.warn(`Failed to update land owner in Airtable: ${landUpdateResponse.status}`);
+            
+          // Try to create a new land record if update fails
+          const landCreateResponse = await fetch(`${apiBaseUrl}/api/land`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ 
+              land_id: transaction.asset_id,
+              user: buyer,
+              wallet_address: buyer
+            }),
+            signal: AbortSignal.timeout(10000)
+          });
+            
+          if (landCreateResponse.ok) {
+            console.log(`Created new land record for ${transaction.asset_id} with owner ${buyer}`);
+          } else {
+            console.warn(`Failed to create land record: ${landCreateResponse.status}`);
+          }
+        }
+      } catch (landUpdateError) {
+        console.warn(`Could not update land owner in Airtable for ${transaction.asset_id}:`, landUpdateError);
+      }
+    }
+      
     // Save the updated transaction
     try {
       fs.writeFileSync(filePath, JSON.stringify(transaction, null, 2));
