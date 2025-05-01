@@ -131,8 +131,13 @@ export default function PolygonViewer() {
     const animate = () => {
       requestAnimationFrame(animate);
       
-      // CRITICAL: Prevent any camera resets by removing all related code
-      // DO NOT update controls here - it might be causing the reset
+      // Update controls ONLY if user is actively interacting with them
+      if (sceneRef.current && sceneRef.current.controls && sceneRef.current.controls.enabled) {
+        // Only update controls if the user is actively using them
+        if (sceneRef.current.controls.userInteracting) {
+          sceneRef.current.controls.update();
+        }
+      }
       
       // Update water effect
       if (waterEffectRef.current) {
@@ -170,25 +175,7 @@ export default function PolygonViewer() {
     };
   }, [polygons, loading, activeView, highQuality, hoveredPolygonId, selectedPolygonId]);
   
-  // Add a separate effect for controls updates
-  useEffect(() => {
-    if (!sceneRef.current) return;
-    
-    // Create a separate animation loop just for controls
-    const updateControls = () => {
-      if (sceneRef.current && sceneRef.current.controls) {
-        sceneRef.current.controls.update();
-      }
-      requestAnimationFrame(updateControls);
-    };
-    
-    // Start the controls update loop
-    const controlsAnimationId = requestAnimationFrame(updateControls);
-    
-    return () => {
-      cancelAnimationFrame(controlsAnimationId);
-    };
-  }, []);
+  // We've removed the separate controls update loop to prevent camera resets
   
   if (loading) {
     return <div className="w-full h-full flex items-center justify-center">Loading polygons...</div>;
