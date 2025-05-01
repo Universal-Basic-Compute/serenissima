@@ -262,8 +262,13 @@ export default function PolygonViewer() {
     if (polygonRendererRef.current && Object.keys(ownerCoatOfArmsMap).length > 0) {
       console.log('Updating coat of arms in renderer with data:', ownerCoatOfArmsMap);
       polygonRendererRef.current.updateOwnerCoatOfArms(ownerCoatOfArmsMap);
+      
+      // Force an update of the view mode to trigger coat of arms application
+      if (activeView === 'land') {
+        polygonRendererRef.current.updateViewMode(activeView);
+      }
     }
-  }, [ownerCoatOfArmsMap]);
+  }, [ownerCoatOfArmsMap, activeView]);
   
   // Add this useEffect to ensure coat of arms are updated when users data changes
   useEffect(() => {
