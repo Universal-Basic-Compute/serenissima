@@ -839,10 +839,15 @@ async def execute_transaction(transaction_id: str, data: dict):
         if record["fields"].get("ExecutedAt"):
             raise HTTPException(status_code=400, detail="Transaction already executed")
         
+        # Get the seller and price from the transaction
+        seller = record["fields"].get("Seller", "")
+        price = record["fields"].get("Price", 0)
+        buyer = data["buyer"]
+        
         # Update the transaction with buyer and executed_at
         now = datetime.datetime.now().isoformat()
         updated_record = transactions_table.update(transaction_id, {
-            "Buyer": data["buyer"],
+            "Buyer": buyer,
             "ExecutedAt": now,
             "UpdatedAt": now
         })
@@ -860,13 +865,13 @@ async def execute_transaction(transaction_id: str, data: dict):
                 # Update the land owner
                 land_record = land_records[0]
                 lands_table.update(land_record["id"], {
-                    "User": data["buyer"]  # Changed from "Wallet" to "User" to match the field name in Airtable
+                    "User": buyer  # Changed from "Wallet" to "User" to match the field name in Airtable
                 })
             else:
                 # Create a new land record
                 land_fields = {
                     "LandId": asset_id,
-                    "User": data["buyer"]  # Changed from "Wallet" to "User" to match the field name in Airtable
+                    "User": buyer  # Changed from "Wallet" to "User" to match the field name in Airtable
                 }
                 
                 # Extract land details from Notes field if available
@@ -884,6 +889,44 @@ async def execute_transaction(transaction_id: str, data: dict):
                         pass
                 
                 lands_table.create(land_fields)
+        
+        # Transfer the price from buyer to seller
+        if price > 0 and seller and buyer:
+            # Get buyer's compute amount
+            buyer_formula = f"{{Wallet}}='{buyer}' OR {{Username}}='{buyer}'"
+            buyer_records = users_table.all(formula=buyer_formula)
+            
+            if not buyer_records:
+                raise HTTPException(status_code=404, detail="Buyer not found")
+            
+            buyer_record = buyer_records[0]
+            buyer_compute = buyer_record["fields"].get("ComputeAmount", 0)
+            
+            # Check if buyer has enough compute
+            if buyer_compute < price:
+                raise HTTPException(status_code=400, detail="Buyer does not have enough compute")
+            
+            # Get seller's compute amount
+            seller_formula = f"{{Wallet}}='{seller}' OR {{Username}}='{seller}'"
+            seller_records = users_table.all(formula=seller_formula)
+            
+            if not seller_records:
+                raise HTTPException(status_code=404, detail="Seller not found")
+            
+            seller_record = seller_records[0]
+            seller_compute = seller_record["fields"].get("ComputeAmount", 0)
+            
+            # Update buyer's compute amount
+            users_table.update(buyer_record["id"], {
+                "ComputeAmount": buyer_compute - price
+            })
+            
+            # Update seller's compute amount
+            users_table.update(seller_record["id"], {
+                "ComputeAmount": seller_compute + price
+            })
+            
+            print(f"Transferred {price} compute from {buyer} to {seller}")
         
         return {
             "id": updated_record["id"],
