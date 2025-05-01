@@ -61,7 +61,7 @@ const BuildingModelViewer: React.FC<BuildingModelViewerProps> = ({
     controls.dampingFactor = 0.25;
     controls.enableZoom = true;
     controls.autoRotate = true;
-    controls.autoRotateSpeed = 2;
+    controls.autoRotateSpeed = 3; // Increased from 2 to 3
     
     // Determine which loader to use based on file extension
     const fileExtension = modelPath.split('.').pop()?.toLowerCase();
@@ -126,14 +126,20 @@ const BuildingModelViewer: React.FC<BuildingModelViewerProps> = ({
         object.position.y = -center.y;
         object.position.z = -center.z;
         
-        // Scale model to fit view
+        // Scale model to fit view better
         const maxDim = Math.max(size.x, size.y, size.z);
         if (maxDim > 0) {
-          const scale = 2 / maxDim;
+          // Increase the scale factor to make the model larger within the viewer
+          const scale = 2.5 / maxDim; // Increased from 2 to 2.5
           object.scale.set(scale, scale, scale);
         }
         
         scene.add(object);
+        
+        // Adjust camera position for better viewing angle
+        camera.position.set(4, 3, 4); // Adjust these values for a better default view
+        camera.lookAt(0, 0, 0);
+        
         setIsLoading(false);
       } catch (err) {
         console.error('Error loading model:', err);

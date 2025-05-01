@@ -183,16 +183,16 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
                           <div className="flex items-start">
                             {/* 3D Model Viewer */}
                             {building.assets?.models?.glb ? (
-                              <div className="mr-3 flex-shrink-0">
+                              <div className="mr-4 flex-shrink-0">
                                 <BuildingModelViewer 
                                   modelPath={building.assets.models.glb}
-                                  width={80}
-                                  height={80}
+                                  width={120}
+                                  height={120}
                                   className="rounded bg-amber-100"
                                 />
                               </div>
                             ) : (
-                              <div className="mr-3 flex-shrink-0 w-20 h-20 bg-amber-100 rounded flex items-center justify-center">
+                              <div className="mr-4 flex-shrink-0 w-20 h-20 bg-amber-100 rounded flex items-center justify-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                                 </svg>
@@ -274,8 +274,8 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
                   <div className="mb-4 flex justify-center">
                     <BuildingModelViewer 
                       modelPath={selectedBuilding.assets.models.glb}
-                      width={300}
-                      height={300}
+                      width={400}
+                      height={400}
                       className="rounded bg-amber-100 border-2 border-amber-300 shadow-md"
                     />
                   </div>
