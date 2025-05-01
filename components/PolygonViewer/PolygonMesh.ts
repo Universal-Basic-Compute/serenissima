@@ -68,6 +68,16 @@ class PolygonMesh {
         return;
       }
       
+      // Check for NaN values in coordinates
+      const hasNaN = normalizedCoords.some(coord => 
+        isNaN(coord.x) || isNaN(coord.y)
+      );
+      
+      if (hasNaN) {
+        console.error('NaN coordinates detected in polygon:', this.polygon.id);
+        return;
+      }
+      
       const shape = createPolygonShape(normalizedCoords);
       
       // Create a COMPLETELY FLAT geometry with NO extrusion
@@ -91,7 +101,28 @@ class PolygonMesh {
         normals[i + 2] = 0; // Z component = 0
       }
       geometry.attributes.normal.needsUpdate = true;
-      geometry.computeBoundingSphere();
+      
+      // Validate positions before computing bounding sphere
+      const posArray = geometry.attributes.position.array;
+      let hasInvalidPos = false;
+      for (let i = 0; i < posArray.length; i++) {
+        if (isNaN(posArray[i]) || !isFinite(posArray[i])) {
+          hasInvalidPos = true;
+          console.error(`Invalid position value at index ${i} for polygon ${this.polygon.id}`);
+          break;
+        }
+      }
+      
+      if (!hasInvalidPos) {
+        // Only compute bounding sphere if all positions are valid
+        try {
+          geometry.computeBoundingSphere();
+        } catch (e) {
+          console.error(`Failed to compute bounding sphere for polygon ${this.polygon.id}:`, e);
+        }
+      } else {
+        console.warn(`Skipping bounding sphere computation for polygon ${this.polygon.id} due to invalid positions`);
+      }
       
       // Determine the color to use
       const landColor = this.determineLandColor();
@@ -181,9 +212,16 @@ class PolygonMesh {
       
       // Completely flat with no edges or borders
       // Apply a minimal inset to avoid z-fighting
-      geometry.scale(0.9995, 1, 0.9995); // Reduced scaling to help canal gaps between polygons
+      // Only scale if the geometry is valid
+      if (!hasInvalidPos) {
+        try {
+          geometry.scale(0.9995, 1, 0.9995); // Reduced scaling to help canal gaps between polygons
+        } catch (e) {
+          console.error(`Failed to scale geometry for polygon ${this.polygon.id}:`, e);
+        }
+      }
     } catch (error) {
-      console.error('Error creating mesh:', error);
+      console.error(`Error creating mesh for polygon ${this.polygon.id}:`, error);
     }
   }
   
