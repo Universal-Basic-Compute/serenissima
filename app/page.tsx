@@ -317,19 +317,19 @@ export default function Home() {
         lastName: lastName.trim(),
         coatOfArmsImage: coatOfArmsImage,
         familyMotto: familyMotto.trim(),
+        familyCoatOfArms: familyCoatOfArms.trim(), // Add this line to store the coat of arms description
         computeAmount: data.compute_amount // Add compute amount from response
       });
       
       // Close the prompt
       setShowUsernamePrompt(false);
-      setFirstName('');
-      setLastName('');
-      setFamilyCoatOfArms('');
-      setFamilyMotto('');
-      setCoatOfArmsImage(null);
       
       // Show success message
-      alert(`Welcome to La Serenissima, ${firstName} ${lastName}!`);
+      if (userProfile) {
+        alert(`Your noble identity has been updated, ${firstName} ${lastName}!`);
+      } else {
+        alert(`Welcome to La Serenissima, ${firstName} ${lastName}!`);
+      }
     } catch (error) {
       console.error('Error updating profile:', error);
       alert(`Failed to update profile. Please try again. Error: ${error.message}`);
@@ -1067,6 +1067,21 @@ export default function Home() {
                 </div>
                 <button
                   onClick={() => {
+                    setShowUsernamePrompt(true); // Reuse the username prompt for profile editing
+                    setUsernameInput(userProfile.username || '');
+                    setFirstName(userProfile.firstName || '');
+                    setLastName(userProfile.lastName || '');
+                    setFamilyCoatOfArms(userProfile.familyCoatOfArms || '');
+                    setFamilyMotto(userProfile.familyMotto || '');
+                    setCoatOfArmsImage(userProfile.coatOfArmsImage || null);
+                    setDropdownOpen(false);
+                  }}
+                  className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-amber-500 hover:text-white transition-colors"
+                >
+                  Edit Profile
+                </button>
+                <button
+                  onClick={() => {
                     console.log('Transfer button clicked, current state:', transferMenuOpen);
                     setTransferMenuOpen(true);
                     setDropdownOpen(false);
@@ -1140,11 +1155,19 @@ export default function Home() {
           <div className="bg-white p-8 rounded-lg shadow-lg w-[900px] max-w-[90vw] border-4 border-amber-700 flex flex-col md:flex-row">
             {/* Left side - Form */}
             <div className="md:w-1/2 pr-0 md:pr-6">
-              <h2 className="text-2xl font-serif font-semibold mb-4 text-amber-800 text-center">Welcome to La Serenissima</h2>
+              <h2 className="text-2xl font-serif font-semibold mb-4 text-amber-800 text-center">
+                {userProfile ? 'Edit Your Noble Profile' : 'Welcome to La Serenissima'}
+              </h2>
               
               <div className="mb-6 text-gray-700 italic text-center">
-                <p>The year is 1525. The Most Serene Republic of Venice stands as a beacon of wealth and power in the Mediterranean.</p>
-                <p className="mt-2">As a noble of Venice, you must now register your identity with the Council of Ten.</p>
+                {userProfile ? (
+                  <p>Update your noble identity and family heraldry as registered with the Council of Ten.</p>
+                ) : (
+                  <>
+                    <p>The year is 1525. The Most Serene Republic of Venice stands as a beacon of wealth and power in the Mediterranean.</p>
+                    <p className="mt-2">As a noble of Venice, you must now register your identity with the Council of Ten.</p>
+                  </>
+                )}
               </div>
               
               <div className="mb-6">
