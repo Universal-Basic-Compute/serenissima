@@ -129,33 +129,27 @@ export default function PolygonViewer() {
     
     // Animation loop
     const animate = () => {
-      // Prevent any camera resets
-      if (typeof window !== 'undefined') {
-        window.resetCameraTriggeredByUser = false;
-        if (window.resetCameraView) {
-          window.resetCameraView = () => {
-            console.log("Camera reset prevented");
-          };
-        }
-      }
+      requestAnimationFrame(animate);
       
-      const animationId = requestAnimationFrame(animate);
-      
-      // IMPORTANT: Only update controls, don't reset camera
-      if (scene.controls) {
-        scene.controls.update();
-      }
+      // CRITICAL: Prevent any camera resets by removing all related code
+      // DO NOT update controls here - it might be causing the reset
       
       // Update water effect
-      waterEffect.update(frameCount, !highQuality);
+      if (waterEffectRef.current) {
+        waterEffectRef.current.update(frameCount, !highQuality);
+      }
       
       // Update polygon LOD
-      polygonRenderer.update();
+      if (polygonRendererRef.current) {
+        polygonRendererRef.current.update();
+      }
       
       frameCount++;
       
       // Use composer instead of renderer directly to include post-processing effects
-      scene.composer.render();
+      if (sceneRef.current && sceneRef.current.composer) {
+        sceneRef.current.composer.render();
+      }
     };
     
     animate();
@@ -175,6 +169,26 @@ export default function PolygonViewer() {
       interactionManagerRef.current = null;
     };
   }, [polygons, loading, activeView, highQuality, hoveredPolygonId, selectedPolygonId]);
+  
+  // Add a separate effect for controls updates
+  useEffect(() => {
+    if (!sceneRef.current) return;
+    
+    // Create a separate animation loop just for controls
+    const updateControls = () => {
+      if (sceneRef.current && sceneRef.current.controls) {
+        sceneRef.current.controls.update();
+      }
+      requestAnimationFrame(updateControls);
+    };
+    
+    // Start the controls update loop
+    const controlsAnimationId = requestAnimationFrame(updateControls);
+    
+    return () => {
+      cancelAnimationFrame(controlsAnimationId);
+    };
+  }, []);
   
   if (loading) {
     return <div className="w-full h-full flex items-center justify-center">Loading polygons...</div>;

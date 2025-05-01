@@ -60,21 +60,19 @@ export default class SceneSetup {
     const renderPass = new RenderPass(this.scene, this.camera);
     this.composer.addPass(renderPass);
     
-    // Set up OrbitControls
+    // Set up OrbitControls with minimal configuration
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-    
-    // Disable auto rotate
+
+    // Disable all automatic behaviors
     this.controls.autoRotate = false;
-    
-    // Configure controls for stability
-    this.controls.enableDamping = true;
-    this.controls.dampingFactor = 0.05;
-    
-    // Make controls less sensitive
+    this.controls.enableDamping = false; // Disable damping to prevent auto-updates
+    this.controls.dampingFactor = 0;
+
+    // Make controls very simple
     this.controls.rotateSpeed = 0.5;
     this.controls.zoomSpeed = 0.5;
     this.controls.panSpeed = 0.5;
-    
+
     // Ensure controls are explicitly enabled
     this.controls.enablePan = true;
     this.controls.enableRotate = true;
@@ -84,7 +82,7 @@ export default class SceneSetup {
     this.controls.minPolarAngle = 0;
     this.controls.maxPolarAngle = Math.PI / 2 - 0.1;
     
-    // Limit zoom range
+    // Basic limits
     this.controls.minDistance = 10;
     this.controls.maxDistance = 300;
     
@@ -98,12 +96,10 @@ export default class SceneSetup {
     // Make panning parallel to the ground plane
     this.controls.screenSpacePanning = false;
     
-    // IMPORTANT: Remove any event listeners that might reset the camera
-    this.controls.removeEventListener('change', this.resetCamera);
-    this.controls.removeEventListener('change', this.handleCameraChange);
-    
     // Set initial target to center of scene
     this.controls.target.set(0, 0, 0);
+    
+    // IMPORTANT: Only call update ONCE during initialization
     this.controls.update();
     
     // Add lights

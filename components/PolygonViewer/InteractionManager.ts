@@ -61,10 +61,9 @@ export default class InteractionManager {
   }
   
   private onMouseMove(event: MouseEvent) {
-    // Add a check to prevent handling events when controls are being used
+    // CRITICAL: If any mouse button is pressed, don't do ANY interaction
+    // This ensures camera controls have complete priority
     if (event.buttons !== 0) {
-      // If any mouse button is pressed, this is likely a camera control operation
-      // Don't process for polygon interaction
       return;
     }
     
@@ -200,8 +199,9 @@ export default class InteractionManager {
   }
   
   private onMouseClick(event: MouseEvent) {
-    // Only handle left-click (button 0)
-    if (event.button !== 0) {
+    // CRITICAL: Only handle left-click when no modifier keys are pressed
+    // This ensures camera controls have complete priority
+    if (event.button !== 0 || event.ctrlKey || event.shiftKey || event.altKey || event.metaKey) {
       return;
     }
     
