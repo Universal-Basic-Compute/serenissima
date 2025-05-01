@@ -426,8 +426,8 @@ export default function PolygonViewer() {
     }
     
     // Add camera reference to window for debugging
-    if (typeof window !== 'undefined') {
-      (window as any).threeJsCamera = sceneSetup.camera;
+    if (typeof window !== 'undefined' && sceneRef.current) {
+      (window as any).threeJsCamera = sceneRef.current.camera;
     }
     
     // Check if texture files exist and are accessible
