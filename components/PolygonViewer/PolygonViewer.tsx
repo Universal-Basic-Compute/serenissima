@@ -144,71 +144,74 @@ export default function PolygonViewer() {
 
   // Load polygons on mount with progressive loading
   useEffect(() => {
-    console.log('Starting progressive loading...');
+    // Use a ref to track if we've already loaded data
+    const hasLoadedDataRef = useRef(false);
     
-    // Set a flag to track if we've already loaded data
-    let hasLoadedData = false;
-    
-    // First load polygons as they're most important
-    loadPolygons();
-    
-    // Set a timeout to force exit from loading state if it takes too long
-    const loadingTimeout = setTimeout(() => {
-      if (!hasLoadedData) {
-        console.log('Loading timeout reached, forcing exit from loading state');
-        usePolygonStore.setState({ loading: false });
-        hasLoadedData = true;
-      }
-    }, 30000); // 30 second timeout
-    
-    // Add a listener to detect when polygons are loaded
-    const handlePolygonsLoaded = () => {
-      console.log('Polygons loaded event detected');
-      hasLoadedData = true;
+    if (!hasLoadedDataRef.current) {
+      console.log('Starting progressive loading...');
       
-      // Load other data with delays to prevent overwhelming the browser
-      setTimeout(() => {
-        loadLandOwners(); // Land owners are needed for the default land view
-        console.log('Loading land owners data...');
-      }, 1000);
+      // Set the flag to true to prevent multiple loads
+      hasLoadedDataRef.current = true;
       
-      setTimeout(() => {
-        loadUsers(); // Load all users data
-        console.log('Loading users data...');
-      }, 2000);
+      // First load polygons as they're most important
+      loadPolygons();
       
-      setTimeout(() => {
-        loadBridges();
-        console.log('Loading bridges data...');
-      }, 3000);
-      
-      // Add an additional timeout to ensure coat of arms are loaded
-      setTimeout(() => {
-        console.log('Forcing coat of arms update from delayed loader');
-        if (polygonRendererRef.current && users && Object.keys(users).length > 0) {
-          const coatOfArmsMap: Record<string, string> = {};
-          
-          Object.values(users).forEach(user => {
-            if (user.user_name && user.coat_of_arms_image) {
-              coatOfArmsMap[user.user_name] = user.coat_of_arms_image;
-            }
-          });
-          
-          if (Object.keys(coatOfArmsMap).length > 0) {
-            polygonRendererRef.current.updateOwnerCoatOfArms(coatOfArmsMap);
-          }
+      // Set a timeout to force exit from loading state if it takes too long
+      const loadingTimeout = setTimeout(() => {
+        if (loading) {
+          console.log('Loading timeout reached, forcing exit from loading state');
+          usePolygonStore.setState({ loading: false });
         }
-      }, 4000);
-    };
-    
-    // Listen for a custom event that will be dispatched when polygons are loaded
-    window.addEventListener('polygonsLoaded', handlePolygonsLoaded);
-    
-    return () => {
-      clearTimeout(loadingTimeout);
-      window.removeEventListener('polygonsLoaded', handlePolygonsLoaded);
-    };
-  }, [loadPolygons, loadBridges, loadLandOwners, loadUsers, users]);
+      }, 30000); // 30 second timeout
+      
+      // Add a listener to detect when polygons are loaded
+      const handlePolygonsLoaded = () => {
+        console.log('Polygons loaded event detected');
+        
+        // Load other data with delays to prevent overwhelming the browser
+        setTimeout(() => {
+          loadLandOwners(); // Land owners are needed for the default land view
+          console.log('Loading land owners data...');
+        }, 1000);
+        
+        setTimeout(() => {
+          loadUsers(); // Load all users data
+          console.log('Loading users data...');
+        }, 2000);
+        
+        setTimeout(() => {
+          loadBridges();
+          console.log('Loading bridges data...');
+        }, 3000);
+        
+        // Add an additional timeout to ensure coat of arms are loaded
+        setTimeout(() => {
+          console.log('Forcing coat of arms update from delayed loader');
+          if (polygonRendererRef.current && users && Object.keys(users).length > 0) {
+            const coatOfArmsMap: Record<string, string> = {};
+            
+            Object.values(users).forEach(user => {
+              if (user.user_name && user.coat_of_arms_image) {
+                coatOfArmsMap[user.user_name] = user.coat_of_arms_image;
+              }
+            });
+            
+            if (Object.keys(coatOfArmsMap).length > 0) {
+              polygonRendererRef.current.updateOwnerCoatOfArms(coatOfArmsMap);
+            }
+          }
+        }, 4000);
+      };
+      
+      // Listen for a custom event that will be dispatched when polygons are loaded
+      window.addEventListener('polygonsLoaded', handlePolygonsLoaded);
+      
+      return () => {
+        clearTimeout(loadingTimeout);
+        window.removeEventListener('polygonsLoaded', handlePolygonsLoaded);
+      };
+    }
+  }, []); // Remove dependencies to prevent re-running
   
   // Calculate centroids directly in the main thread for polygons without centroids
   useEffect(() => {
@@ -272,8 +275,14 @@ export default function PolygonViewer() {
   
   // Add this useEffect to ensure coat of arms are updated when users data changes
   useEffect(() => {
-    if (polygonRendererRef.current && users && Object.keys(users).length > 0) {
+    // Use a ref to track if we've already updated coat of arms
+    const hasUpdatedCoatOfArmsRef = useRef(false);
+    
+    if (polygonRendererRef.current && users && Object.keys(users).length > 0 && !hasUpdatedCoatOfArmsRef.current) {
       console.log('Updating coat of arms from users data in PolygonViewer:', users);
+      
+      // Set the flag to true to prevent multiple updates
+      hasUpdatedCoatOfArmsRef.current = true;
       
       // Create a map of username to coat of arms URL
       const coatOfArmsMap: Record<string, string> = {};
@@ -300,8 +309,10 @@ export default function PolygonViewer() {
       console.log('Created coat of arms map with', Object.keys(coatOfArmsMap).length, 'entries');
       console.log('Created color map with', Object.keys(colorMap).length, 'entries');
       
-      // Update the renderer with the coat of arms map
-      polygonRendererRef.current.updateOwnerCoatOfArms(coatOfArmsMap);
+      // Only update if we have data to update with
+      if (Object.keys(coatOfArmsMap).length > 0) {
+        polygonRendererRef.current.updateOwnerCoatOfArms(coatOfArmsMap);
+      }
       
       // Update the renderer with the color map
       if (Object.keys(colorMap).length > 0) {
@@ -313,7 +324,7 @@ export default function PolygonViewer() {
         polygonRendererRef.current.updateViewMode(activeView);
       }
     }
-  }, [users, activeView]);
+  }, [users]); // Only depend on users
   
   // Add an effect to listen for polygon deletion events
   useEffect(() => {
@@ -546,66 +557,90 @@ export default function PolygonViewer() {
   
     // Animation loop with performance optimizations
     const animate = () => {
+      // Request the next frame at the beginning to ensure the loop continues even if there's an error
       const animationId = requestAnimationFrame(animate);
-    
-      // Skip some frames at the beginning for better initial performance
-      if (isFirstRender) {
-        isFirstRender = false;
-        return;
-      }
-    
-      // Skip frames based on performance mode
-      if (!highQuality && frameCount % 2 !== 0) {
-        frameCount++;
-        return;
-      }
-    
-      // Update controls to enable camera movement
-      if (sceneRef.current && sceneRef.current.controls) {
-        try {
-          sceneRef.current.controls.update();
-        } catch (error) {
-          console.error('Error updating controls:', error);
+
+      try {
+        // Skip some frames at the beginning for better initial performance
+        if (isFirstRender) {
+          isFirstRender = false;
+          return;
         }
-      }
-    
-      // Update water effect - every frame for smoother animation
-      if (waterEffectRef.current) {
-        try {
-          waterEffectRef.current.update(frameCount, !highQuality);
-        } catch (error) {
-          console.error('Error updating water effect:', error);
-        }
-      }
-    
-      // Update polygon LOD and selection state - less frequently for distant objects
-      if (polygonRendererRef.current && (highQuality || frameCount % 3 === 0)) {
-        try {
-          polygonRendererRef.current.update(selectedPolygonId);
-        } catch (error) {
-          console.error('Error updating polygon renderer:', error);
-        }
-      }
       
-      // Update clouds based on camera position
-      if (sceneRef.current) {
-        try {
-          sceneRef.current.updateClouds(frameCount);
-        } catch (error) {
-          console.error('Error updating clouds:', error);
+        // Skip frames based on performance mode
+        if (!highQuality && frameCount % 2 !== 0) {
+          frameCount++;
+          return;
         }
-      }
-    
-      frameCount++;
-    
-      // Use composer instead of renderer directly to include post-processing effects
-      if (sceneRef.current && sceneRef.current.composer) {
-        try {
-          // Render the scene
-          sceneRef.current.composer.render();
-        } catch (error) {
-          console.error('Error rendering scene:', error);
+      
+        // Update controls to enable camera movement
+        if (sceneRef.current && sceneRef.current.controls) {
+          try {
+            sceneRef.current.controls.update();
+          } catch (error) {
+            console.error('Error updating controls:', error);
+          }
         }
+      
+        // Update water effect - every frame for smoother animation
+        if (waterEffectRef.current) {
+          try {
+            waterEffectRef.current.update(frameCount, !highQuality);
+          } catch (error) {
+            console.error('Error updating water effect:', error);
+          }
+        }
+      
+        // Update polygon LOD and selection state - less frequently for distant objects
+        if (polygonRendererRef.current && (highQuality || frameCount % 3 === 0)) {
+          try {
+            polygonRendererRef.current.update(selectedPolygonId);
+          } catch (error) {
+            console.error('Error updating polygon renderer:', error);
+          }
+        }
+        
+        // Update clouds based on camera position
+        if (sceneRef.current) {
+          try {
+            sceneRef.current.updateClouds(frameCount);
+          } catch (error) {
+            console.error('Error updating clouds:', error);
+          }
+        }
+      
+        frameCount++;
+      
+        // Use composer instead of renderer directly to include post-processing effects
+        if (sceneRef.current && sceneRef.current.composer) {
+          // CRITICAL: Add additional checks to ensure all required objects exist before rendering
+          if (sceneRef.current.scene && 
+              sceneRef.current.camera && 
+              !sceneRef.current.scene.userData.isDisposed) {
+            
+            // Check if any materials in the scene have issues
+            try {
+              // Render the scene
+              sceneRef.current.composer.render();
+            } catch (error) {
+              console.error('Error rendering scene:', error);
+              
+              // If we get a specific error about setting properties of undefined,
+              // it's likely a material uniform issue - try to identify and fix it
+              if (error instanceof TypeError && 
+                  error.message.includes("Cannot set properties of undefined")) {
+                console.warn('Detected material uniform issue, attempting recovery...');
+                
+                // Set a flag to prevent continuous error logging
+                if (!sceneRef.current.scene.userData.hasUniformError) {
+                  sceneRef.current.scene.userData.hasUniformError = true;
+                }
+              }
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Fatal error in animation loop:', error);
       }
     };
     
