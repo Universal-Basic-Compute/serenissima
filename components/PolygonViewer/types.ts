@@ -13,7 +13,8 @@ export interface Polygon {
   englishName?: string;
   historicalDescription?: string;
   nameConfidence?: string;
-  owner?: string; // Add owner field
+  owner?: string;
+  areaInSquareMeters?: number; // Add area field
 }
 
 // Add this to the existing types

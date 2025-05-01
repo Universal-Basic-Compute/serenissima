@@ -71,6 +71,16 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
             </p>
           </div>
           
+          {/* Area information */}
+          {selectedPolygon?.areaInSquareMeters && (
+            <div>
+              <h3 className="text-sm font-medium text-gray-500">Area</h3>
+              <p className="mt-1 font-semibold">
+                {selectedPolygon.areaInSquareMeters.toLocaleString()} m²
+              </p>
+            </div>
+          )}
+          
           {/* Historical Name */}
           {selectedPolygon?.historicalName && (
             <div>

@@ -29,7 +29,8 @@ export async function GET() {
           historicalName: data.historicalName,
           englishName: data.englishName,
           historicalDescription: data.historicalDescription,
-          nameConfidence: data.nameConfidence
+          nameConfidence: data.nameConfidence,
+          areaInSquareMeters: data.areaInSquareMeters
         };
       } else {
         console.warn(`Invalid data format in ${file}`);

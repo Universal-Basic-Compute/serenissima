@@ -13,7 +13,8 @@
     "cleanup-polygons": "node scripts/cleanup-polygons.js",
     "name-polygons": "node scripts/name-polygons.js",
     "create-land-records": "node scripts/create-land-records.js",
-    "name-bridges": "node scripts/name-bridges.js"
+    "name-bridges": "node scripts/name-bridges.js",
+    "calculate-areas": "node scripts/calculate-areas.js"
   },
   "dependencies": {
     "@react-google-maps/api": "^2.19.2",
