@@ -94,6 +94,7 @@ export default class PolygonRenderer {
     );
   }
   private coatOfArmSprites: Record<string, THREE.Sprite> = {};
+  private ownerColorMap: Record<string, string> = {}; // Map of owner to color
   private users: Record<string, any> = {}; // Store users data
 
   // Create a static texture loader to be shared across instances
@@ -128,14 +129,22 @@ export default class PolygonRenderer {
     // Initialize texture loader explicitly
     this.textureLoader = new THREE.TextureLoader();
     
-    // Process users data to create coat of arms map
+    // Process users data to create coat of arms map and color map
     if (users) {
       Object.values(users).forEach(user => {
-        if (user.user_name && user.coat_of_arms_image) {
-          this.ownerCoatOfArmsMap[user.user_name] = user.coat_of_arms_image;
+        if (user.user_name) {
+          // Store coat of arms image if available
+          if (user.coat_of_arms_image) {
+            this.ownerCoatOfArmsMap[user.user_name] = user.coat_of_arms_image;
+          }
+          
+          // Store color if available
+          if (user.color) {
+            this.ownerColorMap[user.user_name] = user.color;
+          }
         }
       });
-      console.log(`Processed ${Object.keys(this.ownerCoatOfArmsMap).length} coat of arms from users data`);
+      console.log(`Processed ${Object.keys(this.ownerCoatOfArmsMap).length} coat of arms and ${Object.keys(this.ownerColorMap).length} colors from users data`);
     }
     
     // Use shared texture loader or create one if it doesn't exist
@@ -201,8 +210,14 @@ export default class PolygonRenderer {
             try {
               // Get the owner's color from the users data
               let ownerColor = null;
-              if (polygon.owner && this.users[polygon.owner] && this.users[polygon.owner].color) {
-                ownerColor = this.users[polygon.owner].color;
+              if (polygon.owner) {
+                if (this.ownerColorMap[polygon.owner]) {
+                  ownerColor = this.ownerColorMap[polygon.owner];
+                } else if (this.users[polygon.owner] && this.users[polygon.owner].color) {
+                  ownerColor = this.users[polygon.owner].color;
+                  // Also store in the color map for future use
+                  this.ownerColorMap[polygon.owner] = ownerColor;
+                }
               }
             
               // Get the owner's coat of arms URL if available
@@ -739,8 +754,14 @@ export default class PolygonRenderer {
     
     // Get the owner's color from the users data
     let ownerColor = null;
-    if (newOwner && this.users[newOwner] && this.users[newOwner].color) {
-      ownerColor = this.users[newOwner].color;
+    if (newOwner) {
+      if (this.ownerColorMap[newOwner]) {
+        ownerColor = this.ownerColorMap[newOwner];
+      } else if (this.users[newOwner] && this.users[newOwner].color) {
+        ownerColor = this.users[newOwner].color;
+        // Also store in the color map for future use
+        this.ownerColorMap[newOwner] = ownerColor;
+      }
     }
     
     // Get the owner's coat of arms URL if available
