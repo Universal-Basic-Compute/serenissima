@@ -222,6 +222,11 @@ export default function PolygonViewer() {
       polygonRenderer.updateOwnerCoatOfArms(ownerCoatOfArmsMap);
     }
     
+    // Initialize with any existing coat of arms data
+    if (Object.keys(ownerCoatOfArmsMap).length > 0) {
+      polygonRenderer.updateOwnerCoatOfArms(ownerCoatOfArmsMap);
+    }
+    
     // Initialize water effect
     const waterEffect = new WaterEffect({
       scene: scene.scene,

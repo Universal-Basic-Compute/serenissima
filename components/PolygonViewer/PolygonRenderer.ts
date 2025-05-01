@@ -34,6 +34,8 @@ export default class PolygonRenderer {
   private lodPolygons: LODPolygon[] = [];
   private ownerCoatOfArmsMap: Record<string, string> = {}; // Map of owner to coat of arms URL
   private coatOfArmSprites: Record<string, THREE.Sprite> = {};
+  private ownerCoatOfArmsMap: Record<string, string> = {}; // Map of owner to coat of arms URL
+  private coatOfArmSprites: Record<string, THREE.Sprite> = {};
 
   constructor({
     scene,
