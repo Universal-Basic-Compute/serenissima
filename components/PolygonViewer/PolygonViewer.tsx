@@ -505,6 +505,24 @@ export default function PolygonViewer() {
       window.removeEventListener('landOwnershipChanged', handleLandOwnershipChanged as EventListener);
     };
   }, [polygons, landOwners, selectedPolygonId]);
+  
+  // Add this useEffect to listen for compute balance changes
+  useEffect(() => {
+    const handleComputeBalanceChanged = (event: CustomEvent) => {
+      const { buyer, seller, amount } = event.detail;
+      
+      console.log(`Compute balance changed: ${seller} +${amount}, ${buyer} -${amount}`);
+      
+      // Reload users data to reflect the new compute balances
+      loadUsers();
+    };
+    
+    window.addEventListener('computeBalanceChanged', handleComputeBalanceChanged as EventListener);
+    
+    return () => {
+      window.removeEventListener('computeBalanceChanged', handleComputeBalanceChanged as EventListener);
+    };
+  }, [loadUsers]);
 
   // Add this useEffect to listen for the showLandPurchaseModal event
   useEffect(() => {
