@@ -247,10 +247,19 @@ export default function PolygonViewer() {
     // (normalize to roughly -50 to 50 units)
     const latRange = maxLat - minLat;
     const lngRange = maxLng - minLng;
-    const maxRange = Math.max(latRange, lngRange);
+    
+    // Calculate the latitude correction factor
+    // At Venice's latitude (~45 degrees), longitude degrees are about 70% the length of latitude degrees
+    const latCorrectionFactor = Math.cos(centerLat * Math.PI / 180);
+    
+    // Adjust the longitude range with the correction factor
+    const correctedLngRange = lngRange * latCorrectionFactor;
+    
+    // Use the larger of the two ranges for scaling
+    const maxRange = Math.max(latRange, correctedLngRange);
     const scale = maxRange > 0 ? 100 / maxRange : 1;
     
-    console.log('Center and scale:', { centerLat, centerLng, scale });
+    console.log('Center and scale:', { centerLat, centerLng, scale, latCorrectionFactor });
     
     // Add polygons
     if (polygons.length > 0) {
@@ -263,7 +272,8 @@ export default function PolygonViewer() {
             
             // Normalize coordinates relative to center and apply scale
             const normalizedCoords = polygon.coordinates.map(coord => ({
-              x: (coord.lng - centerLng) * scale,
+              // Apply latitude correction factor to longitude values
+              x: (coord.lng - centerLng) * scale * latCorrectionFactor,
               y: (coord.lat - centerLat) * scale
             }));
             
@@ -327,10 +337,12 @@ export default function PolygonViewer() {
       
       // Add a sample polygon for testing
       const sampleShape = new THREE.Shape();
-      sampleShape.moveTo(-10, -10);
-      sampleShape.lineTo(-10, 10);
-      sampleShape.lineTo(10, 10);
-      sampleShape.lineTo(10, -10);
+      // Make the sample polygon wider to account for latitude correction
+      const sampleWidth = 10 / latCorrectionFactor;
+      sampleShape.moveTo(-sampleWidth, -10);
+      sampleShape.lineTo(-sampleWidth, 10);
+      sampleShape.lineTo(sampleWidth, 10);
+      sampleShape.lineTo(sampleWidth, -10);
       
       const extrudeSettings = {
         steps: 1,
