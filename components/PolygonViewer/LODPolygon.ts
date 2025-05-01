@@ -213,25 +213,23 @@ export default class LODPolygon {
     // Determine the color to use
     const landColor = this.determineLandColor();
     
-    // Create a material that looks like sand
-    const material = new THREE.MeshStandardMaterial({ 
+    // Create a material that looks like sand - using MeshBasicMaterial for better edge rendering
+    const material = new THREE.MeshBasicMaterial({ 
       color: landColor,
-      roughness: 0.9, // High roughness for sand-like appearance
-      metalness: 0.1, // Low metalness
       side: THREE.FrontSide,
       wireframe: false,
-      // Modify these properties to prevent edge transparency:
-      polygonOffset: true,
-      polygonOffsetFactor: 2, // Increased from 1 to 2
-      polygonOffsetUnits: 2, // Increased from 1 to 2
-      // Ensure depth settings are correct
-      depthTest: true,
-      depthWrite: true,
-      // Explicitly disable transparency
+      // Désactiver complètement la transparence
       transparent: false,
       opacity: 1.0,
-      // Use normal blending
-      blending: THREE.NormalBlending
+      // Utiliser un rendu plat sans effets d'éclairage
+      flatShading: true,
+      // Augmenter encore plus les valeurs de polygonOffset
+      polygonOffset: true,
+      polygonOffsetFactor: 5,
+      polygonOffsetUnits: 5,
+      // Assurer que la profondeur est correctement gérée
+      depthTest: true,
+      depthWrite: true
     });
     
     // Load sand texture if not in performance mode

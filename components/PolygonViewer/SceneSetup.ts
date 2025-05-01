@@ -50,7 +50,7 @@ export default class SceneSetup {
       antialias: false, // Start without antialiasing for faster initial render
       powerPreference: 'high-performance',
       precision: this.performanceMode ? 'mediump' : 'highp', // Lower precision in performance mode
-      logarithmicDepthBuffer: true, // Enable logarithmic depth buffer to help with z-fighting
+      logarithmicDepthBuffer: false, // Disable logarithmic depth buffer
       shadowMapEnabled: false // Explicitly disable shadow maps at creation
     });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
@@ -58,6 +58,7 @@ export default class SceneSetup {
     this.renderer.shadowMap.enabled = false; // Disable shadows completely
     this.renderer.shadowMap.autoUpdate = false; // Explicitly disable shadow map updates
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
+    this.renderer.sortObjects = true; // Activate object sorting by the renderer
     
     // Set up a simple EffectComposer initially
     this.composer = new EffectComposer(this.renderer);
