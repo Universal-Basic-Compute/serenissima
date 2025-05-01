@@ -84,6 +84,22 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
       setIsVisible(true);
     }
   }, [preventAutoClose, selectedPolygonId]);
+  
+  // Add this useEffect to listen for the custom event to keep panel open
+  useEffect(() => {
+    const handleKeepOpen = (event: CustomEvent) => {
+      if (event.detail.polygonId === selectedPolygonId) {
+        console.log('Keeping land details panel open for', selectedPolygonId);
+        setIsVisible(true);
+      }
+    };
+    
+    window.addEventListener('keepLandDetailsPanelOpen', handleKeepOpen as EventListener);
+    
+    return () => {
+      window.removeEventListener('keepLandDetailsPanelOpen', handleKeepOpen as EventListener);
+    };
+  }, [selectedPolygonId]);
 
   // Add this effect to fetch transaction data when a polygon is selected
   useEffect(() => {
@@ -671,17 +687,15 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
       // Force the panel to stay visible even if selectedPolygonId changes
       if (preventAutoClose) {
         // Make multiple attempts to keep the panel visible
-        setTimeout(() => {
-          setIsVisible(true);
-        }, 100);
+        const keepVisible = () => setIsVisible(true);
+        setTimeout(keepVisible, 100);
+        setTimeout(keepVisible, 300);
+        setTimeout(keepVisible, 500);
         
-        setTimeout(() => {
-          setIsVisible(true);
-        }, 200);
-        
-        setTimeout(() => {
-          setIsVisible(true);
-        }, 500);
+        // Also dispatch a custom event to notify that we want to keep the panel open
+        window.dispatchEvent(new CustomEvent('keepLandDetailsPanelOpen', {
+          detail: { polygonId: selectedPolygonId }
+        }));
       }
     }
   }

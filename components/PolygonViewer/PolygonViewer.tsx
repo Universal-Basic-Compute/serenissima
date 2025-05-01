@@ -411,6 +411,14 @@ export default function PolygonViewer() {
         polygonRendererRef.current.updatePolygonOwner(landId, newOwner as string);
       }
       
+      // If this is the currently selected polygon, make sure the panel stays open
+      if (landId === selectedPolygonId) {
+        // Dispatch event to keep panel open
+        window.dispatchEvent(new CustomEvent('keepLandDetailsPanelOpen', {
+          detail: { polygonId: landId }
+        }));
+      }
+      
       console.log(`Land ownership changed: ${landId} now owned by ${newOwner}`);
     };
     
@@ -420,7 +428,7 @@ export default function PolygonViewer() {
     return () => {
       window.removeEventListener('landOwnershipChanged', handleLandOwnershipChanged as EventListener);
     };
-  }, [polygons, landOwners]);
+  }, [polygons, landOwners, selectedPolygonId]);
 
   // Update info panel visibility when selectedPolygonId changes
   useEffect(() => {
