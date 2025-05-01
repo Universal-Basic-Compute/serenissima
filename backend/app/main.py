@@ -1114,6 +1114,14 @@ async def execute_transaction(transaction_id: str, data: dict):
             
             print(f"Transferred {price} compute from {buyer} to {seller}")
         
+        # Update the transaction with buyer and executed_at timestamp
+        now = datetime.datetime.now().isoformat()
+        updated_record = transactions_table.update(transaction_id, {
+            "Buyer": buyer,
+            "ExecutedAt": now,
+            "UpdatedAt": now
+        })
+        
         return {
             "id": updated_record["id"],
             "type": updated_record["fields"].get("Type", ""),
