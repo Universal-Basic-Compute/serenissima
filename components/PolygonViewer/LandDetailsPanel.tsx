@@ -14,6 +14,8 @@ interface LandDetailsPanelProps {
 export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons, landOwners }: LandDetailsPanelProps) {
   const router = useRouter();
   const [isVisible, setIsVisible] = useState(false);
+  const [transaction, setTransaction] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(false);
   
   // Find the selected polygon
   const selectedPolygon = selectedPolygonId 
@@ -72,6 +74,36 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
       console.log('Owner for selected polygon:', owner);
     }
   }, [selectedPolygonId, selectedPolygon, landOwners, owner]);
+  
+  // Add this effect to fetch transaction data when a polygon is selected
+  useEffect(() => {
+    if (selectedPolygonId) {
+      setIsLoading(true);
+      fetch(`http://localhost:8000/api/transaction/land/${selectedPolygonId}`)
+        .then(response => {
+          if (!response.ok) {
+            if (response.status === 404) {
+              // No transaction found, that's okay
+              setTransaction(null);
+              return null;
+            }
+            throw new Error('Failed to fetch transaction');
+          }
+          return response.json();
+        })
+        .then(data => {
+          setTransaction(data);
+          setIsLoading(false);
+        })
+        .catch(error => {
+          console.error('Error fetching transaction:', error);
+          setTransaction(null);
+          setIsLoading(false);
+        });
+    } else {
+      setTransaction(null);
+    }
+  }, [selectedPolygonId]);
   
   // Show panel with animation when a polygon is selected
   useEffect(() => {
@@ -143,6 +175,18 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
             </div>
           )}
           
+          {/* Transaction information */}
+          {transaction && (
+            <div>
+              <h3 className="text-sm font-medium text-gray-500">For Sale</h3>
+              <p className="mt-1 font-semibold text-green-600">
+                {transaction.price.toLocaleString()} ducats
+              </p>
+              <p className="mt-1 text-xs text-gray-500">
+                Seller: {transaction.seller}
+              </p>
+            </div>
+          )}
           
           <WalletStatus className="mb-2" />
           
@@ -159,40 +203,69 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
                   return;
                 }
                 
-                // Call the backend API to purchase the land
-                fetch('http://localhost:8000/api/land', {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                  },
-                  body: JSON.stringify({
-                    land_id: selectedPolygonId,
-                    wallet_address: walletAddress,
-                    historical_name: selectedPolygon?.historicalName,
-                    english_name: selectedPolygon?.englishName,
-                    description: selectedPolygon?.historicalDescription
-                  }),
-                })
-                .then(response => {
-                  if (!response.ok) {
-                    throw new Error('Failed to purchase land');
-                  }
-                  return response.json();
-                })
-                .then(data => {
-                  alert(`Successfully purchased land: ${selectedPolygon?.historicalName || selectedPolygonId}`);
-                  // Refresh the land owners data
-                  window.location.reload();
-                })
-                .catch(error => {
-                  console.error('Error purchasing land:', error);
-                  alert('Failed to purchase land. Please try again.');
-                });
+                // If there's a transaction, execute it
+                if (transaction) {
+                  // Call the backend API to execute the transaction
+                  fetch(`http://localhost:8000/api/transaction/${transaction.id}/execute`, {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                      buyer: walletAddress
+                    }),
+                  })
+                  .then(response => {
+                    if (!response.ok) {
+                      throw new Error('Failed to execute transaction');
+                    }
+                    return response.json();
+                  })
+                  .then(data => {
+                    alert(`Successfully purchased ${selectedPolygon?.historicalName || selectedPolygonId}`);
+                    // Refresh the page to update the UI
+                    window.location.reload();
+                  })
+                  .catch(error => {
+                    console.error('Error executing transaction:', error);
+                    alert('Failed to purchase land. Please try again.');
+                  });
+                } else {
+                  // If no transaction, just update the land owner
+                  fetch('http://localhost:8000/api/land', {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                      land_id: selectedPolygonId,
+                      wallet_address: walletAddress,
+                      historical_name: selectedPolygon?.historicalName,
+                      english_name: selectedPolygon?.englishName,
+                      description: selectedPolygon?.historicalDescription
+                    }),
+                  })
+                  .then(response => {
+                    if (!response.ok) {
+                      throw new Error('Failed to purchase land');
+                    }
+                    return response.json();
+                  })
+                  .then(data => {
+                    alert(`Successfully purchased land: ${selectedPolygon?.historicalName || selectedPolygonId}`);
+                    // Refresh the land owners data
+                    window.location.reload();
+                  })
+                  .catch(error => {
+                    console.error('Error purchasing land:', error);
+                    alert('Failed to purchase land. Please try again.');
+                  });
+                }
               }} 
               variant="primary"
               disabled={owner ? true : false}
             >
-              {owner ? 'Already Owned' : 'Purchase Land'}
+              {owner ? 'Already Owned' : (transaction ? `Purchase (${transaction.price.toLocaleString()} ducats)` : 'Purchase Land')}
             </ActionButton>
             
             {/* Add Delete button */}

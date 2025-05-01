@@ -31,6 +31,11 @@ The server will start at http://localhost:8000
 - `POST /api/invest-compute`: Invest compute resources for a wallet
 - `POST /api/land`: Create a land record
 - `GET /api/land/{land_id}`: Get land information
+- `GET /api/lands`: Get all lands with their owners
+- `POST /api/transaction`: Create a transaction record
+- `GET /api/transaction/land/{land_id}`: Get transaction for a specific land
+- `GET /api/transactions`: Get all active transactions
+- `POST /api/transaction/{transaction_id}/execute`: Execute a transaction
 
 ## Airtable Structure
 
@@ -46,3 +51,16 @@ The LANDS table should have the following fields:
 - HistoricalName (text): The historical name of the land
 - EnglishName (text): The English translation of the historical name
 - Description (text): A description of the land
+
+The TRANSACTIONS table should have the following fields:
+- Type (text): The type of transaction (land, bridge, etc.)
+- AssetId (text): The ID of the asset being transacted
+- Seller (text): The seller's wallet address or name
+- Buyer (text): The buyer's wallet address (can be empty for listings)
+- Price (number): The price of the asset
+- HistoricalName (text): The historical name of the asset
+- EnglishName (text): The English translation of the name
+- Description (text): A description of the asset
+- CreatedAt (text): When the transaction was created
+- UpdatedAt (text): When the transaction was last updated
+- ExecutedAt (text): When the transaction was executed (empty for active listings)

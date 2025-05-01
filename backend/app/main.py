@@ -47,6 +47,15 @@ except Exception as e:
     print(f"ERROR initializing Airtable LANDS table: {str(e)}")
     traceback.print_exc(file=sys.stdout)
 
+# Initialize Airtable for TRANSACTIONS table
+AIRTABLE_TRANSACTIONS_TABLE = os.getenv("AIRTABLE_TRANSACTIONS_TABLE", "TRANSACTIONS")
+try:
+    transactions_table = Table(AIRTABLE_API_KEY, AIRTABLE_BASE_ID, AIRTABLE_TRANSACTIONS_TABLE)
+    print(f"Initialized Airtable TRANSACTIONS table: {AIRTABLE_TRANSACTIONS_TABLE}")
+except Exception as e:
+    print(f"ERROR initializing Airtable TRANSACTIONS table: {str(e)}")
+    traceback.print_exc(file=sys.stdout)
+
 # Create FastAPI app
 app = FastAPI(title="Wallet Storage API")
 
@@ -89,6 +98,30 @@ class LandResponse(BaseModel):
     historical_name: str = None
     english_name: str = None
     description: str = None
+
+class TransactionRequest(BaseModel):
+    type: str  # 'land', 'bridge', etc.
+    asset_id: str
+    seller: str
+    buyer: str = None
+    price: float
+    historical_name: str = None
+    english_name: str = None
+    description: str = None
+
+class TransactionResponse(BaseModel):
+    id: str
+    type: str
+    asset_id: str
+    seller: str
+    buyer: str = None
+    price: float
+    historical_name: str = None
+    english_name: str = None
+    description: str = None
+    created_at: str
+    updated_at: str
+    executed_at: str = None
 
 @app.get("/")
 def read_root():
@@ -378,6 +411,237 @@ async def delete_land(land_id: str):
         raise
     except Exception as e:
         error_msg = f"Failed to delete land: {str(e)}"
+        print(f"ERROR: {error_msg}")
+        traceback.print_exc(file=sys.stdout)
+        raise HTTPException(status_code=500, detail=error_msg)
+
+@app.post("/api/transaction", response_model=TransactionResponse)
+async def create_transaction(transaction_data: TransactionRequest):
+    """Create a transaction record in Airtable"""
+    
+    if not transaction_data.type:
+        raise HTTPException(status_code=400, detail="Transaction type is required")
+    
+    if not transaction_data.asset_id:
+        raise HTTPException(status_code=400, detail="Asset ID is required")
+    
+    if not transaction_data.seller:
+        raise HTTPException(status_code=400, detail="Seller is required")
+    
+    if not transaction_data.price or transaction_data.price <= 0:
+        raise HTTPException(status_code=400, detail="Price must be greater than 0")
+    
+    try:
+        # Check if transaction already exists for this asset
+        formula = f"{{AssetId}}='{transaction_data.asset_id}' AND {{Type}}='{transaction_data.type}' AND {{ExecutedAt}}=BLANK()"
+        print(f"Searching for existing transaction with formula: {formula}")
+        existing_records = transactions_table.all(formula=formula)
+        
+        if existing_records:
+            # Return existing record
+            record = existing_records[0]
+            print(f"Found existing transaction record: {record['id']}")
+            return {
+                "id": record["id"],
+                "type": record["fields"].get("Type", ""),
+                "asset_id": record["fields"].get("AssetId", ""),
+                "seller": record["fields"].get("Seller", ""),
+                "buyer": record["fields"].get("Buyer", None),
+                "price": record["fields"].get("Price", 0),
+                "historical_name": record["fields"].get("HistoricalName", None),
+                "english_name": record["fields"].get("EnglishName", None),
+                "description": record["fields"].get("Description", None),
+                "created_at": record["fields"].get("CreatedAt", ""),
+                "updated_at": record["fields"].get("UpdatedAt", ""),
+                "executed_at": record["fields"].get("ExecutedAt", None)
+            }
+        
+        # Create new record
+        now = datetime.datetime.now().isoformat()
+        
+        fields = {
+            "Type": transaction_data.type,
+            "AssetId": transaction_data.asset_id,
+            "Seller": transaction_data.seller,
+            "Price": transaction_data.price,
+            "CreatedAt": now,
+            "UpdatedAt": now
+        }
+        
+        if transaction_data.buyer:
+            fields["Buyer"] = transaction_data.buyer
+            
+        if transaction_data.historical_name:
+            fields["HistoricalName"] = transaction_data.historical_name
+            
+        if transaction_data.english_name:
+            fields["EnglishName"] = transaction_data.english_name
+            
+        if transaction_data.description:
+            fields["Description"] = transaction_data.description
+        
+        print(f"Creating new transaction record with fields: {fields}")
+        record = transactions_table.create(fields)
+        print(f"Created new transaction record: {record['id']}")
+        
+        return {
+            "id": record["id"],
+            "type": record["fields"].get("Type", ""),
+            "asset_id": record["fields"].get("AssetId", ""),
+            "seller": record["fields"].get("Seller", ""),
+            "buyer": record["fields"].get("Buyer", None),
+            "price": record["fields"].get("Price", 0),
+            "historical_name": record["fields"].get("HistoricalName", None),
+            "english_name": record["fields"].get("EnglishName", None),
+            "description": record["fields"].get("Description", None),
+            "created_at": record["fields"].get("CreatedAt", ""),
+            "updated_at": record["fields"].get("UpdatedAt", ""),
+            "executed_at": record["fields"].get("ExecutedAt", None)
+        }
+    except Exception as e:
+        error_msg = f"Failed to create transaction record: {str(e)}"
+        print(f"ERROR: {error_msg}")
+        traceback.print_exc(file=sys.stdout)
+        raise HTTPException(status_code=500, detail=error_msg)
+
+@app.get("/api/transaction/land/{land_id}")
+async def get_land_transaction(land_id: str):
+    """Get transaction information for a land"""
+    
+    try:
+        formula = f"{{AssetId}}='{land_id}' AND {{Type}}='land' AND {{ExecutedAt}}=BLANK()"
+        print(f"Searching for land transaction with formula: {formula}")
+        records = transactions_table.all(formula=formula)
+        
+        if not records:
+            raise HTTPException(status_code=404, detail="Transaction not found")
+        
+        record = records[0]
+        print(f"Found transaction record: {record['id']}")
+        return {
+            "id": record["id"],
+            "type": record["fields"].get("Type", ""),
+            "asset_id": record["fields"].get("AssetId", ""),
+            "seller": record["fields"].get("Seller", ""),
+            "buyer": record["fields"].get("Buyer", None),
+            "price": record["fields"].get("Price", 0),
+            "historical_name": record["fields"].get("HistoricalName", None),
+            "english_name": record["fields"].get("EnglishName", None),
+            "description": record["fields"].get("Description", None),
+            "created_at": record["fields"].get("CreatedAt", ""),
+            "updated_at": record["fields"].get("UpdatedAt", ""),
+            "executed_at": record["fields"].get("ExecutedAt", None)
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        error_msg = f"Failed to get transaction: {str(e)}"
+        print(f"ERROR: {error_msg}")
+        traceback.print_exc(file=sys.stdout)
+        raise HTTPException(status_code=500, detail=error_msg)
+
+@app.get("/api/transactions")
+async def get_transactions():
+    """Get all active transactions"""
+    
+    try:
+        formula = "{{ExecutedAt}}=BLANK()"
+        print(f"Fetching all active transactions with formula: {formula}")
+        records = transactions_table.all(formula=formula)
+        
+        transactions = []
+        for record in records:
+            transactions.append({
+                "id": record["id"],
+                "type": record["fields"].get("Type", ""),
+                "asset_id": record["fields"].get("AssetId", ""),
+                "seller": record["fields"].get("Seller", ""),
+                "buyer": record["fields"].get("Buyer", None),
+                "price": record["fields"].get("Price", 0),
+                "historical_name": record["fields"].get("HistoricalName", None),
+                "english_name": record["fields"].get("EnglishName", None),
+                "description": record["fields"].get("Description", None),
+                "created_at": record["fields"].get("CreatedAt", ""),
+                "updated_at": record["fields"].get("UpdatedAt", ""),
+                "executed_at": record["fields"].get("ExecutedAt", None)
+            })
+        
+        print(f"Found {len(transactions)} active transactions")
+        return transactions
+    except Exception as e:
+        error_msg = f"Failed to get transactions: {str(e)}"
+        print(f"ERROR: {error_msg}")
+        traceback.print_exc(file=sys.stdout)
+        raise HTTPException(status_code=500, detail=error_msg)
+
+@app.post("/api/transaction/{transaction_id}/execute")
+async def execute_transaction(transaction_id: str, data: dict):
+    """Execute a transaction by setting the buyer and executed_at timestamp"""
+    
+    if not data.get("buyer"):
+        raise HTTPException(status_code=400, detail="Buyer is required")
+    
+    try:
+        # Get the transaction record
+        record = transactions_table.get(transaction_id)
+        if not record:
+            raise HTTPException(status_code=404, detail="Transaction not found")
+        
+        # Check if transaction is already executed
+        if record["fields"].get("ExecutedAt"):
+            raise HTTPException(status_code=400, detail="Transaction already executed")
+        
+        # Update the transaction with buyer and executed_at
+        now = datetime.datetime.now().isoformat()
+        updated_record = transactions_table.update(transaction_id, {
+            "Buyer": data["buyer"],
+            "ExecutedAt": now,
+            "UpdatedAt": now
+        })
+        
+        # Update the land ownership
+        asset_id = record["fields"].get("AssetId")
+        asset_type = record["fields"].get("Type")
+        
+        if asset_type == "land":
+            # Get the land record
+            formula = f"{{LandId}}='{asset_id}'"
+            land_records = lands_table.all(formula=formula)
+            
+            if land_records:
+                # Update the land owner
+                land_record = land_records[0]
+                lands_table.update(land_record["id"], {
+                    "Wallet": data["buyer"]
+                })
+            else:
+                # Create a new land record
+                lands_table.create({
+                    "LandId": asset_id,
+                    "Wallet": data["buyer"],
+                    "HistoricalName": record["fields"].get("HistoricalName"),
+                    "EnglishName": record["fields"].get("EnglishName"),
+                    "Description": record["fields"].get("Description")
+                })
+        
+        return {
+            "id": updated_record["id"],
+            "type": updated_record["fields"].get("Type", ""),
+            "asset_id": updated_record["fields"].get("AssetId", ""),
+            "seller": updated_record["fields"].get("Seller", ""),
+            "buyer": updated_record["fields"].get("Buyer", None),
+            "price": updated_record["fields"].get("Price", 0),
+            "historical_name": updated_record["fields"].get("HistoricalName", None),
+            "english_name": updated_record["fields"].get("EnglishName", None),
+            "description": updated_record["fields"].get("Description", None),
+            "created_at": updated_record["fields"].get("CreatedAt", ""),
+            "updated_at": updated_record["fields"].get("UpdatedAt", ""),
+            "executed_at": updated_record["fields"].get("ExecutedAt", None)
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        error_msg = f"Failed to execute transaction: {str(e)}"
         print(f"ERROR: {error_msg}")
         traceback.print_exc(file=sys.stdout)
         raise HTTPException(status_code=500, detail=error_msg)
