@@ -458,13 +458,17 @@ export default class PolygonRenderer {
   public updateSelectionState(selectedPolygonId: string | null) {
     // Update selection state for all LOD polygons
     this.PolygonMeshs.forEach(polygonMesh => {
-      const polygonId = this.polygons.find(
-        p => polygonMesh.getMesh() === this.polygonMeshesRef.current[p.id]
-      )?.id;
-      
-      if (polygonId) {
-        // Apply selection state based on ID match
-        polygonMesh.updateSelectionState(polygonId === selectedPolygonId);
+      try {
+        const polygonId = this.polygons.find(
+          p => p && polygonMesh.getMesh() === this.polygonMeshesRef.current[p.id]
+        )?.id;
+        
+        if (polygonId) {
+          // Apply selection state based on ID match
+          polygonMesh.updateSelectionState(polygonId === selectedPolygonId);
+        }
+      } catch (error) {
+        console.error('Error updating selection state for polygon:', error);
       }
     });
   }
