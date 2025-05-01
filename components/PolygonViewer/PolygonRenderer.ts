@@ -392,7 +392,7 @@ export default class PolygonRenderer {
               this.PolygonMeshs.push(polygonMesh);
               
               // Store reference to the mesh
-              this.polygonMeshesRef.current[polygon.id] = PolygonMesh.getMesh();
+              this.polygonMeshesRef.current[polygon.id] = polygonMesh.getMesh();
               
               processedCount++;
             } catch (error) {
