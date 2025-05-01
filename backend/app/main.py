@@ -531,6 +531,7 @@ async def get_land_transaction(land_id: str):
         
         record = records[0]
         print(f"Found transaction record: {record['id']}")
+        
         # Extract land details from Notes field if available
         historical_name = None
         english_name = None
