@@ -482,8 +482,8 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
 
         {/* Action buttons at the bottom with improved styling */}
         <div className="pt-4 mt-auto border-t-2 border-amber-300">
-          {owner && (
-            // If land is owned, show "Make an Offer" button or the offer input
+          {owner && owner !== (sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress')) && (
+            // Only show "Make an Offer" button if the land is owned by someone else (not the current user)
             showOfferInput ? (
               <div className="flex flex-col w-full space-y-3">
                 <div className="flex space-x-2">
@@ -556,13 +556,24 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
               <ActionButton
                 onClick={() => setShowOfferInput(true)}
                 variant="primary"
+                className="w-full bg-amber-600 hover:bg-amber-700 text-white py-3 rounded-lg shadow-md border border-amber-700 transition-all flex items-center justify-center"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                Make an Offer
+                <span className="font-serif">Make an Offer to Purchase</span>
               </ActionButton>
             )
+          )}
+          
+          {/* Show a message if the user owns this property */}
+          {owner && owner === (sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress')) && (
+            <div className="bg-amber-100 p-4 rounded-lg text-center border border-amber-300">
+              <p className="text-amber-800 font-medium">This property belongs to your noble house</p>
+              <p className="text-sm text-amber-600 mt-1 italic">
+                "May your family prosper under the wings of the Lion of Saint Mark"
+              </p>
+            </div>
           )}
         </div>
         
