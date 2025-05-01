@@ -391,7 +391,13 @@ export default function PolygonViewer() {
   }, [highQuality]);
   
   if (loading) {
-    return <div className="w-full h-full flex items-center justify-center">Loading polygons...</div>;
+    return (
+      <div className="w-full h-full flex flex-col items-center justify-center bg-amber-50">
+        <div className="text-amber-800 text-2xl font-serif mb-4">Mapping the Venetian Republic...</div>
+        <div className="text-amber-600 italic text-lg">The Council of Ten is preparing the charts of La Serenissima</div>
+        <div className="mt-6 w-24 h-24 border-t-4 border-amber-600 rounded-full animate-spin"></div>
+      </div>
+    );
   }
   
   if (error) {
