@@ -288,7 +288,7 @@ export default function PolygonViewer() {
             // Create extruded geometry for the island with a slight height - simplified for performance
             const extrudeSettings = {
               steps: 1,
-              depth: 0.25 + Math.random() * 0.25, // 50% flatter with random height variation
+              depth: 0.1 + Math.random() * 0.1, // 60% flatter than the previous setting
               bevelEnabled: false // Disable bevel completely to remove space between islands
             };
             
@@ -346,7 +346,7 @@ export default function PolygonViewer() {
       
       const extrudeSettings = {
         steps: 1,
-        depth: 0.4, // 50% flatter
+        depth: 0.16, // 60% flatter than the previous setting
         bevelEnabled: false // Disable bevel completely to remove space between islands
       };
       
