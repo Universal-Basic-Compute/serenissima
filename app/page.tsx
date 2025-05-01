@@ -750,6 +750,9 @@ export default function Home() {
   const handleMapClick = (event: google.maps.MapMouseEvent) => {
     if (!event.latLng) return;
     
+    // Skip if we're dragging a centroid
+    if (isDraggingCentroid) return;
+    
     if (deleteMode) {
       // Find which polygon was clicked
       let clickedPolygonId = null;
