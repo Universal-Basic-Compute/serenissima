@@ -72,7 +72,7 @@ class PolygonMesh {
       // Create extruded geometry with minimal settings
       const extrudeSettings = {
         steps: 1,
-        depth: 0.001, // Further reduced from 0.005 to 0.001 to make it practically flat
+        depth: 0.0005, // Further reduced to make it even flatter
         bevelEnabled: false, // Keep bevels disabled
         bevelThickness: 0,
         bevelSize: 0,
@@ -117,21 +117,18 @@ class PolygonMesh {
       // Determine the color to use
       const landColor = this.determineLandColor();
       
-      // Create a completely flat material with NO lighting or edge effects
-      const material = new THREE.MeshLambertMaterial({ 
+      // Create a completely flat material with NO transparency or edges
+      const material = new THREE.MeshBasicMaterial({ // Change from MeshLambertMaterial to MeshBasicMaterial
         color: landColor,
         side: THREE.FrontSide,
         wireframe: false,
-        transparent: false,
+        transparent: false, // Ensure transparency is disabled
         opacity: 1.0,
-        // Remove ALL polygon offset properties
         depthTest: true,
         depthWrite: true,
-        // Add these properties to ensure flat appearance
-        flatShading: false,
+        // Add these properties to ensure no edge rendering
         polygonOffset: false,
-        // Explicitly disable shadows
-        shadowSide: null
+        flatShading: false
       });
       
       // Immediately load and apply the sand texture
@@ -551,7 +548,7 @@ class PolygonMesh {
     }
   }
   
-  // Modify the removeBottomFaces method to remove ALL side faces
+  // Modify the removeBottomFaces method to be more aggressive
   private removeBottomFaces(geometry: THREE.ExtrudeGeometry) {
     const position = geometry.getAttribute('position');
     const count = position.count;
@@ -567,8 +564,8 @@ class PolygonMesh {
       const ac = new THREE.Vector3().subVectors(c, a);
       const normal = new THREE.Vector3().crossVectors(ab, ac).normalize();
       
-      // Only keep faces that are pointing directly upward (top faces)
-      keepFace[i] = normal.y > 0.9; // More strict threshold (was 0.1)
+      // Only keep faces that are pointing exactly upward (top faces)
+      keepFace[i] = normal.y > 0.99; // Even more strict threshold (was 0.9)
     }
     
     const index = [];
