@@ -67,12 +67,12 @@ export default function PolygonViewer() {
     }
   }, [selectedPolygonId]);
 
-  // Set up Three.js scene - only depends on polygons, loading, activeView, and highQuality
-  // NOT dependent on selectedPolygonId to prevent scene recreation on selection
+  // Set up Three.js scene - only depends on polygons and loading
+  // NOT dependent on activeView, highQuality, or selectedPolygonId to prevent scene recreation
   useEffect(() => {
     if (!canvasRef.current || loading) return;
     
-    console.log(`Setting up Three.js scene with ${activeView} view`);
+    console.log(`Setting up Three.js scene`);
     console.log('Polygons:', polygons);
 
     // Calculate bounds for all polygons
@@ -82,7 +82,7 @@ export default function PolygonViewer() {
     // Initialize scene
     const scene = new SceneSetup({
       canvas: canvasRef.current,
-      activeView,
+      activeView, // We'll still pass activeView, but handle view changes separately
       highQuality
     });
     sceneRef.current = scene;
@@ -126,8 +126,6 @@ export default function PolygonViewer() {
       setSelectedPolygonId
     });
     interactionManagerRef.current = interactionManager;
-    
-    // Removed automatic camera reset at initialization
     
     // Add a frame counter for less frequent updates
     let frameCount = 0;
@@ -187,10 +185,10 @@ export default function PolygonViewer() {
     // Cleanup
     return () => {
       // Clean up all components
-      if (interactionManager) interactionManager.cleanup();
-      if (waterEffect) waterEffect.cleanup();
-      if (polygonRenderer) polygonRenderer.cleanup();
-      if (scene) scene.cleanup();
+      if (interactionManagerRef.current) interactionManagerRef.current.cleanup();
+      if (waterEffectRef.current) waterEffectRef.current.cleanup();
+      if (polygonRendererRef.current) polygonRendererRef.current.cleanup();
+      if (sceneRef.current) sceneRef.current.cleanup();
       
       // Clear references
       sceneRef.current = null;
@@ -198,7 +196,7 @@ export default function PolygonViewer() {
       waterEffectRef.current = null;
       interactionManagerRef.current = null;
     };
-  }, [polygons, loading, activeView, highQuality]); // Removed selectedPolygonId dependency
+  }, [polygons, loading]); // Remove activeView and highQuality dependencies
   
   // We've removed the separate controls update loop to prevent camera resets
   
@@ -210,6 +208,47 @@ export default function PolygonViewer() {
       polygonRendererRef.current.updateSelectionState(selectedPolygonId);
     }
   }, [selectedPolygonId]);
+  
+  // Add a separate effect to handle view mode changes
+  useEffect(() => {
+    // Update view mode when activeView changes
+    if (sceneRef.current) {
+      console.log(`Updating view mode to ${activeView}`);
+      
+      // Update water effect
+      if (waterEffectRef.current) {
+        waterEffectRef.current.updateViewMode(activeView);
+      }
+      
+      // Update polygon renderer
+      if (polygonRendererRef.current) {
+        polygonRendererRef.current.updateViewMode(activeView);
+      }
+      
+      // Update interaction manager
+      if (interactionManagerRef.current) {
+        interactionManagerRef.current.updateViewMode(activeView);
+      }
+    }
+  }, [activeView]);
+
+  // Add a separate effect to handle quality changes
+  useEffect(() => {
+    // Update quality when highQuality changes
+    if (sceneRef.current) {
+      console.log(`Updating quality to ${highQuality ? 'high' : 'low'}`);
+      
+      // Update water effect
+      if (waterEffectRef.current) {
+        waterEffectRef.current.updateQuality(!highQuality);
+      }
+      
+      // Update polygon renderer
+      if (polygonRendererRef.current) {
+        polygonRendererRef.current.updateQuality(!highQuality);
+      }
+    }
+  }, [highQuality]);
   
   if (loading) {
     return <div className="w-full h-full flex items-center justify-center">Loading polygons...</div>;

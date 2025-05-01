@@ -104,6 +104,33 @@ export default class WaterEffect {
     }
   }
   
+  public updateViewMode(activeView: ViewMode) {
+    this.activeView = activeView;
+    
+    // Update water material based on view mode
+    this.waterMaterial.color.set(
+      activeView === 'transport' ? '#00aaff' : 
+      activeView === 'land' ? '#3a7ca5' : // Deeper blue for land view
+      '#0066cc' // Different blue for buildings view
+    );
+    
+    // Update opacity based on view mode
+    this.waterMaterial.opacity = activeView === 'land' ? 0.8 : 0.7;
+    
+    // Update material to apply changes
+    this.waterMaterial.needsUpdate = true;
+  }
+
+  public updateQuality(performanceMode: boolean) {
+    this.performanceMode = performanceMode;
+    
+    // Update normal map based on performance mode
+    this.waterMaterial.normalMap = performanceMode ? null : this.waterNormalMap;
+    
+    // Update material to apply changes
+    this.waterMaterial.needsUpdate = true;
+  }
+  
   public cleanup() {
     // Remove water plane from scene and dispose of resources
     this.scene.remove(this.waterPlane);

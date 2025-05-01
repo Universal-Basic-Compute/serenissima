@@ -189,6 +189,24 @@ export default class PolygonRenderer {
     });
   }
   
+  public updateViewMode(activeView: ViewMode) {
+    this.activeView = activeView;
+    
+    // Update all LOD polygons with the new view mode
+    this.lodPolygons.forEach(lodPolygon => {
+      lodPolygon.updateViewMode(activeView);
+    });
+  }
+
+  public updateQuality(performanceMode: boolean) {
+    this.performanceMode = performanceMode;
+    
+    // Update all LOD polygons with the new quality setting
+    this.lodPolygons.forEach(lodPolygon => {
+      lodPolygon.updateQuality(performanceMode);
+    });
+  }
+  
   public cleanup() {
     // Clean up all LOD polygons
     this.lodPolygons.forEach(lodPolygon => {

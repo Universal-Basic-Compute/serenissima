@@ -166,6 +166,61 @@ export default class LODPolygon {
     return this.mesh;
   }
   
+  public updateViewMode(activeView: ViewMode) {
+    this.activeView = activeView;
+    
+    // Apply visual changes to both high and low detail meshes
+    const meshes = [this.highDetailMesh, this.lowDetailMesh].filter(Boolean);
+    
+    meshes.forEach(mesh => {
+      if (!mesh) return;
+      
+      const material = mesh.material as THREE.MeshStandardMaterial;
+      
+      // Update material based on view mode
+      if (activeView === 'land') {
+        // For land view, use green colors
+        if (!this.isSelected) {
+          material.color.set(new THREE.Color(0x7cac6a).lerp(new THREE.Color(0x8fbc8f), Math.random() * 0.3));
+        }
+        material.roughness = 0.9;
+        material.metalness = 0.0;
+      } else {
+        // For other views, use sand color
+        if (!this.isSelected) {
+          material.color.set('#e6d2a8');
+        }
+        material.roughness = 0.7;
+        material.metalness = 0.1;
+      }
+      
+      // Update material to apply changes
+      material.needsUpdate = true;
+    });
+  }
+
+  public updateQuality(performanceMode: boolean) {
+    this.performanceMode = performanceMode;
+    
+    // Apply quality changes to both high and low detail meshes
+    const meshes = [this.highDetailMesh, this.lowDetailMesh].filter(Boolean);
+    
+    meshes.forEach(mesh => {
+      if (!mesh) return;
+      
+      const material = mesh.material as THREE.MeshStandardMaterial;
+      
+      // Update material based on performance mode
+      material.map = performanceMode ? null : this.sandBaseColor;
+      material.normalMap = performanceMode ? null : this.sandNormalMap;
+      material.roughnessMap = performanceMode ? null : this.sandRoughnessMap;
+      material.flatShading = performanceMode;
+      
+      // Update material to apply changes
+      material.needsUpdate = true;
+    });
+  }
+  
   public cleanup() {
     this.scene.remove(this.mesh);
     

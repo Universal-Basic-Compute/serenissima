@@ -186,6 +186,10 @@ export default class InteractionManager {
     });
   }
   
+  public updateViewMode(activeView: ViewMode) {
+    this.activeView = activeView;
+  }
+  
   public cleanup() {
     // Remove event listeners
     window.removeEventListener('click', this.handleMouseClick);
