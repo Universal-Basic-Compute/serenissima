@@ -522,14 +522,18 @@ export default function PolygonViewer() {
       // If the current user is the buyer or seller, update their profile
       const currentWallet = sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress');
       if (currentWallet && (currentWallet === buyer || currentWallet === seller)) {
-        // Fetch updated user data
-        fetch(`${getApiBaseUrl()}/api/wallet/${currentWallet}`)
-          .then(response => {
-            if (response.ok) return response.json();
-            throw new Error('Failed to fetch updated user profile');
-          })
-          .then(data => {
+        // Fetch updated user data with retry logic
+        const fetchUserData = async (retries = 3, delay = 1000) => {
+          try {
+            const response = await fetch(`${getApiBaseUrl()}/api/wallet/${currentWallet}`);
+            if (!response.ok) {
+              throw new Error(`Failed to fetch updated user profile: ${response.status}`);
+            }
+            
+            const data = await response.json();
             if (data && data.user_name) {
+              console.log(`Successfully fetched updated profile for ${data.user_name} with compute: ${data.compute_amount}`);
+              
               // Update local storage with new compute amount
               const storedProfile = localStorage.getItem('userProfile');
               if (storedProfile) {
@@ -537,6 +541,7 @@ export default function PolygonViewer() {
                   const profile = JSON.parse(storedProfile);
                   profile.computeAmount = data.compute_amount;
                   localStorage.setItem('userProfile', JSON.stringify(profile));
+                  console.log(`Updated localStorage profile with compute amount: ${data.compute_amount}`);
                 } catch (e) {
                   console.error('Error updating stored profile:', e);
                 }
@@ -547,10 +552,17 @@ export default function PolygonViewer() {
                 detail: data
               }));
             }
-          })
-          .catch(error => {
-            console.error('Error fetching updated user profile:', error);
-          });
+          } catch (error) {
+            console.error(`Error fetching updated user profile (attempt ${4-retries}/3):`, error);
+            if (retries > 0) {
+              console.log(`Retrying in ${delay}ms...`);
+              setTimeout(() => fetchUserData(retries - 1, delay * 1.5), delay);
+            }
+          }
+        };
+        
+        // Start the fetch with retries
+        fetchUserData();
       }
     };
     

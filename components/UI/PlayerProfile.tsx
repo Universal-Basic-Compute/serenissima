@@ -161,7 +161,7 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
     firstName: firstName || 'Unknown',
     lastName: lastName || 'User',
     coatOfArmsImage: coatOfArmsImage,
-    computeAmount: computeAmount || 0,
+    computeAmount: computeAmount !== undefined ? computeAmount : 0,
     // Don't add any default color here
   };
 

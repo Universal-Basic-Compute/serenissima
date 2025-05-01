@@ -64,7 +64,7 @@ async function updateUserComputeBalances(seller: string, buyer: string, amount: 
           compute_amount: amount,
           operation: 'add'
         }),
-        signal: AbortSignal.timeout(5000) // 5 second timeout
+        signal: AbortSignal.timeout(10000) // Increased from 5 to 10 second timeout
       });
       
       // Update buyer (subtract funds)
@@ -77,7 +77,7 @@ async function updateUserComputeBalances(seller: string, buyer: string, amount: 
           compute_amount: amount,
           operation: 'subtract'
         }),
-        signal: AbortSignal.timeout(5000) // 5 second timeout
+        signal: AbortSignal.timeout(10000) // Increased from 5 to 10 second timeout
       });
       
       if (sellerResponse.ok && buyerResponse.ok) {
@@ -93,14 +93,48 @@ async function updateUserComputeBalances(seller: string, buyer: string, amount: 
           buyer: buyerData.compute_amount
         });
         
+        // Try to update local storage for the current user if they're the buyer or seller
+        try {
+          const currentWallet = sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress');
+          if (currentWallet) {
+            if (currentWallet === seller) {
+              const storedProfile = localStorage.getItem('userProfile');
+              if (storedProfile) {
+                const profile = JSON.parse(storedProfile);
+                profile.computeAmount = sellerData.compute_amount;
+                localStorage.setItem('userProfile', JSON.stringify(profile));
+                console.log('Updated seller profile in localStorage');
+              }
+            } else if (currentWallet === buyer) {
+              const storedProfile = localStorage.getItem('userProfile');
+              if (storedProfile) {
+                const profile = JSON.parse(storedProfile);
+                profile.computeAmount = buyerData.compute_amount;
+                localStorage.setItem('userProfile', JSON.stringify(profile));
+                console.log('Updated buyer profile in localStorage');
+              }
+            }
+          }
+        } catch (storageError) {
+          console.warn('Error updating localStorage:', storageError);
+        }
+        
         return true;
       } else {
         console.warn('API returned non-OK response for compute balance update');
         if (!sellerResponse.ok) {
           console.warn(`Seller update failed: ${sellerResponse.status}`);
+          try {
+            const errorData = await sellerResponse.json();
+            console.warn('Seller error details:', errorData);
+          } catch (e) {}
         }
         if (!buyerResponse.ok) {
           console.warn(`Buyer update failed: ${buyerResponse.status}`);
+          try {
+            const errorData = await buyerResponse.json();
+            console.warn('Buyer error details:', errorData);
+          } catch (e) {}
         }
       }
     } catch (apiError) {
@@ -242,10 +276,14 @@ export async function POST(
       const ownerToSet = buyerUsername || buyer;
       
       // Update compute balances using the wallet addresses (not usernames)
-      await updateUserComputeBalances(transaction.seller, buyer, transaction.price);
+      const balanceUpdateResult = await updateUserComputeBalances(transaction.seller, buyer, transaction.price);
       
       // Log the compute balance update
-      console.log(`Updated compute balances: ${transaction.seller} +${transaction.price}, ${buyer} -${transaction.price}`);
+      if (balanceUpdateResult) {
+        console.log(`Successfully updated compute balances: ${transaction.seller} +${transaction.price}, ${buyer} -${transaction.price}`);
+      } else {
+        console.warn(`Failed to update compute balances through API, transaction was completed but balances may not be accurate`);
+      }
     }
     
     // Update the land ownership if it's a land transaction
@@ -255,7 +293,8 @@ export async function POST(
       // Get the username for the buyer's wallet address
       const buyerUsername = await getUsernameFromWallet(buyer);
       
-      // Use the username if available, otherwise fall back to wallet address
+      // ALWAYS use the username if available, otherwise fall back to wallet address
+      // This ensures consistency in ownership attribution
       const ownerToSet = buyerUsername || buyer;
       console.log(`Setting land owner to ${ownerToSet} (username: ${buyerUsername}, wallet: ${buyer})`);
       

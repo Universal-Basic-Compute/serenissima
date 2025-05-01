@@ -125,6 +125,15 @@ const LandPurchaseModal: React.FC<LandPurchaseModalProps> = ({
               }
             }));
             
+            // Add a new event specifically for compute balance updates
+            window.dispatchEvent(new CustomEvent('computeBalanceChanged', {
+              detail: {
+                buyer: walletAddress,
+                seller: transaction.seller,
+                amount: transaction.price
+              }
+            }));
+            
             // Show success message
             alert(`Acquisition complete! The property "${landName || landId}" has been successfully transferred to your possession.`);
             
@@ -166,6 +175,15 @@ const LandPurchaseModal: React.FC<LandPurchaseModalProps> = ({
             landId: landId, 
             newOwner: ownerToSet, // Use username instead of wallet address
             transaction: updatedTransaction
+          }
+        }));
+      
+        // Add a new event specifically for compute balance updates
+        window.dispatchEvent(new CustomEvent('computeBalanceChanged', {
+          detail: {
+            buyer: walletAddress,
+            seller: transaction.seller,
+            amount: transaction.price
           }
         }));
       
