@@ -21,15 +21,27 @@ export async function POST(request: Request) {
     }
     
     // Get the polygon file
-    const filename = `${id}.json`;
+    let filename = `${id}.json`;
+    // Make sure the filename has .json extension
+    if (!filename.endsWith('.json')) {
+      filename = `${filename}.json`;
+    }
+    
+    // Log the filename we're trying to read
+    console.log(`Updating centroid for file: ${filename}`);
+    
     const data = serverUtils.readJsonFromFile(filename);
     
     if (!data) {
+      console.error(`Polygon file not found: ${filename}`);
       return NextResponse.json(
         { success: false, error: 'Polygon not found' },
         { status: 404 }
       );
     }
+    
+    // Log the current centroid and the new one
+    console.log(`Updating centroid from`, data.centroid, `to`, centroid);
     
     // Update the centroid
     data.centroid = centroid;
@@ -39,7 +51,8 @@ export async function POST(request: Request) {
     
     return NextResponse.json({ 
       success: true, 
-      message: `Centroid updated for ${id}`
+      message: `Centroid updated for ${id}`,
+      centroid: centroid
     });
   } catch (error) {
     console.error('Error updating centroid:', error);
