@@ -60,7 +60,7 @@ button:hover, a:hover {
   animation: fadeIn 0.3s ease-out;
 }
 
-/* Animated metallic $COMPUTE text effect */
+/* Animated metallic $COMPUTE text effect - updated for more pronounced metallic effect */
 .compute-token {
   font-family: 'Geist', sans-serif;
   font-weight: 300; /* Thin font weight */
@@ -70,18 +70,18 @@ button:hover, a:hover {
   letter-spacing: 0.5px;
   background: linear-gradient(
     to right,
-    #8a2be2, /* Purple */
-    #9370db, /* Medium purple */
-    #b19cd9, /* Light purple */
-    #9370db, /* Medium purple */
-    #8a2be2  /* Purple */
+    #9932CC, /* Dark orchid */
+    #E0B0FF, /* Mauve */
+    #9370DB, /* Medium purple */
+    #B19CD9, /* Light purple */
+    #9932CC  /* Dark orchid again */
   );
   background-size: 200% auto;
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  animation: shine 3s linear infinite;
-  text-shadow: 0 0 5px rgba(138, 43, 226, 0.1);
+  animation: shine 2s linear infinite; /* Faster animation */
+  text-shadow: 0 0 3px rgba(138, 43, 226, 0.3);
 }
 
 @keyframes shine {
@@ -90,22 +90,7 @@ button:hover, a:hover {
   }
 }
 
-/* Add a subtle pulse effect */
+/* Remove the pulse effect since we want to focus on the metallic look */
 .compute-token::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(138, 43, 226, 0.2);
-  opacity: 0;
-  animation: pulse 2s ease-in-out infinite;
-  pointer-events: none;
-}
-
-@keyframes pulse {
-  0% { opacity: 0; }
-  50% { opacity: 0.5; }
-  100% { opacity: 0; }
+  content: none;
 }
