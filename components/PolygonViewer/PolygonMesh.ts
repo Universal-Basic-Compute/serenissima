@@ -511,39 +511,43 @@ class PolygonMesh {
   
   // Update selection state
   public updateSelectionState(isSelected: boolean) {
-    if (this.isSelected === isSelected || !this.mesh) return;
+    if (this.isSelected === isSelected || !this.mesh) return; // Early return if state hasn't changed
     
     this.isSelected = isSelected;
     
-    const material = Array.isArray(this.mesh.material) 
-      ? this.mesh.material[0] as THREE.MeshBasicMaterial
-      : this.mesh.material as THREE.MeshBasicMaterial;
-    
-    if (!material) return;
-    
-    if (isSelected) {
-      if (!this.originalColor && material.color) {
-        this.originalColor = material.color.clone();
-      }
+    try {
+      const material = Array.isArray(this.mesh.material) 
+        ? this.mesh.material[0] as THREE.MeshBasicMaterial
+        : this.mesh.material as THREE.MeshBasicMaterial;
       
-      if (material.color) {
-        material.color.set('#ffcc00');
-      }
+      if (!material) return;
       
-      // Instead of changing height, just increase render order to ensure selected polygon appears on top
-      // This prevents creating height differences that cause visible edges
-      this.mesh.renderOrder = 30; // Much higher render order for selected polygons
-      
-      material.needsUpdate = true;
-    } else {
-      if (this.originalColor && material.color) {
-        material.color.copy(this.originalColor);
+      if (isSelected) {
+        if (!this.originalColor && material.color) {
+          this.originalColor = material.color.clone();
+        }
         
-        // Reset render order to base value
-        this.mesh.renderOrder = 20;
+        if (material.color) {
+          material.color.set('#ffcc00');
+        }
+        
+        // Instead of changing height, just increase render order to ensure selected polygon appears on top
+        // This prevents creating height differences that cause visible edges
+        this.mesh.renderOrder = 30; // Much higher render order for selected polygons
         
         material.needsUpdate = true;
+      } else {
+        if (this.originalColor && material.color) {
+          material.color.copy(this.originalColor);
+          
+          // Reset render order to base value
+          this.mesh.renderOrder = 20;
+          
+          material.needsUpdate = true;
+        }
       }
+    } catch (error) {
+      console.error('Error updating selection state:', error);
     }
   }
   

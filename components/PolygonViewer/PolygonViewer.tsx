@@ -801,7 +801,7 @@ export default function PolygonViewer() {
       interactionManagerRef.current = null;
       bridgeRendererRef.current = null;
     };
-  }, [polygons, loading, activeView, highQuality, bridges, ownerCoatOfArmsMap, users, selectedPolygonId, setHoveredPolygonId, setSelectedPolygonId, handleContextLost, handlePolygonAdded, handlePolygonDeleted]); // Add handleContextLost and the new handlers to dependencies
+  }, [polygons, loading, activeView, highQuality, bridges, ownerCoatOfArmsMap, users, setHoveredPolygonId, handleContextLost, handlePolygonAdded, handlePolygonDeleted]); // Removed selectedPolygonId from dependencies
   
   // We've removed the separate controls update loop to prevent camera resets
   
@@ -834,6 +834,15 @@ export default function PolygonViewer() {
   
   // Create a ref at the top level of the component to track previous view
   const prevViewRef = useRef(activeView);
+  
+  // Add a separate effect to handle selection state changes
+  useEffect(() => {
+    // Only update selection state when selectedPolygonId changes
+    if (polygonRendererRef.current) {
+      console.log('Updating selection state:', selectedPolygonId);
+      polygonRendererRef.current.updateSelectionState(selectedPolygonId);
+    }
+  }, [selectedPolygonId]);
   
   // Add a separate effect to handle view mode changes
   useEffect(() => {
