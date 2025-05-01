@@ -119,27 +119,35 @@ export default class InteractionManager {
           // Toggle selection state
           const newSelectedId = clickedId === this.selectedPolygonId ? null : clickedId;
           
-          // Update selection state directly
-          this.setSelectedPolygonId(newSelectedId);
-          this.selectedPolygonId = newSelectedId;
-          this.isProcessingClick = false;
+          // CRITICAL: Use a zero-timeout to defer the state update
+          // This completely separates it from the current event loop
+          setTimeout(() => {
+            // Update selection state
+            this.setSelectedPolygonId(newSelectedId);
+            this.selectedPolygonId = newSelectedId;
+            this.isProcessingClick = false;
+          }, 0);
           return;
         }
       } 
       
       // Clicking on empty space, deselect current selection
       if (this.selectedPolygonId) {
-        // Update selection state directly
-        this.setSelectedPolygonId(null);
-        this.selectedPolygonId = null;
-        this.isProcessingClick = false;
+        // CRITICAL: Use a zero-timeout to defer the state update
+        setTimeout(() => {
+          this.setSelectedPolygonId(null);
+          this.selectedPolygonId = null;
+          this.isProcessingClick = false;
+        }, 0);
         return;
       }
+      
+      // If we get here, we didn't click on anything
+      this.isProcessingClick = false;
     } catch (error) {
       console.error("Error in polygon interaction:", error);
+      this.isProcessingClick = false;
     }
-    
-    this.isProcessingClick = false;
   }
   
   public cleanup() {
