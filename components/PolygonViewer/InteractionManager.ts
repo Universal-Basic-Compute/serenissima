@@ -59,6 +59,10 @@ export default class InteractionManager {
       return;
     }
     
+    // Store the current camera position and rotation before any operations
+    const currentCameraPosition = this.camera.position.clone();
+    const currentCameraQuaternion = this.camera.quaternion.clone();
+    
     // Calculate mouse position in normalized device coordinates (-1 to +1)
     this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
@@ -96,6 +100,11 @@ export default class InteractionManager {
         this.selectedPolygonId = null;
       }
     }
+    
+    // CRITICAL: Restore camera position and rotation after the click operation
+    // This prevents any camera resets that might have occurred
+    this.camera.position.copy(currentCameraPosition);
+    this.camera.quaternion.copy(currentCameraQuaternion);
   }
   
   public cleanup() {
