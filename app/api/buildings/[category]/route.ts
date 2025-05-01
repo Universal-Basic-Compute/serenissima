@@ -7,7 +7,8 @@ export async function GET(
   { params }: { params: { category: string } }
 ) {
   try {
-    const { category } = params;
+    // Access category directly from params without destructuring
+    const category = params.category;
     
     // Validate the category
     const validCategories = [
