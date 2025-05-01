@@ -85,7 +85,7 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
   if (!visible) return null;
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-30 transform transition-transform duration-300 ease-in-out">
+    <div className="fixed inset-x-0 bottom-0 z-30 transform transition-transform duration-300 ease-in-out" onClick={(e) => e.stopPropagation()}>
       <div className="bg-amber-50 border-t-4 border-amber-600 shadow-lg max-h-[70vh] overflow-hidden flex flex-col">
         {/* Header */}
         <div className="flex justify-between items-center p-4 border-b border-amber-300">
@@ -120,6 +120,7 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
                           : 'text-amber-800 hover:bg-amber-200 hover:text-amber-900'
                       }`
                     }
+                    onClick={(e) => e.stopPropagation()}
                   >
                     {category.name}
                   </Tab>
@@ -136,7 +137,10 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
                         <div 
                           key={index} 
                           className="bg-amber-50 rounded-lg p-4 border border-amber-200 hover:border-amber-400 cursor-pointer transition-colors"
-                          onClick={() => setSelectedBuilding(building)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedBuilding(building);
+                          }}
                         >
                           <h3 className="text-lg font-medium text-amber-800 mb-1">{building.name}</h3>
                           <div className="flex justify-between text-xs text-amber-600 mb-2">
@@ -148,7 +152,13 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
                             <div className="text-amber-700 font-medium">
                               {building.constructionCosts.ducats.toLocaleString()} ⚜️
                             </div>
-                            <button className="text-xs bg-amber-600 text-white px-2 py-1 rounded hover:bg-amber-700">
+                            <button 
+                              className="text-xs bg-amber-600 text-white px-2 py-1 rounded hover:bg-amber-700"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedBuilding(building);
+                              }}
+                            >
                               Details
                             </button>
                           </div>
@@ -179,7 +189,10 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
                     </div>
                   </div>
                   <button 
-                    onClick={() => setSelectedBuilding(null)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedBuilding(null);
+                    }}
                     className="text-amber-700 hover:text-amber-900 transition-colors"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -269,13 +282,17 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
 
                 <div className="flex justify-end space-x-3">
                   <button 
-                    onClick={() => setSelectedBuilding(null)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedBuilding(null);
+                    }}
                     className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
                   >
                     Close
                   </button>
                   <button 
                     className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors"
+                    onClick={(e) => e.stopPropagation()}
                   >
                     Build
                   </button>
