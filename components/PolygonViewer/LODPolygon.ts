@@ -141,8 +141,11 @@ export default class LODPolygon {
     // Create extruded geometry with enhanced settings for better quality
     const extrudeSettings = {
       steps: 1, // Reduce steps to prevent shadow artifacts
-      depth: 0.03, // Reduced depth to minimize shadow effect
-      bevelEnabled: false, // Disable bevels to prevent shadow artifacts
+      depth: 0.05, // Increased depth for more island-like appearance
+      bevelEnabled: true, // Enable bevels for smoother island edges
+      bevelThickness: 0.02,
+      bevelSize: 0.02,
+      bevelSegments: 3,
       UVGenerator: { // Add a custom UV generator for better texture mapping
         generateTopUV: function(geometry, vertices, indexA, indexB, indexC) {
           // Create UVs that map the entire texture to the face
@@ -177,18 +180,30 @@ export default class LODPolygon {
     const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
     geometry.rotateX(-Math.PI / 2);
     
+    // Add height variation to the geometry to make islands more natural
+    const positions = geometry.attributes.position.array;
+    for (let i = 0; i < positions.length; i += 3) {
+      // Only modify the Y coordinate (height)
+      // Skip bottom vertices (where y is close to 0 or negative)
+      if (positions[i + 1] > 0.01) {
+        // Add random height variation
+        const noise = Math.random() * 0.03; // Small random variation
+        positions[i + 1] += noise;
+      }
+    }
+    
+    // Update normals after modifying positions
+    geometry.computeVertexNormals();
+    
     // Determine the color to use
     const landColor = this.determineLandColor();
     
-    // Create a material that explicitly doesn't cast shadows
-    // Use MeshBasicMaterial which doesn't interact with lights or shadows
-    const material = new THREE.MeshBasicMaterial({ 
+    // Create a material that looks like sand
+    const material = new THREE.MeshStandardMaterial({ 
       color: landColor,
-      side: THREE.FrontSide, // Only render front side
-      shadowSide: THREE.FrontSide, // Explicitly set shadowSide
-      // Remove all shadow-related properties
-      transparent: false,
-      opacity: 1.0,
+      roughness: 0.9, // High roughness for sand-like appearance
+      metalness: 0.1, // Low metalness
+      side: THREE.FrontSide,
       // Add these important properties to prevent z-fighting:
       polygonOffset: true,
       polygonOffsetFactor: 1,
@@ -197,6 +212,34 @@ export default class LODPolygon {
       depthTest: true,
       depthWrite: true
     });
+    
+    // Load sand texture if not in performance mode
+    if (!this.performanceMode) {
+      // Use shared texture loader
+      this.textureLoader.load(
+        'https://threejs.org/examples/textures/terrain/grasslight-big.jpg', // Use existing texture
+        (texture) => {
+          texture.wrapS = THREE.RepeatWrapping;
+          texture.wrapT = THREE.RepeatWrapping;
+          texture.repeat.set(5, 5); // Adjust based on scale
+          material.map = texture;
+          material.needsUpdate = true;
+        }
+      );
+      
+      // Load normal map for sand texture
+      this.textureLoader.load(
+        'https://threejs.org/examples/textures/terrain/grasslight-big-nm.jpg', // Use existing texture
+        (texture) => {
+          texture.wrapS = THREE.RepeatWrapping;
+          texture.wrapT = THREE.RepeatWrapping;
+          texture.repeat.set(5, 5); // Match the color texture
+          material.normalMap = texture;
+          material.normalScale.set(0.5, 0.5); // Adjust for desired bumpiness
+          material.needsUpdate = true;
+        }
+      );
+    }
     
     this.highDetailMesh = new THREE.Mesh(geometry, material);
     
@@ -216,15 +259,19 @@ export default class LODPolygon {
   private determineLandColor(): THREE.Color {
     if (this.activeView === 'land') {
       if (this.ownerColor) {
-        return new THREE.Color(this.ownerColor);
+        // Blend the owner color with sand color for a more natural look
+        const sandColor = new THREE.Color(0xf0e6c8); // Lighter sand color
+        const ownerColor = new THREE.Color(this.ownerColor);
+        // Mix 70% owner color with 30% sand color
+        return new THREE.Color().lerpColors(sandColor, ownerColor, 0.7);
       } else if (this.polygon.owner) {
         // Instead of generating a color, use a default color
-        return new THREE.Color(0xe6d2a8); // Default sand/beige color
+        return new THREE.Color(0xf0e6c8); // Lighter sand color for owned islands
       } else {
-        return new THREE.Color(0xe6d2a8); // Sand/beige color
+        return new THREE.Color(0xf0e6c8); // Lighter sand color
       }
     } else {
-      return new THREE.Color(0xe6d2a8);
+      return new THREE.Color(0xf0e6c8); // Lighter sand color
     }
   }
   

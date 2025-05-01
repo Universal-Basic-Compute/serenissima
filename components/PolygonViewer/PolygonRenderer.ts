@@ -186,6 +186,9 @@ export default class PolygonRenderer {
       console.log(`Processed ${Object.keys(this.ownerCoatOfArmsMap).length} coat of arms and ${Object.keys(this.ownerColorMap).length} colors from users data`);
     }
     
+    // Create shore effects for islands
+    setTimeout(() => this.createShoreEffects(), 1000);
+    
     // Initialize texture loader explicitly
     this.textureLoader = new THREE.TextureLoader();
     
@@ -865,6 +868,56 @@ export default class PolygonRenderer {
     });
   }
 
+  // Add method to create shore effects for islands
+  private createShoreEffects() {
+    if (this.performanceMode) return; // Skip in performance mode
+    
+    console.log('Creating shore effects for islands...');
+    
+    this.polygons.forEach(polygon => {
+      if (!polygon.coordinates || polygon.coordinates.length < 3) return;
+      
+      const normalizedCoords = normalizeCoordinates(
+        polygon.coordinates,
+        this.bounds.centerLat,
+        this.bounds.centerLng,
+        this.bounds.scale,
+        this.bounds.latCorrectionFactor
+      );
+      
+      // Create a slightly larger shape for the shore
+      const shoreShape = createPolygonShape(normalizedCoords);
+      
+      // Create a slightly larger extrusion for the shore
+      const shoreExtrudeSettings = {
+        steps: 1,
+        depth: 0.01,  // Very thin
+        bevelEnabled: true,
+        bevelThickness: 0.2,
+        bevelSize: 0.3,
+        bevelSegments: 3
+      };
+      
+      const shoreGeometry = new THREE.ExtrudeGeometry(shoreShape, shoreExtrudeSettings);
+      shoreGeometry.rotateX(-Math.PI / 2);
+      
+      // Create a gradient material for the shore
+      const shoreMaterial = new THREE.MeshStandardMaterial({
+        color: 0xf0e68c,  // Light sand color
+        roughness: 1.0,
+        metalness: 0.0,
+        transparent: true,
+        opacity: 0.7,
+        side: THREE.FrontSide
+      });
+      
+      const shoreMesh = new THREE.Mesh(shoreGeometry, shoreMaterial);
+      shoreMesh.position.y = -0.05;  // Position slightly below the main land
+      
+      this.scene.add(shoreMesh);
+    });
+  }
+  
   public cleanup() {
     // Clean up all LOD polygons
     this.lodPolygons.forEach(lodPolygon => {

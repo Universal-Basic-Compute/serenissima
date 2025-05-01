@@ -185,18 +185,18 @@ export default class WaterEffect {
           float landDistance = 1.0 - max(max(landColor.r, landColor.g), landColor.b);
           
           // Create more dynamic wave patterns - reduced frequency to slow down waves
-          float wave1 = sin(time * 0.5 + vUv.x * 10.0 + vUv.y * 8.0) * 0.5 + 0.5;  // Reduced from 1.0
-          float wave2 = cos(time * 0.75 - vUv.x * 8.0 + vUv.y * 6.0) * 0.5 + 0.5;  // Reduced from 1.5
+          float wave1 = sin(time * 0.5 + vUv.x * 10.0 + vUv.y * 8.0) * 0.5 + 0.5;
+          float wave2 = cos(time * 0.75 - vUv.x * 8.0 + vUv.y * 6.0) * 0.5 + 0.5;
           float wave = mix(wave1, wave2, 0.5);
           
-          // Create a wider, more visible shore effect
-          float shoreMask = smoothstep(0.0, 0.2, landDistance) * (1.0 - smoothstep(0.2, 0.5, landDistance));
+          // Create a wider, more visible shore effect with foam
+          float shoreMask = smoothstep(0.0, 0.3, landDistance) * (1.0 - smoothstep(0.3, 0.6, landDistance));
           
-          // Add foam color
-          vec3 foamColor = mix(waterColor, color, 0.7);
+          // Add foam color with more white
+          vec3 foamColor = mix(waterColor, vec3(1.0, 1.0, 1.0), 0.8);
           
-          // Final color with higher opacity for visibility but reduced to avoid flickering
-          gl_FragColor = vec4(foamColor, shoreMask * wave * 0.5);
+          // Final color with higher opacity for visibility
+          gl_FragColor = vec4(foamColor, shoreMask * wave * 0.7);
         }
       `,
       transparent: true,
@@ -377,11 +377,11 @@ export default class WaterEffect {
   private getWaterColorForView(): number {
     switch (this.activeView) {
       case 'transport':
-        return 0x1a8cff; // Brighter, more saturated blue
+        return 0x4ac0ff; // Bright turquoise blue
       case 'land':
-        return 0x2c85c1; // Slightly deeper blue with a hint of teal
+        return 0x20b2aa; // Light sea green for tropical island feel
       default:
-        return 0x0055aa; // Rich deep blue
+        return 0x0088cc; // Deeper turquoise
     }
   }
   

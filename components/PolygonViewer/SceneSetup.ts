@@ -166,15 +166,15 @@ export default class SceneSetup {
   }
   
   private setupLights(activeView: ViewMode) {
-    // Add simple ambient light
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.7); // Reduced intensity
+    // Add warm ambient light for tropical feel
+    const ambientLight = new THREE.AmbientLight(0xfff0e0, 0.7); // Warmer color for tropical feel
     this.scene.add(ambientLight);
     
     // Calculate sun position based on current time of day in Venice
     const sunPosition = this.calculateSunPosition();
     
-    // Add a directional light for the sun with greater distance
-    this.sunLight = new THREE.DirectionalLight(0xffffff, 1.0);
+    // Add a directional light for the sun with warmer color
+    this.sunLight = new THREE.DirectionalLight(0xfff5e0, 1.2); // Warmer color and higher intensity
     this.sunLight.position.copy(sunPosition);
     this.sunLight.castShadow = false;
     
@@ -182,6 +182,11 @@ export default class SceneSetup {
     this.sunLight.position.normalize().multiplyScalar(1000); // 1000 units away
     
     this.scene.add(this.sunLight);
+    
+    // Add a secondary light for fill
+    const fillLight = new THREE.DirectionalLight(0xadd8e6, 0.3); // Light blue fill light
+    fillLight.position.set(-50, 30, -50);
+    this.scene.add(fillLight);
     
     // Add a small sun sphere very far away
     const sunGeometry = new THREE.SphereGeometry(50, 16, 16); // Larger sphere since it's far away
