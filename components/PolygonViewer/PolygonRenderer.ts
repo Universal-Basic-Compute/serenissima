@@ -699,7 +699,7 @@ export default class PolygonRenderer {
     texture.needsUpdate = true;
     
     // Create a flat plane for the colored circle - 20% smaller
-    const planeSize = 1.6; // Reduced size by 20% from 2.0
+    const planeSize = 1.28; // Reduced by 20% from 1.6
     const geometry = new THREE.PlaneGeometry(planeSize, planeSize);
     
     // Create material with the texture
