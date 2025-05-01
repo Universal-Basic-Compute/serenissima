@@ -314,8 +314,11 @@ export default function Home() {
     try {
       console.log('Starting compute investment process...');
       
-      // For testing, let's skip the actual token transfer
-      // Just update the Airtable record
+      // First, transfer the tokens on Solana using Phantom wallet
+      const signature = await transferComputeTokens(walletAdapter, amount);
+      console.log('Token transfer successful:', signature);
+      
+      // Then, update the compute amount in Airtable
       const airtableResponse = await investComputeInAirtable(walletAddress, amount);
       console.log('Airtable update successful:', airtableResponse);
       
@@ -323,6 +326,7 @@ export default function Home() {
     } catch (error) {
       console.error('Error investing compute:', error);
       alert(`Failed to invest compute: ${error.message}`);
+      throw error;
     }
   };
 
