@@ -15,10 +15,10 @@ export default class WaterEffect {
   private scene: THREE.Scene;
   private activeView: ViewMode;
   private performanceMode: boolean;
-  private water: Water;
+  private water: Water | null = null;
   private waterGeometry: THREE.PlaneGeometry;
   private waterNormalMap: THREE.Texture;
-  private waterDUDVMap: THREE.Texture;
+  private waterDUDVMap: THREE.Texture | null = null;
   private width: number;
   private height: number;
   private sunPosition: THREE.Vector3;
@@ -40,6 +40,7 @@ export default class WaterEffect {
   private static waterDUDVMapTexture: THREE.Texture | null = null;
   private static foamTexture: THREE.Texture | null = null;
   private static textureLoader: THREE.TextureLoader | null = null;
+  private textureLoader: THREE.TextureLoader;
   private static causticTextures: THREE.Texture[] | null = null;
 
   constructor({
@@ -78,7 +79,7 @@ export default class WaterEffect {
       WaterEffect.textureLoader = new THREE.TextureLoader();
       WaterEffect.textureLoader.setCrossOrigin('anonymous');
     }
-    this.textureLoader = WaterEffect.textureLoader;
+    this.textureLoader = WaterEffect.textureLoader || new THREE.TextureLoader();
     
     // Create a simple placeholder water plane initially
     this.waterGeometry = new THREE.PlaneGeometry(
@@ -310,7 +311,7 @@ export default class WaterEffect {
       // Try to load the actual texture, but don't wait for it
       this.textureLoader.load(
         '/textures/waternormals.jpg',
-        (texture) => {
+        (texture: THREE.Texture) => {
           console.log('Water normal map loaded successfully');
           texture.wrapS = THREE.RepeatWrapping;
           texture.wrapT = THREE.RepeatWrapping;
@@ -322,15 +323,15 @@ export default class WaterEffect {
             this.water.material.uniforms.normalSampler.value = texture;
           }
         },
-        (xhr) => {
+        (xhr: ProgressEvent) => {
           console.log(`Water normal map loading: ${(xhr.loaded / xhr.total) * 100}% loaded`);
         },
-        (error) => {
+        (error: Error) => {
           console.warn('Could not load water normal map from primary path:', error);
           // Try alternative path without leading slash
           this.textureLoader.load(
             'textures/waternormals.jpg',
-            (texture) => {
+            (texture: THREE.Texture) => {
               console.log('Water normal map loaded from alternative path');
               texture.wrapS = THREE.RepeatWrapping;
               texture.wrapT = THREE.RepeatWrapping;
@@ -342,7 +343,7 @@ export default class WaterEffect {
               }
             },
             undefined,
-            (secondError) => {
+            (secondError: Error) => {
               console.warn('Could not load water normal map from alternative path, using fallback:', secondError);
               // We already have the fallback texture set, so no need to do anything here
             }

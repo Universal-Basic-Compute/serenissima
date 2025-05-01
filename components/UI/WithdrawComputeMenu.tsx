@@ -51,16 +51,16 @@ export default function WithdrawComputeMenu({ onClose, onWithdraw, computeAmount
       console.error('Error withdrawing compute:', error);
       
       // Handle specific error messages
-      if (error.message && error.message.includes('tweetnacl')) {
+      if ((error as Error).message && (error as Error).message.includes('tweetnacl')) {
         setError('Withdrawal service is temporarily unavailable. Please try again later.');
-      } else if (error.message && error.message.includes('parse')) {
+      } else if ((error as Error).message && (error as Error).message.includes('parse')) {
         setError('There was an issue processing your withdrawal. The system is being updated. Please try again later.');
-      } else if (error.message && error.message.includes('Insufficient')) {
+      } else if ((error as Error).message && (error as Error).message.includes('Insufficient')) {
         setError('Insufficient balance for withdrawal.');
-      } else if (error.message && error.message.includes('timeout')) {
+      } else if ((error as Error).message && (error as Error).message.includes('timeout')) {
         setError('The withdrawal request timed out. Please try again later.');
       } else {
-        setError(error.message || 'Failed to withdraw compute. Please try again later.');
+        setError((error as Error).message || 'Failed to withdraw compute. Please try again later.');
       }
     } finally {
       setIsProcessing(false);

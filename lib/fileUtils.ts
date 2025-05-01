@@ -181,7 +181,7 @@ if (typeof window === 'undefined') {
     }
     
     // Read directory and filter for JSON files
-    const files = fs.readdirSync(dataDir).filter(file => file.endsWith('.json'));
+    const files = fs.readdirSync(dataDir).filter((file: string) => file.endsWith('.json'));
     
     // Cache the result
     serverUtils.fileCache[cacheKey] = files;

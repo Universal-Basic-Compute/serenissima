@@ -302,19 +302,19 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
           } else {
             // If no cache at all, create an empty response
             console.log('No cached data available, using empty land owners data');
-            data = { success: true, lands: [], _error: fetchError.message };
+            data = { success: true, lands: [], _error: (fetchError as Error).message };
           }
         }
       }
       
       if (data.success && data.lands) {
         // Create a map of land ID to owner
-        const ownerMap = {};
+        const ownerMap: Record<string, string> = {};
         
         // Get current polygons to check ID formats
         const currentPolygons = get().polygons;
         
-        data.lands.forEach(land => {
+        data.lands.forEach((land: any) => {
           if (land.id && land.owner) {
             // Try different ID formats
             ownerMap[land.id] = land.owner;
@@ -337,7 +337,7 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
         // Update the polygons with owner information
         const updatedPolygons = get().polygons.map(polygon => ({
           ...polygon,
-          owner: ownerMap[polygon.id] || null
+          owner: (ownerMap as Record<string, string>)[polygon.id] || null
         }));
         
         set({ polygons: updatedPolygons });
@@ -396,9 +396,9 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
       
       if (data.success && data.users) {
         // Create a map of username to user data
-        const usersMap = {};
+        const usersMap: Record<string, any> = {};
         
-        data.users.forEach(user => {
+        data.users.forEach((user: any) => {
           if (user.user_name) {
             usersMap[user.user_name] = user;
             

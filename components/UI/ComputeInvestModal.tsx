@@ -19,7 +19,7 @@ export default function ComputeInvestModal({ isOpen, onClose, onInvest }: Comput
       await onInvest(amount);
       onClose();
     } catch (err) {
-      setError(err.message || 'Failed to invest compute');
+      setError((err as Error).message || 'Failed to invest compute');
     } finally {
       setIsProcessing(false);
     }

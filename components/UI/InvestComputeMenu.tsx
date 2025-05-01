@@ -28,7 +28,7 @@ const InvestComputeMenu: React.FC<InvestComputeMenuProps> = ({ onClose, onInvest
       await onInvest(amount);
       onClose();
     } catch (error) {
-      setError(error.message || 'Failed to invest compute');
+      setError((error as Error).message || 'Failed to invest compute');
     } finally {
       setIsLoading(false);
     }

@@ -1,6 +1,11 @@
 import { Connection, PublicKey, Transaction, SystemProgram, Keypair, sendAndConfirmTransaction } from '@solana/web3.js';
-import { Token, TOKEN_PROGRAM_ID } from '@solana/spl-token';
+import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import bs58 from 'bs58';
+import { 
+  getAssociatedTokenAddress, 
+  createAssociatedTokenAccountInstruction,
+  createTransferInstruction
+} from '@solana/spl-token';
 
 // Solana connection - use devnet for testing, mainnet for production
 const connection = new Connection(
@@ -56,8 +61,7 @@ export async function transferComputeFromTreasury(
     const recipient = new PublicKey(recipientAddress);
     
     // Get the token account for the treasury
-    const treasuryTokenAccount = await Token.getAssociatedTokenAddress(
-      TOKEN_PROGRAM_ID,
+    const treasuryTokenAccount = await getAssociatedTokenAddress(
       COMPUTE_TOKEN_MINT,
       treasury.publicKey
     );
@@ -65,8 +69,7 @@ export async function transferComputeFromTreasury(
     // Get or create the token account for the recipient
     let recipientTokenAccount;
     try {
-      recipientTokenAccount = await Token.getAssociatedTokenAddress(
-        TOKEN_PROGRAM_ID,
+      recipientTokenAccount = await getAssociatedTokenAddress(
         COMPUTE_TOKEN_MINT,
         recipient
       );
@@ -78,12 +81,11 @@ export async function transferComputeFromTreasury(
       if (!accountInfo) {
         console.log(`Creating token account for recipient ${recipientAddress}`);
         
-        const createATAIx = Token.createAssociatedTokenAccountInstruction(
-          TOKEN_PROGRAM_ID,
-          COMPUTE_TOKEN_MINT,
+        const createATAIx = createAssociatedTokenAccountInstruction(
+          treasury.publicKey,
           recipientTokenAccount,
           recipient,
-          treasury.publicKey
+          COMPUTE_TOKEN_MINT
         );
         
         const transaction = new Transaction().add(createATAIx);
@@ -103,12 +105,10 @@ export async function transferComputeFromTreasury(
     }
     
     // Create transfer instruction
-    const transferIx = Token.createTransferInstruction(
-      TOKEN_PROGRAM_ID,
+    const transferIx = createTransferInstruction(
       treasuryTokenAccount,
       recipientTokenAccount,
       treasury.publicKey,
-      [],
       amount
     );
     
@@ -148,15 +148,13 @@ export async function withdrawComputeToTreasury(
     const user = new PublicKey(userAddress);
     
     // Get the token account for the treasury
-    const treasuryTokenAccount = await Token.getAssociatedTokenAddress(
-      TOKEN_PROGRAM_ID,
+    const treasuryTokenAccount = await getAssociatedTokenAddress(
       COMPUTE_TOKEN_MINT,
       treasury.publicKey
     );
     
     // Get the token account for the user
-    const userTokenAccount = await Token.getAssociatedTokenAddress(
-      TOKEN_PROGRAM_ID,
+    const userTokenAccount = await getAssociatedTokenAddress(
       COMPUTE_TOKEN_MINT,
       user
     );
@@ -175,12 +173,10 @@ export async function withdrawComputeToTreasury(
     // For demonstration purposes, we'll transfer from treasury to user instead
     console.log(`Simulating withdrawal by transferring from treasury to user`);
     
-    const transferIx = Token.createTransferInstruction(
-      TOKEN_PROGRAM_ID,
+    const transferIx = createTransferInstruction(
       treasuryTokenAccount,
       userTokenAccount,
       treasury.publicKey,
-      [],
       amount
     );
     
