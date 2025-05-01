@@ -351,7 +351,42 @@ export default function PolygonViewer() {
             infoVisible ? 'opacity-100 transform translate-y-0' : 'opacity-0 transform -translate-y-4'
           }`}
         >
-          <p>Selected: {selectedPolygonId}</p>
+          <div className="flex items-center justify-between">
+            <p>Selected: {selectedPolygonId}</p>
+            <button
+              onClick={() => {
+                if (confirm(`Are you sure you want to delete polygon ${selectedPolygonId}?`)) {
+                  // Call the delete API
+                  fetch('/api/delete-polygon', {
+                    method: 'DELETE',
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ id: selectedPolygonId }),
+                  })
+                  .then(response => response.json())
+                  .then(data => {
+                    if (data.success) {
+                      // Clear selection and trigger reload
+                      setSelectedPolygonId(null);
+                      window.dispatchEvent(new Event('polygonDeleted'));
+                      alert('Polygon deleted successfully');
+                    } else {
+                      alert(`Failed to delete polygon: ${data.error}`);
+                    }
+                  })
+                  .catch(error => {
+                    console.error('Error deleting polygon:', error);
+                    alert('An error occurred while deleting the polygon');
+                  });
+                }
+              }}
+              className="ml-4 px-2 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600"
+              title="Delete this polygon"
+            >
+              Delete
+            </button>
+          </div>
         </div>
       )}
 
