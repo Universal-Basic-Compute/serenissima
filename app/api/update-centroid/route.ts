@@ -21,43 +21,56 @@ export async function POST(request: Request) {
     }
     
     // Get the polygon file
-    let filename = `${id}.json`;
-    // Make sure the filename has .json extension
-    if (!filename.endsWith('.json')) {
-      filename = `${filename}.json`;
+    // Handle both formats: with or without 'polygon-' prefix
+    let possibleFilenames = [
+      `${id}.json`,
+      `polygon-${id}.json`,
+      id.startsWith('polygon-') ? `${id}.json` : `polygon-${id}.json`
+    ];
+    
+    // Log the filenames we're trying
+    console.log(`Trying to update centroid for files:`, possibleFilenames);
+    
+    let data = null;
+    let foundFilename = null;
+    
+    // Try each possible filename
+    for (const filename of possibleFilenames) {
+      data = serverUtils.readJsonFromFile(filename);
+      if (data) {
+        foundFilename = filename;
+        break;
+      }
     }
     
-    // Log the filename we're trying to read
-    console.log(`Updating centroid for file: ${filename}`);
-    
-    const data = serverUtils.readJsonFromFile(filename);
-    
-    if (!data) {
-      console.error(`Polygon file not found: ${filename}`);
+    if (!data || !foundFilename) {
+      console.error(`Polygon file not found for ID: ${id}`);
       return NextResponse.json(
-        { success: false, error: 'Polygon not found' },
+        { success: false, error: `Polygon not found for ID: ${id}` },
         { status: 404 }
       );
     }
     
     // Log the current centroid and the new one
+    console.log(`Found polygon file: ${foundFilename}`);
     console.log(`Updating centroid from`, data.centroid, `to`, centroid);
     
     // Update the centroid
     data.centroid = centroid;
     
     // Save the updated data
-    serverUtils.saveJsonToFile(filename, data);
+    serverUtils.saveJsonToFile(foundFilename, data);
     
     return NextResponse.json({ 
       success: true, 
       message: `Centroid updated for ${id}`,
-      centroid: centroid
+      centroid: centroid,
+      filename: foundFilename
     });
   } catch (error) {
     console.error('Error updating centroid:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to update centroid' },
+      { success: false, error: `Failed to update centroid: ${error.message}` },
       { status: 500 }
     );
   }
