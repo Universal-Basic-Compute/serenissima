@@ -72,7 +72,7 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
       do {
         const randomIndex = Math.floor(Math.random() * tracks.length);
         newTrack = tracks[randomIndex];
-      } while (newTrack === currentTrack && tracks.length > 1);
+      } while (newTrack === currentTrack && tracks.length > 1 && !currentTrack.includes('Pausing between tracks'));
     }
     
     setCurrentTrack(newTrack);
@@ -86,6 +86,8 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
         setIsPlaying(false);
       });
     }
+    
+    setIsPlaying(true);
   };
 
   // Initialize audio and play first track
@@ -154,12 +156,30 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
     };
   }, [isLoading, tracks, volume, autoplay]); // Remove isPlaying and currentTrack from dependencies
 
-  // Handle track ending - play next random track
+  // Handle track ending - play next random track with a 10-second pause
   useEffect(() => {
     const audio = audioRef.current;
     
     const handleEnded = () => {
-      playRandomTrack();
+      // Pause for 10 seconds before playing the next track
+      setIsPlaying(false);
+      
+      // Show a message that we're pausing between tracks
+      const pauseMessage = 'Pausing between tracks...';
+      const originalTrack = currentTrack;
+      setCurrentTrack(pauseMessage);
+      
+      // Wait 10 seconds before playing the next track
+      const pauseTimeout = setTimeout(() => {
+        // Only play the next track if we're still on the pause message
+        // This prevents issues if the user manually changed tracks during the pause
+        if (currentTrack === pauseMessage) {
+          playRandomTrack();
+        }
+      }, 10000); // 10 seconds
+      
+      // Clean up the timeout if the component unmounts during the pause
+      return () => clearTimeout(pauseTimeout);
     };
     
     if (audio) {
