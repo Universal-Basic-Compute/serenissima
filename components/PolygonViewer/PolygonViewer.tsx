@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react';
 import * as THREE from 'three';
+import { gsap } from 'gsap';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { OutlinePass } from 'three/examples/jsm/postprocessing/OutlinePass';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
@@ -16,6 +17,7 @@ export default function PolygonViewer() {
   const [activeView, setActiveView] = useState('buildings'); // 'buildings', 'transport', or 'land'
   const [hoveredPolygonId, setHoveredPolygonId] = useState(null);
   const [selectedPolygonId, setSelectedPolygonId] = useState(null);
+  const [infoVisible, setInfoVisible] = useState(false);
   const polygonMeshesRef = useRef({});
   
   // Define resetCamera at component level using useRef to store the function
@@ -84,6 +86,19 @@ export default function PolygonViewer() {
     
     loadPolygons();
   }, []);
+
+  // Update info panel visibility when selectedPolygonId changes
+  useEffect(() => {
+    if (selectedPolygonId) {
+      setInfoVisible(true);
+    } else {
+      // Delay hiding the info to allow for animation
+      const timer = setTimeout(() => {
+        setInfoVisible(false);
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [selectedPolygonId]);
 
   // Set up Three.js scene
   useEffect(() => {
@@ -511,6 +526,25 @@ export default function PolygonViewer() {
         );
         
         if (hoveredId && hoveredId !== hoveredPolygonId && hoveredId !== selectedPolygonId) {
+          // Remove hover effect from previously hovered polygon
+          if (hoveredPolygonId && hoveredPolygonId !== selectedPolygonId) {
+            const previousHovered = polygonMeshesRef.current[hoveredPolygonId];
+            if (previousHovered && previousHovered.material) {
+              // Animate back to original material properties
+              gsap.to(previousHovered.material.emissive, {
+                r: previousHovered.userData.originalEmissive?.r || 0,
+                g: previousHovered.userData.originalEmissive?.g || 0,
+                b: previousHovered.userData.originalEmissive?.b || 0,
+                duration: 0.3
+              });
+              
+              gsap.to(previousHovered.material, {
+                emissiveIntensity: previousHovered.userData.originalEmissiveIntensity || 0,
+                duration: 0.3
+              });
+            }
+          }
+          
           setHoveredPolygonId(hoveredId);
           
           // Apply glow effect to the hovered polygon
@@ -521,20 +555,36 @@ export default function PolygonViewer() {
               object.userData.originalEmissiveIntensity = object.material.emissiveIntensity;
             }
             
-            // Apply glow effect
-            object.material.emissive.set(0x88ff88);
-            object.material.emissiveIntensity = 0.5;
+            // Animate glow effect
+            gsap.to(object.material.emissive, {
+              r: 0.53, // 0x88/255
+              g: 1.0,  // 0xff/255
+              b: 0.53, // 0x88/255
+              duration: 0.3
+            });
+            
+            gsap.to(object.material, {
+              emissiveIntensity: 0.5,
+              duration: 0.3
+            });
           }
         }
-      } else if (hoveredPolygonId) {
+      } else if (hoveredPolygonId && hoveredPolygonId !== selectedPolygonId) {
         // Remove glow effect from previously hovered polygon
         const previousHovered = polygonMeshesRef.current[hoveredPolygonId];
         if (previousHovered && previousHovered.material) {
-          // Restore original material properties unless it's selected
-          if (hoveredPolygonId !== selectedPolygonId) {
-            previousHovered.material.emissive.copy(previousHovered.userData.originalEmissive || new THREE.Color(0x000000));
-            previousHovered.material.emissiveIntensity = previousHovered.userData.originalEmissiveIntensity || 0;
-          }
+          // Animate back to original material properties
+          gsap.to(previousHovered.material.emissive, {
+            r: previousHovered.userData.originalEmissive?.r || 0,
+            g: previousHovered.userData.originalEmissive?.g || 0,
+            b: previousHovered.userData.originalEmissive?.b || 0,
+            duration: 0.3
+          });
+          
+          gsap.to(previousHovered.material, {
+            emissiveIntensity: previousHovered.userData.originalEmissiveIntensity || 0,
+            duration: 0.3
+          });
         }
         
         setHoveredPolygonId(null);
@@ -566,27 +616,48 @@ export default function PolygonViewer() {
           if (clickedId === selectedPolygonId) {
             setSelectedPolygonId(null);
             
-            // Remove selection effect
+            // Remove selection effect with animation
             if (object.material) {
-              // Restore original material properties
-              object.material.emissive.copy(object.userData.originalEmissive || new THREE.Color(0x000000));
-              object.material.emissiveIntensity = object.userData.originalEmissiveIntensity || 0;
+              // Animate back to original material properties
+              gsap.to(object.material.emissive, {
+                r: object.userData.originalEmissive?.r || 0,
+                g: object.userData.originalEmissive?.g || 0,
+                b: object.userData.originalEmissive?.b || 0,
+                duration: 0.5
+              });
+              
+              gsap.to(object.material, {
+                emissiveIntensity: object.userData.originalEmissiveIntensity || 0,
+                duration: 0.5
+              });
+              
+              // Remove outline effect
+              composer.passes = composer.passes.filter(pass => !(pass instanceof OutlinePass));
             }
           } else {
             // Deselect previous selection if any
             if (selectedPolygonId) {
               const previousSelected = polygonMeshesRef.current[selectedPolygonId];
               if (previousSelected && previousSelected.material) {
-                // Restore original material properties
-                previousSelected.material.emissive.copy(previousSelected.userData.originalEmissive || new THREE.Color(0x000000));
-                previousSelected.material.emissiveIntensity = previousSelected.userData.originalEmissiveIntensity || 0;
+                // Animate back to original material properties
+                gsap.to(previousSelected.material.emissive, {
+                  r: previousSelected.userData.originalEmissive?.r || 0,
+                  g: previousSelected.userData.originalEmissive?.g || 0,
+                  b: previousSelected.userData.originalEmissive?.b || 0,
+                  duration: 0.5
+                });
+                
+                gsap.to(previousSelected.material, {
+                  emissiveIntensity: previousSelected.userData.originalEmissiveIntensity || 0,
+                  duration: 0.5
+                });
               }
             }
             
             // Select the new polygon
             setSelectedPolygonId(clickedId);
             
-            // Apply selection effect
+            // Apply selection effect with animation
             if (object.material) {
               // Store original material properties if not already stored
               if (!object.userData.originalEmissive) {
@@ -594,20 +665,31 @@ export default function PolygonViewer() {
                 object.userData.originalEmissiveIntensity = object.material.emissiveIntensity;
               }
               
-              // Apply selection effect - stronger than hover
-              object.material.emissive.set(0x00ff00);
-              object.material.emissiveIntensity = 0.8;
+              // Animate selection effect - stronger than hover
+              gsap.to(object.material.emissive, {
+                r: 0,    // 0x00/255
+                g: 1.0,  // 0xff/255
+                b: 0,    // 0x00/255
+                duration: 0.5
+              });
               
-              // Create outline effect for the selected object
+              gsap.to(object.material, {
+                emissiveIntensity: 0.8,
+                duration: 0.5
+              });
+              
+              // Add outline effect with animation
               const outlinePass = new OutlinePass(
                 new THREE.Vector2(window.innerWidth, window.innerHeight),
                 scene,
                 camera
               );
               outlinePass.selectedObjects = [object];
-              outlinePass.edgeStrength = 3.0;
-              outlinePass.edgeGlow = 0.5;
-              outlinePass.edgeThickness = 1.0;
+              
+              // Start with no outline and animate it in
+              outlinePass.edgeStrength = 0;
+              outlinePass.edgeGlow = 0;
+              outlinePass.edgeThickness = 0;
               outlinePass.visibleEdgeColor.set(0x00ff00);
               
               // Remove any existing outline passes
@@ -615,6 +697,14 @@ export default function PolygonViewer() {
               
               // Add the new outline pass
               composer.addPass(outlinePass);
+              
+              // Animate the outline properties
+              gsap.to(outlinePass, {
+                edgeStrength: 3.0,
+                edgeGlow: 0.5,
+                edgeThickness: 1.0,
+                duration: 0.5
+              });
             }
           }
         }
@@ -623,13 +713,34 @@ export default function PolygonViewer() {
         if (selectedPolygonId) {
           const previousSelected = polygonMeshesRef.current[selectedPolygonId];
           if (previousSelected && previousSelected.material) {
-            // Restore original material properties
-            previousSelected.material.emissive.copy(previousSelected.userData.originalEmissive || new THREE.Color(0x000000));
-            previousSelected.material.emissiveIntensity = previousSelected.userData.originalEmissiveIntensity || 0;
+            // Animate back to original material properties
+            gsap.to(previousSelected.material.emissive, {
+              r: previousSelected.userData.originalEmissive?.r || 0,
+              g: previousSelected.userData.originalEmissive?.g || 0,
+              b: previousSelected.userData.originalEmissive?.b || 0,
+              duration: 0.5
+            });
+            
+            gsap.to(previousSelected.material, {
+              emissiveIntensity: previousSelected.userData.originalEmissiveIntensity || 0,
+              duration: 0.5
+            });
           }
           
-          // Remove outline passes
-          composer.passes = composer.passes.filter(pass => !(pass instanceof OutlinePass));
+          // Remove outline passes with fade-out animation
+          const outlinePasses = composer.passes.filter(pass => pass instanceof OutlinePass);
+          if (outlinePasses.length > 0) {
+            const outlinePass = outlinePasses[0];
+            gsap.to(outlinePass, {
+              edgeStrength: 0,
+              edgeGlow: 0,
+              edgeThickness: 0,
+              duration: 0.3,
+              onComplete: () => {
+                composer.passes = composer.passes.filter(pass => !(pass instanceof OutlinePass));
+              }
+            });
+          }
           
           setSelectedPolygonId(null);
         }
@@ -783,7 +894,11 @@ export default function PolygonViewer() {
       </div>
       
       {selectedPolygonId && (
-        <div className="absolute top-16 left-4 z-10 bg-white p-2 rounded shadow">
+        <div 
+          className={`absolute top-16 left-4 z-10 bg-white p-2 rounded shadow transition-all duration-300 ${
+            infoVisible ? 'opacity-100 transform translate-y-0' : 'opacity-0 transform -translate-y-4'
+          }`}
+        >
           <p>Selected: {selectedPolygonId}</p>
         </div>
       )}
