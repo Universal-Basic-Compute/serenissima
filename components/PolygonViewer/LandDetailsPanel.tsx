@@ -233,7 +233,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
                     \n║  this document confirms the acquisition of:      ║
                     \n║                                                  ║
                     \n║  PROPERTY: ${selectedPolygon?.historicalName || selectedPolygonId}    ║
-                    \n║  LOCATION: ${selectedPolygon?.englishName || 'Venice'}                ║
+                    \n║  LOCATION: ${selectedPolygon?.englishName || 'Venezia'}                ║
                     \n║  PRICE: ${transaction.price.toLocaleString()} ducats                  ║
                     \n║  SELLER: ${transaction.seller}                   ║
                     \n║  BUYER: ${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}     ║

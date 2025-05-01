@@ -111,7 +111,7 @@ export default function ViewModeMenu({ activeView, setActiveView }: ViewModeMenu
       
       <div className="mt-1 border-t border-amber-300 pt-1 flex justify-center">
         <div className="text-amber-800 text-[9px] italic text-center">
-          Venice
+          Venezia
         </div>
       </div>
     </div>

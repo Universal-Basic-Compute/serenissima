@@ -69,13 +69,13 @@ const TransferComputeMenu: React.FC<TransferComputeMenuProps> = ({ onClose, onTr
         <h2 className="text-3xl font-serif font-semibold mb-4 text-amber-800 text-center">Inject <span className="compute-token">$COMPUTE</span></h2>
         
         <div className="mb-8 text-gray-700 text-center">
-          <p className="text-lg">Transfer your compute resources to support the Republic and become the richest merchant of Venice.</p>
+          <p className="text-lg">Transfer your compute resources to support the Republic and become the richest merchant of Venezia.</p>
           <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
             <p className="text-md font-medium text-amber-800">About Ducats in La Serenissima</p>
             <p className="mt-2">Ducats in La Serenissima are backed by real <span className="compute-token">$COMPUTE</span> tokens on the Solana blockchain.</p>
             <p className="mt-1">Each 1 ducat you earn in-game can be withdrawn as 1 <span className="compute-token">$COMPUTE</span> token to your wallet.</p>
             <p className="mt-1 text-amber-700">Please enter whole numbers only - no decimals or fractions.</p>
-            <p className="mt-1 font-semibold">Transferring <span className="compute-token">$COMPUTE</span> helps build the Republic and earns you rewards over time, increasing your wealth and influence in Venice.</p>
+            <p className="mt-1 font-semibold">Transferring <span className="compute-token">$COMPUTE</span> helps build the Republic and earns you rewards over time, increasing your wealth and influence in Venezia.</p>
           </div>
         </div>
         
@@ -144,7 +144,7 @@ const TransferComputeMenu: React.FC<TransferComputeMenuProps> = ({ onClose, onTr
         
         <div className="mt-6 text-center text-sm text-gray-500">
           <p>Your success in La Serenissima depends on your skills as a merchant and diplomat.</p>
-          <p className="mt-1">It is up to your wit and cunning to make or lose ducats in the competitive markets of Venice.</p>
+          <p className="mt-1">It is up to your wit and cunning to make or lose ducats in the competitive markets of Venezia.</p>
         </div>
       </div>
     </div>

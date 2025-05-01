@@ -66,7 +66,7 @@ export function calculateBounds(polygons: { coordinates: Coordinate[] }[]) {
   const lngRange = maxLng - minLng;
   
   // Calculate the latitude correction factor
-  // At Venice's latitude (~45 degrees), longitude degrees are about 70% the length of latitude degrees
+  // At Venezia's latitude (~45 degrees), longitude degrees are about 70% the length of latitude degrees
   const latCorrectionFactor = Math.cos(centerLat * Math.PI / 180);
   
   // Adjust the longitude range with the correction factor

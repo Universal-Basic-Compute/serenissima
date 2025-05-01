@@ -1499,7 +1499,7 @@ export default function Home() {
                   <p>Update your noble identity and family heraldry as registered with the Council of Ten.</p>
                 ) : (
                   <>
-                    <p>The year is 1525. The Most Serene Republic of Venice stands as a beacon of wealth and power in the Mediterranean.</p>
+                    <p>The year is 1525. The Most Serene Republic of Venezia stands as a beacon of wealth and power in the Mediterranean.</p>
                     <p className="mt-2">As a noble of Venice, you must now register your identity with the Council of Ten.</p>
                   </>
                 )}

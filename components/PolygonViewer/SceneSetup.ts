@@ -171,7 +171,7 @@ export default class SceneSetup {
     const ambientLight = new THREE.AmbientLight(0xfff0e0, 0.7); // Warmer color for tropical feel
     this.scene.add(ambientLight);
     
-    // Calculate sun position based on current time of day in Venice
+    // Calculate sun position based on current time of day in Venezia
     const sunPosition = this.calculateSunPosition();
     
     // Add a directional light for the sun with warmer color
@@ -228,8 +228,8 @@ export default class SceneSetup {
     // Convert to decimal hours (0-24)
     const timeOfDay = hours + minutes / 60;
     
-    // Venice coordinates (approximate)
-    const latitude = 45.4; // Venice latitude in degrees
+    // Venezia coordinates (approximate)
+    const latitude = 45.4; // Venezia latitude in degrees
     
     // Calculate sun position based on time of day
     // This is a simplified model - for more accuracy you'd need solar calculations
