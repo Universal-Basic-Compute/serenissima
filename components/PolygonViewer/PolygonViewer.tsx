@@ -49,34 +49,7 @@ export default function PolygonViewer() {
     }
   }, []);
   
-  const handleCanvasMouseDown = useCallback((event: React.MouseEvent) => {
-    // Only apply this in land view
-    if (activeView === 'land') {
-      // Check if we're clicking/hovering on a polygon
-      const rect = canvasRef.current?.getBoundingClientRect();
-      if (!rect) return;
-      
-      // Convert to normalized device coordinates
-      const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-      const y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-      
-      // Use a simple raycaster to check if we're over a polygon
-      const raycaster = new THREE.Raycaster();
-      const mouse = new THREE.Vector2(x, y);
-      
-      if (sceneRef.current) {
-        raycaster.setFromCamera(mouse, sceneRef.current.camera);
-        const intersects = raycaster.intersectObjects(Object.values(polygonMeshesRef.current), false);
-        
-        // If we're over a polygon, set the interaction flag
-        isInteractingWithPolygon.current = intersects.length > 0;
-      }
-    }
-  }, [activeView]);
-  
-  const handleCanvasMouseUp = useCallback(() => {
-    isInteractingWithPolygon.current = false;
-  }, []);
+  // Interaction handlers removed to disable polygon interactions
   
   // Store the resetCamera function on window for access
   useEffect(() => {
@@ -176,10 +149,7 @@ export default function PolygonViewer() {
     const animate = () => {
       const animationId = requestAnimationFrame(animate);
       
-      // Update controls state based on interaction flag
-      if (scene) {
-        scene.updateControlsState(isInteractingWithPolygon.current);
-      }
+      // Controls state update removed
       
       // Update controls each frame for smooth damping effect
       scene.controls.update();
@@ -253,9 +223,7 @@ export default function PolygonViewer() {
 
       <canvas 
         ref={canvasRef} 
-        className="w-full h-full" 
-        onMouseDown={handleCanvasMouseDown}
-        onMouseUp={handleCanvasMouseUp}
+        className="w-full h-full"
       />
     </div>
   );
