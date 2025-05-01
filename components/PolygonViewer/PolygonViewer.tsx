@@ -10,6 +10,7 @@ import WaterEffect from './WaterEffect';
 import InteractionManager from './InteractionManager';
 import ViewModeMenu from './ViewModeMenu';
 import LandDetailsPanel from './LandDetailsPanel';
+import MarketPanel from './MarketPanel';
 import ActionButton from '../UI/ActionButton';
 import TransferComputeMenu from '../UI/TransferComputeMenu';
 import BackgroundMusic from '../UI/BackgroundMusic';
@@ -23,6 +24,7 @@ export default function PolygonViewer() {
   const isInteractingWithPolygon = useRef(false);
   const [transferMenuOpen, setTransferMenuOpen] = useState(false);
   const [isFlushing, setIsFlushing] = useState(false);
+  const [marketPanelVisible, setMarketPanelVisible] = useState(false);
   
   // Add refs at the top level of the component
   const hasLoadedDataRef = useRef<boolean>(false);
@@ -971,6 +973,11 @@ export default function PolygonViewer() {
       {/* Add the Land Details Panel */}
       {LandDetailsPanelMemo}
       
+      {/* Add the Market Panel */}
+      <MarketPanel 
+        visible={marketPanelVisible}
+        onClose={() => setActiveView('land')}
+      />
 
       <canvas 
         ref={canvasRef} 

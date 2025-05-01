@@ -482,6 +482,11 @@ export default function Home() {
   useEffect(() => {
     console.log('transferMenuOpen state changed:', transferMenuOpen);
   }, [transferMenuOpen]);
+  
+  // Add effect to update market panel visibility based on active view
+  useEffect(() => {
+    setMarketPanelVisible(activeView === 'markets');
+  }, [activeView]);
 
   // Handle compute transfer
   const handleTransferCompute = async (amount: number) => {
