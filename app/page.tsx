@@ -852,14 +852,31 @@ export default function Home() {
                   <div className="w-1/3">
                     <label className="block text-gray-700">First Name</label>
                   </div>
-                  <div className="w-2/3">
+                  <div className="w-2/3 flex">
                     <input
                       type="text"
                       value={firstName}
                       onChange={(e) => setFirstName(e.target.value)}
                       placeholder="Enter your first name..."
-                      className="w-full px-3 py-2 border border-amber-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-500"
+                      className="w-full px-3 py-2 border border-amber-300 rounded-l focus:outline-none focus:ring-2 focus:ring-amber-500"
                     />
+                    <button
+                      onClick={() => {
+                        const venetianFirstNames = [
+                          "Marco", "Antonio", "Giovanni", "Francesco", "Alvise",
+                          "Domenico", "Pietro", "Paolo", "Nicolo", "Giacomo",
+                          "Maria", "Caterina", "Isabella", "Lucia", "Elena",
+                          "Beatrice", "Chiara", "Francesca", "Vittoria", "Laura"
+                        ];
+                        const randomName = venetianFirstNames[Math.floor(Math.random() * venetianFirstNames.length)];
+                        setFirstName(randomName);
+                      }}
+                      className="bg-amber-600 text-white p-2 rounded-r hover:bg-amber-700 transition-colors text-xl"
+                      title="Roll the dice for a random name"
+                      type="button"
+                    >
+                      🎲
+                    </button>
                   </div>
                 </div>
                 
@@ -867,14 +884,31 @@ export default function Home() {
                   <div className="w-1/3">
                     <label className="block text-gray-700">Family Name</label>
                   </div>
-                  <div className="w-2/3">
+                  <div className="w-2/3 flex">
                     <input
                       type="text"
                       value={lastName}
                       onChange={(e) => setLastName(e.target.value)}
                       placeholder="Enter your family name..."
-                      className="w-full px-3 py-2 border border-amber-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-500"
+                      className="w-full px-3 py-2 border border-amber-300 rounded-l focus:outline-none focus:ring-2 focus:ring-amber-500"
                     />
+                    <button
+                      onClick={() => {
+                        const venetianLastNames = [
+                          "Contarini", "Morosini", "Dandolo", "Foscari", "Grimani",
+                          "Barbarigo", "Mocenigo", "Venier", "Loredan", "Gritti",
+                          "Pisani", "Tiepolo", "Bembo", "Priuli", "Trevisan",
+                          "Donato", "Giustinian", "Zeno", "Corner", "Gradenigo"
+                        ];
+                        const randomName = venetianLastNames[Math.floor(Math.random() * venetianLastNames.length)];
+                        setLastName(randomName);
+                      }}
+                      className="bg-amber-600 text-white p-2 rounded-r hover:bg-amber-700 transition-colors text-xl"
+                      title="Roll the dice for a random name"
+                      type="button"
+                    >
+                      🎲
+                    </button>
                   </div>
                 </div>
                 
@@ -882,14 +916,37 @@ export default function Home() {
                   <div className="w-1/3">
                     <label className="block text-gray-700">Family Coat of Arms</label>
                   </div>
-                  <div className="w-2/3">
+                  <div className="w-2/3 flex">
                     <textarea
                       value={familyCoatOfArms}
                       onChange={(e) => setFamilyCoatOfArms(e.target.value)}
                       placeholder="Describe your family's coat of arms..."
-                      className="w-full px-3 py-2 border border-amber-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-500"
+                      className="w-full px-3 py-2 border border-amber-300 rounded-l focus:outline-none focus:ring-2 focus:ring-amber-500"
                       rows={3}
                     />
+                    <button
+                      onClick={() => {
+                        const coatOfArmsElements = [
+                          "A golden lion rampant on a field of azure",
+                          "A silver eagle displayed on a field of gules",
+                          "Three golden fleurs-de-lis on a field of azure",
+                          "A red rose on a field of silver",
+                          "A black wolf passant on a field of gold",
+                          "A golden sun with sixteen rays on a field of azure",
+                          "A silver crescent moon on a field of sable",
+                          "A golden ship with white sails on a sea of azure",
+                          "A red griffin segreant on a field of silver",
+                          "Three silver stars on a field of gules"
+                        ];
+                        const randomCoatOfArms = coatOfArmsElements[Math.floor(Math.random() * coatOfArmsElements.length)];
+                        setFamilyCoatOfArms(randomCoatOfArms);
+                      }}
+                      className="bg-amber-600 text-white p-2 rounded-r hover:bg-amber-700 transition-colors text-xl self-stretch"
+                      title="Roll the dice for a random coat of arms"
+                      type="button"
+                    >
+                      🎲
+                    </button>
                   </div>
                 </div>
               </div>
