@@ -149,24 +149,13 @@ class PolygonMesh {
       
       this.mesh = new THREE.Mesh(geometry, material);
       
-      // Create a wireframe outline for the polygon
-      const edgesGeometry = new THREE.EdgesGeometry(geometry);
-      const edgesMaterial = new THREE.LineBasicMaterial({ 
-        color: 0x000000, 
-        transparent: true,
-        opacity: 0.1,
-        linewidth: 1
-      });
-      const edges = new THREE.LineSegments(edgesGeometry, edgesMaterial);
-      
-      // Add the edges as a child of the mesh
-      this.mesh.add(edges);
+      // No wireframe outline - removed to eliminate visible borders
       
       // EXPLICITLY disable shadows
       this.mesh.castShadow = false;
       this.mesh.receiveShadow = false;
       
-      // Set a higher render order to ensure it renders on top
+      // Set a consistent render order for all land polygons
       this.mesh.renderOrder = 10;
       
       // Add to user data to ensure shadows stay disabled
@@ -174,12 +163,12 @@ class PolygonMesh {
       this.mesh.userData.noShadow = true;
       this.mesh.userData.ignoreLight = true;
       
-      // Position ALL polygons at a very slightly elevated height to prevent z-fighting with water
-      this.mesh.position.y = 0.001; // Set to a very small positive value to ensure all polygons are slightly above water
+      // Position ALL polygons at exactly the same height to prevent z-fighting with water and between polygons
+      this.mesh.position.y = 0.001; // Consistent height for all polygons to prevent visible seams
       
       // Completely flat with no edges or borders
-      // Apply a more significant inset to each polygon to create small gaps between them
-      geometry.scale(0.998, 1, 0.998); // Scale even more inward to create small gaps between polygons
+      // Apply a minimal inset to avoid z-fighting but minimize visible gaps
+      geometry.scale(0.9995, 1, 0.9995); // Reduced scaling to minimize gaps between polygons
     } catch (error) {
       console.error('Error creating mesh:', error);
     }
@@ -548,9 +537,8 @@ class PolygonMesh {
           material.color.set('#ffcc00');
         }
         
-        // Instead of changing height, just increase render order to ensure selected polygon appears on top
-        // This prevents creating height differences that cause visible edges
-        this.mesh.renderOrder = 30; // Much higher render order for selected polygons
+        // Use a consistent height but higher render order for selected polygons
+        this.mesh.renderOrder = 30; // Higher render order for selected polygons
         
         material.needsUpdate = true;
       } else {
@@ -558,7 +546,7 @@ class PolygonMesh {
           material.color.copy(this.originalColor);
           
           // Reset render order to base value
-          this.mesh.renderOrder = 20;
+          this.mesh.renderOrder = 10; // Reset to the same value as initial render order
           
           material.needsUpdate = true;
         }
@@ -591,8 +579,7 @@ class PolygonMesh {
         material.color.copy(color);
       }
       
-      // Instead of changing height, just increase render order to ensure hovered polygon appears on top
-      // This prevents creating height differences that cause visible edges
+      // Use consistent height but higher render order for hovered polygons
       this.mesh.renderOrder = 25; // Higher than base but lower than selected
       
       material.needsUpdate = true;
@@ -601,7 +588,7 @@ class PolygonMesh {
         material.color.copy(this.originalColor);
         
         // Reset render order to base value
-        this.mesh.renderOrder = 20;
+        this.mesh.renderOrder = 10; // Reset to the same value as initial render order
         
         material.needsUpdate = true;
       }

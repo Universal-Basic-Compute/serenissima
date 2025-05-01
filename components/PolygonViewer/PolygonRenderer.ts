@@ -364,8 +364,7 @@ export default class PolygonRenderer {
                 polygonMesh.updateCoatOfArmsTexture(ownerCoatOfArmsUrl);
               }
               
-              // Set a consistent render order based on polygon ID
-              const renderOrderOffset = parseInt(polygon.id.replace(/\D/g, '')) % 100 || 0; // Get a stable number from the ID
+              // Set a consistent render order for all polygons
               const mesh = polygonMesh.getMesh();
               if (mesh) {
                 mesh.renderOrder = renderOrderBase;
