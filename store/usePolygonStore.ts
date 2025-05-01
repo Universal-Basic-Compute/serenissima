@@ -63,6 +63,42 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
       if (data.polygons && data.polygons.length > 0) {
         console.log(`Successfully loaded ${data.polygons.length} polygons`);
         set({ polygons: data.polygons });
+        
+        // After loading polygons, immediately load land owners to associate owners with polygons
+        const ownersResponse = await fetch('/api/get-land-owners');
+        if (ownersResponse.ok) {
+          const ownersData = await ownersResponse.json();
+          if (ownersData.success && ownersData.lands) {
+            const ownerMap = {};
+            
+            ownersData.lands.forEach(land => {
+              if (land.id && land.owner) {
+                ownerMap[land.id] = land.owner;
+                
+                // Also try with "polygon-" prefix if the ID doesn't have it
+                if (!land.id.startsWith('polygon-')) {
+                  ownerMap[`polygon-${land.id}`] = land.owner;
+                }
+                
+                // Also try without "polygon-" prefix if the ID has it
+                if (land.id.startsWith('polygon-')) {
+                  ownerMap[land.id.replace('polygon-', '')] = land.owner;
+                }
+              }
+            });
+            
+            console.log('Processed land owners map:', ownerMap);
+            set({ landOwners: ownerMap });
+            
+            // Update the polygons with owner information
+            const updatedPolygons = data.polygons.map(polygon => ({
+              ...polygon,
+              owner: ownerMap[polygon.id] || null
+            }));
+            
+            set({ polygons: updatedPolygons });
+          }
+        }
       } else {
         console.warn('No polygons found in API response');
         // If no polygons, create a sample one for testing
@@ -136,6 +172,14 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
         
         console.log('Processed land owners map:', ownerMap);
         set({ landOwners: ownerMap });
+        
+        // Update the polygons with owner information
+        const updatedPolygons = get().polygons.map(polygon => ({
+          ...polygon,
+          owner: ownerMap[polygon.id] || null
+        }));
+        
+        set({ polygons: updatedPolygons });
       } else {
         console.error('Invalid response format from land owners API:', data);
       }

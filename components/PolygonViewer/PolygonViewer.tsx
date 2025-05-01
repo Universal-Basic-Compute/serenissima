@@ -151,6 +151,14 @@ export default function PolygonViewer() {
     loadLandOwners();
   }, [loadPolygons, loadBridges, loadLandOwners, loadOwnerCoatOfArms]);
   
+  // Add a separate useEffect to update the renderer when coat of arms data changes
+  useEffect(() => {
+    if (polygonRendererRef.current && Object.keys(ownerCoatOfArmsMap).length > 0) {
+      console.log('Updating coat of arms in renderer with data:', ownerCoatOfArmsMap);
+      polygonRendererRef.current.updateOwnerCoatOfArms(ownerCoatOfArmsMap);
+    }
+  }, [ownerCoatOfArmsMap]);
+  
   // Add an effect to listen for polygon deletion events
   useEffect(() => {
     const handlePolygonDeleted = () => {
