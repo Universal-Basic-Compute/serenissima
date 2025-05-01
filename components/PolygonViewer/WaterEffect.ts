@@ -265,7 +265,7 @@ export default class WaterEffect {
     
     this.water = new Water(this.waterGeometry, waterOptions);
     this.water.rotation.x = -Math.PI / 2;
-    this.water.position.y = -0.5; // Changed from -0.3 to -0.5 to avoid z-fighting
+    this.water.position.y = -0.6; // Changed from -0.5 to -0.6 to avoid z-fighting
     this.water.renderOrder = 1; // Ensure water renders before land
     this.water.visible = true;
     

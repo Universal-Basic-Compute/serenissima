@@ -115,12 +115,13 @@ export default class LODPolygon {
       color: '#e6d2a8', // Always use sand/beige color
       side: THREE.FrontSide,
       wireframe: false,
-      // Set stroke width to 0 to completely remove edges
-      wireframeLinewidth: 0,
       // Remove stroke/edge visibility
       polygonOffset: true,
       polygonOffsetFactor: 1,
-      polygonOffsetUnits: 1
+      polygonOffsetUnits: 1,
+      // Add these properties for better blending
+      transparent: false,
+      blending: THREE.NormalBlending
     });
     
     this.lowDetailMesh = new THREE.Mesh(geometry, material);
@@ -150,9 +151,9 @@ export default class LODPolygon {
       steps: 1, // Reduce steps to prevent shadow artifacts
       depth: 0.05, // Increased depth for more island-like appearance
       bevelEnabled: true, // Enable bevels for smoother island edges
-      bevelThickness: 0.04, // Increased for smoother edges
-      bevelSize: 0.04, // Increased for smoother edges
-      bevelSegments: 6, // Increased for smoother bevels
+      bevelThickness: 0.05, // Increased from 0.04 to 0.05
+      bevelSize: 0.05, // Increased from 0.04 to 0.05
+      bevelSegments: 8, // Increased from 6 to 8 for even smoother bevels
       UVGenerator: { // Add a custom UV generator for better texture mapping
         generateTopUV: function(geometry, vertices, indexA, indexB, indexC) {
           // Create UVs that map the entire texture to the face
@@ -217,16 +218,16 @@ export default class LODPolygon {
       metalness: 0.1, // Low metalness
       side: THREE.FrontSide,
       wireframe: false,
-      // Remove emissive properties to eliminate visible edges
-      // Set stroke width to 0 to completely remove edges
-      wireframeLinewidth: 0,
       // Add these important properties to prevent z-fighting:
       polygonOffset: true,
       polygonOffsetFactor: 1,
       polygonOffsetUnits: 1,
       // Ensure depth settings are correct
       depthTest: true,
-      depthWrite: true
+      depthWrite: true,
+      // Add these properties for better blending
+      transparent: false, // Keep opaque for better performance
+      blending: THREE.NormalBlending
     });
     
     // Load sand texture if not in performance mode
