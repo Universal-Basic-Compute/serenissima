@@ -503,7 +503,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
 
         {/* Action buttons at the bottom with improved styling */}
         <div className="pt-4 mt-auto border-t-2 border-amber-300">
-          {owner ? (
+          {owner && (
             // If land is owned, show "Make an Offer" button or the offer input
             showOfferInput ? (
               <div className="flex flex-col w-full space-y-3">
@@ -584,87 +584,6 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
                 Make an Offer
               </ActionButton>
             )
-          ) : (
-            // If land is not owned, keep the existing purchase button with improved styling
-            <ActionButton 
-              onClick={() => {
-                if (!selectedPolygonId) return;
-                
-                // Get the current wallet address from session storage first, then localStorage
-                const walletAddress = sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress') || '';
-                
-                if (!walletAddress) {
-                  alert('Please connect your wallet first');
-                  return;
-                }
-                
-                // If there's a transaction, execute it
-                if (transaction) {
-                  // Call the backend API to execute the transaction
-                  fetch(`http://localhost:8000/api/transaction/${transaction.id}/execute`, {
-                    method: 'POST',
-                    headers: {
-                      'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                      buyer: walletAddress
-                    }),
-                  })
-                  .then(response => {
-                    if (!response.ok) {
-                      throw new Error('Failed to execute transaction');
-                    }
-                    return response.json();
-                  })
-                  .then(data => {
-                    alert(`Successfully acquired ${selectedPolygon?.historicalName || selectedPolygonId}`);
-                    // Refresh the page to update the UI
-                    window.location.reload();
-                  })
-                  .catch(error => {
-                    console.error('Error executing transaction:', error);
-                    alert('Failed to purchase land. Please try again.');
-                  });
-                } else {
-                  // If no transaction, just update the land owner
-                  fetch('http://localhost:8000/api/land', {
-                    method: 'POST',
-                    headers: {
-                      'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                      land_id: selectedPolygonId,
-                      user: walletAddress,
-                      historical_name: selectedPolygon?.historicalName,
-                      english_name: selectedPolygon?.englishName,
-                      description: selectedPolygon?.historicalDescription
-                    }),
-                  })
-                  .then(response => {
-                    if (!response.ok) {
-                      throw new Error('Failed to purchase land');
-                    }
-                    return response.json();
-                  })
-                  .then(data => {
-                    alert(`Successfully purchased land: ${selectedPolygon?.historicalName || selectedPolygonId}`);
-                    // Refresh the land owners data
-                    window.location.reload();
-                  })
-                  .catch(error => {
-                    console.error('Error purchasing land:', error);
-                    alert('Failed to purchase land. Please try again.');
-                  });
-                }
-              }} 
-              variant="primary"
-              disabled={false}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              {transaction ? `Purchase (${transaction.price.toLocaleString()} ducats)` : 'Purchase Land'}
-            </ActionButton>
           )}
         </div>
         
