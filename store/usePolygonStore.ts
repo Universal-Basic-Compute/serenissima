@@ -39,7 +39,15 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
   setPolygons: (polygons) => set({ polygons }),
   setLoading: (loading) => set({ loading }),
   setError: (error) => set({ error }),
-  setActiveView: (view) => set({ activeView: view }),
+  setActiveView: (view: ViewMode) => {
+    // Only allow switching to buildings or land view
+    if (view === 'buildings' || view === 'land') {
+      set({ activeView: view });
+    } else {
+      console.log(`View mode ${view} is not yet available`);
+      // Optionally show a toast or notification here
+    }
+  },
   toggleQuality: () => set((state) => ({ highQuality: !state.highQuality })),
   // Make hover a no-op function
   setHoveredPolygonId: () => {},
