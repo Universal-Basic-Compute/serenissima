@@ -69,6 +69,7 @@ export default function PolygonViewer() {
 
   // Load polygons on mount
   useEffect(() => {
+    console.log('Loading polygons and bridges...');
     loadPolygons();
     loadBridges();
     
