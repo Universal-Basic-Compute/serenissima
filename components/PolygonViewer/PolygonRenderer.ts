@@ -405,10 +405,7 @@ export default class PolygonRenderer {
       // Remove polygon edges by setting these properties:
       polygonOffset: true,
       polygonOffsetFactor: 1,
-      polygonOffsetUnits: 1,
-      // Explicitly disable shadows
-      castShadow: false,
-      receiveShadow: false
+      polygonOffsetUnits: 1
     });
     
     const sampleMesh = new THREE.Mesh(sampleGeometry, sampleMaterial);

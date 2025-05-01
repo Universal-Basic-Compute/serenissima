@@ -388,19 +388,19 @@ export default function PolygonViewer() {
       
       // Update the local state with the new owner
       const updatedPolygons = polygons.map(p => 
-        p.id === landId ? { ...p, owner: newOwner } : p
+        p.id === landId ? { ...p, owner: newOwner as string | undefined } : p
       );
       
       // Update the polygons in the store
       usePolygonStore.setState({ polygons: updatedPolygons });
       
       // Update the land owners map
-      const updatedLandOwners = { ...landOwners, [landId]: newOwner };
+      const updatedLandOwners = { ...landOwners, [landId]: newOwner as string };
       usePolygonStore.setState({ landOwners: updatedLandOwners });
       
       // Update the polygon renderer if it exists
       if (polygonRendererRef.current) {
-        polygonRendererRef.current.updatePolygonOwner(landId, newOwner);
+        polygonRendererRef.current.updatePolygonOwner(landId, newOwner as string);
       }
       
       console.log(`Land ownership changed: ${landId} now owned by ${newOwner}`);
@@ -529,8 +529,8 @@ export default function PolygonViewer() {
     const initPolygonRenderer = () => {
       console.log('Initializing polygon renderer with users data:', users);
       const polygonRenderer = new PolygonRenderer({
-        scene: sceneRef.current.scene,
-        camera: sceneRef.current.camera,
+        scene: sceneRef.current?.scene || new THREE.Scene(),
+        camera: sceneRef.current?.camera || new THREE.PerspectiveCamera(),
         polygons,
         bounds,
         activeView,
@@ -576,14 +576,7 @@ export default function PolygonViewer() {
     const initWaterEffect = () => {
       console.log('Creating water effect...');
       if (sceneRef.current) {
-        // First check if createWater method exists
-        if (sceneRef.current && typeof sceneRef.current.createWater === 'function') {
-          sceneRef.current.createWater();
-        } else {
-          console.warn('createWater method not found on sceneRef.current');
-        }
-        
-        // Then create our own water effect reference
+        // Create our own water effect reference
         const waterEffect = new WaterEffect({
           scene: sceneRef.current.scene,
           activeView,
