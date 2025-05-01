@@ -8,6 +8,71 @@ interface WaterEffectProps {
   performanceMode: boolean;
   width: number;
   height: number;
+}
+
+export default class WaterEffect {
+  private scene: THREE.Scene;
+  private activeView: ViewMode;
+  private performanceMode: boolean;
+  private water: Water;
+  private waterGeometry: THREE.PlaneGeometry;
+  private waterNormalMap: THREE.Texture;
+  private waterDUDVMap: THREE.Texture;
+  private width: number;
+  private height: number;
+  private sunPosition: THREE.Vector3;
+  private sunDirection: THREE.Vector3;
+  private waterFoam: THREE.Mesh | null = null;
+  private foamTexture: THREE.Texture | null = null;
+  private causticTextures: THREE.Texture[] = [];
+  private causticLight: THREE.DirectionalLight | null = null;
+  private causticIndex: number = 0;
+  private causticMesh: THREE.Mesh | null = null;
+  private sunReflection: THREE.Mesh | null = null;
+
+  // Static texture loader and cache for water textures
+  private static waterNormalMapTexture: THREE.Texture | null = null;
+  private static waterDUDVMapTexture: THREE.Texture | null = null;
+  private static foamTexture: THREE.Texture | null = null;
+  private static textureLoader: THREE.TextureLoader | null = null;
+  private static causticTextures: THREE.Texture[] | null = null;
+
+  constructor({
+    scene,
+    activeView,
+    performanceMode,
+    width,
+    height
+  }: WaterEffectProps) {
+    this.scene = scene;
+    this.activeView = activeView;
+    this.performanceMode = performanceMode;
+    this.width = width;
+    this.height = height;
+    
+    // Set up sun position for reflections
+    this.sunPosition = new THREE.Vector3(50, 100, 50);
+    this.sunDirection = new THREE.Vector3()
+      .copy(this.sunPosition)
+      .normalize();
+    
+    // Use shared texture loader or create one if it doesn't exist
+    if (!WaterEffect.textureLoader) {
+      WaterEffect.textureLoader = new THREE.TextureLoader();
+      WaterEffect.textureLoader.setCrossOrigin('anonymous');
+    }
+    
+    // Create a simple placeholder water plane initially
+    this.waterGeometry = new THREE.PlaneGeometry(
+      width, 
+      height, 
+      performanceMode ? 4 : 16
+    );
+    
+    // Load textures with a delay to improve initial loading performance
+    setTimeout(() => this.initializeWater(), 500);
+  }
+  
   // Add method to create a sun reflection
   private createSunReflection() {
     // Create a circular highlight that will represent the sun's reflection
@@ -54,69 +119,6 @@ interface WaterEffectProps {
       const sizeVariation = Math.sin(time * 0.03) * 0.5;
       waterUniforms.size.value = baseSize + sizeVariation;
     }
-  }
-}
-
-export default class WaterEffect {
-  private scene: THREE.Scene;
-  private activeView: ViewMode;
-  private performanceMode: boolean;
-  private water: Water;
-  private waterGeometry: THREE.PlaneGeometry;
-  private waterNormalMap: THREE.Texture;
-  private waterDUDVMap: THREE.Texture;
-  private width: number;
-  private height: number;
-  private sunPosition: THREE.Vector3;
-  private sunDirection: THREE.Vector3;
-  private waterFoam: THREE.Mesh | null = null;
-  private foamTexture: THREE.Texture | null = null;
-  private causticTextures: THREE.Texture[] = [];
-  private causticLight: THREE.DirectionalLight | null = null;
-  private causticIndex: number = 0;
-  private causticMesh: THREE.Mesh | null = null;
-
-  // Static texture loader and cache for water textures
-  private static waterNormalMapTexture: THREE.Texture | null = null;
-  private static waterDUDVMapTexture: THREE.Texture | null = null;
-  private static foamTexture: THREE.Texture | null = null;
-  private static textureLoader: THREE.TextureLoader | null = null;
-  private static causticTextures: THREE.Texture[] | null = null;
-
-  constructor({
-    scene,
-    activeView,
-    performanceMode,
-    width,
-    height
-  }: WaterEffectProps) {
-    this.scene = scene;
-    this.activeView = activeView;
-    this.performanceMode = performanceMode;
-    this.width = width;
-    this.height = height;
-    
-    // Set up sun position for reflections
-    this.sunPosition = new THREE.Vector3(50, 100, 50);
-    this.sunDirection = new THREE.Vector3()
-      .copy(this.sunPosition)
-      .normalize();
-    
-    // Use shared texture loader or create one if it doesn't exist
-    if (!WaterEffect.textureLoader) {
-      WaterEffect.textureLoader = new THREE.TextureLoader();
-      WaterEffect.textureLoader.setCrossOrigin('anonymous');
-    }
-    
-    // Create a simple placeholder water plane initially
-    this.waterGeometry = new THREE.PlaneGeometry(
-      width, 
-      height, 
-      performanceMode ? 4 : 16
-    );
-    
-    // Load textures with a delay to improve initial loading performance
-    setTimeout(() => this.initializeWater(), 500);
   }
   
   private initializeWater() {
