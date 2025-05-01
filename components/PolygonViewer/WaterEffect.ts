@@ -155,14 +155,17 @@ export default class WaterEffect {
     // Create a shader material that will highlight the shore areas
     const shoreGeometry = new THREE.PlaneGeometry(this.width * 1.5, this.height * 1.5, 128, 128); // Reduced complexity
     
+    // Initialize uniforms explicitly
+    const shoreUniforms = {
+      time: { value: 0 },
+      color: { value: new THREE.Color(0xffffff) },
+      landTexture: { value: null },
+      waterColor: { value: new THREE.Color(this.getWaterColorForView()) }
+    };
+    
     // Custom shader material for shore effect with improved visibility
     const shoreMaterial = new THREE.ShaderMaterial({
-      uniforms: {
-        time: { value: 0 },
-        color: { value: new THREE.Color(0xffffff) },
-        landTexture: { value: null },
-        waterColor: { value: new THREE.Color(this.getWaterColorForView()) }
-      },
+      uniforms: shoreUniforms,
       vertexShader: `
         varying vec2 vUv;
         void main() {
@@ -204,6 +207,9 @@ export default class WaterEffect {
       depthWrite: false,
       depthTest: true
     });
+    
+    // Store a reference to the uniforms for easier access
+    shoreMaterial.userData = { uniforms: shoreUniforms };
     
     this.shoreMesh = new THREE.Mesh(shoreGeometry, shoreMaterial);
     this.shoreMesh.rotation.x = -Math.PI / 2;
@@ -384,90 +390,103 @@ export default class WaterEffect {
   }
   
   public update(frameCount: number, performanceMode: boolean) {
-    if (!this.water) return;
-    
-    // Get water uniforms
-    const waterUniforms = this.water.material?.uniforms;
-    if (!waterUniforms) return;
-    
-    // Animate water - reduce values even further to slow down the water
-    if (waterUniforms.time) {
-      waterUniforms.time.value += performanceMode ? 0.001 : 0.002; // Reduced from 0.0025/0.005
-    }
-    
-    // Apply Gerstner waves for more natural water movement - reduce frequency
-    this.applyGerstnerWaves(frameCount * 0.01); // Reduced from 0.025
-    
-    // Animate foam if it exists - slow down the foam movement more
-    if (this.waterFoam && this.foamTexture && this.foamTexture.offset) {
-      this.foamTexture.offset.x += 0.0001; // Reduced from 0.00025
-      this.foamTexture.offset.y += 0.00005; // Reduced from 0.00015
-    }
-    
-    // Animate sun reflection
-    if (this.sunReflection) {
-      const reflectionScale = 1.0 + Math.sin(frameCount * 0.02) * 0.1;
-      this.sunReflection.scale.set(reflectionScale, reflectionScale, 1);
+    try {
+      if (!this.water) return;
       
-      // Slightly move the reflection to simulate water movement
-      const basePosition = new THREE.Vector3();
-      basePosition.copy(this.sunReflection.position);
+      // Get water uniforms
+      const waterUniforms = this.water.material?.uniforms;
+      if (!waterUniforms) return;
       
-      const offsetX = Math.sin(frameCount * 0.01) * 5;
-      const offsetZ = Math.cos(frameCount * 0.015) * 5;
-      
-      this.sunReflection.position.x = basePosition.x + offsetX;
-      this.sunReflection.position.z = basePosition.z + offsetZ;
-    }
-    
-    // Update shore interaction much less frequently to reduce flickering
-    if (this.shoreMesh && this.landRenderTarget && frameCount % 10 === 0) { // Changed from 3 to 10
-      // Update time uniform with slower rate
-      (this.shoreMesh.material as THREE.ShaderMaterial).uniforms.time.value = frameCount * 0.02; // Reduced from 0.05
-      
-      try {
-        // Render land to texture
-        const originalBackground = this.scene.background;
-        this.scene.background = new THREE.Color(0x000000);
-        
-        // Hide water and shore for land rendering
-        const waterVisible = this.water.visible;
-        const foamVisible = this.waterFoam ? this.waterFoam.visible : false;
-        const shoreVisible = this.shoreMesh.visible;
-        
-        this.water.visible = false;
-        if (this.waterFoam) this.waterFoam.visible = false;
-        this.shoreMesh.visible = false;
-        
-        // Save current render target
-        const currentRenderTarget = this.renderer.getRenderTarget();
-        
-        // Render land to texture
-        this.renderer.setRenderTarget(this.landRenderTarget);
-        this.renderer.clear(); // Clear the render target first
-        this.renderer.render(this.scene, this.landCamera);
-        
-        // Restore original render target
-        this.renderer.setRenderTarget(currentRenderTarget);
-        
-        // Restore visibility
-        this.water.visible = waterVisible;
-        if (this.waterFoam) this.waterFoam.visible = foamVisible;
-        this.shoreMesh.visible = shoreVisible;
-        
-        // Restore background
-        this.scene.background = originalBackground;
-        
-        // Update land texture uniform
-        (this.shoreMesh.material as THREE.ShaderMaterial).uniforms.landTexture.value = this.landRenderTarget.texture;
-        
-        // Update water color uniform in shore material
-        if ((this.shoreMesh.material as THREE.ShaderMaterial).uniforms.waterColor) {
-          (this.shoreMesh.material as THREE.ShaderMaterial).uniforms.waterColor.value.setHex(this.getWaterColorForView());
-        }
-      } catch (error) {
-        console.error('Error rendering shore interaction:', error);
+      // Animate water - reduce values even further to slow down the water
+      if (waterUniforms.time) {
+        waterUniforms.time.value += performanceMode ? 0.001 : 0.002; // Reduced from 0.0025/0.005
       }
+      
+      // Apply Gerstner waves for more natural water movement - reduce frequency
+      this.applyGerstnerWaves(frameCount * 0.01); // Reduced from 0.025
+      
+      // Animate foam if it exists - slow down the foam movement more
+      if (this.waterFoam && this.foamTexture && this.foamTexture.offset) {
+        this.foamTexture.offset.x += 0.0001; // Reduced from 0.00025
+        this.foamTexture.offset.y += 0.00005; // Reduced from 0.00015
+      }
+      
+      // Animate sun reflection
+      if (this.sunReflection) {
+        const reflectionScale = 1.0 + Math.sin(frameCount * 0.02) * 0.1;
+        this.sunReflection.scale.set(reflectionScale, reflectionScale, 1);
+        
+        // Slightly move the reflection to simulate water movement
+        const basePosition = new THREE.Vector3();
+        basePosition.copy(this.sunReflection.position);
+        
+        const offsetX = Math.sin(frameCount * 0.01) * 5;
+        const offsetZ = Math.cos(frameCount * 0.015) * 5;
+        
+        this.sunReflection.position.x = basePosition.x + offsetX;
+        this.sunReflection.position.z = basePosition.z + offsetZ;
+      }
+      
+      // Update shore interaction much less frequently to reduce flickering
+      if (this.shoreMesh && this.landRenderTarget && this.shoreMesh.material && frameCount % 10 === 0) {
+        // Add a check for the uniforms
+        const shoreUniforms = (this.shoreMesh.material as THREE.ShaderMaterial).uniforms;
+        if (!shoreUniforms || !shoreUniforms.time) {
+          console.warn('Shore material uniforms not properly initialized');
+          return;
+        }
+        
+        // Update time uniform with slower rate
+        shoreUniforms.time.value = frameCount * 0.02; // Reduced from 0.05
+        
+        try {
+          // Render land to texture
+          const originalBackground = this.scene.background;
+          this.scene.background = new THREE.Color(0x000000);
+          
+          // Hide water and shore for land rendering
+          const waterVisible = this.water.visible;
+          const foamVisible = this.waterFoam ? this.waterFoam.visible : false;
+          const shoreVisible = this.shoreMesh.visible;
+          
+          this.water.visible = false;
+          if (this.waterFoam) this.waterFoam.visible = false;
+          this.shoreMesh.visible = false;
+          
+          // Save current render target
+          const currentRenderTarget = this.renderer.getRenderTarget();
+          
+          // Render land to texture
+          this.renderer.setRenderTarget(this.landRenderTarget);
+          this.renderer.clear(); // Clear the render target first
+          this.renderer.render(this.scene, this.landCamera);
+          
+          // Restore original render target
+          this.renderer.setRenderTarget(currentRenderTarget);
+          
+          // Restore visibility
+          this.water.visible = waterVisible;
+          if (this.waterFoam) this.waterFoam.visible = foamVisible;
+          this.shoreMesh.visible = shoreVisible;
+          
+          // Restore background
+          this.scene.background = originalBackground;
+          
+          // Update land texture uniform - add null checks
+          if (shoreUniforms.landTexture && this.landRenderTarget) {
+            shoreUniforms.landTexture.value = this.landRenderTarget.texture;
+          }
+          
+          // Update water color uniform in shore material - add null checks
+          if (shoreUniforms.waterColor) {
+            shoreUniforms.waterColor.value.setHex(this.getWaterColorForView());
+          }
+        } catch (error) {
+          console.error('Error rendering shore interaction:', error);
+        }
+      }
+    } catch (error) {
+      console.error('Error in WaterEffect update:', error);
     }
   }
   
