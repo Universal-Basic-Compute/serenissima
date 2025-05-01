@@ -8,4 +8,5 @@ export interface Coordinate {
 export interface Polygon {
   id: string;
   coordinates: Coordinate[];
+  centroid?: Coordinate;
 }

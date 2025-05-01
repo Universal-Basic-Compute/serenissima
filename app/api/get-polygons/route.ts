@@ -7,12 +7,33 @@ export async function GET() {
     const files = getAllJsonFiles();
     
     const polygons = files.map(file => {
-      const coordinates = readJsonFromFile(file);
+      const data = readJsonFromFile(file);
+      const id = file.replace('.json', '');
       
-      return {
-        id: file.replace('.json', ''),
-        coordinates
-      };
+      // Handle both old and new data formats
+      if (Array.isArray(data)) {
+        // Old format - just coordinates array
+        return {
+          id,
+          coordinates: data,
+          // Calculate centroid on-the-fly if not already stored
+          centroid: calculateCentroid(data)
+        };
+      } else if (data && data.coordinates) {
+        // New format with coordinates and centroid
+        return {
+          id,
+          coordinates: data.coordinates,
+          centroid: data.centroid || calculateCentroid(data.coordinates)
+        };
+      } else {
+        console.warn(`Invalid data format in ${file}`);
+        return {
+          id,
+          coordinates: [],
+          centroid: null
+        };
+      }
     });
     
     return NextResponse.json({ polygons });
@@ -23,4 +44,25 @@ export async function GET() {
       { status: 500 }
     );
   }
+}
+
+// Helper function to calculate centroid
+function calculateCentroid(coordinates) {
+  if (!coordinates || coordinates.length < 3) {
+    return null;
+  }
+
+  let sumLat = 0;
+  let sumLng = 0;
+  const n = coordinates.length;
+  
+  for (let i = 0; i < n; i++) {
+    sumLat += coordinates[i].lat;
+    sumLng += coordinates[i].lng;
+  }
+
+  return {
+    lat: sumLat / n,
+    lng: sumLng / n
+  };
 }
