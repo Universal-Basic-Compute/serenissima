@@ -623,9 +623,12 @@ export default class WaterEffect {
   }
   
   public updateViewMode(activeView: ViewMode) {
+    // Skip update if view hasn't changed
+    if (this.activeView === activeView) return;
+    
     this.activeView = activeView;
     
-    // Update water color based on view mode
+    // Get the water color for the new view
     const waterColor = this.getWaterColorForView();
     
     // Update water mesh color if it exists
