@@ -101,17 +101,20 @@ export default function PolygonViewer() {
       1000
     );
     
+    // Apply performance settings based on quality mode
+    const performanceMode = !highQuality;
+    
     // Initial camera position - higher up and further back for a good overview
     camera.position.set(0, 80, 80);
     
     const renderer = new THREE.WebGLRenderer({ 
       canvas: canvasRef.current,
-      antialias: true 
+      antialias: !performanceMode // Disable antialiasing in performance mode
     });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(window.devicePixelRatio > 1 ? 2 : 1); // Limit pixel ratio for performance
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.setPixelRatio(performanceMode ? 1 : (window.devicePixelRatio > 1 ? 2 : 1)); // Lower pixel ratio in performance mode
+    renderer.shadowMap.enabled = !performanceMode; // Disable shadows in performance mode
+    renderer.shadowMap.type = performanceMode ? THREE.BasicShadowMap : THREE.PCFSoftShadowMap;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.2;
     renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -120,7 +123,7 @@ export default function PolygonViewer() {
     const controls = new OrbitControls(camera, renderer.domElement);
     
     // Configure controls for this specific application
-    controls.enableDamping = true; // Add smooth inertia
+    controls.enableDamping = !performanceMode; // Disable damping in performance mode
     controls.dampingFactor = 0.1; // Amount of inertia
     
     // Limit vertical rotation to prevent going under the map
@@ -204,8 +207,8 @@ export default function PolygonViewer() {
     scene.add(sunGlow);
     
     // Reduced shadow map resolution for better performance
-    sunLight.shadow.mapSize.width = 1024;
-    sunLight.shadow.mapSize.height = 1024;
+    sunLight.shadow.mapSize.width = performanceMode ? 512 : 1024;
+    sunLight.shadow.mapSize.height = performanceMode ? 512 : 1024;
     sunLight.shadow.camera.near = 0.5;
     sunLight.shadow.camera.far = 500;
     sunLight.shadow.camera.left = -100;
@@ -222,7 +225,7 @@ export default function PolygonViewer() {
     scene.add(fillLight);
     
     // Add water plane with animated normal map - reduced complexity
-    const waterGeometry = new THREE.PlaneGeometry(200, 200, 20, 20);
+    const waterGeometry = new THREE.PlaneGeometry(200, 200, performanceMode ? 8 : 20, performanceMode ? 8 : 20);
     const waterMaterial = new THREE.MeshStandardMaterial({ 
       color: activeView === 'transport' ? '#00aaff' : 
              activeView === 'land' ? '#004488' : 
@@ -231,9 +234,10 @@ export default function PolygonViewer() {
       opacity: 0.7,
       metalness: 0.2,
       roughness: 0.1,
-      normalMap: waterNormalMap,
+      normalMap: performanceMode ? null : waterNormalMap, // Disable normal map in performance mode
       normalScale: new THREE.Vector2(0.4, 0.4),
-      envMapIntensity: 0.8
+      envMapIntensity: 0.8,
+      flatShading: performanceMode // Enable flat shading in performance mode
     });
     
     const waterPlane = new THREE.Mesh(waterGeometry, waterMaterial);
@@ -319,7 +323,7 @@ export default function PolygonViewer() {
             
             // Create extruded geometry for the island with a slight height - simplified for performance
             const extrudeSettings = {
-              steps: 1,
+              steps: performanceMode ? 1 : 2,
               depth: 0.025 + Math.random() * 0.025, // 75% thinner than the previous setting
               bevelEnabled: false // Disable bevel completely to remove space between islands
             };
@@ -332,13 +336,13 @@ export default function PolygonViewer() {
             // Create a realistic sand material
             const sandMaterial = new THREE.MeshStandardMaterial({ 
               color: '#e6d2a8', // More yellow/tan color
-              map: sandBaseColor,
-              normalMap: sandNormalMap,
-              roughnessMap: sandRoughnessMap,
+              map: performanceMode ? null : sandBaseColor, // Disable texture in performance mode
+              normalMap: performanceMode ? null : sandNormalMap, // Disable normal map in performance mode
+              roughnessMap: performanceMode ? null : sandRoughnessMap, // Disable roughness map in performance mode
               roughness: 0.7,
               metalness: 0.1,
-              side: THREE.DoubleSide,
-              flatShading: false,
+              side: performanceMode ? THREE.FrontSide : THREE.DoubleSide, // Use single-sided rendering in performance mode
+              flatShading: performanceMode, // Enable flat shading in performance mode
               wireframe: false,
               // Remove polygon edges by setting these properties:
               polygonOffset: true,
@@ -473,18 +477,28 @@ export default function PolygonViewer() {
       
       // Animate water normal map with less frequent updates
       const time = Date.now() * 0.0005; // Reduced animation speed
-      waterMaterial.normalMap.offset.x = time * 0.05;
-      waterMaterial.normalMap.offset.y = time * 0.05;
       
-      // Animate water waves less frequently (every 3 frames)
-      if (waterVertices && frameCount % 3 === 0) {
-        for (let i = 0; i < waterVertexCount; i += 2) { // Process every other vertex
+      // Only update normal map if it exists (not in performance mode)
+      if (waterMaterial.normalMap) {
+        waterMaterial.normalMap.offset.x = time * 0.05;
+        waterMaterial.normalMap.offset.y = time * 0.05;
+      }
+      
+      // Animate water waves much less frequently in performance mode
+      const updateFrequency = performanceMode ? 10 : 3;
+      if (waterVertices && frameCount % updateFrequency === 0) {
+        // Process fewer vertices in performance mode
+        const stride = performanceMode ? 6 : 2;
+        for (let i = 0; i < waterVertexCount; i += stride) {
           const x = waterVertices.getX(i);
           const z = waterVertices.getZ(i);
           const waveHeight = 0.05; // Reduced wave height
           
-          // Create gentle waves with simpler math
-          const y = Math.sin(x * 0.3 + time) * Math.cos(z * 0.3 + time) * waveHeight;
+          // Simpler wave calculation in performance mode
+          const y = performanceMode 
+            ? Math.sin(x * 0.2 + time) * waveHeight 
+            : Math.sin(x * 0.3 + time) * Math.cos(z * 0.3 + time) * waveHeight;
+            
           waterVertices.setY(i, y);
         }
         
@@ -601,7 +615,7 @@ export default function PolygonViewer() {
         </button>
         <button 
           onClick={() => setHighQuality(!highQuality)}
-          className="bg-white px-4 py-2 rounded shadow"
+          className={`px-4 py-2 rounded shadow ${highQuality ? 'bg-white' : 'bg-blue-500 text-white'}`}
         >
           {highQuality ? 'Performance Mode' : 'Quality Mode'}
         </button>
