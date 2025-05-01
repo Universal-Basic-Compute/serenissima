@@ -37,14 +37,24 @@ export default function RootLayout({
     };
     
     // Register service worker for offline support
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/service-worker.js')
-        .then(registration => {
+    if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+      // Wait until the page is fully loaded
+      window.addEventListener('load', async () => {
+        try {
+          // Unregister any existing service workers first
+          const registrations = await navigator.serviceWorker.getRegistrations();
+          for (const registration of registrations) {
+            await registration.unregister();
+            console.log('Service Worker unregistered');
+          }
+          
+          // Register the new service worker
+          const registration = await navigator.serviceWorker.register('/service-worker.js');
           console.log('Service Worker registered with scope:', registration.scope);
-        })
-        .catch(error => {
+        } catch (error) {
           console.error('Service Worker registration failed:', error);
-        });
+        }
+      });
     }
     
     return () => {
