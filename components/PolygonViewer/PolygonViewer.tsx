@@ -590,13 +590,6 @@ export default function PolygonViewer() {
         />
       )}
       
-      {/* Helper message for coat of arms dragging */}
-      {activeView === 'land' && (
-        <div className="absolute bottom-4 right-4 bg-white bg-opacity-80 p-2 rounded shadow text-sm">
-          <p>Tip: You can drag and drop the coat of arms to reposition them</p>
-        </div>
-      )}
-
       {/* Flush Cache button */}
       <div className="absolute bottom-4 left-4 z-10">
         <button
