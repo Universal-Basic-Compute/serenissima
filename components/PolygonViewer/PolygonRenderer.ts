@@ -435,8 +435,8 @@ export default class PolygonRenderer {
       this.bounds.latCorrectionFactor
     )[0];
     
-    // Position higher above the ground for better visibility
-    sprite.position.set(normalizedCoords.x, 3, -normalizedCoords.y); // Increased height from 1 to 3
+    // Position AT the center (y=0) instead of hovering above
+    sprite.position.set(normalizedCoords.x, 0, -normalizedCoords.y);
     
     // Make sprites larger for better visibility
     sprite.scale.set(2.5, 2.5, 1); // Increased from 1.2 to 2.5
@@ -446,7 +446,7 @@ export default class PolygonRenderer {
     this.coatOfArmSprites[polygon.id] = sprite;
     
     console.log(`Added coat of arms sprite for ${polygon.id} owned by ${polygon.owner} at position:`, 
-      normalizedCoords.x, 3, -normalizedCoords.y);
+      normalizedCoords.x, 0, -normalizedCoords.y);
   }
   
   // Add helper function to create a circular texture
