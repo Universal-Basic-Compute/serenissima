@@ -100,7 +100,15 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
         .then(data => {
           if (data && Array.isArray(data)) {
             console.log(`Found ${data.length} offers for land ${selectedPolygonId}:`, data);
-            setOffers(data);
+            
+            // Filter out offers from the same seller as the main transaction
+            // This prevents showing the same transaction as both "For Sale" and an "Incoming offer"
+            const filteredOffers = transaction ? 
+              data.filter(offer => offer.id !== transaction.id) : 
+              data;
+              
+            console.log(`After filtering, ${filteredOffers.length} offers remain`);
+            setOffers(filteredOffers);
           } else {
             console.log(`Invalid offers data format for land ${selectedPolygonId}:`, data);
             setOffers([]);
@@ -113,7 +121,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
     } else {
       setOffers([]);
     }
-  }, [selectedPolygonId]);
+  }, [selectedPolygonId, transaction]); // Add transaction as a dependency
   
   // Show panel with animation when a polygon is selected
   useEffect(() => {
