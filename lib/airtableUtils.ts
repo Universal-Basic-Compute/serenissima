@@ -1,5 +1,8 @@
 export async function investComputeInAirtable(walletAddress: string, amount: number) {
   try {
+    // Ensure we're sending the full amount without any conversion
+    console.log(`Investing ${amount.toLocaleString()} COMPUTE for wallet ${walletAddress}`);
+    
     const response = await fetch('http://localhost:8000/api/invest-compute', {
       method: 'POST',
       headers: {
@@ -7,7 +10,7 @@ export async function investComputeInAirtable(walletAddress: string, amount: num
       },
       body: JSON.stringify({
         wallet_address: walletAddress,
-        compute_amount: amount,
+        compute_amount: amount, // Send the full amount as entered by the user
       }),
     });
     

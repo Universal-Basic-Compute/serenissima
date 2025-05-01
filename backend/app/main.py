@@ -324,11 +324,17 @@ async def invest_compute(wallet_data: WalletRequest):
         print(f"Searching for wallet with formula: {formula}")
         existing_records = users_table.all(formula=formula)
         
+        # Log the incoming amount for debugging
+        print(f"Received compute investment request: {wallet_data.compute_amount} COMPUTE")
+        
+        # Use the full amount without any conversion
+        investment_amount = wallet_data.compute_amount
+        
         if existing_records:
             # Update existing record
             record = existing_records[0]
             current_amount = record["fields"].get("ComputeAmount", 0)
-            new_amount = current_amount + wallet_data.compute_amount
+            new_amount = current_amount + investment_amount
             
             print(f"Updating wallet {record['id']} compute amount from {current_amount} to {new_amount}")
             updated_record = users_table.update(record["id"], {
@@ -346,10 +352,10 @@ async def invest_compute(wallet_data: WalletRequest):
             }
         else:
             # Create new record
-            print(f"Creating new wallet record with compute amount {wallet_data.compute_amount}")
+            print(f"Creating new wallet record with compute amount {investment_amount}")
             record = users_table.create({
                 "Wallet": wallet_data.wallet_address,
-                "ComputeAmount": wallet_data.compute_amount
+                "ComputeAmount": investment_amount
             })
             
             return {
