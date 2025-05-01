@@ -141,15 +141,15 @@ export default class CloudSystem {
       
       try {
         // Gentle rotation
-        cloud.rotation.z += 0.0001;
+        cloud.rotation.z += 0.00005;
         
         // Gentle movement with unique patterns for each cloud
-        cloud.position.x += Math.sin(time * 0.0001 + i * 0.1) * 0.01;
-        cloud.position.z += Math.cos(time * 0.0001 + i * 0.05) * 0.01;
+        cloud.position.x += Math.sin(time * 0.0001 + i * 0.1) * 0.005;
+        cloud.position.z += Math.cos(time * 0.0001 + i * 0.05) * 0.005;
         
         // Subtle vertical movement for some clouds
         if (i % 3 === 0) {
-          cloud.position.y += Math.sin(time * 0.00005 + i) * 0.005;
+          cloud.position.y += Math.sin(time * 0.00005 + i) * 0.002;
         }
         
         // Wrap around if clouds drift too far
