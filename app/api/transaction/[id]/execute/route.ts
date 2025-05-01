@@ -134,9 +134,36 @@ async function updateUserComputeBalances(seller: string, buyer: string, amount: 
     }
     
     // Fall back to local file handling if API is not available
-    // This would require implementing local user data storage
-    // For now, just log that we couldn't update the balances
-    console.warn('Local compute balance update not implemented');
+    try {
+      // Direct API call to transfer compute
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+      
+      // Try a direct transfer API call as fallback
+      const transferResponse = await fetch(`${apiBaseUrl}/api/transfer-compute`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          from_wallet: buyer,
+          to_wallet: seller,
+          compute_amount: amount
+        }),
+        signal: AbortSignal.timeout(15000) // 15 second timeout
+      });
+      
+      if (transferResponse.ok) {
+        console.log('Successfully transferred compute via direct API call');
+        return true;
+      }
+      
+      console.warn('Direct transfer API call failed, compute balance update may not be complete');
+    } catch (directApiError) {
+      console.error('Error with direct transfer API call:', directApiError);
+    }
+    
+    // If all else fails, log the failure
+    console.warn('All compute balance update methods failed');
     return false;
   } catch (error) {
     console.error('Error updating user compute balances:', error);
@@ -439,18 +466,18 @@ export async function POST(
     // Update the land ownership if it's a land transaction
     if (transaction.type === 'land' && transaction.asset_id) {
       console.log(`Updating land ownership for asset ${transaction.asset_id}`);
-      
+              
       // We already have the username from earlier, no need to fetch again
       // ALWAYS use the username if available, otherwise fall back to wallet address
       // This ensures consistency in ownership attribution
       console.log(`Setting land owner to ${ownerToSet} (username: ${buyerUsername}, wallet: ${buyer})`);
-      
+              
       // Try multiple possible file paths for the land data
       const possiblePaths = [
         path.join(process.cwd(), 'data', `${transaction.asset_id}.json`),
         path.join(process.cwd(), 'data', `polygon-${transaction.asset_id}.json`)
       ];
-      
+              
       let landFilePath = null;
       for (const testPath of possiblePaths) {
         if (fs.existsSync(testPath)) {
@@ -458,12 +485,12 @@ export async function POST(
           break;
         }
       }
-      
+              
       if (landFilePath) {
         try {
           const landContent = fs.readFileSync(landFilePath, 'utf8');
           let land = JSON.parse(landContent);
-          
+                  
           // Handle different land data formats
           if (Array.isArray(land)) {
             // Old format - just coordinates array
@@ -476,49 +503,87 @@ export async function POST(
             // New format - update owner
             land.owner = ownerToSet; // Use username instead of wallet address
           }
-          
+                  
           // Save the updated land
           fs.writeFileSync(landFilePath, JSON.stringify(land, null, 2));
           console.log(`Land ownership updated for ${transaction.asset_id}`);
-          
+                  
           // After updating the land file, also try to update the land owner in the backend
           try {
+            // Try multiple API endpoints to ensure the land ownership is updated
             const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
-            const landUpdateResponse = await fetch(`${apiBaseUrl}/api/land/${transaction.asset_id}/update-owner`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({ 
-                owner: ownerToSet // Use username instead of wallet address
-              }),
-              signal: AbortSignal.timeout(10000) // Increased from 5 to 10 second timeout
-            });
-            
-            if (landUpdateResponse.ok) {
-              console.log(`Successfully updated land owner in backend for ${transaction.asset_id}`);
-            } else {
-              console.warn(`Failed to update land owner in backend: ${landUpdateResponse.status} ${landUpdateResponse.statusText}`);
-              
-              // Retry once after a delay
-              console.log('Retrying backend land owner update after 2 second delay...');
-              await new Promise(resolve => setTimeout(resolve, 2000));
-              
-              const retryResponse = await fetch(`${apiBaseUrl}/api/land/${transaction.asset_id}/update-owner`, {
+                    
+            // First try the update-owner endpoint
+            try {
+              const landUpdateResponse = await fetch(`${apiBaseUrl}/api/land/${transaction.asset_id}/update-owner`, {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({ 
-                  owner: ownerToSet
+                  owner: ownerToSet, // Use username instead of wallet address
+                  wallet: buyer // Also include the wallet address for consistency
                 }),
                 signal: AbortSignal.timeout(10000)
               });
-              
-              if (retryResponse.ok) {
-                console.log(`Retry successful: land owner updated in backend for ${transaction.asset_id}`);
+                      
+              if (landUpdateResponse.ok) {
+                console.log(`Successfully updated land owner in backend for ${transaction.asset_id}`);
               } else {
-                console.error(`Retry failed: could not update land owner in backend for ${transaction.asset_id}`);
+                throw new Error(`Failed with status: ${landUpdateResponse.status}`);
+              }
+            } catch (updateOwnerError) {
+              console.warn(`Failed to update land owner via update-owner endpoint: ${updateOwnerError}`);
+                      
+              // Try the regular land endpoint as a fallback
+              try {
+                const landCreateResponse = await fetch(`${apiBaseUrl}/api/land`, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({ 
+                    land_id: transaction.asset_id,
+                    user: ownerToSet, // Username
+                    wallet_address: buyer, // Wallet address
+                    historical_name: transaction.historical_name,
+                    english_name: transaction.english_name,
+                    description: transaction.description
+                  }),
+                  signal: AbortSignal.timeout(10000)
+                });
+                        
+                if (landCreateResponse.ok) {
+                  console.log(`Successfully created/updated land record in backend for ${transaction.asset_id}`);
+                } else {
+                  throw new Error(`Failed with status: ${landCreateResponse.status}`);
+                }
+              } catch (createLandError) {
+                console.error(`Failed to create/update land record: ${createLandError}`);
+                        
+                // Try one more approach - direct API call
+                try {
+                  const directApiResponse = await fetch(`${apiBaseUrl}/api/direct-land-update`, {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                      land_id: transaction.asset_id,
+                      owner: ownerToSet,
+                      wallet: buyer
+                    }),
+                    signal: AbortSignal.timeout(10000)
+                  });
+                          
+                  if (directApiResponse.ok) {
+                    console.log(`Successfully updated land owner via direct API for ${transaction.asset_id}`);
+                  } else {
+                    throw new Error(`Failed with status: ${directApiResponse.status}`);
+                  }
+                } catch (directApiError) {
+                  console.error(`All attempts to update land ownership in backend failed: ${directApiError}`);
+                }
               }
             }
           } catch (landUpdateError) {
@@ -530,6 +595,32 @@ export async function POST(
         }
       } else {
         console.warn(`Land file not found for asset ${transaction.asset_id}`);
+                
+        // Try to create the land record in the backend even if local file doesn't exist
+        try {
+          const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+          const landCreateResponse = await fetch(`${apiBaseUrl}/api/land`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ 
+              land_id: transaction.asset_id,
+              user: ownerToSet,
+              wallet_address: buyer,
+              historical_name: transaction.historical_name,
+              english_name: transaction.english_name,
+              description: transaction.description
+            }),
+            signal: AbortSignal.timeout(10000)
+          });
+                  
+          if (landCreateResponse.ok) {
+            console.log(`Successfully created land record in backend for ${transaction.asset_id} even though local file doesn't exist`);
+          }
+        } catch (createError) {
+          console.error(`Failed to create land record in backend: ${createError}`);
+        }
       }
     }
     

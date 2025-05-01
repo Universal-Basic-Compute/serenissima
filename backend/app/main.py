@@ -155,10 +155,19 @@ async def store_wallet(wallet_data: WalletRequest):
         raise HTTPException(status_code=400, detail="Wallet address is required")
     
     try:
-        # Check if wallet already exists
+        # Check if wallet already exists - try multiple search approaches
+        existing_records = None
+        
+        # First try exact wallet match
         formula = f"{{Wallet}}='{wallet_data.wallet_address}'"
         print(f"Searching for wallet with formula: {formula}")
         existing_records = users_table.all(formula=formula)
+        
+        # If not found and we have a username, try username match
+        if not existing_records and wallet_data.user_name:
+            formula = f"{{Username}}='{wallet_data.user_name}'"
+            print(f"Searching for username with formula: {formula}")
+            existing_records = users_table.all(formula=formula)
         
         if existing_records:
             # Update existing record with new data
@@ -329,10 +338,19 @@ async def transfer_compute(wallet_data: WalletRequest):
         raise HTTPException(status_code=400, detail="Compute amount must be greater than 0")
     
     try:
-        # Check if wallet exists
+        # Check if wallet exists - try multiple search approaches
+        existing_records = None
+        
+        # First try exact wallet match
         formula = f"{{Wallet}}='{wallet_data.wallet_address}'"
         print(f"Searching for wallet with formula: {formula}")
         existing_records = users_table.all(formula=formula)
+        
+        # If not found, try username match
+        if not existing_records:
+            formula = f"{{Username}}='{wallet_data.wallet_address}'"
+            print(f"Searching for username with formula: {formula}")
+            existing_records = users_table.all(formula=formula)
         
         # Log the incoming amount for debugging
         print(f"Received compute transfer request: {wallet_data.compute_amount} COMPUTE")
@@ -472,7 +490,8 @@ async def create_land(land_data: LandRequest):
         # Create new record
         fields = {
             "LandId": land_data.land_id,
-            "User": owner
+            "User": owner,
+            "Wallet": owner  # Store in both fields for consistency
         }
         
         if land_data.historical_name:
@@ -951,13 +970,15 @@ async def execute_transaction(transaction_id: str, data: dict):
                 # Update the land owner
                 land_record = land_records[0]
                 lands_table.update(land_record["id"], {
-                    "User": buyer  # Changed from "Wallet" to "User" to match the field name in Airtable
+                    "User": buyer,  # Primary field for owner
+                    "Wallet": buyer  # Also update Wallet field for consistency
                 })
             else:
                 # Create a new land record
                 land_fields = {
                     "LandId": asset_id,
-                    "User": buyer  # Changed from "Wallet" to "User" to match the field name in Airtable
+                    "User": buyer,  # Primary field for owner
+                    "Wallet": buyer  # Also update Wallet field for consistency
                 }
                 
                 # Extract land details from Notes field if available
@@ -978,39 +999,128 @@ async def execute_transaction(transaction_id: str, data: dict):
         
         # Transfer the price from buyer to seller
         if price > 0 and seller and buyer:
-            # Get buyer's compute amount
-            buyer_formula = f"{{Wallet}}='{buyer}' OR {{Username}}='{buyer}'"
-            buyer_records = users_table.all(formula=buyer_formula)
-            
-            if not buyer_records:
-                raise HTTPException(status_code=404, detail="Buyer not found")
-            
-            buyer_record = buyer_records[0]
-            buyer_compute = buyer_record["fields"].get("ComputeAmount", 0)
-            
-            # Check if buyer has enough compute
-            if buyer_compute < price:
-                raise HTTPException(status_code=400, detail="Buyer does not have enough compute")
-            
-            # Get seller's compute amount
-            seller_formula = f"{{Wallet}}='{seller}' OR {{Username}}='{seller}'"
-            seller_records = users_table.all(formula=seller_formula)
-            
-            if not seller_records:
-                raise HTTPException(status_code=404, detail="Seller not found")
-            
-            seller_record = seller_records[0]
-            seller_compute = seller_record["fields"].get("ComputeAmount", 0)
-            
-            # Update buyer's compute amount
-            users_table.update(buyer_record["id"], {
-                "ComputeAmount": buyer_compute - price
-            })
-            
-            # Update seller's compute amount
-            users_table.update(seller_record["id"], {
-                "ComputeAmount": seller_compute + price
-            })
+            try:
+                # Get buyer's compute amount - try multiple search approaches
+                buyer_records = None
+                
+                # First try exact wallet match
+                buyer_formula = f"{{Wallet}}='{buyer}'"
+                buyer_records = users_table.all(formula=buyer_formula)
+                
+                # If not found, try username match
+                if not buyer_records:
+                    buyer_formula = f"{{Username}}='{buyer}'"
+                    buyer_records = users_table.all(formula=buyer_formula)
+                
+                # If still not found, try partial wallet match (in case of case differences)
+                if not buyer_records:
+                    # This is a fallback that might be less precise
+                    all_users = users_table.all()
+                    buyer_records = [
+                        record for record in all_users 
+                        if record["fields"].get("Wallet", "").lower() == buyer.lower()
+                    ]
+                
+                if not buyer_records:
+                    raise HTTPException(status_code=404, detail=f"Buyer not found: {buyer}")
+                
+                buyer_record = buyer_records[0]
+                buyer_compute = buyer_record["fields"].get("ComputeAmount", 0)
+                
+                # Check if buyer has enough compute
+                if buyer_compute < price:
+                    raise HTTPException(status_code=400, detail=f"Buyer does not have enough compute. Required: {price}, Available: {buyer_compute}")
+                
+                # Get seller's compute amount - try multiple search approaches
+                seller_records = None
+                
+                # First try exact wallet match
+                seller_formula = f"{{Wallet}}='{seller}'"
+                seller_records = users_table.all(formula=seller_formula)
+                
+                # If not found, try username match
+                if not seller_records:
+                    seller_formula = f"{{Username}}='{seller}'"
+                    seller_records = users_table.all(formula=seller_formula)
+                
+                # If still not found, try partial wallet match (in case of case differences)
+                if not seller_records:
+                    # This is a fallback that might be less precise
+                    all_users = users_table.all()
+                    seller_records = [
+                        record for record in all_users 
+                        if record["fields"].get("Wallet", "").lower() == seller.lower()
+                    ]
+                
+                if not seller_records:
+                    raise HTTPException(status_code=404, detail=f"Seller not found: {seller}")
+                
+                seller_record = seller_records[0]
+                seller_compute = seller_record["fields"].get("ComputeAmount", 0)
+                
+                print(f"Transferring {price} compute from {buyer} (balance: {buyer_compute}) to {seller} (balance: {seller_compute})")
+                
+                # Update buyer's compute amount
+                users_table.update(buyer_record["id"], {
+                    "ComputeAmount": buyer_compute - price
+                })
+                
+                # Update seller's compute amount
+                users_table.update(seller_record["id"], {
+                    "ComputeAmount": seller_compute + price
+                })
+                
+                print(f"Transfer complete. New balances - Buyer: {buyer_compute - price}, Seller: {seller_compute + price}")
+            except Exception as balance_error:
+                # Log the error but don't fail the transaction
+                print(f"ERROR updating compute balances: {str(balance_error)}")
+                traceback.print_exc(file=sys.stdout)
+                
+                # Try a different approach if the first one failed
+                try:
+                    print("Attempting alternative compute balance update approach...")
+                    
+                    # Direct update approach without complex formulas
+                    all_users = users_table.all()
+                    
+                    # Find buyer and seller by exact wallet or username match
+                    buyer_record = None
+                    seller_record = None
+                    
+                    for record in all_users:
+                        wallet = record["fields"].get("Wallet", "")
+                        username = record["fields"].get("Username", "")
+                        
+                        if wallet == buyer or username == buyer:
+                            buyer_record = record
+                        
+                        if wallet == seller or username == seller:
+                            seller_record = record
+                    
+                    if buyer_record and seller_record:
+                        buyer_compute = buyer_record["fields"].get("ComputeAmount", 0)
+                        seller_compute = seller_record["fields"].get("ComputeAmount", 0)
+                        
+                        # Check if buyer has enough compute
+                        if buyer_compute < price:
+                            print(f"WARNING: Buyer does not have enough compute. Required: {price}, Available: {buyer_compute}")
+                        else:
+                            # Update buyer's compute amount
+                            users_table.update(buyer_record["id"], {
+                                "ComputeAmount": buyer_compute - price
+                            })
+                            
+                            # Update seller's compute amount
+                            users_table.update(seller_record["id"], {
+                                "ComputeAmount": seller_compute + price
+                            })
+                            
+                            print(f"Alternative transfer complete. New balances - Buyer: {buyer_compute - price}, Seller: {seller_compute + price}")
+                    else:
+                        print(f"Could not find buyer or seller record in alternative approach. Buyer found: {buyer_record is not None}, Seller found: {seller_record is not None}")
+                except Exception as alt_error:
+                    print(f"ERROR in alternative compute balance update: {str(alt_error)}")
+                    traceback.print_exc(file=sys.stdout)
             
             print(f"Transferred {price} compute from {buyer} to {seller}")
         
@@ -1118,10 +1228,19 @@ async def transfer_compute_solana(wallet_data: WalletRequest):
         raise HTTPException(status_code=400, detail="Compute amount must be greater than 0")
     
     try:
-        # Check if wallet exists
+        # Check if wallet exists - try multiple search approaches
+        existing_records = None
+        
+        # First try exact wallet match
         formula = f"{{Wallet}}='{wallet_data.wallet_address}'"
         print(f"Searching for wallet with formula: {formula}")
         existing_records = users_table.all(formula=formula)
+        
+        # If not found, try username match
+        if not existing_records:
+            formula = f"{{Username}}='{wallet_data.wallet_address}'"
+            print(f"Searching for username with formula: {formula}")
+            existing_records = users_table.all(formula=formula)
         
         # Log the incoming amount for debugging
         print(f"Received compute transfer request: {wallet_data.compute_amount} COMPUTE")
@@ -1285,10 +1404,19 @@ async def withdraw_compute_solana(wallet_data: WalletRequest):
         raise HTTPException(status_code=400, detail="Compute amount must be greater than 0")
     
     try:
-        # Check if wallet exists
+        # Check if wallet exists - try multiple search approaches
+        existing_records = None
+        
+        # First try exact wallet match
         formula = f"{{Wallet}}='{wallet_data.wallet_address}'"
         print(f"Searching for wallet with formula: {formula}")
         existing_records = users_table.all(formula=formula)
+        
+        # If not found, try username match
+        if not existing_records:
+            formula = f"{{Username}}='{wallet_data.wallet_address}'"
+            print(f"Searching for username with formula: {formula}")
+            existing_records = users_table.all(formula=formula)
         
         if not existing_records:
             raise HTTPException(status_code=404, detail="Wallet not found")
