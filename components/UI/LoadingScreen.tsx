@@ -15,22 +15,35 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
   const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
-    // List of loading images - make sure these paths are correct
-    const loadingImages = [
-      '/loading/venice1.jpg',
-      '/loading/venice2.jpg',
-      '/loading/venice3.jpg',
-      '/loading/venice4.jpg',
-      '/loading/venice5.jpg',
-    ];
+    // Function to get random loading image
+    const getRandomLoadingImage = async () => {
+      try {
+        // Fetch the list of files from the loading directory
+        const response = await fetch('/api/list-loading-images');
+        if (!response.ok) {
+          throw new Error('Failed to fetch loading images');
+        }
+        
+        const data = await response.json();
+        
+        if (data.success && data.images && data.images.length > 0) {
+          // Select a random image from the returned list
+          const randomImage = data.images[Math.floor(Math.random() * data.images.length)];
+          console.log('Selected loading image:', randomImage);
+          setLoadingImage(randomImage);
+        } else {
+          // Fallback to a default image if no images are found
+          console.warn('No loading images found, using fallback');
+          setLoadingImage('/loading/fallback.jpg');
+        }
+      } catch (error) {
+        console.error('Error fetching loading images:', error);
+        setLoadingImage('/loading/fallback.jpg');
+      }
+    };
 
-    // Log the available images to verify paths
-    console.log('Available loading images:', loadingImages);
-
-    // Select a random image
-    const randomImage = loadingImages[Math.floor(Math.random() * loadingImages.length)];
-    console.log('Selected loading image:', randomImage);
-    setLoadingImage(randomImage);
+    // Call the function to get a random image
+    getRandomLoadingImage();
 
     // Set up progress animation
     const startTime = Date.now();
