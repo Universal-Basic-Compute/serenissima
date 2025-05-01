@@ -393,11 +393,11 @@ export default function PolygonViewer() {
     
     console.log(`Setting up Three.js scene`);
 
+    // Calculate bounds for all polygons outside the try block to make it accessible to all nested functions
+    const bounds = calculateBounds(polygons);
+    console.log('Calculated bounds:', bounds);
+
     try {
-      // Calculate bounds for all polygons
-      const bounds = calculateBounds(polygons);
-      console.log('Calculated bounds:', bounds);
-      
       // Initialize scene
       const sceneSetup = new SceneSetup({
         canvas: canvasRef.current,
