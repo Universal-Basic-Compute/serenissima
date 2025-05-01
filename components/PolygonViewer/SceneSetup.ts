@@ -79,7 +79,7 @@ export default class SceneSetup {
     // Make controls very simple
     this.controls.rotateSpeed = 0.5;
     this.controls.zoomSpeed = 0.5;
-    this.controls.panSpeed = 0.5;
+    this.controls.panSpeed = 1.5; // Increased from 0.5 to 1.5 for more responsive panning
 
     // Ensure controls are explicitly enabled
     this.controls.enablePan = true;
@@ -102,7 +102,7 @@ export default class SceneSetup {
     };
     
     // Make panning parallel to the ground plane
-    this.controls.screenSpacePanning = false;
+    this.controls.screenSpacePanning = true; // Changed to true for more intuitive panning
     
     // Set initial target to center of scene
     this.controls.target.set(0, 0, 0);
