@@ -396,6 +396,10 @@ export default function PolygonViewer() {
     let sceneOffsetZ = 0;
 
     const handleMouseDown = (event) => {
+      // Clear both flags first to avoid any overlap
+      isDragging = false;
+      isRightDragging = false;
+      
       if (event.button === 0) { // Left mouse button
         isDragging = true;
       } else if (event.button === 2) { // Right mouse button
@@ -409,6 +413,7 @@ export default function PolygonViewer() {
     };
 
     const handleMouseMove = (event) => {
+      // Exit early if no buttons are pressed
       if (!isDragging && !isRightDragging) return;
       
       const deltaMove = {
@@ -416,32 +421,22 @@ export default function PolygonViewer() {
         y: event.clientY - previousMousePosition.y
       };
       
-      // Only rotate if left mouse button is pressed (isDragging)
-      if (isDragging && !isRightDragging) {
+      // Ensure we're only doing one operation at a time
+      if (isDragging) {
+        // ROTATION ONLY - Left mouse button
         // Update spherical coordinates based on mouse movement
-        // Invert the x movement to make it more intuitive
         cameraTheta -= deltaMove.x * 0.01;
         
-        // Invert the y movement to make it more intuitive
-        // When mouse moves up, camera should look more downward (phi decreases)
-        // When mouse moves down, camera should look more upward (phi increases)
         const newPhi = cameraPhi - deltaMove.y * 0.01;
-        
-        // Limit vertical rotation to prevent going upside down
-        // Keep phi between 0.1 and 1.4 radians (about 5 to 80 degrees from vertical)
         cameraPhi = Math.max(0.1, Math.min(1.4, newPhi));
         
         // Convert spherical to cartesian coordinates
         camera.position.x = cameraRadius * Math.sin(cameraPhi) * Math.cos(cameraTheta);
         camera.position.y = cameraRadius * Math.cos(cameraPhi);
         camera.position.z = cameraRadius * Math.sin(cameraPhi) * Math.sin(cameraTheta);
-        
-        // Always look at the center plus offset
-        camera.lookAt(sceneOffsetX, 0, sceneOffsetZ);
       } 
-      // Only pan if right mouse button is pressed (isRightDragging)
-      else if (isRightDragging && !isDragging) {
-        // Pan the scene when right mouse button is dragged
+      else if (isRightDragging) {
+        // PANNING ONLY - Right mouse button
         const panSpeed = 0.1;
         
         // Calculate direction vectors in the camera's local space
@@ -465,10 +460,10 @@ export default function PolygonViewer() {
         // Move all objects in the scene
         scene.position.x = sceneOffsetX;
         scene.position.z = sceneOffsetZ;
-        
-        // Update camera target
-        camera.lookAt(sceneOffsetX, 0, sceneOffsetZ);
       }
+      
+      // Always look at the center plus offset
+      camera.lookAt(sceneOffsetX, 0, sceneOffsetZ);
       
       previousMousePosition = {
         x: event.clientX,
@@ -494,18 +489,24 @@ export default function PolygonViewer() {
       event.preventDefault();
       
       // Adjust camera radius based on wheel direction
-      // Increase zoom speed for faster zooming
-      const zoomSpeed = 10; // Increased from 5 to 10
+      const zoomSpeed = 10;
       const delta = event.deltaY > 0 ? 1 : -1;
       
       // Update radius (distance from center)
-      // Allow zooming much closer and further away
-      cameraRadius = Math.max(5, Math.min(400, cameraRadius + delta * zoomSpeed));
+      const newRadius = Math.max(5, Math.min(400, cameraRadius + delta * zoomSpeed));
+      
+      // Calculate zoom ratio to maintain the same viewing direction
+      const zoomRatio = newRadius / cameraRadius;
+      cameraRadius = newRadius;
       
       // Update camera position using current angles and new radius
+      // This maintains the same viewing direction while changing distance
       camera.position.x = cameraRadius * Math.sin(cameraPhi) * Math.cos(cameraTheta);
       camera.position.y = cameraRadius * Math.cos(cameraPhi);
       camera.position.z = cameraRadius * Math.sin(cameraPhi) * Math.sin(cameraTheta);
+      
+      // Always look at the center plus offset
+      camera.lookAt(sceneOffsetX, 0, sceneOffsetZ);
     };
     
     // Add event listeners
