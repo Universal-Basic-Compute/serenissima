@@ -8,34 +8,56 @@ interface ViewModeMenuProps {
 
 export default function ViewModeMenu({ activeView, setActiveView }: ViewModeMenuProps) {
   return (
-    <div className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 bg-white rounded-lg shadow-lg p-2 flex flex-col gap-3">
+    <div className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 bg-amber-50 rounded-lg shadow-xl p-3 flex flex-col gap-4 border-2 border-amber-600">
+      <h3 className="text-amber-800 font-serif text-center text-sm font-semibold border-b border-amber-300 pb-2 px-1">
+        La Serenissima
+      </h3>
+      
       <IconButton 
         onClick={() => setActiveView('buildings')}
         active={activeView === 'buildings'}
         title="Buildings View"
+        activeColor="amber"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+          <polyline points="9 22 9 12 15 12 15 22"></polyline>
+          <rect x="10" y="5" width="4" height="4"></rect>
         </svg>
+        <span className="text-xs mt-1">Buildings</span>
       </IconButton>
+      
       <IconButton 
         onClick={() => setActiveView('transport')}
         active={activeView === 'transport'}
         title="Transport View"
+        activeColor="amber"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M4 10h16M8 14h8M4 18h16M9 6l-5 4 5 4M15 6l5 4-5 4"></path>
+          <path d="M3 6h18v12H3z"></path>
         </svg>
+        <span className="text-xs mt-1">Transport</span>
       </IconButton>
+      
       <IconButton 
         onClick={() => setActiveView('land')}
         active={activeView === 'land'}
         title="Land View"
+        activeColor="amber"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M20 9v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V9"></path>
+          <path d="M9 22V12h6v10M2 10.6L12 2l10 8.6"></path>
         </svg>
+        <span className="text-xs mt-1">Lands</span>
       </IconButton>
+      
+      <div className="mt-2 border-t border-amber-300 pt-2 flex justify-center">
+        <div className="text-amber-800 text-xs italic text-center">
+          Republic of Venice
+        </div>
+      </div>
     </div>
   );
 }
