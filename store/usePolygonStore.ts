@@ -62,49 +62,64 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
       // Use a timeout to ensure the loading state is rendered
       await new Promise(resolve => setTimeout(resolve, 100));
       
-      // Create a cache key based on timestamp (cache for 5 minutes)
-      const cacheKey = 'polygons_cache';
-      const cacheTimestampKey = 'polygons_cache_timestamp';
-      const currentTime = Date.now();
-      const cacheTime = 5 * 60 * 1000; // 5 minutes in milliseconds
+      // First load a minimal set of polygons for immediate display
+      console.log('Fetching initial essential polygons for quick display');
+      const initialResponse = await fetch('/api/get-polygons?limit=20&essential=true');
+      const initialData = await initialResponse.json();
       
-      // Check if we have cached data
-      const cachedTimestamp = localStorage.getItem(cacheTimestampKey);
-      const isCacheValid = cachedTimestamp && (currentTime - parseInt(cachedTimestamp)) < cacheTime;
-      
-      let data;
-      
-      if (isCacheValid) {
-        // Use cached data
-        const cachedData = localStorage.getItem(cacheKey);
-        if (cachedData) {
-          console.log('Using cached polygon data');
-          data = JSON.parse(cachedData);
-        }
-      }
-      
-      // If no valid cache, fetch from API
-      if (!data) {
-        console.log('Fetching fresh polygon data from API');
-        const response = await fetch('/api/get-polygons');
-        data = await response.json();
+      if (initialData.polygons && initialData.polygons.length > 0) {
+        // Update state with initial polygons
+        console.log(`Loaded ${initialData.polygons.length} initial polygons`);
+        set({ polygons: initialData.polygons, loading: false });
         
-        // Cache the response
-        localStorage.setItem(cacheKey, JSON.stringify(data));
-        localStorage.setItem(cacheTimestampKey, currentTime.toString());
-      }
-      
-      console.log('Processing polygon data:', data);
-      
-      if (data.polygons && data.polygons.length > 0) {
-        console.log(`Successfully loaded ${data.polygons.length} polygons`);
-        set({ polygons: data.polygons, loading: false });
+        // Then load the rest in the background
+        setTimeout(async () => {
+          try {
+            console.log('Loading full polygon data in background');
+            // Create a cache key based on timestamp (cache for 5 minutes)
+            const cacheKey = 'polygons_cache';
+            const cacheTimestampKey = 'polygons_cache_timestamp';
+            const currentTime = Date.now();
+            const cacheTime = 5 * 60 * 1000; // 5 minutes in milliseconds
+            
+            // Check if we have cached data
+            const cachedTimestamp = localStorage.getItem(cacheTimestampKey);
+            const isCacheValid = cachedTimestamp && (currentTime - parseInt(cachedTimestamp)) < cacheTime;
+            
+            let data;
+            
+            if (isCacheValid) {
+              // Use cached data
+              const cachedData = localStorage.getItem(cacheKey);
+              if (cachedData) {
+                console.log('Using cached polygon data');
+                data = JSON.parse(cachedData);
+              }
+            }
+            
+            // If no valid cache, fetch from API
+            if (!data) {
+              const fullResponse = await fetch('/api/get-polygons');
+              data = await fullResponse.json();
+              
+              // Cache the response
+              localStorage.setItem(cacheKey, JSON.stringify(data));
+              localStorage.setItem(cacheTimestampKey, currentTime.toString());
+            }
+            
+            if (data.polygons && data.polygons.length > 0) {
+              console.log(`Loaded ${data.polygons.length} full polygons`);
+              set({ polygons: data.polygons });
+            }
+          } catch (backgroundError) {
+            console.error('Error loading full polygon data:', backgroundError);
+            // Don't update error state since we already have initial polygons
+          }
+        }, 1000);
         
-        // Return early to allow UI to render with the polygons
-        // Land owners will be loaded separately
         return;
       } else {
-        console.warn('No polygons found in API response');
+        console.warn('No initial polygons found in API response');
         // If no polygons, create a sample one for testing
         set({
           polygons: [{

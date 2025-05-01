@@ -152,13 +152,18 @@ export default function PolygonViewer() {
     // Then load other data with delays to prevent overwhelming the browser
     const loadSecondaryData = setTimeout(() => {
       loadLandOwners(); // Land owners are needed for the default land view
-      loadUsers(); // Load all users data
-      console.log('Loading users data...');
+      console.log('Loading land owners data...');
     }, 500);
     
     const loadTertiaryData = setTimeout(() => {
-      loadBridges();
+      loadUsers(); // Load all users data
+      console.log('Loading users data...');
     }, 1000);
+    
+    const loadQuaternaryData = setTimeout(() => {
+      loadBridges();
+      console.log('Loading bridges data...');
+    }, 1500);
     
     // Add an additional timeout to ensure coat of arms are loaded
     const loadCoatOfArms = setTimeout(() => {
@@ -178,12 +183,52 @@ export default function PolygonViewer() {
       }
     }, 3000);
     
+    // Use web worker for heavy calculations if we have many polygons
+    if (polygons.length > 100) {
+      // Use web worker for heavy calculations
+      const worker = new Worker('/workers/geometryWorker.js');
+      
+      worker.onmessage = function(e) {
+        if (e.data.type === 'centroidsCalculated') {
+          // Update centroids in store
+          const centroids = e.data.results;
+          console.log(`Received ${centroids.length} calculated centroids from worker`);
+          
+          // Update polygons with calculated centroids
+          const updatedPolygons = polygons.map(polygon => {
+            const calculatedCentroid = centroids.find(c => c.id === polygon.id);
+            if (calculatedCentroid && !polygon.centroid) {
+              return {
+                ...polygon,
+                centroid: calculatedCentroid.centroid
+              };
+            }
+            return polygon;
+          });
+          
+          // Update store with new centroids
+          usePolygonStore.setState({ polygons: updatedPolygons });
+        }
+      };
+      
+      // Send polygons without centroids to worker
+      const polygonsWithoutCentroids = polygons.filter(p => !p.centroid);
+      if (polygonsWithoutCentroids.length > 0) {
+        console.log(`Sending ${polygonsWithoutCentroids.length} polygons to worker for centroid calculation`);
+        worker.postMessage({
+          type: 'calculateCentroids',
+          data: { polygons: polygonsWithoutCentroids }
+        });
+      }
+    }
+    
     return () => {
       clearTimeout(loadSecondaryData);
       clearTimeout(loadTertiaryData);
+      clearTimeout(loadQuaternaryData);
       clearTimeout(loadCoatOfArms);
     };
-  }, [loadPolygons, loadBridges, loadLandOwners, loadUsers]);
+  }, [loadPolygons, loadBridges, loadLandOwners, loadUsers, polygons.length]);
   
   // Add a separate useEffect to update the renderer when coat of arms data changes
   useEffect(() => {
@@ -405,34 +450,40 @@ export default function PolygonViewer() {
     // Add a frame counter for less frequent updates
     let frameCount = 0;
     let isFirstRender = true;
-    
+  
     // Animation loop with performance optimizations
     const animate = () => {
       const animationId = requestAnimationFrame(animate);
-      
+    
       // Skip some frames at the beginning for better initial performance
       if (isFirstRender) {
         isFirstRender = false;
         return;
       }
-      
+    
+      // Skip frames based on performance mode
+      if (!highQuality && frameCount % 2 !== 0) {
+        frameCount++;
+        return;
+      }
+    
       // Update controls to enable camera movement
       if (sceneRef.current && sceneRef.current.controls) {
         sceneRef.current.controls.update();
       }
-      
+    
       // Update water effect - every frame for smoother animation
       if (waterEffectRef.current) {
         waterEffectRef.current.update(frameCount, !highQuality);
       }
-      
+    
       // Update polygon LOD and selection state - less frequently for distant objects
-      if (polygonRendererRef.current && frameCount % 2 === 0) {
+      if (polygonRendererRef.current && (highQuality || frameCount % 3 === 0)) {
         polygonRendererRef.current.update(selectedPolygonId);
       }
-      
+    
       frameCount++;
-      
+    
       // Use composer instead of renderer directly to include post-processing effects
       if (sceneRef.current && sceneRef.current.composer) {
         // Render the scene
@@ -574,21 +625,29 @@ export default function PolygonViewer() {
     );
   }
   
+  // Memoize components to prevent unnecessary re-renders
+  const ViewModeMenuMemo = useMemo(() => (
+    <ViewModeMenu activeView={activeView} setActiveView={setActiveView} />
+  ), [activeView, setActiveView]);
+  
+  const LandDetailsPanelMemo = useMemo(() => (
+    activeView === 'land' && (
+      <LandDetailsPanel 
+        selectedPolygonId={selectedPolygonId} 
+        onClose={handleCloseLandDetails}
+        polygons={polygons}
+        landOwners={landOwners}
+      />
+    )
+  ), [activeView, selectedPolygonId, handleCloseLandDetails, polygons, landOwners]);
+  
   return (
     <div className="w-screen h-screen">
       {/* View mode menu */}
-      <ViewModeMenu activeView={activeView} setActiveView={setActiveView} />
-
+      {ViewModeMenuMemo}
 
       {/* Add the Land Details Panel */}
-      {activeView === 'land' && (
-        <LandDetailsPanel 
-          selectedPolygonId={selectedPolygonId} 
-          onClose={handleCloseLandDetails}
-          polygons={polygons}
-          landOwners={landOwners}
-        />
-      )}
+      {LandDetailsPanelMemo}
       
       {/* Flush Cache button */}
       <div className="absolute bottom-4 left-4 z-10">

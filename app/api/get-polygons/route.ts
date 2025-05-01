@@ -1,13 +1,20 @@
 import { NextResponse } from 'next/server';
 import { serverUtils, calculateCentroid } from '@/lib/fileUtils';
 
-export async function GET() {
+export async function GET(request: Request) {
+  const url = new URL(request.url);
+  const limit = parseInt(url.searchParams.get('limit') || '0');
+  const essential = url.searchParams.get('essential') === 'true';
+  
   try {
     // Read all JSON files in the data directory
     const files = serverUtils.getAllJsonFiles();
     
+    // Apply limit if specified
+    const filesToProcess = limit > 0 ? files.slice(0, limit) : files;
+    
     // Process files in parallel using Promise.all for better performance
-    const polygonsPromises = files.map(async file => {
+    const polygonsPromises = filesToProcess.map(async file => {
       const data = serverUtils.readJsonFromFile(file);
       const id = file.replace('.json', '');
       
@@ -21,6 +28,15 @@ export async function GET() {
           centroid: calculateCentroid(data)
         };
       } else if (data && data.coordinates) {
+        // If essential mode, return minimal data
+        if (essential) {
+          return {
+            id,
+            coordinates: data.coordinates,
+            centroid: data.centroid || calculateCentroid(data.coordinates)
+          };
+        }
+        
         // New format with coordinates and centroid
         return {
           id,

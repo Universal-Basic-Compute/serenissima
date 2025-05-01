@@ -45,7 +45,9 @@ export default class SceneSetup {
     this.renderer = new THREE.WebGLRenderer({ 
       canvas,
       antialias: false, // Start without antialiasing for faster initial render
-      powerPreference: 'high-performance'
+      powerPreference: 'high-performance',
+      precision: this.performanceMode ? 'mediump' : 'highp', // Lower precision in performance mode
+      logarithmicDepthBuffer: false // Disable for better performance
     });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.setPixelRatio(1); // Start with lowest pixel ratio
@@ -63,13 +65,20 @@ export default class SceneSetup {
       // Add fog for depth
       this.scene.fog = new THREE.FogExp2('#1e5799', 0.0005);
       
-      // Enhance renderer settings
-      this.renderer.antialias = true;
-      this.renderer.setPixelRatio(this.performanceMode ? 1 : (window.devicePixelRatio > 1 ? 2 : 1));
-      this.renderer.shadowMap.enabled = !this.performanceMode;
-      this.renderer.shadowMap.type = this.performanceMode ? THREE.BasicShadowMap : THREE.PCFSoftShadowMap;
-      this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      this.renderer.toneMappingExposure = 1.2;
+      // Enhance renderer settings based on performance mode
+      if (!this.performanceMode) {
+        this.renderer.antialias = true;
+        this.renderer.setPixelRatio(window.devicePixelRatio > 1 ? 2 : 1);
+        this.renderer.shadowMap.enabled = true;
+        this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        this.renderer.toneMappingExposure = 1.2;
+      } else {
+        // Keep minimal settings in performance mode
+        this.renderer.setPixelRatio(1);
+        this.renderer.shadowMap.enabled = false;
+        this.renderer.toneMapping = THREE.NoToneMapping;
+      }
     }, 2000); // Delay enhancement by 2 seconds
     
     // Set up OrbitControls with minimal configuration

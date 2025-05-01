@@ -6,14 +6,34 @@ let cacheTimestamp: number = 0;
 const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes in milliseconds
 const FETCH_TIMEOUT = 15000; // Reduce timeout to 15 seconds
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const currentTime = Date.now();
+    
+    // Implement HTTP caching with ETag
+    const headers = new Headers();
+    
+    // Generate ETag based on data
+    const etag = `"${cacheTimestamp}"`; 
+    headers.set('ETag', etag);
+    headers.set('Cache-Control', 'public, max-age=300'); // 5 minutes
+    
+    // Check if client has valid cache
+    const requestHeaders = new Headers(request.headers);
+    const ifNoneMatch = requestHeaders.get('If-None-Match');
+    
+    if (ifNoneMatch === etag && cachedData) {
+      // Client has valid cache, return 304 Not Modified
+      return new Response(null, {
+        status: 304,
+        headers
+      });
+    }
     
     // Check if we have valid cached data
     if (cachedData && (currentTime - cacheTimestamp) < CACHE_DURATION) {
       console.log('Returning cached land owners data');
-      return NextResponse.json(cachedData);
+      return NextResponse.json(cachedData, { headers });
     }
     
     console.log('Fetching fresh land ownership data from backend...');
@@ -38,10 +58,6 @@ export async function GET() {
       // Update the cache
       cachedData = { success: true, lands: data };
       cacheTimestamp = currentTime;
-      
-      // Set cache headers
-      const headers = new Headers();
-      headers.set('Cache-Control', 'public, max-age=1800'); // Cache for 30 minutes
       
       return NextResponse.json(cachedData, { headers });
     } catch (fetchError) {

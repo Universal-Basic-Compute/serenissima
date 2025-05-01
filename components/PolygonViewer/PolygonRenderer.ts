@@ -180,28 +180,35 @@ export default class PolygonRenderer {
     // Load shared textures if they don't exist yet
     if (!PolygonRenderer.sharedTextures.sandBaseColor) {
       console.log('Loading shared textures...');
-      PolygonRenderer.sharedTextures.sandBaseColor = this.textureLoader.load(
-        'https://threejs.org/examples/textures/terrain/grasslight-big.jpg'
-      );
-      PolygonRenderer.sharedTextures.sandNormalMap = this.textureLoader.load(
-        'https://threejs.org/examples/textures/terrain/grasslight-big-nm.jpg'
-      );
-      PolygonRenderer.sharedTextures.sandRoughnessMap = this.textureLoader.load(
-        'https://threejs.org/examples/textures/terrain/grasslight-big-ao.jpg'
+      
+      // Use optimized texture loading for better performance
+      PolygonRenderer.sharedTextures.sandBaseColor = PolygonRenderer.loadOptimizedTexture(
+        'https://threejs.org/examples/textures/terrain/grasslight-big.jpg',
+        (texture) => {
+          // Configure texture settings once loaded
+          texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+          texture.repeat.set(1.25, 1.25);
+          texture.needsUpdate = true;
+        }
       );
       
-      // Configure texture settings once
-      PolygonRenderer.sharedTextures.sandBaseColor.wrapS = 
-      PolygonRenderer.sharedTextures.sandBaseColor.wrapT = THREE.RepeatWrapping;
-      PolygonRenderer.sharedTextures.sandNormalMap.wrapS = 
-      PolygonRenderer.sharedTextures.sandNormalMap.wrapT = THREE.RepeatWrapping;
-      PolygonRenderer.sharedTextures.sandRoughnessMap.wrapS = 
-      PolygonRenderer.sharedTextures.sandRoughnessMap.wrapT = THREE.RepeatWrapping;
+      PolygonRenderer.sharedTextures.sandNormalMap = PolygonRenderer.loadOptimizedTexture(
+        'https://threejs.org/examples/textures/terrain/grasslight-big-nm.jpg',
+        (texture) => {
+          texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+          texture.repeat.set(1.25, 1.25);
+          texture.needsUpdate = true;
+        }
+      );
       
-      // Make the texture 4x bigger by reducing the repeat value to 1/4 of the original
-      PolygonRenderer.sharedTextures.sandBaseColor.repeat.set(1.25, 1.25);
-      PolygonRenderer.sharedTextures.sandNormalMap.repeat.set(1.25, 1.25);
-      PolygonRenderer.sharedTextures.sandRoughnessMap.repeat.set(1.25, 1.25);
+      PolygonRenderer.sharedTextures.sandRoughnessMap = PolygonRenderer.loadOptimizedTexture(
+        'https://threejs.org/examples/textures/terrain/grasslight-big-ao.jpg',
+        (texture) => {
+          texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+          texture.repeat.set(1.25, 1.25);
+          texture.needsUpdate = true;
+        }
+      );
     }
     
     // Use the shared textures

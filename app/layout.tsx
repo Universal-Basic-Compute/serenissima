@@ -36,6 +36,17 @@ export default function RootLayout({
       originalConsoleLog(...args);
     };
     
+    // Register service worker for offline support
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/service-worker.js')
+        .then(registration => {
+          console.log('Service Worker registered with scope:', registration.scope);
+        })
+        .catch(error => {
+          console.error('Service Worker registration failed:', error);
+        });
+    }
+    
     return () => {
       // Restore original console.log when component unmounts
       console.log = originalConsoleLog;

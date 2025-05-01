@@ -395,6 +395,7 @@ export default class LODPolygon {
   }
 
   public cleanup() {
+    // Remove from scene
     this.scene.remove(this.mesh);
     
     // Clean up coat of arms sprite if it exists
@@ -404,10 +405,29 @@ export default class LODPolygon {
       (this.coatOfArmsSprite.material as THREE.SpriteMaterial).dispose();
     }
     
+    // Dispose of geometries
     if (this.highDetailMesh) {
       this.highDetailMesh.geometry.dispose();
-      (this.highDetailMesh.material as THREE.Material).dispose();
+      if (Array.isArray(this.highDetailMesh.material)) {
+        this.highDetailMesh.material.forEach(m => m.dispose());
+      } else {
+        (this.highDetailMesh.material as THREE.Material).dispose();
+      }
     }
+    
+    if (this.lowDetailMesh) {
+      this.lowDetailMesh.geometry.dispose();
+      if (Array.isArray(this.lowDetailMesh.material)) {
+        this.lowDetailMesh.material.forEach(m => m.dispose());
+      } else {
+        (this.lowDetailMesh.material as THREE.Material).dispose();
+      }
+    }
+    
+    // Clear references to help garbage collection
+    this.highDetailMesh = null;
+    this.lowDetailMesh = null;
+    this.mesh = null;
   }
   
   public updateSelectionState(isSelected: boolean) {

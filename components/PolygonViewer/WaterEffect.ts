@@ -122,10 +122,15 @@ export default class WaterEffect {
   }
   
   private initializeWater() {
+    // Use lower resolution textures in performance mode
+    const textureSize = this.performanceMode ? 256 : 512; // Reduced from 1024
+    
     // Load or use cached normal map
     if (!WaterEffect.waterNormalMapTexture) {
       WaterEffect.waterNormalMapTexture = WaterEffect.textureLoader!.load(
-        'https://threejs.org/examples/textures/waternormals.jpg'
+        this.performanceMode ? 
+          'https://threejs.org/examples/textures/waternormals_small.jpg' : 
+          'https://threejs.org/examples/textures/waternormals.jpg'
       );
       WaterEffect.waterNormalMapTexture.wrapS = THREE.RepeatWrapping;
       WaterEffect.waterNormalMapTexture.wrapT = THREE.RepeatWrapping;
@@ -144,8 +149,8 @@ export default class WaterEffect {
     
     // Create advanced water with reflections
     const waterOptions = {
-      textureWidth: this.performanceMode ? 256 : 1024,
-      textureHeight: this.performanceMode ? 256 : 1024,
+      textureWidth: this.performanceMode ? 128 : 512, // Reduced from 256/1024
+      textureHeight: this.performanceMode ? 128 : 512,
       waterNormals: this.waterNormalMap,
       sunDirection: this.sunDirection,
       sunColor: 0xffffff,
@@ -154,6 +159,13 @@ export default class WaterEffect {
       fog: this.scene.fog !== undefined,
       format: THREE.RGBAFormat
     };
+    
+    // Reduce water geometry complexity
+    this.waterGeometry = new THREE.PlaneGeometry(
+      this.width, 
+      this.height, 
+      this.performanceMode ? 2 : 8 // Reduced from 4/16
+    );
     
     // Create the water mesh
     this.water = new Water(this.waterGeometry, waterOptions);
@@ -272,6 +284,9 @@ export default class WaterEffect {
   
   public update(frameCount: number, performanceMode: boolean) {
     if (!this.water) return;
+    
+    // Skip updates in performance mode
+    if (performanceMode && frameCount % 2 !== 0) return;
     
     // Get current time for animations
     const time = frameCount * 0.05;
