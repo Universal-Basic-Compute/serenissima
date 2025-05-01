@@ -542,15 +542,18 @@ export default class LODPolygon {
       if (!mesh) return;
       
       const material = mesh.material as THREE.MeshBasicMaterial;
+      if (!material) return; // Add check for material
       
       if (isSelected) {
-        // Store original color if not already stored
-        if (!this.originalColor) {
+        // Store original color if not already stored and if material.color exists
+        if (!this.originalColor && material.color) {
           this.originalColor = material.color.clone();
         }
         
         // Highlight the selected polygon with a bright color
-        material.color.set('#ffcc00'); // Bright yellow
+        if (material.color) {
+          material.color.set('#ffcc00'); // Bright yellow
+        }
         
         // IMPORTANT: Adjust the polygon's position to prevent z-fighting
         // Move the mesh slightly up when selected - but not too high
@@ -563,7 +566,7 @@ export default class LODPolygon {
         material.needsUpdate = true;
       } else {
         // Restore original color
-        if (this.originalColor) {
+        if (this.originalColor && material.color) {
           material.color.copy(this.originalColor);
           
           // IMPORTANT: Restore the original position
