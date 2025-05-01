@@ -117,9 +117,11 @@ export default class LODPolygon {
     const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
     geometry.rotateX(-Math.PI / 2);
     
-    // Create a detailed material
+    // Create a detailed material with enhanced land view appearance
     const material = new THREE.MeshStandardMaterial({ 
-      color: this.activeView === 'land' ? '#7cac6a' : '#e6d2a8',
+      color: this.activeView === 'land' 
+        ? new THREE.Color(0x7cac6a).lerp(new THREE.Color(0x8fbc8f), Math.random() * 0.3) // Varied green colors
+        : '#e6d2a8',
       map: this.performanceMode ? null : this.sandBaseColor,
       normalMap: this.performanceMode ? null : this.sandNormalMap,
       roughnessMap: this.performanceMode ? null : this.sandRoughnessMap,

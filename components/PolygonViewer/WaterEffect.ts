@@ -49,10 +49,10 @@ export default class WaterEffect {
     
     this.waterMaterial = new THREE.MeshStandardMaterial({ 
       color: activeView === 'transport' ? '#00aaff' : 
-             activeView === 'land' ? '#004488' : 
+             activeView === 'land' ? '#3a7ca5' : // Deeper blue for land view
              '#0066cc', // Different blue for each view
       transparent: true,
-      opacity: 0.7,
+      opacity: activeView === 'land' ? 0.8 : 0.7, // More opaque in land view
       metalness: 0.2,
       roughness: 0.1,
       normalMap: performanceMode ? null : this.waterNormalMap,

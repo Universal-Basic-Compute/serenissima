@@ -61,9 +61,6 @@ export default class InteractionManager {
   }
   
   private onMouseMove(event: MouseEvent) {
-    // Disable all hover interactions in land view
-    if (this.activeView === 'land') return;
-    
     // Calculate mouse position in normalized device coordinates (-1 to +1)
     this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
@@ -198,9 +195,6 @@ export default class InteractionManager {
   }
   
   private onMouseClick(event: MouseEvent) {
-    // Disable all click interactions in land view
-    if (this.activeView === 'land') return;
-    
     // Removed stopPropagation to prevent issues with OrbitControls
     
     // Update the raycaster with the camera and mouse position

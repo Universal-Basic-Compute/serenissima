@@ -8,6 +8,7 @@ import PolygonRenderer from './PolygonRenderer';
 import WaterEffect from './WaterEffect';
 import InteractionManager from './InteractionManager';
 import ViewModeMenu from './ViewModeMenu';
+import LandDetailsPanel from './LandDetailsPanel';
 import ActionButton from '../UI/ActionButton';
 import usePolygonStore from '@/store/usePolygonStore';
 
@@ -48,6 +49,11 @@ export default function PolygonViewer() {
       sceneRef.current.resetCamera();
     }
   }, []);
+  
+  // Handler for closing the land details panel
+  const handleCloseLandDetails = useCallback(() => {
+    setSelectedPolygonId(null);
+  }, [setSelectedPolygonId]);
   
   // Interaction handlers removed to disable polygon interactions
   
@@ -219,6 +225,14 @@ export default function PolygonViewer() {
         >
           <p>Selected: {selectedPolygonId}</p>
         </div>
+      )}
+
+      {/* Add the Land Details Panel */}
+      {activeView === 'land' && (
+        <LandDetailsPanel 
+          selectedPolygonId={selectedPolygonId} 
+          onClose={handleCloseLandDetails} 
+        />
       )}
 
       <canvas 
