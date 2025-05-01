@@ -400,18 +400,21 @@ export default class PolygonRenderer {
       roughnessMap: this.activeView !== 'land' ? this.sandRoughnessMap : null,
       roughness: 0.7,
       metalness: 0.1,
-      side: THREE.DoubleSide,
+      side: THREE.FrontSide, // Changed from DoubleSide to FrontSide
       flatShading: false,
       wireframe: false,
       // Remove polygon edges by setting these properties:
       polygonOffset: true,
       polygonOffsetFactor: 1,
-      polygonOffsetUnits: 1
+      polygonOffsetUnits: 1,
+      // Explicitly disable shadows
+      castShadow: false,
+      receiveShadow: false
     });
     
     const sampleMesh = new THREE.Mesh(sampleGeometry, sampleMaterial);
-    sampleMesh.castShadow = true;
-    sampleMesh.receiveShadow = true;
+    sampleMesh.castShadow = false;
+    sampleMesh.receiveShadow = false;
     
     // Store the original material properties explicitly
     sampleMesh.userData.originalEmissive = new THREE.Color(0, 0, 0);
