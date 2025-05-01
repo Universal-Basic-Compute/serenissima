@@ -113,7 +113,12 @@ export default class LODPolygon {
     // Create a simple material - CHANGED to MeshBasicMaterial
     const material = new THREE.MeshBasicMaterial({ 
       color: '#e6d2a8', // Always use sand/beige color
-      side: THREE.FrontSide
+      side: THREE.FrontSide,
+      wireframe: false,
+      // Remove stroke/edge visibility
+      polygonOffset: true,
+      polygonOffsetFactor: 1,
+      polygonOffsetUnits: 1
     });
     
     this.lowDetailMesh = new THREE.Mesh(geometry, material);
@@ -143,9 +148,9 @@ export default class LODPolygon {
       steps: 1, // Reduce steps to prevent shadow artifacts
       depth: 0.05, // Increased depth for more island-like appearance
       bevelEnabled: true, // Enable bevels for smoother island edges
-      bevelThickness: 0.02,
-      bevelSize: 0.02,
-      bevelSegments: 3,
+      bevelThickness: 0.03, // Increased for smoother edges
+      bevelSize: 0.03, // Increased for smoother edges
+      bevelSegments: 5, // Increased for smoother bevels
       UVGenerator: { // Add a custom UV generator for better texture mapping
         generateTopUV: function(geometry, vertices, indexA, indexB, indexC) {
           // Create UVs that map the entire texture to the face
@@ -194,6 +199,8 @@ export default class LODPolygon {
     
     // Update normals after modifying positions
     geometry.computeVertexNormals();
+    // Enable smooth shading
+    geometry.attributes.normal.needsUpdate = true;
     
     // Determine the color to use
     const landColor = this.determineLandColor();
@@ -204,6 +211,10 @@ export default class LODPolygon {
       roughness: 0.9, // High roughness for sand-like appearance
       metalness: 0.1, // Low metalness
       side: THREE.FrontSide,
+      wireframe: false,
+      // Set the emissive color to match the fill color to hide edges
+      emissive: landColor,
+      emissiveIntensity: 0.1,
       // Add these important properties to prevent z-fighting:
       polygonOffset: true,
       polygonOffsetFactor: 1,
