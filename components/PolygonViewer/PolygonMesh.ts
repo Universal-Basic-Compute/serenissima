@@ -69,14 +69,14 @@ class PolygonMesh {
       
       const shape = createPolygonShape(normalizedCoords);
       
-      // Create extruded geometry with simplified settings
+      // Create extruded geometry with simplified settings - REDUCE DEPTH
       const extrudeSettings = {
         steps: 1,
-        depth: 0.05,
-        bevelEnabled: true,
-        bevelThickness: 0.05,
-        bevelSize: 0.05,
-        bevelSegments: 4,
+        depth: 0.02, // REDUCED from 0.05 to 0.02
+        bevelEnabled: false, // CHANGED from true to false to remove bevels completely
+        bevelThickness: 0, // CHANGED from 0.05 to 0
+        bevelSize: 0, // CHANGED from 0.05 to 0
+        bevelSegments: 0, // CHANGED from 4 to 0
         UVGenerator: {
           generateTopUV: function(geometry, vertices, indexA, indexB, indexC) {
             const a = vertices[indexA];
@@ -107,16 +107,9 @@ class PolygonMesh {
       const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
       geometry.rotateX(-Math.PI / 2);
       
-      // Add height variation to the geometry
-      const positions = geometry.attributes.position.array;
-      for (let i = 0; i < positions.length; i += 3) {
-        if (positions[i + 1] > 0.01) {
-          const noise = Math.random() * 0.03;
-          positions[i + 1] += noise;
-        }
-      }
+      // REMOVED height variation code to make the surface completely flat
       
-      // Update normals after modifying positions
+      // Update normals
       geometry.computeVertexNormals();
       geometry.attributes.normal.needsUpdate = true;
       geometry.computeBoundingSphere();
@@ -124,19 +117,19 @@ class PolygonMesh {
       // Determine the color to use
       const landColor = this.determineLandColor();
       
-      // Create a material that looks like sand
+      // Create a BASIC material with NO lighting effects
       const material = new THREE.MeshBasicMaterial({ 
         color: landColor,
         side: THREE.FrontSide,
         wireframe: false,
         transparent: false,
         opacity: 1.0,
-        // Removed polygon offset properties that can create borders
+        // Completely removed all polygon offset properties
         depthTest: true,
         depthWrite: true
       });
       
-      // Always load sand texture regardless of performance mode
+      // Immediately load and apply the sand texture
       this.textureLoader.load(
         '/textures/sand.jpg',
         (texture) => {
@@ -155,14 +148,18 @@ class PolygonMesh {
       );
       
       this.mesh = new THREE.Mesh(geometry, material);
+      
+      // EXPLICITLY disable shadows
       this.mesh.castShadow = false;
       this.mesh.receiveShadow = false;
+      
+      // Set a consistent render order
       this.mesh.renderOrder = 1;
       
-      // Explicitly ensure shadows are disabled
+      // Add to user data to ensure shadows stay disabled
       this.mesh.userData.disableShadows = true;
       
-      // Remove bottom faces
+      // Remove bottom faces to improve performance
       this.removeBottomFaces(geometry);
     } catch (error) {
       console.error('Error creating mesh:', error);
@@ -383,9 +380,8 @@ class PolygonMesh {
     
     if (!material) return;
     
-    // Always keep the texture, even in performance mode
+    // Always ensure the texture is applied
     if (!material.map) {
-      // Load texture if it's not already loaded
       this.textureLoader.load(
         '/textures/sand.jpg',
         (texture) => {
