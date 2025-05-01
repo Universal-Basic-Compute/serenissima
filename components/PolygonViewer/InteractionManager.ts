@@ -128,6 +128,12 @@ export default class InteractionManager {
               emissiveIntensity: previousHovered.userData.originalEmissiveIntensity || 0,
               duration: 0.3
             });
+            
+            // Reset position when hover is removed
+            gsap.to(previousHovered.position, {
+              y: 0,
+              duration: 0.3
+            });
           }
         }
       }
@@ -171,6 +177,12 @@ export default class InteractionManager {
             
             gsap.to(newHovered.material, {
               emissiveIntensity: 0.5,
+              duration: 0.3
+            });
+            
+            // Make the polygon "pop up" when hovered
+            gsap.to(newHovered.position, {
+              y: 0.2, // Move it slightly upward
               duration: 0.3
             });
           }
@@ -227,6 +239,12 @@ export default class InteractionManager {
               duration: 0.5
             });
             
+            // Reset position with animation
+            gsap.to(object.position, {
+              y: 0,
+              duration: 0.5
+            });
+            
             // Fade out the outline mesh if it exists
             if (object.userData.outlineMesh) {
               gsap.to(object.userData.outlineMesh.material, {
@@ -258,6 +276,12 @@ export default class InteractionManager {
               
               gsap.to(previousSelected.material, {
                 emissiveIntensity: previousSelected.userData.originalEmissiveIntensity || 0,
+                duration: 0.5
+              });
+            
+              // Reset position with animation
+              gsap.to(previousSelected.position, {
+                y: 0,
                 duration: 0.5
               });
               
@@ -336,7 +360,21 @@ export default class InteractionManager {
               
             // Animate the outline opacity
             gsap.to(object.userData.outlineMesh.material, {
-              opacity: 0.3,
+              opacity: 0.5, // Increased from 0.3 to 0.5
+              duration: 0.5
+            });
+            
+            // Make the outline slightly larger for better visibility
+            gsap.to(object.userData.outlineMesh.scale, {
+              x: 1.015,
+              y: 1.015,
+              z: 1.015,
+              duration: 0.5
+            });
+            
+            // Make the selected polygon pop up more prominently
+            gsap.to(object.position, {
+              y: 0.3, // Higher than hover effect
               duration: 0.5
             });
           }
@@ -388,9 +426,16 @@ export default class InteractionManager {
     window.removeEventListener('mousemove', this.handleMouseMove);
     window.removeEventListener('click', this.handleMouseClick);
     
-    // Clean up any outline meshes
+    // Clean up any outline meshes and animations
     Object.values(this.polygonMeshesRef.current).forEach(mesh => {
+      // Kill any ongoing animations
+      gsap.killTweensOf(mesh.position);
+      gsap.killTweensOf(mesh.material);
+      gsap.killTweensOf(mesh.material.emissive);
+      
       if (mesh.userData.outlineMesh) {
+        gsap.killTweensOf(mesh.userData.outlineMesh.scale);
+        gsap.killTweensOf(mesh.userData.outlineMesh.material);
         this.scene.remove(mesh.userData.outlineMesh);
         mesh.userData.outlineMesh.geometry.dispose();
         mesh.userData.outlineMesh.material.dispose();
