@@ -162,50 +162,6 @@ export default class SceneSetup {
     this.scene.add(fillLight);
   }
   
-  public resetCamera = () => {
-    // Completely disable automatic camera resets
-    console.log("Camera reset functionality disabled");
-    return;
-    
-    // The rest of the method is now unreachable
-    // Check if this is an intentional reset triggered by the user
-    if (window.resetCameraTriggeredByUser !== true) {
-      console.log("Camera reset prevented - not triggered by user");
-      return;
-    }
-    
-    // Reset the flag immediately to prevent multiple resets
-    window.resetCameraTriggeredByUser = false;
-    
-    // Smoothly animate to the default position
-    const startPosition = this.camera.position.clone();
-    const startTarget = this.controls.target.clone();
-    const endPosition = new THREE.Vector3(0, 80, 80);
-    const endTarget = new THREE.Vector3(0, 0, 0);
-    
-    // Animation duration in milliseconds
-    const duration = 1000;
-    const startTime = Date.now();
-    
-    const animateReset = () => {
-      const elapsed = Date.now() - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      
-      // Use easeOutCubic easing function for smooth deceleration
-      const easeProgress = 1 - Math.pow(1 - progress, 3);
-      
-      // Interpolate position and target
-      this.camera.position.lerpVectors(startPosition, endPosition, easeProgress);
-      this.controls.target.lerpVectors(startTarget, endTarget, easeProgress);
-      this.controls.update();
-      
-      if (progress < 1) {
-        requestAnimationFrame(animateReset);
-      }
-    };
-    
-    animateReset();
-  };
   
   private handleResize = () => {
     this.camera.aspect = window.innerWidth / window.innerHeight;

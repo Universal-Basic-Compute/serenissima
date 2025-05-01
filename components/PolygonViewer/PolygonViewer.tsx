@@ -40,11 +40,6 @@ export default function PolygonViewer() {
   const waterEffectRef = useRef<WaterEffect | null>(null);
   const interactionManagerRef = useRef<InteractionManager | null>(null);
   
-  // Define resetView at component level but disable it
-  const resetView = useCallback(() => {
-    console.log("Reset view functionality disabled");
-    return;
-  }, []);
   
   // Handler for closing the land details panel
   const handleCloseLandDetails = useCallback(() => {
@@ -135,8 +130,6 @@ export default function PolygonViewer() {
     // Animation loop
     const animate = () => {
       const animationId = requestAnimationFrame(animate);
-      
-      // Controls state update removed
       
       // Update controls each frame for smooth damping effect
       scene.controls.update();
