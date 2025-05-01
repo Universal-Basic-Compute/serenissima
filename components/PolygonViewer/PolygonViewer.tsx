@@ -536,8 +536,8 @@ export default function PolygonViewer() {
           id => polygonMeshesRef.current[id] === object
         );
         
-        // Only set as hovered if it's not the selected polygon
-        if (hoveredId && hoveredId !== selectedPolygonId) {
+        // Set as hovered regardless of selection state
+        if (hoveredId) {
           currentHoveredId = hoveredId;
         }
       }
@@ -545,20 +545,41 @@ export default function PolygonViewer() {
       // If the hovered polygon has changed
       if (currentHoveredId !== hoveredPolygonId) {
         // Remove hover effect from previously hovered polygon
-        if (hoveredPolygonId && hoveredPolygonId !== selectedPolygonId) {
+        if (hoveredPolygonId) {
           const previousHovered = polygonMeshesRef.current[hoveredPolygonId];
           if (previousHovered && previousHovered.material) {
-            // Cancel any ongoing animations
+            // Cancel any ongoing hover animations
             gsap.killTweensOf(previousHovered.material.emissive);
             gsap.killTweensOf(previousHovered.material);
             
-            // Reset to original values immediately
-            previousHovered.material.emissive.set(
-              previousHovered.userData.originalEmissive?.r || 0,
-              previousHovered.userData.originalEmissive?.g || 0,
-              previousHovered.userData.originalEmissive?.b || 0
-            );
-            previousHovered.material.emissiveIntensity = previousHovered.userData.originalEmissiveIntensity || 0;
+            // If this is the selected polygon, restore selection effect
+            if (hoveredPolygonId === selectedPolygonId) {
+              // Restore selection effect
+              gsap.to(previousHovered.material.emissive, {
+                r: 0,
+                g: 1.0,
+                b: 0,
+                duration: 0.3
+              });
+              
+              gsap.to(previousHovered.material, {
+                emissiveIntensity: 0.8,
+                duration: 0.3
+              });
+            } else {
+              // Otherwise reset to original values
+              gsap.to(previousHovered.material.emissive, {
+                r: previousHovered.userData.originalEmissive?.r || 0,
+                g: previousHovered.userData.originalEmissive?.g || 0,
+                b: previousHovered.userData.originalEmissive?.b || 0,
+                duration: 0.3
+              });
+              
+              gsap.to(previousHovered.material, {
+                emissiveIntensity: previousHovered.userData.originalEmissiveIntensity || 0,
+                duration: 0.3
+              });
+            }
           }
         }
         
@@ -576,18 +597,34 @@ export default function PolygonViewer() {
             gsap.killTweensOf(newHovered.material.emissive);
             gsap.killTweensOf(newHovered.material);
             
-            // Apply hover effect
-            gsap.to(newHovered.material.emissive, {
-              r: 0.53,
-              g: 1.0,
-              b: 0.53,
-              duration: 0.3
-            });
-            
-            gsap.to(newHovered.material, {
-              emissiveIntensity: 0.5,
-              duration: 0.3
-            });
+            // If this is the selected polygon, use a different hover effect
+            if (currentHoveredId === selectedPolygonId) {
+              // Brighten the selection effect slightly
+              gsap.to(newHovered.material.emissive, {
+                r: 0.2,
+                g: 1.0,
+                b: 0.2,
+                duration: 0.3
+              });
+              
+              gsap.to(newHovered.material, {
+                emissiveIntensity: 1.0,
+                duration: 0.3
+              });
+            } else {
+              // Apply standard hover effect
+              gsap.to(newHovered.material.emissive, {
+                r: 0.53,
+                g: 1.0,
+                b: 0.53,
+                duration: 0.3
+              });
+              
+              gsap.to(newHovered.material, {
+                emissiveIntensity: 0.5,
+                duration: 0.3
+              });
+            }
           }
         }
         
