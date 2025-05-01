@@ -34,6 +34,11 @@ export default class PolygonRenderer {
   private sandRoughnessMap: THREE.Texture;
   private lodPolygons: LODPolygon[] = [];
   private ownerCoatOfArmsMap: Record<string, string> = {}; // Map of owner to coat of arms URL
+  private isDraggingCoatOfArms: boolean = false;
+  private draggedCoatOfArms: THREE.Mesh | null = null;
+  private draggedPolygonId: string | null = null;
+  private raycaster: THREE.Raycaster;
+  private mouse: THREE.Vector2;
   
   // Add a method to create a sprite for the coat of arms
   private createCoatOfArmsSprite(coatOfArmsUrl: string) {
@@ -128,6 +133,10 @@ export default class PolygonRenderer {
     // Initialize texture loader explicitly
     this.textureLoader = new THREE.TextureLoader();
     
+    // Initialize raycaster and mouse for drag and drop
+    this.raycaster = new THREE.Raycaster();
+    this.mouse = new THREE.Vector2();
+    
     // Process users data to create coat of arms map
     if (users) {
       Object.values(users).forEach(user => {
@@ -179,6 +188,148 @@ export default class PolygonRenderer {
     
     // Render polygons with a slight delay to allow the UI to render first
     setTimeout(() => this.renderPolygons(), 0);
+    
+    // Add event listeners for drag and drop
+    window.addEventListener('mousedown', this.handleMouseDown.bind(this));
+    window.addEventListener('mousemove', this.handleMouseMove.bind(this));
+    window.addEventListener('mouseup', this.handleMouseUp.bind(this));
+  }
+  
+  private handleMouseDown = (event: MouseEvent) => {
+    // Only handle drag in land view
+    if (this.activeView !== 'land') return;
+    
+    // Calculate mouse position in normalized device coordinates (-1 to +1)
+    this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    
+    // Update the raycaster with the camera and mouse position
+    this.raycaster.setFromCamera(this.mouse, this.camera);
+    
+    // Find all sprites (coat of arms) in the scene
+    const sprites = Object.entries(this.coatOfArmSprites);
+    
+    // Check for intersections with sprites
+    for (const [polygonId, sprite] of sprites) {
+      const intersects = this.raycaster.intersectObject(sprite);
+      
+      if (intersects.length > 0) {
+        // We've clicked on a coat of arms sprite
+        this.isDraggingCoatOfArms = true;
+        this.draggedCoatOfArms = sprite;
+        this.draggedPolygonId = polygonId;
+        
+        // Change cursor to indicate dragging
+        document.body.style.cursor = 'grabbing';
+        
+        // Visual feedback - move the sprite up slightly
+        sprite.position.y += 0.1;
+        
+        // Add a glow effect or change opacity
+        if (sprite.material instanceof THREE.MeshBasicMaterial) {
+          sprite.material.opacity = 0.8; // Make it slightly transparent while dragging
+        }
+        
+        // Stop checking after finding the first hit
+        break;
+      }
+    }
+  }
+  
+  private handleMouseMove = (event: MouseEvent) => {
+    // Only process if we're dragging a coat of arms
+    if (!this.isDraggingCoatOfArms || !this.draggedCoatOfArms || !this.draggedPolygonId) return;
+    
+    // Calculate mouse position in normalized device coordinates (-1 to +1)
+    this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    
+    // Update the raycaster with the camera and mouse position
+    this.raycaster.setFromCamera(this.mouse, this.camera);
+    
+    // Create a plane at y=0 (ground level)
+    const groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+    
+    // Find where the ray intersects the ground plane
+    const intersection = new THREE.Vector3();
+    this.raycaster.ray.intersectPlane(groundPlane, intersection);
+    
+    // Update the sprite position
+    if (intersection) {
+      this.draggedCoatOfArms.position.x = intersection.x;
+      this.draggedCoatOfArms.position.z = intersection.z;
+    }
+  }
+  
+  private handleMouseUp = (event: MouseEvent) => {
+    // Only process if we're dragging a coat of arms
+    if (!this.isDraggingCoatOfArms || !this.draggedCoatOfArms || !this.draggedPolygonId) return;
+    
+    // Reset visual feedback
+    this.draggedCoatOfArms.position.y -= 0.1;
+    
+    if (this.draggedCoatOfArms.material instanceof THREE.MeshBasicMaterial) {
+      this.draggedCoatOfArms.material.opacity = 1.0; // Reset opacity
+    }
+    
+    // Find the polygon that corresponds to the dragged coat of arms
+    const polygon = this.polygons.find(p => p.id === this.draggedPolygonId);
+    
+    if (polygon) {
+      // Convert the 3D position back to lat/lng
+      const newCentroid = this.convertPositionToLatLng(
+        this.draggedCoatOfArms.position.x,
+        this.draggedCoatOfArms.position.z
+      );
+      
+      // Update the polygon's centroid
+      polygon.centroid = newCentroid;
+      
+      // Send the updated centroid to the backend
+      this.updateCentroidInBackend(this.draggedPolygonId, newCentroid);
+    }
+    
+    // Reset dragging state
+    this.isDraggingCoatOfArms = false;
+    this.draggedCoatOfArms = null;
+    this.draggedPolygonId = null;
+    
+    // Reset cursor
+    document.body.style.cursor = 'auto';
+  }
+  
+  // Convert 3D position back to lat/lng
+  private convertPositionToLatLng(x: number, z: number): { lat: number, lng: number } {
+    // Reverse the normalization process
+    const lng = (x / this.bounds.scale / this.bounds.latCorrectionFactor) + this.bounds.centerLng;
+    const lat = (-z / this.bounds.scale) + this.bounds.centerLat;
+    
+    return { lat, lng };
+  }
+  
+  // Update the centroid in the backend
+  private updateCentroidInBackend(polygonId: string, centroid: { lat: number, lng: number }) {
+    fetch('/api/update-centroid', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        id: polygonId,
+        centroid: centroid
+      }),
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        console.log(`Successfully updated centroid for ${polygonId}`);
+      } else {
+        console.error(`Failed to update centroid: ${data.error}`);
+      }
+    })
+    .catch(error => {
+      console.error('Error updating centroid:', error);
+    });
   }
   
   private renderPolygons() {
@@ -464,8 +615,8 @@ export default class PolygonRenderer {
           // Create a circular texture from the loaded image
           const circularTexture = this.createCircularTexture(texture);
           
-          // Create a flat plane for the coat of arms - 20% smaller
-          const planeSize = 1.6;
+          // Create a flat plane for the coat of arms - larger for better interaction
+          const planeSize = 2.0; // Increased size for better interaction
           const geometry = new THREE.PlaneGeometry(planeSize, planeSize);
           
           // Create material with the texture
@@ -488,8 +639,8 @@ export default class PolygonRenderer {
             this.bounds.latCorrectionFactor
           )[0];
           
-          // Position higher above the land to avoid z-fighting (0.1 instead of 0.05)
-          plane.position.set(normalizedCoords.x, 0.1, -normalizedCoords.y);
+          // Position higher above the land to avoid z-fighting (0.15 instead of 0.1)
+          plane.position.set(normalizedCoords.x, 0.15, -normalizedCoords.y);
           
           // Rotate to lay flat on the ground (90 degrees around X axis)
           plane.rotation.x = -Math.PI / 2;
@@ -499,7 +650,7 @@ export default class PolygonRenderer {
           this.coatOfArmSprites[polygon.id] = plane;
           
           console.log(`Added flat coat of arms for ${polygon.id} at position:`, 
-            normalizedCoords.x, 0.1, -normalizedCoords.y);
+            normalizedCoords.x, 0.15, -normalizedCoords.y);
         },
         undefined,
         (error) => {
@@ -681,8 +832,8 @@ export default class PolygonRenderer {
     const texture = new THREE.Texture(canvas);
     texture.needsUpdate = true;
     
-    // Create a flat plane for the colored circle - 20% smaller
-    const planeSize = 1.6; // Reduced size by 20% from 2.0
+    // Create a flat plane for the colored circle - larger for better interaction
+    const planeSize = 2.0; // Increased size for better interaction
     const geometry = new THREE.PlaneGeometry(planeSize, planeSize);
     
     // Create material with the texture
@@ -705,8 +856,8 @@ export default class PolygonRenderer {
       this.bounds.latCorrectionFactor
     )[0];
     
-    // Position higher above the land to avoid z-fighting (0.1 instead of 0.05)
-    plane.position.set(normalizedCoords.x, 0.1, -normalizedCoords.y);
+    // Position higher above the land to avoid z-fighting (0.15 instead of 0.1)
+    plane.position.set(normalizedCoords.x, 0.15, -normalizedCoords.y);
     
     // Rotate to lay flat on the ground (90 degrees around X axis)
     plane.rotation.x = -Math.PI / 2;
@@ -773,6 +924,11 @@ export default class PolygonRenderer {
   }
 
   public cleanup() {
+    // Remove event listeners
+    window.removeEventListener('mousedown', this.handleMouseDown);
+    window.removeEventListener('mousemove', this.handleMouseMove);
+    window.removeEventListener('mouseup', this.handleMouseUp);
+    
     // Clean up all LOD polygons
     this.lodPolygons.forEach(lodPolygon => {
       lodPolygon.cleanup();
