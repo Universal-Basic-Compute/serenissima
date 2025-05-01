@@ -84,24 +84,31 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
           if (!response.ok) {
             if (response.status === 404) {
               // No transaction found, that's okay
+              console.log(`No transaction found for land ${selectedPolygonId}`);
               setTransaction(null);
               return null;
             }
-            throw new Error('Failed to fetch transaction');
+            throw new Error(`Failed to fetch transaction: ${response.status} ${response.statusText}`);
           }
           return response.json();
         })
         .then(data => {
+          if (data) {
+            console.log(`Transaction data for land ${selectedPolygonId}:`, data);
+          }
           setTransaction(data);
-          setIsLoading(false);
         })
         .catch(error => {
+          // Just log the error and continue without a transaction
           console.error('Error fetching transaction:', error);
           setTransaction(null);
+        })
+        .finally(() => {
           setIsLoading(false);
         });
     } else {
       setTransaction(null);
+      setIsLoading(false);
     }
   }, [selectedPolygonId]);
   
