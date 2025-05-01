@@ -659,13 +659,26 @@ async def execute_transaction(transaction_id: str, data: dict):
                 })
             else:
                 # Create a new land record
-                lands_table.create({
+                land_fields = {
                     "LandId": asset_id,
-                    "Wallet": data["buyer"],
-                    "HistoricalName": None,
-                    "EnglishName": None,
-                    "Description": None
-                })
+                    "Wallet": data["buyer"]
+                }
+                
+                # Extract land details from Notes field if available
+                if "Notes" in record["fields"]:
+                    try:
+                        land_details = json.loads(record["fields"].get("Notes", "{}"))
+                        if "historical_name" in land_details:
+                            land_fields["HistoricalName"] = land_details["historical_name"]
+                        if "english_name" in land_details:
+                            land_fields["EnglishName"] = land_details["english_name"]
+                        if "description" in land_details:
+                            land_fields["Description"] = land_details["description"]
+                    except json.JSONDecodeError:
+                        # If Notes isn't valid JSON, just ignore it
+                        pass
+                
+                lands_table.create(land_fields)
         
         return {
             "id": updated_record["id"],
