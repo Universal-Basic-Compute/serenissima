@@ -63,6 +63,50 @@ function calculateDistance(coord1: any, coord2: any) {
   return Math.sqrt(latDiff * latDiff + lngDiff * lngDiff);
 }
 
+// Add these functions to lib/fileUtils.ts
+export function findClosestPointOnPolygonEdge(point: {lat: number, lng: number}, polygon: {lat: number, lng: number}[]) {
+  let closestPoint = null;
+  let minDistance = Infinity;
+  
+  // Check each edge of the polygon
+  for (let i = 0; i < polygon.length; i++) {
+    const start = polygon[i];
+    const end = polygon[(i + 1) % polygon.length]; // Wrap around to the first point
+    
+    // Find the closest point on this edge
+    const closest = findClosestPointOnLineSegment(point, start, end);
+    const distance = calculateDistance(point, closest);
+    
+    if (distance < minDistance) {
+      minDistance = distance;
+      closestPoint = closest;
+    }
+  }
+  
+  return closestPoint;
+}
+
+// Helper function to find closest point on a line segment
+export function findClosestPointOnLineSegment(point: {lat: number, lng: number}, start: {lat: number, lng: number}, end: {lat: number, lng: number}) {
+  const dx = end.lng - start.lng;
+  const dy = end.lat - start.lat;
+  
+  // If the line segment is just a point, return it
+  if (dx === 0 && dy === 0) return start;
+  
+  // Calculate the projection of the point onto the line
+  const t = ((point.lng - start.lng) * dx + (point.lat - start.lat) * dy) / (dx * dx + dy * dy);
+  
+  // Constrain t to the line segment
+  const tConstrained = Math.max(0, Math.min(1, t));
+  
+  // Calculate the closest point on the line segment
+  return {
+    lat: start.lat + tConstrained * dy,
+    lng: start.lng + tConstrained * dx
+  };
+}
+
 // Helper function to calculate centroid
 function calculateCentroid(coordinates: any[]) {
   if (!coordinates || coordinates.length < 3) {
