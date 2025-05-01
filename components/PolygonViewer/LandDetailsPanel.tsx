@@ -246,7 +246,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
                     },
                     body: JSON.stringify({
                       land_id: selectedPolygonId,
-                      wallet_address: walletAddress,
+                      user: walletAddress,
                       historical_name: selectedPolygon?.historicalName,
                       english_name: selectedPolygon?.englishName,
                       description: selectedPolygon?.historicalDescription

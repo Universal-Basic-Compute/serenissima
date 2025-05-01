@@ -5,7 +5,7 @@ const axios = require('axios');
 
 // Define constants
 const DATA_DIR = path.join(process.cwd(), 'data');
-const DEFAULT_WALLET = "GcWA4LwbGyoryPvauWkuVadi69FcEaWMmLxu4rxg7hVk";
+const DEFAULT_OWNER = "ConsiglioDeiDieci"; // The Venetian Council of Ten
 
 // Ensure data directory exists
 function ensureDataDirExists() {
@@ -76,7 +76,7 @@ async function createLandRecords() {
           // Create the land record
           const response = await axios.post('http://localhost:8000/api/land', {
             land_id: id,
-            wallet_address: DEFAULT_WALLET,
+            user: DEFAULT_OWNER,
             historical_name: data.historicalName || null,
             english_name: data.englishName || null,
             description: data.historicalDescription || null

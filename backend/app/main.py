@@ -87,7 +87,8 @@ class WalletResponse(BaseModel):
 # Add these new models
 class LandRequest(BaseModel):
     land_id: str
-    wallet_address: str
+    user: str = None
+    wallet_address: str = None  # Keep for backward compatibility
     historical_name: str = None
     english_name: str = None
     description: str = None
@@ -95,7 +96,8 @@ class LandRequest(BaseModel):
 class LandResponse(BaseModel):
     id: str
     land_id: str
-    wallet_address: str
+    user: str = None
+    wallet_address: str = None  # Keep for backward compatibility
     historical_name: str = None
     english_name: str = None
     description: str = None
@@ -275,8 +277,10 @@ async def create_land(land_data: LandRequest):
     if not land_data.land_id:
         raise HTTPException(status_code=400, detail="Land ID is required")
     
-    if not land_data.wallet_address:
-        raise HTTPException(status_code=400, detail="Wallet address is required")
+    # Handle either user or wallet_address
+    owner = land_data.user or land_data.wallet_address
+    if not owner:
+        raise HTTPException(status_code=400, detail="User or wallet_address is required")
     
     try:
         # Check if land already exists
@@ -291,6 +295,7 @@ async def create_land(land_data: LandRequest):
             return {
                 "id": record["id"],
                 "land_id": record["fields"].get("LandId", ""),
+                "user": record["fields"].get("User", ""),
                 "wallet_address": record["fields"].get("Wallet", ""),
                 "historical_name": record["fields"].get("HistoricalName", None),
                 "english_name": record["fields"].get("EnglishName", None),
@@ -300,7 +305,7 @@ async def create_land(land_data: LandRequest):
         # Create new record
         fields = {
             "LandId": land_data.land_id,
-            "Wallet": land_data.wallet_address
+            "User": owner
         }
         
         if land_data.historical_name:
@@ -319,6 +324,7 @@ async def create_land(land_data: LandRequest):
         return {
             "id": record["id"],
             "land_id": record["fields"].get("LandId", ""),
+            "user": record["fields"].get("User", ""),
             "wallet_address": record["fields"].get("Wallet", ""),
             "historical_name": record["fields"].get("HistoricalName", None),
             "english_name": record["fields"].get("EnglishName", None),
@@ -347,6 +353,7 @@ async def get_land(land_id: str):
         return {
             "id": record["id"],
             "land_id": record["fields"].get("LandId", ""),
+            "user": record["fields"].get("User", ""),
             "wallet_address": record["fields"].get("Wallet", ""),
             "historical_name": record["fields"].get("HistoricalName", None),
             "english_name": record["fields"].get("EnglishName", None),
