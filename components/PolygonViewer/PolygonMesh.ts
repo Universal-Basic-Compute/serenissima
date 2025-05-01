@@ -92,8 +92,8 @@ class PolygonMesh {
         depthTest: true,
         depthWrite: true,
         // Remove ALL special properties that might cause edge artifacts
-        polygonOffset: false,
-        flatShading: false
+        polygonOffset: false
+        // flatShading is not valid for MeshBasicMaterial
       });
       
       // Immediately load and apply the sand texture
@@ -220,25 +220,27 @@ class PolygonMesh {
           const topFaces = [];
           const sideFaces = [];
           
-          for (let i = 0; i < geometry.index.count / 3; i++) {
-            const a = geometry.index.getX(i * 3);
-            const normalY = normalAttribute.getY(a);
-            
-            if (Math.abs(normalY - 1.0) < 0.1) {
-              topFaces.push(i);
-            } else {
-              sideFaces.push(i);
+          if (geometry.index) {
+            for (let i = 0; i < geometry.index.count / 3; i++) {
+              const a = geometry.index.getX(i * 3);
+              const normalY = normalAttribute.getY(a);
+              
+              if (Math.abs(normalY - 1.0) < 0.1) {
+                topFaces.push(i);
+              } else {
+                sideFaces.push(i);
+              }
             }
-          }
-          
-          geometry.clearGroups();
-          
-          if (topFaces.length > 0) {
-            geometry.addGroup(0, topFaces.length * 3, 0);
-          }
-          
-          if (sideFaces.length > 0) {
-            geometry.addGroup(topFaces.length * 3, sideFaces.length * 3, 1);
+            
+            geometry.clearGroups();
+            
+            if (topFaces.length > 0) {
+              geometry.addGroup(0, topFaces.length * 3, 0);
+            }
+            
+            if (sideFaces.length > 0) {
+              geometry.addGroup(topFaces.length * 3, sideFaces.length * 3, 1);
+            }
           }
           
           this.mesh.material = materials;
@@ -428,10 +430,11 @@ class PolygonMesh {
     if (this.coatOfArmsSprite) {
       this.scene.remove(this.coatOfArmsSprite);
       if (this.coatOfArmsSprite.material) {
-        if ((this.coatOfArmsSprite.material as THREE.SpriteMaterial).map) {
-          (this.coatOfArmsSprite.material as THREE.SpriteMaterial).map.dispose();
+        const material = this.coatOfArmsSprite.material as THREE.SpriteMaterial;
+        if (material.map) {
+          material.map.dispose();
         }
-        (this.coatOfArmsSprite.material as THREE.SpriteMaterial).dispose();
+        material.dispose();
       }
     }
     

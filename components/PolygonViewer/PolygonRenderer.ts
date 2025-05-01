@@ -70,12 +70,11 @@ export default class PolygonRenderer {
             this.bounds.scale,
             this.bounds.latCorrectionFactor
           )[0];
-          
+            
           this.coatOfArmsSprite.position.set(normalizedCoords.x, 0.5, -normalizedCoords.y);
         } else {
-          // If no centroid, use the mesh position
-          const center = this.mesh.position.clone();
-          center.y += 0.5; // Position above the land
+          // If no centroid, use a default position
+          const center = new THREE.Vector3(0, 0.5, 0);
           this.coatOfArmsSprite.position.copy(center);
         }
         
@@ -372,27 +371,32 @@ export default class PolygonRenderer {
                 this.activeView,
                 this.performanceMode,
                 this.textureLoader,
-                {
-                  sandBaseColor: this.sandBaseColor,
-                  sandNormalMap: this.sandNormalMap,
-                  sandRoughnessMap: this.sandRoughnessMap
-                },
-                ownerColor, // Pass the owner's color
-                ownerCoatOfArmsUrl // Pass the owner's coat of arms URL
+                ownerColor // Pass the owner's color
               );
+              
+              // Apply coat of arms texture separately if available
+              if (ownerCoatOfArmsUrl && this.activeView === 'land') {
+                polygonMesh.updateCoatOfArmsTexture(ownerCoatOfArmsUrl);
+              }
               
               // Add this line to set a consistent render order based on polygon ID:
               const renderOrderBase = 10; // Base value to ensure it's above water
               const renderOrderOffset = parseInt(polygon.id.replace(/\D/g, '')) % 100 || 0; // Get a stable number from the ID
-              polygonMesh.getMesh().renderOrder = renderOrderBase + renderOrderOffset;
-              
-              // Force a high render order for all polygons to fix edge issues
-              polygonMesh.getMesh().renderOrder = 10;
+              const mesh = polygonMesh.getMesh();
+              if (mesh) {
+                mesh.renderOrder = renderOrderBase + renderOrderOffset;
+                
+                // Force a high render order for all polygons to fix edge issues
+                mesh.renderOrder = 10;
+              }
             
               this.PolygonMeshs.push(polygonMesh);
               
               // Store reference to the mesh
-              this.polygonMeshesRef.current[polygon.id] = polygonMesh.getMesh();
+              const mesh = polygonMesh.getMesh();
+              if (mesh) {
+                this.polygonMeshesRef.current[polygon.id] = mesh;
+              }
               
               processedCount++;
             } catch (error) {
@@ -477,16 +481,14 @@ export default class PolygonRenderer {
       this.activeView,
       this.performanceMode,
       this.textureLoader,
-      {
-        sandBaseColor: this.sandBaseColor,
-        sandNormalMap: this.sandNormalMap,
-        sandRoughnessMap: this.sandRoughnessMap
-      },
       '#7cac6a' // Default green color for sample
     );
     
     this.PolygonMeshs.push(polygonMesh);
-    this.polygonMeshesRef.current['sample'] = polygonMesh.getMesh();
+    const mesh = polygonMesh.getMesh();
+    if (mesh) {
+      this.polygonMeshesRef.current['sample'] = mesh;
+    }
     
     console.log('Added sample polygon to scene');
   }
@@ -726,16 +728,21 @@ export default class PolygonRenderer {
     const plane = new THREE.Mesh(geometry, material);
     
     // Position at the centroid
-    const normalizedCoords = normalizeCoordinates(
-      [polygon.centroid],
-      this.bounds.centerLat,
-      this.bounds.centerLng,
-      this.bounds.scale,
-      this.bounds.latCorrectionFactor
-    )[0];
-    
-    // Position slightly above the land to avoid z-fighting
-    plane.position.set(normalizedCoords.x, 0.05, -normalizedCoords.y);
+    if (polygon.centroid) {
+      const normalizedCoords = normalizeCoordinates(
+        [polygon.centroid],
+        this.bounds.centerLat,
+        this.bounds.centerLng,
+        this.bounds.scale,
+        this.bounds.latCorrectionFactor
+      )[0];
+      
+      // Position slightly above the land to avoid z-fighting
+      plane.position.set(normalizedCoords.x, 0.05, -normalizedCoords.y);
+    } else {
+      // Default position if no centroid
+      plane.position.set(0, 0.05, 0);
+    }
     
     // Rotate to lay flat on the ground (90 degrees around X axis)
     plane.rotation.x = -Math.PI / 2;
@@ -894,16 +901,21 @@ export default class PolygonRenderer {
     const plane = new THREE.Mesh(geometry, material);
     
     // Position at the centroid
-    const normalizedCoords = normalizeCoordinates(
-      [polygon.centroid],
-      this.bounds.centerLat,
-      this.bounds.centerLng,
-      this.bounds.scale,
-      this.bounds.latCorrectionFactor
-    )[0];
-    
-    // Position higher above the land to avoid z-fighting
-    plane.position.set(normalizedCoords.x, 0.25, -normalizedCoords.y); // Increased height
+    if (polygon.centroid) {
+      const normalizedCoords = normalizeCoordinates(
+        [polygon.centroid],
+        this.bounds.centerLat,
+        this.bounds.centerLng,
+        this.bounds.scale,
+        this.bounds.latCorrectionFactor
+      )[0];
+      
+      // Position higher above the land to avoid z-fighting
+      plane.position.set(normalizedCoords.x, 0.25, -normalizedCoords.y); // Increased height
+    } else {
+      // Default position if no centroid
+      plane.position.set(0, 0.25, 0);
+    }
     
     // Rotate to lay flat on the ground (90 degrees around X axis)
     plane.rotation.x = -Math.PI / 2;
