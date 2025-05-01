@@ -281,6 +281,13 @@ export default function Home() {
 
   // Add this function to handle bridge creation
   const handleBridgeMode = () => {
+    // Turn off delete mode if it's on
+    if (deleteMode) {
+      setDeleteMode(false);
+      setSelectedMapPolygon(null);
+      setSelectedMapPolygonId(null);
+    }
+    
     setBridgeMode(!bridgeMode);
     
     // Reset bridge start if turning off bridge mode
