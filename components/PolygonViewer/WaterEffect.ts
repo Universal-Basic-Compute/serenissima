@@ -78,6 +78,7 @@ export default class WaterEffect {
       WaterEffect.textureLoader = new THREE.TextureLoader();
       WaterEffect.textureLoader.setCrossOrigin('anonymous');
     }
+    this.textureLoader = WaterEffect.textureLoader;
     
     // Create a simple placeholder water plane initially
     this.waterGeometry = new THREE.PlaneGeometry(
@@ -85,6 +86,21 @@ export default class WaterEffect {
       height, 
       performanceMode ? 4 : 16
     );
+    
+    // Create a fallback texture for water normal map
+    const canvas = document.createElement('canvas');
+    canvas.width = 128;
+    canvas.height = 128;
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      ctx.fillStyle = '#8080ff'; // Blue color for normal map
+      ctx.fillRect(0, 0, 128, 128);
+    }
+    const fallbackTexture = new THREE.CanvasTexture(canvas);
+    fallbackTexture.wrapS = THREE.RepeatWrapping;
+    fallbackTexture.wrapT = THREE.RepeatWrapping;
+    fallbackTexture.repeat.set(10, 10);
+    this.waterNormalMap = fallbackTexture;
     
     // Initialize water immediately instead of with delay
     this.initializeWater();
@@ -246,43 +262,32 @@ export default class WaterEffect {
   
   private initializeWater() {
     try {
-      // Load water textures if not already loaded
-      if (!WaterEffect.waterNormalMapTexture) {
-        WaterEffect.waterNormalMapTexture = WaterEffect.textureLoader!.load(
-          '/textures/waternormals.jpg', // Use local texture instead of external URL
-          (texture) => {
-            texture.wrapS = THREE.RepeatWrapping;
-            texture.wrapT = THREE.RepeatWrapping;
-            texture.repeat.set(10, 10);
-          },
-          undefined,
-          (error) => {
-            console.error('Error loading water normal map:', error);
-            // Create a fallback texture if loading fails
-            const canvas = document.createElement('canvas');
-            canvas.width = 128;
-            canvas.height = 128;
-            const ctx = canvas.getContext('2d');
-            if (ctx) {
-              ctx.fillStyle = '#0066ff';
-              ctx.fillRect(0, 0, 128, 128);
-            }
-            const fallbackTexture = new THREE.CanvasTexture(canvas);
-            fallbackTexture.wrapS = THREE.RepeatWrapping;
-            fallbackTexture.wrapT = THREE.RepeatWrapping;
-            fallbackTexture.repeat.set(10, 10);
-            WaterEffect.waterNormalMapTexture = fallbackTexture;
-          }
-        );
-      }
-      
-      this.waterNormalMap = WaterEffect.waterNormalMapTexture;
-      
       // Create proper water geometry that matches the scene size
       this.waterGeometry = new THREE.PlaneGeometry(
         this.width * 1.5, 
         this.height * 1.5,
         this.performanceMode ? 8 : 16  // Further reduced complexity
+      );
+      
+      // Try to load the actual texture, but don't wait for it
+      this.textureLoader.load(
+        '/textures/waternormals.jpg',
+        (texture) => {
+          texture.wrapS = THREE.RepeatWrapping;
+          texture.wrapT = THREE.RepeatWrapping;
+          texture.repeat.set(10, 10);
+          this.waterNormalMap = texture;
+          
+          // If water already exists, update its normal map
+          if (this.water && this.water.material && this.water.material.uniforms && this.water.material.uniforms.normalSampler) {
+            this.water.material.uniforms.normalSampler.value = texture;
+          }
+        },
+        undefined,
+        (error) => {
+          console.warn('Could not load water normal map, using fallback:', error);
+          // We already have the fallback texture set, so no need to do anything here
+        }
       );
       
       // Create water with proper options
