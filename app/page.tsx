@@ -54,6 +54,21 @@ export default function Home() {
   const [familyMotto, setFamilyMotto] = useState<string>('');
   const [coatOfArmsImage, setCoatOfArmsImage] = useState<string | null>(null);
   const [isGeneratingImage, setIsGeneratingImage] = useState<boolean>(false);
+  const [selectedColor, setSelectedColor] = useState<string>('#8B4513'); // Default brown color
+  
+  // Venice-themed color palette
+  const veniceColorPalette = [
+    // Venetian reds
+    '#8B0000', '#A52A2A', '#B22222', '#CD5C5C',
+    // Venetian blues
+    '#1E5799', '#3A7CA5', '#00AAFF', '#0066CC',
+    // Venetian golds
+    '#DAA520', '#B8860B', '#CD853F', '#D2B48C',
+    // Venetian greens
+    '#2E8B57', '#3CB371', '#6B8E23', '#556B2F',
+    // Venetian purples and other colors
+    '#4B0082', '#800080', '#8B4513', '#A0522D'
+  ];
   // Add user profile state
   const [userProfile, setUserProfile] = useState<{
     username: string;
@@ -61,6 +76,7 @@ export default function Home() {
     lastName: string;
     coatOfArmsImage: string | null;
     familyMotto?: string;
+    color?: string;
   } | null>(null);
   
   // Get API key from environment variable
@@ -128,11 +144,13 @@ export default function Home() {
               coatOfArmsImage: data.coat_of_arms_image,
               familyMotto: data.family_motto,
               familyCoatOfArms: data.family_coat_of_arms,
-              computeAmount: data.compute_amount
+              computeAmount: data.compute_amount,
+              color: data.color || '#8B4513'
             };
-            
+          
             // Update state with backend data
             setUserProfile(backendProfile);
+            setSelectedColor(data.color || '#8B4513');
             
             // Also update localStorage
             localStorage.setItem('userProfile', JSON.stringify(backendProfile));
@@ -312,9 +330,10 @@ export default function Home() {
         last_name: lastName.trim(),
         family_coat_of_arms: familyCoatOfArms.trim(),
         family_motto: familyMotto.trim(),
-        coat_of_arms_image: coatOfArmsImage
+        coat_of_arms_image: coatOfArmsImage,
+        color: selectedColor
       });
-      
+          
       // Update the user record with the username, first name, last name, coat of arms, family motto, and image URL
       const response = await fetch('http://localhost:8000/api/wallet', {
         method: 'POST',
@@ -328,7 +347,8 @@ export default function Home() {
           last_name: lastName.trim(),
           family_coat_of_arms: familyCoatOfArms.trim(),
           family_motto: familyMotto.trim(),
-          coat_of_arms_image: coatOfArmsImage
+          coat_of_arms_image: coatOfArmsImage,
+          color: selectedColor
         }),
       });
       
@@ -348,7 +368,8 @@ export default function Home() {
         coatOfArmsImage: coatOfArmsImage,
         familyMotto: familyMotto.trim(),
         familyCoatOfArms: familyCoatOfArms.trim(),
-        computeAmount: data.compute_amount
+        computeAmount: data.compute_amount,
+        color: selectedColor
       };
       
       // Update the user profile state
@@ -1383,6 +1404,32 @@ export default function Home() {
                         className="w-full px-3 py-2 border border-amber-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-500"
                         rows={2}
                       />
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center mt-4">
+                    <div className="w-1/3">
+                      <label className="block text-gray-700">Family Color</label>
+                    </div>
+                    <div className="w-2/3">
+                      <div className="flex flex-wrap gap-2">
+                        {veniceColorPalette.map((color) => (
+                          <button
+                            key={color}
+                            onClick={() => setSelectedColor(color)}
+                            className={`w-8 h-8 rounded-full border-2 ${
+                              selectedColor === color ? 'border-white ring-2 ring-amber-500' : 'border-gray-300'
+                            }`}
+                            style={{ backgroundColor: color }}
+                            title={`Select ${color} as your family color`}
+                            type="button"
+                            aria-label={`Select ${color} as your family color`}
+                          />
+                        ))}
+                      </div>
+                      <p className="mt-1 text-xs text-gray-500">
+                        This color will represent your family on the map of Venice.
+                      </p>
                     </div>
                   </div>
                 </div>

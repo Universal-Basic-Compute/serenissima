@@ -86,6 +86,7 @@ class WalletRequest(BaseModel):
     family_coat_of_arms: str = None
     family_motto: str = None
     coat_of_arms_image: str = None
+    color: str = None
 
 # Define response models
 class WalletResponse(BaseModel):
@@ -190,6 +191,9 @@ async def store_wallet(wallet_data: WalletRequest):
                 
             if wallet_data.coat_of_arms_image:
                 update_fields["CoatOfArmsImage"] = wallet_data.coat_of_arms_image
+                
+            if wallet_data.color:
+                update_fields["Color"] = wallet_data.color
             
             # Only update if there are fields to update
             if update_fields:
@@ -207,7 +211,8 @@ async def store_wallet(wallet_data: WalletRequest):
                 "email": record["fields"].get("Email", None),
                 "family_coat_of_arms": record["fields"].get("FamilyCoatOfArms", None),
                 "family_motto": record["fields"].get("FamilyMotto", None),
-                "coat_of_arms_image": record["fields"].get("CoatOfArmsImage", None)
+                "coat_of_arms_image": record["fields"].get("CoatOfArmsImage", None),
+                "color": record["fields"].get("Color", "#8B4513")
             }
         
         # Create new record
@@ -259,7 +264,8 @@ async def store_wallet(wallet_data: WalletRequest):
             "email": record["fields"].get("Email", None),
             "family_coat_of_arms": record["fields"].get("FamilyCoatOfArms", None),
             "family_motto": record["fields"].get("FamilyMotto", None),
-            "coat_of_arms_image": record["fields"].get("CoatOfArmsImage", None)
+            "coat_of_arms_image": record["fields"].get("CoatOfArmsImage", None),
+            "color": record["fields"].get("Color", "#8B4513")
         }
     except Exception as e:
         error_msg = f"Failed to store wallet: {str(e)}"

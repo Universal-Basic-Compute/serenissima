@@ -35,6 +35,7 @@ export default class PolygonRenderer {
   private lodPolygons: LODPolygon[] = [];
   private ownerCoatOfArmsMap: Record<string, string> = {}; // Map of owner to coat of arms URL
   private coatOfArmSprites: Record<string, THREE.Sprite> = {};
+  private users: Record<string, any> = {}; // Store users data
 
   // Create a static texture loader to be shared across instances
   private static sharedTextureLoader: THREE.TextureLoader | null = null;
@@ -61,6 +62,9 @@ export default class PolygonRenderer {
     this.activeView = activeView;
     this.performanceMode = performanceMode;
     this.polygonMeshesRef = polygonMeshesRef;
+    
+    // Store users data
+    this.users = users || {};
     
     // Process users data to create coat of arms map
     if (users) {
@@ -349,8 +353,14 @@ export default class PolygonRenderer {
             console.log(`Texture loaded successfully for ${polygon.owner}`);
             texture.minFilter = THREE.LinearFilter; // Improve texture quality
             
-            // Always create circular texture
-            const circularTexture = this.createCircularTexture(texture);
+            // Get the owner's color from the users data
+            let ownerColor = '#8B4513'; // Default brown color
+            if (polygon.owner && this.users[polygon.owner] && this.users[polygon.owner].color) {
+              ownerColor = this.users[polygon.owner].color;
+            }
+          
+            // Always create circular texture with owner's color
+            const circularTexture = this.createCircularTexture(texture, ownerColor);
             circularTexture.userData.isCircular = true;
             
             // Create sprite after texture is loaded
@@ -366,8 +376,14 @@ export default class PolygonRenderer {
       } else {
         // Use cached texture
         console.log(`Using cached texture for ${polygon.owner}`);
-        // Always apply circular mask to cached texture
-        const circularTexture = this.createCircularTexture(textureCache[polygon.owner]);
+        // Get the owner's color from the users data
+        let ownerColor = '#8B4513'; // Default brown color
+        if (polygon.owner && this.users[polygon.owner] && this.users[polygon.owner].color) {
+          ownerColor = this.users[polygon.owner].color;
+        }
+        
+        // Always apply circular mask to cached texture with owner's color
+        const circularTexture = this.createCircularTexture(textureCache[polygon.owner], ownerColor);
         circularTexture.userData.isCircular = true;
         textureCache[polygon.owner] = circularTexture;
         this.createSpriteForPolygon(polygon, textureCache[polygon.owner]);
@@ -377,8 +393,17 @@ export default class PolygonRenderer {
 
   // Add this helper method to create a sprite for a polygon
   private createSpriteForPolygon(polygon: Polygon, texture: THREE.Texture) {
+    // Get the owner's color from the users data
+    let ownerColor = '#8B4513'; // Default brown color
+    if (polygon.owner && this.users[polygon.owner] && this.users[polygon.owner].color) {
+      ownerColor = this.users[polygon.owner].color;
+    }
+    
+    // Apply the circular mask with the owner's color
+    const circularTexture = this.createCircularTexture(texture, ownerColor);
+    
     const material = new THREE.SpriteMaterial({ 
-      map: texture,
+      map: circularTexture,
       transparent: true,
       depthTest: true,
       depthWrite: false,
@@ -411,7 +436,7 @@ export default class PolygonRenderer {
   }
   
   // Add helper function to create a circular texture
-  private createCircularTexture(texture: THREE.Texture): THREE.Texture {
+  private createCircularTexture(texture: THREE.Texture, ownerColor: string = '#8B4513'): THREE.Texture {
     // Check if texture.image exists
     if (!texture.image) {
       console.warn('Texture image is null, returning original texture');
@@ -450,8 +475,8 @@ export default class PolygonRenderer {
         ctx.drawImage(texture.image, 0, 0, size, size);
       }
       
-      // Add a circular border
-      ctx.strokeStyle = '#8B4513'; // Brown border
+      // Add a circular border with the owner's color
+      ctx.strokeStyle = ownerColor; // Use the owner's color instead of hardcoded brown
       ctx.lineWidth = 8;
       ctx.stroke();
       
@@ -471,7 +496,7 @@ export default class PolygonRenderer {
         // Draw a filled circle as a fallback
         ctx.beginPath();
         ctx.arc(size/2, size/2, size/2 - 4, 0, Math.PI * 2);
-        ctx.fillStyle = '#8B4513'; // Brown fill as fallback
+        ctx.fillStyle = ownerColor; // Use the owner's color
         ctx.fill();
         
         // Create a new texture from the canvas
