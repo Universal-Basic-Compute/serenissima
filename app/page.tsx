@@ -269,15 +269,26 @@ export default function Home() {
   };
 
   const handleUsernameSubmit = async () => {
-    if (!usernameInput.trim() || !firstName.trim() || !lastName.trim() || !walletAddress) {
-      alert('Please enter a username, first name, and last name');
+    // When editing a profile, we need to ensure all required fields are present
+    // When creating a new profile, we need username, first name, and last name
+    if ((!userProfile && (!usernameInput.trim() || !firstName.trim() || !lastName.trim())) || 
+        (userProfile && (!firstName.trim() || !lastName.trim()))) {
+      alert('Please fill in all required fields');
+      return;
+    }
+    
+    if (!walletAddress) {
+      alert('Wallet connection is required');
       return;
     }
     
     try {
+      // When editing, use the existing username
+      const username = userProfile ? userProfile.username : usernameInput.trim();
+      
       console.log('Submitting profile data to backend:', {
         wallet_address: walletAddress,
-        user_name: usernameInput.trim(),
+        user_name: username,
         first_name: firstName.trim(),
         last_name: lastName.trim(),
         family_coat_of_arms: familyCoatOfArms.trim(),
@@ -293,7 +304,7 @@ export default function Home() {
         },
         body: JSON.stringify({
           wallet_address: walletAddress,
-          user_name: usernameInput.trim(),
+          user_name: username,
           first_name: firstName.trim(),
           last_name: lastName.trim(),
           family_coat_of_arms: familyCoatOfArms.trim(),
