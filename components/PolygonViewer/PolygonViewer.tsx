@@ -11,6 +11,7 @@ import ViewModeMenu from './ViewModeMenu';
 import LandDetailsPanel from './LandDetailsPanel';
 import ActionButton from '../UI/ActionButton';
 import TransferComputeMenu from '../UI/TransferComputeMenu';
+import BackgroundMusic from '../UI/BackgroundMusic';
 import usePolygonStore from '@/store/usePolygonStore';
 import BridgeRenderer from './BridgeRenderer';
 
