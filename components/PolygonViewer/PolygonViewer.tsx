@@ -910,7 +910,12 @@ export default function PolygonViewer() {
           {isFlushing ? 'Flushing...' : 'Flush Cache'}
         </button>
       </div>
-      
+    
+      {/* Add a persistent BackgroundMusic component */}
+      <div className="fixed top-4 right-36 z-10">
+        <BackgroundMusic initialVolume={0.24} autoplay={true} />
+      </div>
+    
       {/* Removed duplicate Transfer Compute Menu */}
     </div>
   );

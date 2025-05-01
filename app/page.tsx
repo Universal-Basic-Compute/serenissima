@@ -1409,10 +1409,7 @@ export default function Home() {
                 >
                   Edit Profile
                 </button>
-    
-                {/* Add BackgroundMusic component here */}
-                <BackgroundMusic initialVolume={0.24} autoplay={true} />
-    
+
                 <button
                   onClick={() => {
                     setTransferMenuOpen(true);
