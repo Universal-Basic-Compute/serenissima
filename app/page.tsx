@@ -6,6 +6,7 @@ import { WalletReadyState } from '@solana/wallet-adapter-base';
 import dynamic from 'next/dynamic';
 import { GoogleMap, LoadScript, DrawingManager } from '@react-google-maps/api';
 import ComputeInvestModal from '../components/UI/ComputeInvestModal';
+import PlayerProfile from '../components/UI/PlayerProfile';
 import { transferComputeTokens } from '../lib/tokenUtils';
 import { investComputeInAirtable } from '../lib/airtableUtils';
 
@@ -875,20 +876,14 @@ export default function Home() {
               onClick={() => setDropdownOpen(!dropdownOpen)}
               className="bg-white px-4 py-2 rounded shadow hover:bg-gray-100 transition-colors flex items-center"
             >
-              {userProfile.coatOfArmsImage ? (
-                <img 
-                  src={userProfile.coatOfArmsImage} 
-                  alt="Coat of Arms" 
-                  className="w-8 h-8 rounded-full mr-2 object-cover border border-amber-500"
-                />
-              ) : (
-                <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center mr-2 border border-amber-500">
-                  <span className="text-amber-800 text-xs font-bold">
-                    {userProfile.firstName.charAt(0)}{userProfile.lastName.charAt(0)}
-                  </span>
-                </div>
-              )}
-              <span className="font-medium">{userProfile.username}</span>
+              <PlayerProfile
+                username={userProfile.username}
+                firstName={userProfile.firstName}
+                lastName={userProfile.lastName}
+                coatOfArmsImage={userProfile.coatOfArmsImage}
+                size="small"
+                className="mr-2"
+              />
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
