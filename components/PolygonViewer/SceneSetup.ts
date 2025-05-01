@@ -320,7 +320,7 @@ export default class SceneSetup {
   public update(frameCount: number) {
     // Update water if it exists
     if (this.water) {
-      this.water.update(frameCount, this.performanceMode);
+      this.water.update(frameCount);
     }
     
     // Update clouds

@@ -523,15 +523,42 @@ export default class WaterEffect {
       this.water.cleanup();
     }
     
-    this.water = new SimpleWater({
-      scene: this.scene,
-      activeView: this.activeView,
-      performanceMode: this.performanceMode,
-      width: 300, // Make water wider than the scene
-      height: 300, // Make water taller than the scene
-    });
+    // Create a simple water plane directly
+    this.createSimpleWaterPlane();
     
     console.log('Simple water effect created successfully');
+  }
+  
+  // Add helper method to create a simple water plane
+  private createSimpleWaterPlane() {
+    // Create a simple water plane with a blue color
+    const waterGeometry = new THREE.PlaneGeometry(
+      300, 
+      300,
+      32, 32  // Higher resolution for better waves
+    );
+    
+    // Create a simple material with a blue color
+    const waterColor = this.getWaterColorForView();
+    const waterMaterial = new THREE.MeshBasicMaterial({
+      color: waterColor,
+      transparent: true,
+      opacity: 0.8,
+      side: THREE.FrontSide
+    });
+    
+    // Create the water mesh
+    this.waterMesh = new THREE.Mesh(waterGeometry, waterMaterial);
+    this.waterMesh.rotation.x = -Math.PI / 2;
+    this.waterMesh.position.y = -0.7;  // Position below land
+    this.waterMesh.renderOrder = 0;    // Render before land
+    
+    // Add to scene
+    this.scene.add(this.waterMesh);
+    console.log('Simple water plane added to scene at position y =', this.waterMesh.position.y);
+    
+    // Store reference to water for other methods
+    this.water = this.waterMesh;
   }
   
   public update(frameCount: number, performanceMode: boolean) {

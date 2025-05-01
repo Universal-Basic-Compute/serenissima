@@ -447,8 +447,20 @@ export default function PolygonViewer() {
       });
       sceneRef.current = sceneSetup;
       
-      // Create water immediately
-      sceneSetup.createWater();
+      // Create water effect directly instead of using sceneSetup.createWater()
+      setTimeout(() => {
+        if (sceneRef.current) {
+          const waterEffect = new WaterEffect({
+            scene: sceneRef.current.scene,
+            activeView,
+            performanceMode: !highQuality,
+            width: bounds.scale * 200,
+            height: bounds.scale * 200,
+            renderer: sceneRef.current.renderer
+          });
+          waterEffectRef.current = waterEffect;
+        }
+      }, 500);
       
       // Add error handling for WebGL context loss
       canvasRef.current.addEventListener('webglcontextlost', (event) => {

@@ -337,7 +337,7 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
         // Update the polygons with owner information
         const updatedPolygons = get().polygons.map(polygon => ({
           ...polygon,
-          owner: (ownerMap as Record<string, string>)[polygon.id] || null
+          owner: (ownerMap as Record<string, string>)[polygon.id] || undefined
         }));
         
         set({ polygons: updatedPolygons });
