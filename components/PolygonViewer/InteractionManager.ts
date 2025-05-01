@@ -58,11 +58,6 @@ export default class InteractionManager {
       return;
     }
     
-    // Store camera state before any operations
-    const cameraPosition = this.camera.position.clone();
-    const cameraQuaternion = this.camera.quaternion.clone();
-    const cameraTarget = this.camera.getWorldDirection(new THREE.Vector3());
-    
     // Calculate mouse position in normalized device coordinates (-1 to +1)
     this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
@@ -84,33 +79,17 @@ export default class InteractionManager {
       
       if (clickedId) {
         // ONLY update the selection state, nothing else
-        // Don't touch the camera at all
         const newSelectedId = clickedId === this.selectedPolygonId ? null : clickedId;
-        
-        // Use setTimeout to delay the state update until after the current event loop
-        // This prevents any synchronous camera resets that might be triggered
-        setTimeout(() => {
-          this.setSelectedPolygonId(newSelectedId);
-          this.selectedPolygonId = newSelectedId;
-        }, 0);
+        this.setSelectedPolygonId(newSelectedId);
+        this.selectedPolygonId = newSelectedId;
       }
     } else {
       // Clicking on empty space, deselect current selection
       if (this.selectedPolygonId) {
-        // Use setTimeout to delay the state update
-        setTimeout(() => {
-          this.setSelectedPolygonId(null);
-          this.selectedPolygonId = null;
-        }, 0);
+        this.setSelectedPolygonId(null);
+        this.selectedPolygonId = null;
       }
     }
-    
-    // Use requestAnimationFrame to restore camera state on the next frame
-    // This ensures the camera position is restored after any potential resets
-    requestAnimationFrame(() => {
-      this.camera.position.copy(cameraPosition);
-      this.camera.quaternion.copy(cameraQuaternion);
-    });
   }
   
   public cleanup() {
