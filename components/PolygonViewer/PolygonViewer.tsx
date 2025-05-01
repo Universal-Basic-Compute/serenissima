@@ -75,6 +75,22 @@ export default function PolygonViewer() {
     // Always load land owners since land view is now the default
     loadLandOwners();
   }, [loadPolygons, loadBridges, loadLandOwners]);
+  
+  // Add an effect to listen for polygon deletion events
+  useEffect(() => {
+    const handlePolygonDeleted = () => {
+      // Reload polygons when a polygon is deleted
+      loadPolygons();
+      loadLandOwners();
+    };
+    
+    // Create a custom event for polygon deletion
+    window.addEventListener('polygonDeleted', handlePolygonDeleted);
+    
+    return () => {
+      window.removeEventListener('polygonDeleted', handlePolygonDeleted);
+    };
+  }, [loadPolygons, loadLandOwners]);
 
   // Update info panel visibility when selectedPolygonId changes
   useEffect(() => {

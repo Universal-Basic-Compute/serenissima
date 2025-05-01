@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import ActionButton from '../UI/ActionButton';
 import WalletStatus from '../UI/WalletStatus';
 import { Polygon } from './types';
@@ -11,6 +12,7 @@ interface LandDetailsPanelProps {
 }
 
 export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons, landOwners }: LandDetailsPanelProps) {
+  const router = useRouter();
   const [isVisible, setIsVisible] = useState(false);
   
   // Find the selected polygon
@@ -20,6 +22,46 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
   
   // Get the owner for the selected polygon
   const owner = selectedPolygonId ? landOwners[selectedPolygonId] : null;
+  
+  // Add this function to handle polygon deletion
+  const handleDeletePolygon = async () => {
+    if (!selectedPolygonId) return;
+    
+    // Confirm deletion
+    if (!confirm(`Are you sure you want to delete this land: ${selectedPolygon?.historicalName || selectedPolygonId}?`)) {
+      return;
+    }
+    
+    try {
+      const response = await fetch('/api/delete-polygon', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id: selectedPolygonId }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to delete land');
+      }
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        alert('Land deleted successfully');
+        // Close the panel
+        onClose();
+        
+        // Dispatch a custom event to notify components
+        window.dispatchEvent(new Event('polygonDeleted'));
+      } else {
+        alert(`Failed to delete land: ${data.error}`);
+      }
+    } catch (error) {
+      console.error('Error deleting land:', error);
+      alert('An error occurred while deleting the land');
+    }
+  };
   
   // Debug logging
   useEffect(() => {
@@ -104,7 +146,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
           
           <WalletStatus className="mb-2" />
           
-          <div className="pt-2">
+          <div className="pt-2 flex space-x-2">
             <ActionButton 
               onClick={() => {
                 if (!selectedPolygonId) return;
@@ -151,6 +193,14 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
               disabled={owner ? true : false}
             >
               {owner ? 'Already Owned' : 'Purchase Land'}
+            </ActionButton>
+            
+            {/* Add Delete button */}
+            <ActionButton 
+              onClick={handleDeletePolygon}
+              variant="danger"
+            >
+              Delete Land
             </ActionButton>
           </div>
         </div>

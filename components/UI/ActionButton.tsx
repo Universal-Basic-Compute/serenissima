@@ -2,17 +2,39 @@ import { ReactNode } from 'react';
 
 interface ActionButtonProps {
   onClick: () => void;
-  variant?: 'primary' | 'secondary';
+  variant?: 'primary' | 'secondary' | 'danger';
   children: ReactNode;
+  disabled?: boolean;
 }
 
-export default function ActionButton({ onClick, variant = 'secondary', children }: ActionButtonProps) {
+export default function ActionButton({ 
+  onClick, 
+  variant = 'secondary', 
+  children,
+  disabled = false
+}: ActionButtonProps) {
+  const getButtonClasses = () => {
+    const baseClasses = 'px-4 py-2 rounded shadow transition-colors';
+    
+    if (disabled) {
+      return `${baseClasses} bg-gray-300 text-gray-500 cursor-not-allowed`;
+    }
+    
+    switch (variant) {
+      case 'primary':
+        return `${baseClasses} bg-blue-500 text-white hover:bg-blue-600`;
+      case 'danger':
+        return `${baseClasses} bg-red-500 text-white hover:bg-red-600`;
+      default:
+        return `${baseClasses} bg-white hover:bg-gray-100`;
+    }
+  };
+  
   return (
     <button 
       onClick={onClick}
-      className={`px-4 py-2 rounded shadow ${
-        variant === 'primary' ? 'bg-blue-500 text-white' : 'bg-white'
-      }`}
+      className={getButtonClasses()}
+      disabled={disabled}
     >
       {children}
     </button>

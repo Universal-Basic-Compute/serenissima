@@ -354,3 +354,30 @@ async def get_lands():
         print(f"ERROR: {error_msg}")
         traceback.print_exc(file=sys.stdout)
         raise HTTPException(status_code=500, detail=error_msg)
+
+@app.delete("/api/land/{land_id}")
+async def delete_land(land_id: str):
+    """Delete a land record from Airtable"""
+    
+    try:
+        # Check if land exists
+        formula = f"{{LandId}}='{land_id}'"
+        print(f"Searching for land with formula: {formula}")
+        existing_records = lands_table.all(formula=formula)
+        
+        if not existing_records:
+            raise HTTPException(status_code=404, detail="Land not found")
+        
+        # Delete the record
+        record = existing_records[0]
+        print(f"Deleting land record: {record['id']}")
+        lands_table.delete(record['id'])
+        
+        return {"success": True, "message": f"Land {land_id} deleted successfully"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        error_msg = f"Failed to delete land: {str(e)}"
+        print(f"ERROR: {error_msg}")
+        traceback.print_exc(file=sys.stdout)
+        raise HTTPException(status_code=500, detail=error_msg)
