@@ -106,6 +106,43 @@ export default class PolygonRenderer {
     sandRoughnessMap?: THREE.Texture;
   } = {};
   
+  // Add static method for optimized texture loading
+  private static loadOptimizedTexture(url: string, callback?: (texture: THREE.Texture) => void): THREE.Texture {
+    // Check if device supports WebP
+    const supportsWebP = document.createElement('canvas')
+      .toDataURL('image/webp')
+      .indexOf('data:image/webp') === 0;
+    
+    // Use WebP if supported
+    const optimizedUrl = supportsWebP ? 
+      url.replace(/\.(jpg|png)$/, '.webp') : 
+      url;
+    
+    // Create a low-res placeholder texture first
+    const placeholderTexture = new THREE.Texture();
+    
+    // Load the full texture in the background
+    if (PolygonRenderer.sharedTextureLoader) {
+      PolygonRenderer.sharedTextureLoader.load(
+        optimizedUrl,
+        (fullTexture) => {
+          // Copy properties from placeholder to full texture
+          fullTexture.wrapS = placeholderTexture.wrapS;
+          fullTexture.wrapT = placeholderTexture.wrapT;
+          fullTexture.repeat = placeholderTexture.repeat;
+          
+          // Replace the placeholder with the full texture
+          placeholderTexture.image = fullTexture.image;
+          placeholderTexture.needsUpdate = true;
+          
+          if (callback) callback(placeholderTexture);
+        }
+      );
+    }
+    
+    return placeholderTexture;
+  }
+  
   // Add sun reflection property
   private sunReflection: THREE.Mesh | null = null;
 
@@ -225,6 +262,15 @@ export default class PolygonRenderer {
     console.log(`Rendering ${this.polygons.length} polygons`);
     
     if (this.polygons.length > 0) {
+      // Create a frustum for culling
+      const frustum = new THREE.Frustum();
+      const projScreenMatrix = new THREE.Matrix4();
+      projScreenMatrix.multiplyMatrices(
+        this.camera.projectionMatrix, 
+        this.camera.matrixWorldInverse
+      );
+      frustum.setFromProjectionMatrix(projScreenMatrix);
+      
       // Process polygons in batches to prevent UI freezing
       const batchSize = 10; // Process 10 polygons at a time
       const totalPolygons = this.polygons.length;
@@ -238,6 +284,23 @@ export default class PolygonRenderer {
           
           if (polygon.coordinates && polygon.coordinates.length > 2) {
             try {
+              // Skip if not in view frustum (approximate check using centroid)
+              if (polygon.centroid) {
+                const centroidPos = new THREE.Vector3(
+                  (polygon.centroid.lng - this.bounds.centerLng) * this.bounds.scale * this.bounds.latCorrectionFactor,
+                  0,
+                  -(polygon.centroid.lat - this.bounds.centerLat) * this.bounds.scale
+                );
+                
+                // Add a bounding sphere around the centroid
+                const boundingSphere = new THREE.Sphere(centroidPos, 10); // Approximate radius
+                
+                // Skip if not in view
+                if (!frustum.intersectsSphere(boundingSphere)) {
+                  continue;
+                }
+              }
+              
               // Get the owner's color from the users data
               let ownerColor = null;
               if (polygon.owner) {
