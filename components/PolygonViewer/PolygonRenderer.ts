@@ -98,6 +98,10 @@ export default class PolygonRenderer {
   private coatOfArmSprites: Record<string, THREE.Sprite> = {};
   private ownerColorMap: Record<string, string> = {}; // Map of owner to color
   private users: Record<string, any> = {}; // Store users data
+  private PolygonMeshs: PolygonMesh[] = []; // Store PolygonMesh instances
+  private coatOfArmsSprite: THREE.Sprite | null = null;
+  private ownerColor: string | null = null;
+  private polygon: any = {}; // Store current polygon data
 
   // Create a static texture loader to be shared across instances
   private static sharedTextureLoader: THREE.TextureLoader | null = null;
@@ -361,7 +365,7 @@ export default class PolygonRenderer {
                 console.log(`Creating polygon ${polygon.id} with owner ${polygon.owner}, color: ${ownerColor}, coat of arms: ${ownerCoatOfArmsUrl ? 'yes' : 'no'}`);
               }
               
-              const PolygonMesh = new PolygonMesh(
+              const polygonMesh = new PolygonMesh(
                 this.scene,
                 polygon,
                 this.bounds,
@@ -380,12 +384,12 @@ export default class PolygonRenderer {
               // Add this line to set a consistent render order based on polygon ID:
               const renderOrderBase = 10; // Base value to ensure it's above water
               const renderOrderOffset = parseInt(polygon.id.replace(/\D/g, '')) % 100 || 0; // Get a stable number from the ID
-              PolygonMesh.getMesh().renderOrder = renderOrderBase + renderOrderOffset;
+              polygonMesh.getMesh().renderOrder = renderOrderBase + renderOrderOffset;
               
               // Force a high render order for all polygons to fix edge issues
-              PolygonMesh.getMesh().renderOrder = 10;
+              polygonMesh.getMesh().renderOrder = 10;
             
-              this.PolygonMeshs.push(PolygonMesh);
+              this.PolygonMeshs.push(polygonMesh);
               
               // Store reference to the mesh
               this.polygonMeshesRef.current[polygon.id] = PolygonMesh.getMesh();
@@ -466,7 +470,7 @@ export default class PolygonRenderer {
     sampleMesh.userData.originalEmissiveIntensity = 0;
     
     // Create a LOD polygon for the sample
-    const PolygonMesh = new PolygonMesh(
+    const polygonMesh = new PolygonMesh(
       this.scene,
       { id: 'sample', coordinates: [] },
       this.bounds,
@@ -481,8 +485,8 @@ export default class PolygonRenderer {
       '#7cac6a' // Default green color for sample
     );
     
-    this.PolygonMeshs.push(PolygonMesh);
-    this.polygonMeshesRef.current['sample'] = PolygonMesh.getMesh();
+    this.PolygonMeshs.push(polygonMesh);
+    this.polygonMeshesRef.current['sample'] = polygonMesh.getMesh();
     
     console.log('Added sample polygon to scene');
   }
@@ -496,14 +500,14 @@ export default class PolygonRenderer {
   // Add this new method to update selection state
   public updateSelectionState(selectedPolygonId: string | null) {
     // Update selection state for all LOD polygons
-    this.PolygonMeshs.forEach(PolygonMesh => {
+    this.PolygonMeshs.forEach(polygonMesh => {
       const polygonId = this.polygons.find(
-        p => PolygonMesh.getMesh() === this.polygonMeshesRef.current[p.id]
+        p => polygonMesh.getMesh() === this.polygonMeshesRef.current[p.id]
       )?.id;
       
       if (polygonId) {
         // Apply selection state based on ID match
-        PolygonMesh.updateSelectionState(polygonId === selectedPolygonId);
+        polygonMesh.updateSelectionState(polygonId === selectedPolygonId);
       }
     });
   }
@@ -512,8 +516,8 @@ export default class PolygonRenderer {
     this.activeView = activeView;
     
     // Update all LOD polygons with the new view mode
-    this.PolygonMeshs.forEach(PolygonMesh => {
-      PolygonMesh.updateViewMode(activeView);
+    this.PolygonMeshs.forEach(polygonMesh => {
+      polygonMesh.updateViewMode(activeView);
     });
     
     // Always update coat of arms sprites when changing view mode
@@ -535,11 +539,11 @@ export default class PolygonRenderer {
     this.polygons.forEach(polygon => {
       if (polygon.owner) {
         // Find the corresponding LOD polygon
-        const PolygonMesh = this.PolygonMeshs.find(lp => 
+        const polygonMesh = this.PolygonMeshs.find(lp => 
           lp.getMesh() === this.polygonMeshesRef.current[polygon.id]
         );
         
-        if (PolygonMesh) {
+        if (polygonMesh) {
           // Get the owner's color
           let ownerColor = null;
           if (this.ownerColorMap[polygon.owner]) {
@@ -552,7 +556,7 @@ export default class PolygonRenderer {
           
           if (ownerColor) {
             console.log(`Applying color ${ownerColor} to polygon ${polygon.id} owned by ${polygon.owner}`);
-            PolygonMesh.updateOwner(polygon.owner, ownerColor);
+            polygonMesh.updateOwner(polygon.owner, ownerColor);
           }
         }
       }
@@ -563,8 +567,8 @@ export default class PolygonRenderer {
     this.performanceMode = performanceMode;
     
     // Update all LOD polygons with the new quality setting
-    this.PolygonMeshs.forEach(PolygonMesh => {
-      PolygonMesh.updateQuality(performanceMode);
+    this.PolygonMeshs.forEach(polygonMesh => {
+      polygonMesh.updateQuality(performanceMode);
     });
   }
   
@@ -922,11 +926,11 @@ export default class PolygonRenderer {
     polygon.owner = newOwner;
     
     // Find the corresponding LOD polygon
-    const PolygonMesh = this.PolygonMeshs.find(lp => 
+    const polygonMesh = this.PolygonMeshs.find(lp => 
       lp.getMesh() === this.polygonMeshesRef.current[polygonId]
     );
     
-    if (!PolygonMesh) return;
+    if (!polygonMesh) return;
     
     // Get the owner's color from the users data
     let ownerColor = null;
@@ -952,10 +956,10 @@ export default class PolygonRenderer {
     }
     
     // Update the LOD polygon with the new owner's color and coat of arms
-    PolygonMesh.updateOwner(newOwner, ownerColor);
+    polygonMesh.updateOwner(newOwner, ownerColor);
     
     if (ownerCoatOfArmsUrl) {
-      PolygonMesh.updateCoatOfArmsTexture(ownerCoatOfArmsUrl);
+      polygonMesh.updateCoatOfArmsTexture(ownerCoatOfArmsUrl);
     }
     
     // Update coat of arms sprites
@@ -967,17 +971,17 @@ export default class PolygonRenderer {
     console.log('Updating hover state for polygon:', hoveredPolygonId);
     
     // Update hover state for all LOD polygons
-    this.PolygonMeshs.forEach(PolygonMesh => {
-      if (!PolygonMesh) return;
+    this.PolygonMeshs.forEach(polygonMesh => {
+      if (!polygonMesh) return;
       
       try {
         const polygonId = this.polygons.find(
-          p => p && PolygonMesh.getMesh() === this.polygonMeshesRef.current[p.id]
+          p => p && polygonMesh.getMesh() === this.polygonMeshesRef.current[p.id]
         )?.id;
         
         if (polygonId) {
           // Apply hover state based on ID match
-          PolygonMesh.updateHoverState(polygonId === hoveredPolygonId);
+          polygonMesh.updateHoverState(polygonId === hoveredPolygonId);
         }
       } catch (error) {
         console.error('Error updating hover state for polygon:', error);
@@ -1053,8 +1057,8 @@ export default class PolygonRenderer {
   
   public cleanup() {
     // Clean up all LOD polygons
-    this.PolygonMeshs.forEach(PolygonMesh => {
-      PolygonMesh.cleanup();
+    this.PolygonMeshs.forEach(polygonMesh => {
+      polygonMesh.cleanup();
     });
     
     // Clean up coat of arms objects (planes or sprites)
