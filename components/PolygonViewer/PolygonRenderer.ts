@@ -243,6 +243,20 @@ export default class PolygonRenderer {
                 }
               }
             
+              // Get the owner's color from the users data
+              let ownerColor = null;
+              if (polygon.owner) {
+                if (this.ownerColorMap[polygon.owner]) {
+                  ownerColor = this.ownerColorMap[polygon.owner];
+                  console.log(`Using stored color for ${polygon.owner}: ${ownerColor}`);
+                } else if (this.users[polygon.owner] && this.users[polygon.owner].color) {
+                  ownerColor = this.users[polygon.owner].color;
+                  // Also store in the color map for future use
+                  this.ownerColorMap[polygon.owner] = ownerColor;
+                  console.log(`Found color for ${polygon.owner} in users data: ${ownerColor}`);
+                }
+              }
+            
               // Get the owner's coat of arms URL if available
               let ownerCoatOfArmsUrl = null;
               if (polygon.owner && this.ownerCoatOfArmsMap && this.ownerCoatOfArmsMap[polygon.owner]) {
