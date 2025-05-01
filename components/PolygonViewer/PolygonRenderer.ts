@@ -349,7 +349,7 @@ export default class PolygonRenderer {
             console.log(`Texture loaded successfully for ${polygon.owner}`);
             texture.minFilter = THREE.LinearFilter; // Improve texture quality
             
-            // Create circular texture
+            // Always create circular texture
             const circularTexture = this.createCircularTexture(texture);
             circularTexture.userData.isCircular = true;
             
@@ -366,12 +366,10 @@ export default class PolygonRenderer {
       } else {
         // Use cached texture
         console.log(`Using cached texture for ${polygon.owner}`);
-        // Apply circular mask to cached texture if not already applied
-        if (!textureCache[polygon.owner].userData.isCircular) {
-          const circularTexture = this.createCircularTexture(textureCache[polygon.owner]);
-          circularTexture.userData.isCircular = true;
-          textureCache[polygon.owner] = circularTexture;
-        }
+        // Always apply circular mask to cached texture
+        const circularTexture = this.createCircularTexture(textureCache[polygon.owner]);
+        circularTexture.userData.isCircular = true;
+        textureCache[polygon.owner] = circularTexture;
         this.createSpriteForPolygon(polygon, textureCache[polygon.owner]);
       }
     });
@@ -398,10 +396,10 @@ export default class PolygonRenderer {
       this.bounds.latCorrectionFactor
     )[0];
     
-    // Position higher above the land for better visibility
-    sprite.position.set(normalizedCoords.x, 10, -normalizedCoords.y);
+    // Position much closer to the ground - change from 10 to 1
+    sprite.position.set(normalizedCoords.x, 1, -normalizedCoords.y);
     
-    // Make the sprite 5 times smaller (from 12 to 2.4)
+    // Keep the sprite size the same
     sprite.scale.set(2.4, 2.4, 1);
     
     // Add to scene and store reference
@@ -409,12 +407,12 @@ export default class PolygonRenderer {
     this.coatOfArmSprites[polygon.id] = sprite;
     
     console.log(`Added coat of arms sprite for ${polygon.id} owned by ${polygon.owner} at position:`, 
-      normalizedCoords.x, 10, -normalizedCoords.y);
+      normalizedCoords.x, 1, -normalizedCoords.y);
   }
   
   // Add helper function to create a circular texture
   private createCircularTexture(texture: THREE.Texture): THREE.Texture {
-    // Check if texture.image exists and has a valid source
+    // Check if texture.image exists
     if (!texture.image) {
       console.warn('Texture image is null, returning original texture');
       return texture; // Return the original texture if image is missing
@@ -429,15 +427,28 @@ export default class PolygonRenderer {
     const ctx = canvas.getContext('2d');
     if (!ctx) return texture; // Fallback if context creation fails
     
-    // Draw a circular clipping path
-    ctx.beginPath();
-    ctx.arc(size/2, size/2, size/2, 0, Math.PI * 2);
-    ctx.closePath();
-    ctx.clip();
-    
     try {
-      // Try to draw the image directly
-      ctx.drawImage(texture.image, 0, 0, size, size);
+      // Clear the canvas first
+      ctx.clearRect(0, 0, size, size);
+      
+      // Draw a circular clipping path
+      ctx.beginPath();
+      ctx.arc(size/2, size/2, size/2, 0, Math.PI * 2);
+      ctx.closePath();
+      ctx.clip();
+      
+      // Fill with a background color to ensure transparency outside the circle
+      ctx.fillStyle = 'rgba(0,0,0,0)';
+      ctx.fill();
+      
+      // Draw the image - handle both HTMLImageElement and other image types
+      if (texture.image instanceof HTMLImageElement && texture.image.complete) {
+        // Image is an HTMLImageElement and is loaded
+        ctx.drawImage(texture.image, 0, 0, size, size);
+      } else if (texture.image) {
+        // For other image types or non-loaded images, try direct drawing
+        ctx.drawImage(texture.image, 0, 0, size, size);
+      }
       
       // Add a circular border
       ctx.strokeStyle = '#8B4513'; // Brown border
@@ -451,7 +462,27 @@ export default class PolygonRenderer {
       return circularTexture;
     } catch (error) {
       console.error('Error creating circular texture:', error);
-      return texture; // Return original texture on error
+      
+      // If there's an error, try a simpler approach
+      try {
+        // Clear and start over
+        ctx.clearRect(0, 0, size, size);
+        
+        // Draw a filled circle as a fallback
+        ctx.beginPath();
+        ctx.arc(size/2, size/2, size/2 - 4, 0, Math.PI * 2);
+        ctx.fillStyle = '#8B4513'; // Brown fill as fallback
+        ctx.fill();
+        
+        // Create a new texture from the canvas
+        const fallbackTexture = new THREE.Texture(canvas);
+        fallbackTexture.needsUpdate = true;
+        
+        return fallbackTexture;
+      } catch (e) {
+        // If all else fails, return the original texture
+        return texture;
+      }
     }
   }
 
