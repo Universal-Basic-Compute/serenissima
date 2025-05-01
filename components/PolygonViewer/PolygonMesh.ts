@@ -69,14 +69,14 @@ class PolygonMesh {
       
       const shape = createPolygonShape(normalizedCoords);
       
-      // Create extruded geometry with simplified settings - REDUCE DEPTH
+      // Create extruded geometry with minimal settings
       const extrudeSettings = {
         steps: 1,
-        depth: 0.02, // REDUCED from 0.05 to 0.02
-        bevelEnabled: false, // CHANGED from true to false to remove bevels completely
-        bevelThickness: 0, // CHANGED from 0.05 to 0
-        bevelSize: 0, // CHANGED from 0.05 to 0
-        bevelSegments: 0, // CHANGED from 4 to 0
+        depth: 0.005, // DRASTICALLY REDUCED from 0.02 to 0.005 to make it almost flat
+        bevelEnabled: false, // Keep bevels disabled
+        bevelThickness: 0,
+        bevelSize: 0,
+        bevelSegments: 0,
         UVGenerator: {
           generateTopUV: function(geometry, vertices, indexA, indexB, indexC) {
             const a = vertices[indexA];
@@ -117,16 +117,19 @@ class PolygonMesh {
       // Determine the color to use
       const landColor = this.determineLandColor();
       
-      // Create a BASIC material with NO lighting effects
+      // Create a completely flat material with NO lighting or edge effects
       const material = new THREE.MeshBasicMaterial({ 
         color: landColor,
         side: THREE.FrontSide,
         wireframe: false,
         transparent: false,
         opacity: 1.0,
-        // Completely removed all polygon offset properties
+        // Remove ALL polygon offset properties
         depthTest: true,
-        depthWrite: true
+        depthWrite: true,
+        // Add these properties to ensure flat appearance
+        flatShading: false,
+        polygonOffset: false
       });
       
       // Immediately load and apply the sand texture
@@ -544,7 +547,7 @@ class PolygonMesh {
     }
   }
   
-  // Remove bottom faces
+  // Modify the removeBottomFaces method to remove ALL side faces
   private removeBottomFaces(geometry: THREE.ExtrudeGeometry) {
     const position = geometry.getAttribute('position');
     const count = position.count;
@@ -560,7 +563,8 @@ class PolygonMesh {
       const ac = new THREE.Vector3().subVectors(c, a);
       const normal = new THREE.Vector3().crossVectors(ab, ac).normalize();
       
-      keepFace[i] = normal.y > 0.1;
+      // Only keep faces that are pointing directly upward (top faces)
+      keepFace[i] = normal.y > 0.9; // More strict threshold (was 0.1)
     }
     
     const index = [];
