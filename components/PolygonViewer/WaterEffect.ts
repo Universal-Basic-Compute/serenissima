@@ -9,70 +9,6 @@ interface WaterEffectProps {
   width: number;
   height: number;
   renderer: THREE.WebGLRenderer;
-  // Add method to create shore interaction effect
-  private createShoreInteraction() {
-    // Create a shader material that will highlight the shore areas
-    const shoreGeometry = new THREE.PlaneGeometry(this.width * 1.2, this.height * 1.2, 128, 128);
-    
-    // Custom shader material for shore effect
-    const shoreMaterial = new THREE.ShaderMaterial({
-      uniforms: {
-        time: { value: 0 },
-        color: { value: new THREE.Color(0xffffff) },
-        landTexture: { value: null } // Will be set in update
-      },
-      vertexShader: `
-        varying vec2 vUv;
-        void main() {
-          vUv = uv;
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-        }
-      `,
-      fragmentShader: `
-        uniform float time;
-        uniform vec3 color;
-        uniform sampler2D landTexture;
-        varying vec2 vUv;
-        
-        void main() {
-          // Sample the land texture
-          vec4 landColor = texture2D(landTexture, vUv);
-          
-          // Calculate distance to land
-          float landDistance = 1.0 - landColor.r;
-          
-          // Create wave pattern
-          float wave = sin(time * 2.0 + vUv.x * 10.0 + vUv.y * 10.0) * 0.5 + 0.5;
-          
-          // Only show waves near the shore
-          float shoreMask = smoothstep(0.0, 0.1, landDistance) * (1.0 - smoothstep(0.1, 0.3, landDistance));
-          
-          // Final color
-          gl_FragColor = vec4(color, shoreMask * wave * 0.5);
-        }
-      `,
-      transparent: true,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false
-    });
-    
-    this.shoreMesh = new THREE.Mesh(shoreGeometry, shoreMaterial);
-    this.shoreMesh.rotation.x = -Math.PI / 2;
-    this.shoreMesh.position.y = -0.03; // Just above water level
-    this.scene.add(this.shoreMesh);
-    
-    // Create render target for land texture
-    this.landRenderTarget = new THREE.WebGLRenderTarget(512, 512);
-    
-    // Create camera for rendering land texture
-    this.landCamera = new THREE.OrthographicCamera(
-      -this.width/2, this.width/2, 
-      this.height/2, -this.height/2, 
-      0.1, 1000
-    );
-    this.landCamera.position.y = 10;
-    this.landCamera.lookAt(0, 0, 0);
-  }
 }
 
 export default class WaterEffect {
@@ -190,6 +126,71 @@ export default class WaterEffect {
       const sizeVariation = Math.sin(time * 0.03) * 0.5;
       waterUniforms.size.value = baseSize + sizeVariation;
     }
+  }
+  
+  // Add method to create shore interaction effect
+  private createShoreInteraction() {
+    // Create a shader material that will highlight the shore areas
+    const shoreGeometry = new THREE.PlaneGeometry(this.width * 1.2, this.height * 1.2, 128, 128);
+    
+    // Custom shader material for shore effect
+    const shoreMaterial = new THREE.ShaderMaterial({
+      uniforms: {
+        time: { value: 0 },
+        color: { value: new THREE.Color(0xffffff) },
+        landTexture: { value: null } // Will be set in update
+      },
+      vertexShader: `
+        varying vec2 vUv;
+        void main() {
+          vUv = uv;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform float time;
+        uniform vec3 color;
+        uniform sampler2D landTexture;
+        varying vec2 vUv;
+        
+        void main() {
+          // Sample the land texture
+          vec4 landColor = texture2D(landTexture, vUv);
+          
+          // Calculate distance to land
+          float landDistance = 1.0 - landColor.r;
+          
+          // Create wave pattern
+          float wave = sin(time * 2.0 + vUv.x * 10.0 + vUv.y * 10.0) * 0.5 + 0.5;
+          
+          // Only show waves near the shore
+          float shoreMask = smoothstep(0.0, 0.1, landDistance) * (1.0 - smoothstep(0.1, 0.3, landDistance));
+          
+          // Final color
+          gl_FragColor = vec4(color, shoreMask * wave * 0.5);
+        }
+      `,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false
+    });
+    
+    this.shoreMesh = new THREE.Mesh(shoreGeometry, shoreMaterial);
+    this.shoreMesh.rotation.x = -Math.PI / 2;
+    this.shoreMesh.position.y = -0.03; // Just above water level
+    this.scene.add(this.shoreMesh);
+    
+    // Create render target for land texture
+    this.landRenderTarget = new THREE.WebGLRenderTarget(512, 512);
+    
+    // Create camera for rendering land texture
+    this.landCamera = new THREE.OrthographicCamera(
+      -this.width/2, this.width/2, 
+      this.height/2, -this.height/2, 
+      0.1, 1000
+    );
+    this.landCamera.position.y = 10;
+    this.landCamera.lookAt(0, 0, 0);
   }
   
   private initializeWater() {
