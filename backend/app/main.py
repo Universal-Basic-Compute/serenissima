@@ -7,10 +7,15 @@ import sys
 import traceback
 import datetime
 import json
+import requests
+from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
+
+# Get API key for image generation
+IDEOGRAM_API_KEY = os.getenv("IDEOGRAM_API_KEY", "")
 
 # Get Airtable credentials
 AIRTABLE_API_KEY = os.getenv("AIRTABLE_API_KEY")
@@ -78,6 +83,7 @@ class WalletRequest(BaseModel):
     email: str = None
     family_coat_of_arms: str = None
     family_motto: str = None
+    coat_of_arms_image: str = None
 
 # Define response models
 class WalletResponse(BaseModel):
@@ -88,6 +94,7 @@ class WalletResponse(BaseModel):
     email: str = None
     family_coat_of_arms: str = None
     family_motto: str = None
+    coat_of_arms_image: str = None
 
 # Add these new models
 class LandRequest(BaseModel):
@@ -181,6 +188,9 @@ async def store_wallet(wallet_data: WalletRequest):
             
         if wallet_data.family_motto:
             fields["FamilyMotto"] = wallet_data.family_motto
+            
+        if wallet_data.coat_of_arms_image:
+            fields["CoatOfArmsImage"] = wallet_data.coat_of_arms_image
         
         print(f"Creating new wallet record with fields: {fields}")
         record = users_table.create(fields)
@@ -193,7 +203,8 @@ async def store_wallet(wallet_data: WalletRequest):
             "user_name": record["fields"].get("Username", None),
             "email": record["fields"].get("Email", None),
             "family_coat_of_arms": record["fields"].get("FamilyCoatOfArms", None),
-            "family_motto": record["fields"].get("FamilyMotto", None)
+            "family_motto": record["fields"].get("FamilyMotto", None),
+            "coat_of_arms_image": record["fields"].get("CoatOfArmsImage", None)
         }
     except Exception as e:
         error_msg = f"Failed to store wallet: {str(e)}"
@@ -221,7 +232,8 @@ async def get_wallet(wallet_address: str):
             "compute_amount": record["fields"].get("ComputeAmount", 0),
             "user_name": record["fields"].get("Username", None),
             "email": record["fields"].get("Email", None),
-            "family_coat_of_arms": record["fields"].get("FamilyCoatOfArms", None)
+            "family_coat_of_arms": record["fields"].get("FamilyCoatOfArms", None),
+            "coat_of_arms_image": record["fields"].get("CoatOfArmsImage", None)
         }
     except HTTPException:
         raise
@@ -792,6 +804,63 @@ async def execute_transaction(transaction_id: str, data: dict):
         print(f"ERROR: {error_msg}")
         traceback.print_exc(file=sys.stdout)
         raise HTTPException(status_code=500, detail=error_msg)
+
+@app.post("/api/generate-coat-of-arms")
+async def generate_coat_of_arms(data: dict):
+    """Generate a coat of arms image based on description"""
+    
+    if not data.get("description"):
+        raise HTTPException(status_code=400, detail="Description is required")
+    
+    if not IDEOGRAM_API_KEY:
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "error": "Ideogram API key not configured"}
+        )
+    
+    try:
+        # Create a prompt for the image generation
+        prompt = f"Create a detailed 15th century Venetian coat of arms with these elements: {data['description']}. Style: historical, realistic, detailed heraldry, Renaissance Venetian style, gold leaf accents, rich colors."
+        
+        # Call the Ideogram API (replace with actual API endpoint)
+        response = requests.post(
+            "https://api.ideogram.ai/api/v1/generate",
+            headers={
+                "Authorization": f"Bearer {IDEOGRAM_API_KEY}",
+                "Content-Type": "application/json"
+            },
+            json={
+                "prompt": prompt,
+                "style": "renaissance",
+                "aspect_ratio": "1:1",
+                "num_images": 1
+            }
+        )
+        
+        if not response.ok:
+            print(f"Error from Ideogram API: {response.status_code} {response.text}")
+            return JSONResponse(
+                status_code=500,
+                content={"success": False, "error": f"Failed to generate image: {response.text}"}
+            )
+        
+        # Parse the response to get the image URL
+        result = response.json()
+        
+        # Return the image URL or data
+        return {
+            "success": True,
+            "image_url": result.get("image_url", ""),
+            "prompt": prompt
+        }
+    except Exception as e:
+        error_msg = f"Failed to generate coat of arms: {str(e)}"
+        print(f"ERROR: {error_msg}")
+        traceback.print_exc(file=sys.stdout)
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "error": error_msg}
+        )
 
 @app.post("/api/transaction/{transaction_id}/cancel")
 async def cancel_transaction(transaction_id: str, data: dict):

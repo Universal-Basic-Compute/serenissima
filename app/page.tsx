@@ -51,6 +51,8 @@ export default function Home() {
   const [lastName, setLastName] = useState<string>('');
   const [familyCoatOfArms, setFamilyCoatOfArms] = useState<string>('');
   const [familyMotto, setFamilyMotto] = useState<string>('');
+  const [coatOfArmsImage, setCoatOfArmsImage] = useState<string | null>(null);
+  const [isGeneratingImage, setIsGeneratingImage] = useState<boolean>(false);
   
   // Get API key from environment variable
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '';
@@ -150,6 +152,45 @@ export default function Home() {
   };
   
 
+  // Add this function to generate the coat of arms image
+  const generateCoatOfArmsImage = async () => {
+    if (!familyCoatOfArms.trim()) {
+      alert('Please enter a description of your family coat of arms first');
+      return;
+    }
+    
+    try {
+      setIsGeneratingImage(true);
+      
+      const response = await fetch('http://localhost:8000/api/generate-coat-of-arms', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          description: familyCoatOfArms
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to generate coat of arms image');
+      }
+      
+      const data = await response.json();
+      
+      if (data.success && data.image_url) {
+        setCoatOfArmsImage(data.image_url);
+      } else {
+        throw new Error(data.error || 'Failed to generate image');
+      }
+    } catch (error) {
+      console.error('Error generating coat of arms image:', error);
+      alert(`Failed to generate image: ${error.message}`);
+    } finally {
+      setIsGeneratingImage(false);
+    }
+  };
+
   const handleUsernameSubmit = async () => {
     // Combine names to create the username
     const fullUsername = `${firstName} ${lastName}`;
@@ -160,7 +201,7 @@ export default function Home() {
     }
     
     try {
-      // Update the user record with the username, coat of arms, and family motto
+      // Update the user record with the username, coat of arms, family motto, and image URL
       const response = await fetch('http://localhost:8000/api/wallet', {
         method: 'POST',
         headers: {
@@ -170,7 +211,8 @@ export default function Home() {
           wallet_address: walletAddress,
           user_name: fullUsername.trim(),
           family_coat_of_arms: familyCoatOfArms.trim(),
-          family_motto: familyMotto.trim()
+          family_motto: familyMotto.trim(),
+          coat_of_arms_image: coatOfArmsImage
         }),
       });
       
@@ -187,6 +229,7 @@ export default function Home() {
       setLastName('');
       setFamilyCoatOfArms('');
       setFamilyMotto('');
+      setCoatOfArmsImage(null);
       
       // Show success message
       alert(`Welcome to La Serenissima, ${fullUsername}!`);
@@ -919,37 +962,64 @@ export default function Home() {
                   <div className="w-1/3">
                     <label className="block text-gray-700">Family Coat of Arms</label>
                   </div>
-                  <div className="w-2/3 flex">
-                    <textarea
-                      value={familyCoatOfArms}
-                      onChange={(e) => setFamilyCoatOfArms(e.target.value)}
-                      placeholder="Describe your family's coat of arms..."
-                      className="w-full px-3 py-2 border border-amber-300 rounded-l focus:outline-none focus:ring-2 focus:ring-amber-500"
-                      rows={3}
-                    />
-                    <button
-                      onClick={() => {
-                        const coatOfArmsElements = [
-                          "A golden lion rampant on a field of azure",
-                          "A silver eagle displayed on a field of gules",
-                          "Three golden fleurs-de-lis on a field of azure",
-                          "A red rose on a field of silver",
-                          "A black wolf passant on a field of gold",
-                          "A golden sun with sixteen rays on a field of azure",
-                          "A silver crescent moon on a field of sable",
-                          "A golden ship with white sails on a sea of azure",
-                          "A red griffin segreant on a field of silver",
-                          "Three silver stars on a field of gules"
-                        ];
-                        const randomCoatOfArms = coatOfArmsElements[Math.floor(Math.random() * coatOfArmsElements.length)];
-                        setFamilyCoatOfArms(randomCoatOfArms);
-                      }}
-                      className="bg-amber-600 text-white p-2 rounded-r hover:bg-amber-700 transition-colors text-xl self-stretch"
-                      title="Roll the dice for a random coat of arms"
-                      type="button"
-                    >
-                      🎲
-                    </button>
+                  <div className="w-2/3 flex flex-col">
+                    <div className="flex">
+                      <textarea
+                        value={familyCoatOfArms}
+                        onChange={(e) => setFamilyCoatOfArms(e.target.value)}
+                        placeholder="Describe your family's coat of arms..."
+                        className="w-full px-3 py-2 border border-amber-300 rounded-l focus:outline-none focus:ring-2 focus:ring-amber-500"
+                        rows={3}
+                      />
+                      <button
+                        onClick={() => {
+                          const coatOfArmsElements = [
+                            "A golden lion rampant on a field of azure",
+                            "A silver eagle displayed on a field of gules",
+                            "Three golden fleurs-de-lis on a field of azure",
+                            "A red rose on a field of silver",
+                            "A black wolf passant on a field of gold",
+                            "A golden sun with sixteen rays on a field of azure",
+                            "A silver crescent moon on a field of sable",
+                            "A golden ship with white sails on a sea of azure",
+                            "A red griffin segreant on a field of silver",
+                            "Three silver stars on a field of gules"
+                          ];
+                          const randomCoatOfArms = coatOfArmsElements[Math.floor(Math.random() * coatOfArmsElements.length)];
+                          setFamilyCoatOfArms(randomCoatOfArms);
+                        }}
+                        className="bg-amber-600 text-white p-2 rounded-r hover:bg-amber-700 transition-colors text-xl self-stretch"
+                        title="Roll the dice for a random coat of arms"
+                        type="button"
+                      >
+                        🎲
+                      </button>
+                    </div>
+                    
+                    <div className="mt-2 flex justify-between">
+                      <button
+                        onClick={generateCoatOfArmsImage}
+                        disabled={!familyCoatOfArms.trim() || isGeneratingImage}
+                        className={`px-3 py-1 rounded text-white text-sm ${
+                          !familyCoatOfArms.trim() || isGeneratingImage 
+                            ? 'bg-gray-400 cursor-not-allowed' 
+                            : 'bg-amber-600 hover:bg-amber-700'
+                        }`}
+                      >
+                        {isGeneratingImage ? 'Generating...' : 'Generate Image'}
+                      </button>
+                    </div>
+                    
+                    {/* Display the generated coat of arms image */}
+                    {coatOfArmsImage && (
+                      <div className="mt-3 border border-amber-300 rounded p-2">
+                        <img 
+                          src={coatOfArmsImage} 
+                          alt="Family Coat of Arms" 
+                          className="w-full h-auto max-h-48 object-contain"
+                        />
+                      </div>
+                    )}
                   </div>
                 </div>
                 
