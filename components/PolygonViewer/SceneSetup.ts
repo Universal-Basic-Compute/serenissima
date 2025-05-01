@@ -152,7 +152,7 @@ export default class SceneSetup {
     // Main directional light (sun) - bigger and more yellow
     this.sunLight = new THREE.DirectionalLight(0xffffcc, 1.8);
     this.sunLight.position.set(50, 100, 50);
-    this.sunLight.castShadow = false; // Disable shadows to prevent the dark shadow effect
+    this.sunLight.castShadow = false; // Ensure shadows are completely disabled
     
     // Create a sun sphere for visual effect
     const sunGeometry = new THREE.SphereGeometry(5, 16, 16);

@@ -103,7 +103,7 @@ export default class LODPolygon {
     // Create extruded geometry with minimal settings
     const extrudeSettings = {
       steps: 1,
-      depth: 0.025 + Math.random() * 0.025,
+      depth: 0.025, // Fixed depth without random variation
       bevelEnabled: false
     };
     
@@ -116,12 +116,15 @@ export default class LODPolygon {
       roughness: 0.7,
       metalness: 0.1,
       side: THREE.FrontSide,
-      flatShading: true
+      flatShading: true,
+      // Explicitly disable shadows
+      castShadow: false,
+      receiveShadow: false
     });
     
     this.lowDetailMesh = new THREE.Mesh(geometry, material);
-    this.lowDetailMesh.castShadow = true;
-    this.lowDetailMesh.receiveShadow = true;
+    this.lowDetailMesh.castShadow = false;
+    this.lowDetailMesh.receiveShadow = false;
     this.lowDetailMesh.userData.originalEmissive = new THREE.Color(0, 0, 0);
     this.lowDetailMesh.userData.originalEmissiveIntensity = 0;
     this.lowDetailMesh.userData.isLowDetail = true;
@@ -140,8 +143,8 @@ export default class LODPolygon {
     
     // Create extruded geometry with enhanced settings for better quality
     const extrudeSettings = {
-      steps: 2, // Increase steps for smoother extrusion
-      depth: 0.05 + Math.random() * 0.03, // Slightly taller with some variation
+      steps: 1, // Reduce steps to prevent shadow artifacts
+      depth: 0.05, // Consistent depth without random variation
       bevelEnabled: false, // Disable bevels to prevent shadow artifacts
       UVGenerator: { // Add a custom UV generator for better texture mapping
         generateTopUV: function(geometry, vertices, indexA, indexB, indexC) {
@@ -195,7 +198,10 @@ export default class LODPolygon {
       polygonOffset: true,
       polygonOffsetFactor: 1,
       polygonOffsetUnits: 1,
-      shadowSide: THREE.FrontSide // Ensure shadows are only cast from front face
+      shadowSide: THREE.FrontSide, // Ensure shadows are only cast from front face
+      // Explicitly disable shadows
+      castShadow: false,
+      receiveShadow: false
     });
     
     // If we're in land view and the polygon has an owner with a coat of arms,
@@ -206,8 +212,9 @@ export default class LODPolygon {
                           this.ownerCoatOfArmsMap[this.polygon.owner];
     
     this.highDetailMesh = new THREE.Mesh(geometry, material);
-    this.highDetailMesh.castShadow = true;
-    this.highDetailMesh.receiveShadow = true;
+    // Explicitly disable shadows on the mesh
+    this.highDetailMesh.castShadow = false;
+    this.highDetailMesh.receiveShadow = false;
     this.highDetailMesh.userData.originalEmissive = new THREE.Color(0, 0, 0);
     this.highDetailMesh.userData.originalEmissiveIntensity = 0;
     this.highDetailMesh.userData.isLowDetail = false;
