@@ -683,17 +683,21 @@ export default class WaterEffect {
   public updateQuality(performanceMode: boolean) {
     this.performanceMode = performanceMode;
     
-    if (!this.water) return;
+    // Add more robust null checks
+    if (!this.water || !this.water.material || !this.water.material.uniforms) {
+      console.log('Water not fully initialized, skipping quality update');
+      return;
+    }
     
-    // Update water quality settings
+    // Update water quality settings with additional null checks
     const waterUniforms = this.water.material.uniforms;
     
-    // Adjust distortion scale based on performance mode
-    if (waterUniforms.distortionScale) {
+    // Adjust distortion scale based on performance mode with null check
+    if (waterUniforms && waterUniforms.distortionScale && waterUniforms.distortionScale.value !== undefined) {
       waterUniforms.distortionScale.value = performanceMode ? 2.0 : 3.7;
     }
     
-    // Show/hide foam and caustics based on performance mode
+    // Show/hide foam and caustics based on performance mode with null checks
     if (this.waterFoam) {
       this.waterFoam.visible = !performanceMode;
     }
