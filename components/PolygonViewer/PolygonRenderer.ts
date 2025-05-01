@@ -333,7 +333,7 @@ export default class PolygonRenderer {
                 mesh.renderOrder = renderOrderBase + renderOrderOffset;
                 
                 // Force a high render order for all polygons to fix edge issues
-                mesh.renderOrder = 10;
+                mesh.renderOrder = 15; // Increased from 10 to 15 for better layering
               }
             
               this.PolygonMeshs.push(polygonMesh);

@@ -544,14 +544,16 @@ export default class WaterEffect {
       color: waterColor,
       transparent: true,
       opacity: 0.8,
-      side: THREE.FrontSide
+      side: THREE.FrontSide,
+      // Ensure water is rendered behind land
+      depthWrite: true
     });
     
     // Create the water mesh
     this.waterMesh = new THREE.Mesh(waterGeometry, waterMaterial);
     this.waterMesh.rotation.x = -Math.PI / 2;
-    this.waterMesh.position.y = -0.7;  // Position below land
-    this.waterMesh.renderOrder = 0;    // Render before land
+    this.waterMesh.position.y = -0.8;  // Position lower below land (was -0.7)
+    this.waterMesh.renderOrder = -1;   // Ensure water renders before land (was 0)
     
     // Add to scene
     this.scene.add(this.waterMesh);

@@ -82,7 +82,7 @@ class PolygonMesh {
       // Determine the color to use
       const landColor = this.determineLandColor();
       
-      // Create a completely flat material with NO transparency
+      // Create a completely flat material with NO transparency and enable polygon offset
       const material = new THREE.MeshBasicMaterial({ 
         color: landColor,
         side: THREE.FrontSide,
@@ -91,9 +91,10 @@ class PolygonMesh {
         opacity: 1.0,
         depthTest: true,
         depthWrite: true,
-        // Remove ALL special properties that might cause edge artifacts
-        polygonOffset: false
-        // flatShading is not valid for MeshBasicMaterial
+        // Enable polygon offset to prevent z-fighting at edges
+        polygonOffset: true,
+        polygonOffsetFactor: 1.0,
+        polygonOffsetUnits: 1.0
       });
       
       // Immediately load and apply the sand texture
@@ -105,8 +106,12 @@ class PolygonMesh {
             texture.wrapS = THREE.RepeatWrapping;
             texture.wrapT = THREE.RepeatWrapping;
             texture.repeat.set(5, 5);
-            // Add texture offset to avoid edge artifacts
-            texture.offset.set(0.5, 0.5);
+            // Remove texture offset which can cause edge artifacts
+            texture.offset.set(0, 0);
+            // Ensure texture has proper settings to avoid edge artifacts
+            texture.anisotropy = 4;
+            texture.generateMipmaps = true;
+            texture.needsUpdate = true;
             material.map = texture;
             material.needsUpdate = true;
           }
@@ -125,7 +130,9 @@ class PolygonMesh {
                 texture.wrapS = THREE.RepeatWrapping;
                 texture.wrapT = THREE.RepeatWrapping;
                 texture.repeat.set(5, 5);
-                texture.offset.set(0.5, 0.5);
+                texture.anisotropy = 4;
+                texture.generateMipmaps = true;
+                texture.needsUpdate = true;
                 material.map = texture;
                 material.needsUpdate = true;
               }
@@ -144,8 +151,8 @@ class PolygonMesh {
       this.mesh.castShadow = false;
       this.mesh.receiveShadow = false;
       
-      // Set a high render order to ensure it renders on top
-      this.mesh.renderOrder = 5;
+      // Set a higher render order to ensure it renders on top
+      this.mesh.renderOrder = 10;
       
       // Add to user data to ensure shadows stay disabled
       this.mesh.userData.disableShadows = true;
@@ -153,7 +160,7 @@ class PolygonMesh {
       this.mesh.userData.ignoreLight = true;
       
       // Position higher above water to avoid z-fighting
-      this.mesh.position.y = 0.1;
+      this.mesh.position.y = 0.15; // Increased from 0.1 to 0.15
     } catch (error) {
       console.error('Error creating mesh:', error);
     }
@@ -216,11 +223,18 @@ class PolygonMesh {
       (texture) => {
         const circularTexture = this.createCircularTexture(texture);
         
+        // Create a material with proper settings to avoid edge artifacts
         const material = new THREE.MeshBasicMaterial({
           map: circularTexture,
           transparent: true,
           side: THREE.FrontSide,
-          opacity: 1.0
+          opacity: 1.0,
+          depthTest: true,
+          depthWrite: true,
+          // Enable polygon offset to prevent z-fighting with the base material
+          polygonOffset: true,
+          polygonOffsetFactor: 1.0,
+          polygonOffsetUnits: 1.0
         });
         
         if (this.mesh) {
@@ -228,7 +242,11 @@ class PolygonMesh {
           
           const sidesMaterial = new THREE.MeshBasicMaterial({
             color: this.determineLandColor(),
-            side: THREE.FrontSide
+            side: THREE.FrontSide,
+            transparent: false,
+            opacity: 1.0,
+            depthTest: true,
+            depthWrite: true
           });
           
           const materials = [
@@ -266,7 +284,10 @@ class PolygonMesh {
           }
           
           this.mesh.material = materials;
-          this.mesh.renderOrder = 2;
+          // Increase render order to ensure it renders on top of other elements
+          this.mesh.renderOrder = 15;
+          // Slightly raise the mesh to avoid z-fighting
+          this.mesh.position.y += 0.01;
         }
       },
       undefined,
@@ -291,17 +312,22 @@ class PolygonMesh {
       ctx.arc(size/2, size/2, size/2 - 4, 0, Math.PI * 2);
       ctx.fillStyle = this.ownerColor || '#8B4513';
       ctx.fill();
-      ctx.strokeStyle = '#FFFFFF';
-      ctx.lineWidth = 8;
-      ctx.stroke();
+      // Remove the stroke which can cause edge artifacts
+      // ctx.strokeStyle = '#FFFFFF';
+      // ctx.lineWidth = 8;
+      // ctx.stroke();
       
       const fallbackTexture = new THREE.Texture(canvas);
       fallbackTexture.needsUpdate = true;
+      // Add these properties to improve texture quality
+      fallbackTexture.premultiplyAlpha = true;
+      fallbackTexture.generateMipmaps = true;
       return fallbackTexture;
     }
     
     const canvas = document.createElement('canvas');
-    const size = 512;
+    // Increase size for better quality
+    const size = 1024;
     canvas.width = size;
     canvas.height = size;
     
@@ -309,31 +335,35 @@ class PolygonMesh {
     if (!ctx) return texture;
     
     try {
+      // Clear with transparent background
       ctx.clearRect(0, 0, size, size);
       
+      // Create a perfect circle with no stroke
       ctx.beginPath();
-      ctx.arc(size/2, size/2, size/2 - 4, 0, Math.PI * 2);
+      ctx.arc(size/2, size/2, size/2, 0, Math.PI * 2);
       ctx.closePath();
       
-      ctx.strokeStyle = '#FFFFFF';
-      ctx.lineWidth = 8;
-      ctx.stroke();
+      // Remove the white stroke which can cause edge artifacts
+      // ctx.strokeStyle = '#FFFFFF';
+      // ctx.lineWidth = 8;
+      // ctx.stroke();
       
       ctx.save();
       ctx.beginPath();
-      ctx.arc(size/2, size/2, size/2 - 12, 0, Math.PI * 2);
+      // Make the clipping circle slightly smaller to avoid edge artifacts
+      ctx.arc(size/2, size/2, size/2 - 1, 0, Math.PI * 2);
       ctx.clip();
       
-      let drawWidth = size - 24;
-      let drawHeight = size - 24;
-      let offsetX = 12;
-      let offsetY = 12;
+      let drawWidth = size - 2;
+      let drawHeight = size - 2;
+      let offsetX = 1;
+      let offsetY = 1;
       
       if (texture.image.width > texture.image.height) {
-        drawHeight = (texture.image.height / texture.image.width) * (size - 24);
+        drawHeight = (texture.image.height / texture.image.width) * (size - 2);
         offsetY = (size - drawHeight) / 2;
       } else if (texture.image.height > texture.image.width) {
-        drawWidth = (texture.image.width / texture.image.height) * (size - 24);
+        drawWidth = (texture.image.width / texture.image.height) * (size - 2);
         offsetX = (size - drawWidth) / 2;
       }
       
@@ -344,6 +374,9 @@ class PolygonMesh {
       ctx.restore();
       
       const circularTexture = new THREE.Texture(canvas);
+      // Add these properties to improve texture quality
+      circularTexture.premultiplyAlpha = true;
+      circularTexture.generateMipmaps = true;
       circularTexture.needsUpdate = true;
       
       return circularTexture;
@@ -352,14 +385,14 @@ class PolygonMesh {
       
       ctx.clearRect(0, 0, size, size);
       ctx.beginPath();
-      ctx.arc(size/2, size/2, size/2 - 4, 0, Math.PI * 2);
+      ctx.arc(size/2, size/2, size/2, 0, Math.PI * 2);
       ctx.fillStyle = this.ownerColor || '#8B4513';
       ctx.fill();
-      ctx.strokeStyle = '#FFFFFF';
-      ctx.lineWidth = 8;
-      ctx.stroke();
+      // Remove stroke
       
       const fallbackTexture = new THREE.Texture(canvas);
+      fallbackTexture.premultiplyAlpha = true;
+      fallbackTexture.generateMipmaps = true;
       fallbackTexture.needsUpdate = true;
       return fallbackTexture;
     }

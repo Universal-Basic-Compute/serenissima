@@ -49,21 +49,23 @@ export default class SceneSetup {
     // Initial camera position - higher up and further back for a good overview
     this.camera.position.set(0, 80, 80);
     
-    // Initialize renderer with minimal settings initially
+    // Initialize renderer with settings to prevent z-fighting
     this.renderer = new THREE.WebGLRenderer({ 
       canvas,
-      antialias: false, // Start without antialiasing for faster initial render
+      antialias: true, // Enable antialiasing to reduce jagged edges
       powerPreference: 'high-performance',
-      precision: this.performanceMode ? 'mediump' : 'highp', // Lower precision in performance mode
-      logarithmicDepthBuffer: false, // Disable logarithmic depth buffer
+      precision: this.performanceMode ? 'mediump' : 'highp',
+      logarithmicDepthBuffer: true, // Enable logarithmic depth buffer to prevent z-fighting
       alpha: true // Add alpha channel to prevent white screen issues
     });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
-    this.renderer.setPixelRatio(1); // Start with lowest pixel ratio
+    this.renderer.setPixelRatio(window.devicePixelRatio > 1 ? 2 : 1); // Use higher pixel ratio for better quality
     this.renderer.shadowMap.enabled = false; // Disable shadows completely
     this.renderer.shadowMap.autoUpdate = false; // Explicitly disable shadow map updates
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.sortObjects = true; // Activate object sorting by the renderer
+    // Set pixel ratio explicitly to prevent blurry edges
+    this.renderer.setPixelRatio(window.devicePixelRatio > 1 ? window.devicePixelRatio : 1);
     
     // Set up a simple EffectComposer initially
     this.composer = new EffectComposer(this.renderer);
