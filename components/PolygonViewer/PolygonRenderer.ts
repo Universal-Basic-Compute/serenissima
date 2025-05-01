@@ -657,6 +657,65 @@ export default class PolygonRenderer {
       return fallbackTexture;
     }
   }
+  
+  // Add a new method to create a colored circle on the land
+  private createColoredCircleOnLand(polygon: Polygon, color: string) {
+    // Create a canvas
+    const canvas = document.createElement('canvas');
+    const size = 256; // Larger canvas for better quality
+    canvas.width = size;
+    canvas.height = size;
+    
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    
+    // Draw a colored circle with border
+    ctx.beginPath();
+    ctx.arc(size/2, size/2, size/2 - 8, 0, Math.PI * 2);
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.strokeStyle = '#FFFFFF';
+    ctx.lineWidth = 8;
+    ctx.stroke();
+    
+    // Create a texture from the canvas
+    const texture = new THREE.Texture(canvas);
+    texture.needsUpdate = true;
+    
+    // Create a flat plane for the colored circle
+    const planeSize = 4; // Size of the plane
+    const geometry = new THREE.PlaneGeometry(planeSize, planeSize);
+    
+    // Create material with the texture
+    const material = new THREE.MeshBasicMaterial({ 
+      map: texture,
+      transparent: true,
+      side: THREE.DoubleSide,
+      depthWrite: true
+    });
+    
+    // Create mesh
+    const plane = new THREE.Mesh(geometry, material);
+    
+    // Position at the centroid
+    const normalizedCoords = normalizeCoordinates(
+      [polygon.centroid],
+      this.bounds.centerLat,
+      this.bounds.centerLng,
+      this.bounds.scale,
+      this.bounds.latCorrectionFactor
+    )[0];
+    
+    // Position slightly above the land to avoid z-fighting
+    plane.position.set(normalizedCoords.x, 0.05, -normalizedCoords.y);
+    
+    // Rotate to lay flat on the ground (90 degrees around X axis)
+    plane.rotation.x = -Math.PI / 2;
+    
+    // Add to scene and store reference
+    this.scene.add(plane);
+    this.coatOfArmSprites[polygon.id] = plane;
+  }
 
   // Add method to update polygon owner
   public updatePolygonOwner(polygonId: string, newOwner: string) {
