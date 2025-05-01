@@ -143,8 +143,8 @@ const TransferComputeMenu: React.FC<TransferComputeMenuProps> = ({ onClose, onTr
         </div>
         
         <div className="mt-6 text-center text-sm text-gray-500">
-          <p>By transferring, you are contributing to the growth and prosperity of La Serenissima.</p>
-          <p className="mt-1">Your transfer will be recorded on the Solana blockchain and earn you status as a prominent merchant of Venice.</p>
+          <p>Your success in La Serenissima depends on your skills as a merchant and diplomat.</p>
+          <p className="mt-1">It is up to your wit and cunning to make or lose ducats in the competitive markets of Venice.</p>
         </div>
       </div>
     </div>
