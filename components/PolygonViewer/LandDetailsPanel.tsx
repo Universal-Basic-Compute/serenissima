@@ -274,6 +274,14 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
             >
               {owner ? 'Already Owned' : (transaction ? `Purchase (${transaction.price.toLocaleString()} ducats)` : 'Purchase Land')}
             </ActionButton>
+            
+            {/* Delete button */}
+            <ActionButton 
+              onClick={handleDeletePolygon}
+              variant="danger"
+            >
+              Delete Land
+            </ActionButton>
           </div>
         </div>
       </div>
