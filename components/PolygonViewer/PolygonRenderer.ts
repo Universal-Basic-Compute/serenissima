@@ -462,10 +462,10 @@ export default class PolygonRenderer {
         coatOfArmsUrl,
         (texture) => {
           // Create a circular texture from the loaded image
-          const circularTexture = this.createCircularTexture(texture, ownerColor);
+          const circularTexture = this.createCircularTexture(texture);
           
-          // Create a flat plane for the coat of arms - 50% smaller
-          const planeSize = 2; // Reduced size by 50%
+          // Create a flat plane for the coat of arms - 20% smaller
+          const planeSize = 1.6;
           const geometry = new THREE.PlaneGeometry(planeSize, planeSize);
           
           // Create material with the texture
