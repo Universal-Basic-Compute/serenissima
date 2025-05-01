@@ -540,30 +540,50 @@ export default function PolygonViewer() {
     
       // Update controls to enable camera movement
       if (sceneRef.current && sceneRef.current.controls) {
-        sceneRef.current.controls.update();
+        try {
+          sceneRef.current.controls.update();
+        } catch (error) {
+          console.error('Error updating controls:', error);
+        }
       }
     
       // Update water effect - every frame for smoother animation
       if (waterEffectRef.current) {
-        waterEffectRef.current.update(frameCount, !highQuality);
+        try {
+          waterEffectRef.current.update(frameCount, !highQuality);
+        } catch (error) {
+          console.error('Error updating water effect:', error);
+        }
       }
     
       // Update polygon LOD and selection state - less frequently for distant objects
       if (polygonRendererRef.current && (highQuality || frameCount % 3 === 0)) {
-        polygonRendererRef.current.update(selectedPolygonId);
+        try {
+          polygonRendererRef.current.update(selectedPolygonId);
+        } catch (error) {
+          console.error('Error updating polygon renderer:', error);
+        }
       }
       
       // Update clouds based on camera position
       if (sceneRef.current) {
-        sceneRef.current.updateClouds(frameCount);
+        try {
+          sceneRef.current.updateClouds(frameCount);
+        } catch (error) {
+          console.error('Error updating clouds:', error);
+        }
       }
     
       frameCount++;
     
       // Use composer instead of renderer directly to include post-processing effects
       if (sceneRef.current && sceneRef.current.composer) {
-        // Render the scene
-        sceneRef.current.composer.render();
+        try {
+          // Render the scene
+          sceneRef.current.composer.render();
+        } catch (error) {
+          console.error('Error rendering scene:', error);
+        }
       }
     };
     
