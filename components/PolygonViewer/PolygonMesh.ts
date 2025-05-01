@@ -152,8 +152,8 @@ class PolygonMesh {
       this.mesh.userData.noShadow = true;
       this.mesh.userData.ignoreLight = true;
       
-      // Position slightly above water to avoid z-fighting
-      this.mesh.position.y = 0.01;
+      // Position higher above water to avoid z-fighting
+      this.mesh.position.y = 0.1;
     } catch (error) {
       console.error('Error creating mesh:', error);
     }

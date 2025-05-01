@@ -27,6 +27,7 @@ export default class WaterEffect {
   private clock: THREE.Clock;
   private sunReflection: THREE.Mesh | null = null;
   private water: any = null;
+  private waterMesh: THREE.Mesh | null = null;
   private waterFoam: THREE.Mesh | null = null;
   private foamTexture: THREE.Texture | null = null;
   private shoreMesh: THREE.Mesh | null = null;
@@ -303,79 +304,37 @@ export default class WaterEffect {
   
   private initializeWater() {
     try {
-      // Create proper water geometry that matches the scene size
-      this.waterGeometry = new THREE.PlaneGeometry(
+      // Create a simple water plane with a blue color
+      const waterGeometry = new THREE.PlaneGeometry(
         this.width * 1.5, 
         this.height * 1.5,
-        this.performanceMode ? 8 : 32  // Increased resolution for high quality mode
+        32, 32  // Higher resolution for better waves
       );
       
-      // Try to load the actual texture, but don't wait for it
-      this.textureLoader.load(
-        '/textures/waternormals.jpg',
-        (texture: THREE.Texture) => {
-          console.log('Water normal map loaded successfully');
-          texture.wrapS = THREE.RepeatWrapping;
-          texture.wrapT = THREE.RepeatWrapping;
-          texture.repeat.set(10, 10);
-          this.waterNormalMap = texture;
-          
-          // If water already exists, update its normal map
-          if (this.water && this.water.material && this.water.material.uniforms && this.water.material.uniforms.normalSampler) {
-            this.water.material.uniforms.normalSampler.value = texture;
-          }
-        },
-        (xhr: ProgressEvent) => {
-          console.log(`Water normal map loading: ${(xhr.loaded / xhr.total) * 100}% loaded`);
-        },
-        (error: unknown) => {
-          console.warn('Could not load water normal map from primary path:', error);
-          // Try alternative path without leading slash
-          this.textureLoader.load(
-            'textures/waternormals.jpg',
-            (texture: THREE.Texture) => {
-              console.log('Water normal map loaded from alternative path');
-              texture.wrapS = THREE.RepeatWrapping;
-              texture.wrapT = THREE.RepeatWrapping;
-              texture.repeat.set(10, 10);
-              this.waterNormalMap = texture;
-              
-              if (this.water && this.water.material && this.water.material.uniforms && this.water.material.uniforms.normalSampler) {
-                this.water.material.uniforms.normalSampler.value = texture;
-              }
-            },
-            undefined,
-            (secondError: unknown) => {
-              console.warn('Could not load water normal map from alternative path, using fallback:', secondError);
-              // We already have the fallback texture set, so no need to do anything here
-            }
-          );
-        }
-      );
+      // Create a simple material with a blue color
+      const waterColor = this.getWaterColorForView();
+      const waterMaterial = new THREE.MeshBasicMaterial({
+        color: waterColor,
+        transparent: true,
+        opacity: 0.8,
+        side: THREE.FrontSide
+      });
       
-      // Create water with proper options
-      const waterOptions = {
-        textureWidth: this.performanceMode ? 128 : 512, // Increased resolution for high quality
-        textureHeight: this.performanceMode ? 128 : 512,
-        waterNormals: this.waterNormalMap,
-        sunDirection: this.sunDirection,
-        sunColor: 0xffffff,
-        waterColor: this.getWaterColorForView(),
-        distortionScale: this.performanceMode ? 1.0 : 3.0, // Increased distortion for high quality
-        fog: false,
-        format: THREE.RGBAFormat
-      };
+      // Create the water mesh
+      this.waterMesh = new THREE.Mesh(waterGeometry, waterMaterial);
+      this.waterMesh.rotation.x = -Math.PI / 2;
+      this.waterMesh.position.y = -0.7;  // Position below land
+      this.waterMesh.renderOrder = 0;    // Render before land
       
-      this.water = new Water(this.waterGeometry, waterOptions);
-      this.water.rotation.x = -Math.PI / 2;
-      this.water.position.y = -0.7; // Lower position to avoid z-fighting
-      this.water.renderOrder = 1;
-      this.water.visible = true;
+      // Add to scene
+      this.scene.add(this.waterMesh);
+      console.log('Simple water plane added to scene at position y =', this.waterMesh.position.y);
       
-      // Add the water to the scene
-      this.scene.add(this.water);
+      // Add vertex displacement for waves
+      this.addWaveDisplacement(waterGeometry);
       
-      // Skip foam and caustics in all cases to reduce errors
+      // Store reference to water for other methods
+      this.water = this.waterMesh;
       
       // Add sun reflection with a delay to ensure water is properly initialized
       setTimeout(() => {
@@ -394,20 +353,27 @@ export default class WaterEffect {
           console.error('Error creating shore interaction:', error);
         }
       }, 1500);
-      
-      // Create realistic water surface with a delay
-      if (!this.performanceMode) {
-        setTimeout(() => {
-          try {
-            this.createRealisticWaterSurface();
-          } catch (error) {
-            console.error('Error creating realistic water surface:', error);
-          }
-        }, 2000);
-      }
     } catch (error) {
       console.error('Error initializing water:', error);
     }
+  }
+  
+  // Add a new method to create wave displacement
+  private addWaveDisplacement(geometry: THREE.PlaneGeometry) {
+    const positions = geometry.attributes.position.array;
+    
+    // Add wave displacement to vertices
+    for (let i = 0; i < positions.length; i += 3) {
+      const x = positions[i];
+      const z = positions[i + 2];
+      
+      // Create gentle waves using sine functions
+      positions[i + 1] = Math.sin(x * 0.5) * 0.2 + Math.cos(z * 0.5) * 0.2;
+    }
+    
+    // Update geometry
+    geometry.attributes.position.needsUpdate = true;
+    geometry.computeVertexNormals();
   }
   
   private loadFoamTexture() {
@@ -552,6 +518,8 @@ export default class WaterEffect {
   
   // Add method to create water
   public createWater() {
+    console.log('Creating water effect...');
+    
     if (this.water) {
       this.water.cleanup();
     }
@@ -565,58 +533,40 @@ export default class WaterEffect {
       renderer: this.renderer
     });
     
-    console.log('Water effect created');
+    console.log('Water effect created successfully');
   }
   
   public update(frameCount: number, performanceMode: boolean) {
     try {
       // Skip all updates if water isn't properly initialized
-      if (!this.water || !this.water.material) {
+      if (!this.waterMesh) {
         return;
       }
       
-      // Get water uniforms with additional safety checks
-      const waterUniforms = this.water.material.uniforms;
-      if (!waterUniforms) {
-        return;
-      }
-      
-      // Animate water with null checks for each uniform
-      if (waterUniforms.time && waterUniforms.time.value !== undefined) {
+      // Animate water waves by updating vertex positions
+      if (frameCount % 5 === 0 && this.waterMesh.geometry) {
         try {
-          // Use a very small increment to minimize the chance of errors
-          const timeIncrement = performanceMode ? 0.0002 : 0.0005;
-          waterUniforms.time.value += timeIncrement;
-        } catch (error) {
-          // Just silently fail here - no need to log errors for every frame
-        }
-      }
-      
-      // Skip all other animations most of the time to reduce potential errors
-      if (frameCount % 10 !== 0) {
-        return;
-      }
-      
-      // Apply Gerstner waves with additional checks - but much less frequently
-      if (frameCount % 30 === 0 && typeof this.applyGerstnerWaves === 'function') {
-        try {
-          this.applyGerstnerWaves(frameCount * 0.002);
+          const positions = this.waterMesh.geometry.attributes.position.array;
+          const time = frameCount * 0.01;
+          
+          for (let i = 0; i < positions.length; i += 3) {
+            const x = positions[i];
+            const z = positions[i + 2];
+            
+            // Create dynamic waves using time-based sine functions
+            positions[i + 1] = 
+              Math.sin(x * 0.5 + time) * 0.2 + 
+              Math.cos(z * 0.5 + time * 0.8) * 0.2;
+          }
+          
+          // Update geometry
+          this.waterMesh.geometry.attributes.position.needsUpdate = true;
         } catch (error) {
           // Silent fail
         }
       }
       
-      // Animate foam with additional checks - but much less frequently
-      if (frameCount % 20 === 0 && this.waterFoam && this.foamTexture && this.foamTexture.offset) {
-        try {
-          this.foamTexture.offset.x += 0.00002;
-          this.foamTexture.offset.y += 0.00001;
-        } catch (error) {
-          // Silent fail
-        }
-      }
-      
-      // Animate sun reflection with additional checks - but much less frequently
+      // Animate sun reflection with additional checks
       if (frameCount % 15 === 0 && this.sunReflection && this.sunReflection.scale) {
         try {
           const reflectionScale = 1.0 + Math.sin(frameCount * 0.01) * 0.05;
@@ -626,7 +576,7 @@ export default class WaterEffect {
         }
       }
       
-      // Update shore interaction with better error handling - more frequent updates for smoother animation
+      // Update shore interaction with better error handling
       if (this.shoreMesh && this.shoreMesh.material) {
         try {
           // Update shore material time uniform for wave animation
@@ -640,36 +590,6 @@ export default class WaterEffect {
           // Silent fail
         }
       }
-      
-      // Render land texture to render target for shore effect - less frequently to save performance
-      if (this.landRenderTarget && this.landCamera && frameCount % 30 === 0) {
-        try {
-          // Store current renderer state
-          const currentRenderTarget = this.renderer.getRenderTarget();
-          
-          // Set render target to land texture
-          this.renderer.setRenderTarget(this.landRenderTarget);
-          
-          // Render only land objects
-          const currentVisibility = this.water.visible;
-          this.water.visible = false;
-          this.renderer.render(this.scene, this.landCamera);
-          this.water.visible = currentVisibility;
-          
-          // Restore renderer state
-          this.renderer.setRenderTarget(currentRenderTarget);
-          
-          // Update shore material with land texture
-          if (this.shoreMesh && this.shoreMesh.material) {
-            const shoreMaterial = this.shoreMesh.material as THREE.ShaderMaterial;
-            if (shoreMaterial.userData && shoreMaterial.userData.uniforms && shoreMaterial.userData.uniforms.landTexture) {
-              shoreMaterial.userData.uniforms.landTexture.value = this.landRenderTarget.texture;
-            }
-          }
-        } catch (error) {
-          // Silent fail
-        }
-      }
     } catch (error) {
       // Silent fail for the entire update method
     }
@@ -678,15 +598,14 @@ export default class WaterEffect {
   public updateViewMode(activeView: ViewMode) {
     this.activeView = activeView;
     
-    if (!this.water || !this.water.material || !this.water.material.uniforms) return;
-    
     // Update water color based on view mode
     const waterColor = this.getWaterColorForView();
-    const waterUniforms = this.water.material.uniforms;
     
-    if (waterUniforms.waterColor && waterUniforms.waterColor.value) {
+    // Update water mesh color if it exists
+    if (this.waterMesh && this.waterMesh.material) {
       try {
-        waterUniforms.waterColor.value.setHex(waterColor);
+        (this.waterMesh.material as THREE.MeshBasicMaterial).color.setHex(waterColor);
+        (this.waterMesh.material as THREE.MeshBasicMaterial).needsUpdate = true;
       } catch (error) {
         console.error('Error updating water color in view mode change:', error);
       }
@@ -760,22 +679,40 @@ export default class WaterEffect {
   
   public cleanup() {
     // Remove water and related objects from scene
-    if (this.water) {
-      this.scene.remove(this.water);
-      this.water.geometry.dispose();
-      (this.water.material as THREE.Material).dispose();
+    if (this.waterMesh) {
+      this.scene.remove(this.waterMesh);
+      if (this.waterMesh.geometry) this.waterMesh.geometry.dispose();
+      if (this.waterMesh.material) {
+        if (Array.isArray(this.waterMesh.material)) {
+          this.waterMesh.material.forEach(m => m.dispose());
+        } else {
+          this.waterMesh.material.dispose();
+        }
+      }
     }
     
     if (this.waterFoam) {
       this.scene.remove(this.waterFoam);
-      this.waterFoam.geometry.dispose();
-      (this.waterFoam.material as THREE.Material).dispose();
+      if (this.waterFoam.geometry) this.waterFoam.geometry.dispose();
+      if (this.waterFoam.material) {
+        if (Array.isArray(this.waterFoam.material)) {
+          this.waterFoam.material.forEach(m => m.dispose());
+        } else {
+          this.waterFoam.material.dispose();
+        }
+      }
     }
     
     if (this.causticMesh) {
       this.scene.remove(this.causticMesh);
-      this.causticMesh.geometry.dispose();
-      (this.causticMesh.material as THREE.Material).dispose();
+      if (this.causticMesh.geometry) this.causticMesh.geometry.dispose();
+      if (this.causticMesh.material) {
+        if (Array.isArray(this.causticMesh.material)) {
+          this.causticMesh.material.forEach(m => m.dispose());
+        } else {
+          this.causticMesh.material.dispose();
+        }
+      }
     }
     
     if (this.causticLight) {
@@ -784,19 +721,35 @@ export default class WaterEffect {
     
     if (this.sunReflection) {
       this.scene.remove(this.sunReflection);
-      this.sunReflection.geometry.dispose();
-      (this.sunReflection.material as THREE.Material).dispose();
+      if (this.sunReflection.geometry) this.sunReflection.geometry.dispose();
+      if (this.sunReflection.material) {
+        if (Array.isArray(this.sunReflection.material)) {
+          this.sunReflection.material.forEach(m => m.dispose());
+        } else {
+          this.sunReflection.material.dispose();
+        }
+      }
     }
     
     // Clean up shore interaction
     if (this.shoreMesh) {
       this.scene.remove(this.shoreMesh);
-      this.shoreMesh.geometry.dispose();
-      (this.shoreMesh.material as THREE.Material).dispose();
+      if (this.shoreMesh.geometry) this.shoreMesh.geometry.dispose();
+      if (this.shoreMesh.material) {
+        if (Array.isArray(this.shoreMesh.material)) {
+          this.shoreMesh.material.forEach(m => m.dispose());
+        } else {
+          this.shoreMesh.material.dispose();
+        }
+      }
     }
     
     if (this.landRenderTarget) {
       this.landRenderTarget.dispose();
     }
+    
+    // Clear references
+    this.waterMesh = null;
+    this.water = null;
   }
 }
