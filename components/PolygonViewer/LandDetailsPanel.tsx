@@ -221,12 +221,13 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
                         'Content-Type': 'application/json',
                       },
                       body: JSON.stringify({
-                        buyer: walletAddress
+                        buyer: walletAddress  // Make sure this is included
                       }),
                     });
                     
                     if (!response.ok) {
-                      throw new Error('Failed to execute transaction');
+                      const errorData = await response.json();
+                      throw new Error(errorData.detail || 'Failed to execute transaction');
                     }
                     
                     const data = await response.json();
