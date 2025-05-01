@@ -14,6 +14,29 @@ function ensureTransactionsDirExists() {
   return TRANSACTIONS_DIR;
 }
 
+// Add a function to get username from wallet address
+async function getUsernameFromWallet(walletAddress: string): Promise<string | null> {
+  try {
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+    const response = await fetch(`${apiBaseUrl}/api/wallet/${walletAddress}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      signal: AbortSignal.timeout(5000) // 5 second timeout
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      return data.user_name || null;
+    }
+    return null;
+  } catch (error) {
+    console.warn(`Could not get username for wallet ${walletAddress}:`, error);
+    return null;
+  }
+}
+
 // Add this function to handle the specific Airtable formula error
 function isAirtableFormulaError(error: any): boolean {
   const errorStr = String(error);
@@ -200,6 +223,13 @@ export async function POST(
     if (transaction.type === 'land' && transaction.asset_id) {
       console.log(`Updating land ownership for asset ${transaction.asset_id}`);
       
+      // Get the username for the buyer's wallet address
+      const buyerUsername = await getUsernameFromWallet(buyer);
+      
+      // Use the username if available, otherwise fall back to wallet address
+      const ownerToSet = buyerUsername || buyer;
+      console.log(`Setting land owner to ${ownerToSet} (username: ${buyerUsername}, wallet: ${buyer})`);
+      
       // Try multiple possible file paths for the land data
       const possiblePaths = [
         path.join(process.cwd(), 'data', `${transaction.asset_id}.json`),
@@ -225,11 +255,11 @@ export async function POST(
             // Convert to new format with owner
             land = {
               coordinates: land,
-              owner: buyer
+              owner: ownerToSet // Use username instead of wallet address
             };
           } else {
             // New format - update owner
-            land.owner = buyer;
+            land.owner = ownerToSet; // Use username instead of wallet address
           }
           
           // Save the updated land
@@ -245,7 +275,7 @@ export async function POST(
                 'Content-Type': 'application/json',
               },
               body: JSON.stringify({ 
-                owner: buyer
+                owner: ownerToSet // Use username instead of wallet address
               }),
               signal: AbortSignal.timeout(5000) // 5 second timeout
             });

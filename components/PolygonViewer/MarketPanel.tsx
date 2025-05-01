@@ -3,6 +3,21 @@ import { getApiBaseUrl } from '@/lib/apiUtils';
 import PlayerProfile from '../UI/PlayerProfile';
 import AnimatedDucats from '../UI/AnimatedDucats';
 
+// Add a function to get username from wallet address
+const getUsernameFromWallet = async (walletAddress: string): Promise<string | null> => {
+  try {
+    const response = await fetch(`${getApiBaseUrl()}/api/wallet/${walletAddress}`);
+    if (response.ok) {
+      const data = await response.json();
+      return data.user_name || null;
+    }
+    return null;
+  } catch (error) {
+    console.warn(`Could not get username for wallet ${walletAddress}:`, error);
+    return null;
+  }
+};
+
 interface Transaction {
   id: string;
   type: string;
@@ -150,11 +165,15 @@ const MarketPanel: React.FC<MarketPanelProps> = ({ visible, onClose }) => {
       // Remove the purchased transaction from the list
       setTransactions(transactions.filter(t => t.id !== transaction.id));
       
+      // Get the username for the wallet address
+      const username = await getUsernameFromWallet(walletAddress);
+      const ownerToSet = username || walletAddress;
+      
       // Dispatch event to update user profile with new compute amount
       window.dispatchEvent(new CustomEvent('landOwnershipChanged', {
         detail: { 
           landId: transaction.asset_id, 
-          newOwner: walletAddress
+          newOwner: ownerToSet // Use username instead of wallet address
         }
       }));
       

@@ -10,6 +10,21 @@ interface LandPurchaseModalProps {
   onComplete: () => void;
 }
 
+// Add a function to get username from wallet address
+const getUsernameFromWallet = async (walletAddress: string): Promise<string | null> => {
+  try {
+    const response = await fetch(`${getApiBaseUrl()}/api/wallet/${walletAddress}`);
+    if (response.ok) {
+      const data = await response.json();
+      return data.user_name || null;
+    }
+    return null;
+  } catch (error) {
+    console.warn(`Could not get username for wallet ${walletAddress}:`, error);
+    return null;
+  }
+};
+
 const LandPurchaseModal: React.FC<LandPurchaseModalProps> = ({
   visible,
   landId,
@@ -88,20 +103,24 @@ const LandPurchaseModal: React.FC<LandPurchaseModalProps> = ({
               executed_at: new Date().toISOString()
             };
             
+            // Get the username for the wallet address
+            const username = await getUsernameFromWallet(walletAddress);
+            const ownerToSet = username || walletAddress;
+      
             // Dispatch custom events to notify other components
             window.dispatchEvent(new CustomEvent('landOwnershipChanged', {
               detail: { 
                 landId: landId, 
-                newOwner: walletAddress,
+                newOwner: ownerToSet, // Use username instead of wallet address
                 transaction: localTransaction
               }
             }));
-            
+      
             // Dispatch a specific event for land purchase to update the panel
             window.dispatchEvent(new CustomEvent('landPurchased', {
               detail: { 
                 landId: landId, 
-                newOwner: walletAddress,
+                newOwner: ownerToSet, // Use username instead of wallet address
                 transaction: localTransaction
               }
             }));
@@ -128,11 +147,15 @@ const LandPurchaseModal: React.FC<LandPurchaseModalProps> = ({
           executed_at: new Date().toISOString()
         };
       
+        // Get the username for the wallet address
+        const username = await getUsernameFromWallet(walletAddress);
+        const ownerToSet = username || walletAddress;
+      
         // Dispatch custom events to notify other components
         window.dispatchEvent(new CustomEvent('landOwnershipChanged', {
           detail: { 
             landId: landId, 
-            newOwner: walletAddress,
+            newOwner: ownerToSet, // Use username instead of wallet address
             transaction: updatedTransaction
           }
         }));
@@ -141,7 +164,7 @@ const LandPurchaseModal: React.FC<LandPurchaseModalProps> = ({
         window.dispatchEvent(new CustomEvent('landPurchased', {
           detail: { 
             landId: landId, 
-            newOwner: walletAddress,
+            newOwner: ownerToSet, // Use username instead of wallet address
             transaction: updatedTransaction
           }
         }));
