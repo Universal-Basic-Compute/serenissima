@@ -437,10 +437,10 @@ export default class PolygonRenderer {
     
     // Position AT the center (y=0) instead of hovering above
     sprite.position.set(normalizedCoords.x, 0, -normalizedCoords.y);
-    
-    // Make sprites larger for better visibility
-    sprite.scale.set(2.5, 2.5, 1); // Increased from 1.2 to 2.5
-    
+  
+    // Make sprites 50% smaller than before
+    sprite.scale.set(1.25, 1.25, 1); // Reduced from 2.5 to 1.25
+  
     // Add to scene and store reference
     this.scene.add(sprite);
     this.coatOfArmSprites[polygon.id] = sprite;
