@@ -622,6 +622,11 @@ export default class LODPolygon {
     }
   }
   
+  // Add the getMesh method
+  public getMesh() {
+    return this.mesh;
+  }
+  
   // Helper method to update material color
   private updateMaterialColor(material: THREE.MeshBasicMaterial | THREE.MeshStandardMaterial) {
     // Determine the color to use
