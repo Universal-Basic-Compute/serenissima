@@ -125,6 +125,14 @@ export default class PolygonRenderer {
       if (users['ConsiglioDeiDieci']) {
         console.log('ConsiglioDeiDieci user data in PolygonRenderer:', users['ConsiglioDeiDieci']);
         console.log('ConsiglioDeiDieci color in PolygonRenderer:', users['ConsiglioDeiDieci'].color);
+      } else {
+        // If ConsiglioDeiDieci is missing, add it with default values
+        console.warn('ConsiglioDeiDieci not found in users data! Adding default entry in PolygonRenderer.');
+        this.users['ConsiglioDeiDieci'] = {
+          user_name: 'ConsiglioDeiDieci',
+          color: '#8B0000', // Dark red
+          coat_of_arms_image: null
+        };
       }
       
       Object.values(users).forEach(user => {
@@ -145,6 +153,13 @@ export default class PolygonRenderer {
           }
         }
       });
+      
+      // Always ensure ConsiglioDeiDieci has a color
+      if (!this.ownerColorMap['ConsiglioDeiDieci']) {
+        this.ownerColorMap['ConsiglioDeiDieci'] = '#8B0000'; // Dark red
+        console.log('Added missing ConsiglioDeiDieci color in PolygonRenderer');
+      }
+      
       console.log(`Processed ${Object.keys(this.ownerCoatOfArmsMap).length} coat of arms and ${Object.keys(this.ownerColorMap).length} colors from users data`);
     }
     
