@@ -146,25 +146,91 @@ export default class SceneSetup {
   
   private setupLights(activeView: ViewMode) {
     // Add simple ambient light
-    const ambientLight = new THREE.AmbientLight(0xffffff, 1.0);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.7); // Reduced intensity
     this.scene.add(ambientLight);
     
-    // Add a simple directional light
+    // Calculate sun position based on current time of day in Venice
+    const sunPosition = this.calculateSunPosition();
+    
+    // Add a directional light for the sun with greater distance
     this.sunLight = new THREE.DirectionalLight(0xffffff, 1.0);
-    this.sunLight.position.set(50, 100, 50);
+    this.sunLight.position.copy(sunPosition);
     this.sunLight.castShadow = false;
+    
+    // Make the light come from much further away (normalize and multiply)
+    this.sunLight.position.normalize().multiplyScalar(1000); // 1000 units away
+    
     this.scene.add(this.sunLight);
     
-    // Remove all the sun sphere, glow, and ray effects
-    // this.sunSphere = null;
-    // this.sunGlow = null;
+    // Add a small sun sphere very far away
+    const sunGeometry = new THREE.SphereGeometry(50, 16, 16); // Larger sphere since it's far away
+    const sunMaterial = new THREE.MeshBasicMaterial({ 
+      color: 0xffffcc, 
+      transparent: true,
+      opacity: 0.8
+    });
     
-    // Don't call animateSun
-    // this.animateSun();
+    this.sunSphere = new THREE.Mesh(sunGeometry, sunMaterial);
+    this.sunSphere.position.copy(this.sunLight.position);
+    this.scene.add(this.sunSphere);
+    
+    // Add a subtle glow around the sun
+    const sunGlowGeometry = new THREE.SphereGeometry(80, 16, 16);
+    const sunGlowMaterial = new THREE.MeshBasicMaterial({
+      color: 0xffffee,
+      transparent: true,
+      opacity: 0.3,
+      side: THREE.BackSide
+    });
+    
+    this.sunGlow = new THREE.Mesh(sunGlowGeometry, sunGlowMaterial);
+    this.sunGlow.position.copy(this.sunLight.position);
+    this.scene.add(this.sunGlow);
   }
   
   private animateSun() {
     // Do nothing - no sun animation
+  }
+  
+  private calculateSunPosition(): THREE.Vector3 {
+    // Get current time
+    const now = new Date();
+    const hours = now.getHours();
+    const minutes = now.getMinutes();
+    
+    // Convert to decimal hours (0-24)
+    const timeOfDay = hours + minutes / 60;
+    
+    // Venice coordinates (approximate)
+    const latitude = 45.4; // Venice latitude in degrees
+    
+    // Calculate sun position based on time of day
+    // This is a simplified model - for more accuracy you'd need solar calculations
+    
+    // Map time to angle (0 at midnight, π at noon)
+    const sunAngle = ((timeOfDay - 12) / 12) * Math.PI;
+    
+    // Calculate height based on time (highest at noon)
+    // Adjust for latitude - sun is lower in northern latitudes
+    const maxHeight = Math.cos((90 - latitude) * Math.PI / 180);
+    const height = Math.sin(sunAngle) * maxHeight;
+    
+    // Calculate east-west position (east in morning, west in evening)
+    const eastWest = Math.cos(sunAngle);
+    
+    // Calculate north-south position (more southern in winter, northern in summer)
+    // This is a very simplified seasonal adjustment
+    const month = now.getMonth(); // 0-11
+    const seasonalOffset = Math.cos(((month - 6) / 6) * Math.PI) * 0.4;
+    const northSouth = -seasonalOffset; // Negative because south is negative Z in Three.js
+    
+    // Create position vector
+    // X = east(+)/west(-), Y = up, Z = north(+)/south(-)
+    return new THREE.Vector3(
+      eastWest * 100,
+      Math.max(0.1, height) * 100, // Ensure sun is always at least slightly above horizon
+      northSouth * 100
+    );
   }
   
   

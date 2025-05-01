@@ -57,8 +57,18 @@ export default class WaterEffect {
     this.height = height;
     this.renderer = renderer;
     
-    // Set up sun position for reflections
-    this.sunPosition = new THREE.Vector3(50, 100, 50);
+    // Get the sun position from the scene if available
+    const sunLight = this.scene.children.find(child => 
+      child instanceof THREE.DirectionalLight && child !== this.causticLight
+    ) as THREE.DirectionalLight | undefined;
+
+    if (sunLight) {
+      this.sunPosition = sunLight.position.clone();
+    } else {
+      // Default position if no sun light found
+      this.sunPosition = new THREE.Vector3(100, 100, 100);
+    }
+    
     this.sunDirection = new THREE.Vector3()
       .copy(this.sunPosition)
       .normalize();
@@ -82,6 +92,18 @@ export default class WaterEffect {
   
   // Add method to create a sun reflection
   private createSunReflection() {
+    // Get the sun position projected onto the water plane
+    const sunProjection = new THREE.Vector3();
+    sunProjection.copy(this.sunPosition);
+    
+    // Scale down the position to fit within the water plane
+    const maxDimension = Math.max(this.width, this.height);
+    const scale = maxDimension / (2 * sunProjection.length());
+    sunProjection.multiplyScalar(scale * 0.5);
+    
+    // Keep only the X and Z components for the water plane
+    sunProjection.y = -0.1; // Just above water level
+    
     // Create a circular highlight that will represent the sun's reflection
     const reflectionGeometry = new THREE.CircleGeometry(15, 32);
     const reflectionMaterial = new THREE.MeshBasicMaterial({
@@ -94,7 +116,7 @@ export default class WaterEffect {
     
     this.sunReflection = new THREE.Mesh(reflectionGeometry, reflectionMaterial);
     this.sunReflection.rotation.x = -Math.PI / 2;
-    this.sunReflection.position.set(50, -0.1, 50); // Position based on sun direction
+    this.sunReflection.position.copy(sunProjection);
     this.scene.add(this.sunReflection);
   }
   
@@ -388,11 +410,15 @@ export default class WaterEffect {
       const reflectionScale = 1.0 + Math.sin(frameCount * 0.02) * 0.1;
       this.sunReflection.scale.set(reflectionScale, reflectionScale, 1);
       
-      // Slightly move the reflection
+      // Slightly move the reflection to simulate water movement
+      const basePosition = new THREE.Vector3();
+      basePosition.copy(this.sunReflection.position);
+      
       const offsetX = Math.sin(frameCount * 0.01) * 5;
       const offsetZ = Math.cos(frameCount * 0.015) * 5;
-      this.sunReflection.position.x = 50 + offsetX;
-      this.sunReflection.position.z = 50 + offsetZ;
+      
+      this.sunReflection.position.x = basePosition.x + offsetX;
+      this.sunReflection.position.z = basePosition.z + offsetZ;
     }
     
     // Update shore interaction - only do this every few frames to reduce flickering
