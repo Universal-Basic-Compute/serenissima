@@ -104,6 +104,9 @@ export default class PolygonRenderer {
     sandNormalMap?: THREE.Texture;
     sandRoughnessMap?: THREE.Texture;
   } = {};
+  
+  // Add sun reflection property
+  private sunReflection: THREE.Mesh | null = null;
 
   constructor({
     scene,
