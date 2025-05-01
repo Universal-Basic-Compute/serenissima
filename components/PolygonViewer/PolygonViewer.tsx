@@ -631,14 +631,13 @@ export default function PolygonViewer() {
   ), [activeView, setActiveView]);
   
   const LandDetailsPanelMemo = useMemo(() => (
-    activeView === 'land' && (
-      <LandDetailsPanel 
-        selectedPolygonId={selectedPolygonId} 
-        onClose={handleCloseLandDetails}
-        polygons={polygons}
-        landOwners={landOwners}
-      />
-    )
+    <LandDetailsPanel 
+      selectedPolygonId={selectedPolygonId} 
+      onClose={handleCloseLandDetails}
+      polygons={polygons}
+      landOwners={landOwners}
+      visible={activeView === 'land'} // Pass visibility as a prop instead
+    />
   ), [activeView, selectedPolygonId, handleCloseLandDetails, polygons, landOwners]);
   
   return (

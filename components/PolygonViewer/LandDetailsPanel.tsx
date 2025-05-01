@@ -10,9 +10,10 @@ interface LandDetailsPanelProps {
   onClose: () => void;
   polygons: Polygon[];
   landOwners: Record<string, string>;
+  visible?: boolean; // Add this prop
 }
 
-export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons, landOwners }: LandDetailsPanelProps) {
+export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons, landOwners, visible = true }: LandDetailsPanelProps) {
   const router = useRouter();
   const [isVisible, setIsVisible] = useState(false);
   const [transaction, setTransaction] = useState<any>(null);
@@ -132,7 +133,8 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
     }
   }, [selectedPolygonId]);
   
-  if (!selectedPolygonId) return null;
+  // Early return if not visible or no selected polygon
+  if (!visible || !selectedPolygonId) return null;
   
   return (
     <div 
