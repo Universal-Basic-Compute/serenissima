@@ -55,6 +55,11 @@ export default function Home() {
   const [bridgeStartLandId, setBridgeStartLandId] = useState<string | null>(null);
   const [activeLandPolygons, setActiveLandPolygons] = useState<{[id: string]: google.maps.Polygon}>({});
   
+  // Add these new state variables for delete mode
+  const [deleteMode, setDeleteMode] = useState(false);
+  const [selectedMapPolygon, setSelectedMapPolygon] = useState<google.maps.Polygon | null>(null);
+  const [selectedMapPolygonId, setSelectedMapPolygonId] = useState<string | null>(null);
+  
   // Initialize wallet adapter
   useEffect(() => {
     const adapter = new PhantomWalletAdapter();
@@ -292,72 +297,177 @@ export default function Home() {
     }
   };
 
-  // Add this function to handle map clicks for bridge creation
+  // Add this function to handle map clicks for bridge creation and polygon selection
   const handleMapClick = (event: google.maps.MapMouseEvent) => {
-    if (!bridgeMode || !event.latLng) return;
+    if (!event.latLng) return;
     
-    // Find which polygon was clicked
-    let clickedPolygonId = null;
-    
-    for (const [id, polygon] of Object.entries(activeLandPolygons)) {
-      if (google.maps.geometry.poly.containsLocation(event.latLng, polygon)) {
-        clickedPolygonId = id;
-        break;
+    if (deleteMode) {
+      // Find which polygon was clicked
+      let clickedPolygonId = null;
+      let clickedPolygon = null;
+      
+      for (const [id, polygon] of Object.entries(activeLandPolygons)) {
+        if (google.maps.geometry.poly.containsLocation(event.latLng, polygon)) {
+          clickedPolygonId = id;
+          clickedPolygon = polygon;
+          break;
+        }
       }
-    }
-    
-    if (!clickedPolygonId) {
-      alert('Please click on a land polygon');
-      return;
-    }
-    
-    if (!bridgeStart) {
-      // Set bridge start point
-      setBridgeStart(event.latLng);
-      setBridgeStartLandId(clickedPolygonId);
-      alert(`Bridge start point set on land ${clickedPolygonId}`);
-    } else {
-      // Set bridge end point and create bridge
-      if (clickedPolygonId === bridgeStartLandId) {
-        alert('Bridge must connect two different lands');
+      
+      if (!clickedPolygonId || !clickedPolygon) {
+        // If we didn't click on a polygon, deselect the current one
+        if (selectedMapPolygon) {
+          selectedMapPolygon.setOptions({
+            strokeColor: '#3388ff',
+            strokeOpacity: 0.8,
+            fillColor: '#3388ff',
+            fillOpacity: 0.35
+          });
+        }
+        setSelectedMapPolygon(null);
+        setSelectedMapPolygonId(null);
         return;
       }
       
-      // Create bridge
-      const bridge = {
-        id: `bridge-${Date.now()}`,
-        startPoint: {
-          lat: bridgeStart.lat(),
-          lng: bridgeStart.lng()
-        },
-        endPoint: {
-          lat: event.latLng.lat(),
-          lng: event.latLng.lng()
-        },
-        startLandId: bridgeStartLandId,
-        endLandId: clickedPolygonId
-      };
+      // If we already had a selected polygon, reset its style
+      if (selectedMapPolygon && selectedMapPolygon !== clickedPolygon) {
+        selectedMapPolygon.setOptions({
+          strokeColor: '#3388ff',
+          strokeOpacity: 0.8,
+          fillColor: '#3388ff',
+          fillOpacity: 0.35
+        });
+      }
       
-      // Save bridge to file
-      saveBridgeToFile(bridge);
+      // Select the clicked polygon
+      setSelectedMapPolygon(clickedPolygon);
+      setSelectedMapPolygonId(clickedPolygonId);
       
-      // Reset bridge mode
-      setBridgeStart(null);
-      setBridgeStartLandId(null);
-      
-      // Draw bridge line on map
-      const bridgeLine = new google.maps.Polyline({
-        path: [
-          { lat: bridge.startPoint.lat, lng: bridge.startPoint.lng },
-          { lat: bridge.endPoint.lat, lng: bridge.endPoint.lng }
-        ],
-        geodesic: true,
-        strokeColor: '#FF0000',
+      // Highlight the selected polygon
+      clickedPolygon.setOptions({
+        strokeColor: '#ff0000',
         strokeOpacity: 1.0,
-        strokeWeight: 3
+        fillColor: '#ff0000',
+        fillOpacity: 0.5
       });
       
-      bridgeLine.setMap(mapRef.current);
+      return;
+    }
+    
+    if (bridgeMode) {
+      // Find which polygon was clicked
+      let clickedPolygonId = null;
+      
+      for (const [id, polygon] of Object.entries(activeLandPolygons)) {
+        if (google.maps.geometry.poly.containsLocation(event.latLng, polygon)) {
+          clickedPolygonId = id;
+          break;
+        }
+      }
+      
+      if (!clickedPolygonId) {
+        alert('Please click on a land polygon');
+        return;
+      }
+      
+      if (!bridgeStart) {
+        // Set bridge start point
+        setBridgeStart(event.latLng);
+        setBridgeStartLandId(clickedPolygonId);
+        alert(`Bridge start point set on land ${clickedPolygonId}`);
+      } else {
+        // Set bridge end point and create bridge
+        if (clickedPolygonId === bridgeStartLandId) {
+          alert('Bridge must connect two different lands');
+          return;
+        }
+        
+        // Create bridge
+        const bridge = {
+          id: `bridge-${Date.now()}`,
+          startPoint: {
+            lat: bridgeStart.lat(),
+            lng: bridgeStart.lng()
+          },
+          endPoint: {
+            lat: event.latLng.lat(),
+            lng: event.latLng.lng()
+          },
+          startLandId: bridgeStartLandId,
+          endLandId: clickedPolygonId
+        };
+        
+        // Save bridge to file
+        saveBridgeToFile(bridge);
+        
+        // Reset bridge mode
+        setBridgeStart(null);
+        setBridgeStartLandId(null);
+        
+        // Draw bridge line on map
+        const bridgeLine = new google.maps.Polyline({
+          path: [
+            { lat: bridge.startPoint.lat, lng: bridge.startPoint.lng },
+            { lat: bridge.endPoint.lat, lng: bridge.endPoint.lng }
+          ],
+          geodesic: true,
+          strokeColor: '#FF0000',
+          strokeOpacity: 1.0,
+          strokeWeight: 3
+        });
+        
+        bridgeLine.setMap(mapRef.current);
+      }
+    }
+  };
+  
+  // Add this function to handle polygon deletion
+  const handleDeletePolygon = async () => {
+    if (!selectedMapPolygonId || !selectedMapPolygon) {
+      alert('Please select a polygon to delete first');
+      return;
+    }
+    
+    // Confirm deletion
+    if (!confirm(`Are you sure you want to delete this polygon: ${selectedMapPolygonId}?`)) {
+      return;
+    }
+    
+    try {
+      const response = await fetch('/api/delete-polygon', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id: selectedMapPolygonId }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to delete polygon');
+      }
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        // Remove the polygon from the map
+        selectedMapPolygon.setMap(null);
+        
+        // Remove from active polygons
+        const newActiveLandPolygons = { ...activeLandPolygons };
+        delete newActiveLandPolygons[selectedMapPolygonId];
+        setActiveLandPolygons(newActiveLandPolygons);
+        
+        // Reset selection
+        setSelectedMapPolygon(null);
+        setSelectedMapPolygonId(null);
+        
+        alert('Polygon deleted successfully');
+      } else {
+        alert(`Failed to delete polygon: ${data.error}`);
+      }
+    } catch (error) {
+      console.error('Error deleting polygon:', error);
+      alert('An error occurred while deleting the polygon');
     }
   };
 
@@ -556,6 +666,33 @@ export default function Home() {
             }`}
           >
             {bridgeMode ? 'Cancel Bridge' : 'Add Bridge'}
+          </button>
+        </div>
+      )}
+      
+      {/* Delete mode button */}
+      {isGoogleLoaded && (
+        <div className="absolute bottom-4 left-36 z-10">
+          <button
+            onClick={handleDeleteMode}
+            className={`px-4 py-2 rounded shadow ${
+              deleteMode ? 'bg-red-500 text-white' : 'bg-white'
+            }`}
+          >
+            {deleteMode ? 'Cancel Delete' : 'Delete Polygon'}
+          </button>
+        </div>
+      )}
+      
+      {/* Delete confirmation button - only show when a polygon is selected in delete mode */}
+      {deleteMode && selectedMapPolygonId && (
+        <div className="absolute bottom-16 left-36 z-10 bg-white p-2 rounded shadow">
+          <p className="mb-2">Selected: {selectedMapPolygonId}</p>
+          <button
+            onClick={handleDeletePolygon}
+            className="px-4 py-2 bg-red-500 text-white rounded shadow hover:bg-red-600"
+          >
+            Confirm Delete
           </button>
         </div>
       )}
