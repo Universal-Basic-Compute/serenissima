@@ -54,14 +54,9 @@ export default class InteractionManager {
   
   private onMouseClick(event: MouseEvent) {
     // CRITICAL: Only handle left-click when no modifier keys are pressed
-    // This ensures camera controls have complete priority
     if (event.button !== 0 || event.ctrlKey || event.shiftKey || event.altKey || event.metaKey) {
       return;
     }
-    
-    // Store the current camera position and rotation before any operations
-    const currentCameraPosition = this.camera.position.clone();
-    const currentCameraQuaternion = this.camera.quaternion.clone();
     
     // Calculate mouse position in normalized device coordinates (-1 to +1)
     this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
@@ -83,15 +78,10 @@ export default class InteractionManager {
       );
       
       if (clickedId) {
-        // If clicking the same polygon, deselect it
-        if (clickedId === this.selectedPolygonId) {
-          this.setSelectedPolygonId(null);
-          this.selectedPolygonId = null;
-        } else {
-          // Select the new polygon
-          this.setSelectedPolygonId(clickedId);
-          this.selectedPolygonId = clickedId;
-        }
+        // ONLY update the selection state, nothing else
+        // Don't touch the camera at all
+        this.setSelectedPolygonId(clickedId === this.selectedPolygonId ? null : clickedId);
+        this.selectedPolygonId = clickedId === this.selectedPolygonId ? null : clickedId;
       }
     } else {
       // Clicking on empty space, deselect current selection
@@ -101,10 +91,7 @@ export default class InteractionManager {
       }
     }
     
-    // CRITICAL: Restore camera position and rotation after the click operation
-    // This prevents any camera resets that might have occurred
-    this.camera.position.copy(currentCameraPosition);
-    this.camera.quaternion.copy(currentCameraQuaternion);
+    // DO NOT touch the camera at all - no camera-related code here
   }
   
   public cleanup() {
