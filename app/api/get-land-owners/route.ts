@@ -78,7 +78,7 @@ export async function GET(request: Request) {
       return NextResponse.json({
         success: true,
         lands: [],
-        _error: fetchError.message
+        _error: fetchError instanceof Error ? fetchError.message : String(fetchError)
       });
     }
   } catch (error) {
@@ -90,7 +90,7 @@ export async function GET(request: Request) {
       return NextResponse.json({
         ...cachedData,
         _cached: true,
-        _error: error.message
+        _error: error instanceof Error ? error.message : String(error)
       });
     }
     

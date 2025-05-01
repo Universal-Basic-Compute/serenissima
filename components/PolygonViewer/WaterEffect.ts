@@ -26,6 +26,24 @@ export default class WaterEffect {
   private landBuffer: THREE.BufferAttribute;
   private clock: THREE.Clock;
   private sunReflection: THREE.Mesh | null = null;
+  private water: any = null;
+  private waterFoam: THREE.Mesh | null = null;
+  private foamTexture: THREE.Texture | null = null;
+  private shoreMesh: THREE.Mesh | null = null;
+  private landRenderTarget: THREE.WebGLRenderTarget | null = null;
+  private landCamera: THREE.OrthographicCamera | null = null;
+  private causticMesh: THREE.Mesh | null = null;
+  private causticLight: THREE.DirectionalLight | null = null;
+  private causticTextures: THREE.Texture[] = [];
+  private sunPosition: THREE.Vector3 = new THREE.Vector3();
+  private sunDirection: THREE.Vector3 = new THREE.Vector3();
+  private textureLoader: THREE.TextureLoader;
+  private waterNormalMap: THREE.Texture | null = null;
+  
+  // Static properties
+  private static textureLoader: THREE.TextureLoader | null = null;
+  private static foamTexture: THREE.Texture | null = null;
+  private static causticTextures: THREE.Texture[] | null = null;
 
   constructor({
     scene,
