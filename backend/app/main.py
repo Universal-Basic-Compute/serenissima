@@ -662,6 +662,131 @@ async def get_lands_basic():
         traceback.print_exc(file=sys.stdout)
         raise HTTPException(status_code=500, detail=error_msg)
 
+@app.post("/api/land/{land_id}/update-owner")
+async def update_land_owner(land_id: str, data: dict):
+    """Update the owner of a land record"""
+    
+    if not data.get("owner"):
+        raise HTTPException(status_code=400, detail="Owner is required")
+    
+    try:
+        # Check if land exists
+        formula = f"{{LandId}}='{land_id}'"
+        print(f"Searching for land with formula: {formula}")
+        existing_records = lands_table.all(formula=formula)
+        
+        if existing_records:
+            # Update existing record
+            record = existing_records[0]
+            print(f"Found existing land record: {record['id']}")
+            
+            # Update the owner
+            updated_record = lands_table.update(record["id"], {
+                "User": data["owner"],
+                "Wallet": data.get("wallet", data["owner"])  # Use wallet if provided, otherwise use owner
+            })
+            
+            return {
+                "id": updated_record["id"],
+                "land_id": updated_record["fields"].get("LandId", ""),
+                "user": updated_record["fields"].get("User", ""),
+                "wallet_address": updated_record["fields"].get("Wallet", ""),
+                "historical_name": updated_record["fields"].get("HistoricalName", None),
+                "english_name": updated_record["fields"].get("EnglishName", None),
+                "description": updated_record["fields"].get("Description", None)
+            }
+        else:
+            # Create new record
+            fields = {
+                "LandId": land_id,
+                "User": data["owner"],
+                "Wallet": data.get("wallet", data["owner"])  # Use wallet if provided, otherwise use owner
+            }
+            
+            # Add optional fields if provided
+            if data.get("historical_name"):
+                fields["HistoricalName"] = data["historical_name"]
+                
+            if data.get("english_name"):
+                fields["EnglishName"] = data["english_name"]
+                
+            if data.get("description"):
+                fields["Description"] = data["description"]
+            
+            print(f"Creating new land record with fields: {fields}")
+            record = lands_table.create(fields)
+            print(f"Created new land record: {record['id']}")
+            
+            return {
+                "id": record["id"],
+                "land_id": record["fields"].get("LandId", ""),
+                "user": record["fields"].get("User", ""),
+                "wallet_address": record["fields"].get("Wallet", ""),
+                "historical_name": record["fields"].get("HistoricalName", None),
+                "english_name": record["fields"].get("EnglishName", None),
+                "description": record["fields"].get("Description", None)
+            }
+    except Exception as e:
+        error_msg = f"Failed to update land owner: {str(e)}"
+        print(f"ERROR: {error_msg}")
+        traceback.print_exc(file=sys.stdout)
+        raise HTTPException(status_code=500, detail=error_msg)
+
+@app.post("/api/direct-land-update")
+async def direct_land_update(data: dict):
+    """Direct update of land ownership - simplified endpoint for emergency updates"""
+    
+    if not data.get("land_id"):
+        raise HTTPException(status_code=400, detail="Land ID is required")
+    
+    if not data.get("owner"):
+        raise HTTPException(status_code=400, detail="Owner is required")
+    
+    try:
+        # Check if land exists
+        formula = f"{{LandId}}='{data['land_id']}'"
+        print(f"Searching for land with formula: {formula}")
+        existing_records = lands_table.all(formula=formula)
+        
+        if existing_records:
+            # Update existing record
+            record = existing_records[0]
+            print(f"Found existing land record: {record['id']}")
+            
+            # Update the owner
+            updated_record = lands_table.update(record["id"], {
+                "User": data["owner"],
+                "Wallet": data.get("wallet", data["owner"])  # Use wallet if provided, otherwise use owner
+            })
+            
+            return {
+                "success": True,
+                "message": f"Land {data['land_id']} owner updated to {data['owner']}",
+                "id": updated_record["id"]
+            }
+        else:
+            # Create new record
+            fields = {
+                "LandId": data["land_id"],
+                "User": data["owner"],
+                "Wallet": data.get("wallet", data["owner"])  # Use wallet if provided, otherwise use owner
+            }
+            
+            print(f"Creating new land record with fields: {fields}")
+            record = lands_table.create(fields)
+            print(f"Created new land record: {record['id']}")
+            
+            return {
+                "success": True,
+                "message": f"Land {data['land_id']} record created with owner {data['owner']}",
+                "id": record["id"]
+            }
+    except Exception as e:
+        error_msg = f"Failed to update land owner: {str(e)}"
+        print(f"ERROR: {error_msg}")
+        traceback.print_exc(file=sys.stdout)
+        raise HTTPException(status_code=500, detail=error_msg)
+
 @app.delete("/api/land/{land_id}")
 async def delete_land(land_id: str):
     """Delete a land record from Airtable"""
