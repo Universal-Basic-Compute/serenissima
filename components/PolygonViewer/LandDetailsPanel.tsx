@@ -60,6 +60,14 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
         if (event.detail.transaction) {
           setTransaction(event.detail.transaction);
         }
+        
+        // Force the panel to stay visible
+        setIsVisible(true);
+        
+        // Dispatch event to keep panel open
+        window.dispatchEvent(new CustomEvent('keepLandDetailsPanelOpen', {
+          detail: { polygonId: selectedPolygonId }
+        }));
       }
     };
 
