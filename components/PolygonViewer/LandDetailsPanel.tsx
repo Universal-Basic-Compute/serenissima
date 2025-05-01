@@ -213,7 +213,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
             <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
               <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">For Sale</h3>
               <p className="text-2xl font-semibold text-green-600 text-center">
-                {transaction.price.toLocaleString()} <span className="text-sm">ducats</span>
+                {transaction.price.toLocaleString()} <span className="text-sm">⚜️ ducats</span>
               </p>
               
               {/* Add Acquire Land button with improved styling */}
@@ -379,7 +379,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
                   <div key={index} className="p-3 rounded-lg bg-amber-50 border border-amber-200">
                     <div className="flex justify-between items-center">
                       <span className="font-semibold text-green-600">
-                        {offer.price.toLocaleString()} <span className="text-xs">ducats</span>
+                        {offer.price.toLocaleString()} <span className="text-xs">⚜️ ducats</span>
                       </span>
                       <span className="text-xs text-amber-700 bg-amber-100 px-2 py-1 rounded-full">
                         {new Date(offer.created_at).toLocaleDateString()}
@@ -513,7 +513,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
                     value={offerAmount}
                     onChange={(e) => setOfferAmount(parseInt(e.target.value) || 0)}
                     className="px-3 py-2 border border-amber-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-amber-500"
-                    placeholder="Offer amount in ducats"
+                    placeholder="Offer amount in ⚜️ ducats"
                     min="1"
                   />
                   <ActionButton
@@ -554,7 +554,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
                         }
                         
                         const data = await response.json();
-                        alert(`Offer of ${offerAmount.toLocaleString()} ducats created successfully!`);
+                        alert(`Offer of ${offerAmount.toLocaleString()} ⚜️ ducats created successfully!`);
                         setShowOfferInput(false);
                       } catch (error) {
                         console.error('Error creating offer:', error);
@@ -617,7 +617,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
                     return response.json();
                   })
                   .then(data => {
-                    alert(`Successfully purchased ${selectedPolygon?.historicalName || selectedPolygonId}`);
+                    alert(`Successfully acquired ${selectedPolygon?.historicalName || selectedPolygonId}`);
                     // Refresh the page to update the UI
                     window.location.reload();
                   })
