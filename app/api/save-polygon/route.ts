@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { updateOrCreatePolygonFile } from '@/lib/fileUtils';
+import { serverUtils } from '@/lib/fileUtils';
 
 export async function POST(request: Request) {
   try {
@@ -14,13 +14,12 @@ export async function POST(request: Request) {
     }
     
     // Calculate centroid and update or create file
-    const result = updateOrCreatePolygonFile(coordinates);
+    const result = serverUtils.updateOrCreatePolygonFile(coordinates);
     
     return NextResponse.json({ 
       success: true, 
       filename: result.filename,
-      isNew: result.isNew,
-      centroid: result.centroid
+      isNew: result.isNew
     });
   } catch (error) {
     console.error('Error saving polygon:', error);

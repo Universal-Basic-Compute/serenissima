@@ -1,13 +1,13 @@
 import { NextResponse } from 'next/server';
-import { getAllJsonFiles, readJsonFromFile } from '@/lib/fileUtils';
+import { serverUtils, calculateCentroid } from '@/lib/fileUtils';
 
 export async function GET() {
   try {
     // Read all JSON files in the data directory
-    const files = getAllJsonFiles();
+    const files = serverUtils.getAllJsonFiles();
     
     const polygons = files.map(file => {
-      const data = readJsonFromFile(file);
+      const data = serverUtils.readJsonFromFile(file);
       const id = file.replace('.json', '');
       
       // Handle both old and new data formats
@@ -50,25 +50,4 @@ export async function GET() {
       { status: 500 }
     );
   }
-}
-
-// Helper function to calculate centroid
-function calculateCentroid(coordinates) {
-  if (!coordinates || coordinates.length < 3) {
-    return null;
-  }
-
-  let sumLat = 0;
-  let sumLng = 0;
-  const n = coordinates.length;
-  
-  for (let i = 0; i < n; i++) {
-    sumLat += coordinates[i].lat;
-    sumLng += coordinates[i].lng;
-  }
-
-  return {
-    lat: sumLat / n,
-    lng: sumLng / n
-  };
 }

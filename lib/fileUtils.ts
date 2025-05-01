@@ -1,66 +1,33 @@
-import fs from 'fs';
 import path from 'path';
 
 export const DATA_DIR = path.join(process.cwd(), 'data');
 
-export function ensureDataDirExists() {
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR);
-  }
-  return DATA_DIR;
-}
-
-export function saveJsonToFile(filename: string, data: any) {
-  const dataDir = ensureDataDirExists();
-  const filePath = path.join(dataDir, filename);
-  fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
-  return filePath;
-}
-
-export function updateOrCreatePolygonFile(coordinates: any[], centroid: any = null) {
-  // Calculate centroid if not provided
-  if (!centroid) {
-    centroid = calculateCentroid(coordinates);
-  }
-  
-  // Check if a similar polygon already exists
-  const existingFiles = getAllJsonFiles();
-  for (const file of existingFiles) {
-    const existingData = readJsonFromFile(file);
-    
-    // Skip if not a polygon file
-    if (!existingData || !existingData.coordinates) continue;
-    
-    // Check if centroids are very close (within ~10 meters)
-    if (existingData.centroid && centroid) {
-      const distance = calculateDistance(existingData.centroid, centroid);
-      if (distance < 0.0001) { // Approximately 10 meters
-        // Update existing file
-        const updatedData = {
-          coordinates,
-          centroid
-        };
-        saveJsonToFile(file, updatedData);
-        return { filename: file, isNew: false };
-      }
-    }
-  }
-  
-  // No similar polygon found, create a new file
-  const filename = `polygon-${Date.now()}.json`;
-  const polygonData = {
-    coordinates,
-    centroid
-  };
-  saveJsonToFile(filename, polygonData);
-  return { filename, isNew: true };
-}
-
 // Helper function to calculate distance between two coordinates
-function calculateDistance(coord1: any, coord2: any) {
+export function calculateDistance(coord1: any, coord2: any) {
   const latDiff = coord1.lat - coord2.lat;
   const lngDiff = coord1.lng - coord2.lng;
   return Math.sqrt(latDiff * latDiff + lngDiff * lngDiff);
+}
+
+// Helper function to calculate centroid
+export function calculateCentroid(coordinates: any[]) {
+  if (!coordinates || coordinates.length < 3) {
+    return null;
+  }
+
+  let sumLat = 0;
+  let sumLng = 0;
+  const n = coordinates.length;
+  
+  for (let i = 0; i < n; i++) {
+    sumLat += coordinates[i].lat;
+    sumLng += coordinates[i].lng;
+  }
+
+  return {
+    lat: sumLat / n,
+    lng: sumLng / n
+  };
 }
 
 // Add these functions to lib/fileUtils.ts
@@ -107,78 +74,127 @@ export function findClosestPointOnLineSegment(point: {lat: number, lng: number},
   };
 }
 
-// Helper function to calculate centroid
-function calculateCentroid(coordinates: any[]) {
-  if (!coordinates || coordinates.length < 3) {
-    return null;
-  }
+// Create server-only versions of these functions
+// These will be used only in API routes
+export const serverUtils = {
+  ensureDataDirExists: null as any,
+  saveJsonToFile: null as any,
+  readJsonFromFile: null as any,
+  getAllJsonFiles: null as any,
+  updateOrCreatePolygonFile: null as any,
+  cleanupDuplicatePolygons: null as any
+};
 
-  let sumLat = 0;
-  let sumLng = 0;
-  const n = coordinates.length;
+// Only import fs and initialize server functions if we're on the server
+if (typeof window === 'undefined') {
+  // We're on the server
+  const fs = require('fs');
   
-  for (let i = 0; i < n; i++) {
-    sumLat += coordinates[i].lat;
-    sumLng += coordinates[i].lng;
-  }
-
-  return {
-    lat: sumLat / n,
-    lng: sumLng / n
+  serverUtils.ensureDataDirExists = () => {
+    if (!fs.existsSync(DATA_DIR)) {
+      fs.mkdirSync(DATA_DIR, { recursive: true });
+    }
+    return DATA_DIR;
   };
-}
-
-export function readJsonFromFile(filename: string) {
-  const filePath = path.join(DATA_DIR, filename);
-  if (!fs.existsSync(filePath)) {
-    return null;
-  }
-  const fileContent = fs.readFileSync(filePath, 'utf8');
-  return JSON.parse(fileContent);
-}
-
-export function getAllJsonFiles() {
-  const dataDir = ensureDataDirExists();
-  const files = fs.readdirSync(dataDir).filter(file => file.endsWith('.json'));
-  return files;
-}
-
-export function cleanupDuplicatePolygons() {
-  const files = getAllJsonFiles();
-  const processedCentroids: {[key: string]: string} = {};
-  const filesToDelete: string[] = [];
   
-  // First pass: identify duplicates
-  for (const file of files) {
-    const data = readJsonFromFile(file);
-    if (!data || !data.centroid) continue;
-    
-    // Create a key based on centroid coordinates (rounded to 5 decimal places)
-    const centroidKey = `${data.centroid.lat.toFixed(5)},${data.centroid.lng.toFixed(5)}`;
-    
-    if (processedCentroids[centroidKey]) {
-      // This is a duplicate, mark for deletion
-      filesToDelete.push(file);
-    } else {
-      // This is the first occurrence, keep it
-      processedCentroids[centroidKey] = file;
+  serverUtils.saveJsonToFile = (filename: string, data: any) => {
+    const dataDir = serverUtils.ensureDataDirExists();
+    const filePath = path.join(dataDir, filename);
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+    return filePath;
+  };
+  
+  serverUtils.readJsonFromFile = (filename: string) => {
+    const filePath = path.join(DATA_DIR, filename);
+    if (!fs.existsSync(filePath)) {
+      return null;
     }
-  }
+    const fileContent = fs.readFileSync(filePath, 'utf8');
+    return JSON.parse(fileContent);
+  };
   
-  // Second pass: delete duplicates
-  for (const file of filesToDelete) {
-    const filePath = path.join(DATA_DIR, file);
-    try {
-      fs.unlinkSync(filePath);
-      console.log(`Deleted duplicate polygon: ${file}`);
-    } catch (error) {
-      console.error(`Failed to delete ${file}:`, error);
+  serverUtils.getAllJsonFiles = () => {
+    const dataDir = serverUtils.ensureDataDirExists();
+    const files = fs.readdirSync(dataDir).filter(file => file.endsWith('.json'));
+    return files;
+  };
+  
+  serverUtils.updateOrCreatePolygonFile = (coordinates: any[], centroid: any = null) => {
+    // Calculate centroid if not provided
+    if (!centroid) {
+      centroid = calculateCentroid(coordinates);
     }
-  }
+    
+    // Check if a similar polygon already exists
+    const existingFiles = serverUtils.getAllJsonFiles();
+    for (const file of existingFiles) {
+      const existingData = serverUtils.readJsonFromFile(file);
+      
+      // Skip if not a polygon file
+      if (!existingData || !existingData.coordinates) continue;
+      
+      // Check if centroids are very close (within ~10 meters)
+      if (existingData.centroid && centroid) {
+        const distance = calculateDistance(existingData.centroid, centroid);
+        if (distance < 0.0001) { // Approximately 10 meters
+          // Update existing file
+          const updatedData = {
+            coordinates,
+            centroid
+          };
+          serverUtils.saveJsonToFile(file, updatedData);
+          return { filename: file, isNew: false };
+        }
+      }
+    }
+    
+    // No similar polygon found, create a new file
+    const filename = `polygon-${Date.now()}.json`;
+    const polygonData = {
+      coordinates,
+      centroid
+    };
+    serverUtils.saveJsonToFile(filename, polygonData);
+    return { filename, isNew: true };
+  };
   
-  return {
-    total: files.length,
-    deleted: filesToDelete.length,
-    remaining: files.length - filesToDelete.length
+  serverUtils.cleanupDuplicatePolygons = () => {
+    const files = serverUtils.getAllJsonFiles();
+    const processedCentroids: {[key: string]: string} = {};
+    const filesToDelete: string[] = [];
+    
+    // First pass: identify duplicates
+    for (const file of files) {
+      const data = serverUtils.readJsonFromFile(file);
+      if (!data || !data.centroid) continue;
+      
+      // Create a key based on centroid coordinates (rounded to 5 decimal places)
+      const centroidKey = `${data.centroid.lat.toFixed(5)},${data.centroid.lng.toFixed(5)}`;
+      
+      if (processedCentroids[centroidKey]) {
+        // This is a duplicate, mark for deletion
+        filesToDelete.push(file);
+      } else {
+        // This is the first occurrence, keep it
+        processedCentroids[centroidKey] = file;
+      }
+    }
+    
+    // Second pass: delete duplicates
+    for (const file of filesToDelete) {
+      const filePath = path.join(DATA_DIR, file);
+      try {
+        fs.unlinkSync(filePath);
+        console.log(`Deleted duplicate polygon: ${file}`);
+      } catch (error) {
+        console.error(`Failed to delete ${file}:`, error);
+      }
+    }
+    
+    return {
+      total: files.length,
+      deleted: filesToDelete.length,
+      remaining: files.length - filesToDelete.length
+    };
   };
 }
