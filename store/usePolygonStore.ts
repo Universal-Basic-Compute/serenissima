@@ -78,10 +78,48 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
         });
       }, 10000); // 10 second timeout
       
+      // First try to load from cache to avoid network requests entirely
+      const cacheKey = 'polygons_cache';
+      const cacheTimestampKey = 'polygons_cache_timestamp';
+      const currentTime = Date.now();
+      const cacheTime = 5 * 60 * 1000; // 5 minutes in milliseconds
+      
+      // Check if we have cached data
+      const cachedTimestamp = localStorage.getItem(cacheTimestampKey);
+      const isCacheValid = cachedTimestamp && (currentTime - parseInt(cachedTimestamp)) < cacheTime;
+      
+      if (isCacheValid) {
+        // Use cached data
+        const cachedData = localStorage.getItem(cacheKey);
+        if (cachedData) {
+          try {
+            console.log('Using cached polygon data');
+            const data = JSON.parse(cachedData);
+            
+            if (data.polygons && data.polygons.length > 0) {
+              console.log(`Loaded ${data.polygons.length} polygons from cache`);
+              
+              // Clear the timeout since we have data
+              clearTimeout(loadingTimeout);
+              
+              // Set the data and exit loading state
+              set({ polygons: data.polygons, loading: false });
+              return;
+            }
+          } catch (cacheError) {
+            console.error('Error parsing cached data:', cacheError);
+            // Continue to fetch from API
+          }
+        }
+      }
+      
       try {
         // Try to load a minimal set of polygons
         console.log('Loading minimal polygon set...');
-        const response = await fetch('/api/get-polygons?limit=5');
+        const response = await fetch('/api/get-polygons?limit=5', {
+          // Add a timeout to prevent hanging requests
+          signal: AbortSignal.timeout(5000) // 5 second timeout
+        });
         
         if (!response.ok) {
           throw new Error(`Failed to fetch initial polygons: ${response.status}`);
@@ -95,6 +133,10 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
           // Clear the timeout since we have data
           clearTimeout(loadingTimeout);
           
+          // Cache the response
+          localStorage.setItem(cacheKey, JSON.stringify(data));
+          localStorage.setItem(cacheTimestampKey, currentTime.toString());
+          
           // Set the data and exit loading state
           set({ polygons: data.polygons, loading: false });
           
@@ -102,10 +144,20 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
           setTimeout(() => {
             console.log('Loading full polygon set in background...');
             fetch('/api/get-polygons')
-              .then(response => response.json())
+              .then(response => {
+                if (!response.ok) {
+                  throw new Error(`Failed to fetch full polygons: ${response.status}`);
+                }
+                return response.json();
+              })
               .then(fullData => {
                 if (fullData.polygons && fullData.polygons.length > 0) {
                   console.log(`Loaded ${fullData.polygons.length} total polygons`);
+                  
+                  // Cache the full response
+                  localStorage.setItem(cacheKey, JSON.stringify(fullData));
+                  localStorage.setItem(cacheTimestampKey, currentTime.toString());
+                  
                   set({ polygons: fullData.polygons });
                 }
               })
