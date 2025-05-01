@@ -50,6 +50,7 @@ export default function Home() {
   const [firstName, setFirstName] = useState<string>('');
   const [lastName, setLastName] = useState<string>('');
   const [familyCoatOfArms, setFamilyCoatOfArms] = useState<string>('');
+  const [familyMotto, setFamilyMotto] = useState<string>('');
   
   // Get API key from environment variable
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '';
@@ -159,7 +160,7 @@ export default function Home() {
     }
     
     try {
-      // Update the user record with the username and coat of arms
+      // Update the user record with the username, coat of arms, and family motto
       const response = await fetch('http://localhost:8000/api/wallet', {
         method: 'POST',
         headers: {
@@ -168,7 +169,8 @@ export default function Home() {
         body: JSON.stringify({
           wallet_address: walletAddress,
           user_name: fullUsername.trim(),
-          family_coat_of_arms: familyCoatOfArms.trim()
+          family_coat_of_arms: familyCoatOfArms.trim(),
+          family_motto: familyMotto.trim()
         }),
       });
       
@@ -184,6 +186,7 @@ export default function Home() {
       setFirstName('');
       setLastName('');
       setFamilyCoatOfArms('');
+      setFamilyMotto('');
       
       // Show success message
       alert(`Welcome to La Serenissima, ${fullUsername}!`);
@@ -943,6 +946,44 @@ export default function Home() {
                       }}
                       className="bg-amber-600 text-white p-2 rounded-r hover:bg-amber-700 transition-colors text-xl self-stretch"
                       title="Roll the dice for a random coat of arms"
+                      type="button"
+                    >
+                      🎲
+                    </button>
+                  </div>
+                </div>
+                
+                <div className="flex items-center mt-4">
+                  <div className="w-1/3">
+                    <label className="block text-gray-700">La Devise Familiale</label>
+                  </div>
+                  <div className="w-2/3 flex">
+                    <textarea
+                      value={familyMotto}
+                      onChange={(e) => setFamilyMotto(e.target.value)}
+                      placeholder="Enter your family motto..."
+                      className="w-full px-3 py-2 border border-amber-300 rounded-l focus:outline-none focus:ring-2 focus:ring-amber-500"
+                      rows={2}
+                    />
+                    <button
+                      onClick={() => {
+                        const familyMottos = [
+                          "Virtus et Honor",
+                          "Fides et Fortitudo",
+                          "Mare Nostrum",
+                          "Audaces Fortuna Iuvat",
+                          "Semper Fidelis",
+                          "Deus Providebit",
+                          "Per Mare Per Terram",
+                          "Veritas Vincit",
+                          "Carpe Diem",
+                          "Sic Itur Ad Astra"
+                        ];
+                        const randomMotto = familyMottos[Math.floor(Math.random() * familyMottos.length)];
+                        setFamilyMotto(randomMotto);
+                      }}
+                      className="bg-amber-600 text-white p-2 rounded-r hover:bg-amber-700 transition-colors text-xl self-stretch"
+                      title="Roll the dice for a random family motto"
                       type="button"
                     >
                       🎲

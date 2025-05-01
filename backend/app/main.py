@@ -77,6 +77,7 @@ class WalletRequest(BaseModel):
     user_name: str = None
     email: str = None
     family_coat_of_arms: str = None
+    family_motto: str = None
 
 # Define response models
 class WalletResponse(BaseModel):
@@ -86,6 +87,7 @@ class WalletResponse(BaseModel):
     user_name: str = None
     email: str = None
     family_coat_of_arms: str = None
+    family_motto: str = None
 
 # Add these new models
 class LandRequest(BaseModel):
@@ -156,7 +158,8 @@ async def store_wallet(wallet_data: WalletRequest):
                 "compute_amount": record["fields"].get("ComputeAmount", 0),
                 "user_name": record["fields"].get("Username", None),
                 "email": record["fields"].get("Email", None),
-                "family_coat_of_arms": record["fields"].get("FamilyCoatOfArms", None)
+                "family_coat_of_arms": record["fields"].get("FamilyCoatOfArms", None),
+                "family_motto": record["fields"].get("FamilyMotto", None)
             }
         
         # Create new record
@@ -175,6 +178,9 @@ async def store_wallet(wallet_data: WalletRequest):
             
         if wallet_data.family_coat_of_arms:
             fields["FamilyCoatOfArms"] = wallet_data.family_coat_of_arms
+            
+        if wallet_data.family_motto:
+            fields["FamilyMotto"] = wallet_data.family_motto
         
         print(f"Creating new wallet record with fields: {fields}")
         record = users_table.create(fields)
@@ -186,7 +192,8 @@ async def store_wallet(wallet_data: WalletRequest):
             "compute_amount": record["fields"].get("ComputeAmount", 0),
             "user_name": record["fields"].get("Username", None),
             "email": record["fields"].get("Email", None),
-            "family_coat_of_arms": record["fields"].get("FamilyCoatOfArms", None)
+            "family_coat_of_arms": record["fields"].get("FamilyCoatOfArms", None),
+            "family_motto": record["fields"].get("FamilyMotto", None)
         }
     except Exception as e:
         error_msg = f"Failed to store wallet: {str(e)}"
@@ -256,7 +263,8 @@ async def invest_compute(wallet_data: WalletRequest):
                 "wallet_address": updated_record["fields"].get("Wallet", ""),
                 "compute_amount": updated_record["fields"].get("ComputeAmount", 0),
                 "user_name": updated_record["fields"].get("Username", None),
-                "email": updated_record["fields"].get("Email", None)
+                "email": updated_record["fields"].get("Email", None),
+                "family_motto": updated_record["fields"].get("FamilyMotto", None)
             }
         else:
             # Create new record
@@ -271,7 +279,8 @@ async def invest_compute(wallet_data: WalletRequest):
                 "wallet_address": record["fields"].get("Wallet", ""),
                 "compute_amount": record["fields"].get("ComputeAmount", 0),
                 "user_name": record["fields"].get("Username", None),
-                "email": record["fields"].get("Email", None)
+                "email": record["fields"].get("Email", None),
+                "family_motto": record["fields"].get("FamilyMotto", None)
             }
     except Exception as e:
         error_msg = f"Failed to invest compute: {str(e)}"
