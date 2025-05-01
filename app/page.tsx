@@ -340,13 +340,42 @@ export default function Home() {
 
   // Handle compute investment
   const handleInvestCompute = async (amount: number) => {
-    if (!walletAdapter || !walletAddress) {
-      alert('Please connect your wallet first');
-      return;
-    }
-    
     try {
       console.log('Starting compute investment process...');
+      
+      // Get the wallet address from session or local storage
+      const walletAddress = sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress');
+      
+      if (!walletAddress) {
+        alert('Please connect your wallet first');
+        return;
+      }
+      
+      // Check if wallet adapter is connected
+      if (!walletAdapter || !walletAdapter.connected) {
+        console.log('Wallet adapter not connected, attempting to reconnect...');
+        
+        // Try to reconnect the wallet
+        if (walletAdapter && walletAdapter.readyState === WalletReadyState.Installed) {
+          try {
+            await walletAdapter.connect();
+            console.log('Wallet reconnected successfully');
+          } catch (error) {
+            console.error('Failed to reconnect wallet:', error);
+            alert('Please reconnect your wallet to continue');
+            return;
+          }
+        } else {
+          alert('Please connect your wallet first');
+          return;
+        }
+      }
+      
+      // Verify the wallet is now connected
+      if (!walletAdapter.connected) {
+        alert('Wallet connection is required to invest compute');
+        return;
+      }
       
       // First, transfer the tokens on Solana using Phantom wallet
       const signature = await transferComputeTokens(walletAdapter, amount);

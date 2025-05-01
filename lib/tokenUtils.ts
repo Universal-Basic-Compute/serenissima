@@ -22,10 +22,20 @@ export async function transferComputeTokens(
   amount: number
 ): Promise<string> {
   try {
+    if (!walletAdapter) {
+      throw new Error('Wallet adapter is not initialized');
+    }
+    
     if (!walletAdapter.connected) {
-      throw new Error('Wallet not connected');
+      throw new Error('Wallet is not connected. Please connect your wallet first.');
+    }
+    
+    if (!walletAdapter.publicKey) {
+      throw new Error('No public key found. Please reconnect your wallet.');
     }
 
+    console.log('Starting token transfer with wallet:', walletAdapter.publicKey.toString());
+    
     // Connect to Solana network
     const connection = new Connection('https://api.mainnet-beta.solana.com', 'confirmed');
     
@@ -35,11 +45,15 @@ export async function transferComputeTokens(
       walletAdapter.publicKey
     );
     
+    console.log('Sender token account:', senderTokenAccount.toString());
+    
     // Get the treasury's token account
     const treasuryTokenAccount = await getAssociatedTokenAddress(
       COMPUTE_TOKEN_MINT,
       TREASURY_WALLET
     );
+    
+    console.log('Treasury token account:', treasuryTokenAccount.toString());
     
     // Create the transfer instruction
     const transferInstruction = createTransferInstruction(
@@ -59,18 +73,26 @@ export async function transferComputeTokens(
     const { blockhash } = await connection.getRecentBlockhash();
     transaction.recentBlockhash = blockhash;
     
+    console.log('Transaction created, requesting signature...');
+    
     // Sign the transaction
     const signedTransaction = await walletAdapter.signTransaction(transaction);
+    
+    console.log('Transaction signed, sending to network...');
     
     // Send the transaction
     const signature = await connection.sendRawTransaction(signedTransaction.serialize());
     
+    console.log('Transaction sent, signature:', signature);
+    
     // Confirm the transaction
     await connection.confirmTransaction(signature, 'confirmed');
+    
+    console.log('Transaction confirmed');
     
     return signature;
   } catch (error) {
     console.error('Error transferring compute tokens:', error);
-    throw error;
+    throw new Error(`Failed to transfer tokens: ${error.message}`);
   }
 }
