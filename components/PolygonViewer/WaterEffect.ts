@@ -249,11 +249,29 @@ export default class WaterEffect {
       // Load water textures if not already loaded
       if (!WaterEffect.waterNormalMapTexture) {
         WaterEffect.waterNormalMapTexture = WaterEffect.textureLoader!.load(
-          'https://threejs.org/examples/textures/waternormals.jpg',
+          '/textures/waternormals.jpg', // Use local texture instead of external URL
           (texture) => {
             texture.wrapS = THREE.RepeatWrapping;
             texture.wrapT = THREE.RepeatWrapping;
             texture.repeat.set(10, 10);
+          },
+          undefined,
+          (error) => {
+            console.error('Error loading water normal map:', error);
+            // Create a fallback texture if loading fails
+            const canvas = document.createElement('canvas');
+            canvas.width = 128;
+            canvas.height = 128;
+            const ctx = canvas.getContext('2d');
+            if (ctx) {
+              ctx.fillStyle = '#0066ff';
+              ctx.fillRect(0, 0, 128, 128);
+            }
+            const fallbackTexture = new THREE.CanvasTexture(canvas);
+            fallbackTexture.wrapS = THREE.RepeatWrapping;
+            fallbackTexture.wrapT = THREE.RepeatWrapping;
+            fallbackTexture.repeat.set(10, 10);
+            WaterEffect.waterNormalMapTexture = fallbackTexture;
           }
         );
       }

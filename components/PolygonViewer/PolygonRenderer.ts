@@ -286,19 +286,20 @@ export default class PolygonRenderer {
     console.log(`Rendering ${this.polygons.length} polygons`);
     
     if (this.polygons.length > 0) {
-      // Create a frustum for culling
-      const frustum = new THREE.Frustum();
-      const projScreenMatrix = new THREE.Matrix4();
-      projScreenMatrix.multiplyMatrices(
-        this.camera.projectionMatrix, 
-        this.camera.matrixWorldInverse
-      );
-      frustum.setFromProjectionMatrix(projScreenMatrix);
-      
-      // Process polygons in smaller batches with longer delays to prevent UI freezing
-      const batchSize = 5; // Reduced from 10 to 5 polygons at a time
-      const totalPolygons = this.polygons.length;
-      let processedCount = 0;
+      try {
+        // Create a frustum for culling
+        const frustum = new THREE.Frustum();
+        const projScreenMatrix = new THREE.Matrix4();
+        projScreenMatrix.multiplyMatrices(
+          this.camera.projectionMatrix, 
+          this.camera.matrixWorldInverse
+        );
+        frustum.setFromProjectionMatrix(projScreenMatrix);
+        
+        // Process polygons in smaller batches with longer delays to prevent UI freezing
+        const batchSize = 3; // Further reduced from 5 to 3 polygons at a time
+        const totalPolygons = this.polygons.length;
+        let processedCount = 0;
       
       const processBatch = (startIdx: number) => {
         const endIdx = Math.min(startIdx + batchSize, totalPolygons);

@@ -393,17 +393,37 @@ export default function PolygonViewer() {
     
     console.log(`Setting up Three.js scene`);
 
-    // Calculate bounds for all polygons
-    const bounds = calculateBounds(polygons);
-    console.log('Calculated bounds:', bounds);
-    
-    // Initialize scene
-    const scene = new SceneSetup({
-      canvas: canvasRef.current,
-      activeView, // We'll still pass activeView, but handle view changes separately
-      highQuality
-    });
-    sceneRef.current = scene;
+    try {
+      // Calculate bounds for all polygons
+      const bounds = calculateBounds(polygons);
+      console.log('Calculated bounds:', bounds);
+      
+      // Initialize scene
+      const scene = new SceneSetup({
+        canvas: canvasRef.current,
+        activeView, // We'll still pass activeView, but handle view changes separately
+        highQuality
+      });
+      sceneRef.current = scene;
+      
+      // Add error handling for WebGL context loss
+      canvasRef.current.addEventListener('webglcontextlost', (event) => {
+        console.error('WebGL context lost:', event);
+        event.preventDefault();
+        // Attempt to recover after a short delay
+        setTimeout(() => {
+          if (sceneRef.current && sceneRef.current.renderer) {
+            try {
+              sceneRef.current.renderer.forceContextRestore();
+            } catch (e) {
+              console.error('Failed to restore WebGL context:', e);
+            }
+          }
+        }, 1000);
+      });
+    } catch (error) {
+      console.error('Error setting up Three.js scene:', error);
+    }
     
     // Add camera reference to window for debugging
     if (typeof window !== 'undefined') {
@@ -776,6 +796,24 @@ export default function PolygonViewer() {
             <div className="h-full bg-amber-600 animate-pulse"></div>
           </div>
         </div>
+      </div>
+    );
+  }
+  
+  // Add error boundary fallback
+  if (error) {
+    return (
+      <div className="w-full h-full flex flex-col items-center justify-center bg-amber-50">
+        <div className="text-red-600 text-2xl font-serif mb-4">An error occurred</div>
+        <div className="text-amber-800 italic text-lg max-w-md text-center">
+          The Council of Ten regrets to inform you that there was an issue loading the map.
+        </div>
+        <button 
+          onClick={() => window.location.reload()}
+          className="mt-6 px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors"
+        >
+          Reload Page
+        </button>
       </div>
     );
   }

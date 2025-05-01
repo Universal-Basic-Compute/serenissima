@@ -27,9 +27,9 @@ export default class SceneSetup {
   constructor({ canvas, activeView, highQuality }: SceneSetupProps) {
     this.performanceMode = !highQuality;
     
-    // Initialize scene with a plain white background
+    // Initialize scene with a light blue background
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color('#FFFFFF'); // Plain white background
+    this.scene.background = new THREE.Color('#e6f7ff'); // Light blue background
     
     // No fog for cleaner visuals
     
@@ -51,7 +51,7 @@ export default class SceneSetup {
       powerPreference: 'high-performance',
       precision: this.performanceMode ? 'mediump' : 'highp', // Lower precision in performance mode
       logarithmicDepthBuffer: false, // Disable logarithmic depth buffer
-      shadowMapEnabled: false // Explicitly disable shadow maps at creation
+      alpha: true // Add alpha channel to prevent white screen issues
     });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.setPixelRatio(1); // Start with lowest pixel ratio

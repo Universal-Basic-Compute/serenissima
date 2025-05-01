@@ -138,24 +138,31 @@ export default class LODPolygon {
   }
   
   private createHighDetailMesh() {
-    const normalizedCoords = normalizeCoordinates(
-      this.polygon.coordinates,
-      this.bounds.centerLat,
-      this.bounds.centerLng,
-      this.bounds.scale,
-      this.bounds.latCorrectionFactor
-    );
-    
-    const shape = createPolygonShape(normalizedCoords);
-    
-    // Create extruded geometry with enhanced settings for better quality
-    const extrudeSettings = {
-      steps: 1, // Reduce steps to prevent shadow artifacts
-      depth: 0.05, // Increased depth for more island-like appearance
-      bevelEnabled: true, // Enable bevels for smoother island edges
-      bevelThickness: 0.05, // Increased from 0.04 to 0.05
-      bevelSize: 0.05, // Increased from 0.04 to 0.05
-      bevelSegments: 8, // Increased from 6 to 8 for even smoother bevels
+    try {
+      const normalizedCoords = normalizeCoordinates(
+        this.polygon.coordinates,
+        this.bounds.centerLat,
+        this.bounds.centerLng,
+        this.bounds.scale,
+        this.bounds.latCorrectionFactor
+      );
+      
+      // Ensure we have valid coordinates
+      if (!normalizedCoords || normalizedCoords.length < 3) {
+        console.error('Invalid coordinates for polygon:', this.polygon.id);
+        return;
+      }
+      
+      const shape = createPolygonShape(normalizedCoords);
+      
+      // Create extruded geometry with simplified settings for better stability
+      const extrudeSettings = {
+        steps: 1, // Reduce steps to prevent shadow artifacts
+        depth: 0.05, // Increased depth for more island-like appearance
+        bevelEnabled: true, // Enable bevels for smoother island edges
+        bevelThickness: 0.05, // Increased from 0.04 to 0.05
+        bevelSize: 0.05, // Increased from 0.04 to 0.05
+        bevelSegments: 4, // Reduced from 8 to 4 for better performance
       UVGenerator: { // Add a custom UV generator for better texture mapping
         generateTopUV: function(geometry, vertices, indexA, indexB, indexC) {
           // Create UVs that map the entire texture to the face
