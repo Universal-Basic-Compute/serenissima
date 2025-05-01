@@ -516,31 +516,30 @@ export default class LODPolygon {
     
     console.log(`Updating owner for polygon to ${newOwner} with color ${ownerColor}`);
     
-    // Only update if we're in land view
-    if (this.activeView !== 'land') return;
-    
     // Update the material color based on the new owner
     if (!this.highDetailMesh) return;
     
-    const material = this.highDetailMesh.material as THREE.MeshStandardMaterial;
-    
-    // Determine the color to use
-    let landColor;
-    if (ownerColor) {
-      // Use the owner's color if available
-      landColor = new THREE.Color(ownerColor);
-      console.log(`Using provided color for ${newOwner}: ${ownerColor}`);
-    } else if (newOwner) {
-      // Generate a random color based on the owner's username
-      landColor = this.generateColorFromUsername(newOwner);
-      console.log(`Generated color for ${newOwner}: ${landColor.getHexString()}`);
-    } else {
-      // Default green color for unowned land
-      landColor = new THREE.Color(0x7cac6a);
+    // Handle different material types
+    if (Array.isArray(this.highDetailMesh.material)) {
+      // If it's an array of materials, update each one
+      this.highDetailMesh.material.forEach(mat => {
+        if (mat instanceof THREE.MeshBasicMaterial || mat instanceof THREE.MeshStandardMaterial) {
+          this.updateMaterialColor(mat);
+        }
+      });
+    } else if (this.highDetailMesh.material instanceof THREE.MeshBasicMaterial || 
+               this.highDetailMesh.material instanceof THREE.MeshStandardMaterial) {
+      this.updateMaterialColor(this.highDetailMesh.material);
     }
+  }
+  
+  // Helper method to update material color
+  private updateMaterialColor(material: THREE.MeshBasicMaterial | THREE.MeshStandardMaterial) {
+    // Determine the color to use
+    const landColor = this.determineLandColor();
     
     // Apply the new color if not selected
-    if (!this.isSelected) {
+    if (!this.isSelected && material.color) {
       material.color.copy(landColor);
       this.originalColor = landColor.clone();
     }
@@ -731,14 +730,19 @@ export default class LODPolygon {
   private determineLandColor(): THREE.Color {
     if (this.activeView === 'land') {
       if (this.ownerColor) {
-        return new THREE.Color(this.ownerColor);
+        // Blend the owner color with sand color for a more natural look
+        const sandColor = new THREE.Color(0xf0e6c8); // Lighter sand color
+        const ownerColor = new THREE.Color(this.ownerColor);
+        // Mix 70% owner color with 30% sand color
+        return new THREE.Color().lerpColors(sandColor, ownerColor, 0.7);
       } else if (this.polygon.owner) {
-        return this.generateColorFromUsername(this.polygon.owner);
+        // If we have an owner but no color, use a default color
+        return new THREE.Color(0x7cac6a); // Default green color for owned lands
       } else {
-        return new THREE.Color(0xe6d2a8); // Changed from green to sand/beige
+        return new THREE.Color(0xe6d2a8); // Sand/beige for unowned lands
       }
     } else {
-      return new THREE.Color(0xe6d2a8);
+      return new THREE.Color(0xe6d2a8); // Sand/beige for non-land views
     }
   }
   

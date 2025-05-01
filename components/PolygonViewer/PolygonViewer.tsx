@@ -273,21 +273,38 @@ export default function PolygonViewer() {
       // Create a map of username to coat of arms URL
       const coatOfArmsMap: Record<string, string> = {};
       
+      // Create a map of username to color
+      const colorMap: Record<string, string> = {};
+      
       Object.values(users).forEach(user => {
-        if (user.user_name && user.coat_of_arms_image) {
-          coatOfArmsMap[user.user_name] = user.coat_of_arms_image;
-          console.log(`Added coat of arms for ${user.user_name}:`, user.coat_of_arms_image);
+        if (user.user_name) {
+          // Add coat of arms if available
+          if (user.coat_of_arms_image) {
+            coatOfArmsMap[user.user_name] = user.coat_of_arms_image;
+            console.log(`Added coat of arms for ${user.user_name}:`, user.coat_of_arms_image);
+          }
+          
+          // Add color if available
+          if (user.color) {
+            colorMap[user.user_name] = user.color;
+            console.log(`Added color for ${user.user_name}:`, user.color);
+          }
         }
       });
       
       console.log('Created coat of arms map with', Object.keys(coatOfArmsMap).length, 'entries');
+      console.log('Created color map with', Object.keys(colorMap).length, 'entries');
       
-      // Only update if we actually have coat of arms data
-      if (Object.keys(coatOfArmsMap).length > 0) {
-        // Update the renderer with the coat of arms map
-        polygonRendererRef.current.updateOwnerCoatOfArms(coatOfArmsMap);
-        
-        // Force an update of the view mode to trigger sprite creation
+      // Update the renderer with the coat of arms map
+      polygonRendererRef.current.updateOwnerCoatOfArms(coatOfArmsMap);
+      
+      // Update the renderer with the color map
+      if (Object.keys(colorMap).length > 0) {
+        polygonRendererRef.current.updateOwnerColors(colorMap);
+      }
+      
+      // Force an update of the view mode to trigger sprite creation
+      if (activeView === 'land') {
         polygonRendererRef.current.updateViewMode(activeView);
       }
     }

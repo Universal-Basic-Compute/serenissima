@@ -96,7 +96,6 @@ export default class PolygonRenderer {
   private coatOfArmSprites: Record<string, THREE.Sprite> = {};
   private ownerColorMap: Record<string, string> = {}; // Map of owner to color
   private users: Record<string, any> = {}; // Store users data
-  private ownerColorMap: Record<string, string> = {}; // Map of owner to color
 
   // Create a static texture loader to be shared across instances
   private static sharedTextureLoader: THREE.TextureLoader | null = null;
@@ -354,6 +353,11 @@ export default class PolygonRenderer {
                 ownerCoatOfArmsUrl = this.ownerCoatOfArmsMap[polygon.owner];
               }
               
+              // Log the color and coat of arms for debugging
+              if (polygon.owner) {
+                console.log(`Creating polygon ${polygon.id} with owner ${polygon.owner}, color: ${ownerColor}, coat of arms: ${ownerCoatOfArmsUrl ? 'yes' : 'no'}`);
+              }
+              
               const lodPolygon = new LODPolygon(
                 this.scene,
                 polygon,
@@ -511,7 +515,42 @@ export default class PolygonRenderer {
     // and removed when switching away
     this.updateCoatOfArmsSprites();
     
+    // Force update of owner colors when switching to land view
+    if (activeView === 'land') {
+      this.updatePolygonOwnerColors();
+    }
+    
     console.log(`View mode updated to ${activeView}, coat of arms sprites updated`);
+  }
+  
+  // Add method to update all polygon owner colors
+  private updatePolygonOwnerColors() {
+    console.log('Updating all polygon owner colors');
+    this.polygons.forEach(polygon => {
+      if (polygon.owner) {
+        // Find the corresponding LOD polygon
+        const lodPolygon = this.lodPolygons.find(lp => 
+          lp.getMesh() === this.polygonMeshesRef.current[polygon.id]
+        );
+        
+        if (lodPolygon) {
+          // Get the owner's color
+          let ownerColor = null;
+          if (this.ownerColorMap[polygon.owner]) {
+            ownerColor = this.ownerColorMap[polygon.owner];
+          } else if (this.users[polygon.owner] && this.users[polygon.owner].color) {
+            ownerColor = this.users[polygon.owner].color;
+            // Store for future use
+            this.ownerColorMap[polygon.owner] = ownerColor;
+          }
+          
+          if (ownerColor) {
+            console.log(`Applying color ${ownerColor} to polygon ${polygon.id} owned by ${polygon.owner}`);
+            lodPolygon.updateOwner(polygon.owner, ownerColor);
+          }
+        }
+      }
+    });
   }
 
   public updateQuality(performanceMode: boolean) {
@@ -533,23 +572,48 @@ export default class PolygonRenderer {
     Object.entries(ownerCoatOfArmsMap).forEach(([owner, url]) => {
       if (this.users[owner]) {
         this.users[owner].coat_of_arms_image = url;
-      }
-    });
-    
-    // Also update the owner color map from users data
-    Object.entries(this.users).forEach(([username, userData]) => {
-      if (userData.color) {
-        this.ownerColorMap[username] = userData.color;
-        console.log(`Updated color for ${username}: ${userData.color}`);
+      } else {
+        // Create user entry if it doesn't exist
+        this.users[owner] = { 
+          user_name: owner,
+          coat_of_arms_image: url
+        };
       }
     });
     
     console.log('Combined coat of arms map now has', Object.keys(this.ownerCoatOfArmsMap).length, 'entries');
-    console.log('Owner color map now has', Object.keys(this.ownerColorMap).length, 'entries');
     
     // If we're in land view, apply the new coat of arms textures directly to the land shapes
     if (this.activeView === 'land') {
       this.updateCoatOfArmsSprites();
+    }
+  }
+  
+  // Add method to update owner colors
+  public updateOwnerColors(colorMap: Record<string, string>) {
+    console.log('updateOwnerColors called with data:', colorMap);
+    
+    // Update the owner color map
+    this.ownerColorMap = { ...this.ownerColorMap, ...colorMap };
+    
+    // Update the users data with color information
+    Object.entries(colorMap).forEach(([owner, color]) => {
+      if (this.users[owner]) {
+        this.users[owner].color = color;
+      } else {
+        // Create user entry if it doesn't exist
+        this.users[owner] = { 
+          user_name: owner,
+          color: color
+        };
+      }
+    });
+    
+    console.log('Owner color map now has', Object.keys(this.ownerColorMap).length, 'entries');
+    
+    // If we're in land view, update the colors
+    if (this.activeView === 'land') {
+      this.updatePolygonOwnerColors();
     }
   }
   
@@ -596,8 +660,14 @@ export default class PolygonRenderer {
       
       // Get the owner's color from the users data
       let ownerColor = '#8B4513'; // Default brown color
-      if (this.users[polygon.owner] && this.users[polygon.owner].color) {
+      if (this.ownerColorMap[polygon.owner]) {
+        ownerColor = this.ownerColorMap[polygon.owner];
+        console.log(`Using cached color for ${polygon.owner}: ${ownerColor}`);
+      } else if (this.users[polygon.owner] && this.users[polygon.owner].color) {
         ownerColor = this.users[polygon.owner].color;
+        // Cache the color for future use
+        this.ownerColorMap[polygon.owner] = ownerColor;
+        console.log(`Using color from users data for ${polygon.owner}: ${ownerColor}`);
       }
       
       // Find the corresponding LOD polygon
@@ -609,6 +679,9 @@ export default class PolygonRenderer {
         console.warn(`Could not find LOD polygon for ${polygon.id}`);
         return;
       }
+      
+      // Always update the owner color first
+      lodPolygon.updateOwner(polygon.owner, ownerColor);
       
       if (coatOfArmsUrl) {
         console.log(`Applying coat of arms texture for ${polygon.id} with URL: ${coatOfArmsUrl}`);
