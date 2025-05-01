@@ -67,6 +67,14 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
       window.removeEventListener('landPurchased', handleLandPurchase as EventListener);
     };
   }, [selectedPolygonId]);
+  
+  // Add effect to maintain panel visibility after a purchase
+  useEffect(() => {
+    if (transaction && transaction.buyer === (sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress'))) {
+      // If the current user is the buyer, ensure the panel stays visible
+      setIsVisible(true);
+    }
+  }, [transaction]);
 
   // Add this effect to fetch transaction data when a polygon is selected
   useEffect(() => {
