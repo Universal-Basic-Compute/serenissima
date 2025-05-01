@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { getApiBaseUrl } from '@/lib/apiUtils';
 import { ViewMode, Polygon } from '@/components/PolygonViewer/types';
 
 interface PolygonState {

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import { getApiBaseUrl } from '@/lib/apiUtils';
 import * as THREE from 'three';
 import { calculateBounds } from './utils';
 import SceneSetup from './SceneSetup';
@@ -71,7 +72,7 @@ export default function PolygonViewer() {
       }
       
       // Call the backend API to transfer compute
-      const response = await fetch('http://localhost:8000/api/transfer-compute', {
+      const response = await fetch(`${getApiBaseUrl()}/api/transfer-compute`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -156,7 +157,7 @@ export default function PolygonViewer() {
   // Add this function to load owner coat of arms
   const loadOwnerCoatOfArms = useCallback(async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/users/coat-of-arms');
+      const response = await fetch(`${getApiBaseUrl()}/api/users/coat-of-arms`);
       if (!response.ok) {
         throw new Error(`Failed to fetch owner coat of arms: ${response.status}`);
       }

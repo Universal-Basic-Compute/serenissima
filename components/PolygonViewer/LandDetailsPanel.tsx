@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { getApiBaseUrl } from '@/lib/apiUtils';
 import { useRouter } from 'next/navigation';
 import ActionButton from '../UI/ActionButton';
 import WalletStatus from '../UI/WalletStatus';
@@ -80,7 +81,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
   useEffect(() => {
     if (selectedPolygonId) {
       setIsLoading(true);
-      fetch(`http://localhost:8000/api/transaction/land/${selectedPolygonId}`)
+      fetch(`${getApiBaseUrl()}/api/transaction/land/${selectedPolygonId}`)
         .then(response => {
           if (!response.ok) {
             if (response.status === 404) {
@@ -120,7 +121,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
   useEffect(() => {
     if (selectedPolygonId) {
       // Fetch all offers for this land
-      fetch(`http://localhost:8000/api/transactions/land/${selectedPolygonId}`)
+      fetch(`${getApiBaseUrl()}/api/transactions/land/${selectedPolygonId}`)
         .then(response => {
           if (!response.ok) {
             if (response.status === 404) {
@@ -340,7 +341,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
                           
                           try {
                             // Execute the transaction
-                            const response = await fetch(`http://localhost:8000/api/transaction/${offer.id}/execute`, {
+                            const response = await fetch(`${getApiBaseUrl()}/api/transaction/${offer.id}/execute`, {
                               method: 'POST',
                               headers: {
                                 'Content-Type': 'application/json',
@@ -391,7 +392,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
                           
                           try {
                             // Cancel the transaction
-                            const response = await fetch(`http://localhost:8000/api/transaction/${offer.id}/cancel`, {
+                            const response = await fetch(`${getApiBaseUrl()}/api/transaction/${offer.id}/cancel`, {
                               method: 'POST',
                               headers: {
                                 'Content-Type': 'application/json',
@@ -461,7 +462,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
                       
                       try {
                         // Create a transaction for the land
-                        const response = await fetch('http://localhost:8000/api/transaction', {
+                        const response = await fetch(`${getApiBaseUrl()}/api/transaction`, {
                           method: 'POST',
                           headers: {
                             'Content-Type': 'application/json',
@@ -555,7 +556,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
       }
       
       // Call the backend API to execute the transaction
-      const response = await fetch(`http://localhost:8000/api/transaction/${transaction.id}/execute`, {
+      const response = await fetch(`${getApiBaseUrl()}/api/transaction/${transaction.id}/execute`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -574,7 +575,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
           alert(`This land has already been acquired. The information will be updated.`);
         
           // Fetch updated land data
-          const landResponse = await fetch(`http://localhost:8000/api/land/${selectedPolygonId}`);
+          const landResponse = await fetch(`${getApiBaseUrl()}/api/land/${selectedPolygonId}`);
           if (landResponse.ok) {
             const landData = await landResponse.json();
           
@@ -640,7 +641,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
       }));
     
       // 5. Fetch updated user data to reflect new compute balance
-      const userResponse = await fetch(`http://localhost:8000/api/wallet/${walletAddress}`);
+      const userResponse = await fetch(`${getApiBaseUrl()}/api/wallet/${walletAddress}`);
       if (userResponse.ok) {
         const userData = await userResponse.json();
       

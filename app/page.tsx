@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, useCallback } from 'react';
+import { getApiBaseUrl } from '@/lib/apiUtils';
 import { PhantomWalletAdapter } from '@solana/wallet-adapter-phantom';
 import { WalletReadyState } from '@solana/wallet-adapter-base';
 import dynamic from 'next/dynamic';
@@ -151,7 +152,7 @@ export default function Home() {
       }
       
       // Also fetch user profile data from backend to ensure it's up to date
-      fetch(`http://localhost:8000/api/wallet/${storedWallet}`)
+      fetch(`${getApiBaseUrl()}/api/wallet/${storedWallet}`)
         .then(response => {
           if (response.ok) return response.json();
           throw new Error('Failed to fetch user profile');
@@ -246,7 +247,7 @@ export default function Home() {
   // Functions to interact with the backend
   const storeWalletInAirtable = async (walletAddress: string) => {
     try {
-      const response = await fetch('http://localhost:8000/api/wallet', {
+      const response = await fetch(`${getApiBaseUrl()}/api/wallet`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -298,7 +299,7 @@ export default function Home() {
     try {
       setIsGeneratingImage(true);
       
-      const response = await fetch('http://localhost:8000/api/generate-coat-of-arms', {
+      const response = await fetch(`${getApiBaseUrl()}/api/generate-coat-of-arms`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -363,7 +364,7 @@ export default function Home() {
       });
           
       // Update the user record with the username, first name, last name, coat of arms, family motto, and image URL
-      const response = await fetch('http://localhost:8000/api/wallet', {
+      const response = await fetch(`${getApiBaseUrl()}/api/wallet`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -429,7 +430,7 @@ export default function Home() {
   // Add function to load users data
   const loadUsers = useCallback(async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/users');
+      const response = await fetch(`${getApiBaseUrl()}/api/users`);
       if (response.ok) {
         const data = await response.json();
         if (data && Array.isArray(data)) {
@@ -496,7 +497,7 @@ export default function Home() {
       }
       
       // Call the backend API to transfer compute using Solana
-      const response = await fetch('http://localhost:8000/api/transfer-compute-solana', {
+      const response = await fetch(`${getApiBaseUrl()}/api/transfer-compute-solana`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -599,7 +600,7 @@ export default function Home() {
       }
       
       // Fall back to the backend API
-      const response = await fetch('http://localhost:8000/api/withdraw-compute-solana', {
+      const response = await fetch(`${getApiBaseUrl()}/api/withdraw-compute-solana`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

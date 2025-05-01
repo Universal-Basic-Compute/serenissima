@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, useCallback } from 'react';
+import { getApiBaseUrl } from '@/lib/apiUtils';
 import { PhantomWalletAdapter } from '@solana/wallet-adapter-phantom';
 import { WalletReadyState } from '@solana/wallet-adapter-base';
 import { GoogleMap, LoadScript, DrawingManager } from '@react-google-maps/api';
@@ -89,7 +90,7 @@ export default function MapPage() {
   // Functions to interact with the backend
   const storeWalletInAirtable = async (walletAddress: string) => {
     try {
-      const response = await fetch('http://localhost:8000/api/wallet', {
+      const response = await fetch(`${getApiBaseUrl()}/api/wallet`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -114,7 +115,7 @@ export default function MapPage() {
 
   const investCompute = async (walletAddress: string, amount: number) => {
     try {
-      const response = await fetch('http://localhost:8000/api/invest-compute', {
+      const response = await fetch(`${getApiBaseUrl()}/api/invest-compute`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
