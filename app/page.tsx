@@ -231,7 +231,7 @@ export default function Home() {
       setCoatOfArmsImage(null);
       
       // Show success message
-      alert(`Welcome to La Serenissima, ${fullUsername}!`);
+      alert(`Welcome to La Serenissima, ${firstName} ${lastName}!`);
     } catch (error) {
       console.error('Error updating profile:', error);
       alert('Failed to update profile. Please try again.');
