@@ -10,6 +10,7 @@ import json
 import requests
 from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
+from user_utils import find_user_by_identifier, update_compute_balance, transfer_compute
 
 # Load environment variables
 load_dotenv()
@@ -291,21 +292,21 @@ async def get_wallet(wallet_address: str):
     """Get wallet information from Airtable"""
     
     try:
-        # First try to find by wallet address
-        formula = f"{{Wallet}}='{wallet_address}'"
-        print(f"Searching for wallet with formula: {formula}")
-        records = users_table.all(formula=formula)
+        # Normalize the wallet address to lowercase for case-insensitive comparison
+        normalized_address = wallet_address.lower()
         
-        # If not found, try to find by username
-        if not records:
-            formula = f"{{Username}}='{wallet_address}'"
-            print(f"Searching for user with formula: {formula}")
-            records = users_table.all(formula=formula)
-            
-        if not records:
+        # First try to find by wallet address (case insensitive)
+        all_users = users_table.all()
+        matching_records = [
+            record for record in all_users 
+            if record["fields"].get("Wallet", "").lower() == normalized_address or
+               record["fields"].get("Username", "").lower() == normalized_address
+        ]
+        
+        if not matching_records:
             raise HTTPException(status_code=404, detail="Wallet or user not found")
         
-        record = records[0]
+        record = matching_records[0]
         print(f"Found user record: {record['id']}")
         return {
             "id": record["id"],
@@ -328,7 +329,7 @@ async def get_wallet(wallet_address: str):
         raise HTTPException(status_code=500, detail=error_msg)
 
 @app.post("/api/transfer-compute")
-async def transfer_compute(wallet_data: WalletRequest):
+async def transfer_compute_endpoint(wallet_data: WalletRequest):
     """Transfer compute resources for a wallet"""
     
     if not wallet_data.wallet_address:
@@ -338,19 +339,16 @@ async def transfer_compute(wallet_data: WalletRequest):
         raise HTTPException(status_code=400, detail="Compute amount must be greater than 0")
     
     try:
-        # Check if wallet exists - try multiple search approaches
-        existing_records = None
+        # Normalize the wallet address to lowercase for case-insensitive comparison
+        normalized_address = wallet_data.wallet_address.lower()
         
-        # First try exact wallet match
-        formula = f"{{Wallet}}='{wallet_data.wallet_address}'"
-        print(f"Searching for wallet with formula: {formula}")
-        existing_records = users_table.all(formula=formula)
-        
-        # If not found, try username match
-        if not existing_records:
-            formula = f"{{Username}}='{wallet_data.wallet_address}'"
-            print(f"Searching for username with formula: {formula}")
-            existing_records = users_table.all(formula=formula)
+        # Get all users and find matching record
+        all_users = users_table.all()
+        matching_records = [
+            record for record in all_users 
+            if record["fields"].get("Wallet", "").lower() == normalized_address or
+               record["fields"].get("Username", "").lower() == normalized_address
+        ]
         
         # Log the incoming amount for debugging
         print(f"Received compute transfer request: {wallet_data.compute_amount} COMPUTE")
@@ -358,9 +356,9 @@ async def transfer_compute(wallet_data: WalletRequest):
         # Use the full amount without any conversion
         transfer_amount = wallet_data.compute_amount
         
-        if existing_records:
+        if matching_records:
             # Update existing record
-            record = existing_records[0]
+            record = matching_records[0]
             current_amount = record["fields"].get("ComputeAmount", 0)
             new_amount = current_amount + transfer_amount
             
@@ -368,6 +366,26 @@ async def transfer_compute(wallet_data: WalletRequest):
             updated_record = users_table.update(record["id"], {
                 "ComputeAmount": new_amount
             })
+            
+            # Add transaction record to TRANSACTIONS table
+            try:
+                transaction_record = transactions_table.create({
+                    "Type": "deposit",
+                    "AssetId": "compute_token",
+                    "Seller": "Treasury",
+                    "Buyer": wallet_data.wallet_address,
+                    "Price": transfer_amount,
+                    "CreatedAt": datetime.datetime.now().toISOString(),
+                    "UpdatedAt": datetime.datetime.now().toISOString(),
+                    "ExecutedAt": datetime.datetime.now().toISOString(),
+                    "Notes": json.dumps({
+                        "operation": "deposit",
+                        "method": "direct"
+                    })
+                })
+                print(f"Created transaction record: {transaction_record['id']}")
+            except Exception as tx_error:
+                print(f"Warning: Failed to create transaction record: {str(tx_error)}")
             
             return {
                 "id": updated_record["id"],
@@ -385,6 +403,27 @@ async def transfer_compute(wallet_data: WalletRequest):
                 "Wallet": wallet_data.wallet_address,
                 "ComputeAmount": transfer_amount
             })
+            
+            # Add transaction record to TRANSACTIONS table
+            try:
+                transaction_record = transactions_table.create({
+                    "Type": "deposit",
+                    "AssetId": "compute_token",
+                    "Seller": "Treasury",
+                    "Buyer": wallet_data.wallet_address,
+                    "Price": transfer_amount,
+                    "CreatedAt": datetime.datetime.now().toISOString(),
+                    "UpdatedAt": datetime.datetime.now().toISOString(),
+                    "ExecutedAt": datetime.datetime.now().toISOString(),
+                    "Notes": json.dumps({
+                        "operation": "deposit",
+                        "method": "direct",
+                        "new_user": True
+                    })
+                })
+                print(f"Created transaction record: {transaction_record['id']}")
+            except Exception as tx_error:
+                print(f"Warning: Failed to create transaction record: {str(tx_error)}")
             
             return {
                 "id": record["id"],
@@ -949,77 +988,22 @@ async def execute_transaction(transaction_id: str, data: dict):
         price = record["fields"].get("Price", 0)
         buyer = data["buyer"]
         
-        # Update the transaction with buyer and executed_at
-        now = datetime.datetime.now().isoformat()
-        updated_record = transactions_table.update(transaction_id, {
-            "Buyer": buyer,
-            "ExecutedAt": now,
-            "UpdatedAt": now
-        })
+        # Normalize addresses for case-insensitive comparison
+        normalized_buyer = buyer.lower()
+        normalized_seller = seller.lower()
         
-        # Update the land ownership
-        asset_id = record["fields"].get("AssetId")
-        asset_type = record["fields"].get("Type")
-        
-        if asset_type == "land":
-            # Get the land record
-            formula = f"{{LandId}}='{asset_id}'"
-            land_records = lands_table.all(formula=formula)
-            
-            if land_records:
-                # Update the land owner
-                land_record = land_records[0]
-                lands_table.update(land_record["id"], {
-                    "User": buyer,  # Primary field for owner
-                    "Wallet": buyer  # Also update Wallet field for consistency
-                })
-            else:
-                # Create a new land record
-                land_fields = {
-                    "LandId": asset_id,
-                    "User": buyer,  # Primary field for owner
-                    "Wallet": buyer  # Also update Wallet field for consistency
-                }
-                
-                # Extract land details from Notes field if available
-                if "Notes" in record["fields"]:
-                    try:
-                        land_details = json.loads(record["fields"].get("Notes", "{}"))
-                        if "historical_name" in land_details:
-                            land_fields["HistoricalName"] = land_details["historical_name"]
-                        if "english_name" in land_details:
-                            land_fields["EnglishName"] = land_details["english_name"]
-                        if "description" in land_details:
-                            land_fields["Description"] = land_details["description"]
-                    except json.JSONDecodeError:
-                        # If Notes isn't valid JSON, just ignore it
-                        pass
-                
-                lands_table.create(land_fields)
-        
-        # Transfer the price from buyer to seller
+        # Transfer the price from buyer to seller first to ensure funds are available
         if price > 0 and seller and buyer:
             try:
-                # Get buyer's compute amount - try multiple search approaches
-                buyer_records = None
+                # Get all users for lookup
+                all_users = users_table.all()
                 
-                # First try exact wallet match
-                buyer_formula = f"{{Wallet}}='{buyer}'"
-                buyer_records = users_table.all(formula=buyer_formula)
-                
-                # If not found, try username match
-                if not buyer_records:
-                    buyer_formula = f"{{Username}}='{buyer}'"
-                    buyer_records = users_table.all(formula=buyer_formula)
-                
-                # If still not found, try partial wallet match (in case of case differences)
-                if not buyer_records:
-                    # This is a fallback that might be less precise
-                    all_users = users_table.all()
-                    buyer_records = [
-                        record for record in all_users 
-                        if record["fields"].get("Wallet", "").lower() == buyer.lower()
-                    ]
+                # Find buyer record
+                buyer_records = [
+                    record for record in all_users 
+                    if record["fields"].get("Wallet", "").lower() == normalized_buyer or
+                       record["fields"].get("Username", "").lower() == normalized_buyer
+                ]
                 
                 if not buyer_records:
                     raise HTTPException(status_code=404, detail=f"Buyer not found: {buyer}")
@@ -1031,26 +1015,12 @@ async def execute_transaction(transaction_id: str, data: dict):
                 if buyer_compute < price:
                     raise HTTPException(status_code=400, detail=f"Buyer does not have enough compute. Required: {price}, Available: {buyer_compute}")
                 
-                # Get seller's compute amount - try multiple search approaches
-                seller_records = None
-                
-                # First try exact wallet match
-                seller_formula = f"{{Wallet}}='{seller}'"
-                seller_records = users_table.all(formula=seller_formula)
-                
-                # If not found, try username match
-                if not seller_records:
-                    seller_formula = f"{{Username}}='{seller}'"
-                    seller_records = users_table.all(formula=seller_formula)
-                
-                # If still not found, try partial wallet match (in case of case differences)
-                if not seller_records:
-                    # This is a fallback that might be less precise
-                    all_users = users_table.all()
-                    seller_records = [
-                        record for record in all_users 
-                        if record["fields"].get("Wallet", "").lower() == seller.lower()
-                    ]
+                # Find seller record
+                seller_records = [
+                    record for record in all_users 
+                    if record["fields"].get("Wallet", "").lower() == normalized_seller or
+                       record["fields"].get("Username", "").lower() == normalized_seller
+                ]
                 
                 if not seller_records:
                     raise HTTPException(status_code=404, detail=f"Seller not found: {seller}")
@@ -1059,6 +1029,20 @@ async def execute_transaction(transaction_id: str, data: dict):
                 seller_compute = seller_record["fields"].get("ComputeAmount", 0)
                 
                 print(f"Transferring {price} compute from {buyer} (balance: {buyer_compute}) to {seller} (balance: {seller_compute})")
+                
+                # Create a transaction log entry before making changes
+                transaction_log = {
+                    "transaction_id": transaction_id,
+                    "buyer": buyer,
+                    "seller": seller,
+                    "price": price,
+                    "buyer_before": buyer_compute,
+                    "seller_before": seller_compute,
+                    "buyer_after": buyer_compute - price,
+                    "seller_after": seller_compute + price,
+                    "timestamp": datetime.datetime.now().isoformat(),
+                    "status": "pending"
+                }
                 
                 # Update buyer's compute amount
                 users_table.update(buyer_record["id"], {
@@ -1070,56 +1054,59 @@ async def execute_transaction(transaction_id: str, data: dict):
                     "ComputeAmount": seller_compute + price
                 })
                 
+                # Update transaction log status
+                transaction_log["status"] = "completed"
+                
+                # Add transaction log to TRANSACTIONS table
+                try:
+                    transactions_table.create({
+                        "Type": "transfer",
+                        "AssetId": "compute_token",
+                        "Seller": seller,
+                        "Buyer": buyer,
+                        "Price": price,
+                        "CreatedAt": datetime.datetime.now().isoformat(),
+                        "UpdatedAt": datetime.datetime.now().isoformat(),
+                        "ExecutedAt": datetime.datetime.now().isoformat(),
+                        "Notes": json.dumps(transaction_log)
+                    })
+                except Exception as tx_log_error:
+                    print(f"Warning: Failed to create transaction log: {str(tx_log_error)}")
+                
                 print(f"Transfer complete. New balances - Buyer: {buyer_compute - price}, Seller: {seller_compute + price}")
             except Exception as balance_error:
                 # Log the error but don't fail the transaction
                 print(f"ERROR updating compute balances: {str(balance_error)}")
                 traceback.print_exc(file=sys.stdout)
                 
-                # Try a different approach if the first one failed
+                # Create a record of the failed transaction for later reconciliation
                 try:
-                    print("Attempting alternative compute balance update approach...")
+                    failed_transaction = {
+                        "transaction_id": transaction_id,
+                        "buyer": buyer,
+                        "seller": seller,
+                        "price": price,
+                        "error": str(balance_error),
+                        "timestamp": datetime.datetime.now().isoformat(),
+                        "type": "compute_transfer_error"
+                    }
                     
-                    # Direct update approach without complex formulas
-                    all_users = users_table.all()
+                    # Add to TRANSACTIONS table as a failed transaction
+                    transactions_table.create({
+                        "Type": "error",
+                        "AssetId": "compute_token",
+                        "Seller": seller,
+                        "Buyer": buyer,
+                        "Price": price,
+                        "CreatedAt": datetime.datetime.now().isoformat(),
+                        "UpdatedAt": datetime.datetime.now().isoformat(),
+                        "ExecutedAt": datetime.datetime.now().isoformat(),
+                        "Notes": json.dumps(failed_transaction)
+                    })
                     
-                    # Find buyer and seller by exact wallet or username match
-                    buyer_record = None
-                    seller_record = None
-                    
-                    for record in all_users:
-                        wallet = record["fields"].get("Wallet", "")
-                        username = record["fields"].get("Username", "")
-                        
-                        if wallet == buyer or username == buyer:
-                            buyer_record = record
-                        
-                        if wallet == seller or username == seller:
-                            seller_record = record
-                    
-                    if buyer_record and seller_record:
-                        buyer_compute = buyer_record["fields"].get("ComputeAmount", 0)
-                        seller_compute = seller_record["fields"].get("ComputeAmount", 0)
-                        
-                        # Check if buyer has enough compute
-                        if buyer_compute < price:
-                            print(f"WARNING: Buyer does not have enough compute. Required: {price}, Available: {buyer_compute}")
-                        else:
-                            # Update buyer's compute amount
-                            users_table.update(buyer_record["id"], {
-                                "ComputeAmount": buyer_compute - price
-                            })
-                            
-                            # Update seller's compute amount
-                            users_table.update(seller_record["id"], {
-                                "ComputeAmount": seller_compute + price
-                            })
-                            
-                            print(f"Alternative transfer complete. New balances - Buyer: {buyer_compute - price}, Seller: {seller_compute + price}")
-                    else:
-                        print(f"Could not find buyer or seller record in alternative approach. Buyer found: {buyer_record is not None}, Seller found: {seller_record is not None}")
-                except Exception as alt_error:
-                    print(f"ERROR in alternative compute balance update: {str(alt_error)}")
+                    print(f"Saved failed transaction record for later reconciliation")
+                except Exception as record_error:
+                    print(f"ERROR saving failed transaction record: {str(record_error)}")
                     traceback.print_exc(file=sys.stdout)
             
             print(f"Transferred {price} compute from {buyer} to {seller}")
@@ -1385,6 +1372,67 @@ async def transfer_compute_solana(wallet_data: WalletRequest):
                 "transaction_signature": signature,
                 "block_time": transfer_result.get("blockTime")
             }
+    except HTTPException:
+        raise
+    except Exception as e:
+        error_msg = f"Failed to transfer compute: {str(e)}"
+        print(f"ERROR: {error_msg}")
+        traceback.print_exc(file=sys.stdout)
+        raise HTTPException(status_code=500, detail=error_msg)
+
+# Add a new endpoint for direct transfers between users
+@app.post("/api/transfer-compute-between-users")
+async def transfer_compute_between_users(data: dict):
+    """Transfer compute directly between two users"""
+    
+    if not data.get("from_wallet"):
+        raise HTTPException(status_code=400, detail="Sender wallet address is required")
+    
+    if not data.get("to_wallet"):
+        raise HTTPException(status_code=400, detail="Recipient wallet address is required")
+    
+    if not data.get("compute_amount") or data.get("compute_amount") <= 0:
+        raise HTTPException(status_code=400, detail="Compute amount must be greater than 0")
+    
+    try:
+        # Use the utility function to handle the transfer
+        from_wallet = data["from_wallet"]
+        to_wallet = data["to_wallet"]
+        amount = data["compute_amount"]
+        
+        # Perform the transfer
+        from_record, to_record = transfer_compute(users_table, from_wallet, to_wallet, amount)
+        
+        # Log the transaction
+        try:
+            transaction_record = transactions_table.create({
+                "Type": "transfer",
+                "AssetId": "compute_token",
+                "Seller": to_wallet,  # Recipient is the "seller" in this context
+                "Buyer": from_wallet,  # Sender is the "buyer" in this context
+                "Price": amount,
+                "CreatedAt": datetime.datetime.now().isoformat(),
+                "UpdatedAt": datetime.datetime.now().isoformat(),
+                "ExecutedAt": datetime.datetime.now().isoformat(),
+                "Notes": json.dumps({
+                    "operation": "direct_transfer",
+                    "from_wallet": from_wallet,
+                    "to_wallet": to_wallet,
+                    "amount": amount
+                })
+            })
+            print(f"Created transaction record: {transaction_record['id']}")
+        except Exception as tx_error:
+            print(f"Warning: Failed to create transaction record: {str(tx_error)}")
+        
+        return {
+            "success": True,
+            "from_wallet": from_wallet,
+            "to_wallet": to_wallet,
+            "amount": amount,
+            "from_balance": from_record["fields"].get("ComputeAmount", 0),
+            "to_balance": to_record["fields"].get("ComputeAmount", 0)
+        }
     except HTTPException:
         raise
     except Exception as e:

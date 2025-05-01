@@ -46,7 +46,28 @@ async function updateUserComputeBalances(seller: string, buyer: string, amount: 
     try {
       const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
       
-      // Update seller (add funds)
+      // Try a direct transfer API call first (atomic operation)
+      const transferResponse = await fetch(`${apiBaseUrl}/api/transfer-compute`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          from_wallet: buyer,
+          to_wallet: seller,
+          compute_amount: amount
+        }),
+        signal: AbortSignal.timeout(15000) // 15 second timeout
+      });
+      
+      if (transferResponse.ok) {
+        console.log('Successfully transferred compute via direct API call');
+        return true;
+      }
+      
+      console.warn('Direct transfer API call failed, falling back to separate updates');
+      
+      // Fallback: Update seller (add funds)
       const sellerResponse = await fetch(`${apiBaseUrl}/api/wallet/${seller}/update-compute`, {
         method: 'POST',
         headers: {
@@ -56,7 +77,7 @@ async function updateUserComputeBalances(seller: string, buyer: string, amount: 
           compute_amount: amount,
           operation: 'add'
         }),
-        signal: AbortSignal.timeout(10000) // Increased from 5 to 10 second timeout
+        signal: AbortSignal.timeout(10000) // 10 second timeout
       });
       
       // Update buyer (subtract funds)
@@ -69,7 +90,7 @@ async function updateUserComputeBalances(seller: string, buyer: string, amount: 
           compute_amount: amount,
           operation: 'subtract'
         }),
-        signal: AbortSignal.timeout(10000) // Increased from 5 to 10 second timeout
+        signal: AbortSignal.timeout(10000) // 10 second timeout
       });
       
       if (sellerResponse.ok && buyerResponse.ok) {
@@ -276,9 +297,27 @@ async function updateUserComputeBalances(seller: string, buyer: string, amount: 
     }
     
     // Fall back to local file handling if API is not available
-    // This would require implementing local user data storage
-    // For now, just log that we couldn't update the balances
-    console.warn('Local compute balance update not implemented');
+    // Create a record of the failed transaction for later reconciliation
+    try {
+      const failedTransactionDir = path.join(process.cwd(), 'data', 'failed-transactions');
+      if (!fs.existsSync(failedTransactionDir)) {
+        fs.mkdirSync(failedTransactionDir, { recursive: true });
+      }
+      
+      const failedTransactionPath = path.join(failedTransactionDir, `${Date.now()}-${seller}-${buyer}.json`);
+      fs.writeFileSync(failedTransactionPath, JSON.stringify({
+        seller,
+        buyer,
+        amount,
+        timestamp: new Date().toISOString(),
+        type: 'compute_transfer'
+      }, null, 2));
+      
+      console.warn(`Saved failed transaction record to ${failedTransactionPath} for later reconciliation`);
+    } catch (fileError) {
+      console.error('Failed to save failed transaction record:', fileError);
+    }
+    
     return false;
   } catch (error) {
     console.error('Error updating user compute balances:', error);
