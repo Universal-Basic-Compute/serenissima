@@ -1025,39 +1025,16 @@ export default function Home() {
                 
                 <div className="flex items-center mt-4">
                   <div className="w-1/3">
-                    <label className="block text-gray-700">La Devise Familiale</label>
+                    <label className="block text-gray-700">Family Motto</label>
                   </div>
-                  <div className="w-2/3 flex">
+                  <div className="w-2/3">
                     <textarea
                       value={familyMotto}
                       onChange={(e) => setFamilyMotto(e.target.value)}
                       placeholder="Enter your family motto..."
-                      className="w-full px-3 py-2 border border-amber-300 rounded-l focus:outline-none focus:ring-2 focus:ring-amber-500"
+                      className="w-full px-3 py-2 border border-amber-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-500"
                       rows={2}
                     />
-                    <button
-                      onClick={() => {
-                        const familyMottos = [
-                          "Virtus et Honor",
-                          "Fides et Fortitudo",
-                          "Mare Nostrum",
-                          "Audaces Fortuna Iuvat",
-                          "Semper Fidelis",
-                          "Deus Providebit",
-                          "Per Mare Per Terram",
-                          "Veritas Vincit",
-                          "Carpe Diem",
-                          "Sic Itur Ad Astra"
-                        ];
-                        const randomMotto = familyMottos[Math.floor(Math.random() * familyMottos.length)];
-                        setFamilyMotto(randomMotto);
-                      }}
-                      className="bg-amber-600 text-white p-2 rounded-r hover:bg-amber-700 transition-colors text-xl self-stretch"
-                      title="Roll the dice for a random family motto"
-                      type="button"
-                    >
-                      🎲
-                    </button>
                   </div>
                 </div>
               </div>
