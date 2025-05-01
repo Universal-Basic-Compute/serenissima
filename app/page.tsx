@@ -114,7 +114,8 @@ export default function Home() {
               firstName: data.first_name || data.user_name.split(' ')[0] || '',
               lastName: data.last_name || data.user_name.split(' ').slice(1).join(' ') || '',
               coatOfArmsImage: data.coat_of_arms_image,
-              familyMotto: data.family_motto
+              familyMotto: data.family_motto,
+              computeAmount: data.compute_amount // Add this line
             });
           }
         })
