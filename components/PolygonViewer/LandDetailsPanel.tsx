@@ -201,6 +201,47 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
               <p className="mt-1 font-semibold text-green-600">
                 {transaction.price.toLocaleString()} ducats
               </p>
+              
+              {/* Add Acquire Land button */}
+              <button
+                onClick={async () => {
+                  // Get the current wallet address
+                  const walletAddress = sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress') || '';
+                  
+                  if (!walletAddress) {
+                    alert('Please connect your wallet first');
+                    return;
+                  }
+                  
+                  try {
+                    // Call the backend API to execute the transaction
+                    const response = await fetch(`http://localhost:8000/api/transaction/${transaction.id}/execute`, {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                      },
+                      body: JSON.stringify({
+                        buyer: walletAddress
+                      }),
+                    });
+                    
+                    if (!response.ok) {
+                      throw new Error('Failed to execute transaction');
+                    }
+                    
+                    const data = await response.json();
+                    alert(`Successfully acquired ${selectedPolygon?.historicalName || selectedPolygonId}`);
+                    // Refresh the page to update the UI
+                    window.location.reload();
+                  } catch (error) {
+                    console.error('Error executing transaction:', error);
+                    alert('Failed to acquire land. Please try again.');
+                  }
+                }}
+                className="mt-2 w-full px-3 py-2 bg-amber-600 text-white text-sm rounded hover:bg-amber-700 transition-colors"
+              >
+                Acquire Land
+              </button>
             </div>
           )}
 
