@@ -56,7 +56,7 @@ const LandPurchaseConfirmation: React.FC<LandPurchaseConfirmationProps> = ({
             <div className="flex items-center justify-center mb-2">
               <div className="bg-amber-100 px-4 py-2 rounded-lg border border-amber-300 flex items-center">
                 <span className="text-amber-800 font-medium mr-2">Price:</span>
-                <span className="text-2xl font-bold text-amber-900">{price.toLocaleString()}</span>
+                <span className="text-2xl font-bold" style={{ color: '#d4af37' }}>{price.toLocaleString()}</span>
                 <span className="ml-2">⚜️ ducats</span>
               </div>
             </div>
