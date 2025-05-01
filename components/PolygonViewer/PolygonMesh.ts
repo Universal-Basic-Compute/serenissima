@@ -162,16 +162,7 @@ class PolygonMesh {
       // Position MUCH LOWER above water to avoid z-fighting
       this.mesh.position.y = 0.001; // Reduced from 0.01 to 0.001 to minimize elevation
       
-      // Add edge lines to create clean borders
-      const edges = new THREE.EdgesGeometry(geometry);
-      const edgeMaterial = new THREE.LineBasicMaterial({
-        color: 0x000000, // Black borders for better visibility
-        linewidth: 1,
-        transparent: true,
-        opacity: 0.5 // Semi-transparent for a more subtle effect
-      });
-      const line = new THREE.LineSegments(edges, edgeMaterial);
-      this.mesh.add(line);
+      // Edges removed to eliminate polygon borders
     } catch (error) {
       console.error('Error creating mesh:', error);
     }
