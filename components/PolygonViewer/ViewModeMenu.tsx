@@ -9,7 +9,7 @@ interface ViewModeMenuProps {
 export default function ViewModeMenu({ activeView, setActiveView }: ViewModeMenuProps) {
   // Helper function to check if a view is disabled
   const isDisabled = (view: ViewMode): boolean => {
-    return view !== 'buildings' && view !== 'land';
+    return view !== 'buildings' && view !== 'land' && view !== 'markets';
   };
 
   // Detailed descriptions for each view mode
@@ -43,14 +43,14 @@ export default function ViewModeMenu({ activeView, setActiveView }: ViewModeMenu
         <span className="text-[10px] mt-1">Governance</span>
       </IconButton>
       
-      {/* Markets View - Disabled */}
+      {/* Markets View - Now Enabled */}
       <IconButton 
-        onClick={() => {}}
-        active={false}
-        title={viewDescriptions.markets + " (Coming Soon)"}
+        onClick={() => activeView !== 'markets' ? setActiveView('markets') : null}
+        active={activeView === 'markets'}
+        title={viewDescriptions.markets}
         activeColor="amber"
         compact={true}
-        disabled={true}
+        disabled={false}
       >
         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
