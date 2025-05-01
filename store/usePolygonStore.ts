@@ -165,17 +165,36 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
       // If no valid cache, fetch from API
       if (!data) {
         console.log('Fetching fresh land owners data from API');
-        const response = await fetch('/api/get-land-owners');
-        
-        if (!response.ok) {
-          throw new Error(`Failed to fetch land owners: ${response.status}`);
+        try {
+          const response = await fetch('/api/get-land-owners', {
+            // Add a timeout to prevent hanging requests
+            signal: AbortSignal.timeout(10000) // 10 second timeout
+          });
+          
+          if (!response.ok) {
+            throw new Error(`Failed to fetch land owners: ${response.status}`);
+          }
+          
+          data = await response.json();
+          
+          // Cache the response
+          localStorage.setItem(cacheKey, JSON.stringify(data));
+          localStorage.setItem(cacheTimestampKey, currentTime.toString());
+        } catch (fetchError) {
+          console.error('Error fetching land owners:', fetchError);
+          
+          // Try to use stale cache if available
+          const staleCachedData = localStorage.getItem(cacheKey);
+          if (staleCachedData) {
+            console.log('Using stale cached land owners data due to fetch error');
+            data = JSON.parse(staleCachedData);
+            data._stale = true; // Mark as stale
+          } else {
+            // If no cache at all, create an empty response
+            console.log('No cached data available, using empty land owners data');
+            data = { success: true, lands: [], _error: fetchError.message };
+          }
         }
-        
-        data = await response.json();
-        
-        // Cache the response
-        localStorage.setItem(cacheKey, JSON.stringify(data));
-        localStorage.setItem(cacheTimestampKey, currentTime.toString());
       }
       
       if (data.success && data.lands) {
@@ -202,7 +221,7 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
           }
         });
         
-        console.log('Processed land owners map');
+        console.log('Processed land owners map with', Object.keys(ownerMap).length, 'entries');
         set({ landOwners: ownerMap });
         
         // Update the polygons with owner information
@@ -213,10 +232,14 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
         
         set({ polygons: updatedPolygons });
       } else {
-        console.error('Invalid response format from land owners API');
+        console.error('Invalid response format from land owners API:', data);
+        // Set empty land owners to prevent further errors
+        set({ landOwners: {} });
       }
     } catch (error) {
       console.error('Error loading land owners:', error);
+      // Set empty land owners to prevent further errors
+      set({ landOwners: {} });
     }
   },
   
