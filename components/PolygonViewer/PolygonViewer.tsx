@@ -516,6 +516,8 @@ export default function PolygonViewer() {
       // Get objects intersecting the ray
       const intersects = raycaster.intersectObjects(scene.children, false);
       
+      let foundHoveredObject = false;
+      
       // Check if we're hovering over a polygon
       if (intersects.length > 0) {
         const object = intersects[0].object;
@@ -525,79 +527,95 @@ export default function PolygonViewer() {
           id => polygonMeshesRef.current[id] === object
         );
         
-        if (hoveredId && hoveredId !== hoveredPolygonId && hoveredId !== selectedPolygonId) {
-          // Remove hover effect from previously hovered polygon
-          if (hoveredPolygonId && hoveredPolygonId !== selectedPolygonId) {
-            const previousHovered = polygonMeshesRef.current[hoveredPolygonId];
-            if (previousHovered && previousHovered.material) {
-              // Ensure we have original values to return to
-              const originalEmissive = previousHovered.userData.originalEmissive || new THREE.Color(0, 0, 0);
-              const originalIntensity = previousHovered.userData.originalEmissiveIntensity || 0;
-              
-              // Animate back to original material properties
-              gsap.to(previousHovered.material.emissive, {
-                r: originalEmissive.r,
-                g: originalEmissive.g,
-                b: originalEmissive.b,
-                duration: 0.3,
-                overwrite: true // Ensure any ongoing animations are stopped
-              });
-              
-              gsap.to(previousHovered.material, {
-                emissiveIntensity: originalIntensity,
-                duration: 0.3,
-                overwrite: true // Ensure any ongoing animations are stopped
-              });
-            }
-          }
+        if (hoveredId && hoveredId !== selectedPolygonId) {
+          foundHoveredObject = true;
           
-          setHoveredPolygonId(hoveredId);
-          
-          // Apply glow effect to the hovered polygon
-          if (object.material) {
-            // Store original material properties if not already stored
-            if (!object.userData.originalEmissive) {
-              object.userData.originalEmissive = object.material.emissive.clone();
-              object.userData.originalEmissiveIntensity = object.material.emissiveIntensity;
+          // If we're hovering over a new object
+          if (hoveredId !== hoveredPolygonId) {
+            // Remove hover effect from previously hovered polygon
+            if (hoveredPolygonId && hoveredPolygonId !== selectedPolygonId) {
+              const previousHovered = polygonMeshesRef.current[hoveredPolygonId];
+              if (previousHovered && previousHovered.material) {
+                // Store original values if not already stored
+                if (!previousHovered.userData.originalEmissive) {
+                  previousHovered.userData.originalEmissive = new THREE.Color(0, 0, 0);
+                  previousHovered.userData.originalEmissiveIntensity = 0;
+                }
+                
+                // Animate back to original material properties
+                gsap.killTweensOf(previousHovered.material.emissive);
+                gsap.killTweensOf(previousHovered.material);
+                
+                gsap.to(previousHovered.material.emissive, {
+                  r: previousHovered.userData.originalEmissive.r,
+                  g: previousHovered.userData.originalEmissive.g,
+                  b: previousHovered.userData.originalEmissive.b,
+                  duration: 0.3
+                });
+                
+                gsap.to(previousHovered.material, {
+                  emissiveIntensity: previousHovered.userData.originalEmissiveIntensity,
+                  duration: 0.3
+                });
+              }
             }
             
-            // Animate glow effect
-            gsap.to(object.material.emissive, {
-              r: 0.53, // 0x88/255
-              g: 1.0,  // 0xff/255
-              b: 0.53, // 0x88/255
-              duration: 0.3,
-              overwrite: true // Ensure any ongoing animations are stopped
-            });
+            setHoveredPolygonId(hoveredId);
             
-            gsap.to(object.material, {
-              emissiveIntensity: 0.5,
-              duration: 0.3,
-              overwrite: true // Ensure any ongoing animations are stopped
-            });
+            // Apply glow effect to the hovered polygon
+            if (object.material) {
+              // Store original material properties if not already stored
+              if (!object.userData.originalEmissive) {
+                object.userData.originalEmissive = object.material.emissive.clone();
+                object.userData.originalEmissiveIntensity = object.material.emissiveIntensity;
+              }
+              
+              // Kill any existing tweens
+              gsap.killTweensOf(object.material.emissive);
+              gsap.killTweensOf(object.material);
+              
+              // Animate glow effect
+              gsap.to(object.material.emissive, {
+                r: 0.53,
+                g: 1.0,
+                b: 0.53,
+                duration: 0.3
+              });
+              
+              gsap.to(object.material, {
+                emissiveIntensity: 0.5,
+                duration: 0.3
+              });
+            }
           }
         }
-      } else if (hoveredPolygonId && hoveredPolygonId !== selectedPolygonId) {
-        // Remove glow effect from previously hovered polygon
+      }
+      
+      // If we're not hovering over any object but we had a previously hovered object
+      if (!foundHoveredObject && hoveredPolygonId && hoveredPolygonId !== selectedPolygonId) {
         const previousHovered = polygonMeshesRef.current[hoveredPolygonId];
         if (previousHovered && previousHovered.material) {
-          // Ensure we have original values to return to
-          const originalEmissive = previousHovered.userData.originalEmissive || new THREE.Color(0, 0, 0);
-          const originalIntensity = previousHovered.userData.originalEmissiveIntensity || 0;
+          // Store original values if not already stored
+          if (!previousHovered.userData.originalEmissive) {
+            previousHovered.userData.originalEmissive = new THREE.Color(0, 0, 0);
+            previousHovered.userData.originalEmissiveIntensity = 0;
+          }
+          
+          // Kill any existing tweens
+          gsap.killTweensOf(previousHovered.material.emissive);
+          gsap.killTweensOf(previousHovered.material);
           
           // Animate back to original material properties
           gsap.to(previousHovered.material.emissive, {
-            r: originalEmissive.r,
-            g: originalEmissive.g,
-            b: originalEmissive.b,
-            duration: 0.3,
-            overwrite: true // Ensure any ongoing animations are stopped
+            r: previousHovered.userData.originalEmissive.r,
+            g: previousHovered.userData.originalEmissive.g,
+            b: previousHovered.userData.originalEmissive.b,
+            duration: 0.3
           });
           
           gsap.to(previousHovered.material, {
-            emissiveIntensity: originalIntensity,
-            duration: 0.3,
-            overwrite: true // Ensure any ongoing animations are stopped
+            emissiveIntensity: previousHovered.userData.originalEmissiveIntensity,
+            duration: 0.3
           });
         }
         
@@ -632,6 +650,10 @@ export default function PolygonViewer() {
             
             // Remove selection effect with animation
             if (object.material) {
+              // Kill any existing tweens
+              gsap.killTweensOf(object.material.emissive);
+              gsap.killTweensOf(object.material);
+              
               // Animate back to original material properties
               gsap.to(object.material.emissive, {
                 r: object.userData.originalEmissive?.r || 0,
@@ -693,42 +715,40 @@ export default function PolygonViewer() {
               });
               
               // Add outline effect with animation
-              const outlinePass = new OutlinePass(
-                new THREE.Vector2(window.innerWidth, window.innerHeight),
-                scene,
-                camera
-              );
-              outlinePass.selectedObjects = [object];
-              
-              // Configure the outline pass with better defaults
-              outlinePass.edgeStrength = 0; // Start at 0 and animate up
-              outlinePass.edgeGlow = 0;
-              outlinePass.edgeThickness = 0;
-              outlinePass.pulsePeriod = 0; // Disable pulsing
-              outlinePass.visibleEdgeColor.set(0x00ff00);
-              outlinePass.hiddenEdgeColor.set(0x00ff00);
-              outlinePass.usePatternTexture = false; // Don't use pattern texture
-              
-              // Remove any existing outline passes more carefully
-              const existingOutlinePasses = composer.passes.filter(pass => pass instanceof OutlinePass);
-              existingOutlinePasses.forEach(pass => {
-                const index = composer.passes.indexOf(pass);
-                if (index !== -1) {
-                  composer.passes.splice(index, 1);
-                }
-              });
-              
-              // Add the new outline pass
-              composer.addPass(outlinePass);
-              
-              // Animate the outline properties more gradually
-              gsap.to(outlinePass, {
-                edgeStrength: 2.0, // Reduced from 3.0
-                edgeGlow: 0.3,    // Reduced from 0.5
-                edgeThickness: 1.0,
-                duration: 0.8,    // Increased from 0.5
-                ease: "power2.out" // Add easing for smoother animation
-              });
+              if (composer && typeof OutlinePass !== 'undefined') {
+                // Remove any existing outline passes first
+                composer.passes = composer.passes.filter(pass => !(pass instanceof OutlinePass));
+                
+                // Create new outline pass
+                const outlinePass = new OutlinePass(
+                  new THREE.Vector2(window.innerWidth, window.innerHeight),
+                  scene,
+                  camera
+                );
+                
+                // Set up the outline pass with initial values
+                outlinePass.edgeStrength = 0;
+                outlinePass.edgeGlow = 0;
+                outlinePass.edgeThickness = 0;
+                outlinePass.pulsePeriod = 0;
+                outlinePass.visibleEdgeColor.set(0x00ff00);
+                outlinePass.hiddenEdgeColor.set(0x00ff00);
+                
+                // Add the object to be outlined
+                outlinePass.selectedObjects = [object];
+                
+                // Add the pass to the composer
+                composer.addPass(outlinePass);
+                
+                // Animate the outline properties
+                gsap.to(outlinePass, {
+                  edgeStrength: 1.5,
+                  edgeGlow: 0.2,
+                  edgeThickness: 1.0,
+                  duration: 1.0,
+                  ease: "power2.out"
+                });
+              }
             }
           }
         }
