@@ -564,19 +564,26 @@ export default class LODPolygon {
     if (!this.highDetailMesh) return;
     
     const material = this.highDetailMesh.material as THREE.MeshBasicMaterial;
+    if (!material) return; // Add this check
     
     if (isHovered) {
       // Store original material properties if not already stored
       if (!this.originalMaterial) {
-        this.originalMaterial = material.clone();
+        // Instead of cloning the material (which might not be available),
+        // just store the color value
+        this.originalMaterial = {
+          color: material.color ? material.color.clone() : new THREE.Color()
+        };
       }
       
       // Create glow effect
       if (this.activeView === 'land') {
         // Add a slight bloom effect by increasing the brightness
-        const color = material.color.clone();
-        color.multiplyScalar(1.5);
-        material.color.copy(color);
+        if (material.color) {
+          const color = material.color.clone();
+          color.multiplyScalar(1.5);
+          material.color.copy(color);
+        }
         
         // IMPORTANT: Adjust the polygon's position to prevent z-fighting
         // Move the mesh slightly up when hovered - but not too high
@@ -590,7 +597,7 @@ export default class LODPolygon {
       }
     } else {
       // Restore original material properties
-      if (this.originalMaterial) {
+      if (this.originalMaterial && this.originalMaterial.color && material.color) {
         material.color.copy(this.originalMaterial.color);
         material.needsUpdate = true;
         
