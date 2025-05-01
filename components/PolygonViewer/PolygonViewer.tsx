@@ -130,8 +130,10 @@ export default function PolygonViewer() {
     const animate = () => {
       requestAnimationFrame(animate);
       
-      // Don't update controls automatically to prevent camera resets
-      // The controls will only update when the user interacts with them
+      // Update controls to enable camera movement
+      if (sceneRef.current && sceneRef.current.controls) {
+        sceneRef.current.controls.update();
+      }
       
       // Update water effect
       if (waterEffectRef.current) {

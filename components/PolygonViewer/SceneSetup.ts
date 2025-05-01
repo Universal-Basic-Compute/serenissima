@@ -107,16 +107,8 @@ export default class SceneSetup {
     // Set initial target to center of scene
     this.controls.target.set(0, 0, 0);
     
-    // IMPORTANT: Prevent any automatic updates
-    const originalUpdate = this.controls.update;
-    this.controls.update = function() {
-      // Override the update method to do nothing
-      // This prevents any automatic camera resets
-      return;
-    };
-    
-    // Call the original update once during initialization
-    originalUpdate.call(this.controls);
+    // Call the update method during initialization
+    this.controls.update();
     
     // Add lights
     this.setupLights(activeView);
