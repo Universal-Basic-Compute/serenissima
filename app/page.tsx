@@ -53,6 +53,12 @@ export default function Home() {
   const [familyMotto, setFamilyMotto] = useState<string>('');
   const [coatOfArmsImage, setCoatOfArmsImage] = useState<string | null>(null);
   const [isGeneratingImage, setIsGeneratingImage] = useState<boolean>(false);
+  // Add user profile state
+  const [userProfile, setUserProfile] = useState<{
+    firstName: string;
+    lastName: string;
+    coatOfArmsImage: string | null;
+  } | null>(null);
   
   // Get API key from environment variable
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '';
@@ -142,6 +148,13 @@ export default function Home() {
       if (!data.user_name) {
         // If no username, show the prompt
         setShowUsernamePrompt(true);
+      } else {
+        // Store the user profile information
+        setUserProfile({
+          firstName: data.first_name || data.user_name.split(' ')[0] || '',
+          lastName: data.last_name || data.user_name.split(' ').slice(1).join(' ') || '',
+          coatOfArmsImage: data.coat_of_arms_image
+        });
       }
       
       return data;
@@ -221,6 +234,13 @@ export default function Home() {
       
       const data = await response.json();
       console.log('Profile updated:', data);
+      
+      // Update the user profile state
+      setUserProfile({
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        coatOfArmsImage: coatOfArmsImage
+      });
       
       // Close the prompt
       setShowUsernamePrompt(false);
@@ -833,42 +853,98 @@ export default function Home() {
       >
         View Map
       </a>
-      {/* Wallet button/dropdown */}
+      {/* Wallet button/dropdown or User Profile */}
       {walletAddress ? (
-        <div className="absolute top-4 right-4 z-10" ref={dropdownRef}>
-          <button 
-            onClick={() => setDropdownOpen(!dropdownOpen)}
-            className="bg-white px-4 py-2 rounded shadow hover:bg-gray-100 transition-colors flex items-center"
-          >
-            <span className="mr-2">{walletAddress.slice(0, 4)}...{walletAddress.slice(-4)}</span>
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
-          
-          {dropdownOpen && (
-            <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-20">
-              <button
-                onClick={() => {
-                  setComputeModalOpen(true);
-                  setDropdownOpen(false);
-                }}
-                className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-blue-500 hover:text-white transition-colors"
-              >
-                Invest Compute
-              </button>
-              <button
-                onClick={() => {
-                  connectWallet();
-                  setDropdownOpen(false);
-                }}
-                className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-red-500 hover:text-white transition-colors"
-              >
-                Disconnect
-              </button>
-            </div>
-          )}
-        </div>
+        userProfile ? (
+          // Show user profile with coat of arms and name
+          <div className="absolute top-4 right-4 z-10" ref={dropdownRef}>
+            <button 
+              onClick={() => setDropdownOpen(!dropdownOpen)}
+              className="bg-white px-4 py-2 rounded shadow hover:bg-gray-100 transition-colors flex items-center"
+            >
+              {userProfile.coatOfArmsImage ? (
+                <img 
+                  src={userProfile.coatOfArmsImage} 
+                  alt="Coat of Arms" 
+                  className="w-8 h-8 rounded-full mr-2 object-cover border border-amber-500"
+                />
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center mr-2 border border-amber-500">
+                  <span className="text-amber-800 text-xs font-bold">
+                    {userProfile.firstName.charAt(0)}{userProfile.lastName.charAt(0)}
+                  </span>
+                </div>
+              )}
+              <span className="font-medium">{userProfile.firstName} {userProfile.lastName}</span>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            
+            {dropdownOpen && (
+              <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-20">
+                <div className="px-4 py-2 border-b border-gray-200">
+                  <p className="text-xs text-gray-500">Wallet</p>
+                  <p className="text-sm truncate">{walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}</p>
+                </div>
+                <button
+                  onClick={() => {
+                    setComputeModalOpen(true);
+                    setDropdownOpen(false);
+                  }}
+                  className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-blue-500 hover:text-white transition-colors"
+                >
+                  Invest Compute
+                </button>
+                <button
+                  onClick={() => {
+                    connectWallet();
+                    setDropdownOpen(false);
+                  }}
+                  className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-red-500 hover:text-white transition-colors"
+                >
+                  Disconnect
+                </button>
+              </div>
+            )}
+          </div>
+        ) : (
+          // Show wallet address if profile not loaded yet
+          <div className="absolute top-4 right-4 z-10" ref={dropdownRef}>
+            <button 
+              onClick={() => setDropdownOpen(!dropdownOpen)}
+              className="bg-white px-4 py-2 rounded shadow hover:bg-gray-100 transition-colors flex items-center"
+            >
+              <span className="mr-2">{walletAddress.slice(0, 4)}...{walletAddress.slice(-4)}</span>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            
+            {dropdownOpen && (
+              <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-20">
+                <button
+                  onClick={() => {
+                    setComputeModalOpen(true);
+                    setDropdownOpen(false);
+                  }}
+                  className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-blue-500 hover:text-white transition-colors"
+                >
+                  Invest Compute
+                </button>
+                <button
+                  onClick={() => {
+                    connectWallet();
+                    setDropdownOpen(false);
+                  }}
+                  className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-red-500 hover:text-white transition-colors"
+                >
+                  Disconnect
+                </button>
+              </div>
+            )}
+          </div>
+        )
       ) : (
         <button 
           onClick={connectWallet}
