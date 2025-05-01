@@ -522,7 +522,17 @@ async def get_land_transaction(land_id: str):
     """Get transaction information for a land"""
     
     try:
-        formula = f"AND({{AssetId}}='{land_id}', {{Type}}='land', {{ExecutedAt}}=BLANK())"
+        # Try different formats of the land ID
+        possible_ids = [
+            land_id,
+            f"polygon-{land_id}" if not land_id.startswith("polygon-") else land_id,
+            land_id.replace("polygon-", "") if land_id.startswith("polygon-") else land_id
+        ]
+        
+        # Create a formula that checks all possible ID formats
+        id_conditions = [f"{{AssetId}}='{id}'" for id in possible_ids]
+        formula = f"AND(OR({', '.join(id_conditions)}), {{Type}}='land', {{ExecutedAt}}=BLANK())"
+        
         print(f"Searching for land transaction with formula: {formula}")
         records = transactions_table.all(formula=formula)
         
@@ -623,8 +633,17 @@ async def get_land_transactions(land_id: str):
     """Get all transactions for a land (both incoming and outgoing offers)"""
     
     try:
-        # Get all active transactions for this land
-        formula = f"AND({{AssetId}}='{land_id}', {{Type}}='land', {{ExecutedAt}}=BLANK())"
+        # Try different formats of the land ID
+        possible_ids = [
+            land_id,
+            f"polygon-{land_id}" if not land_id.startswith("polygon-") else land_id,
+            land_id.replace("polygon-", "") if land_id.startswith("polygon-") else land_id
+        ]
+        
+        # Create a formula that checks all possible ID formats
+        id_conditions = [f"{{AssetId}}='{id}'" for id in possible_ids]
+        formula = f"AND(OR({', '.join(id_conditions)}), {{Type}}='land', {{ExecutedAt}}=BLANK())"
+        
         print(f"Searching for land transactions with formula: {formula}")
         records = transactions_table.all(formula=formula)
         
