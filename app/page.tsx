@@ -60,9 +60,18 @@ export default function Home() {
     const adapter = new PhantomWalletAdapter();
     setWalletAdapter(adapter);
     
-    // Check if wallet is already connected
-    if (adapter.connected) {
-      setWalletAddress(adapter.publicKey?.toString() || null);
+    // Check if wallet is already connected in session or local storage
+    const storedWallet = sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress');
+    if (storedWallet) {
+      setWalletAddress(storedWallet);
+    } else if (adapter.connected) {
+      // If adapter is connected but not in storage, update both
+      const address = adapter.publicKey?.toString() || null;
+      if (address) {
+        setWalletAddress(address);
+        sessionStorage.setItem('walletAddress', address);
+        localStorage.setItem('walletAddress', address);
+      }
     }
     
     return () => {
@@ -147,7 +156,8 @@ export default function Home() {
       // If already connected, disconnect
       await walletAdapter.disconnect();
       setWalletAddress(null);
-      // Clear wallet from localStorage
+      // Clear wallet from both storages
+      sessionStorage.removeItem('walletAddress');
       localStorage.removeItem('walletAddress');
       return;
     }
@@ -164,8 +174,9 @@ export default function Home() {
       setWalletAddress(address);
       console.log('Connected to wallet:', address);
       
-      // Store wallet in localStorage for use in other components
+      // Store wallet in both session and local storage
       if (address) {
+        sessionStorage.setItem('walletAddress', address);
         localStorage.setItem('walletAddress', address);
         // Store wallet in Airtable
         await storeWalletInAirtable(address);
