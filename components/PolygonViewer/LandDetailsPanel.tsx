@@ -138,18 +138,19 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
   
   return (
     <div 
-      className={`fixed top-0 right-0 h-full w-80 bg-white shadow-lg transform transition-transform duration-300 ease-in-out z-20 ${
+      className={`fixed top-0 right-0 h-full w-96 bg-amber-50 shadow-xl transform transition-transform duration-300 ease-in-out z-20 border-l-4 border-amber-600 ${
         isVisible ? 'translate-x-0' : 'translate-x-full'
       }`}
     >
-      <div className="p-6">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-semibold">
+      <div className="p-6 h-full flex flex-col">
+        {/* Header with improved styling */}
+        <div className="flex justify-between items-center mb-6 border-b-2 border-amber-300 pb-3">
+          <h2 className="text-2xl font-serif font-semibold text-amber-800">
             {selectedPolygon?.historicalName || 'Land Details'}
           </h2>
           <button 
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700"
+            className="text-amber-700 hover:text-amber-900 transition-colors"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -157,62 +158,65 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
           </button>
         </div>
         
-        <div className="space-y-4">
-          {/* Owner information - always show this section */}
-          <div>
-            <h3 className="text-sm font-medium text-gray-500">Owner</h3>
+        <div className="space-y-6 overflow-y-auto flex-grow">
+          {/* Owner information with enhanced styling */}
+          <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
+            <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Owner</h3>
             {owner && owner !== "" ? (
-              <div className="mt-2 flex items-center">
+              <div className="flex items-center justify-center">
                 <PlayerProfile 
                   username={owner}
-                  walletAddress={owner} // Pass the owner as wallet address to fetch full profile
+                  walletAddress={owner}
                   size="medium"
                   className="mx-auto"
                 />
               </div>
             ) : (
-              <p className="mt-1 font-semibold">Available</p>
+              <div className="bg-amber-100 p-3 rounded-lg text-center">
+                <p className="font-semibold text-amber-800">Available for Purchase</p>
+                <p className="text-xs text-amber-600 mt-1">This land has no current owner</p>
+              </div>
             )}
           </div>
           
-          {/* Area information */}
+          {/* Area information with enhanced styling */}
           {selectedPolygon?.areaInSquareMeters && (
-            <div>
-              <h3 className="text-sm font-medium text-gray-500">Buildable Area</h3>
-              <p className="mt-1 font-semibold">
+            <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
+              <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Buildable Area</h3>
+              <p className="text-2xl font-semibold text-amber-800 text-center">
                 {Math.floor(selectedPolygon.areaInSquareMeters).toLocaleString()} m²
               </p>
             </div>
           )}
           
-          {/* Historical Name */}
+          {/* Historical Name with enhanced styling */}
           {selectedPolygon?.historicalName && (
-            <div>
-              <h3 className="text-sm font-medium text-gray-500">Historical Name</h3>
-              <p className="mt-1 font-semibold">{selectedPolygon.historicalName}</p>
+            <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
+              <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Historical Name</h3>
+              <p className="font-serif text-xl font-semibold text-amber-800">{selectedPolygon.historicalName}</p>
               {selectedPolygon.englishName && (
-                <p className="mt-1 text-sm italic text-gray-600">{selectedPolygon.englishName}</p>
+                <p className="mt-1 text-sm italic text-amber-600">{selectedPolygon.englishName}</p>
               )}
             </div>
           )}
           
-          {/* Historical Description */}
+          {/* Historical Description with enhanced styling */}
           {selectedPolygon?.historicalDescription && (
-            <div>
-              <h3 className="text-sm font-medium text-gray-500">Historical Description</h3>
-              <p className="mt-1 text-sm">{selectedPolygon.historicalDescription}</p>
+            <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
+              <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Historical Description</h3>
+              <p className="text-sm text-gray-700 leading-relaxed">{selectedPolygon.historicalDescription}</p>
             </div>
           )}
           
-          {/* Transaction information */}
+          {/* Transaction information with enhanced styling */}
           {transaction && (
-            <div>
-              <h3 className="text-sm font-medium text-gray-500">For Sale</h3>
-              <p className="mt-1 font-semibold text-green-600">
-                {transaction.price.toLocaleString()} ducats
+            <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
+              <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">For Sale</h3>
+              <p className="text-2xl font-semibold text-green-600 text-center">
+                {transaction.price.toLocaleString()} <span className="text-sm">ducats</span>
               </p>
               
-              {/* Add Acquire Land button */}
+              {/* Add Acquire Land button with improved styling */}
               <button
                 onClick={async () => {
                   // Get the current wallet address
@@ -355,37 +359,40 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
                     alert('Failed to acquire land. Please try again.');
                   }
                 }}
-                className="mt-2 w-full px-3 py-2 bg-amber-600 text-white text-sm rounded hover:bg-amber-700 transition-colors"
+                className="mt-4 w-full px-4 py-3 bg-amber-600 text-white text-base font-medium rounded-lg hover:bg-amber-700 transition-colors flex items-center justify-center"
               >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
                 Acquire Land
               </button>
             </div>
           )}
 
           
-          {/* Offers section */}
+          {/* Offers section with enhanced styling */}
           {offers.length > 0 && (
-            <div>
-              <h3 className="text-sm font-medium text-gray-500 mt-4">Offers</h3>
-              <div className="mt-1 space-y-2">
+            <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
+              <h3 className="text-sm uppercase font-medium text-amber-600 mb-3">Offers</h3>
+              <div className="space-y-3">
                 {offers.map((offer, index) => (
-                  <div key={index} className="p-2 border rounded bg-gray-50">
+                  <div key={index} className="p-3 rounded-lg bg-amber-50 border border-amber-200">
                     <div className="flex justify-between items-center">
                       <span className="font-semibold text-green-600">
-                        {offer.price.toLocaleString()} ducats
+                        {offer.price.toLocaleString()} <span className="text-xs">ducats</span>
                       </span>
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-amber-700 bg-amber-100 px-2 py-1 rounded-full">
                         {new Date(offer.created_at).toLocaleDateString()}
                       </span>
                     </div>
-                    <div className="text-xs">
+                    <div className="text-xs mt-1">
                       {offer.seller === (sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress')) ? (
-                        <span className="text-blue-600">Outgoing offer</span>
+                        <span className="text-blue-600 font-medium">Your outgoing offer</span>
                       ) : (
-                        <span className="text-purple-600">Incoming offer from {offer.seller}</span>
+                        <span className="text-purple-600 font-medium">Incoming offer from {offer.seller.slice(0, 6)}...{offer.seller.slice(-4)}</span>
                       )}
                     </div>
-                    {/* Add accept button for incoming offers */}
+                    {/* Add accept button for incoming offers with improved styling */}
                     {offer.seller !== owner && (
                       <button
                         onClick={async () => {
@@ -428,12 +435,15 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
                             alert('Failed to accept offer. Please try again.');
                           }
                         }}
-                        className="mt-2 w-full px-2 py-1 bg-green-500 text-white text-xs rounded hover:bg-green-600"
+                        className="mt-2 w-full px-3 py-2 bg-green-500 text-white text-sm font-medium rounded-lg hover:bg-green-600 transition-colors flex items-center justify-center"
                       >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
                         Accept Offer
                       </button>
                     )}
-                    {/* Add cancel button for outgoing offers */}
+                    {/* Add cancel button for outgoing offers with improved styling */}
                     {offer.seller === owner && (
                       <button
                         onClick={async () => {
@@ -476,8 +486,11 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
                             alert('Failed to cancel offer. Please try again.');
                           }
                         }}
-                        className="mt-2 w-full px-2 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600"
+                        className="mt-2 w-full px-3 py-2 bg-red-500 text-white text-sm font-medium rounded-lg hover:bg-red-600 transition-colors flex items-center justify-center"
                       >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
                         Cancel Offer
                       </button>
                     )}
@@ -486,166 +499,184 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
               </div>
             </div>
           )}
+        </div>
 
-          
-          <div className="pt-2 flex space-x-2">
-            {owner ? (
-              // If land is owned, show "Make an Offer" button or the offer input
-              showOfferInput ? (
-                <div className="flex flex-col w-full space-y-2">
-                  <div className="flex space-x-2">
-                    <input
-                      type="number"
-                      value={offerAmount}
-                      onChange={(e) => setOfferAmount(parseInt(e.target.value) || 0)}
-                      className="px-2 py-1 border rounded w-full"
-                      placeholder="Offer amount in COMPUTE"
-                      min="1"
-                    />
-                    <ActionButton
-                      onClick={async () => {
-                        // Get the current wallet address
-                        const walletAddress = sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress') || '';
-                        
-                        if (!walletAddress) {
-                          alert('Please connect your wallet first');
-                          return;
-                        }
-                        
-                        if (offerAmount <= 0) {
-                          alert('Please enter a valid offer amount');
-                          return;
-                        }
-                        
-                        try {
-                          // Create a transaction for the land
-                          const response = await fetch('http://localhost:8000/api/transaction', {
-                            method: 'POST',
-                            headers: {
-                              'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                              type: 'land',
-                              asset_id: selectedPolygonId,
-                              seller: owner, // Current owner
-                              price: offerAmount,
-                              historical_name: selectedPolygon?.historicalName,
-                              english_name: selectedPolygon?.englishName,
-                              description: selectedPolygon?.historicalDescription
-                            }),
-                          });
-                          
-                          if (!response.ok) {
-                            throw new Error('Failed to create offer');
-                          }
-                          
-                          const data = await response.json();
-                          alert(`Offer of ${offerAmount} COMPUTE created successfully!`);
-                          setShowOfferInput(false);
-                        } catch (error) {
-                          console.error('Error creating offer:', error);
-                          alert('Failed to create offer. Please try again.');
-                        }
-                      }}
-                      variant="primary"
-                    >
-                      Submit Offer
-                    </ActionButton>
-                  </div>
+        {/* Action buttons at the bottom with improved styling */}
+        <div className="pt-4 mt-auto border-t-2 border-amber-300">
+          {owner ? (
+            // If land is owned, show "Make an Offer" button or the offer input
+            showOfferInput ? (
+              <div className="flex flex-col w-full space-y-3">
+                <div className="flex space-x-2">
+                  <input
+                    type="number"
+                    value={offerAmount}
+                    onChange={(e) => setOfferAmount(parseInt(e.target.value) || 0)}
+                    className="px-3 py-2 border border-amber-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    placeholder="Offer amount in ducats"
+                    min="1"
+                  />
                   <ActionButton
-                    onClick={() => setShowOfferInput(false)}
-                    variant="secondary"
+                    onClick={async () => {
+                      // Get the current wallet address
+                      const walletAddress = sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress') || '';
+                      
+                      if (!walletAddress) {
+                        alert('Please connect your wallet first');
+                        return;
+                      }
+                      
+                      if (offerAmount <= 0) {
+                        alert('Please enter a valid offer amount');
+                        return;
+                      }
+                      
+                      try {
+                        // Create a transaction for the land
+                        const response = await fetch('http://localhost:8000/api/transaction', {
+                          method: 'POST',
+                          headers: {
+                            'Content-Type': 'application/json',
+                          },
+                          body: JSON.stringify({
+                            type: 'land',
+                            asset_id: selectedPolygonId,
+                            seller: owner, // Current owner
+                            price: offerAmount,
+                            historical_name: selectedPolygon?.historicalName,
+                            english_name: selectedPolygon?.englishName,
+                            description: selectedPolygon?.historicalDescription
+                          }),
+                        });
+                        
+                        if (!response.ok) {
+                          throw new Error('Failed to create offer');
+                        }
+                        
+                        const data = await response.json();
+                        alert(`Offer of ${offerAmount.toLocaleString()} ducats created successfully!`);
+                        setShowOfferInput(false);
+                      } catch (error) {
+                        console.error('Error creating offer:', error);
+                        alert('Failed to create offer. Please try again.');
+                      }
+                    }}
+                    variant="primary"
                   >
-                    Cancel
+                    Submit Offer
                   </ActionButton>
                 </div>
-              ) : (
                 <ActionButton
-                  onClick={() => setShowOfferInput(true)}
-                  variant="primary"
+                  onClick={() => setShowOfferInput(false)}
+                  variant="secondary"
                 >
-                  Make an Offer
+                  Cancel
                 </ActionButton>
-              )
+              </div>
             ) : (
-              // If land is not owned, keep the existing purchase button
-              <ActionButton 
-                onClick={() => {
-                  if (!selectedPolygonId) return;
-                  
-                  // Get the current wallet address from session storage first, then localStorage
-                  const walletAddress = sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress') || '';
-                  
-                  if (!walletAddress) {
-                    alert('Please connect your wallet first');
-                    return;
-                  }
-                  
-                  // If there's a transaction, execute it
-                  if (transaction) {
-                    // Call the backend API to execute the transaction
-                    fetch(`http://localhost:8000/api/transaction/${transaction.id}/execute`, {
-                      method: 'POST',
-                      headers: {
-                        'Content-Type': 'application/json',
-                      },
-                      body: JSON.stringify({
-                        buyer: walletAddress
-                      }),
-                    })
-                    .then(response => {
-                      if (!response.ok) {
-                        throw new Error('Failed to execute transaction');
-                      }
-                      return response.json();
-                    })
-                    .then(data => {
-                      alert(`Successfully purchased ${selectedPolygon?.historicalName || selectedPolygonId}`);
-                      // Refresh the page to update the UI
-                      window.location.reload();
-                    })
-                    .catch(error => {
-                      console.error('Error executing transaction:', error);
-                      alert('Failed to purchase land. Please try again.');
-                    });
-                  } else {
-                    // If no transaction, just update the land owner
-                    fetch('http://localhost:8000/api/land', {
-                      method: 'POST',
-                      headers: {
-                        'Content-Type': 'application/json',
-                      },
-                      body: JSON.stringify({
-                        land_id: selectedPolygonId,
-                        user: walletAddress,
-                        historical_name: selectedPolygon?.historicalName,
-                        english_name: selectedPolygon?.englishName,
-                        description: selectedPolygon?.historicalDescription
-                      }),
-                    })
-                    .then(response => {
-                      if (!response.ok) {
-                        throw new Error('Failed to purchase land');
-                      }
-                      return response.json();
-                    })
-                    .then(data => {
-                      alert(`Successfully purchased land: ${selectedPolygon?.historicalName || selectedPolygonId}`);
-                      // Refresh the land owners data
-                      window.location.reload();
-                    })
-                    .catch(error => {
-                      console.error('Error purchasing land:', error);
-                      alert('Failed to purchase land. Please try again.');
-                    });
-                  }
-                }} 
+              <ActionButton
+                onClick={() => setShowOfferInput(true)}
                 variant="primary"
-                disabled={false}
               >
-                {transaction ? `Purchase (${transaction.price.toLocaleString()} ducats)` : 'Purchase Land'}
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Make an Offer
               </ActionButton>
-            )}
+            )
+          ) : (
+            // If land is not owned, keep the existing purchase button with improved styling
+            <ActionButton 
+              onClick={() => {
+                if (!selectedPolygonId) return;
+                
+                // Get the current wallet address from session storage first, then localStorage
+                const walletAddress = sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress') || '';
+                
+                if (!walletAddress) {
+                  alert('Please connect your wallet first');
+                  return;
+                }
+                
+                // If there's a transaction, execute it
+                if (transaction) {
+                  // Call the backend API to execute the transaction
+                  fetch(`http://localhost:8000/api/transaction/${transaction.id}/execute`, {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                      buyer: walletAddress
+                    }),
+                  })
+                  .then(response => {
+                    if (!response.ok) {
+                      throw new Error('Failed to execute transaction');
+                    }
+                    return response.json();
+                  })
+                  .then(data => {
+                    alert(`Successfully purchased ${selectedPolygon?.historicalName || selectedPolygonId}`);
+                    // Refresh the page to update the UI
+                    window.location.reload();
+                  })
+                  .catch(error => {
+                    console.error('Error executing transaction:', error);
+                    alert('Failed to purchase land. Please try again.');
+                  });
+                } else {
+                  // If no transaction, just update the land owner
+                  fetch('http://localhost:8000/api/land', {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                      land_id: selectedPolygonId,
+                      user: walletAddress,
+                      historical_name: selectedPolygon?.historicalName,
+                      english_name: selectedPolygon?.englishName,
+                      description: selectedPolygon?.historicalDescription
+                    }),
+                  })
+                  .then(response => {
+                    if (!response.ok) {
+                      throw new Error('Failed to purchase land');
+                    }
+                    return response.json();
+                  })
+                  .then(data => {
+                    alert(`Successfully purchased land: ${selectedPolygon?.historicalName || selectedPolygonId}`);
+                    // Refresh the land owners data
+                    window.location.reload();
+                  })
+                  .catch(error => {
+                    console.error('Error purchasing land:', error);
+                    alert('Failed to purchase land. Please try again.');
+                  });
+                }
+              }} 
+              variant="primary"
+              disabled={false}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              {transaction ? `Purchase (${transaction.price.toLocaleString()} ducats)` : 'Purchase Land'}
+            </ActionButton>
+          )}
+        </div>
+        
+        {/* Add a decorative Venetian footer */}
+        <div className="mt-4 text-center">
+          <div className="text-amber-600 text-xs italic">
+            La Serenissima Repubblica di Venezia
+          </div>
+          <div className="flex justify-center mt-1">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-amber-600" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+            </svg>
           </div>
         </div>
       </div>
