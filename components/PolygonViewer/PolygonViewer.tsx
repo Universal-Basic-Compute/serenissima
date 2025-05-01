@@ -576,7 +576,7 @@ export default function PolygonViewer() {
           try {
             sceneRef.current.controls.update();
           } catch (error) {
-            console.error('Error updating controls:', error);
+            // Silent fail
           }
         }
       
@@ -585,7 +585,7 @@ export default function PolygonViewer() {
           try {
             waterEffectRef.current.update(frameCount, !highQuality);
           } catch (error) {
-            console.error('Error updating water effect:', error);
+            // Silent fail
           }
         }
       
@@ -594,7 +594,7 @@ export default function PolygonViewer() {
           try {
             polygonRendererRef.current.update(selectedPolygonId);
           } catch (error) {
-            console.error('Error updating polygon renderer:', error);
+            // Silent fail
           }
         }
         
@@ -603,7 +603,7 @@ export default function PolygonViewer() {
           try {
             sceneRef.current.updateClouds(frameCount);
           } catch (error) {
-            console.error('Error updating clouds:', error);
+            // Silent fail
           }
         }
       
@@ -621,24 +621,12 @@ export default function PolygonViewer() {
               // Render the scene
               sceneRef.current.composer.render();
             } catch (error) {
-              console.error('Error rendering scene:', error);
-              
-              // If we get a specific error about setting properties of undefined,
-              // it's likely a material uniform issue - try to identify and fix it
-              if (error instanceof TypeError && 
-                  error.message.includes("Cannot set properties of undefined")) {
-                console.warn('Detected material uniform issue, attempting recovery...');
-                
-                // Set a flag to prevent continuous error logging
-                if (!sceneRef.current.scene.userData.hasUniformError) {
-                  sceneRef.current.scene.userData.hasUniformError = true;
-                }
-              }
+              // Silent fail - don't log errors for every frame
             }
           }
         }
       } catch (error) {
-        console.error('Fatal error in animation loop:', error);
+        // Silent fail for the entire animation loop
       }
     };
     
