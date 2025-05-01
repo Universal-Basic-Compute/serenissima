@@ -24,12 +24,11 @@ export default class SceneSetup {
   constructor({ canvas, activeView, highQuality }: SceneSetupProps) {
     this.performanceMode = !highQuality;
     
-    // Initialize scene
+    // Initialize scene with simpler settings initially
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color('#1e5799'); // Brighter blue background
     
-    // Create a fog effect for depth
-    this.scene.fog = new THREE.FogExp2('#1e5799', 0.0005); // Further reduced fog density for performance
+    // Skip fog initially for faster loading - we'll add it later
     
     // Create a camera with a better initial position
     this.camera = new THREE.PerspectiveCamera(
@@ -42,23 +41,36 @@ export default class SceneSetup {
     // Initial camera position - higher up and further back for a good overview
     this.camera.position.set(0, 80, 80);
     
-    // Initialize renderer
+    // Initialize renderer with minimal settings initially
     this.renderer = new THREE.WebGLRenderer({ 
       canvas,
-      antialias: true // Always enable antialiasing for better visual quality
+      antialias: false, // Start without antialiasing for faster initial render
+      powerPreference: 'high-performance'
     });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
-    this.renderer.setPixelRatio(this.performanceMode ? 1 : (window.devicePixelRatio > 1 ? 2 : 1));
-    this.renderer.shadowMap.enabled = !this.performanceMode;
-    this.renderer.shadowMap.type = this.performanceMode ? THREE.BasicShadowMap : THREE.PCFSoftShadowMap;
-    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.2;
+    this.renderer.setPixelRatio(1); // Start with lowest pixel ratio
+    this.renderer.shadowMap.enabled = false; // Start without shadows
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     
-    // Set up EffectComposer for post-processing effects
+    // Set up a simple EffectComposer initially
     this.composer = new EffectComposer(this.renderer);
     const renderPass = new RenderPass(this.scene, this.camera);
     this.composer.addPass(renderPass);
+    
+    // Enhance renderer after initial load
+    setTimeout(() => {
+      console.log('Enhancing renderer quality...');
+      // Add fog for depth
+      this.scene.fog = new THREE.FogExp2('#1e5799', 0.0005);
+      
+      // Enhance renderer settings
+      this.renderer.antialias = true;
+      this.renderer.setPixelRatio(this.performanceMode ? 1 : (window.devicePixelRatio > 1 ? 2 : 1));
+      this.renderer.shadowMap.enabled = !this.performanceMode;
+      this.renderer.shadowMap.type = this.performanceMode ? THREE.BasicShadowMap : THREE.PCFSoftShadowMap;
+      this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      this.renderer.toneMappingExposure = 1.2;
+    }, 2000); // Delay enhancement by 2 seconds
     
     // Set up OrbitControls with minimal configuration
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);

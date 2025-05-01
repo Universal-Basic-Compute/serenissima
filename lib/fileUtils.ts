@@ -31,6 +31,10 @@ export function calculateCentroid(coordinates: any[]) {
 }
 
 // Add these functions to lib/fileUtils.ts
+// Memoize the distance calculation function for better performance
+const distanceCache = new Map<string, number>();
+
+// Add these functions to lib/fileUtils.ts
 export function findClosestPointOnPolygonEdge(point: {lat: number, lng: number}, polygon: {lat: number, lng: number}[]) {
   let closestPoint = null;
   let minDistance = Infinity;
@@ -42,7 +46,7 @@ export function findClosestPointOnPolygonEdge(point: {lat: number, lng: number},
     
     // Find the closest point on this edge
     const closest = findClosestPointOnLineSegment(point, start, end);
-    const distance = calculateDistance(point, closest);
+    const distance = calculateDistanceMemoized(point, closest);
     
     if (distance < minDistance) {
       minDistance = distance;
@@ -74,6 +78,29 @@ export function findClosestPointOnLineSegment(point: {lat: number, lng: number},
   };
 }
 
+// Memoized version of calculateDistance
+export function calculateDistanceMemoized(coord1: any, coord2: any) {
+  // Create a cache key from the coordinates
+  const key = `${coord1.lat},${coord1.lng}-${coord2.lat},${coord2.lng}`;
+  
+  // Check if we have a cached result
+  if (distanceCache.has(key)) {
+    return distanceCache.get(key)!;
+  }
+  
+  // Calculate the distance
+  const result = calculateDistance(coord1, coord2);
+  
+  // Cache the result (limit cache size to prevent memory issues)
+  if (distanceCache.size > 1000) {
+    // Clear the cache if it gets too large
+    distanceCache.clear();
+  }
+  distanceCache.set(key, result);
+  
+  return result;
+}
+
 // Create server-only versions of these functions
 // These will be used only in API routes
 export const serverUtils = {
@@ -82,7 +109,9 @@ export const serverUtils = {
   readJsonFromFile: null as any,
   getAllJsonFiles: null as any,
   updateOrCreatePolygonFile: null as any,
-  cleanupDuplicatePolygons: null as any
+  cleanupDuplicatePolygons: null as any,
+  fileCache: {} as Record<string, any>, // Add a cache for file contents
+  fileCacheTimestamps: {} as Record<string, number> // Add timestamps for cache invalidation
 };
 
 // Only import fs and initialize server functions if we're on the server
@@ -109,13 +138,55 @@ if (typeof window === 'undefined') {
     if (!fs.existsSync(filePath)) {
       return null;
     }
+    
+    // Check if we have a cached version that's still valid (5 minute cache)
+    const now = Date.now();
+    const cacheTime = 5 * 60 * 1000; // 5 minutes in milliseconds
+    
+    if (
+      serverUtils.fileCache[filename] && 
+      serverUtils.fileCacheTimestamps[filename] && 
+      (now - serverUtils.fileCacheTimestamps[filename]) < cacheTime
+    ) {
+      // Use cached version
+      return serverUtils.fileCache[filename];
+    }
+    
+    // Read from file and cache the result
     const fileContent = fs.readFileSync(filePath, 'utf8');
-    return JSON.parse(fileContent);
+    const parsedContent = JSON.parse(fileContent);
+    
+    // Store in cache
+    serverUtils.fileCache[filename] = parsedContent;
+    serverUtils.fileCacheTimestamps[filename] = now;
+    
+    return parsedContent;
   };
   
   serverUtils.getAllJsonFiles = () => {
     const dataDir = serverUtils.ensureDataDirExists();
+    
+    // Use a static cache for the file list with a 5-minute expiration
+    const cacheKey = 'all_json_files';
+    const now = Date.now();
+    const cacheTime = 5 * 60 * 1000; // 5 minutes in milliseconds
+    
+    if (
+      serverUtils.fileCache[cacheKey] && 
+      serverUtils.fileCacheTimestamps[cacheKey] && 
+      (now - serverUtils.fileCacheTimestamps[cacheKey]) < cacheTime
+    ) {
+      // Use cached file list
+      return serverUtils.fileCache[cacheKey];
+    }
+    
+    // Read directory and filter for JSON files
     const files = fs.readdirSync(dataDir).filter(file => file.endsWith('.json'));
+    
+    // Cache the result
+    serverUtils.fileCache[cacheKey] = files;
+    serverUtils.fileCacheTimestamps[cacheKey] = now;
+    
     return files;
   };
   

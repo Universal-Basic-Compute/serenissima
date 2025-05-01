@@ -6,7 +6,8 @@ export async function GET() {
     // Read all JSON files in the data directory
     const files = serverUtils.getAllJsonFiles();
     
-    const polygons = files.map(file => {
+    // Process files in parallel using Promise.all for better performance
+    const polygonsPromises = files.map(async file => {
       const data = serverUtils.readJsonFromFile(file);
       const id = file.replace('.json', '');
       
@@ -42,7 +43,16 @@ export async function GET() {
       }
     });
     
-    return NextResponse.json({ polygons });
+    const polygons = await Promise.all(polygonsPromises);
+    
+    // Set cache headers to allow browsers to cache the response
+    const headers = new Headers();
+    headers.set('Cache-Control', 'public, max-age=300'); // Cache for 5 minutes
+    
+    return new NextResponse(JSON.stringify({ polygons }), {
+      status: 200,
+      headers
+    });
   } catch (error) {
     console.error('Error fetching polygons:', error);
     return NextResponse.json(

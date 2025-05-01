@@ -42,13 +42,22 @@ export default class LODPolygon {
     this.sandNormalMap = textures.sandNormalMap;
     this.sandRoughnessMap = textures.sandRoughnessMap;
     
-    // Create both detail levels
+    // Start with only low detail mesh for faster initial loading
     this.createLowDetailMesh();
-    this.createHighDetailMesh();
-    
-    // Start with high detail mesh
-    this.mesh = this.highDetailMesh!;
+    this.mesh = this.lowDetailMesh!;
     this.scene.add(this.mesh);
+    
+    // Create high detail mesh after a short delay
+    setTimeout(() => {
+      this.createHighDetailMesh();
+      
+      // Switch to high detail if camera is close enough
+      if (this.distanceThreshold > 150) { // If we're close enough
+        this.scene.remove(this.mesh);
+        this.mesh = this.highDetailMesh!;
+        this.scene.add(this.mesh);
+      }
+    }, 500); // 500ms delay
   }
   
   private createLowDetailMesh() {

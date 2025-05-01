@@ -55,50 +55,51 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
     try {
       console.log('Starting to load polygons...');
       set({ loading: true, error: null });
-      const response = await fetch('/api/get-polygons');
-      const data = await response.json();
       
-      console.log('Loaded polygons from API:', data);
+      // Use a timeout to ensure the loading state is rendered
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // Create a cache key based on timestamp (cache for 5 minutes)
+      const cacheKey = 'polygons_cache';
+      const cacheTimestampKey = 'polygons_cache_timestamp';
+      const currentTime = Date.now();
+      const cacheTime = 5 * 60 * 1000; // 5 minutes in milliseconds
+      
+      // Check if we have cached data
+      const cachedTimestamp = localStorage.getItem(cacheTimestampKey);
+      const isCacheValid = cachedTimestamp && (currentTime - parseInt(cachedTimestamp)) < cacheTime;
+      
+      let data;
+      
+      if (isCacheValid) {
+        // Use cached data
+        const cachedData = localStorage.getItem(cacheKey);
+        if (cachedData) {
+          console.log('Using cached polygon data');
+          data = JSON.parse(cachedData);
+        }
+      }
+      
+      // If no valid cache, fetch from API
+      if (!data) {
+        console.log('Fetching fresh polygon data from API');
+        const response = await fetch('/api/get-polygons');
+        data = await response.json();
+        
+        // Cache the response
+        localStorage.setItem(cacheKey, JSON.stringify(data));
+        localStorage.setItem(cacheTimestampKey, currentTime.toString());
+      }
+      
+      console.log('Processing polygon data:', data);
       
       if (data.polygons && data.polygons.length > 0) {
         console.log(`Successfully loaded ${data.polygons.length} polygons`);
-        set({ polygons: data.polygons });
+        set({ polygons: data.polygons, loading: false });
         
-        // After loading polygons, immediately load land owners to associate owners with polygons
-        const ownersResponse = await fetch('/api/get-land-owners');
-        if (ownersResponse.ok) {
-          const ownersData = await ownersResponse.json();
-          if (ownersData.success && ownersData.lands) {
-            const ownerMap = {};
-            
-            ownersData.lands.forEach(land => {
-              if (land.id && land.owner) {
-                ownerMap[land.id] = land.owner;
-                
-                // Also try with "polygon-" prefix if the ID doesn't have it
-                if (!land.id.startsWith('polygon-')) {
-                  ownerMap[`polygon-${land.id}`] = land.owner;
-                }
-                
-                // Also try without "polygon-" prefix if the ID has it
-                if (land.id.startsWith('polygon-')) {
-                  ownerMap[land.id.replace('polygon-', '')] = land.owner;
-                }
-              }
-            });
-            
-            console.log('Processed land owners map:', ownerMap);
-            set({ landOwners: ownerMap });
-            
-            // Update the polygons with owner information
-            const updatedPolygons = data.polygons.map(polygon => ({
-              ...polygon,
-              owner: ownerMap[polygon.id] || null
-            }));
-            
-            set({ polygons: updatedPolygons });
-          }
-        }
+        // Return early to allow UI to render with the polygons
+        // Land owners will be loaded separately
+        return;
       } else {
         console.warn('No polygons found in API response');
         // If no polygons, create a sample one for testing
@@ -111,7 +112,8 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
               { lat: 1, lng: 1 },
               { lat: 1, lng: 0 }
             ]
-          }]
+          }],
+          loading: false
         });
       }
     } catch (error) {
@@ -126,24 +128,52 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
             { lat: 1, lng: 1 },
             { lat: 1, lng: 0 }
           ]
-        }]
+        }],
+        loading: false
       });
-    } finally {
-      set({ loading: false });
     }
   },
   
   loadLandOwners: async () => {
     try {
       console.log('Loading land owners...');
-      const response = await fetch('/api/get-land-owners');
       
-      if (!response.ok) {
-        throw new Error(`Failed to fetch land owners: ${response.status}`);
+      // Create a cache key based on timestamp (cache for 5 minutes)
+      const cacheKey = 'land_owners_cache';
+      const cacheTimestampKey = 'land_owners_cache_timestamp';
+      const currentTime = Date.now();
+      const cacheTime = 5 * 60 * 1000; // 5 minutes in milliseconds
+      
+      // Check if we have cached data
+      const cachedTimestamp = localStorage.getItem(cacheTimestampKey);
+      const isCacheValid = cachedTimestamp && (currentTime - parseInt(cachedTimestamp)) < cacheTime;
+      
+      let data;
+      
+      if (isCacheValid) {
+        // Use cached data
+        const cachedData = localStorage.getItem(cacheKey);
+        if (cachedData) {
+          console.log('Using cached land owners data');
+          data = JSON.parse(cachedData);
+        }
       }
       
-      const data = await response.json();
-      console.log('Land owners API response:', data);
+      // If no valid cache, fetch from API
+      if (!data) {
+        console.log('Fetching fresh land owners data from API');
+        const response = await fetch('/api/get-land-owners');
+        
+        if (!response.ok) {
+          throw new Error(`Failed to fetch land owners: ${response.status}`);
+        }
+        
+        data = await response.json();
+        
+        // Cache the response
+        localStorage.setItem(cacheKey, JSON.stringify(data));
+        localStorage.setItem(cacheTimestampKey, currentTime.toString());
+      }
       
       if (data.success && data.lands) {
         // Create a map of land ID to owner
@@ -151,7 +181,6 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
         
         // Get current polygons to check ID formats
         const currentPolygons = get().polygons;
-        console.log('Current polygon IDs:', currentPolygons.map(p => p.id));
         
         data.lands.forEach(land => {
           if (land.id && land.owner) {
@@ -170,7 +199,7 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
           }
         });
         
-        console.log('Processed land owners map:', ownerMap);
+        console.log('Processed land owners map');
         set({ landOwners: ownerMap });
         
         // Update the polygons with owner information
@@ -181,7 +210,7 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
         
         set({ polygons: updatedPolygons });
       } else {
-        console.error('Invalid response format from land owners API:', data);
+        console.error('Invalid response format from land owners API');
       }
     } catch (error) {
       console.error('Error loading land owners:', error);

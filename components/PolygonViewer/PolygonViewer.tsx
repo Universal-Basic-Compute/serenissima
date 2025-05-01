@@ -140,15 +140,31 @@ export default function PolygonViewer() {
     }
   }, []);
 
-  // Load polygons on mount
+  // Load polygons on mount with progressive loading
   useEffect(() => {
-    console.log('Loading polygons, bridges, and owner coat of arms...');
-    loadPolygons();
-    loadBridges();
-    loadOwnerCoatOfArms();
+    console.log('Starting progressive loading...');
     
-    // Always load land owners since land view is now the default
-    loadLandOwners();
+    // First load polygons as they're most important
+    loadPolygons();
+    
+    // Then load other data with delays to prevent overwhelming the browser
+    const loadSecondaryData = setTimeout(() => {
+      loadLandOwners(); // Land owners are needed for the default land view
+    }, 500);
+    
+    const loadTertiaryData = setTimeout(() => {
+      loadBridges();
+    }, 1000);
+    
+    const loadQuaternaryData = setTimeout(() => {
+      loadOwnerCoatOfArms();
+    }, 1500);
+    
+    return () => {
+      clearTimeout(loadSecondaryData);
+      clearTimeout(loadTertiaryData);
+      clearTimeout(loadQuaternaryData);
+    };
   }, [loadPolygons, loadBridges, loadLandOwners, loadOwnerCoatOfArms]);
   
   // Add a separate useEffect to update the renderer when coat of arms data changes
@@ -194,7 +210,6 @@ export default function PolygonViewer() {
     if (!canvasRef.current || loading) return;
     
     console.log(`Setting up Three.js scene`);
-    console.log('Polygons:', polygons);
 
     // Calculate bounds for all polygons
     const bounds = calculateBounds(polygons);
@@ -213,83 +228,101 @@ export default function PolygonViewer() {
       (window as any).threeJsCamera = scene.camera;
     }
     
-    // Initialize polygon renderer
-    const polygonRenderer = new PolygonRenderer({
-      scene: scene.scene,
-      camera: scene.camera,
-      polygons,
-      bounds,
-      activeView,
-      performanceMode: !highQuality,
-      polygonMeshesRef
-    });
-    polygonRendererRef.current = polygonRenderer;
+    // Progressive initialization of components
     
-    // Initialize with any existing coat of arms data
-    if (Object.keys(ownerCoatOfArmsMap).length > 0) {
-      polygonRenderer.updateOwnerCoatOfArms(ownerCoatOfArmsMap);
-    }
+    // Step 1: Initialize polygon renderer first (most important)
+    const initPolygonRenderer = () => {
+      const polygonRenderer = new PolygonRenderer({
+        scene: scene.scene,
+        camera: scene.camera,
+        polygons,
+        bounds,
+        activeView,
+        performanceMode: !highQuality,
+        polygonMeshesRef
+      });
+      polygonRendererRef.current = polygonRenderer;
+      
+      // Initialize with any existing coat of arms data
+      if (Object.keys(ownerCoatOfArmsMap).length > 0) {
+        polygonRenderer.updateOwnerCoatOfArms(ownerCoatOfArmsMap);
+      }
+    };
     
-    // Initialize with any existing coat of arms data
-    if (Object.keys(ownerCoatOfArmsMap).length > 0) {
-      polygonRenderer.updateOwnerCoatOfArms(ownerCoatOfArmsMap);
-    }
+    // Step 2: Initialize water effect
+    const initWaterEffect = () => {
+      const waterEffect = new WaterEffect({
+        scene: scene.scene,
+        activeView,
+        performanceMode: !highQuality,
+        width: 200,
+        height: 200
+      });
+      waterEffectRef.current = waterEffect;
+    };
     
-    // Initialize water effect
-    const waterEffect = new WaterEffect({
-      scene: scene.scene,
-      activeView,
-      performanceMode: !highQuality,
-      width: 200,
-      height: 200
-    });
-    waterEffectRef.current = waterEffect;
+    // Step 3: Initialize interaction manager
+    const initInteractionManager = () => {
+      const interactionManager = new InteractionManager({
+        camera: scene.camera,
+        scene: scene.scene,
+        polygonMeshesRef,
+        activeView,
+        hoveredPolygonId: null,
+        setHoveredPolygonId,
+        selectedPolygonId,
+        setSelectedPolygonId
+      });
+      interactionManagerRef.current = interactionManager;
+    };
     
-    // Initialize interaction manager
-    const interactionManager = new InteractionManager({
-      camera: scene.camera,
-      scene: scene.scene,
-      polygonMeshesRef,
-      activeView,
-      hoveredPolygonId: null,
-      setHoveredPolygonId,
-      selectedPolygonId,
-      setSelectedPolygonId
-    });
-    interactionManagerRef.current = interactionManager;
+    // Step 4: Initialize bridge renderer (least important)
+    const initBridgeRenderer = () => {
+      const bridgeRenderer = new BridgeRenderer({
+        scene: scene.scene,
+        bridges,
+        polygons,
+        bounds,
+        activeView,
+        performanceMode: !highQuality
+      });
+      bridgeRendererRef.current = bridgeRenderer;
+    };
     
-    // Initialize bridge renderer
-    const bridgeRenderer = new BridgeRenderer({
-      scene: scene.scene,
-      bridges,
-      polygons,
-      bounds,
-      activeView,
-      performanceMode: !highQuality
-    });
-    bridgeRendererRef.current = bridgeRenderer;
+    // Execute initialization in sequence with delays
+    initPolygonRenderer(); // Start with polygons immediately
+    
+    // Schedule the rest with increasing delays
+    setTimeout(initWaterEffect, 100);
+    setTimeout(initInteractionManager, 200);
+    setTimeout(initBridgeRenderer, 300);
     
     // Add a frame counter for less frequent updates
     let frameCount = 0;
+    let isFirstRender = true;
     
-    // Animation loop
+    // Animation loop with performance optimizations
     const animate = () => {
-      requestAnimationFrame(animate);
+      const animationId = requestAnimationFrame(animate);
+      
+      // Skip some frames at the beginning for better initial performance
+      if (isFirstRender) {
+        isFirstRender = false;
+        return;
+      }
       
       // Update controls to enable camera movement
       if (sceneRef.current && sceneRef.current.controls) {
-        // Store camera position before update to avoid unnecessary logging
         sceneRef.current.controls.update();
       }
       
-      // Update water effect
-      if (waterEffectRef.current) {
+      // Update water effect - less frequently for better performance
+      if (waterEffectRef.current && frameCount % 2 === 0) {
         waterEffectRef.current.update(frameCount, !highQuality);
       }
       
-      // Update polygon LOD and selection state
-      if (polygonRendererRef.current) {
-        // Pass the current selectedPolygonId to ensure selection state is maintained
+      // Update polygon LOD and selection state - less frequently for distant objects
+      if (polygonRendererRef.current && frameCount % 2 === 0) {
         polygonRendererRef.current.update(selectedPolygonId);
       }
       
@@ -302,10 +335,13 @@ export default function PolygonViewer() {
       }
     };
     
-    animate();
+    // Start animation loop
+    const animationId = requestAnimationFrame(animate);
     
     // Cleanup
     return () => {
+      cancelAnimationFrame(animationId);
+      
       // Clean up all components
       if (interactionManagerRef.current) interactionManagerRef.current.cleanup();
       if (waterEffectRef.current) waterEffectRef.current.cleanup();
@@ -395,7 +431,15 @@ export default function PolygonViewer() {
       <div className="w-full h-full flex flex-col items-center justify-center bg-amber-50">
         <div className="text-amber-800 text-2xl font-serif mb-4">Mapping the Venetian Republic...</div>
         <div className="text-amber-600 italic text-lg">The Council of Ten is preparing the charts of La Serenissima</div>
-        <div className="mt-6 w-24 h-24 border-t-4 border-amber-600 rounded-full animate-spin"></div>
+        <div className="mt-6 flex flex-col items-center">
+          <div className="w-24 h-24 border-t-4 border-amber-600 rounded-full animate-spin mb-4"></div>
+          <div className="text-amber-700 text-sm">
+            Loading resources... Please wait a moment.
+          </div>
+          <div className="mt-2 w-64 h-2 bg-amber-100 rounded-full overflow-hidden">
+            <div className="h-full bg-amber-600 animate-pulse"></div>
+          </div>
+        </div>
       </div>
     );
   }

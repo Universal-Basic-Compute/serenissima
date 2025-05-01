@@ -20,6 +20,10 @@ export default class WaterEffect {
   private waterVertexCount: number;
   private waterNormalMap: THREE.Texture;
 
+  // Static texture loader and cache for water normal map
+  private static waterNormalMapTexture: THREE.Texture | null = null;
+  private static textureLoader: THREE.TextureLoader | null = null;
+
   constructor({
     scene,
     activeView,
@@ -31,20 +35,18 @@ export default class WaterEffect {
     this.activeView = activeView;
     this.performanceMode = performanceMode;
     
-    // Create textures
-    const textureLoader = new THREE.TextureLoader();
+    // Use shared texture loader or create one if it doesn't exist
+    if (!WaterEffect.textureLoader) {
+      WaterEffect.textureLoader = new THREE.TextureLoader();
+      WaterEffect.textureLoader.setCrossOrigin('anonymous');
+    }
     
-    // Water textures
-    this.waterNormalMap = textureLoader.load('https://threejs.org/examples/textures/waternormals.jpg');
-    this.waterNormalMap.wrapS = this.waterNormalMap.wrapT = THREE.RepeatWrapping;
-    this.waterNormalMap.repeat.set(10, 10);
-    
-    // Create water plane with animated normal map
+    // Start with a simple water plane without normal map
     this.waterGeometry = new THREE.PlaneGeometry(
       width, 
       height, 
-      performanceMode ? 8 : 20, 
-      performanceMode ? 8 : 20
+      performanceMode ? 4 : 8, // Start with fewer segments
+      performanceMode ? 4 : 8
     );
     
     this.waterMaterial = new THREE.MeshStandardMaterial({ 
@@ -55,21 +57,71 @@ export default class WaterEffect {
       opacity: activeView === 'land' ? 0.8 : 0.7, // More opaque in land view
       metalness: 0.2,
       roughness: 0.1,
-      normalMap: performanceMode ? null : this.waterNormalMap,
-      normalScale: new THREE.Vector2(0.4, 0.4),
-      envMapIntensity: 0.8,
+      normalMap: null, // Start without normal map
       flatShading: performanceMode
     });
     
     this.waterPlane = new THREE.Mesh(this.waterGeometry, this.waterMaterial);
     this.waterPlane.rotation.x = Math.PI / 2;
     this.waterPlane.position.y = -0.2;
-    this.waterPlane.receiveShadow = true;
+    this.waterPlane.receiveShadow = false; // Start without shadows
     this.scene.add(this.waterPlane);
     
     // Get vertices for animation
     this.waterVertices = this.waterGeometry.attributes.position as THREE.BufferAttribute;
     this.waterVertexCount = this.waterVertices.count;
+    
+    // Load water normal map with a delay
+    setTimeout(() => {
+      if (!performanceMode) {
+        // Use cached texture or load it if not available
+        if (!WaterEffect.waterNormalMapTexture) {
+          WaterEffect.waterNormalMapTexture = WaterEffect.textureLoader!.load(
+            'https://threejs.org/examples/textures/waternormals.jpg',
+            () => {
+              // Configure texture once loaded
+              WaterEffect.waterNormalMapTexture!.wrapS = 
+              WaterEffect.waterNormalMapTexture!.wrapT = THREE.RepeatWrapping;
+              WaterEffect.waterNormalMapTexture!.repeat.set(10, 10);
+              
+              // Apply to material
+              this.waterNormalMap = WaterEffect.waterNormalMapTexture!;
+              this.waterMaterial.normalMap = this.waterNormalMap;
+              this.waterMaterial.normalScale = new THREE.Vector2(0.4, 0.4);
+              this.waterMaterial.needsUpdate = true;
+              
+              // Enhance water geometry
+              this.scene.remove(this.waterPlane);
+              this.waterGeometry.dispose();
+              
+              this.waterGeometry = new THREE.PlaneGeometry(
+                width, 
+                height, 
+                performanceMode ? 8 : 20, 
+                performanceMode ? 8 : 20
+              );
+              
+              this.waterPlane = new THREE.Mesh(this.waterGeometry, this.waterMaterial);
+              this.waterPlane.rotation.x = Math.PI / 2;
+              this.waterPlane.position.y = -0.2;
+              this.waterPlane.receiveShadow = true;
+              this.scene.add(this.waterPlane);
+              
+              // Update vertices reference
+              this.waterVertices = this.waterGeometry.attributes.position as THREE.BufferAttribute;
+              this.waterVertexCount = this.waterVertices.count;
+            }
+          );
+        } else {
+          // Use existing texture
+          this.waterNormalMap = WaterEffect.waterNormalMapTexture;
+          this.waterMaterial.normalMap = this.waterNormalMap;
+          this.waterMaterial.normalScale = new THREE.Vector2(0.4, 0.4);
+          this.waterMaterial.needsUpdate = true;
+          this.waterPlane.receiveShadow = true;
+        }
+      }
+    }, 1500); // Delay normal map loading by 1.5 seconds
   }
   
   public update(frameCount: number, performanceMode: boolean) {

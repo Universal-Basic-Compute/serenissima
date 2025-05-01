@@ -35,6 +35,14 @@ export default class PolygonRenderer {
   private ownerCoatOfArmsMap: Record<string, string> = {}; // Map of owner to coat of arms URL
   private coatOfArmSprites: Record<string, THREE.Sprite> = {};
 
+  // Create a static texture loader to be shared across instances
+  private static sharedTextureLoader: THREE.TextureLoader | null = null;
+  private static sharedTextures: {
+    sandBaseColor?: THREE.Texture;
+    sandNormalMap?: THREE.Texture;
+    sandRoughnessMap?: THREE.Texture;
+  } = {};
+
   constructor({
     scene,
     camera,
@@ -52,62 +60,105 @@ export default class PolygonRenderer {
     this.performanceMode = performanceMode;
     this.polygonMeshesRef = polygonMeshesRef;
     
-    // Create textures
-    this.textureLoader = new THREE.TextureLoader();
+    // Use shared texture loader or create one if it doesn't exist
+    if (!PolygonRenderer.sharedTextureLoader) {
+      PolygonRenderer.sharedTextureLoader = new THREE.TextureLoader();
+      PolygonRenderer.sharedTextureLoader.setCrossOrigin('anonymous');
+    }
+    this.textureLoader = PolygonRenderer.sharedTextureLoader;
     
-    // Sand textures
-    this.sandBaseColor = this.textureLoader.load('https://threejs.org/examples/textures/terrain/grasslight-big.jpg');
-    this.sandNormalMap = this.textureLoader.load('https://threejs.org/examples/textures/terrain/grasslight-big-nm.jpg');
-    this.sandRoughnessMap = this.textureLoader.load('https://threejs.org/examples/textures/terrain/grasslight-big-ao.jpg');
+    // Load shared textures if they don't exist yet
+    if (!PolygonRenderer.sharedTextures.sandBaseColor) {
+      console.log('Loading shared textures...');
+      PolygonRenderer.sharedTextures.sandBaseColor = this.textureLoader.load(
+        'https://threejs.org/examples/textures/terrain/grasslight-big.jpg'
+      );
+      PolygonRenderer.sharedTextures.sandNormalMap = this.textureLoader.load(
+        'https://threejs.org/examples/textures/terrain/grasslight-big-nm.jpg'
+      );
+      PolygonRenderer.sharedTextures.sandRoughnessMap = this.textureLoader.load(
+        'https://threejs.org/examples/textures/terrain/grasslight-big-ao.jpg'
+      );
+      
+      // Configure texture settings once
+      PolygonRenderer.sharedTextures.sandBaseColor.wrapS = 
+      PolygonRenderer.sharedTextures.sandBaseColor.wrapT = THREE.RepeatWrapping;
+      PolygonRenderer.sharedTextures.sandNormalMap.wrapS = 
+      PolygonRenderer.sharedTextures.sandNormalMap.wrapT = THREE.RepeatWrapping;
+      PolygonRenderer.sharedTextures.sandRoughnessMap.wrapS = 
+      PolygonRenderer.sharedTextures.sandRoughnessMap.wrapT = THREE.RepeatWrapping;
+      
+      // Make the texture 4x bigger by reducing the repeat value to 1/4 of the original
+      PolygonRenderer.sharedTextures.sandBaseColor.repeat.set(1.25, 1.25);
+      PolygonRenderer.sharedTextures.sandNormalMap.repeat.set(1.25, 1.25);
+      PolygonRenderer.sharedTextures.sandRoughnessMap.repeat.set(1.25, 1.25);
+    }
     
-    this.sandBaseColor.wrapS = this.sandBaseColor.wrapT = THREE.RepeatWrapping;
-    this.sandNormalMap.wrapS = this.sandNormalMap.wrapT = THREE.RepeatWrapping;
-    this.sandRoughnessMap.wrapS = this.sandRoughnessMap.wrapT = THREE.RepeatWrapping;
+    // Use the shared textures
+    this.sandBaseColor = PolygonRenderer.sharedTextures.sandBaseColor!;
+    this.sandNormalMap = PolygonRenderer.sharedTextures.sandNormalMap!;
+    this.sandRoughnessMap = PolygonRenderer.sharedTextures.sandRoughnessMap!;
     
-    // Make the texture 4x bigger by reducing the repeat value to 1/4 of the original
-    this.sandBaseColor.repeat.set(1.25, 1.25);
-    this.sandNormalMap.repeat.set(1.25, 1.25);
-    this.sandRoughnessMap.repeat.set(1.25, 1.25);
-    
-    this.renderPolygons();
+    // Render polygons with a slight delay to allow the UI to render first
+    setTimeout(() => this.renderPolygons(), 0);
   }
   
   private renderPolygons() {
     console.log(`Rendering ${this.polygons.length} polygons`);
     
     if (this.polygons.length > 0) {
-      this.polygons.forEach((polygon, index) => {
-        console.log(`Processing polygon ${index}:`, polygon);
+      // Process polygons in batches to prevent UI freezing
+      const batchSize = 10; // Process 10 polygons at a time
+      const totalPolygons = this.polygons.length;
+      let processedCount = 0;
+      
+      const processBatch = (startIdx: number) => {
+        const endIdx = Math.min(startIdx + batchSize, totalPolygons);
         
-        if (polygon.coordinates && polygon.coordinates.length > 2) {
-          try {
-            const lodPolygon = new LODPolygon(
-              this.scene,
-              polygon,
-              this.bounds,
-              this.activeView,
-              this.performanceMode,
-              this.textureLoader,
-              {
-                sandBaseColor: this.sandBaseColor,
-                sandNormalMap: this.sandNormalMap,
-                sandRoughnessMap: this.sandRoughnessMap
-              }
-            );
-            
-            this.lodPolygons.push(lodPolygon);
-            
-            // Store reference to the mesh
-            this.polygonMeshesRef.current[polygon.id] = lodPolygon.getMesh();
-            
-            console.log(`Added polygon ${index} to scene`);
-          } catch (error) {
-            console.error(`Error creating polygon ${index}:`, error);
+        for (let i = startIdx; i < endIdx; i++) {
+          const polygon = this.polygons[i];
+          
+          if (polygon.coordinates && polygon.coordinates.length > 2) {
+            try {
+              const lodPolygon = new LODPolygon(
+                this.scene,
+                polygon,
+                this.bounds,
+                this.activeView,
+                this.performanceMode,
+                this.textureLoader,
+                {
+                  sandBaseColor: this.sandBaseColor,
+                  sandNormalMap: this.sandNormalMap,
+                  sandRoughnessMap: this.sandRoughnessMap
+                }
+              );
+              
+              this.lodPolygons.push(lodPolygon);
+              
+              // Store reference to the mesh
+              this.polygonMeshesRef.current[polygon.id] = lodPolygon.getMesh();
+              
+              processedCount++;
+            } catch (error) {
+              console.error(`Error creating polygon ${i}:`, error);
+            }
+          } else {
+            console.warn(`Polygon ${i} has invalid coordinates:`, polygon.coordinates);
           }
-        } else {
-          console.warn(`Polygon ${index} has invalid coordinates:`, polygon.coordinates);
         }
-      });
+        
+        // If there are more polygons to process, schedule the next batch
+        if (endIdx < totalPolygons) {
+          setTimeout(() => processBatch(endIdx), 0);
+          console.log(`Processed ${processedCount}/${totalPolygons} polygons...`);
+        } else {
+          console.log(`Completed rendering all ${processedCount} polygons`);
+        }
+      };
+      
+      // Start processing the first batch
+      processBatch(0);
     } else {
       console.warn('No polygons to display');
       this.createSamplePolygon();
@@ -236,7 +287,7 @@ export default class PolygonRenderer {
     this.updateCoatOfArmsSprites();
   }
 
-  // Create and update coat of arms sprites
+  // Create and update coat of arms sprites with texture caching
   private updateCoatOfArmsSprites() {
     // Remove existing sprites
     Object.values(this.coatOfArmSprites).forEach(sprite => {
@@ -247,52 +298,78 @@ export default class PolygonRenderer {
     // Only create sprites if we're in land view
     if (this.activeView !== 'land') return;
 
-    console.log('Updating coat of arms sprites with data:', this.ownerCoatOfArmsMap);
-    console.log('Current polygons:', this.polygons);
+    // Create a cache for textures to avoid loading the same texture multiple times
+    const textureCache: Record<string, THREE.Texture> = {};
     
     // Create new sprites for each polygon with an owner
+    const ownersToProcess = new Set<string>();
+    
+    // First, identify all unique owners that need sprites
     this.polygons.forEach(polygon => {
       if (polygon.owner && polygon.centroid && this.ownerCoatOfArmsMap[polygon.owner]) {
-        console.log(`Creating coat of arms sprite for ${polygon.id} owned by ${polygon.owner}`);
-        console.log(`Using coat of arms image: ${this.ownerCoatOfArmsMap[polygon.owner]}`);
-        
-        // Create a sprite for this owner's coat of arms
-        const texture = new THREE.TextureLoader().load(this.ownerCoatOfArmsMap[polygon.owner]);
-        texture.minFilter = THREE.LinearFilter; // Improve texture quality
-        
-        const material = new THREE.SpriteMaterial({ 
-          map: texture,
-          transparent: true,
-          depthTest: true,
-          depthWrite: false,
-          sizeAttenuation: true
-        });
-        
-        const sprite = new THREE.Sprite(material);
-        
-        // Position at the centroid
-        const normalizedCoords = normalizeCoordinates(
-          [polygon.centroid],
-          this.bounds.centerLat,
-          this.bounds.centerLng,
-          this.bounds.scale,
-          this.bounds.latCorrectionFactor
-        )[0];
-        
-        // Position slightly above the land
-        sprite.position.set(normalizedCoords.x, 5, -normalizedCoords.y); // Increased height from 2.5 to 5
-        
-        // Make the sprite a good size - increased from 4 to 8
-        sprite.scale.set(8, 8, 1);
-        
-        // Add to scene and store reference
-        this.scene.add(sprite);
-        this.coatOfArmSprites[polygon.id] = sprite;
-        
-        console.log(`Added coat of arms sprite for ${polygon.id} owned by ${polygon.owner} at position:`, 
-          normalizedCoords.x, 5, -normalizedCoords.y);
+        ownersToProcess.add(polygon.owner);
       }
     });
+    
+    // Process owners in batches
+    const processOwners = (owners: string[]) => {
+      owners.forEach(owner => {
+        // Load texture if not already in cache
+        if (!textureCache[owner]) {
+          textureCache[owner] = this.textureLoader.load(this.ownerCoatOfArmsMap[owner]);
+          textureCache[owner].minFilter = THREE.LinearFilter; // Improve texture quality
+        }
+      });
+      
+      // Now create sprites for all polygons with these owners
+      this.polygons.forEach(polygon => {
+        if (polygon.owner && polygon.centroid && owners.includes(polygon.owner)) {
+          // Use cached texture
+          const texture = textureCache[polygon.owner];
+          
+          const material = new THREE.SpriteMaterial({ 
+            map: texture,
+            transparent: true,
+            depthTest: true,
+            depthWrite: false,
+            sizeAttenuation: true
+          });
+          
+          const sprite = new THREE.Sprite(material);
+          
+          // Position at the centroid
+          const normalizedCoords = normalizeCoordinates(
+            [polygon.centroid],
+            this.bounds.centerLat,
+            this.bounds.centerLng,
+            this.bounds.scale,
+            this.bounds.latCorrectionFactor
+          )[0];
+          
+          // Position slightly above the land
+          sprite.position.set(normalizedCoords.x, 5, -normalizedCoords.y);
+          
+          // Make the sprite a good size
+          sprite.scale.set(8, 8, 1);
+          
+          // Add to scene and store reference
+          this.scene.add(sprite);
+          this.coatOfArmSprites[polygon.id] = sprite;
+        }
+      });
+    };
+    
+    // Process all owners at once if there are few, otherwise batch them
+    const ownersArray = Array.from(ownersToProcess);
+    if (ownersArray.length <= 5) {
+      processOwners(ownersArray);
+    } else {
+      // Process in batches of 5
+      for (let i = 0; i < ownersArray.length; i += 5) {
+        const batch = ownersArray.slice(i, i + 5);
+        setTimeout(() => processOwners(batch), i * 100); // Stagger loading
+      }
+    }
   }
 
   public cleanup() {
