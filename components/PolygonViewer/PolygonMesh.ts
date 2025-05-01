@@ -165,8 +165,10 @@ class PolygonMesh {
       // Add edge lines to create clean borders
       const edges = new THREE.EdgesGeometry(geometry);
       const edgeMaterial = new THREE.LineBasicMaterial({
-        color: this.determineLandColor(),
-        linewidth: 1
+        color: 0x000000, // Black borders for better visibility
+        linewidth: 1,
+        transparent: true,
+        opacity: 0.5 // Semi-transparent for a more subtle effect
       });
       const line = new THREE.LineSegments(edges, edgeMaterial);
       this.mesh.add(line);
