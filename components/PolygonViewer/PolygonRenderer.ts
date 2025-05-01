@@ -1002,52 +1002,95 @@ export default class PolygonRenderer {
 
   // Add method to update polygon owner
   public updatePolygonOwner(polygonId: string, newOwner: string) {
+    console.log(`PolygonRenderer.updatePolygonOwner called for ${polygonId} with new owner ${newOwner}`);
+    
     // Find the polygon in our list
     const polygon = this.polygons.find(p => p.id === polygonId);
-    if (!polygon) return;
+    if (!polygon) {
+      console.warn(`Polygon ${polygonId} not found in polygons list`);
+      return;
+    }
     
     // Update the polygon's owner
     polygon.owner = newOwner;
+    console.log(`Updated polygon ${polygonId} owner to ${newOwner} in data model`);
     
-    // Find the corresponding LOD polygon
-    const polygonMesh = this.PolygonMeshs.find(lp => 
-      lp.getMesh() === this.polygonMeshesRef.current[polygonId]
+    // Find the corresponding PolygonMesh
+    const polygonMesh = this.PolygonMeshs.find(pm => 
+      pm.getMesh() === this.polygonMeshesRef.current[polygonId]
     );
     
-    if (!polygonMesh) return;
+    if (!polygonMesh) {
+      console.warn(`PolygonMesh for ${polygonId} not found`);
+      return;
+    }
     
-    // Get the owner's color from the users data
+    // Get the owner's color from the users data with better error handling
     let ownerColor = null;
-    if (newOwner) {
-      if (this.ownerColorMap[newOwner]) {
-        ownerColor = this.ownerColorMap[newOwner];
-        console.log(`Using stored color for ${newOwner}: ${ownerColor}`);
-      } else if (this.users[newOwner] && this.users[newOwner].color) {
-        ownerColor = this.users[newOwner].color;
-        // Also store in the color map for future use
-        this.ownerColorMap[newOwner] = ownerColor;
-        console.log(`Found color for ${newOwner} in users data: ${ownerColor}`);
-      } else {
-        // Use default color if no owner color is specified
-        ownerColor = '#7cac6a'; // Default green color
+    try {
+      if (newOwner) {
+        if (this.ownerColorMap[newOwner]) {
+          ownerColor = this.ownerColorMap[newOwner];
+          console.log(`Using stored color for ${newOwner}: ${ownerColor}`);
+        } else if (this.users[newOwner] && this.users[newOwner].color) {
+          ownerColor = this.users[newOwner].color;
+          // Also store in the color map for future use
+          this.ownerColorMap[newOwner] = ownerColor;
+          console.log(`Found color for ${newOwner} in users data: ${ownerColor}`);
+        } else if (newOwner === 'ConsiglioDeiDieci') {
+          // Special case for ConsiglioDeiDieci
+          ownerColor = '#8B0000'; // Dark red
+          this.ownerColorMap[newOwner] = ownerColor;
+          console.log(`Using hardcoded color for ConsiglioDeiDieci: ${ownerColor}`);
+        } else {
+          // Use default color if no owner color is specified
+          ownerColor = '#7cac6a'; // Default green color
+          console.log(`Using default color for ${newOwner}: ${ownerColor}`);
+        }
       }
+    } catch (error) {
+      console.error(`Error getting color for owner ${newOwner}:`, error);
+      // Use default color if there was an error
+      ownerColor = '#7cac6a'; // Default green color
     }
     
     // Get the owner's coat of arms URL if available
     let ownerCoatOfArmsUrl = null;
-    if (newOwner && this.ownerCoatOfArmsMap && this.ownerCoatOfArmsMap[newOwner]) {
-      ownerCoatOfArmsUrl = this.ownerCoatOfArmsMap[newOwner];
+    try {
+      if (newOwner && this.ownerCoatOfArmsMap && this.ownerCoatOfArmsMap[newOwner]) {
+        ownerCoatOfArmsUrl = this.ownerCoatOfArmsMap[newOwner];
+        console.log(`Found coat of arms for ${newOwner}: ${ownerCoatOfArmsUrl}`);
+      }
+    } catch (error) {
+      console.error(`Error getting coat of arms for owner ${newOwner}:`, error);
     }
     
-    // Update the LOD polygon with the new owner's color and coat of arms
-    polygonMesh.updateOwner(newOwner, ownerColor);
-    
-    if (ownerCoatOfArmsUrl) {
-      polygonMesh.updateCoatOfArmsTexture(ownerCoatOfArmsUrl);
+    // Update the PolygonMesh with the new owner's color and coat of arms
+    try {
+      console.log(`Updating PolygonMesh for ${polygonId} with owner ${newOwner} and color ${ownerColor}`);
+      polygonMesh.updateOwner(newOwner, ownerColor);
+      
+      if (ownerCoatOfArmsUrl) {
+        console.log(`Updating coat of arms texture for ${polygonId} with URL ${ownerCoatOfArmsUrl}`);
+        polygonMesh.updateCoatOfArmsTexture(ownerCoatOfArmsUrl);
+      }
+    } catch (error) {
+      console.error(`Error updating PolygonMesh for ${polygonId}:`, error);
     }
     
     // Update coat of arms sprites
-    this.updateCoatOfArmsSprites();
+    try {
+      console.log('Updating coat of arms sprites');
+      this.updateCoatOfArmsSprites();
+    } catch (error) {
+      console.error('Error updating coat of arms sprites:', error);
+    }
+    
+    // Force a render to apply changes
+    if (this.scene.userData.forceRender) {
+      console.log('Forcing render to apply changes');
+      this.scene.userData.forceRender();
+    }
   }
   
   // Add method to update hover state

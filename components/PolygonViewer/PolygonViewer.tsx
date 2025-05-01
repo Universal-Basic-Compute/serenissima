@@ -524,7 +524,7 @@ export default function PolygonViewer() {
     const handleComputeBalanceChanged = (event: CustomEvent) => {
       const { buyer, seller, amount } = event.detail;
       
-      console.log(`Compute balance changed: ${seller} +${amount}, ${buyer} -${amount}`);
+      console.log(`Compute balance changed event received: ${seller} +${amount}, ${buyer} -${amount}`);
       
       // Reload users data to reflect the new compute balances
       loadUsers();
@@ -532,9 +532,12 @@ export default function PolygonViewer() {
       // If the current user is the buyer or seller, update their profile
       const currentWallet = sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress');
       if (currentWallet && (currentWallet === buyer || currentWallet === seller)) {
+        console.log(`Current user (${currentWallet}) is involved in the transaction, updating profile`);
+        
         // Fetch updated user data with retry logic
         const fetchUserData = async (retries = 3, delay = 1000) => {
           try {
+            console.log(`Fetching updated user profile for ${currentWallet}, attempt ${4-retries}/3`);
             const response = await fetch(`${getApiBaseUrl()}/api/wallet/${currentWallet}`);
             if (!response.ok) {
               throw new Error(`Failed to fetch updated user profile: ${response.status}`);
@@ -558,6 +561,7 @@ export default function PolygonViewer() {
               }
               
               // Dispatch event to update UI components
+              console.log('Dispatching userProfileUpdated event');
               window.dispatchEvent(new CustomEvent('userProfileUpdated', {
                 detail: data
               }));
@@ -587,6 +591,20 @@ export default function PolygonViewer() {
   useEffect(() => {
     const handleShowPurchaseModal = (event: CustomEvent) => {
       console.log('Show purchase modal event received:', event.detail);
+      
+      // Validate the transaction data before showing the modal
+      if (!event.detail.transaction) {
+        console.error('Missing transaction data in showLandPurchaseModal event');
+        alert('Cannot process purchase: Missing transaction data');
+        return;
+      }
+      
+      if (!event.detail.landId) {
+        console.error('Missing landId in showLandPurchaseModal event');
+        alert('Cannot process purchase: Missing land ID');
+        return;
+      }
+      
       setPurchaseModalData({
         landId: event.detail.landId,
         landName: event.detail.landName,

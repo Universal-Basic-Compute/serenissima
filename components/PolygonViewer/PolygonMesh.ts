@@ -290,34 +290,43 @@ class PolygonMesh {
     this.polygon.owner = newOwner;
     this.ownerColor = ownerColor;
     
-    if (!this.mesh) return;
+    if (!this.mesh) {
+      console.warn(`Cannot update owner for polygon ${this.polygon.id}: mesh is null`);
+      return;
+    }
     
-    // Determine the new land color
-    const landColor = this.determineLandColor();
-    console.log(`New land color for ${this.polygon.id}: ${landColor.getHexString()}`);
-    
-    // Update the material
-    if (Array.isArray(this.mesh.material)) {
-      // If we have an array of materials, update the second one (for the sides)
-      if (this.mesh.material.length > 1 && this.mesh.material[1] instanceof THREE.MeshBasicMaterial) {
-        this.mesh.material[1].color.copy(landColor);
-        this.mesh.material[1].needsUpdate = true;
-      }
-    } else if (this.mesh.material instanceof THREE.MeshBasicMaterial) {
-      // If we have a single material, update it directly
-      this.mesh.material.color.copy(landColor);
-      this.mesh.material.needsUpdate = true;
+    try {
+      // Determine the new land color
+      const landColor = this.determineLandColor();
+      console.log(`New land color for ${this.polygon.id}: ${landColor.getHexString()}`);
       
-      // Store the original color for hover/selection states
-      this.originalColor = landColor.clone();
+      // Update the material
+      if (Array.isArray(this.mesh.material)) {
+        // If we have an array of materials, update the second one (for the sides)
+        if (this.mesh.material.length > 1 && this.mesh.material[1] instanceof THREE.MeshBasicMaterial) {
+          this.mesh.material[1].color.copy(landColor);
+          this.mesh.material[1].needsUpdate = true;
+        }
+      } else if (this.mesh.material instanceof THREE.MeshBasicMaterial) {
+        // If we have a single material, update it directly
+        this.mesh.material.color.copy(landColor);
+        this.mesh.material.needsUpdate = true;
+        
+        // Store the original color for hover/selection states
+        this.originalColor = landColor.clone();
+      }
+      
+      // Force a render to apply the changes
+      if (this.scene.userData.forceRender) {
+        this.scene.userData.forceRender();
+      } else {
+        console.warn(`Cannot force render for polygon ${this.polygon.id}: forceRender function not found`);
+      }
+      
+      console.log(`Owner successfully updated for polygon ${this.polygon.id}`);
+    } catch (error) {
+      console.error(`Error updating owner for polygon ${this.polygon.id}:`, error);
     }
-    
-    // Force a render to apply the changes
-    if (this.scene.userData.forceRender) {
-      this.scene.userData.forceRender();
-    }
-    
-    console.log(`Owner updated for polygon ${this.polygon.id}`);
   }
   
   // Get mesh

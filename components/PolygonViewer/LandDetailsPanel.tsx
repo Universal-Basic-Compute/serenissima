@@ -60,13 +60,18 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
         
         // Update transaction data locally
         if (event.detail.transaction) {
+          console.log('Updating transaction data locally:', event.detail.transaction);
           setTransaction(event.detail.transaction);
+          
+          // Set flag to indicate a transaction was just completed
+          setJustCompletedTransaction(true);
         }
         
         // Force the panel to stay visible
         setIsVisible(true);
         
         // Dispatch event to keep panel open
+        console.log('Dispatching keepLandDetailsPanelOpen event');
         window.dispatchEvent(new CustomEvent('keepLandDetailsPanelOpen', {
           detail: { polygonId: selectedPolygonId }
         }));
@@ -170,21 +175,23 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
   // Add this useEffect to fetch offers when a polygon is selected
   useEffect(() => {
     if (selectedPolygonId) {
-      // Fetch all offers for this land
-      fetch(`${getApiBaseUrl()}/api/transactions/land/${selectedPolygonId}`)
-        .then(response => {
+      console.log(`Fetching offers for land ${selectedPolygonId}`);
+      
+      // Function to fetch offers with retry logic
+      const fetchOffersWithRetry = async (retries = 3, delay = 1000) => {
+        try {
+          const response = await fetch(`${getApiBaseUrl()}/api/transactions/land/${selectedPolygonId}`);
+          
           if (!response.ok) {
             if (response.status === 404) {
               // No offers found, that's okay
               console.log(`No offers found for land ${selectedPolygonId}`);
-              setOffers([]);
               return [];
             }
             throw new Error(`Failed to fetch offers: ${response.status} ${response.statusText}`);
           }
-          return response.json();
-        })
-        .then(data => {
+          
+          const data = await response.json();
           if (data && Array.isArray(data)) {
             console.log(`Found ${data.length} offers for land ${selectedPolygonId}:`, data);
             
@@ -195,15 +202,29 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
               data;
               
             console.log(`After filtering, ${filteredOffers.length} offers remain`);
-            setOffers(filteredOffers);
+            return filteredOffers;
           } else {
             console.log(`Invalid offers data format for land ${selectedPolygonId}:`, data);
-            setOffers([]);
+            return [];
           }
-        })
-        .catch(error => {
-          console.error('Error fetching offers:', error);
-          setOffers([]);
+        } catch (error) {
+          console.error(`Error fetching offers (attempt ${4-retries}/3):`, error);
+          if (retries > 1) {
+            console.log(`Retrying in ${delay}ms...`);
+            await new Promise(resolve => setTimeout(resolve, delay));
+            return fetchOffersWithRetry(retries - 1, delay * 2);
+          } else {
+            // Last attempt failed, return empty array
+            console.warn('All retry attempts failed, continuing without offers data');
+            return [];
+          }
+        }
+      };
+      
+      // Start the fetch with retries
+      fetchOffersWithRetry()
+        .then(filteredOffers => {
+          setOffers(filteredOffers);
         });
     } else {
       setOffers([]);
@@ -340,6 +361,13 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
                         return;
                       }
                       
+                      // Check if this is the user's own listing
+                      if (transaction.seller === walletAddress) {
+                        alert('You cannot purchase your own listing');
+                        return;
+                      }
+                      
+                      console.log('Dispatching showLandPurchaseModal event');
                       // Dispatch a global event to show the purchase modal
                       window.dispatchEvent(new CustomEvent('showLandPurchaseModal', {
                         detail: { 
@@ -350,6 +378,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
                             // This will be called after the purchase is complete
                             console.log('Purchase completed, refreshing panel');
                             setRefreshKey(prevKey => prevKey + 1);
+                            setJustCompletedTransaction(true);
                           }
                         }
                       }));

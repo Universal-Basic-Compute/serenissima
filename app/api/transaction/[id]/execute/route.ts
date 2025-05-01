@@ -264,10 +264,12 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
+    console.log(`Transaction execution started for ID: ${params.id}`);
     const { id } = params;
     const { buyer } = await request.json();
     
     if (!id) {
+      console.error('Transaction execution failed: Missing transaction ID');
       return NextResponse.json(
         { success: false, error: 'Transaction ID is required' },
         { status: 400 }
@@ -275,11 +277,14 @@ export async function POST(
     }
     
     if (!buyer) {
+      console.error('Transaction execution failed: Missing buyer address');
       return NextResponse.json(
         { success: false, error: 'Buyer address is required' },
         { status: 400 }
       );
     }
+    
+    console.log(`Processing transaction ${id} for buyer ${buyer}`);
     
     // First try to execute the transaction via the backend API
     try {
@@ -376,13 +381,40 @@ export async function POST(
     
     // After successfully updating the transaction, also update compute balances
     if (transaction.seller && buyer && transaction.price) {
-      // Get the username for the buyer's wallet address
-      const buyerUsername = await getUsernameFromWallet(buyer);
+      // Get the username for the buyer's wallet address with retry logic
+      let buyerUsername = null;
+      let retryCount = 0;
+      const maxRetries = 3;
+      
+      while (retryCount < maxRetries && buyerUsername === null) {
+        try {
+          console.log(`Attempt ${retryCount + 1} to get username for wallet ${buyer}`);
+          buyerUsername = await getUsernameFromWallet(buyer);
+          if (buyerUsername) {
+            console.log(`Successfully retrieved username: ${buyerUsername} for wallet ${buyer}`);
+          } else {
+            console.warn(`No username found for wallet ${buyer} on attempt ${retryCount + 1}`);
+          }
+        } catch (error) {
+          console.error(`Error getting username on attempt ${retryCount + 1}:`, error);
+        }
+        
+        if (buyerUsername === null && retryCount < maxRetries - 1) {
+          // Wait with exponential backoff before retrying
+          const delay = Math.pow(2, retryCount) * 1000;
+          console.log(`Waiting ${delay}ms before retry ${retryCount + 2}`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+        }
+        
+        retryCount++;
+      }
       
       // Use the username if available, otherwise fall back to wallet address
       const ownerToSet = buyerUsername || buyer;
+      console.log(`Setting land owner to: ${ownerToSet} (username: ${buyerUsername}, wallet: ${buyer})`);
       
       // Update compute balances using the wallet addresses (not usernames)
+      console.log(`Updating compute balances: ${transaction.seller} +${transaction.price}, ${buyer} -${transaction.price}`);
       const balanceUpdateResult = await updateUserComputeBalances(transaction.seller, buyer, transaction.price);
       
       // Log the compute balance update
@@ -390,6 +422,17 @@ export async function POST(
         console.log(`Successfully updated compute balances: ${transaction.seller} +${transaction.price}, ${buyer} -${transaction.price}`);
       } else {
         console.warn(`Failed to update compute balances through API, transaction was completed but balances may not be accurate`);
+        
+        // Retry compute balance update once more with a delay
+        console.log('Retrying compute balance update after 2 second delay...');
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        const retryResult = await updateUserComputeBalances(transaction.seller, buyer, transaction.price);
+        if (retryResult) {
+          console.log('Retry successful: compute balances updated');
+        } else {
+          console.error('Retry failed: compute balances could not be updated');
+        }
       }
     }
     
@@ -397,12 +440,9 @@ export async function POST(
     if (transaction.type === 'land' && transaction.asset_id) {
       console.log(`Updating land ownership for asset ${transaction.asset_id}`);
       
-      // Get the username for the buyer's wallet address
-      const buyerUsername = await getUsernameFromWallet(buyer);
-      
+      // We already have the username from earlier, no need to fetch again
       // ALWAYS use the username if available, otherwise fall back to wallet address
       // This ensures consistency in ownership attribution
-      const ownerToSet = buyerUsername || buyer;
       console.log(`Setting land owner to ${ownerToSet} (username: ${buyerUsername}, wallet: ${buyer})`);
       
       // Try multiple possible file paths for the land data
@@ -452,11 +492,34 @@ export async function POST(
               body: JSON.stringify({ 
                 owner: ownerToSet // Use username instead of wallet address
               }),
-              signal: AbortSignal.timeout(5000) // 5 second timeout
+              signal: AbortSignal.timeout(10000) // Increased from 5 to 10 second timeout
             });
             
             if (landUpdateResponse.ok) {
               console.log(`Successfully updated land owner in backend for ${transaction.asset_id}`);
+            } else {
+              console.warn(`Failed to update land owner in backend: ${landUpdateResponse.status} ${landUpdateResponse.statusText}`);
+              
+              // Retry once after a delay
+              console.log('Retrying backend land owner update after 2 second delay...');
+              await new Promise(resolve => setTimeout(resolve, 2000));
+              
+              const retryResponse = await fetch(`${apiBaseUrl}/api/land/${transaction.asset_id}/update-owner`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                  owner: ownerToSet
+                }),
+                signal: AbortSignal.timeout(10000)
+              });
+              
+              if (retryResponse.ok) {
+                console.log(`Retry successful: land owner updated in backend for ${transaction.asset_id}`);
+              } else {
+                console.error(`Retry failed: could not update land owner in backend for ${transaction.asset_id}`);
+              }
             }
           } catch (landUpdateError) {
             console.warn(`Could not update land owner in backend for ${transaction.asset_id}:`, landUpdateError);

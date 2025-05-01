@@ -46,11 +46,16 @@ const LandPurchaseModal: React.FC<LandPurchaseModalProps> = ({
       
       if (!walletAddress) {
         alert('Please connect your wallet first');
+        setIsPurchasing(false);
         return;
       }
       
+      console.log(`Starting purchase process for land ${landId} by wallet ${walletAddress}`);
+      
       // First try the Next.js API route
       try {
+        console.log(`Executing transaction ${transaction.id} via Next.js API route`);
+        
         // Call the backend API to execute the transaction
         const response = await fetch(`${getApiBaseUrl()}/api/transaction/${transaction.id}/execute`, {
           method: 'POST',
@@ -61,24 +66,30 @@ const LandPurchaseModal: React.FC<LandPurchaseModalProps> = ({
             buyer: walletAddress
           }),
           // Add a timeout to prevent hanging requests
-          signal: AbortSignal.timeout(15000) // 15 second timeout
+          signal: AbortSignal.timeout(20000) // Increased from 15 to 20 second timeout
         });
       
         // Parse the response data regardless of status
         const data = await response.json();
+        console.log(`Transaction execution response:`, data);
       
         if (!response.ok) {
+          console.warn(`Transaction execution failed with status ${response.status}`);
+        
           // Check if this is a "transaction already executed" error
           if (data.detail && data.detail.includes("already executed")) {
+            console.log('Transaction already executed, fetching updated land data');
             alert(`This land has already been acquired. The information will be updated.`);
-          
+        
             // Fetch updated land data
             const landResponse = await fetch(`${getApiBaseUrl()}/api/land/${landId}`);
             if (landResponse.ok) {
               const landData = await landResponse.json();
-            
+              console.log('Fetched updated land data:', landData);
+          
               // Dispatch a custom event to notify other components
               if (landData && landData.user) {
+                console.log(`Dispatching landOwnershipChanged event with new owner: ${landData.user}`);
                 window.dispatchEvent(new CustomEvent('landOwnershipChanged', {
                   detail: { 
                     landId: landId, 
@@ -86,8 +97,12 @@ const LandPurchaseModal: React.FC<LandPurchaseModalProps> = ({
                   }
                 }));
               }
+            } else {
+              console.warn(`Failed to fetch updated land data: ${landResponse.status}`);
             }
-          
+        
+            setIsPurchasing(false);
+            onClose();
             return;
           }
           
@@ -95,19 +110,47 @@ const LandPurchaseModal: React.FC<LandPurchaseModalProps> = ({
           const errorStr = String(data.detail || '');
           if (errorStr.includes('INVALID_FILTER_BY_FORMULA') || errorStr.includes('Invalid formula') || errorStr.includes('OR')) {
             console.log('Detected Airtable formula error, using local fallback');
-            
+          
             // Create a local transaction result
             const localTransaction = {
               ...transaction,
               buyer: walletAddress,
               executed_at: new Date().toISOString()
             };
+          
+            // Get the username for the wallet address with retry logic
+            let username = null;
+            let retryCount = 0;
+            const maxRetries = 3;
+          
+            while (retryCount < maxRetries && username === null) {
+              try {
+                console.log(`Attempt ${retryCount + 1} to get username for wallet ${walletAddress}`);
+                username = await getUsernameFromWallet(walletAddress);
+                if (username) {
+                  console.log(`Successfully retrieved username: ${username}`);
+                } else {
+                  console.warn(`No username found for wallet ${walletAddress} on attempt ${retryCount + 1}`);
+                }
+              } catch (error) {
+                console.error(`Error getting username on attempt ${retryCount + 1}:`, error);
+              }
             
-            // Get the username for the wallet address
-            const username = await getUsernameFromWallet(walletAddress);
+              if (username === null && retryCount < maxRetries - 1) {
+                // Wait with exponential backoff before retrying
+                const delay = Math.pow(2, retryCount) * 1000;
+                console.log(`Waiting ${delay}ms before retry ${retryCount + 2}`);
+                await new Promise(resolve => setTimeout(resolve, delay));
+              }
+            
+              retryCount++;
+            }
+          
             const ownerToSet = username || walletAddress;
-      
+            console.log(`Setting land owner to: ${ownerToSet} (username: ${username}, wallet: ${walletAddress})`);
+    
             // Dispatch custom events to notify other components
+            console.log('Dispatching landOwnershipChanged event');
             window.dispatchEvent(new CustomEvent('landOwnershipChanged', {
               detail: { 
                 landId: landId, 
@@ -115,8 +158,9 @@ const LandPurchaseModal: React.FC<LandPurchaseModalProps> = ({
                 transaction: localTransaction
               }
             }));
-      
+    
             // Dispatch a specific event for land purchase to update the panel
+            console.log('Dispatching landPurchased event');
             window.dispatchEvent(new CustomEvent('landPurchased', {
               detail: { 
                 landId: landId, 
@@ -124,8 +168,9 @@ const LandPurchaseModal: React.FC<LandPurchaseModalProps> = ({
                 transaction: localTransaction
               }
             }));
-            
+          
             // Add a new event specifically for compute balance updates
+            console.log('Dispatching computeBalanceChanged event');
             window.dispatchEvent(new CustomEvent('computeBalanceChanged', {
               detail: {
                 buyer: walletAddress,
@@ -133,10 +178,10 @@ const LandPurchaseModal: React.FC<LandPurchaseModalProps> = ({
                 amount: transaction.price
               }
             }));
-            
+          
             // Show success message
             alert(`Acquisition complete! The property "${landName || landId}" has been successfully transferred to your possession.`);
-            
+          
             // Call the onComplete callback
             onComplete();
             onClose();
@@ -147,20 +192,49 @@ const LandPurchaseModal: React.FC<LandPurchaseModalProps> = ({
         }
       
         // Show success message
+        console.log('Transaction executed successfully');
         alert(`Acquisition complete! The property "${landName || landId}" has been successfully transferred to your possession.`);
-      
+    
         // Update transaction to mark it as executed
         const updatedTransaction = {
           ...transaction,
           buyer: walletAddress,
           executed_at: new Date().toISOString()
         };
+    
+        // Get the username for the wallet address with retry logic
+        let username = null;
+        let retryCount = 0;
+        const maxRetries = 3;
       
-        // Get the username for the wallet address
-        const username = await getUsernameFromWallet(walletAddress);
+        while (retryCount < maxRetries && username === null) {
+          try {
+            console.log(`Attempt ${retryCount + 1} to get username for wallet ${walletAddress}`);
+            username = await getUsernameFromWallet(walletAddress);
+            if (username) {
+              console.log(`Successfully retrieved username: ${username}`);
+            } else {
+              console.warn(`No username found for wallet ${walletAddress} on attempt ${retryCount + 1}`);
+            }
+          } catch (error) {
+            console.error(`Error getting username on attempt ${retryCount + 1}:`, error);
+          }
+        
+          if (username === null && retryCount < maxRetries - 1) {
+            // Wait with exponential backoff before retrying
+            const delay = Math.pow(2, retryCount) * 1000;
+            console.log(`Waiting ${delay}ms before retry ${retryCount + 2}`);
+            await new Promise(resolve => setTimeout(resolve, delay));
+          }
+        
+          retryCount++;
+        }
+      
         const ownerToSet = username || walletAddress;
-      
+        console.log(`Setting land owner to: ${ownerToSet} (username: ${username}, wallet: ${walletAddress})`);
+    
         // Dispatch custom events to notify other components
+        console.log('Dispatching landOwnershipChanged event');
         window.dispatchEvent(new CustomEvent('landOwnershipChanged', {
           detail: { 
             landId: landId, 
@@ -168,8 +242,9 @@ const LandPurchaseModal: React.FC<LandPurchaseModalProps> = ({
             transaction: updatedTransaction
           }
         }));
-      
+    
         // Dispatch a specific event for land purchase to update the panel
+        console.log('Dispatching landPurchased event');
         window.dispatchEvent(new CustomEvent('landPurchased', {
           detail: { 
             landId: landId, 
@@ -177,8 +252,9 @@ const LandPurchaseModal: React.FC<LandPurchaseModalProps> = ({
             transaction: updatedTransaction
           }
         }));
-      
+    
         // Add a new event specifically for compute balance updates
+        console.log('Dispatching computeBalanceChanged event');
         window.dispatchEvent(new CustomEvent('computeBalanceChanged', {
           detail: {
             buyer: walletAddress,
@@ -187,24 +263,54 @@ const LandPurchaseModal: React.FC<LandPurchaseModalProps> = ({
           }
         }));
       
-        // Add a new event specifically for compute balance updates
-        window.dispatchEvent(new CustomEvent('computeBalanceChanged', {
-          detail: {
-            buyer: walletAddress,
-            seller: transaction.seller,
-            amount: transaction.price
-          }
-        }));
+        // Fetch updated user data to reflect new compute balance with retry logic
+        let userDataFetched = false;
+        retryCount = 0;
       
-        // Fetch updated user data to reflect new compute balance
-        const userResponse = await fetch(`${getApiBaseUrl()}/api/wallet/${walletAddress}`);
-        if (userResponse.ok) {
-          const userData = await userResponse.json();
+        while (retryCount < maxRetries && !userDataFetched) {
+          try {
+            console.log(`Attempt ${retryCount + 1} to fetch updated user data`);
+            const userResponse = await fetch(`${getApiBaseUrl()}/api/wallet/${walletAddress}`);
+          
+            if (userResponse.ok) {
+              const userData = await userResponse.json();
+              console.log('Fetched updated user data:', userData);
+            
+              // Dispatch event to update user profile with new compute amount
+              console.log('Dispatching userProfileUpdated event');
+              window.dispatchEvent(new CustomEvent('userProfileUpdated', {
+                detail: userData
+              }));
+            
+              // Update local storage with new user data
+              try {
+                const storedProfile = localStorage.getItem('userProfile');
+                if (storedProfile) {
+                  const profile = JSON.parse(storedProfile);
+                  profile.computeAmount = userData.compute_amount;
+                  localStorage.setItem('userProfile', JSON.stringify(profile));
+                  console.log('Updated localStorage with new compute amount:', userData.compute_amount);
+                }
+              } catch (storageError) {
+                console.error('Error updating localStorage:', storageError);
+              }
+            
+              userDataFetched = true;
+            } else {
+              console.warn(`Failed to fetch user data: ${userResponse.status}`);
+            }
+          } catch (error) {
+            console.error(`Error fetching user data on attempt ${retryCount + 1}:`, error);
+          }
         
-          // Dispatch event to update user profile with new compute amount
-          window.dispatchEvent(new CustomEvent('userProfileUpdated', {
-            detail: userData
-          }));
+          if (!userDataFetched && retryCount < maxRetries - 1) {
+            // Wait with exponential backoff before retrying
+            const delay = Math.pow(2, retryCount) * 1000;
+            console.log(`Waiting ${delay}ms before retry ${retryCount + 2}`);
+            await new Promise(resolve => setTimeout(resolve, delay));
+          }
+        
+          retryCount++;
         }
         
         // Call the onComplete callback
@@ -214,6 +320,7 @@ const LandPurchaseModal: React.FC<LandPurchaseModalProps> = ({
         
         // Try the direct backend API as a fallback
         try {
+          console.log('Falling back to direct backend API call');
           const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
           const directResponse = await fetch(`${apiBaseUrl}/api/transaction/${transaction.id}/execute`, {
             method: 'POST',
@@ -224,7 +331,7 @@ const LandPurchaseModal: React.FC<LandPurchaseModalProps> = ({
               buyer: walletAddress
             }),
             // Add a timeout to prevent hanging requests
-            signal: AbortSignal.timeout(15000) // 15 second timeout
+            signal: AbortSignal.timeout(20000) // Increased from 15 to 20 second timeout
           });
           
           if (directResponse.ok) {
