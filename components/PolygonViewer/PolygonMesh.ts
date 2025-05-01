@@ -180,8 +180,8 @@ class PolygonMesh {
       this.mesh.position.y = 0.001; // Consistent height for all polygons to prevent visible seams
       
       // Completely flat with no edges or borders
-      // Apply a minimal inset to avoid z-fighting but minimize visible gaps
-      geometry.scale(0.9995, 1, 0.9995); // Reduced scaling to minimize gaps between polygons
+      // Apply a minimal inset to avoid z-fighting
+      geometry.scale(0.9995, 1, 0.9995); // Reduced scaling to help canal gaps between polygons
     } catch (error) {
       console.error('Error creating mesh:', error);
     }
