@@ -19,6 +19,7 @@ export default class LODPolygon {
   private isSelected: boolean = false;
   private originalColor: THREE.Color | null = null;
   private ownerColor: string | null = null;
+  private coatOfArmsSprite: THREE.Sprite | null = null;
 
   constructor(
     scene: THREE.Scene,
@@ -282,6 +283,11 @@ export default class LODPolygon {
         material.map = this.sandBaseColor;
         material.normalMap = this.sandNormalMap;
         material.roughnessMap = this.sandRoughnessMap;
+        
+        // Hide coat of arms sprite in non-land views
+        if (this.coatOfArmsSprite) {
+          this.coatOfArmsSprite.visible = false;
+        }
       }
       
       // Update material to apply changes
@@ -293,24 +299,44 @@ export default class LODPolygon {
   private applyProjectionMapping(texture: THREE.Texture) {
     if (!this.highDetailMesh) return;
     
-    const material = this.highDetailMesh.material as THREE.MeshStandardMaterial;
+    // Create a custom shader material that projects the texture from above
+    const customMaterial = new THREE.ShaderMaterial({
+      uniforms: {
+        map: { value: texture },
+        color: { value: new THREE.Color(this.ownerColor || '#7cac6a') }
+      },
+      vertexShader: `
+        varying vec2 vUv;
+        void main() {
+          // Use the x and z coordinates for UV mapping (top-down projection)
+          vUv = vec2(position.x, position.z);
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform sampler2D map;
+        uniform vec3 color;
+        varying vec2 vUv;
+        void main() {
+          // Scale and center the UVs to fit the texture in the center
+          vec2 centeredUV = (vUv - 0.5) * 2.0;
+          // Sample the texture
+          vec4 texColor = texture2D(map, centeredUV * 0.5 + 0.5);
+          // Mix with the base color
+          gl_FragColor = texColor * vec4(color, 1.0);
+        }
+      `,
+      side: THREE.DoubleSide
+    });
     
-    // Use a matrix to project the texture from above
-    const matrix = new THREE.Matrix4();
-    matrix.makeRotationX(-Math.PI / 2); // Rotate to project from above
+    // Replace the material
+    const oldMaterial = this.highDetailMesh.material;
+    this.highDetailMesh.material = customMaterial;
     
-    // Create a projection matrix that maps the texture to cover the entire polygon
-    texture.matrixAutoUpdate = false;
-    texture.matrix.copy(matrix);
-    
-    // Set texture parameters
-    texture.wrapS = texture.wrapT = THREE.ClampToEdgeWrapping;
-    texture.minFilter = THREE.LinearFilter;
-    texture.magFilter = THREE.LinearFilter;
-    
-    // Apply the texture to the material
-    material.map = texture;
-    material.needsUpdate = true;
+    // Dispose of the old material
+    if (oldMaterial) {
+      oldMaterial.dispose();
+    }
   }
   
   // Add method to apply coat of arms texture to the land
@@ -326,12 +352,11 @@ export default class LODPolygon {
     this.textureLoader.load(
       coatOfArmsUrl,
       (texture) => {
-        // Change texture wrapping to ClampToEdge instead of RepeatWrapping
+        // Set texture to not repeat and use clamp to edge
         texture.wrapS = texture.wrapT = THREE.ClampToEdgeWrapping;
         
-        // Don't set repeat - we want one image per land
-        // Set texture to cover the entire polygon
-        texture.mapping = THREE.UVMapping;
+        // Important: Use a mapping mode that preserves aspect ratio
+        texture.mapping = THREE.EquirectangularReflectionMapping;
         
         // Apply the texture to the material
         material.map = texture;
@@ -339,15 +364,16 @@ export default class LODPolygon {
         // Add a slight tint with the owner's color for better identification
         if (this.ownerColor) {
           material.color.set(this.ownerColor);
-          material.color.multiplyScalar(1.2); // Brighten slightly
+          // Use a lighter tint to let the image show through more clearly
+          material.color.multiplyScalar(1.5);
         } else if (this.polygon.owner) {
           material.color.copy(this.generateColorFromUsername(this.polygon.owner));
-          material.color.multiplyScalar(1.2); // Brighten slightly
+          material.color.multiplyScalar(1.5);
         }
         
         // Adjust material properties for textured appearance
-        material.roughness = 0.6;
-        material.metalness = 0.2;
+        material.roughness = 0.4; // Less rough for better image clarity
+        material.metalness = 0.1;
         
         // Update material to apply changes
         material.needsUpdate = true;
@@ -420,6 +446,13 @@ export default class LODPolygon {
 
   public cleanup() {
     this.scene.remove(this.mesh);
+    
+    // Clean up coat of arms sprite if it exists
+    if (this.coatOfArmsSprite) {
+      this.scene.remove(this.coatOfArmsSprite);
+      (this.coatOfArmsSprite.material as THREE.SpriteMaterial).map?.dispose();
+      (this.coatOfArmsSprite.material as THREE.SpriteMaterial).dispose();
+    }
     
     if (this.highDetailMesh) {
       this.highDetailMesh.geometry.dispose();

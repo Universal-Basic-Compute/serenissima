@@ -34,6 +34,65 @@ export default class PolygonRenderer {
   private sandRoughnessMap: THREE.Texture;
   private lodPolygons: LODPolygon[] = [];
   private ownerCoatOfArmsMap: Record<string, string> = {}; // Map of owner to coat of arms URL
+  
+  // Add a method to create a sprite for the coat of arms
+  private createCoatOfArmsSprite(coatOfArmsUrl: string) {
+    // Remove any existing sprite
+    if (this.coatOfArmsSprite) {
+      this.scene.remove(this.coatOfArmsSprite);
+      (this.coatOfArmsSprite.material as THREE.SpriteMaterial).map?.dispose();
+      (this.coatOfArmsSprite.material as THREE.SpriteMaterial).dispose();
+    }
+    
+    // Load the texture for the sprite
+    this.textureLoader.load(
+      coatOfArmsUrl,
+      (texture) => {
+        // Create a sprite material with the texture
+        const spriteMaterial = new THREE.SpriteMaterial({ 
+          map: texture,
+          color: this.ownerColor ? new THREE.Color(this.ownerColor) : new THREE.Color(0xffffff),
+          transparent: true,
+          depthTest: false // Ensure visibility
+        });
+        
+        // Create a sprite
+        this.coatOfArmsSprite = new THREE.Sprite(spriteMaterial);
+        
+        // Position the sprite at the center of the polygon, slightly above it
+        if (this.polygon.centroid) {
+          const normalizedCoords = normalizeCoordinates(
+            [this.polygon.centroid],
+            this.bounds.centerLat,
+            this.bounds.centerLng,
+            this.bounds.scale,
+            this.bounds.latCorrectionFactor
+          )[0];
+          
+          this.coatOfArmsSprite.position.set(normalizedCoords.x, 0.5, -normalizedCoords.y);
+        } else {
+          // If no centroid, use the mesh position
+          const center = this.mesh.position.clone();
+          center.y += 0.5; // Position above the land
+          this.coatOfArmsSprite.position.copy(center);
+        }
+        
+        // Scale the sprite to cover most of the land
+        const size = 3; // Adjust based on your scene scale
+        this.coatOfArmsSprite.scale.set(size, size, 1);
+        
+        // Only show in land view
+        this.coatOfArmsSprite.visible = this.activeView === 'land';
+        
+        // Add to scene
+        this.scene.add(this.coatOfArmsSprite);
+      },
+      undefined,
+      (error) => {
+        console.error('Error loading coat of arms sprite texture:', error);
+      }
+    );
+  }
   private coatOfArmSprites: Record<string, THREE.Sprite> = {};
   private users: Record<string, any> = {}; // Store users data
 
@@ -524,7 +583,7 @@ export default class PolygonRenderer {
     
     // Create a canvas to draw the circular mask
     const canvas = document.createElement('canvas');
-    const size = 256; // Use a power of 2 for better performance
+    const size = 512; // Increased size for better quality
     canvas.width = size;
     canvas.height = size;
     
@@ -555,9 +614,25 @@ export default class PolygonRenderer {
       ctx.arc(size/2, size/2, size/2 - 8, 0, Math.PI * 2);
       ctx.clip();
       
-      // Draw the image if it exists and is loaded
+      // Calculate dimensions to maintain aspect ratio
+      let drawWidth = size;
+      let drawHeight = size;
+      let offsetX = 0;
+      let offsetY = 0;
+      
+      if (texture.image.width > texture.image.height) {
+        // Landscape image
+        drawHeight = (texture.image.height / texture.image.width) * size;
+        offsetY = (size - drawHeight) / 2;
+      } else if (texture.image.height > texture.image.width) {
+        // Portrait image
+        drawWidth = (texture.image.width / texture.image.height) * size;
+        offsetX = (size - drawWidth) / 2;
+      }
+      
+      // Draw the image with proper aspect ratio
       if (texture.image) {
-        ctx.drawImage(texture.image, 0, 0, size, size);
+        ctx.drawImage(texture.image, offsetX, offsetY, drawWidth, drawHeight);
       }
       
       ctx.restore();
