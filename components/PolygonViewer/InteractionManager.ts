@@ -28,7 +28,6 @@ export default class InteractionManager {
   private isProcessingClick: boolean = false;
   private isDragging: boolean = false;
   private mouseDownPosition = { x: 0, y: 0 };
-  private cameraPositionOnClick = new THREE.Vector3();
 
   constructor({
     camera,
@@ -65,9 +64,6 @@ export default class InteractionManager {
   private onMouseDown(event: MouseEvent) {
     this.mouseDownPosition = { x: event.clientX, y: event.clientY };
     this.isDragging = false;
-    
-    // Store camera position at click start
-    this.cameraPositionOnClick.copy(this.camera.position);
   }
   
   private onMouseMove(event: MouseEvent) {
@@ -123,42 +119,20 @@ export default class InteractionManager {
           // Toggle selection state
           const newSelectedId = clickedId === this.selectedPolygonId ? null : clickedId;
           
-          // Update the selection state in a way that doesn't affect the camera
-          // Use requestAnimationFrame to defer the update to the next frame
-          requestAnimationFrame(() => {
-            // Preserve camera position
-            const currentPosition = this.camera.position.clone();
-            
-            // Update selection state
-            this.setSelectedPolygonId(newSelectedId);
-            this.selectedPolygonId = newSelectedId;
-            
-            // Restore camera position after a short delay to ensure it's not reset
-            setTimeout(() => {
-              this.camera.position.copy(currentPosition);
-              this.isProcessingClick = false;
-            }, 10);
-          });
+          // Update selection state directly
+          this.setSelectedPolygonId(newSelectedId);
+          this.selectedPolygonId = newSelectedId;
+          this.isProcessingClick = false;
           return;
         }
       } 
       
       // Clicking on empty space, deselect current selection
       if (this.selectedPolygonId) {
-        requestAnimationFrame(() => {
-          // Preserve camera position
-          const currentPosition = this.camera.position.clone();
-          
-          // Update selection state
-          this.setSelectedPolygonId(null);
-          this.selectedPolygonId = null;
-          
-          // Restore camera position after a short delay
-          setTimeout(() => {
-            this.camera.position.copy(currentPosition);
-            this.isProcessingClick = false;
-          }, 10);
-        });
+        // Update selection state directly
+        this.setSelectedPolygonId(null);
+        this.selectedPolygonId = null;
+        this.isProcessingClick = false;
         return;
       }
     } catch (error) {
