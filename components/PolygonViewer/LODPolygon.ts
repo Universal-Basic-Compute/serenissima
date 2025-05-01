@@ -142,10 +142,7 @@ export default class LODPolygon {
     const extrudeSettings = {
       steps: 2, // Increase steps for smoother extrusion
       depth: 0.05 + Math.random() * 0.03, // Slightly taller with some variation
-      bevelEnabled: true, // Enable bevels for more realistic edges
-      bevelThickness: 0.01,
-      bevelSize: 0.01,
-      bevelSegments: 2,
+      bevelEnabled: false, // Disable bevels to prevent shadow artifacts
       UVGenerator: { // Add a custom UV generator for better texture mapping
         generateTopUV: function(geometry, vertices, indexA, indexB, indexC) {
           // Create UVs that map the entire texture to the face
@@ -193,11 +190,12 @@ export default class LODPolygon {
       color: landColor,
       roughness: 0.7,
       metalness: 0.1,
-      side: THREE.DoubleSide,
+      side: THREE.FrontSide, // Use FrontSide instead of DoubleSide to prevent shadow artifacts
       flatShading: false, // Smooth shading for better quality
       polygonOffset: true,
       polygonOffsetFactor: 1,
-      polygonOffsetUnits: 1
+      polygonOffsetUnits: 1,
+      shadowSide: THREE.FrontSide // Ensure shadows are only cast from front face
     });
     
     // If we're in land view and the polygon has an owner with a coat of arms,

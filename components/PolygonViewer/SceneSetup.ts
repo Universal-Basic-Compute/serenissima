@@ -51,7 +51,7 @@ export default class SceneSetup {
     });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.setPixelRatio(1); // Start with lowest pixel ratio
-    this.renderer.shadowMap.enabled = false; // Start without shadows
+    this.renderer.shadowMap.enabled = false; // Disable shadows completely
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     
     // Set up a simple EffectComposer initially
@@ -68,8 +68,7 @@ export default class SceneSetup {
       if (!this.performanceMode) {
         this.renderer.antialias = true;
         this.renderer.setPixelRatio(window.devicePixelRatio > 1 ? 2 : 1);
-        this.renderer.shadowMap.enabled = true;
-        this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        this.renderer.shadowMap.enabled = false; // Keep shadows disabled even in high quality mode
         this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
         this.renderer.toneMappingExposure = 1.2;
       } else {
@@ -153,7 +152,7 @@ export default class SceneSetup {
     // Main directional light (sun) - bigger and more yellow
     this.sunLight = new THREE.DirectionalLight(0xffffcc, 1.8);
     this.sunLight.position.set(50, 100, 50);
-    this.sunLight.castShadow = true;
+    this.sunLight.castShadow = false; // Disable shadows to prevent the dark shadow effect
     
     // Create a sun sphere for visual effect
     const sunGeometry = new THREE.SphereGeometry(5, 16, 16);
@@ -222,16 +221,7 @@ export default class SceneSetup {
     const sunRays = new THREE.LineSegments(rayGeometry, rayMaterial);
     this.sunSphere.add(sunRays);
     
-    // Reduced shadow map resolution for better performance
-    this.sunLight.shadow.mapSize.width = this.performanceMode ? 512 : 1024;
-    this.sunLight.shadow.mapSize.height = this.performanceMode ? 512 : 1024;
-    this.sunLight.shadow.camera.near = 0.5;
-    this.sunLight.shadow.camera.far = 500;
-    this.sunLight.shadow.camera.left = -100;
-    this.sunLight.shadow.camera.right = 100;
-    this.sunLight.shadow.camera.top = 100;
-    this.sunLight.shadow.camera.bottom = -100;
-    this.sunLight.shadow.bias = -0.0001;
+    // Shadow settings are not needed since we disabled shadows
     
     this.scene.add(this.sunLight);
     
