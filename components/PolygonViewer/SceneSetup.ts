@@ -20,11 +20,6 @@ export default class SceneSetup {
   private sunLight: THREE.DirectionalLight;
   private sunSphere: THREE.Mesh;
   private sunGlow: THREE.Mesh;
-  private controlsEventHandlers: {
-    handleMouseDown: () => void;
-    handleMouseUp: () => void;
-    handleWheel: () => void;
-  };
   
   constructor({ canvas, activeView, highQuality }: SceneSetupProps) {
     this.performanceMode = !highQuality;
@@ -70,8 +65,7 @@ export default class SceneSetup {
 
     // Disable all automatic behaviors
     this.controls.autoRotate = false;
-    this.controls.enableDamping = false; // Disable damping to prevent auto-updates
-    this.controls.dampingFactor = 0;
+    this.controls.enableDamping = false;
 
     // Make controls very simple
     this.controls.rotateSpeed = 0.5;
@@ -103,37 +97,6 @@ export default class SceneSetup {
     
     // Set initial target to center of scene
     this.controls.target.set(0, 0, 0);
-    
-    // Add a flag to track user interaction
-    this.controls.userInteracting = false;
-
-    // Add event listeners to track when user is interacting with controls
-    const handleMouseDown = () => {
-      this.controls.userInteracting = true;
-    };
-    
-    const handleMouseUp = () => {
-      this.controls.userInteracting = false;
-    };
-    
-    const handleWheel = () => {
-      this.controls.userInteracting = true;
-      // Reset after a short delay
-      setTimeout(() => {
-        this.controls.userInteracting = false;
-      }, 200);
-    };
-    
-    this.renderer.domElement.addEventListener('mousedown', handleMouseDown);
-    this.renderer.domElement.addEventListener('mouseup', handleMouseUp);
-    this.renderer.domElement.addEventListener('wheel', handleWheel);
-    
-    // Store event handlers for cleanup
-    this.controlsEventHandlers = {
-      handleMouseDown,
-      handleMouseUp,
-      handleWheel
-    };
     
     // IMPORTANT: Only call update ONCE during initialization
     this.controls.update();
@@ -222,13 +185,6 @@ export default class SceneSetup {
   public cleanup() {
     // Remove event listeners
     window.removeEventListener('resize', this.handleResize);
-    
-    // Remove the control interaction event listeners
-    if (this.controlsEventHandlers) {
-      this.renderer.domElement.removeEventListener('mousedown', this.controlsEventHandlers.handleMouseDown);
-      this.renderer.domElement.removeEventListener('mouseup', this.controlsEventHandlers.handleMouseUp);
-      this.renderer.domElement.removeEventListener('wheel', this.controlsEventHandlers.handleWheel);
-    }
     
     // Dispose of controls
     this.controls.dispose();

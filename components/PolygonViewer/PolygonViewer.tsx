@@ -131,12 +131,9 @@ export default function PolygonViewer() {
     const animate = () => {
       requestAnimationFrame(animate);
       
-      // Update controls ONLY if user is actively interacting with them
-      if (sceneRef.current && sceneRef.current.controls && sceneRef.current.controls.enabled) {
-        // Only update controls if the user is actively using them
-        if (sceneRef.current.controls.userInteracting) {
-          sceneRef.current.controls.update();
-        }
+      // Always update controls - this is the key change
+      if (sceneRef.current && sceneRef.current.controls) {
+        sceneRef.current.controls.update();
       }
       
       // Update water effect
