@@ -47,6 +47,11 @@ export default function Home() {
   const [computeModalOpen, setComputeModalOpen] = useState(false);
   const [showUsernamePrompt, setShowUsernamePrompt] = useState(false);
   const [usernameInput, setUsernameInput] = useState('');
+  const [firstNameOptions, setFirstNameOptions] = useState<string[]>([]);
+  const [lastNameOptions, setLastNameOptions] = useState<string[]>([]);
+  const [selectedFirstName, setSelectedFirstName] = useState<string>('');
+  const [selectedLastName, setSelectedLastName] = useState<string>('');
+  const [familyCoatOfArms, setFamilyCoatOfArms] = useState<string>('');
   
   // Get API key from environment variable
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '';
@@ -145,14 +150,71 @@ export default function Home() {
     }
   };
   
+  // Generate Venetian-style names
+  const generateNameOptions = useCallback(() => {
+    // Historical Venetian first names
+    const venetianFirstNames = [
+      "Antonio", "Marco", "Giovanni", "Francesco", "Pietro", "Alvise", "Domenico", "Nicolò", 
+      "Giacomo", "Lorenzo", "Andrea", "Bartolomeo", "Tommaso", "Marino", "Sebastiano", 
+      "Bernardo", "Vincenzo", "Filippo", "Daniele", "Matteo", "Paolo", "Vittorio", "Enrico", 
+      "Leonardo", "Ludovico", "Alessandro", "Gabriele", "Marcantonio", "Girolamo", "Tiziano", 
+      "Benedetto", "Carlo", "Stefano", "Guido", "Roberto", "Silvio", "Emilio", "Cesare", 
+      "Dario", "Fabio", "Giulio", "Massimo", "Ottavio", "Renato", "Salvatore", "Umberto", 
+      "Valerio", "Zaccaria", "Aldo", "Bruno"
+    ];
+    
+    // Historical Venetian last names
+    const venetianLastNames = [
+      "Contarini", "Morosini", "Dandolo", "Foscari", "Grimani", "Barbarigo", "Mocenigo", 
+      "Venier", "Loredan", "Gritti", "Donà", "Priuli", "Bembo", "Corner", "Tron", 
+      "Tiepolo", "Malipiero", "Soranzo", "Pisani", "Querini", "Zorzi", "Gradenigo", 
+      "Trevisan", "Michiel", "Giustinian", "Zane", "Marcello", "Dolfin", "Valier", "Molin", 
+      "Foscarini", "Bragadin", "Vendramin", "Zen", "Memmo", "Sanudo", "Falier", "Erizzo", 
+      "Badoer", "Barozzi", "Canal", "Diedo", "Emo", "Lando", "Moro", "Nani", "Pesaro", 
+      "Sagredo", "Trevisan", "Ziani"
+    ];
+    
+    // Shuffle arrays to get random selections each time
+    const shuffledFirstNames = [...venetianFirstNames].sort(() => 0.5 - Math.random());
+    const shuffledLastNames = [...venetianLastNames].sort(() => 0.5 - Math.random());
+    
+    setFirstNameOptions(shuffledFirstNames);
+    setLastNameOptions(shuffledLastNames);
+    
+    // Set initial selections
+    setSelectedFirstName(shuffledFirstNames[0]);
+    setSelectedLastName(shuffledLastNames[0]);
+  }, []);
+
+  // Call this function when the username prompt is shown
+  useEffect(() => {
+    if (showUsernamePrompt) {
+      generateNameOptions();
+    }
+  }, [showUsernamePrompt, generateNameOptions]);
+
+  // Add these functions to handle dice rolls
+  const rollFirstName = () => {
+    const randomIndex = Math.floor(Math.random() * firstNameOptions.length);
+    setSelectedFirstName(firstNameOptions[randomIndex]);
+  };
+
+  const rollLastName = () => {
+    const randomIndex = Math.floor(Math.random() * lastNameOptions.length);
+    setSelectedLastName(lastNameOptions[randomIndex]);
+  };
+
   const handleUsernameSubmit = async () => {
-    if (!usernameInput.trim() || !walletAddress) {
-      alert('Please enter a valid username');
+    // Combine names to create the username
+    const fullUsername = `${selectedFirstName} ${selectedLastName}`;
+    
+    if (!fullUsername.trim() || !walletAddress) {
+      alert('Please select a valid name');
       return;
     }
     
     try {
-      // Update the user record with the username
+      // Update the user record with the username and coat of arms
       const response = await fetch('http://localhost:8000/api/wallet', {
         method: 'POST',
         headers: {
@@ -160,26 +222,29 @@ export default function Home() {
         },
         body: JSON.stringify({
           wallet_address: walletAddress,
-          user_name: usernameInput.trim()
+          user_name: fullUsername.trim(),
+          family_coat_of_arms: familyCoatOfArms.trim()
         }),
       });
       
       if (!response.ok) {
-        throw new Error('Failed to update username');
+        throw new Error('Failed to update profile');
       }
       
       const data = await response.json();
-      console.log('Username updated:', data);
+      console.log('Profile updated:', data);
       
       // Close the prompt
       setShowUsernamePrompt(false);
-      setUsernameInput('');
+      setSelectedFirstName('');
+      setSelectedLastName('');
+      setFamilyCoatOfArms('');
       
       // Show success message
-      alert(`Welcome, ${usernameInput.trim()}!`);
+      alert(`Welcome to La Serenissima, ${fullUsername}!`);
     } catch (error) {
-      console.error('Error updating username:', error);
-      alert('Failed to update username. Please try again.');
+      console.error('Error updating profile:', error);
+      alert('Failed to update profile. Please try again.');
     }
   };
 
@@ -825,30 +890,101 @@ export default function Home() {
       
       {/* Username prompt modal - non-dismissable */}
       {showUsernamePrompt && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-96 max-w-full">
-            <h2 className="text-xl font-semibold mb-4">Choose a Username</h2>
-            <p className="mb-4 text-gray-600">
-              Please choose a username for your account. This will be visible to other users.
-            </p>
-            <input
-              type="text"
-              value={usernameInput}
-              onChange={(e) => setUsernameInput(e.target.value)}
-              placeholder="Enter username"
-              className="w-full px-3 py-2 border rounded mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              autoFocus
-            />
-            <button
-              onClick={handleUsernameSubmit}
-              className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition-colors"
-              disabled={!usernameInput.trim()}
-            >
-              Set Username
-            </button>
-            <p className="mt-2 text-xs text-gray-500 text-center">
-              You must set a username to continue.
-            </p>
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
+          <div className="bg-white p-8 rounded-lg shadow-lg w-[500px] max-w-full border-4 border-amber-700">
+            <h2 className="text-2xl font-serif font-semibold mb-4 text-amber-800 text-center">Welcome to La Serenissima</h2>
+            
+            <div className="mb-6 text-gray-700 italic text-center">
+              <p>The year is 1525. The Most Serene Republic of Venice stands as a beacon of wealth and power in the Mediterranean.</p>
+              <p className="mt-2">As a noble of Venice, you must now register your identity with the Council of Ten.</p>
+            </div>
+            
+            <div className="mb-6">
+              <h3 className="text-lg font-medium text-amber-700 mb-2">Your Noble Identity</h3>
+              
+              <div className="flex flex-col space-y-4">
+                <div className="flex items-center">
+                  <div className="w-1/3">
+                    <label className="block text-gray-700">First Name</label>
+                  </div>
+                  <div className="w-2/3 flex items-center space-x-2">
+                    <select
+                      value={selectedFirstName}
+                      onChange={(e) => setSelectedFirstName(e.target.value)}
+                      className="flex-grow px-3 py-2 border border-amber-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    >
+                      {firstNameOptions.map((name, index) => (
+                        <option key={`first-${index}`} value={name}>{name}</option>
+                      ))}
+                    </select>
+                    <button
+                      onClick={rollFirstName}
+                      className="bg-amber-600 text-white p-2 rounded hover:bg-amber-700 transition-colors"
+                      title="Roll the dice for a random name"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+                
+                <div className="flex items-center">
+                  <div className="w-1/3">
+                    <label className="block text-gray-700">Family Name</label>
+                  </div>
+                  <div className="w-2/3 flex items-center space-x-2">
+                    <select
+                      value={selectedLastName}
+                      onChange={(e) => setSelectedLastName(e.target.value)}
+                      className="flex-grow px-3 py-2 border border-amber-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    >
+                      {lastNameOptions.map((name, index) => (
+                        <option key={`last-${index}`} value={name}>{name}</option>
+                      ))}
+                    </select>
+                    <button
+                      onClick={rollLastName}
+                      className="bg-amber-600 text-white p-2 rounded hover:bg-amber-700 transition-colors"
+                      title="Roll the dice for a random family name"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+                
+                <div className="flex items-center">
+                  <div className="w-1/3">
+                    <label className="block text-gray-700">Family Coat of Arms</label>
+                  </div>
+                  <div className="w-2/3">
+                    <textarea
+                      value={familyCoatOfArms}
+                      onChange={(e) => setFamilyCoatOfArms(e.target.value)}
+                      placeholder="Describe your family's coat of arms..."
+                      className="w-full px-3 py-2 border border-amber-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-500"
+                      rows={3}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="text-center">
+              <button
+                onClick={handleUsernameSubmit}
+                className="px-6 py-3 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors font-medium"
+                disabled={!selectedFirstName || !selectedLastName}
+              >
+                Register with the Council
+              </button>
+              
+              <p className="mt-4 text-xs text-gray-600 italic">
+                By decree of the Doge, all citizens must register their identity to conduct business in the Republic.
+              </p>
+            </div>
           </div>
         </div>
       )}

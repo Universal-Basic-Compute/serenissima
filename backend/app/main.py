@@ -76,6 +76,7 @@ class WalletRequest(BaseModel):
     compute_amount: float = None
     user_name: str = None
     email: str = None
+    family_coat_of_arms: str = None
 
 # Define response models
 class WalletResponse(BaseModel):
@@ -84,6 +85,7 @@ class WalletResponse(BaseModel):
     compute_amount: float = None
     user_name: str = None
     email: str = None
+    family_coat_of_arms: str = None
 
 # Add these new models
 class LandRequest(BaseModel):
@@ -153,7 +155,8 @@ async def store_wallet(wallet_data: WalletRequest):
                 "wallet_address": record["fields"].get("Wallet", ""),
                 "compute_amount": record["fields"].get("ComputeAmount", 0),
                 "user_name": record["fields"].get("Username", None),
-                "email": record["fields"].get("Email", None)
+                "email": record["fields"].get("Email", None),
+                "family_coat_of_arms": record["fields"].get("FamilyCoatOfArms", None)
             }
         
         # Create new record
@@ -169,6 +172,9 @@ async def store_wallet(wallet_data: WalletRequest):
             
         if wallet_data.email:
             fields["Email"] = wallet_data.email
+            
+        if wallet_data.family_coat_of_arms:
+            fields["FamilyCoatOfArms"] = wallet_data.family_coat_of_arms
         
         print(f"Creating new wallet record with fields: {fields}")
         record = users_table.create(fields)
@@ -179,7 +185,8 @@ async def store_wallet(wallet_data: WalletRequest):
             "wallet_address": record["fields"].get("Wallet", ""),
             "compute_amount": record["fields"].get("ComputeAmount", 0),
             "user_name": record["fields"].get("Username", None),
-            "email": record["fields"].get("Email", None)
+            "email": record["fields"].get("Email", None),
+            "family_coat_of_arms": record["fields"].get("FamilyCoatOfArms", None)
         }
     except Exception as e:
         error_msg = f"Failed to store wallet: {str(e)}"
@@ -206,7 +213,8 @@ async def get_wallet(wallet_address: str):
             "wallet_address": record["fields"].get("Wallet", ""),
             "compute_amount": record["fields"].get("ComputeAmount", 0),
             "user_name": record["fields"].get("Username", None),
-            "email": record["fields"].get("Email", None)
+            "email": record["fields"].get("Email", None),
+            "family_coat_of_arms": record["fields"].get("FamilyCoatOfArms", None)
         }
     except HTTPException:
         raise
