@@ -60,8 +60,11 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
         .then(data => {
           if (data) {
             console.log(`Transaction data for land ${selectedPolygonId}:`, data);
+            setTransaction(data);
+          } else {
+            console.log(`No transaction data returned for land ${selectedPolygonId}`);
+            setTransaction(null);
           }
-          setTransaction(data);
         })
         .catch(error => {
           // Just log the error and continue without a transaction
@@ -86,6 +89,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
           if (!response.ok) {
             if (response.status === 404) {
               // No offers found, that's okay
+              console.log(`No offers found for land ${selectedPolygonId}`);
               setOffers([]);
               return [];
             }
@@ -98,6 +102,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
             console.log(`Found ${data.length} offers for land ${selectedPolygonId}:`, data);
             setOffers(data);
           } else {
+            console.log(`Invalid offers data format for land ${selectedPolygonId}:`, data);
             setOffers([]);
           }
         })

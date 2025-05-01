@@ -647,15 +647,28 @@ async def get_land_transaction(land_id: str):
             land_id.replace("polygon-", "") if land_id.startswith("polygon-") else land_id
         ]
         
+        # Log the possible IDs we're checking
+        print(f"Checking possible land IDs: {possible_ids}")
+        
         # Create a formula that checks all possible ID formats
-        id_conditions = [f"{{AssetId}}='{id}'" for id in possible_ids]
+        id_conditions = []
+        for id in possible_ids:
+            id_conditions.append(f"{{AssetId}}='{id}'")
+        
         formula = f"AND(OR({', '.join(id_conditions)}), {{Type}}='land', {{ExecutedAt}}=BLANK())"
         
         print(f"Searching for land transaction with formula: {formula}")
         records = transactions_table.all(formula=formula)
         
         if not records:
-            raise HTTPException(status_code=404, detail="Transaction not found")
+            # Try a more lenient search without the ExecutedAt condition
+            lenient_formula = f"AND(OR({', '.join(id_conditions)}), {{Type}}='land')"
+            print(f"No active transaction found. Trying more lenient search: {lenient_formula}")
+            records = transactions_table.all(formula=lenient_formula)
+            
+            if not records:
+                print(f"No transaction found for land {land_id}")
+                raise HTTPException(status_code=404, detail="Transaction not found")
         
         record = records[0]
         print(f"Found transaction record: {record['id']}")
