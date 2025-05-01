@@ -197,13 +197,8 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
         </div>
       )}
       
-      {/* Full Name */}
-      <div className={`${dim.name} text-gray-600 text-center w-full`}>
-        {displayData.firstName} {displayData.lastName}
-      </div>
-      
-      {/* Family Motto (optional) */}
-      {(showMotto && (userData?.familyMotto || familyMotto)) && (
+      {/* Family Motto - Replace the Full Name section */}
+      {(userData?.familyMotto || familyMotto) && (
         <div className={`${dim.name} italic text-amber-600 text-center mt-1 w-full overflow-hidden text-ellipsis`}>
           "{userData?.familyMotto || familyMotto}"
         </div>
