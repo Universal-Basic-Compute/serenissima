@@ -236,18 +236,6 @@ export default class PolygonRenderer {
               if (polygon.owner) {
                 if (this.ownerColorMap[polygon.owner]) {
                   ownerColor = this.ownerColorMap[polygon.owner];
-                } else if (this.users[polygon.owner] && this.users[polygon.owner].color) {
-                  ownerColor = this.users[polygon.owner].color;
-                  // Also store in the color map for future use
-                  this.ownerColorMap[polygon.owner] = ownerColor;
-                }
-              }
-            
-              // Get the owner's color from the users data
-              let ownerColor = null;
-              if (polygon.owner) {
-                if (this.ownerColorMap[polygon.owner]) {
-                  ownerColor = this.ownerColorMap[polygon.owner];
                   console.log(`Using stored color for ${polygon.owner}: ${ownerColor}`);
                 } else if (this.users[polygon.owner] && this.users[polygon.owner].color) {
                   ownerColor = this.users[polygon.owner].color;
