@@ -82,7 +82,26 @@ async function updateUserComputeBalances(seller: string, buyer: string, amount: 
       
       if (sellerResponse.ok && buyerResponse.ok) {
         console.log('Successfully updated compute balances via API');
+        
+        // Dispatch an event to update the UI with the new compute balances
+        // This will be caught by the client to update the UI
+        const sellerData = await sellerResponse.json();
+        const buyerData = await buyerResponse.json();
+        
+        console.log('Updated compute balances:', {
+          seller: sellerData.compute_amount,
+          buyer: buyerData.compute_amount
+        });
+        
         return true;
+      } else {
+        console.warn('API returned non-OK response for compute balance update');
+        if (!sellerResponse.ok) {
+          console.warn(`Seller update failed: ${sellerResponse.status}`);
+        }
+        if (!buyerResponse.ok) {
+          console.warn(`Buyer update failed: ${buyerResponse.status}`);
+        }
       }
     } catch (apiError) {
       console.warn('Backend API not available for compute balance update, falling back to local handling:', apiError);
@@ -216,7 +235,17 @@ export async function POST(
     
     // After successfully updating the transaction, also update compute balances
     if (transaction.seller && buyer && transaction.price) {
+      // Get the username for the buyer's wallet address
+      const buyerUsername = await getUsernameFromWallet(buyer);
+      
+      // Use the username if available, otherwise fall back to wallet address
+      const ownerToSet = buyerUsername || buyer;
+      
+      // Update compute balances using the wallet addresses (not usernames)
       await updateUserComputeBalances(transaction.seller, buyer, transaction.price);
+      
+      // Log the compute balance update
+      console.log(`Updated compute balances: ${transaction.seller} +${transaction.price}, ${buyer} -${transaction.price}`);
     }
     
     // Update the land ownership if it's a land transaction

@@ -518,6 +518,40 @@ export default function PolygonViewer() {
       
       // Reload users data to reflect the new compute balances
       loadUsers();
+      
+      // If the current user is the buyer or seller, update their profile
+      const currentWallet = sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress');
+      if (currentWallet && (currentWallet === buyer || currentWallet === seller)) {
+        // Fetch updated user data
+        fetch(`${getApiBaseUrl()}/api/wallet/${currentWallet}`)
+          .then(response => {
+            if (response.ok) return response.json();
+            throw new Error('Failed to fetch updated user profile');
+          })
+          .then(data => {
+            if (data && data.user_name) {
+              // Update local storage with new compute amount
+              const storedProfile = localStorage.getItem('userProfile');
+              if (storedProfile) {
+                try {
+                  const profile = JSON.parse(storedProfile);
+                  profile.computeAmount = data.compute_amount;
+                  localStorage.setItem('userProfile', JSON.stringify(profile));
+                } catch (e) {
+                  console.error('Error updating stored profile:', e);
+                }
+              }
+              
+              // Dispatch event to update UI components
+              window.dispatchEvent(new CustomEvent('userProfileUpdated', {
+                detail: data
+              }));
+            }
+          })
+          .catch(error => {
+            console.error('Error fetching updated user profile:', error);
+          });
+      }
     };
     
     window.addEventListener('computeBalanceChanged', handleComputeBalanceChanged as EventListener);
