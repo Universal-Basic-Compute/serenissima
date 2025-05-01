@@ -213,77 +213,76 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
   };
 
   return (
-    <div className="fixed top-4 right-20 z-50"> {/* Changed from "bottom-4 right-4" to "top-4 right-20" */}
+    <div className="relative"> {/* Remove fixed positioning to place it in the menu */}
       {/* Hidden audio element */}
       <audio ref={audioRef} />
       
       {/* Music control button */}
-      <div className="relative">
-        <button 
-          onClick={() => setShowControls(!showControls)}
-          className={`bg-amber-700 text-white p-3 rounded-full shadow-lg hover:bg-amber-800 transition-colors ${!isPlaying && currentTrack ? 'animate-pulse' : ''}`}
-          title={isPlaying ? "Music Controls" : "Click to Play Music"}
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
-          </svg>
-        </button>
-        
-        {/* Expanded controls */}
-        {showControls && (
-          <div className="absolute top-14 right-0 bg-amber-50 p-4 rounded-lg shadow-xl border-2 border-amber-300 w-64"> {/* Changed from "bottom-14" to "top-14" */}
-            <div className="flex flex-col space-y-3">
-              <div className="text-center font-medium text-amber-800 mb-1">
-                {isLoading ? 'Loading music...' : formatTrackName(currentTrack)}
-              </div>
-              
-              <div className="flex justify-center space-x-4">
-                <button 
-                  onClick={togglePlayPause}
-                  className="bg-amber-600 text-white p-2 rounded-full hover:bg-amber-700 transition-colors"
-                  disabled={isLoading}
-                >
-                  {isPlaying ? (
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  ) : (
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  )}
-                </button>
-                
-                <button 
-                  onClick={nextTrack}
-                  className="bg-amber-600 text-white p-2 rounded-full hover:bg-amber-700 transition-colors"
-                  disabled={isLoading}
-                >
+      <button 
+        onClick={() => setShowControls(!showControls)}
+        className={`flex items-center px-4 py-2 text-gray-800 hover:bg-amber-500 hover:text-white transition-colors w-full text-left ${!isPlaying && currentTrack ? 'animate-pulse' : ''}`}
+        title={isPlaying ? "Music Controls" : "Click to Play Music"}
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+        </svg>
+        {isPlaying ? "Music Playing" : "Play Music"}
+      </button>
+      
+      {/* Expanded controls */}
+      {showControls && (
+        <div className="absolute right-0 mt-2 bg-amber-50 p-4 rounded-lg shadow-xl border-2 border-amber-300 w-64 z-50">
+          <div className="flex flex-col space-y-3">
+            <div className="text-center font-medium text-amber-800 mb-1">
+              {isLoading ? 'Loading music...' : formatTrackName(currentTrack)}
+            </div>
+            
+            <div className="flex justify-center space-x-4">
+              <button 
+                onClick={togglePlayPause}
+                className="bg-amber-600 text-white p-2 rounded-full hover:bg-amber-700 transition-colors"
+                disabled={isLoading}
+              >
+                {isPlaying ? (
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                </button>
-              </div>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                )}
+              </button>
               
-              <div className="flex items-center space-x-2">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-amber-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15.536a5 5 0 010-7.072m12.728 0l-3.536 3.536m-7.07-7.072L11.243 8.5" />
+              <button 
+                onClick={nextTrack}
+                className="bg-amber-600 text-white p-2 rounded-full hover:bg-amber-700 transition-colors"
+                disabled={isLoading}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
                 </svg>
-                <input 
-                  type="range" 
-                  min="0" 
-                  max="1" 
-                  step="0.01" 
-                  value={volume}
-                  onChange={(e) => setVolume(parseFloat(e.target.value))}
-                  className="w-full accent-amber-600"
-                />
-              </div>
+              </button>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-amber-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15.536a5 5 0 010-7.072m12.728 0l-3.536 3.536m-7.07-7.072L11.243 8.5" />
+              </svg>
+              <input 
+                type="range" 
+                min="0" 
+                max="1" 
+                step="0.01" 
+                value={volume}
+                onChange={(e) => setVolume(parseFloat(e.target.value))}
+                className="w-full accent-amber-600"
+              />
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };

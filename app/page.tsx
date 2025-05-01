@@ -1409,6 +1409,10 @@ export default function Home() {
                 >
                   Edit Profile
                 </button>
+    
+                {/* Add BackgroundMusic component here */}
+                <BackgroundMusic initialVolume={0.24} autoplay={true} />
+    
                 <button
                   onClick={() => {
                     setTransferMenuOpen(true);
@@ -2002,8 +2006,6 @@ export default function Home() {
       {/* Always show the 3D Polygon Viewer regardless of wallet connection status */}
       <PolygonViewer />
       
-      {/* Background Music Player */}
-      <BackgroundMusic initialVolume={0.3} autoplay={true} />
     </div>
   );
 }
