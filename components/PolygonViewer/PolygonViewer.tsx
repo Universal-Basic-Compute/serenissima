@@ -11,6 +11,7 @@ import ViewModeMenu from './ViewModeMenu';
 import LandDetailsPanel from './LandDetailsPanel';
 import ActionButton from '../UI/ActionButton';
 import usePolygonStore from '@/store/usePolygonStore';
+import BridgeRenderer from './BridgeRenderer';
 
 export default function PolygonViewer() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -40,6 +41,7 @@ export default function PolygonViewer() {
   const polygonRendererRef = useRef<PolygonRenderer | null>(null);
   const waterEffectRef = useRef<WaterEffect | null>(null);
   const interactionManagerRef = useRef<InteractionManager | null>(null);
+  const bridgeRendererRef = useRef<BridgeRenderer | null>(null);
   
   
   // Handler for closing the land details panel
@@ -51,15 +53,30 @@ export default function PolygonViewer() {
   
   // Removed effect that stores resetCamera function on window
   
+  // Add this to the state
+  const [bridges, setBridges] = useState([]);
+
+  // Add this function to load bridges
+  const loadBridges = useCallback(async () => {
+    try {
+      const response = await fetch('/api/get-bridges');
+      const data = await response.json();
+      setBridges(data.bridges || []);
+    } catch (error) {
+      console.error('Error loading bridges:', error);
+    }
+  }, []);
+
   // Load polygons on mount
   useEffect(() => {
     loadPolygons();
+    loadBridges();
     
     // Only load land owners when in land view
     if (activeView === 'land') {
       loadLandOwners();
     }
-  }, [loadPolygons, loadLandOwners, activeView]);
+  }, [loadPolygons, loadBridges, loadLandOwners, activeView]);
 
   // Update info panel visibility when selectedPolygonId changes
   useEffect(() => {
@@ -134,6 +151,17 @@ export default function PolygonViewer() {
     });
     interactionManagerRef.current = interactionManager;
     
+    // Initialize bridge renderer
+    const bridgeRenderer = new BridgeRenderer({
+      scene: scene.scene,
+      bridges,
+      polygons,
+      bounds,
+      activeView,
+      performanceMode: !highQuality
+    });
+    bridgeRendererRef.current = bridgeRenderer;
+    
     // Add a frame counter for less frequent updates
     let frameCount = 0;
     
@@ -196,6 +224,7 @@ export default function PolygonViewer() {
       if (interactionManagerRef.current) interactionManagerRef.current.cleanup();
       if (waterEffectRef.current) waterEffectRef.current.cleanup();
       if (polygonRendererRef.current) polygonRendererRef.current.cleanup();
+      if (bridgeRendererRef.current) bridgeRendererRef.current.cleanup();
       if (sceneRef.current) sceneRef.current.cleanup();
       
       // Clear references
@@ -203,6 +232,7 @@ export default function PolygonViewer() {
       polygonRendererRef.current = null;
       waterEffectRef.current = null;
       interactionManagerRef.current = null;
+      bridgeRendererRef.current = null;
     };
   }, [polygons, loading]); // Remove activeView and highQuality dependencies
   
@@ -243,6 +273,11 @@ export default function PolygonViewer() {
       if (interactionManagerRef.current) {
         interactionManagerRef.current.updateViewMode(activeView);
       }
+      
+      // Update bridge renderer
+      if (bridgeRendererRef.current) {
+        bridgeRendererRef.current.updateViewMode(activeView);
+      }
     }
   }, [activeView, loadLandOwners]);
 
@@ -260,6 +295,11 @@ export default function PolygonViewer() {
       // Update polygon renderer
       if (polygonRendererRef.current) {
         polygonRendererRef.current.updateQuality(!highQuality);
+      }
+      
+      // Update bridge renderer
+      if (bridgeRendererRef.current) {
+        bridgeRendererRef.current.updateQuality(!highQuality);
       }
     }
   }, [highQuality]);

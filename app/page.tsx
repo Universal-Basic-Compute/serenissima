@@ -33,7 +33,7 @@ const polygonOptions = {
 };
 
 // Libraries we need to load
-const libraries = ['drawing'];
+const libraries = ['drawing', 'geometry'];
 
 export default function Home() {
   // State for wallet connection
@@ -48,6 +48,12 @@ export default function Home() {
   const mapRef = useRef(null);
   const drawingManagerRef = useRef(null);
   const [isGoogleLoaded, setIsGoogleLoaded] = useState(false);
+  
+  // Add these states to the Home component
+  const [bridgeMode, setBridgeMode] = useState(false);
+  const [bridgeStart, setBridgeStart] = useState<google.maps.LatLng | null>(null);
+  const [bridgeStartLandId, setBridgeStartLandId] = useState<string | null>(null);
+  const [activeLandPolygons, setActiveLandPolygons] = useState<{[id: string]: google.maps.Polygon}>({});
   
   // Initialize wallet adapter
   useEffect(() => {
@@ -253,9 +259,123 @@ export default function Home() {
     }
   };
 
+  // Add this function to handle bridge creation
+  const handleBridgeMode = () => {
+    setBridgeMode(!bridgeMode);
+    
+    // Reset bridge start if turning off bridge mode
+    if (bridgeMode) {
+      setBridgeStart(null);
+      setBridgeStartLandId(null);
+    }
+    
+    // Change cursor style based on bridge mode
+    if (mapRef.current) {
+      mapRef.current.setOptions({
+        draggableCursor: !bridgeMode ? 'crosshair' : ''
+      });
+    }
+  };
+
+  // Add this function to handle map clicks for bridge creation
+  const handleMapClick = (event: google.maps.MapMouseEvent) => {
+    if (!bridgeMode || !event.latLng) return;
+    
+    // Find which polygon was clicked
+    let clickedPolygonId = null;
+    
+    for (const [id, polygon] of Object.entries(activeLandPolygons)) {
+      if (google.maps.geometry.poly.containsLocation(event.latLng, polygon)) {
+        clickedPolygonId = id;
+        break;
+      }
+    }
+    
+    if (!clickedPolygonId) {
+      alert('Please click on a land polygon');
+      return;
+    }
+    
+    if (!bridgeStart) {
+      // Set bridge start point
+      setBridgeStart(event.latLng);
+      setBridgeStartLandId(clickedPolygonId);
+      alert(`Bridge start point set on land ${clickedPolygonId}`);
+    } else {
+      // Set bridge end point and create bridge
+      if (clickedPolygonId === bridgeStartLandId) {
+        alert('Bridge must connect two different lands');
+        return;
+      }
+      
+      // Create bridge
+      const bridge = {
+        id: `bridge-${Date.now()}`,
+        startPoint: {
+          lat: bridgeStart.lat(),
+          lng: bridgeStart.lng()
+        },
+        endPoint: {
+          lat: event.latLng.lat(),
+          lng: event.latLng.lng()
+        },
+        startLandId: bridgeStartLandId,
+        endLandId: clickedPolygonId
+      };
+      
+      // Save bridge to file
+      saveBridgeToFile(bridge);
+      
+      // Reset bridge mode
+      setBridgeStart(null);
+      setBridgeStartLandId(null);
+      
+      // Draw bridge line on map
+      const bridgeLine = new google.maps.Polyline({
+        path: [
+          { lat: bridge.startPoint.lat, lng: bridge.startPoint.lng },
+          { lat: bridge.endPoint.lat, lng: bridge.endPoint.lng }
+        ],
+        geodesic: true,
+        strokeColor: '#FF0000',
+        strokeOpacity: 1.0,
+        strokeWeight: 3
+      });
+      
+      bridgeLine.setMap(mapRef.current);
+    }
+  };
+
+  // Add this function to save bridge to file
+  const saveBridgeToFile = (bridge) => {
+    // Send bridge data to the API
+    fetch('/api/save-bridge', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(bridge)
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        console.log(`Bridge created: ${data.filename}`);
+        alert(`Bridge created between lands ${bridge.startLandId} and ${bridge.endLandId}`);
+      } else {
+        console.error('Failed to save bridge:', data.error);
+        alert('Failed to create bridge');
+      }
+    })
+    .catch(error => {
+      console.error('Error saving bridge:', error);
+      alert('Error creating bridge');
+    });
+  };
+
   // Handle map load
   const onMapLoad = (map) => {
     mapRef.current = map;
+    
+    // Add click listener for bridge creation
+    map.addListener('click', handleMapClick);
   };
 
   // Handle drawing manager load
@@ -264,6 +384,58 @@ export default function Home() {
     setIsGoogleLoaded(true);
   };
   
+  // Add a function to load polygons onto the map
+  const loadPolygonsOnMap = useCallback(() => {
+    if (!mapRef.current || !isGoogleLoaded) return;
+    
+    // Clear existing polygons
+    Object.values(activeLandPolygons).forEach(polygon => {
+      polygon.setMap(null);
+    });
+    
+    // Reset active polygons
+    const newActiveLandPolygons = {};
+    
+    // Fetch polygons from API
+    fetch('/api/get-polygons')
+      .then(response => response.json())
+      .then(data => {
+        data.polygons.forEach(polygon => {
+          if (polygon.coordinates && polygon.coordinates.length > 2) {
+            const path = polygon.coordinates.map(coord => ({
+              lat: coord.lat,
+              lng: coord.lng
+            }));
+            
+            const mapPolygon = new google.maps.Polygon({
+              paths: path,
+              strokeColor: '#3388ff',
+              strokeOpacity: 0.8,
+              strokeWeight: 2,
+              fillColor: '#3388ff',
+              fillOpacity: 0.35,
+              map: mapRef.current
+            });
+            
+            // Store reference to polygon
+            newActiveLandPolygons[polygon.id] = mapPolygon;
+          }
+        });
+        
+        setActiveLandPolygons(newActiveLandPolygons);
+      })
+      .catch(error => {
+        console.error('Error loading polygons:', error);
+      });
+  }, [isGoogleLoaded]);
+
+  // Add useEffect to load polygons when map is ready
+  useEffect(() => {
+    if (mapRef.current && isGoogleLoaded) {
+      loadPolygonsOnMap();
+    }
+  }, [mapRef.current, isGoogleLoaded, loadPolygonsOnMap]);
+
   // Handle script load
   const handleScriptLoad = () => {
     setIsGoogleLoaded(true);
@@ -350,6 +522,20 @@ export default function Home() {
         >
           Connect Wallet
         </button>
+      )}
+      
+      {/* Bridge mode button */}
+      {isGoogleLoaded && (
+        <div className="absolute bottom-4 left-4 z-10">
+          <button
+            onClick={handleBridgeMode}
+            className={`px-4 py-2 rounded shadow ${
+              bridgeMode ? 'bg-red-500 text-white' : 'bg-white'
+            }`}
+          >
+            {bridgeMode ? 'Cancel Bridge' : 'Add Bridge'}
+          </button>
+        </div>
       )}
       
       {/* Always show the 3D Polygon Viewer regardless of wallet connection status */}
