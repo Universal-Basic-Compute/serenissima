@@ -16,7 +16,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
   const [isVisible, setIsVisible] = useState(false);
   const [transaction, setTransaction] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [offerAmount, setOfferAmount] = useState<number>(1000); // Default offer of 1000 COMPUTE
+  const [offerAmount, setOfferAmount] = useState<number>(10000000); // Default offer of 10M COMPUTE
   const [showOfferInput, setShowOfferInput] = useState<boolean>(false);
   const [offers, setOffers] = useState<any[]>([]);
   
