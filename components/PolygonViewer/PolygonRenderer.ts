@@ -96,6 +96,7 @@ export default class PolygonRenderer {
   private coatOfArmSprites: Record<string, THREE.Sprite> = {};
   private ownerColorMap: Record<string, string> = {}; // Map of owner to color
   private users: Record<string, any> = {}; // Store users data
+  private ownerColorMap: Record<string, string> = {}; // Map of owner to color
 
   // Create a static texture loader to be shared across instances
   private static sharedTextureLoader: THREE.TextureLoader | null = null;
@@ -128,6 +129,25 @@ export default class PolygonRenderer {
     
     // Store users data
     this.users = users || {};
+    
+    // Process users data to create coat of arms map and color map
+    if (users) {
+      Object.values(users).forEach(user => {
+        if (user.user_name) {
+          // Store coat of arms image if available
+          if (user.coat_of_arms_image) {
+            this.ownerCoatOfArmsMap[user.user_name] = user.coat_of_arms_image;
+          }
+          
+          // Store color if available
+          if (user.color) {
+            this.ownerColorMap[user.user_name] = user.color;
+            console.log(`Stored color for ${user.user_name}: ${user.color}`);
+          }
+        }
+      });
+      console.log(`Processed ${Object.keys(this.ownerCoatOfArmsMap).length} coat of arms and ${Object.keys(this.ownerColorMap).length} colors from users data`);
+    }
     
     // Initialize texture loader explicitly
     this.textureLoader = new THREE.TextureLoader();
