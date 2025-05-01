@@ -1169,8 +1169,8 @@ export default function Home() {
     }
     
     // Reset active polygons and centroid markers
-    const newActiveLandPolygons = {};
-    const newCentroidMarkers = {};
+    const newActiveLandPolygons: Record<string, google.maps.Polygon> = {};
+    const newCentroidMarkers: Record<string, google.maps.Marker> = {};
     
     // Fetch polygons from API
     fetch('/api/get-polygons')

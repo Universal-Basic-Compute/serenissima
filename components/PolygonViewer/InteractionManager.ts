@@ -28,6 +28,8 @@ export default class InteractionManager {
   private isProcessingClick: boolean = false;
   private isDragging: boolean = false;
   private mouseDownPosition = { x: 0, y: 0 };
+  private hoveredPolygonId: string | null;
+  private setHoveredPolygonId: (id: string | null) => void;
 
   constructor({
     camera,
@@ -45,10 +47,14 @@ export default class InteractionManager {
     this.activeView = activeView;
     this.selectedPolygonId = selectedPolygonId;
     this.setSelectedPolygonId = setSelectedPolygonId;
+    this.hoveredPolygonId = hoveredPolygonId; // Initialize the property
     
     // Create a raycaster for mouse interaction
     this.raycaster = new THREE.Raycaster();
     this.mouse = new THREE.Vector2();
+    
+    // Store the original setHoveredPolygonId function
+    const originalSetHoveredPolygonId = setHoveredPolygonId;
     
     // Modify the setHoveredPolygonId function to dispatch a custom event
     this.setHoveredPolygonId = (id: string | null) => {
@@ -58,7 +64,7 @@ export default class InteractionManager {
       }));
       
       // Call the original setHoveredPolygonId function
-      setHoveredPolygonId(id);
+      originalSetHoveredPolygonId(id);
     };
     
     // Bind methods to this instance

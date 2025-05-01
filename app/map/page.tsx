@@ -28,7 +28,7 @@ const polygonOptions = {
 };
 
 // Libraries we need to load
-const libraries = ['drawing', 'geometry'];
+const libraries: ("drawing" | "geometry" | "places" | "visualization")[] = ['drawing', 'geometry'];
 
 export default function MapPage() {
   // State for wallet connection
@@ -39,8 +39,8 @@ export default function MapPage() {
   
   // Get API key from environment variable
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '';
-  const [savedPolygons, setSavedPolygons] = useState([]);
-  const mapRef = useRef(null);
+  const [savedPolygons, setSavedPolygons] = useState<google.maps.Polygon[]>([]);
+  const mapRef = useRef<google.maps.Map | null>(null);
   const drawingManagerRef = useRef(null);
   const [isGoogleLoaded, setIsGoogleLoaded] = useState(false);
   
@@ -215,7 +215,7 @@ export default function MapPage() {
   };
 
   // Handle polygon complete event
-  const onPolygonComplete = (polygon) => {
+  const onPolygonComplete = (polygon: google.maps.Polygon) => {
     // Apply rounded corners (this is a visual effect only)
     polygon.setOptions({
       ...polygonOptions,
@@ -411,7 +411,7 @@ export default function MapPage() {
   };
 
   // Add this function to save bridge to file
-  const saveBridgeToFile = (bridge) => {
+  const saveBridgeToFile = (bridge: any) => {
     // Send bridge data to the API
     fetch('/api/save-bridge', {
       method: 'POST',
@@ -435,7 +435,7 @@ export default function MapPage() {
   };
 
   // Handle map load
-  const onMapLoad = (map) => {
+  const onMapLoad = (map: google.maps.Map) => {
     mapRef.current = map;
     
     // Add click listener for bridge creation
@@ -443,7 +443,7 @@ export default function MapPage() {
   };
 
   // Handle drawing manager load
-  const onDrawingManagerLoad = (drawingManager) => {
+  const onDrawingManagerLoad = (drawingManager: google.maps.drawing.DrawingManager) => {
     drawingManagerRef.current = drawingManager;
     setIsGoogleLoaded(true);
   };
@@ -458,15 +458,15 @@ export default function MapPage() {
     });
     
     // Reset active polygons
-    const newActiveLandPolygons = {};
+    const newActiveLandPolygons: Record<string, google.maps.Polygon> = {};
     
     // Fetch polygons from API
     fetch('/api/get-polygons')
       .then(response => response.json())
       .then(data => {
-        data.polygons.forEach(polygon => {
+        data.polygons.forEach((polygon: any, index: number) => {
           if (polygon.coordinates && polygon.coordinates.length > 2) {
-            const path = polygon.coordinates.map(coord => ({
+            const path = polygon.coordinates.map((coord: any) => ({
               lat: coord.lat,
               lng: coord.lng
             }));
@@ -506,11 +506,11 @@ export default function MapPage() {
   };
 
   // Create drawing manager options with client-side safety
-  const [drawingManagerOptions, setDrawingManagerOptions] = useState({
+  const [drawingManagerOptions, setDrawingManagerOptions] = useState<any>({
     drawingControl: true,
     drawingControlOptions: {
       position: 1, // TOP_CENTER
-      drawingModes: ['polygon']
+      drawingModes: ['polygon'] as any
     },
     polygonOptions
   });
