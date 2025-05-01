@@ -495,12 +495,14 @@ export default function PolygonViewer() {
       // Update radius (distance from center)
       const newRadius = Math.max(5, Math.min(400, cameraRadius + delta * zoomSpeed));
       
-      // Calculate zoom ratio to maintain the same viewing direction
-      const zoomRatio = newRadius / cameraRadius;
+      // Store the current camera direction before changing radius
+      const direction = new THREE.Vector3();
+      camera.getWorldDirection(direction);
+      
+      // Update radius
       cameraRadius = newRadius;
       
       // Update camera position using current angles and new radius
-      // This maintains the same viewing direction while changing distance
       camera.position.x = cameraRadius * Math.sin(cameraPhi) * Math.cos(cameraTheta);
       camera.position.y = cameraRadius * Math.cos(cameraPhi);
       camera.position.z = cameraRadius * Math.sin(cameraPhi) * Math.sin(cameraTheta);
