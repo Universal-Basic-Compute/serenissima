@@ -1,0 +1,778 @@
+[
+    {
+      "name": "Market Stall",
+      "category": "Commercial",
+      "subcategory": "Retail Shops",
+      "tier": 1,
+      "size": "Small",
+      "unlockCondition": "None - available from start",
+      
+      "shortDescription": "Simple open-air selling space for basic goods and produce.",
+      "fullDescription": "The humble beginning of many Venetian merchants, these wooden stalls provide a simple but effective way to sell goods directly to the public. Typically clustered in market areas or along busy streets, market stalls can be assembled daily and feature awnings for protection from sun and rain.",
+      "flavorText": "A good location, a keen eye, and a loud voice—the three essentials of the successful market vendor.",
+      
+      "constructionCosts": {
+        "ducats": 300,
+        "timber": 20
+      },
+      "maintenanceCost": 2,
+      "constructionTime": 86400000,
+      "incomeGeneration": 8,
+      "employmentCapacity": 1,
+      
+      "locationRequirements": {
+        "districtRestrictions": "Must be placed in designated market areas or along commercial streets",
+        "adjacentRequirements": "Requires open plaza or street access",
+        "environmentalEffects": "Increases foot traffic in immediate area"
+      },
+      
+      "productionInformation": {
+        "inputResources": {
+          "Various Trade Goods": "5-10 units per day depending on type"
+        },
+        "outputResources": {
+          "Sales Revenue": "8-15 ducats per day depending on location and goods"
+        },
+        "storageCapacity": 20
+      },
+      
+      "constructionPhase3DPrompt": "Renaissance Venetian market stall under construction, simple wooden framework being assembled in town square, partial awning of striped fabric, small counter being built, basic wooden structure, crates ready to display goods, simple tools for assembly, very quick construction process, workers securing support posts, historically accurate but simple design, isometric game perspective, stylized but detailed, warm wood textures",
+      
+      "completedBuilding3DPrompt": "Completed Renaissance Venetian market stall, simple wooden structure with striped fabric awning in red and white, sturdy wooden counter for displaying goods, small storage space beneath counter, hanging scale for weighing goods, various produce or goods displayed according to stall type, small signage indicating merchant's specialty, oil lamp for evening operation, basket for transactions, historically accurate but slightly stylized for game aesthetic, isometric game perspective, colorful goods creating visual interest, weathered wood textures, bustling activity around stall",
+      
+      "gameplayInformation": {
+        "unlocks": ["Basic Retail Operations"],
+        "specialAbilities": ["Flexible location - can be moved for a fee", "Low startup costs", "Quick to establish"],
+        "upgradePath": ["Bottega"],
+        "reputationEffects": {
+          "Merchant Guild": 2,
+          "Local Neighborhood": 3
+        },
+        "riskFactors": {
+          "fireRisk": "Medium",
+          "weatherRisk": "High (exposed to elements)",
+          "theftRisk": "High (limited security)"
+        }
+      },
+      
+      "soundDesign": {
+        "ambientSound": "Market chatter, occasional vendor calls",
+        "activitySounds": "Haggling, coins clinking, goods being arranged",
+        "musicTheme": "Rialto Mercante"
+      },
+      
+      "seasonalEffects": {
+        "winter": "Additional wind protection, brazier for warmth",
+        "carnival": "Festive decorations, specialized carnival goods",
+        "rain": "Additional awning coverage, goods better protected"
+      },
+      
+      "aiInteractionPoints": ["Front counter", "Sides for browsing", "Merchant position behind counter"]
+    },
+    
+    {
+      "name": "Bottega",
+      "category": "Commercial",
+      "subcategory": "Retail Shops",
+      "tier": 2,
+      "size": "Medium",
+      "unlockCondition": "1,000 ducats total wealth, any Guild membership",
+      
+      "shortDescription": "Specialized shop with workshop in back, common for artisans and merchants.",
+      "fullDescription": "The backbone of Venetian retail, these versatile shops combine a front retail area with a rear workshop where goods are produced or customized. With large shutters that open to the street during business hours, botteghe create an inviting shopping environment while allowing craftspeople to work efficiently in the same location.",
+      "flavorText": "The hands create in the back, the voice sells in the front—the perfect marriage of craft and commerce.",
+      
+      "constructionCosts": {
+        "ducats": 1200,
+        "timber": 50,
+        "bricks": 100,
+        "stone": 30,
+        "glass": 5
+      },
+      "maintenanceCost": 8,
+      "constructionTime": 172800000,
+      "incomeGeneration": 22,
+      "employmentCapacity": 3,
+      
+      "locationRequirements": {
+        "districtRestrictions": "Best suited to commercial streets in any district",
+        "adjacentRequirements": "Must have street access",
+        "environmentalEffects": "Increases property value of adjacent buildings by 5%, creates steady foot traffic"
+      },
+      
+      "productionInformation": {
+        "inputResources": {
+          "Raw Materials": "15-25 units per day depending on specialization",
+          "Labor": "2-3 workers"
+        },
+        "outputResources": {
+          "Finished Goods": "12-20 units per day",
+          "Sales Revenue": "20-35 ducats per day"
+        },
+        "storageCapacity": 50
+      },
+      
+      "constructionPhase3DPrompt": "Renaissance Venetian bottega under construction, shop-workshop combination, brick and timber structure, front retail area taking shape with large openable shutters to street, workshop area in rear with specialized construction for craft type (woodworking, glass, textiles, etc.), workers installing distinctive wooden counter, specialized storage areas being built, front entrance with stepped access, space for business signage, isometric game perspective, stylized but detailed, historically accurate construction methods, warm brick and timber textures",
+      
+      "completedBuilding3DPrompt": "Completed Renaissance Venetian bottega, charming shop-workshop combination, front area with large wooden shutters opened to street creating inviting retail space, decorated wooden counter with goods displayed, hanging shop sign with merchant's craft symbol, rear workshop visible with craft-specific tools and equipment, warm plastered exterior in Venetian yellow or terracotta, small glass windows with iron guards, quality wooden door, specialized display elements based on shop type (fabric bolts, glass shelves, etc.), historically accurate but slightly stylized for game aesthetic, isometric game perspective, active workshop scene with apprentices or workers, detailed craft-specific elements, well-worn threshold indicating established business",
+      
+      "gameplayInformation": {
+        "unlocks": ["Craft Production", "Retail Operations", "Apprentice Training"],
+        "specialAbilities": ["Produces and sells specialized goods", "Can fulfill custom orders", "Trains new craftspeople"],
+        "upgradePath": ["Luxury Showroom"],
+        "reputationEffects": {
+          "Craft-Specific Guild": 10,
+          "Merchant Guild": 8,
+          "Local Neighborhood": 5
+        },
+        "riskFactors": {
+          "fireRisk": "Medium-High (workshop materials)",
+          "theftRisk": "Medium",
+          "competitionRisk": "Medium (affected by nearby similar shops)"
+        }
+      },
+      
+      "soundDesign": {
+        "ambientSound": "Workshop sounds specific to craft, customer conversations",
+        "activitySounds": "Tools working, sales transactions, apprentice instructions",
+        "musicTheme": "Rialto Mercante"
+      },
+      
+      "seasonalEffects": {
+        "winter": "Partially closed shutters, interior more visible at night with lanterns",
+        "carnival": "Specialized carnival merchandise, festive decorations",
+        "high season": "Extended hours, more workers visible"
+      },
+      
+      "aiInteractionPoints": ["Shop counter", "Workshop area", "Street display", "Entrance"]
+    },
+    
+    {
+      "name": "Merceria",
+      "category": "Commercial",
+      "subcategory": "Retail Shops",
+      "tier": 2,
+      "size": "Medium",
+      "unlockCondition": "2,500 ducats total wealth, connection to Textile Guild",
+      
+      "shortDescription": "Specialized textile and fabric shop offering a variety of imported and local cloths.",
+      "fullDescription": "Named after Venice's famous shopping street, these specialized shops are the center of the textile trade. Offering everything from simple local woolens to exotic silks from the East, a merceria features dramatic fabric displays, specialized measuring counters, and often a separate area for noble clients. These shops connect Venice's vital textile industry directly to consumers.",
+      "flavorText": "Under these silks lie the true fabric of Venice—commerce that spans from humble wool to threads of gold.",
+      
+      "constructionCosts": {
+        "ducats": 2000,
+        "timber": 60,
+        "bricks": 120,
+        "stone": 40,
+        "glass": 10
+      },
+      "maintenanceCost": 12,
+      "constructionTime": 259200000,
+      "incomeGeneration": 30,
+      "employmentCapacity": 4,
+      
+      "locationRequirements": {
+        "districtRestrictions": "Premium locations in San Marco, Rialto, or Castello",
+        "adjacentRequirements": "Preferably near other luxury retailers",
+        "environmentalEffects": "Increases property value of adjacent buildings by 8%, attracts wealthy clientele"
+      },
+      
+      "productionInformation": {
+        "inputResources": {
+          "Various Textiles": "30-50 units per day",
+          "Imported Fabrics": "10-20 units per day"
+        },
+        "outputResources": {
+          "Retail Fabric Sales": "25-40 units per day",
+          "Sales Revenue": "30-60 ducats per day"
+        },
+        "storageCapacity": 80
+      },
+      
+      "constructionPhase3DPrompt": "Renaissance Venetian merceria under construction, textile shop with specialized features, large retail space taking shape, fabric display areas being built, custom shelving for fabric bolts, special north-facing windows for true color assessment, separate fitting area, elaborate counter being crafted, refined architectural elements, quality construction materials, workers installing specialized cabinet work, isometric game perspective, stylized but detailed, warm wood and plaster textures, attention to lighting considerations for fabric display",
+      
+      "completedBuilding3DPrompt": "Completed Renaissance Venetian merceria, elegant textile shop with refined facade, large display windows with fabric samples visible, interior showing wooden shelves with colorful fabric bolts arranged by type and quality, long measuring counter of polished wood, separate area with privacy screens for noble customers, fabric samples draped artfully, specialized lighting to show true colors, small scissor and thread display, glass-front cabinets with exotic textiles, hanging sign showing measuring tools and fabric, historically accurate but slightly stylized for game aesthetic, isometric game perspective, color-coordinated textile displays creating vibrant interior, elegant customers examining fabrics, merchant showing silks to client, Persian carpet on floor",
+      
+      "gameplayInformation": {
+        "unlocks": ["Textile Trade", "Fashion Industry Connections", "Noble Client List"],
+        "specialAbilities": ["Access to imported fabrics", "Can fulfill noble commissions", "Fashion trend information"],
+        "upgradePath": ["Luxury Showroom"],
+        "reputationEffects": {
+          "Textile Guild": 15,
+          "Merchant Guild": 10,
+          "Nobility": 8
+        },
+        "riskFactors": {
+          "fireRisk": "High (flammable textiles)",
+          "theftRisk": "High (valuable merchandise)",
+          "fashionRisk": "Medium (affected by changing tastes)"
+        }
+      },
+      
+      "soundDesign": {
+        "ambientSound": "Soft conversation, fabric being unfolded",
+        "activitySounds": "Scissors cutting samples, measuring discussions, price negotiations",
+        "musicTheme": "Sospiri Veneziani"
+      },
+      
+      "seasonalEffects": {
+        "winter": "Heavier fabrics prominently displayed, seasonal colors",
+        "carnival": "Mask-making fabrics, costume materials featured",
+        "seasonal collections": "Complete rotation of stock 4 times per year"
+      },
+      
+      "aiInteractionPoints": ["Main counter", "Noble client area", "Fabric displays", "Window shopping", "Color matching area"]
+    },
+    
+    {
+      "name": "Apothecary",
+      "category": "Commercial",
+      "subcategory": "Retail Shops",
+      "tier": 2,
+      "size": "Medium",
+      "unlockCondition": "3,000 ducats total wealth, Medical or Spice Guild connection",
+      
+      "shortDescription": "Medicine and herb shop offering remedies, cosmetics, and imported spices.",
+      "fullDescription": "Combining pharmacy, perfumery, and exotic goods shop, the Venetian apothecary is a vital community resource. The distinctive interior features walls lined with labeled ceramic jars, a preparation counter, and often a small garden for fresh herbs. Offering everything from fever remedies to beauty treatments, these shops benefit from Venice's position as a gateway for Eastern medical knowledge and ingredients.",
+      "flavorText": "Between these jars lies the boundary between East and West, between ancient wisdom and modern commerce, between life and death itself.",
+      
+      "constructionCosts": {
+        "ducats": 2500,
+        "timber": 50,
+        "bricks": 130,
+        "stone": 60,
+        "glass": 20
+      },
+      "maintenanceCost": 15,
+      "constructionTime": 259200000,
+      "incomeGeneration": 28,
+      "employmentCapacity": 3,
+      
+      "locationRequirements": {
+        "districtRestrictions": "All districts, particularly near residential areas",
+        "adjacentRequirements": "Benefits from proximity to physicians",
+        "environmentalEffects": "Increases health of nearby citizens, slight exotic aroma in vicinity"
+      },
+      
+      "productionInformation": {
+        "inputResources": {
+          "Herbs": "10-15 units per day",
+          "Exotic Ingredients": "5-10 units per day",
+          "Alcohol Base": "3-5 units per day"
+        },
+        "outputResources": {
+          "Medicines": "8-12 units per day",
+          "Cosmetics": "5-8 units per day",
+          "Spice Packets": "10-15 units per day"
+        },
+        "storageCapacity": 60
+      },
+      
+      "constructionPhase3DPrompt": "Renaissance Venetian apothecary under construction, specialized shop with medicine focus, walls being lined with custom shelving for ingredient jars, preparation counter being installed with marble top, small distillation area taking shape with ventilation, secure storage areas for valuable ingredients, specialized grinding station, herb-drying rack installation, small side garden being planted, higher quality finishes than standard shop, isometric game perspective, stylized but detailed, combination of scientific and commercial design elements",
+      
+      "completedBuilding3DPrompt": "Completed Renaissance Venetian apothecary, distinctive medical shop, elegant facade with medical symbol sign, interior lined with blue and white ceramic jars labeled in Latin script, central marble-topped preparation counter with mortar and pestle, brass scales for precise measurements, glass-fronted cabinets with exotic ingredients, dried herbs hanging from ceiling, small distillation apparatus, rack of prepared medicines in bottles, separate cosmetic preparation area, small garden visible through back window with medicinal plants, warm wooden interior with medical illustrations on walls, historically accurate but slightly stylized for game aesthetic, isometric game perspective, atmospheric lighting highlighting colorful jars and bottles, apothecary in distinctive robe weighing ingredients, subtle smoke from distillation process",
+      
+      "gameplayInformation": {
+        "unlocks": ["Medicine Production", "Plague Treatment", "Cosmetics Trade"],
+        "specialAbilities": ["Disease prevention for nearby buildings", "Beauty treatments", "Exotic ingredient knowledge"],
+        "upgradePath": ["Medical Academy partnership"],
+        "reputationEffects": {
+          "Medical Guild": 12,
+          "Spice Merchants": 10,
+          "Nobility": 5 
+        },
+        "riskFactors": {
+          "fireRisk": "Medium-High (distillation processes)",
+          "health hazard": "Low-Medium (toxic ingredients)",
+          "theftRisk": "High (valuable exotic ingredients)"
+        }
+      },
+      
+      "soundDesign": {
+        "ambientSound": "Glass bottles clinking, quiet consultation",
+        "activitySounds": "Mortar and pestle grinding, liquid pouring, weighing sounds",
+        "musicTheme": "Spezie d'Oriente"
+      },
+      
+      "seasonalEffects": {
+        "winter": "Cold remedies prominently displayed, winter illnesses treated",
+        "plague season": "Preventative medicines, increased activity",
+        "summer": "Cooling remedies, sunburn treatments available"
+      },
+      
+      "aiInteractionPoints": ["Consultation counter", "Preparation area", "Herb garden", "Private treatment area"]
+    },
+    
+    {
+      "name": "Luxury Showroom",
+      "category": "Commercial",
+      "subcategory": "Retail Shops",
+      "tier": 3,
+      "size": "Large",
+      "unlockCondition": "10,000 ducats total wealth, Noble connections",
+      
+      "shortDescription": "High-end display space for luxury goods catering to nobility and wealthy merchants.",
+      "fullDescription": "The pinnacle of Venetian retail, these elegant spaces showcase the finest products Venice has to offer. Unlike crowded market shops, luxury showrooms feature carefully curated displays, private consultation areas, and by-appointment service for elite clients. Often specializing in a particular luxury good—Murano glass, jewelry, imported rarities—these establishments cultivate an exclusive atmosphere that justifies premium prices.",
+      "flavorText": "Here we do not simply sell objects, but rather the very essence of refinement and distinction that separates the truly cultured from the merely wealthy.",
+      
+      "constructionCosts": {
+        "ducats": 6000,
+        "timber": 100,
+        "bricks": 200,
+        "stone": 150,
+        "glass": 50,
+        "marble": 30
+      },
+      "maintenanceCost": 40,
+      "constructionTime": 432000000,
+      "incomeGeneration": 70,
+      "employmentCapacity": 5,
+      
+      "locationRequirements": {
+        "districtRestrictions": "Premium locations only: San Marco, Grand Canal frontage, or Rialto",
+        "adjacentRequirements": "Benefits from proximity to other luxury establishments",
+        "environmentalEffects": "Significantly increases property value of surrounding buildings, attracts wealthy visitors"
+      },
+      
+      "productionInformation": {
+        "inputResources": {
+          "Luxury Goods": "5-10 units per day (high value)",
+          "Imported Rarities": "1-3 units per day (very high value)"
+        },
+        "outputResources": {
+          "Luxury Sales": "3-8 units per day",
+          "Custom Commissions": "1-2 per week (extremely high value)"
+        },
+        "storageCapacity": 40
+      },
+      
+      "constructionPhase3DPrompt": "Renaissance Venetian luxury showroom under construction, high-end retail space in premium location, finest materials being used including marble columns and gold leaf accents, large display windows being installed with special security features, custom display cases under construction, private consultation room taking shape with elegant finishes, specialized lighting considerations, security features being integrated discreetly, master craftsmen working on architectural details, higher level of finish than standard buildings, isometric game perspective, stylized but detailed, refined architectural elements",
+      
+      "completedBuilding3DPrompt": "Completed Renaissance Venetian luxury showroom, aristocratic retail establishment, refined classical facade with subtle luxury signifiers, large glass display windows with discreet iron guards, interior featuring marble floors with geometric patterns, custom-built display cases of polished wood and glass, individual item spotlighting, private consultation area with velvet seating, separate entrance for noble clients, specialized lighting highlighting merchandise, minimal but exceptional product display, uniformed attendants, silk wall coverings, subtle security features, historically accurate but slightly stylized for game aesthetic, isometric game perspective, atmospheric lighting creating dramatic product highlights, gold and marble accents, sensation of exclusivity and refinement, small coat of arms indicating possible noble patronage",
+      
+      "gameplayInformation": {
+        "unlocks": ["Noble Clientele", "Custom Commissions", "Foreign Diplomatic Gifts"],
+        "specialAbilities": ["Extremely high margins", "Reputation enhancement", "International connections"],
+        "upgradePath": ["International Luxury Brand"],
+        "reputationEffects": {
+          "Nobility": 20,
+          "Merchant Guild": 15,
+          "Foreign Diplomats": 10,
+          "Commoners": -5
+        },
+        "riskFactors": {
+          "theftRisk": "Very High (extremely valuable merchandise)",
+          "fashionRisk": "High (elite tastes change quickly)",
+          "competitionRisk": "Medium (exclusivity provides buffer)"
+        }
+      },
+      
+      "soundDesign": {
+        "ambientSound": "Hushed conversation, subtle ambient music",
+        "activitySounds": "Glass display cases opening, delicate handling of merchandise, discreet financial discussions",
+        "musicTheme": "Sospiri Veneziani"
+      },
+      
+      "seasonalEffects": {
+        "winter": "Seasonal luxury collections, holiday gift displays",
+        "carnival": "Exclusive mask designs, noble costume accessories",
+        "diplomatic season": "Foreign luxury goods prominently featured"
+      },
+      
+      "aiInteractionPoints": ["Main display area", "Private consultation room", "Exclusive client entrance", "Custom commission desk"]
+    },
+    
+    {
+      "name": "Fondaco dei Tedeschi",
+      "category": "Commercial",
+      "subcategory": "Trade Facilities",
+      "tier": 3,
+      "size": "Extra Large",
+      "unlockCondition": "15,000 ducats total wealth, German merchant connections, Senate approval",
+      
+      "shortDescription": "German merchant trading hall combining warehouse, accommodation, and commercial offices.",
+      "fullDescription": "A cornerstone of Venice's international trade, this massive complex serves as headquarters for German merchants. Combining warehouse facilities, living quarters, offices, and trading halls, the fondaco creates a self-contained community for foreign traders under Venetian oversight. State regulations require all German goods to pass through this building, making it a vital link to Northern European markets while allowing careful tax collection.",
+      "flavorText": "Between these walls the languages of north and south mingle, as do the coins of a dozen cities—all under the watchful eye of the Serenissima.",
+      
+      "constructionCosts": {
+        "ducats": 15000,
+        "timber": 300,
+        "bricks": 800,
+        "stone": 500,
+        "glass": 100,
+        "marble": 50
+      },
+      "maintenanceCost": 80,
+      "constructionTime": 1296000000,
+      "incomeGeneration": 150,
+      "employmentCapacity": 40,
+      
+      "locationRequirements": {
+        "districtRestrictions": "Grand Canal frontage near Rialto",
+        "adjacentRequirements": "Requires major canal access, proximity to commercial district",
+        "environmentalEffects": "Creates international commercial zone, increases nearby property values by 20%"
+      },
+      
+      "productionInformation": {
+        "inputResources": {
+          "Northern European Goods": "100-200 units per day",
+          "Venetian Export Goods": "80-150 units per day"
+        },
+        "outputResources": {
+          "Trade Revenue": "150-300 ducats per day",
+          "Tax Revenue": "30-60 ducats per day to state"
+        },
+        "storageCapacity": 500
+      },
+      
+      "constructionPhase3DPrompt": "Renaissance Venetian Fondaco dei Tedeschi under construction, massive trading complex on Grand Canal, multi-story structure with central courtyard layout, large-scale foundation work visible, canal-side loading docks being built, huge warehouse spaces taking shape, multiple cranes and construction equipment, offices and accommodation areas on upper floors under construction, hundreds of workers on scaffolding, distinct German architectural influences being incorporated alongside Venetian elements, government officials overseeing certain aspects, massive stone blocks being positioned, scale dwarfing nearby buildings, isometric game perspective, stylized but detailed, sense of architectural and commercial importance",
+      
+      "completedBuilding3DPrompt": "Completed Renaissance Venetian Fondaco dei Tedeschi, imposing trading complex directly on Grand Canal, massive multi-story structure surrounding central courtyard, distinctive architecture blending Venetian and Northern European styles, impressive canal frontage with multiple loading docks active with boats, ground floor featuring vast warehouse spaces and customs inspection areas, upper floors with trading offices and accommodation for German merchants, rows of elegant arched windows, central stone courtyard with well and commercial activity, German cultural symbols and Venetian regulations displayed side-by-side, watchtower with customs officials, red exterior typical of Venetian commercial buildings, historically accurate but slightly stylized for game aesthetic, isometric game perspective, bustling activity with merchants from different regions recognizable by dress, scaled to dwarf surrounding buildings, multiple entrances with different levels of access restriction",
+      
+      "gameplayInformation": {
+        "unlocks": ["Northern European Trade Routes", "German Merchant Connections", "Access to Northern Technologies"],
+        "specialAbilities": ["International trading hub", "Cross-cultural exchange", "Tax and customs collection point"],
+        "upgradePath": ["International Trade Network expansion"],
+        "reputationEffects": {
+          "German Merchants": 25,
+          "Venetian Senate": 15,
+          "Merchant Guild": 20
+        },
+        "riskFactors": {
+          "fireRisk": "Medium (despite size, good regulations)",
+          "political risk": "Medium (subject to diplomatic relations)",
+          "espionage risk": "High (valuable trade information)"
+        }
+      },
+      
+      "soundDesign": {
+        "ambientSound": "Multiple languages being spoken, trading negotiations, cargo movement",
+        "activitySounds": "Goods being inspected, coins counting, ships docking, cargo loading",
+        "musicTheme": "Diplomazia Veneziana" 
+      },
+      
+      "seasonalEffects": {
+        "winter": "Increased northern goods, fur trading",
+        "trading seasons": "Dramatic fluctuations in activity based on shipping seasons",
+        "festive seasons": "Cultural exchanges, German and Venetian celebrations"
+      },
+      
+      "aiInteractionPoints": ["Trading floor", "Customs office", "Warehouse receiving", "Merchant accommodations", "Canal docks", "Courtyard market", "Administrative offices"]
+    },
+    
+    {
+      "name": "Eastern Merchant House",
+      "category": "Commercial",
+      "subcategory": "Trade Facilities",
+      "tier": 3,
+      "size": "Large",
+      "unlockCondition": "20,000 ducats total wealth, Eastern trade connections",
+      
+      "shortDescription": "Trading post specialized in Eastern goods, combining warehouse, offices, and cultural showcase.",
+      "fullDescription": "Venice's gateway to the riches of the East, these specialized trading houses focus on goods from the Ottoman Empire, Persia, and beyond. Featuring architecture and decoration influenced by Eastern styles, these buildings provide both commercial facilities and cultural spaces where Eastern and Western merchants can negotiate. Often housing translators and cultural experts, they facilitate the flow of exotic goods that made Venice wealthy.",
+      "flavorText": "Here the silk road reaches its final destination, as do the dreams of a thousand caravans—and the nightmares of Venice's competitors.",
+      
+      "constructionCosts": {
+        "ducats": 10000,
+        "timber": 200,
+        "bricks": 500,
+        "stone": 300,
+        "glass": 80,
+        "marble": 40
+      },
+      "maintenanceCost": 60,
+      "constructionTime": 864000000,
+      "incomeGeneration": 120,
+      "employmentCapacity": 20,
+      
+      "locationRequirements": {
+        "districtRestrictions": "Waterfront locations, particularly in Castello or Cannaregio",
+        "adjacentRequirements": "Requires dock access, benefits from proximity to spice markets",
+        "environmentalEffects": "Creates exotic atmosphere, slightly increases crime risk but significantly increases commercial activity"
+      },
+      
+      "productionInformation": {
+        "inputResources": {
+          "Eastern Luxury Goods": "20-40 units per day",
+          "Spices": "30-50 units per day",
+          "Silk": "15-30 units per day"
+        },
+        "outputResources": {
+          "Processed Eastern Goods": "50-90 units per day",
+          "Trade Revenue": "120-200 ducats per day"
+        },
+        "storageCapacity": 300
+      },
+      
+      "constructionPhase3DPrompt": "Renaissance Venetian Eastern Merchant House under construction, distinctive trading complex with Eastern architectural influences, mashrabiya-style window screens being installed, specialized warehouse areas for spices and silks taking shape, small mosque or prayer room included in design, secure vaults for high-value goods being reinforced, decorative Eastern tilework being applied to certain areas, translation and negotiation spaces under construction, spice-processing ventilation systems, specialized storage areas with climate considerations for delicate Eastern goods, culturally hybrid design elements, isometric game perspective, stylized but detailed, blend of Venetian and Ottoman architectural elements",
+      
+      "completedBuilding3DPrompt": "Completed Renaissance Venetian Eastern Merchant House, elegant trading complex combining Venetian structure with Eastern decorative elements, pointed arches, geometric patterns, specialized dock for Eastern ships, distinct warehouse sections for different categories of Eastern goods (spices, textiles, ceramics), secure counting rooms, translation offices with multilingual documents visible, meeting chambers designed for cross-cultural negotiation with both Western chairs and Eastern floor cushions, small prayer space for Muslim merchants, spice processing and quality control areas, silk assessment room with specific lighting, courtyard with small fountain, subtle Islamic architectural influences integrated into Venetian framework, historically accurate but slightly stylized for game aesthetic, isometric game perspective, exotic goods visible in various states of processing, merchants in both Venetian and Eastern attire, spice displays creating colorful accents, subtle incense smoke for appropriate atmosphere",
+      
+      "gameplayInformation": {
+        "unlocks": ["Eastern Trade Routes", "Exotic Goods Market", "Cultural Diplomacy"],
+        "specialAbilities": ["Spice processing expertise", "Eastern language translation", "Cultural knowledge advantages"],
+        "upgradePath": ["Levantine Trade Network"],
+        "reputationEffects": {
+          "Eastern Merchants": 25,
+          "Spice Guild": 20,
+          "Silk Guild": 15,
+          "Senate": 10
+        },
+        "riskFactors": {
+          "fireRisk": "High (flammable spices and oils)",
+          "political risk": "High (subject to Ottoman relations)",
+          "theftRisk": "Very High (extremely valuable goods)"
+        }
+      },
+      
+      "soundDesign": {
+        "ambientSound": "Multiple languages, eastern musical elements, spice grinding",
+        "activitySounds": "Silk fabric handling, spice measuring, multilingual negotiations",
+        "musicTheme": "La Via della Seta"
+      },
+      
+      "seasonalEffects": {
+        "summer": "Peak shipping season from Eastern ports",
+        "religious observances": "Accommodations for Ramadan and other Eastern religious periods",
+        "trading cycles": "Activity fluctuates with caravan arrivals from the East"
+      },
+      
+      "aiInteractionPoints": ["Trade negotiation rooms", "Specialized goods inspection areas", "Translation office", "Secure goods vault", "Spice processing area", "Cultural exchange space", "Dock receiving area"]
+    },
+    
+    {
+      "name": "Broker's Office",
+      "category": "Commercial",
+      "subcategory": "Trade Facilities",
+      "tier": 2,
+      "size": "Small",
+      "unlockCondition": "5,000 ducats total wealth, Merchant Guild membership",
+      
+      "shortDescription": "Specialized office for trade intermediaries who connect buyers with sellers for a commission.",
+      "fullDescription": "The oil that keeps Venice's commercial machinery running smoothly, brokers facilitate transactions without ever taking ownership of goods. These offices feature secure document storage, private meeting rooms for confidential negotiations, and often a public-facing area where potential clients can make inquiries. Brokers specialize by industry or trade route, building networks of connections that make them invaluable intermediaries.",
+      "flavorText": "The shrewd broker sells not silk nor spice nor silver, but something far more valuable: the perfect connection, made at precisely the right moment.",
+      
+      "constructionCosts": {
+        "ducats": 2000,
+        "timber": 40,
+        "bricks": 100,
+        "stone": 60,
+        "glass": 15
+      },
+      "maintenanceCost": 15,
+      "constructionTime": 172800000,
+      "incomeGeneration": 40,
+      "employmentCapacity": 4,
+      
+      "locationRequirements": {
+        "districtRestrictions": "Commercial districts, particularly near Rialto",
+        "adjacentRequirements": "Benefits from proximity to related industry offices",
+        "environmentalEffects": "Increases efficiency of nearby commercial buildings by 5%"
+      },
+      
+      "productionInformation": {
+        "inputResources": {
+          "Market Information": "Constantly updated",
+          "Client Connections": "Network-based resource"
+        },
+        "outputResources": {
+          "Brokerage Commissions": "30-60 ducats per day",
+          "Completed Transactions": "5-15 per day of varying sizes"
+        },
+        "storageCapacity": "Minimal physical storage, extensive document storage"
+      },
+      
+      "constructionPhase3DPrompt": "Renaissance Venetian broker's office under construction, dignified commercial space taking shape, secure document storage areas being built with special attention to security, private meeting room with sound isolation features, public reception area, specialized desk and counter installations for document review and signing, quality materials but understated aesthetic, strategic window placement for light but maintaining privacy, lockable cabinets and document storage being installed, discreet side entrance for private clients, isometric game perspective, stylized but detailed, focus on practical business functionality with subtle status markers",
+      
+      "completedBuilding3DPrompt": "Completed Renaissance Venetian broker's office, refined commercial space with understated elegant facade, discrete business signage, main room with large transaction desk featuring document reviewing space, walls lined with securely locked document cabinets, private meeting room with door closed for confidential negotiations, small waiting area for clients, quality furnishings that convey stability without ostentation, mercantile maps on walls showing trade routes, secure strongbox visible, writing equipment and legal seals arranged precisely, multiple ledgers and contract books, clerk's desk separate from broker's main position, historically accurate but slightly stylized for game aesthetic, isometric game perspective, atmospheric lighting emphasizing the serious business environment, subtle wealth indicators through quality materials rather than decoration, sense of discreet commercial activity",
+      
+      "gameplayInformation": {
+        "unlocks": ["Trade Commissions", "Market Information Network", "Commercial Partnerships"],
+        "specialAbilities": ["Connection bonus to related industries", "Market price information", "Transaction facilitation without inventory"],
+        "upgradePath": ["Trading House"],
+        "reputationEffects": {
+          "Merchant Guild": 15,
+          "Specific Industry Guilds": 10,
+          "Banking Houses": 8
+        },
+        "riskFactors": {
+          "market risk": "Medium (commission-based income fluctuates)",
+          "reputation risk": "High (business relies on trust)",
+          "information security": "Medium (valuable market data)"
+        }
+      },
+      
+      "soundDesign": {
+        "ambientSound": "Quill scratching, muted business discussions, paper handling",
+        "activitySounds": "Contract sealing, coin counting, deal negotiations",
+        "musicTheme": "Diplomazia Veneziana"
+      },
+      
+      "seasonalEffects": {
+        "trading seasons": "Activity levels fluctuate with shipping seasons",
+        "market disruptions": "Particularly busy during price fluctuations or political changes",
+        "end of fiscal periods": "Increased activity during closing periods"
+      },
+      
+      "aiInteractionPoints": ["Main broker's desk", "Private meeting room", "Document review area", "Client waiting space", "Clerk's position"]
+    },
+    
+    {
+      "name": "Customs House",
+      "category": "Commercial",
+      "subcategory": "Trade Facilities",
+      "tier": 3,
+      "size": "Large",
+      "unlockCondition": "Senate appointment or 25,000 ducats with government connections",
+      
+      "shortDescription": "Official goods inspection and taxation facility operated under government authority.",
+      "fullDescription": "The gateway through which all legal goods must pass, the customs house combines administrative offices, inspection facilities, and secure storage. Government officials carefully record imported and exported goods, calculate appropriate taxes, and inspect for contraband. These imposing buildings represent Venice's strict commercial regulations, which helped maintain quality standards while generating substantial revenue for the Republic.",
+      "flavorText": "Through these doors pass the riches of the world—and a healthy portion remains behind for the glory of the Serenissima.",
+      
+      "constructionCosts": {
+        "ducats": 8000,
+        "timber": 150,
+        "bricks": 400,
+        "stone": 300,
+        "glass": 40,
+        "marble": 30
+      },
+      "maintenanceCost": 50,
+      "constructionTime": 604800000,
+      "incomeGeneration": 200,
+      "employmentCapacity": 30,
+      
+      "locationRequirements": {
+        "districtRestrictions": "Must be positioned at key harbor entrance points",
+        "adjacentRequirements": "Requires direct deep water access for ships",
+        "environmentalEffects": "Decreases illegal trade in area, increases formal commercial activity"
+      },
+      
+      "productionInformation": {
+        "inputResources": {
+          "Imported Goods": "200-500 units per day for inspection",
+          "Exported Goods": "150-400 units per day for inspection"
+        },
+        "outputResources": {
+          "Tax Revenue": "150-300 ducats per day to state treasury",
+          "Inspection Certificates": "100-200 per day",
+          "Trade Data": "Valuable market intelligence"
+        },
+        "storageCapacity": 400
+      },
+      
+      "constructionPhase3DPrompt": "Renaissance Venetian customs house under construction, official government building with imposing facade, substantial harbor-side foundation work, large-scale secure warehousing areas being built, official inspection halls with specialized lighting, offices for customs officials, secure document repositories, strong room for tax collection, multiple inspection stations taking shape, official architectural elements including state symbols, government oversight of construction visible, higher construction standards than commercial buildings, fortified elements for security, deep water docking facilities under construction, isometric game perspective, stylized but detailed, sense of government authority and permanence",
+      
+      "completedBuilding3DPrompt": "Completed Renaissance Venetian customs house, imposing official building at harbor entrance, grand stone facade featuring Lion of St. Mark and government symbols, multiple inspection halls with specialized tables for opening and examining crates, separate areas for different types of goods, official's offices with view of operations, secure counting rooms for tax collection, armed guards at strategic positions, large harbor-facing doors allowing direct unloading from ships, official scales and measuring equipment, document office with clerks recording all transactions, separate entrances for merchants and officials, inspection stamps and seals visible, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of official authority and oversight, uniformed customs officials examining goods, merchants waiting for clearance, activity showing the blend of bureaucracy and commerce",
+      
+      "gameplayInformation": {
+        "unlocks": ["Legal Import/Export Operations", "Government Revenue Stream", "Official Trade Data"],
+        "specialAbilities": ["Tax collection", "Contraband seizure", "Market regulation enforcement"],
+        "upgradePath": ["Commercial Magistracy"],
+        "reputationEffects": {
+          "Senate": 20,
+          "Treasury": 25,
+          "Merchant Guild": 10,
+          "Smugglers": -30
+        },
+        "riskFactors": {
+          "corruption risk": "Medium (valuable position for bribes)",
+          "security risk": "Low (well-guarded)",
+          "efficiency risk": "Medium (bureaucratic delays)"
+        }
+      },
+      
+      "soundDesign": {
+        "ambientSound": "Official stamps and seals, clerks calling next in line, harbor sounds",
+        "activitySounds": "Crates being opened for inspection, official declarations, tax calculations",
+        "musicTheme": "Processione Ducale"
+      },
+      
+      "seasonalEffects": {
+        "shipping seasons": "Dramatically increased activity during peak seasons",
+        "trade fairs": "Special procedures and extended hours",
+        "diplomatic tensions": "Increased scrutiny of certain nation's goods"
+      },
+      
+      "aiInteractionPoints": ["Main inspection hall", "Document processing office", "Tax payment window", "Merchant waiting area", "Official's offices", "Harbor inspection point", "Security checkpoint"]
+    },
+    
+    {
+      "name": "Weighing Station",
+      "category": "Commercial",
+      "subcategory": "Trade Facilities",
+      "tier": 2,
+      "size": "Medium",
+      "unlockCondition": "Government license or 8,000 ducats with official connections",
+      
+      "shortDescription": "Official product measurement facility ensuring accurate weights and measures for commerce.",
+      "fullDescription": "Accuracy in commerce was essential to Venice's reputation, and these official stations provided standardized weights and measures for all significant transactions. Featuring precisely calibrated scales, volume measures, and length standards, these government-regulated facilities prevented fraud while collecting small fees for their services. The official certification they provided gave merchants confidence in their transactions.",
+      "flavorText": "A gram too light or an inch too short may seem trivial, until one calculates the difference across a thousand transactions—then one understands why the Republic is so precise in its measures.",
+      
+      "constructionCosts": {
+        "ducats": 3500,
+        "timber": 60,
+        "bricks": 150,
+        "stone": 100,
+        "glass": 10,
+        "iron": 50
+      },
+      "maintenanceCost": 25,
+      "constructionTime": 259200000,
+      "incomeGeneration": 45,
+      "employmentCapacity": 8,
+      
+      "locationRequirements": {
+        "districtRestrictions": "Commercial zones, particularly near markets",
+        "adjacentRequirements": "Requires good access for carts and porters",
+        "environmentalEffects": "Increases efficiency and trust in local commercial transactions"
+      },
+      
+      "productionInformation": {
+        "inputResources": {
+          "Goods for Weighing": "100-200 transactions per day",
+          "Calibration Standards": "Maintained by government"
+        },
+        "outputResources": {
+          "Official Certificates": "100-200 per day",
+          "Measurement Fees": "40-80 ducats per day",
+          "Commercial Dispute Resolution": "5-10 cases per day"
+        },
+        "storageCapacity": "Minimal, primarily equipment storage"
+      },
+      
+      "constructionPhase3DPrompt": "Renaissance Venetian weighing station under construction, official measurement facility, foundation being reinforced for stability and accuracy of scales, specialized equipment installation areas, precision stone platform for large scale being laid perfectly level, separate areas for different measurement types (weight, volume, length), official's office and document area, security features to prevent tampering, equipment calibration area, official symbols of weights and measures being installed, isometric game perspective, stylized but detailed, focus on precision and permanence of construction",
+      
+      "completedBuilding3DPrompt": "Completed Renaissance Venetian weighing station, official measurement facility featuring large central hall with massive precision scale on perfectly level stone platform, smaller scales of various sizes for different goods, standardized volume measures in copper and brass, official length measures inlaid in stone floor, separate booths for specific commodities, official's desk with stamps and certification documents, Republic's seal prominently displayed, weights and measures symbols on exterior, carts and goods waiting to be weighed, clerks recording measurements, bronze standard weights in secure display, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of precision and official authority, activity showing commercial goods being carefully measured, certificate being issued to merchant",
+      
+      "gameplayInformation": {
+        "unlocks": ["Certified Trade Operations", "Dispute Resolution", "Standard Measurement Reference"],
+        "specialAbilities": ["Fraud prevention", "Commercial dispute resolution", "Quality certification"],
+        "upgradePath": ["Commercial Regulatory Office"],
+        "reputationEffects": {
+          "Merchant Guild": 15,
+          "Treasury": 10,
+          "Consumer Trust": 20
+        },
+        "riskFactors": {
+          "corruption risk": "Medium (opportunities for falsification)",
+          "maintenance risk": "High (requires precise calibration)",
+          "throughput risk": "Medium (bottlenecks during busy periods)"
+        }
+      },
+      
+      "soundDesign": {
+        "ambientSound": "Scale mechanisms, official stamps, merchant discussions",
+        "activitySounds": "Weights being placed, goods being positioned, official declarations",
+        "musicTheme": "Rialto Mercante"
+      },
+      
+      "seasonalEffects": {
+        "harvest seasons": "Increased grain and produce weighing",
+        "shipping arrivals": "Peaks of activity following major ship arrivals",
+        "market days": "Extended hours and additional staff"
+      },
+      
+      "aiInteractionPoints": ["Main weighing platform", "Certification desk", "Dispute resolution area", "Smaller scales area", "Queue management position", "Record-keeping office"]
+    }
+  ]

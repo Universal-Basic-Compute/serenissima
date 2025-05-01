@@ -1,0 +1,605 @@
+[
+    {
+      "name": "Doge's Palace",
+      "category": "Special Buildings",
+      "subcategory": "Unique Structures",
+      "tier": 5,
+      "size": "Extra Large",
+      "unlockCondition": "Government structure only, not privately constructable",
+      
+      "shortDescription": "Seat of government for the Venetian Republic, housing the Doge and major councils.",
+      "fullDescription": "The political heart of Venice, the Doge's Palace (Palazzo Ducale) houses the Republic's key governmental institutions. Featuring the Great Council chamber, Senate hall, Doge's apartments, judicial facilities, and administrative offices, this architectural masterpiece combines practical governance with symbolic authority. Its distinctive design represents Venice's unique political identity, balancing power between the Doge, aristocracy, and complex council system.",
+      "flavorText": "These walls have witnessed a thousand years of decisions that shaped Venice and beyond—for while emperors may command with swords, the true art of governance is found in these chambers where words, votes, and laws determine the fate of nations.",
+      
+      "constructionCosts": {
+        "ducats": 100000,
+        "timber": 500,
+        "bricks": 1000,
+        "stone": 2000,
+        "glass": 300,
+        "marble": 500,
+        "gold": 100
+      },
+      "maintenanceCost": 500,
+      "constructionTime": 7776000000,
+      "incomeGeneration": 0,
+      "employmentCapacity": 200,
+      
+      "locationRequirements": {
+        "districtRestrictions": "San Marco district only, waterfront facing Basin",
+        "adjacentRequirements": "St. Mark's Basilica adjacency, grand piazza frontage",
+        "environmentalEffects": "Center of political power, creates governmental district"
+      },
+      
+      "constructionPhase3DPrompt": "Renaissance Venetian Doge's Palace under construction, monumental seat of government, exceptional foundation work supporting massive structure, distinctive Gothic-Byzantine-Renaissance fusion architecture taking shape, grand council chamber with enormous ceiling spans, ornate facades with complex stone patterns, master craftsmen creating artistic elements, gold leaf application, marble column installation, colored stone patterns being laid, connection to St. Mark's Basilica, water entrance with ceremonial docking, security features being integrated despite ornate appearance, governmental chambers designed for various councils, state-commissioned artists painting ceremonial spaces, isometric game perspective, stylized but detailed, sense of creating architectural masterpiece that embodies Venetian governmental principles",
+      
+      "completedBuilding3DPrompt": "Completed Renaissance Venetian Doge's Palace, magnificent seat of government featuring distinctive Gothic-Byzantine fusion architecture, iconic diamond pattern stonework on facades, grand portico with ornate columns, enormous Great Council chamber where hundreds of nobles govern, Doge's private apartments, Senate meeting hall, various council rooms for specific governmental functions, Bridge of Sighs connecting to prisons, ceremonial water entrance where ambassadors arrive by gondola, grand staircase (Scala dei Giganti) with Neptune and Mars statues, ornate interior with masterpiece paintings by Venetian artists, gold detailing throughout, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of governmental power balanced through architectural sophistication, perfect expression of Venice's unique republican system, dignitaries in official robes moving between chambers, guards in state uniforms, governmental activities visible in various chambers, combination of practical administration and symbolic authority",
+      
+      "gameplayInformation": {
+        "unlocks": ["Venetian Government System", "Diplomatic Relations", "State Authority"],
+        "specialAbilities": ["Central governance", "Diplomatic center", "Symbolic power projection"],
+        "upgradePath": ["None - unique historical structure"],
+        "reputationEffects": {
+          "Government": 50,
+          "Nobility": 40,
+          "Foreign Powers": 40,
+          "Citizens": 30
+        },
+        "riskFactors": {
+          "fireRisk": "Medium (despite protections)",
+          "politicalRisk": "High (center of power struggles)",
+          "symbolRisk": "Very High (primary target in conflicts)"
+        }
+      },
+      
+      "soundDesign": {
+        "ambientSound": "Echoing chambers, distant debates, ceremonial announcements",
+        "activitySounds": "Council voting, diplomatic receptions, governmental proclamations",
+        "musicTheme": "Processione Ducale"
+      },
+      
+      "seasonalEffects": {
+        "state ceremonies": "Elaborate decorations, increased ceremonial activity",
+        "election periods": "Conclave procedures, heightened security",
+        "diplomatic seasons": "Foreign ambassadors, treaty negotiations"
+      },
+      
+      "aiInteractionPoints": ["Great Council Chamber", "Senate Hall", "Doge's Apartments", "Ceremonial Staircase", "Diplomatic Reception Rooms", "Governmental Offices", "Bridge of Sighs", "Water Entrance"]
+    },
+    
+    {
+      "name": "St. Mark's Basilica",
+      "category": "Special Buildings",
+      "subcategory": "Unique Structures",
+      "tier": 5,
+      "size": "Extra Large",
+      "unlockCondition": "Religious structure only, not privately constructable",
+      
+      "shortDescription": "Primary cathedral of Venice combining religious significance with state symbolism.",
+      "fullDescription": "The spiritual center of Venice, St. Mark's Basilica (Basilica di San Marco) serves as both religious cathedral and state church. Featuring Byzantine-influenced architecture, spectacular golden mosaics, the famous quadriga horses, and St. Mark's relics, this magnificent structure blends Eastern and Western traditions. As the Doge's personal chapel and venue for state ceremonies, it represents the fusion of religious and political authority in Venetian governance.",
+      "flavorText": "Gold above, marble below, and centuries of prayer in between—this basilica stands not merely as a church, but as Venice's spiritual foundation and the treasure house of her most sacred relics and memories.",
+      
+      "constructionCosts": {
+        "ducats": 120000,
+        "timber": 400,
+        "bricks": 1000,
+        "stone": 2000,
+        "glass": 400,
+        "marble": 800,
+        "gold": 200
+      },
+      "maintenanceCost": 400,
+      "constructionTime": 10368000000,
+      "incomeGeneration": 100,
+      "employmentCapacity": 60,
+      
+      "locationRequirements": {
+        "districtRestrictions": "San Marco district only, adjacent to Doge's Palace",
+        "adjacentRequirements": "Piazza frontage, campanile proximity",
+        "environmentalEffects": "Religious center, creates spiritual focal point, pilgrimage destination"
+      },
+      
+      "constructionPhase3DPrompt": "Renaissance Venetian St. Mark's Basilica under construction, magnificent religious structure, Byzantine-influenced architecture taking shape, multiple domes with supporting structures, ornate facade design with marble inlay work, interior scaffolding where master craftsmen apply gold mosaics, marble column installation from Eastern sources, reliquary areas being prepared with security features, baptistery construction, connection to Doge's Palace, specially reinforced areas for golden altarpiece (Pala d'Oro), skilled artisans creating intricate decorative elements, isometric game perspective, stylized but detailed, sense of creating otherworldly spiritual space that also projects Venetian state power",
+      
+      "completedBuilding3DPrompt": "Completed Renaissance Venetian St. Mark's Basilica, breathtaking cathedral featuring distinctive Byzantine-influenced architecture with five domes, ornate facade with marble, columns, and sculptures, famous quadriga horses above entrance, interior glowing with golden mosaics depicting biblical and Venetian scenes, central area where St. Mark's relics are housed, Pala d'Oro golden altarpiece studded with gems, baptistery with ancient decoration, treasury filled with Venetian plunder from Constantinople, connection to Doge's Palace symbolizing church-state relationship, priests conducting services, pilgrims visiting sacred relics, state ceremonies with Doge participating, historically accurate but slightly stylized for game aesthetic, isometric game perspective, atmosphere of divine splendor combined with state power, perfect fusion of Eastern and Western traditions, golden light filtering through windows, sense of spiritual authority and material magnificence supporting each other",
+      
+      "gameplayInformation": {
+        "unlocks": ["State Religion", "Pilgrimage Destination", "Ceremonial Center"],
+        "specialAbilities": ["Religious authority", "State ceremonies", "Divine protection"],
+        "upgradePath": ["None - unique historical structure"],
+        "reputationEffects": {
+          "Church": 50,
+          "Government": 40,
+          "Citizens": 40,
+          "Foreign Visitors": 40
+        },
+        "riskFactors": {
+          "fireRisk": "Medium (despite sacred protection)",
+          "theftRisk": "High (valuable treasures)",
+          "floodRisk": "High (ground level, despite precautions)"
+        }
+      },
+      
+      "soundDesign": {
+        "ambientSound": "Gregorian chants, echoing prayers, reverent whispers",
+        "activitySounds": "Religious ceremonies, choir performances, state processions",
+        "musicTheme": "Gloria di San Marco"
+      },
+      
+      "seasonalEffects": {
+        "major religious festivals": "Spectacular ceremonies, special displays",
+        "state ceremonies": "Doge's participation, political-religious events",
+        "holy days": "Enhanced decorations, increased pilgrim visits"
+      },
+      
+      "aiInteractionPoints": ["Main Sanctuary", "Reliquary of St. Mark", "Golden Altarpiece", "Baptistery", "Treasury", "Doge's Ceremonial Area", "Prayer Spaces", "Tourist Viewing Areas"]
+    },
+    
+    {
+      "name": "Rialto Bridge",
+      "category": "Special Buildings",
+      "subcategory": "Unique Structures",
+      "tier": 4,
+      "size": "Large",
+      "unlockCondition": "Government project only, not privately constructable",
+      
+      "shortDescription": "Main bridge spanning the Grand Canal with shops, connecting San Marco and Rialto districts.",
+      "fullDescription": "The commercial artery connecting Venice's governmental and financial centers, the Rialto Bridge spans the Grand Canal at its narrowest point. Featuring a single bold stone arch, rows of shops on either side of the central pathway, and distinctive architectural details, this engineering marvel combines practical transportation with commercial opportunity. As a symbol of Venice's commercial prowess and engineering skill, it remains one of the city's most recognizable landmarks.",
+      "flavorText": "Some bridges merely connect two shores, but the Rialto connects commerce with governance, tradition with innovation, and engineering with art—all in a single, perfect arch that seems to defy gravity while defining Venice.",
+      
+      "constructionCosts": {
+        "ducats": 70000,
+        "timber": 300,
+        "bricks": 500,
+        "stone": 1500,
+        "marble": 200
+      },
+      "maintenanceCost": 300,
+      "constructionTime": 5184000000,
+      "incomeGeneration": 300,
+      "employmentCapacity": 30,
+      
+      "locationRequirements": {
+        "districtRestrictions": "Grand Canal at narrowest point between San Marco and Rialto",
+        "adjacentRequirements": "Commercial districts on both sides, water traffic clearance",
+        "environmentalEffects": "Creates major commercial thoroughfare, increases property values"
+      },
+      
+      "constructionPhase3DPrompt": "Renaissance Venetian Rialto Bridge under construction, monumental engineering project spanning Grand Canal, temporary foundations in canal supporting massive construction, innovative single stone arch taking shape with precise geometry, rows of shop structures being built on either side, complex structural support system, master engineers supervising every detail, wooden scaffolding throughout, stone blocks being precisely fitted, shop interiors taking shape with commercial considerations, decorative elements including balustrades and archways, specialized water engineering to work around Grand Canal traffic, isometric game perspective, stylized but detailed, focus on revolutionary engineering allowing single span across canal while supporting commercial structures",
+      
+      "completedBuilding3DPrompt": "Completed Renaissance Venetian Rialto Bridge, impressive structure featuring bold single stone arch spanning Grand Canal, two rows of shops lining both sides of central pedestrian pathway, elegant stone balustrades with decorative elements, archways at entrance points, steps ascending and descending the arch, shop fronts with various luxury merchants, continuous portico sheltering shoppers, boats passing underneath with generous clearance, crowds of people crossing between San Marco and Rialto districts, merchants conducting business, goods being transported across, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of commercial vitality combined with engineering achievement, perfect balance of practical transportation and business opportunity, distinctive silhouette that defines the Grand Canal, atmosphere of commerce and connection",
+      
+      "gameplayInformation": {
+        "unlocks": ["Grand Canal Crossing", "Premium Commercial Space", "City Integration"],
+        "specialAbilities": ["Major pedestrian connection", "High-value retail location", "Commercial hub"],
+        "upgradePath": ["None - unique historical structure"],
+        "reputationEffects": {
+          "Merchants": 40,
+          "Engineers": 30,
+          "Government": 25,
+          "Citizens": 35
+        },
+        "riskFactors": {
+          "structuralRisk": "Low (exceptional construction)",
+          "fireRisk": "Medium (shop contents)",
+          "congestionRisk": "Very High (major thoroughfare)"
+        }
+      },
+      
+      "soundDesign": {
+        "ambientSound": "Bustling commerce, footsteps on stone, boats below",
+        "activitySounds": "Merchant transactions, tourist amazement, continuous movement",
+        "musicTheme": "Rialto Mercante"
+      },
+      
+      "seasonalEffects": {
+        "carnival": "Decorated shops, masked revelers crossing",
+        "market days": "Peak commercial activity, special goods",
+        "regatta viewing": "Crowds watching boat races from vantage point"
+      },
+      
+      "aiInteractionPoints": ["Central Walkway", "Shop Fronts", "Viewing Points", "Entrance Steps", "Underbridge Passage", "Merchant Stalls", "Bridge Crossroads", "Architectural Details"]
+    },
+    
+    {
+      "name": "Clocktower",
+      "category": "Special Buildings",
+      "subcategory": "Unique Structures",
+      "tier": 3,
+      "size": "Medium",
+      "unlockCondition": "Government project only, not privately constructable",
+      
+      "shortDescription": "Public timepiece marking hours with automatons and astronomical indicators.",
+      "fullDescription": "Regulating Venetian life through public timekeeping, the Clock Tower (Torre dell'Orologio) combines practical function with astronomical artistry. Featuring an ornate blue and gold clockface, zodiac indicators, automated figures striking the hours, and a bell at the top, this sophisticated mechanism represented cutting-edge Renaissance technology. Its prominent position overlooking St. Mark's Square symbolized Venice's orderly governance and scientific advancement.",
+      "flavorText": "How better to demonstrate the Republic's mastery over commerce than to measure and display time itself—for in Venice, even the hours are counted, regulated, and transformed into the rhythm of prosperity.",
+      
+      "constructionCosts": {
+        "ducats": 40000,
+        "timber": 100,
+        "bricks": 300,
+        "stone": 500,
+        "iron": 200,
+        "gold": 50
+      },
+      "maintenanceCost": 150,
+      "constructionTime": 3456000000,
+      "incomeGeneration": 0,
+      "employmentCapacity": 5,
+      
+      "locationRequirements": {
+        "districtRestrictions": "San Marco district, entrance to Mercerie from piazza",
+        "adjacentRequirements": "Visibility from main square, prominent position",
+        "environmentalEffects": "Creates public time reference, architectural focal point"
+      },
+      
+      "constructionPhase3DPrompt": "Renaissance Venetian Clocktower under construction, specialized public timepiece, tower structure rising from arch over street, precision clockwork mechanism being assembled by master horologists, astronomical dial installation with zodiac symbols, automated striking figures being installed on platform, golden detailing and blue enamel work, bell housing at top taking shape, archway underneath maintaining street access during construction, specialized craftsmen focusing on technical precision and artistic detail simultaneously, clockface being calibrated, isometric game perspective, stylized but detailed, focus on creating public chronometer that demonstrates Venetian technical skill and artistic refinement",
+      
+      "completedBuilding3DPrompt": "Completed Renaissance Venetian Clocktower, impressive public timepiece featuring ornate tower rising from arch spanning street entrance to Mercerie, large blue and gold clockface with astronomical indicators showing zodiac signs and lunar phases, famous Moors statues on top platform striking bell to mark hours, winged lion of St. Mark displayed prominently, intricate mechanical elements including procession of Wise Men on certain festivals, precision clockwork mechanism maintained by specialist technicians, archway below allowing pedestrian traffic between Piazza San Marco and shopping streets, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of technological achievement combined with public practicality, perfect expression of Venetian appreciation for both art and science, citizens checking time as they pass, tourists admiring mechanical marvel, atmosphere of orderly civic life regulated by mechanical precision",
+      
+      "gameplayInformation": {
+        "unlocks": ["Public Timekeeping", "Astronomical Display", "City Regulation"],
+        "specialAbilities": ["Time standardization", "Civic pride enhancement", "Technological demonstration"],
+        "upgradePath": ["None - unique historical structure"],
+        "reputationEffects": {
+          "Government": 25,
+          "Citizens": 30,
+          "Engineers": 35,
+          "Foreign Visitors": 30
+        },
+        "riskFactors": {
+          "mechanicalRisk": "Medium (complex mechanisms)",
+          "maintenanceRisk": "High (precision requirements)",
+          "lightningRisk": "Medium (elevated structure)"
+        }
+      },
+      
+      "soundDesign": {
+        "ambientSound": "Clockwork mechanisms, gentle ticking, pedestrians below",
+        "activitySounds": "Bell striking hours, automated figures moving, crowd reactions",
+        "musicTheme": "Processione Ducale"
+      },
+      
+      "seasonalEffects": {
+        "festivals": "Special automated displays, decorative elements",
+        "astronomical events": "Highlighted indicators, educational focus",
+        "civic ceremonies": "Timing coordination, official reference point"
+      },
+      
+      "aiInteractionPoints": ["Main Clockface", "Automated Figures Platform", "Zodiac Display", "Archway Passage", "Bell Tower", "Maintenance Access", "Timekeeper's Station", "Viewing Area"]
+    },
+    
+    {
+      "name": "Glass Guild Hall",
+      "category": "Special Buildings",
+      "subcategory": "Guild Headquarters",
+      "tier": 3,
+      "size": "Large",
+      "unlockCondition": "Glass Guild Master status or 20,000 ducats with Guild connections",
+      
+      "shortDescription": "Headquarters of the Murano Glass Guild governing the prestigious Venetian glass industry.",
+      "fullDescription": "Regulating Venice's world-renowned glass industry, the Glass Guild Hall serves as administrative center and knowledge repository for this crucial craft. Featuring meeting chambers, demonstration facilities, archives of designs and techniques, and ceremonial spaces, this distinguished institution maintains quality standards while protecting trade secrets. Located on Murano island, it governs every aspect of Venetian glassmaking from apprenticeships to export regulations.",
+      "flavorText": "Within these walls we preserve not merely the techniques of our craft, but its very soul—for while any furnace can melt sand, only the true traditions of Murano transform it into miracles of transparency and color.",
+      
+      "constructionCosts": {
+        "ducats": 25000,
+        "timber": 150,
+        "bricks": 300,
+        "stone": 500,
+        "glass": 200,
+        "marble": 60
+      },
+      "maintenanceCost": 120,
+      "constructionTime": 1728000000,
+      "incomeGeneration": 150,
+      "employmentCapacity": 20,
+      
+      "locationRequirements": {
+        "districtRestrictions": "Murano Island only, prominent location",
+        "adjacentRequirements": "Proximity to glassworks, water access",
+        "environmentalEffects": "Increases glass industry prestige, creates regulatory center"
+      },
+      
+      "constructionPhase3DPrompt": "Renaissance Venetian Glass Guild Hall under construction on Murano island, prestigious institutional building, formal meeting chamber taking shape with hierarchical seating for masters and apprentices, demonstration area with small furnace for technique teaching, archive room with secure storage for secret formula documents, quality control facilities, exhibition space for masterworks, ceremonial room for guild initiations and awards, master glassblower consultation rooms, administrative offices, decorative glass elements being installed throughout, elaborate exterior showing guild symbols and historical glass achievements, isometric game perspective, stylized but detailed, focus on creating institutional headquarters that governs prestigious craft",
+      
+      "completedBuilding3DPrompt": "Completed Renaissance Venetian Glass Guild Hall, impressive institutional building featuring grand entrance with glass guild symbol prominently displayed, formal meeting chamber where masters debate regulations and standards, demonstration area with small furnace where techniques are taught and tested, secure archive room containing closely guarded formulas and patterns, quality assessment area where glass pieces are certified, exhibition gallery displaying masterworks from top artisans, ceremonial space for guild rituals and master certifications, administrative offices managing guild affairs, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of prestigious craft governance, elaborate glass decorative elements throughout showing Murano expertise, guild masters in formal attire conducting official business, atmosphere of tradition and innovation carefully balanced, institutional authority over world-famous craft",
+      
+      "gameplayInformation": {
+        "unlocks": ["Glass Guild Membership", "Technique Access", "Quality Certification"],
+        "specialAbilities": ["Industry regulation", "Technique protection", "Market control", "Export authorization"],
+        "upgradePath": ["International Glass Authority (expanded global influence)"],
+        "reputationEffects": {
+          "Glass Guild": 40,
+          "Luxury Merchants": 30,
+          "Government": 20,
+          "Foreign Craftsmen": 25
+        },
+        "riskFactors": {
+          "industrialEspionageRisk": "Very High (valuable secrets)",
+          "monopolyBustingRisk": "Medium (regulatory challenges)",
+          "innovationResistanceRisk": "Medium (traditional methods)"
+        }
+      },
+      
+      "soundDesign": {
+        "ambientSound": "Formal discussions, glass demonstrations, administrative activity",
+        "activitySounds": "Guild ceremonies, quality testing, technique instruction",
+        "musicTheme": "Merletti di Burano"
+      },
+      
+      "seasonalEffects": {
+        "master competitions": "Special exhibitions, technique demonstrations",
+        "apprentice graduations": "Ceremonies, new master inductions",
+        "trade seasons": "Export regulations, quality control focus"
+      },
+      
+      "aiInteractionPoints": ["Main Meeting Chamber", "Demonstration Area", "Secret Archive", "Quality Control Station", "Exhibition Gallery", "Ceremonial Hall", "Administrative Offices", "Master Consultation Rooms"]
+    },
+    
+    {
+      "name": "Merchant Guild Hall",
+      "category": "Special Buildings",
+      "subcategory": "Guild Headquarters",
+      "tier": 3,
+      "size": "Extra Large",
+      "unlockCondition": "Merchant Guild Master status or 25,000 ducats with Guild connections",
+      
+      "shortDescription": "Headquarters of the Merchant Guild governing trade practices, standards, and commercial relationships.",
+      "fullDescription": "Coordinating Venice's vast commercial networks, the Merchant Guild Hall serves as the central institution for trading activities and relationships. Featuring grand meeting halls, contract rooms, price-setting chambers, foreign trade offices, and extensive archives, this imposing institution regulates every aspect of Venetian commerce. Its strategic location near the Rialto emphasizes its central role in the Republic's commercial success and international trading power.",
+      "flavorText": "Ships and goods are merely the visible manifestations of trade—the true art of commerce lives here, where relationships are cultivated, standards maintained, and the invisible networks of trust and credit span continents and cultures.",
+      
+      "constructionCosts": {
+        "ducats": 30000,
+        "timber": 200,
+        "bricks": 400,
+        "stone": 600,
+        "glass": 100,
+        "marble": 100
+      },
+      "maintenanceCost": 150,
+      "constructionTime": 2160000000,
+      "incomeGeneration": 200,
+      "employmentCapacity": 40,
+      
+      "locationRequirements": {
+        "districtRestrictions": "Rialto district, commercial center proximity",
+        "adjacentRequirements": "Water access, marketplace visibility",
+        "environmentalEffects": "Creates commercial regulatory center, increases business activity"
+      },
+      
+      "constructionPhase3DPrompt": "Renaissance Venetian Merchant Guild Hall under construction, substantial commercial institution, grand meeting chamber with tiered seating for guild hierarchy, foreign trade offices representing different regions, contract rooms with specialized legal features, international price board area, quality standards testing facility, record archive with extensive storage, market intelligence room, dispute resolution chamber, ceremonial spaces for member induction, elaborate facade with trading symbols and historical commercial scenes, isometric game perspective, stylized but detailed, focus on creating governance center for Venice's commercial lifeblood",
+      
+      "completedBuilding3DPrompt": "Completed Renaissance Venetian Merchant Guild Hall, impressive commercial institution featuring grand entrance with international trading symbols, massive central hall where merchants gather to discuss regulations and standards, specialized rooms dedicated to different trading regions (Levant, Northern Europe, etc.), contract signing chambers with legal witnesses, price-setting room with current quotations for key commodities, quality control testing area, extensive archives containing commercial history and regulations, dispute resolution chamber where conflicts are mediated, ceremonial space for member advancement, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of commercial governance and international connections, guild officials in formal attire, merchants from different nations conducting business, scribes recording transactions and regulations, atmosphere of regulated commerce and global trade networks, perfect expression of Venice's sophisticated commercial organization",
+      
+      "gameplayInformation": {
+        "unlocks": ["Merchant Guild Membership", "Trade Regulations", "Commercial Standards"],
+        "specialAbilities": ["Market regulation", "Trade dispute resolution", "Price standardization", "Quality certification"],
+        "upgradePath": ["International Commerce Authority (global trading power)"],
+        "reputationEffects": {
+          "Merchant Guild": 40,
+          "Foreign Traders": 30,
+          "Government": 25,
+          "Craftsmen": 20
+        },
+        "riskFactors": {
+          "marketManipulationRisk": "Medium (price control)",
+          "corruptionRisk": "Medium (valuable trading rights)",
+          "informationLeakRisk": "High (market intelligence value)"
+        }
+      },
+      
+      "soundDesign": {
+        "ambientSound": "Trade discussions, contract negotiations, multilingual conversations",
+        "activitySounds": "Price announcements, dispute resolutions, contract signatures",
+        "musicTheme": "Rialto Mercante"
+      },
+      
+      "seasonalEffects": {
+        "trade fairs": "International delegations, special price-setting",
+        "shipping seasons": "Cargo regulations, quality standards focus",
+        "new market openings": "Strategy meetings, opportunity briefings"
+      },
+      
+      "aiInteractionPoints": ["Grand Meeting Hall", "Foreign Trade Offices", "Contract Rooms", "Price-Setting Chamber", "Quality Control Area", "Dispute Resolution Court", "Commercial Archives", "Ceremonial Member Hall"]
+    },
+    
+    {
+      "name": "Silk Guild Hall",
+      "category": "Special Buildings",
+      "subcategory": "Guild Headquarters",
+      "tier": 3,
+      "size": "Large",
+      "unlockCondition": "Textile Guild Master status or 22,000 ducats with Guild connections",
+      
+      "shortDescription": "Headquarters of the Silk Guild governing the prestigious textile industry and fashion standards.",
+      "fullDescription": "Regulating Venice's lucrative textile trade, the Silk Guild Hall administers this sophisticated industry from raw material import to finished luxury products. Featuring material testing facilities, pattern archives, quality control chambers, fashion design spaces, and international trade offices, this influential institution maintained Venice's reputation for textile excellence. Its regulation of everything from dye standards to weaving techniques ensured consistent quality in one of Venice's most profitable industries.",
+      "flavorText": "The silk thread is delicate yet strong, simple yet refined—much like the regulations that govern our craft, which must be strict enough to ensure quality yet flexible enough to permit the innovation that keeps Venice at fashion's forefront.",
+      
+      "constructionCosts": {
+        "ducats": 24000,
+        "timber": 150,
+        "bricks": 300,
+        "stone": 450,
+        "glass": 80,
+        "marble": 70
+      },
+      "maintenanceCost": 130,
+      "constructionTime": 1728000000,
+      "incomeGeneration": 170,
+      "employmentCapacity": 30,
+      
+      "locationRequirements": {
+        "districtRestrictions": "Near textile district, commercial visibility",
+        "adjacentRequirements": "Transportation access, market proximity",
+        "environmentalEffects": "Creates fashion industry center, increases textile activity"
+      },
+      
+      "constructionPhase3DPrompt": "Renaissance Venetian Silk Guild Hall under construction, prestigious textile institution, material testing laboratory with specific light considerations, pattern archive with secure storage, quality testing chamber with precision equipment, fashion design studio with optimal lighting, grand meeting hall for guild masters, apprentice training area, international trade office focusing on Eastern silk sources, texture library with samples of various techniques, dyeing standards room with color references, elaborate facade with textile motifs and weaving symbols, isometric game perspective, stylized but detailed, focus on creating governance center for Venice's fashion and textile industry",
+      
+      "completedBuilding3DPrompt": "Completed Renaissance Venetian Silk Guild Hall, impressive textile institution featuring grand entrance with silk guild emblems, central hall displaying finest textile examples, material testing laboratory where experts evaluate raw silk quality, pattern archive containing centuries of designs in secure storage, quality control chamber where finished products are inspected and certified, fashion design studio where new styles are developed, training area where techniques are demonstrated and taught, color standards room with official dye samples, international trade office managing silk imports, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of textile expertise and fashion governance, guild officials in quality garments, artisans demonstrating techniques, merchants examining certified products, atmosphere of artistic creativity balanced with technical precision, perfect expression of Venice's reputation for textile excellence",
+      
+      "gameplayInformation": {
+        "unlocks": ["Silk Guild Membership", "Fashion Standards", "Textile Regulations"],
+        "specialAbilities": ["Material quality control", "Pattern protection", "Fashion trend setting", "Technique standardization"],
+        "upgradePath": ["International Fashion Authority (global style influence)"],
+        "reputationEffects": {
+          "Textile Guild": 40,
+          "Luxury Merchants": 30,
+          "Foreign Fashion Houses": 25,
+          "Nobility": 20
+        },
+        "riskFactors": {
+          "fashionChangeRisk": "Medium (style evolution)",
+          "industrialEspionageRisk": "High (technique value)",
+          "importDisruptionRisk": "Medium (raw material dependency)"
+        }
+      },
+      
+      "soundDesign": {
+        "ambientSound": "Fabric handling, quality discussions, fashion consultations",
+        "activitySounds": "Textile demonstrations, standard setting debates, material testing",
+        "musicTheme": "Merletti di Burano"
+      },
+      
+      "seasonalEffects": {
+        "fashion seasons": "New style presentations, seasonal standards",
+        "silk arrivals": "Material quality evaluations, import certifications",
+        "noble commissions": "Special pattern development, exclusive designs"
+      },
+      
+      "aiInteractionPoints": ["Main Guild Hall", "Material Testing Laboratory", "Pattern Archive", "Quality Control Chamber", "Fashion Design Studio", "Apprentice Training Area", "Color Standards Room", "International Trade Office"]
+    },
+    
+    {
+      "name": "Shipwright Guild Hall",
+      "category": "Special Buildings",
+      "subcategory": "Guild Headquarters",
+      "tier": 3,
+      "size": "Large",
+      "unlockCondition": "Maritime Guild Master status or 24,000 ducats with Guild connections",
+      
+      "shortDescription": "Headquarters of the Shipwright Guild governing naval construction and maritime engineering standards.",
+      "fullDescription": "Overseeing Venice's crucial shipbuilding industry, the Shipwright Guild Hall regulates the construction techniques and standards that maintained the Republic's naval superiority. Featuring design archives, model testing facilities, timber quality control, technical libraries, and training spaces, this specialized institution ensured consistent excellence in both merchant and naval vessels. Its regulations governed everything from material selection to construction techniques across Venice's numerous shipyards.",
+      "flavorText": "The ship is the most complex machine of our age, and the most vital to our prosperity—thus each nail, plank, and rope must meet standards forged from centuries of experience, triumph, and occasional tragedy at sea.",
+      
+      "constructionCosts": {
+        "ducats": 26000,
+        "timber": 250,
+        "bricks": 300,
+        "stone": 400,
+        "iron": 150,
+        "glass": 60
+      },
+      "maintenanceCost": 140,
+      "constructionTime": 1728000000,
+      "incomeGeneration": 180,
+      "employmentCapacity": 25,
+      
+      "locationRequirements": {
+        "districtRestrictions": "Near shipbuilding districts, water visibility",
+        "adjacentRequirements": "Water access, transportation for materials",
+        "environmentalEffects": "Creates maritime engineering center, shipbuilding focus"
+      },
+      
+      "constructionPhase3DPrompt": "Renaissance Venetian Shipwright Guild Hall under construction, maritime engineering institution, ship design archive with large plan tables, model testing pool for hull evaluations, timber assessment laboratory, rope and sail quality testing areas, technical library for shipbuilding knowledge, training areas with partial ship sections, guild meeting chamber with ship models, ceremonial space for master certifications, facade with maritime symbols and famous ship designs, naval engineering equipment displays, isometric game perspective, stylized but detailed, focus on creating governance center for Venice's crucial shipbuilding industry",
+      
+      "completedBuilding3DPrompt": "Completed Renaissance Venetian Shipwright Guild Hall, impressive maritime institution featuring grand entrance with ship design motifs, central hall displaying ship models from galleys to merchant vessels, technical design room with large tables for ship plans, model testing facility where hull designs are evaluated in water, timber quality assessment laboratory, rope strength testing equipment, nautical engineering library with technical manuscripts, training area with sectional ship constructions, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of naval engineering excellence and maritime tradition, guild officials reviewing designs, master shipwrights demonstrating techniques to apprentices, quality inspectors examining materials, atmosphere of technical precision and practical knowledge, perfect expression of Venice's shipbuilding superiority that enabled its maritime power",
+      
+      "gameplayInformation": {
+        "unlocks": ["Shipwright Guild Membership", "Naval Design Access", "Construction Standards"],
+        "specialAbilities": ["Ship quality control", "Construction technique standardization", "Material certification", "Design protection"],
+        "upgradePath": ["Advanced Naval Engineering Authority (cutting-edge ship design)"],
+        "reputationEffects": {
+          "Shipwright Guild": 40,
+          "Naval Officers": 30,
+          "Merchant Marine": 30,
+          "Foreign Shipyards": 25
+        },
+        "riskFactors": {
+          "technicalObsolescenceRisk": "Medium (evolving designs)",
+          "industrialEspionageRisk": "High (valuable techniques)",
+          "materialShortageRisk": "Medium (timber dependency)"
+        }
+      },
+      
+      "soundDesign": {
+        "ambientSound": "Technical discussions, model testing water, material evaluation",
+        "activitySounds": "Design reviews, quality testing, apprentice instruction",
+        "musicTheme": "Arsenale in Movimento"
+      },
+      
+      "seasonalEffects": {
+        "naval commissions": "Military design reviews, quality standards emphasis",
+        "merchant fleet renewals": "Commercial vessel standards, efficiency focus",
+        "timber arrivals": "Material quality assessments, supply evaluations"
+      },
+      
+      "aiInteractionPoints": ["Main Guild Hall", "Ship Design Room", "Model Testing Pool", "Material Quality Laboratory", "Technical Library", "Training Area", "Master Certification Chamber", "Naval Engineering Display"]
+    },
+    
+    {
+      "name": "Goldsmith Guild Hall",
+      "category": "Special Buildings",
+      "subcategory": "Guild Headquarters",
+      "tier": 3,
+      "size": "Medium",
+      "unlockCondition": "Goldsmith Guild Master status or 20,000 ducats with Guild connections",
+      
+      "shortDescription": "Headquarters of the Goldsmith Guild governing precious metal crafting and jewelry standards.",
+      "fullDescription": "Regulating Venice's prestigious precious metals industry, the Goldsmith Guild Hall ensures the quality and authenticity of gold and silver work throughout the city. Featuring metal testing laboratories, design archives, gem assessment facilities, security vaults, and demonstration spaces, this exclusive institution maintains strict standards on materials and craftsmanship. Its certification was required for all precious metal works, ensuring consistent quality in this high-value industry.",
+      "flavorText": "Gold may seem unchangeable, but the craftsman's hand transforms it from mere wealth to immortal beauty—our guild ensures that when the Venetian mark is struck on gold, both the metal and the craftsmanship are beyond reproach.",
+      
+      "constructionCosts": {
+        "ducats": 22000,
+        "timber": 100,
+        "bricks": 250,
+        "stone": 400,
+        "gold": 30,
+        "marble": 80
+      },
+      "maintenanceCost": 120,
+      "constructionTime": 1296000000,
+      "incomeGeneration": 160,
+      "employmentCapacity": 20,
+      
+      "locationRequirements": {
+        "districtRestrictions": "Secure area, often near government district",
+        "adjacentRequirements": "Security considerations, commercial visibility",
+        "environmentalEffects": "Creates luxury craft center, increases precious metal activity"
+      },
+      
+      "constructionPhase3DPrompt": "Renaissance Venetian Goldsmith Guild Hall under construction, prestigious precious metals institution, secure metal testing laboratory with assaying equipment, gem assessment room with perfect lighting, design archive with elaborate security, demonstration workshop for technique teaching, high-security vault for material and pattern storage, guild meeting chamber with ceremonial features, official mark stamping station, quality control facility with precision tools, elaborate facade with goldsmithing motifs and tools, security features integrated throughout construction, isometric game perspective, stylized but detailed, focus on creating governance center for Venice's high-value jewelry and precious metal industry",
+      
+      "completedBuilding3DPrompt": "Completed Renaissance Venetian Goldsmith Guild Hall, impressive precious metals institution featuring secure entrance with guild symbols, central hall displaying masterwork examples in secure cases, metal testing laboratory where gold and silver purity is verified, gem assessment room with specialized lighting for evaluation, pattern archive containing historical designs in secure storage, demonstration workshop where techniques are taught to apprentices, official hallmarking station where the Venetian mark is stamped on verified pieces, high-security vault for materials and valuable items, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of valuable craft governance, guild officials in formal attire, master goldsmiths demonstrating techniques, quality inspectors examining jewelry with magnification tools, atmosphere of precision and security appropriate to precious materials, perfect expression of Venice's reputation for jewelry excellence",
+      
+      "gameplayInformation": {
+        "unlocks": ["Goldsmith Guild Membership", "Precious Metal Certification", "Jewelry Standards"],
+        "specialAbilities": ["Metal purity verification", "Design protection", "Official hallmarking", "Gem certification"],
+        "upgradePath": ["International Precious Metals Authority (global standard-setting)"],
+        "reputationEffects": {
+          "Goldsmith Guild": 40,
+          "Nobility": 30,
+          "Church": 25,
+          "Foreign Merchants": 20
+        },
+        "riskFactors": {
+          "theftRisk": "Very High (valuable materials)",
+          "fraudRisk": "High (certification forgery)",
+          "materialShortageRisk": "Medium (precious metal dependency)"
+        }
+      },
+      
+      "soundDesign": {
+        "ambientSound": "Metal working tools, quiet deliberation, security mechanisms",
+        "activitySounds": "Metal testing, hallmarking stamps, quality discussions",
+        "musicTheme": "Merletti di Burano"
+      },
+      
+      "seasonalEffects": {
+        "state ceremonies": "Official regalia maintenance, ceremonial item creation",
+        "noble wedding seasons": "Jewelry commissions, gift certifications",
+        "religious festivals": "Church item creation, liturgical object certification"
+      },
+      
+      "aiInteractionPoints": ["Main Guild Hall", "Metal Testing Laboratory", "Gem Assessment Room", "Design Archive", "Demonstration Workshop", "Hallmarking Station", "Security Vault", "Quality Control Area"]
+    }
+  ]
