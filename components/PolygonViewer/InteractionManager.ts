@@ -64,12 +64,6 @@ export default class InteractionManager {
       return;
     }
     
-    // If any mouse button is pressed (during drag), don't process
-    if (event.buttons !== 1) {
-      this.isProcessingClick = false;
-      return;
-    }
-    
     try {
       // Calculate mouse position in normalized device coordinates (-1 to +1)
       this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
