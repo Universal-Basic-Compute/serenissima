@@ -27,6 +27,7 @@ export default class SceneSetup {
   private zoomThreshold: number = 40; // Changed from 70 to 40 - Threshold for showing clouds
   public water: SimpleWater | null = null; // Reference to water effect
   private activeView: ViewMode;
+  public water: SimpleWater | null = null; // Reference to water effect
   
   constructor({ canvas, activeView, highQuality }: SceneSetupProps) {
     this.performanceMode = !highQuality;
@@ -234,6 +235,25 @@ export default class SceneSetup {
     // Do nothing - no sun animation
   }
   
+  // Add method to create water
+  public createWater() {
+    console.log('Creating water effect...');
+    
+    if (this.water) {
+      this.water.cleanup();
+    }
+    
+    this.water = new SimpleWater({
+      scene: this.scene,
+      activeView: this.activeView,
+      performanceMode: this.performanceMode,
+      width: 300, // Make water wider than the scene
+      height: 300, // Make water taller than the scene
+    });
+    
+    console.log('Water effect created successfully');
+  }
+  
   private calculateSunPosition(): THREE.Vector3 {
     // Get current time
     const now = new Date();
@@ -335,6 +355,9 @@ export default class SceneSetup {
     if (this.water) {
       this.water.updateQuality(this.performanceMode);
     }
+    if (this.water) {
+      this.water.updateQuality(this.performanceMode);
+    }
   }
   
   public cleanup() {
@@ -374,6 +397,11 @@ export default class SceneSetup {
     if (this.cloudSystem) {
       this.cloudSystem.cleanup();
       this.cloudSystem = null;
+    }
+    
+    if (this.water) {
+      this.water.cleanup();
+      this.water = null;
     }
     
     if (this.water) {
