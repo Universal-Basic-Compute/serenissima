@@ -90,7 +90,7 @@ async def store_wallet(wallet_data: WalletRequest):
                 "id": record["id"],
                 "wallet_address": record["fields"].get("Wallet", ""),
                 "compute_amount": record["fields"].get("ComputeAmount", 0),
-                "user_name": record["fields"].get("Name", None),
+                "user_name": record["fields"].get("Username", None),
                 "email": record["fields"].get("Email", None)
             }
         
@@ -103,7 +103,7 @@ async def store_wallet(wallet_data: WalletRequest):
             fields["ComputeAmount"] = wallet_data.compute_amount
             
         if wallet_data.user_name:
-            fields["Name"] = wallet_data.user_name
+            fields["Username"] = wallet_data.user_name
             
         if wallet_data.email:
             fields["Email"] = wallet_data.email
@@ -116,7 +116,7 @@ async def store_wallet(wallet_data: WalletRequest):
             "id": record["id"],
             "wallet_address": record["fields"].get("Wallet", ""),
             "compute_amount": record["fields"].get("ComputeAmount", 0),
-            "user_name": record["fields"].get("Name", None),
+            "user_name": record["fields"].get("Username", None),
             "email": record["fields"].get("Email", None)
         }
     except Exception as e:
@@ -143,7 +143,7 @@ async def get_wallet(wallet_address: str):
             "id": record["id"],
             "wallet_address": record["fields"].get("Wallet", ""),
             "compute_amount": record["fields"].get("ComputeAmount", 0),
-            "user_name": record["fields"].get("Name", None),
+            "user_name": record["fields"].get("Username", None),
             "email": record["fields"].get("Email", None)
         }
     except HTTPException:
@@ -185,7 +185,7 @@ async def invest_compute(wallet_data: WalletRequest):
                 "id": updated_record["id"],
                 "wallet_address": updated_record["fields"].get("Wallet", ""),
                 "compute_amount": updated_record["fields"].get("ComputeAmount", 0),
-                "user_name": updated_record["fields"].get("Name", None),
+                "user_name": updated_record["fields"].get("Username", None),
                 "email": updated_record["fields"].get("Email", None)
             }
         else:
@@ -200,7 +200,7 @@ async def invest_compute(wallet_data: WalletRequest):
                 "id": record["id"],
                 "wallet_address": record["fields"].get("Wallet", ""),
                 "compute_amount": record["fields"].get("ComputeAmount", 0),
-                "user_name": record["fields"].get("Name", None),
+                "user_name": record["fields"].get("Username", None),
                 "email": record["fields"].get("Email", None)
             }
     except Exception as e:

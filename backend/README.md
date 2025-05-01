@@ -29,3 +29,11 @@ The server will start at http://localhost:8000
 - `POST /api/wallet`: Store a wallet address
 - `GET /api/wallet/{wallet_address}`: Get wallet information
 - `POST /api/invest-compute`: Invest compute resources for a wallet
+
+## Airtable Structure
+
+The Users table should have the following fields:
+- Wallet (text): The wallet address
+- ComputeAmount (number): The amount of compute resources invested
+- Username (text): The user's username
+- Email (text): The user's email address
