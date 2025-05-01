@@ -303,25 +303,6 @@ export default class LODPolygon {
     this.removeBottomFaces(geometry);
   }
   
-  // Add helper method to determine land color
-  private determineLandColor(): THREE.Color {
-    if (this.activeView === 'land') {
-      if (this.ownerColor) {
-        // Blend the owner color with sand color for a more natural look
-        const sandColor = new THREE.Color(0xf0e6c8); // Lighter sand color
-        const ownerColor = new THREE.Color(this.ownerColor);
-        // Mix 70% owner color with 30% sand color
-        return new THREE.Color().lerpColors(sandColor, ownerColor, 0.7);
-      } else if (this.polygon.owner) {
-        // Instead of generating a color, use a default color
-        return new THREE.Color(0xf0e6c8); // Lighter sand color for owned islands
-      } else {
-        return new THREE.Color(0xf0e6c8); // Lighter sand color
-      }
-    } else {
-      return new THREE.Color(0xf0e6c8); // Lighter sand color
-    }
-  }
   
   public updateLOD(cameraPosition: THREE.Vector3) {
     // No LOD switching needed anymore
