@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Tab } from '@headlessui/react';
 import { getApiBaseUrl } from '@/lib/apiUtils';
+import BuildingModelViewer from '../UI/BuildingModelViewer';
 
 interface Building {
   name: string;
@@ -18,6 +19,15 @@ interface Building {
   };
   maintenanceCost: number;
   constructionTime: number;
+  assets?: {
+    models?: {
+      glb?: string;
+      fbx?: string;
+      obj?: string;
+    };
+    textures?: string;
+    thumbnail?: string;
+  };
   [key: string]: any; // For other properties
 }
 
@@ -170,28 +180,51 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
                             setSelectedBuilding(building);
                           }}
                         >
-                          <h3 className="text-lg font-medium text-amber-800 mb-1">{building.name}</h3>
-                          <div className="flex justify-between text-xs text-amber-600 mb-2">
-                            <span>Tier {building.tier}</span>
-                            <span>{building.size}</span>
-                            {building.assets?.thumbnail && (
-                              <span className="text-green-600">✓</span>
+                          <div className="flex items-start">
+                            {/* 3D Model Viewer */}
+                            {building.assets?.models?.glb ? (
+                              <div className="mr-3 flex-shrink-0">
+                                <BuildingModelViewer 
+                                  modelPath={building.assets.models.glb}
+                                  width={80}
+                                  height={80}
+                                  className="rounded bg-amber-100"
+                                />
+                              </div>
+                            ) : (
+                              <div className="mr-3 flex-shrink-0 w-20 h-20 bg-amber-100 rounded flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                </svg>
+                              </div>
                             )}
-                          </div>
-                          <p className="text-sm text-gray-700 mb-3">{building.shortDescription}</p>
-                          <div className="flex justify-between items-center">
-                            <div className="text-amber-700 font-medium">
-                              {building.constructionCosts.ducats.toLocaleString()} ⚜️
+                            
+                            {/* Building Info */}
+                            <div className="flex-grow">
+                              <h3 className="text-lg font-medium text-amber-800 mb-1">{building.name}</h3>
+                              <div className="flex justify-between text-xs text-amber-600 mb-2">
+                                <span>Tier {building.tier}</span>
+                                <span>{building.size}</span>
+                                {building.assets?.thumbnail && (
+                                  <span className="text-green-600">✓</span>
+                                )}
+                              </div>
+                              <p className="text-sm text-gray-700 mb-3">{building.shortDescription}</p>
+                              <div className="flex justify-between items-center">
+                                <div className="text-amber-700 font-medium">
+                                  {building.constructionCosts.ducats.toLocaleString()} ⚜️
+                                </div>
+                                <button 
+                                  className="text-xs bg-amber-600 text-white px-2 py-1 rounded hover:bg-amber-700"
+                                  onClick={(e) => {
+                                    e.stopPropagation(); // Prevent the parent div's onClick from firing
+                                    setSelectedBuilding(building);
+                                  }}
+                                >
+                                  Details
+                                </button>
+                              </div>
                             </div>
-                            <button 
-                              className="text-xs bg-amber-600 text-white px-2 py-1 rounded hover:bg-amber-700"
-                              onClick={(e) => {
-                                e.stopPropagation(); // Prevent the parent div's onClick from firing
-                                setSelectedBuilding(building);
-                              }}
-                            >
-                              Details
-                            </button>
                           </div>
                         </div>
                       ))}
@@ -236,8 +269,17 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
                   "{selectedBuilding.flavorText}"
                 </div>
                 
-                {/* Building thumbnail if available */}
-                {selectedBuilding.assets?.thumbnail && (
+                {/* 3D Model Viewer */}
+                {selectedBuilding.assets?.models?.glb ? (
+                  <div className="mb-4 flex justify-center">
+                    <BuildingModelViewer 
+                      modelPath={selectedBuilding.assets.models.glb}
+                      width={300}
+                      height={300}
+                      className="rounded bg-amber-100 border-2 border-amber-300 shadow-md"
+                    />
+                  </div>
+                ) : selectedBuilding.assets?.thumbnail ? (
                   <div className="mb-4 flex justify-center">
                     <img 
                       src={selectedBuilding.assets.thumbnail} 
@@ -246,7 +288,7 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
                       style={{ maxHeight: '200px' }}
                     />
                   </div>
-                )}
+                ) : null}
 
                 <div className="mb-4">
                   <h3 className="text-lg font-medium text-amber-700 mb-2">Description</h3>
@@ -347,18 +389,18 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
                   </button>
                 </div>
                 
-                {/* 3D Model preview if available */}
+                {/* Additional model controls if available */}
                 {selectedBuilding.assets?.models?.glb && (
                   <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-                    <h3 className="text-lg font-medium text-amber-700 mb-2">3D Model Preview</h3>
+                    <h3 className="text-lg font-medium text-amber-700 mb-2">3D Model Controls</h3>
                     <p className="text-sm text-amber-600 mb-2">
-                      This building has a 3D model available for preview.
+                      Click and drag to rotate the model. Scroll to zoom in/out.
                     </p>
                     <button 
                       className="w-full px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors flex items-center justify-center"
                       onClick={(e) => {
                         e.stopPropagation();
-                        // Dispatch event to show 3D model preview
+                        // Dispatch event to show 3D model in fullscreen
                         window.dispatchEvent(new CustomEvent('showBuildingModel', {
                           detail: {
                             modelUrl: selectedBuilding.assets.models.glb,
@@ -368,9 +410,9 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
                       }}
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clipRule="evenodd" />
+                        <path fillRule="evenodd" d="M3 4a1 1 0 011-1h4a1 1 0 010 2H6.414l2.293 2.293a1 1 0 01-1.414 1.414L5 6.414V8a1 1 0 01-2 0V4zm9 1a1 1 0 010-2h4a1 1 0 011 1v4a1 1 0 01-2 0V6.414l-2.293 2.293a1 1 0 11-1.414-1.414L13.586 5H12zm-9 7a1 1 0 012 0v1.586l2.293-2.293a1 1 0 011.414 1.414L6.414 15H8a1 1 0 010 2H4a1 1 0 01-1-1v-4zm13-1a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 010-2h1.586l-2.293-2.293a1 1 0 011.414-1.414L15 13.586V12a1 1 0 011-1z" clipRule="evenodd" />
                       </svg>
-                      View 3D Model
+                      View Fullscreen
                     </button>
                   </div>
                 )}
