@@ -36,8 +36,8 @@ export async function transferComputeTokens(
 
     console.log('Starting token transfer with wallet:', walletAdapter.publicKey.toString());
     
-    // Connect to Solana network
-    const connection = new Connection('https://api.mainnet-beta.solana.com', 'confirmed');
+    // Connect to Solana network using a public RPC endpoint
+    const connection = new Connection('https://api.devnet.solana.com', 'confirmed');
     
     // Get the sender's token account
     const senderTokenAccount = await getAssociatedTokenAddress(
