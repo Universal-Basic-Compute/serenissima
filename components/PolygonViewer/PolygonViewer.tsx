@@ -30,12 +30,14 @@ export default function PolygonViewer() {
     highQuality,
     selectedPolygonId,
     landOwners,
+    users,
     setActiveView,
     toggleQuality,
     setHoveredPolygonId,
     setSelectedPolygonId,
     loadPolygons,
-    loadLandOwners
+    loadLandOwners,
+    loadUsers
   } = usePolygonStore();
   
   // References to our scene components
@@ -150,22 +152,18 @@ export default function PolygonViewer() {
     // Then load other data with delays to prevent overwhelming the browser
     const loadSecondaryData = setTimeout(() => {
       loadLandOwners(); // Land owners are needed for the default land view
+      loadUsers(); // Load all users data
     }, 500);
     
     const loadTertiaryData = setTimeout(() => {
       loadBridges();
     }, 1000);
     
-    const loadQuaternaryData = setTimeout(() => {
-      loadOwnerCoatOfArms();
-    }, 1500);
-    
     return () => {
       clearTimeout(loadSecondaryData);
       clearTimeout(loadTertiaryData);
-      clearTimeout(loadQuaternaryData);
     };
-  }, [loadPolygons, loadBridges, loadLandOwners, loadOwnerCoatOfArms]);
+  }, [loadPolygons, loadBridges, loadLandOwners, loadUsers]);
   
   // Add a separate useEffect to update the renderer when coat of arms data changes
   useEffect(() => {
@@ -239,7 +237,8 @@ export default function PolygonViewer() {
         bounds,
         activeView,
         performanceMode: !highQuality,
-        polygonMeshesRef
+        polygonMeshesRef,
+        users
       });
       polygonRendererRef.current = polygonRenderer;
       

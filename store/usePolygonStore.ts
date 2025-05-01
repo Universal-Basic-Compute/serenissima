@@ -10,6 +10,7 @@ interface PolygonState {
   hoveredPolygonId: string | null;
   selectedPolygonId: string | null;
   landOwners: Record<string, string>; // Map of land ID to owner
+  users: Record<string, any>; // Map of username to user data
   
   // Actions
   setPolygons: (polygons: Polygon[]) => void;
@@ -21,6 +22,7 @@ interface PolygonState {
   setSelectedPolygonId: (id: string | null) => void;
   loadPolygons: () => Promise<void>;
   loadLandOwners: () => Promise<void>;
+  loadUsers: () => Promise<void>;
 }
 
 const usePolygonStore = create<PolygonState>((set, get) => ({
@@ -32,6 +34,7 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
   hoveredPolygonId: null,
   selectedPolygonId: null,
   landOwners: {},
+  users: {},
   
   setPolygons: (polygons) => set({ polygons }),
   setLoading: (loading) => set({ loading }),
@@ -214,6 +217,72 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
       }
     } catch (error) {
       console.error('Error loading land owners:', error);
+    }
+  },
+  
+  loadUsers: async () => {
+    try {
+      console.log('Loading users data...');
+      
+      // Create a cache key based on timestamp (cache for 5 minutes)
+      const cacheKey = 'users_cache';
+      const cacheTimestampKey = 'users_cache_timestamp';
+      const currentTime = Date.now();
+      const cacheTime = 5 * 60 * 1000; // 5 minutes in milliseconds
+      
+      // Check if we have cached data
+      const cachedTimestamp = localStorage.getItem(cacheTimestampKey);
+      const isCacheValid = cachedTimestamp && (currentTime - parseInt(cachedTimestamp)) < cacheTime;
+      
+      let data;
+      
+      if (isCacheValid) {
+        // Use cached data
+        const cachedData = localStorage.getItem(cacheKey);
+        if (cachedData) {
+          console.log('Using cached users data');
+          data = JSON.parse(cachedData);
+        }
+      }
+      
+      // If no valid cache, fetch from API
+      if (!data) {
+        console.log('Fetching fresh users data from API');
+        const response = await fetch('/api/get-all-users');
+        
+        if (!response.ok) {
+          throw new Error(`Failed to fetch users: ${response.status}`);
+        }
+        
+        data = await response.json();
+        
+        // Cache the response
+        localStorage.setItem(cacheKey, JSON.stringify(data));
+        localStorage.setItem(cacheTimestampKey, currentTime.toString());
+      }
+      
+      if (data.success && data.users) {
+        // Create a map of username to user data
+        const usersMap = {};
+        
+        data.users.forEach(user => {
+          if (user.user_name) {
+            usersMap[user.user_name] = user;
+            
+            // Also map by wallet address if available
+            if (user.wallet_address) {
+              usersMap[user.wallet_address] = user;
+            }
+          }
+        });
+        
+        console.log('Processed users map with', Object.keys(usersMap).length, 'entries');
+        set({ users: usersMap });
+      } else {
+        console.error('Invalid response format from users API');
+      }
+    } catch (error) {
+      console.error('Error loading users:', error);
     }
   }
 }));

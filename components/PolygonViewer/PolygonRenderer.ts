@@ -17,6 +17,7 @@ interface PolygonRendererProps {
   activeView: ViewMode;
   performanceMode: boolean;
   polygonMeshesRef: MutableRefObject<Record<string, THREE.Mesh>>;
+  users?: Record<string, any>; // Add this
 }
 
 export default class PolygonRenderer {
@@ -50,7 +51,8 @@ export default class PolygonRenderer {
     bounds,
     activeView,
     performanceMode,
-    polygonMeshesRef
+    polygonMeshesRef,
+    users
   }: PolygonRendererProps) {
     this.scene = scene;
     this.camera = camera;
@@ -59,6 +61,16 @@ export default class PolygonRenderer {
     this.activeView = activeView;
     this.performanceMode = performanceMode;
     this.polygonMeshesRef = polygonMeshesRef;
+    
+    // Process users data to create coat of arms map
+    if (users) {
+      Object.values(users).forEach(user => {
+        if (user.user_name && user.coat_of_arms_image) {
+          this.ownerCoatOfArmsMap[user.user_name] = user.coat_of_arms_image;
+        }
+      });
+      console.log(`Processed ${Object.keys(this.ownerCoatOfArmsMap).length} coat of arms from users data`);
+    }
     
     // Use shared texture loader or create one if it doesn't exist
     if (!PolygonRenderer.sharedTextureLoader) {

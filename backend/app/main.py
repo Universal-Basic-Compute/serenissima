@@ -989,6 +989,38 @@ async def get_users_coat_of_arms():
         traceback.print_exc(file=sys.stdout)
         raise HTTPException(status_code=500, detail=error_msg)
 
+@app.get("/api/users")
+async def get_users():
+    """Get all users with their data"""
+    
+    try:
+        print("Fetching all users from Airtable...")
+        # Fetch all records from the USERS table
+        records = users_table.all()
+        
+        # Format the response
+        users = []
+        for record in records:
+            fields = record['fields']
+            user_data = {
+                'user_name': fields.get('Username', ''),
+                'first_name': fields.get('FirstName', ''),
+                'last_name': fields.get('LastName', ''),
+                'wallet_address': fields.get('Wallet', ''),
+                'compute_amount': fields.get('ComputeAmount', 0),
+                'family_motto': fields.get('FamilyMotto', ''),
+                'coat_of_arms_image': fields.get('CoatOfArmsImage', '')
+            }
+            users.append(user_data)
+        
+        print(f"Found {len(users)} user records")
+        return users
+    except Exception as e:
+        error_msg = f"Error fetching users: {str(e)}"
+        print(f"ERROR: {error_msg}")
+        traceback.print_exc(file=sys.stdout)
+        raise HTTPException(status_code=500, detail=error_msg)
+
 @app.post("/api/transaction/{transaction_id}/cancel")
 async def cancel_transaction(transaction_id: str, data: dict):
     """Cancel a transaction"""
