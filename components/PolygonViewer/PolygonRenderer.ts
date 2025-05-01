@@ -341,15 +341,10 @@ export default class PolygonRenderer {
               }
               
               // Add this line to set a consistent render order based on polygon ID:
-              const renderOrderBase = 10; // Base value to ensure it's above water
+              const renderOrderBase = 20; // Base value to ensure it's above water
               const renderOrderOffset = parseInt(polygon.id.replace(/\D/g, '')) % 100 || 0; // Get a stable number from the ID
               const mesh = polygonMesh.getMesh();
               if (mesh) {
-                mesh.renderOrder = renderOrderBase + renderOrderOffset;
-                
-                // Set a consistent render order for all polygons based on their ID
-                // This ensures deterministic rendering order and prevents flickering edges
-                const renderOrderBase = 20; // Increased from 15 to 20 for better layering
                 mesh.renderOrder = renderOrderBase;
               }
             
