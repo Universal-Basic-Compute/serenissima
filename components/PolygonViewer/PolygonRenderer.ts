@@ -399,7 +399,7 @@ export default class PolygonRenderer {
       ownerColor = this.users[polygon.owner].color;
     }
     
-    // Apply the circular mask with the owner's color
+    // Always apply the circular mask with the owner's color
     const circularTexture = this.createCircularTexture(texture, ownerColor);
     
     const material = new THREE.SpriteMaterial({ 
@@ -424,8 +424,8 @@ export default class PolygonRenderer {
     // Position much closer to the ground - change from 10 to 1
     sprite.position.set(normalizedCoords.x, 1, -normalizedCoords.y);
     
-    // Keep the sprite size the same
-    sprite.scale.set(2.4, 2.4, 1);
+    // Make sprites 2 times smaller (change from 2.4 to 1.2)
+    sprite.scale.set(1.2, 1.2, 1);
     
     // Add to scene and store reference
     this.scene.add(sprite);
