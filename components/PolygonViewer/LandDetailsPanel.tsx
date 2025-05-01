@@ -267,8 +267,8 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
                 // Display purchase option if the user is not the buyer
                 <>
                   <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">For Sale</h3>
-                  <p className="text-2xl font-semibold text-green-600 text-center">
-                    {transaction.price.toLocaleString()} <span className="text-sm">⚜️ ducats</span>
+                  <p className="text-2xl font-semibold text-center">
+                    <span style={{ color: '#d4af37' }}>{transaction.price.toLocaleString()}</span> <span className="text-sm">⚜️ ducats</span>
                   </p>
                   
                   {/* Add Acquire Land button with improved styling */}
