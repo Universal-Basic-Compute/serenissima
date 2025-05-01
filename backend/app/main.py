@@ -468,9 +468,20 @@ async def get_lands():
         lands = []
         for record in records:
             fields = record['fields']
+            owner = fields.get('User', '')
+            
+            # If we have an owner, try to get their username
+            owner_username = owner
+            if owner:
+                # Look up the user to get their username
+                user_formula = f"{{Wallet}}='{owner}'"
+                user_records = users_table.all(formula=user_formula)
+                if user_records:
+                    owner_username = user_records[0]['fields'].get('Username', owner)
+            
             land_data = {
                 'id': fields.get('LandId', ''),
-                'owner': fields.get('User', ''),  # Use User field instead of Wallet
+                'owner': owner_username,  # Use username instead of wallet address
                 'historicalName': fields.get('HistoricalName', ''),
                 'englishName': fields.get('EnglishName', ''),
                 'description': fields.get('Description', '')
@@ -934,6 +945,36 @@ async def generate_coat_of_arms(data: dict):
             status_code=500,
             content={"success": False, "error": error_msg}
         )
+
+@app.get("/api/users/coat-of-arms")
+async def get_users_coat_of_arms():
+    """Get all users with their coat of arms images"""
+    
+    try:
+        print("Fetching all users with coat of arms images...")
+        # Fetch all records from the USERS table
+        records = users_table.all()
+        
+        # Format the response
+        users = []
+        for record in records:
+            fields = record['fields']
+            if 'CoatOfArmsImage' in fields:
+                user_data = {
+                    'user_name': fields.get('Username', ''),
+                    'first_name': fields.get('FirstName', ''),
+                    'last_name': fields.get('LastName', ''),
+                    'coat_of_arms_image': fields.get('CoatOfArmsImage', '')
+                }
+                users.append(user_data)
+        
+        print(f"Found {len(users)} users with coat of arms images")
+        return {"success": True, "users": users}
+    except Exception as e:
+        error_msg = f"Error fetching users coat of arms: {str(e)}"
+        print(f"ERROR: {error_msg}")
+        traceback.print_exc(file=sys.stdout)
+        raise HTTPException(status_code=500, detail=error_msg)
 
 @app.post("/api/transaction/{transaction_id}/cancel")
 async def cancel_transaction(transaction_id: str, data: dict):

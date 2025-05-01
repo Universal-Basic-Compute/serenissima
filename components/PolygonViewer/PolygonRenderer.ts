@@ -32,6 +32,8 @@ export default class PolygonRenderer {
   private sandNormalMap: THREE.Texture;
   private sandRoughnessMap: THREE.Texture;
   private lodPolygons: LODPolygon[] = [];
+  private ownerCoatOfArmsMap: Record<string, string> = {}; // Map of owner to coat of arms URL
+  private coatOfArmSprites: Record<string, THREE.Sprite> = {};
 
   constructor({
     scene,
@@ -210,11 +212,66 @@ export default class PolygonRenderer {
     });
   }
   
+  public updateOwnerCoatOfArms(ownerCoatOfArmsMap: Record<string, string>) {
+    this.ownerCoatOfArmsMap = ownerCoatOfArmsMap;
+    this.updateCoatOfArmsSprites();
+  }
+
+  // Create and update coat of arms sprites
+  private updateCoatOfArmsSprites() {
+    // Remove existing sprites
+    Object.values(this.coatOfArmSprites).forEach(sprite => {
+      this.scene.remove(sprite);
+    });
+    this.coatOfArmSprites = {};
+
+    // Create new sprites for each polygon with an owner
+    this.polygons.forEach(polygon => {
+      if (polygon.owner && polygon.centroid && this.ownerCoatOfArmsMap[polygon.owner]) {
+        // Create a sprite for this owner's coat of arms
+        const texture = new THREE.TextureLoader().load(this.ownerCoatOfArmsMap[polygon.owner]);
+        const material = new THREE.SpriteMaterial({ 
+          map: texture,
+          transparent: true,
+          depthTest: true,
+          depthWrite: false,
+          sizeAttenuation: true
+        });
+        
+        const sprite = new THREE.Sprite(material);
+        
+        // Position at the centroid
+        const normalizedCoords = normalizeCoordinates(
+          [polygon.centroid],
+          this.bounds.centerLat,
+          this.bounds.centerLng,
+          this.bounds.scale,
+          this.bounds.latCorrectionFactor
+        )[0];
+        
+        sprite.position.set(normalizedCoords.x, 1.5, -normalizedCoords.y); // Slightly above the land
+        sprite.scale.set(3, 3, 1); // Adjust size as needed
+        
+        // Add to scene and store reference
+        this.scene.add(sprite);
+        this.coatOfArmSprites[polygon.id] = sprite;
+      }
+    });
+  }
+
   public cleanup() {
     // Clean up all LOD polygons
     this.lodPolygons.forEach(lodPolygon => {
       lodPolygon.cleanup();
     });
+    
+    // Clean up coat of arms sprites
+    Object.values(this.coatOfArmSprites).forEach(sprite => {
+      this.scene.remove(sprite);
+      sprite.material.dispose();
+      (sprite.material as THREE.SpriteMaterial).map?.dispose();
+    });
+    this.coatOfArmSprites = {};
     
     // Dispose of textures
     this.sandBaseColor.dispose();

@@ -93,6 +93,7 @@ export default function PolygonViewer() {
   
   // Add this to the state
   const [bridges, setBridges] = useState([]);
+  const [ownerCoatOfArmsMap, setOwnerCoatOfArmsMap] = useState<Record<string, string>>({});
 
   // Add this function to load bridges
   const loadBridges = useCallback(async () => {
@@ -104,16 +105,51 @@ export default function PolygonViewer() {
       console.error('Error loading bridges:', error);
     }
   }, []);
+  
+  // Add this function to load owner coat of arms
+  const loadOwnerCoatOfArms = useCallback(async () => {
+    try {
+      const response = await fetch('http://localhost:8000/api/users/coat-of-arms');
+      if (!response.ok) {
+        throw new Error(`Failed to fetch owner coat of arms: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log('Owner coat of arms data:', data);
+      
+      if (data.success && data.users) {
+        // Create a map of owner username to coat of arms URL
+        const coatOfArmsMap: Record<string, string> = {};
+        
+        data.users.forEach(user => {
+          if (user.user_name && user.coat_of_arms_image) {
+            coatOfArmsMap[user.user_name] = user.coat_of_arms_image;
+          }
+        });
+        
+        console.log('Processed coat of arms map:', coatOfArmsMap);
+        setOwnerCoatOfArmsMap(coatOfArmsMap);
+        
+        // Update the polygon renderer if it exists
+        if (polygonRendererRef.current) {
+          polygonRendererRef.current.updateOwnerCoatOfArms(coatOfArmsMap);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading owner coat of arms:', error);
+    }
+  }, []);
 
   // Load polygons on mount
   useEffect(() => {
-    console.log('Loading polygons and bridges...');
+    console.log('Loading polygons, bridges, and owner coat of arms...');
     loadPolygons();
     loadBridges();
+    loadOwnerCoatOfArms();
     
     // Always load land owners since land view is now the default
     loadLandOwners();
-  }, [loadPolygons, loadBridges, loadLandOwners]);
+  }, [loadPolygons, loadBridges, loadLandOwners, loadOwnerCoatOfArms]);
   
   // Add an effect to listen for polygon deletion events
   useEffect(() => {
@@ -180,6 +216,11 @@ export default function PolygonViewer() {
       polygonMeshesRef
     });
     polygonRendererRef.current = polygonRenderer;
+    
+    // Initialize with any existing coat of arms data
+    if (Object.keys(ownerCoatOfArmsMap).length > 0) {
+      polygonRenderer.updateOwnerCoatOfArms(ownerCoatOfArmsMap);
+    }
     
     // Initialize water effect
     const waterEffect = new WaterEffect({

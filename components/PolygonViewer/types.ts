@@ -15,6 +15,7 @@ export interface Polygon {
   nameConfidence?: string;
   owner?: string;
   areaInSquareMeters?: number; // Add area field
+  coatOfArmsImage?: string; // Add coat of arms image URL
 }
 
 // Add this to the existing types
