@@ -1,14 +1,10 @@
 require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
-const { Table } = require('pyairtable');
 const axios = require('axios');
 
 // Define constants
 const DATA_DIR = path.join(process.cwd(), 'data');
-const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
-const AIRTABLE_BASE_ID = process.env.AIRTABLE_BASE_ID;
-const AIRTABLE_LANDS_TABLE = "LANDS"; // The name of the table for land records
 const DEFAULT_WALLET = "GcWA4LwbGyoryPvauWkuVadi69FcEaWMmLxu4rxg7hVk";
 
 // Ensure data directory exists
@@ -40,22 +36,10 @@ function readJsonFromFile(filename) {
 async function createLandRecords() {
   console.log('Starting to create land records in Airtable...');
   
-  // Check if we have the required API keys
-  if (!AIRTABLE_API_KEY) {
-    console.error('AIRTABLE_API_KEY is not set in environment variables');
-    process.exit(1);
-  }
-
-  if (!AIRTABLE_BASE_ID) {
-    console.error('AIRTABLE_BASE_ID is not set in environment variables');
-    process.exit(1);
-  }
-  
   // Get all polygon files
   const files = getAllJsonFiles();
   console.log(`Found ${files.length} polygon files`);
   
-  // Create Airtable client
   try {
     // We'll use the backend API to create records
     let createdCount = 0;
