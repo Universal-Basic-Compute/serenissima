@@ -336,16 +336,15 @@ const MarketPanel: React.FC<MarketPanelProps> = ({ visible, onClose }) => {
           </div>
         )}
         
-        {/* Transactions Grid */}
-        {!loading && !error && filteredTransactions.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredTransactions.map(transaction => (
-              <div key={transaction.id} className="bg-white rounded-lg shadow-md overflow-hidden border border-amber-200 hover:shadow-lg transition-shadow">
-                {/* Header with type and date */}
-                <div className="bg-amber-100 px-4 py-2 flex justify-between items-center">
-                  <span className="text-amber-800 font-medium capitalize">{transaction.type}</span>
-                  <span className="text-amber-600 text-sm">{new Date(transaction.created_at).toLocaleDateString()}</span>
-                </div>
+        {/* Add the Land Details Panel */}
+        <LandDetailsPanel 
+          selectedPolygonId={selectedPolygonId} 
+          onClose={handleCloseLandDetails}
+          polygons={polygons}
+          landOwners={landOwners}
+          visible={activeView === 'land'} // Pass visibility as a prop instead
+          preventAutoClose={true} // Add this prop to prevent auto-closing after purchase
+        />
                 
                 {/* Main content */}
                 <div className="p-4">
