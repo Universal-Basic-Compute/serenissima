@@ -192,16 +192,13 @@ export default function Home() {
   };
 
   const handleUsernameSubmit = async () => {
-    // Combine names to create the username
-    const fullUsername = `${firstName} ${lastName}`;
-    
     if (!firstName.trim() || !lastName.trim() || !walletAddress) {
       alert('Please enter both first and last name');
       return;
     }
     
     try {
-      // Update the user record with the username, coat of arms, family motto, and image URL
+      // Update the user record with the first name, last name, coat of arms, family motto, and image URL
       const response = await fetch('http://localhost:8000/api/wallet', {
         method: 'POST',
         headers: {
@@ -209,7 +206,9 @@ export default function Home() {
         },
         body: JSON.stringify({
           wallet_address: walletAddress,
-          user_name: fullUsername.trim(),
+          user_name: `${firstName.trim()} ${lastName.trim()}`,  // Keep this for backward compatibility
+          first_name: firstName.trim(),
+          last_name: lastName.trim(),
           family_coat_of_arms: familyCoatOfArms.trim(),
           family_motto: familyMotto.trim(),
           coat_of_arms_image: coatOfArmsImage

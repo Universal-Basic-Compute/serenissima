@@ -80,6 +80,8 @@ class WalletRequest(BaseModel):
     wallet_address: str
     compute_amount: float = None
     user_name: str = None
+    first_name: str = None  # Add this field
+    last_name: str = None   # Add this field
     email: str = None
     family_coat_of_arms: str = None
     family_motto: str = None
@@ -91,6 +93,8 @@ class WalletResponse(BaseModel):
     wallet_address: str
     compute_amount: float = None
     user_name: str = None
+    first_name: str = None  # Add this field
+    last_name: str = None   # Add this field
     email: str = None
     family_coat_of_arms: str = None
     family_motto: str = None
@@ -164,6 +168,8 @@ async def store_wallet(wallet_data: WalletRequest):
                 "wallet_address": record["fields"].get("Wallet", ""),
                 "compute_amount": record["fields"].get("ComputeAmount", 0),
                 "user_name": record["fields"].get("Username", None),
+                "first_name": record["fields"].get("FirstName", None),
+                "last_name": record["fields"].get("LastName", None),
                 "email": record["fields"].get("Email", None),
                 "family_coat_of_arms": record["fields"].get("FamilyCoatOfArms", None),
                 "family_motto": record["fields"].get("FamilyMotto", None),
@@ -181,6 +187,12 @@ async def store_wallet(wallet_data: WalletRequest):
         if wallet_data.user_name:
             fields["Username"] = wallet_data.user_name
             
+        if wallet_data.first_name:
+            fields["FirstName"] = wallet_data.first_name
+            
+        if wallet_data.last_name:
+            fields["LastName"] = wallet_data.last_name
+            
         if wallet_data.email:
             fields["Email"] = wallet_data.email
             
@@ -189,9 +201,6 @@ async def store_wallet(wallet_data: WalletRequest):
             
         if wallet_data.family_motto:
             fields["FamilyMotto"] = wallet_data.family_motto
-            
-        if wallet_data.coat_of_arms_image:
-            fields["CoatOfArmsImage"] = wallet_data.coat_of_arms_image
             
         if wallet_data.coat_of_arms_image:
             fields["CoatOfArmsImage"] = wallet_data.coat_of_arms_image
@@ -205,6 +214,8 @@ async def store_wallet(wallet_data: WalletRequest):
             "wallet_address": record["fields"].get("Wallet", ""),
             "compute_amount": record["fields"].get("ComputeAmount", 0),
             "user_name": record["fields"].get("Username", None),
+            "first_name": record["fields"].get("FirstName", None),
+            "last_name": record["fields"].get("LastName", None),
             "email": record["fields"].get("Email", None),
             "family_coat_of_arms": record["fields"].get("FamilyCoatOfArms", None),
             "family_motto": record["fields"].get("FamilyMotto", None),
@@ -235,8 +246,11 @@ async def get_wallet(wallet_address: str):
             "wallet_address": record["fields"].get("Wallet", ""),
             "compute_amount": record["fields"].get("ComputeAmount", 0),
             "user_name": record["fields"].get("Username", None),
+            "first_name": record["fields"].get("FirstName", None),
+            "last_name": record["fields"].get("LastName", None),
             "email": record["fields"].get("Email", None),
             "family_coat_of_arms": record["fields"].get("FamilyCoatOfArms", None),
+            "family_motto": record["fields"].get("FamilyMotto", None),
             "coat_of_arms_image": record["fields"].get("CoatOfArmsImage", None)
         }
     except HTTPException:
