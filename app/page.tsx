@@ -544,7 +544,47 @@ export default function Home() {
       
       console.log(`Initiating withdrawal of ${amount.toLocaleString()} ducats...`);
       
-      // Call the backend API to withdraw compute using Solana
+      // Try the direct API route first
+      try {
+        const response = await fetch('/api/withdraw-compute', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            wallet_address: walletAddress,
+            compute_amount: amount,
+          }),
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Compute withdrawal successful:', data);
+          
+          // Update the user profile with the new compute amount
+          if (userProfile) {
+            const updatedProfile = {
+              ...userProfile,
+              computeAmount: data.compute_amount
+            };
+            setUserProfile(updatedProfile);
+            
+            // Update localStorage
+            localStorage.setItem('userProfile', JSON.stringify(updatedProfile));
+            
+            // Dispatch event to update other components
+            window.dispatchEvent(new CustomEvent('userProfileUpdated', {
+              detail: updatedProfile
+            }));
+          }
+          
+          return data;
+        }
+      } catch (directApiError) {
+        console.warn('Direct API withdrawal failed, falling back to backend API:', directApiError);
+      }
+      
+      // Fall back to the backend API
       const response = await fetch('http://localhost:8000/api/withdraw-compute-solana', {
         method: 'POST',
         headers: {
@@ -554,6 +594,8 @@ export default function Home() {
           wallet_address: walletAddress,
           compute_amount: amount,
         }),
+        // Add a timeout to prevent hanging requests
+        signal: AbortSignal.timeout(15000) // 15 second timeout
       });
       
       // Handle non-OK responses with more detailed error messages

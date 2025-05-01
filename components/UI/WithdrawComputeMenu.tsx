@@ -29,7 +29,15 @@ export default function WithdrawComputeMenu({ onClose, onWithdraw, computeAmount
     setIsProcessing(true);
     
     try {
-      await onWithdraw(withdrawAmount);
+      // Add a timeout to prevent hanging indefinitely
+      const withdrawPromise = onWithdraw(withdrawAmount);
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Withdrawal request timed out after 30 seconds')), 30000)
+      );
+      
+      // Race the withdrawal against the timeout
+      await Promise.race([withdrawPromise, timeoutPromise]);
+      
       setSuccess(`Successfully withdrew ${withdrawAmount.toLocaleString()} ducats!`);
       
       // Reset amount after successful withdrawal
@@ -41,7 +49,19 @@ export default function WithdrawComputeMenu({ onClose, onWithdraw, computeAmount
       }, 2000);
     } catch (error) {
       console.error('Error withdrawing compute:', error);
-      setError('Failed to withdraw compute. Please try again.');
+      
+      // Handle specific error messages
+      if (error.message && error.message.includes('tweetnacl')) {
+        setError('Withdrawal service is temporarily unavailable. Please try again later.');
+      } else if (error.message && error.message.includes('parse')) {
+        setError('There was an issue processing your withdrawal. The system is being updated. Please try again later.');
+      } else if (error.message && error.message.includes('Insufficient')) {
+        setError('Insufficient balance for withdrawal.');
+      } else if (error.message && error.message.includes('timeout')) {
+        setError('The withdrawal request timed out. Please try again later.');
+      } else {
+        setError(error.message || 'Failed to withdraw compute. Please try again later.');
+      }
     } finally {
       setIsProcessing(false);
     }
