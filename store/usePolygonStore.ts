@@ -57,19 +57,31 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
   loadPolygons: async () => {
     try {
       console.log('Starting to load polygons...');
+      
+      // Set loading state immediately
       set({ loading: true, error: null });
       
-      // Create a simple flag to prevent multiple simultaneous loads
-      const isAlreadyLoading = get().loading;
-      if (isAlreadyLoading) {
-        console.log('Already loading polygons, skipping duplicate request');
-        return;
-      }
+      // Create a timeout to ensure we don't get stuck in loading state
+      const loadingTimeout = setTimeout(() => {
+        console.log('Loading timeout reached, forcing completion with sample data');
+        set({
+          loading: false,
+          polygons: [{
+            id: 'sample',
+            coordinates: [
+              { lat: 0, lng: 0 },
+              { lat: 0, lng: 1 },
+              { lat: 1, lng: 1 },
+              { lat: 1, lng: 0 }
+            ]
+          }]
+        });
+      }, 10000); // 10 second timeout
       
-      // Try to load a minimal set first to show something quickly
       try {
+        // Try to load a minimal set of polygons
         console.log('Loading minimal polygon set...');
-        const response = await fetch('/api/get-polygons?limit=10');
+        const response = await fetch('/api/get-polygons?limit=5');
         
         if (!response.ok) {
           throw new Error(`Failed to fetch initial polygons: ${response.status}`);
@@ -79,9 +91,14 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
         
         if (data.polygons && data.polygons.length > 0) {
           console.log(`Loaded ${data.polygons.length} initial polygons`);
+          
+          // Clear the timeout since we have data
+          clearTimeout(loadingTimeout);
+          
+          // Set the data and exit loading state
           set({ polygons: data.polygons, loading: false });
           
-          // Don't try to load more right away - wait for the UI to stabilize
+          // Load more data in the background
           setTimeout(() => {
             console.log('Loading full polygon set in background...');
             fetch('/api/get-polygons')
@@ -94,9 +111,9 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
               })
               .catch(error => {
                 console.error('Error loading full polygon set:', error);
-                // Don't set error state or loading=false here since we already have some data
+                // Don't change loading state since we already have data
               });
-          }, 5000); // Wait 5 seconds before loading more
+          }, 2000); // Reduced from 5000ms to 2000ms
           
           return;
         }
@@ -107,6 +124,10 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
       
       // If we get here, we couldn't load any real data, so show a sample polygon
       console.log('Using sample polygon as fallback');
+      
+      // Clear the timeout since we're manually setting the state
+      clearTimeout(loadingTimeout);
+      
       set({
         polygons: [{
           id: 'sample',
@@ -122,6 +143,7 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
       
     } catch (error) {
       console.error('Error in loadPolygons:', error);
+      
       // Ensure we always set loading to false to prevent getting stuck
       set({ 
         loading: false,
