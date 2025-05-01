@@ -142,6 +142,9 @@ export default function PolygonViewer() {
     }
   }, []);
 
+  // Create a reference for the web worker
+  const geometryWorker = useRef<Worker | null>(null);
+  
   // Load polygons on mount with progressive loading
   useEffect(() => {
     console.log('Starting progressive loading...');
@@ -183,87 +186,84 @@ export default function PolygonViewer() {
       }
     }, 3000);
     
-    // Use a reference for the web worker to ensure proper cleanup
-    const geometryWorker = useRef<Worker | null>(null);
-    
-    // Initialize the worker only once
-    useEffect(() => {
-      // Clean up any existing worker
-      if (geometryWorker.current) {
-        geometryWorker.current.terminate();
-      }
-      
-      // Create a new worker
-      geometryWorker.current = new Worker('/workers/geometryWorker.js');
-      
-      // Set up message handler
-      geometryWorker.current.onmessage = function(e) {
-        if (e.data.type === 'centroidsCalculated') {
-          // Update centroids in store
-          const centroids = e.data.results;
-          console.log(`Received ${centroids.length} calculated centroids from worker`);
-          
-          // Update polygons with calculated centroids
-          const updatedPolygons = polygons.map(polygon => {
-            const calculatedCentroid = centroids.find(c => c.id === polygon.id);
-            if (calculatedCentroid && !polygon.centroid) {
-              return {
-                ...polygon,
-                centroid: calculatedCentroid.centroid
-              };
-            }
-            return polygon;
-          });
-          
-          // Update store with new centroids
-          usePolygonStore.setState({ polygons: updatedPolygons });
-        }
-      };
-      
-      // Clean up worker on component unmount
-      return () => {
-        if (geometryWorker.current) {
-          geometryWorker.current.terminate();
-          geometryWorker.current = null;
-        }
-      };
-    }, []);
-    
-    // Send polygons to worker in smaller batches
-    useEffect(() => {
-      if (geometryWorker.current && polygons.length > 0) {
-        // Only process polygons without centroids
-        const polygonsWithoutCentroids = polygons.filter(p => !p.centroid);
-        
-        if (polygonsWithoutCentroids.length > 0) {
-          console.log(`Sending ${polygonsWithoutCentroids.length} polygons to worker for centroid calculation`);
-          
-          // Process in smaller batches to prevent worker overload
-          const batchSize = 20;
-          for (let i = 0; i < polygonsWithoutCentroids.length; i += batchSize) {
-            const batch = polygonsWithoutCentroids.slice(i, i + batchSize);
-            
-            // Add a small delay between batches
-            setTimeout(() => {
-              if (geometryWorker.current) {
-                geometryWorker.current.postMessage({
-                  type: 'calculateCentroids',
-                  data: { polygons: batch }
-                });
-              }
-            }, i * 50); // 50ms delay between batches
-          }
-        }
-      }
-    }, [polygons]);
-    
     return () => {
       clearTimeout(loadSecondaryData);
       clearTimeout(loadTertiaryData);
       clearTimeout(loadQuaternaryData);
       clearTimeout(loadCoatOfArms);
     };
-  }, [loadPolygons, loadBridges, loadLandOwners, loadUsers, polygons.length]);
+  }, [loadPolygons, loadBridges, loadLandOwners, loadUsers, polygons.length, users]);
+  
+  // Initialize the worker only once
+  useEffect(() => {
+    // Clean up any existing worker
+    if (geometryWorker.current) {
+      geometryWorker.current.terminate();
+    }
+    
+    // Create a new worker
+    geometryWorker.current = new Worker('/workers/geometryWorker.js');
+    
+    // Set up message handler
+    geometryWorker.current.onmessage = function(e) {
+      if (e.data.type === 'centroidsCalculated') {
+        // Update centroids in store
+        const centroids = e.data.results;
+        console.log(`Received ${centroids.length} calculated centroids from worker`);
+        
+        // Update polygons with calculated centroids
+        const updatedPolygons = polygons.map(polygon => {
+          const calculatedCentroid = centroids.find(c => c.id === polygon.id);
+          if (calculatedCentroid && !polygon.centroid) {
+            return {
+              ...polygon,
+              centroid: calculatedCentroid.centroid
+            };
+          }
+          return polygon;
+        });
+        
+        // Update store with new centroids
+        usePolygonStore.setState({ polygons: updatedPolygons });
+      }
+    };
+    
+    // Clean up worker on component unmount
+    return () => {
+      if (geometryWorker.current) {
+        geometryWorker.current.terminate();
+        geometryWorker.current = null;
+      }
+    };
+  }, []);
+  
+  // Send polygons to worker in smaller batches
+  useEffect(() => {
+    if (geometryWorker.current && polygons.length > 0) {
+      // Only process polygons without centroids
+      const polygonsWithoutCentroids = polygons.filter(p => !p.centroid);
+      
+      if (polygonsWithoutCentroids.length > 0) {
+        console.log(`Sending ${polygonsWithoutCentroids.length} polygons to worker for centroid calculation`);
+        
+        // Process in smaller batches to prevent worker overload
+        const batchSize = 20;
+        for (let i = 0; i < polygonsWithoutCentroids.length; i += batchSize) {
+          const batch = polygonsWithoutCentroids.slice(i, i + batchSize);
+          
+          // Add a small delay between batches
+          setTimeout(() => {
+            if (geometryWorker.current) {
+              geometryWorker.current.postMessage({
+                type: 'calculateCentroids',
+                data: { polygons: batch }
+              });
+            }
+          }, i * 50); // 50ms delay between batches
+        }
+      }
+    }
+  }, [polygons]);
   
   // Add a separate useEffect to update the renderer when coat of arms data changes
   useEffect(() => {
