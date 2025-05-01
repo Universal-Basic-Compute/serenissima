@@ -38,62 +38,6 @@ export default class PolygonRenderer {
   
   // Add a method to create a sprite for the coat of arms
   // Add method to create a sprite for the coat of arms
-  private createCoatOfArmsSprite(coatOfArmsUrl: string) {
-    // Remove any existing sprite
-    if (this.coatOfArmsSprite) {
-      this.scene.remove(this.coatOfArmsSprite);
-      (this.coatOfArmsSprite.material as THREE.SpriteMaterial).map?.dispose();
-      (this.coatOfArmsSprite.material as THREE.SpriteMaterial).dispose();
-    }
-    
-    // Load the texture for the sprite
-    this.textureLoader.load(
-      coatOfArmsUrl,
-      (texture) => {
-        // Create a sprite material with the texture
-        const spriteMaterial = new THREE.SpriteMaterial({ 
-          map: texture,
-          color: this.ownerColor ? new THREE.Color(this.ownerColor) : new THREE.Color(0xffffff),
-          transparent: true,
-          depthTest: false // Ensure visibility
-        });
-        
-        // Create a sprite
-        this.coatOfArmsSprite = new THREE.Sprite(spriteMaterial);
-        
-        // Position the sprite at the center of the polygon, slightly above it
-        if (this.polygon.centroid) {
-          const normalizedCoords = normalizeCoordinates(
-            [this.polygon.centroid],
-            this.bounds.centerLat,
-            this.bounds.centerLng,
-            this.bounds.scale,
-            this.bounds.latCorrectionFactor
-          )[0];
-            
-          this.coatOfArmsSprite.position.set(normalizedCoords.x, 0.5, -normalizedCoords.y);
-        } else {
-          // If no centroid, use a default position
-          const center = new THREE.Vector3(0, 0.5, 0);
-          this.coatOfArmsSprite.position.copy(center);
-        }
-        
-        // Scale the sprite to cover most of the land
-        const size = 3; // Adjust based on your scene scale
-        this.coatOfArmsSprite.scale.set(size, size, 1);
-        
-        // Only show in land view
-        this.coatOfArmsSprite.visible = this.activeView === 'land';
-        
-        // Add to scene
-        this.scene.add(this.coatOfArmsSprite);
-      },
-      undefined,
-      (error) => {
-        console.error('Error loading coat of arms sprite texture:', error);
-      }
-    );
-  }
   private coatOfArmSprites: Record<string, THREE.Object3D | THREE.Mesh> = {};
   private ownerColorMap: Record<string, string> = {}; // Map of owner to color
   private users: Record<string, any> = {}; // Store users data
