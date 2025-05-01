@@ -291,48 +291,6 @@ export class LODPolygon {
     this.removeBottomFaces(geometry);
   }
 
-  public updateViewMode(activeView: ViewMode) {
-    this.activeView = activeView;
-    
-    // Apply visual changes to both high and low detail meshes
-    const meshes = [this.highDetailMesh, this.lowDetailMesh].filter(Boolean);
-    
-    meshes.forEach(mesh => {
-      if (!mesh) return;
-      
-      const material = mesh.material as THREE.MeshBasicMaterial; // Changed from MeshStandardMaterial
-      
-      // Skip if material is undefined
-      if (!material) return;
-      
-      // Update material based on view mode
-      if (activeView === 'land') {
-        // For land view, use owner's color or generate one
-        if (!this.isSelected) {
-          const landColor = this.determineLandColor();
-          if (material.color) {
-            material.color.copy(landColor);
-          }
-        }
-        
-        // Only set these properties if they exist on the material
-        if ('roughness' in material) material.roughness = 0.7;
-        if ('metalness' in material) material.metalness = 0.1;
-      } else {
-        // For other views, use sand color
-        if (!this.isSelected && material.color) {
-          material.color.set('#e6d2a8');
-        }
-        
-        // Only set these properties if they exist on the material
-        if ('roughness' in material) material.roughness = 0.7;
-        if ('metalness' in material) material.metalness = 0.1;
-      }
-      
-      // Update material to apply changes
-      material.needsUpdate = true;
-    });
-  }
   
   // Alternative method using projection mapping for coat of arms
   private applyProjectionMapping(texture: THREE.Texture) {
