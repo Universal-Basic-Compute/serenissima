@@ -337,26 +337,6 @@ export default function PolygonViewer() {
       {/* View mode menu */}
       <ViewModeMenu activeView={activeView} setActiveView={setActiveView} />
 
-      {/* Info panel */}
-      <div className="absolute top-4 left-4 z-10 bg-white p-2 rounded shadow">
-        {polygons.length === 0 ? (
-          <p>No polygons found. Draw some on the map first.</p>
-        ) : (
-          <p>Found {polygons.length} polygon(s)</p>
-        )}
-      </div>
-      
-      {selectedPolygonId && (
-        <div 
-          className={`absolute top-16 left-4 z-10 bg-white p-2 rounded shadow transition-all duration-300 ${
-            infoVisible ? 'opacity-100 transform translate-y-0' : 'opacity-0 transform -translate-y-4'
-          }`}
-        >
-          <div className="flex items-center justify-between">
-            <p>Selected: {selectedPolygonId}</p>
-          </div>
-        </div>
-      )}
 
       {/* Add the Land Details Panel */}
       {activeView === 'land' && (
