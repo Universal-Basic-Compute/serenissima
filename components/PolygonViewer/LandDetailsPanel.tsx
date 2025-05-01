@@ -225,12 +225,20 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
                       }),
                     });
                     
+                    // Parse the response data regardless of status
+                    const data = await response.json();
+                    
                     if (!response.ok) {
-                      const errorData = await response.json();
-                      throw new Error(errorData.detail || 'Failed to execute transaction');
+                      // Check if this is a "transaction already executed" error
+                      if (data.detail && data.detail.includes("already executed")) {
+                        alert(`This land has already been acquired. The page will refresh to show the current owner.`);
+                        window.location.reload();
+                        return;
+                      }
+                      
+                      throw new Error(data.detail || 'Failed to execute transaction');
                     }
                     
-                    const data = await response.json();
                     alert(`Successfully acquired ${selectedPolygon?.historicalName || selectedPolygonId}`);
                     // Refresh the page to update the UI
                     window.location.reload();
