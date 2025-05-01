@@ -245,6 +245,9 @@ async def store_wallet(wallet_data: WalletRequest):
         if wallet_data.coat_of_arms_image:
             fields["CoatOfArmsImage"] = wallet_data.coat_of_arms_image
         
+        # Always include color field if provided, even if null/empty
+        if wallet_data.color is not None:
+            fields["Color"] = wallet_data.color
         print(f"Creating new wallet record with fields: {fields}")
         # Print the actual values for debugging
         print(f"First Name: '{wallet_data.first_name}'")
