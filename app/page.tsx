@@ -448,71 +448,47 @@ export default function Home() {
         return;
       }
       
-      // Check if wallet adapter is connected
-      if (!walletAdapter || !walletAdapter.connected) {
-        console.log('Wallet adapter not connected, attempting to reconnect...');
-        
-        // Try to reconnect the wallet
-        if (walletAdapter && walletAdapter.readyState === WalletReadyState.Installed) {
-          try {
-            await walletAdapter.connect();
-            console.log('Wallet reconnected successfully');
-          } catch (error) {
-            console.error('Failed to reconnect wallet:', error);
-            alert('Please reconnect your wallet to continue');
-            return;
-          }
-        } else {
-          alert('Please connect your wallet first');
-          return;
-        }
+      // Call the backend API to transfer compute using Solana
+      const response = await fetch('http://localhost:8000/api/transfer-compute-solana', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          wallet_address: walletAddress,
+          compute_amount: amount,
+        }),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to transfer compute');
       }
       
-      // Verify the wallet is now connected
-      if (!walletAdapter.connected) {
-        alert('Wallet connection is required to transfer compute');
-        return;
+      const data = await response.json();
+      console.log('Compute transfer successful:', data);
+      
+      // Update the user profile with the new compute amount
+      if (userProfile) {
+        const updatedProfile = {
+          ...userProfile,
+          computeAmount: data.compute_amount
+        };
+        setUserProfile(updatedProfile);
+        
+        // Update localStorage
+        localStorage.setItem('userProfile', JSON.stringify(updatedProfile));
+        
+        // Dispatch event to update other components
+        window.dispatchEvent(new CustomEvent('userProfileUpdated', {
+          detail: updatedProfile
+        }));
       }
       
-      try {
-        // First, transfer the tokens on Solana using Phantom wallet
-        console.log(`Initiating blockchain transfer of ${amount.toLocaleString()} COMPUTE tokens...`);
-        const signature = await transferComputeTokens(walletAdapter, amount);
-        console.log('Token transfer successful:', signature);
-        
-        // Then, update the compute amount in Airtable with a timeout
-        console.log('Updating database record...');
-        const airtablePromise = transferComputeInAirtable(walletAddress, amount);
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Database update timed out after 15 seconds')), 15000)
-        );
-        
-        try {
-          // Race the Airtable update against the timeout
-          const airtableResponse = await Promise.race([airtablePromise, timeoutPromise]);
-          console.log('Airtable update successful:', airtableResponse);
-          
-          alert(`Successfully transferred ${amount.toLocaleString()} compute tokens!`);
-          return airtableResponse;
-        } catch (dbError) {
-          console.error('Error updating database:', dbError);
-          
-          // Still consider it a partial success since the blockchain transfer worked
-          alert(`Tokens transferred on blockchain, but database update failed. Please try refreshing the page. Error: ${dbError.message}`);
-          
-          // Return a partial success response
-          return {
-            partial_success: true,
-            blockchain_signature: signature,
-            error: dbError.message
-          };
-        }
-      } catch (blockchainError) {
-        console.error('Error transferring tokens on blockchain:', blockchainError);
-        throw new Error(`Failed to transfer tokens on blockchain: ${blockchainError.message}`);
-      }
+      alert(`Successfully transferred ${amount.toLocaleString()} $COMPUTE tokens to your wallet!\nTransaction signature: ${data.transaction_signature?.slice(0, 10)}...`);
+      return data;
     } catch (error) {
-      console.error('Error in transfer process:', error);
+      console.error('Error transferring compute:', error);
       alert(`Failed to transfer compute: ${error.message}`);
       throw error;
     }
@@ -531,8 +507,8 @@ export default function Home() {
       
       console.log(`Initiating withdrawal of ${amount.toLocaleString()} ducats...`);
       
-      // Call the backend API to withdraw compute
-      const response = await fetch('http://localhost:8000/api/withdraw-compute', {
+      // Call the backend API to withdraw compute using Solana
+      const response = await fetch('http://localhost:8000/api/withdraw-compute-solana', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -557,7 +533,7 @@ export default function Home() {
       if (userProfile) {
         const updatedProfile = {
           ...userProfile,
-          computeAmount: data.compute_amount || ((userProfile.computeAmount || 0) - amount)
+          computeAmount: data.compute_amount
         };
         setUserProfile(updatedProfile);
         

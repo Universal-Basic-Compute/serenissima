@@ -1103,6 +1103,203 @@ async def generate_coat_of_arms(data: dict):
             content={"success": False, "error": error_msg}
         )
 
+@app.post("/api/transfer-compute-solana")
+async def transfer_compute_solana(wallet_data: WalletRequest):
+    """Transfer compute resources for a wallet using Solana blockchain"""
+    
+    if not wallet_data.wallet_address:
+        raise HTTPException(status_code=400, detail="Wallet address is required")
+    
+    if wallet_data.compute_amount is None or wallet_data.compute_amount <= 0:
+        raise HTTPException(status_code=400, detail="Compute amount must be greater than 0")
+    
+    try:
+        # Check if wallet exists
+        formula = f"{{Wallet}}='{wallet_data.wallet_address}'"
+        print(f"Searching for wallet with formula: {formula}")
+        existing_records = users_table.all(formula=formula)
+        
+        # Log the incoming amount for debugging
+        print(f"Received compute transfer request: {wallet_data.compute_amount} COMPUTE")
+        
+        # Use the full amount without any conversion
+        transfer_amount = wallet_data.compute_amount
+        
+        # Call the Node.js script to perform the Solana transfer
+        # This is a simplified example - in a real implementation, you would use a more robust approach
+        import subprocess
+        import json
+        
+        # Create a temporary JSON file with the transfer details
+        transfer_data = {
+            "recipient": wallet_data.wallet_address,
+            "amount": transfer_amount
+        }
+        
+        with open("transfer_data.json", "w") as f:
+            json.dump(transfer_data, f)
+        
+        # Call the Node.js script to perform the transfer
+        result = subprocess.run(
+            ["node", "scripts/transfer-compute.js"],
+            capture_output=True,
+            text=True
+        )
+        
+        if result.returncode != 0:
+            print(f"Error executing Solana transfer: {result.stderr}")
+            raise HTTPException(status_code=500, detail=f"Failed to execute Solana transfer: {result.stderr}")
+        
+        # Parse the result to get the transaction signature
+        try:
+            transfer_result = json.loads(result.stdout)
+            signature = transfer_result.get("signature")
+            print(f"Solana transfer successful: {signature}")
+        except json.JSONDecodeError:
+            print(f"Error parsing transfer result: {result.stdout}")
+            signature = None
+        
+        if existing_records:
+            # Update existing record
+            record = existing_records[0]
+            current_amount = record["fields"].get("ComputeAmount", 0)
+            new_amount = current_amount + transfer_amount
+            
+            print(f"Updating wallet {record['id']} compute amount from {current_amount} to {new_amount}")
+            updated_record = users_table.update(record["id"], {
+                "ComputeAmount": new_amount
+            })
+            
+            return {
+                "id": updated_record["id"],
+                "wallet_address": updated_record["fields"].get("Wallet", ""),
+                "compute_amount": updated_record["fields"].get("ComputeAmount", 0),
+                "user_name": updated_record["fields"].get("Username", None),
+                "email": updated_record["fields"].get("Email", None),
+                "family_motto": updated_record["fields"].get("FamilyMotto", None),
+                "coat_of_arms_image": updated_record["fields"].get("CoatOfArmsImage", None),
+                "transaction_signature": signature
+            }
+        else:
+            # Create new record
+            print(f"Creating new wallet record with compute amount {transfer_amount}")
+            record = users_table.create({
+                "Wallet": wallet_data.wallet_address,
+                "ComputeAmount": transfer_amount
+            })
+            
+            return {
+                "id": record["id"],
+                "wallet_address": record["fields"].get("Wallet", ""),
+                "compute_amount": record["fields"].get("ComputeAmount", 0),
+                "user_name": record["fields"].get("Username", None),
+                "email": record["fields"].get("Email", None),
+                "family_motto": record["fields"].get("FamilyMotto", None),
+                "transaction_signature": signature
+            }
+    except HTTPException:
+        raise
+    except Exception as e:
+        error_msg = f"Failed to transfer compute: {str(e)}"
+        print(f"ERROR: {error_msg}")
+        traceback.print_exc(file=sys.stdout)
+        raise HTTPException(status_code=500, detail=error_msg)
+
+@app.post("/api/withdraw-compute-solana")
+async def withdraw_compute_solana(wallet_data: WalletRequest):
+    """Withdraw compute resources from a wallet using Solana blockchain"""
+    
+    if not wallet_data.wallet_address:
+        raise HTTPException(status_code=400, detail="Wallet address is required")
+    
+    if wallet_data.compute_amount is None or wallet_data.compute_amount <= 0:
+        raise HTTPException(status_code=400, detail="Compute amount must be greater than 0")
+    
+    try:
+        # Check if wallet exists
+        formula = f"{{Wallet}}='{wallet_data.wallet_address}'"
+        print(f"Searching for wallet with formula: {formula}")
+        existing_records = users_table.all(formula=formula)
+        
+        if not existing_records:
+            raise HTTPException(status_code=404, detail="Wallet not found")
+        
+        # Get current compute amount
+        record = existing_records[0]
+        current_amount = record["fields"].get("ComputeAmount", 0)
+        
+        # Check if user has enough compute to withdraw
+        if current_amount < wallet_data.compute_amount:
+            raise HTTPException(status_code=400, detail="Insufficient compute balance")
+        
+        # Calculate new amount
+        new_amount = current_amount - wallet_data.compute_amount
+        
+        # Call the Node.js script to perform the Solana transfer
+        import subprocess
+        import json
+        
+        # Create a temporary JSON file with the transfer details
+        transfer_data = {
+            "user": wallet_data.wallet_address,
+            "amount": wallet_data.compute_amount
+        }
+        
+        with open("withdraw_data.json", "w") as f:
+            json.dump(transfer_data, f)
+        
+        # Call the Node.js script to perform the withdrawal
+        result = subprocess.run(
+            ["node", "scripts/withdraw-compute.js"],
+            capture_output=True,
+            text=True
+        )
+        
+        if result.returncode != 0:
+            print(f"Error executing Solana withdrawal: {result.stderr}")
+            raise HTTPException(status_code=500, detail=f"Failed to execute Solana withdrawal: {result.stderr}")
+        
+        # Parse the result to get the transaction signature
+        try:
+            transfer_result = json.loads(result.stdout)
+            signature = transfer_result.get("signature")
+            print(f"Solana withdrawal successful: {signature}")
+        except json.JSONDecodeError:
+            print(f"Error parsing withdrawal result: {result.stdout}")
+            signature = None
+        
+        # Update the record
+        print(f"Withdrawing {wallet_data.compute_amount} compute from wallet {record['id']}")
+        print(f"Updating compute amount from {current_amount} to {new_amount}")
+        
+        updated_record = users_table.update(record["id"], {
+            "ComputeAmount": new_amount
+        })
+        
+        return {
+            "id": updated_record["id"],
+            "wallet_address": updated_record["fields"].get("Wallet", ""),
+            "compute_amount": updated_record["fields"].get("ComputeAmount", 0),
+            "user_name": updated_record["fields"].get("Username", None),
+            "email": updated_record["fields"].get("Email", None),
+            "family_motto": updated_record["fields"].get("FamilyMotto", None),
+            "coat_of_arms_image": updated_record["fields"].get("CoatOfArmsImage", None),
+            "transaction_signature": signature,
+            "transaction_details": {
+                "from_wallet": wallet_data.wallet_address,
+                "to_wallet": "Treasury",
+                "amount": wallet_data.compute_amount,
+                "status": "completed"
+            }
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        error_msg = f"Failed to withdraw compute: {str(e)}"
+        print(f"ERROR: {error_msg}")
+        traceback.print_exc(file=sys.stdout)
+        raise HTTPException(status_code=500, detail=error_msg)
+
 @app.get("/api/users/coat-of-arms")
 async def get_users_coat_of_arms():
     """Get all users with their coat of arms images"""
