@@ -211,7 +211,8 @@ export default class LODPolygon {
       if (this.ownerColor) {
         return new THREE.Color(this.ownerColor);
       } else if (this.polygon.owner) {
-        return this.generateColorFromUsername(this.polygon.owner);
+        // Instead of generating a color, use a default color
+        return new THREE.Color(0x7cac6a); // Default green color
       } else {
         return new THREE.Color(0x7cac6a);
       }
@@ -229,22 +230,6 @@ export default class LODPolygon {
     return this.mesh;
   }
   
-  // Add a method to generate a color from a username
-  private generateColorFromUsername(username: string): THREE.Color {
-    // Simple hash function to generate a number from a string
-    let hash = 0;
-    for (let i = 0; i < username.length; i++) {
-      hash = username.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    
-    // Convert the hash to a color - use a more deterministic approach
-    // Use modulo to ensure values are in 0-255 range
-    const r = Math.abs((hash & 0xFF) % 256) / 255;
-    const g = Math.abs(((hash >> 8) & 0xFF) % 256) / 255;
-    const b = Math.abs(((hash >> 16) & 0xFF) % 256) / 255;
-    
-    return new THREE.Color(r, g, b);
-  }
 
   public updateViewMode(activeView: ViewMode) {
     this.activeView = activeView;

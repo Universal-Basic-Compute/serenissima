@@ -312,6 +312,9 @@ export default class PolygonRenderer {
                   // Also store in the color map for future use
                   this.ownerColorMap[polygon.owner] = ownerColor;
                   console.log(`Found color for ${polygon.owner} in users data: ${ownerColor}`);
+                } else {
+                  // Use default color if no owner color is specified
+                  ownerColor = '#7cac6a'; // Default green color
                 }
                 
                 // Debug log for ConsiglioDeiDieci specifically
@@ -817,8 +820,10 @@ export default class PolygonRenderer {
         // Also store in the color map for future use
         this.ownerColorMap[newOwner] = ownerColor;
         console.log(`Found color for ${newOwner} in users data: ${ownerColor}`);
+      } else {
+        // Use default color if no owner color is specified
+        ownerColor = '#7cac6a'; // Default green color
       }
-      // No default color assignment here
     }
     
     // Get the owner's coat of arms URL if available
