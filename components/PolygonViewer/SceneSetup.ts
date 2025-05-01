@@ -1,7 +1,8 @@
 import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
-import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
+// Use dynamic imports with type assertions
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { ViewMode } from './types';
 import CloudSystem from './CloudSystem';
 
@@ -18,9 +19,9 @@ export default class SceneSetup {
   public controls: OrbitControls;
   public composer: EffectComposer;
   private performanceMode: boolean;
-  private sunLight: THREE.DirectionalLight;
-  private sunSphere: THREE.Mesh;
-  private sunGlow: THREE.Mesh;
+  private sunLight: THREE.DirectionalLight = new THREE.DirectionalLight();
+  private sunSphere: THREE.Mesh = new THREE.Mesh();
+  private sunGlow: THREE.Mesh = new THREE.Mesh();
   private cloudSystem: CloudSystem | null = null;
   private zoomThreshold: number = 40; // Changed from 70 to 40 - Threshold for showing clouds
   
@@ -72,7 +73,7 @@ export default class SceneSetup {
       
       // Enhance renderer settings based on performance mode
       if (!this.performanceMode) {
-        this.renderer.antialias = true;
+        (this.renderer as any).antialias = true;
         this.renderer.setPixelRatio(window.devicePixelRatio > 1 ? 2 : 1);
         this.renderer.shadowMap.enabled = false; // Keep shadows disabled even in high quality mode
         this.renderer.shadowMap.autoUpdate = false; // Explicitly disable shadow map updates
@@ -127,7 +128,7 @@ export default class SceneSetup {
     
     // Enable panning with right mouse button and rotation with middle mouse button
     this.controls.mouseButtons = {
-      LEFT: THREE.MOUSE.NONE, // No action on left click
+      LEFT: (THREE.MOUSE as any).NONE, // No action on left click
       MIDDLE: THREE.MOUSE.ROTATE, // Rotation on middle mouse button
       RIGHT: THREE.MOUSE.PAN // Panning on right mouse button (unchanged)
     };
