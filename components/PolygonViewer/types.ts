@@ -13,4 +13,5 @@ export interface Polygon {
   englishName?: string;
   historicalDescription?: string;
   nameConfidence?: string;
+  owner?: string; // Add owner field
 }

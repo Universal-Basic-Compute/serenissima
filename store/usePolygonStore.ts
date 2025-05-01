@@ -9,6 +9,7 @@ interface PolygonState {
   highQuality: boolean;
   hoveredPolygonId: string | null;
   selectedPolygonId: string | null;
+  landOwners: Record<string, string>; // Map of land ID to owner
   
   // Actions
   setPolygons: (polygons: Polygon[]) => void;
@@ -19,6 +20,7 @@ interface PolygonState {
   setHoveredPolygonId: (id: string | null) => void;
   setSelectedPolygonId: (id: string | null) => void;
   loadPolygons: () => Promise<void>;
+  loadLandOwners: () => Promise<void>;
 }
 
 const usePolygonStore = create<PolygonState>((set, get) => ({
@@ -29,6 +31,7 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
   highQuality: false,
   hoveredPolygonId: null,
   selectedPolygonId: null,
+  landOwners: {},
   
   setPolygons: (polygons) => set({ polygons }),
   setLoading: (loading) => set({ loading }),
@@ -98,6 +101,28 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
       });
     } finally {
       set({ loading: false });
+    }
+  },
+  
+  loadLandOwners: async () => {
+    try {
+      const response = await fetch('/api/get-land-owners');
+      const data = await response.json();
+      
+      if (data.success && data.lands) {
+        // Create a map of land ID to owner
+        const ownerMap = {};
+        data.lands.forEach(land => {
+          if (land.id && land.owner) {
+            ownerMap[land.id] = land.owner;
+          }
+        });
+        
+        set({ landOwners: ownerMap });
+        console.log('Loaded land owners:', ownerMap);
+      }
+    } catch (error) {
+      console.error('Error loading land owners:', error);
     }
   }
 }));

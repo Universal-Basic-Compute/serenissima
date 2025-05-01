@@ -26,11 +26,13 @@ export default function PolygonViewer() {
     activeView,
     highQuality,
     selectedPolygonId,
+    landOwners,
     setActiveView,
     toggleQuality,
     setHoveredPolygonId,
     setSelectedPolygonId,
-    loadPolygons
+    loadPolygons,
+    loadLandOwners
   } = usePolygonStore();
   
   // References to our scene components
@@ -52,7 +54,12 @@ export default function PolygonViewer() {
   // Load polygons on mount
   useEffect(() => {
     loadPolygons();
-  }, [loadPolygons]);
+    
+    // Only load land owners when in land view
+    if (activeView === 'land') {
+      loadLandOwners();
+    }
+  }, [loadPolygons, loadLandOwners, activeView]);
 
   // Update info panel visibility when selectedPolygonId changes
   useEffect(() => {
@@ -217,6 +224,11 @@ export default function PolygonViewer() {
     if (sceneRef.current) {
       console.log(`Updating view mode to ${activeView}`);
       
+      // Load land owners when switching to land view
+      if (activeView === 'land') {
+        loadLandOwners();
+      }
+      
       // Update water effect
       if (waterEffectRef.current) {
         waterEffectRef.current.updateViewMode(activeView);
@@ -232,7 +244,7 @@ export default function PolygonViewer() {
         interactionManagerRef.current.updateViewMode(activeView);
       }
     }
-  }, [activeView]);
+  }, [activeView, loadLandOwners]);
 
   // Add a separate effect to handle quality changes
   useEffect(() => {
@@ -295,6 +307,7 @@ export default function PolygonViewer() {
           selectedPolygonId={selectedPolygonId} 
           onClose={handleCloseLandDetails}
           polygons={polygons}
+          landOwners={landOwners}
         />
       )}
 

@@ -6,9 +6,10 @@ interface LandDetailsPanelProps {
   selectedPolygonId: string | null;
   onClose: () => void;
   polygons: Polygon[];
+  landOwners: Record<string, string>; // Add landOwners prop
 }
 
-export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons }: LandDetailsPanelProps) {
+export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons, landOwners }: LandDetailsPanelProps) {
   const [isVisible, setIsVisible] = useState(false);
   
   // Find the selected polygon
@@ -72,8 +73,14 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons 
           </div>
           
           <div>
-            <h3 className="text-sm font-medium text-gray-500">Status</h3>
-            <p className="mt-1">Available</p>
+            <h3 className="text-sm font-medium text-gray-500">
+              {selectedPolygonId && landOwners[selectedPolygonId] ? 'Owner' : 'Status'}
+            </h3>
+            <p className="mt-1">
+              {selectedPolygonId && landOwners[selectedPolygonId] 
+                ? landOwners[selectedPolygonId] 
+                : 'Available'}
+            </p>
           </div>
           
           {selectedPolygon?.centroid && (
