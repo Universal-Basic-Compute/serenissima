@@ -483,19 +483,19 @@ export default class LODPolygon {
       if (this.activeView === 'land') {
         // Enhance the color to create a glow effect
         material.emissive.copy(material.color);
-        material.emissiveIntensity = 0.7; // Increase from 0.5 to 0.7 for more noticeable glow
+        material.emissiveIntensity = 0.7;
         
         // Add a slight bloom effect by increasing the brightness
         const color = material.color.clone();
-        color.multiplyScalar(1.5); // Increase from 1.3 to 1.5 for brighter effect
+        color.multiplyScalar(1.5);
         material.color.copy(color);
         
         // Reduce roughness for a more shiny appearance
-        material.roughness = 0.2; // Decrease from 0.3 to 0.2 for more shine
+        material.roughness = 0.2;
         
         // IMPORTANT: Adjust the polygon's position to prevent z-fighting
-        // Move the mesh slightly up when hovered - increase this value to ensure it's always on top
-        this.highDetailMesh.position.y += 0.05; // Increase from 0.01 to 0.05
+        // Move the mesh slightly up when hovered - but not too high
+        this.highDetailMesh.position.y += 0.03; // Reduced from 0.05
         
         // Also increase the renderOrder to ensure it renders on top
         this.highDetailMesh.renderOrder = 1;
@@ -514,7 +514,7 @@ export default class LODPolygon {
         
         // IMPORTANT: Restore the original position
         // Move the mesh back to its original position
-        this.highDetailMesh.position.y -= 0.05; // Match the increase above
+        this.highDetailMesh.position.y -= 0.03; // Reduced from 0.05
         
         // Reset the renderOrder
         this.highDetailMesh.renderOrder = 0;
