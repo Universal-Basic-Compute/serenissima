@@ -332,7 +332,6 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
             </div>
           )}
 
-          <WalletStatus className="mb-2" />
           
           <div className="pt-2 flex space-x-2">
             {owner ? (
