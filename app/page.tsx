@@ -112,7 +112,7 @@ export default function Home() {
   
   // Add state for users data and active view
   const [users, setUsers] = useState<Record<string, any>>({});
-  const [activeView, setActiveView] = useState<'buildings' | 'transport' | 'land'>('land');
+  const [activeView, setActiveView] = useState<'buildings' | 'land'>('land');
   const polygonRendererRef = useRef<any>(null);
   
   // Initialize wallet adapter

@@ -1,4 +1,4 @@
-export type ViewMode = 'buildings' | 'transport' | 'land';
+export type ViewMode = 'buildings' | 'land';
 
 export interface Coordinate {
   lat: number;

@@ -376,8 +376,6 @@ export default class WaterEffect {
   
   private getWaterColorForView(): number {
     switch (this.activeView) {
-      case 'transport':
-        return 0x4ac0ff; // Bright turquoise blue
       case 'land':
         return 0x20b2aa; // Light sea green for tropical island feel
       default:

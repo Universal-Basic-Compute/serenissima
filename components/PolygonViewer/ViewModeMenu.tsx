@@ -28,19 +28,6 @@ export default function ViewModeMenu({ activeView, setActiveView }: ViewModeMenu
       </IconButton>
       
       <IconButton 
-        onClick={() => setActiveView('transport')}
-        active={activeView === 'transport'}
-        title="Transport View"
-        activeColor="amber"
-        compact={true}
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M4 10h16M8 14h8M4 18h16M9 6l-5 4 5 4M15 6l5 4-5 4"></path>
-        </svg>
-        <span className="text-[10px] mt-1">Transport</span>
-      </IconButton>
-      
-      <IconButton 
         onClick={() => setActiveView('land')}
         active={activeView === 'land'}
         title="Land View"
