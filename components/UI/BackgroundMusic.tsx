@@ -8,7 +8,7 @@ interface BackgroundMusicProps {
 }
 
 const BackgroundMusic: React.FC<BackgroundMusicProps> = ({ 
-  initialVolume = 0.3, 
+  initialVolume = 0.24, // Reduced from 0.3 to 0.24 (20% quieter)
   autoplay = true 
 }) => {
   const [isPlaying, setIsPlaying] = useState(autoplay);
@@ -213,7 +213,7 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
   };
 
   return (
-    <div className="fixed bottom-4 right-4 z-50">
+    <div className="fixed top-4 right-20 z-50"> {/* Changed from "bottom-4 right-4" to "top-4 right-20" */}
       {/* Hidden audio element */}
       <audio ref={audioRef} />
       
@@ -231,7 +231,7 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
         
         {/* Expanded controls */}
         {showControls && (
-          <div className="absolute bottom-14 right-0 bg-amber-50 p-4 rounded-lg shadow-xl border-2 border-amber-300 w-64">
+          <div className="absolute top-14 right-0 bg-amber-50 p-4 rounded-lg shadow-xl border-2 border-amber-300 w-64"> {/* Changed from "bottom-14" to "top-14" */}
             <div className="flex flex-col space-y-3">
               <div className="text-center font-medium text-amber-800 mb-1">
                 {isLoading ? 'Loading music...' : formatTrackName(currentTrack)}
