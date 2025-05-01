@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import ActionButton from '../UI/ActionButton';
+import WalletStatus from '../UI/WalletStatus';
 import { Polygon } from './types';
 
 interface LandDetailsPanelProps {
@@ -101,9 +102,55 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
           )}
           
           
-          <div className="pt-4">
-            <ActionButton onClick={() => alert('Purchase action')} variant="primary">
-              Purchase Land
+          <WalletStatus className="mb-2" />
+          
+          <div className="pt-2">
+            <ActionButton 
+              onClick={() => {
+                if (!selectedPolygonId) return;
+                
+                // Get the current wallet address from localStorage or another source
+                const walletAddress = localStorage.getItem('walletAddress') || '';
+                
+                if (!walletAddress) {
+                  alert('Please connect your wallet first');
+                  return;
+                }
+                
+                // Call the backend API to purchase the land
+                fetch('http://localhost:8000/api/land', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                    land_id: selectedPolygonId,
+                    wallet_address: walletAddress,
+                    historical_name: selectedPolygon?.historicalName,
+                    english_name: selectedPolygon?.englishName,
+                    description: selectedPolygon?.historicalDescription
+                  }),
+                })
+                .then(response => {
+                  if (!response.ok) {
+                    throw new Error('Failed to purchase land');
+                  }
+                  return response.json();
+                })
+                .then(data => {
+                  alert(`Successfully purchased land: ${selectedPolygon?.historicalName || selectedPolygonId}`);
+                  // Refresh the land owners data
+                  window.location.reload();
+                })
+                .catch(error => {
+                  console.error('Error purchasing land:', error);
+                  alert('Failed to purchase land. Please try again.');
+                });
+              }} 
+              variant="primary"
+              disabled={owner ? true : false}
+            >
+              {owner ? 'Already Owned' : 'Purchase Land'}
             </ActionButton>
           </div>
         </div>

@@ -141,6 +141,8 @@ export default function MapPage() {
       // If already connected, disconnect
       await walletAdapter.disconnect();
       setWalletAddress(null);
+      // Clear wallet from localStorage
+      localStorage.removeItem('walletAddress');
       return;
     }
     
@@ -156,8 +158,10 @@ export default function MapPage() {
       setWalletAddress(address);
       console.log('Connected to wallet:', address);
       
-      // Store wallet in Airtable
+      // Store wallet in localStorage for use in other components
       if (address) {
+        localStorage.setItem('walletAddress', address);
+        // Store wallet in Airtable
         await storeWalletInAirtable(address);
       }
     } catch (error) {
