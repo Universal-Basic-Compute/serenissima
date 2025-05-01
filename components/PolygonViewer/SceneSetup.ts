@@ -403,10 +403,5 @@ export default class SceneSetup {
       this.water.cleanup();
       this.water = null;
     }
-    
-    if (this.water) {
-      this.water.cleanup();
-      this.water = null;
-    }
   }
 }
