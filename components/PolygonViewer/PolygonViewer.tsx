@@ -202,7 +202,10 @@ export default function PolygonViewer() {
       const loadingTimeout = setTimeout(() => {
         if (loading) {
           console.log('Loading timeout reached, forcing exit from loading state');
-          usePolygonStore.setState({ loading: false });
+          // Fix: Don't call setState inside useEffect callback
+          setTimeout(() => {
+            usePolygonStore.setState({ loading: false });
+          }, 0);
         }
       }, 30000); // 30 second timeout
       
@@ -253,7 +256,7 @@ export default function PolygonViewer() {
         window.removeEventListener('polygonsLoaded', handlePolygonsLoaded);
       };
     }
-  }, []); // Remove dependencies to prevent re-running
+  }, [loadPolygons, loadLandOwners, loadUsers, loadBridges, loading, users]); // Fix: Add proper dependencies
   
   // Calculate centroids directly in the main thread for polygons without centroids
   useEffect(() => {
@@ -296,8 +299,10 @@ export default function PolygonViewer() {
           }
         });
         
-        // Update the store with the new centroids
-        usePolygonStore.setState({ polygons: updatedPolygons });
+        // Fix: Move setState outside of useEffect callback
+        setTimeout(() => {
+          usePolygonStore.setState({ polygons: updatedPolygons });
+        }, 0);
       }, 500); // Delay to allow UI to render first
     }
   }, [polygons]);
@@ -448,7 +453,7 @@ export default function PolygonViewer() {
       sceneRef.current = sceneSetup;
       
       // Create water effect directly instead of using sceneSetup.createWater()
-      setTimeout(() => {
+      const waterEffectTimeout = setTimeout(() => {
         if (sceneRef.current) {
           const waterEffect = new WaterEffect({
             scene: sceneRef.current.scene,
@@ -463,7 +468,7 @@ export default function PolygonViewer() {
       }, 500);
       
       // Add error handling for WebGL context loss
-      canvasRef.current.addEventListener('webglcontextlost', (event) => {
+      const handleContextLost = (event: WebGLContextEvent) => {
         console.error('WebGL context lost:', event);
         event.preventDefault();
         // Attempt to recover after a short delay
@@ -476,10 +481,12 @@ export default function PolygonViewer() {
             }
           }
         }, 1000);
-      });
+      };
+      
+      canvasRef.current.addEventListener('webglcontextlost', handleContextLost);
       
       // Add custom event listener for polygon changes to update water effects
-      window.addEventListener('polygonAdded', () => {
+      const handlePolygonAdded = () => {
         if (waterEffectRef.current) {
           console.log('Polygon added, updating water effects');
           setTimeout(() => {
@@ -488,9 +495,9 @@ export default function PolygonViewer() {
             }
           }, 500);
         }
-      });
+      };
       
-      window.addEventListener('polygonDeleted', () => {
+      const handlePolygonDeleted = () => {
         if (waterEffectRef.current) {
           console.log('Polygon deleted, updating water effects');
           setTimeout(() => {
@@ -499,7 +506,10 @@ export default function PolygonViewer() {
             }
           }, 500);
         }
-      });
+      };
+      
+      window.addEventListener('polygonAdded', handlePolygonAdded);
+      window.addEventListener('polygonDeleted', handlePolygonDeleted);
     } catch (error) {
       console.error('Error setting up Three.js scene:', error);
     }
@@ -510,30 +520,34 @@ export default function PolygonViewer() {
     }
     
     // Check if texture files exist and are accessible
-    console.log('Checking for texture files...');
-    fetch('/textures/sand.jpg')
-      .then(response => {
-        if (response.ok) {
-          console.log('Sand texture file exists and is accessible');
-        } else {
-          console.error('Sand texture file not found or not accessible:', response.status);
-        }
-      })
-      .catch(error => {
-        console.error('Error checking sand texture file:', error);
-      });
+    const checkTextureFiles = () => {
+      console.log('Checking for texture files...');
+      fetch('/textures/sand.jpg')
+        .then(response => {
+          if (response.ok) {
+            console.log('Sand texture file exists and is accessible');
+          } else {
+            console.error('Sand texture file not found or not accessible:', response.status);
+          }
+        })
+        .catch(error => {
+          console.error('Error checking sand texture file:', error);
+        });
 
-    fetch('/textures/sand_normal.jpg')
-      .then(response => {
-        if (response.ok) {
-          console.log('Sand normal map file exists and is accessible');
-        } else {
-          console.error('Sand normal map file not found or not accessible:', response.status);
-        }
-      })
-      .catch(error => {
-        console.error('Error checking sand normal map file:', error);
-      });
+      fetch('/textures/sand_normal.jpg')
+        .then(response => {
+          if (response.ok) {
+            console.log('Sand normal map file exists and is accessible');
+          } else {
+            console.error('Sand normal map file not found or not accessible:', response.status);
+          }
+        })
+        .catch(error => {
+          console.error('Error checking sand normal map file:', error);
+        });
+    };
+    
+    checkTextureFiles();
     
     // Progressive initialization of components
     
@@ -641,12 +655,12 @@ export default function PolygonViewer() {
     initPolygonRenderer(); // Start with polygons immediately
     
     // Schedule the rest with increasing delays
-    setTimeout(initWaterEffect, 500); // Increased delay to ensure polygons are rendered first
-    setTimeout(initInteractionManager, 600);
-    setTimeout(initBridgeRenderer, 700);
+    const waterEffectTimer = setTimeout(initWaterEffect, 500); // Increased delay to ensure polygons are rendered first
+    const interactionManagerTimer = setTimeout(initInteractionManager, 600);
+    const bridgeRendererTimer = setTimeout(initBridgeRenderer, 700);
     
     // Add a delayed update for coat of arms
-    setTimeout(() => {
+    const coatOfArmsTimer = setTimeout(() => {
       if (polygonRendererRef.current && users && Object.keys(users).length > 0) {
         console.log('Forcing coat of arms update after initialization');
         const coatOfArmsMap: Record<string, string> = {};
@@ -762,6 +776,19 @@ export default function PolygonViewer() {
       if (bridgeRendererRef.current) bridgeRendererRef.current.cleanup();
       if (sceneRef.current) sceneRef.current.cleanup();
       
+      // Remove event listeners
+      if (canvasRef.current) {
+        canvasRef.current.removeEventListener('webglcontextlost', handleContextLost);
+      }
+      window.removeEventListener('polygonAdded', handlePolygonAdded);
+      window.removeEventListener('polygonDeleted', handlePolygonDeleted);
+      
+      // Clear all timers
+      clearTimeout(waterEffectTimer);
+      clearTimeout(interactionManagerTimer);
+      clearTimeout(bridgeRendererTimer);
+      clearTimeout(coatOfArmsTimer);
+      
       // Clear references
       sceneRef.current = null;
       polygonRendererRef.current = null;
@@ -769,7 +796,7 @@ export default function PolygonViewer() {
       interactionManagerRef.current = null;
       bridgeRendererRef.current = null;
     };
-  }, [polygons, loading]); // Remove activeView and highQuality dependencies
+  }, [polygons, loading, activeView, highQuality, bridges, ownerCoatOfArmsMap, users, selectedPolygonId, setHoveredPolygonId, setSelectedPolygonId]); // Add all dependencies
   
   // We've removed the separate controls update loop to prevent camera resets
   
