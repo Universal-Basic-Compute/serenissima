@@ -383,6 +383,7 @@ export default function PolygonViewer() {
     
     // Track mouse state
     let isDragging = false;
+    let isRightDragging = false; // Track right mouse button for panning
     let previousMousePosition = { x: 0, y: 0 };
     // Calculate initial spherical coordinates correctly
     let cameraRadius = Math.sqrt(camera.position.x**2 + camera.position.y**2 + camera.position.z**2);
@@ -390,9 +391,17 @@ export default function PolygonViewer() {
     let cameraTheta = Math.atan2(camera.position.z, camera.position.x);
     // Use correct calculation for phi
     let cameraPhi = Math.acos(camera.position.y / cameraRadius);
+    // Track scene offset for panning
+    let sceneOffsetX = 0;
+    let sceneOffsetZ = 0;
 
     const handleMouseDown = (event) => {
-      isDragging = true;
+      if (event.button === 0) { // Left mouse button
+        isDragging = true;
+      } else if (event.button === 2) { // Right mouse button
+        isRightDragging = true;
+      }
+      
       previousMousePosition = {
         x: event.clientX,
         y: event.clientY
@@ -400,33 +409,63 @@ export default function PolygonViewer() {
     };
 
     const handleMouseMove = (event) => {
-      if (!isDragging) return;
+      if (!isDragging && !isRightDragging) return;
       
       const deltaMove = {
         x: event.clientX - previousMousePosition.x,
         y: event.clientY - previousMousePosition.y
       };
       
-      // Update spherical coordinates based on mouse movement
-      // Invert the x movement to make it more intuitive
-      cameraTheta -= deltaMove.x * 0.01;
-      
-      // Invert the y movement to make it more intuitive
-      // When mouse moves up, camera should look more downward (phi decreases)
-      // When mouse moves down, camera should look more upward (phi increases)
-      const newPhi = cameraPhi - deltaMove.y * 0.01;
-      
-      // Limit vertical rotation to prevent going upside down
-      // Keep phi between 0.1 and 1.4 radians (about 5 to 80 degrees from vertical)
-      cameraPhi = Math.max(0.1, Math.min(1.4, newPhi));
-      
-      // Convert spherical to cartesian coordinates
-      camera.position.x = cameraRadius * Math.sin(cameraPhi) * Math.cos(cameraTheta);
-      camera.position.y = cameraRadius * Math.cos(cameraPhi);
-      camera.position.z = cameraRadius * Math.sin(cameraPhi) * Math.sin(cameraTheta);
-      
-      // Always look at the center
-      camera.lookAt(0, 0, 0);
+      if (isDragging) {
+        // Update spherical coordinates based on mouse movement
+        // Invert the x movement to make it more intuitive
+        cameraTheta -= deltaMove.x * 0.01;
+        
+        // Invert the y movement to make it more intuitive
+        // When mouse moves up, camera should look more downward (phi decreases)
+        // When mouse moves down, camera should look more upward (phi increases)
+        const newPhi = cameraPhi - deltaMove.y * 0.01;
+        
+        // Limit vertical rotation to prevent going upside down
+        // Keep phi between 0.1 and 1.4 radians (about 5 to 80 degrees from vertical)
+        cameraPhi = Math.max(0.1, Math.min(1.4, newPhi));
+        
+        // Convert spherical to cartesian coordinates
+        camera.position.x = cameraRadius * Math.sin(cameraPhi) * Math.cos(cameraTheta);
+        camera.position.y = cameraRadius * Math.cos(cameraPhi);
+        camera.position.z = cameraRadius * Math.sin(cameraPhi) * Math.sin(cameraTheta);
+        
+        // Always look at the center plus offset
+        camera.lookAt(sceneOffsetX, 0, sceneOffsetZ);
+      } else if (isRightDragging) {
+        // Pan the scene when right mouse button is dragged
+        const panSpeed = 0.1;
+        
+        // Calculate direction vectors in the camera's local space
+        const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
+        const right = new THREE.Vector3(1, 0, 0).applyQuaternion(camera.quaternion);
+        
+        // Project these vectors onto the xz plane for horizontal movement
+        forward.y = 0;
+        right.y = 0;
+        forward.normalize();
+        right.normalize();
+        
+        // Calculate movement
+        const moveX = -deltaMove.x * panSpeed;
+        const moveZ = -deltaMove.y * panSpeed;
+        
+        // Update scene offset
+        sceneOffsetX += right.x * moveX + forward.x * moveZ;
+        sceneOffsetZ += right.z * moveX + forward.z * moveZ;
+        
+        // Move all objects in the scene
+        scene.position.x = sceneOffsetX;
+        scene.position.z = sceneOffsetZ;
+        
+        // Update camera target
+        camera.lookAt(sceneOffsetX, 0, sceneOffsetZ);
+      }
       
       previousMousePosition = {
         x: event.clientX,
@@ -434,8 +473,17 @@ export default function PolygonViewer() {
       };
     };
     
-    const handleMouseUp = () => {
-      isDragging = false;
+    const handleMouseUp = (event) => {
+      if (event.button === 0) {
+        isDragging = false;
+      } else if (event.button === 2) {
+        isRightDragging = false;
+      }
+    };
+    
+    // Prevent context menu to allow right-click dragging
+    const handleContextMenu = (event) => {
+      event.preventDefault();
     };
     
     // Add mouse wheel zoom
@@ -462,6 +510,7 @@ export default function PolygonViewer() {
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('mouseup', handleMouseUp);
     window.addEventListener('wheel', handleWheel, { passive: false });
+    window.addEventListener('contextmenu', handleContextMenu);
     
     // Function to reset camera to a good viewing position
     const resetCamera = () => {
@@ -469,6 +518,12 @@ export default function PolygonViewer() {
       cameraRadius = 120; // Distance from center
       cameraTheta = Math.PI / 4; // Horizontal angle (45 degrees)
       cameraPhi = Math.PI / 4; // Vertical angle (45 degrees from vertical)
+      
+      // Reset scene position
+      sceneOffsetX = 0;
+      sceneOffsetZ = 0;
+      scene.position.x = 0;
+      scene.position.z = 0;
       
       // Convert to cartesian coordinates
       camera.position.x = cameraRadius * Math.sin(cameraPhi) * Math.cos(cameraTheta);
@@ -519,6 +574,8 @@ export default function PolygonViewer() {
       
       frameCount++;
       
+      // Ensure camera is always looking at the correct position with offset
+      camera.lookAt(sceneOffsetX, 0, sceneOffsetZ);
       
       renderer.render(scene, camera);
     };
@@ -541,6 +598,7 @@ export default function PolygonViewer() {
       window.removeEventListener('mouseup', handleMouseUp);
       window.removeEventListener('wheel', handleWheel);
       window.removeEventListener('resize', handleResize);
+      window.removeEventListener('contextmenu', handleContextMenu);
       
       // Make resetCamera available to the component
       if (typeof window !== 'undefined') {
