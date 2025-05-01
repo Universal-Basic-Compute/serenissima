@@ -433,6 +433,22 @@ export default function PolygonViewer() {
     }
   }, [selectedPolygonId]);
 
+  // Define handleContextLost outside of useEffect to make it available in cleanup
+  const handleContextLost = useCallback((event: WebGLContextEvent) => {
+    console.error('WebGL context lost:', event);
+    event.preventDefault();
+    // Attempt to recover after a short delay
+    setTimeout(() => {
+      if (sceneRef.current && sceneRef.current.renderer) {
+        try {
+          sceneRef.current.renderer.forceContextRestore();
+        } catch (e) {
+          console.error('Failed to restore WebGL context:', e);
+        }
+      }
+    }, 1000);
+  }, []);
+
   // Set up Three.js scene - only depends on polygons and loading
   // NOT dependent on activeView, highQuality, or selectedPolygonId to prevent scene recreation
   useEffect(() => {
@@ -468,22 +484,7 @@ export default function PolygonViewer() {
         }
       }, 500);
       
-      // Add error handling for WebGL context loss
-      const handleContextLost = (event: WebGLContextEvent) => {
-        console.error('WebGL context lost:', event);
-        event.preventDefault();
-        // Attempt to recover after a short delay
-        setTimeout(() => {
-          if (sceneRef.current && sceneRef.current.renderer) {
-            try {
-              sceneRef.current.renderer.forceContextRestore();
-            } catch (e) {
-              console.error('Failed to restore WebGL context:', e);
-            }
-          }
-        }, 1000);
-      };
-      
+      // Add error handling for WebGL context loss using the function defined outside
       canvasRef.current.addEventListener('webglcontextlost', handleContextLost);
       
       // Add custom event listener for polygon changes to update water effects
@@ -797,7 +798,7 @@ export default function PolygonViewer() {
       interactionManagerRef.current = null;
       bridgeRendererRef.current = null;
     };
-  }, [polygons, loading, activeView, highQuality, bridges, ownerCoatOfArmsMap, users, selectedPolygonId, setHoveredPolygonId, setSelectedPolygonId]); // Add all dependencies
+  }, [polygons, loading, activeView, highQuality, bridges, ownerCoatOfArmsMap, users, selectedPolygonId, setHoveredPolygonId, setSelectedPolygonId, handleContextLost]); // Add handleContextLost to dependencies
   
   // We've removed the separate controls update loop to prevent camera resets
   
