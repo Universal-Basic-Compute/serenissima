@@ -308,9 +308,9 @@ async def get_wallet(wallet_address: str):
         traceback.print_exc(file=sys.stdout)
         raise HTTPException(status_code=500, detail=error_msg)
 
-@app.post("/api/invest-compute")
-async def invest_compute(wallet_data: WalletRequest):
-    """Invest compute resources for a wallet"""
+@app.post("/api/transfer-compute")
+async def transfer_compute(wallet_data: WalletRequest):
+    """Transfer compute resources for a wallet"""
     
     if not wallet_data.wallet_address:
         raise HTTPException(status_code=400, detail="Wallet address is required")
@@ -325,16 +325,16 @@ async def invest_compute(wallet_data: WalletRequest):
         existing_records = users_table.all(formula=formula)
         
         # Log the incoming amount for debugging
-        print(f"Received compute investment request: {wallet_data.compute_amount} COMPUTE")
+        print(f"Received compute transfer request: {wallet_data.compute_amount} COMPUTE")
         
         # Use the full amount without any conversion
-        investment_amount = wallet_data.compute_amount
+        transfer_amount = wallet_data.compute_amount
         
         if existing_records:
             # Update existing record
             record = existing_records[0]
             current_amount = record["fields"].get("ComputeAmount", 0)
-            new_amount = current_amount + investment_amount
+            new_amount = current_amount + transfer_amount
             
             print(f"Updating wallet {record['id']} compute amount from {current_amount} to {new_amount}")
             updated_record = users_table.update(record["id"], {
@@ -352,10 +352,10 @@ async def invest_compute(wallet_data: WalletRequest):
             }
         else:
             # Create new record
-            print(f"Creating new wallet record with compute amount {investment_amount}")
+            print(f"Creating new wallet record with compute amount {transfer_amount}")
             record = users_table.create({
                 "Wallet": wallet_data.wallet_address,
-                "ComputeAmount": investment_amount
+                "ComputeAmount": transfer_amount
             })
             
             return {
@@ -367,7 +367,7 @@ async def invest_compute(wallet_data: WalletRequest):
                 "family_motto": record["fields"].get("FamilyMotto", None)
             }
     except Exception as e:
-        error_msg = f"Failed to invest compute: {str(e)}"
+        error_msg = f"Failed to transfer compute: {str(e)}"
         print(f"ERROR: {error_msg}")
         traceback.print_exc(file=sys.stdout)
         raise HTTPException(status_code=500, detail=error_msg)

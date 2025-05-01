@@ -1,9 +1,9 @@
-export async function investComputeInAirtable(walletAddress: string, amount: number) {
+export async function transferComputeInAirtable(walletAddress: string, amount: number) {
   try {
     // Ensure we're sending the full amount without any conversion
-    console.log(`Investing ${amount.toLocaleString()} COMPUTE for wallet ${walletAddress}`);
+    console.log(`Transferring ${amount.toLocaleString()} COMPUTE for wallet ${walletAddress}`);
     
-    const response = await fetch('http://localhost:8000/api/invest-compute', {
+    const response = await fetch('http://localhost:8000/api/transfer-compute', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -16,12 +16,12 @@ export async function investComputeInAirtable(walletAddress: string, amount: num
     
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.detail || 'Failed to invest compute');
+      throw new Error(errorData.detail || 'Failed to transfer compute');
     }
     
     return await response.json();
   } catch (error) {
-    console.error('Error investing compute in Airtable:', error);
+    console.error('Error transferring compute in Airtable:', error);
     throw error;
   }
 }

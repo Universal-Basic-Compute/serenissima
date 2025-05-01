@@ -6,9 +6,9 @@ import { WalletReadyState } from '@solana/wallet-adapter-base';
 import dynamic from 'next/dynamic';
 import { GoogleMap, LoadScript, DrawingManager } from '@react-google-maps/api';
 import PlayerProfile from '../components/UI/PlayerProfile';
-import InvestComputeMenu from '../components/UI/InvestComputeMenu';
+import TransferComputeMenu from '../components/UI/TransferComputeMenu';
 import { transferComputeTokens } from '../lib/tokenUtils';
-import { investComputeInAirtable } from '../lib/airtableUtils';
+import { transferComputeInAirtable } from '../lib/airtableUtils';
 
 // Import PolygonViewer with no SSR to avoid hydration issues
 const PolygonViewer = dynamic(() => import('../components/PolygonViewer/PolygonViewer'), {
@@ -45,7 +45,7 @@ export default function Home() {
   const [walletAdapter, setWalletAdapter] = useState<PhantomWalletAdapter | null>(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const [investMenuOpen, setInvestMenuOpen] = useState(false);
+  const [transferMenuOpen, setTransferMenuOpen] = useState(false);
   const [showUsernamePrompt, setShowUsernamePrompt] = useState(false);
   const [usernameInput, setUsernameInput] = useState('');
   const [firstName, setFirstName] = useState<string>('');
@@ -333,15 +333,15 @@ export default function Home() {
     }
   };
 
-  // Add effect to log when investMenuOpen changes
+  // Add effect to log when transferMenuOpen changes
   useEffect(() => {
-    console.log('investMenuOpen state changed:', investMenuOpen);
-  }, [investMenuOpen]);
+    console.log('transferMenuOpen state changed:', transferMenuOpen);
+  }, [transferMenuOpen]);
 
-  // Handle compute investment
-  const handleInvestCompute = async (amount: number) => {
+  // Handle compute transfer
+  const handleTransferCompute = async (amount: number) => {
     try {
-      console.log('Starting compute investment process...');
+      console.log('Starting compute transfer process...');
       
       // Get the wallet address from session or local storage
       const walletAddress = sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress');
@@ -373,7 +373,7 @@ export default function Home() {
       
       // Verify the wallet is now connected
       if (!walletAdapter.connected) {
-        alert('Wallet connection is required to invest compute');
+        alert('Wallet connection is required to transfer compute');
         return;
       }
       
@@ -382,13 +382,13 @@ export default function Home() {
       console.log('Token transfer successful:', signature);
       
       // Then, update the compute amount in Airtable
-      const airtableResponse = await investComputeInAirtable(walletAddress, amount);
+      const airtableResponse = await transferComputeInAirtable(walletAddress, amount);
       console.log('Airtable update successful:', airtableResponse);
       
-      alert(`Successfully invested ${amount.toLocaleString()} compute tokens!`);
+      alert(`Successfully transferred ${amount.toLocaleString()} compute tokens!`);
     } catch (error) {
-      console.error('Error investing compute:', error);
-      alert(`Failed to invest compute: ${error.message}`);
+      console.error('Error transferring compute:', error);
+      alert(`Failed to transfer compute: ${error.message}`);
       throw error;
     }
   };
@@ -972,11 +972,11 @@ export default function Home() {
 
   return (
     <div className="relative w-screen h-screen">
-      {/* Invest Compute Menu - moved to top level */}
-      {investMenuOpen && (
-        <InvestComputeMenu
-          onClose={() => setInvestMenuOpen(false)}
-          onInvest={handleInvestCompute}
+      {/* Transfer Compute Menu - moved to top level */}
+      {transferMenuOpen && (
+        <TransferComputeMenu
+          onClose={() => setTransferMenuOpen(false)}
+          onTransfer={handleTransferCompute}
         />
       )}
       
@@ -1022,14 +1022,14 @@ export default function Home() {
                 </div>
                 <button
                   onClick={() => {
-                    console.log('Invest button clicked, current state:', investMenuOpen);
-                    setInvestMenuOpen(true);
+                    console.log('Transfer button clicked, current state:', transferMenuOpen);
+                    setTransferMenuOpen(true);
                     setDropdownOpen(false);
                     console.log('State after setting:', true);
                   }}
                   className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-blue-500 hover:text-white transition-colors"
                 >
-                  Invest Compute
+                  Transfer Compute
                 </button>
                 <button
                   onClick={() => {
@@ -1060,12 +1060,12 @@ export default function Home() {
               <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-20">
                 <button
                   onClick={() => {
-                    setInvestMenuOpen(true);
+                    setTransferMenuOpen(true);
                     setDropdownOpen(false);
                   }}
                   className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-blue-500 hover:text-white transition-colors"
                 >
-                  Invest Compute
+                  Transfer Compute
                 </button>
                 <button
                   onClick={() => {
