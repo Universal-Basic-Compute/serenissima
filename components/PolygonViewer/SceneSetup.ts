@@ -163,6 +163,11 @@ export default class SceneSetup {
   }
   
   public resetCamera = () => {
+    // Completely disable automatic camera resets
+    console.log("Camera reset functionality disabled");
+    return;
+    
+    // The rest of the method is now unreachable
     // Check if this is an intentional reset triggered by the user
     if (window.resetCameraTriggeredByUser !== true) {
       console.log("Camera reset prevented - not triggered by user");

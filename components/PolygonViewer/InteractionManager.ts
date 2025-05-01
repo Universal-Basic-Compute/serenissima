@@ -65,10 +65,7 @@ export default class InteractionManager {
     this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
     
-    // Ensure we're not triggering camera reset on mouse move
-    if (typeof window !== 'undefined') {
-      window.resetCameraTriggeredByUser = false;
-    }
+    // Removed code that might trigger camera reset
     
     // Update the raycaster with the camera and mouse position
     this.raycaster.setFromCamera(this.mouse, this.camera);
@@ -198,10 +195,7 @@ export default class InteractionManager {
   }
   
   private onMouseClick(event: MouseEvent) {
-    // Ensure we're not triggering camera reset on mouse click
-    if (typeof window !== 'undefined') {
-      window.resetCameraTriggeredByUser = false;
-    }
+    // Removed code that might trigger camera reset
     
     // Update the raycaster with the camera and mouse position
     this.raycaster.setFromCamera(this.mouse, this.camera);

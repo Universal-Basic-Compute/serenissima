@@ -40,14 +40,10 @@ export default function PolygonViewer() {
   const waterEffectRef = useRef<WaterEffect | null>(null);
   const interactionManagerRef = useRef<InteractionManager | null>(null);
   
-  // Define resetView at component level
+  // Define resetView at component level but disable it
   const resetView = useCallback(() => {
-    if (typeof window !== 'undefined') {
-      window.resetCameraTriggeredByUser = true;
-    }
-    if (sceneRef.current) {
-      sceneRef.current.resetCamera();
-    }
+    console.log("Reset view functionality disabled");
+    return;
   }, []);
   
   // Handler for closing the land details panel
@@ -57,21 +53,7 @@ export default function PolygonViewer() {
   
   // Interaction handlers removed to disable polygon interactions
   
-  // Store the resetCamera function on window for access
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      window.resetCameraView = resetView;
-      // Initialize the flag
-      window.resetCameraTriggeredByUser = false;
-    }
-    
-    return () => {
-      if (typeof window !== 'undefined') {
-        window.resetCameraView = undefined;
-        window.resetCameraTriggeredByUser = undefined;
-      }
-    };
-  }, [resetView]);
+  // Removed effect that stores resetCamera function on window
   
   // Load polygons on mount
   useEffect(() => {
@@ -145,11 +127,7 @@ export default function PolygonViewer() {
     });
     interactionManagerRef.current = interactionManager;
     
-    // Set a good starting view only once at initialization
-    if (typeof window !== 'undefined') {
-      window.resetCameraTriggeredByUser = true;
-      scene.resetCamera();
-    }
+    // Removed automatic camera reset at initialization
     
     // Add a frame counter for less frequent updates
     let frameCount = 0;
