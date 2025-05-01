@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { PhantomWalletAdapter } from '@solana/wallet-adapter-phantom';
 import { WalletReadyState } from '@solana/wallet-adapter-base';
 import { GoogleMap, LoadScript, DrawingManager } from '@react-google-maps/api';
+import { findClosestPointOnPolygonEdge } from '@/lib/fileUtils';
 
 // Venice coordinates
 const center = {
@@ -48,6 +49,7 @@ export default function MapPage() {
   const [bridgeStart, setBridgeStart] = useState<google.maps.LatLng | null>(null);
   const [bridgeStartLandId, setBridgeStartLandId] = useState<string | null>(null);
   const [activeLandPolygons, setActiveLandPolygons] = useState<{[id: string]: google.maps.Polygon}>({});
+  const [bridgeStartMarker, setBridgeStartMarker] = useState<google.maps.Marker | null>(null);
   
   // Initialize wallet adapter
   useEffect(() => {
@@ -265,6 +267,12 @@ export default function MapPage() {
     if (bridgeMode) {
       setBridgeStart(null);
       setBridgeStartLandId(null);
+      
+      // Remove the start marker if it exists
+      if (bridgeStartMarker) {
+        bridgeStartMarker.setMap(null);
+        setBridgeStartMarker(null);
+      }
     }
     
     // Change cursor style based on bridge mode
@@ -275,29 +283,78 @@ export default function MapPage() {
     }
   };
 
+  // Add a function to get polygon coordinates from a Google Maps polygon
+  const getPolygonCoordinates = (polygon: google.maps.Polygon) => {
+    const path = polygon.getPath();
+    return Array.from({ length: path.getLength() }, (_, i) => {
+      const point = path.getAt(i);
+      return { lat: point.lat(), lng: point.lng() };
+    });
+  };
+
   // Add this function to handle map clicks for bridge creation
   const handleMapClick = (event: google.maps.MapMouseEvent) => {
     if (!bridgeMode || !event.latLng) return;
     
     // Find which polygon was clicked
     let clickedPolygonId = null;
+    let clickedPolygon = null;
     
     for (const [id, polygon] of Object.entries(activeLandPolygons)) {
       if (google.maps.geometry.poly.containsLocation(event.latLng, polygon)) {
         clickedPolygonId = id;
+        clickedPolygon = polygon;
         break;
       }
     }
     
-    if (!clickedPolygonId) {
+    if (!clickedPolygonId || !clickedPolygon) {
       alert('Please click on a land polygon');
       return;
     }
     
+    // Get the polygon coordinates
+    const polygonCoords = getPolygonCoordinates(clickedPolygon);
+    
+    // Get the clicked point
+    const clickedPoint = {
+      lat: event.latLng.lat(),
+      lng: event.latLng.lng()
+    };
+    
+    // Find the closest point on the polygon edge
+    const closestPoint = findClosestPointOnPolygonEdge(clickedPoint, polygonCoords);
+    
+    if (!closestPoint) {
+      console.error('Could not find closest point on polygon edge');
+      return;
+    }
+    
+    // Create a LatLng object from the closest point
+    const snappedPoint = new google.maps.LatLng(closestPoint.lat, closestPoint.lng);
+    
     if (!bridgeStart) {
       // Set bridge start point
-      setBridgeStart(event.latLng);
+      setBridgeStart(snappedPoint);
       setBridgeStartLandId(clickedPolygonId);
+      
+      // Show a marker at the snapped point
+      const startMarker = new google.maps.Marker({
+        position: snappedPoint,
+        map: mapRef.current,
+        icon: {
+          path: google.maps.SymbolPath.CIRCLE,
+          scale: 7,
+          fillColor: '#FF0000',
+          fillOpacity: 1,
+          strokeWeight: 2,
+          strokeColor: '#FFFFFF'
+        }
+      });
+      
+      // Store the marker to remove it later
+      setBridgeStartMarker(startMarker);
+      
       alert(`Bridge start point set on land ${clickedPolygonId}`);
     } else {
       // Set bridge end point and create bridge
@@ -314,8 +371,8 @@ export default function MapPage() {
           lng: bridgeStart.lng()
         },
         endPoint: {
-          lat: event.latLng.lat(),
-          lng: event.latLng.lng()
+          lat: snappedPoint.lat(),
+          lng: snappedPoint.lng()
         },
         startLandId: bridgeStartLandId,
         endLandId: clickedPolygonId
@@ -323,10 +380,6 @@ export default function MapPage() {
       
       // Save bridge to file
       saveBridgeToFile(bridge);
-      
-      // Reset bridge mode
-      setBridgeStart(null);
-      setBridgeStartLandId(null);
       
       // Draw bridge line on map
       const bridgeLine = new google.maps.Polyline({
@@ -341,6 +394,16 @@ export default function MapPage() {
       });
       
       bridgeLine.setMap(mapRef.current);
+      
+      // Remove the start marker
+      if (bridgeStartMarker) {
+        bridgeStartMarker.setMap(null);
+        setBridgeStartMarker(null);
+      }
+      
+      // Reset bridge mode
+      setBridgeStart(null);
+      setBridgeStartLandId(null);
     }
   };
 
