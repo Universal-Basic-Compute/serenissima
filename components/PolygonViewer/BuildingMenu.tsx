@@ -57,7 +57,8 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
 
         for (const category of categoryFiles) {
           try {
-            const response = await fetch(`/data/buildings/${category}.json`);
+            // Use the API route instead of direct file access
+            const response = await fetch(`/api/buildings/${category}`);
             if (response.ok) {
               const buildings = await response.json();
               loadedCategories.push({
