@@ -506,6 +506,26 @@ export default function PolygonViewer() {
     };
   }, [polygons, landOwners, selectedPolygonId]);
 
+  // Add this useEffect to listen for the showLandPurchaseModal event
+  useEffect(() => {
+    const handleShowPurchaseModal = (event: CustomEvent) => {
+      console.log('Show purchase modal event received:', event.detail);
+      setPurchaseModalData({
+        landId: event.detail.landId,
+        landName: event.detail.landName,
+        transaction: event.detail.transaction,
+        onComplete: event.detail.onComplete
+      });
+      setPurchaseModalVisible(true);
+    };
+    
+    window.addEventListener('showLandPurchaseModal', handleShowPurchaseModal as EventListener);
+    
+    return () => {
+      window.removeEventListener('showLandPurchaseModal', handleShowPurchaseModal as EventListener);
+    };
+  }, []);
+
   // Update info panel visibility when selectedPolygonId changes
   useEffect(() => {
     if (selectedPolygonId) {
