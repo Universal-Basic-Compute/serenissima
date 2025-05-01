@@ -32,7 +32,8 @@ export default class LODPolygon {
       sandNormalMap: THREE.Texture;
       sandRoughnessMap: THREE.Texture;
     },
-    ownerColor: string | null = null
+    ownerColor: string | null = null,
+    ownerCoatOfArmsUrl: string | null = null
   ) {
     this.scene = scene;
     this.polygon = polygon;
@@ -44,6 +45,23 @@ export default class LODPolygon {
     this.sandNormalMap = textures.sandNormalMap;
     this.sandRoughnessMap = textures.sandRoughnessMap;
     this.ownerColor = ownerColor;
+    
+    // Create high detail mesh directly
+    this.createHighDetailMesh();
+    
+    // Make sure we have a valid mesh before adding to scene
+    if (this.highDetailMesh) {
+      this.mesh = this.highDetailMesh;
+      this.scene.add(this.mesh);
+      
+      // Apply coat of arms texture if provided and in land view
+      if (ownerCoatOfArmsUrl && activeView === 'land') {
+        this.updateCoatOfArmsTexture(ownerCoatOfArmsUrl);
+      }
+    } else {
+      // If we couldn't create a high detail mesh, log an error
+      console.error('Failed to create high detail mesh for polygon:', polygon.id);
+    }
     
     // Create high detail mesh directly
     this.createHighDetailMesh();
@@ -163,6 +181,13 @@ export default class LODPolygon {
       polygonOffsetUnits: 1
     });
     
+    // If we're in land view and the polygon has an owner with a coat of arms,
+    // prepare to apply the coat of arms texture after mesh creation
+    const hasCoatOfArms = this.activeView === 'land' && 
+                          this.polygon.owner && 
+                          this.ownerCoatOfArmsMap && 
+                          this.ownerCoatOfArmsMap[this.polygon.owner];
+    
     this.highDetailMesh = new THREE.Mesh(geometry, material);
     this.highDetailMesh.castShadow = true;
     this.highDetailMesh.receiveShadow = true;
@@ -222,7 +247,7 @@ export default class LODPolygon {
         material.roughness = 0.7;
         material.metalness = 0.1;
         
-        // Remove textures in land view
+        // Remove textures in land view (coat of arms textures will be applied separately)
         material.map = null;
         material.normalMap = null;
         material.roughnessMap = null;
@@ -243,6 +268,49 @@ export default class LODPolygon {
       // Update material to apply changes
       material.needsUpdate = true;
     });
+  }
+  
+  // Add method to apply coat of arms texture to the land
+  public updateCoatOfArmsTexture(coatOfArmsUrl: string | null) {
+    if (!coatOfArmsUrl || this.activeView !== 'land') return;
+    
+    // Only apply to high detail mesh
+    if (!this.highDetailMesh) return;
+    
+    const material = this.highDetailMesh.material as THREE.MeshStandardMaterial;
+    
+    // Load the coat of arms texture
+    this.textureLoader.load(
+      coatOfArmsUrl,
+      (texture) => {
+        // Set texture properties
+        texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.set(1, 1);
+        
+        // Apply the texture to the material
+        material.map = texture;
+        
+        // Add a slight tint with the owner's color for better identification
+        if (this.ownerColor) {
+          material.color.set(this.ownerColor);
+          material.color.multiplyScalar(1.2); // Brighten slightly
+        } else if (this.polygon.owner) {
+          material.color.copy(this.generateColorFromUsername(this.polygon.owner));
+          material.color.multiplyScalar(1.2); // Brighten slightly
+        }
+        
+        // Adjust material properties for textured appearance
+        material.roughness = 0.6;
+        material.metalness = 0.2;
+        
+        // Update material to apply changes
+        material.needsUpdate = true;
+      },
+      undefined,
+      (error) => {
+        console.error('Error loading coat of arms texture:', error);
+      }
+    );
   }
 
   public updateQuality(performanceMode: boolean) {

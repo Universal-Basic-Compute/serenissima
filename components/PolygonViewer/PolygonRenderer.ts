@@ -145,6 +145,12 @@ export default class PolygonRenderer {
                 ownerColor = this.users[polygon.owner].color;
               }
             
+              // Get the owner's coat of arms URL if available
+              let ownerCoatOfArmsUrl = null;
+              if (polygon.owner && this.ownerCoatOfArmsMap && this.ownerCoatOfArmsMap[polygon.owner]) {
+                ownerCoatOfArmsUrl = this.ownerCoatOfArmsMap[polygon.owner];
+              }
+              
               const lodPolygon = new LODPolygon(
                 this.scene,
                 polygon,
@@ -157,7 +163,8 @@ export default class PolygonRenderer {
                   sandNormalMap: this.sandNormalMap,
                   sandRoughnessMap: this.sandRoughnessMap
                 },
-                ownerColor // Pass the owner's color
+                ownerColor, // Pass the owner's color
+                ownerCoatOfArmsUrl // Pass the owner's coat of arms URL
               );
             
               this.lodPolygons.push(lodPolygon);
@@ -285,6 +292,22 @@ export default class PolygonRenderer {
       lodPolygon.updateViewMode(activeView);
     });
     
+    // If we're in land view, apply coat of arms textures to owned lands
+    if (activeView === 'land') {
+      this.polygons.forEach((polygon, index) => {
+        if (polygon.owner && this.ownerCoatOfArmsMap[polygon.owner]) {
+          // Find the corresponding LOD polygon
+          const lodPolygon = this.lodPolygons.find(lp => 
+            lp.getMesh() === this.polygonMeshesRef.current[polygon.id]
+          );
+          
+          if (lodPolygon) {
+            lodPolygon.updateCoatOfArmsTexture(this.ownerCoatOfArmsMap[polygon.owner]);
+          }
+        }
+      });
+    }
+    
     // Update coat of arms sprites - show in land view, hide in other views
     this.updateCoatOfArmsSprites();
   }
@@ -312,6 +335,21 @@ export default class PolygonRenderer {
     });
     
     console.log('Combined coat of arms map now has', Object.keys(this.ownerCoatOfArmsMap).length, 'entries');
+    
+    // If we're in land view, apply the new coat of arms textures
+    if (this.activeView === 'land') {
+      this.polygons.forEach((polygon) => {
+        if (polygon.owner && this.ownerCoatOfArmsMap[polygon.owner]) {
+          const lodPolygon = this.lodPolygons.find(lp => 
+            lp.getMesh() === this.polygonMeshesRef.current[polygon.id]
+          );
+          
+          if (lodPolygon) {
+            lodPolygon.updateCoatOfArmsTexture(this.ownerCoatOfArmsMap[polygon.owner]);
+          }
+        }
+      });
+    }
     
     // Update the sprites
     this.updateCoatOfArmsSprites();
