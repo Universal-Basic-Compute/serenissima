@@ -38,18 +38,26 @@ const MarketPanel: React.FC<MarketPanelProps> = ({ visible, onClose }) => {
     const fetchTransactions = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`${getApiBaseUrl()}/api/transactions/available`);
+        const response = await fetch(`/api/transactions/available`); // Use relative path
         
         if (!response.ok) {
           throw new Error(`Failed to fetch transactions: ${response.status}`);
         }
         
         const data = await response.json();
-        setTransactions(data);
+        
+        // If the data is empty or not an array, set an empty array
+        if (!data || !Array.isArray(data)) {
+          setTransactions([]);
+        } else {
+          setTransactions(data);
+        }
+        
         setLoading(false);
       } catch (err) {
         console.error('Error fetching transactions:', err);
         setError(err instanceof Error ? err.message : 'Failed to fetch transactions');
+        setTransactions([]); // Set empty array on error
         setLoading(false);
       }
     };
@@ -121,7 +129,7 @@ const MarketPanel: React.FC<MarketPanelProps> = ({ visible, onClose }) => {
     }
     
     try {
-      const response = await fetch(`${getApiBaseUrl()}/api/transaction/${transaction.id}/execute`, {
+      const response = await fetch(`/api/transaction/${transaction.id}/execute`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -133,7 +141,7 @@ const MarketPanel: React.FC<MarketPanelProps> = ({ visible, onClose }) => {
       
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.detail || 'Failed to execute transaction');
+        throw new Error(errorData.detail || errorData.error || 'Failed to execute transaction');
       }
       
       alert(`Purchase successful! You are now the owner of ${transaction.historical_name || transaction.asset_id}.`);
@@ -178,7 +186,7 @@ const MarketPanel: React.FC<MarketPanelProps> = ({ visible, onClose }) => {
     }
     
     try {
-      const response = await fetch(`${getApiBaseUrl()}/api/transaction`, {
+      const response = await fetch(`/api/transaction`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -193,7 +201,7 @@ const MarketPanel: React.FC<MarketPanelProps> = ({ visible, onClose }) => {
       
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.detail || 'Failed to create listing');
+        throw new Error(errorData.detail || errorData.error || 'Failed to create listing');
       }
       
       const data = await response.json();
