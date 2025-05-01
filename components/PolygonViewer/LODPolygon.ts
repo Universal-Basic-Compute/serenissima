@@ -405,12 +405,19 @@ export default class LODPolygon {
   
   // Add method to apply coat of arms texture to the land
   public updateCoatOfArmsTexture(coatOfArmsUrl: string | null) {
-    if (!coatOfArmsUrl || !this.highDetailMesh) return;
+    if (!coatOfArmsUrl || !this.highDetailMesh) {
+      console.log('No coat of arms URL or high detail mesh available');
+      return;
+    }
+    
+    console.log(`Loading coat of arms texture from URL: ${coatOfArmsUrl}`);
     
     // Load the texture
     this.textureLoader.load(
       coatOfArmsUrl,
       (texture) => {
+        console.log('Coat of arms texture loaded successfully');
+        
         // Create a new material that uses the coat of arms texture
         const material = new THREE.MeshBasicMaterial({
           map: texture,
@@ -470,6 +477,8 @@ export default class LODPolygon {
           
           // Apply the multi-material
           this.highDetailMesh.material = materials;
+          
+          console.log('Applied coat of arms texture to land');
         }
       },
       undefined,

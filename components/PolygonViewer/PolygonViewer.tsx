@@ -626,7 +626,14 @@ export default function PolygonViewer() {
       
       // Load land owners when switching to land view
       if (activeView === 'land') {
+        console.log('Switching to land view, loading land owners and coat of arms');
         loadLandOwners();
+        
+        // Force an update of coat of arms
+        if (polygonRendererRef.current) {
+          console.log('Forcing coat of arms update for land view');
+          polygonRendererRef.current.updateViewMode(activeView);
+        }
       }
       
       // Update water effect

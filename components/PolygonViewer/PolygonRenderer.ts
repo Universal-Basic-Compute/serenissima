@@ -503,16 +503,12 @@ export default class PolygonRenderer {
       lodPolygon.updateViewMode(activeView);
     });
     
-    // Update coat of arms sprites - recreate them when switching to land view
-    if (activeView === 'land') {
-      this.updateCoatOfArmsSprites();
-    } else {
-      // Remove sprites when not in land view
-      Object.values(this.coatOfArmSprites).forEach(sprite => {
-        this.scene.remove(sprite);
-      });
-      this.coatOfArmSprites = {};
-    }
+    // Always update coat of arms sprites when changing view mode
+    // This ensures they're created when switching to land view
+    // and removed when switching away
+    this.updateCoatOfArmsSprites();
+    
+    console.log(`View mode updated to ${activeView}, coat of arms sprites updated`);
   }
 
   public updateQuality(performanceMode: boolean) {
@@ -584,9 +580,13 @@ export default class PolygonRenderer {
       return;
     }
 
+    console.log('Creating coat of arms for land view, polygons count:', this.polygons.length);
+    
     // Process each polygon with an owner
     this.polygons.forEach(polygon => {
       if (!polygon.owner) return;
+      
+      console.log(`Processing polygon ${polygon.id} with owner ${polygon.owner}`);
       
       // Get the coat of arms URL
       const coatOfArmsUrl = this.ownerCoatOfArmsMap[polygon.owner];
@@ -602,12 +602,17 @@ export default class PolygonRenderer {
         lp.getMesh() === this.polygonMeshesRef.current[polygon.id]
       );
       
-      if (!lodPolygon) return;
+      if (!lodPolygon) {
+        console.warn(`Could not find LOD polygon for ${polygon.id}`);
+        return;
+      }
       
       if (coatOfArmsUrl) {
+        console.log(`Applying coat of arms texture for ${polygon.id} with URL: ${coatOfArmsUrl}`);
         // Apply the coat of arms texture directly to the land shape
         lodPolygon.updateCoatOfArmsTexture(coatOfArmsUrl);
       } else if (polygon.centroid) {
+        console.log(`Creating colored circle for ${polygon.id} with color: ${ownerColor}`);
         // Create a colored circle texture on the land as fallback
         this.createColoredCircleOnLand(polygon, ownerColor);
       }
