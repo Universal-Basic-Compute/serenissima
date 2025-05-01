@@ -37,32 +37,6 @@ function calculateDistance(point1, point2) {
   return Math.sqrt(latDiff * latDiff + lngDiff * lngDiff);
 }
 
-// Calculate similarity between two polygons
-function calculatePolygonSimilarity(poly1, poly2) {
-  // If centroids are far apart, polygons are definitely different
-  if (!poly1.centroid || !poly2.centroid) return 0;
-  
-  const centroidDistance = calculateDistance(poly1.centroid, poly2.centroid);
-  
-  // If centroids are more than 0.001 degrees apart (roughly 100 meters), 
-  // consider them different polygons
-  if (centroidDistance > 0.001) return 0;
-  
-  // If centroids are very close, check area similarity
-  const area1 = calculatePolygonArea(poly1.coordinates);
-  const area2 = calculatePolygonArea(poly2.coordinates);
-  
-  // Compare areas - if they differ by more than 20%, consider them different
-  const areaRatio = Math.min(area1, area2) / Math.max(area1, area2);
-  if (areaRatio < 0.8) return 0;
-  
-  // Calculate similarity score (0-1) based on centroid distance and area similarity
-  const distanceScore = 1 - (centroidDistance / 0.001);
-  const areaScore = areaRatio;
-  
-  return (distanceScore * 0.7) + (areaScore * 0.3); // Weight distance more than area
-}
-
 // Calculate polygon area using Shoelace formula
 function calculatePolygonArea(coordinates) {
   let area = 0;
@@ -77,7 +51,7 @@ function calculatePolygonArea(coordinates) {
   return Math.abs(area) / 2;
 }
 
-// Clean up duplicate polygons with more aggressive similarity detection
+// Clean up duplicate polygons, keeping only the newest one for each location
 function cleanupDuplicatePolygons() {
   const files = getAllJsonFiles();
   const polygons = [];
@@ -88,47 +62,67 @@ function cleanupDuplicatePolygons() {
     const data = readJsonFromFile(file);
     if (!data || !data.coordinates || !data.centroid) continue;
     
+    // Extract timestamp from filename
+    const timestamp = parseInt(file.replace('polygon-', '').replace('.json', '')) || 0;
+    
     polygons.push({
       file,
       data,
-      // Extract timestamp from filename for age comparison
-      timestamp: parseInt(file.replace('polygon-', '').replace('.json', '')) || 0
+      timestamp
     });
   }
   
-  // Sort polygons by timestamp (oldest first)
-  polygons.sort((a, b) => a.timestamp - b.timestamp);
+  // Sort polygons by timestamp (newest first)
+  polygons.sort((a, b) => b.timestamp - a.timestamp);
   
-  // Second pass: identify duplicates using similarity
-  const processedPolygons = [];
+  // Group polygons by similar location
+  const locationGroups = {};
   
   for (const polygon of polygons) {
-    let isDuplicate = false;
+    let foundGroup = false;
     
-    // Compare with all processed polygons
-    for (const processedPolygon of processedPolygons) {
-      const similarity = calculatePolygonSimilarity(polygon.data, processedPolygon.data);
+    // Check if this polygon belongs to an existing group
+    for (const groupId in locationGroups) {
+      const group = locationGroups[groupId];
+      const distance = calculateDistance(polygon.data.centroid, group.centroid);
       
-      // If similarity is above threshold (0.7), consider it a duplicate
-      if (similarity > 0.7) {
-        isDuplicate = true;
-        filesToDelete.push(polygon.file);
+      // If centroids are close (within ~50 meters), add to this group
+      if (distance < 0.0005) {
+        group.polygons.push(polygon);
+        foundGroup = true;
         break;
       }
     }
     
-    // If not a duplicate, add to processed list
-    if (!isDuplicate) {
-      processedPolygons.push(polygon);
+    // If not found in any group, create a new group
+    if (!foundGroup) {
+      const groupId = `group-${Object.keys(locationGroups).length}`;
+      locationGroups[groupId] = {
+        centroid: polygon.data.centroid,
+        polygons: [polygon]
+      };
     }
   }
   
-  // Third pass: delete duplicates
+  // For each group, keep only the newest polygon
+  for (const groupId in locationGroups) {
+    const group = locationGroups[groupId];
+    
+    // Sort by timestamp (newest first)
+    group.polygons.sort((a, b) => b.timestamp - a.timestamp);
+    
+    // Keep the first one (newest), mark the rest for deletion
+    for (let i = 1; i < group.polygons.length; i++) {
+      filesToDelete.push(group.polygons[i].file);
+    }
+  }
+  
+  // Delete the marked files
   for (const file of filesToDelete) {
     const filePath = path.join(DATA_DIR, file);
     try {
       fs.unlinkSync(filePath);
-      console.log(`Deleted duplicate polygon: ${file}`);
+      console.log(`Deleted older duplicate polygon: ${file}`);
     } catch (error) {
       console.error(`Failed to delete ${file}:`, error);
     }
@@ -137,14 +131,16 @@ function cleanupDuplicatePolygons() {
   return {
     total: files.length,
     deleted: filesToDelete.length,
-    remaining: files.length - filesToDelete.length
+    remaining: files.length - filesToDelete.length,
+    groups: Object.keys(locationGroups).length
   };
 }
 
 // Run the cleanup
-console.log('Starting aggressive polygon cleanup...');
+console.log('Starting newest-only polygon cleanup...');
 const result = cleanupDuplicatePolygons();
 console.log(`Cleanup complete!`);
 console.log(`Total files: ${result.total}`);
 console.log(`Deleted duplicates: ${result.deleted}`);
 console.log(`Remaining files: ${result.remaining}`);
+console.log(`Unique locations: ${result.groups}`);
