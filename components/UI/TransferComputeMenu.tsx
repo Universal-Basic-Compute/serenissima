@@ -25,10 +25,22 @@ const TransferComputeMenu: React.FC<TransferComputeMenuProps> = ({ onClose, onTr
     setError(null);
 
     try {
-      await onTransfer(amount);
+      console.log(`Starting transfer of ${formatNumberWithCommas(amount)} COMPUTE...`);
+      
+      // Add a timeout to prevent hanging indefinitely
+      const transferPromise = onTransfer(amount);
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Transfer timed out after 30 seconds')), 30000)
+      );
+      
+      // Race the transfer against the timeout
+      await Promise.race([transferPromise, timeoutPromise]);
+      
+      console.log('Transfer completed successfully');
       onClose();
     } catch (error) {
-      setError(error.message || 'Failed to transfer compute');
+      console.error('Transfer failed:', error);
+      setError(error.message || 'Failed to transfer compute. The blockchain transaction may have succeeded, but the database update failed.');
     } finally {
       setIsLoading(false);
     }

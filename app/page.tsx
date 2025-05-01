@@ -377,17 +377,45 @@ export default function Home() {
         return;
       }
       
-      // First, transfer the tokens on Solana using Phantom wallet
-      const signature = await transferComputeTokens(walletAdapter, amount);
-      console.log('Token transfer successful:', signature);
-      
-      // Then, update the compute amount in Airtable
-      const airtableResponse = await transferComputeInAirtable(walletAddress, amount);
-      console.log('Airtable update successful:', airtableResponse);
-      
-      alert(`Successfully transferred ${amount.toLocaleString()} compute tokens!`);
+      try {
+        // First, transfer the tokens on Solana using Phantom wallet
+        console.log(`Initiating blockchain transfer of ${amount.toLocaleString()} COMPUTE tokens...`);
+        const signature = await transferComputeTokens(walletAdapter, amount);
+        console.log('Token transfer successful:', signature);
+        
+        // Then, update the compute amount in Airtable with a timeout
+        console.log('Updating database record...');
+        const airtablePromise = transferComputeInAirtable(walletAddress, amount);
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Database update timed out after 15 seconds')), 15000)
+        );
+        
+        try {
+          // Race the Airtable update against the timeout
+          const airtableResponse = await Promise.race([airtablePromise, timeoutPromise]);
+          console.log('Airtable update successful:', airtableResponse);
+          
+          alert(`Successfully transferred ${amount.toLocaleString()} compute tokens!`);
+          return airtableResponse;
+        } catch (dbError) {
+          console.error('Error updating database:', dbError);
+          
+          // Still consider it a partial success since the blockchain transfer worked
+          alert(`Tokens transferred on blockchain, but database update failed. Please try refreshing the page. Error: ${dbError.message}`);
+          
+          // Return a partial success response
+          return {
+            partial_success: true,
+            blockchain_signature: signature,
+            error: dbError.message
+          };
+        }
+      } catch (blockchainError) {
+        console.error('Error transferring tokens on blockchain:', blockchainError);
+        throw new Error(`Failed to transfer tokens on blockchain: ${blockchainError.message}`);
+      }
     } catch (error) {
-      console.error('Error transferring compute:', error);
+      console.error('Error in transfer process:', error);
       alert(`Failed to transfer compute: ${error.message}`);
       throw error;
     }

@@ -16,8 +16,15 @@ export async function transferComputeInAirtable(walletAddress: string, amount: n
     });
     
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.detail || 'Failed to transfer compute');
+      let errorMessage = 'Failed to transfer compute';
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.detail || errorMessage;
+      } catch (e) {
+        // If we can't parse the error response, just use the status text
+        errorMessage = `${errorMessage}: ${response.status} ${response.statusText}`;
+      }
+      throw new Error(errorMessage);
     }
     
     return await response.json();
