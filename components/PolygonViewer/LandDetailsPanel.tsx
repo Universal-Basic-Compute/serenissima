@@ -221,6 +221,28 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
                     return;
                   }
                   
+                  // Show confirmation dialog styled as an official document
+                  if (!confirm(
+                    `\n╔══════════════════════════════════════════════════╗
+                    \n║        REPUBLIC OF VENICE - OFFICIAL DECREE        ║
+                    \n╠══════════════════════════════════════════════════╣
+                    \n║                                                  ║
+                    \n║  By the authority of the Council of Ten,         ║
+                    \n║  this document confirms the acquisition of:      ║
+                    \n║                                                  ║
+                    \n║  PROPERTY: ${selectedPolygon?.historicalName || selectedPolygonId}    ║
+                    \n║  LOCATION: ${selectedPolygon?.englishName || 'Venice'}                ║
+                    \n║  PRICE: ${transaction.price.toLocaleString()} ducats                  ║
+                    \n║  SELLER: ${transaction.seller}                   ║
+                    \n║  BUYER: ${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}     ║
+                    \n║                                                  ║
+                    \n║  Do you confirm this transaction?                ║
+                    \n║                                                  ║
+                    \n╚══════════════════════════════════════════════════╝`
+                  )) {
+                    return; // User cancelled the transaction
+                  }
+                  
                   try {
                     // Call the backend API to execute the transaction
                     const response = await fetch(`http://localhost:8000/api/transaction/${transaction.id}/execute`, {
@@ -247,7 +269,27 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
                       throw new Error(data.detail || 'Failed to execute transaction');
                     }
                     
-                    alert(`Successfully acquired ${selectedPolygon?.historicalName || selectedPolygonId}`);
+                    // Show success message styled as an official document
+                    alert(
+                      `\n╔══════════════════════════════════════════════════╗
+                      \n║        REPUBLIC OF VENICE - DEED OF OWNERSHIP      ║
+                      \n╠══════════════════════════════════════════════════╣
+                      \n║                                                  ║
+                      \n║  ACQUISITION COMPLETE                            ║
+                      \n║                                                  ║
+                      \n║  The property known as:                          ║
+                      \n║  "${selectedPolygon?.historicalName || selectedPolygonId}"          ║
+                      \n║                                                  ║
+                      \n║  Has been successfully transferred to your       ║
+                      \n║  possession for the sum of:                      ║
+                      \n║  ${transaction.price.toLocaleString()} ducats                       ║
+                      \n║                                                  ║
+                      \n║  Sealed by the authority of the Most Serene      ║
+                      \n║  Republic of Venice on this day.                 ║
+                      \n║                                                  ║
+                      \n╚══════════════════════════════════════════════════╝`
+                    );
+                    
                     // Refresh the page to update the UI
                     window.location.reload();
                   } catch (error) {
