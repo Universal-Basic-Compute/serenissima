@@ -131,14 +131,15 @@ export default class WaterEffect {
   // Add method to create shore interaction effect
   private createShoreInteraction() {
     // Create a shader material that will highlight the shore areas
-    const shoreGeometry = new THREE.PlaneGeometry(this.width * 1.2, this.height * 1.2, 128, 128);
+    const shoreGeometry = new THREE.PlaneGeometry(this.width * 1.5, this.height * 1.5, 256, 256);
     
-    // Custom shader material for shore effect
+    // Custom shader material for shore effect with improved visibility
     const shoreMaterial = new THREE.ShaderMaterial({
       uniforms: {
         time: { value: 0 },
         color: { value: new THREE.Color(0xffffff) },
-        landTexture: { value: null } // Will be set in update
+        landTexture: { value: null },
+        waterColor: { value: new THREE.Color(this.getWaterColorForView()) }
       },
       vertexShader: `
         varying vec2 vUv;
@@ -150,6 +151,7 @@ export default class WaterEffect {
       fragmentShader: `
         uniform float time;
         uniform vec3 color;
+        uniform vec3 waterColor;
         uniform sampler2D landTexture;
         varying vec2 vUv;
         
@@ -157,17 +159,22 @@ export default class WaterEffect {
           // Sample the land texture
           vec4 landColor = texture2D(landTexture, vUv);
           
-          // Calculate distance to land
-          float landDistance = 1.0 - landColor.r;
+          // Calculate distance to land - use all channels for better detection
+          float landDistance = 1.0 - max(max(landColor.r, landColor.g), landColor.b);
           
-          // Create wave pattern
-          float wave = sin(time * 2.0 + vUv.x * 10.0 + vUv.y * 10.0) * 0.5 + 0.5;
+          // Create more dynamic wave patterns
+          float wave1 = sin(time * 1.5 + vUv.x * 20.0 + vUv.y * 15.0) * 0.5 + 0.5;
+          float wave2 = cos(time * 2.0 - vUv.x * 15.0 + vUv.y * 10.0) * 0.5 + 0.5;
+          float wave = mix(wave1, wave2, 0.5);
           
-          // Only show waves near the shore
-          float shoreMask = smoothstep(0.0, 0.1, landDistance) * (1.0 - smoothstep(0.1, 0.3, landDistance));
+          // Create a wider, more visible shore effect
+          float shoreMask = smoothstep(0.0, 0.15, landDistance) * (1.0 - smoothstep(0.15, 0.4, landDistance));
           
-          // Final color
-          gl_FragColor = vec4(color, shoreMask * wave * 0.5);
+          // Add foam color
+          vec3 foamColor = mix(waterColor, color, 0.8);
+          
+          // Final color with higher opacity for visibility
+          gl_FragColor = vec4(foamColor, shoreMask * wave * 0.7);
         }
       `,
       transparent: true,
@@ -177,11 +184,11 @@ export default class WaterEffect {
     
     this.shoreMesh = new THREE.Mesh(shoreGeometry, shoreMaterial);
     this.shoreMesh.rotation.x = -Math.PI / 2;
-    this.shoreMesh.position.y = -0.03; // Just above water level
+    this.shoreMesh.position.y = -0.02; // Position slightly higher for better visibility
     this.scene.add(this.shoreMesh);
     
-    // Create render target for land texture
-    this.landRenderTarget = new THREE.WebGLRenderTarget(512, 512);
+    // Create higher resolution render target for land texture
+    this.landRenderTarget = new THREE.WebGLRenderTarget(1024, 1024);
     
     // Create camera for rendering land texture
     this.landCamera = new THREE.OrthographicCamera(
@@ -210,27 +217,27 @@ export default class WaterEffect {
     
     // Create proper water geometry that matches the scene size
     this.waterGeometry = new THREE.PlaneGeometry(
-      this.width * 1.2, 
-      this.height * 1.2,
-      this.performanceMode ? 8 : 32  // More segments for better quality
+      this.width * 1.5, 
+      this.height * 1.5,
+      this.performanceMode ? 16 : 64  // Increase segments for better wave detail
     );
     
     // Create water with proper options
     const waterOptions = {
-      textureWidth: this.performanceMode ? 256 : 512,
-      textureHeight: this.performanceMode ? 256 : 512,
+      textureWidth: this.performanceMode ? 512 : 1024,
+      textureHeight: this.performanceMode ? 512 : 1024,
       waterNormals: this.waterNormalMap,
       sunDirection: this.sunDirection,
       sunColor: 0xffffff,
       waterColor: this.getWaterColorForView(),
-      distortionScale: this.performanceMode ? 2.0 : 3.7,
+      distortionScale: this.performanceMode ? 3.0 : 5.0, // Increase distortion
       fog: false,
       format: THREE.RGBAFormat
     };
     
     this.water = new Water(this.waterGeometry, waterOptions);
     this.water.rotation.x = -Math.PI / 2;
-    this.water.position.y = -0.1; // Position just below land level
+    this.water.position.y = -0.15; // Position water slightly lower than land
     this.water.visible = true;
     
     // Add the water to the scene
@@ -255,12 +262,12 @@ export default class WaterEffect {
           texture.wrapT = THREE.RepeatWrapping;
           texture.repeat.set(40, 40);
           
-          // Create foam mesh with proper opacity
-          const foamGeometry = new THREE.PlaneGeometry(this.width * 1.2, this.height * 1.2);
+          // Create foam mesh with higher opacity
+          const foamGeometry = new THREE.PlaneGeometry(this.width * 1.5, this.height * 1.5);
           const foamMaterial = new THREE.MeshBasicMaterial({
             map: texture,
             transparent: true,
-            opacity: 0.3, // Set to a visible value
+            opacity: 0.5, // Increased from 0.3 to 0.5
             blending: THREE.AdditiveBlending,
             depthWrite: false
           });
@@ -273,12 +280,12 @@ export default class WaterEffect {
         }
       );
     } else {
-      // Use cached foam texture with proper opacity
-      const foamGeometry = new THREE.PlaneGeometry(this.width * 1.2, this.height * 1.2);
+      // Use cached foam texture with higher opacity
+      const foamGeometry = new THREE.PlaneGeometry(this.width * 1.5, this.height * 1.5);
       const foamMaterial = new THREE.MeshBasicMaterial({
         map: WaterEffect.foamTexture,
         transparent: true,
-        opacity: 0.3, // Set to a visible value
+        opacity: 0.5, // Increased from 0.3 to 0.5
         blending: THREE.AdditiveBlending,
         depthWrite: false
       });
@@ -410,6 +417,11 @@ export default class WaterEffect {
       
       // Update land texture uniform
       (this.shoreMesh.material as THREE.ShaderMaterial).uniforms.landTexture.value = this.landRenderTarget.texture;
+      
+      // Update water color uniform in shore material
+      if ((this.shoreMesh.material as THREE.ShaderMaterial).uniforms.waterColor) {
+        (this.shoreMesh.material as THREE.ShaderMaterial).uniforms.waterColor.value.setHex(this.getWaterColorForView());
+      }
     }
   }
   
