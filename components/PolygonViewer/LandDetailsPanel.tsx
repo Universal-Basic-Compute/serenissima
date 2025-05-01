@@ -721,6 +721,14 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
         window.dispatchEvent(new CustomEvent('keepLandDetailsPanelOpen', {
           detail: { polygonId: selectedPolygonId }
         }));
+        
+        // After a short delay, reopen the purchase confirmation dialog
+        // This allows the user to make multiple purchases without reopening the panel
+        setTimeout(() => {
+          if (transaction) {
+            setShowPurchaseConfirmation(true);
+          }
+        }, 1000);
       }
     }
   }
