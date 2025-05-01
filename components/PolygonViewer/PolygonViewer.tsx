@@ -10,6 +10,7 @@ import InteractionManager from './InteractionManager';
 import ViewModeMenu from './ViewModeMenu';
 import LandDetailsPanel from './LandDetailsPanel';
 import ActionButton from '../UI/ActionButton';
+import ComputeInvestModal from '../UI/ComputeInvestModal';
 import usePolygonStore from '@/store/usePolygonStore';
 import BridgeRenderer from './BridgeRenderer';
 
@@ -18,6 +19,7 @@ export default function PolygonViewer() {
   const [infoVisible, setInfoVisible] = useState(false);
   const polygonMeshesRef = useRef<Record<string, THREE.Mesh>>({});
   const isInteractingWithPolygon = useRef(false);
+  const [computeModalOpen, setComputeModalOpen] = useState(false);
   
   // Get state from store
   const {
@@ -48,6 +50,42 @@ export default function PolygonViewer() {
   const handleCloseLandDetails = useCallback(() => {
     setSelectedPolygonId(null);
   }, [setSelectedPolygonId]);
+  
+  // Add function to handle compute investment
+  const handleInvestCompute = async (amount: number) => {
+    try {
+      // Get the wallet address from session or local storage
+      const walletAddress = sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress');
+      
+      if (!walletAddress) {
+        alert('Please connect your wallet first');
+        return;
+      }
+      
+      // Call the backend API to invest compute
+      const response = await fetch('http://localhost:8000/api/invest-compute', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          wallet_address: walletAddress,
+          compute_amount: amount,
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to invest compute');
+      }
+      
+      const data = await response.json();
+      console.log('Compute investment successful:', data);
+      return data;
+    } catch (error) {
+      console.error('Error investing compute:', error);
+      throw error;
+    }
+  };
   
   // Interaction handlers removed to disable polygon interactions
   
