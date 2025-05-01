@@ -24,5 +24,10 @@
   "centroid": {
     "lat": 45.42589877032131,
     "lng": 12.314167815997067
-  }
+  },
+  "historicalName": "Sacca della Misericordia",
+  "englishName": "Mercy's Shallows",
+  "historicalDescription": "A shallow lagoon area in the Dorsoduro sestiere, known for its marshy wetlands and fishing activities during the 15th century.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 22187.05
 }

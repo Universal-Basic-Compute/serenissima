@@ -56,5 +56,10 @@
   "centroid": {
     "lat": 45.43716435421534,
     "lng": 12.337028335121268
-  }
+  },
+  "historicalName": "Calle de la Fava, San Marco",
+  "englishName": "Bean Street, St Mark's district",
+  "historicalDescription": "Named for the bean sellers who populated this street. Located in the central San Marco sestiere, near the Mercerie main shopping area and Rialto bridge.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 38540.81
 }

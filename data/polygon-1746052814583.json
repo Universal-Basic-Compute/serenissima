@@ -36,5 +36,10 @@
   "centroid": {
     "lat": 45.427739775123285,
     "lng": 12.314498532368603
-  }
+  },
+  "historicalName": "Calle Larga dei Lavraneri, Sestiere di Dorsoduro",
+  "englishName": "Wide Street of the Wool Workers, Dorsoduro District",
+  "historicalDescription": "This area was known for its wool workers and their workshops in the 15th century, located in the Dorsoduro sestiere near the Giudecca Canal.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 102570.77
 }

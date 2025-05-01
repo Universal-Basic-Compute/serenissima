@@ -52,5 +52,10 @@
   "centroid": {
     "lat": 45.43624889834311,
     "lng": 12.342097284246178
-  }
+  },
+  "historicalName": "Corte del Pozzo Roverso in San Marco",
+  "englishName": "Courtyard of the Roverso Well in Saint Mark's",
+  "historicalDescription": "A small courtyard located near Piazza San Marco, the political and religious center of Venice in the 15th century. The area was known for its artisan workshops and proximity to the Doge's Palace.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 20760.6
 }

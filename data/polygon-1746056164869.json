@@ -36,5 +36,10 @@
   "centroid": {
     "lat": 45.43825011625501,
     "lng": 12.338734361112731
-  }
+  },
+  "historicalName": "Cale de la Malvasia Vechia, Sestiere San Marco",
+  "englishName": "Old Malvasia Street, District of St. Mark",
+  "historicalDescription": "This area was known for its taverns and wine shops, particularly those selling Malvasia wine, a sweet wine originating from Greece that was popular in Venice during the 15th century.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 13966.29
 }

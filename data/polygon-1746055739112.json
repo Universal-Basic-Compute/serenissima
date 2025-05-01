@@ -44,5 +44,10 @@
   "centroid": {
     "lat": 45.444455045524144,
     "lng": 12.332611397471526
-  }
+  },
+  "historicalName": "Calle de le Pignate in Sestiere di Castello",
+  "englishName": "Alley of the Pots in the Castello District",
+  "historicalDescription": "A narrow alley in the Castello sestiere, known for its pottery workshops and kilns in the 15th century, located near the Chiesa di San Martino.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 31157.21
 }

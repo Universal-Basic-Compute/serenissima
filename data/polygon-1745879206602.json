@@ -48,5 +48,10 @@
   "centroid": {
     "lat": 45.43397933253766,
     "lng": 12.314824878887718
-  }
+  },
+  "historicalName": "Fondamenta de Santa Marta in Sestiere Dorsoduro",
+  "englishName": "Quay of St. Martha in the Dorsoduro District",
+  "historicalDescription": "Area near the Church of Santa Marta along the canal, part of the Dorsoduro sestiere. Known for shipping and maritime activities in the 15th century.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 200123.05
 }

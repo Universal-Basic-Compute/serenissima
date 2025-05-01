@@ -24,5 +24,10 @@
   "centroid": {
     "lat": 45.44451379274158,
     "lng": 12.320152034000564
-  }
+  },
+  "historicalName": "Fondamenta de la Misericordia",
+  "englishName": "Quay of Mercy",
+  "historicalDescription": "Area along the Rio de la Misericordia canal in the Cannaregio sestiere, known for the Scuola Vecchia della Misericordia, a historic religious confraternity building.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 35698.4
 }

@@ -68,5 +68,10 @@
   "centroid": {
     "lat": 45.433188939976375,
     "lng": 12.3302413659378
-  }
+  },
+  "historicalName": "Fondamenta dei Narisi in Cannaregio",
+  "englishName": "Wharf of the Narisi Family in Cannaregio",
+  "historicalDescription": "A bustling area along a canal in the Cannaregio sestiere, known for its many artisan workshops and proximity to the Jewish Ghetto, which was established in 1516.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 35776.2
 }

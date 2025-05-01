@@ -176,5 +176,10 @@
   "centroid": {
     "lat": 45.438037645304256,
     "lng": 12.35731142511499
-  }
+  },
+  "historicalName": "Calle de la Madonna",
+  "englishName": "Alley of the Madonna",
+  "historicalDescription": "This narrow alley in the Castello sestiere was known for its proximity to the Chiesa della Madonna della Fava church. The area was a quiet residential district populated by working-class Venetians.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 227020.48
 }

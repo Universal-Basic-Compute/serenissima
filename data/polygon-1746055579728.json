@@ -32,5 +32,10 @@
   "centroid": {
     "lat": 45.44527763840166,
     "lng": 12.326886973395338
-  }
+  },
+  "historicalName": "Ghetto Novo",
+  "englishName": "New Ghetto",
+  "historicalDescription": "Area of the Cannaregio sestiere where Jewish people were required to live under the Venetian Republic starting in 1516. It was one of the first Jewish ghettos in Europe.",
+  "nameConfidence": "high",
+  "areaInSquareMeters": 6792.67
 }

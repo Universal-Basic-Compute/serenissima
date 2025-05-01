@@ -40,5 +40,10 @@
   "centroid": {
     "lat": 45.447483518921324,
     "lng": 12.324013370954349
-  }
+  },
+  "historicalName": "Calle de le Capuzzine in Sestiere di Cannaregio",
+  "englishName": "Alley of the Capuchin Nuns in the Cannaregio District",
+  "historicalDescription": "This area in the Cannaregio sestiere was known for the nearby Capuchin convent and church of Santa Maria dei Miracoli, a popular pilgrimage site completed in the late 15th century.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 43117.29
 }

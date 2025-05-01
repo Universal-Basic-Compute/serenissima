@@ -36,5 +36,10 @@
   "centroid": {
     "lat": 45.436715968853875,
     "lng": 12.343348534751625
-  }
+  },
+  "historicalName": "Fondamenta San Severo, Sestiere Castello",
+  "englishName": "San Severo Waterfront, Castello District",
+  "historicalDescription": "The area was known for its proximity to the Church of San Severo and its location along the San Severo canal in the Castello sestiere, one of the six main districts of Venice.",
+  "nameConfidence": "high",
+  "areaInSquareMeters": 23690.42
 }

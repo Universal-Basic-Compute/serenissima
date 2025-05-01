@@ -64,5 +64,10 @@
   "centroid": {
     "lat": 45.43921619036314,
     "lng": 12.323206896372884
-  }
+  },
+  "historicalName": "Calle del Pezzetto, Sestiere di Cannaregio",
+  "englishName": "Alley of the Small Piece, Cannaregio District",
+  "historicalDescription": "This narrow street was located in the Cannaregio sestiere, known for its working-class population and being home to the Jewish Ghetto in the 15th century. The area was characterized by its dense network of small alleys and canals.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 67914.72
 }

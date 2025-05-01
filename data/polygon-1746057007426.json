@@ -52,5 +52,10 @@
   "centroid": {
     "lat": 45.43581034465256,
     "lng": 12.348867372779798
-  }
+  },
+  "historicalName": "Calle del Bastion in Sestiere Castello",
+  "englishName": "Bastion Street in Castello District",
+  "historicalDescription": "This area in the sestiere of Castello was known for its proximity to the city's defensive walls and bastions in the 15th century. It was a residential area populated by working-class Venetians.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 23226
 }

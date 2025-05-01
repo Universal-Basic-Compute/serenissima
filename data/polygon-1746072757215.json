@@ -1,0 +1,45 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.44210472885054,
+      "lng": 12.329123452329434
+    },
+    {
+      "lat": 45.44202757018885,
+      "lng": 12.329515054845608
+    },
+    {
+      "lat": 45.44197111256467,
+      "lng": 12.329759135865963
+    },
+    {
+      "lat": 45.44099815063163,
+      "lng": 12.32907249035815
+    },
+    {
+      "lat": 45.44061987656894,
+      "lng": 12.328734532022274
+    },
+    {
+      "lat": 45.44076102390389,
+      "lng": 12.328450217866695
+    },
+    {
+      "lat": 45.440996268677395,
+      "lng": 12.32845290007571
+    },
+    {
+      "lat": 45.441385831865304,
+      "lng": 12.328696981096066
+    }
+  ],
+  "centroid": {
+    "lat": 45.4413580704064,
+    "lng": 12.328975595557488
+  },
+  "areaInSquareMeters": 7333.71,
+  "historicalName": "Calle del Megio in Sestiere Dorsoduro",
+  "englishName": "Alley of the Megio in the Dorsoduro District",
+  "historicalDescription": "A narrow alley located in the Dorsoduro sestiere, known for its artisan workshops and proximity to the Chiesa di San Sebastiano church.",
+  "nameConfidence": "medium"
+}

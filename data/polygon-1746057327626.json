@@ -72,5 +72,10 @@
   "centroid": {
     "lat": 45.43403514444964,
     "lng": 12.35994639116804
-  }
+  },
+  "historicalName": "Campo de San Zanipolo",
+  "englishName": "Field of Saint John and Paul",
+  "historicalDescription": "This area was known for the Dominican church and monastery of Santi Giovanni e Paolo, one of the largest churches in Venice. The campo (square) in front of the church was a popular gathering place.",
+  "nameConfidence": "high",
+  "areaInSquareMeters": 60979.15
 }

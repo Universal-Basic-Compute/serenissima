@@ -32,5 +32,10 @@
   "centroid": {
     "lat": 45.4464267433075,
     "lng": 12.333002422847931
-  }
+  },
+  "historicalName": "Calle Loredan in Sestiere Cannaregio",
+  "englishName": "Loredan Street in Cannaregio District",
+  "historicalDescription": "A residential street in the Cannaregio sestiere, near the northern edge of Venice. The area was known for its proximity to the Jewish Ghetto, which was established in 1516.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 62919
 }

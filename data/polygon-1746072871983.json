@@ -1,0 +1,41 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.43788868985301,
+      "lng": 12.331188812130737
+    },
+    {
+      "lat": 45.437075634974825,
+      "lng": 12.332004203671264
+    },
+    {
+      "lat": 45.436672867339595,
+      "lng": 12.332299246662902
+    },
+    {
+      "lat": 45.436386787646974,
+      "lng": 12.331188812130737
+    },
+    {
+      "lat": 45.43681214245454,
+      "lng": 12.330904497975158
+    },
+    {
+      "lat": 45.43716973914819,
+      "lng": 12.330791845196533
+    },
+    {
+      "lat": 45.43772683263994,
+      "lng": 12.330770387524414
+    }
+  ],
+  "centroid": {
+    "lat": 45.437104670579586,
+    "lng": 12.33130682932739
+  },
+  "areaInSquareMeters": 11464.5,
+  "historicalName": "Calle del Forno in Sestiere di Santa Croce",
+  "englishName": "Oven Street in the District of the Holy Cross",
+  "historicalDescription": "This calle was located in the sestiere of Santa Croce, known for its many artisan workshops and bread ovens in the 15th century. It was likely near the Church of San Simeon Grando.",
+  "nameConfidence": "medium"
+}

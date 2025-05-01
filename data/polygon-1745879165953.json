@@ -56,5 +56,10 @@
   "centroid": {
     "lat": 45.43179710640338,
     "lng": 12.31837053423733
-  }
+  },
+  "historicalName": "Calle Larga Santa Maria Formosa",
+  "englishName": "Long Street of Saint Mary Formosa",
+  "historicalDescription": "This street was located in the sestiere of Castello, near the Church of Santa Maria Formosa, which was an important religious and social center in 15th century Venice. The area was known for its artisans and merchants.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 59193.74
 }

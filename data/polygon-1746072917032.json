@@ -1,0 +1,53 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.44103643092501,
+      "lng": 12.33190680592016
+    },
+    {
+      "lat": 45.44065251122206,
+      "lng": 12.332625637936152
+    },
+    {
+      "lat": 45.43988089999612,
+      "lng": 12.331842432903803
+    },
+    {
+      "lat": 45.43950073643877,
+      "lng": 12.331542025494135
+    },
+    {
+      "lat": 45.438822394597516,
+      "lng": 12.3309010098889
+    },
+    {
+      "lat": 45.43832553734139,
+      "lng": 12.330348474831831
+    },
+    {
+      "lat": 45.43872452912035,
+      "lng": 12.329838855119002
+    },
+    {
+      "lat": 45.439044473319925,
+      "lng": 12.330262644143355
+    },
+    {
+      "lat": 45.439782220088944,
+      "lng": 12.330842001290572
+    },
+    {
+      "lat": 45.44047102596661,
+      "lng": 12.331356985421431
+    }
+  ],
+  "centroid": {
+    "lat": 45.43962407590167,
+    "lng": 12.331146687294936
+  },
+  "areaInSquareMeters": 19390.59,
+  "historicalName": "Calle de la Regina presso Santa Maria Formosa",
+  "englishName": "Street of the Queen near Saint Mary Formosa",
+  "historicalDescription": "This area in the sestiere of Castello was known for its proximity to the Church of Santa Maria Formosa, one of the oldest churches in Venice dating back to the 7th century. The street name likely referred to a prominent woman or queen associated with the area.",
+  "nameConfidence": "medium"
+}

@@ -56,5 +56,10 @@
   "centroid": {
     "lat": 45.440939560908085,
     "lng": 12.336309073015704
-  }
+  },
+  "historicalName": "Calle de la Madona in Sestiere San Marco",
+  "englishName": "Our Lady's Street in the District of St. Mark",
+  "historicalDescription": "A narrow street located near Piazza San Marco, the cultural and religious heart of 15th century Venice. The area was known for its numerous churches, palaces of wealthy merchants and nobility, and bustling commercial activity.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 77063.07
 }

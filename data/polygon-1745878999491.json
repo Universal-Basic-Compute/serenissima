@@ -84,5 +84,10 @@
   "centroid": {
     "lat": 45.43105829193068,
     "lng": 12.328124497913217
-  }
+  },
+  "historicalName": "Salizada dei Greci",
+  "englishName": "Way of the Greeks",
+  "historicalDescription": "This area was historically known for its Greek immigrant population and the nearby Greek Orthodox church of San Giorgio dei Greci, founded in the late 15th century.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 69248.5
 }

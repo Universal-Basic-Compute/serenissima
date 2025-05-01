@@ -28,5 +28,10 @@
   "centroid": {
     "lat": 45.44430349934998,
     "lng": 12.331090406146147
-  }
+  },
+  "historicalName": "Fondamenta de le Gatte in Sestier de Dorsoduro",
+  "englishName": "Quay of the Cats in Dorsoduro District",
+  "historicalDescription": "This area in the Dorsoduro sestiere was known for its many stray cats in the 15th century. It is located near the Giudecca Canal and the Church of San Trovaso.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 13526.45
 }

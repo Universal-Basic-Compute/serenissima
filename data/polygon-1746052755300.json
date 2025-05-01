@@ -28,5 +28,10 @@
   "centroid": {
     "lat": 45.42423427545518,
     "lng": 12.326397258593502
-  }
+  },
+  "historicalName": "Fondamenta de le Scuole de San Rocco",
+  "englishName": "Foundations of the Schools of San Rocco",
+  "historicalDescription": "This area in the San Polo sestiere was known for housing the Scuole Grandi di San Rocco, a prominent confraternity dedicated to Saint Roch, which was established in the late 15th century.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 25638.46
 }

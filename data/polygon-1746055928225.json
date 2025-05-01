@@ -24,5 +24,10 @@
   "centroid": {
     "lat": 45.44378315272813,
     "lng": 12.337420662960984
-  }
+  },
+  "historicalName": "Calle de la Scuola de San Rocco",
+  "englishName": "Street of the School of Saint Roch",
+  "historicalDescription": "In the 15th century, this area was part of the San Polo sestiere and was known for the Scuola Grande di San Rocco, a prominent confraternity dedicated to Saint Roch, which was founded nearby in 1478.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 49399.17
 }

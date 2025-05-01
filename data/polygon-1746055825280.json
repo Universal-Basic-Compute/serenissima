@@ -44,5 +44,10 @@
   "centroid": {
     "lat": 45.4432647517079,
     "lng": 12.332758158443706
-  }
+  },
+  "historicalName": "Fondamenta de Ca' Vendramin in Cannaregio",
+  "englishName": "Vendramin House Foundations in Cannaregio",
+  "historicalDescription": "A walkway along a canal in the Cannaregio sestiere, near the historic Jewish Ghetto of Venice which was established in 1516.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 7652.71
 }

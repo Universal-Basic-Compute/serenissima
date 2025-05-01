@@ -40,5 +40,10 @@
   "centroid": {
     "lat": 45.433926788711815,
     "lng": 12.356724935425705
-  }
+  },
+  "historicalName": "Ramo del Figareto in Sestiere San Marco",
+  "englishName": "Figareto Alley in the District of St. Mark",
+  "historicalDescription": "A narrow alley located in the San Marco sestiere, known for its artisan workshops and proximity to Piazza San Marco, the political and religious heart of 15th century Venice.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 24039.32
 }

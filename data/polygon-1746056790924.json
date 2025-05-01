@@ -56,5 +56,10 @@
   "centroid": {
     "lat": 45.432952673893666,
     "lng": 12.33489323288353
-  }
+  },
+  "historicalName": "Calle Larga de San Moisè",
+  "englishName": "Long Street of Saint Moses",
+  "historicalDescription": "This street was located in the San Marco sestiere, known for its proximity to the Church of San Moisè and the bustling commercial activity in the area during the 15th century.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 29376.11
 }

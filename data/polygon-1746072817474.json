@@ -1,0 +1,77 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.43971487292721,
+      "lng": 12.328614400081998
+    },
+    {
+      "lat": 45.438876914124066,
+      "lng": 12.329982326679593
+    },
+    {
+      "lat": 45.438745172223314,
+      "lng": 12.32978384321249
+    },
+    {
+      "lat": 45.43863977848125,
+      "lng": 12.329362736397153
+    },
+    {
+      "lat": 45.43817491444846,
+      "lng": 12.328662679844266
+    },
+    {
+      "lat": 45.43795471435938,
+      "lng": 12.328386412315732
+    },
+    {
+      "lat": 45.43812974526946,
+      "lng": 12.328145013504392
+    },
+    {
+      "lat": 45.43828971928229,
+      "lng": 12.328029678516751
+    },
+    {
+      "lat": 45.43834806263294,
+      "lng": 12.328142331295377
+    },
+    {
+      "lat": 45.43854191268735,
+      "lng": 12.328043089561826
+    },
+    {
+      "lat": 45.438982307423174,
+      "lng": 12.327619300537473
+    },
+    {
+      "lat": 45.43924955383493,
+      "lng": 12.328145013504392
+    },
+    {
+      "lat": 45.43945657483313,
+      "lng": 12.328458831959134
+    },
+    {
+      "lat": 45.43950927096595,
+      "lng": 12.328405187778836
+    },
+    {
+      "lat": 45.439554439040606,
+      "lng": 12.328399823360806
+    },
+    {
+      "lat": 45.43958831507287,
+      "lng": 12.328453467541104
+    }
+  ],
+  "centroid": {
+    "lat": 45.4388597667254,
+    "lng": 12.328539633505706
+  },
+  "areaInSquareMeters": 16700.97,
+  "historicalName": "Calle del Traghetto di San Marcuola",
+  "englishName": "Street of the San Marcuola Ferry",
+  "historicalDescription": "This area in the Cannaregio sestiere was known for its traghetto (ferry) crossing, connecting the north and south banks of the Grand Canal near the Chiesa di San Marcuola.",
+  "nameConfidence": "medium"
+}

@@ -60,5 +60,10 @@
   "centroid": {
     "lat": 45.44192310617295,
     "lng": 12.320674747112863
-  }
+  },
+  "historicalName": "Calle dei Carmelitani in Sestiere di Dorsoduro",
+  "englishName": "Carmelite Friars' Street in the Dorsoduro District",
+  "historicalDescription": "A street located near the Church and Monastery of Santa Maria dei Carmini, home to Carmelite friars. The area was known for its religious institutions and residential neighborhoods in the 15th century.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 245644.89
 }

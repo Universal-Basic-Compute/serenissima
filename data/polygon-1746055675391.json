@@ -20,5 +20,10 @@
   "centroid": {
     "lat": 45.44608600527951,
     "lng": 12.330742616225873
-  }
+  },
+  "historicalName": "Calle de la Misericordia",
+  "englishName": "Alley of Mercy",
+  "historicalDescription": "This narrow alley was located in the Cannaregio sestiere, near the church of Santa Maria della Misericordia. The area was known for its charitable institutions and hospices serving the poor and sick.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 12245.52
 }

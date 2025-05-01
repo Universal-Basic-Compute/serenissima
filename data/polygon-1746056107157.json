@@ -48,5 +48,10 @@
   "centroid": {
     "lat": 45.438957929966705,
     "lng": 12.337213025604335
-  }
+  },
+  "historicalName": "Campo San Zuane Grisostomo",
+  "englishName": "St. John Chrysostom Square",
+  "historicalDescription": "This campo was located in the Cannaregio sestiere, named after the nearby Church of San Giovanni Grisostomo. In the 15th century, it was a bustling area known for its artisans, particularly goldsmiths and jewelers.",
+  "nameConfidence": "high",
+  "areaInSquareMeters": 15174.18
 }

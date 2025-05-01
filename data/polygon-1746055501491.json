@@ -32,5 +32,10 @@
   "centroid": {
     "lat": 45.44548029748454,
     "lng": 12.31841549524978
-  }
+  },
+  "historicalName": "Calle del Scarlatto, Sestiere di Castello",
+  "englishName": "Calle del Scarlatto, Castello District",
+  "historicalDescription": "This street was located in the Castello sestiere, one of the six districts of Venice. In the 15th century, Castello was known for its naval shipyards, the Arsenale, and numerous churches.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 47476.78
 }

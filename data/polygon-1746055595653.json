@@ -32,5 +32,10 @@
   "centroid": {
     "lat": 45.44606765906546,
     "lng": 12.324005537201035
-  }
+  },
+  "historicalName": "Calle del Batelo in Contrada San Moisè, Sestiere San Marco",
+  "englishName": "Batelo Alley in the San Moisè Quarter, District of St. Mark",
+  "historicalDescription": "A narrow alley in the vibrant San Moisè quarter, known for its artisan workshops and proximity to St. Mark's Square and the bustling Rialto market area.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 30400.25
 }

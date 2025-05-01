@@ -36,5 +36,10 @@
   "centroid": {
     "lat": 45.438014814308225,
     "lng": 12.32076977516263
-  }
+  },
+  "historicalName": "Fondamenta de le Eremite",
+  "englishName": "Foundations of the Hermits",
+  "historicalDescription": "This area in the Dorsoduro sestiere was known for a convent of hermit nuns located nearby in the 15th century. The fondamenta (quay) likely took its name from this religious establishment.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 17967.48
 }

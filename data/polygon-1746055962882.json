@@ -24,5 +24,10 @@
   "centroid": {
     "lat": 45.44220011458114,
     "lng": 12.335912188611008
-  }
+  },
+  "historicalName": "Calle degli Albanesi, San Marco",
+  "englishName": "Alley of the Albanians, St. Mark's district",
+  "historicalDescription": "This narrow street in the San Marco sestiere was known for its Albanian community during the 15th century, as many Albanians fled to Venice after the Ottoman conquest of their homeland.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 9870.51
 }

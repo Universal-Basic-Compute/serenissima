@@ -52,5 +52,10 @@
   "centroid": {
     "lat": 45.4401962087928,
     "lng": 12.32620066400255
-  }
+  },
+  "historicalName": "Calle de la Testa",
+  "englishName": "Head Street",
+  "historicalDescription": "A narrow street in the San Polo sestiere, known for its proximity to the Rialto Market and the Grand Canal. The area was a bustling center of commerce in the 15th century.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 67595.42
 }

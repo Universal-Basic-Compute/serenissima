@@ -32,5 +32,10 @@
   "centroid": {
     "lat": 45.4297243062312,
     "lng": 12.331701944036721
-  }
+  },
+  "historicalName": "Calle de la Fava",
+  "englishName": "Street of the Broad Bean",
+  "historicalDescription": "A small street in the San Marco sestiere, named after the nearby market where broad beans were commonly sold. The area was known for its bustling marketplaces and proximity to Piazza San Marco.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 42705.65
 }

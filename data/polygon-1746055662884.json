@@ -28,5 +28,10 @@
   "centroid": {
     "lat": 45.448331237191304,
     "lng": 12.327398877634822
-  }
+  },
+  "historicalName": "Fondamenta de la Misericordia",
+  "englishName": "Foundations of Mercy",
+  "historicalDescription": "This area in the Cannaregio sestiere was known for the Scuola Grande della Misericordia, a large charitable confraternity building constructed in the late 15th century. The nearby Rio della Sensa canal was an important thoroughfare.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 66616.85
 }

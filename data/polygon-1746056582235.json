@@ -52,5 +52,10 @@
   "centroid": {
     "lat": 45.433748070729415,
     "lng": 12.333847819718544
-  }
+  },
+  "historicalName": "Calle del Caffettier in Sestiere San Marco",
+  "englishName": "Coffeehouse Maker Street in the District of St. Mark",
+  "historicalDescription": "This street was located in the bustling commercial district of San Marco, known for its artisan workshops, merchants, and proximity to Piazza San Marco, the heart of Venice. The street name suggests it was home to one or more coffeehouses or coffee roasters in the 15th century, when coffee was first introduced to Venice from the Ottoman Empire.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 16989.8
 }

@@ -1,0 +1,73 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.44009493134731,
+      "lng": 12.330025118564908
+    },
+    {
+      "lat": 45.44129186068488,
+      "lng": 12.331591528629605
+    },
+    {
+      "lat": 45.44151016581353,
+      "lng": 12.331151646351163
+    },
+    {
+      "lat": 45.44133702733254,
+      "lng": 12.33099071381027
+    },
+    {
+      "lat": 45.44136229974228,
+      "lng": 12.330950793257246
+    },
+    {
+      "lat": 45.44151661877977,
+      "lng": 12.33109563254405
+    },
+    {
+      "lat": 45.44197016375163,
+      "lng": 12.329843040934096
+    },
+    {
+      "lat": 45.44100661157261,
+      "lng": 12.329129573336134
+    },
+    {
+      "lat": 45.44058693428763,
+      "lng": 12.328756746283064
+    },
+    {
+      "lat": 45.44040061915606,
+      "lng": 12.329011556139479
+    },
+    {
+      "lat": 45.44024629706613,
+      "lng": 12.328850623598585
+    },
+    {
+      "lat": 45.440056216838606,
+      "lng": 12.328695055475722
+    },
+    {
+      "lat": 45.439796502225185,
+      "lng": 12.328509983053694
+    },
+    {
+      "lat": 45.4393448217892,
+      "lng": 12.32935219668437
+    },
+    {
+      "lat": 45.43975321634005,
+      "lng": 12.32973038815547
+    }
+  ],
+  "centroid": {
+    "lat": 45.440684952448485,
+    "lng": 12.329845639787857
+  },
+  "areaInSquareMeters": 31561.23,
+  "historicalName": "Salizada San Stae, Sestiere di Santa Croce",
+  "englishName": "Salizada San Stae, District of Santa Croce",
+  "historicalDescription": "This area was part of the Santa Croce sestiere, known for its artisan workshops and proximity to the Grand Canal. The nearby Chiesa di San Stae, a church dedicated to Saint Eustachius, dates back to the 11th century.",
+  "nameConfidence": "medium"
+}

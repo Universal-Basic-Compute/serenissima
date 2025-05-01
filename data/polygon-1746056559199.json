@@ -32,5 +32,10 @@
   "centroid": {
     "lat": 45.43495947586602,
     "lng": 12.330735754777956
-  }
+  },
+  "historicalName": "Corte de l'Albero in Sestiere di San Marco",
+  "englishName": "Courtyard of the Tree in the District of St. Mark",
+  "historicalDescription": "A small courtyard located in the San Marco district, known for its artisan workshops and proximity to Piazza San Marco, the cultural and political heart of 15th-century Venice.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 8126.4
 }

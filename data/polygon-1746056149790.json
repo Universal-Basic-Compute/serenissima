@@ -40,5 +40,10 @@
   "centroid": {
     "lat": 45.44027360119018,
     "lng": 12.340964428009839
-  }
+  },
+  "historicalName": "Calle de la Testa, Sestiere di Castello",
+  "englishName": "Head Street, Castello District",
+  "historicalDescription": "This narrow street was located in the Castello sestiere, known for being the largest district and home to the Arsenale, the historic shipyard and naval base of Venice. The area was populated by artisans, sailors, and shipbuilders.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 31953.71
 }

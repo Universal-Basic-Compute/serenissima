@@ -48,5 +48,10 @@
   "centroid": {
     "lat": 45.43163099498937,
     "lng": 12.323467696566865
-  }
+  },
+  "historicalName": "Calle de Ogni Santi",
+  "englishName": "All Saints Street",
+  "historicalDescription": "Located in the sestiere of Dorsoduro, this street was named after the nearby Church of Ognissanti (All Saints), which was an important religious and social center in 15th century Venice.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 21092.55
 }

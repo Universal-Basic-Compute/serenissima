@@ -32,5 +32,10 @@
   "centroid": {
     "lat": 45.42976226285946,
     "lng": 12.333896568182642
-  }
+  },
+  "historicalName": "Calle dei Saloni presso Santa Maria Formosa",
+  "englishName": "Saloni Street near Saint Mary Formosa",
+  "historicalDescription": "This area in the Castello sestiere was known for its proximity to the Church of Santa Maria Formosa, one of the oldest churches in Venice dating back to the 7th century. The street name 'Saloni' likely referred to large hall-like buildings in the area.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 31953.71
 }

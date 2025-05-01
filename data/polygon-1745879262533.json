@@ -72,5 +72,10 @@
   "centroid": {
     "lat": 45.43522022048487,
     "lng": 12.321389703699964
-  }
+  },
+  "historicalName": "Calle Larga dei Ragusei, Sestiere di Dorsoduro",
+  "englishName": "Long Street of the Ragusans, Dorsoduro District",
+  "historicalDescription": "This area was known for its proximity to the Scuola Grande dei Carmini, a prominent confraternity building, and the Chiesa dei Carmini, a church dedicated to Our Lady of Mount Carmel. The street name suggests a connection to the Ragusan community, merchants from Dubrovnik (Ragusa) who traded in Venice.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 36705.56
 }

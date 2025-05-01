@@ -20,5 +20,10 @@
   "centroid": {
     "lat": 45.43556544079619,
     "lng": 12.319229005769357
-  }
+  },
+  "historicalName": "Fondamenta de le Erbe, Sestiere Dorsoduro",
+  "englishName": "Quay of the Herbs, Dorsoduro District",
+  "historicalDescription": "This area in the Dorsoduro sestiere was known for its herb market along the canal quay in the 15th century, near the Church of San Nicolo dei Mendicoli.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 8716.76
 }

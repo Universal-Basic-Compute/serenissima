@@ -40,5 +40,10 @@
   "centroid": {
     "lat": 45.42697170695621,
     "lng": 12.365408622156476
-  }
+  },
+  "historicalName": "Campo de Santa Elena",
+  "englishName": "St. Helen's Square",
+  "historicalDescription": "Area located in the Castello sestiere, near the church of Sant'Elena and the eastern end of the main Venetian islands. In the 15th century, it was a relatively quiet and less populated part of the city.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 103261.57
 }

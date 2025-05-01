@@ -104,5 +104,10 @@
   "centroid": {
     "lat": 45.44496994196827,
     "lng": 12.325101365990626
-  }
+  },
+  "historicalName": "Calle del Forno in Sestiere San Polo",
+  "englishName": "Oven Street in the District of Saint Paul",
+  "historicalDescription": "A street known for its bakeries and located near the Rialto market, an important commercial hub of 15th century Venice.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 168912.38
 }

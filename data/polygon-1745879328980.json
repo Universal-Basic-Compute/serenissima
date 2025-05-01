@@ -56,5 +56,10 @@
   "centroid": {
     "lat": 45.436314002786006,
     "lng": 12.321785905541278
-  }
+  },
+  "historicalName": "Calle de la Sbiaca, Sestiere di San Marco",
+  "englishName": "Alley of the Bleachers, District of St. Mark",
+  "historicalDescription": "This narrow alley was located in the Sestiere di San Marco, near Piazza San Marco, the heart of Venice. The area was known for its artisan workshops, particularly bleachers who whitened linens and fabrics.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 19977.49
 }

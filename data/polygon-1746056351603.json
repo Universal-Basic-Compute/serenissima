@@ -64,5 +64,10 @@
   "centroid": {
     "lat": 45.43556191524828,
     "lng": 12.335251919240763
-  }
+  },
+  "historicalName": "Calle dei Fuseri presso San Luca",
+  "englishName": "Spindle-makers' Street near Saint Luke's",
+  "historicalDescription": "A narrow street in the San Marco sestiere, known for its spindle-making workshops and proximity to the Church of San Luca.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 47536.72
 }

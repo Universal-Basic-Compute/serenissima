@@ -28,5 +28,10 @@
   "centroid": {
     "lat": 45.44441013627738,
     "lng": 12.33441155144106
-  }
+  },
+  "historicalName": "Campiello de la Scuola Vecchia della Misericordia",
+  "englishName": "Little Square of the Old School of Mercy",
+  "historicalDescription": "This area in the Cannaregio sestiere was known for housing the Scuola Vecchia della Misericordia, one of the six major confraternities in Venice. The scuola was founded in the 13th century and was an important charitable institution in the 15th century.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 15708.76
 }

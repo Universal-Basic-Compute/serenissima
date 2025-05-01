@@ -28,5 +28,10 @@
   "centroid": {
     "lat": 45.439087266978554,
     "lng": 12.343820656648534
-  }
+  },
+  "historicalName": "Calle de le Tole",
+  "englishName": "Street of the Planks",
+  "historicalDescription": "Located in the Castello sestiere, this area was known for its workshops producing wooden planks and boards for construction, especially for building and repairing ships at the nearby Arsenale.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 110491.89
 }

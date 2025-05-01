@@ -24,5 +24,10 @@
   "centroid": {
     "lat": 45.43261435526686,
     "lng": 12.328993401138392
-  }
+  },
+  "historicalName": "Calle Giustinian, San Marco",
+  "englishName": "Giustinian Alley, St. Mark's District",
+  "historicalDescription": "A narrow street located in the central San Marco sestiere, near Piazza San Marco and the Ducal Palace. The area was a hub of political and commercial activity in 15th century Venice.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 7897.65
 }

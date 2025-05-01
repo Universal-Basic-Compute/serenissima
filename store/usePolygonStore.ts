@@ -63,15 +63,18 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
   
   loadPolygons: async () => {
     try {
+      console.log('Starting to load polygons...');
       set({ loading: true, error: null });
       const response = await fetch('/api/get-polygons');
       const data = await response.json();
       
-      console.log('Loaded polygons:', data);
+      console.log('Loaded polygons from API:', data);
       
       if (data.polygons && data.polygons.length > 0) {
+        console.log(`Successfully loaded ${data.polygons.length} polygons`);
         set({ polygons: data.polygons });
       } else {
+        console.warn('No polygons found in API response');
         // If no polygons, create a sample one for testing
         set({
           polygons: [{

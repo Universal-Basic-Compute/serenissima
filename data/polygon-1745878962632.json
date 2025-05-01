@@ -76,5 +76,10 @@
   "centroid": {
     "lat": 45.43037672313807,
     "lng": 12.330778516721201
-  }
+  },
+  "historicalName": "Ponte del Formager in Sestiere San Polo",
+  "englishName": "Bridge of the Cheese Maker in the San Polo District",
+  "historicalDescription": "This bridge was likely named after a nearby cheese maker or cheese market in the San Polo sestiere, one of the central districts of Venice known for its artisan shops and markets in the 15th century.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 24798.06
 }

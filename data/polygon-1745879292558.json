@@ -64,5 +64,10 @@
   "centroid": {
     "lat": 45.438118626886435,
     "lng": 12.317903283441947
-  }
+  },
+  "historicalName": "Sacca della Misericordia",
+  "englishName": "Mercy's Sack",
+  "historicalDescription": "In the 15th century, this area was a shallow lagoon used as a landfill and later filled in to create new land. It was not yet developed into the artificial island seen today.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 95878.81
 }

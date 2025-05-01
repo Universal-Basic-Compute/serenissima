@@ -40,5 +40,10 @@
   "centroid": {
     "lat": 45.4324295634239,
     "lng": 12.326243213943853
-  }
+  },
+  "historicalName": "Calle dei Cerchieri, sestiere di San Marco",
+  "englishName": "Street of the Barrel Makers, district of St. Mark",
+  "historicalDescription": "This street was known for its concentration of barrel makers and coopers in the 15th century, located in the central San Marco district near Piazza San Marco and the Doge's Palace.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 8779.64
 }

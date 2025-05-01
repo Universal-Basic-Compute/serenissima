@@ -36,5 +36,10 @@
   "centroid": {
     "lat": 45.43036759991757,
     "lng": 12.335278438770441
-  }
+  },
+  "historicalName": "Fondamenta delle Zattere",
+  "englishName": "Wharf of the Rafts",
+  "historicalDescription": "This area along the Giudecca Canal in the sestiere of Dorsoduro was known for its zattere (rafts or barges) that would transport goods along the canal. The nearby Chiesa dello Spirito Santo church was a prominent landmark.",
+  "nameConfidence": "high",
+  "areaInSquareMeters": 19095.58
 }

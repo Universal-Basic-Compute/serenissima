@@ -80,5 +80,10 @@
   "centroid": {
     "lat": 45.43021994308285,
     "lng": 12.361810591252652
-  }
+  },
+  "historicalName": "Strada de la Carità",
+  "englishName": "Street of Charity",
+  "historicalDescription": "This area was part of the Dorsoduro sestiere and was known for the presence of the Chiesa di Santa Maria della Carità, a church dedicated to the Virgin Mary of Charity. The church and its surrounding area were important religious and cultural centers in 15th century Venice.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 223708.36
 }

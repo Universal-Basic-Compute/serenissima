@@ -48,5 +48,10 @@
   "centroid": {
     "lat": 45.429412418680435,
     "lng": 12.357638859052997
-  }
+  },
+  "historicalName": "Calle de le Terese",
+  "englishName": "Alley of the Teresian nuns",
+  "historicalDescription": "This narrow street was located near a convent of Teresian nuns in the sestiere of Dorsoduro. The area was known for its religious institutions and quiet residential neighborhoods in the 15th century.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 85806.69
 }

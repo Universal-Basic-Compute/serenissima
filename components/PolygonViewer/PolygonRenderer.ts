@@ -71,6 +71,8 @@ export default class PolygonRenderer {
   }
   
   private renderPolygons() {
+    console.log(`Rendering ${this.polygons.length} polygons`);
+    
     if (this.polygons.length > 0) {
       this.polygons.forEach((polygon, index) => {
         console.log(`Processing polygon ${index}:`, polygon);

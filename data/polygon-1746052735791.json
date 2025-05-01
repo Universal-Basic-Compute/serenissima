@@ -48,5 +48,10 @@
   "centroid": {
     "lat": 45.42383891663316,
     "lng": 12.33029861097366
-  }
+  },
+  "historicalName": "Calle San Giacomo in Sestiere di Santa Croce",
+  "englishName": "Saint James Street in the District of Holy Cross",
+  "historicalDescription": "This street was located in the sestiere of Santa Croce, known for its many churches and proximity to the Grand Canal. The nearby Church of San Giacomo dell'Orio, dating back to the 9th century, was a prominent landmark in the area during the 15th century.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 102048.29
 }

@@ -24,5 +24,10 @@
   "centroid": {
     "lat": 45.44235443190306,
     "lng": 12.337902387700058
-  }
+  },
+  "historicalName": "Calle dei Sartori presso San Zulian",
+  "englishName": "Street of the Tailors near Saint Julian",
+  "historicalDescription": "This narrow street in the San Marco sestiere was known for its concentration of tailor shops and proximity to the Church of San Zulian (Saint Julian) in the 15th century.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 8270.02
 }

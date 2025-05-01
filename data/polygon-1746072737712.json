@@ -1,0 +1,69 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.43761728943238,
+      "lng": 12.327095845132332
+    },
+    {
+      "lat": 45.43773021333759,
+      "lng": 12.327868321328621
+    },
+    {
+      "lat": 45.43783560877856,
+      "lng": 12.32839403429554
+    },
+    {
+      "lat": 45.437489308733255,
+      "lng": 12.328715899377327
+    },
+    {
+      "lat": 45.43738391264544,
+      "lng": 12.328426220803719
+    },
+    {
+      "lat": 45.4373312145277,
+      "lng": 12.328501322656136
+    },
+    {
+      "lat": 45.437436610713945,
+      "lng": 12.328801730065804
+    },
+    {
+      "lat": 45.436623549321816,
+      "lng": 12.329048493295174
+    },
+    {
+      "lat": 45.436058916462414,
+      "lng": 12.329756596475105
+    },
+    {
+      "lat": 45.43552439214978,
+      "lng": 12.328447678475838
+    },
+    {
+      "lat": 45.43608903035756,
+      "lng": 12.32839403429554
+    },
+    {
+      "lat": 45.43639016842492,
+      "lng": 12.327718117623787
+    },
+    {
+      "lat": 45.43677411713015,
+      "lng": 12.327932694344979
+    },
+    {
+      "lat": 45.43717311987925,
+      "lng": 12.327310421853523
+    }
+  ],
+  "centroid": {
+    "lat": 45.43696124656391,
+    "lng": 12.328315100715958
+  },
+  "areaInSquareMeters": 23455.34,
+  "historicalName": "Calle Seconda de li Saoneri in Sestiere San Polo",
+  "englishName": "Second Street of the Soapmakers in the San Polo District",
+  "historicalDescription": "This area was known for its soapmaking workshops and proximity to the Rialto market in the 15th century.",
+  "nameConfidence": "medium"
+}
