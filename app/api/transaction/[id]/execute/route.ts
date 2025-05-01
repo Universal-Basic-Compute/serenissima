@@ -442,23 +442,53 @@ export async function POST(
       
       // Update compute balances using the wallet addresses (not usernames)
       console.log(`Updating compute balances: ${transaction.seller} +${transaction.price}, ${buyer} -${transaction.price}`);
-      const balanceUpdateResult = await updateUserComputeBalances(transaction.seller, buyer, transaction.price);
       
-      // Log the compute balance update
-      if (balanceUpdateResult) {
-        console.log(`Successfully updated compute balances: ${transaction.seller} +${transaction.price}, ${buyer} -${transaction.price}`);
-      } else {
-        console.warn(`Failed to update compute balances through API, transaction was completed but balances may not be accurate`);
+      // Try multiple times with increasing delays to update compute balances
+      let balanceUpdateSuccess = false;
+      const maxBalanceRetries = 5;
+      
+      for (let i = 0; i < maxBalanceRetries; i++) {
+        if (i > 0) {
+          const delay = Math.pow(2, i) * 1000; // Exponential backoff
+          console.log(`Balance update attempt ${i+1}/${maxBalanceRetries} after ${delay}ms delay...`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+        }
         
-        // Retry compute balance update once more with a delay
-        console.log('Retrying compute balance update after 2 second delay...');
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        const balanceUpdateResult = await updateUserComputeBalances(transaction.seller, buyer, transaction.price);
         
-        const retryResult = await updateUserComputeBalances(transaction.seller, buyer, transaction.price);
-        if (retryResult) {
-          console.log('Retry successful: compute balances updated');
+        if (balanceUpdateResult) {
+          console.log(`Successfully updated compute balances on attempt ${i+1}: ${transaction.seller} +${transaction.price}, ${buyer} -${transaction.price}`);
+          balanceUpdateSuccess = true;
+          break;
         } else {
-          console.error('Retry failed: compute balances could not be updated');
+          console.warn(`Failed to update compute balances on attempt ${i+1}`);
+        }
+      }
+      
+      if (!balanceUpdateSuccess) {
+        console.error('All attempts to update compute balances failed. Transaction was completed but balances may not be accurate.');
+        
+        // Dispatch an event to notify the frontend that balances need to be refreshed
+        try {
+          // Create a file to indicate balance update failure for this transaction
+          const balanceUpdateFailurePath = path.join(process.cwd(), 'data', 'balance-update-failures', `${id}.json`);
+          const balanceUpdateFailureDir = path.dirname(balanceUpdateFailurePath);
+          
+          if (!fs.existsSync(balanceUpdateFailureDir)) {
+            fs.mkdirSync(balanceUpdateFailureDir, { recursive: true });
+          }
+          
+          fs.writeFileSync(balanceUpdateFailurePath, JSON.stringify({
+            transaction_id: id,
+            seller: transaction.seller,
+            buyer: buyer,
+            amount: transaction.price,
+            timestamp: new Date().toISOString()
+          }, null, 2));
+          
+          console.log(`Created balance update failure record at ${balanceUpdateFailurePath}`);
+        } catch (fileError) {
+          console.error('Error creating balance update failure record:', fileError);
         }
       }
     }
