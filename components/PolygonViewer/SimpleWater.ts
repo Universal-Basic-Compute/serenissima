@@ -55,8 +55,8 @@ export default class SimpleWater {
     // Create the water mesh
     this.waterMesh = new THREE.Mesh(waterGeometry, waterMaterial);
     this.waterMesh.rotation.x = -Math.PI / 2; // Rotate to be horizontal
-    this.waterMesh.position.y = -1.0; // Position below land
-    this.waterMesh.renderOrder = 0; // Render before land
+    this.waterMesh.position.y = -0.5; // Position closer to land to reduce gap
+    this.waterMesh.renderOrder = -1; // Ensure water renders before land
     
     // Add to scene
     this.scene.add(this.waterMesh);
