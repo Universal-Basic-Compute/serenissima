@@ -168,18 +168,18 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
       )}
       
       {/* Username */}
-      <div className={`${dim.username} font-medium text-center mt-1 truncate w-full`}>
+      <div className={`${dim.username} font-medium text-center mt-1 w-full`}>
         {displayData.username}
       </div>
       
       {/* Full Name */}
-      <div className={`${dim.name} text-gray-600 text-center truncate w-full`}>
+      <div className={`${dim.name} text-gray-600 text-center w-full`}>
         {displayData.firstName} {displayData.lastName}
       </div>
       
       {/* Family Motto (optional) */}
       {userData?.familyMotto && (
-        <div className={`${dim.name} italic text-amber-600 text-center mt-1 truncate w-full`}>
+        <div className={`${dim.name} italic text-amber-600 text-center mt-1 w-full`}>
           "{userData.familyMotto}"
         </div>
       )}
