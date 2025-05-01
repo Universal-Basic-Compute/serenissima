@@ -9,6 +9,7 @@ import PlayerProfile from '../components/UI/PlayerProfile';
 import TransferComputeMenu from '../components/UI/TransferComputeMenu';
 import WithdrawComputeMenu from '../components/UI/WithdrawComputeMenu';
 import BackgroundMusic from '../components/UI/BackgroundMusic';
+import LoadingScreen from '../components/UI/LoadingScreen';
 import { transferComputeTokens } from '../lib/tokenUtils';
 import { transferComputeInAirtable } from '../lib/airtableUtils';
 
@@ -42,6 +43,9 @@ const polygonOptions = {
 const libraries = ['drawing', 'geometry'];
 
 export default function Home() {
+  // State for loading screen
+  const [isLoading, setIsLoading] = useState(true);
+  
   // State for wallet connection
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [walletAdapter, setWalletAdapter] = useState<PhantomWalletAdapter | null>(null);
@@ -1342,6 +1346,14 @@ export default function Home() {
 
   return (
     <div className="relative w-screen h-screen">
+      {/* Loading Screen */}
+      {isLoading && (
+        <LoadingScreen 
+          onLoadingComplete={() => setIsLoading(false)}
+          duration={3000}
+        />
+      )}
+    
       {/* Transfer Compute Menu - moved to top level */}
       {transferMenuOpen && (
         <TransferComputeMenu
