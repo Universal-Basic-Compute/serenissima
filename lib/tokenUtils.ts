@@ -39,11 +39,6 @@ export async function transferComputeTokens(
     console.log('Starting token transfer with wallet:', walletAdapter.publicKey.toString());
     console.log(`Original amount: ${amount} COMPUTE`);
     
-    // Convert the amount to the correct decimal representation
-    // For example, if amount is 10 and decimals is 6, this becomes 10 * 10^6 = 10,000,000
-    const adjustedAmount = amount * Math.pow(10, COMPUTE_TOKEN_DECIMALS);
-    console.log(`Adjusted amount with decimals: ${adjustedAmount}`);
-    
     // Connect to Solana network using the Helius RPC URL from environment variables
     const SOLANA_RPC_URL = process.env.NEXT_PUBLIC_HELIUS_RPC_URL || 'https://solana-mainnet.g.alchemy.com/v2/demo';
     const connection = new Connection(SOLANA_RPC_URL, 'confirmed');
@@ -56,6 +51,36 @@ export async function transferComputeTokens(
     
     console.log('Sender token account:', senderTokenAccount.toString());
     
+    // Check if the token account exists and has sufficient balance
+    try {
+      const tokenAccountInfo = await connection.getTokenAccountBalance(senderTokenAccount);
+      console.log('Token account balance:', tokenAccountInfo.value.uiAmount);
+      
+      // Check if there's enough balance
+      if (!tokenAccountInfo.value.uiAmount || tokenAccountInfo.value.uiAmount < amount / Math.pow(10, COMPUTE_TOKEN_DECIMALS)) {
+        throw new Error(`Insufficient balance. You have ${tokenAccountInfo.value.uiAmount || 0} COMPUTE, but tried to transfer ${amount / Math.pow(10, COMPUTE_TOKEN_DECIMALS)} COMPUTE.`);
+      }
+    } catch (error) {
+      if (error.message && error.message.includes('Insufficient balance')) {
+        throw error; // Re-throw our custom error
+      }
+      
+      // Check if the account doesn't exist
+      console.error('Error checking token balance:', error);
+      
+      // Create the associated token account if it doesn't exist
+      console.log('Token account may not exist. Checking if we need to create it...');
+      
+      try {
+        const accountInfo = await connection.getAccountInfo(senderTokenAccount);
+        if (!accountInfo) {
+          throw new Error('Token account does not exist. Please add some COMPUTE tokens to your wallet first.');
+        }
+      } catch (e) {
+        throw new Error('Unable to check token account. You may not have any COMPUTE tokens in your wallet.');
+      }
+    }
+    
     // Get the treasury's token account
     const treasuryTokenAccount = await getAssociatedTokenAddress(
       COMPUTE_TOKEN_MINT,
@@ -63,6 +88,23 @@ export async function transferComputeTokens(
     );
     
     console.log('Treasury token account:', treasuryTokenAccount.toString());
+    
+    // Check if the treasury token account exists
+    try {
+      const treasuryAccountInfo = await connection.getAccountInfo(treasuryTokenAccount);
+      if (!treasuryAccountInfo) {
+        console.log('Treasury token account does not exist. Creating it...');
+        // In a real app, you would create the treasury token account here
+        throw new Error('Treasury token account does not exist. Please contact support.');
+      }
+    } catch (error) {
+      console.error('Error checking treasury token account:', error);
+      throw new Error('Error checking treasury account. Please try again later.');
+    }
+    
+    // Convert the amount to the correct decimal representation
+    const adjustedAmount = amount * Math.pow(10, COMPUTE_TOKEN_DECIMALS);
+    console.log(`Adjusted amount with decimals: ${adjustedAmount}`);
     
     // Create the transfer instruction with the adjusted amount
     const transferInstruction = createTransferInstruction(

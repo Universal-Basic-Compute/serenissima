@@ -40,7 +40,18 @@ const TransferComputeMenu: React.FC<TransferComputeMenuProps> = ({ onClose, onTr
       onClose();
     } catch (error) {
       console.error('Transfer failed:', error);
-      setError(error.message || 'Failed to transfer compute. The blockchain transaction may have succeeded, but the database update failed.');
+      
+      // Check for specific error messages
+      if (error.message && (
+        error.message.includes('Insufficient balance') || 
+        error.message.includes('no balance changes found') ||
+        error.message.includes('Token account does not exist') ||
+        error.message.includes('You may not have any COMPUTE tokens')
+      )) {
+        setError('You don\'t have enough COMPUTE tokens in your wallet. Please add tokens to your wallet first.');
+      } else {
+        setError(error.message || 'Failed to transfer compute. The blockchain transaction may have succeeded, but the database update failed.');
+      }
     } finally {
       setIsLoading(false);
     }
