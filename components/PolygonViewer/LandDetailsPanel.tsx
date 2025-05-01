@@ -271,7 +271,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
                       </span>
                     </div>
                     <div className="text-xs">
-                      {offer.seller === owner ? (
+                      {offer.seller === (sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress')) ? (
                         <span className="text-blue-600">Outgoing offer</span>
                       ) : (
                         <span className="text-purple-600">Incoming offer from {offer.seller}</span>
