@@ -14,6 +14,13 @@ function ensureTransactionsDirExists() {
   return TRANSACTIONS_DIR;
 }
 
+// Add this function to handle the specific Airtable formula error
+function isAirtableFormulaError(error: any): boolean {
+  const errorStr = String(error);
+  return errorStr.includes('INVALID_FILTER_BY_FORMULA') || 
+         errorStr.includes('Invalid formula');
+}
+
 export async function POST(
   request: Request,
   { params }: { params: { id: string } }
@@ -57,9 +64,13 @@ export async function POST(
         return NextResponse.json(data);
       }
       
-      // If the API returns a specific error, pass it through
-      if (response.status !== 404) {
-        const errorData = await response.json();
+      // Handle the specific Airtable formula error
+      const errorData = await response.json().catch(() => ({}));
+      if (response.status === 500 && isAirtableFormulaError(errorData.detail || '')) {
+        console.log('Detected Airtable formula error, falling back to local execution');
+        // Fall through to local execution
+      } else if (response.status !== 404) {
+        // If the API returns a specific error, pass it through
         console.warn(`Backend API returned error for transaction ${id}:`, errorData);
         return NextResponse.json(
           errorData,
