@@ -28,7 +28,7 @@ const CONFIG = {
     fbx: false, // Skip FBX by default
     obj: false  // Skip OBJ by default
   },
-  maxPromptLength: 500 // Maximum prompt length allowed by Meshy API
+  maxPromptLength: 600 // Maximum prompt length allowed by Meshy API
 };
 
 // Ensure assets directory exists
