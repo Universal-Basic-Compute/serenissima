@@ -184,6 +184,7 @@ export default class PolygonRenderer {
       )?.id;
       
       if (polygonId) {
+        // Apply selection state based on ID match
         lodPolygon.updateSelectionState(polygonId === selectedPolygonId);
       }
     });

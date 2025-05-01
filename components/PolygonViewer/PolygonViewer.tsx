@@ -157,6 +157,7 @@ export default function PolygonViewer() {
       
       // Update polygon LOD and selection state
       if (polygonRendererRef.current) {
+        // Pass the current selectedPolygonId to ensure selection state is maintained
         polygonRendererRef.current.update(selectedPolygonId);
       }
       
@@ -203,8 +204,9 @@ export default function PolygonViewer() {
   // Add a separate effect to handle selection state changes
   useEffect(() => {
     // Only update selection state when selectedPolygonId changes
-    // This prevents recreating the entire scene
+    // This ensures the selection is durable
     if (polygonRendererRef.current) {
+      console.log('Updating selection state:', selectedPolygonId);
       polygonRendererRef.current.updateSelectionState(selectedPolygonId);
     }
   }, [selectedPolygonId]);

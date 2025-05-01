@@ -125,7 +125,8 @@ export default class InteractionManager {
           // Log that we're selecting a polygon
           console.log(`Selecting polygon: ${clickedId}`);
           
-          // Toggle selection state
+          // Only toggle selection if clicking the same polygon
+          // Otherwise, always select the new polygon
           const newSelectedId = clickedId === this.selectedPolygonId ? null : clickedId;
           
           // Log camera position before state update

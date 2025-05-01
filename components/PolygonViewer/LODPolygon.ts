@@ -259,12 +259,18 @@ export default class LODPolygon {
         material.color.set('#ffcc00'); // Bright yellow
         material.emissive.set('#ff6600'); // Orange glow
         material.emissiveIntensity = 0.3;
+        
+        // Make sure the material update is applied
+        material.needsUpdate = true;
       } else {
         // Restore original color
         if (this.originalColor) {
           material.color.copy(this.originalColor);
           material.emissive.set('#000000');
           material.emissiveIntensity = 0;
+          
+          // Make sure the material update is applied
+          material.needsUpdate = true;
         }
       }
     });
