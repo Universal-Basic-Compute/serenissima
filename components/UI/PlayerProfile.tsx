@@ -170,7 +170,7 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
     >
       {/* Coat of Arms or Initials */}
       {displayData.coatOfArmsImage ? (
-        <div className="rounded-full border-2 border-amber-600 overflow-hidden bg-amber-50">
+        <div className="rounded-full border-2 border-amber-600 overflow-hidden bg-amber-50 flex items-center justify-center">
           <img 
             src={displayData.coatOfArmsImage} 
             alt={`${displayData.username}'s Coat of Arms`}

@@ -1057,10 +1057,10 @@ export default function Home() {
             </button>
             
             {dropdownOpen && (
-              <div className="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg py-1 z-20">
-                <div className="px-4 py-3 border-b border-gray-200">
-                  <p className="text-xs text-gray-500">Wallet</p>
-                  <p className="text-sm truncate">{walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}</p>
+              <div className="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-xl py-1 z-20 border border-amber-200 overflow-hidden">
+                <div className="px-4 py-3 border-b border-amber-100 bg-amber-50">
+                  <p className="text-xs text-amber-700">Wallet</p>
+                  <p className="text-sm truncate font-medium">{walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}</p>
                   {userProfile.familyMotto && (
                     <p className="text-xs italic text-amber-600 mt-1">"{userProfile.familyMotto}"</p>
                   )}
@@ -1072,7 +1072,7 @@ export default function Home() {
                     setDropdownOpen(false);
                     console.log('State after setting:', true);
                   }}
-                  className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-blue-500 hover:text-white transition-colors"
+                  className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-amber-500 hover:text-white transition-colors"
                 >
                   Transfer Compute
                 </button>
@@ -1329,11 +1329,12 @@ export default function Home() {
               <div className="flex-1 flex flex-col items-center justify-center w-full">
                 {coatOfArmsImage ? (
                   <div className="flex flex-col items-center">
-                    <div className="border-8 border-amber-700 rounded-lg shadow-xl p-2 bg-amber-50">
+                    <div className="border-8 border-amber-700 rounded-lg shadow-xl p-2 bg-amber-50 flex items-center justify-center">
                       <img 
                         src={coatOfArmsImage} 
                         alt="Family Coat of Arms" 
                         className="w-full h-auto max-h-[400px] object-contain"
+                        style={{ maxWidth: "300px" }} // Add fixed width for better consistency
                       />
                     </div>
                     <p className="mt-4 text-center italic text-amber-800 font-medium">

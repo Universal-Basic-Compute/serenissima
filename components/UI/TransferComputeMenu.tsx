@@ -65,7 +65,7 @@ const TransferComputeMenu: React.FC<TransferComputeMenuProps> = ({ onClose, onTr
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
-      <div className="bg-white p-8 rounded-lg shadow-lg w-[700px] max-w-[90vw] border-4 border-amber-600">
+      <div className="bg-white p-8 rounded-lg shadow-xl w-[700px] max-w-[90vw] border-4 border-amber-600 transform transition-all">
         <h2 className="text-3xl font-serif font-semibold mb-4 text-amber-800 text-center">Transfer Compute</h2>
         
         <div className="mb-8 text-gray-700 text-center">

@@ -26,4 +26,36 @@ body {
   margin: 0;
   padding: 0;
   overflow: hidden;
+  line-height: 1.5;
+}
+
+/* Add smooth scrolling to the whole document */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Improve button styling globally */
+button {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Add a subtle hover effect to all interactive elements */
+button:hover, a:hover {
+  transform: translateY(-1px);
+}
+
+/* Improve focus styles for accessibility */
+:focus {
+  outline: 2px solid #f59e0b;
+  outline-offset: 2px;
+}
+
+/* Add a subtle animation for modal appearances */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.fixed {
+  animation: fadeIn 0.3s ease-out;
 }
