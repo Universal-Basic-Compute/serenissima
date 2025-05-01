@@ -17,7 +17,9 @@ export default class LODPolygon {
   private sandRoughnessMap: THREE.Texture;
   private distanceThreshold: number = 150;
   private isSelected: boolean = false;
+  private isHovered: boolean = false;
   private originalColor: THREE.Color | null = null;
+  private originalMaterial: THREE.MeshStandardMaterial | null = null;
   private ownerColor: string | null = null;
   private coatOfArmsSprite: THREE.Sprite | null = null;
 
@@ -441,5 +443,54 @@ export default class LODPolygon {
         }
       }
     });
+  }
+  
+  // Add method to handle hover state changes
+  public updateHoverState(isHovered: boolean) {
+    // Only process if hover state actually changed
+    if (this.isHovered === isHovered) return;
+    this.isHovered = isHovered;
+    
+    // Don't apply hover effects if the polygon is selected
+    if (this.isSelected) return;
+    
+    // Apply hover effects only to high detail mesh
+    if (!this.highDetailMesh) return;
+    
+    const material = this.highDetailMesh.material as THREE.MeshStandardMaterial;
+    
+    if (isHovered) {
+      // Store original material properties if not already stored
+      if (!this.originalMaterial) {
+        this.originalMaterial = material.clone();
+      }
+      
+      // Create glow effect
+      if (this.activeView === 'land') {
+        // Enhance the color to create a glow effect
+        material.emissive.copy(material.color);
+        material.emissiveIntensity = 0.5;
+        
+        // Add a slight bloom effect by increasing the brightness
+        const color = material.color.clone();
+        color.multiplyScalar(1.3); // Make it brighter
+        material.color.copy(color);
+        
+        // Reduce roughness for a more shiny appearance
+        material.roughness = 0.3;
+        
+        // Update material
+        material.needsUpdate = true;
+      }
+    } else {
+      // Restore original material properties
+      if (this.originalMaterial) {
+        material.emissive.set(0, 0, 0);
+        material.emissiveIntensity = 0;
+        material.color.copy(this.originalMaterial.color);
+        material.roughness = this.originalMaterial.roughness;
+        material.needsUpdate = true;
+      }
+    }
   }
 }

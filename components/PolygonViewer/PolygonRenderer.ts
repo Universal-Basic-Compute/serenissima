@@ -754,6 +754,21 @@ export default class PolygonRenderer {
     // Update coat of arms sprites
     this.updateCoatOfArmsSprites();
   }
+  
+  // Add method to update hover state
+  public updateHoverState(hoveredPolygonId: string | null) {
+    // Update hover state for all LOD polygons
+    this.lodPolygons.forEach(lodPolygon => {
+      const polygonId = this.polygons.find(
+        p => lodPolygon.getMesh() === this.polygonMeshesRef.current[p.id]
+      )?.id;
+      
+      if (polygonId) {
+        // Apply hover state based on ID match
+        lodPolygon.updateHoverState(polygonId === hoveredPolygonId);
+      }
+    });
+  }
 
   public cleanup() {
     // Clean up all LOD polygons

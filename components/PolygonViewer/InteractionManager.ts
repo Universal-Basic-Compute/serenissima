@@ -50,6 +50,17 @@ export default class InteractionManager {
     this.raycaster = new THREE.Raycaster();
     this.mouse = new THREE.Vector2();
     
+    // Modify the setHoveredPolygonId function to dispatch a custom event
+    this.setHoveredPolygonId = (id: string | null) => {
+      // Dispatch a custom event for hover state changes
+      window.dispatchEvent(new CustomEvent('polygonHover', {
+        detail: { polygonId: id }
+      }));
+      
+      // Call the original setHoveredPolygonId function
+      setHoveredPolygonId(id);
+    };
+    
     // Bind methods to this instance
     this.handleMouseClick = this.onMouseClick.bind(this);
     this.handleMouseDown = this.onMouseDown.bind(this);
@@ -74,6 +85,38 @@ export default class InteractionManager {
       if (dx > 3 || dy > 3) {
         this.isDragging = true;
       }
+      return; // Skip hover detection during dragging
+    }
+    
+    // Calculate mouse position in normalized device coordinates (-1 to +1)
+    this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    
+    // Update the raycaster with the camera and mouse position
+    this.raycaster.setFromCamera(this.mouse, this.camera);
+    
+    // Get objects intersecting the ray
+    const intersects = this.raycaster.intersectObjects(this.scene.children, false);
+    
+    // Check if we're hovering over a polygon
+    if (intersects.length > 0) {
+      const object = intersects[0].object;
+      
+      // Find the polygon ID from our ref
+      const hoveredId = Object.keys(this.polygonMeshesRef.current).find(
+        id => this.polygonMeshesRef.current[id] === object
+      );
+      
+      if (hoveredId && this.hoveredPolygonId !== hoveredId) {
+        // Update hover state
+        this.setHoveredPolygonId(hoveredId);
+        this.hoveredPolygonId = hoveredId;
+        return;
+      }
+    } else if (this.hoveredPolygonId) {
+      // Clear hover state when not hovering over any polygon
+      this.setHoveredPolygonId(null);
+      this.hoveredPolygonId = null;
     }
   }
   

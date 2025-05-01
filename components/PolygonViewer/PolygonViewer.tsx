@@ -475,6 +475,22 @@ export default function PolygonViewer() {
     }
   }, [selectedPolygonId]);
   
+  // Add a new useEffect to handle hover state changes
+  useEffect(() => {
+    const handleHoverStateChange = (event: CustomEvent) => {
+      if (polygonRendererRef.current && activeView === 'land') {
+        polygonRendererRef.current.updateHoverState(event.detail.polygonId);
+      }
+    };
+    
+    // Listen for custom hover events
+    window.addEventListener('polygonHover', handleHoverStateChange as EventListener);
+    
+    return () => {
+      window.removeEventListener('polygonHover', handleHoverStateChange as EventListener);
+    };
+  }, [activeView]);
+  
   // Add a separate effect to handle view mode changes
   useEffect(() => {
     // Update view mode when activeView changes
