@@ -516,7 +516,8 @@ export default function PolygonViewer() {
       // Get objects intersecting the ray
       const intersects = raycaster.intersectObjects(scene.children, false);
       
-      let foundHoveredObject = false;
+      // Track if we found a hoverable object
+      let foundHoverable = false;
       
       // Check if we're hovering over a polygon
       if (intersects.length > 0) {
@@ -528,7 +529,7 @@ export default function PolygonViewer() {
         );
         
         if (hoveredId && hoveredId !== selectedPolygonId) {
-          foundHoveredObject = true;
+          foundHoverable = true;
           
           // If we're hovering over a new object
           if (hoveredId !== hoveredPolygonId) {
@@ -536,25 +537,20 @@ export default function PolygonViewer() {
             if (hoveredPolygonId && hoveredPolygonId !== selectedPolygonId) {
               const previousHovered = polygonMeshesRef.current[hoveredPolygonId];
               if (previousHovered && previousHovered.material) {
-                // Store original values if not already stored
-                if (!previousHovered.userData.originalEmissive) {
-                  previousHovered.userData.originalEmissive = new THREE.Color(0, 0, 0);
-                  previousHovered.userData.originalEmissiveIntensity = 0;
-                }
-                
-                // Animate back to original material properties
+                // Kill any existing tweens
                 gsap.killTweensOf(previousHovered.material.emissive);
                 gsap.killTweensOf(previousHovered.material);
                 
+                // Animate back to original material properties
                 gsap.to(previousHovered.material.emissive, {
-                  r: previousHovered.userData.originalEmissive.r,
-                  g: previousHovered.userData.originalEmissive.g,
-                  b: previousHovered.userData.originalEmissive.b,
+                  r: previousHovered.userData.originalEmissive?.r || 0,
+                  g: previousHovered.userData.originalEmissive?.g || 0,
+                  b: previousHovered.userData.originalEmissive?.b || 0,
                   duration: 0.3
                 });
                 
                 gsap.to(previousHovered.material, {
-                  emissiveIntensity: previousHovered.userData.originalEmissiveIntensity,
+                  emissiveIntensity: previousHovered.userData.originalEmissiveIntensity || 0,
                   duration: 0.3
                 });
               }
@@ -591,34 +587,30 @@ export default function PolygonViewer() {
         }
       }
       
-      // If we're not hovering over any object but we had a previously hovered object
-      if (!foundHoveredObject && hoveredPolygonId && hoveredPolygonId !== selectedPolygonId) {
+      // If we didn't find a hoverable object but we have a previously hovered one,
+      // remove the hover effect
+      if (!foundHoverable && hoveredPolygonId !== null && hoveredPolygonId !== selectedPolygonId) {
         const previousHovered = polygonMeshesRef.current[hoveredPolygonId];
         if (previousHovered && previousHovered.material) {
-          // Store original values if not already stored
-          if (!previousHovered.userData.originalEmissive) {
-            previousHovered.userData.originalEmissive = new THREE.Color(0, 0, 0);
-            previousHovered.userData.originalEmissiveIntensity = 0;
-          }
-          
           // Kill any existing tweens
           gsap.killTweensOf(previousHovered.material.emissive);
           gsap.killTweensOf(previousHovered.material);
           
           // Animate back to original material properties
           gsap.to(previousHovered.material.emissive, {
-            r: previousHovered.userData.originalEmissive.r,
-            g: previousHovered.userData.originalEmissive.g,
-            b: previousHovered.userData.originalEmissive.b,
+            r: previousHovered.userData.originalEmissive?.r || 0,
+            g: previousHovered.userData.originalEmissive?.g || 0,
+            b: previousHovered.userData.originalEmissive?.b || 0,
             duration: 0.3
           });
           
           gsap.to(previousHovered.material, {
-            emissiveIntensity: previousHovered.userData.originalEmissiveIntensity,
+            emissiveIntensity: previousHovered.userData.originalEmissiveIntensity || 0,
             duration: 0.3
           });
         }
         
+        // Clear the hovered polygon ID
         setHoveredPolygonId(null);
       }
     };
