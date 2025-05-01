@@ -69,7 +69,9 @@ export default function Home() {
     // Venetian greens
     '#2E8B57', '#3CB371', '#6B8E23', '#556B2F',
     // Venetian purples and other colors
-    '#4B0082', '#800080', '#8B4513', '#A0522D'
+    '#4B0082', '#800080', '#8B4513', '#A0522D',
+    // Add more distinct colors to ensure uniqueness
+    '#FF5733', '#33FF57', '#3357FF', '#F033FF', '#FF33A8'
   ];
   // Add user profile state
   const [userProfile, setUserProfile] = useState<{
@@ -444,6 +446,11 @@ export default function Home() {
       if (users['ConsiglioDeiDieci']) {
         console.log('ConsiglioDeiDieci user data:', users['ConsiglioDeiDieci']);
         console.log('ConsiglioDeiDieci color:', users['ConsiglioDeiDieci'].color);
+        
+        // If ConsiglioDeiDieci has no color, log a warning
+        if (!users['ConsiglioDeiDieci'].color) {
+          console.warn('ConsiglioDeiDieci has no color defined in user data!');
+        }
       }
       
       // Force an update of the polygon renderer with the users data

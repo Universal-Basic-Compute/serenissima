@@ -192,7 +192,8 @@ async def store_wallet(wallet_data: WalletRequest):
             if wallet_data.coat_of_arms_image:
                 update_fields["CoatOfArmsImage"] = wallet_data.coat_of_arms_image
                 
-            if wallet_data.color:
+            # Always update color field if provided, even if null/empty
+            if wallet_data.color is not None:
                 update_fields["Color"] = wallet_data.color
             
             # Only update if there are fields to update

@@ -243,6 +243,12 @@ export default class PolygonRenderer {
                   this.ownerColorMap[polygon.owner] = ownerColor;
                   console.log(`Found color for ${polygon.owner} in users data: ${ownerColor}`);
                 }
+                
+                // Debug log for ConsiglioDeiDieci specifically
+                if (polygon.owner === 'ConsiglioDeiDieci') {
+                  console.log(`ConsiglioDeiDieci polygon color: ${ownerColor}`);
+                  console.log(`ConsiglioDeiDieci user data:`, this.users['ConsiglioDeiDieci']);
+                }
               }
             
               // Get the owner's coat of arms URL if available
@@ -799,11 +805,14 @@ export default class PolygonRenderer {
     if (newOwner) {
       if (this.ownerColorMap[newOwner]) {
         ownerColor = this.ownerColorMap[newOwner];
+        console.log(`Using stored color for ${newOwner}: ${ownerColor}`);
       } else if (this.users[newOwner] && this.users[newOwner].color) {
         ownerColor = this.users[newOwner].color;
         // Also store in the color map for future use
         this.ownerColorMap[newOwner] = ownerColor;
+        console.log(`Found color for ${newOwner} in users data: ${ownerColor}`);
       }
+      // No default color assignment here
     }
     
     // Get the owner's coat of arms URL if available

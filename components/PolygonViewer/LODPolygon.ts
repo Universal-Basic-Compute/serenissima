@@ -177,7 +177,7 @@ export default class LODPolygon {
         // Use the owner's color if available
         landColor = new THREE.Color(this.ownerColor);
       } else if (this.polygon.owner) {
-        // Generate a random color based on the owner's username
+        // Generate a color based on the owner's username - no random component
         landColor = this.generateColorFromUsername(this.polygon.owner);
       } else {
         // Default green color for unowned land
@@ -232,10 +232,11 @@ export default class LODPolygon {
       hash = username.charCodeAt(i) + ((hash << 5) - hash);
     }
     
-    // Convert the hash to a color
-    const r = (hash & 0xFF) / 255;
-    const g = ((hash >> 8) & 0xFF) / 255;
-    const b = ((hash >> 16) & 0xFF) / 255;
+    // Convert the hash to a color - use a more deterministic approach
+    // Use modulo to ensure values are in 0-255 range
+    const r = Math.abs((hash & 0xFF) % 256) / 255;
+    const g = Math.abs(((hash >> 8) & 0xFF) % 256) / 255;
+    const b = Math.abs(((hash >> 16) & 0xFF) % 256) / 255;
     
     return new THREE.Color(r, g, b);
   }
