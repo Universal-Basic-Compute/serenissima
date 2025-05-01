@@ -447,6 +447,9 @@ export default function PolygonViewer() {
       });
       sceneRef.current = sceneSetup;
       
+      // Create water immediately
+      sceneSetup.createWater();
+      
       // Add error handling for WebGL context loss
       canvasRef.current.addEventListener('webglcontextlost', (event) => {
         console.error('WebGL context lost:', event);
@@ -693,7 +696,7 @@ export default function PolygonViewer() {
         } else if (sceneRef.current && sceneRef.current.water) {
           // Use scene's water if waterEffectRef is not available
           try {
-            sceneRef.current.water.update(frameCount, !highQuality);
+            sceneRef.current.water.update(frameCount);
           } catch (error) {
             // Silent fail
           }
