@@ -22,6 +22,7 @@ export default class LODPolygon {
   private originalMaterial: THREE.MeshStandardMaterial | null = null;
   private ownerColor: string | null = null;
   private coatOfArmsSprite: THREE.Sprite | null = null;
+  private ownerCoatOfArmsMap: Record<string, string> | null = null;
 
   constructor(
     scene: THREE.Scene,
