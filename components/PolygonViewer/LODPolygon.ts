@@ -303,12 +303,6 @@ export default class LODPolygon {
     this.removeBottomFaces(geometry);
   }
   
-  
-  public updateLOD(cameraPosition: THREE.Vector3) {
-    // No LOD switching needed anymore
-    return;
-  }
-  
   public getMesh() {
     return this.mesh;
   }
