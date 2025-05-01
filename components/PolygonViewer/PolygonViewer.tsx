@@ -416,7 +416,8 @@ export default function PolygonViewer() {
         y: event.clientY - previousMousePosition.y
       };
       
-      if (isDragging) {
+      // Only rotate if left mouse button is pressed (isDragging)
+      if (isDragging && !isRightDragging) {
         // Update spherical coordinates based on mouse movement
         // Invert the x movement to make it more intuitive
         cameraTheta -= deltaMove.x * 0.01;
@@ -437,7 +438,9 @@ export default function PolygonViewer() {
         
         // Always look at the center plus offset
         camera.lookAt(sceneOffsetX, 0, sceneOffsetZ);
-      } else if (isRightDragging) {
+      } 
+      // Only pan if right mouse button is pressed (isRightDragging)
+      else if (isRightDragging && !isDragging) {
         // Pan the scene when right mouse button is dragged
         const panSpeed = 0.1;
         
