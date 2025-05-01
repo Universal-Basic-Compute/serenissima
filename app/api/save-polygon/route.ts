@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { serverUtils } from '@/lib/fileUtils';
+import { serverUtils, validateAndRepairCoordinates } from '@/lib/fileUtils';
 
 export async function POST(request: Request) {
   try {
@@ -13,8 +13,17 @@ export async function POST(request: Request) {
       );
     }
     
+    // Validate and repair coordinates
+    const validCoordinates = validateAndRepairCoordinates(coordinates);
+    if (!validCoordinates) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid polygon coordinates - contains NaN or insufficient valid points' },
+        { status: 400 }
+      );
+    }
+    
     // Calculate centroid and update or create file
-    const result = serverUtils.updateOrCreatePolygonFile(coordinates);
+    const result = serverUtils.updateOrCreatePolygonFile(validCoordinates);
     
     return NextResponse.json({ 
       success: true, 

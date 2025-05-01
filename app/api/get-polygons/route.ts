@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { serverUtils, calculateCentroid } from '@/lib/fileUtils';
+import { serverUtils, calculateCentroid, validateAndRepairCoordinates } from '@/lib/fileUtils';
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
@@ -28,27 +28,41 @@ export async function GET(request: Request) {
         // Handle both old and new data formats
         if (Array.isArray(data)) {
           // Old format - just coordinates array
+          // Validate and repair coordinates
+          const validCoordinates = validateAndRepairCoordinates(data);
+          if (!validCoordinates) {
+            console.warn(`Invalid coordinates in ${file}, skipping`);
+            return null;
+          }
+          
           return {
             id,
-            coordinates: data,
+            coordinates: validCoordinates,
             // Calculate centroid on-the-fly if not already stored
-            centroid: calculateCentroid(data)
+            centroid: calculateCentroid(validCoordinates)
           };
         } else if (data && data.coordinates) {
+          // Validate and repair coordinates
+          const validCoordinates = validateAndRepairCoordinates(data.coordinates);
+          if (!validCoordinates) {
+            console.warn(`Invalid coordinates in ${file}, skipping`);
+            return null;
+          }
+          
           // If essential mode, return minimal data
           if (essential) {
             return {
               id,
-              coordinates: data.coordinates,
-              centroid: data.centroid || calculateCentroid(data.coordinates)
+              coordinates: validCoordinates,
+              centroid: data.centroid || calculateCentroid(validCoordinates)
             };
           }
           
           // New format with coordinates and centroid
           return {
             id,
-            coordinates: data.coordinates,
-            centroid: data.centroid || calculateCentroid(data.coordinates),
+            coordinates: validCoordinates,
+            centroid: data.centroid || calculateCentroid(validCoordinates),
             // Include historical information if available
             historicalName: data.historicalName,
             englishName: data.englishName,
@@ -58,16 +72,13 @@ export async function GET(request: Request) {
           };
         } else {
           console.warn(`Invalid data format in ${file}`);
-          return {
-            id,
-            coordinates: [],
-            centroid: null
-          };
+          return null;
         }
       });
       
       const batchResults = await Promise.all(batchPromises);
-      polygons.push(...batchResults);
+      // Filter out null results (invalid polygons)
+      polygons.push(...batchResults.filter(Boolean));
     }
     
     // Set cache headers to allow browsers to cache the response

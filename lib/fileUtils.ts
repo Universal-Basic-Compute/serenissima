@@ -15,13 +15,25 @@ export function calculateCentroid(coordinates: any[]) {
     return null;
   }
 
+  // Filter out invalid coordinates
+  const validCoords = coordinates.filter(coord => 
+    coord && 
+    typeof coord.lat === 'number' && !isNaN(coord.lat) && isFinite(coord.lat) &&
+    typeof coord.lng === 'number' && !isNaN(coord.lng) && isFinite(coord.lng)
+  );
+  
+  if (validCoords.length < 3) {
+    console.warn('Not enough valid coordinates to calculate centroid');
+    return null;
+  }
+
   let sumLat = 0;
   let sumLng = 0;
-  const n = coordinates.length;
+  const n = validCoords.length;
   
   for (let i = 0; i < n; i++) {
-    sumLat += coordinates[i].lat;
-    sumLng += coordinates[i].lng;
+    sumLat += validCoords[i].lat;
+    sumLng += validCoords[i].lng;
   }
 
   return {
@@ -99,6 +111,33 @@ export function calculateDistanceMemoized(coord1: any, coord2: any) {
   distanceCache.set(key, result);
   
   return result;
+}
+
+/**
+ * Validates and repairs polygon coordinates
+ * @param coordinates Array of coordinates to validate
+ * @returns Cleaned coordinates array or null if beyond repair
+ */
+export function validateAndRepairCoordinates(coordinates: any[]): any[] | null {
+  if (!coordinates || !Array.isArray(coordinates) || coordinates.length < 3) {
+    console.warn('Invalid polygon: needs at least 3 coordinates');
+    return null;
+  }
+
+  // Filter out invalid coordinates (NaN, undefined, etc.)
+  const validCoordinates = coordinates.filter(coord => 
+    coord && 
+    typeof coord.lat === 'number' && !isNaN(coord.lat) && isFinite(coord.lat) &&
+    typeof coord.lng === 'number' && !isNaN(coord.lng) && isFinite(coord.lng)
+  );
+
+  // Check if we still have enough valid coordinates
+  if (validCoordinates.length < 3) {
+    console.warn(`Polygon has insufficient valid coordinates: ${validCoordinates.length} (needs at least 3)`);
+    return null;
+  }
+
+  return validCoordinates;
 }
 
 // Create server-only versions of these functions
@@ -191,9 +230,16 @@ if (typeof window === 'undefined') {
   };
   
   serverUtils.updateOrCreatePolygonFile = (coordinates: any[], centroid: any = null) => {
+    // Validate coordinates
+    const validCoordinates = validateAndRepairCoordinates(coordinates);
+    if (!validCoordinates) {
+      console.error('Invalid coordinates provided to updateOrCreatePolygonFile');
+      throw new Error('Invalid polygon coordinates');
+    }
+    
     // Calculate centroid if not provided
     if (!centroid) {
-      centroid = calculateCentroid(coordinates);
+      centroid = calculateCentroid(validCoordinates);
     }
     
     // Check if a similar polygon already exists
@@ -210,7 +256,7 @@ if (typeof window === 'undefined') {
         if (distance < 0.0001) { // Approximately 10 meters
           // Update existing file
           const updatedData = {
-            coordinates,
+            coordinates: validCoordinates,
             centroid
           };
           serverUtils.saveJsonToFile(file, updatedData);
@@ -222,7 +268,7 @@ if (typeof window === 'undefined') {
     // No similar polygon found, create a new file
     const filename = `polygon-${Date.now()}.json`;
     const polygonData = {
-      coordinates,
+      coordinates: validCoordinates,
       centroid
     };
     serverUtils.saveJsonToFile(filename, polygonData);
