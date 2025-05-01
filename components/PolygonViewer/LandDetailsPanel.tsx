@@ -239,32 +239,53 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
           {/* Transaction information with enhanced styling */}
           {transaction && (
             <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
-              <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">For Sale</h3>
-              <p className="text-2xl font-semibold text-green-600 text-center">
-                {transaction.price.toLocaleString()} <span className="text-sm">⚜️ ducats</span>
-              </p>
-              
-              {/* Add Acquire Land button with improved styling */}
-              <button
-                onClick={() => {
-                  // Get the current wallet address
-                  const walletAddress = sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress') || '';
+              {transaction.buyer === (sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress')) ? (
+                // Display acquisition decree if the user is the buyer
+                <div className="text-center">
+                  <h3 className="text-sm uppercase font-medium text-green-600 mb-2">Land Acquisition Decree</h3>
+                  <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                    <p className="text-green-800 font-medium">
+                      This land has been successfully acquired by your noble house.
+                    </p>
+                    <p className="text-sm text-green-600 mt-1">
+                      Transaction completed for {transaction.price.toLocaleString()} ⚜️ ducats
+                    </p>
+                    <p className="text-xs italic text-green-700 mt-2">
+                      By decree of the Council of Ten, this property is now under your stewardship.
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                // Display purchase option if the user is not the buyer
+                <>
+                  <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">For Sale</h3>
+                  <p className="text-2xl font-semibold text-green-600 text-center">
+                    {transaction.price.toLocaleString()} <span className="text-sm">⚜️ ducats</span>
+                  </p>
                   
-                  if (!walletAddress) {
-                    alert('Please connect your wallet first');
-                    return;
-                  }
-                  
-                  // Show the purchase confirmation dialog
-                  setShowPurchaseConfirmation(true);
-                }}
-                className="mt-4 w-full px-4 py-3 bg-amber-600 text-white text-base font-medium rounded-lg hover:bg-amber-700 transition-colors flex items-center justify-center"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                Acquire Land
-              </button>
+                  {/* Add Acquire Land button with improved styling */}
+                  <button
+                    onClick={() => {
+                      // Get the current wallet address
+                      const walletAddress = sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress') || '';
+                      
+                      if (!walletAddress) {
+                        alert('Please connect your wallet first');
+                        return;
+                      }
+                      
+                      // Show the purchase confirmation dialog
+                      setShowPurchaseConfirmation(true);
+                    }}
+                    className="mt-4 w-full px-4 py-3 bg-amber-600 text-white text-base font-medium rounded-lg hover:bg-amber-700 transition-colors flex items-center justify-center"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Acquire Land
+                  </button>
+                </>
+              )}
             </div>
           )}
 
@@ -626,6 +647,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
     } finally {
       setIsPurchasing(false);
       setShowPurchaseConfirmation(false);
+      // We don't close the panel here to allow the user to see the acquisition decree
     }
   }
 }
