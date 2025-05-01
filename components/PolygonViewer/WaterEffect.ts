@@ -150,9 +150,12 @@ export default class WaterEffect {
           typeof waterUniforms.distortionScale !== 'undefined' && 
           typeof waterUniforms.distortionScale.value !== 'undefined') {
         try {
-          // Use a much smaller variation to minimize errors
+          // Enhanced wave pattern with multiple frequencies
           const baseDistortion = 3.0;
-          const variation = Math.sin(time) * 0.2;
+          const variation = 
+            Math.sin(time) * 0.15 + 
+            Math.cos(time * 0.5) * 0.1 + 
+            Math.sin(time * 0.25) * 0.05;
           waterUniforms.distortionScale.value = baseDistortion + variation;
         } catch (error) {
           // Silent fail
@@ -165,8 +168,30 @@ export default class WaterEffect {
           typeof waterUniforms.size.value !== 'undefined') {
         try {
           const baseSize = 4.0;
-          const sizeVariation = Math.sin(time * 0.01) * 0.2;
+          // More complex variation pattern
+          const sizeVariation = 
+            Math.sin(time * 0.01) * 0.15 + 
+            Math.cos(time * 0.02) * 0.1;
           waterUniforms.size.value = baseSize + sizeVariation;
+        } catch (error) {
+          // Silent fail
+        }
+      }
+      
+      // Add subtle color variation if available
+      if (waterUniforms.waterColor && 
+          typeof waterUniforms.waterColor !== 'undefined' && 
+          typeof waterUniforms.waterColor.value !== 'undefined') {
+        try {
+          // Get base color
+          const baseColor = new THREE.Color(this.getWaterColorForView());
+          
+          // Add subtle variation
+          const r = baseColor.r + Math.sin(time * 0.1) * 0.02;
+          const g = baseColor.g + Math.cos(time * 0.15) * 0.02;
+          const b = baseColor.b + Math.sin(time * 0.2) * 0.02;
+          
+          waterUniforms.waterColor.value.setRGB(r, g, b);
         } catch (error) {
           // Silent fail
         }
@@ -221,18 +246,24 @@ export default class WaterEffect {
           // Mix waves for more natural look
           float wave = mix(mix(wave1, wave2, 0.5), wave3, 0.3);
           
-          // Create a wider, more visible shore effect with foam
-          // Adjusted parameters for more pronounced shore effect
-          float shoreMask = smoothstep(0.0, 0.25, landDistance) * (1.0 - smoothstep(0.25, 0.5, landDistance));
+          // Enhanced shore effect with more dynamic foam
+          float shoreMask = smoothstep(0.0, 0.2, landDistance) * (1.0 - smoothstep(0.2, 0.6, landDistance));
+          
+          // Create more dynamic foam near shores
+          float foamIntensity = shoreMask * (
+            0.8 + 
+            0.2 * sin(time * 0.8 + vUv.x * 20.0 + vUv.y * 15.0) + 
+            0.3 * cos(time * 0.5 - vUv.x * 15.0 + vUv.y * 10.0)
+          );
           
           // Add foam color with more white and slight blue tint
-          vec3 foamColor = mix(waterColor, vec3(0.95, 0.98, 1.0), 0.85);
+          vec3 foamColor = mix(waterColor, vec3(0.98, 0.99, 1.0), 0.9);
           
           // Add subtle variation to foam based on position
-          float foamVariation = sin(vUv.x * 30.0) * sin(vUv.y * 30.0) * 0.1 + 0.9;
+          float foamVariation = sin(vUv.x * 40.0) * sin(vUv.y * 40.0) * 0.15 + 0.85;
           
           // Final color with higher opacity for visibility and variation
-          gl_FragColor = vec4(foamColor * foamVariation, shoreMask * wave * 0.8);
+          gl_FragColor = vec4(foamColor * foamVariation, foamIntensity * wave * 0.9);
         }
       `,
       transparent: true,
@@ -273,7 +304,7 @@ export default class WaterEffect {
       this.waterGeometry = new THREE.PlaneGeometry(
         this.width * 1.5, 
         this.height * 1.5,
-        this.performanceMode ? 8 : 16  // Further reduced complexity
+        this.performanceMode ? 8 : 32  // Increased resolution for high quality mode
       );
       
       // Try to load the actual texture, but don't wait for it
@@ -299,13 +330,13 @@ export default class WaterEffect {
       
       // Create water with proper options
       const waterOptions = {
-        textureWidth: this.performanceMode ? 128 : 256, // Further reduced resolution
-        textureHeight: this.performanceMode ? 128 : 256,
+        textureWidth: this.performanceMode ? 128 : 512, // Increased resolution for high quality
+        textureHeight: this.performanceMode ? 128 : 512,
         waterNormals: this.waterNormalMap,
         sunDirection: this.sunDirection,
         sunColor: 0xffffff,
         waterColor: this.getWaterColorForView(),
-        distortionScale: this.performanceMode ? 1.0 : 2.0, // Further reduced distortion
+        distortionScale: this.performanceMode ? 1.0 : 3.0, // Increased distortion for high quality
         fog: false,
         format: THREE.RGBAFormat
       };
@@ -338,6 +369,17 @@ export default class WaterEffect {
           console.error('Error creating shore interaction:', error);
         }
       }, 1500);
+      
+      // Create realistic water surface with a delay
+      if (!this.performanceMode) {
+        setTimeout(() => {
+          try {
+            this.createRealisticWaterSurface();
+          } catch (error) {
+            console.error('Error creating realistic water surface:', error);
+          }
+        }, 2000);
+      }
     } catch (error) {
       console.error('Error initializing water:', error);
     }
@@ -452,6 +494,37 @@ export default class WaterEffect {
     }
   }
   
+  // Add method to create a more realistic water surface
+  private createRealisticWaterSurface() {
+    if (!this.water || this.performanceMode) return;
+    
+    try {
+      // Add subtle height variation to water geometry for more realistic waves
+      const waterGeometry = this.water.geometry as THREE.PlaneGeometry;
+      const position = waterGeometry.attributes.position;
+      
+      for (let i = 0; i < position.count; i++) {
+        const x = position.getX(i);
+        const z = position.getZ(i);
+        
+        // Add very subtle height variation based on position
+        // This creates a gentle undulating effect
+        const height = 
+          Math.sin(x * 0.05) * 0.1 + 
+          Math.cos(z * 0.04) * 0.1 +
+          Math.sin(x * 0.03 + z * 0.02) * 0.05;
+        
+        position.setY(i, height);
+      }
+      
+      // Update geometry
+      position.needsUpdate = true;
+      waterGeometry.computeVertexNormals();
+    } catch (error) {
+      console.warn('Error creating realistic water surface:', error);
+    }
+  }
+  
   public update(frameCount: number, performanceMode: boolean) {
     try {
       // Skip all updates if water isn't properly initialized
@@ -510,17 +583,48 @@ export default class WaterEffect {
         }
       }
       
-      // Update shore interaction with better error handling
-      if (this.shoreMesh && this.landRenderTarget && this.shoreMesh.material && frameCount % 60 === 0) {
+      // Update shore interaction with better error handling - more frequent updates for smoother animation
+      if (this.shoreMesh && this.shoreMesh.material) {
         try {
           // Update shore material time uniform for wave animation
           const shoreMaterial = this.shoreMesh.material as THREE.ShaderMaterial;
           if (shoreMaterial.userData && shoreMaterial.userData.uniforms && shoreMaterial.userData.uniforms.time) {
-            shoreMaterial.userData.uniforms.time.value = frameCount * 0.01;
+            // Use a smoother time increment for more fluid animation
+            shoreMaterial.userData.uniforms.time.value = frameCount * 0.005;
             shoreMaterial.needsUpdate = true;
           }
         } catch (error) {
-          console.warn('Error updating shore material:', error);
+          // Silent fail
+        }
+      }
+      
+      // Render land texture to render target for shore effect - less frequently to save performance
+      if (this.landRenderTarget && this.landCamera && frameCount % 30 === 0) {
+        try {
+          // Store current renderer state
+          const currentRenderTarget = this.renderer.getRenderTarget();
+          
+          // Set render target to land texture
+          this.renderer.setRenderTarget(this.landRenderTarget);
+          
+          // Render only land objects
+          const currentVisibility = this.water.visible;
+          this.water.visible = false;
+          this.renderer.render(this.scene, this.landCamera);
+          this.water.visible = currentVisibility;
+          
+          // Restore renderer state
+          this.renderer.setRenderTarget(currentRenderTarget);
+          
+          // Update shore material with land texture
+          if (this.shoreMesh && this.shoreMesh.material) {
+            const shoreMaterial = this.shoreMesh.material as THREE.ShaderMaterial;
+            if (shoreMaterial.userData && shoreMaterial.userData.uniforms && shoreMaterial.userData.uniforms.landTexture) {
+              shoreMaterial.userData.uniforms.landTexture.value = this.landRenderTarget.texture;
+            }
+          }
+        } catch (error) {
+          // Silent fail
         }
       }
     } catch (error) {

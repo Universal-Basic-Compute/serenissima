@@ -421,6 +421,21 @@ export default function PolygonViewer() {
           }
         }, 1000);
       });
+      
+      // Add custom event listener for polygon changes to update water effects
+      window.addEventListener('polygonAdded', () => {
+        if (waterEffectRef.current) {
+          console.log('Polygon added, updating water effects');
+          setTimeout(() => waterEffectRef.current.update(0, !highQuality), 500);
+        }
+      });
+      
+      window.addEventListener('polygonDeleted', () => {
+        if (waterEffectRef.current) {
+          console.log('Polygon deleted, updating water effects');
+          setTimeout(() => waterEffectRef.current.update(0, !highQuality), 500);
+        }
+      });
     } catch (error) {
       console.error('Error setting up Three.js scene:', error);
     }

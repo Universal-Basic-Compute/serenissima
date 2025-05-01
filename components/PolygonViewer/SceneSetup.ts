@@ -213,6 +213,13 @@ export default class SceneSetup {
     this.sunGlow = new THREE.Mesh(sunGlowGeometry, sunGlowMaterial);
     this.sunGlow.position.copy(this.sunLight.position);
     this.scene.add(this.sunGlow);
+    
+    // Add water reflection light - a subtle blue light from below
+    const waterReflectionLight = new THREE.DirectionalLight(0x8ecbf5, 0.3);
+    waterReflectionLight.position.set(0, -10, 0); // Coming from below
+    waterReflectionLight.target.position.set(0, 0, 0);
+    this.scene.add(waterReflectionLight);
+    this.scene.add(waterReflectionLight.target);
   }
   
   private animateSun() {
