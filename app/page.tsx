@@ -1417,7 +1417,7 @@ export default function Home() {
                   }}
                   className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-amber-500 hover:text-white transition-colors"
                 >
-                  Add Compute
+                  Inject $COMPUTE
                 </button>
                 <button
                   onClick={() => {
@@ -1426,7 +1426,7 @@ export default function Home() {
                   }}
                   className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-amber-500 hover:text-white transition-colors"
                 >
-                  Withdraw Ducats
+                  Cash out $COMPUTE
                 </button>
                 <button
                   onClick={() => {
