@@ -504,10 +504,17 @@ export default function Home() {
 
   // Handle map load
   const onMapLoad = (map) => {
+    console.log('Google Map loaded');
     mapRef.current = map;
     
     // Add click listener for bridge creation
     map.addListener('click', handleMapClick);
+    
+    // Load polygons immediately when map is ready
+    if (isGoogleLoaded) {
+      console.log('Loading polygons on map load...');
+      loadPolygonsOnMap();
+    }
   };
 
   // Handle drawing manager load
@@ -518,7 +525,19 @@ export default function Home() {
   
   // Add a function to load polygons onto the map
   const loadPolygonsOnMap = useCallback(() => {
-    if (!mapRef.current || !isGoogleLoaded) return;
+    console.log('loadPolygonsOnMap called');
+    
+    if (!mapRef.current) {
+      console.warn('Map reference not available');
+      return;
+    }
+    
+    if (!isGoogleLoaded) {
+      console.warn('Google Maps API not loaded');
+      return;
+    }
+    
+    console.log('Loading polygons onto map...');
     
     // Clear existing polygons
     Object.values(activeLandPolygons).forEach(polygon => {
@@ -532,8 +551,17 @@ export default function Home() {
     fetch('/api/get-polygons')
       .then(response => response.json())
       .then(data => {
-        data.polygons.forEach(polygon => {
+        console.log(`Fetched ${data.polygons?.length || 0} polygons from API`);
+        
+        if (!data.polygons || data.polygons.length === 0) {
+          console.warn('No polygons returned from API');
+          return;
+        }
+        
+        data.polygons.forEach((polygon, index) => {
           if (polygon.coordinates && polygon.coordinates.length > 2) {
+            console.log(`Creating polygon ${index} (${polygon.id}) on map`);
+            
             const path = polygon.coordinates.map(coord => ({
               lat: coord.lat,
               lng: coord.lng
@@ -551,9 +579,12 @@ export default function Home() {
             
             // Store reference to polygon
             newActiveLandPolygons[polygon.id] = mapPolygon;
+          } else {
+            console.warn(`Polygon ${index} (${polygon.id}) has invalid coordinates:`, polygon.coordinates);
           }
         });
         
+        console.log(`Added ${Object.keys(newActiveLandPolygons).length} polygons to map`);
         setActiveLandPolygons(newActiveLandPolygons);
       })
       .catch(error => {
@@ -564,9 +595,27 @@ export default function Home() {
   // Add useEffect to load polygons when map is ready
   useEffect(() => {
     if (mapRef.current && isGoogleLoaded) {
+      console.log('Map and Google Maps API ready, loading polygons...');
       loadPolygonsOnMap();
     }
   }, [mapRef.current, isGoogleLoaded, loadPolygonsOnMap]);
+
+  // Also add this to ensure polygons are loaded when the component mounts
+  useEffect(() => {
+    // This will run once when the component mounts
+    const loadPolygonsWhenReady = () => {
+      if (mapRef.current && isGoogleLoaded) {
+        console.log('Loading polygons on mount...');
+        loadPolygonsOnMap();
+      } else {
+        // If map or Google Maps API isn't ready yet, check again in a moment
+        console.log('Map or Google Maps API not ready yet, waiting...');
+        setTimeout(loadPolygonsWhenReady, 500);
+      }
+    };
+    
+    loadPolygonsWhenReady();
+  }, []);
 
   // Handle script load
   const handleScriptLoad = () => {
