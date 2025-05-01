@@ -164,8 +164,24 @@ export default class PolygonRenderer {
     sampleMesh.userData.originalEmissive = new THREE.Color(0, 0, 0);
     sampleMesh.userData.originalEmissiveIntensity = 0;
     
-    this.meshes.push(sampleMesh);
-    this.scene.add(sampleMesh);
+    // Create a LOD polygon for the sample
+    const lodPolygon = new LODPolygon(
+      this.scene,
+      { id: 'sample', coordinates: [] },
+      this.bounds,
+      this.activeView,
+      this.performanceMode,
+      this.textureLoader,
+      {
+        sandBaseColor: this.sandBaseColor,
+        sandNormalMap: this.sandNormalMap,
+        sandRoughnessMap: this.sandRoughnessMap
+      }
+    );
+    
+    this.lodPolygons.push(lodPolygon);
+    this.polygonMeshesRef.current['sample'] = lodPolygon.getMesh();
+    
     console.log('Added sample polygon to scene');
   }
   
