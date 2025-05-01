@@ -28,7 +28,7 @@ export default class SceneSetup {
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color('#87CEEB'); // Sky blue background
     
-    // Skip fog initially for faster loading - we'll add it later
+    // No fog for cleaner visuals
     
     // Create a camera with a better initial position
     this.camera = new THREE.PerspectiveCamera(
@@ -62,8 +62,7 @@ export default class SceneSetup {
     // Enhance renderer after initial load
     setTimeout(() => {
       console.log('Enhancing renderer quality...');
-      // Add fog for depth
-      this.scene.fog = new THREE.FogExp2('#87CEEB', 0.0003); // Lighter fog with reduced density
+      // No fog for cleaner visuals
       
       // Enhance renderer settings based on performance mode
       if (!this.performanceMode) {
