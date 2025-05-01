@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { Polygon, ViewMode } from './types';
 import { normalizeCoordinates, createPolygonShape } from './utils';
 
-export default class LODPolygon {
+export class LODPolygon {
   private scene: THREE.Scene;
   private polygon: Polygon;
   private bounds: any;
@@ -875,5 +875,3 @@ export default class LODPolygon {
   }
 }
 
-// Explicit export statement to ensure proper module handling
-export default LODPolygon;

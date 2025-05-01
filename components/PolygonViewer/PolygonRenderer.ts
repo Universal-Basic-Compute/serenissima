@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { MutableRefObject } from 'react';
 import { Polygon, ViewMode } from './types';
 import { normalizeCoordinates, createPolygonShape } from './utils';
-import LODPolygon from './LODPolygon';
+import { LODPolygon } from './LODPolygon';
 
 interface PolygonRendererProps {
   scene: THREE.Scene;
