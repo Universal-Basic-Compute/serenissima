@@ -25,7 +25,6 @@ export default function PolygonViewer() {
   const [transferMenuOpen, setTransferMenuOpen] = useState(false);
   const [isFlushing, setIsFlushing] = useState(false);
   const [marketPanelVisible, setMarketPanelVisible] = useState(false);
-  const polygonRendererRef = useRef<any>(null);
   
   // Add refs at the top level of the component
   const hasLoadedDataRef = useRef<boolean>(false);
