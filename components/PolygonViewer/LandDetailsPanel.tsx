@@ -18,6 +18,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
   const [isLoading, setIsLoading] = useState(false);
   const [offerAmount, setOfferAmount] = useState<number>(1000); // Default offer of 1000 COMPUTE
   const [showOfferInput, setShowOfferInput] = useState<boolean>(false);
+  const [offers, setOffers] = useState<any[]>([]);
   
   // Find the selected polygon
   const selectedPolygon = selectedPolygonId 
@@ -114,6 +115,39 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
     }
   }, [selectedPolygonId]);
   
+  // Add this useEffect to fetch offers when a polygon is selected
+  useEffect(() => {
+    if (selectedPolygonId) {
+      // Fetch all offers for this land
+      fetch(`http://localhost:8000/api/transactions/land/${selectedPolygonId}`)
+        .then(response => {
+          if (!response.ok) {
+            if (response.status === 404) {
+              // No offers found, that's okay
+              setOffers([]);
+              return [];
+            }
+            throw new Error(`Failed to fetch offers: ${response.status} ${response.statusText}`);
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (data && Array.isArray(data)) {
+            console.log(`Found ${data.length} offers for land ${selectedPolygonId}:`, data);
+            setOffers(data);
+          } else {
+            setOffers([]);
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching offers:', error);
+          setOffers([]);
+        });
+    } else {
+      setOffers([]);
+    }
+  }, [selectedPolygonId]);
+  
   // Show panel with animation when a polygon is selected
   useEffect(() => {
     if (selectedPolygonId) {
@@ -197,6 +231,130 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
             </div>
           )}
           
+          {/* Offers section */}
+          {offers.length > 0 && (
+            <div>
+              <h3 className="text-sm font-medium text-gray-500 mt-4">Offers</h3>
+              <div className="mt-1 space-y-2">
+                {offers.map((offer, index) => (
+                  <div key={index} className="p-2 border rounded bg-gray-50">
+                    <div className="flex justify-between items-center">
+                      <span className="font-semibold text-green-600">
+                        {offer.price.toLocaleString()} ducats
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        {new Date(offer.created_at).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <div className="text-xs">
+                      {offer.seller === owner ? (
+                        <span className="text-blue-600">Outgoing offer</span>
+                      ) : (
+                        <span className="text-purple-600">Incoming offer from {offer.seller}</span>
+                      )}
+                    </div>
+                    {/* Add accept button for incoming offers */}
+                    {offer.seller !== owner && (
+                      <button
+                        onClick={async () => {
+                          // Get the current wallet address
+                          const walletAddress = sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress') || '';
+                          
+                          if (!walletAddress) {
+                            alert('Please connect your wallet first');
+                            return;
+                          }
+                          
+                          // Only the owner can accept offers
+                          if (owner !== walletAddress) {
+                            alert('Only the current owner can accept offers');
+                            return;
+                          }
+                          
+                          try {
+                            // Execute the transaction
+                            const response = await fetch(`http://localhost:8000/api/transaction/${offer.id}/execute`, {
+                              method: 'POST',
+                              headers: {
+                                'Content-Type': 'application/json',
+                              },
+                              body: JSON.stringify({
+                                buyer: offer.seller
+                              }),
+                            });
+                            
+                            if (!response.ok) {
+                              throw new Error('Failed to accept offer');
+                            }
+                            
+                            const data = await response.json();
+                            alert(`Offer accepted! Land transferred to ${offer.seller}`);
+                            // Refresh the page to update the UI
+                            window.location.reload();
+                          } catch (error) {
+                            console.error('Error accepting offer:', error);
+                            alert('Failed to accept offer. Please try again.');
+                          }
+                        }}
+                        className="mt-2 w-full px-2 py-1 bg-green-500 text-white text-xs rounded hover:bg-green-600"
+                      >
+                        Accept Offer
+                      </button>
+                    )}
+                    {/* Add cancel button for outgoing offers */}
+                    {offer.seller === owner && (
+                      <button
+                        onClick={async () => {
+                          // Get the current wallet address
+                          const walletAddress = sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress') || '';
+                          
+                          if (!walletAddress) {
+                            alert('Please connect your wallet first');
+                            return;
+                          }
+                          
+                          // Only the seller can cancel their own offers
+                          if (owner !== walletAddress) {
+                            alert('Only the offer creator can cancel it');
+                            return;
+                          }
+                          
+                          try {
+                            // Cancel the transaction
+                            const response = await fetch(`http://localhost:8000/api/transaction/${offer.id}/cancel`, {
+                              method: 'POST',
+                              headers: {
+                                'Content-Type': 'application/json',
+                              },
+                              body: JSON.stringify({
+                                seller: walletAddress
+                              }),
+                            });
+                            
+                            if (!response.ok) {
+                              throw new Error('Failed to cancel offer');
+                            }
+                            
+                            const data = await response.json();
+                            alert('Offer cancelled successfully');
+                            // Refresh offers
+                            setOffers(offers.filter(o => o.id !== offer.id));
+                          } catch (error) {
+                            console.error('Error cancelling offer:', error);
+                            alert('Failed to cancel offer. Please try again.');
+                          }
+                        }}
+                        className="mt-2 w-full px-2 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600"
+                      >
+                        Cancel Offer
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <WalletStatus className="mb-2" />
           
           <div className="pt-2 flex space-x-2">

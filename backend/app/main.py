@@ -618,6 +618,60 @@ async def get_transactions():
         traceback.print_exc(file=sys.stdout)
         raise HTTPException(status_code=500, detail=error_msg)
 
+@app.get("/api/transactions/land/{land_id}")
+async def get_land_transactions(land_id: str):
+    """Get all transactions for a land (both incoming and outgoing offers)"""
+    
+    try:
+        # Get all active transactions for this land
+        formula = f"AND({{AssetId}}='{land_id}', {{Type}}='land', {{ExecutedAt}}=BLANK())"
+        print(f"Searching for land transactions with formula: {formula}")
+        records = transactions_table.all(formula=formula)
+        
+        if not records:
+            # No transactions found
+            return []
+        
+        transactions = []
+        for record in records:
+            # Extract land details from Notes field if available
+            historical_name = None
+            english_name = None
+            description = None
+            
+            if "Notes" in record["fields"]:
+                try:
+                    land_details = json.loads(record["fields"].get("Notes", "{}"))
+                    historical_name = land_details.get("historical_name")
+                    english_name = land_details.get("english_name")
+                    description = land_details.get("description")
+                except json.JSONDecodeError:
+                    # If Notes isn't valid JSON, just ignore it
+                    pass
+            
+            transactions.append({
+                "id": record["id"],
+                "type": record["fields"].get("Type", ""),
+                "asset_id": record["fields"].get("AssetId", ""),
+                "seller": record["fields"].get("Seller", ""),
+                "buyer": record["fields"].get("Buyer", None),
+                "price": record["fields"].get("Price", 0),
+                "historical_name": historical_name,
+                "english_name": english_name,
+                "description": description,
+                "created_at": record["fields"].get("CreatedAt", ""),
+                "updated_at": record["fields"].get("UpdatedAt", ""),
+                "executed_at": record["fields"].get("ExecutedAt", None)
+            })
+        
+        print(f"Found {len(transactions)} transactions for land {land_id}")
+        return transactions
+    except Exception as e:
+        error_msg = f"Failed to get land transactions: {str(e)}"
+        print(f"ERROR: {error_msg}")
+        traceback.print_exc(file=sys.stdout)
+        raise HTTPException(status_code=500, detail=error_msg)
+
 @app.post("/api/transaction/{transaction_id}/execute")
 async def execute_transaction(transaction_id: str, data: dict):
     """Execute a transaction by setting the buyer and executed_at timestamp"""
@@ -699,6 +753,39 @@ async def execute_transaction(transaction_id: str, data: dict):
         raise
     except Exception as e:
         error_msg = f"Failed to execute transaction: {str(e)}"
+        print(f"ERROR: {error_msg}")
+        traceback.print_exc(file=sys.stdout)
+        raise HTTPException(status_code=500, detail=error_msg)
+
+@app.post("/api/transaction/{transaction_id}/cancel")
+async def cancel_transaction(transaction_id: str, data: dict):
+    """Cancel a transaction"""
+    
+    if not data.get("seller"):
+        raise HTTPException(status_code=400, detail="Seller is required")
+    
+    try:
+        # Get the transaction record
+        record = transactions_table.get(transaction_id)
+        if not record:
+            raise HTTPException(status_code=404, detail="Transaction not found")
+        
+        # Check if transaction is already executed
+        if record["fields"].get("ExecutedAt"):
+            raise HTTPException(status_code=400, detail="Transaction already executed")
+        
+        # Check if the seller is the one who created the transaction
+        if record["fields"].get("Seller") != data["seller"]:
+            raise HTTPException(status_code=403, detail="Only the seller can cancel this transaction")
+        
+        # Delete the transaction
+        transactions_table.delete(transaction_id)
+        
+        return {"success": True, "message": "Transaction cancelled successfully"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        error_msg = f"Failed to cancel transaction: {str(e)}"
         print(f"ERROR: {error_msg}")
         traceback.print_exc(file=sys.stdout)
         raise HTTPException(status_code=500, detail=error_msg)
