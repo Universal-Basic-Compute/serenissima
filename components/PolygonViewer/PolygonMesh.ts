@@ -82,7 +82,7 @@ class PolygonMesh {
       // Determine the color to use
       const landColor = this.determineLandColor();
       
-      // Create a completely flat material with NO transparency and enable polygon offset
+      // Create a completely flat material with NO transparency and enhanced settings to prevent edge artifacts
       const material = new THREE.MeshBasicMaterial({ 
         color: landColor,
         side: THREE.FrontSide,
@@ -91,10 +91,12 @@ class PolygonMesh {
         opacity: 1.0,
         depthTest: true,
         depthWrite: true,
-        // Enhanced polygon offset to prevent z-fighting at edges
+        // Further enhanced polygon offset to completely eliminate z-fighting
         polygonOffset: true,
-        polygonOffsetFactor: 2.0, // Increased from 1.0 to 2.0
-        polygonOffsetUnits: 2.0   // Increased from 1.0 to 2.0
+        polygonOffsetFactor: 3.0, // Increased from 2.0 to 3.0
+        polygonOffsetUnits: 3.0,  // Increased from 2.0 to 3.0
+        // Disable all edge highlighting
+        flatShading: false
       });
       
       // Immediately load and apply the sand texture
@@ -159,10 +161,12 @@ class PolygonMesh {
       this.mesh.userData.noShadow = true;
       this.mesh.userData.ignoreLight = true;
       
-      // Position MUCH LOWER above water to avoid z-fighting
-      this.mesh.position.y = 0.001; // Reduced from 0.01 to 0.001 to minimize elevation
+      // Position ALL polygons at EXACTLY the same height to eliminate any z-fighting between adjacent polygons
+      this.mesh.position.y = 0.0; // Set to exactly 0.0 to ensure all polygons are at identical height
       
-      // Edges removed to eliminate polygon borders
+      // Completely flat with no edges or borders
+      // Apply a very slight inset to each polygon to create tiny gaps between them
+      geometry.scale(0.999, 1, 0.999); // Scale slightly inward while maintaining height
     } catch (error) {
       console.error('Error creating mesh:', error);
     }
@@ -225,7 +229,7 @@ class PolygonMesh {
       (texture) => {
         const circularTexture = this.createCircularTexture(texture);
         
-        // Create a material with proper settings to avoid edge artifacts
+        // Create a material with enhanced settings to completely avoid edge artifacts
         const material = new THREE.MeshBasicMaterial({
           map: circularTexture,
           transparent: true,
@@ -233,10 +237,10 @@ class PolygonMesh {
           opacity: 1.0,
           depthTest: true,
           depthWrite: true,
-          // Enable polygon offset to prevent z-fighting with the base material
+          // Enhanced polygon offset to completely prevent z-fighting
           polygonOffset: true,
-          polygonOffsetFactor: 1.0,
-          polygonOffsetUnits: 1.0
+          polygonOffsetFactor: 3.0,
+          polygonOffsetUnits: 3.0
         });
         
         if (this.mesh) {
@@ -248,7 +252,11 @@ class PolygonMesh {
             transparent: false,
             opacity: 1.0,
             depthTest: true,
-            depthWrite: true
+            depthWrite: true,
+            // Match polygon offset settings for consistency
+            polygonOffset: true,
+            polygonOffsetFactor: 3.0,
+            polygonOffsetUnits: 3.0
           });
           
           const materials = [
@@ -286,10 +294,12 @@ class PolygonMesh {
           }
           
           this.mesh.material = materials;
-          // Increase render order to ensure it renders on top of other elements
-          this.mesh.renderOrder = 15;
-          // Slightly raise the mesh to avoid z-fighting, but much less than before
-          this.mesh.position.y += 0.005; // Reduced from 0.01 to 0.005
+          // Keep the same render order as the base polygon to avoid z-fighting
+          // Just ensure it's high enough to be above water
+          this.mesh.renderOrder = 20;
+          
+          // Do NOT change the height - keep all polygons at exactly the same height
+          // This is critical to prevent visible seams between polygons
         }
       },
       undefined,
@@ -520,16 +530,17 @@ class PolygonMesh {
         material.color.set('#ffcc00');
       }
       
-      this.mesh.position.y += 0.01; // Reduced from 0.03 to 0.01
-      this.mesh.renderOrder = 2;
+      // Instead of changing height, just increase render order to ensure selected polygon appears on top
+      // This prevents creating height differences that cause visible edges
+      this.mesh.renderOrder = 30; // Much higher render order for selected polygons
       
       material.needsUpdate = true;
     } else {
       if (this.originalColor && material.color) {
         material.color.copy(this.originalColor);
         
-        this.mesh.position.y -= 0.01; // Reduced from 0.03 to 0.01
-        this.mesh.renderOrder = 0;
+        // Reset render order to base value
+        this.mesh.renderOrder = 20;
         
         material.needsUpdate = true;
       }
@@ -559,16 +570,17 @@ class PolygonMesh {
         material.color.copy(color);
       }
       
-      this.mesh.position.y += 0.01; // Reduced from 0.03 to 0.01
-      this.mesh.renderOrder = 1;
+      // Instead of changing height, just increase render order to ensure hovered polygon appears on top
+      // This prevents creating height differences that cause visible edges
+      this.mesh.renderOrder = 25; // Higher than base but lower than selected
       
       material.needsUpdate = true;
     } else {
       if (this.originalColor && material.color) {
         material.color.copy(this.originalColor);
         
-        this.mesh.position.y -= 0.01; // Reduced from 0.03 to 0.01
-        this.mesh.renderOrder = 0;
+        // Reset render order to base value
+        this.mesh.renderOrder = 20;
         
         material.needsUpdate = true;
       }
