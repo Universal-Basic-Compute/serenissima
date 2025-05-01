@@ -1350,7 +1350,7 @@ export default function Home() {
       {isLoading && (
         <LoadingScreen 
           onLoadingComplete={() => setIsLoading(false)}
-          duration={3000}
+          duration={5000}
         />
       )}
     

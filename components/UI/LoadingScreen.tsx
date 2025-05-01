@@ -8,7 +8,7 @@ interface LoadingScreenProps {
 
 const LoadingScreen: React.FC<LoadingScreenProps> = ({ 
   onLoadingComplete, 
-  duration = 3000 // Default 3 seconds
+  duration = 5000 // Changed from 3000 to 5000 (5 seconds)
 }) => {
   const [loadingImage, setLoadingImage] = useState<string>('');
   const [progress, setProgress] = useState(0);
