@@ -288,17 +288,33 @@ export default class SceneSetup {
     window.removeEventListener('resize', this.handleResize);
     
     // Dispose of controls
-    this.controls.dispose();
+    if (this.controls) {
+      this.controls.dispose();
+    }
     
-    // Dispose of Three.js resources
-    this.scene.remove(this.sunSphere);
-    this.scene.remove(this.sunGlow);
-    this.scene.remove(this.sunLight);
+    // Dispose of Three.js resources - add null checks
+    if (this.sunSphere) {
+      this.scene.remove(this.sunSphere);
+      if (this.sunSphere.geometry) {
+        this.sunSphere.geometry.dispose();
+      }
+      if (this.sunSphere.material) {
+        (this.sunSphere.material as THREE.Material).dispose();
+      }
+    }
     
-    // Dispose of geometries and materials
-    this.sunSphere.geometry.dispose();
-    (this.sunSphere.material as THREE.Material).dispose();
-    this.sunGlow.geometry.dispose();
-    (this.sunGlow.material as THREE.Material).dispose();
+    if (this.sunGlow) {
+      this.scene.remove(this.sunGlow);
+      if (this.sunGlow.geometry) {
+        this.sunGlow.geometry.dispose();
+      }
+      if (this.sunGlow.material) {
+        (this.sunGlow.material as THREE.Material).dispose();
+      }
+    }
+    
+    if (this.sunLight) {
+      this.scene.remove(this.sunLight);
+    }
   }
 }
