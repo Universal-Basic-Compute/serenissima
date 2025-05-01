@@ -76,6 +76,11 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
             ]
           }]
         });
+        
+        // Dispatch event to notify that polygons are loaded
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new Event('polygonsLoaded'));
+        }
       }, 10000); // 10 second timeout
       
       // First try to load from cache to avoid network requests entirely
@@ -104,6 +109,12 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
               
               // Set the data and exit loading state
               set({ polygons: data.polygons, loading: false });
+              
+              // Dispatch event to notify that polygons are loaded
+              if (typeof window !== 'undefined') {
+                window.dispatchEvent(new Event('polygonsLoaded'));
+              }
+              
               return;
             }
           } catch (cacheError) {
@@ -139,6 +150,11 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
           
           // Set the data and exit loading state
           set({ polygons: data.polygons, loading: false });
+          
+          // Dispatch event to notify that polygons are loaded
+          if (typeof window !== 'undefined') {
+            window.dispatchEvent(new Event('polygonsLoaded'));
+          }
           
           // Load more data in the background
           setTimeout(() => {
@@ -193,6 +209,11 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
         loading: false
       });
       
+      // Dispatch event to notify that polygons are loaded
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('polygonsLoaded'));
+      }
+      
     } catch (error) {
       console.error('Error in loadPolygons:', error);
       
@@ -210,6 +231,11 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
           ]
         }]
       });
+      
+      // Dispatch event to notify that polygons are loaded (even with error)
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('polygonsLoaded'));
+      }
     }
   },
   

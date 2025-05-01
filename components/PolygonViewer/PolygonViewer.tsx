@@ -146,50 +146,69 @@ export default function PolygonViewer() {
   useEffect(() => {
     console.log('Starting progressive loading...');
     
+    // Set a flag to track if we've already loaded data
+    let hasLoadedData = false;
+    
     // First load polygons as they're most important
     loadPolygons();
     
-    // Then load other data with delays to prevent overwhelming the browser
-    const loadSecondaryData = setTimeout(() => {
-      loadLandOwners(); // Land owners are needed for the default land view
-      console.log('Loading land owners data...');
-    }, 500);
-    
-    const loadTertiaryData = setTimeout(() => {
-      loadUsers(); // Load all users data
-      console.log('Loading users data...');
-    }, 1000);
-    
-    const loadQuaternaryData = setTimeout(() => {
-      loadBridges();
-      console.log('Loading bridges data...');
-    }, 1500);
-    
-    // Add an additional timeout to ensure coat of arms are loaded
-    const loadCoatOfArms = setTimeout(() => {
-      console.log('Forcing coat of arms update from delayed loader');
-      if (polygonRendererRef.current && users && Object.keys(users).length > 0) {
-        const coatOfArmsMap: Record<string, string> = {};
-        
-        Object.values(users).forEach(user => {
-          if (user.user_name && user.coat_of_arms_image) {
-            coatOfArmsMap[user.user_name] = user.coat_of_arms_image;
-          }
-        });
-        
-        if (Object.keys(coatOfArmsMap).length > 0) {
-          polygonRendererRef.current.updateOwnerCoatOfArms(coatOfArmsMap);
-        }
+    // Set a timeout to force exit from loading state if it takes too long
+    const loadingTimeout = setTimeout(() => {
+      if (!hasLoadedData) {
+        console.log('Loading timeout reached, forcing exit from loading state');
+        usePolygonStore.setState({ loading: false });
+        hasLoadedData = true;
       }
-    }, 3000);
+    }, 10000); // 10 second timeout
+    
+    // Add a listener to detect when polygons are loaded
+    const handlePolygonsLoaded = () => {
+      console.log('Polygons loaded event detected');
+      hasLoadedData = true;
+      
+      // Load other data with delays to prevent overwhelming the browser
+      setTimeout(() => {
+        loadLandOwners(); // Land owners are needed for the default land view
+        console.log('Loading land owners data...');
+      }, 1000);
+      
+      setTimeout(() => {
+        loadUsers(); // Load all users data
+        console.log('Loading users data...');
+      }, 2000);
+      
+      setTimeout(() => {
+        loadBridges();
+        console.log('Loading bridges data...');
+      }, 3000);
+      
+      // Add an additional timeout to ensure coat of arms are loaded
+      setTimeout(() => {
+        console.log('Forcing coat of arms update from delayed loader');
+        if (polygonRendererRef.current && users && Object.keys(users).length > 0) {
+          const coatOfArmsMap: Record<string, string> = {};
+          
+          Object.values(users).forEach(user => {
+            if (user.user_name && user.coat_of_arms_image) {
+              coatOfArmsMap[user.user_name] = user.coat_of_arms_image;
+            }
+          });
+          
+          if (Object.keys(coatOfArmsMap).length > 0) {
+            polygonRendererRef.current.updateOwnerCoatOfArms(coatOfArmsMap);
+          }
+        }
+      }, 4000);
+    };
+    
+    // Listen for a custom event that will be dispatched when polygons are loaded
+    window.addEventListener('polygonsLoaded', handlePolygonsLoaded);
     
     return () => {
-      clearTimeout(loadSecondaryData);
-      clearTimeout(loadTertiaryData);
-      clearTimeout(loadQuaternaryData);
-      clearTimeout(loadCoatOfArms);
+      clearTimeout(loadingTimeout);
+      window.removeEventListener('polygonsLoaded', handlePolygonsLoaded);
     };
-  }, [loadPolygons, loadBridges, loadLandOwners, loadUsers, polygons.length, users]);
+  }, [loadPolygons, loadBridges, loadLandOwners, loadUsers, users]);
   
   // Calculate centroids directly in the main thread for polygons without centroids
   useEffect(() => {
