@@ -58,10 +58,6 @@ export default class InteractionManager {
       return;
     }
     
-    // Store camera state before any operations
-    const cameraPosition = this.camera.position.clone();
-    const cameraQuaternion = this.camera.quaternion.clone();
-    
     // Calculate mouse position in normalized device coordinates (-1 to +1)
     this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
@@ -85,28 +81,17 @@ export default class InteractionManager {
         // ONLY update the selection state, nothing else
         const newSelectedId = clickedId === this.selectedPolygonId ? null : clickedId;
         
-        // Use setTimeout to delay the state update
-        setTimeout(() => {
-          this.setSelectedPolygonId(newSelectedId);
-          this.selectedPolygonId = newSelectedId;
-        }, 0);
+        // Update selection state directly
+        this.setSelectedPolygonId(newSelectedId);
+        this.selectedPolygonId = newSelectedId;
       }
     } else {
       // Clicking on empty space, deselect current selection
       if (this.selectedPolygonId) {
-        setTimeout(() => {
-          this.setSelectedPolygonId(null);
-          this.selectedPolygonId = null;
-        }, 0);
+        this.setSelectedPolygonId(null);
+        this.selectedPolygonId = null;
       }
     }
-    
-    // Restore camera position and rotation after the click operation
-    // Use requestAnimationFrame to ensure this happens after any potential resets
-    requestAnimationFrame(() => {
-      this.camera.position.copy(cameraPosition);
-      this.camera.quaternion.copy(cameraQuaternion);
-    });
   }
   
   public cleanup() {
