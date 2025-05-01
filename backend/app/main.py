@@ -441,7 +441,7 @@ async def create_transaction(transaction_data: TransactionRequest):
     
     try:
         # Check if transaction already exists for this asset
-        formula = f"{{AssetId}}='{transaction_data.asset_id}' AND {{Type}}='{transaction_data.type}' AND {{ExecutedAt}}=BLANK()"
+        formula = f"AND({{AssetId}}='{transaction_data.asset_id}', {{Type}}='{transaction_data.type}', {{ExecutedAt}}=BLANK())"
         print(f"Searching for existing transaction with formula: {formula}")
         existing_records = transactions_table.all(formula=formula)
         
@@ -517,7 +517,7 @@ async def get_land_transaction(land_id: str):
     """Get transaction information for a land"""
     
     try:
-        formula = f"{{AssetId}}='{land_id}' AND {{Type}}='land' AND {{ExecutedAt}}=BLANK()"
+        formula = f"AND({{AssetId}}='{land_id}', {{Type}}='land', {{ExecutedAt}}=BLANK())"
         print(f"Searching for land transaction with formula: {formula}")
         records = transactions_table.all(formula=formula)
         
