@@ -42,22 +42,29 @@ export default class LODPolygon {
     this.sandNormalMap = textures.sandNormalMap;
     this.sandRoughnessMap = textures.sandRoughnessMap;
     
-    // Start with only low detail mesh for faster initial loading
+    // Create low detail mesh first
     this.createLowDetailMesh();
-    this.mesh = this.lowDetailMesh!;
-    this.scene.add(this.mesh);
     
-    // Create high detail mesh after a short delay
-    setTimeout(() => {
-      this.createHighDetailMesh();
+    // Make sure we have a valid mesh before adding to scene
+    if (this.lowDetailMesh) {
+      this.mesh = this.lowDetailMesh;
+      this.scene.add(this.mesh);
       
-      // Switch to high detail if camera is close enough
-      if (this.distanceThreshold > 150) { // If we're close enough
-        this.scene.remove(this.mesh);
-        this.mesh = this.highDetailMesh!;
-        this.scene.add(this.mesh);
-      }
-    }, 500); // 500ms delay
+      // Create high detail mesh after a short delay
+      setTimeout(() => {
+        this.createHighDetailMesh();
+        
+        // Only switch to high detail if it was created successfully
+        if (this.highDetailMesh && this.distanceThreshold > 150) {
+          this.scene.remove(this.mesh);
+          this.mesh = this.highDetailMesh;
+          this.scene.add(this.mesh);
+        }
+      }, 500); // 500ms delay
+    } else {
+      // If we couldn't create a low detail mesh, log an error
+      console.error('Failed to create low detail mesh for polygon:', polygon.id);
+    }
   }
   
   private createLowDetailMesh() {
@@ -158,15 +165,15 @@ export default class LODPolygon {
     const distance = cameraPosition.distanceTo(this.mesh.position);
     
     // Switch based on distance
-    if (distance > this.distanceThreshold && this.mesh !== this.lowDetailMesh) {
+    if (distance > this.distanceThreshold && this.mesh !== this.lowDetailMesh && this.lowDetailMesh) {
       // Switch to low detail
       this.scene.remove(this.mesh);
-      this.mesh = this.lowDetailMesh!;
+      this.mesh = this.lowDetailMesh;
       this.scene.add(this.mesh);
-    } else if (distance <= this.distanceThreshold && this.mesh !== this.highDetailMesh) {
+    } else if (distance <= this.distanceThreshold && this.mesh !== this.highDetailMesh && this.highDetailMesh) {
       // Switch to high detail
       this.scene.remove(this.mesh);
-      this.mesh = this.highDetailMesh!;
+      this.mesh = this.highDetailMesh;
       this.scene.add(this.mesh);
     }
   }
