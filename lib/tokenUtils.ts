@@ -61,7 +61,7 @@ export async function transferComputeTokens(
         throw new Error(`Insufficient balance. You have ${tokenAccountInfo.value.uiAmount || 0} COMPUTE, but tried to transfer ${amount / Math.pow(10, COMPUTE_TOKEN_DECIMALS)} COMPUTE.`);
       }
     } catch (error) {
-      if (error.message && error.message.includes('Insufficient balance')) {
+      if ((error as Error).message && (error as Error).message.includes('Insufficient balance')) {
         throw error; // Re-throw our custom error
       }
       
@@ -144,6 +144,6 @@ export async function transferComputeTokens(
     return signature;
   } catch (error) {
     console.error('Error transferring compute tokens:', error);
-    throw new Error(`Failed to transfer tokens: ${error.message}`);
+    throw new Error(`Failed to transfer tokens: ${(error as Error).message}`);
   }
 }
