@@ -57,6 +57,7 @@ export default function Home() {
   const [coatOfArmsImage, setCoatOfArmsImage] = useState<string | null>(null);
   const [isGeneratingImage, setIsGeneratingImage] = useState<boolean>(false);
   const [selectedColor, setSelectedColor] = useState<string>('#8B4513'); // Default brown color
+  const [successMessage, setSuccessMessage] = useState<{message: string, signature: string} | null>(null);
   
   // Venice-themed color palette
   const veniceColorPalette = [
@@ -522,7 +523,11 @@ export default function Home() {
         }));
       }
       
-      alert(`Successfully transferred ${amount.toLocaleString()} $COMPUTE tokens to your wallet!\nTransaction signature: ${data.transaction_signature?.slice(0, 10)}...`);
+      // Show success message with custom component instead of alert
+      setSuccessMessage({
+        message: `Successfully transferred ${amount.toLocaleString()}`,
+        signature: data.transaction_signature || 'Transaction completed'
+      });
       return data;
     } catch (error) {
       console.error('Error transferring compute:', error);
@@ -1417,7 +1422,7 @@ export default function Home() {
                   }}
                   className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-amber-500 hover:text-white transition-colors"
                 >
-                  Inject $COMPUTE
+                  Inject <span className="compute-token">$COMPUTE</span>
                 </button>
                 <button
                   onClick={() => {
@@ -1426,7 +1431,7 @@ export default function Home() {
                   }}
                   className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-amber-500 hover:text-white transition-colors"
                 >
-                  Cash out $COMPUTE
+                  Cash out <span className="compute-token">$COMPUTE</span>
                 </button>
                 <button
                   onClick={() => {
@@ -1989,6 +1994,15 @@ export default function Home() {
             </button>
           </div>
         </div>
+      )}
+      
+      {/* Success message alert */}
+      {successMessage && (
+        <SuccessAlert 
+          message={successMessage.message}
+          signature={successMessage.signature}
+          onClose={() => setSuccessMessage(null)}
+        />
       )}
       
       {/* Always show the 3D Polygon Viewer regardless of wallet connection status */}

@@ -66,16 +66,16 @@ const TransferComputeMenu: React.FC<TransferComputeMenuProps> = ({ onClose, onTr
   return (
     <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
       <div className="bg-white p-8 rounded-lg shadow-xl w-[700px] max-w-[90vw] border-4 border-amber-600 transform transition-all">
-        <h2 className="text-3xl font-serif font-semibold mb-4 text-amber-800 text-center">Inject $COMPUTE</h2>
+        <h2 className="text-3xl font-serif font-semibold mb-4 text-amber-800 text-center">Inject <span className="compute-token">$COMPUTE</span></h2>
         
         <div className="mb-8 text-gray-700 text-center">
           <p className="text-lg">Transfer your compute resources to support the Republic and become the richest merchant of Venice.</p>
           <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
             <p className="text-md font-medium text-amber-800">About Ducats in La Serenissima</p>
-            <p className="mt-2">Ducats in La Serenissima are backed by real $COMPUTE tokens on the Solana blockchain.</p>
-            <p className="mt-1">Each 1 ducat you earn in-game can be withdrawn as 1 $COMPUTE token to your wallet.</p>
+            <p className="mt-2">Ducats in La Serenissima are backed by real <span className="compute-token">$COMPUTE</span> tokens on the Solana blockchain.</p>
+            <p className="mt-1">Each 1 ducat you earn in-game can be withdrawn as 1 <span className="compute-token">$COMPUTE</span> token to your wallet.</p>
             <p className="mt-1 text-amber-700">Please enter whole numbers only - no decimals or fractions.</p>
-            <p className="mt-1 font-semibold">Transferring $COMPUTE helps build the Republic and earns you rewards over time, increasing your wealth and influence in Venice.</p>
+            <p className="mt-1 font-semibold">Transferring <span className="compute-token">$COMPUTE</span> helps build the Republic and earns you rewards over time, increasing your wealth and influence in Venice.</p>
           </div>
         </div>
         
@@ -137,7 +137,7 @@ const TransferComputeMenu: React.FC<TransferComputeMenuProps> = ({ onClose, onTr
                 Injecting...
               </>
             ) : (
-              'Inject $COMPUTE'
+              'Inject <span className="compute-token">$COMPUTE</span>'
             )}
           </button>
         </div>
