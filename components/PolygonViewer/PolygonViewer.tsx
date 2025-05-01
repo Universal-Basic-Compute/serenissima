@@ -159,7 +159,7 @@ export default function PolygonViewer() {
         usePolygonStore.setState({ loading: false });
         hasLoadedData = true;
       }
-    }, 10000); // 10 second timeout
+    }, 30000); // 30 second timeout
     
     // Add a listener to detect when polygons are loaded
     const handlePolygonsLoaded = () => {

@@ -81,7 +81,7 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
         if (typeof window !== 'undefined') {
           window.dispatchEvent(new Event('polygonsLoaded'));
         }
-      }, 10000); // 10 second timeout
+      }, 30000); // 30 second timeout
       
       // First try to load from cache to avoid network requests entirely
       const cacheKey = 'polygons_cache';
