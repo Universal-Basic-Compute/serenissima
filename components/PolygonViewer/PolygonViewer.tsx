@@ -526,6 +526,11 @@ export default function PolygonViewer() {
       if (polygonRendererRef.current && (highQuality || frameCount % 3 === 0)) {
         polygonRendererRef.current.update(selectedPolygonId);
       }
+      
+      // Update clouds based on camera position
+      if (sceneRef.current) {
+        sceneRef.current.updateClouds(frameCount);
+      }
     
       frameCount++;
     
@@ -625,6 +630,9 @@ export default function PolygonViewer() {
     // Update quality when highQuality changes
     if (sceneRef.current) {
       console.log(`Updating quality to ${highQuality ? 'high' : 'low'}`);
+      
+      // Update scene quality
+      sceneRef.current.updateQuality(highQuality);
       
       // Update water effect
       if (waterEffectRef.current) {

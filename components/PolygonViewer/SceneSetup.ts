@@ -3,6 +3,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
 import { ViewMode } from './types';
+import CloudSystem from './CloudSystem';
 
 interface SceneSetupProps {
   canvas: HTMLCanvasElement;
@@ -20,6 +21,8 @@ export default class SceneSetup {
   private sunLight: THREE.DirectionalLight;
   private sunSphere: THREE.Mesh;
   private sunGlow: THREE.Mesh;
+  private cloudSystem: CloudSystem | null = null;
+  private zoomThreshold: number = 70; // Threshold for showing clouds
   
   constructor({ canvas, activeView, highQuality }: SceneSetupProps) {
     this.performanceMode = !highQuality;
@@ -142,6 +145,16 @@ export default class SceneSetup {
     
     // Add window resize handler
     window.addEventListener('resize', this.handleResize);
+    
+    setTimeout(() => {
+      // Create cloud system with a delay to prioritize initial scene loading
+      this.cloudSystem = new CloudSystem({
+        scene: this.scene,
+        width: 200, // Make clouds cover a wide area
+        height: 200,
+        performanceMode: this.performanceMode
+      });
+    }, 3000); // Delay cloud creation by 3 seconds
   }
   
   private setupLights(activeView: ViewMode) {
@@ -251,6 +264,26 @@ export default class SceneSetup {
     }
   }
   
+  public updateClouds(frameCount: number) {
+    if (!this.cloudSystem) return;
+    
+    // Show clouds only when zoomed out
+    const showClouds = this.camera.position.y > this.zoomThreshold;
+    this.cloudSystem.setVisibility(showClouds);
+    
+    // Update cloud animation
+    if (showClouds) {
+      this.cloudSystem.update(frameCount);
+    }
+  }
+  
+  public updateQuality(highQuality: boolean) {
+    this.performanceMode = !highQuality;
+    if (this.cloudSystem) {
+      this.cloudSystem.updateQuality(this.performanceMode);
+    }
+  }
+  
   public cleanup() {
     // Remove event listeners
     window.removeEventListener('resize', this.handleResize);
@@ -283,6 +316,11 @@ export default class SceneSetup {
     
     if (this.sunLight) {
       this.scene.remove(this.sunLight);
+    }
+    
+    if (this.cloudSystem) {
+      this.cloudSystem.cleanup();
+      this.cloudSystem = null;
     }
   }
 }
