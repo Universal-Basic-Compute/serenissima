@@ -16,6 +16,7 @@ interface LandDetailsPanelProps {
 
 export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons, landOwners, visible = true }: LandDetailsPanelProps) {
   const router = useRouter();
+  const [refreshKey, setRefreshKey] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const [transaction, setTransaction] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -44,6 +45,29 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
     }
   }, [selectedPolygonId, selectedPolygon, landOwners, owner]);
   
+  // Add this effect to listen for land purchase events
+  useEffect(() => {
+    const handleLandPurchase = (event: CustomEvent) => {
+      // Force a panel update if the selected land is the one that was just purchased
+      if (event.detail.landId === selectedPolygonId) {
+        console.log('Land purchase detected, refreshing panel');
+        // Force a refresh of the data
+        setRefreshKey(prevKey => prevKey + 1);
+        
+        // Update transaction data locally
+        if (event.detail.transaction) {
+          setTransaction(event.detail.transaction);
+        }
+      }
+    };
+
+    window.addEventListener('landPurchased', handleLandPurchase as EventListener);
+    
+    return () => {
+      window.removeEventListener('landPurchased', handleLandPurchase as EventListener);
+    };
+  }, [selectedPolygonId]);
+
   // Add this effect to fetch transaction data when a polygon is selected
   useEffect(() => {
     if (selectedPolygonId) {
@@ -82,7 +106,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
       setTransaction(null);
       setIsLoading(false);
     }
-  }, [selectedPolygonId]);
+  }, [selectedPolygonId, refreshKey]);
   
   // Add this useEffect to fetch offers when a polygon is selected
   useEffect(() => {
@@ -144,6 +168,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
       className={`fixed top-0 right-0 h-full w-96 bg-amber-50 shadow-xl transform transition-transform duration-300 ease-in-out z-20 border-l-4 border-amber-600 ${
         isVisible ? 'translate-x-0' : 'translate-x-full'
       }`}
+      key={refreshKey}
     >
       <div className="p-6 h-full flex flex-col">
         {/* Header with improved styling */}
@@ -567,8 +592,17 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
       // 3. Clear offers since the land has been sold
       setOffers([]);
     
-      // 4. Dispatch a custom event to notify other components
+      // 4. Dispatch custom events to notify other components
       window.dispatchEvent(new CustomEvent('landOwnershipChanged', {
+        detail: { 
+          landId: selectedPolygonId, 
+          newOwner: walletAddress,
+          transaction: updatedTransaction
+        }
+      }));
+      
+      // 5. Dispatch a specific event for land purchase to update the panel
+      window.dispatchEvent(new CustomEvent('landPurchased', {
         detail: { 
           landId: selectedPolygonId, 
           newOwner: walletAddress,
