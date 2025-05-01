@@ -406,6 +406,12 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
             if (user.wallet_address) {
               usersMap[user.wallet_address] = user;
             }
+            
+            // Add specific debug for ConsiglioDeiDieci
+            if (user.user_name === 'ConsiglioDeiDieci') {
+              console.log('ConsiglioDeiDieci user data found:', user);
+              console.log('ConsiglioDeiDieci color value:', user.color);
+            }
           }
         });
         

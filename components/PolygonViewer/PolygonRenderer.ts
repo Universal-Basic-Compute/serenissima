@@ -121,6 +121,12 @@ export default class PolygonRenderer {
     
     // Process users data to create coat of arms map and color map
     if (users) {
+      // Debug log for ConsiglioDeiDieci specifically
+      if (users['ConsiglioDeiDieci']) {
+        console.log('ConsiglioDeiDieci user data in PolygonRenderer:', users['ConsiglioDeiDieci']);
+        console.log('ConsiglioDeiDieci color in PolygonRenderer:', users['ConsiglioDeiDieci'].color);
+      }
+      
       Object.values(users).forEach(user => {
         if (user.user_name) {
           // Store coat of arms image if available
@@ -128,10 +134,14 @@ export default class PolygonRenderer {
             this.ownerCoatOfArmsMap[user.user_name] = user.coat_of_arms_image;
           }
           
-          // Store color if available
+          // Store color if available - ensure we check for null/undefined
           if (user.color) {
             this.ownerColorMap[user.user_name] = user.color;
             console.log(`Stored color for ${user.user_name}: ${user.color}`);
+          } else if (user.user_name === 'ConsiglioDeiDieci') {
+            // Provide a default color for ConsiglioDeiDieci if missing
+            this.ownerColorMap[user.user_name] = '#8B0000'; // Dark red
+            console.log(`Assigned default color for ConsiglioDeiDieci: #8B0000`);
           }
         }
       });
@@ -287,6 +297,11 @@ export default class PolygonRenderer {
                   // Also store in the color map for future use
                   this.ownerColorMap[polygon.owner] = ownerColor;
                   console.log(`Found color for ${polygon.owner} in users data: ${ownerColor}`);
+                } else if (polygon.owner === 'ConsiglioDeiDieci') {
+                  // Special case for ConsiglioDeiDieci
+                  ownerColor = '#8B0000'; // Dark red
+                  this.ownerColorMap[polygon.owner] = ownerColor;
+                  console.log(`Using hardcoded color for ConsiglioDeiDieci: ${ownerColor}`);
                 } else {
                   // Use default color if no owner color is specified
                   ownerColor = '#7cac6a'; // Default green color
