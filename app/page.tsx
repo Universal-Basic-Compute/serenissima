@@ -7,6 +7,7 @@ import dynamic from 'next/dynamic';
 import { GoogleMap, LoadScript, DrawingManager } from '@react-google-maps/api';
 import PlayerProfile from '../components/UI/PlayerProfile';
 import TransferComputeMenu from '../components/UI/TransferComputeMenu';
+import WithdrawComputeMenu from '../components/UI/WithdrawComputeMenu';
 import { transferComputeTokens } from '../lib/tokenUtils';
 import { transferComputeInAirtable } from '../lib/airtableUtils';
 
@@ -46,6 +47,7 @@ export default function Home() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [transferMenuOpen, setTransferMenuOpen] = useState(false);
+  const [withdrawMenuOpen, setWithdrawMenuOpen] = useState(false);
   const [showUsernamePrompt, setShowUsernamePrompt] = useState(false);
   const [usernameInput, setUsernameInput] = useState('');
   const [firstName, setFirstName] = useState<string>('');
@@ -512,6 +514,62 @@ export default function Home() {
     } catch (error) {
       console.error('Error in transfer process:', error);
       alert(`Failed to transfer compute: ${error.message}`);
+      throw error;
+    }
+  };
+  
+  // Handle compute withdrawal
+  const handleWithdrawCompute = async (amount: number) => {
+    try {
+      // Get the wallet address from session or local storage
+      const walletAddress = sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress');
+      
+      if (!walletAddress) {
+        alert('Please connect your wallet first');
+        return;
+      }
+      
+      // Call the backend API to withdraw compute
+      const response = await fetch('http://localhost:8000/api/withdraw-compute', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          wallet_address: walletAddress,
+          compute_amount: amount,
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to withdraw compute');
+      }
+      
+      const data = await response.json();
+      console.log('Compute withdrawal successful:', data);
+      
+      // Update the user profile with the new compute amount
+      if (userProfile) {
+        const updatedProfile = {
+          ...userProfile,
+          computeAmount: (userProfile.computeAmount || 0) - amount
+        };
+        setUserProfile(updatedProfile);
+        
+        // Update localStorage
+        localStorage.setItem('userProfile', JSON.stringify(updatedProfile));
+        
+        // Dispatch event to update other components
+        window.dispatchEvent(new CustomEvent('userProfileUpdated', {
+          detail: updatedProfile
+        }));
+      }
+      
+      alert(`Successfully withdrew ${amount.toLocaleString()} compute tokens!`);
+      return data;
+    } catch (error) {
+      console.error('Error withdrawing compute:', error);
+      alert(`Failed to withdraw compute: ${error.message}`);
       throw error;
     }
   };
@@ -1134,6 +1192,15 @@ export default function Home() {
         />
       )}
       
+      {/* Withdraw Compute Menu */}
+      {withdrawMenuOpen && (
+        <WithdrawComputeMenu
+          onClose={() => setWithdrawMenuOpen(false)}
+          onWithdraw={handleWithdrawCompute}
+          computeAmount={userProfile?.computeAmount || 0}
+        />
+      )}
+      
       {/* View Map button */}
       <a 
         href="/map"
@@ -1193,14 +1260,21 @@ export default function Home() {
                 </button>
                 <button
                   onClick={() => {
-                    console.log('Transfer button clicked, current state:', transferMenuOpen);
                     setTransferMenuOpen(true);
                     setDropdownOpen(false);
-                    console.log('State after setting:', true);
                   }}
                   className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-amber-500 hover:text-white transition-colors"
                 >
-                  Transfer Compute
+                  Add Compute
+                </button>
+                <button
+                  onClick={() => {
+                    setWithdrawMenuOpen(true);
+                    setDropdownOpen(false);
+                  }}
+                  className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-amber-500 hover:text-white transition-colors"
+                >
+                  Withdraw Compute
                 </button>
                 <button
                   onClick={() => {

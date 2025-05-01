@@ -378,6 +378,61 @@ async def transfer_compute(wallet_data: WalletRequest):
         traceback.print_exc(file=sys.stdout)
         raise HTTPException(status_code=500, detail=error_msg)
 
+@app.post("/api/withdraw-compute")
+async def withdraw_compute(wallet_data: WalletRequest):
+    """Withdraw compute resources from a wallet"""
+    
+    if not wallet_data.wallet_address:
+        raise HTTPException(status_code=400, detail="Wallet address is required")
+    
+    if wallet_data.compute_amount is None or wallet_data.compute_amount <= 0:
+        raise HTTPException(status_code=400, detail="Compute amount must be greater than 0")
+    
+    try:
+        # Check if wallet exists
+        formula = f"{{Wallet}}='{wallet_data.wallet_address}'"
+        print(f"Searching for wallet with formula: {formula}")
+        existing_records = users_table.all(formula=formula)
+        
+        if not existing_records:
+            raise HTTPException(status_code=404, detail="Wallet not found")
+        
+        # Get current compute amount
+        record = existing_records[0]
+        current_amount = record["fields"].get("ComputeAmount", 0)
+        
+        # Check if user has enough compute to withdraw
+        if current_amount < wallet_data.compute_amount:
+            raise HTTPException(status_code=400, detail="Insufficient compute balance")
+        
+        # Calculate new amount
+        new_amount = current_amount - wallet_data.compute_amount
+        
+        # Update the record
+        print(f"Withdrawing {wallet_data.compute_amount} compute from wallet {record['id']}")
+        print(f"Updating compute amount from {current_amount} to {new_amount}")
+        
+        updated_record = users_table.update(record["id"], {
+            "ComputeAmount": new_amount
+        })
+        
+        return {
+            "id": updated_record["id"],
+            "wallet_address": updated_record["fields"].get("Wallet", ""),
+            "compute_amount": updated_record["fields"].get("ComputeAmount", 0),
+            "user_name": updated_record["fields"].get("Username", None),
+            "email": updated_record["fields"].get("Email", None),
+            "family_motto": updated_record["fields"].get("FamilyMotto", None),
+            "coat_of_arms_image": updated_record["fields"].get("CoatOfArmsImage", None)
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        error_msg = f"Failed to withdraw compute: {str(e)}"
+        print(f"ERROR: {error_msg}")
+        traceback.print_exc(file=sys.stdout)
+        raise HTTPException(status_code=500, detail=error_msg)
+
 @app.post("/api/land", response_model=LandResponse)
 async def create_land(land_data: LandRequest):
     """Create a land record in Airtable"""
