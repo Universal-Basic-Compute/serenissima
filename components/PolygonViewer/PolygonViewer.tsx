@@ -11,6 +11,7 @@ import InteractionManager from './InteractionManager';
 import ViewModeMenu from './ViewModeMenu';
 import LandDetailsPanel from './LandDetailsPanel';
 import MarketPanel from './MarketPanel';
+import BuildingMenu from './BuildingMenu';
 import ActionButton from '../UI/ActionButton';
 import TransferComputeMenu from '../UI/TransferComputeMenu';
 import BackgroundMusic from '../UI/BackgroundMusic';
@@ -38,6 +39,8 @@ export default function PolygonViewer() {
     transaction: null,
     onComplete: undefined
   });
+  
+  const [buildingMenuVisible, setBuildingMenuVisible] = useState(false);
   
   // Add refs at the top level of the component
   const hasLoadedDataRef = useRef<boolean>(false);
@@ -1058,6 +1061,16 @@ export default function PolygonViewer() {
     }
   }, [activeView, forceVisualUpdate]);
   
+  // Effect to show/hide the building menu based on activeView
+  useEffect(() => {
+    // Show building menu when in buildings view and a polygon is selected
+    if (activeView === 'buildings' && selectedPolygonId) {
+      setBuildingMenuVisible(true);
+    } else {
+      setBuildingMenuVisible(false);
+    }
+  }, [activeView, selectedPolygonId]);
+  
   // Add a separate effect to handle selection state changes
   useEffect(() => {
     // Only update selection state when selectedPolygonId changes
@@ -1293,6 +1306,15 @@ export default function PolygonViewer() {
           if (purchaseModalData.onComplete) {
             purchaseModalData.onComplete();
           }
+        }}
+      />
+      
+      {/* Building Menu */}
+      <BuildingMenu 
+        visible={buildingMenuVisible}
+        onClose={() => {
+          setBuildingMenuVisible(false);
+          setSelectedPolygonId(null);
         }}
       />
     </div>
