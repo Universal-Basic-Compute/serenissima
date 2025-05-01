@@ -72,7 +72,7 @@ class PolygonMesh {
       // Create extruded geometry with minimal settings
       const extrudeSettings = {
         steps: 1,
-        depth: 0.005, // DRASTICALLY REDUCED from 0.02 to 0.005 to make it almost flat
+        depth: 0.001, // Further reduced from 0.005 to 0.001 to make it practically flat
         bevelEnabled: false, // Keep bevels disabled
         bevelThickness: 0,
         bevelSize: 0,
@@ -118,7 +118,7 @@ class PolygonMesh {
       const landColor = this.determineLandColor();
       
       // Create a completely flat material with NO lighting or edge effects
-      const material = new THREE.MeshBasicMaterial({ 
+      const material = new THREE.MeshLambertMaterial({ 
         color: landColor,
         side: THREE.FrontSide,
         wireframe: false,
@@ -129,7 +129,9 @@ class PolygonMesh {
         depthWrite: true,
         // Add these properties to ensure flat appearance
         flatShading: false,
-        polygonOffset: false
+        polygonOffset: false,
+        // Explicitly disable shadows
+        shadowSide: null
       });
       
       // Immediately load and apply the sand texture
@@ -161,6 +163,8 @@ class PolygonMesh {
       
       // Add to user data to ensure shadows stay disabled
       this.mesh.userData.disableShadows = true;
+      this.mesh.userData.noShadow = true;
+      this.mesh.userData.ignoreLight = true;
       
       // Remove bottom faces to improve performance
       this.removeBottomFaces(geometry);
