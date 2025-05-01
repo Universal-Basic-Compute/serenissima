@@ -430,8 +430,11 @@ export default class LODPolygon {
         material.emissiveIntensity = 0.3;
         
         // IMPORTANT: Adjust the polygon's position to prevent z-fighting
-        // Move the mesh slightly up when selected
-        mesh.position.y += 0.02; // Move selected polygons higher than hovered ones
+        // Move the mesh slightly up when selected - increase this value
+        mesh.position.y += 0.1; // Increase from 0.02 to 0.1 (higher than hover)
+        
+        // Also increase the renderOrder to ensure it renders on top
+        mesh.renderOrder = 2; // Higher than hover
         
         // Make sure the material update is applied
         material.needsUpdate = true;
@@ -444,7 +447,10 @@ export default class LODPolygon {
           
           // IMPORTANT: Restore the original position
           // Move the mesh back to its original position
-          mesh.position.y -= 0.02;
+          mesh.position.y -= 0.1; // Match the increase above
+          
+          // Reset the renderOrder
+          mesh.renderOrder = 0;
           
           // Make sure the material update is applied
           material.needsUpdate = true;
@@ -488,8 +494,11 @@ export default class LODPolygon {
         material.roughness = 0.2; // Decrease from 0.3 to 0.2 for more shine
         
         // IMPORTANT: Adjust the polygon's position to prevent z-fighting
-        // Move the mesh slightly up when hovered
-        this.highDetailMesh.position.y += 0.01;
+        // Move the mesh slightly up when hovered - increase this value to ensure it's always on top
+        this.highDetailMesh.position.y += 0.05; // Increase from 0.01 to 0.05
+        
+        // Also increase the renderOrder to ensure it renders on top
+        this.highDetailMesh.renderOrder = 1;
         
         // Update material
         material.needsUpdate = true;
@@ -505,7 +514,10 @@ export default class LODPolygon {
         
         // IMPORTANT: Restore the original position
         // Move the mesh back to its original position
-        this.highDetailMesh.position.y -= 0.01;
+        this.highDetailMesh.position.y -= 0.05; // Match the increase above
+        
+        // Reset the renderOrder
+        this.highDetailMesh.renderOrder = 0;
       }
     }
   }
