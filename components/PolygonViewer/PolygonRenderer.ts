@@ -94,7 +94,7 @@ export default class PolygonRenderer {
       }
     );
   }
-  private coatOfArmSprites: Record<string, THREE.Object3D> = {};
+  private coatOfArmSprites: Record<string, THREE.Object3D | THREE.Mesh> = {};
   private ownerColorMap: Record<string, string> = {}; // Map of owner to color
   private users: Record<string, any> = {}; // Store users data
   private PolygonMeshs: PolygonMesh[] = []; // Store PolygonMesh instances
@@ -738,7 +738,7 @@ export default class PolygonRenderer {
         this.bounds.scale,
         this.bounds.latCorrectionFactor
       )[0];
-        
+          
       // Position slightly above the land to avoid z-fighting
       plane.position.set(normalizedCoords.x, 0.05, -normalizedCoords.y);
     } else {
@@ -911,7 +911,7 @@ export default class PolygonRenderer {
         this.bounds.scale,
         this.bounds.latCorrectionFactor
       )[0];
-        
+          
       // Position higher above the land to avoid z-fighting
       plane.position.set(normalizedCoords.x, 0.25, -normalizedCoords.y); // Increased height
     } else {
@@ -1078,16 +1078,18 @@ export default class PolygonRenderer {
     // Clean up coat of arms objects (planes or sprites)
     Object.values(this.coatOfArmSprites).forEach(obj => {
       this.scene.remove(obj);
-      if (obj.geometry) obj.geometry.dispose();
-      if (obj.material) {
-        if (Array.isArray(obj.material)) {
-          obj.material.forEach(mat => {
-            if (mat.map) mat.map.dispose();
-            mat.dispose();
-          });
-        } else {
-          if (obj.material.map) obj.material.map.dispose();
-          obj.material.dispose();
+      if (obj instanceof THREE.Mesh) {
+        if (obj.geometry) obj.geometry.dispose();
+        if (obj.material) {
+          if (Array.isArray(obj.material)) {
+            obj.material.forEach(mat => {
+              if (mat.map) mat.map.dispose();
+              mat.dispose();
+            });
+          } else {
+            if (obj.material.map) obj.material.map.dispose();
+            obj.material.dispose();
+          }
         }
       }
     });

@@ -128,7 +128,7 @@ export default function PolygonViewer() {
       // window.location.reload();
     } catch (error) {
       console.error('Error flushing cache:', error);
-      alert(`Failed to flush cache: ${error.message}`);
+      alert(`Failed to flush cache: ${error instanceof Error ? error.message : String(error)}`);
     } finally {
       setIsFlushing(false);
     }
@@ -168,7 +168,7 @@ export default function PolygonViewer() {
         // Create a map of owner username to coat of arms URL
         const coatOfArmsMap: Record<string, string> = {};
         
-        data.users.forEach(user => {
+        data.users.forEach((user: any) => {
           if (user.user_name && user.coat_of_arms_image) {
             coatOfArmsMap[user.user_name] = user.coat_of_arms_image;
           }
@@ -478,7 +478,11 @@ export default function PolygonViewer() {
       window.addEventListener('polygonDeleted', () => {
         if (waterEffectRef.current) {
           console.log('Polygon deleted, updating water effects');
-          setTimeout(() => waterEffectRef.current.update(0, !highQuality), 500);
+          setTimeout(() => {
+            if (waterEffectRef.current) {
+              waterEffectRef.current.update(0, !highQuality);
+            }
+          }, 500);
         }
       });
     } catch (error) {
@@ -567,22 +571,30 @@ export default function PolygonViewer() {
     
     // Step 2: Initialize water effect
     const initWaterEffect = () => {
+      // Create fallback objects
+      const fallbackScene = new THREE.Scene();
+      const fallbackRenderer = new THREE.WebGLRenderer({ antialias: false });
+      
       const waterEffect = new WaterEffect({
-        scene: sceneRef.current?.scene,
+        scene: sceneRef.current?.scene || fallbackScene,
         activeView,
         performanceMode: !highQuality,
         width: bounds.scale * 200,
         height: bounds.scale * 200,
-        renderer: sceneRef.current?.renderer  // Pass the renderer
+        renderer: sceneRef.current?.renderer || fallbackRenderer
       });
       waterEffectRef.current = waterEffect;
     };
     
     // Step 3: Initialize interaction manager
     const initInteractionManager = () => {
+      // Create fallback objects
+      const fallbackScene = new THREE.Scene();
+      const fallbackCamera = new THREE.PerspectiveCamera();
+      
       const interactionManager = new InteractionManager({
-        camera: sceneRef.current?.camera,
-        scene: sceneRef.current?.scene,
+        camera: sceneRef.current?.camera || fallbackCamera,
+        scene: sceneRef.current?.scene || fallbackScene,
         polygonMeshesRef,
         activeView,
         hoveredPolygonId: null,

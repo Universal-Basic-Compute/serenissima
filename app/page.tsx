@@ -10,6 +10,7 @@ import TransferComputeMenu from '../components/UI/TransferComputeMenu';
 import WithdrawComputeMenu from '../components/UI/WithdrawComputeMenu';
 import BackgroundMusic from '../components/UI/BackgroundMusic';
 import LoadingScreen from '../components/UI/LoadingScreen';
+import SuccessAlert from '../components/UI/SuccessAlert';
 import { transferComputeTokens } from '../lib/tokenUtils';
 import { transferComputeInAirtable } from '../lib/airtableUtils';
 
@@ -320,7 +321,7 @@ export default function Home() {
       }
     } catch (error) {
       console.error('Error generating coat of arms image:', error);
-      alert(`Failed to generate image: ${error.message}`);
+      alert(`Failed to generate image: ${error instanceof Error ? error.message : String(error)}`);
     } finally {
       setIsGeneratingImage(false);
     }
@@ -421,7 +422,7 @@ export default function Home() {
       }
     } catch (error) {
       console.error('Error updating profile:', error);
-      alert(`Failed to update profile. Please try again. Error: ${error.message}`);
+      alert(`Failed to update profile. Please try again. Error: ${error instanceof Error ? error.message : String(error)}`);
     }
   };
 
@@ -432,7 +433,7 @@ export default function Home() {
       if (response.ok) {
         const data = await response.json();
         if (data && Array.isArray(data)) {
-          const usersMap = {};
+          const usersMap: Record<string, any> = {};
           data.forEach(user => {
             if (user.user_name) {
               usersMap[user.user_name] = user;
@@ -676,7 +677,7 @@ export default function Home() {
         console.log("Wallet disconnected successfully");
       } catch (error) {
         console.error("Error disconnecting wallet:", error);
-        alert(`Failed to disconnect wallet: ${error.message}`);
+        alert(`Failed to disconnect wallet: ${error instanceof Error ? error.message : String(error)}`);
       }
       return;
     }
@@ -710,7 +711,7 @@ export default function Home() {
       }
     } catch (error) {
       console.error('Error connecting to wallet:', error);
-      alert(`Failed to connect wallet: ${error.message}`);
+      alert(`Failed to connect wallet: ${error instanceof Error ? error.message : String(error)}`);
     }
   }, [walletAdapter]);
 

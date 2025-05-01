@@ -70,7 +70,7 @@ export async function GET(request: Request) {
           ...cachedData,
           _cached: true,
           _stale: true,
-          _error: fetchError.message
+          _error: fetchError instanceof Error ? fetchError.message : String(fetchError)
         });
       }
       
@@ -95,7 +95,11 @@ export async function GET(request: Request) {
     }
     
     return NextResponse.json(
-      { success: false, error: 'Failed to fetch land ownership data', message: String(error) },
+      { 
+        success: false, 
+        error: 'Failed to fetch land ownership data', 
+        message: error instanceof Error ? error.message : String(error) 
+      },
       { status: 500 }
     );
   }
