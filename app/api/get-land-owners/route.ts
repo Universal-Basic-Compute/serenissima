@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 let cachedData: any = null;
 let cacheTimestamp: number = 0;
 const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes in milliseconds
-const FETCH_TIMEOUT = 20000; // 20 seconds timeout
+const FETCH_TIMEOUT = 60000; // 60 seconds timeout (increased from 20 seconds)
 
 export async function GET() {
   try {

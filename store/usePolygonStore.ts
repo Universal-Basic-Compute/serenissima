@@ -168,7 +168,7 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
         try {
           const response = await fetch('/api/get-land-owners', {
             // Add a timeout to prevent hanging requests
-            signal: AbortSignal.timeout(10000) // 10 second timeout
+            signal: AbortSignal.timeout(30000) // 30 second timeout
           });
           
           if (!response.ok) {
