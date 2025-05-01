@@ -599,8 +599,8 @@ export default class PolygonRenderer {
           // Create a circular texture from the loaded image
           const circularTexture = this.createCircularTexture(texture);
           
-          // Create a flat plane for the coat of arms - 20% smaller
-          const planeSize = 1.28; // Reduced by 20% from 1.6
+          // Create a flat plane for the coat of arms - increase size for better visibility
+          const planeSize = 2.5; // Increased for better visibility
           const geometry = new THREE.PlaneGeometry(planeSize, planeSize);
           
           // Create material with the texture
@@ -624,7 +624,7 @@ export default class PolygonRenderer {
           )[0];
           
           // Position higher above the land to avoid z-fighting - INCREASE THIS VALUE
-          plane.position.set(normalizedCoords.x, 0.15, -normalizedCoords.y);
+          plane.position.set(normalizedCoords.x, 0.25, -normalizedCoords.y); // Increased height
           
           // Rotate to lay flat on the ground (90 degrees around X axis)
           plane.rotation.x = -Math.PI / 2;
@@ -637,7 +637,7 @@ export default class PolygonRenderer {
           this.coatOfArmSprites[polygon.id] = plane;
           
           console.log(`Added flat coat of arms for ${polygon.id} at position:`, 
-            normalizedCoords.x, 0.15, -normalizedCoords.y);
+            normalizedCoords.x, 0.25, -normalizedCoords.y);
         },
         undefined,
         (error) => {

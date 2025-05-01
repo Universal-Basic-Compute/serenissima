@@ -282,11 +282,14 @@ export default function PolygonViewer() {
       
       console.log('Created coat of arms map with', Object.keys(coatOfArmsMap).length, 'entries');
       
-      // Update the renderer with the coat of arms map
-      polygonRendererRef.current.updateOwnerCoatOfArms(coatOfArmsMap);
-      
-      // Force an update of the view mode to trigger sprite creation
-      polygonRendererRef.current.updateViewMode(activeView);
+      // Only update if we actually have coat of arms data
+      if (Object.keys(coatOfArmsMap).length > 0) {
+        // Update the renderer with the coat of arms map
+        polygonRendererRef.current.updateOwnerCoatOfArms(coatOfArmsMap);
+        
+        // Force an update of the view mode to trigger sprite creation
+        polygonRendererRef.current.updateViewMode(activeView);
+      }
     }
   }, [users, activeView]);
   
