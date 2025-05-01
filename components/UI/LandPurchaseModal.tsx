@@ -78,7 +78,7 @@ const LandPurchaseModal: React.FC<LandPurchaseModalProps> = ({
           
           // Check if this is the Airtable formula error
           const errorStr = String(data.detail || '');
-          if (errorStr.includes('INVALID_FILTER_BY_FORMULA') || errorStr.includes('Invalid formula')) {
+          if (errorStr.includes('INVALID_FILTER_BY_FORMULA') || errorStr.includes('Invalid formula') || errorStr.includes('OR')) {
             console.log('Detected Airtable formula error, using local fallback');
             
             // Create a local transaction result
