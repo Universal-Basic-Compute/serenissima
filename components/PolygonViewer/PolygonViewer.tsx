@@ -598,6 +598,21 @@ export default function PolygonViewer() {
     }
   }, [highQuality]);
   
+  // Create memoized components before any conditional returns
+  const ViewModeMenuMemo = useMemo(() => (
+    <ViewModeMenu activeView={activeView} setActiveView={setActiveView} />
+  ), [activeView, setActiveView]);
+  
+  const LandDetailsPanelMemo = useMemo(() => (
+    <LandDetailsPanel 
+      selectedPolygonId={selectedPolygonId} 
+      onClose={handleCloseLandDetails}
+      polygons={polygons}
+      landOwners={landOwners}
+      visible={activeView === 'land'} // Pass visibility as a prop instead
+    />
+  ), [activeView, selectedPolygonId, handleCloseLandDetails, polygons, landOwners]);
+
   if (loading) {
     return (
       <div className="w-full h-full flex flex-col items-center justify-center bg-amber-50">
@@ -625,7 +640,7 @@ export default function PolygonViewer() {
     );
   }
   
-  // Memoize components to prevent unnecessary re-renders
+  // Always create memoized components regardless of conditions
   const ViewModeMenuMemo = useMemo(() => (
     <ViewModeMenu activeView={activeView} setActiveView={setActiveView} />
   ), [activeView, setActiveView]);
