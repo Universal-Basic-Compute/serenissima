@@ -100,13 +100,6 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
             </div>
           )}
           
-          {/* Name Confidence if available */}
-          {selectedPolygon?.nameConfidence && (
-            <div>
-              <h3 className="text-sm font-medium text-gray-500">Name Confidence</h3>
-              <p className="mt-1 text-sm">{selectedPolygon.nameConfidence}</p>
-            </div>
-          )}
           
           <div className="pt-4">
             <ActionButton onClick={() => alert('Purchase action')} variant="primary">
