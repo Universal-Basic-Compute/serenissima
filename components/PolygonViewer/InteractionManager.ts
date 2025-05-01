@@ -94,11 +94,30 @@ export default class InteractionManager {
       }
     }
     
-    // If the hovered polygon has changed
-    if (currentHoveredId !== this.hoveredPolygonId) {
+    // CRITICAL CHANGE: Only update the hovered polygon ID if it has changed
+    // AND don't update if we're in the middle of a camera operation
+    if (currentHoveredId !== this.hoveredPolygonId && !(this.camera.userData.isMoving)) {
+      // Store the current camera position to detect if it changes
+      const currentCameraPosition = this.camera.position.clone();
+      const currentCameraTarget = this.camera.getWorldDirection(new THREE.Vector3());
+      
       // Update the hovered polygon ID
       this.setHoveredPolygonId(currentHoveredId);
       this.hoveredPolygonId = currentHoveredId;
+      
+      // Check if camera position changed during the hover update
+      if (!this.camera.position.equals(currentCameraPosition) || 
+          !this.camera.getWorldDirection(new THREE.Vector3()).equals(currentCameraTarget)) {
+        console.log("Camera position changed during hover - restoring");
+        // Restore camera position
+        this.camera.position.copy(currentCameraPosition);
+        // We can't directly set world direction, but we can ensure the camera is looking at the same point
+        const targetPoint = new THREE.Vector3().addVectors(
+          currentCameraPosition, 
+          currentCameraTarget.multiplyScalar(10) // Look 10 units ahead in the direction
+        );
+        this.camera.lookAt(targetPoint);
+      }
     }
   }
   

@@ -63,6 +63,15 @@ export default class SceneSetup {
     // Set up OrbitControls with minimal configuration
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
 
+    // Add camera movement detection
+    this.camera.userData.isMoving = false;
+    this.controls.addEventListener('start', () => {
+      this.camera.userData.isMoving = true;
+    });
+    this.controls.addEventListener('end', () => {
+      this.camera.userData.isMoving = false;
+    });
+
     // Disable all automatic behaviors
     this.controls.autoRotate = false;
     this.controls.enableDamping = false;
