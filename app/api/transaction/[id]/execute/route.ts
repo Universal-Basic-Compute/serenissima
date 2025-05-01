@@ -70,7 +70,7 @@ export async function POST(
       console.warn(`Backend API not available for transaction ${id}, falling back to local data:`, apiError);
     }
     
-    // Fall back to local file handling if API is not available
+    // Fall back to local file handling if API is not available or has Airtable formula errors
     console.log(`Falling back to local file handling for transaction ${id}`);
     
     // Ensure transactions directory exists
