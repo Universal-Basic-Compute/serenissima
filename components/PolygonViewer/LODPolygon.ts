@@ -765,7 +765,7 @@ export default class LODPolygon {
         
         // IMPORTANT: Adjust the polygon's position to prevent z-fighting
         // Move the mesh slightly up when selected - but not too high
-        mesh.position.y += 0.05; // Reduced from 0.1
+        mesh.position.y += 0.03; // Reduced further to minimize z-fighting
         
         // Also increase the renderOrder to ensure it renders on top
         mesh.renderOrder = 2; // Higher than hover
@@ -779,7 +779,7 @@ export default class LODPolygon {
           
           // IMPORTANT: Restore the original position
           // Move the mesh back to its original position
-          mesh.position.y -= 0.05; // Reduced from 0.1
+          mesh.position.y -= 0.03; // Reduced to match the new offset
           
           // Reset the renderOrder
           mesh.renderOrder = 0;

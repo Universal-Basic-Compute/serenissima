@@ -407,18 +407,18 @@ export default class WaterEffect {
       
       // Animate water - reduce values even further to slow down the water
       if (waterUniforms.time) {
-        waterUniforms.time.value += performanceMode ? 0.001 : 0.002; // Reduced from 0.0025/0.005
+        waterUniforms.time.value += performanceMode ? 0.0005 : 0.001; // Reduced by half again
       }
       
       // Apply Gerstner waves for more natural water movement - reduce frequency
       if (typeof this.applyGerstnerWaves === 'function') {
-        this.applyGerstnerWaves(frameCount * 0.01); // Reduced from 0.025
+        this.applyGerstnerWaves(frameCount * 0.005); // Reduced by half again
       }
       
       // Animate foam if it exists - slow down the foam movement more
       if (this.waterFoam && this.foamTexture && this.foamTexture.offset) {
-        this.foamTexture.offset.x += 0.0001; // Reduced from 0.00025
-        this.foamTexture.offset.y += 0.00005; // Reduced from 0.00015
+        this.foamTexture.offset.x += 0.00005; // Reduced by half again
+        this.foamTexture.offset.y += 0.000025; // Reduced by half again
       }
       
       // Animate sun reflection
@@ -438,7 +438,7 @@ export default class WaterEffect {
       }
       
       // Update shore interaction much less frequently to reduce flickering
-      if (this.shoreMesh && this.landRenderTarget && this.shoreMesh.material && frameCount % 10 === 0) {
+      if (this.shoreMesh && this.landRenderTarget && this.shoreMesh.material && frameCount % 30 === 0) {
         // Add a check for the uniforms
         const shoreUniforms = (this.shoreMesh.material as THREE.ShaderMaterial).uniforms;
         if (!shoreUniforms || !shoreUniforms.time) {
@@ -447,7 +447,7 @@ export default class WaterEffect {
         }
         
         // Update time uniform with slower rate
-        shoreUniforms.time.value = frameCount * 0.02; // Reduced from 0.05
+        shoreUniforms.time.value = frameCount * 0.01; // Reduced by half again
         
         try {
           // Only proceed if all required objects exist

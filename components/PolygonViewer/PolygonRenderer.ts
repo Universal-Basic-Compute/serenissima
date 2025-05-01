@@ -34,6 +34,7 @@ export default class PolygonRenderer {
   private sandRoughnessMap: THREE.Texture;
   private lodPolygons: LODPolygon[] = [];
   private ownerCoatOfArmsMap: Record<string, string> = {}; // Map of owner to coat of arms URL
+  public hasUpdatedCoatOfArms: boolean = false; // Flag to track if coat of arms have been updated
   
   // Add a method to create a sprite for the coat of arms
   private createCoatOfArmsSprite(coatOfArmsUrl: string) {
@@ -587,6 +588,9 @@ export default class PolygonRenderer {
     if (this.activeView === 'land') {
       this.updateCoatOfArmsSprites();
     }
+    
+    // Set the flag to indicate we've updated coat of arms
+    this.hasUpdatedCoatOfArms = true;
   }
   
   // Add method to update owner colors
