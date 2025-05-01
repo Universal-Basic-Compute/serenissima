@@ -134,25 +134,33 @@ export default class CloudSystem {
 
   public update(time: number) {
     // Animate clouds slowly
+    if (!this.cloudParticles || this.cloudParticles.length === 0) return;
+    
     this.cloudParticles.forEach((cloud, i) => {
-      // Gentle rotation
-      cloud.rotation.z += 0.0001;
+      if (!cloud) return;
       
-      // Gentle movement with unique patterns for each cloud
-      cloud.position.x += Math.sin(time * 0.0001 + i * 0.1) * 0.01;
-      cloud.position.z += Math.cos(time * 0.0001 + i * 0.05) * 0.01;
-      
-      // Subtle vertical movement for some clouds
-      if (i % 3 === 0) {
-        cloud.position.y += Math.sin(time * 0.00005 + i) * 0.005;
+      try {
+        // Gentle rotation
+        cloud.rotation.z += 0.0001;
+        
+        // Gentle movement with unique patterns for each cloud
+        cloud.position.x += Math.sin(time * 0.0001 + i * 0.1) * 0.01;
+        cloud.position.z += Math.cos(time * 0.0001 + i * 0.05) * 0.01;
+        
+        // Subtle vertical movement for some clouds
+        if (i % 3 === 0) {
+          cloud.position.y += Math.sin(time * 0.00005 + i) * 0.005;
+        }
+        
+        // Wrap around if clouds drift too far
+        const limit = Math.max(this.width, this.height);
+        if (cloud.position.x > limit) cloud.position.x = -limit;
+        if (cloud.position.x < -limit) cloud.position.x = limit;
+        if (cloud.position.z > limit) cloud.position.z = -limit;
+        if (cloud.position.z < -limit) cloud.position.z = limit;
+      } catch (error) {
+        console.error(`Error animating cloud ${i}:`, error);
       }
-      
-      // Wrap around if clouds drift too far
-      const limit = Math.max(this.width, this.height);
-      if (cloud.position.x > limit) cloud.position.x = -limit;
-      if (cloud.position.x < -limit) cloud.position.x = limit;
-      if (cloud.position.z > limit) cloud.position.z = -limit;
-      if (cloud.position.z < -limit) cloud.position.z = limit;
     });
   }
 

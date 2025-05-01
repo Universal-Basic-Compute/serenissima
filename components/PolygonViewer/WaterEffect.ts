@@ -389,7 +389,8 @@ export default class WaterEffect {
     if (!this.water) return;
     
     // Get water uniforms
-    const waterUniforms = this.water.material.uniforms;
+    const waterUniforms = this.water.material?.uniforms;
+    if (!waterUniforms) return;
     
     // Animate water - reduce values even further to slow down the water
     if (waterUniforms.time) {
@@ -400,7 +401,7 @@ export default class WaterEffect {
     this.applyGerstnerWaves(frameCount * 0.01); // Reduced from 0.025
     
     // Animate foam if it exists - slow down the foam movement more
-    if (this.waterFoam && this.foamTexture) {
+    if (this.waterFoam && this.foamTexture && this.foamTexture.offset) {
       this.foamTexture.offset.x += 0.0001; // Reduced from 0.00025
       this.foamTexture.offset.y += 0.00005; // Reduced from 0.00015
     }

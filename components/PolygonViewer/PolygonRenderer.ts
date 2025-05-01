@@ -959,13 +959,19 @@ export default class PolygonRenderer {
     
     // Update hover state for all LOD polygons
     this.lodPolygons.forEach(lodPolygon => {
-      const polygonId = this.polygons.find(
-        p => lodPolygon.getMesh() === this.polygonMeshesRef.current[p.id]
-      )?.id;
+      if (!lodPolygon) return;
       
-      if (polygonId) {
-        // Apply hover state based on ID match
-        lodPolygon.updateHoverState(polygonId === hoveredPolygonId);
+      try {
+        const polygonId = this.polygons.find(
+          p => p && lodPolygon.getMesh() === this.polygonMeshesRef.current[p.id]
+        )?.id;
+        
+        if (polygonId) {
+          // Apply hover state based on ID match
+          lodPolygon.updateHoverState(polygonId === hoveredPolygonId);
+        }
+      } catch (error) {
+        console.error('Error updating hover state for polygon:', error);
       }
     });
   }

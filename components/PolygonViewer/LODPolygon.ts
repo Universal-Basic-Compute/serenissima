@@ -238,12 +238,14 @@ export default class LODPolygon {
       this.textureLoader.load(
         '/textures/sand.jpg', // Use absolute path
         (texture) => {
-          texture.wrapS = THREE.RepeatWrapping;
-          texture.wrapT = THREE.RepeatWrapping;
-          texture.repeat.set(5, 5); // Adjust based on scale
-          material.map = texture;
-          material.needsUpdate = true;
-          console.log('Sand texture loaded successfully');
+          if (texture && material) {
+            texture.wrapS = THREE.RepeatWrapping;
+            texture.wrapT = THREE.RepeatWrapping;
+            texture.repeat.set(5, 5); // Adjust based on scale
+            material.map = texture;
+            material.needsUpdate = true;
+            console.log('Sand texture loaded successfully');
+          }
         },
         undefined,
         (error) => {
@@ -255,13 +257,24 @@ export default class LODPolygon {
       this.textureLoader.load(
         '/textures/sand_normal.jpg', // Use absolute path
         (texture) => {
-          texture.wrapS = THREE.RepeatWrapping;
-          texture.wrapT = THREE.RepeatWrapping;
-          texture.repeat.set(5, 5); // Match the color texture
-          material.normalMap = texture;
-          material.normalScale.set(0.5, 0.5); // Adjust for desired bumpiness
-          material.needsUpdate = true;
-          console.log('Sand normal map loaded successfully');
+          if (texture && material && material.normalScale) {
+            texture.wrapS = THREE.RepeatWrapping;
+            texture.wrapT = THREE.RepeatWrapping;
+            texture.repeat.set(5, 5); // Match the color texture
+            material.normalMap = texture;
+            material.normalScale.set(0.5, 0.5); // Adjust for desired bumpiness
+            material.needsUpdate = true;
+            console.log('Sand normal map loaded successfully');
+          } else if (texture && material) {
+            // If normalScale doesn't exist, create it
+            texture.wrapS = THREE.RepeatWrapping;
+            texture.wrapT = THREE.RepeatWrapping;
+            texture.repeat.set(5, 5);
+            material.normalMap = texture;
+            material.normalScale = new THREE.Vector2(0.5, 0.5);
+            material.needsUpdate = true;
+            console.log('Sand normal map loaded successfully (created normalScale)');
+          }
         },
         undefined,
         (error) => {
@@ -714,15 +727,19 @@ export default class LODPolygon {
     } else {
       // Restore original material properties
       if (this.originalMaterial && this.originalMaterial.color && material.color) {
-        material.color.copy(this.originalMaterial.color);
-        material.needsUpdate = true;
-        
-        // IMPORTANT: Restore the original position
-        // Move the mesh back to its original position
-        this.highDetailMesh.position.y -= 0.03; // Reduced from 0.05
-        
-        // Reset the renderOrder
-        this.highDetailMesh.renderOrder = 0;
+        try {
+          material.color.copy(this.originalMaterial.color);
+          material.needsUpdate = true;
+          
+          // IMPORTANT: Restore the original position
+          // Move the mesh back to its original position
+          this.highDetailMesh.position.y -= 0.03; // Reduced from 0.05
+          
+          // Reset the renderOrder
+          this.highDetailMesh.renderOrder = 0;
+        } catch (error) {
+          console.error('Error restoring original material properties:', error);
+        }
       }
     }
   }

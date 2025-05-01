@@ -280,7 +280,6 @@ export default class SceneSetup {
   
   public updateClouds(frameCount: number) {
     if (!this.cloudSystem) {
-      console.log('Cloud system not initialized');
       return;
     }
     
@@ -289,11 +288,16 @@ export default class SceneSetup {
     if (frameCount % 100 === 0) { // Log only occasionally to avoid console spam
       console.log(`Camera height: ${this.camera.position.y}, Cloud threshold: ${this.zoomThreshold}, Showing clouds: ${showClouds}`);
     }
-    this.cloudSystem.setVisibility(showClouds);
     
-    // Update cloud animation
-    if (showClouds) {
-      this.cloudSystem.update(frameCount);
+    try {
+      this.cloudSystem.setVisibility(showClouds);
+      
+      // Update cloud animation
+      if (showClouds) {
+        this.cloudSystem.update(frameCount);
+      }
+    } catch (error) {
+      console.error('Error updating clouds:', error);
     }
   }
   
