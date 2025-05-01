@@ -22,7 +22,7 @@ export default class SceneSetup {
   private sunSphere: THREE.Mesh;
   private sunGlow: THREE.Mesh;
   private cloudSystem: CloudSystem | null = null;
-  private zoomThreshold: number = 70; // Threshold for showing clouds
+  private zoomThreshold: number = 40; // Changed from 70 to 40 - Threshold for showing clouds
   
   constructor({ canvas, activeView, highQuality }: SceneSetupProps) {
     this.performanceMode = !highQuality;
@@ -147,6 +147,7 @@ export default class SceneSetup {
     window.addEventListener('resize', this.handleResize);
     
     setTimeout(() => {
+      console.log('Creating cloud system...');
       // Create cloud system with a delay to prioritize initial scene loading
       this.cloudSystem = new CloudSystem({
         scene: this.scene,
@@ -155,11 +156,13 @@ export default class SceneSetup {
         performanceMode: this.performanceMode
       });
       
-      // Force an initial update to position clouds
+      // Force an initial update to position clouds and make them visible
       if (this.cloudSystem) {
+        console.log('Initializing clouds and setting visibility');
         this.cloudSystem.update(0);
+        this.cloudSystem.setVisibility(true); // Force visibility initially
       }
-    }, 3000); // Delay cloud creation by 3 seconds
+    }, 2000); // Reduced from 3000 to 2000 ms
   }
   
   private setupLights(activeView: ViewMode) {
@@ -270,10 +273,16 @@ export default class SceneSetup {
   }
   
   public updateClouds(frameCount: number) {
-    if (!this.cloudSystem) return;
+    if (!this.cloudSystem) {
+      console.log('Cloud system not initialized');
+      return;
+    }
     
     // Show clouds only when zoomed out
     const showClouds = this.camera.position.y > this.zoomThreshold;
+    if (frameCount % 100 === 0) { // Log only occasionally to avoid console spam
+      console.log(`Camera height: ${this.camera.position.y}, Cloud threshold: ${this.zoomThreshold}, Showing clouds: ${showClouds}`);
+    }
     this.cloudSystem.setVisibility(showClouds);
     
     // Update cloud animation

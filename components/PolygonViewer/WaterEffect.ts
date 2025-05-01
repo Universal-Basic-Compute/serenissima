@@ -265,7 +265,7 @@ export default class WaterEffect {
     
     this.water = new Water(this.waterGeometry, waterOptions);
     this.water.rotation.x = -Math.PI / 2;
-    this.water.position.y = -0.3; // Position water even lower to avoid z-fighting
+    this.water.position.y = -0.5; // Changed from -0.3 to -0.5 to avoid z-fighting
     this.water.renderOrder = 1; // Ensure water renders before land
     this.water.visible = true;
     
@@ -391,19 +391,18 @@ export default class WaterEffect {
     // Get water uniforms
     const waterUniforms = this.water.material.uniforms;
     
-    // Animate water - reduced values to slow down the water
+    // Animate water - reduce values even further to slow down the water
     if (waterUniforms.time) {
-      waterUniforms.time.value += performanceMode ? 0.0025 : 0.005; // Reduced from 0.005/0.01
+      waterUniforms.time.value += performanceMode ? 0.001 : 0.002; // Reduced from 0.0025/0.005
     }
     
-    // Apply Gerstner waves for more natural water movement
-    // Reduce the multiplier to slow down the waves
-    this.applyGerstnerWaves(frameCount * 0.025); // Reduced from 0.05
+    // Apply Gerstner waves for more natural water movement - reduce frequency
+    this.applyGerstnerWaves(frameCount * 0.01); // Reduced from 0.025
     
-    // Animate foam if it exists - slow down the foam movement too
+    // Animate foam if it exists - slow down the foam movement more
     if (this.waterFoam && this.foamTexture) {
-      this.foamTexture.offset.x += 0.00025; // Reduced from 0.0005
-      this.foamTexture.offset.y += 0.00015; // Reduced from 0.0003
+      this.foamTexture.offset.x += 0.0001; // Reduced from 0.00025
+      this.foamTexture.offset.y += 0.00005; // Reduced from 0.00015
     }
     
     // Animate sun reflection
@@ -422,10 +421,10 @@ export default class WaterEffect {
       this.sunReflection.position.z = basePosition.z + offsetZ;
     }
     
-    // Update shore interaction - only do this every few frames to reduce flickering
-    if (this.shoreMesh && this.landRenderTarget && frameCount % 3 === 0) {
-      // Update time uniform
-      (this.shoreMesh.material as THREE.ShaderMaterial).uniforms.time.value = frameCount * 0.05;
+    // Update shore interaction much less frequently to reduce flickering
+    if (this.shoreMesh && this.landRenderTarget && frameCount % 10 === 0) { // Changed from 3 to 10
+      // Update time uniform with slower rate
+      (this.shoreMesh.material as THREE.ShaderMaterial).uniforms.time.value = frameCount * 0.02; // Reduced from 0.05
       
       try {
         // Render land to texture
