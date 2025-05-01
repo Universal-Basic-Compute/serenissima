@@ -27,6 +27,7 @@ class PolygonMesh {
     ownerColor: string | null = null,
     ownerCoatOfArmsUrl: string | null = null
   ) {
+    console.log(`Creating polygon mesh for ${polygon.id}`);
     this.scene = scene;
     this.polygon = polygon;
     this.bounds = bounds;
@@ -479,6 +480,7 @@ class PolygonMesh {
   // Clean up resources
   public cleanup() {
     if (this.mesh) {
+      console.log(`Cleaning up polygon mesh`);
       this.scene.remove(this.mesh);
       
       if (this.mesh.geometry) {

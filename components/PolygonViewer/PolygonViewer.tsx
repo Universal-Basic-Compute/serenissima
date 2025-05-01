@@ -479,6 +479,12 @@ export default function PolygonViewer() {
   useEffect(() => {
     if (!canvasRef.current || loading) return;
     
+    // Prevent multiple initializations
+    if (sceneRef.current) {
+      console.log('Scene already initialized, skipping setup');
+      return;
+    }
+    
     console.log(`Setting up Three.js scene`);
 
     // Calculate bounds for all polygons outside the try block to make it accessible to all nested functions

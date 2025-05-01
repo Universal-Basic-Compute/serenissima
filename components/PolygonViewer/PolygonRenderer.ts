@@ -240,8 +240,25 @@ export default class PolygonRenderer {
     
   }
   
+  // Add a set to track created polygon IDs
+  private createdPolygonIds = new Set<string>();
+
   private renderPolygons() {
     console.log(`Rendering ${this.polygons.length} polygons`);
+    
+    // Clean up existing polygon meshes before creating new ones
+    this.PolygonMeshs.forEach(polygonMesh => {
+      polygonMesh.cleanup();
+    });
+    this.PolygonMeshs = [];
+    
+    // Clear the reference to polygon meshes
+    Object.keys(this.polygonMeshesRef.current).forEach(key => {
+      delete this.polygonMeshesRef.current[key];
+    });
+    
+    // Reset the created polygon IDs set
+    this.createdPolygonIds.clear();
     
     if (this.polygons.length > 0) {
       try {
@@ -270,6 +287,12 @@ export default class PolygonRenderer {
           
           if (polygon.coordinates && polygon.coordinates.length > 2) {
             try {
+              // Skip if this polygon has already been created
+              if (this.createdPolygonIds.has(polygon.id)) {
+                console.log(`Skipping duplicate polygon: ${polygon.id}`);
+                continue;
+              }
+              
               // Skip if not in view frustum (approximate check using centroid)
               if (polygon.centroid) {
                 const centroidPos = new THREE.Vector3(
@@ -355,6 +378,9 @@ export default class PolygonRenderer {
               if (polygonMeshInstance) {
                 this.polygonMeshesRef.current[polygon.id] = polygonMeshInstance;
               }
+              
+              // Mark this polygon as created
+              this.createdPolygonIds.add(polygon.id);
               
               processedCount++;
             } catch (error) {
@@ -1037,10 +1063,16 @@ export default class PolygonRenderer {
   }
   
   public cleanup() {
+    console.log(`Cleaning up PolygonRenderer with ${this.PolygonMeshs.length} meshes`);
+    
     // Clean up all LOD polygons
     this.PolygonMeshs.forEach(polygonMesh => {
       polygonMesh.cleanup();
     });
+    
+    // Clear the arrays and maps
+    this.PolygonMeshs = [];
+    this.createdPolygonIds.clear();
     
     // Clean up coat of arms objects (planes or sprites)
     Object.values(this.coatOfArmSprites).forEach(obj => {
