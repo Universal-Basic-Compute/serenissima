@@ -29,6 +29,8 @@ The server will start at http://localhost:8000
 - `POST /api/wallet`: Store a wallet address
 - `GET /api/wallet/{wallet_address}`: Get wallet information
 - `POST /api/invest-compute`: Invest compute resources for a wallet
+- `POST /api/land`: Create a land record
+- `GET /api/land/{land_id}`: Get land information
 
 ## Airtable Structure
 
@@ -37,3 +39,10 @@ The Users table should have the following fields:
 - ComputeAmount (number): The amount of compute resources invested
 - Username (text): The user's username
 - Email (text): The user's email address
+
+The LANDS table should have the following fields:
+- LandId (text): The ID of the land (polygon)
+- Wallet (text): The wallet address of the owner
+- HistoricalName (text): The historical name of the land
+- EnglishName (text): The English translation of the historical name
+- Description (text): A description of the land

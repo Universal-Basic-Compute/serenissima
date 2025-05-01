@@ -38,6 +38,15 @@ except Exception as e:
     print(f"ERROR initializing Airtable: {str(e)}")
     traceback.print_exc(file=sys.stdout)
 
+# Initialize Airtable for LANDS table
+AIRTABLE_LANDS_TABLE = os.getenv("AIRTABLE_LANDS_TABLE", "LANDS")
+try:
+    lands_table = Table(AIRTABLE_API_KEY, AIRTABLE_BASE_ID, AIRTABLE_LANDS_TABLE)
+    print(f"Initialized Airtable LANDS table: {AIRTABLE_LANDS_TABLE}")
+except Exception as e:
+    print(f"ERROR initializing Airtable LANDS table: {str(e)}")
+    traceback.print_exc(file=sys.stdout)
+
 # Create FastAPI app
 app = FastAPI(title="Wallet Storage API")
 
@@ -64,6 +73,22 @@ class WalletResponse(BaseModel):
     compute_amount: float = None
     user_name: str = None
     email: str = None
+
+# Add these new models
+class LandRequest(BaseModel):
+    land_id: str
+    wallet_address: str
+    historical_name: str = None
+    english_name: str = None
+    description: str = None
+
+class LandResponse(BaseModel):
+    id: str
+    land_id: str
+    wallet_address: str
+    historical_name: str = None
+    english_name: str = None
+    description: str = None
 
 @app.get("/")
 def read_root():
@@ -205,6 +230,98 @@ async def invest_compute(wallet_data: WalletRequest):
             }
     except Exception as e:
         error_msg = f"Failed to invest compute: {str(e)}"
+        print(f"ERROR: {error_msg}")
+        traceback.print_exc(file=sys.stdout)
+        raise HTTPException(status_code=500, detail=error_msg)
+
+@app.post("/api/land", response_model=LandResponse)
+async def create_land(land_data: LandRequest):
+    """Create a land record in Airtable"""
+    
+    if not land_data.land_id:
+        raise HTTPException(status_code=400, detail="Land ID is required")
+    
+    if not land_data.wallet_address:
+        raise HTTPException(status_code=400, detail="Wallet address is required")
+    
+    try:
+        # Check if land already exists
+        formula = f"{{LandId}}='{land_data.land_id}'"
+        print(f"Searching for land with formula: {formula}")
+        existing_records = lands_table.all(formula=formula)
+        
+        if existing_records:
+            # Return existing record
+            record = existing_records[0]
+            print(f"Found existing land record: {record['id']}")
+            return {
+                "id": record["id"],
+                "land_id": record["fields"].get("LandId", ""),
+                "wallet_address": record["fields"].get("Wallet", ""),
+                "historical_name": record["fields"].get("HistoricalName", None),
+                "english_name": record["fields"].get("EnglishName", None),
+                "description": record["fields"].get("Description", None)
+            }
+        
+        # Create new record
+        fields = {
+            "LandId": land_data.land_id,
+            "Wallet": land_data.wallet_address
+        }
+        
+        if land_data.historical_name:
+            fields["HistoricalName"] = land_data.historical_name
+            
+        if land_data.english_name:
+            fields["EnglishName"] = land_data.english_name
+            
+        if land_data.description:
+            fields["Description"] = land_data.description
+        
+        print(f"Creating new land record with fields: {fields}")
+        record = lands_table.create(fields)
+        print(f"Created new land record: {record['id']}")
+        
+        return {
+            "id": record["id"],
+            "land_id": record["fields"].get("LandId", ""),
+            "wallet_address": record["fields"].get("Wallet", ""),
+            "historical_name": record["fields"].get("HistoricalName", None),
+            "english_name": record["fields"].get("EnglishName", None),
+            "description": record["fields"].get("Description", None)
+        }
+    except Exception as e:
+        error_msg = f"Failed to create land record: {str(e)}"
+        print(f"ERROR: {error_msg}")
+        traceback.print_exc(file=sys.stdout)
+        raise HTTPException(status_code=500, detail=error_msg)
+
+@app.get("/api/land/{land_id}")
+async def get_land(land_id: str):
+    """Get land information from Airtable"""
+    
+    try:
+        formula = f"{{LandId}}='{land_id}'"
+        print(f"Searching for land with formula: {formula}")
+        records = lands_table.all(formula=formula)
+        
+        if not records:
+            raise HTTPException(status_code=404, detail="Land not found")
+        
+        record = records[0]
+        print(f"Found land record: {record['id']}")
+        return {
+            "id": record["id"],
+            "land_id": record["fields"].get("LandId", ""),
+            "wallet_address": record["fields"].get("Wallet", ""),
+            "historical_name": record["fields"].get("HistoricalName", None),
+            "english_name": record["fields"].get("EnglishName", None),
+            "description": record["fields"].get("Description", None)
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        error_msg = f"Failed to get land: {str(e)}"
         print(f"ERROR: {error_msg}")
         traceback.print_exc(file=sys.stdout)
         raise HTTPException(status_code=500, detail=error_msg)
