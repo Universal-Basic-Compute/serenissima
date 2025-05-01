@@ -232,23 +232,56 @@ const LandPurchaseModal: React.FC<LandPurchaseModalProps> = ({
             
             // Show success message
             alert(`Acquisition complete! The property "${landName || landId}" has been successfully transferred to your possession.`);
-            
+    
             // Update transaction to mark it as executed
             const updatedTransaction = {
               ...transaction,
               buyer: walletAddress,
               executed_at: new Date().toISOString()
             };
-            
+    
+            // Get the username for the wallet address
+            const username = await getUsernameFromWallet(walletAddress);
+            const ownerToSet = username || walletAddress;
+    
             // Dispatch custom events to notify other components
             window.dispatchEvent(new CustomEvent('landOwnershipChanged', {
               detail: { 
                 landId: landId, 
-                newOwner: walletAddress,
+                newOwner: ownerToSet, // Use username instead of wallet address
                 transaction: updatedTransaction
               }
             }));
-            
+    
+            // Dispatch a specific event for land purchase to update the panel
+            window.dispatchEvent(new CustomEvent('landPurchased', {
+              detail: { 
+                landId: landId, 
+                newOwner: ownerToSet, // Use username instead of wallet address
+                transaction: updatedTransaction
+              }
+            }));
+    
+            // Add a new event specifically for compute balance updates
+            window.dispatchEvent(new CustomEvent('computeBalanceChanged', {
+              detail: {
+                buyer: walletAddress,
+                seller: transaction.seller,
+                amount: transaction.price
+              }
+            }));
+    
+            // Fetch updated user data to reflect new compute balance
+            const userResponse = await fetch(`${getApiBaseUrl()}/api/wallet/${walletAddress}`);
+            if (userResponse.ok) {
+              const userData = await userResponse.json();
+      
+              // Dispatch event to update user profile with new compute amount
+              window.dispatchEvent(new CustomEvent('userProfileUpdated', {
+                detail: userData
+              }));
+            }
+      
             // Call the onComplete callback
             onComplete();
             return;

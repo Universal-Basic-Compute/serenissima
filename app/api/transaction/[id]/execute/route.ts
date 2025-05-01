@@ -37,6 +37,113 @@ async function getUsernameFromWallet(walletAddress: string): Promise<string | nu
   }
 }
 
+// Add this function to update user compute balances
+async function updateUserComputeBalances(seller: string, buyer: string, amount: number) {
+  try {
+    console.log(`Updating compute balances: ${seller} +${amount}, ${buyer} -${amount}`);
+    
+    // First try to update via the backend API
+    try {
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+      
+      // Update seller (add funds)
+      const sellerResponse = await fetch(`${apiBaseUrl}/api/wallet/${seller}/update-compute`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          compute_amount: amount,
+          operation: 'add'
+        }),
+        signal: AbortSignal.timeout(10000) // Increased from 5 to 10 second timeout
+      });
+      
+      // Update buyer (subtract funds)
+      const buyerResponse = await fetch(`${apiBaseUrl}/api/wallet/${buyer}/update-compute`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          compute_amount: amount,
+          operation: 'subtract'
+        }),
+        signal: AbortSignal.timeout(10000) // Increased from 5 to 10 second timeout
+      });
+      
+      if (sellerResponse.ok && buyerResponse.ok) {
+        console.log('Successfully updated compute balances via API');
+        
+        // Dispatch an event to update the UI with the new compute balances
+        // This will be caught by the client to update the UI
+        const sellerData = await sellerResponse.json();
+        const buyerData = await buyerResponse.json();
+        
+        console.log('Updated compute balances:', {
+          seller: sellerData.compute_amount,
+          buyer: buyerData.compute_amount
+        });
+        
+        // Try to update local storage for the current user if they're the buyer or seller
+        try {
+          const currentWallet = sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress');
+          if (currentWallet) {
+            if (currentWallet === seller) {
+              const storedProfile = localStorage.getItem('userProfile');
+              if (storedProfile) {
+                const profile = JSON.parse(storedProfile);
+                profile.computeAmount = sellerData.compute_amount;
+                localStorage.setItem('userProfile', JSON.stringify(profile));
+                console.log('Updated seller profile in localStorage');
+              }
+            } else if (currentWallet === buyer) {
+              const storedProfile = localStorage.getItem('userProfile');
+              if (storedProfile) {
+                const profile = JSON.parse(storedProfile);
+                profile.computeAmount = buyerData.compute_amount;
+                localStorage.setItem('userProfile', JSON.stringify(profile));
+                console.log('Updated buyer profile in localStorage');
+              }
+            }
+          }
+        } catch (storageError) {
+          console.warn('Error updating localStorage:', storageError);
+        }
+        
+        return true;
+      } else {
+        console.warn('API returned non-OK response for compute balance update');
+        if (!sellerResponse.ok) {
+          console.warn(`Seller update failed: ${sellerResponse.status}`);
+          try {
+            const errorData = await sellerResponse.json();
+            console.warn('Seller error details:', errorData);
+          } catch (e) {}
+        }
+        if (!buyerResponse.ok) {
+          console.warn(`Buyer update failed: ${buyerResponse.status}`);
+          try {
+            const errorData = await buyerResponse.json();
+            console.warn('Buyer error details:', errorData);
+          } catch (e) {}
+        }
+      }
+    } catch (apiError) {
+      console.warn('Backend API not available for compute balance update, falling back to local handling:', apiError);
+    }
+    
+    // Fall back to local file handling if API is not available
+    // This would require implementing local user data storage
+    // For now, just log that we couldn't update the balances
+    console.warn('Local compute balance update not implemented');
+    return false;
+  } catch (error) {
+    console.error('Error updating user compute balances:', error);
+    return false;
+  }
+}
+
 // Add this function to handle the specific Airtable formula error
 function isAirtableFormulaError(error: any): boolean {
   const errorStr = String(error);
