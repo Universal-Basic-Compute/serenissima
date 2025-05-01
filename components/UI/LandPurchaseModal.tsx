@@ -136,13 +136,22 @@ const LandPurchaseModal: React.FC<LandPurchaseModalProps> = ({
             transaction: updatedTransaction
           }
         }));
-        
+      
         // Dispatch a specific event for land purchase to update the panel
         window.dispatchEvent(new CustomEvent('landPurchased', {
           detail: { 
             landId: landId, 
             newOwner: walletAddress,
             transaction: updatedTransaction
+          }
+        }));
+      
+        // Add a new event specifically for compute balance updates
+        window.dispatchEvent(new CustomEvent('computeBalanceChanged', {
+          detail: {
+            buyer: walletAddress,
+            seller: transaction.seller,
+            amount: transaction.price
           }
         }));
       

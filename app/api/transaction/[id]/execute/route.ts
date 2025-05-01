@@ -22,6 +22,60 @@ function isAirtableFormulaError(error: any): boolean {
          errorStr.includes('OR');
 }
 
+// Add this function to update user compute balances
+async function updateUserComputeBalances(seller: string, buyer: string, amount: number) {
+  try {
+    console.log(`Updating compute balances: ${seller} +${amount}, ${buyer} -${amount}`);
+    
+    // First try to update via the backend API
+    try {
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+      
+      // Update seller (add funds)
+      const sellerResponse = await fetch(`${apiBaseUrl}/api/wallet/${seller}/update-compute`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          compute_amount: amount,
+          operation: 'add'
+        }),
+        signal: AbortSignal.timeout(5000) // 5 second timeout
+      });
+      
+      // Update buyer (subtract funds)
+      const buyerResponse = await fetch(`${apiBaseUrl}/api/wallet/${buyer}/update-compute`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          compute_amount: amount,
+          operation: 'subtract'
+        }),
+        signal: AbortSignal.timeout(5000) // 5 second timeout
+      });
+      
+      if (sellerResponse.ok && buyerResponse.ok) {
+        console.log('Successfully updated compute balances via API');
+        return true;
+      }
+    } catch (apiError) {
+      console.warn('Backend API not available for compute balance update, falling back to local handling:', apiError);
+    }
+    
+    // Fall back to local file handling if API is not available
+    // This would require implementing local user data storage
+    // For now, just log that we couldn't update the balances
+    console.warn('Local compute balance update not implemented');
+    return false;
+  } catch (error) {
+    console.error('Error updating user compute balances:', error);
+    return false;
+  }
+}
+
 export async function POST(
   request: Request,
   { params }: { params: { id: string } }
@@ -137,6 +191,11 @@ export async function POST(
       );
     }
     
+    // After successfully updating the transaction, also update compute balances
+    if (transaction.seller && buyer && transaction.price) {
+      await updateUserComputeBalances(transaction.seller, buyer, transaction.price);
+    }
+    
     // Update the land ownership if it's a land transaction
     if (transaction.type === 'land' && transaction.asset_id) {
       console.log(`Updating land ownership for asset ${transaction.asset_id}`);
@@ -176,6 +235,27 @@ export async function POST(
           // Save the updated land
           fs.writeFileSync(landFilePath, JSON.stringify(land, null, 2));
           console.log(`Land ownership updated for ${transaction.asset_id}`);
+          
+          // After updating the land file, also try to update the land owner in the backend
+          try {
+            const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+            const landUpdateResponse = await fetch(`${apiBaseUrl}/api/land/${transaction.asset_id}/update-owner`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ 
+                owner: buyer
+              }),
+              signal: AbortSignal.timeout(5000) // 5 second timeout
+            });
+            
+            if (landUpdateResponse.ok) {
+              console.log(`Successfully updated land owner in backend for ${transaction.asset_id}`);
+            }
+          } catch (landUpdateError) {
+            console.warn(`Could not update land owner in backend for ${transaction.asset_id}:`, landUpdateError);
+          }
         } catch (landError) {
           console.error(`Error updating land ownership for ${transaction.asset_id}:`, landError);
           // Continue execution even if land update fails
