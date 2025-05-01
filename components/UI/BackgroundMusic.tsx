@@ -217,20 +217,20 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
       {/* Hidden audio element */}
       <audio ref={audioRef} />
       
-      {/* Music control button */}
+      {/* Music control button - make it smaller */}
       <button 
         onClick={() => setShowControls(!showControls)}
-        className={`bg-amber-700 text-white p-3 rounded-full shadow-lg hover:bg-amber-800 transition-colors ${!isPlaying && currentTrack ? 'animate-pulse' : ''}`}
+        className={`bg-amber-700 text-white p-2 rounded-full shadow-lg hover:bg-amber-800 transition-colors ${!isPlaying && currentTrack ? 'animate-pulse' : ''}`}
         title={isPlaying ? "Music Controls" : "Click to Play Music"}
       >
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
         </svg>
       </button>
       
-      {/* Expanded controls */}
+      {/* Expanded controls - adjust position to appear below the smaller button */}
       {showControls && (
-        <div className="absolute top-14 right-0 bg-amber-50 p-4 rounded-lg shadow-xl border-2 border-amber-300 w-64 z-50">
+        <div className="absolute top-10 right-0 bg-amber-50 p-4 rounded-lg shadow-xl border-2 border-amber-300 w-64 z-50">
           <div className="flex flex-col space-y-3">
             <div className="text-center font-medium text-amber-800 mb-1">
               {isLoading ? 'Loading music...' : formatTrackName(currentTrack)}

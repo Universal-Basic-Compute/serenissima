@@ -913,7 +913,7 @@ export default function PolygonViewer() {
       </div>
     
       {/* Add a persistent BackgroundMusic component */}
-      <div className="fixed top-4 right-36 z-10">
+      <div className="fixed top-4 right-16 z-10">
         <BackgroundMusic initialVolume={0.24} autoplay={true} />
       </div>
     
