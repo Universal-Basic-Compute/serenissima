@@ -30,7 +30,19 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
           // Select a random image from the returned list
           const randomImage = data.images[Math.floor(Math.random() * data.images.length)];
           console.log('Selected loading image:', randomImage);
-          setLoadingImage(randomImage);
+          
+          // Précharger l'image pour s'assurer qu'elle est disponible
+          const img = new Image();
+          img.onload = () => {
+            setLoadingImage(randomImage);
+            setImageError(false);
+          };
+          img.onerror = () => {
+            console.error('Error preloading image:', randomImage);
+            setImageError(true);
+            setLoadingImage('/loading/fallback.jpg');
+          };
+          img.src = randomImage;
         } else {
           // Fallback to a default image if no images are found
           console.warn('No loading images found, using fallback');
@@ -70,19 +82,14 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black">
       {/* Background image with overlay */}
-      {loadingImage && (
+      {loadingImage && !imageError && (
         <div className="absolute inset-0 overflow-hidden">
-          <Image
-            src={loadingImage}
-            alt="Loading Venice"
-            fill
-            style={{ objectFit: 'cover' }}
-            priority
-            onError={(e) => {
-              console.error('Error loading image:', loadingImage);
-              setImageError(true);
-              // Try to load a fallback image
-              setLoadingImage('/loading/fallback.jpg');
+          <div 
+            className="absolute inset-0 bg-cover bg-center"
+            style={{ 
+              backgroundImage: `url(${loadingImage})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center'
             }}
           />
           <div className="absolute inset-0 bg-black bg-opacity-40"></div>
