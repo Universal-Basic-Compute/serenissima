@@ -36,8 +36,9 @@ export async function transferComputeTokens(
 
     console.log('Starting token transfer with wallet:', walletAdapter.publicKey.toString());
     
-    // Connect to Solana network using a reliable public RPC endpoint
-    const connection = new Connection('https://solana-mainnet.g.alchemy.com/v2/demo', 'confirmed');
+    // Connect to Solana network using the Helius RPC URL from environment variables
+    const SOLANA_RPC_URL = process.env.NEXT_PUBLIC_HELIUS_RPC_URL || 'https://solana-mainnet.g.alchemy.com/v2/demo';
+    const connection = new Connection(SOLANA_RPC_URL, 'confirmed');
     
     // Get the sender's token account
     const senderTokenAccount = await getAssociatedTokenAddress(
