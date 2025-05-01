@@ -131,7 +131,7 @@ export default class WaterEffect {
   // Add method to create shore interaction effect
   private createShoreInteraction() {
     // Create a shader material that will highlight the shore areas
-    const shoreGeometry = new THREE.PlaneGeometry(this.width * 1.5, this.height * 1.5, 256, 256);
+    const shoreGeometry = new THREE.PlaneGeometry(this.width * 1.5, this.height * 1.5, 128, 128); // Reduced complexity
     
     // Custom shader material for shore effect with improved visibility
     const shoreMaterial = new THREE.ShaderMaterial({
@@ -162,34 +162,39 @@ export default class WaterEffect {
           // Calculate distance to land - use all channels for better detection
           float landDistance = 1.0 - max(max(landColor.r, landColor.g), landColor.b);
           
-          // Create more dynamic wave patterns
-          float wave1 = sin(time * 1.5 + vUv.x * 20.0 + vUv.y * 15.0) * 0.5 + 0.5;
-          float wave2 = cos(time * 2.0 - vUv.x * 15.0 + vUv.y * 10.0) * 0.5 + 0.5;
+          // Create more dynamic wave patterns - reduced frequency to avoid flickering
+          float wave1 = sin(time * 1.0 + vUv.x * 10.0 + vUv.y * 8.0) * 0.5 + 0.5;
+          float wave2 = cos(time * 1.5 - vUv.x * 8.0 + vUv.y * 6.0) * 0.5 + 0.5;
           float wave = mix(wave1, wave2, 0.5);
           
           // Create a wider, more visible shore effect
-          float shoreMask = smoothstep(0.0, 0.15, landDistance) * (1.0 - smoothstep(0.15, 0.4, landDistance));
+          float shoreMask = smoothstep(0.0, 0.2, landDistance) * (1.0 - smoothstep(0.2, 0.5, landDistance));
           
           // Add foam color
-          vec3 foamColor = mix(waterColor, color, 0.8);
+          vec3 foamColor = mix(waterColor, color, 0.7);
           
-          // Final color with higher opacity for visibility
-          gl_FragColor = vec4(foamColor, shoreMask * wave * 0.7);
+          // Final color with higher opacity for visibility but reduced to avoid flickering
+          gl_FragColor = vec4(foamColor, shoreMask * wave * 0.5);
         }
       `,
       transparent: true,
       blending: THREE.AdditiveBlending,
-      depthWrite: false
+      depthWrite: false,
+      depthTest: true
     });
     
     this.shoreMesh = new THREE.Mesh(shoreGeometry, shoreMaterial);
     this.shoreMesh.rotation.x = -Math.PI / 2;
-    this.shoreMesh.position.y = -0.02; // Position slightly higher for better visibility
-    this.shoreMesh.renderOrder = 5; // Between water and land
+    this.shoreMesh.position.y = -0.15; // Position lower to avoid z-fighting with land
+    this.shoreMesh.renderOrder = 2; // Lower render order to ensure it renders before land
     this.scene.add(this.shoreMesh);
     
-    // Create higher resolution render target for land texture
-    this.landRenderTarget = new THREE.WebGLRenderTarget(1024, 1024);
+    // Create lower resolution render target for better performance
+    this.landRenderTarget = new THREE.WebGLRenderTarget(512, 512, {
+      minFilter: THREE.LinearFilter,
+      magFilter: THREE.LinearFilter,
+      format: THREE.RGBAFormat
+    });
     
     // Create camera for rendering land texture
     this.landCamera = new THREE.OrthographicCamera(
@@ -220,26 +225,26 @@ export default class WaterEffect {
     this.waterGeometry = new THREE.PlaneGeometry(
       this.width * 1.5, 
       this.height * 1.5,
-      this.performanceMode ? 16 : 64  // Increase segments for better wave detail
+      this.performanceMode ? 16 : 32  // Reduced complexity for better performance
     );
     
     // Create water with proper options
     const waterOptions = {
-      textureWidth: this.performanceMode ? 512 : 1024,
-      textureHeight: this.performanceMode ? 512 : 1024,
+      textureWidth: this.performanceMode ? 256 : 512, // Reduced resolution
+      textureHeight: this.performanceMode ? 256 : 512,
       waterNormals: this.waterNormalMap,
       sunDirection: this.sunDirection,
       sunColor: 0xffffff,
       waterColor: this.getWaterColorForView(),
-      distortionScale: this.performanceMode ? 3.0 : 5.0, // Increase distortion
+      distortionScale: this.performanceMode ? 2.0 : 3.0, // Reduced distortion
       fog: false,
       format: THREE.RGBAFormat
     };
     
     this.water = new Water(this.waterGeometry, waterOptions);
     this.water.rotation.x = -Math.PI / 2;
-    this.water.position.y = -0.2; // Position water even lower to avoid z-fighting
-    this.water.renderOrder = 0; // Ensure water renders before land
+    this.water.position.y = -0.3; // Position water even lower to avoid z-fighting
+    this.water.renderOrder = 1; // Ensure water renders before land
     this.water.visible = true;
     
     // Add the water to the scene
@@ -262,39 +267,43 @@ export default class WaterEffect {
         (texture) => {
           texture.wrapS = THREE.RepeatWrapping;
           texture.wrapT = THREE.RepeatWrapping;
-          texture.repeat.set(40, 40);
+          texture.repeat.set(20, 20); // Reduced repeat for less visual noise
           
-          // Create foam mesh with higher opacity
+          // Create foam mesh with lower opacity
           const foamGeometry = new THREE.PlaneGeometry(this.width * 1.5, this.height * 1.5);
           const foamMaterial = new THREE.MeshBasicMaterial({
             map: texture,
             transparent: true,
-            opacity: 0.5, // Increased from 0.3 to 0.5
+            opacity: 0.3, // Reduced opacity to minimize flickering
             blending: THREE.AdditiveBlending,
-            depthWrite: false
+            depthWrite: false,
+            depthTest: true
           });
           
           this.waterFoam = new THREE.Mesh(foamGeometry, foamMaterial);
           this.waterFoam.rotation.x = -Math.PI / 2;
-          this.waterFoam.position.y = -0.05; // Position just above water level
+          this.waterFoam.position.y = -0.25; // Position lower to avoid z-fighting
+          this.waterFoam.renderOrder = 1; // Same render order as water
           this.scene.add(this.waterFoam);
           this.foamTexture = texture;
         }
       );
     } else {
-      // Use cached foam texture with higher opacity
+      // Use cached foam texture with lower opacity
       const foamGeometry = new THREE.PlaneGeometry(this.width * 1.5, this.height * 1.5);
       const foamMaterial = new THREE.MeshBasicMaterial({
         map: WaterEffect.foamTexture,
         transparent: true,
-        opacity: 0.5, // Increased from 0.3 to 0.5
+        opacity: 0.3, // Reduced opacity
         blending: THREE.AdditiveBlending,
-        depthWrite: false
+        depthWrite: false,
+        depthTest: true
       });
       
       this.waterFoam = new THREE.Mesh(foamGeometry, foamMaterial);
       this.waterFoam.rotation.x = -Math.PI / 2;
-      this.waterFoam.position.y = -0.05; // Position just above water level
+      this.waterFoam.position.y = -0.25; // Position lower
+      this.waterFoam.renderOrder = 1; // Same render order as water
       this.scene.add(this.waterFoam);
       this.foamTexture = WaterEffect.foamTexture;
     }
@@ -386,43 +395,53 @@ export default class WaterEffect {
       this.sunReflection.position.z = 50 + offsetZ;
     }
     
-    // Update shore interaction
-    if (this.shoreMesh && this.landRenderTarget) {
+    // Update shore interaction - only do this every few frames to reduce flickering
+    if (this.shoreMesh && this.landRenderTarget && frameCount % 3 === 0) {
       // Update time uniform
       (this.shoreMesh.material as THREE.ShaderMaterial).uniforms.time.value = frameCount * 0.05;
       
-      // Render land to texture
-      const originalBackground = this.scene.background;
-      this.scene.background = new THREE.Color(0x000000);
-      
-      // Hide water and shore for land rendering
-      const waterVisible = this.water.visible;
-      const foamVisible = this.waterFoam ? this.waterFoam.visible : false;
-      const shoreVisible = this.shoreMesh.visible;
-      
-      this.water.visible = false;
-      if (this.waterFoam) this.waterFoam.visible = false;
-      this.shoreMesh.visible = false;
-      
-      // Render land to texture
-      this.renderer.setRenderTarget(this.landRenderTarget);
-      this.renderer.render(this.scene, this.landCamera);
-      this.renderer.setRenderTarget(null);
-      
-      // Restore visibility
-      this.water.visible = waterVisible;
-      if (this.waterFoam) this.waterFoam.visible = foamVisible;
-      this.shoreMesh.visible = shoreVisible;
-      
-      // Restore background
-      this.scene.background = originalBackground;
-      
-      // Update land texture uniform
-      (this.shoreMesh.material as THREE.ShaderMaterial).uniforms.landTexture.value = this.landRenderTarget.texture;
-      
-      // Update water color uniform in shore material
-      if ((this.shoreMesh.material as THREE.ShaderMaterial).uniforms.waterColor) {
-        (this.shoreMesh.material as THREE.ShaderMaterial).uniforms.waterColor.value.setHex(this.getWaterColorForView());
+      try {
+        // Render land to texture
+        const originalBackground = this.scene.background;
+        this.scene.background = new THREE.Color(0x000000);
+        
+        // Hide water and shore for land rendering
+        const waterVisible = this.water.visible;
+        const foamVisible = this.waterFoam ? this.waterFoam.visible : false;
+        const shoreVisible = this.shoreMesh.visible;
+        
+        this.water.visible = false;
+        if (this.waterFoam) this.waterFoam.visible = false;
+        this.shoreMesh.visible = false;
+        
+        // Save current render target
+        const currentRenderTarget = this.renderer.getRenderTarget();
+        
+        // Render land to texture
+        this.renderer.setRenderTarget(this.landRenderTarget);
+        this.renderer.clear(); // Clear the render target first
+        this.renderer.render(this.scene, this.landCamera);
+        
+        // Restore original render target
+        this.renderer.setRenderTarget(currentRenderTarget);
+        
+        // Restore visibility
+        this.water.visible = waterVisible;
+        if (this.waterFoam) this.waterFoam.visible = foamVisible;
+        this.shoreMesh.visible = shoreVisible;
+        
+        // Restore background
+        this.scene.background = originalBackground;
+        
+        // Update land texture uniform
+        (this.shoreMesh.material as THREE.ShaderMaterial).uniforms.landTexture.value = this.landRenderTarget.texture;
+        
+        // Update water color uniform in shore material
+        if ((this.shoreMesh.material as THREE.ShaderMaterial).uniforms.waterColor) {
+          (this.shoreMesh.material as THREE.ShaderMaterial).uniforms.waterColor.value.setHex(this.getWaterColorForView());
+        }
+      } catch (error) {
+        console.error('Error rendering shore interaction:', error);
       }
     }
   }
