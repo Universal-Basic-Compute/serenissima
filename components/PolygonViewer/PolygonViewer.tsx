@@ -72,11 +72,9 @@ export default function PolygonViewer() {
     loadPolygons();
     loadBridges();
     
-    // Only load land owners when in land view
-    if (activeView === 'land') {
-      loadLandOwners();
-    }
-  }, [loadPolygons, loadBridges, loadLandOwners, activeView]);
+    // Always load land owners since land view is now the default
+    loadLandOwners();
+  }, [loadPolygons, loadBridges, loadLandOwners]);
 
   // Update info panel visibility when selectedPolygonId changes
   useEffect(() => {

@@ -27,7 +27,7 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
   polygons: [],
   loading: true,
   error: null,
-  activeView: 'buildings',
+  activeView: 'land',
   highQuality: false,
   hoveredPolygonId: null,
   selectedPolygonId: null,
