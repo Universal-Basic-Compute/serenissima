@@ -316,7 +316,7 @@ async function downloadBuildingAssets(taskData, building) {
         if (texture.base_color) {
           const filePath = path.join(textureDir, `texture_${index}_base_color.png`);
           console.log(`Downloading base color texture ${index} for ${building.name}`);
-          texturePromises.push(downloadFile(url, filePath).catch(err => {
+          texturePromises.push(downloadFile(texture.base_color, filePath).catch(err => {
             console.warn(`Failed to download base color texture ${index} for ${building.name}:`, err.message);
             logError(building.name, 'texture_download', { textureIndex: index, type: 'base_color', error: err.message });
           }));
