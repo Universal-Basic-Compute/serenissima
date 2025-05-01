@@ -414,6 +414,12 @@ export default class PolygonRenderer {
   
   // Add helper function to create a circular texture
   private createCircularTexture(texture: THREE.Texture): THREE.Texture {
+    // Check if texture.image exists and has a valid source
+    if (!texture.image) {
+      console.warn('Texture image is null, returning original texture');
+      return texture; // Return the original texture if image is missing
+    }
+    
     // Create a canvas to draw the circular mask
     const canvas = document.createElement('canvas');
     const size = 256; // Use a power of 2 for better performance
@@ -429,23 +435,24 @@ export default class PolygonRenderer {
     ctx.closePath();
     ctx.clip();
     
-    // Create a temporary image to draw the texture
-    const img = new Image();
-    img.src = texture.image.src;
-    
-    // Draw the image inside the circle
-    ctx.drawImage(img, 0, 0, size, size);
-    
-    // Add a circular border
-    ctx.strokeStyle = '#8B4513'; // Brown border
-    ctx.lineWidth = 8;
-    ctx.stroke();
-    
-    // Create a new texture from the canvas
-    const circularTexture = new THREE.Texture(canvas);
-    circularTexture.needsUpdate = true;
-    
-    return circularTexture;
+    try {
+      // Try to draw the image directly
+      ctx.drawImage(texture.image, 0, 0, size, size);
+      
+      // Add a circular border
+      ctx.strokeStyle = '#8B4513'; // Brown border
+      ctx.lineWidth = 8;
+      ctx.stroke();
+      
+      // Create a new texture from the canvas
+      const circularTexture = new THREE.Texture(canvas);
+      circularTexture.needsUpdate = true;
+      
+      return circularTexture;
+    } catch (error) {
+      console.error('Error creating circular texture:', error);
+      return texture; // Return original texture on error
+    }
   }
 
   public cleanup() {
