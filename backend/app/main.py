@@ -812,33 +812,36 @@ async def generate_coat_of_arms(data: dict):
     if not data.get("description"):
         raise HTTPException(status_code=400, detail="Description is required")
     
-    if not IDEOGRAM_API_KEY:
+    # Use OpenAI API key instead of Ideogram
+    openai_api_key = os.getenv("OPENAI_API_KEY", "")
+    
+    if not openai_api_key:
         return JSONResponse(
             status_code=500,
-            content={"success": False, "error": "Ideogram API key not configured"}
+            content={"success": False, "error": "OpenAI API key not configured"}
         )
     
     try:
         # Create a prompt for the image generation
         prompt = f"Create a detailed 15th century Venetian coat of arms with these elements: {data['description']}. Style: historical, realistic, detailed heraldry, Renaissance Venetian style, gold leaf accents, rich colors."
         
-        # Call the Ideogram API (replace with actual API endpoint)
+        # Call the OpenAI API for image generation
         response = requests.post(
-            "https://api.ideogram.ai/api/v1/generate",
+            "https://api.openai.com/v1/images/generations",
             headers={
-                "Authorization": f"Bearer {IDEOGRAM_API_KEY}",
+                "Authorization": f"Bearer {openai_api_key}",
                 "Content-Type": "application/json"
             },
             json={
                 "prompt": prompt,
-                "style": "renaissance",
-                "aspect_ratio": "1:1",
-                "num_images": 1
+                "n": 1,
+                "size": "1024x1024",
+                "model": "dall-e-3"
             }
         )
         
         if not response.ok:
-            print(f"Error from Ideogram API: {response.status_code} {response.text}")
+            print(f"Error from OpenAI API: {response.status_code} {response.text}")
             return JSONResponse(
                 status_code=500,
                 content={"success": False, "error": f"Failed to generate image: {response.text}"}
@@ -847,10 +850,10 @@ async def generate_coat_of_arms(data: dict):
         # Parse the response to get the image URL
         result = response.json()
         
-        # Return the image URL or data
+        # Return the image URL
         return {
             "success": True,
-            "image_url": result.get("image_url", ""),
+            "image_url": result.get("data", [{}])[0].get("url", ""),
             "prompt": prompt
         }
     except Exception as e:
