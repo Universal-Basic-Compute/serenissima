@@ -6,7 +6,8 @@ interface IconButtonProps {
   title?: string;
   children: ReactNode;
   activeColor?: 'blue' | 'amber' | 'red';
-  compact?: boolean; // Add this prop
+  compact?: boolean;
+  disabled?: boolean; // Add this prop
 }
 
 export default function IconButton({ 
@@ -15,7 +16,8 @@ export default function IconButton({
   title, 
   children,
   activeColor = 'blue',
-  compact = false // Default to false
+  compact = false,
+  disabled = false // Default to false
 }: IconButtonProps) {
   // Define color schemes
   const colorSchemes = {
@@ -37,13 +39,21 @@ export default function IconButton({
 
   return (
     <button 
-      onClick={onClick}
+      onClick={disabled ? undefined : onClick}
       className={`${compact ? 'p-2' : 'p-3'} rounded-lg transition-all flex flex-col items-center ${
-        active ? colors.active : `text-amber-800 ${colors.hover}`
+        disabled 
+          ? 'opacity-40 cursor-not-allowed text-gray-500 bg-gray-100' 
+          : active 
+            ? colors.active 
+            : `text-amber-800 ${colors.hover}`
       }`}
-      title={title}
+      title={disabled ? `${title} (Coming Soon)` : title}
+      disabled={disabled}
     >
       {children}
+      {disabled && (
+        <span className="text-[8px] mt-0.5 bg-amber-200 text-amber-800 px-1 rounded">Coming Soon</span>
+      )}
     </button>
   );
 }
