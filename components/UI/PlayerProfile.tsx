@@ -7,10 +7,12 @@ interface PlayerProfileProps {
   coatOfArmsImage?: string | null;
   familyMotto?: string;
   walletAddress?: string; // Add wallet address prop
+  computeAmount?: number; // Add this property
   size?: 'small' | 'medium' | 'large';
   onClick?: () => void;
   className?: string;
   showMotto?: boolean;
+  showDucats?: boolean; // Add this property to control display
 }
 
 // Add a cache for user profiles to avoid redundant fetches
@@ -23,10 +25,12 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
   coatOfArmsImage,
   familyMotto,
   walletAddress, // New prop
+  computeAmount, // New prop
   size = 'medium',
   onClick,
   className = '',
-  showMotto = false
+  showMotto = false,
+  showDucats = true // Default to showing ducats
 }) => {
   // Add state for user data
   const [userData, setUserData] = useState<{
@@ -35,6 +39,7 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
     lastName: string;
     coatOfArmsImage: string | null;
     familyMotto?: string;
+    computeAmount?: number; // Add this to the state
   } | null>(null);
   
   const [isLoading, setIsLoading] = useState(false);
@@ -48,7 +53,9 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
         username,
         firstName,
         lastName,
-        coatOfArmsImage: coatOfArmsImage || null
+        coatOfArmsImage: coatOfArmsImage || null,
+        familyMotto,
+        computeAmount // Include the compute amount if provided directly
       });
       return;
     }
@@ -77,7 +84,8 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
             firstName: data.first_name || data.user_name?.split(' ')[0] || 'Unknown',
             lastName: data.last_name || data.user_name?.split(' ').slice(1).join(' ') || 'User',
             coatOfArmsImage: data.coat_of_arms_image,
-            familyMotto: data.family_motto
+            familyMotto: data.family_motto,
+            computeAmount: data.compute_amount // Include the compute amount from API response
           };
           
           // Store in cache
@@ -141,12 +149,18 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
     );
   }
   
+  // Format the ducats with commas for better readability
+  const formatDucats = (amount: number = 0) => {
+    return amount.toLocaleString();
+  };
+
   // Use either provided data or fetched data
   const displayData = userData || {
     username: username || 'Unknown',
     firstName: firstName || 'Unknown',
     lastName: lastName || 'User',
-    coatOfArmsImage: coatOfArmsImage
+    coatOfArmsImage: coatOfArmsImage,
+    computeAmount: computeAmount || 0
   };
 
   return (
@@ -175,6 +189,13 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
       <div className={`${dim.username} font-medium text-center mt-1 w-full`}>
         {displayData.username}
       </div>
+      
+      {/* Ducats (Compute Amount) - New section */}
+      {showDucats && displayData.computeAmount !== undefined && (
+        <div className={`${dim.name} text-amber-600 font-semibold text-center w-full flex items-center justify-center`}>
+          <span className="mr-1">⚜️</span> {formatDucats(displayData.computeAmount)} ducats
+        </div>
+      )}
       
       {/* Full Name */}
       <div className={`${dim.name} text-gray-600 text-center w-full`}>

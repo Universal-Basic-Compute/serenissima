@@ -215,7 +215,8 @@ export default function Home() {
           firstName: data.first_name || data.user_name.split(' ')[0] || '',
           lastName: data.last_name || data.user_name.split(' ').slice(1).join(' ') || '',
           coatOfArmsImage: data.coat_of_arms_image,
-          familyMotto: data.family_motto
+          familyMotto: data.family_motto,
+          computeAmount: data.compute_amount // Add this line
         });
       }
       
@@ -314,7 +315,8 @@ export default function Home() {
         firstName: firstName.trim(),
         lastName: lastName.trim(),
         coatOfArmsImage: coatOfArmsImage,
-        familyMotto: familyMotto.trim()
+        familyMotto: familyMotto.trim(),
+        computeAmount: data.compute_amount // Add compute amount from response
       });
       
       // Close the prompt
@@ -1030,9 +1032,11 @@ export default function Home() {
                 lastName={userProfile.lastName || lastName}
                 coatOfArmsImage={userProfile.coatOfArmsImage || coatOfArmsImage}
                 familyMotto={userProfile.familyMotto || familyMotto}
+                computeAmount={userProfile.computeAmount} // Add this line
                 size="small"
                 className="mr-2"
                 showMotto={false}
+                showDucats={true} // Explicitly show ducats
               />
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
