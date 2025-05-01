@@ -302,11 +302,6 @@ export default class LODPolygon {
     // CRITICAL ADDITION: Remove bottom faces completely
     this.removeBottomFaces(geometry);
   }
-  
-  public getMesh() {
-    return this.mesh;
-  }
-  
 
   public updateViewMode(activeView: ViewMode) {
     this.activeView = activeView;
