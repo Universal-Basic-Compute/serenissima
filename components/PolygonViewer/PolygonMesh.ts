@@ -242,158 +242,16 @@ class PolygonMesh {
   
   // Apply coat of arms texture
   public updateCoatOfArmsTexture(coatOfArmsUrl: string | null) {
-    if (!coatOfArmsUrl || !this.mesh) {
-      return;
-    }
-    
-    console.log(`Loading coat of arms texture: ${coatOfArmsUrl}`);
-    
-    this.textureLoader.load(
-      coatOfArmsUrl,
-      (texture) => {
-        console.log(`Coat of arms texture loaded successfully for ${this.polygon.id}`);
-        const circularTexture = this.createCircularTexture(texture);
-        
-        // Instead of creating new geometry, just update the material of the existing mesh
-        if (this.mesh) {
-          // Create a material with the coat of arms texture
-          const material = new THREE.MeshBasicMaterial({
-            map: circularTexture,
-            transparent: true,
-            side: THREE.FrontSide,
-            opacity: 1.0,
-            depthTest: true,
-            depthWrite: true,
-            polygonOffset: true,
-            polygonOffsetFactor: 3.0,
-            polygonOffsetUnits: 3.0,
-            color: this.determineLandColor() // Apply the land color to tint the texture
-          });
-          
-          // Simply replace the material instead of creating new geometry
-          this.mesh.material = material;
-          
-          // Increase render order to ensure it renders above other elements
-          this.mesh.renderOrder = 20;
-          
-          // Ensure the geometry remains completely flat
-          if (this.mesh.geometry) {
-            const positions = this.mesh.geometry.attributes.position.array;
-            for (let i = 1; i < positions.length; i += 3) {
-              positions[i] = 0; // Force Y coordinate to 0
-            }
-            this.mesh.geometry.attributes.position.needsUpdate = true;
-          }
-          
-          console.log(`Applied coat of arms texture to polygon ${this.polygon.id}`);
-        }
-      },
-      undefined,
-      (error) => {
-        console.error(`Error loading coat of arms texture for ${this.polygon.id}:`, error);
-      }
-    );
+    // Coat of arms texture application has been removed
+    console.log('Coat of arms texture application is disabled');
+    return;
   }
   
-  // Create circular texture
+  // Create circular texture - kept as a stub since it might be referenced elsewhere
   private createCircularTexture(texture: THREE.Texture): THREE.Texture {
-    if (!texture.image) {
-      const canvas = document.createElement('canvas');
-      const size = 256;
-      canvas.width = size;
-      canvas.height = size;
-      
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return texture;
-      
-      ctx.beginPath();
-      ctx.arc(size/2, size/2, size/2 - 4, 0, Math.PI * 2);
-      ctx.fillStyle = this.ownerColor || '#8B4513';
-      ctx.fill();
-      // Remove the stroke which can cause edge artifacts
-      // ctx.strokeStyle = '#FFFFFF';
-      // ctx.lineWidth = 8;
-      // ctx.stroke();
-      
-      const fallbackTexture = new THREE.Texture(canvas);
-      fallbackTexture.needsUpdate = true;
-      // Add these properties to improve texture quality
-      fallbackTexture.premultiplyAlpha = true;
-      fallbackTexture.generateMipmaps = true;
-      return fallbackTexture;
-    }
-    
-    const canvas = document.createElement('canvas');
-    // Increase size for better quality
-    const size = 1024;
-    canvas.width = size;
-    canvas.height = size;
-    
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return texture;
-    
-    try {
-      // Clear with transparent background
-      ctx.clearRect(0, 0, size, size);
-      
-      // Create a perfect circle with no stroke
-      ctx.beginPath();
-      ctx.arc(size/2, size/2, size/2, 0, Math.PI * 2);
-      ctx.closePath();
-      
-      // Remove the white stroke which can cause edge artifacts
-      // ctx.strokeStyle = '#FFFFFF';
-      // ctx.lineWidth = 8;
-      // ctx.stroke();
-      
-      ctx.save();
-      ctx.beginPath();
-      // Make the clipping circle slightly smaller to avoid edge artifacts
-      ctx.arc(size/2, size/2, size/2 - 1, 0, Math.PI * 2);
-      ctx.clip();
-      
-      let drawWidth = size - 2;
-      let drawHeight = size - 2;
-      let offsetX = 1;
-      let offsetY = 1;
-      
-      if (texture.image.width > texture.image.height) {
-        drawHeight = (texture.image.height / texture.image.width) * (size - 2);
-        offsetY = (size - drawHeight) / 2;
-      } else if (texture.image.height > texture.image.width) {
-        drawWidth = (texture.image.width / texture.image.height) * (size - 2);
-        offsetX = (size - drawWidth) / 2;
-      }
-      
-      if (texture.image) {
-        ctx.drawImage(texture.image, offsetX, offsetY, drawWidth, drawHeight);
-      }
-      
-      ctx.restore();
-      
-      const circularTexture = new THREE.Texture(canvas);
-      // Add these properties to improve texture quality
-      circularTexture.premultiplyAlpha = true;
-      circularTexture.generateMipmaps = true;
-      circularTexture.needsUpdate = true;
-      
-      return circularTexture;
-    } catch (error) {
-      console.error('Error creating circular texture:', error);
-      
-      ctx.clearRect(0, 0, size, size);
-      ctx.beginPath();
-      ctx.arc(size/2, size/2, size/2, 0, Math.PI * 2);
-      ctx.fillStyle = this.ownerColor || '#8B4513';
-      ctx.fill();
-      // Remove stroke
-      
-      const fallbackTexture = new THREE.Texture(canvas);
-      fallbackTexture.premultiplyAlpha = true;
-      fallbackTexture.generateMipmaps = true;
-      fallbackTexture.needsUpdate = true;
-      return fallbackTexture;
-    }
+    // This method is no longer used for applying textures to land
+    console.log('createCircularTexture is disabled');
+    return texture;
   }
   
   // Update quality settings
