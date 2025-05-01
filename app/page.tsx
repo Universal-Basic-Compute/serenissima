@@ -529,6 +529,8 @@ export default function Home() {
         return;
       }
       
+      console.log(`Initiating withdrawal of ${amount.toLocaleString()} ducats...`);
+      
       // Call the backend API to withdraw compute
       const response = await fetch('http://localhost:8000/api/withdraw-compute', {
         method: 'POST',
@@ -541,8 +543,11 @@ export default function Home() {
         }),
       });
       
+      // Handle non-OK responses with more detailed error messages
       if (!response.ok) {
-        throw new Error('Failed to withdraw compute');
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = errorData.detail || `Server returned ${response.status}: ${response.statusText}`;
+        throw new Error(errorMessage);
       }
       
       const data = await response.json();
@@ -552,7 +557,7 @@ export default function Home() {
       if (userProfile) {
         const updatedProfile = {
           ...userProfile,
-          computeAmount: (userProfile.computeAmount || 0) - amount
+          computeAmount: data.compute_amount || ((userProfile.computeAmount || 0) - amount)
         };
         setUserProfile(updatedProfile);
         
@@ -565,11 +570,11 @@ export default function Home() {
         }));
       }
       
-      alert(`Successfully withdrew ${amount.toLocaleString()} compute tokens!`);
+      // Return the data instead of showing an alert (the component will handle the success message)
       return data;
     } catch (error) {
       console.error('Error withdrawing compute:', error);
-      alert(`Failed to withdraw compute: ${error.message}`);
+      // Don't show alert here, let the component handle the error
       throw error;
     }
   };
@@ -1274,7 +1279,7 @@ export default function Home() {
                   }}
                   className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-amber-500 hover:text-white transition-colors"
                 >
-                  Withdraw Compute
+                  Withdraw Ducats
                 </button>
                 <button
                   onClick={() => {

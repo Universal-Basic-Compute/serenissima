@@ -11,6 +11,7 @@ export default function WithdrawComputeMenu({ onClose, onWithdraw, computeAmount
   const [amount, setAmount] = useState<number>(0);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   const handleWithdraw = async (withdrawAmount: number) => {
     if (withdrawAmount <= 0) {
@@ -24,11 +25,20 @@ export default function WithdrawComputeMenu({ onClose, onWithdraw, computeAmount
     }
 
     setError(null);
+    setSuccess(null);
     setIsProcessing(true);
     
     try {
       await onWithdraw(withdrawAmount);
-      onClose();
+      setSuccess(`Successfully withdrew ${withdrawAmount.toLocaleString()} ducats!`);
+      
+      // Reset amount after successful withdrawal
+      setAmount(0);
+      
+      // Close the modal after a short delay
+      setTimeout(() => {
+        onClose();
+      }, 2000);
     } catch (error) {
       console.error('Error withdrawing compute:', error);
       setError('Failed to withdraw compute. Please try again.');
@@ -39,12 +49,13 @@ export default function WithdrawComputeMenu({ onClose, onWithdraw, computeAmount
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-96 max-w-full">
+      <div className="bg-white rounded-lg p-6 w-96 max-w-full border-2 border-amber-600">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">Withdraw Compute</h2>
+          <h2 className="text-xl font-semibold text-amber-800">Withdraw Ducats</h2>
           <button 
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700"
+            disabled={isProcessing}
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -53,21 +64,29 @@ export default function WithdrawComputeMenu({ onClose, onWithdraw, computeAmount
         </div>
         
         <div className="mb-4">
-          <p className="text-gray-700 mb-2">Your current balance: <span className="font-bold">{computeAmount.toLocaleString()} ducats</span></p>
-          <p className="mb-4">Enter the amount of compute to withdraw:</p>
+          <div className="bg-amber-50 p-3 rounded-lg mb-4 border border-amber-200">
+            <p className="text-amber-800 mb-1">Your current balance:</p>
+            <p className="font-bold text-2xl text-amber-700">{computeAmount.toLocaleString()} <span className="text-sm">ducats</span></p>
+          </div>
+          
+          <p className="mb-4 text-gray-700">Enter the amount of ducats to withdraw:</p>
           
           <input
             type="number"
             value={amount}
             onChange={(e) => setAmount(Number(e.target.value))}
-            className="w-full px-3 py-2 border border-gray-300 rounded mb-4"
+            className="w-full px-3 py-2 border border-amber-300 rounded mb-4 focus:outline-none focus:ring-2 focus:ring-amber-500"
             placeholder="Enter amount..."
             min="1"
             max={computeAmount}
           />
           
           {error && (
-            <p className="text-red-500 text-sm mb-4">{error}</p>
+            <p className="text-red-500 text-sm mb-4 p-2 bg-red-50 rounded border border-red-200">{error}</p>
+          )}
+          
+          {success && (
+            <p className="text-green-600 text-sm mb-4 p-2 bg-green-50 rounded border border-green-200">{success}</p>
           )}
           
           <div className="grid grid-cols-2 gap-2 mb-4">
@@ -108,7 +127,15 @@ export default function WithdrawComputeMenu({ onClose, onWithdraw, computeAmount
             variant="primary"
             disabled={isProcessing || amount <= 0 || amount > computeAmount}
           >
-            {isProcessing ? 'Processing...' : 'Withdraw'}
+            {isProcessing ? (
+              <span className="flex items-center">
+                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Processing...
+              </span>
+            ) : 'Withdraw Ducats'}
           </ActionButton>
           <ActionButton 
             onClick={onClose} 
