@@ -399,12 +399,12 @@ export default function PolygonViewer() {
       console.log('Calculated bounds:', bounds);
       
       // Initialize scene
-      const scene = new SceneSetup({
+      const sceneSetup = new SceneSetup({
         canvas: canvasRef.current,
         activeView, // We'll still pass activeView, but handle view changes separately
         highQuality
       });
-      sceneRef.current = scene;
+      sceneRef.current = sceneSetup;
       
       // Add error handling for WebGL context loss
       canvasRef.current.addEventListener('webglcontextlost', (event) => {
@@ -427,7 +427,7 @@ export default function PolygonViewer() {
     
     // Add camera reference to window for debugging
     if (typeof window !== 'undefined') {
-      (window as any).threeJsCamera = scene.camera;
+      (window as any).threeJsCamera = sceneSetup.camera;
     }
     
     // Check if texture files exist and are accessible
@@ -462,8 +462,8 @@ export default function PolygonViewer() {
     const initPolygonRenderer = () => {
       console.log('Initializing polygon renderer with users data:', users);
       const polygonRenderer = new PolygonRenderer({
-        scene: scene.scene,
-        camera: scene.camera,
+        scene: sceneSetup.scene,
+        camera: sceneSetup.camera,
         polygons,
         bounds,
         activeView,
@@ -508,12 +508,12 @@ export default function PolygonViewer() {
     // Step 2: Initialize water effect
     const initWaterEffect = () => {
       const waterEffect = new WaterEffect({
-        scene: scene.scene,
+        scene: sceneSetup.scene,
         activeView,
         performanceMode: !highQuality,
         width: bounds.scale * 200,
         height: bounds.scale * 200,
-        renderer: scene.renderer  // Pass the renderer
+        renderer: sceneSetup.renderer  // Pass the renderer
       });
       waterEffectRef.current = waterEffect;
     };
@@ -521,8 +521,8 @@ export default function PolygonViewer() {
     // Step 3: Initialize interaction manager
     const initInteractionManager = () => {
       const interactionManager = new InteractionManager({
-        camera: scene.camera,
-        scene: scene.scene,
+        camera: sceneSetup.camera,
+        scene: sceneSetup.scene,
         polygonMeshesRef,
         activeView,
         hoveredPolygonId: null,
@@ -536,7 +536,7 @@ export default function PolygonViewer() {
     // Step 4: Initialize bridge renderer (least important)
     const initBridgeRenderer = () => {
       const bridgeRenderer = new BridgeRenderer({
-        scene: scene.scene,
+        scene: sceneSetup.scene,
         bridges,
         polygons,
         bounds,
