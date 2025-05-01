@@ -25,7 +25,6 @@ export default function PolygonViewer() {
     error,
     activeView,
     highQuality,
-    hoveredPolygonId,
     selectedPolygonId,
     setActiveView,
     toggleQuality,
@@ -115,7 +114,7 @@ export default function PolygonViewer() {
       scene: scene.scene,
       polygonMeshesRef,
       activeView,
-      hoveredPolygonId,
+      hoveredPolygonId: null,
       setHoveredPolygonId,
       selectedPolygonId,
       setSelectedPolygonId
@@ -170,7 +169,7 @@ export default function PolygonViewer() {
       waterEffectRef.current = null;
       interactionManagerRef.current = null;
     };
-  }, [polygons, loading, activeView, highQuality, hoveredPolygonId, selectedPolygonId]);
+  }, [polygons, loading, activeView, highQuality, selectedPolygonId]);
   
   // We've removed the separate controls update loop to prevent camera resets
   

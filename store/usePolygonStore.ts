@@ -35,7 +35,8 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
   setError: (error) => set({ error }),
   setActiveView: (view) => set({ activeView: view }),
   toggleQuality: () => set((state) => ({ highQuality: !state.highQuality })),
-  setHoveredPolygonId: (id) => set({ hoveredPolygonId: id }),
+  // Make hover a no-op function
+  setHoveredPolygonId: () => {},
   setSelectedPolygonId: (id) => set({ selectedPolygonId: id }),
   
   loadPolygons: async () => {
