@@ -462,8 +462,8 @@ export default function PolygonViewer() {
     const initPolygonRenderer = () => {
       console.log('Initializing polygon renderer with users data:', users);
       const polygonRenderer = new PolygonRenderer({
-        scene: sceneSetup.scene,
-        camera: sceneSetup.camera,
+        scene: sceneRef.current.scene,
+        camera: sceneRef.current.camera,
         polygons,
         bounds,
         activeView,
@@ -508,12 +508,12 @@ export default function PolygonViewer() {
     // Step 2: Initialize water effect
     const initWaterEffect = () => {
       const waterEffect = new WaterEffect({
-        scene: sceneSetup.scene,
+        scene: sceneRef.current.scene,
         activeView,
         performanceMode: !highQuality,
         width: bounds.scale * 200,
         height: bounds.scale * 200,
-        renderer: sceneSetup.renderer  // Pass the renderer
+        renderer: sceneRef.current.renderer  // Pass the renderer
       });
       waterEffectRef.current = waterEffect;
     };
@@ -521,8 +521,8 @@ export default function PolygonViewer() {
     // Step 3: Initialize interaction manager
     const initInteractionManager = () => {
       const interactionManager = new InteractionManager({
-        camera: sceneSetup.camera,
-        scene: sceneSetup.scene,
+        camera: sceneRef.current.camera,
+        scene: sceneRef.current.scene,
         polygonMeshesRef,
         activeView,
         hoveredPolygonId: null,
@@ -536,7 +536,7 @@ export default function PolygonViewer() {
     // Step 4: Initialize bridge renderer (least important)
     const initBridgeRenderer = () => {
       const bridgeRenderer = new BridgeRenderer({
-        scene: sceneSetup.scene,
+        scene: sceneRef.current.scene,
         bridges,
         polygons,
         bounds,
