@@ -20,6 +20,7 @@ export default function PolygonViewer() {
   const polygonMeshesRef = useRef<Record<string, THREE.Mesh>>({});
   const isInteractingWithPolygon = useRef(false);
   const [transferMenuOpen, setTransferMenuOpen] = useState(false);
+  const [isFlushing, setIsFlushing] = useState(false);
   
   // Add refs at the top level of the component
   const hasLoadedDataRef = useRef(false);
@@ -90,6 +91,45 @@ export default function PolygonViewer() {
     } catch (error) {
       console.error('Error transferring compute:', error);
       throw error;
+    }
+  };
+  
+  // Handle cache flushing
+  const handleFlushCache = async () => {
+    try {
+      setIsFlushing(true);
+      
+      // Call the API to flush the cache
+      const response = await fetch('/api/flush-cache', {
+        method: 'POST',
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to flush cache');
+      }
+      
+      const data = await response.json();
+      console.log('Cache flushed successfully:', data);
+      
+      // Reload the data
+      loadPolygons();
+      loadLandOwners();
+      loadUsers();
+      loadBridges();
+      
+      // Reset the hasLoadedDataRef to allow reloading
+      hasLoadedDataRef.current = false;
+      
+      // Show success message
+      alert('Cache flushed successfully. Reloading data...');
+      
+      // Optional: reload the page for a complete refresh
+      // window.location.reload();
+    } catch (error) {
+      console.error('Error flushing cache:', error);
+      alert(`Failed to flush cache: ${error.message}`);
+    } finally {
+      setIsFlushing(false);
     }
   };
   
@@ -855,6 +895,21 @@ export default function PolygonViewer() {
         ref={canvasRef} 
         className="w-full h-full"
       />
+      
+      {/* Flush Cache Button */}
+      <div className="absolute bottom-4 right-4 z-10">
+        <button
+          onClick={handleFlushCache}
+          disabled={isFlushing}
+          className={`px-4 py-2 rounded-lg shadow-md ${
+            isFlushing 
+              ? 'bg-gray-400 cursor-not-allowed' 
+              : 'bg-amber-600 hover:bg-amber-700 text-white'
+          } transition-colors`}
+        >
+          {isFlushing ? 'Flushing...' : 'Flush Cache'}
+        </button>
+      </div>
       
       {/* Removed duplicate Transfer Compute Menu */}
     </div>
