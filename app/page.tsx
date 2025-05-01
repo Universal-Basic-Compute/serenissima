@@ -5,6 +5,9 @@ import { PhantomWalletAdapter } from '@solana/wallet-adapter-phantom';
 import { WalletReadyState } from '@solana/wallet-adapter-base';
 import dynamic from 'next/dynamic';
 import { GoogleMap, LoadScript, DrawingManager } from '@react-google-maps/api';
+import ComputeInvestModal from '../components/UI/ComputeInvestModal';
+import { transferComputeTokens } from '../lib/tokenUtils';
+import { investComputeInAirtable } from '../lib/airtableUtils';
 
 // Import PolygonViewer with no SSR to avoid hydration issues
 const PolygonViewer = dynamic(() => import('../components/PolygonViewer/PolygonViewer'), {
@@ -41,6 +44,7 @@ export default function Home() {
   const [walletAdapter, setWalletAdapter] = useState<PhantomWalletAdapter | null>(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [computeModalOpen, setComputeModalOpen] = useState(false);
   
   // Get API key from environment variable
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '';
@@ -132,29 +136,27 @@ export default function Home() {
     }
   };
 
-  const investCompute = async (walletAddress: string, amount: number) => {
+  // Handle compute investment
+  const handleInvestCompute = async (amount: number) => {
+    if (!walletAdapter || !walletAddress) {
+      alert('Please connect your wallet first');
+      return;
+    }
+    
     try {
-      const response = await fetch('http://localhost:8000/api/invest-compute', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          wallet_address: walletAddress,
-          compute_amount: amount,
-        }),
-      });
+      // First, transfer the tokens on Solana
+      const signature = await transferComputeTokens(walletAdapter, amount);
+      console.log('Token transfer successful:', signature);
       
-      if (!response.ok) {
-        throw new Error('Failed to invest compute');
-      }
+      // Then, update the compute amount in Airtable
+      const airtableResponse = await investComputeInAirtable(walletAddress, amount);
+      console.log('Airtable update successful:', airtableResponse);
       
-      const data = await response.json();
-      console.log('Compute invested:', data);
-      return data;
+      alert(`Successfully invested ${amount.toLocaleString()} compute tokens!`);
     } catch (error) {
       console.error('Error investing compute:', error);
-      return null;
+      alert(`Failed to invest compute: ${error.message}`);
+      throw error;
     }
   };
 
@@ -742,20 +744,8 @@ export default function Home() {
           {dropdownOpen && (
             <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-20">
               <button
-                onClick={async () => {
-                  if (walletAddress) {
-                    // Ask for compute amount using a prompt
-                    const amountStr = prompt('Enter compute amount to invest:', '1');
-                    if (amountStr) {
-                      const amount = parseFloat(amountStr);
-                      if (!isNaN(amount) && amount > 0) {
-                        await investCompute(walletAddress, amount);
-                        alert(`Successfully invested ${amount} compute resources!`);
-                      } else {
-                        alert('Please enter a valid amount greater than 0');
-                      }
-                    }
-                  }
+                onClick={() => {
+                  setComputeModalOpen(true);
                   setDropdownOpen(false);
                 }}
                 className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-blue-500 hover:text-white transition-colors"

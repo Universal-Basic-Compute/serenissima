@@ -352,6 +352,13 @@ export default function PolygonViewer() {
         ref={canvasRef} 
         className="w-full h-full"
       />
+      
+      {/* Compute Investment Modal */}
+      <ComputeInvestModal
+        isOpen={computeModalOpen}
+        onClose={() => setComputeModalOpen(false)}
+        onInvest={handleInvestCompute}
+      />
     </div>
   );
 }
