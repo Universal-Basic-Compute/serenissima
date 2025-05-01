@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import AnimatedDucats from './AnimatedDucats';
 
 interface SuccessAlertProps {
   message: string;
@@ -31,7 +32,17 @@ const SuccessAlert: React.FC<SuccessAlertProps> = ({ message, signature, onClose
           <h3 className="text-lg font-medium text-gray-900">Success!</h3>
         </div>
         
-        <p className="mb-3 text-gray-700">{message} <span className="compute-token">$COMPUTE</span> tokens to your wallet!</p>
+        <p className="mb-3 text-gray-700">
+          {message.includes('$COMPUTE') ? (
+            <>
+              {message.split('$COMPUTE')[0]}
+              <span className="compute-token">$COMPUTE</span>
+              {message.split('$COMPUTE')[1]}
+            </>
+          ) : (
+            message
+          )}
+        </p>
         
         {signature && (
           <div className="bg-gray-50 p-3 rounded mb-4 border border-gray-200">

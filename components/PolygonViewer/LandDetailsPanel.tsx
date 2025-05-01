@@ -5,6 +5,7 @@ import ActionButton from '../UI/ActionButton';
 import WalletStatus from '../UI/WalletStatus';
 import PlayerProfile from '../UI/PlayerProfile';
 import LandPurchaseConfirmation from '../UI/LandPurchaseConfirmation';
+import AnimatedDucats from '../UI/AnimatedDucats';
 import { Polygon } from './types';
 
 interface LandDetailsPanelProps {
@@ -319,7 +320,13 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
                 <>
                   <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">For Sale</h3>
                   <p className="text-2xl font-semibold text-center">
-                    <span style={{ color: '#d4af37' }}>{transaction.price.toLocaleString()}</span> <span className="text-sm">⚜️ ducats</span>
+                    <span style={{ color: '#d4af37' }}>
+                      <AnimatedDucats 
+                        value={transaction.price} 
+                        suffix="⚜️ ducats" 
+                        duration={1500}
+                      />
+                    </span>
                   </p>
                   
                   {/* Add Acquire Land button with improved styling */}

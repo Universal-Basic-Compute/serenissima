@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import ActionButton from './ActionButton';
+import AnimatedDucats from './AnimatedDucats';
 
 interface ComputeInvestModalProps {
   isOpen: boolean;
@@ -79,22 +80,33 @@ export default function ComputeInvestModal({ isOpen, onClose, onInvest }: Comput
         
         <div className="mb-4">
           <p className="mb-2">Or enter a custom amount:</p>
-          <div className="flex space-x-2">
-            <input
-              type="number"
-              value={customAmount}
-              onChange={(e) => setCustomAmount(e.target.value)}
-              placeholder="Enter amount"
-              className="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              disabled={isProcessing}
-            />
-            <ActionButton 
-              onClick={handleCustomInvest} 
-              variant="primary"
-              disabled={isProcessing}
-            >
-              Invest
-            </ActionButton>
+          <div className="flex flex-col">
+            <div className="flex space-x-2 mb-2">
+              <input
+                type="number"
+                value={customAmount}
+                onChange={(e) => setCustomAmount(e.target.value)}
+                placeholder="Enter amount"
+                className="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                disabled={isProcessing}
+              />
+              <ActionButton 
+                onClick={handleCustomInvest} 
+                variant="primary"
+                disabled={isProcessing}
+              >
+                Invest
+              </ActionButton>
+            </div>
+            {customAmount && parseFloat(customAmount) > 0 && (
+              <div className="text-center text-amber-700 font-medium">
+                <AnimatedDucats 
+                  value={parseFloat(customAmount)} 
+                  suffix="⚜️ ducats" 
+                  className="text-lg"
+                />
+              </div>
+            )}
           </div>
         </div>
         

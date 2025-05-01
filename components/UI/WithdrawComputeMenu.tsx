@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import ActionButton from './ActionButton';
+import AnimatedDucats from './AnimatedDucats';
 
 interface WithdrawComputeMenuProps {
   onClose: () => void;
@@ -86,7 +87,13 @@ export default function WithdrawComputeMenu({ onClose, onWithdraw, computeAmount
         <div className="mb-4">
           <div className="bg-amber-50 p-3 rounded-lg mb-4 border border-amber-200">
             <p className="text-amber-800 mb-1">Your current balance:</p>
-            <p className="font-bold text-2xl text-amber-700">{computeAmount.toLocaleString()} <span className="text-sm">ducats</span></p>
+            <p className="font-bold text-2xl text-amber-700">
+              <AnimatedDucats 
+                value={computeAmount} 
+                suffix="⚜️ ducats" 
+                duration={1200}
+              />
+            </p>
           </div>
           
           <p className="mb-4 text-gray-700">Enter the amount of ducats to withdraw:</p>

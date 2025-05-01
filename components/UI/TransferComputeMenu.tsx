@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import AnimatedDucats from './AnimatedDucats';
 
 // Add function to format the number with commas
 const formatNumberWithCommas = (num: number): string => {
@@ -99,19 +100,28 @@ const TransferComputeMenu: React.FC<TransferComputeMenuProps> = ({ onClose, onTr
             ))}
           </div>
           
-          {/* Custom amount input */}
-          <div className="flex items-center">
-            <input
-              type="text"
-              value={formatNumberWithCommas(amount)}
-              onChange={(e) => {
-                // Remove commas before parsing
-                const value = e.target.value.replace(/,/g, '');
-                setAmount(parseInt(value) || 0);
-              }}
-              className="w-full px-4 py-3 text-xl border border-amber-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-500"
-              min="1"
-            />
+          {/* Custom amount input with animated display */}
+          <div className="flex flex-col">
+            <div className="flex items-center mb-2">
+              <input
+                type="text"
+                value={formatNumberWithCommas(amount)}
+                onChange={(e) => {
+                  // Remove commas before parsing
+                  const value = e.target.value.replace(/,/g, '');
+                  setAmount(parseInt(value) || 0);
+                }}
+                className="w-full px-4 py-3 text-xl border border-amber-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-500"
+                min="1"
+              />
+            </div>
+            <div className="text-center text-amber-700 font-medium">
+              <AnimatedDucats 
+                value={amount} 
+                suffix="⚜️ ducats" 
+                className="text-lg"
+              />
+            </div>
           </div>
           {error && <p className="mt-2 text-red-500 text-sm">{error}</p>}
         </div>

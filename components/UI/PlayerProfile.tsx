@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import AnimatedDucats from './AnimatedDucats';
 
 interface PlayerProfileProps {
   username?: string;
@@ -194,7 +195,13 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
       {/* Ducats (Compute Amount) */}
       {showDucats && displayData.computeAmount !== undefined && (
         <div className={`${dim.name} text-amber-700 font-semibold text-center w-full flex items-center justify-center mt-1 bg-amber-50 py-1 px-2 rounded-full border border-amber-200`}>
-          <span className="mr-1">⚜️</span> {formatDucats(displayData.computeAmount)} ducats
+          <span className="mr-1">⚜️</span> 
+          <AnimatedDucats 
+            value={displayData.computeAmount} 
+            suffix="ducats" 
+            prefix=""
+            className="inline"
+          />
         </div>
       )}
       

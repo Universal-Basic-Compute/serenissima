@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getApiBaseUrl } from '@/lib/apiUtils';
 import PlayerProfile from '../UI/PlayerProfile';
+import AnimatedDucats from '../UI/AnimatedDucats';
 
 interface Transaction {
   id: string;
@@ -373,8 +374,13 @@ const MarketPanel: React.FC<MarketPanelProps> = ({ visible, onClose }) => {
                   {/* Price */}
                   <div className="bg-amber-50 p-3 rounded-md border border-amber-200 mb-4">
                     <p className="text-center">
-                      <span className="text-2xl font-bold" style={{ color: '#d4af37' }}>{transaction.price.toLocaleString()}</span>
-                      <span className="text-amber-700 ml-2">⚜️ ducats</span>
+                      <span className="text-2xl font-bold" style={{ color: '#d4af37' }}>
+                        <AnimatedDucats 
+                          value={transaction.price} 
+                          suffix="⚜️ ducats" 
+                          duration={1200}
+                        />
+                      </span>
                     </p>
                   </div>
                   
