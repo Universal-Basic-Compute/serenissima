@@ -6,6 +6,7 @@ import os
 import sys
 import traceback
 import datetime
+import json
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -456,9 +457,9 @@ async def create_transaction(transaction_data: TransactionRequest):
                 "seller": record["fields"].get("Seller", ""),
                 "buyer": record["fields"].get("Buyer", None),
                 "price": record["fields"].get("Price", 0),
-                "historical_name": record["fields"].get("HistoricalName", None),
-                "english_name": record["fields"].get("EnglishName", None),
-                "description": record["fields"].get("Description", None),
+                "historical_name": None,
+                "english_name": None,
+                "description": None,
                 "created_at": record["fields"].get("CreatedAt", ""),
                 "updated_at": record["fields"].get("UpdatedAt", ""),
                 "executed_at": record["fields"].get("ExecutedAt", None)
@@ -479,14 +480,18 @@ async def create_transaction(transaction_data: TransactionRequest):
         if transaction_data.buyer:
             fields["Buyer"] = transaction_data.buyer
             
-        if transaction_data.historical_name:
-            fields["HistoricalName"] = transaction_data.historical_name
-            
-        if transaction_data.english_name:
-            fields["EnglishName"] = transaction_data.english_name
-            
-        if transaction_data.description:
-            fields["Description"] = transaction_data.description
+        # Store land details as JSON in Notes field if this is a land transaction
+        if transaction_data.type == "land":
+            land_details = {}
+            if transaction_data.historical_name:
+                land_details["historical_name"] = transaction_data.historical_name
+            if transaction_data.english_name:
+                land_details["english_name"] = transaction_data.english_name
+            if transaction_data.description:
+                land_details["description"] = transaction_data.description
+                
+            if land_details:
+                fields["Notes"] = json.dumps(land_details)
         
         print(f"Creating new transaction record with fields: {fields}")
         record = transactions_table.create(fields)
@@ -499,9 +504,9 @@ async def create_transaction(transaction_data: TransactionRequest):
             "seller": record["fields"].get("Seller", ""),
             "buyer": record["fields"].get("Buyer", None),
             "price": record["fields"].get("Price", 0),
-            "historical_name": record["fields"].get("HistoricalName", None),
-            "english_name": record["fields"].get("EnglishName", None),
-            "description": record["fields"].get("Description", None),
+            "historical_name": None,
+            "english_name": None,
+            "description": None,
             "created_at": record["fields"].get("CreatedAt", ""),
             "updated_at": record["fields"].get("UpdatedAt", ""),
             "executed_at": record["fields"].get("ExecutedAt", None)
@@ -526,6 +531,21 @@ async def get_land_transaction(land_id: str):
         
         record = records[0]
         print(f"Found transaction record: {record['id']}")
+        # Extract land details from Notes field if available
+        historical_name = None
+        english_name = None
+        description = None
+        
+        if "Notes" in record["fields"]:
+            try:
+                land_details = json.loads(record["fields"].get("Notes", "{}"))
+                historical_name = land_details.get("historical_name")
+                english_name = land_details.get("english_name")
+                description = land_details.get("description")
+            except json.JSONDecodeError:
+                # If Notes isn't valid JSON, just ignore it
+                pass
+        
         return {
             "id": record["id"],
             "type": record["fields"].get("Type", ""),
@@ -533,9 +553,9 @@ async def get_land_transaction(land_id: str):
             "seller": record["fields"].get("Seller", ""),
             "buyer": record["fields"].get("Buyer", None),
             "price": record["fields"].get("Price", 0),
-            "historical_name": record["fields"].get("HistoricalName", None),
-            "english_name": record["fields"].get("EnglishName", None),
-            "description": record["fields"].get("Description", None),
+            "historical_name": historical_name,
+            "english_name": english_name,
+            "description": description,
             "created_at": record["fields"].get("CreatedAt", ""),
             "updated_at": record["fields"].get("UpdatedAt", ""),
             "executed_at": record["fields"].get("ExecutedAt", None)
@@ -559,6 +579,21 @@ async def get_transactions():
         
         transactions = []
         for record in records:
+            # Extract land details from Notes field if available
+            historical_name = None
+            english_name = None
+            description = None
+            
+            if "Notes" in record["fields"]:
+                try:
+                    land_details = json.loads(record["fields"].get("Notes", "{}"))
+                    historical_name = land_details.get("historical_name")
+                    english_name = land_details.get("english_name")
+                    description = land_details.get("description")
+                except json.JSONDecodeError:
+                    # If Notes isn't valid JSON, just ignore it
+                    pass
+            
             transactions.append({
                 "id": record["id"],
                 "type": record["fields"].get("Type", ""),
@@ -566,9 +601,9 @@ async def get_transactions():
                 "seller": record["fields"].get("Seller", ""),
                 "buyer": record["fields"].get("Buyer", None),
                 "price": record["fields"].get("Price", 0),
-                "historical_name": record["fields"].get("HistoricalName", None),
-                "english_name": record["fields"].get("EnglishName", None),
-                "description": record["fields"].get("Description", None),
+                "historical_name": historical_name,
+                "english_name": english_name,
+                "description": description,
                 "created_at": record["fields"].get("CreatedAt", ""),
                 "updated_at": record["fields"].get("UpdatedAt", ""),
                 "executed_at": record["fields"].get("ExecutedAt", None)
@@ -627,9 +662,9 @@ async def execute_transaction(transaction_id: str, data: dict):
                 lands_table.create({
                     "LandId": asset_id,
                     "Wallet": data["buyer"],
-                    "HistoricalName": record["fields"].get("HistoricalName"),
-                    "EnglishName": record["fields"].get("EnglishName"),
-                    "Description": record["fields"].get("Description")
+                    "HistoricalName": None,
+                    "EnglishName": None,
+                    "Description": None
                 })
         
         return {
