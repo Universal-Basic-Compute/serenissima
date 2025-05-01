@@ -527,32 +527,74 @@ export default class PolygonRenderer {
   
   // Add method to update all polygon owner colors
   private updatePolygonOwnerColors() {
-    console.log('Updating all polygon owner colors');
+    console.log('Updating all polygon owner colors with', Object.keys(this.ownerColorMap).length, 'colors');
+    
+    // Vérifier si nous avons des couleurs de propriétaires
+    if (Object.keys(this.ownerColorMap).length === 0) {
+      console.warn('No owner colors available');
+      return;
+    }
+    
+    // Parcourir tous les polygones
     this.polygons.forEach(polygon => {
       if (polygon.owner) {
-        // Find the corresponding LOD polygon
-        const polygonMesh = this.PolygonMeshs.find(lp => 
-          lp.getMesh() === this.polygonMeshesRef.current[polygon.id]
-        );
+        console.log(`Processing polygon ${polygon.id} owned by ${polygon.owner}`);
+        
+        // Trouver le PolygonMesh correspondant
+        const polygonMesh = this.PolygonMeshs.find(pm => {
+          const mesh = pm.getMesh();
+          return mesh && this.polygonMeshesRef.current[polygon.id] === mesh;
+        });
         
         if (polygonMesh) {
-          // Get the owner's color
+          // Obtenir la couleur du propriétaire
           let ownerColor = null;
           if (this.ownerColorMap[polygon.owner]) {
             ownerColor = this.ownerColorMap[polygon.owner];
+            console.log(`Using stored color for ${polygon.owner}: ${ownerColor}`);
           } else if (this.users[polygon.owner] && this.users[polygon.owner].color) {
             ownerColor = this.users[polygon.owner].color;
-            // Store for future use
+            // Stocker pour une utilisation future
             this.ownerColorMap[polygon.owner] = ownerColor;
+            console.log(`Found color for ${polygon.owner} in users data: ${ownerColor}`);
+          } else if (polygon.owner === 'ConsiglioDeiDieci') {
+            // Cas spécial pour ConsiglioDeiDieci
+            ownerColor = '#8B0000'; // Rouge foncé
+            this.ownerColorMap[polygon.owner] = ownerColor;
+            console.log(`Using hardcoded color for ConsiglioDeiDieci: ${ownerColor}`);
+          } else {
+            // Utiliser une couleur par défaut si aucune couleur de propriétaire n'est spécifiée
+            ownerColor = '#7cac6a'; // Couleur verte par défaut
           }
           
           if (ownerColor) {
             console.log(`Applying color ${ownerColor} to polygon ${polygon.id} owned by ${polygon.owner}`);
             polygonMesh.updateOwner(polygon.owner, ownerColor);
+            
+            // Forcer une mise à jour du matériau
+            const mesh = polygonMesh.getMesh();
+            if (mesh) {
+              if (Array.isArray(mesh.material)) {
+                mesh.material.forEach(mat => {
+                  if (mat instanceof THREE.MeshBasicMaterial) {
+                    mat.needsUpdate = true;
+                  }
+                });
+              } else if (mesh.material instanceof THREE.MeshBasicMaterial) {
+                mesh.material.needsUpdate = true;
+              }
+            }
           }
+        } else {
+          console.warn(`Could not find PolygonMesh for polygon ${polygon.id}`);
         }
       }
     });
+    
+    // Forcer un rendu pour appliquer les changements
+    if (this.scene.userData.forceRender) {
+      this.scene.userData.forceRender();
+    }
   }
 
   public updateQuality(performanceMode: boolean) {
@@ -655,6 +697,7 @@ export default class PolygonRenderer {
     }
 
     console.log('Creating coat of arms for land view, polygons count:', this.polygons.length);
+    console.log('Available coat of arms:', Object.keys(this.ownerCoatOfArmsMap));
     
     // Process each polygon with an owner
     this.polygons.forEach(polygon => {
@@ -677,29 +720,38 @@ export default class PolygonRenderer {
         console.log(`Using color from users data for ${polygon.owner}: ${ownerColor}`);
       }
       
-      // Find the corresponding LOD polygon
-      const PolygonMesh = this.PolygonMeshs.find(lp => 
-        lp.getMesh() === this.polygonMeshesRef.current[polygon.id]
-      );
+      // Find the corresponding PolygonMesh
+      const polygonMesh = this.PolygonMeshs.find(pm => {
+        const mesh = pm.getMesh();
+        return mesh && this.polygonMeshesRef.current[polygon.id] === mesh;
+      });
       
-      if (!PolygonMesh) {
-        console.warn(`Could not find LOD polygon for ${polygon.id}`);
+      if (!polygonMesh) {
+        console.warn(`Could not find PolygonMesh for ${polygon.id}`);
         return;
       }
       
       // Always update the owner color first
-      PolygonMesh.updateOwner(polygon.owner, ownerColor);
+      polygonMesh.updateOwner(polygon.owner, ownerColor);
       
       if (coatOfArmsUrl) {
         console.log(`Applying coat of arms texture for ${polygon.id} with URL: ${coatOfArmsUrl}`);
         // Apply the coat of arms texture directly to the land shape
-        PolygonMesh.updateCoatOfArmsTexture(coatOfArmsUrl);
+        polygonMesh.updateCoatOfArmsTexture(coatOfArmsUrl);
       } else if (polygon.centroid) {
         console.log(`Creating colored circle for ${polygon.id} with color: ${ownerColor}`);
         // Create a colored circle texture on the land as fallback
         this.createColoredCircleOnLand(polygon, ownerColor);
       }
     });
+    
+    // Force a render to apply the changes
+    if (this.scene.userData.forceRender) {
+      this.scene.userData.forceRender();
+    }
+    
+    // Mark that we have updated coat of arms
+    this.hasUpdatedCoatOfArms = true;
   }
 
   // Add this helper method to create a flat texture on the land for a polygon

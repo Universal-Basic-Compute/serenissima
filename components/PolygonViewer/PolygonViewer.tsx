@@ -500,6 +500,15 @@ export default function PolygonViewer() {
       });
       sceneRef.current = sceneSetup;
       
+      // Add a method forceRender to the scene
+      if (sceneRef.current) {
+        sceneRef.current.scene.userData.forceRender = () => {
+          if (sceneRef.current && sceneRef.current.renderer) {
+            sceneRef.current.renderer.render(sceneRef.current.scene, sceneRef.current.camera);
+          }
+        };
+      }
+      
       // Create water effect directly instead of using sceneSetup.createWater()
       const waterEffectTimeout = setTimeout(() => {
         if (sceneRef.current) {

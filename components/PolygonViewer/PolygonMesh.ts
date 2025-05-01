@@ -229,9 +229,12 @@ class PolygonMesh {
       return;
     }
     
+    console.log(`Loading coat of arms texture: ${coatOfArmsUrl}`);
+    
     this.textureLoader.load(
       coatOfArmsUrl,
       (texture) => {
+        console.log(`Coat of arms texture loaded successfully for ${this.polygon.id}`);
         const circularTexture = this.createCircularTexture(texture);
         
         // Create a material with enhanced settings to completely avoid edge artifacts
@@ -249,8 +252,10 @@ class PolygonMesh {
         });
         
         if (this.mesh) {
-          const currentMaterial = this.mesh.material as THREE.MeshBasicMaterial;
+          // Save the original material
+          const originalMaterial = this.mesh.material;
           
+          // Create a material for the sides
           const sidesMaterial = new THREE.MeshBasicMaterial({
             color: this.determineLandColor(),
             side: THREE.FrontSide,
@@ -264,52 +269,23 @@ class PolygonMesh {
             polygonOffsetUnits: 3.0
           });
           
-          const materials = [
-            material,
-            sidesMaterial
-          ];
+          // Apply the new materials
+          this.mesh.material = [material, sidesMaterial];
           
+          // Set material groups
           const geometry = this.mesh.geometry;
-          const normalAttribute = geometry.getAttribute('normal');
+          geometry.clearGroups();
+          geometry.addGroup(0, Infinity, 0); // All of the polygon uses the first material
           
-          const topFaces = [];
-          const sideFaces = [];
-          
-          if (geometry.index) {
-            for (let i = 0; i < geometry.index.count / 3; i++) {
-              const a = geometry.index.getX(i * 3);
-              const normalY = normalAttribute.getY(a);
-              
-              if (Math.abs(normalY - 1.0) < 0.1) {
-                topFaces.push(i);
-              } else {
-                sideFaces.push(i);
-              }
-            }
-            
-            geometry.clearGroups();
-            
-            if (topFaces.length > 0) {
-              geometry.addGroup(0, topFaces.length * 3, 0);
-            }
-            
-            if (sideFaces.length > 0) {
-              geometry.addGroup(topFaces.length * 3, sideFaces.length * 3, 1);
-            }
-          }
-          
-          this.mesh.material = materials;
-          // Keep the same render order as the base polygon to avoid z-fighting
-          // Just ensure it's high enough to be above water
+          // Increase render order to ensure it renders above other elements
           this.mesh.renderOrder = 20;
           
-          // Do NOT change the height - keep all polygons at exactly the same height
-          // This is critical to prevent visible seams between polygons
+          console.log(`Applied coat of arms texture to polygon ${this.polygon.id}`);
         }
       },
       undefined,
       (error) => {
-        console.error('Error loading coat of arms texture:', error);
+        console.error(`Error loading coat of arms texture for ${this.polygon.id}:`, error);
       }
     );
   }
@@ -446,20 +422,34 @@ class PolygonMesh {
   
   // Update owner
   public updateOwner(newOwner: string, ownerColor: string | null = null) {
+    console.log(`Updating owner for polygon ${this.polygon.id} to ${newOwner} with color ${ownerColor}`);
+    
     this.polygon.owner = newOwner;
     this.ownerColor = ownerColor;
     
     if (!this.mesh) return;
     
+    // Determine the new land color
+    const landColor = this.determineLandColor();
+    console.log(`New land color for ${this.polygon.id}: ${landColor.getHexString()}`);
+    
+    // Update the material
     if (Array.isArray(this.mesh.material)) {
-      this.mesh.material.forEach(mat => {
-        if (mat instanceof THREE.MeshBasicMaterial) {
-          this.updateMaterialColor(mat);
-        }
-      });
+      // If we have an array of materials, update the second one (for the sides)
+      if (this.mesh.material.length > 1 && this.mesh.material[1] instanceof THREE.MeshBasicMaterial) {
+        this.mesh.material[1].color.copy(landColor);
+        this.mesh.material[1].needsUpdate = true;
+      }
     } else if (this.mesh.material instanceof THREE.MeshBasicMaterial) {
-      this.updateMaterialColor(this.mesh.material);
+      // If we have a single material, update it directly
+      this.mesh.material.color.copy(landColor);
+      this.mesh.material.needsUpdate = true;
+      
+      // Store the original color for hover/selection states
+      this.originalColor = landColor.clone();
     }
+    
+    console.log(`Owner updated for polygon ${this.polygon.id}`);
   }
   
   // Get mesh
