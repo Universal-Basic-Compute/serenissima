@@ -1239,6 +1239,42 @@ async def execute_transaction(transaction_id: str, data: dict):
             
             print(f"Transferred {price} compute from {buyer} to {seller}")
         
+        # Update the land ownership if it's a land transaction
+        if record["fields"].get("Type") == "land" and record["fields"].get("AssetId"):
+            land_id = record["fields"].get("AssetId")
+            print(f"Updating land ownership for asset {land_id} to {buyer}")
+            
+            # Check if land exists in Airtable
+            try:
+                land_formula = f"{{LandId}}='{land_id}'"
+                print(f"Searching for land with formula: {land_formula}")
+                land_records = lands_table.all(formula=land_formula)
+                
+                if land_records:
+                    # Update existing land record
+                    land_record = land_records[0]
+                    print(f"Found existing land record: {land_record['id']}")
+                    
+                    # Update the owner
+                    lands_table.update(land_record["id"], {
+                        "User": buyer,
+                        "Wallet": buyer
+                    })
+                    print(f"Updated land owner in Airtable to {buyer}")
+                else:
+                    # Create new land record
+                    print(f"Land record not found, creating new record for {land_id}")
+                    lands_table.create({
+                        "LandId": land_id,
+                        "User": buyer,
+                        "Wallet": buyer
+                    })
+                    print(f"Created new land record with owner {buyer}")
+            except Exception as land_error:
+                print(f"ERROR updating land ownership in Airtable: {str(land_error)}")
+                traceback.print_exc(file=sys.stdout)
+                # Continue execution even if land update fails
+        
         # Update the transaction with buyer and executed_at timestamp
         now = datetime.datetime.now().isoformat()
         updated_record = transactions_table.update(transaction_id, {
