@@ -449,6 +449,29 @@ export default function PolygonViewer() {
     }, 1000);
   }, []);
 
+  // Define these event handlers before they're used in the useEffect
+  const handlePolygonAdded = useCallback(() => {
+    if (waterEffectRef.current) {
+      console.log('Polygon added, updating water effects');
+      setTimeout(() => {
+        if (waterEffectRef.current) {
+          waterEffectRef.current.update(0, !highQuality);
+        }
+      }, 500);
+    }
+  }, [highQuality]);
+
+  const handlePolygonDeleted = useCallback(() => {
+    if (waterEffectRef.current) {
+      console.log('Polygon deleted, updating water effects');
+      setTimeout(() => {
+        if (waterEffectRef.current) {
+          waterEffectRef.current.update(0, !highQuality);
+        }
+      }, 500);
+    }
+  }, [highQuality]);
+
   // Set up Three.js scene - only depends on polygons and loading
   // NOT dependent on activeView, highQuality, or selectedPolygonId to prevent scene recreation
   useEffect(() => {
