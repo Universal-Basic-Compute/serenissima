@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 let cachedData: any = null;
 let cacheTimestamp: number = 0;
 const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes in milliseconds
-const FETCH_TIMEOUT = 60000; // 60 seconds timeout (increased from 20 seconds)
+const FETCH_TIMEOUT = 15000; // Reduce timeout to 15 seconds
 
 export async function GET() {
   try {
@@ -19,19 +19,14 @@ export async function GET() {
     console.log('Fetching fresh land ownership data from backend...');
     
     try {
-      // Fetch land ownership data from the backend with increased timeout
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT);
-      
-      const response = await fetch('http://localhost:8000/api/lands', {
+      // Use a more efficient endpoint that returns minimal data
+      const response = await fetch('http://localhost:8000/api/lands/basic', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
-        signal: controller.signal
+        signal: AbortSignal.timeout(FETCH_TIMEOUT)
       });
-      
-      clearTimeout(timeoutId);
       
       if (!response.ok) {
         throw new Error(`Backend returned ${response.status}: ${response.statusText}`);

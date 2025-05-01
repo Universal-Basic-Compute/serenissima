@@ -515,6 +515,33 @@ async def get_lands():
         traceback.print_exc(file=sys.stdout)
         raise HTTPException(status_code=500, detail=error_msg)
 
+@app.get("/api/lands/basic")
+async def get_lands_basic():
+    """Get all lands with their owners from Airtable (basic version without user lookups)."""
+    try:
+        print("Fetching basic land ownership data from Airtable...")
+        
+        # Fetch all records from the LANDS table
+        records = lands_table.all()
+        
+        # Format the response with minimal data
+        lands = []
+        for record in records:
+            fields = record['fields']
+            land_data = {
+                'id': fields.get('LandId', ''),
+                'owner': fields.get('User', '')  # Just return the raw owner value
+            }
+            lands.append(land_data)
+        
+        print(f"Found {len(lands)} land records")
+        return lands
+    except Exception as e:
+        error_msg = f"Error fetching basic land data: {str(e)}"
+        print(f"ERROR: {error_msg}")
+        traceback.print_exc(file=sys.stdout)
+        raise HTTPException(status_code=500, detail=error_msg)
+
 @app.delete("/api/land/{land_id}")
 async def delete_land(land_id: str):
     """Delete a land record from Airtable"""
