@@ -145,8 +145,11 @@ export default function PolygonViewer() {
     });
     interactionManagerRef.current = interactionManager;
     
-    // Call resetCamera initially to set a good starting view
-    scene.resetCamera();
+    // Set a good starting view only once at initialization
+    if (typeof window !== 'undefined') {
+      window.resetCameraTriggeredByUser = true;
+      scene.resetCamera();
+    }
     
     // Add a frame counter for less frequent updates
     let frameCount = 0;

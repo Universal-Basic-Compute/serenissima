@@ -169,7 +169,7 @@ export default class SceneSetup {
       return;
     }
     
-    // Reset the flag
+    // Reset the flag immediately to prevent multiple resets
     window.resetCameraTriggeredByUser = false;
     
     // Smoothly animate to the default position

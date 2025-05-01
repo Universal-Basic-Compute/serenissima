@@ -65,7 +65,10 @@ export default class InteractionManager {
     this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
     
-    // Removed stopPropagation to prevent issues with OrbitControls
+    // Ensure we're not triggering camera reset on mouse move
+    if (typeof window !== 'undefined') {
+      window.resetCameraTriggeredByUser = false;
+    }
     
     // Update the raycaster with the camera and mouse position
     this.raycaster.setFromCamera(this.mouse, this.camera);
@@ -195,7 +198,10 @@ export default class InteractionManager {
   }
   
   private onMouseClick(event: MouseEvent) {
-    // Removed stopPropagation to prevent issues with OrbitControls
+    // Ensure we're not triggering camera reset on mouse click
+    if (typeof window !== 'undefined') {
+      window.resetCameraTriggeredByUser = false;
+    }
     
     // Update the raycaster with the camera and mouse position
     this.raycaster.setFromCamera(this.mouse, this.camera);
