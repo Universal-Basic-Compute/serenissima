@@ -650,7 +650,7 @@ export default class LODPolygon {
       } else if (this.polygon.owner) {
         return this.generateColorFromUsername(this.polygon.owner);
       } else {
-        return new THREE.Color(0x7cac6a);
+        return new THREE.Color(0xe6d2a8); // Changed from green to sand/beige
       }
     } else {
       return new THREE.Color(0xe6d2a8);
