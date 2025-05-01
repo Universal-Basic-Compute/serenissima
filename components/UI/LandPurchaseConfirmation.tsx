@@ -1,5 +1,5 @@
 import React from 'react';
-import Image from 'next/image';
+import NextImage from 'next/image';
 
 interface LandPurchaseConfirmationProps {
   landId: string;
@@ -24,7 +24,7 @@ const LandPurchaseConfirmation: React.FC<LandPurchaseConfirmationProps> = ({
         {/* Header with decorative elements */}
         <div className="bg-amber-700 p-4 flex items-center justify-between">
           <div className="flex items-center">
-            <Image 
+            <NextImage 
               src="/images/venice-seal.png" 
               alt="Seal of Venice" 
               width={40} 

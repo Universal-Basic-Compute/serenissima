@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import Image from 'next/image';
+import NextImage from 'next/image';
 
 interface LoadingScreenProps {
   onLoadingComplete: () => void;
@@ -32,7 +32,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
           console.log('Selected loading image:', randomImage);
           
           // Précharger l'image pour s'assurer qu'elle est disponible
-          const img = new Image();
+          const img = new window.Image(); // Use the browser's native Image constructor
           img.onload = () => {
             setLoadingImage(randomImage);
             setImageError(false);
