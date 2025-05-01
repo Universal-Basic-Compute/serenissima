@@ -471,7 +471,7 @@ export default class LODPolygon {
     // Apply hover effects only to high detail mesh
     if (!this.highDetailMesh) return;
     
-    const material = this.highDetailMesh.material as THREE.MeshStandardMaterial;
+    const material = this.highDetailMesh.material as THREE.MeshBasicMaterial;
     
     if (isHovered) {
       // Store original material properties if not already stored
@@ -481,17 +481,10 @@ export default class LODPolygon {
       
       // Create glow effect
       if (this.activeView === 'land') {
-        // Enhance the color to create a glow effect
-        material.emissive.copy(material.color);
-        material.emissiveIntensity = 0.7;
-        
         // Add a slight bloom effect by increasing the brightness
         const color = material.color.clone();
         color.multiplyScalar(1.5);
         material.color.copy(color);
-        
-        // Reduce roughness for a more shiny appearance
-        material.roughness = 0.2;
         
         // IMPORTANT: Adjust the polygon's position to prevent z-fighting
         // Move the mesh slightly up when hovered - but not too high
@@ -506,10 +499,7 @@ export default class LODPolygon {
     } else {
       // Restore original material properties
       if (this.originalMaterial) {
-        material.emissive.set(0, 0, 0);
-        material.emissiveIntensity = 0;
         material.color.copy(this.originalMaterial.color);
-        material.roughness = this.originalMaterial.roughness;
         material.needsUpdate = true;
         
         // IMPORTANT: Restore the original position
