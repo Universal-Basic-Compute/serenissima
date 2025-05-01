@@ -152,8 +152,8 @@ export default function Home() {
   
   // Generate Venetian-style names
   const generateNameOptions = useCallback(() => {
-    // Historical Venetian first names
-    const venetianFirstNames = [
+    // Historical Venetian first names - male
+    const venetianMaleFirstNames = [
       "Antonio", "Marco", "Giovanni", "Francesco", "Pietro", "Alvise", "Domenico", "Nicolò", 
       "Giacomo", "Lorenzo", "Andrea", "Bartolomeo", "Tommaso", "Marino", "Sebastiano", 
       "Bernardo", "Vincenzo", "Filippo", "Daniele", "Matteo", "Paolo", "Vittorio", "Enrico", 
@@ -162,6 +162,20 @@ export default function Home() {
       "Dario", "Fabio", "Giulio", "Massimo", "Ottavio", "Renato", "Salvatore", "Umberto", 
       "Valerio", "Zaccaria", "Aldo", "Bruno"
     ];
+    
+    // Historical Venetian first names - female
+    const venetianFemaleFirstNames = [
+      "Maria", "Caterina", "Lucia", "Isabella", "Elena", "Beatrice", "Chiara", "Francesca",
+      "Giovanna", "Laura", "Paola", "Bianca", "Cecilia", "Elisabetta", "Vittoria", "Angela",
+      "Maddalena", "Margherita", "Adriana", "Antonia", "Camilla", "Cassandra", "Costanza", "Diana",
+      "Eleonora", "Felicita", "Ginevra", "Giulia", "Lucrezia", "Marina", "Olimpia", "Ortensia",
+      "Renata", "Rosa", "Silvia", "Sofia", "Teresa", "Valentina", "Veronica", "Viola",
+      "Agnese", "Alessandra", "Barbara", "Claudia", "Dorotea", "Faustina", "Fiammetta", "Gasparina",
+      "Lavinia", "Zenobia"
+    ];
+    
+    // Combine male and female names
+    const venetianFirstNames = [...venetianMaleFirstNames, ...venetianFemaleFirstNames];
     
     // Historical Venetian last names
     const venetianLastNames = [
