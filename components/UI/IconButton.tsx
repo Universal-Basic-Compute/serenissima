@@ -6,6 +6,7 @@ interface IconButtonProps {
   title?: string;
   children: ReactNode;
   activeColor?: 'blue' | 'amber' | 'red';
+  compact?: boolean; // Add this prop
 }
 
 export default function IconButton({ 
@@ -13,7 +14,8 @@ export default function IconButton({
   active = false, 
   title, 
   children,
-  activeColor = 'blue'
+  activeColor = 'blue',
+  compact = false // Default to false
 }: IconButtonProps) {
   // Define color schemes
   const colorSchemes = {
@@ -36,7 +38,7 @@ export default function IconButton({
   return (
     <button 
       onClick={onClick}
-      className={`p-3 rounded-lg transition-all flex flex-col items-center ${
+      className={`${compact ? 'p-2' : 'p-3'} rounded-lg transition-all flex flex-col items-center ${
         active ? colors.active : `text-amber-800 ${colors.hover}`
       }`}
       title={title}
