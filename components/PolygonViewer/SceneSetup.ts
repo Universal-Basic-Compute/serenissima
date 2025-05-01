@@ -96,7 +96,7 @@ export default class SceneSetup {
     
     // Basic limits
     this.controls.minDistance = 10;
-    this.controls.maxDistance = 128; // Reduced by another 20% from 160 to further limit how far users can zoom out
+    this.controls.maxDistance = 200; // Increased from 128 to allow more zooming out
     
     // Enable panning with right mouse button and rotation with middle mouse button
     this.controls.mouseButtons = {
