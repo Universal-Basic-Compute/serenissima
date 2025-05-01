@@ -205,6 +205,21 @@ export default class LODPolygon {
     this.removeBottomFaces(geometry);
   }
   
+  // Add helper method to determine land color
+  private determineLandColor(): THREE.Color {
+    if (this.activeView === 'land') {
+      if (this.ownerColor) {
+        return new THREE.Color(this.ownerColor);
+      } else if (this.polygon.owner) {
+        return this.generateColorFromUsername(this.polygon.owner);
+      } else {
+        return new THREE.Color(0x7cac6a);
+      }
+    } else {
+      return new THREE.Color(0xe6d2a8);
+    }
+  }
+  
   public updateLOD(cameraPosition: THREE.Vector3) {
     // No LOD switching needed anymore
     return;
