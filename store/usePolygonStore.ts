@@ -30,7 +30,7 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
   loading: true,
   error: null,
   activeView: 'land',
-  highQuality: false,
+  highQuality: true, // Changed to true to enable high quality mode by default
   hoveredPolygonId: null,
   selectedPolygonId: null,
   landOwners: {},

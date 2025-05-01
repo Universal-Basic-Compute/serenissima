@@ -136,6 +136,10 @@ export default class PolygonRenderer {
           placeholderTexture.needsUpdate = true;
           
           if (callback) callback(placeholderTexture);
+        },
+        undefined,
+        (error) => {
+          console.error(`Error loading optimized texture ${optimizedUrl}:`, error);
         }
       );
     }
@@ -221,32 +225,49 @@ export default class PolygonRenderer {
     if (!PolygonRenderer.sharedTextures.sandBaseColor) {
       console.log('Loading shared textures...');
       
-      // Use optimized texture loading for better performance
-      PolygonRenderer.sharedTextures.sandBaseColor = PolygonRenderer.loadOptimizedTexture(
+      // Load sand texture directly
+      PolygonRenderer.sharedTextures.sandBaseColor = this.textureLoader.load(
         '/textures/sand.jpg',
         (texture) => {
           // Configure texture settings once loaded
           texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
           texture.repeat.set(1.25, 1.25);
           texture.needsUpdate = true;
+          console.log('Sand base color texture loaded successfully');
+        },
+        undefined,
+        (error) => {
+          console.error('Error loading sand base color texture:', error);
         }
       );
       
-      PolygonRenderer.sharedTextures.sandNormalMap = PolygonRenderer.loadOptimizedTexture(
+      // Load normal map directly
+      PolygonRenderer.sharedTextures.sandNormalMap = this.textureLoader.load(
         '/textures/sand_normal.jpg',
         (texture) => {
           texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
           texture.repeat.set(1.25, 1.25);
           texture.needsUpdate = true;
+          console.log('Sand normal map texture loaded successfully');
+        },
+        undefined,
+        (error) => {
+          console.error('Error loading sand normal map texture:', error);
         }
       );
       
-      PolygonRenderer.sharedTextures.sandRoughnessMap = PolygonRenderer.loadOptimizedTexture(
+      // Load roughness map directly
+      PolygonRenderer.sharedTextures.sandRoughnessMap = this.textureLoader.load(
         '/textures/sand_roughness.jpg',
         (texture) => {
           texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
           texture.repeat.set(1.25, 1.25);
           texture.needsUpdate = true;
+          console.log('Sand roughness map texture loaded successfully');
+        },
+        undefined,
+        (error) => {
+          console.error('Error loading sand roughness map texture:', error);
         }
       );
     }
@@ -912,13 +933,20 @@ export default class PolygonRenderer {
       });
       
       // Load custom sand texture for the shore
-      this.textureLoader.load('/textures/sand.jpg', (texture) => {
-        texture.wrapS = THREE.RepeatWrapping;
-        texture.wrapT = THREE.RepeatWrapping;
-        texture.repeat.set(8, 8);  // More repetition for smaller detail
-        shoreMaterial.map = texture;
-        shoreMaterial.needsUpdate = true;
-      });
+      this.textureLoader.load('/textures/sand.jpg', 
+        (texture) => {
+          texture.wrapS = THREE.RepeatWrapping;
+          texture.wrapT = THREE.RepeatWrapping;
+          texture.repeat.set(8, 8);  // More repetition for smaller detail
+          shoreMaterial.map = texture;
+          shoreMaterial.needsUpdate = true;
+          console.log('Shore sand texture loaded successfully');
+        },
+        undefined,
+        (error) => {
+          console.error('Error loading shore sand texture:', error);
+        }
+      );
       
       const shoreMesh = new THREE.Mesh(shoreGeometry, shoreMaterial);
       shoreMesh.position.y = -0.05;  // Position slightly below the main land

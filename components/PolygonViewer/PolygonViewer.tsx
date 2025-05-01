@@ -379,6 +379,32 @@ export default function PolygonViewer() {
       (window as any).threeJsCamera = scene.camera;
     }
     
+    // Check if texture files exist and are accessible
+    console.log('Checking for texture files...');
+    fetch('/textures/sand.jpg')
+      .then(response => {
+        if (response.ok) {
+          console.log('Sand texture file exists and is accessible');
+        } else {
+          console.error('Sand texture file not found or not accessible:', response.status);
+        }
+      })
+      .catch(error => {
+        console.error('Error checking sand texture file:', error);
+      });
+
+    fetch('/textures/sand_normal.jpg')
+      .then(response => {
+        if (response.ok) {
+          console.log('Sand normal map file exists and is accessible');
+        } else {
+          console.error('Sand normal map file not found or not accessible:', response.status);
+        }
+      })
+      .catch(error => {
+        console.error('Error checking sand normal map file:', error);
+      });
+    
     // Progressive initialization of components
     
     // Step 1: Initialize polygon renderer first (most important)

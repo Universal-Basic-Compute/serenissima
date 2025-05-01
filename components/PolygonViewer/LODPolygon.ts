@@ -215,21 +215,26 @@ export default class LODPolygon {
     
     // Load sand texture if not in performance mode
     if (!this.performanceMode) {
-      // Use shared texture loader
+      // Use the texture loader directly with absolute paths
       this.textureLoader.load(
-        '/textures/sand.jpg', // Use custom sand texture
+        '/textures/sand.jpg', // Use absolute path
         (texture) => {
           texture.wrapS = THREE.RepeatWrapping;
           texture.wrapT = THREE.RepeatWrapping;
           texture.repeat.set(5, 5); // Adjust based on scale
           material.map = texture;
           material.needsUpdate = true;
+          console.log('Sand texture loaded successfully');
+        },
+        undefined,
+        (error) => {
+          console.error('Error loading sand texture:', error);
         }
       );
       
       // Load normal map for sand texture
       this.textureLoader.load(
-        '/textures/sand_normal.jpg', // Use custom normal map
+        '/textures/sand_normal.jpg', // Use absolute path
         (texture) => {
           texture.wrapS = THREE.RepeatWrapping;
           texture.wrapT = THREE.RepeatWrapping;
@@ -237,6 +242,11 @@ export default class LODPolygon {
           material.normalMap = texture;
           material.normalScale.set(0.5, 0.5); // Adjust for desired bumpiness
           material.needsUpdate = true;
+          console.log('Sand normal map loaded successfully');
+        },
+        undefined,
+        (error) => {
+          console.error('Error loading sand normal map:', error);
         }
       );
     }
