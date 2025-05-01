@@ -57,20 +57,26 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
 
         for (const category of categoryFiles) {
           try {
+            console.log(`Fetching buildings for category: ${category}`);
             // Use the API route instead of direct file access
             const response = await fetch(`/api/buildings/${category}`);
             if (response.ok) {
               const buildings = await response.json();
+              console.log(`Loaded ${buildings.length} buildings for category ${category}`);
+              
               loadedCategories.push({
                 name: category.charAt(0).toUpperCase() + category.slice(1).replace('&', ' & '),
                 buildings: buildings
               });
+            } else {
+              console.warn(`Failed to load buildings for ${category}: ${response.status}`);
             }
           } catch (error) {
             console.error(`Error loading ${category} buildings:`, error);
           }
         }
 
+        console.log(`Total categories loaded: ${loadedCategories.length}`);
         setCategories(loadedCategories);
       } catch (error) {
         console.error('Error loading building data:', error);
