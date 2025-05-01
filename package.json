@@ -15,7 +15,8 @@
     "create-land-records": "node scripts/create-land-records.js",
     "name-bridges": "node scripts/name-bridges.js",
     "calculate-areas": "node scripts/calculate-areas.js",
-    "put-lands-on-sale": "node scripts/put-lands-on-sale.js"
+    "put-lands-on-sale": "node scripts/put-lands-on-sale.js",
+    "prepare-lands": "node scripts/prepare-lands.js"
   },
   "dependencies": {
     "@react-google-maps/api": "^2.19.2",
