@@ -976,16 +976,36 @@ export default function Home() {
                         <button
                           onClick={() => {
                             const coatOfArmsElements = [
-                              "A golden lion rampant on a field of azure",
-                              "A silver eagle displayed on a field of gules",
-                              "Three golden fleurs-de-lis on a field of azure",
-                              "A red rose on a field of silver",
-                              "A black wolf passant on a field of gold",
-                              "A golden sun with sixteen rays on a field of azure",
-                              "A silver crescent moon on a field of sable",
-                              "A golden ship with white sails on a sea of azure",
-                              "A red griffin segreant on a field of silver",
-                              "Three silver stars on a field of gules"
+                              "A golden winged lion of St. Mark rampant on a field of azure, holding an open book with the words 'Pax Tibi Marce'",
+                              "A silver eagle displayed on a field of crimson, with a golden crown above its head",
+                              "Three golden fleurs-de-lis on a field of azure, bordered with a silver and red checkered pattern",
+                              "A red rose with golden center on a field of silver, surrounded by eight smaller golden stars",
+                              "A black wolf passant on a field of gold, with three silver crescents in chief",
+                              "A golden sun with sixteen rays on a field of azure, above a silver galley ship on waves",
+                              "A silver crescent moon on a field of sable, with three golden stars arranged in a triangle",
+                              "A golden Venetian galley with white sails on a sea of azure, beneath a red sky",
+                              "A red griffin segreant on a field of silver, holding a golden key in its claws",
+                              "Three silver stars on a field of gules, above a silver bridge spanning blue waves",
+                              "A golden lion and a silver winged horse supporting a shield divided per pale azure and gules",
+                              "A black double-headed eagle on a gold field, with a red shield on its breast",
+                              "A silver tower between two cypress trees on a field of blue, with a red chief bearing three gold coins",
+                              "A golden doge's cap (corno ducale) on a field of crimson, with silver tassels",
+                              "A silver dolphin naiant on a field of blue and green waves, beneath a golden sun",
+                              "A red and gold checkerboard pattern, with a black eagle in the center square",
+                              "Three golden crowns on a field of azure, separated by a silver chevron",
+                              "A silver gondola on blue waves, beneath a night sky of gold stars on black",
+                              "A golden lion's head erased on a field of red, surrounded by a border of alternating gold and blue squares",
+                              "A silver winged horse rampant on a field of blue, with golden stars in each corner",
+                              "A red cross on a silver field, with four golden keys in the quarters",
+                              "A golden tree with deep roots on a green mound, on a field of azure with silver stars",
+                              "Three black ravens on a field of gold, above a red rose on a silver chief",
+                              "A silver unicorn rampant on a field of blue, with a golden crown around its neck",
+                              "A golden portcullis on a field of red, with three silver shells in chief",
+                              "A silver mermaid holding a mirror on a field of blue waves, beneath a golden sun",
+                              "A red and gold striped field, with a silver lion passant in chief",
+                              "A golden phoenix rising from flames on a field of azure, with silver stars in chief",
+                              "Three silver crescents on a field of blue, with a golden sun in the center",
+                              "A silver tower between two red roses on a field of blue, with a golden chief"
                             ];
                             const randomCoatOfArms = coatOfArmsElements[Math.floor(Math.random() * coatOfArmsElements.length)];
                             setFamilyCoatOfArms(randomCoatOfArms);
