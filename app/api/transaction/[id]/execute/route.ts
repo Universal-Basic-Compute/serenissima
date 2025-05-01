@@ -6,6 +6,14 @@ import { getApiBaseUrl } from '@/lib/apiUtils';
 // Define the path to the transactions directory
 const TRANSACTIONS_DIR = path.join(process.cwd(), 'data', 'transactions');
 
+// Ensure transactions directory exists
+function ensureTransactionsDirExists() {
+  if (!fs.existsSync(TRANSACTIONS_DIR)) {
+    fs.mkdirSync(TRANSACTIONS_DIR, { recursive: true });
+  }
+  return TRANSACTIONS_DIR;
+}
+
 export async function POST(
   request: Request,
   { params }: { params: { id: string } }
@@ -30,36 +38,48 @@ export async function POST(
     
     // First try to execute the transaction via the backend API
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'}/api/transaction/${id}/execute`, {
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+      console.log(`Attempting to execute transaction ${id} via backend API at ${apiBaseUrl}`);
+      
+      const response = await fetch(`${apiBaseUrl}/api/transaction/${id}/execute`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ buyer }),
+        // Add a timeout to prevent hanging requests
+        signal: AbortSignal.timeout(10000) // 10 second timeout
       });
       
       if (response.ok) {
         const data = await response.json();
+        console.log(`Transaction ${id} executed successfully via backend API`);
         return NextResponse.json(data);
       }
       
       // If the API returns a specific error, pass it through
       if (response.status !== 404) {
         const errorData = await response.json();
+        console.warn(`Backend API returned error for transaction ${id}:`, errorData);
         return NextResponse.json(
           errorData,
           { status: response.status }
         );
       }
     } catch (apiError) {
-      console.warn('Backend API not available, falling back to local data:', apiError);
+      console.warn(`Backend API not available for transaction ${id}, falling back to local data:`, apiError);
     }
     
     // Fall back to local file handling if API is not available
+    console.log(`Falling back to local file handling for transaction ${id}`);
+    
+    // Ensure transactions directory exists
+    ensureTransactionsDirExists();
     
     // Check if the transaction file exists
     const filePath = path.join(TRANSACTIONS_DIR, `${id}.json`);
     if (!fs.existsSync(filePath)) {
+      console.error(`Transaction file not found: ${filePath}`);
       return NextResponse.json(
         { success: false, error: 'Transaction not found' },
         { status: 404 }
@@ -68,10 +88,21 @@ export async function POST(
     
     // Read the transaction
     const fileContent = fs.readFileSync(filePath, 'utf8');
-    const transaction = JSON.parse(fileContent);
+    let transaction;
+    
+    try {
+      transaction = JSON.parse(fileContent);
+    } catch (parseError) {
+      console.error(`Error parsing transaction file ${filePath}:`, parseError);
+      return NextResponse.json(
+        { success: false, error: 'Invalid transaction data format' },
+        { status: 500 }
+      );
+    }
     
     // Check if the transaction has already been executed
     if (transaction.executed_at || transaction.buyer) {
+      console.warn(`Transaction ${id} has already been executed`);
       return NextResponse.json(
         { success: false, detail: 'Transaction has already been executed' },
         { status: 400 }
@@ -83,20 +114,62 @@ export async function POST(
     transaction.executed_at = new Date().toISOString();
     
     // Save the updated transaction
-    fs.writeFileSync(filePath, JSON.stringify(transaction, null, 2));
+    try {
+      fs.writeFileSync(filePath, JSON.stringify(transaction, null, 2));
+      console.log(`Transaction ${id} updated successfully`);
+    } catch (writeError) {
+      console.error(`Error writing transaction file ${filePath}:`, writeError);
+      return NextResponse.json(
+        { success: false, error: 'Failed to update transaction' },
+        { status: 500 }
+      );
+    }
     
     // Update the land ownership if it's a land transaction
     if (transaction.type === 'land' && transaction.asset_id) {
-      const landFilePath = path.join(process.cwd(), 'data', `${transaction.asset_id}.json`);
-      if (fs.existsSync(landFilePath)) {
-        const landContent = fs.readFileSync(landFilePath, 'utf8');
-        const land = JSON.parse(landContent);
-        
-        // Update the owner
-        land.owner = buyer;
-        
-        // Save the updated land
-        fs.writeFileSync(landFilePath, JSON.stringify(land, null, 2));
+      console.log(`Updating land ownership for asset ${transaction.asset_id}`);
+      
+      // Try multiple possible file paths for the land data
+      const possiblePaths = [
+        path.join(process.cwd(), 'data', `${transaction.asset_id}.json`),
+        path.join(process.cwd(), 'data', `polygon-${transaction.asset_id}.json`)
+      ];
+      
+      let landFilePath = null;
+      for (const testPath of possiblePaths) {
+        if (fs.existsSync(testPath)) {
+          landFilePath = testPath;
+          break;
+        }
+      }
+      
+      if (landFilePath) {
+        try {
+          const landContent = fs.readFileSync(landFilePath, 'utf8');
+          let land = JSON.parse(landContent);
+          
+          // Handle different land data formats
+          if (Array.isArray(land)) {
+            // Old format - just coordinates array
+            // Convert to new format with owner
+            land = {
+              coordinates: land,
+              owner: buyer
+            };
+          } else {
+            // New format - update owner
+            land.owner = buyer;
+          }
+          
+          // Save the updated land
+          fs.writeFileSync(landFilePath, JSON.stringify(land, null, 2));
+          console.log(`Land ownership updated for ${transaction.asset_id}`);
+        } catch (landError) {
+          console.error(`Error updating land ownership for ${transaction.asset_id}:`, landError);
+          // Continue execution even if land update fails
+        }
+      } else {
+        console.warn(`Land file not found for asset ${transaction.asset_id}`);
       }
     }
     
