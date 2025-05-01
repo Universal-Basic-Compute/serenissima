@@ -18,6 +18,18 @@ if (!MESHY_API_KEY) {
 // Directory paths
 const BUILDINGS_DIR = path.join(process.cwd(), 'data', 'buildings');
 const ASSETS_DIR = path.join(process.cwd(), 'public', 'assets', 'buildings');
+const PROGRESS_FILE = path.join(process.cwd(), 'data', 'building_generation_progress.json');
+const ERROR_LOG = path.join(process.cwd(), 'data', 'building_generation_errors.json');
+
+// Configuration
+const CONFIG = {
+  downloadFormats: {
+    glb: true,  // Always download GLB (primary format for Three.js)
+    fbx: false, // Skip FBX by default
+    obj: false  // Skip OBJ by default
+  },
+  maxPromptLength: 500 // Maximum prompt length allowed by Meshy API
+};
 
 // Ensure assets directory exists
 function ensureAssetsDirectoryExists() {
@@ -34,6 +46,78 @@ function ensureAssetsDirectoryExists() {
       console.log(`Created directory: ${dir}`);
     }
   });
+}
+
+// Function to save progress
+function saveProgress(processedBuildings) {
+  fs.writeFileSync(PROGRESS_FILE, JSON.stringify(processedBuildings, null, 2));
+  console.log(`Progress saved: ${processedBuildings.length} buildings processed`);
+}
+
+// Function to load progress
+function loadProgress() {
+  if (fs.existsSync(PROGRESS_FILE)) {
+    try {
+      const progress = JSON.parse(fs.readFileSync(PROGRESS_FILE, 'utf8'));
+      console.log(`Loaded progress: ${progress.length} buildings already processed`);
+      return progress;
+    } catch (error) {
+      console.error('Error loading progress file:', error);
+      return [];
+    }
+  }
+  return [];
+}
+
+// Function to log errors
+function logError(buildingName, stage, error) {
+  let errors = [];
+  if (fs.existsSync(ERROR_LOG)) {
+    try {
+      errors = JSON.parse(fs.readFileSync(ERROR_LOG, 'utf8'));
+    } catch (e) {
+      console.error('Error reading error log:', e);
+    }
+  }
+  
+  errors.push({
+    building: buildingName,
+    stage,
+    error: error.message || String(error),
+    timestamp: new Date().toISOString()
+  });
+  
+  fs.writeFileSync(ERROR_LOG, JSON.stringify(errors, null, 2));
+  console.error(`Error logged for ${buildingName} at ${stage} stage`);
+}
+
+// Function to truncate prompts to the maximum allowed length
+function truncatePrompt(prompt, maxLength = CONFIG.maxPromptLength) {
+  if (!prompt) return '';
+  
+  if (prompt.length <= maxLength) return prompt;
+  
+  // Truncate and add ellipsis to indicate truncation
+  return prompt.substring(0, maxLength - 3) + '...';
+}
+
+// Utility function for retrying operations with exponential backoff
+async function retryWithBackoff(operation, maxRetries = 5, initialDelay = 1000) {
+  let retries = 0;
+  let delay = initialDelay;
+  
+  while (retries < maxRetries) {
+    try {
+      return await operation();
+    } catch (error) {
+      retries++;
+      if (retries >= maxRetries) throw error;
+      
+      console.log(`Operation failed, retrying in ${delay/1000}s (attempt ${retries}/${maxRetries})...`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+      delay *= 2; // Exponential backoff
+    }
+  }
 }
 
 // Get all building category files
@@ -80,83 +164,100 @@ async function loadAllBuildings() {
 
 // Create a preview task for a building
 async function createPreviewTask(building) {
-  try {
-    // Use the completedBuilding3DPrompt for the model generation
-    const prompt = building.completedBuilding3DPrompt || 
+  return retryWithBackoff(async () => {
+    try {
+      // Use the completedBuilding3DPrompt for the model generation
+      let prompt = building.completedBuilding3DPrompt || 
                   `Renaissance Venetian ${building.name.toLowerCase()}, ${building.subcategory.toLowerCase()}, ${building.shortDescription}`;
-    
-    console.log(`Creating preview task for: ${building.name}`);
-    console.log(`Using prompt: ${prompt}`);
-    
-    const response = await axios.post('https://api.meshy.ai/openapi/v2/text-to-3d', {
-      mode: 'preview',
-      prompt: prompt,
-      art_style: 'realistic', // Use realistic style for architectural models
-      ai_model: 'meshy-4' // Use the latest model
-    }, {
-      headers: {
-        'Authorization': `Bearer ${MESHY_API_KEY}`,
-        'Content-Type': 'application/json'
+      
+      // Truncate the prompt to the maximum allowed length
+      prompt = truncatePrompt(prompt, CONFIG.maxPromptLength);
+      
+      console.log(`Creating preview task for: ${building.name}`);
+      console.log(`Using prompt: ${prompt} (${prompt.length} characters)`);
+      
+      const response = await axios.post('https://api.meshy.ai/openapi/v2/text-to-3d', {
+        mode: 'preview',
+        prompt: prompt,
+        art_style: 'realistic', // Use realistic style for architectural models
+        ai_model: 'meshy-4' // Use the latest model
+      }, {
+        headers: {
+          'Authorization': `Bearer ${MESHY_API_KEY}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (response.data && response.data.result) {
+        console.log(`Preview task created for ${building.name}, task ID: ${response.data.result}`);
+        return response.data.result;
+      } else {
+        console.error(`Failed to create preview task for ${building.name}:`, response.data);
+        logError(building.name, 'preview_task_creation', { message: 'No result in response' });
+        return null;
       }
-    });
-    
-    if (response.data && response.data.result) {
-      console.log(`Preview task created for ${building.name}, task ID: ${response.data.result}`);
-      return response.data.result;
-    } else {
-      console.error(`Failed to create preview task for ${building.name}:`, response.data);
-      return null;
+    } catch (error) {
+      console.error(`Error creating preview task for ${building.name}:`, error.response?.data || error.message);
+      logError(building.name, 'preview_task_creation', error.response?.data || error);
+      throw error; // Rethrow for retry mechanism
     }
-  } catch (error) {
-    console.error(`Error creating preview task for ${building.name}:`, error.response?.data || error.message);
-    return null;
-  }
+  }, 3, 2000); // 3 retries, starting with 2 second delay
 }
 
 // Check the status of a task
 async function checkTaskStatus(taskId) {
-  try {
-    const response = await axios.get(`https://api.meshy.ai/openapi/v2/text-to-3d/${taskId}`, {
-      headers: {
-        'Authorization': `Bearer ${MESHY_API_KEY}`
-      }
-    });
-    
-    return response.data;
-  } catch (error) {
-    console.error(`Error checking task status for ${taskId}:`, error.response?.data || error.message);
-    return null;
-  }
+  return retryWithBackoff(async () => {
+    try {
+      const response = await axios.get(`https://api.meshy.ai/openapi/v2/text-to-3d/${taskId}`, {
+        headers: {
+          'Authorization': `Bearer ${MESHY_API_KEY}`
+        }
+      });
+      
+      return response.data;
+    } catch (error) {
+      console.error(`Error checking task status for ${taskId}:`, error.response?.data || error.message);
+      logError('unknown', 'check_task_status', { taskId, error: error.response?.data || error.message });
+      throw error; // Rethrow for retry mechanism
+    }
+  }, 3, 2000); // 3 retries, starting with 2 second delay
 }
 
 // Create a refine task for a building
 async function createRefineTask(previewTaskId, building) {
-  try {
-    console.log(`Creating refine task for: ${building.name} with preview task ID: ${previewTaskId}`);
-    
-    const response = await axios.post('https://api.meshy.ai/openapi/v2/text-to-3d', {
-      mode: 'refine',
-      preview_task_id: previewTaskId,
-      enable_pbr: true, // Enable PBR maps for better rendering
-      texture_prompt: building.shortDescription // Use the short description to guide texturing
-    }, {
-      headers: {
-        'Authorization': `Bearer ${MESHY_API_KEY}`,
-        'Content-Type': 'application/json'
+  return retryWithBackoff(async () => {
+    try {
+      console.log(`Creating refine task for: ${building.name} with preview task ID: ${previewTaskId}`);
+      
+      // Truncate texture prompt if needed
+      const texturePrompt = truncatePrompt(building.shortDescription, CONFIG.maxPromptLength);
+      
+      const response = await axios.post('https://api.meshy.ai/openapi/v2/text-to-3d', {
+        mode: 'refine',
+        preview_task_id: previewTaskId,
+        enable_pbr: true, // Enable PBR maps for better rendering
+        texture_prompt: texturePrompt // Use the short description to guide texturing
+      }, {
+        headers: {
+          'Authorization': `Bearer ${MESHY_API_KEY}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (response.data && response.data.result) {
+        console.log(`Refine task created for ${building.name}, task ID: ${response.data.result}`);
+        return response.data.result;
+      } else {
+        console.error(`Failed to create refine task for ${building.name}:`, response.data);
+        logError(building.name, 'refine_task_creation', { message: 'No result in response' });
+        return null;
       }
-    });
-    
-    if (response.data && response.data.result) {
-      console.log(`Refine task created for ${building.name}, task ID: ${response.data.result}`);
-      return response.data.result;
-    } else {
-      console.error(`Failed to create refine task for ${building.name}:`, response.data);
-      return null;
+    } catch (error) {
+      console.error(`Error creating refine task for ${building.name}:`, error.response?.data || error.message);
+      logError(building.name, 'refine_task_creation', error.response?.data || error);
+      throw error; // Rethrow for retry mechanism
     }
-  } catch (error) {
-    console.error(`Error creating refine task for ${building.name}:`, error.response?.data || error.message);
-    return null;
-  }
+  }, 3, 2000); // 3 retries, starting with 2 second delay
 }
 
 // Download a file from a URL
@@ -196,12 +297,16 @@ async function downloadBuildingAssets(taskData, building) {
       }
     });
     
-    // Download model files
+    // Download model files based on configuration
     const modelPromises = [];
     for (const [format, url] of Object.entries(taskData.model_urls)) {
-      const filePath = path.join(modelDir, `model.${format}`);
-      console.log(`Downloading ${format} model for ${building.name} to ${filePath}`);
-      modelPromises.push(downloadFile(url, filePath));
+      if (CONFIG.downloadFormats[format]) {
+        const filePath = path.join(modelDir, `model.${format}`);
+        console.log(`Downloading ${format} model for ${building.name} to ${filePath}`);
+        modelPromises.push(downloadFile(url, filePath));
+      } else {
+        console.log(`Skipping ${format} model download as per configuration`);
+      }
     }
     
     // Download texture files
@@ -211,7 +316,10 @@ async function downloadBuildingAssets(taskData, building) {
         if (texture.base_color) {
           const filePath = path.join(textureDir, `texture_${index}_base_color.png`);
           console.log(`Downloading base color texture ${index} for ${building.name}`);
-          texturePromises.push(downloadFile(texture.base_color, filePath));
+          texturePromises.push(downloadFile(url, filePath).catch(err => {
+            console.warn(`Failed to download base color texture ${index} for ${building.name}:`, err.message);
+            logError(building.name, 'texture_download', { textureIndex: index, type: 'base_color', error: err.message });
+          }));
         }
         
         // Download PBR maps if available
@@ -219,7 +327,10 @@ async function downloadBuildingAssets(taskData, building) {
           if (texture[mapType]) {
             const filePath = path.join(textureDir, `texture_${index}_${mapType}.png`);
             console.log(`Downloading ${mapType} map ${index} for ${building.name}`);
-            texturePromises.push(downloadFile(texture[mapType], filePath));
+            texturePromises.push(downloadFile(texture[mapType], filePath).catch(err => {
+              console.warn(`Failed to download ${mapType} map ${index} for ${building.name}:`, err.message);
+              logError(building.name, 'texture_download', { textureIndex: index, type: mapType, error: err.message });
+            }));
           }
         });
       });
@@ -230,29 +341,39 @@ async function downloadBuildingAssets(taskData, building) {
     if (taskData.thumbnail_url) {
       const thumbnailPath = path.join(thumbnailDir, `${buildingId}.png`);
       console.log(`Downloading thumbnail for ${building.name}`);
-      thumbnailPromises.push(downloadFile(taskData.thumbnail_url, thumbnailPath));
+      thumbnailPromises.push(downloadFile(taskData.thumbnail_url, thumbnailPath).catch(err => {
+        console.warn(`Failed to download thumbnail for ${building.name}:`, err.message);
+        logError(building.name, 'thumbnail_download', { error: err.message });
+      }));
     }
     
     // Wait for all downloads to complete
-    await Promise.all([...modelPromises, ...texturePromises, ...thumbnailPromises]);
+    await Promise.allSettled([...modelPromises, ...texturePromises, ...thumbnailPromises]);
     
     console.log(`All assets downloaded for ${building.name}`);
+    
+    // Create asset paths object based on what was actually downloaded
+    const assetPaths = {
+      models: {},
+      textures: `/assets/buildings/textures/${buildingId}/`,
+      thumbnail: `/assets/buildings/thumbnails/${buildingId}.png`
+    };
+    
+    // Only include model formats that were actually downloaded
+    for (const format of Object.keys(CONFIG.downloadFormats)) {
+      if (CONFIG.downloadFormats[format] && fs.existsSync(path.join(modelDir, `model.${format}`))) {
+        assetPaths.models[format] = `/assets/buildings/models/${buildingId}/model.${format}`;
+      }
+    }
     
     // Update building data with asset paths
     return {
       ...building,
-      assets: {
-        models: {
-          glb: `/assets/buildings/models/${buildingId}/model.glb`,
-          fbx: `/assets/buildings/models/${buildingId}/model.fbx`,
-          obj: `/assets/buildings/models/${buildingId}/model.obj`
-        },
-        textures: `/assets/buildings/textures/${buildingId}/`,
-        thumbnail: `/assets/buildings/thumbnails/${buildingId}.png`
-      }
+      assets: assetPaths
     };
   } catch (error) {
     console.error(`Error downloading assets for ${building.name}:`, error.message);
+    logError(building.name, 'asset_download', error);
     return building;
   }
 }
@@ -305,6 +426,7 @@ async function processBuildingBatch(buildings) {
       const previewTaskId = await createPreviewTask(building);
       if (!previewTaskId) {
         console.error(`Failed to create preview task for ${building.name}, skipping...`);
+        logError(building.name, 'preview_task', { message: 'Failed to create preview task' });
         continue;
       }
       
@@ -319,6 +441,7 @@ async function processBuildingBatch(buildings) {
         
         if (!previewTaskData) {
           console.error(`Failed to check preview task status for ${building.name}, skipping...`);
+          logError(building.name, 'preview_task_status', { taskId: previewTaskId, message: 'Failed to check status' });
           break;
         }
         
@@ -327,6 +450,10 @@ async function processBuildingBatch(buildings) {
           break;
         } else if (previewTaskData.status === 'FAILED') {
           console.error(`Preview task for ${building.name} failed: ${previewTaskData.task_error?.message || 'Unknown error'}`);
+          logError(building.name, 'preview_task_failed', { 
+            taskId: previewTaskId, 
+            error: previewTaskData.task_error?.message || 'Unknown error' 
+          });
           break;
         }
         
@@ -337,6 +464,10 @@ async function processBuildingBatch(buildings) {
       
       if (!previewTaskData || previewTaskData.status !== 'SUCCEEDED') {
         console.error(`Preview task for ${building.name} did not complete successfully, skipping...`);
+        logError(building.name, 'preview_task_incomplete', { 
+          taskId: previewTaskId, 
+          status: previewTaskData?.status || 'unknown' 
+        });
         continue;
       }
       
@@ -344,6 +475,10 @@ async function processBuildingBatch(buildings) {
       const refineTaskId = await createRefineTask(previewTaskId, building);
       if (!refineTaskId) {
         console.error(`Failed to create refine task for ${building.name}, skipping...`);
+        logError(building.name, 'refine_task', { 
+          previewTaskId: previewTaskId,
+          message: 'Failed to create refine task' 
+        });
         continue;
       }
       
@@ -357,6 +492,10 @@ async function processBuildingBatch(buildings) {
         
         if (!refineTaskData) {
           console.error(`Failed to check refine task status for ${building.name}, skipping...`);
+          logError(building.name, 'refine_task_status', { 
+            taskId: refineTaskId, 
+            message: 'Failed to check status' 
+          });
           break;
         }
         
@@ -365,6 +504,10 @@ async function processBuildingBatch(buildings) {
           break;
         } else if (refineTaskData.status === 'FAILED') {
           console.error(`Refine task for ${building.name} failed: ${refineTaskData.task_error?.message || 'Unknown error'}`);
+          logError(building.name, 'refine_task_failed', { 
+            taskId: refineTaskId, 
+            error: refineTaskData.task_error?.message || 'Unknown error' 
+          });
           break;
         }
         
@@ -375,6 +518,10 @@ async function processBuildingBatch(buildings) {
       
       if (!refineTaskData || refineTaskData.status !== 'SUCCEEDED') {
         console.error(`Refine task for ${building.name} did not complete successfully, skipping...`);
+        logError(building.name, 'refine_task_incomplete', { 
+          taskId: refineTaskId, 
+          status: refineTaskData?.status || 'unknown' 
+        });
         continue;
       }
       
@@ -382,7 +529,10 @@ async function processBuildingBatch(buildings) {
       const updatedBuilding = await downloadBuildingAssets(refineTaskData, building);
       
       // Step 6: Update building data in the category file
-      updateBuildingData(updatedBuilding);
+      const updateResult = updateBuildingData(updatedBuilding);
+      if (!updateResult) {
+        logError(building.name, 'update_building_data', { message: 'Failed to update building data in category file' });
+      }
       
       console.log(`\n=== Completed processing for ${building.name} ===\n`);
       
@@ -391,6 +541,7 @@ async function processBuildingBatch(buildings) {
       
     } catch (error) {
       console.error(`Error processing building ${building.name}:`, error);
+      logError(building.name, 'process_building', error);
     }
   }
 }
@@ -406,11 +557,15 @@ async function main() {
     // Load all buildings
     const allBuildings = await loadAllBuildings();
     
-    // Filter buildings that don't have assets yet
+    // Load progress
+    const processedBuildingNames = loadProgress();
+    
+    // Filter buildings that don't have assets yet and weren't processed before
     const buildingsToProcess = allBuildings.filter(building => {
       const buildingId = building.name.toLowerCase().replace(/\s+/g, '-');
       const glbPath = path.join(ASSETS_DIR, 'models', buildingId, 'model.glb');
-      return !fs.existsSync(glbPath) || !building.assets;
+      return (!fs.existsSync(glbPath) || !building.assets) && 
+             !processedBuildingNames.includes(building.name);
     });
     
     console.log(`Found ${buildingsToProcess.length} buildings that need assets`);
@@ -421,6 +576,11 @@ async function main() {
       const batch = buildingsToProcess.slice(i, i + batchSize);
       console.log(`\n=== Processing batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(buildingsToProcess.length / batchSize)} ===\n`);
       await processBuildingBatch(batch);
+      
+      // Save progress after each batch
+      const newProcessedBuildings = [...processedBuildingNames];
+      batch.forEach(building => newProcessedBuildings.push(building.name));
+      saveProgress(newProcessedBuildings);
       
       // Add a delay between batches to avoid overwhelming the API
       if (i + batchSize < buildingsToProcess.length) {
@@ -433,6 +593,7 @@ async function main() {
     
   } catch (error) {
     console.error('Error in main function:', error);
+    logError('main', 'main_function', error);
     process.exit(1);
   }
 }
