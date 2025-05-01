@@ -1382,8 +1382,8 @@ export default function Home() {
             coat_of_arms_image: null
           }
         };
-        // Update the store with the modified users data
-        usePolygonStore.setState({ users: updatedUsers });
+        // Update the users state directly instead of using usePolygonStore
+        setUsers(updatedUsers);
       }
       
       updatePolygonColors();
