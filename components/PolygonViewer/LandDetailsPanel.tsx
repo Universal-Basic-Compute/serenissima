@@ -16,6 +16,8 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
   const [isVisible, setIsVisible] = useState(false);
   const [transaction, setTransaction] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [offerAmount, setOfferAmount] = useState<number>(1000); // Default offer of 1000 COMPUTE
+  const [showOfferInput, setShowOfferInput] = useState<boolean>(false);
   
   // Find the selected polygon
   const selectedPolygon = selectedPolygonId 
@@ -198,82 +200,163 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
           <WalletStatus className="mb-2" />
           
           <div className="pt-2 flex space-x-2">
-            <ActionButton 
-              onClick={() => {
-                if (!selectedPolygonId) return;
-                
-                // Get the current wallet address from session storage first, then localStorage
-                const walletAddress = sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress') || '';
-                
-                if (!walletAddress) {
-                  alert('Please connect your wallet first');
-                  return;
-                }
-                
-                // If there's a transaction, execute it
-                if (transaction) {
-                  // Call the backend API to execute the transaction
-                  fetch(`http://localhost:8000/api/transaction/${transaction.id}/execute`, {
-                    method: 'POST',
-                    headers: {
-                      'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                      buyer: walletAddress
-                    }),
-                  })
-                  .then(response => {
-                    if (!response.ok) {
-                      throw new Error('Failed to execute transaction');
-                    }
-                    return response.json();
-                  })
-                  .then(data => {
-                    alert(`Successfully purchased ${selectedPolygon?.historicalName || selectedPolygonId}`);
-                    // Refresh the page to update the UI
-                    window.location.reload();
-                  })
-                  .catch(error => {
-                    console.error('Error executing transaction:', error);
-                    alert('Failed to purchase land. Please try again.');
-                  });
-                } else {
-                  // If no transaction, just update the land owner
-                  fetch('http://localhost:8000/api/land', {
-                    method: 'POST',
-                    headers: {
-                      'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                      land_id: selectedPolygonId,
-                      user: walletAddress,
-                      historical_name: selectedPolygon?.historicalName,
-                      english_name: selectedPolygon?.englishName,
-                      description: selectedPolygon?.historicalDescription
-                    }),
-                  })
-                  .then(response => {
-                    if (!response.ok) {
-                      throw new Error('Failed to purchase land');
-                    }
-                    return response.json();
-                  })
-                  .then(data => {
-                    alert(`Successfully purchased land: ${selectedPolygon?.historicalName || selectedPolygonId}`);
-                    // Refresh the land owners data
-                    window.location.reload();
-                  })
-                  .catch(error => {
-                    console.error('Error purchasing land:', error);
-                    alert('Failed to purchase land. Please try again.');
-                  });
-                }
-              }} 
-              variant="primary"
-              disabled={owner ? true : false}
-            >
-              {owner ? 'Already Owned' : (transaction ? `Purchase (${transaction.price.toLocaleString()} ducats)` : 'Purchase Land')}
-            </ActionButton>
+            {owner ? (
+              // If land is owned, show "Make an Offer" button or the offer input
+              showOfferInput ? (
+                <div className="flex flex-col w-full space-y-2">
+                  <div className="flex space-x-2">
+                    <input
+                      type="number"
+                      value={offerAmount}
+                      onChange={(e) => setOfferAmount(parseInt(e.target.value) || 0)}
+                      className="px-2 py-1 border rounded w-full"
+                      placeholder="Offer amount in COMPUTE"
+                      min="1"
+                    />
+                    <ActionButton
+                      onClick={async () => {
+                        // Get the current wallet address
+                        const walletAddress = sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress') || '';
+                        
+                        if (!walletAddress) {
+                          alert('Please connect your wallet first');
+                          return;
+                        }
+                        
+                        if (offerAmount <= 0) {
+                          alert('Please enter a valid offer amount');
+                          return;
+                        }
+                        
+                        try {
+                          // Create a transaction for the land
+                          const response = await fetch('http://localhost:8000/api/transaction', {
+                            method: 'POST',
+                            headers: {
+                              'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                              type: 'land',
+                              asset_id: selectedPolygonId,
+                              seller: owner, // Current owner
+                              price: offerAmount,
+                              historical_name: selectedPolygon?.historicalName,
+                              english_name: selectedPolygon?.englishName,
+                              description: selectedPolygon?.historicalDescription
+                            }),
+                          });
+                          
+                          if (!response.ok) {
+                            throw new Error('Failed to create offer');
+                          }
+                          
+                          const data = await response.json();
+                          alert(`Offer of ${offerAmount} COMPUTE created successfully!`);
+                          setShowOfferInput(false);
+                        } catch (error) {
+                          console.error('Error creating offer:', error);
+                          alert('Failed to create offer. Please try again.');
+                        }
+                      }}
+                      variant="primary"
+                    >
+                      Submit Offer
+                    </ActionButton>
+                  </div>
+                  <ActionButton
+                    onClick={() => setShowOfferInput(false)}
+                    variant="secondary"
+                  >
+                    Cancel
+                  </ActionButton>
+                </div>
+              ) : (
+                <ActionButton
+                  onClick={() => setShowOfferInput(true)}
+                  variant="primary"
+                >
+                  Make an Offer
+                </ActionButton>
+              )
+            ) : (
+              // If land is not owned, keep the existing purchase button
+              <ActionButton 
+                onClick={() => {
+                  if (!selectedPolygonId) return;
+                  
+                  // Get the current wallet address from session storage first, then localStorage
+                  const walletAddress = sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress') || '';
+                  
+                  if (!walletAddress) {
+                    alert('Please connect your wallet first');
+                    return;
+                  }
+                  
+                  // If there's a transaction, execute it
+                  if (transaction) {
+                    // Call the backend API to execute the transaction
+                    fetch(`http://localhost:8000/api/transaction/${transaction.id}/execute`, {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                      },
+                      body: JSON.stringify({
+                        buyer: walletAddress
+                      }),
+                    })
+                    .then(response => {
+                      if (!response.ok) {
+                        throw new Error('Failed to execute transaction');
+                      }
+                      return response.json();
+                    })
+                    .then(data => {
+                      alert(`Successfully purchased ${selectedPolygon?.historicalName || selectedPolygonId}`);
+                      // Refresh the page to update the UI
+                      window.location.reload();
+                    })
+                    .catch(error => {
+                      console.error('Error executing transaction:', error);
+                      alert('Failed to purchase land. Please try again.');
+                    });
+                  } else {
+                    // If no transaction, just update the land owner
+                    fetch('http://localhost:8000/api/land', {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                      },
+                      body: JSON.stringify({
+                        land_id: selectedPolygonId,
+                        user: walletAddress,
+                        historical_name: selectedPolygon?.historicalName,
+                        english_name: selectedPolygon?.englishName,
+                        description: selectedPolygon?.historicalDescription
+                      }),
+                    })
+                    .then(response => {
+                      if (!response.ok) {
+                        throw new Error('Failed to purchase land');
+                      }
+                      return response.json();
+                    })
+                    .then(data => {
+                      alert(`Successfully purchased land: ${selectedPolygon?.historicalName || selectedPolygonId}`);
+                      // Refresh the land owners data
+                      window.location.reload();
+                    })
+                    .catch(error => {
+                      console.error('Error purchasing land:', error);
+                      alert('Failed to purchase land. Please try again.');
+                    });
+                  }
+                }} 
+                variant="primary"
+                disabled={false}
+              >
+                {transaction ? `Purchase (${transaction.price.toLocaleString()} ducats)` : 'Purchase Land'}
+              </ActionButton>
+            )}
           </div>
         </div>
       </div>
