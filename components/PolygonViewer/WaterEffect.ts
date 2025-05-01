@@ -122,66 +122,35 @@ export default class WaterEffect {
   }
   
   private initializeWater() {
-    // Use lower resolution textures in performance mode
-    const textureSize = this.performanceMode ? 256 : 512; // Reduced from 1024
-    
-    // Load or use cached normal map
-    if (!WaterEffect.waterNormalMapTexture) {
-      WaterEffect.waterNormalMapTexture = WaterEffect.textureLoader!.load(
-        this.performanceMode ? 
-          'https://threejs.org/examples/textures/waternormals_small.jpg' : 
-          'https://threejs.org/examples/textures/waternormals.jpg'
-      );
-      WaterEffect.waterNormalMapTexture.wrapS = THREE.RepeatWrapping;
-      WaterEffect.waterNormalMapTexture.wrapT = THREE.RepeatWrapping;
-    }
-    this.waterNormalMap = WaterEffect.waterNormalMapTexture;
-    
-    // Load or use cached DUDV map (distortion)
-    if (!WaterEffect.waterDUDVMapTexture) {
-      WaterEffect.waterDUDVMapTexture = WaterEffect.textureLoader!.load(
-        'https://threejs.org/examples/textures/waterdudv.jpg'
-      );
-      WaterEffect.waterDUDVMapTexture.wrapS = THREE.RepeatWrapping;
-      WaterEffect.waterDUDVMapTexture.wrapT = THREE.RepeatWrapping;
-    }
-    this.waterDUDVMap = WaterEffect.waterDUDVMapTexture;
-    
-    // Create advanced water with reflections
+    // Create a completely invisible water plane
     const waterOptions = {
-      textureWidth: this.performanceMode ? 128 : 512, // Reduced from 256/1024
-      textureHeight: this.performanceMode ? 128 : 512,
+      textureWidth: 1,
+      textureHeight: 1,
       waterNormals: this.waterNormalMap,
       sunDirection: this.sunDirection,
       sunColor: 0xffffff,
-      waterColor: 0x001e0f, // Darker blue-green color for better contrast
-      distortionScale: 3.0, // Reduced distortion
-      fog: this.scene.fog !== undefined,
+      waterColor: 0x001e0f,
+      distortionScale: 0, // Set to 0 to remove distortion
+      fog: false, // Disable fog
       format: THREE.RGBAFormat
     };
     
-    // Increase water geometry size to ensure it covers the entire scene
-    this.waterGeometry = new THREE.PlaneGeometry(
-      this.width * 2, 
-      this.height * 2, 
-      this.performanceMode ? 2 : 8
-    );
+    // Create minimal geometry
+    this.waterGeometry = new THREE.PlaneGeometry(0, 0);
     
-    // Create the water mesh
+    // Create the water mesh but make it invisible
     this.water = new Water(this.waterGeometry, waterOptions);
     this.water.rotation.x = -Math.PI / 2;
-    this.water.position.y = -0.3; // Lower water level further to avoid shadow effects
-    this.water.renderOrder = 0; // Ensure water renders below land
+    this.water.position.y = -100; // Move far below the scene
+    this.water.visible = false; // Make it invisible
     
-    // Add the water to the scene
+    // Add the water to the scene (though it's invisible)
     this.scene.add(this.water);
     
-    // Load foam texture for wave crests
-    if (!this.performanceMode) {
-      this.loadFoamTexture();
-      this.loadCausticTextures();
-      this.createSunReflection();
-    }
+    // Don't load any additional effects
+    // this.loadFoamTexture();
+    // this.loadCausticTextures();
+    // this.createSunReflection();
   }
   
   private loadFoamTexture() {
@@ -284,52 +253,8 @@ export default class WaterEffect {
   }
   
   public update(frameCount: number, performanceMode: boolean) {
-    if (!this.water) return;
-    
-    // Skip updates in performance mode
-    if (performanceMode && frameCount % 2 !== 0) return;
-    
-    // Get current time for animations
-    const time = frameCount * 0.05;
-    
-    // Update water shader time
-    const waterUniforms = this.water.material.uniforms;
-    if (waterUniforms.time) {
-      // Slower time progression for more majestic waves
-      waterUniforms.time.value += 1.0 / 120.0;
-    }
-    
-    // Apply Gerstner waves
-    this.applyGerstnerWaves(time);
-    
-    // Update foam texture animation
-    if (this.waterFoam && this.foamTexture) {
-      this.foamTexture.offset.x = time * 0.03;
-      this.foamTexture.offset.y = time * 0.04;
-    }
-    
-    // Update caustics animation - change every 4 frames
-    if (this.causticMesh && frameCount % 4 === 0) {
-      this.causticIndex = (this.causticIndex + 1) % this.causticTextures.length;
-      (this.causticMesh.material as THREE.MeshBasicMaterial).map = 
-        this.causticTextures[this.causticIndex];
-      
-      // Pulse the caustic light intensity for more dynamic effect
-      if (this.causticLight) {
-        const pulseIntensity = 0.3 + 0.2 * Math.sin(time * 0.5);
-        this.causticLight.intensity = pulseIntensity;
-      }
-    }
-    
-    // Update sun reflection if it exists
-    if (this.sunReflection) {
-      const scaleVariation = 1 + 0.1 * Math.sin(time * 0.4);
-      this.sunReflection.scale.set(scaleVariation, 1, scaleVariation);
-      
-      // Vary opacity for a shimmering effect
-      const opacityVariation = 0.3 + 0.1 * Math.sin(time * 0.6);
-      (this.sunReflection.material as THREE.MeshBasicMaterial).opacity = opacityVariation;
-    }
+    // Do nothing - all water effects disabled
+    return;
   }
   
   public updateViewMode(activeView: ViewMode) {

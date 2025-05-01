@@ -24,9 +24,9 @@ export default class SceneSetup {
   constructor({ canvas, activeView, highQuality }: SceneSetupProps) {
     this.performanceMode = !highQuality;
     
-    // Initialize scene with simpler settings initially
+    // Initialize scene with a plain white background
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color('#87CEEB'); // Sky blue background
+    this.scene.background = new THREE.Color('#FFFFFF'); // Plain white background
     
     // No fog for cleaner visuals
     
@@ -145,128 +145,26 @@ export default class SceneSetup {
   }
   
   private setupLights(activeView: ViewMode) {
-    // Add ambient light
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+    // Add simple ambient light
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1.0);
     this.scene.add(ambientLight);
     
-    // Add a hemisphere light for better overall illumination
-    const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x0044ff, 0.6);
-    this.scene.add(hemisphereLight);
-    
-    // Main directional light (sun) - bigger and more yellow
-    this.sunLight = new THREE.DirectionalLight(0xffffcc, 1.8);
+    // Add a simple directional light
+    this.sunLight = new THREE.DirectionalLight(0xffffff, 1.0);
     this.sunLight.position.set(50, 100, 50);
-    this.sunLight.castShadow = false; // Ensure shadows are completely disabled
-    this.sunLight.shadow.autoUpdate = false; // Explicitly disable shadow updates
-    this.sunLight.shadow.needsUpdate = false; // Ensure shadows never update
-    
-    // Create a sun sphere for visual effect
-    const sunGeometry = new THREE.SphereGeometry(5, 16, 16);
-    const sunMaterial = new THREE.MeshBasicMaterial({ 
-      color: 0xffffaa, 
-      transparent: true,
-      opacity: 0.8
-    });
-    this.sunSphere = new THREE.Mesh(sunGeometry, sunMaterial);
-    this.sunSphere.position.copy(this.sunLight.position);
-    
-    // Add bloom effect to sun
-    const sunBloomGeometry = new THREE.SphereGeometry(6, 16, 16);
-    const sunBloomMaterial = new THREE.MeshBasicMaterial({
-      color: 0xffffee,
-      transparent: true,
-      opacity: 0.4,
-      blending: THREE.AdditiveBlending
-    });
-    const sunBloom = new THREE.Mesh(sunBloomGeometry, sunBloomMaterial);
-    this.sunSphere.add(sunBloom);
-    
-    this.scene.add(this.sunSphere);
-    
-    // Add a subtle glow effect to the sun
-    const sunGlowGeometry = new THREE.SphereGeometry(10, 16, 16);
-    const sunGlowMaterial = new THREE.MeshBasicMaterial({ 
-      color: 0xffffdd, 
-      transparent: true,
-      opacity: 0.3,
-      side: THREE.BackSide,
-      blending: THREE.AdditiveBlending
-    });
-    this.sunGlow = new THREE.Mesh(sunGlowGeometry, sunGlowMaterial);
-    this.sunGlow.position.copy(this.sunLight.position);
-    this.scene.add(this.sunGlow);
-    
-    // Add sun rays using line segments
-    const rayCount = 8;
-    const rayGeometry = new THREE.BufferGeometry();
-    const rayMaterial = new THREE.LineBasicMaterial({
-      color: 0xffffcc,
-      transparent: true,
-      opacity: 0.3,
-      blending: THREE.AdditiveBlending
-    });
-    
-    const rayVertices = [];
-    for (let i = 0; i < rayCount; i++) {
-      const angle = (i / rayCount) * Math.PI * 2;
-      const innerRadius = 7;
-      const outerRadius = 15;
-      
-      const x1 = Math.cos(angle) * innerRadius;
-      const y1 = Math.sin(angle) * innerRadius;
-      const z1 = 0;
-      
-      const x2 = Math.cos(angle) * outerRadius;
-      const y2 = Math.sin(angle) * outerRadius;
-      const z2 = 0;
-      
-      rayVertices.push(x1, y1, z1, x2, y2, z2);
-    }
-    
-    rayGeometry.setAttribute('position', new THREE.Float32BufferAttribute(rayVertices, 3));
-    const sunRays = new THREE.LineSegments(rayGeometry, rayMaterial);
-    this.sunSphere.add(sunRays);
-    
-    // Shadow settings are not needed since we disabled shadows
-    
+    this.sunLight.castShadow = false;
     this.scene.add(this.sunLight);
     
-    // Add a secondary light for better illumination
-    const fillLight = new THREE.DirectionalLight(0xadd8e6, 0.5);
-    fillLight.position.set(-50, 50, -50);
-    this.scene.add(fillLight);
+    // Remove all the sun sphere, glow, and ray effects
+    // this.sunSphere = null;
+    // this.sunGlow = null;
     
-    // Add a subtle rim light to enhance edges
-    const rimLight = new THREE.DirectionalLight(0xfff0e0, 0.3);
-    rimLight.position.set(0, -10, -50);
-    this.scene.add(rimLight);
-    
-    // Animate sun and lights
-    this.animateSun();
+    // Don't call animateSun
+    // this.animateSun();
   }
   
   private animateSun() {
-    // Create subtle animation for sun and its effects
-    const animate = () => {
-      if (!this.sunSphere || !this.sunGlow) return;
-      
-      const time = Date.now() * 0.0005;
-      
-      // Subtle pulsing effect for sun glow
-      const pulseScale = 1 + 0.05 * Math.sin(time * 2);
-      this.sunGlow.scale.set(pulseScale, pulseScale, pulseScale);
-      
-      // Subtle color shift
-      const hue = 0.12 + 0.01 * Math.sin(time * 3);
-      const sunColor = new THREE.Color().setHSL(hue, 0.5, 0.7);
-      this.sunLight.color.copy(sunColor);
-      
-      // Request next frame
-      requestAnimationFrame(animate);
-    };
-    
-    // Start animation
-    animate();
+    // Do nothing - no sun animation
   }
   
   
