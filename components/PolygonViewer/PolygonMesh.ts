@@ -91,10 +91,10 @@ class PolygonMesh {
         opacity: 1.0,
         depthTest: true,
         depthWrite: true,
-        // Enable polygon offset to prevent z-fighting at edges
+        // Enhanced polygon offset to prevent z-fighting at edges
         polygonOffset: true,
-        polygonOffsetFactor: 1.0,
-        polygonOffsetUnits: 1.0
+        polygonOffsetFactor: 2.0, // Increased from 1.0 to 2.0
+        polygonOffsetUnits: 2.0   // Increased from 1.0 to 2.0
       });
       
       // Immediately load and apply the sand texture
@@ -160,7 +160,7 @@ class PolygonMesh {
       this.mesh.userData.ignoreLight = true;
       
       // Position MUCH LOWER above water to avoid z-fighting
-      this.mesh.position.y = 0.01; // Reduced from 0.15 to 0.01
+      this.mesh.position.y = 0.001; // Reduced from 0.01 to 0.001 to minimize elevation
     } catch (error) {
       console.error('Error creating mesh:', error);
     }

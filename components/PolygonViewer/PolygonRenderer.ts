@@ -865,8 +865,8 @@ export default class PolygonRenderer {
     // Rotate to lay flat on the ground (90 degrees around X axis)
     plane.rotation.x = -Math.PI / 2;
     
-    // Set a high renderOrder to ensure it's always on top
-    plane.renderOrder = 10;
+    // Set a very high renderOrder to ensure it's always on top
+    plane.renderOrder = 20;
     
     // Add to scene and store reference
     this.scene.add(plane);

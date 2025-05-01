@@ -48,7 +48,7 @@ export default class SimpleWater {
     const waterMaterial = new THREE.MeshBasicMaterial({
       color: waterColor,
       transparent: true,
-      opacity: 0.8,
+      opacity: 0.95, // Increased opacity to reduce transparency effects
       side: THREE.FrontSide
     });
     
