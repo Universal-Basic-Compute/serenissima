@@ -790,6 +790,29 @@ export default function PolygonViewer() {
     }
   }, [selectedPolygonId]);
   
+  // Define these event handlers outside the useEffect to make them available in cleanup
+  const handlePolygonAdded = useCallback(() => {
+    if (waterEffectRef.current) {
+      console.log('Polygon added, updating water effects');
+      setTimeout(() => {
+        if (waterEffectRef.current) {
+          waterEffectRef.current.update(0, !highQuality);
+        }
+      }, 500);
+    }
+  }, [highQuality]);
+
+  const handlePolygonDeleted = useCallback(() => {
+    if (waterEffectRef.current) {
+      console.log('Polygon deleted, updating water effects');
+      setTimeout(() => {
+        if (waterEffectRef.current) {
+          waterEffectRef.current.update(0, !highQuality);
+        }
+      }, 500);
+    }
+  }, [highQuality]);
+
   // Add a new useEffect to handle hover state changes
   useEffect(() => {
     const handleHoverStateChange = (event: CustomEvent) => {
