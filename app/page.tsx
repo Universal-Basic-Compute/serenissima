@@ -1068,7 +1068,7 @@ export default function Home() {
                 <button
                   onClick={() => {
                     setShowUsernamePrompt(true); // Reuse the username prompt for profile editing
-                    setUsernameInput(userProfile.username || '');
+                    // Don't set username input when editing
                     setFirstName(userProfile.firstName || '');
                     setLastName(userProfile.lastName || '');
                     setFamilyCoatOfArms(userProfile.familyCoatOfArms || '');
@@ -1174,20 +1174,23 @@ export default function Home() {
                 <h3 className="text-lg font-medium text-amber-700 mb-2">Your Noble Identity</h3>
                 
                 <div className="flex flex-col space-y-4">
-                  <div className="flex items-center">
-                    <div className="w-1/3">
-                      <label className="block text-gray-700">Username</label>
+                  {/* Only show username field when creating a new profile, not when editing */}
+                  {!userProfile && (
+                    <div className="flex items-center">
+                      <div className="w-1/3">
+                        <label className="block text-gray-700">Username</label>
+                      </div>
+                      <div className="w-2/3">
+                        <input
+                          type="text"
+                          value={usernameInput}
+                          onChange={(e) => setUsernameInput(e.target.value)}
+                          placeholder="Enter your username..."
+                          className="w-full px-3 py-2 border border-amber-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-500"
+                        />
+                      </div>
                     </div>
-                    <div className="w-2/3">
-                      <input
-                        type="text"
-                        value={usernameInput}
-                        onChange={(e) => setUsernameInput(e.target.value)}
-                        placeholder="Enter your username..."
-                        className="w-full px-3 py-2 border border-amber-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-500"
-                      />
-                    </div>
-                  </div>
+                  )}
                   
                   <div className="flex items-center">
                     <div className="w-1/3">
