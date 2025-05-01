@@ -52,28 +52,16 @@ export default class LODPolygon {
     
     // Create high detail mesh directly
     this.createHighDetailMesh();
-    
+  
     // Make sure we have a valid mesh before adding to scene
     if (this.highDetailMesh) {
       this.mesh = this.highDetailMesh;
       this.scene.add(this.mesh);
-      
+    
       // Apply coat of arms texture if provided and in land view
       if (ownerCoatOfArmsUrl && activeView === 'land') {
         this.updateCoatOfArmsTexture(ownerCoatOfArmsUrl);
       }
-    } else {
-      // If we couldn't create a high detail mesh, log an error
-      console.error('Failed to create high detail mesh for polygon:', polygon.id);
-    }
-    
-    // Create high detail mesh directly
-    this.createHighDetailMesh();
-    
-    // Make sure we have a valid mesh before adding to scene
-    if (this.highDetailMesh) {
-      this.mesh = this.highDetailMesh;
-      this.scene.add(this.mesh);
     } else {
       // If we couldn't create a high detail mesh, log an error
       console.error('Failed to create high detail mesh for polygon:', polygon.id);

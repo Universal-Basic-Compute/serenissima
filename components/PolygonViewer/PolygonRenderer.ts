@@ -37,6 +37,7 @@ export default class PolygonRenderer {
   public hasUpdatedCoatOfArms: boolean = false; // Flag to track if coat of arms have been updated
   
   // Add a method to create a sprite for the coat of arms
+  // Add method to create a sprite for the coat of arms
   private createCoatOfArmsSprite(coatOfArmsUrl: string) {
     // Remove any existing sprite
     if (this.coatOfArmsSprite) {
