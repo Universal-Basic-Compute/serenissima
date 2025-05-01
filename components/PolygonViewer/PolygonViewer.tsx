@@ -973,6 +973,7 @@ export default function PolygonViewer() {
       polygons={polygons}
       landOwners={landOwners}
       visible={activeView === 'land'} // Pass visibility as a prop instead
+      preventAutoClose={true} // Add this prop to prevent auto-closing after purchase
     />
   ), [activeView, selectedPolygonId, handleCloseLandDetails, polygons, landOwners]);
 

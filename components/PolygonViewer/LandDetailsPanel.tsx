@@ -13,9 +13,10 @@ interface LandDetailsPanelProps {
   polygons: Polygon[];
   landOwners: Record<string, string>;
   visible?: boolean; // Add this prop
+  preventAutoClose?: boolean; // Add this prop to prevent auto-closing after purchase
 }
 
-export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons, landOwners, visible = true }: LandDetailsPanelProps) {
+export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons, landOwners, visible = true, preventAutoClose = false }: LandDetailsPanelProps) {
   const router = useRouter();
   const [refreshKey, setRefreshKey] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
@@ -76,6 +77,13 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
       setIsVisible(true);
     }
   }, [transaction]);
+  
+  // Add additional effect to maintain visibility when preventAutoClose is true
+  useEffect(() => {
+    if (preventAutoClose && selectedPolygonId) {
+      setIsVisible(true);
+    }
+  }, [preventAutoClose, selectedPolygonId]);
 
   // Add this effect to fetch transaction data when a polygon is selected
   useEffect(() => {
@@ -658,6 +666,13 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
       setShowPurchaseConfirmation(false);
       // Explicitly set the panel to visible to ensure it stays open
       setIsVisible(true);
+      
+      // Force the panel to stay visible even if selectedPolygonId changes
+      if (preventAutoClose) {
+        setTimeout(() => {
+          setIsVisible(true);
+        }, 100);
+      }
     }
   }
 }
