@@ -29,45 +29,6 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
   // Get the owner for the selected polygon
   const owner = selectedPolygonId ? landOwners[selectedPolygonId] : null;
   
-  // Add this function to handle polygon deletion
-  const handleDeletePolygon = async () => {
-    if (!selectedPolygonId) return;
-    
-    // Confirm deletion
-    if (!confirm(`Are you sure you want to delete this land: ${selectedPolygon?.historicalName || selectedPolygonId}?`)) {
-      return;
-    }
-    
-    try {
-      const response = await fetch('/api/delete-polygon', {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ id: selectedPolygonId }),
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to delete land');
-      }
-      
-      const data = await response.json();
-      
-      if (data.success) {
-        alert('Land deleted successfully');
-        // Close the panel
-        onClose();
-        
-        // Dispatch a custom event to notify components
-        window.dispatchEvent(new Event('polygonDeleted'));
-      } else {
-        alert(`Failed to delete land: ${data.error}`);
-      }
-    } catch (error) {
-      console.error('Error deleting land:', error);
-      alert('An error occurred while deleting the land');
-    }
-  };
   
   // Debug logging
   useEffect(() => {
@@ -241,21 +202,6 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
             </div>
           )}
 
-          {/* Admin controls - only show for the owner */}
-          {owner && owner === (sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress')) && (
-            <div className="mt-4 border-t pt-4">
-              <h3 className="text-sm font-medium text-gray-500">Land Management</h3>
-              <button
-                onClick={handleDeletePolygon}
-                className="mt-2 w-full px-3 py-2 bg-red-500 text-white text-sm rounded hover:bg-red-600 flex items-center justify-center"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
-                Delete Land
-              </button>
-            </div>
-          )}
           
           {/* Offers section */}
           {offers.length > 0 && (
