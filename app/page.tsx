@@ -436,13 +436,25 @@ export default function Home() {
     if (walletAdapter.connected) {
       // If already connected, disconnect
       console.log("Disconnecting wallet...");
-      await walletAdapter.disconnect();
-      setWalletAddress(null);
-      setUserProfile(null); // Also clear the user profile
-      // Clear wallet from both storages
-      sessionStorage.removeItem('walletAddress');
-      localStorage.removeItem('walletAddress');
-      console.log("Wallet disconnected");
+      try {
+        await walletAdapter.disconnect();
+        
+        // Only update state after successful disconnect
+        setWalletAddress(null);
+        setUserProfile(null); // Also clear the user profile
+        
+        // Clear wallet from both storages
+        sessionStorage.removeItem('walletAddress');
+        localStorage.removeItem('walletAddress');
+        
+        // Dispatch a custom event to notify other components
+        window.dispatchEvent(new CustomEvent('walletChanged'));
+        
+        console.log("Wallet disconnected successfully");
+      } catch (error) {
+        console.error("Error disconnecting wallet:", error);
+        alert(`Failed to disconnect wallet: ${error.message}`);
+      }
       return;
     }
     
