@@ -21,6 +21,10 @@ export default function PolygonViewer() {
   const isInteractingWithPolygon = useRef(false);
   const [transferMenuOpen, setTransferMenuOpen] = useState(false);
   
+  // Add refs at the top level of the component
+  const hasLoadedDataRef = useRef(false);
+  const hasUpdatedCoatOfArmsRef = useRef(false);
+  
   // Get state from store
   const {
     polygons,
@@ -144,9 +148,6 @@ export default function PolygonViewer() {
 
   // Load polygons on mount with progressive loading
   useEffect(() => {
-    // Use a ref to track if we've already loaded data
-    const hasLoadedDataRef = useRef(false);
-    
     if (!hasLoadedDataRef.current) {
       console.log('Starting progressive loading...');
       
@@ -275,9 +276,6 @@ export default function PolygonViewer() {
   
   // Add this useEffect to ensure coat of arms are updated when users data changes
   useEffect(() => {
-    // Use a ref to track if we've already updated coat of arms
-    const hasUpdatedCoatOfArmsRef = useRef(false);
-    
     if (polygonRendererRef.current && users && Object.keys(users).length > 0 && !hasUpdatedCoatOfArmsRef.current) {
       console.log('Updating coat of arms from users data in PolygonViewer:', users);
       
