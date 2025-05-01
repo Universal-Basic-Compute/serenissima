@@ -860,13 +860,13 @@ async def execute_transaction(transaction_id: str, data: dict):
                 # Update the land owner
                 land_record = land_records[0]
                 lands_table.update(land_record["id"], {
-                    "Wallet": data["buyer"]
+                    "User": data["buyer"]  # Changed from "Wallet" to "User" to match the field name in Airtable
                 })
             else:
                 # Create a new land record
                 land_fields = {
                     "LandId": asset_id,
-                    "Wallet": data["buyer"]
+                    "User": data["buyer"]  # Changed from "Wallet" to "User" to match the field name in Airtable
                 }
                 
                 # Extract land details from Notes field if available
