@@ -351,24 +351,16 @@ export default class PolygonRenderer {
       lodPolygon.updateViewMode(activeView);
     });
     
-    // If we're in land view, apply coat of arms textures to owned lands
+    // Update coat of arms sprites - recreate them when switching to land view
     if (activeView === 'land') {
-      this.polygons.forEach((polygon, index) => {
-        if (polygon.owner && this.ownerCoatOfArmsMap[polygon.owner]) {
-          // Find the corresponding LOD polygon
-          const lodPolygon = this.lodPolygons.find(lp => 
-            lp.getMesh() === this.polygonMeshesRef.current[polygon.id]
-          );
-          
-          if (lodPolygon) {
-            lodPolygon.updateCoatOfArmsTexture(this.ownerCoatOfArmsMap[polygon.owner]);
-          }
-        }
+      this.updateCoatOfArmsSprites();
+    } else {
+      // Remove sprites when not in land view
+      Object.values(this.coatOfArmSprites).forEach(sprite => {
+        this.scene.remove(sprite);
       });
+      this.coatOfArmSprites = {};
     }
-    
-    // Update coat of arms sprites - show in land view, hide in other views
-    this.updateCoatOfArmsSprites();
   }
 
   public updateQuality(performanceMode: boolean) {
