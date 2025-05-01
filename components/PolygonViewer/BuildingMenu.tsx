@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Tab } from '@headlessui/react';
+import { getApiBaseUrl } from '@/lib/apiUtils';
 
 interface Building {
   name: string;
@@ -35,58 +36,71 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
   const [loading, setLoading] = useState(true);
   const [selectedBuilding, setSelectedBuilding] = useState<Building | null>(null);
 
-  // Load building data
+  // Memoized function to load building data
+  const loadBuildingData = useCallback(async () => {
+    setLoading(true);
+    try {
+      // Load all building categories
+      const categoryFiles = [
+        'residential',
+        'commercial',
+        'production',
+        'infrastructure',
+        'public&government',
+        'military&defence',
+        'special'
+      ];
+
+      const loadedCategories: BuildingCategory[] = [];
+      const apiBaseUrl = getApiBaseUrl();
+
+      for (const category of categoryFiles) {
+        try {
+          console.log(`Fetching buildings for category: ${category}`);
+          
+          // Try the Next.js API route first
+          let response = await fetch(`/api/buildings/${category}`, {
+            signal: AbortSignal.timeout(5000) // 5 second timeout
+          });
+          
+          // If that fails, try the direct backend API
+          if (!response.ok) {
+            console.log(`Falling back to direct API for ${category}`);
+            response = await fetch(`${apiBaseUrl}/api/buildings/${category}`, {
+              signal: AbortSignal.timeout(5000) // 5 second timeout
+            });
+          }
+          
+          if (response.ok) {
+            const buildings = await response.json();
+            console.log(`Loaded ${buildings.length} buildings for category ${category}`);
+            
+            loadedCategories.push({
+              name: category.charAt(0).toUpperCase() + category.slice(1).replace('&', ' & '),
+              buildings: buildings
+            });
+          } else {
+            console.warn(`Failed to load buildings for ${category}: ${response.status}`);
+          }
+        } catch (error) {
+          console.error(`Error loading ${category} buildings:`, error);
+        }
+      }
+
+      console.log(`Total categories loaded: ${loadedCategories.length}`);
+      setCategories(loadedCategories);
+    } catch (error) {
+      console.error('Error loading building data:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Load building data when the menu becomes visible
   useEffect(() => {
     if (!visible) return;
-
-    const loadBuildingData = async () => {
-      setLoading(true);
-      try {
-        // Load all building categories
-        const categoryFiles = [
-          'residential',
-          'commercial',
-          'production',
-          'infrastructure',
-          'public&government',
-          'military&defence',
-          'special'
-        ];
-
-        const loadedCategories: BuildingCategory[] = [];
-
-        for (const category of categoryFiles) {
-          try {
-            console.log(`Fetching buildings for category: ${category}`);
-            // Use the API route instead of direct file access
-            const response = await fetch(`/api/buildings/${category}`);
-            if (response.ok) {
-              const buildings = await response.json();
-              console.log(`Loaded ${buildings.length} buildings for category ${category}`);
-              
-              loadedCategories.push({
-                name: category.charAt(0).toUpperCase() + category.slice(1).replace('&', ' & '),
-                buildings: buildings
-              });
-            } else {
-              console.warn(`Failed to load buildings for ${category}: ${response.status}`);
-            }
-          } catch (error) {
-            console.error(`Error loading ${category} buildings:`, error);
-          }
-        }
-
-        console.log(`Total categories loaded: ${loadedCategories.length}`);
-        setCategories(loadedCategories);
-      } catch (error) {
-        console.error('Error loading building data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     loadBuildingData();
-  }, [visible]);
+  }, [visible, loadBuildingData]);
 
   if (!visible) return null;
 
@@ -160,6 +174,9 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
                           <div className="flex justify-between text-xs text-amber-600 mb-2">
                             <span>Tier {building.tier}</span>
                             <span>{building.size}</span>
+                            {building.assets?.thumbnail && (
+                              <span className="text-green-600">✓</span>
+                            )}
                           </div>
                           <p className="text-sm text-gray-700 mb-3">{building.shortDescription}</p>
                           <div className="flex justify-between items-center">
@@ -218,6 +235,18 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
                 <div className="bg-amber-100 p-4 rounded-lg border border-amber-200 mb-4 italic text-amber-800">
                   "{selectedBuilding.flavorText}"
                 </div>
+                
+                {/* Building thumbnail if available */}
+                {selectedBuilding.assets?.thumbnail && (
+                  <div className="mb-4 flex justify-center">
+                    <img 
+                      src={selectedBuilding.assets.thumbnail} 
+                      alt={`${selectedBuilding.name} thumbnail`}
+                      className="max-w-full h-auto rounded-lg border-2 border-amber-300 shadow-md"
+                      style={{ maxHeight: '200px' }}
+                    />
+                  </div>
+                )}
 
                 <div className="mb-4">
                   <h3 className="text-lg font-medium text-amber-700 mb-2">Description</h3>
@@ -306,11 +335,45 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
                   </button>
                   <button 
                     className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors"
-                    onClick={(e) => e.stopPropagation()}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      // Dispatch a custom event to notify other components about building selection
+                      window.dispatchEvent(new CustomEvent('buildingSelected', {
+                        detail: selectedBuilding
+                      }));
+                    }}
                   >
                     Build
                   </button>
                 </div>
+                
+                {/* 3D Model preview if available */}
+                {selectedBuilding.assets?.models?.glb && (
+                  <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                    <h3 className="text-lg font-medium text-amber-700 mb-2">3D Model Preview</h3>
+                    <p className="text-sm text-amber-600 mb-2">
+                      This building has a 3D model available for preview.
+                    </p>
+                    <button 
+                      className="w-full px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors flex items-center justify-center"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        // Dispatch event to show 3D model preview
+                        window.dispatchEvent(new CustomEvent('showBuildingModel', {
+                          detail: {
+                            modelUrl: selectedBuilding.assets.models.glb,
+                            buildingName: selectedBuilding.name
+                          }
+                        }));
+                      }}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clipRule="evenodd" />
+                      </svg>
+                      View 3D Model
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>
