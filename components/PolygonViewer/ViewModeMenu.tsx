@@ -12,6 +12,16 @@ export default function ViewModeMenu({ activeView, setActiveView }: ViewModeMenu
     return view !== 'buildings' && view !== 'land';
   };
 
+  // Detailed descriptions for each view mode
+  const viewDescriptions: Record<ViewMode, string> = {
+    'governance': 'Examine political districts, administrative boundaries, and centers of power in the Venetian Republic',
+    'markets': 'Explore commercial hubs, trading posts, and economic activity across the Venetian territories',
+    'resources': 'Survey natural resources, production centers, and material wealth of La Serenissima',
+    'transport': 'Navigate the network of canals, bridges, and maritime routes that connect the Republic',
+    'buildings': 'Explore the architectural marvels, palaces, and structures of Venezia in detail',
+    'land': 'View land ownership, property boundaries, and territorial divisions of the Republic'
+  };
+
   return (
     <div className="absolute left-2 top-1/2 transform -translate-y-1/2 z-10 bg-amber-50 rounded-lg shadow-xl p-2 flex flex-col gap-2 border-2 border-amber-600">
       <h3 className="text-amber-800 font-serif text-center text-xs font-semibold border-b border-amber-300 pb-1 px-1">
@@ -22,7 +32,7 @@ export default function ViewModeMenu({ activeView, setActiveView }: ViewModeMenu
       <IconButton 
         onClick={() => {}}
         active={false}
-        title="Governance View (Coming Soon)"
+        title={viewDescriptions.governance + " (Coming Soon)"}
         activeColor="amber"
         compact={true}
         disabled={true}
@@ -37,7 +47,7 @@ export default function ViewModeMenu({ activeView, setActiveView }: ViewModeMenu
       <IconButton 
         onClick={() => {}}
         active={false}
-        title="Markets View (Coming Soon)"
+        title={viewDescriptions.markets + " (Coming Soon)"}
         activeColor="amber"
         compact={true}
         disabled={true}
@@ -52,7 +62,7 @@ export default function ViewModeMenu({ activeView, setActiveView }: ViewModeMenu
       <IconButton 
         onClick={() => {}}
         active={false}
-        title="Resources View (Coming Soon)"
+        title={viewDescriptions.resources + " (Coming Soon)"}
         activeColor="amber"
         compact={true}
         disabled={true}
@@ -68,7 +78,7 @@ export default function ViewModeMenu({ activeView, setActiveView }: ViewModeMenu
       <IconButton 
         onClick={() => {}}
         active={false}
-        title="Transport View (Coming Soon)"
+        title={viewDescriptions.transport + " (Coming Soon)"}
         activeColor="amber"
         compact={true}
         disabled={true}
@@ -82,7 +92,7 @@ export default function ViewModeMenu({ activeView, setActiveView }: ViewModeMenu
       <IconButton 
         onClick={() => setActiveView('buildings')}
         active={activeView === 'buildings'}
-        title="Buildings View"
+        title={viewDescriptions.buildings}
         activeColor="amber"
         compact={true}
         disabled={false}
@@ -97,7 +107,7 @@ export default function ViewModeMenu({ activeView, setActiveView }: ViewModeMenu
       <IconButton 
         onClick={() => setActiveView('land')}
         active={activeView === 'land'}
-        title="Land View"
+        title={viewDescriptions.land}
         activeColor="amber"
         compact={true}
         disabled={false}
