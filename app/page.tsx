@@ -1382,7 +1382,9 @@ export default function Home() {
         
               {/* Oath Section - Moved below the image */}
               <div className="mt-6 border-2 border-amber-600 rounded-lg p-4 bg-amber-50 w-full">
-                <h4 className="text-lg font-medium text-amber-800 mb-2">Swear Your Oath to Venice</h4>
+                <h4 className="text-lg font-medium text-amber-800 mb-2">
+                  {userProfile ? 'Confirm Your Changes' : 'Swear Your Oath to Venice'}
+                </h4>
           
                 <p className="text-sm text-amber-700 mb-4 italic">
                   "I solemnly pledge my loyalty to the Most Serene Republic of Venice, to uphold her laws, defend her interests, and increase her glory. May my family prosper under the wings of the Lion of Saint Mark."
@@ -1402,11 +1404,22 @@ export default function Home() {
                     <path d="M2 2l8 8" />
                     <path d="M20 2l-8 8" />
                   </svg>
-                  Sign and Seal Your Oath
+                  {userProfile ? 'Update Your Noble Identity' : 'Sign and Seal Your Oath'}
                 </button>
           
+                {userProfile && (
+                  <button
+                    onClick={() => setShowUsernamePrompt(false)}
+                    className="w-full mt-2 px-6 py-2 bg-gray-300 text-gray-700 rounded-lg transition-colors font-medium hover:bg-gray-400"
+                  >
+                    Cancel
+                  </button>
+                )}
+          
                 <p className="mt-3 text-xs text-center text-amber-600">
-                  By signing this oath, you will be granted the rights and privileges of a Venetian noble, including the ability to own property and conduct trade within the Republic.
+                  {userProfile 
+                    ? 'Your updated information will be recorded in the official registers of Venice.'
+                    : 'By signing this oath, you will be granted the rights and privileges of a Venetian noble, including the ability to own property and conduct trade within the Republic.'}
                 </p>
               </div>
             </div>
