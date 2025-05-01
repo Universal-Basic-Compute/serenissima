@@ -406,78 +406,35 @@ export default class PolygonRenderer {
     this.updateCoatOfArmsSprites();
   }
   
-  // Add a new method to create a colored circle sprite
-  private createColoredCircleSprite(polygon: Polygon, color: string) {
-    // Create a canvas
-    const canvas = document.createElement('canvas');
-    const size = 256; // Larger canvas for better quality
-    canvas.width = size;
-    canvas.height = size;
-    
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    
-    // Draw a colored circle with border
-    ctx.beginPath();
-    ctx.arc(size/2, size/2, size/2 - 8, 0, Math.PI * 2);
-    ctx.fillStyle = color;
-    ctx.fill();
-    ctx.strokeStyle = '#FFFFFF';
-    ctx.lineWidth = 8;
-    ctx.stroke();
-    
-    // Create a texture from the canvas
-    const texture = new THREE.Texture(canvas);
-    texture.needsUpdate = true;
-    
-    // Create a sprite material
-    const material = new THREE.SpriteMaterial({ 
-      map: texture,
-      transparent: true,
-      depthTest: true,
-      depthWrite: true,
-      sizeAttenuation: true
-    });
-    
-    const sprite = new THREE.Sprite(material);
-    
-    // Position at the centroid
-    const normalizedCoords = normalizeCoordinates(
-      [polygon.centroid],
-      this.bounds.centerLat,
-      this.bounds.centerLng,
-      this.bounds.scale,
-      this.bounds.latCorrectionFactor
-    )[0];
-    
-    // Position higher above the land
-    sprite.position.set(normalizedCoords.x, 0.5, -normalizedCoords.y);
-    
-    // Make sprites larger
-    sprite.scale.set(4, 4, 1);
-    
-    // Add to scene and store reference
-    this.scene.add(sprite);
-    this.coatOfArmSprites[polygon.id] = sprite;
-  }
+  // This method is replaced by createColoredCircleOnLand
 
-  // Create and update coat of arms sprites with texture caching
+  // Create and update coat of arms as flat textures on the land
   private updateCoatOfArmsSprites() {
-    console.log('Updating coat of arms sprites, active view:', this.activeView);
+    console.log('Updating coat of arms textures, active view:', this.activeView);
     console.log('Owner coat of arms map has', Object.keys(this.ownerCoatOfArmsMap).length, 'entries');
     console.log('Users data has', Object.keys(this.users).length, 'entries');
     
-    // Remove existing sprites
-    Object.values(this.coatOfArmSprites).forEach(sprite => {
-      this.scene.remove(sprite);
-      (sprite.material as THREE.SpriteMaterial).map?.dispose();
-      (sprite.material as THREE.SpriteMaterial).dispose();
+    // Remove existing coat of arms objects
+    Object.values(this.coatOfArmSprites).forEach(obj => {
+      this.scene.remove(obj);
+      if (obj.geometry) obj.geometry.dispose();
+      if (obj.material) {
+        if (Array.isArray(obj.material)) {
+          obj.material.forEach(mat => {
+            if (mat.map) mat.map.dispose();
+            mat.dispose();
+          });
+        } else {
+          if (obj.material.map) obj.material.map.dispose();
+          obj.material.dispose();
+        }
+      }
     });
     this.coatOfArmSprites = {};
 
-    // Only create sprites if we're in land view
+    // Only create coat of arms if we're in land view
     if (this.activeView !== 'land') {
-      console.log('Not in land view, skipping coat of arms sprites');
+      console.log('Not in land view, skipping coat of arms textures');
       return;
     }
 
@@ -495,8 +452,8 @@ export default class PolygonRenderer {
       }
       
       if (!coatOfArmsUrl) {
-        // Create a colored circle sprite as fallback
-        this.createColoredCircleSprite(polygon, ownerColor);
+        // Create a colored circle texture on the land as fallback
+        this.createColoredCircleOnLand(polygon, ownerColor);
         return;
       }
       
@@ -504,16 +461,20 @@ export default class PolygonRenderer {
       this.textureLoader.load(
         coatOfArmsUrl,
         (texture) => {
-          // Create sprite with the texture directly (no circular masking)
-          const material = new THREE.SpriteMaterial({ 
+          // Create a flat plane for the coat of arms
+          const planeSize = 4; // Size of the plane
+          const geometry = new THREE.PlaneGeometry(planeSize, planeSize);
+          
+          // Create material with the texture
+          const material = new THREE.MeshBasicMaterial({ 
             map: texture,
             transparent: true,
-            depthTest: true,
-            depthWrite: true,
-            sizeAttenuation: true
+            side: THREE.DoubleSide,
+            depthWrite: true
           });
           
-          const sprite = new THREE.Sprite(material);
+          // Create mesh
+          const plane = new THREE.Mesh(geometry, material);
           
           // Position at the centroid
           const normalizedCoords = normalizeCoordinates(
@@ -524,40 +485,45 @@ export default class PolygonRenderer {
             this.bounds.latCorrectionFactor
           )[0];
           
-          // Position higher above the land to ensure visibility
-          sprite.position.set(normalizedCoords.x, 0.5, -normalizedCoords.y);
+          // Position slightly above the land to avoid z-fighting
+          plane.position.set(normalizedCoords.x, 0.05, -normalizedCoords.y);
           
-          // Make sprites larger
-          sprite.scale.set(4, 4, 1);
+          // Rotate to lay flat on the ground (90 degrees around X axis)
+          plane.rotation.x = -Math.PI / 2;
           
           // Add to scene and store reference
-          this.scene.add(sprite);
-          this.coatOfArmSprites[polygon.id] = sprite;
+          this.scene.add(plane);
+          this.coatOfArmSprites[polygon.id] = plane;
           
-          console.log(`Added coat of arms sprite for ${polygon.id} at position:`, 
-            normalizedCoords.x, 0.5, -normalizedCoords.y);
+          console.log(`Added flat coat of arms for ${polygon.id} at position:`, 
+            normalizedCoords.x, 0.05, -normalizedCoords.y);
         },
         undefined,
         (error) => {
           console.error(`Error loading texture for ${polygon.owner}:`, error);
           // Create a colored circle as fallback
-          this.createColoredCircleSprite(polygon, ownerColor);
+          this.createColoredCircleOnLand(polygon, ownerColor);
         }
       );
     });
   }
 
-  // Add this helper method to create a sprite for a polygon
-  private createSpriteForPolygon(polygon: Polygon, texture: THREE.Texture) {
-    const material = new THREE.SpriteMaterial({ 
-      map: texture, // The texture should already be circular at this point
+  // Add this helper method to create a flat texture on the land for a polygon
+  private createFlatTextureForPolygon(polygon: Polygon, texture: THREE.Texture) {
+    // Create a flat plane for the coat of arms
+    const planeSize = 4; // Size of the plane
+    const geometry = new THREE.PlaneGeometry(planeSize, planeSize);
+    
+    // Create material with the texture
+    const material = new THREE.MeshBasicMaterial({ 
+      map: texture,
       transparent: true,
-      depthTest: true, // Changed to true for proper depth sorting
-      depthWrite: true,
-      sizeAttenuation: true
+      side: THREE.DoubleSide,
+      depthWrite: true
     });
     
-    const sprite = new THREE.Sprite(material);
+    // Create mesh
+    const plane = new THREE.Mesh(geometry, material);
     
     // Position at the centroid
     const normalizedCoords = normalizeCoordinates(
@@ -568,18 +534,18 @@ export default class PolygonRenderer {
       this.bounds.latCorrectionFactor
     )[0];
     
-    // Position higher above the land to avoid z-fighting and ensure visibility
-    sprite.position.set(normalizedCoords.x, 0.5, -normalizedCoords.y);
-  
-    // Make sprites larger for better visibility
-    sprite.scale.set(4, 4, 1);
-  
-    // Add to scene and store reference
-    this.scene.add(sprite);
-    this.coatOfArmSprites[polygon.id] = sprite;
+    // Position slightly above the land to avoid z-fighting
+    plane.position.set(normalizedCoords.x, 0.05, -normalizedCoords.y);
     
-    console.log(`Added coat of arms sprite for ${polygon.id} owned by ${polygon.owner} at position:`, 
-      normalizedCoords.x, 0.5, -normalizedCoords.y);
+    // Rotate to lay flat on the ground (90 degrees around X axis)
+    plane.rotation.x = -Math.PI / 2;
+    
+    // Add to scene and store reference
+    this.scene.add(plane);
+    this.coatOfArmSprites[polygon.id] = plane;
+    
+    console.log(`Added flat coat of arms for ${polygon.id} owned by ${polygon.owner} at position:`, 
+      normalizedCoords.x, 0.05, -normalizedCoords.y);
   }
   
   // Add helper function to create a circular texture
@@ -737,11 +703,21 @@ export default class PolygonRenderer {
       lodPolygon.cleanup();
     });
     
-    // Clean up coat of arms sprites
-    Object.values(this.coatOfArmSprites).forEach(sprite => {
-      this.scene.remove(sprite);
-      sprite.material.dispose();
-      (sprite.material as THREE.SpriteMaterial).map?.dispose();
+    // Clean up coat of arms objects (planes or sprites)
+    Object.values(this.coatOfArmSprites).forEach(obj => {
+      this.scene.remove(obj);
+      if (obj.geometry) obj.geometry.dispose();
+      if (obj.material) {
+        if (Array.isArray(obj.material)) {
+          obj.material.forEach(mat => {
+            if (mat.map) mat.map.dispose();
+            mat.dispose();
+          });
+        } else {
+          if (obj.material.map) obj.material.map.dispose();
+          obj.material.dispose();
+        }
+      }
     });
     this.coatOfArmSprites = {};
     
