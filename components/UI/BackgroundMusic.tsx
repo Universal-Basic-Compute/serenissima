@@ -217,10 +217,12 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
       {/* Hidden audio element */}
       <audio ref={audioRef} />
       
-      {/* Music control button - make it smaller */}
+      {/* Music control button - make it smaller and more elegant */}
       <button 
         onClick={() => setShowControls(!showControls)}
-        className={`bg-amber-700 text-white p-2 rounded-full shadow-lg hover:bg-amber-800 transition-colors ${!isPlaying && currentTrack ? 'animate-pulse' : ''}`}
+        className={`bg-amber-700 text-white p-2 rounded-full shadow-lg hover:bg-amber-800 transition-colors ${
+          !isPlaying && currentTrack ? 'opacity-80' : ''
+        }`}
         title={isPlaying ? "Music Controls" : "Click to Play Music"}
       >
         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -228,9 +230,9 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
         </svg>
       </button>
       
-      {/* Expanded controls - adjust position to appear below the smaller button */}
+      {/* Expanded controls - position to the left instead of below */}
       {showControls && (
-        <div className="absolute top-10 right-0 bg-amber-50 p-4 rounded-lg shadow-xl border-2 border-amber-300 w-64 z-50">
+        <div className="absolute top-0 right-10 bg-amber-50 p-4 rounded-lg shadow-xl border-2 border-amber-300 w-64 z-50">
           <div className="flex flex-col space-y-3">
             <div className="text-center font-medium text-amber-800 mb-1">
               {isLoading ? 'Loading music...' : formatTrackName(currentTrack)}
