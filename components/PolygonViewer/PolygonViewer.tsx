@@ -109,7 +109,7 @@ export default function PolygonViewer() {
     
     const renderer = new THREE.WebGLRenderer({ 
       canvas: canvasRef.current,
-      antialias: !performanceMode // Disable antialiasing in performance mode
+      antialias: true // Always enable antialiasing for better visual quality
     });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(performanceMode ? 1 : (window.devicePixelRatio > 1 ? 2 : 1)); // Lower pixel ratio in performance mode
