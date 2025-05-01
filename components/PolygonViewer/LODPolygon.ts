@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { Polygon, ViewMode } from './types';
 import { normalizeCoordinates, createPolygonShape } from './utils';
 
-export class LODPolygon {
+class LODPolygon {
   private scene: THREE.Scene;
   private polygon: Polygon;
   private bounds: any;
@@ -876,4 +876,6 @@ export class LODPolygon {
     this.highDetailMesh.geometry = newGeometry;
   }
 }
+
+export default LODPolygon;
 
