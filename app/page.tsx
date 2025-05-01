@@ -682,7 +682,7 @@ export default function Home() {
         loadPolygonsOnMap();
       } else {
         // If map or Google Maps API isn't ready yet, check again in a moment
-        console.log('Map or Google Maps API not ready yet, waiting...');
+        // Map or Google Maps API not ready yet, waiting...
         setTimeout(loadPolygonsWhenReady, 500);
       }
     };

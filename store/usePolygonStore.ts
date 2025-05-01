@@ -41,16 +41,6 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
   // Make hover a no-op function
   setHoveredPolygonId: () => {},
   setSelectedPolygonId: (id) => {
-    console.log('setSelectedPolygonId called with:', id);
-    
-    // If we have access to the camera, log its position
-    if (typeof window !== 'undefined' && (window as any).threeJsCamera) {
-      console.log('Camera position in setSelectedPolygonId:', {
-        position: (window as any).threeJsCamera.position.clone(),
-        quaternion: (window as any).threeJsCamera.quaternion.clone()
-      });
-    }
-    
     // Use a function form of set to ensure we're not causing unnecessary rerenders
     set(state => {
       // Only update if the ID actually changed

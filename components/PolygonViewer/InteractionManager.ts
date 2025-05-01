@@ -78,12 +78,6 @@ export default class InteractionManager {
   }
   
   private onMouseClick(event: MouseEvent) {
-    // Log camera position before click processing
-    console.log('Camera position BEFORE click:', {
-      position: this.camera.position.clone(),
-      quaternion: this.camera.quaternion.clone()
-    });
-    
     // Prevent processing if already handling a click
     if (this.isProcessingClick) return;
     
@@ -129,22 +123,10 @@ export default class InteractionManager {
           // Otherwise, always select the new polygon
           const newSelectedId = clickedId === this.selectedPolygonId ? null : clickedId;
           
-          // Log camera position before state update
-          console.log('Camera position BEFORE state update:', {
-            position: this.camera.position.clone(),
-            quaternion: this.camera.quaternion.clone()
-          });
-          
           // Update selection state directly without setTimeout
           // This avoids unnecessary re-renders
           this.setSelectedPolygonId(newSelectedId);
           this.selectedPolygonId = newSelectedId;
-          
-          // Log camera position after state update
-          console.log('Camera position AFTER state update:', {
-            position: this.camera.position.clone(),
-            quaternion: this.camera.quaternion.clone()
-          });
           
           this.isProcessingClick = false;
           return;
@@ -153,21 +135,9 @@ export default class InteractionManager {
       
       // Clicking on empty space, deselect current selection
       if (this.selectedPolygonId) {
-        // Log camera position before deselection
-        console.log('Camera position BEFORE deselection:', {
-          position: this.camera.position.clone(),
-          quaternion: this.camera.quaternion.clone()
-        });
-        
         // Update selection state directly without setTimeout
         this.setSelectedPolygonId(null);
         this.selectedPolygonId = null;
-        
-        // Log camera position after deselection
-        console.log('Camera position AFTER deselection:', {
-          position: this.camera.position.clone(),
-          quaternion: this.camera.quaternion.clone()
-        });
         
         this.isProcessingClick = false;
         return;
@@ -179,12 +149,6 @@ export default class InteractionManager {
       console.error("Error in polygon interaction:", error);
       this.isProcessingClick = false;
     }
-    
-    // Log camera position after click processing
-    console.log('Camera position AFTER click:', {
-      position: this.camera.position.clone(),
-      quaternion: this.camera.quaternion.clone()
-    });
   }
   
   public updateViewMode(activeView: ViewMode) {
