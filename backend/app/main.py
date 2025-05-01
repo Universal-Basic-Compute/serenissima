@@ -892,7 +892,7 @@ async def generate_coat_of_arms(data: dict):
     
     try:
         # Create a prompt for the image generation
-        prompt = f"Create a detailed 15th century Venetian coat of arms with these elements: {data['description']}. Style: historical, realistic, detailed heraldry, Renaissance Venetian style, gold leaf accents, rich colors."
+        prompt = f"Create a perfectly centered heraldic asset of a detailed 15th century Venetian coat of arms with these elements: {data['description']}. The coat of arms should be centered in the frame with proper proportions. Style: historical, realistic, detailed heraldry, Renaissance Venetian style, gold leaf accents, rich colors. The image should be a clean, professional asset with the coat of arms as the central focus, not a photograph. Include a decorative shield shape with the heraldic elements properly arranged within it."
         
         # Call the Ideogram API with the correct endpoint and parameters
         response = requests.post(
