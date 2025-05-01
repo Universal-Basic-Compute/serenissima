@@ -96,15 +96,17 @@ export default class InteractionManager {
     this.raycaster.setFromCamera(this.mouse, this.camera);
     
     // Get objects intersecting the ray
-    const intersects = this.raycaster.intersectObjects(this.scene.children, false);
+    const intersects = this.raycaster.intersectObjects(Object.values(this.polygonMeshesRef.current), true);
     
     // Check if we're hovering over a polygon
     if (intersects.length > 0) {
-      const object = intersects[0].object;
+      // Find the first intersected object that is a polygon mesh
+      const intersectedObject = intersects[0].object;
       
       // Find the polygon ID from our ref
       const hoveredId = Object.keys(this.polygonMeshesRef.current).find(
-        id => this.polygonMeshesRef.current[id] === object
+        id => this.polygonMeshesRef.current[id] === intersectedObject || 
+             (intersectedObject.parent && this.polygonMeshesRef.current[id] === intersectedObject.parent)
       );
       
       if (hoveredId && this.hoveredPolygonId !== hoveredId) {

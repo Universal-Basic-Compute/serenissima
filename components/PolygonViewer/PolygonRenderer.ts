@@ -757,6 +757,8 @@ export default class PolygonRenderer {
   
   // Add method to update hover state
   public updateHoverState(hoveredPolygonId: string | null) {
+    console.log('Updating hover state for polygon:', hoveredPolygonId);
+    
     // Update hover state for all LOD polygons
     this.lodPolygons.forEach(lodPolygon => {
       const polygonId = this.polygons.find(

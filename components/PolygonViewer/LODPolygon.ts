@@ -469,15 +469,15 @@ export default class LODPolygon {
       if (this.activeView === 'land') {
         // Enhance the color to create a glow effect
         material.emissive.copy(material.color);
-        material.emissiveIntensity = 0.5;
+        material.emissiveIntensity = 0.7; // Increase from 0.5 to 0.7 for more noticeable glow
         
         // Add a slight bloom effect by increasing the brightness
         const color = material.color.clone();
-        color.multiplyScalar(1.3); // Make it brighter
+        color.multiplyScalar(1.5); // Increase from 1.3 to 1.5 for brighter effect
         material.color.copy(color);
         
         // Reduce roughness for a more shiny appearance
-        material.roughness = 0.3;
+        material.roughness = 0.2; // Decrease from 0.3 to 0.2 for more shine
         
         // Update material
         material.needsUpdate = true;
