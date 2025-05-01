@@ -141,7 +141,7 @@ export default class LODPolygon {
     // Create extruded geometry with enhanced settings for better quality
     const extrudeSettings = {
       steps: 1, // Reduce steps to prevent shadow artifacts
-      depth: 0.05, // Consistent depth without random variation
+      depth: 0.03, // Reduced depth to minimize shadow effect
       bevelEnabled: false, // Disable bevels to prevent shadow artifacts
       UVGenerator: { // Add a custom UV generator for better texture mapping
         generateTopUV: function(geometry, vertices, indexA, indexB, indexC) {
@@ -181,10 +181,11 @@ export default class LODPolygon {
     const landColor = this.determineLandColor();
     
     // Create a material that explicitly doesn't cast shadows
-    // CRITICAL CHANGE: Use MeshBasicMaterial instead of MeshStandardMaterial
+    // Use MeshBasicMaterial which doesn't interact with lights or shadows
     const material = new THREE.MeshBasicMaterial({ 
       color: landColor,
       side: THREE.FrontSide, // Only render front side
+      shadowSide: THREE.FrontSide, // Explicitly set shadowSide
       // Remove all shadow-related properties
       transparent: false,
       opacity: 1.0
@@ -195,6 +196,7 @@ export default class LODPolygon {
     // IMPORTANT: Disable shadows completely
     this.highDetailMesh.castShadow = false;
     this.highDetailMesh.receiveShadow = false;
+    this.highDetailMesh.renderOrder = 1; // Ensure land renders above water
     this.highDetailMesh.userData.originalEmissive = new THREE.Color(0, 0, 0);
     this.highDetailMesh.userData.originalEmissiveIntensity = 0;
     this.highDetailMesh.userData.isLowDetail = false;
@@ -638,7 +640,8 @@ export default class LODPolygon {
       const normal = new THREE.Vector3().crossVectors(ab, ac).normalize();
       
       // If the normal points downward (y component is negative), don't keep this face
-      keepFace[i] = normal.y >= -0.1; // Allow slightly downward-facing faces
+      // Be more aggressive in removing downward-facing faces
+      keepFace[i] = normal.y >= 0; // Only keep faces that point upward or horizontally
     }
     
     // Create a new index array that only includes the faces we want to keep

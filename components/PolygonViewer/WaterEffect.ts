@@ -170,7 +170,8 @@ export default class WaterEffect {
     // Create the water mesh
     this.water = new Water(this.waterGeometry, waterOptions);
     this.water.rotation.x = -Math.PI / 2;
-    this.water.position.y = -0.2; // Lower water level to avoid z-fighting with land
+    this.water.position.y = -0.3; // Lower water level further to avoid shadow effects
+    this.water.renderOrder = 0; // Ensure water renders below land
     
     // Add the water to the scene
     this.scene.add(this.water);

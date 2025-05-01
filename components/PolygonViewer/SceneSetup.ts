@@ -47,11 +47,13 @@ export default class SceneSetup {
       antialias: false, // Start without antialiasing for faster initial render
       powerPreference: 'high-performance',
       precision: this.performanceMode ? 'mediump' : 'highp', // Lower precision in performance mode
-      logarithmicDepthBuffer: false // Disable for better performance
+      logarithmicDepthBuffer: false, // Disable for better performance
+      shadowMapEnabled: false // Explicitly disable shadow maps at creation
     });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.setPixelRatio(1); // Start with lowest pixel ratio
     this.renderer.shadowMap.enabled = false; // Disable shadows completely
+    this.renderer.shadowMap.autoUpdate = false; // Explicitly disable shadow map updates
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     
     // Set up a simple EffectComposer initially
@@ -69,12 +71,14 @@ export default class SceneSetup {
         this.renderer.antialias = true;
         this.renderer.setPixelRatio(window.devicePixelRatio > 1 ? 2 : 1);
         this.renderer.shadowMap.enabled = false; // Keep shadows disabled even in high quality mode
+        this.renderer.shadowMap.autoUpdate = false; // Explicitly disable shadow map updates
         this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
         this.renderer.toneMappingExposure = 1.2;
       } else {
         // Keep minimal settings in performance mode
         this.renderer.setPixelRatio(1);
         this.renderer.shadowMap.enabled = false;
+        this.renderer.shadowMap.autoUpdate = false; // Explicitly disable shadow map updates
         this.renderer.toneMapping = THREE.NoToneMapping;
       }
     }, 2000); // Delay enhancement by 2 seconds
@@ -153,6 +157,8 @@ export default class SceneSetup {
     this.sunLight = new THREE.DirectionalLight(0xffffcc, 1.8);
     this.sunLight.position.set(50, 100, 50);
     this.sunLight.castShadow = false; // Ensure shadows are completely disabled
+    this.sunLight.shadow.autoUpdate = false; // Explicitly disable shadow updates
+    this.sunLight.shadow.needsUpdate = false; // Ensure shadows never update
     
     // Create a sun sphere for visual effect
     const sunGeometry = new THREE.SphereGeometry(5, 16, 16);
