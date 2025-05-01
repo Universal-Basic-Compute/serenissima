@@ -65,7 +65,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
         <div className="space-y-4">
           {/* Owner information - always show this section */}
           <div>
-            <h3 className="text-sm font-medium text-gray-500">Architect</h3>
+            <h3 className="text-sm font-medium text-gray-500">Owner</h3>
             <p className="mt-1 font-semibold">
               {owner ? owner : 'Available'}
             </p>
