@@ -3,13 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { PhantomWalletAdapter } from '@solana/wallet-adapter-phantom';
 import { WalletReadyState } from '@solana/wallet-adapter-base';
-import dynamic from 'next/dynamic';
 import { GoogleMap, LoadScript, DrawingManager } from '@react-google-maps/api';
-
-// Import PolygonViewer with no SSR to avoid hydration issues
-const PolygonViewer = dynamic(() => import('../components/PolygonViewer/PolygonViewer'), {
-  ssr: false
-});
 
 // Venice coordinates
 const center = {
@@ -35,7 +29,7 @@ const polygonOptions = {
 // Libraries we need to load
 const libraries = ['drawing', 'geometry'];
 
-export default function Home() {
+export default function MapPage() {
   // State for wallet connection
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [walletAdapter, setWalletAdapter] = useState<PhantomWalletAdapter | null>(null);
@@ -171,7 +165,7 @@ export default function Home() {
     }
   }, [walletAdapter]);
 
-  if (!apiKey && walletAddress) {
+  if (!apiKey) {
     return <div className="w-screen h-screen flex items-center justify-center">
       <p>Google Maps API key is missing. Please add it to your .env.local file.</p>
     </div>;
@@ -467,13 +461,6 @@ export default function Home() {
 
   return (
     <div className="relative w-screen h-screen">
-      {/* View Map button */}
-      <a 
-        href="/map"
-        className="absolute top-4 left-4 z-10 bg-white px-4 py-2 rounded shadow hover:bg-blue-100 transition-colors"
-      >
-        View Map
-      </a>
       {/* Wallet button/dropdown */}
       {walletAddress ? (
         <div className="absolute top-4 right-4 z-10" ref={dropdownRef}>
@@ -531,6 +518,14 @@ export default function Home() {
         </button>
       )}
       
+      {/* Back to 3D View button */}
+      <a 
+        href="/"
+        className="absolute top-4 left-4 z-10 bg-white px-4 py-2 rounded shadow hover:bg-blue-100 transition-colors"
+      >
+        Back to 3D View
+      </a>
+      
       {/* Bridge mode button */}
       {isGoogleLoaded && (
         <div className="absolute bottom-4 left-4 z-10">
@@ -545,8 +540,27 @@ export default function Home() {
         </div>
       )}
       
-      {/* Always show the 3D Polygon Viewer regardless of wallet connection status */}
-      <PolygonViewer />
+      {/* Google Maps */}
+      <LoadScript
+        googleMapsApiKey={apiKey}
+        libraries={libraries}
+        onLoad={handleScriptLoad}
+      >
+        <GoogleMap
+          mapContainerStyle={mapContainerStyle}
+          center={center}
+          zoom={15}
+          onLoad={onMapLoad}
+        >
+          {isGoogleLoaded && (
+            <DrawingManager
+              onLoad={onDrawingManagerLoad}
+              onPolygonComplete={onPolygonComplete}
+              options={drawingManagerOptions}
+            />
+          )}
+        </GoogleMap>
+      </LoadScript>
     </div>
   );
 }
