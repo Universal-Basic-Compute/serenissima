@@ -131,37 +131,36 @@ class PolygonMesh {
         wireframe: false,
         transparent: false,
         opacity: 1.0,
-        polygonOffset: true,
-        polygonOffsetFactor: 5,
-        polygonOffsetUnits: 5,
+        // Removed polygon offset properties that can create borders
         depthTest: true,
         depthWrite: true
       });
       
-      // Load sand texture if not in performance mode
-      if (!this.performanceMode) {
-        this.textureLoader.load(
-          '/textures/sand.jpg',
-          (texture) => {
-            if (texture && material) {
-              texture.wrapS = THREE.RepeatWrapping;
-              texture.wrapT = THREE.RepeatWrapping;
-              texture.repeat.set(5, 5);
-              material.map = texture;
-              material.needsUpdate = true;
-            }
-          },
-          undefined,
-          (error) => {
-            console.error('Error loading sand texture:', error);
+      // Always load sand texture regardless of performance mode
+      this.textureLoader.load(
+        '/textures/sand.jpg',
+        (texture) => {
+          if (texture && material) {
+            texture.wrapS = THREE.RepeatWrapping;
+            texture.wrapT = THREE.RepeatWrapping;
+            texture.repeat.set(5, 5);
+            material.map = texture;
+            material.needsUpdate = true;
           }
-        );
-      }
+        },
+        undefined,
+        (error) => {
+          console.error('Error loading sand texture:', error);
+        }
+      );
       
       this.mesh = new THREE.Mesh(geometry, material);
       this.mesh.castShadow = false;
       this.mesh.receiveShadow = false;
       this.mesh.renderOrder = 1;
+      
+      // Explicitly ensure shadows are disabled
+      this.mesh.userData.disableShadows = true;
       
       // Remove bottom faces
       this.removeBottomFaces(geometry);
@@ -384,11 +383,9 @@ class PolygonMesh {
     
     if (!material) return;
     
-    // In performance mode, remove textures
-    if (performanceMode) {
-      material.map = null;
-    } else {
-      // Load texture in high quality mode
+    // Always keep the texture, even in performance mode
+    if (!material.map) {
+      // Load texture if it's not already loaded
       this.textureLoader.load(
         '/textures/sand.jpg',
         (texture) => {
