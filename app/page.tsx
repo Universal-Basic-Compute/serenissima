@@ -39,6 +39,8 @@ export default function Home() {
   // State for wallet connection
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [walletAdapter, setWalletAdapter] = useState<PhantomWalletAdapter | null>(null);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   
   // Get API key from environment variable
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '';
@@ -62,6 +64,20 @@ export default function Home() {
       if (adapter) {
         adapter.disconnect();
       }
+    };
+  }, []);
+  
+  // Add effect to handle clicking outside the dropdown to close it
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setDropdownOpen(false);
+      }
+    }
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
 
@@ -204,14 +220,42 @@ export default function Home() {
 
   return (
     <div className="relative w-screen h-screen">
-      {/* Wallet button */}
+      {/* Wallet button/dropdown */}
       {walletAddress ? (
-        <button 
-          onClick={() => alert('Investing compute resources...')}
-          className="absolute top-4 right-4 z-10 bg-blue-500 text-white px-4 py-2 rounded shadow hover:bg-blue-600 transition-colors"
-        >
-          Invest Compute
-        </button>
+        <div className="absolute top-4 right-4 z-10" ref={dropdownRef}>
+          <button 
+            onClick={() => setDropdownOpen(!dropdownOpen)}
+            className="bg-white px-4 py-2 rounded shadow hover:bg-gray-100 transition-colors flex items-center"
+          >
+            <span className="mr-2">{walletAddress.slice(0, 4)}...{walletAddress.slice(-4)}</span>
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          
+          {dropdownOpen && (
+            <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-20">
+              <button
+                onClick={() => {
+                  alert('Investing compute resources...');
+                  setDropdownOpen(false);
+                }}
+                className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-blue-500 hover:text-white transition-colors"
+              >
+                Invest Compute
+              </button>
+              <button
+                onClick={() => {
+                  connectWallet();
+                  setDropdownOpen(false);
+                }}
+                className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-red-500 hover:text-white transition-colors"
+              >
+                Disconnect
+              </button>
+            </div>
+          )}
+        </div>
       ) : (
         <button 
           onClick={connectWallet}
