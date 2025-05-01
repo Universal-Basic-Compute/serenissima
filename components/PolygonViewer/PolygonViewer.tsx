@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react';
 import * as THREE from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
 export default function PolygonViewer() {
   const canvasRef = useRef(null);
@@ -98,10 +99,8 @@ export default function PolygonViewer() {
       1000
     );
     
-    // Position camera above the scene looking down at an angle
+    // Initial camera position - higher up and further back for a good overview
     camera.position.set(0, 80, 80);
-    camera.up.set(0, 1, 0); // Ensure "up" is the Y axis
-    camera.lookAt(0, 0, 0);
     
     const renderer = new THREE.WebGLRenderer({ 
       canvas: canvasRef.current,
@@ -114,6 +113,35 @@ export default function PolygonViewer() {
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.2;
     renderer.outputColorSpace = THREE.SRGBColorSpace;
+    
+    // Set up OrbitControls
+    const controls = new OrbitControls(camera, renderer.domElement);
+    
+    // Configure controls for this specific application
+    controls.enableDamping = true; // Add smooth inertia
+    controls.dampingFactor = 0.1; // Amount of inertia
+    
+    // Limit vertical rotation to prevent going under the map
+    controls.minPolarAngle = 0; // Can't go below the horizon
+    controls.maxPolarAngle = Math.PI / 2 - 0.1; // Can't go below the horizon (with small margin)
+    
+    // Limit zoom range
+    controls.minDistance = 10; // Can't zoom in too close
+    controls.maxDistance = 300; // Can't zoom out too far
+    
+    // Enable panning with right mouse button
+    controls.mouseButtons = {
+      LEFT: THREE.MOUSE.ROTATE,
+      MIDDLE: THREE.MOUSE.DOLLY,
+      RIGHT: THREE.MOUSE.PAN
+    };
+    
+    // Make panning parallel to the ground plane
+    controls.screenSpacePanning = false;
+    
+    // Set initial target to center of scene
+    controls.target.set(0, 0, 0);
+    controls.update();
     
     // Create textures
     const textureLoader = new THREE.TextureLoader();
@@ -376,173 +404,36 @@ export default function PolygonViewer() {
       console.log('Added sample polygon to scene');
     }
     
-    // Don't rotate the scene at all initially
-    scene.rotation.x = 0;
-    scene.rotation.y = 0;
-    scene.rotation.z = 0;
-    
-    // Track mouse state
-    let isDragging = false;
-    let isRightDragging = false; // Track right mouse button for panning
-    let previousMousePosition = { x: 0, y: 0 };
-    // Calculate initial spherical coordinates correctly
-    let cameraRadius = Math.sqrt(camera.position.x**2 + camera.position.y**2 + camera.position.z**2);
-    // Use correct calculation for theta - this was the main issue
-    let cameraTheta = Math.atan2(camera.position.z, camera.position.x);
-    // Use correct calculation for phi
-    let cameraPhi = Math.acos(camera.position.y / cameraRadius);
-    // Track scene offset for panning
-    let sceneOffsetX = 0;
-    let sceneOffsetZ = 0;
-
-    const handleMouseDown = (event) => {
-      // Clear both flags first to avoid any overlap
-      isDragging = false;
-      isRightDragging = false;
-      
-      if (event.button === 0) { // Left mouse button
-        isDragging = true;
-      } else if (event.button === 2) { // Right mouse button
-        isRightDragging = true;
-      }
-      
-      previousMousePosition = {
-        x: event.clientX,
-        y: event.clientY
-      };
-    };
-
-    const handleMouseMove = (event) => {
-      // Exit early if no buttons are pressed
-      if (!isDragging && !isRightDragging) return;
-      
-      const deltaMove = {
-        x: event.clientX - previousMousePosition.x,
-        y: event.clientY - previousMousePosition.y
-      };
-      
-      // Ensure we're only doing one operation at a time
-      if (isDragging) {
-        // ROTATION ONLY - Left mouse button
-        // Update spherical coordinates based on mouse movement
-        cameraTheta -= deltaMove.x * 0.01;
-        
-        const newPhi = cameraPhi - deltaMove.y * 0.01;
-        cameraPhi = Math.max(0.1, Math.min(1.4, newPhi));
-        
-        // Convert spherical to cartesian coordinates
-        camera.position.x = cameraRadius * Math.sin(cameraPhi) * Math.cos(cameraTheta);
-        camera.position.y = cameraRadius * Math.cos(cameraPhi);
-        camera.position.z = cameraRadius * Math.sin(cameraPhi) * Math.sin(cameraTheta);
-      } 
-      else if (isRightDragging) {
-        // PANNING ONLY - Right mouse button
-        const panSpeed = 0.1;
-        
-        // Calculate direction vectors in the camera's local space
-        const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
-        const right = new THREE.Vector3(1, 0, 0).applyQuaternion(camera.quaternion);
-        
-        // Project these vectors onto the xz plane for horizontal movement
-        forward.y = 0;
-        right.y = 0;
-        forward.normalize();
-        right.normalize();
-        
-        // Calculate movement
-        const moveX = -deltaMove.x * panSpeed;
-        const moveZ = -deltaMove.y * panSpeed;
-        
-        // Update scene offset
-        sceneOffsetX += right.x * moveX + forward.x * moveZ;
-        sceneOffsetZ += right.z * moveX + forward.z * moveZ;
-        
-        // Move all objects in the scene
-        scene.position.x = sceneOffsetX;
-        scene.position.z = sceneOffsetZ;
-      }
-      
-      // Always look at the center plus offset
-      camera.lookAt(sceneOffsetX, 0, sceneOffsetZ);
-      
-      previousMousePosition = {
-        x: event.clientX,
-        y: event.clientY
-      };
-    };
-    
-    const handleMouseUp = (event) => {
-      if (event.button === 0) {
-        isDragging = false;
-      } else if (event.button === 2) {
-        isRightDragging = false;
-      }
-    };
-    
-    // Prevent context menu to allow right-click dragging
-    const handleContextMenu = (event) => {
-      event.preventDefault();
-    };
-    
-    // Add mouse wheel zoom
-    const handleWheel = (event) => {
-      event.preventDefault();
-      
-      // Adjust camera radius based on wheel direction
-      const zoomSpeed = 10;
-      const delta = event.deltaY > 0 ? 1 : -1;
-      
-      // Update radius (distance from center)
-      const newRadius = Math.max(5, Math.min(400, cameraRadius + delta * zoomSpeed));
-      
-      // Store the current camera direction before changing radius
-      const direction = new THREE.Vector3();
-      camera.getWorldDirection(direction);
-      
-      // Update radius
-      cameraRadius = newRadius;
-      
-      // Update camera position using current angles and new radius
-      camera.position.x = cameraRadius * Math.sin(cameraPhi) * Math.cos(cameraTheta);
-      camera.position.y = cameraRadius * Math.cos(cameraPhi);
-      camera.position.z = cameraRadius * Math.sin(cameraPhi) * Math.sin(cameraTheta);
-      
-      // Always look at the center plus offset
-      camera.lookAt(sceneOffsetX, 0, sceneOffsetZ);
-    };
-    
-    // Add event listeners
-    window.addEventListener('mousedown', handleMouseDown);
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
-    window.addEventListener('wheel', handleWheel, { passive: false });
-    window.addEventListener('contextmenu', handleContextMenu);
-    
     // Function to reset camera to a good viewing position
     const resetCamera = () => {
-      // Reset camera position using spherical coordinates
-      cameraRadius = 120; // Distance from center
-      cameraTheta = Math.PI / 4; // Horizontal angle (45 degrees)
-      cameraPhi = Math.PI / 4; // Vertical angle (45 degrees from vertical)
+      // Smoothly animate to the default position
+      const startPosition = camera.position.clone();
+      const startTarget = controls.target.clone();
+      const endPosition = new THREE.Vector3(0, 80, 80);
+      const endTarget = new THREE.Vector3(0, 0, 0);
       
-      // Reset scene position
-      sceneOffsetX = 0;
-      sceneOffsetZ = 0;
-      scene.position.x = 0;
-      scene.position.z = 0;
+      // Animation duration in milliseconds
+      const duration = 1000;
+      const startTime = Date.now();
       
-      // Convert to cartesian coordinates
-      camera.position.x = cameraRadius * Math.sin(cameraPhi) * Math.cos(cameraTheta);
-      camera.position.y = cameraRadius * Math.cos(cameraPhi);
-      camera.position.z = cameraRadius * Math.sin(cameraPhi) * Math.sin(cameraTheta);
+      function animateReset() {
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        
+        // Use easeOutCubic easing function for smooth deceleration
+        const easeProgress = 1 - Math.pow(1 - progress, 3);
+        
+        // Interpolate position and target
+        camera.position.lerpVectors(startPosition, endPosition, easeProgress);
+        controls.target.lerpVectors(startTarget, endTarget, easeProgress);
+        controls.update();
+        
+        if (progress < 1) {
+          requestAnimationFrame(animateReset);
+        }
+      }
       
-      // Look at center
-      camera.lookAt(0, 0, 0);
-      
-      // Reset scene rotation
-      scene.rotation.x = 0;
-      scene.rotation.y = 0;
-      scene.rotation.z = 0;
+      animateReset();
     };
     
     // Store the resetCamera function in our ref so it can be called from outside
@@ -557,6 +448,9 @@ export default function PolygonViewer() {
     // Animation loop
     const animate = () => {
       requestAnimationFrame(animate);
+      
+      // Update controls each frame for smooth damping effect
+      controls.update();
       
       // Animate water normal map with less frequent updates
       const time = Date.now() * 0.0005; // Reduced animation speed
@@ -580,9 +474,6 @@ export default function PolygonViewer() {
       
       frameCount++;
       
-      // Ensure camera is always looking at the correct position with offset
-      camera.lookAt(sceneOffsetX, 0, sceneOffsetZ);
-      
       renderer.render(scene, camera);
     };
     
@@ -599,12 +490,10 @@ export default function PolygonViewer() {
     
     // Cleanup
     return () => {
-      window.removeEventListener('mousedown', handleMouseDown);
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
-      window.removeEventListener('wheel', handleWheel);
+      // Dispose of controls
+      controls.dispose();
+      
       window.removeEventListener('resize', handleResize);
-      window.removeEventListener('contextmenu', handleContextMenu);
       
       // Make resetCamera available to the component
       if (typeof window !== 'undefined') {
