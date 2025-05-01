@@ -24,9 +24,12 @@ export default class SceneSetup {
   private sunGlow: THREE.Mesh = new THREE.Mesh();
   private cloudSystem: CloudSystem | null = null;
   private zoomThreshold: number = 40; // Changed from 70 to 40 - Threshold for showing clouds
+  public water: any = null; // Reference to water effect
+  private activeView: ViewMode;
   
   constructor({ canvas, activeView, highQuality }: SceneSetupProps) {
     this.performanceMode = !highQuality;
+    this.activeView = activeView;
     
     // Initialize scene with a light blue background
     this.scene = new THREE.Scene();
@@ -312,10 +315,24 @@ export default class SceneSetup {
     }
   }
   
+  // Add update method to handle all animations
+  public update(frameCount: number) {
+    // Update water if it exists
+    if (this.water) {
+      this.water.update(frameCount, this.performanceMode);
+    }
+    
+    // Update clouds
+    this.updateClouds(frameCount);
+  }
+  
   public updateQuality(highQuality: boolean) {
     this.performanceMode = !highQuality;
     if (this.cloudSystem) {
       this.cloudSystem.updateQuality(this.performanceMode);
+    }
+    if (this.water) {
+      this.water.updateQuality(this.performanceMode);
     }
   }
   
@@ -356,6 +373,11 @@ export default class SceneSetup {
     if (this.cloudSystem) {
       this.cloudSystem.cleanup();
       this.cloudSystem = null;
+    }
+    
+    if (this.water) {
+      this.water.cleanup();
+      this.water = null;
     }
   }
 }

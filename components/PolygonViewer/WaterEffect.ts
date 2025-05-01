@@ -548,6 +548,24 @@ export default class WaterEffect {
     }
   }
   
+  // Add method to create water
+  public createWater() {
+    if (this.water) {
+      this.water.cleanup();
+    }
+    
+    this.water = new WaterEffect({
+      scene: this.scene,
+      activeView: this.activeView,
+      performanceMode: this.performanceMode,
+      width: 300, // Make water wider than the scene
+      height: 300, // Make water taller than the scene
+      renderer: this.renderer
+    });
+    
+    console.log('Water effect created');
+  }
+  
   public update(frameCount: number, performanceMode: boolean) {
     try {
       // Skip all updates if water isn't properly initialized

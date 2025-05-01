@@ -622,9 +622,9 @@ export default function PolygonViewer() {
     initPolygonRenderer(); // Start with polygons immediately
     
     // Schedule the rest with increasing delays
-    setTimeout(initWaterEffect, 100);
-    setTimeout(initInteractionManager, 200);
-    setTimeout(initBridgeRenderer, 300);
+    setTimeout(initWaterEffect, 500); // Increased delay to ensure polygons are rendered first
+    setTimeout(initInteractionManager, 600);
+    setTimeout(initBridgeRenderer, 700);
     
     // Add a delayed update for coat of arms
     setTimeout(() => {
@@ -676,6 +676,13 @@ export default function PolygonViewer() {
         if (waterEffectRef.current) {
           try {
             waterEffectRef.current.update(frameCount, !highQuality);
+          } catch (error) {
+            // Silent fail
+          }
+        } else if (sceneRef.current && sceneRef.current.water) {
+          // Use scene's water if waterEffectRef is not available
+          try {
+            sceneRef.current.water.update(frameCount, !highQuality);
           } catch (error) {
             // Silent fail
           }
