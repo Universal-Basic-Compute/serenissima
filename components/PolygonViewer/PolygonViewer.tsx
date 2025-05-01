@@ -701,32 +701,6 @@ export default function PolygonViewer() {
       {/* Add the Land Details Panel */}
       {LandDetailsPanelMemo}
       
-      {/* Flush Cache button */}
-      <div className="absolute bottom-4 left-4 z-10">
-        <button
-          onClick={() => {
-            // Clear all cache keys
-            const cacheKeys = [
-              'polygons_cache', 'polygons_cache_timestamp',
-              'land_owners_cache', 'land_owners_cache_timestamp',
-              'users_cache', 'users_cache_timestamp'
-            ];
-            
-            cacheKeys.forEach(key => localStorage.removeItem(key));
-            
-            // Reload the data
-            loadPolygons();
-            loadLandOwners();
-            loadUsers();
-            
-            // Show a notification
-            alert('Cache flushed successfully! Reloading data...');
-          }}
-          className="px-4 py-2 rounded shadow bg-red-500 text-white hover:bg-red-600 transition-colors"
-        >
-          Flush Cache
-        </button>
-      </div>
 
       <canvas 
         ref={canvasRef} 

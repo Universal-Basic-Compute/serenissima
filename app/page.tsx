@@ -1358,13 +1358,6 @@ export default function Home() {
         />
       )}
       
-      {/* View Map button */}
-      <a 
-        href="/map"
-        className="absolute top-4 left-4 z-10 bg-white px-4 py-2 rounded shadow hover:bg-blue-100 transition-colors"
-      >
-        View Map
-      </a>
       {/* Wallet button/dropdown or User Profile */}
       {walletAddress ? (
         userProfile ? (
