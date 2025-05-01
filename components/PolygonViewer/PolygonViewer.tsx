@@ -15,6 +15,7 @@ export default function PolygonViewer() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [infoVisible, setInfoVisible] = useState(false);
   const polygonMeshesRef = useRef<Record<string, THREE.Mesh>>({});
+  const isInteractingWithPolygon = useRef(false);
   
   // Get state from store
   const {
@@ -46,6 +47,35 @@ export default function PolygonViewer() {
     if (sceneRef.current) {
       sceneRef.current.resetCamera();
     }
+  }, []);
+  
+  const handleCanvasMouseDown = useCallback((event: React.MouseEvent) => {
+    // Only apply this in land view
+    if (activeView === 'land') {
+      // Check if we're clicking/hovering on a polygon
+      const rect = canvasRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      
+      // Convert to normalized device coordinates
+      const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      const y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+      
+      // Use a simple raycaster to check if we're over a polygon
+      const raycaster = new THREE.Raycaster();
+      const mouse = new THREE.Vector2(x, y);
+      
+      if (sceneRef.current) {
+        raycaster.setFromCamera(mouse, sceneRef.current.camera);
+        const intersects = raycaster.intersectObjects(Object.values(polygonMeshesRef.current), false);
+        
+        // If we're over a polygon, set the interaction flag
+        isInteractingWithPolygon.current = intersects.length > 0;
+      }
+    }
+  }, [activeView]);
+  
+  const handleCanvasMouseUp = useCallback(() => {
+    isInteractingWithPolygon.current = false;
   }, []);
   
   // Store the resetCamera function on window for access
@@ -146,6 +176,11 @@ export default function PolygonViewer() {
     const animate = () => {
       const animationId = requestAnimationFrame(animate);
       
+      // Update controls state based on interaction flag
+      if (scene) {
+        scene.updateControlsState(isInteractingWithPolygon.current);
+      }
+      
       // Update controls each frame for smooth damping effect
       scene.controls.update();
       
@@ -228,7 +263,12 @@ export default function PolygonViewer() {
           {highQuality ? 'Performance Mode' : 'Quality Mode'}
         </ActionButton>
       </div>
-      <canvas ref={canvasRef} className="w-full h-full" />
+      <canvas 
+        ref={canvasRef} 
+        className="w-full h-full" 
+        onMouseDown={handleCanvasMouseDown}
+        onMouseUp={handleCanvasMouseUp}
+      />
     </div>
   );
 }

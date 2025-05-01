@@ -67,6 +67,11 @@ export default class SceneSetup {
     this.controls.enableDamping = !this.performanceMode;
     this.controls.dampingFactor = 0.1;
     
+    // Make controls less sensitive to prevent accidental camera resets
+    this.controls.rotateSpeed = 0.7;
+    this.controls.zoomSpeed = 0.7;
+    this.controls.panSpeed = 0.7;
+    
     // Ensure controls are explicitly enabled
     this.controls.enablePan = true;
     this.controls.enableRotate = true;
@@ -203,6 +208,16 @@ export default class SceneSetup {
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.composer.setSize(window.innerWidth, window.innerHeight);
   };
+  
+  public updateControlsState(isInteractingWithPolygon: boolean) {
+    if (isInteractingWithPolygon) {
+      // Disable controls when interacting with polygons
+      this.controls.enabled = false;
+    } else {
+      // Re-enable controls when not interacting
+      this.controls.enabled = true;
+    }
+  }
   
   public cleanup() {
     // Remove event listeners
