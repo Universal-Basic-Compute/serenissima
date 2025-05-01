@@ -159,8 +159,8 @@ class PolygonMesh {
       this.mesh.userData.noShadow = true;
       this.mesh.userData.ignoreLight = true;
       
-      // Position higher above water to avoid z-fighting
-      this.mesh.position.y = 0.15; // Increased from 0.1 to 0.15
+      // Position MUCH LOWER above water to avoid z-fighting
+      this.mesh.position.y = 0.01; // Reduced from 0.15 to 0.01
     } catch (error) {
       console.error('Error creating mesh:', error);
     }
@@ -286,8 +286,8 @@ class PolygonMesh {
           this.mesh.material = materials;
           // Increase render order to ensure it renders on top of other elements
           this.mesh.renderOrder = 15;
-          // Slightly raise the mesh to avoid z-fighting
-          this.mesh.position.y += 0.01;
+          // Slightly raise the mesh to avoid z-fighting, but much less than before
+          this.mesh.position.y += 0.005; // Reduced from 0.01 to 0.005
         }
       },
       undefined,
@@ -518,7 +518,7 @@ class PolygonMesh {
         material.color.set('#ffcc00');
       }
       
-      this.mesh.position.y += 0.03;
+      this.mesh.position.y += 0.01; // Reduced from 0.03 to 0.01
       this.mesh.renderOrder = 2;
       
       material.needsUpdate = true;
@@ -526,7 +526,7 @@ class PolygonMesh {
       if (this.originalColor && material.color) {
         material.color.copy(this.originalColor);
         
-        this.mesh.position.y -= 0.03;
+        this.mesh.position.y -= 0.01; // Reduced from 0.03 to 0.01
         this.mesh.renderOrder = 0;
         
         material.needsUpdate = true;
@@ -557,7 +557,7 @@ class PolygonMesh {
         material.color.copy(color);
       }
       
-      this.mesh.position.y += 0.03;
+      this.mesh.position.y += 0.01; // Reduced from 0.03 to 0.01
       this.mesh.renderOrder = 1;
       
       material.needsUpdate = true;
@@ -565,7 +565,7 @@ class PolygonMesh {
       if (this.originalColor && material.color) {
         material.color.copy(this.originalColor);
         
-        this.mesh.position.y -= 0.03;
+        this.mesh.position.y -= 0.01; // Reduced from 0.03 to 0.01
         this.mesh.renderOrder = 0;
         
         material.needsUpdate = true;
