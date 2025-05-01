@@ -8,6 +8,71 @@ interface WaterEffectProps {
   performanceMode: boolean;
   width: number;
   height: number;
+  renderer: THREE.WebGLRenderer;
+  // Add method to create shore interaction effect
+  private createShoreInteraction() {
+    // Create a shader material that will highlight the shore areas
+    const shoreGeometry = new THREE.PlaneGeometry(this.width * 1.2, this.height * 1.2, 128, 128);
+    
+    // Custom shader material for shore effect
+    const shoreMaterial = new THREE.ShaderMaterial({
+      uniforms: {
+        time: { value: 0 },
+        color: { value: new THREE.Color(0xffffff) },
+        landTexture: { value: null } // Will be set in update
+      },
+      vertexShader: `
+        varying vec2 vUv;
+        void main() {
+          vUv = uv;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform float time;
+        uniform vec3 color;
+        uniform sampler2D landTexture;
+        varying vec2 vUv;
+        
+        void main() {
+          // Sample the land texture
+          vec4 landColor = texture2D(landTexture, vUv);
+          
+          // Calculate distance to land
+          float landDistance = 1.0 - landColor.r;
+          
+          // Create wave pattern
+          float wave = sin(time * 2.0 + vUv.x * 10.0 + vUv.y * 10.0) * 0.5 + 0.5;
+          
+          // Only show waves near the shore
+          float shoreMask = smoothstep(0.0, 0.1, landDistance) * (1.0 - smoothstep(0.1, 0.3, landDistance));
+          
+          // Final color
+          gl_FragColor = vec4(color, shoreMask * wave * 0.5);
+        }
+      `,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false
+    });
+    
+    this.shoreMesh = new THREE.Mesh(shoreGeometry, shoreMaterial);
+    this.shoreMesh.rotation.x = -Math.PI / 2;
+    this.shoreMesh.position.y = -0.03; // Just above water level
+    this.scene.add(this.shoreMesh);
+    
+    // Create render target for land texture
+    this.landRenderTarget = new THREE.WebGLRenderTarget(512, 512);
+    
+    // Create camera for rendering land texture
+    this.landCamera = new THREE.OrthographicCamera(
+      -this.width/2, this.width/2, 
+      this.height/2, -this.height/2, 
+      0.1, 1000
+    );
+    this.landCamera.position.y = 10;
+    this.landCamera.lookAt(0, 0, 0);
+  }
 }
 
 export default class WaterEffect {
@@ -29,6 +94,10 @@ export default class WaterEffect {
   private causticIndex: number = 0;
   private causticMesh: THREE.Mesh | null = null;
   private sunReflection: THREE.Mesh | null = null;
+  private shoreMesh: THREE.Mesh | null = null;
+  private landRenderTarget: THREE.WebGLRenderTarget | null = null;
+  private landCamera: THREE.OrthographicCamera | null = null;
+  private renderer: THREE.WebGLRenderer;
 
   // Static texture loader and cache for water textures
   private static waterNormalMapTexture: THREE.Texture | null = null;
@@ -42,13 +111,15 @@ export default class WaterEffect {
     activeView,
     performanceMode,
     width,
-    height
+    height,
+    renderer
   }: WaterEffectProps) {
     this.scene = scene;
     this.activeView = activeView;
     this.performanceMode = performanceMode;
     this.width = width;
     this.height = height;
+    this.renderer = renderer;
     
     // Set up sun position for reflections
     this.sunPosition = new THREE.Vector3(50, 100, 50);
@@ -122,35 +193,56 @@ export default class WaterEffect {
   }
   
   private initializeWater() {
-    // Create a completely invisible water plane
+    // Load water textures if not already loaded
+    if (!WaterEffect.waterNormalMapTexture) {
+      WaterEffect.waterNormalMapTexture = WaterEffect.textureLoader!.load(
+        'https://threejs.org/examples/textures/waternormals.jpg',
+        (texture) => {
+          texture.wrapS = THREE.RepeatWrapping;
+          texture.wrapT = THREE.RepeatWrapping;
+          texture.repeat.set(10, 10);
+        }
+      );
+    }
+    
+    this.waterNormalMap = WaterEffect.waterNormalMapTexture;
+    
+    // Create proper water geometry that matches the scene size
+    this.waterGeometry = new THREE.PlaneGeometry(
+      this.width * 1.2, 
+      this.height * 1.2,
+      this.performanceMode ? 8 : 32  // More segments for better quality
+    );
+    
+    // Create water with proper options
     const waterOptions = {
-      textureWidth: 1,
-      textureHeight: 1,
+      textureWidth: this.performanceMode ? 256 : 512,
+      textureHeight: this.performanceMode ? 256 : 512,
       waterNormals: this.waterNormalMap,
       sunDirection: this.sunDirection,
       sunColor: 0xffffff,
-      waterColor: 0x001e0f,
-      distortionScale: 0, // Set to 0 to remove distortion
-      fog: false, // Disable fog
+      waterColor: this.getWaterColorForView(),
+      distortionScale: this.performanceMode ? 2.0 : 3.7,
+      fog: false,
       format: THREE.RGBAFormat
     };
     
-    // Create minimal geometry
-    this.waterGeometry = new THREE.PlaneGeometry(0, 0);
-    
-    // Create the water mesh but make it invisible
     this.water = new Water(this.waterGeometry, waterOptions);
     this.water.rotation.x = -Math.PI / 2;
-    this.water.position.y = -100; // Move far below the scene
-    this.water.visible = false; // Make it invisible
+    this.water.position.y = -0.1; // Position just below land level
+    this.water.visible = true;
     
-    // Add the water to the scene (though it's invisible)
+    // Add the water to the scene
     this.scene.add(this.water);
     
-    // Don't load any additional effects
-    // this.loadFoamTexture();
-    // this.loadCausticTextures();
-    // this.createSunReflection();
+    // Add shore foam effect
+    this.loadFoamTexture();
+    
+    // Add sun reflection
+    this.createSunReflection();
+    
+    // Create shore interaction effect
+    this.createShoreInteraction();
   }
   
   private loadFoamTexture() {
@@ -162,37 +254,37 @@ export default class WaterEffect {
           texture.wrapT = THREE.RepeatWrapping;
           texture.repeat.set(40, 40);
           
-          // Create foam mesh with ZERO opacity - effectively disabling it
+          // Create foam mesh with proper opacity
           const foamGeometry = new THREE.PlaneGeometry(this.width * 1.2, this.height * 1.2);
           const foamMaterial = new THREE.MeshBasicMaterial({
             map: texture,
             transparent: true,
-            opacity: 0, // Set to 0 to completely hide the foam
-            blending: THREE.NoBlending, // Change blending mode
+            opacity: 0.3, // Set to a visible value
+            blending: THREE.AdditiveBlending,
             depthWrite: false
           });
           
           this.waterFoam = new THREE.Mesh(foamGeometry, foamMaterial);
           this.waterFoam.rotation.x = -Math.PI / 2;
-          this.waterFoam.position.y = -0.15;
+          this.waterFoam.position.y = -0.05; // Position just above water level
           this.scene.add(this.waterFoam);
           this.foamTexture = texture;
         }
       );
     } else {
-      // Use cached foam texture but with zero opacity
+      // Use cached foam texture with proper opacity
       const foamGeometry = new THREE.PlaneGeometry(this.width * 1.2, this.height * 1.2);
       const foamMaterial = new THREE.MeshBasicMaterial({
         map: WaterEffect.foamTexture,
         transparent: true,
-        opacity: 0, // Set to 0 to completely hide the foam
-        blending: THREE.NoBlending, // Change blending mode
+        opacity: 0.3, // Set to a visible value
+        blending: THREE.AdditiveBlending,
         depthWrite: false
       });
       
       this.waterFoam = new THREE.Mesh(foamGeometry, foamMaterial);
       this.waterFoam.rotation.x = -Math.PI / 2;
-      this.waterFoam.position.y = -0.15;
+      this.waterFoam.position.y = -0.05; // Position just above water level
       this.scene.add(this.waterFoam);
       this.foamTexture = WaterEffect.foamTexture;
     }
@@ -253,8 +345,71 @@ export default class WaterEffect {
   }
   
   public update(frameCount: number, performanceMode: boolean) {
-    // Do nothing - all water effects disabled
-    return;
+    if (!this.water) return;
+    
+    // Get water uniforms
+    const waterUniforms = this.water.material.uniforms;
+    
+    // Animate water
+    if (waterUniforms.time) {
+      waterUniforms.time.value += performanceMode ? 0.005 : 0.01;
+    }
+    
+    // Apply Gerstner waves for more natural water movement
+    this.applyGerstnerWaves(frameCount * 0.05);
+    
+    // Animate foam if it exists
+    if (this.waterFoam && this.foamTexture) {
+      this.foamTexture.offset.x += 0.0005;
+      this.foamTexture.offset.y += 0.0003;
+    }
+    
+    // Animate sun reflection
+    if (this.sunReflection) {
+      const reflectionScale = 1.0 + Math.sin(frameCount * 0.02) * 0.1;
+      this.sunReflection.scale.set(reflectionScale, reflectionScale, 1);
+      
+      // Slightly move the reflection
+      const offsetX = Math.sin(frameCount * 0.01) * 5;
+      const offsetZ = Math.cos(frameCount * 0.015) * 5;
+      this.sunReflection.position.x = 50 + offsetX;
+      this.sunReflection.position.z = 50 + offsetZ;
+    }
+    
+    // Update shore interaction
+    if (this.shoreMesh && this.landRenderTarget) {
+      // Update time uniform
+      (this.shoreMesh.material as THREE.ShaderMaterial).uniforms.time.value = frameCount * 0.05;
+      
+      // Render land to texture
+      const originalBackground = this.scene.background;
+      this.scene.background = new THREE.Color(0x000000);
+      
+      // Hide water and shore for land rendering
+      const waterVisible = this.water.visible;
+      const foamVisible = this.waterFoam ? this.waterFoam.visible : false;
+      const shoreVisible = this.shoreMesh.visible;
+      
+      this.water.visible = false;
+      if (this.waterFoam) this.waterFoam.visible = false;
+      this.shoreMesh.visible = false;
+      
+      // Render land to texture
+      this.renderer.setRenderTarget(this.landRenderTarget);
+      this.renderer.render(this.scene, this.landCamera);
+      this.renderer.setRenderTarget(null);
+      
+      // Restore visibility
+      this.water.visible = waterVisible;
+      if (this.waterFoam) this.waterFoam.visible = foamVisible;
+      this.shoreMesh.visible = shoreVisible;
+      
+      // Restore background
+      this.scene.background = originalBackground;
+      
+      // Update land texture uniform
+      (this.shoreMesh.material as THREE.ShaderMaterial).uniforms.landTexture.value = this.landRenderTarget.texture;
+    }
   }
   
   public updateViewMode(activeView: ViewMode) {
@@ -339,6 +494,17 @@ export default class WaterEffect {
       this.scene.remove(this.sunReflection);
       this.sunReflection.geometry.dispose();
       (this.sunReflection.material as THREE.Material).dispose();
+    }
+    
+    // Clean up shore interaction
+    if (this.shoreMesh) {
+      this.scene.remove(this.shoreMesh);
+      this.shoreMesh.geometry.dispose();
+      (this.shoreMesh.material as THREE.Material).dispose();
+    }
+    
+    if (this.landRenderTarget) {
+      this.landRenderTarget.dispose();
     }
   }
 }
