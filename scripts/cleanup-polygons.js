@@ -1,5 +1,9 @@
 // This script cleans up duplicate polygon files
-const { cleanupDuplicatePolygons } = require('../lib/fileUtils');
+const path = require('path');
+const fs = require('fs');
+
+// Import fileUtils directly with the correct path
+const { cleanupDuplicatePolygons } = require(path.join(process.cwd(), 'lib', 'fileUtils'));
 
 console.log('Starting polygon cleanup...');
 const result = cleanupDuplicatePolygons();
