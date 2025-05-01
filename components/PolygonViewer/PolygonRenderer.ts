@@ -410,10 +410,11 @@ export default class PolygonRenderer {
       
       // Start processing the first batch
       processBatch(0);
-    } else {
-      console.warn('No polygons to display');
-      this.createSamplePolygon();
     }
+  } else {
+    console.warn('No polygons to display');
+    this.createSamplePolygon();
+  }
   }
   
   private createSamplePolygon() {
