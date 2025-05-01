@@ -25,6 +25,18 @@ export default function PolygonViewer() {
   const [transferMenuOpen, setTransferMenuOpen] = useState(false);
   const [isFlushing, setIsFlushing] = useState(false);
   const [marketPanelVisible, setMarketPanelVisible] = useState(false);
+  const [purchaseModalVisible, setPurchaseModalVisible] = useState(false);
+  const [purchaseModalData, setPurchaseModalData] = useState<{
+    landId: string | null;
+    landName?: string;
+    transaction: any;
+    onComplete?: () => void;
+  }>({
+    landId: null,
+    landName: undefined,
+    transaction: null,
+    onComplete: undefined
+  });
   
   // Add refs at the top level of the component
   const hasLoadedDataRef = useRef<boolean>(false);
@@ -1231,6 +1243,19 @@ export default function PolygonViewer() {
       </div>
     
       {/* Removed duplicate Transfer Compute Menu */}
+      
+      <LandPurchaseModal
+        visible={purchaseModalVisible}
+        landId={purchaseModalData.landId}
+        landName={purchaseModalData.landName}
+        transaction={purchaseModalData.transaction}
+        onClose={() => setPurchaseModalVisible(false)}
+        onComplete={() => {
+          if (purchaseModalData.onComplete) {
+            purchaseModalData.onComplete();
+          }
+        }}
+      />
     </div>
   );
 }
