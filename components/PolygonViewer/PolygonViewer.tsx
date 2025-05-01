@@ -907,6 +907,48 @@ export default function PolygonViewer() {
   // Create a ref at the top level of the component to track previous view
   const prevViewRef = useRef(activeView);
   
+  // Add a function to force update of all visual elements
+  const forceVisualUpdate = useCallback(() => {
+    if (polygonRendererRef.current) {
+      console.log('Forcing update of all visual elements');
+      
+      // Update view mode
+      polygonRendererRef.current.updateViewMode(activeView);
+      
+      // Update colors
+      updatePolygonColors();
+      
+      // Update coat of arms
+      updateCoatOfArms();
+      
+      // Force specific updates for land view
+      if (activeView === 'land') {
+        polygonRendererRef.current.updatePolygonOwnerColors();
+        polygonRendererRef.current.updateCoatOfArmsSprites();
+      }
+      
+      // Force a render
+      if (sceneRef.current && sceneRef.current.scene.userData.forceRender) {
+        sceneRef.current.scene.userData.forceRender();
+      }
+    }
+  }, [activeView, updatePolygonColors, updateCoatOfArms]);
+  
+  // Add effect to periodically force visual updates when in land view
+  useEffect(() => {
+    if (activeView === 'land') {
+      // Force an initial update
+      forceVisualUpdate();
+      
+      // Set up a timer to periodically force updates
+      const timer = setInterval(forceVisualUpdate, 5000);
+      
+      return () => {
+        clearInterval(timer);
+      };
+    }
+  }, [activeView, forceVisualUpdate]);
+  
   // Add a separate effect to handle selection state changes
   useEffect(() => {
     // Only update selection state when selectedPolygonId changes
