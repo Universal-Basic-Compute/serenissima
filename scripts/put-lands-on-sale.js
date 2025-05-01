@@ -89,9 +89,9 @@ async function putLandsOnSale() {
             seller: SELLER,
             buyer: null, // No buyer yet
             price: price,
-            historical_name: data.historicalName || null,
-            english_name: data.englishName || null,
-            description: data.historicalDescription || null
+            HistoricalName: data.historicalName || null,
+            EnglishName: data.englishName || null,
+            Description: data.historicalDescription || null
           });
           
           if (response.status === 200 || response.status === 201) {
