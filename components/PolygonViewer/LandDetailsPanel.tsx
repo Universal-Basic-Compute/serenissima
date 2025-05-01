@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import ActionButton from '../UI/ActionButton';
 import WalletStatus from '../UI/WalletStatus';
+import PlayerProfile from '../UI/PlayerProfile';
 import { Polygon } from './types';
 
 interface LandDetailsPanelProps {
@@ -184,9 +185,18 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
           {/* Owner information - always show this section */}
           <div>
             <h3 className="text-sm font-medium text-gray-500">Owner</h3>
-            <p className="mt-1 font-semibold">
-              {owner && owner !== "" ? owner : 'Available'}
-            </p>
+            {owner && owner !== "" ? (
+              <div className="mt-2 flex items-center">
+                <PlayerProfile 
+                  username={owner}
+                  walletAddress={owner} // Pass the owner as wallet address to fetch full profile
+                  size="medium"
+                  className="mx-auto"
+                />
+              </div>
+            ) : (
+              <p className="mt-1 font-semibold">Available</p>
+            )}
           </div>
           
           {/* Area information */}

@@ -272,15 +272,22 @@ async def get_wallet(wallet_address: str):
     """Get wallet information from Airtable"""
     
     try:
+        # First try to find by wallet address
         formula = f"{{Wallet}}='{wallet_address}'"
         print(f"Searching for wallet with formula: {formula}")
         records = users_table.all(formula=formula)
         
+        # If not found, try to find by username
         if not records:
-            raise HTTPException(status_code=404, detail="Wallet not found")
+            formula = f"{{Username}}='{wallet_address}'"
+            print(f"Searching for user with formula: {formula}")
+            records = users_table.all(formula=formula)
+            
+        if not records:
+            raise HTTPException(status_code=404, detail="Wallet or user not found")
         
         record = records[0]
-        print(f"Found wallet record: {record['id']}")
+        print(f"Found user record: {record['id']}")
         return {
             "id": record["id"],
             "wallet_address": record["fields"].get("Wallet", ""),
