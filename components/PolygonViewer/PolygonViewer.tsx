@@ -251,18 +251,6 @@ export default function PolygonViewer() {
         </div>
       )}
 
-      {/* Control buttons */}
-      <div className="absolute bottom-4 right-4 z-10 flex gap-2">
-        <ActionButton onClick={resetView}>
-          Reset View
-        </ActionButton>
-        <ActionButton 
-          onClick={toggleQuality}
-          variant={highQuality ? 'secondary' : 'primary'}
-        >
-          {highQuality ? 'Performance Mode' : 'Quality Mode'}
-        </ActionButton>
-      </div>
       <canvas 
         ref={canvasRef} 
         className="w-full h-full" 
