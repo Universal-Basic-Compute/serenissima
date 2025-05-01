@@ -129,10 +129,10 @@ export default class WaterEffect {
     // Base distortion
     const baseDistortion = 8.0;
     
-    // Multiple wave frequencies for more complex patterns
-    const wave1 = Math.sin(time * 0.1) * 1.5;
-    const wave2 = Math.cos(time * 0.2) * 0.8;
-    const wave3 = Math.sin(time * 0.05) * 1.2;
+    // Multiple wave frequencies for more complex patterns - reduced frequencies to slow down
+    const wave1 = Math.sin(time * 0.05) * 1.5;  // Reduced from 0.1
+    const wave2 = Math.cos(time * 0.1) * 0.8;   // Reduced from 0.2
+    const wave3 = Math.sin(time * 0.025) * 1.2; // Reduced from 0.05
     
     // Combine waves for a more natural effect
     const combinedWaves = wave1 + wave2 + wave3;
@@ -145,7 +145,7 @@ export default class WaterEffect {
     // Also modify the normal map scale for more variation
     if (waterUniforms.size) {
       const baseSize = 4.0;
-      const sizeVariation = Math.sin(time * 0.03) * 0.5;
+      const sizeVariation = Math.sin(time * 0.015) * 0.5; // Reduced from 0.03
       waterUniforms.size.value = baseSize + sizeVariation;
     }
   }
@@ -184,9 +184,9 @@ export default class WaterEffect {
           // Calculate distance to land - use all channels for better detection
           float landDistance = 1.0 - max(max(landColor.r, landColor.g), landColor.b);
           
-          // Create more dynamic wave patterns - reduced frequency to avoid flickering
-          float wave1 = sin(time * 1.0 + vUv.x * 10.0 + vUv.y * 8.0) * 0.5 + 0.5;
-          float wave2 = cos(time * 1.5 - vUv.x * 8.0 + vUv.y * 6.0) * 0.5 + 0.5;
+          // Create more dynamic wave patterns - reduced frequency to slow down waves
+          float wave1 = sin(time * 0.5 + vUv.x * 10.0 + vUv.y * 8.0) * 0.5 + 0.5;  // Reduced from 1.0
+          float wave2 = cos(time * 0.75 - vUv.x * 8.0 + vUv.y * 6.0) * 0.5 + 0.5;  // Reduced from 1.5
           float wave = mix(wave1, wave2, 0.5);
           
           // Create a wider, more visible shore effect
@@ -391,18 +391,19 @@ export default class WaterEffect {
     // Get water uniforms
     const waterUniforms = this.water.material.uniforms;
     
-    // Animate water
+    // Animate water - reduced values to slow down the water
     if (waterUniforms.time) {
-      waterUniforms.time.value += performanceMode ? 0.005 : 0.01;
+      waterUniforms.time.value += performanceMode ? 0.0025 : 0.005; // Reduced from 0.005/0.01
     }
     
     // Apply Gerstner waves for more natural water movement
-    this.applyGerstnerWaves(frameCount * 0.05);
+    // Reduce the multiplier to slow down the waves
+    this.applyGerstnerWaves(frameCount * 0.025); // Reduced from 0.05
     
-    // Animate foam if it exists
+    // Animate foam if it exists - slow down the foam movement too
     if (this.waterFoam && this.foamTexture) {
-      this.foamTexture.offset.x += 0.0005;
-      this.foamTexture.offset.y += 0.0003;
+      this.foamTexture.offset.x += 0.00025; // Reduced from 0.0005
+      this.foamTexture.offset.y += 0.00015; // Reduced from 0.0003
     }
     
     // Animate sun reflection
