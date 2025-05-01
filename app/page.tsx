@@ -45,6 +45,8 @@ export default function Home() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [computeModalOpen, setComputeModalOpen] = useState(false);
+  const [showUsernamePrompt, setShowUsernamePrompt] = useState(false);
+  const [usernameInput, setUsernameInput] = useState('');
   
   // Get API key from environment variable
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '';
@@ -129,10 +131,55 @@ export default function Home() {
       
       const data = await response.json();
       console.log('Wallet stored in Airtable:', data);
+      
+      // Check if the user has a username
+      if (!data.user_name) {
+        // If no username, show the prompt
+        setShowUsernamePrompt(true);
+      }
+      
       return data;
     } catch (error) {
       console.error('Error storing wallet:', error);
       return null;
+    }
+  };
+  
+  const handleUsernameSubmit = async () => {
+    if (!usernameInput.trim() || !walletAddress) {
+      alert('Please enter a valid username');
+      return;
+    }
+    
+    try {
+      // Update the user record with the username
+      const response = await fetch('http://localhost:8000/api/wallet', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          wallet_address: walletAddress,
+          user_name: usernameInput.trim()
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to update username');
+      }
+      
+      const data = await response.json();
+      console.log('Username updated:', data);
+      
+      // Close the prompt
+      setShowUsernamePrompt(false);
+      setUsernameInput('');
+      
+      // Show success message
+      alert(`Welcome, ${usernameInput.trim()}!`);
+    } catch (error) {
+      console.error('Error updating username:', error);
+      alert('Failed to update username. Please try again.');
     }
   };
 
@@ -190,8 +237,10 @@ export default function Home() {
       if (address) {
         sessionStorage.setItem('walletAddress', address);
         localStorage.setItem('walletAddress', address);
-        // Store wallet in Airtable
-        await storeWalletInAirtable(address);
+        // Store wallet in Airtable and check for username
+        const userData = await storeWalletInAirtable(address);
+        
+        // If the user doesn't have a username, the prompt will be shown by storeWalletInAirtable
       }
     } catch (error) {
       console.error('Error connecting to wallet:', error);
@@ -772,6 +821,36 @@ export default function Home() {
         >
           Connect Wallet
         </button>
+      )}
+      
+      {/* Username prompt modal - non-dismissable */}
+      {showUsernamePrompt && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-96 max-w-full">
+            <h2 className="text-xl font-semibold mb-4">Choose a Username</h2>
+            <p className="mb-4 text-gray-600">
+              Please choose a username for your account. This will be visible to other users.
+            </p>
+            <input
+              type="text"
+              value={usernameInput}
+              onChange={(e) => setUsernameInput(e.target.value)}
+              placeholder="Enter username"
+              className="w-full px-3 py-2 border rounded mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              autoFocus
+            />
+            <button
+              onClick={handleUsernameSubmit}
+              className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition-colors"
+              disabled={!usernameInput.trim()}
+            >
+              Set Username
+            </button>
+            <p className="mt-2 text-xs text-gray-500 text-center">
+              You must set a username to continue.
+            </p>
+          </div>
+        </div>
       )}
       
       {/* Bridge mode button */}
