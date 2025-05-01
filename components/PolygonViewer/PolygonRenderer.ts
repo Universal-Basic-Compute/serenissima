@@ -552,7 +552,7 @@ export default class PolygonRenderer {
   }
   
   // Add helper function to create a circular texture
-  private createCircularTexture(texture: THREE.Texture, ownerColor: string = '#8B4513'): THREE.Texture {
+  private createCircularTexture(texture: THREE.Texture): THREE.Texture {
     // Check if texture.image exists
     if (!texture.image) {
       console.warn('Texture image is null, creating fallback texture');
@@ -569,7 +569,7 @@ export default class PolygonRenderer {
       // Draw a colored circle as fallback
       ctx.beginPath();
       ctx.arc(size/2, size/2, size/2 - 4, 0, Math.PI * 2);
-      ctx.fillStyle = ownerColor;
+      ctx.fillStyle = '#8B4513'; // Default brown color
       ctx.fill();
       ctx.strokeStyle = '#FFFFFF';
       ctx.lineWidth = 8;
@@ -599,11 +599,7 @@ export default class PolygonRenderer {
       ctx.arc(size/2, size/2, size/2 - 4, 0, Math.PI * 2);
       ctx.closePath();
       
-      // Fill with the owner's color first as a background
-      ctx.fillStyle = ownerColor;
-      ctx.fill();
-      
-      // Add a stroke around the circle
+      // Add a white stroke around the circle
       ctx.strokeStyle = '#FFFFFF';
       ctx.lineWidth = 8;
       ctx.stroke();
@@ -649,7 +645,7 @@ export default class PolygonRenderer {
       ctx.clearRect(0, 0, size, size);
       ctx.beginPath();
       ctx.arc(size/2, size/2, size/2 - 4, 0, Math.PI * 2);
-      ctx.fillStyle = ownerColor;
+      ctx.fillStyle = '#8B4513'; // Default brown color
       ctx.fill();
       ctx.strokeStyle = '#FFFFFF';
       ctx.lineWidth = 8;
@@ -685,8 +681,8 @@ export default class PolygonRenderer {
     const texture = new THREE.Texture(canvas);
     texture.needsUpdate = true;
     
-    // Create a flat plane for the colored circle - 50% smaller
-    const planeSize = 2; // Reduced size by 50%
+    // Create a flat plane for the colored circle - 20% smaller
+    const planeSize = 1.6; // Reduced size by 20% from 2.0
     const geometry = new THREE.PlaneGeometry(planeSize, planeSize);
     
     // Create material with the texture
