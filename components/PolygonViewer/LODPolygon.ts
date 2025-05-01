@@ -874,3 +874,6 @@ export default class LODPolygon {
     this.highDetailMesh.geometry = newGeometry;
   }
 }
+
+// Explicit export statement to ensure proper module handling
+export default LODPolygon;
