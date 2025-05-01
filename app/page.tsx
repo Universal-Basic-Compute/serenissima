@@ -93,6 +93,9 @@ export default function Home() {
   const [bridgeStart, setBridgeStart] = useState<google.maps.LatLng | null>(null);
   const [bridgeStartLandId, setBridgeStartLandId] = useState<string | null>(null);
   const [activeLandPolygons, setActiveLandPolygons] = useState<{[id: string]: google.maps.Polygon}>({});
+  const [centroidDragMode, setCentroidDragMode] = useState(false);
+  const [centroidMarkers, setCentroidMarkers] = useState<{[id: string]: google.maps.Marker}>({});
+  const [isDraggingCentroid, setIsDraggingCentroid] = useState(false);
   
   // Add these new state variables for delete mode
   const [deleteMode, setDeleteMode] = useState(false);
