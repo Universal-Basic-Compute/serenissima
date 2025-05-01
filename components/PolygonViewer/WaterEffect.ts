@@ -69,8 +69,8 @@ export default class WaterEffect {
       performanceMode ? 4 : 16
     );
     
-    // Load textures with a delay to improve initial loading performance
-    setTimeout(() => this.initializeWater(), 500);
+    // Initialize water immediately instead of with delay
+    this.initializeWater();
   }
   
   // Add method to create a sun reflection
@@ -154,23 +154,23 @@ export default class WaterEffect {
       waterNormals: this.waterNormalMap,
       sunDirection: this.sunDirection,
       sunColor: 0xffffff,
-      waterColor: this.getWaterColorForView(),
-      distortionScale: 8.0, // Increased from 3.7 for more pronounced waves
+      waterColor: 0x001e0f, // Darker blue-green color for better contrast
+      distortionScale: 3.0, // Reduced distortion
       fog: this.scene.fog !== undefined,
       format: THREE.RGBAFormat
     };
     
-    // Reduce water geometry complexity
+    // Increase water geometry size to ensure it covers the entire scene
     this.waterGeometry = new THREE.PlaneGeometry(
-      this.width, 
-      this.height, 
-      this.performanceMode ? 2 : 8 // Reduced from 4/16
+      this.width * 2, 
+      this.height * 2, 
+      this.performanceMode ? 2 : 8
     );
     
     // Create the water mesh
     this.water = new Water(this.waterGeometry, waterOptions);
     this.water.rotation.x = -Math.PI / 2;
-    this.water.position.y = -0.2;
+    this.water.position.y = -0.1; // Raise water level slightly
     
     // Add the water to the scene
     this.scene.add(this.water);

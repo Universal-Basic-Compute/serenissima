@@ -417,8 +417,8 @@ export default function PolygonViewer() {
         scene: scene.scene,
         activeView,
         performanceMode: !highQuality,
-        width: 300,  // Increased size for better coverage
-        height: 300  // Increased size for better coverage
+        width: 500,  // Significantly increased size for better coverage
+        height: 500  // Significantly increased size for better coverage
       });
       waterEffectRef.current = waterEffect;
     };
