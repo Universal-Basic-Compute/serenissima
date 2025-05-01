@@ -98,11 +98,11 @@ export default class SceneSetup {
     this.controls.minDistance = 10;
     this.controls.maxDistance = 300;
     
-    // Enable panning with right mouse button
+    // Enable panning with right mouse button and rotation with middle mouse button
     this.controls.mouseButtons = {
-      LEFT: THREE.MOUSE.ROTATE,
-      MIDDLE: THREE.MOUSE.DOLLY,
-      RIGHT: THREE.MOUSE.PAN
+      LEFT: THREE.MOUSE.NONE, // No action on left click
+      MIDDLE: THREE.MOUSE.ROTATE, // Rotation on middle mouse button
+      RIGHT: THREE.MOUSE.PAN // Panning on right mouse button (unchanged)
     };
     
     // Make panning parallel to the ground plane
