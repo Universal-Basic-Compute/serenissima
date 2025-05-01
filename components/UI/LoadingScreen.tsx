@@ -155,7 +155,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
         </div>
         
         <p className="text-amber-300 text-sm">
-          Preparing the charts of Venice...
+          Preparing the beauty of Venice...
         </p>
       </div>
     </div>
