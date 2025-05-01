@@ -530,17 +530,23 @@ export default function PolygonViewer() {
           if (hoveredPolygonId && hoveredPolygonId !== selectedPolygonId) {
             const previousHovered = polygonMeshesRef.current[hoveredPolygonId];
             if (previousHovered && previousHovered.material) {
+              // Ensure we have original values to return to
+              const originalEmissive = previousHovered.userData.originalEmissive || new THREE.Color(0, 0, 0);
+              const originalIntensity = previousHovered.userData.originalEmissiveIntensity || 0;
+              
               // Animate back to original material properties
               gsap.to(previousHovered.material.emissive, {
-                r: previousHovered.userData.originalEmissive?.r || 0,
-                g: previousHovered.userData.originalEmissive?.g || 0,
-                b: previousHovered.userData.originalEmissive?.b || 0,
-                duration: 0.3
+                r: originalEmissive.r,
+                g: originalEmissive.g,
+                b: originalEmissive.b,
+                duration: 0.3,
+                overwrite: true // Ensure any ongoing animations are stopped
               });
               
               gsap.to(previousHovered.material, {
-                emissiveIntensity: previousHovered.userData.originalEmissiveIntensity || 0,
-                duration: 0.3
+                emissiveIntensity: originalIntensity,
+                duration: 0.3,
+                overwrite: true // Ensure any ongoing animations are stopped
               });
             }
           }
@@ -560,12 +566,14 @@ export default function PolygonViewer() {
               r: 0.53, // 0x88/255
               g: 1.0,  // 0xff/255
               b: 0.53, // 0x88/255
-              duration: 0.3
+              duration: 0.3,
+              overwrite: true // Ensure any ongoing animations are stopped
             });
             
             gsap.to(object.material, {
               emissiveIntensity: 0.5,
-              duration: 0.3
+              duration: 0.3,
+              overwrite: true // Ensure any ongoing animations are stopped
             });
           }
         }
@@ -573,17 +581,23 @@ export default function PolygonViewer() {
         // Remove glow effect from previously hovered polygon
         const previousHovered = polygonMeshesRef.current[hoveredPolygonId];
         if (previousHovered && previousHovered.material) {
+          // Ensure we have original values to return to
+          const originalEmissive = previousHovered.userData.originalEmissive || new THREE.Color(0, 0, 0);
+          const originalIntensity = previousHovered.userData.originalEmissiveIntensity || 0;
+          
           // Animate back to original material properties
           gsap.to(previousHovered.material.emissive, {
-            r: previousHovered.userData.originalEmissive?.r || 0,
-            g: previousHovered.userData.originalEmissive?.g || 0,
-            b: previousHovered.userData.originalEmissive?.b || 0,
-            duration: 0.3
+            r: originalEmissive.r,
+            g: originalEmissive.g,
+            b: originalEmissive.b,
+            duration: 0.3,
+            overwrite: true // Ensure any ongoing animations are stopped
           });
           
           gsap.to(previousHovered.material, {
-            emissiveIntensity: previousHovered.userData.originalEmissiveIntensity || 0,
-            duration: 0.3
+            emissiveIntensity: originalIntensity,
+            duration: 0.3,
+            overwrite: true // Ensure any ongoing animations are stopped
           });
         }
         
@@ -686,24 +700,34 @@ export default function PolygonViewer() {
               );
               outlinePass.selectedObjects = [object];
               
-              // Start with no outline and animate it in
-              outlinePass.edgeStrength = 0;
+              // Configure the outline pass with better defaults
+              outlinePass.edgeStrength = 0; // Start at 0 and animate up
               outlinePass.edgeGlow = 0;
               outlinePass.edgeThickness = 0;
+              outlinePass.pulsePeriod = 0; // Disable pulsing
               outlinePass.visibleEdgeColor.set(0x00ff00);
+              outlinePass.hiddenEdgeColor.set(0x00ff00);
+              outlinePass.usePatternTexture = false; // Don't use pattern texture
               
-              // Remove any existing outline passes
-              composer.passes = composer.passes.filter(pass => !(pass instanceof OutlinePass));
+              // Remove any existing outline passes more carefully
+              const existingOutlinePasses = composer.passes.filter(pass => pass instanceof OutlinePass);
+              existingOutlinePasses.forEach(pass => {
+                const index = composer.passes.indexOf(pass);
+                if (index !== -1) {
+                  composer.passes.splice(index, 1);
+                }
+              });
               
               // Add the new outline pass
               composer.addPass(outlinePass);
               
-              // Animate the outline properties
+              // Animate the outline properties more gradually
               gsap.to(outlinePass, {
-                edgeStrength: 3.0,
-                edgeGlow: 0.5,
+                edgeStrength: 2.0, // Reduced from 3.0
+                edgeGlow: 0.3,    // Reduced from 0.5
                 edgeThickness: 1.0,
-                duration: 0.5
+                duration: 0.8,    // Increased from 0.5
+                ease: "power2.out" // Add easing for smoother animation
               });
             }
           }
