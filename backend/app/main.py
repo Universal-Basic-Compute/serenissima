@@ -5,6 +5,7 @@ from pyairtable import Api, Table
 import os
 import sys
 import traceback
+import datetime
 from dotenv import load_dotenv
 
 # Load environment variables
