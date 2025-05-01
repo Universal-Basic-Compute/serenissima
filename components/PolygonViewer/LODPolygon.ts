@@ -117,10 +117,12 @@ export default class LODPolygon {
       wireframe: false,
       // Remove stroke/edge visibility
       polygonOffset: true,
-      polygonOffsetFactor: 1,
-      polygonOffsetUnits: 1,
-      // Add these properties for better blending
+      polygonOffsetFactor: 2, // Increased from 1 to 2
+      polygonOffsetUnits: 2, // Increased from 1 to 2
+      // Explicitly disable transparency
       transparent: false,
+      opacity: 1.0,
+      // Use normal blending
       blending: THREE.NormalBlending
     });
     
@@ -218,15 +220,17 @@ export default class LODPolygon {
       metalness: 0.1, // Low metalness
       side: THREE.FrontSide,
       wireframe: false,
-      // Add these important properties to prevent z-fighting:
+      // Modify these properties to prevent edge transparency:
       polygonOffset: true,
-      polygonOffsetFactor: 1,
-      polygonOffsetUnits: 1,
+      polygonOffsetFactor: 2, // Increased from 1 to 2
+      polygonOffsetUnits: 2, // Increased from 1 to 2
       // Ensure depth settings are correct
       depthTest: true,
       depthWrite: true,
-      // Add these properties for better blending
-      transparent: false, // Keep opaque for better performance
+      // Explicitly disable transparency
+      transparent: false,
+      opacity: 1.0,
+      // Use normal blending
       blending: THREE.NormalBlending
     });
     
@@ -752,9 +756,9 @@ export default class LODPolygon {
       const ac = new THREE.Vector3().subVectors(c, a);
       const normal = new THREE.Vector3().crossVectors(ab, ac).normalize();
       
-      // If the normal points downward (y component is negative), don't keep this face
       // Be more aggressive in removing downward-facing faces
-      keepFace[i] = normal.y >= 0; // Only keep faces that point upward or horizontally
+      // Only keep faces that point significantly upward
+      keepFace[i] = normal.y > 0.1; // Changed from >= 0 to > 0.1
     }
     
     // Create a new index array that only includes the faces we want to keep
