@@ -68,6 +68,9 @@ export default class InteractionManager {
     this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
     
+    // Prevent event from interfering with camera controls
+    event.stopPropagation();
+    
     // Update the raycaster with the camera and mouse position
     this.raycaster.setFromCamera(this.mouse, this.camera);
     
@@ -198,6 +201,9 @@ export default class InteractionManager {
   private onMouseClick(event: MouseEvent) {
     // Only process selection in land view
     if (this.activeView !== 'land') return;
+    
+    // Prevent event from interfering with camera controls
+    event.stopPropagation();
     
     // Update the raycaster with the camera and mouse position
     this.raycaster.setFromCamera(this.mouse, this.camera);

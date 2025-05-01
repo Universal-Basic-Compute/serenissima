@@ -67,6 +67,11 @@ export default class SceneSetup {
     this.controls.enableDamping = !this.performanceMode;
     this.controls.dampingFactor = 0.1;
     
+    // Ensure controls are explicitly enabled
+    this.controls.enablePan = true;
+    this.controls.enableRotate = true;
+    this.controls.enableZoom = true;
+    
     // Limit vertical rotation to prevent going under the map
     this.controls.minPolarAngle = 0;
     this.controls.maxPolarAngle = Math.PI / 2 - 0.1;
@@ -153,6 +158,15 @@ export default class SceneSetup {
   }
   
   public resetCamera = () => {
+    // Check if this is an intentional reset triggered by the user
+    if (window.resetCameraTriggeredByUser !== true) {
+      console.log("Camera reset prevented - not triggered by user");
+      return;
+    }
+    
+    // Reset the flag
+    window.resetCameraTriggeredByUser = false;
+    
     // Smoothly animate to the default position
     const startPosition = this.camera.position.clone();
     const startTarget = this.controls.target.clone();

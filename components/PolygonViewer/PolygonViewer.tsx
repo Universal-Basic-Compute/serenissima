@@ -40,6 +40,9 @@ export default function PolygonViewer() {
   
   // Define resetView at component level
   const resetView = useCallback(() => {
+    if (typeof window !== 'undefined') {
+      window.resetCameraTriggeredByUser = true;
+    }
     if (sceneRef.current) {
       sceneRef.current.resetCamera();
     }
@@ -49,11 +52,14 @@ export default function PolygonViewer() {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       window.resetCameraView = resetView;
+      // Initialize the flag
+      window.resetCameraTriggeredByUser = false;
     }
     
     return () => {
       if (typeof window !== 'undefined') {
         window.resetCameraView = undefined;
+        window.resetCameraTriggeredByUser = undefined;
       }
     };
   }, [resetView]);
