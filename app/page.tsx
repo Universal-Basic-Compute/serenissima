@@ -100,23 +100,42 @@ export default function Home() {
       console.log("Found stored wallet address, setting as connected");
       setWalletAddress(storedWallet);
       
-      // Also fetch user profile data if wallet is connected
+      // Try to load user profile from localStorage first
+      const storedProfile = localStorage.getItem('userProfile');
+      if (storedProfile) {
+        try {
+          const parsedProfile = JSON.parse(storedProfile);
+          console.log('Loaded user profile from localStorage:', parsedProfile);
+          setUserProfile(parsedProfile);
+        } catch (e) {
+          console.error('Error parsing stored profile:', e);
+        }
+      }
+      
+      // Also fetch user profile data from backend to ensure it's up to date
       fetch(`http://localhost:8000/api/wallet/${storedWallet}`)
         .then(response => {
           if (response.ok) return response.json();
           throw new Error('Failed to fetch user profile');
         })
         .then(data => {
-          console.log('Fetched user profile on init:', data);
+          console.log('Fetched user profile from backend:', data);
           if (data.user_name) {
-            setUserProfile({
+            const backendProfile = {
               username: data.user_name,
               firstName: data.first_name || data.user_name.split(' ')[0] || '',
               lastName: data.last_name || data.user_name.split(' ').slice(1).join(' ') || '',
               coatOfArmsImage: data.coat_of_arms_image,
               familyMotto: data.family_motto,
-              computeAmount: data.compute_amount // Add this line
-            });
+              familyCoatOfArms: data.family_coat_of_arms,
+              computeAmount: data.compute_amount
+            };
+            
+            // Update state with backend data
+            setUserProfile(backendProfile);
+            
+            // Also update localStorage
+            localStorage.setItem('userProfile', JSON.stringify(backendProfile));
           }
         })
         .catch(error => {
@@ -321,16 +340,27 @@ export default function Home() {
       const data = await response.json();
       console.log('Profile updated successfully:', data);
       
-      // Update the user profile state
-      setUserProfile({
-        username: usernameInput.trim(),
+      // Create updated user profile object
+      const updatedProfile = {
+        username: username,
         firstName: firstName.trim(),
         lastName: lastName.trim(),
         coatOfArmsImage: coatOfArmsImage,
         familyMotto: familyMotto.trim(),
-        familyCoatOfArms: familyCoatOfArms.trim(), // Add this line to store the coat of arms description
-        computeAmount: data.compute_amount // Add compute amount from response
-      });
+        familyCoatOfArms: familyCoatOfArms.trim(),
+        computeAmount: data.compute_amount
+      };
+      
+      // Update the user profile state
+      setUserProfile(updatedProfile);
+      
+      // Also store the updated profile in localStorage for persistence
+      localStorage.setItem('userProfile', JSON.stringify(updatedProfile));
+      
+      // Dispatch a custom event to notify other components about the profile update
+      window.dispatchEvent(new CustomEvent('userProfileUpdated', { 
+        detail: updatedProfile 
+      }));
       
       // Close the prompt
       setShowUsernamePrompt(false);
