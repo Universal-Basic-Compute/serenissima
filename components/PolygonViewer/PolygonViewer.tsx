@@ -10,6 +10,7 @@ export default function PolygonViewer() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [highQuality, setHighQuality] = useState(false);
+  const [activeView, setActiveView] = useState('buildings'); // 'buildings' or 'transport'
   
   // Define resetCamera at component level using useRef to store the function
   const resetCameraRef = useRef(() => {});
@@ -82,7 +83,8 @@ export default function PolygonViewer() {
   useEffect(() => {
     if (!canvasRef.current) return;
     
-    console.log('Setting up Three.js scene with polygons:', polygons);
+    console.log(`Setting up Three.js scene with ${activeView} view`);
+    console.log('Polygons:', polygons);
 
     // Initialize Three.js
     const scene = new THREE.Scene();
@@ -222,7 +224,7 @@ export default function PolygonViewer() {
     // Add water plane with animated normal map - reduced complexity
     const waterGeometry = new THREE.PlaneGeometry(200, 200, 20, 20);
     const waterMaterial = new THREE.MeshStandardMaterial({ 
-      color: '#0066cc', // More blue, less green
+      color: activeView === 'transport' ? '#00aaff' : '#0066cc', // Different blue for transport view
       transparent: true,
       opacity: 0.7,
       metalness: 0.2,
@@ -514,7 +516,7 @@ export default function PolygonViewer() {
       
       renderer.dispose();
     };
-  }, [polygons, loading]);
+  }, [polygons, loading, activeView]);
   
   if (loading) {
     return <div className="w-full h-full flex items-center justify-center">Loading polygons...</div>;
@@ -532,6 +534,29 @@ export default function PolygonViewer() {
   
   return (
     <div className="w-screen h-screen">
+      {/* Floating menu on the left side */}
+      <div className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 bg-white rounded-lg shadow-lg p-2 flex flex-col gap-3">
+        <button 
+          onClick={() => setActiveView('buildings')}
+          className={`p-3 rounded-lg transition-all ${activeView === 'buildings' ? 'bg-blue-500 text-white' : 'hover:bg-gray-100'}`}
+          title="Buildings View"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+          </svg>
+        </button>
+        <button 
+          onClick={() => setActiveView('transport')}
+          className={`p-3 rounded-lg transition-all ${activeView === 'transport' ? 'bg-blue-500 text-white' : 'hover:bg-gray-100'}`}
+          title="Transport View"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+          </svg>
+        </button>
+      </div>
+
+      {/* Existing info panel */}
       <div className="absolute top-4 left-4 z-10 bg-white p-2 rounded shadow">
         {polygons.length === 0 ? (
           <p>No polygons found. Draw some on the map first.</p>
@@ -539,6 +564,8 @@ export default function PolygonViewer() {
           <p>Found {polygons.length} polygon(s)</p>
         )}
       </div>
+
+      {/* Existing buttons */}
       <div className="absolute bottom-4 right-4 z-10 flex gap-2">
         <button 
           onClick={resetView}
