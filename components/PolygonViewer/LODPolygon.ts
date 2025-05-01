@@ -861,25 +861,6 @@ export default class LODPolygon {
       }
     }
   }
-  // Add helper method to determine land color
-  private determineLandColor(): THREE.Color {
-    if (this.activeView === 'land') {
-      if (this.ownerColor) {
-        // Blend the owner color with sand color for a more natural look
-        const sandColor = new THREE.Color(0xf0e6c8); // Lighter sand color
-        const ownerColor = new THREE.Color(this.ownerColor);
-        // Mix 70% owner color with 30% sand color
-        return new THREE.Color().lerpColors(sandColor, ownerColor, 0.7);
-      } else if (this.polygon.owner) {
-        // If we have an owner but no color, use a default color
-        return new THREE.Color(0x7cac6a); // Default green color for owned lands
-      } else {
-        return new THREE.Color(0xe6d2a8); // Sand/beige for unowned lands
-      }
-    } else {
-      return new THREE.Color(0xe6d2a8); // Sand/beige for non-land views
-    }
-  }
   
   // Add this new helper method to remove bottom faces
   private removeBottomFaces(geometry: THREE.ExtrudeGeometry) {
