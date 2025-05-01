@@ -93,8 +93,8 @@ export default class CloudSystem {
     console.log(`Creating ${cloudCount} clouds at heights: ${heightLevels}`);
     
     for (let i = 0; i < cloudCount; i++) {
-      // Create a plane for each cloud - make them larger
-      const cloudSize = Math.random() * 30 + 30; // Increased from 20+20 to 30+30
+      // Create a plane for each cloud - make them MUCH larger
+      const cloudSize = Math.random() * 50 + 50; // Increased from 30+30 to 50+50
       const cloudGeometry = new THREE.PlaneGeometry(cloudSize, cloudSize);
       
       const cloud = new THREE.Mesh(cloudGeometry, cloudMaterial.clone());
@@ -115,8 +115,8 @@ export default class CloudSystem {
       // Add some random rotation for variety
       cloud.rotation.z = Math.random() * Math.PI * 2;
       
-      // Scale randomly for variety
-      const scale = Math.random() * 0.5 + 0.8; // Increased base scale from 0.5 to 0.8
+      // Scale randomly for variety - increase the scale
+      const scale = Math.random() * 0.7 + 1.2; // Increased from 0.5+0.8 to 0.7+1.2
       cloud.scale.set(scale, scale, scale);
       
       // Add random opacity for more depth - but keep it higher
