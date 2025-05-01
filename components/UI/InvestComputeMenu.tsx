@@ -41,12 +41,12 @@ const InvestComputeMenu: React.FC<InvestComputeMenuProps> = ({ onClose, onInvest
         <h2 className="text-3xl font-serif font-semibold mb-4 text-amber-800 text-center">Invest Compute</h2>
         
         <div className="mb-8 text-gray-700 text-center">
-          <p className="text-lg">Invest your compute resources to support the Republic of Venice and earn rewards.</p>
+          <p className="text-lg">Invest your compute resources to support the Republic and become the richest merchant of Venice.</p>
           <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
             <p className="text-md font-medium text-amber-800">About Ducats in La Serenissima</p>
             <p className="mt-2">Ducats in La Serenissima are backed by real $COMPUTE tokens on the Solana blockchain.</p>
             <p className="mt-1">Each 1 ducat you earn in-game can be withdrawn as 1 $COMPUTE token to your wallet.</p>
-            <p className="mt-1 font-semibold">Investing $COMPUTE helps build the Republic and earns you rewards over time.</p>
+            <p className="mt-1 font-semibold">Investing $COMPUTE helps build the Republic and earns you rewards over time, increasing your wealth and influence in Venice.</p>
           </div>
         </div>
         
@@ -111,7 +111,7 @@ const InvestComputeMenu: React.FC<InvestComputeMenuProps> = ({ onClose, onInvest
         
         <div className="mt-6 text-center text-sm text-gray-500">
           <p>By investing, you are contributing to the growth and prosperity of La Serenissima.</p>
-          <p className="mt-1">Your investment will be recorded on the Solana blockchain.</p>
+          <p className="mt-1">Your investment will be recorded on the Solana blockchain and earn you status as a prominent merchant of Venice.</p>
         </div>
       </div>
     </div>
