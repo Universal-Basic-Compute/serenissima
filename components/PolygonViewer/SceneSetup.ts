@@ -37,6 +37,8 @@ export default class SceneSetup {
     this.scene.background = new THREE.Color('#e6f7ff'); // Light blue background
     
     // No fog for cleaner visuals
+    // Set up scene to use orthographic rendering for flat appearance
+    this.scene.userData.flatRendering = true;
     
     // Create a camera with a better initial position
     this.camera = new THREE.PerspectiveCamera(

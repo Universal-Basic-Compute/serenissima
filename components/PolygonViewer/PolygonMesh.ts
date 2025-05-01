@@ -71,19 +71,32 @@ class PolygonMesh {
       const shape = createPolygonShape(normalizedCoords);
       
       // Create a COMPLETELY FLAT geometry with NO extrusion
-      // Instead of using ExtrudeGeometry, use ShapeGeometry for a completely flat shape
+      // Use ShapeGeometry for a completely flat shape
       const geometry = new THREE.ShapeGeometry(shape);
       geometry.rotateX(-Math.PI / 2);
       
-      // Update normals
+      // IMPORTANT: Force all vertices to have the same Y value (0)
+      const positions = geometry.attributes.position.array;
+      for (let i = 1; i < positions.length; i += 3) {
+        positions[i] = 0; // Set Y coordinate to 0 for all vertices
+      }
+      geometry.attributes.position.needsUpdate = true;
+      
+      // Update normals to all point straight up
       geometry.computeVertexNormals();
+      const normals = geometry.attributes.normal.array;
+      for (let i = 0; i < normals.length; i += 3) {
+        normals[i] = 0;     // X component = 0
+        normals[i + 1] = 1; // Y component = 1 (pointing up)
+        normals[i + 2] = 0; // Z component = 0
+      }
       geometry.attributes.normal.needsUpdate = true;
       geometry.computeBoundingSphere();
       
       // Determine the color to use
       const landColor = this.determineLandColor();
       
-      // Create a completely flat material with NO transparency and enhanced settings to prevent edge artifacts
+      // Create a completely flat material with NO lighting effects
       const material = new THREE.MeshBasicMaterial({ 
         color: landColor,
         side: THREE.FrontSide,
@@ -262,6 +275,15 @@ class PolygonMesh {
           
           // Increase render order to ensure it renders above other elements
           this.mesh.renderOrder = 20;
+          
+          // Ensure the geometry remains completely flat
+          if (this.mesh.geometry) {
+            const positions = this.mesh.geometry.attributes.position.array;
+            for (let i = 1; i < positions.length; i += 3) {
+              positions[i] = 0; // Force Y coordinate to 0
+            }
+            this.mesh.geometry.attributes.position.needsUpdate = true;
+          }
           
           console.log(`Applied coat of arms texture to polygon ${this.polygon.id}`);
         }

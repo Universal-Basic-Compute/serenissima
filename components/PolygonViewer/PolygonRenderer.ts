@@ -598,6 +598,15 @@ export default class PolygonRenderer {
               } else if (mesh.material instanceof THREE.MeshBasicMaterial) {
                 mesh.material.needsUpdate = true;
               }
+              
+              // Ensure the mesh is completely flat
+              if (mesh.geometry) {
+                const positions = mesh.geometry.attributes.position.array;
+                for (let i = 1; i < positions.length; i += 3) {
+                  positions[i] = 0; // Force Y coordinate to 0
+                }
+                mesh.geometry.attributes.position.needsUpdate = true;
+              }
             }
           }
         } else {
@@ -974,10 +983,10 @@ export default class PolygonRenderer {
       )[0];
           
       // Position higher above the land to avoid z-fighting
-      plane.position.set(normalizedCoords.x, 0.25, -normalizedCoords.y); // Increased height
+      plane.position.set(normalizedCoords.x, 0.5, -normalizedCoords.y); // Increased height even more
     } else {
       // Default position if no centroid
-      plane.position.set(0, 0.25, 0);
+      plane.position.set(0, 0.5, 0);
     }
     
     // Rotate to lay flat on the ground (90 degrees around X axis)
