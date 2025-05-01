@@ -134,8 +134,8 @@ const LandPurchaseModal: React.FC<LandPurchaseModalProps> = ({
             <img 
               src="/images/venice-seal.png" 
               alt="Seal of Venice" 
-              width={40} 
-              height={40}
+              width={60} 
+              height={60}
               className="mr-3"
             />
             <h2 className="text-xl font-serif text-amber-50">Land Acquisition Decree</h2>
@@ -226,7 +226,7 @@ const LandPurchaseModal: React.FC<LandPurchaseModalProps> = ({
             Sealed by the authority of the Most Serene Republic of Venice
           </p>
           <div className="mt-1 flex justify-center">
-            <svg className="h-6 w-6 text-amber-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="h-8 w-8 text-amber-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
             </svg>
           </div>
