@@ -291,12 +291,18 @@ export default class PolygonRenderer {
   }
   
   public updateOwnerCoatOfArms(ownerCoatOfArmsMap: Record<string, string>) {
-    this.ownerCoatOfArmsMap = ownerCoatOfArmsMap;
+    console.log('updateOwnerCoatOfArms called with data:', ownerCoatOfArmsMap);
+    this.ownerCoatOfArmsMap = { ...this.ownerCoatOfArmsMap, ...ownerCoatOfArmsMap };
+    console.log('Combined coat of arms map now has', Object.keys(this.ownerCoatOfArmsMap).length, 'entries');
     this.updateCoatOfArmsSprites();
   }
 
   // Create and update coat of arms sprites with texture caching
   private updateCoatOfArmsSprites() {
+    console.log('Updating coat of arms sprites, active view:', this.activeView);
+    console.log('Owner coat of arms map:', this.ownerCoatOfArmsMap);
+    console.log('Polygons with owners:', this.polygons.filter(p => p.owner));
+
     // Remove existing sprites
     Object.values(this.coatOfArmSprites).forEach(sprite => {
       this.scene.remove(sprite);
@@ -304,80 +310,96 @@ export default class PolygonRenderer {
     this.coatOfArmSprites = {};
 
     // Only create sprites if we're in land view
-    if (this.activeView !== 'land') return;
+    if (this.activeView !== 'land') {
+      console.log('Not in land view, skipping coat of arms sprites');
+      return;
+    }
 
     // Create a cache for textures to avoid loading the same texture multiple times
     const textureCache: Record<string, THREE.Texture> = {};
     
-    // Create new sprites for each polygon with an owner
-    const ownersToProcess = new Set<string>();
+    // Log the polygons with owners and coat of arms
+    const polygonsWithOwners = this.polygons.filter(p => 
+      p.owner && 
+      p.centroid && 
+      this.ownerCoatOfArmsMap[p.owner]
+    );
     
-    // First, identify all unique owners that need sprites
-    this.polygons.forEach(polygon => {
-      if (polygon.owner && polygon.centroid && this.ownerCoatOfArmsMap[polygon.owner]) {
-        ownersToProcess.add(polygon.owner);
+    console.log(`Found ${polygonsWithOwners.length} polygons with owners and coat of arms`);
+    
+    // Process each polygon with an owner and coat of arms
+    polygonsWithOwners.forEach(polygon => {
+      console.log(`Processing polygon ${polygon.id} with owner ${polygon.owner}`);
+      
+      // Get the coat of arms URL
+      const coatOfArmsUrl = this.ownerCoatOfArmsMap[polygon.owner];
+      console.log(`Coat of arms URL for ${polygon.owner}:`, coatOfArmsUrl);
+      
+      if (!coatOfArmsUrl) {
+        console.warn(`No coat of arms found for owner ${polygon.owner}`);
+        return;
+      }
+      
+      // Load texture if not already in cache
+      if (!textureCache[polygon.owner]) {
+        console.log(`Loading texture for ${polygon.owner}`);
+        textureCache[polygon.owner] = this.textureLoader.load(coatOfArmsUrl, 
+          // Success callback
+          (texture) => {
+            console.log(`Texture loaded successfully for ${polygon.owner}`);
+            texture.minFilter = THREE.LinearFilter; // Improve texture quality
+            
+            // Create sprite after texture is loaded
+            this.createSpriteForPolygon(polygon, texture);
+          },
+          // Progress callback
+          undefined,
+          // Error callback
+          (error) => {
+            console.error(`Error loading texture for ${polygon.owner}:`, error);
+          }
+        );
+      } else {
+        // Use cached texture
+        console.log(`Using cached texture for ${polygon.owner}`);
+        this.createSpriteForPolygon(polygon, textureCache[polygon.owner]);
       }
     });
+  }
+
+  // Add this helper method to create a sprite for a polygon
+  private createSpriteForPolygon(polygon: Polygon, texture: THREE.Texture) {
+    const material = new THREE.SpriteMaterial({ 
+      map: texture,
+      transparent: true,
+      depthTest: true,
+      depthWrite: false,
+      sizeAttenuation: true
+    });
     
-    // Process owners in batches
-    const processOwners = (owners: string[]) => {
-      owners.forEach(owner => {
-        // Load texture if not already in cache
-        if (!textureCache[owner]) {
-          textureCache[owner] = this.textureLoader.load(this.ownerCoatOfArmsMap[owner]);
-          textureCache[owner].minFilter = THREE.LinearFilter; // Improve texture quality
-        }
-      });
-      
-      // Now create sprites for all polygons with these owners
-      this.polygons.forEach(polygon => {
-        if (polygon.owner && polygon.centroid && owners.includes(polygon.owner)) {
-          // Use cached texture
-          const texture = textureCache[polygon.owner];
-          
-          const material = new THREE.SpriteMaterial({ 
-            map: texture,
-            transparent: true,
-            depthTest: true,
-            depthWrite: false,
-            sizeAttenuation: true
-          });
-          
-          const sprite = new THREE.Sprite(material);
-          
-          // Position at the centroid
-          const normalizedCoords = normalizeCoordinates(
-            [polygon.centroid],
-            this.bounds.centerLat,
-            this.bounds.centerLng,
-            this.bounds.scale,
-            this.bounds.latCorrectionFactor
-          )[0];
-          
-          // Position slightly above the land
-          sprite.position.set(normalizedCoords.x, 5, -normalizedCoords.y);
-          
-          // Make the sprite a good size
-          sprite.scale.set(8, 8, 1);
-          
-          // Add to scene and store reference
-          this.scene.add(sprite);
-          this.coatOfArmSprites[polygon.id] = sprite;
-        }
-      });
-    };
+    const sprite = new THREE.Sprite(material);
     
-    // Process all owners at once if there are few, otherwise batch them
-    const ownersArray = Array.from(ownersToProcess);
-    if (ownersArray.length <= 5) {
-      processOwners(ownersArray);
-    } else {
-      // Process in batches of 5
-      for (let i = 0; i < ownersArray.length; i += 5) {
-        const batch = ownersArray.slice(i, i + 5);
-        setTimeout(() => processOwners(batch), i * 100); // Stagger loading
-      }
-    }
+    // Position at the centroid
+    const normalizedCoords = normalizeCoordinates(
+      [polygon.centroid],
+      this.bounds.centerLat,
+      this.bounds.centerLng,
+      this.bounds.scale,
+      this.bounds.latCorrectionFactor
+    )[0];
+    
+    // Position higher above the land for better visibility
+    sprite.position.set(normalizedCoords.x, 10, -normalizedCoords.y); // Increased height from 5 to 10
+    
+    // Make the sprite larger for better visibility
+    sprite.scale.set(12, 12, 1); // Increased from 8 to 12
+    
+    // Add to scene and store reference
+    this.scene.add(sprite);
+    this.coatOfArmSprites[polygon.id] = sprite;
+    
+    console.log(`Added coat of arms sprite for ${polygon.id} owned by ${polygon.owner} at position:`, 
+      normalizedCoords.x, 10, -normalizedCoords.y);
   }
 
   public cleanup() {

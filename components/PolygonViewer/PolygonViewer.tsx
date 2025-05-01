@@ -153,15 +153,36 @@ export default function PolygonViewer() {
     const loadSecondaryData = setTimeout(() => {
       loadLandOwners(); // Land owners are needed for the default land view
       loadUsers(); // Load all users data
+      console.log('Loading users data...');
     }, 500);
     
     const loadTertiaryData = setTimeout(() => {
       loadBridges();
     }, 1000);
     
+    // Add an additional timeout to ensure coat of arms are loaded
+    const loadCoatOfArms = setTimeout(() => {
+      console.log('Checking if coat of arms need to be loaded...');
+      if (polygonRendererRef.current && users && Object.keys(users).length > 0) {
+        console.log('Forcing coat of arms update from delayed loader');
+        const coatOfArmsMap: Record<string, string> = {};
+        
+        Object.values(users).forEach(user => {
+          if (user.user_name && user.coat_of_arms_image) {
+            coatOfArmsMap[user.user_name] = user.coat_of_arms_image;
+          }
+        });
+        
+        if (Object.keys(coatOfArmsMap).length > 0) {
+          polygonRendererRef.current.updateOwnerCoatOfArms(coatOfArmsMap);
+        }
+      }
+    }, 3000);
+    
     return () => {
       clearTimeout(loadSecondaryData);
       clearTimeout(loadTertiaryData);
+      clearTimeout(loadCoatOfArms);
     };
   }, [loadPolygons, loadBridges, loadLandOwners, loadUsers]);
   
@@ -172,6 +193,28 @@ export default function PolygonViewer() {
       polygonRendererRef.current.updateOwnerCoatOfArms(ownerCoatOfArmsMap);
     }
   }, [ownerCoatOfArmsMap]);
+  
+  // Add this useEffect to ensure coat of arms are updated when users data changes
+  useEffect(() => {
+    if (polygonRendererRef.current && users && Object.keys(users).length > 0) {
+      console.log('Updating coat of arms from users data:', users);
+      
+      // Create a map of username to coat of arms URL
+      const coatOfArmsMap: Record<string, string> = {};
+      
+      Object.values(users).forEach(user => {
+        if (user.user_name && user.coat_of_arms_image) {
+          coatOfArmsMap[user.user_name] = user.coat_of_arms_image;
+          console.log(`Added coat of arms for ${user.user_name}:`, user.coat_of_arms_image);
+        }
+      });
+      
+      console.log('Created coat of arms map with', Object.keys(coatOfArmsMap).length, 'entries');
+      
+      // Update the renderer with the coat of arms map
+      polygonRendererRef.current.updateOwnerCoatOfArms(coatOfArmsMap);
+    }
+  }, [users]);
   
   // Add an effect to listen for polygon deletion events
   useEffect(() => {
@@ -230,6 +273,7 @@ export default function PolygonViewer() {
     
     // Step 1: Initialize polygon renderer first (most important)
     const initPolygonRenderer = () => {
+      console.log('Initializing polygon renderer with users data:', users);
       const polygonRenderer = new PolygonRenderer({
         scene: scene.scene,
         camera: scene.camera,
@@ -244,6 +288,7 @@ export default function PolygonViewer() {
       
       // Initialize with any existing coat of arms data
       if (Object.keys(ownerCoatOfArmsMap).length > 0) {
+        console.log('Initializing with existing coat of arms data:', ownerCoatOfArmsMap);
         polygonRenderer.updateOwnerCoatOfArms(ownerCoatOfArmsMap);
       }
     };
