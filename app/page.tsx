@@ -882,176 +882,199 @@ export default function Home() {
       {/* Username prompt modal - non-dismissable */}
       {showUsernamePrompt && (
         <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
-          <div className="bg-white p-8 rounded-lg shadow-lg w-[500px] max-w-full border-4 border-amber-700">
-            <h2 className="text-2xl font-serif font-semibold mb-4 text-amber-800 text-center">Welcome to La Serenissima</h2>
-            
-            <div className="mb-6 text-gray-700 italic text-center">
-              <p>The year is 1525. The Most Serene Republic of Venice stands as a beacon of wealth and power in the Mediterranean.</p>
-              <p className="mt-2">As a noble of Venice, you must now register your identity with the Council of Ten.</p>
-            </div>
-            
-            <div className="mb-6">
-              <h3 className="text-lg font-medium text-amber-700 mb-2">Your Noble Identity</h3>
+          <div className="bg-white p-8 rounded-lg shadow-lg w-[900px] max-w-[90vw] border-4 border-amber-700 flex flex-col md:flex-row">
+            {/* Left side - Form */}
+            <div className="md:w-1/2 pr-0 md:pr-6">
+              <h2 className="text-2xl font-serif font-semibold mb-4 text-amber-800 text-center">Welcome to La Serenissima</h2>
               
-              <div className="flex flex-col space-y-4">
-                <div className="flex items-center">
-                  <div className="w-1/3">
-                    <label className="block text-gray-700">First Name</label>
-                  </div>
-                  <div className="w-2/3 flex">
-                    <input
-                      type="text"
-                      value={firstName}
-                      onChange={(e) => setFirstName(e.target.value)}
-                      placeholder="Enter your first name..."
-                      className="w-full px-3 py-2 border border-amber-300 rounded-l focus:outline-none focus:ring-2 focus:ring-amber-500"
-                    />
-                    <button
-                      onClick={() => {
-                        const venetianFirstNames = [
-                          "Marco", "Antonio", "Giovanni", "Francesco", "Alvise",
-                          "Domenico", "Pietro", "Paolo", "Nicolo", "Giacomo",
-                          "Maria", "Caterina", "Isabella", "Lucia", "Elena",
-                          "Beatrice", "Chiara", "Francesca", "Vittoria", "Laura"
-                        ];
-                        const randomName = venetianFirstNames[Math.floor(Math.random() * venetianFirstNames.length)];
-                        setFirstName(randomName);
-                      }}
-                      className="bg-amber-600 text-white p-2 rounded-r hover:bg-amber-700 transition-colors text-xl"
-                      title="Roll the dice for a random name"
-                      type="button"
-                    >
-                      🎲
-                    </button>
-                  </div>
-                </div>
+              <div className="mb-6 text-gray-700 italic text-center">
+                <p>The year is 1525. The Most Serene Republic of Venice stands as a beacon of wealth and power in the Mediterranean.</p>
+                <p className="mt-2">As a noble of Venice, you must now register your identity with the Council of Ten.</p>
+              </div>
+              
+              <div className="mb-6">
+                <h3 className="text-lg font-medium text-amber-700 mb-2">Your Noble Identity</h3>
                 
-                <div className="flex items-center mt-4">
-                  <div className="w-1/3">
-                    <label className="block text-gray-700">Family Name</label>
-                  </div>
-                  <div className="w-2/3 flex">
-                    <input
-                      type="text"
-                      value={lastName}
-                      onChange={(e) => setLastName(e.target.value)}
-                      placeholder="Enter your family name..."
-                      className="w-full px-3 py-2 border border-amber-300 rounded-l focus:outline-none focus:ring-2 focus:ring-amber-500"
-                    />
-                    <button
-                      onClick={() => {
-                        const venetianLastNames = [
-                          "Contarini", "Morosini", "Dandolo", "Foscari", "Grimani",
-                          "Barbarigo", "Mocenigo", "Venier", "Loredan", "Gritti",
-                          "Pisani", "Tiepolo", "Bembo", "Priuli", "Trevisan",
-                          "Donato", "Giustinian", "Zeno", "Corner", "Gradenigo"
-                        ];
-                        const randomName = venetianLastNames[Math.floor(Math.random() * venetianLastNames.length)];
-                        setLastName(randomName);
-                      }}
-                      className="bg-amber-600 text-white p-2 rounded-r hover:bg-amber-700 transition-colors text-xl"
-                      title="Roll the dice for a random name"
-                      type="button"
-                    >
-                      🎲
-                    </button>
-                  </div>
-                </div>
-                
-                <div className="flex items-center">
-                  <div className="w-1/3">
-                    <label className="block text-gray-700">Family Coat of Arms</label>
-                  </div>
-                  <div className="w-2/3 flex flex-col">
-                    <div className="flex">
-                      <textarea
-                        value={familyCoatOfArms}
-                        onChange={(e) => setFamilyCoatOfArms(e.target.value)}
-                        placeholder="Describe your family's coat of arms..."
+                <div className="flex flex-col space-y-4">
+                  <div className="flex items-center">
+                    <div className="w-1/3">
+                      <label className="block text-gray-700">First Name</label>
+                    </div>
+                    <div className="w-2/3 flex">
+                      <input
+                        type="text"
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
+                        placeholder="Enter your first name..."
                         className="w-full px-3 py-2 border border-amber-300 rounded-l focus:outline-none focus:ring-2 focus:ring-amber-500"
-                        rows={3}
                       />
                       <button
                         onClick={() => {
-                          const coatOfArmsElements = [
-                            "A golden lion rampant on a field of azure",
-                            "A silver eagle displayed on a field of gules",
-                            "Three golden fleurs-de-lis on a field of azure",
-                            "A red rose on a field of silver",
-                            "A black wolf passant on a field of gold",
-                            "A golden sun with sixteen rays on a field of azure",
-                            "A silver crescent moon on a field of sable",
-                            "A golden ship with white sails on a sea of azure",
-                            "A red griffin segreant on a field of silver",
-                            "Three silver stars on a field of gules"
+                          const venetianFirstNames = [
+                            "Marco", "Antonio", "Giovanni", "Francesco", "Alvise",
+                            "Domenico", "Pietro", "Paolo", "Nicolo", "Giacomo",
+                            "Maria", "Caterina", "Isabella", "Lucia", "Elena",
+                            "Beatrice", "Chiara", "Francesca", "Vittoria", "Laura"
                           ];
-                          const randomCoatOfArms = coatOfArmsElements[Math.floor(Math.random() * coatOfArmsElements.length)];
-                          setFamilyCoatOfArms(randomCoatOfArms);
+                          const randomName = venetianFirstNames[Math.floor(Math.random() * venetianFirstNames.length)];
+                          setFirstName(randomName);
                         }}
-                        className="bg-amber-600 text-white p-2 rounded-r hover:bg-amber-700 transition-colors text-xl self-stretch"
-                        title="Roll the dice for a random coat of arms"
+                        className="bg-amber-600 text-white p-2 rounded-r hover:bg-amber-700 transition-colors text-xl"
+                        title="Roll the dice for a random name"
                         type="button"
                       >
                         🎲
                       </button>
                     </div>
-                    
-                    <div className="mt-2 flex justify-between">
+                  </div>
+                  
+                  <div className="flex items-center mt-4">
+                    <div className="w-1/3">
+                      <label className="block text-gray-700">Family Name</label>
+                    </div>
+                    <div className="w-2/3 flex">
+                      <input
+                        type="text"
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
+                        placeholder="Enter your family name..."
+                        className="w-full px-3 py-2 border border-amber-300 rounded-l focus:outline-none focus:ring-2 focus:ring-amber-500"
+                      />
                       <button
-                        onClick={generateCoatOfArmsImage}
-                        disabled={!familyCoatOfArms.trim() || isGeneratingImage}
-                        className={`px-3 py-1 rounded text-white text-sm ${
-                          !familyCoatOfArms.trim() || isGeneratingImage 
-                            ? 'bg-gray-400 cursor-not-allowed' 
-                            : 'bg-amber-600 hover:bg-amber-700'
-                        }`}
+                        onClick={() => {
+                          const venetianLastNames = [
+                            "Contarini", "Morosini", "Dandolo", "Foscari", "Grimani",
+                            "Barbarigo", "Mocenigo", "Venier", "Loredan", "Gritti",
+                            "Pisani", "Tiepolo", "Bembo", "Priuli", "Trevisan",
+                            "Donato", "Giustinian", "Zeno", "Corner", "Gradenigo"
+                          ];
+                          const randomName = venetianLastNames[Math.floor(Math.random() * venetianLastNames.length)];
+                          setLastName(randomName);
+                        }}
+                        className="bg-amber-600 text-white p-2 rounded-r hover:bg-amber-700 transition-colors text-xl"
+                        title="Roll the dice for a random name"
+                        type="button"
                       >
-                        {isGeneratingImage ? 'Generating...' : 'Generate Image'}
+                        🎲
                       </button>
                     </div>
-                    
-                    {/* Display the generated coat of arms image */}
-                    {coatOfArmsImage && (
-                      <div className="mt-3 border border-amber-300 rounded p-2">
-                        <img 
-                          src={coatOfArmsImage} 
-                          alt="Family Coat of Arms" 
-                          className="w-full h-auto max-h-48 object-contain"
+                  </div>
+                  
+                  <div className="flex items-center">
+                    <div className="w-1/3">
+                      <label className="block text-gray-700">Family Coat of Arms</label>
+                    </div>
+                    <div className="w-2/3 flex flex-col">
+                      <div className="flex">
+                        <textarea
+                          value={familyCoatOfArms}
+                          onChange={(e) => setFamilyCoatOfArms(e.target.value)}
+                          placeholder="Describe your family's coat of arms..."
+                          className="w-full px-3 py-2 border border-amber-300 rounded-l focus:outline-none focus:ring-2 focus:ring-amber-500"
+                          rows={3}
                         />
+                        <button
+                          onClick={() => {
+                            const coatOfArmsElements = [
+                              "A golden lion rampant on a field of azure",
+                              "A silver eagle displayed on a field of gules",
+                              "Three golden fleurs-de-lis on a field of azure",
+                              "A red rose on a field of silver",
+                              "A black wolf passant on a field of gold",
+                              "A golden sun with sixteen rays on a field of azure",
+                              "A silver crescent moon on a field of sable",
+                              "A golden ship with white sails on a sea of azure",
+                              "A red griffin segreant on a field of silver",
+                              "Three silver stars on a field of gules"
+                            ];
+                            const randomCoatOfArms = coatOfArmsElements[Math.floor(Math.random() * coatOfArmsElements.length)];
+                            setFamilyCoatOfArms(randomCoatOfArms);
+                          }}
+                          className="bg-amber-600 text-white p-2 rounded-r hover:bg-amber-700 transition-colors text-xl self-stretch"
+                          title="Roll the dice for a random coat of arms"
+                          type="button"
+                        >
+                          🎲
+                        </button>
                       </div>
-                    )}
+                      
+                      <div className="mt-2 flex justify-between">
+                        <button
+                          onClick={generateCoatOfArmsImage}
+                          disabled={!familyCoatOfArms.trim() || isGeneratingImage}
+                          className={`px-3 py-1 rounded text-white text-sm ${
+                            !familyCoatOfArms.trim() || isGeneratingImage 
+                              ? 'bg-gray-400 cursor-not-allowed' 
+                              : 'bg-amber-600 hover:bg-amber-700'
+                          }`}
+                        >
+                          {isGeneratingImage ? 'Generating...' : 'Generate Image'}
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                </div>
-                
-                <div className="flex items-center mt-4">
-                  <div className="w-1/3">
-                    <label className="block text-gray-700">Family Motto</label>
-                  </div>
-                  <div className="w-2/3">
-                    <textarea
-                      value={familyMotto}
-                      onChange={(e) => setFamilyMotto(e.target.value)}
-                      placeholder="Enter your family motto..."
-                      className="w-full px-3 py-2 border border-amber-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-500"
-                      rows={2}
-                    />
+                  
+                  <div className="flex items-center mt-4">
+                    <div className="w-1/3">
+                      <label className="block text-gray-700">Family Motto</label>
+                    </div>
+                    <div className="w-2/3">
+                      <textarea
+                        value={familyMotto}
+                        onChange={(e) => setFamilyMotto(e.target.value)}
+                        placeholder="Enter your family motto..."
+                        className="w-full px-3 py-2 border border-amber-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-500"
+                        rows={2}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
+              
+              <div className="text-center">
+                <button
+                  onClick={handleUsernameSubmit}
+                  className="px-6 py-3 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors font-medium"
+                  disabled={!firstName.trim() || !lastName.trim()}
+                >
+                  Register with the Council
+                </button>
+                
+                <p className="mt-4 text-xs text-gray-600 italic">
+                  By decree of the Doge, all citizens must register their identity to conduct business in the Republic.
+                </p>
+              </div>
             </div>
             
-            <div className="text-center">
-              <button
-                onClick={handleUsernameSubmit}
-                className="px-6 py-3 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors font-medium"
-                disabled={!firstName.trim() || !lastName.trim()}
-              >
-                Register with the Council
-              </button>
-              
-              <p className="mt-4 text-xs text-gray-600 italic">
-                By decree of the Doge, all citizens must register their identity to conduct business in the Republic.
-              </p>
+            {/* Right side - Coat of Arms Image */}
+            <div className="md:w-1/2 mt-6 md:mt-0 flex flex-col items-center justify-center">
+              {coatOfArmsImage ? (
+                <div className="flex flex-col items-center">
+                  <div className="border-8 border-amber-700 rounded-lg shadow-xl p-2 bg-amber-50">
+                    <img 
+                      src={coatOfArmsImage} 
+                      alt="Family Coat of Arms" 
+                      className="w-full h-auto max-h-[500px] object-contain"
+                    />
+                  </div>
+                  <p className="mt-4 text-center italic text-amber-800 font-medium">
+                    The Coat of Arms of the House of {lastName || "Your Family"}
+                  </p>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center h-full">
+                  <div className="w-64 h-64 border-4 border-dashed border-amber-300 rounded-lg flex items-center justify-center bg-amber-50">
+                    <p className="text-amber-700 text-center p-4">
+                      {isGeneratingImage 
+                        ? "Creating your family's coat of arms..." 
+                        : "Describe your family's coat of arms and click 'Generate Image' to visualize it"}
+                    </p>
+                  </div>
+                  <p className="mt-4 text-center italic text-amber-800">
+                    Every noble Venetian family is known by its distinctive emblem
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>
