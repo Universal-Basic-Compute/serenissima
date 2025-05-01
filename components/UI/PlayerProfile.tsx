@@ -183,7 +183,7 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
       
       {/* Family Motto (optional) */}
       {(showMotto && (userData?.familyMotto || familyMotto)) && (
-        <div className={`${dim.name} italic text-amber-600 text-center mt-1 w-full`}>
+        <div className={`${dim.name} italic text-amber-600 text-center mt-1 w-full overflow-hidden text-ellipsis`}>
           "{userData?.familyMotto || familyMotto}"
         </div>
       )}

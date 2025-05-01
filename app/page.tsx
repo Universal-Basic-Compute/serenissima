@@ -896,10 +896,13 @@ export default function Home() {
             </button>
             
             {dropdownOpen && (
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-20">
-                <div className="px-4 py-2 border-b border-gray-200">
+              <div className="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg py-1 z-20">
+                <div className="px-4 py-3 border-b border-gray-200">
                   <p className="text-xs text-gray-500">Wallet</p>
                   <p className="text-sm truncate">{walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}</p>
+                  {userProfile.familyMotto && (
+                    <p className="text-xs italic text-amber-600 mt-1">"{userProfile.familyMotto}"</p>
+                  )}
                 </div>
                 <button
                   onClick={() => {
