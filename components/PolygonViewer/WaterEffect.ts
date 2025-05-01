@@ -190,39 +190,39 @@ export default class WaterEffect {
         (texture) => {
           texture.wrapS = THREE.RepeatWrapping;
           texture.wrapT = THREE.RepeatWrapping;
-          texture.repeat.set(40, 40); // Increased repeat for smaller foam patterns
+          texture.repeat.set(40, 40);
           
-          // Create foam mesh
-          const foamGeometry = new THREE.PlaneGeometry(this.width * 1.2, this.height * 1.2); // Slightly larger than water
+          // Create foam mesh with ZERO opacity - effectively disabling it
+          const foamGeometry = new THREE.PlaneGeometry(this.width * 1.2, this.height * 1.2);
           const foamMaterial = new THREE.MeshBasicMaterial({
             map: texture,
             transparent: true,
-            opacity: 0.15, // More subtle foam
-            blending: THREE.AdditiveBlending,
+            opacity: 0, // Set to 0 to completely hide the foam
+            blending: THREE.NoBlending, // Change blending mode
             depthWrite: false
           });
           
           this.waterFoam = new THREE.Mesh(foamGeometry, foamMaterial);
           this.waterFoam.rotation.x = -Math.PI / 2;
-          this.waterFoam.position.y = -0.15; // Slightly above water
+          this.waterFoam.position.y = -0.15;
           this.scene.add(this.waterFoam);
           this.foamTexture = texture;
         }
       );
     } else {
-      // Use cached foam texture with the same enhanced settings
+      // Use cached foam texture but with zero opacity
       const foamGeometry = new THREE.PlaneGeometry(this.width * 1.2, this.height * 1.2);
       const foamMaterial = new THREE.MeshBasicMaterial({
         map: WaterEffect.foamTexture,
         transparent: true,
-        opacity: 0.15,
-        blending: THREE.AdditiveBlending,
+        opacity: 0, // Set to 0 to completely hide the foam
+        blending: THREE.NoBlending, // Change blending mode
         depthWrite: false
       });
       
       this.waterFoam = new THREE.Mesh(foamGeometry, foamMaterial);
       this.waterFoam.rotation.x = -Math.PI / 2;
-      this.waterFoam.position.y = -0.15; // Slightly above water
+      this.waterFoam.position.y = -0.15;
       this.scene.add(this.waterFoam);
       this.foamTexture = WaterEffect.foamTexture;
     }
@@ -232,7 +232,7 @@ export default class WaterEffect {
     // Load caustic textures for underwater light effects
     if (!WaterEffect.causticTextures) {
       WaterEffect.causticTextures = [];
-      const causticCount = 16; // Number of caustic animation frames
+      const causticCount = 16;
       
       for (let i = 0; i < causticCount; i++) {
         const num = i < 10 ? `0${i}` : i;
@@ -249,25 +249,25 @@ export default class WaterEffect {
       this.causticTextures = WaterEffect.causticTextures;
     }
     
-    // Create caustic light
-    this.causticLight = new THREE.DirectionalLight(0xffffff, 0.5);
+    // Create caustic light with zero intensity (effectively disabled)
+    this.causticLight = new THREE.DirectionalLight(0xffffff, 0);
     this.causticLight.position.set(0, 10, 0);
     this.causticLight.lookAt(0, 0, 0);
     this.scene.add(this.causticLight);
     
-    // Create caustic projection mesh
+    // Create caustic projection mesh with zero opacity
     const causticGeometry = new THREE.PlaneGeometry(this.width, this.height);
     const causticMaterial = new THREE.MeshBasicMaterial({
       map: this.causticTextures[0],
       transparent: true,
-      opacity: 0.3,
-      blending: THREE.AdditiveBlending,
+      opacity: 0, // Set to 0 to completely hide caustics
+      blending: THREE.NoBlending, // Change blending mode
       depthWrite: false
     });
     
     this.causticMesh = new THREE.Mesh(causticGeometry, causticMaterial);
     this.causticMesh.rotation.x = -Math.PI / 2;
-    this.causticMesh.position.y = -0.25; // Below water surface
+    this.causticMesh.position.y = -0.25;
     this.scene.add(this.causticMesh);
   }
   
@@ -344,15 +344,17 @@ export default class WaterEffect {
       waterUniforms.waterColor.value.setHex(waterColor);
     }
     
-    // Update opacity and other view-specific settings
+    // Keep foam and caustics disabled regardless of view mode
     if (this.waterFoam) {
-      (this.waterFoam.material as THREE.MeshBasicMaterial).opacity = 
-        activeView === 'land' ? 0.3 : 0.2;
+      (this.waterFoam.material as THREE.MeshBasicMaterial).opacity = 0;
     }
     
     if (this.causticMesh) {
-      (this.causticMesh.material as THREE.MeshBasicMaterial).opacity = 
-        activeView === 'land' ? 0.4 : 0.3;
+      (this.causticMesh.material as THREE.MeshBasicMaterial).opacity = 0;
+    }
+    
+    if (this.causticLight) {
+      this.causticLight.intensity = 0;
     }
   }
 
