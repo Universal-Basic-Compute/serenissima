@@ -798,36 +798,33 @@ export default function PolygonViewer() {
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('click', handleMouseClick);
     
-    // Effect to maintain selection when switching views
-    useEffect(() => {
-      // When switching to land view, restore selection effect if needed
-      if (activeView === 'land' && selectedPolygonId) {
-        const selectedPolygon = polygonMeshesRef.current[selectedPolygonId];
-        if (selectedPolygon && selectedPolygon.material) {
-          // Apply selection effect
-          gsap.to(selectedPolygon.material.emissive, {
-            r: 0,
-            g: 1.0,
-            b: 0,
+    // Apply selection effect if in land view and a polygon is selected
+    if (activeView === 'land' && selectedPolygonId) {
+      const selectedPolygon = polygonMeshesRef.current[selectedPolygonId];
+      if (selectedPolygon && selectedPolygon.material) {
+        // Apply selection effect
+        gsap.to(selectedPolygon.material.emissive, {
+          r: 0,
+          g: 1.0,
+          b: 0,
+          duration: 0.5
+        });
+        
+        gsap.to(selectedPolygon.material, {
+          emissiveIntensity: 0.8,
+          duration: 0.5
+        });
+        
+        // Ensure outline is visible
+        if (selectedPolygon.userData.outlineMesh) {
+          selectedPolygon.userData.outlineMesh.visible = true;
+          gsap.to(selectedPolygon.userData.outlineMesh.material, {
+            opacity: 0.3,
             duration: 0.5
           });
-          
-          gsap.to(selectedPolygon.material, {
-            emissiveIntensity: 0.8,
-            duration: 0.5
-          });
-          
-          // Ensure outline is visible
-          if (selectedPolygon.userData.outlineMesh) {
-            selectedPolygon.userData.outlineMesh.visible = true;
-            gsap.to(selectedPolygon.userData.outlineMesh.material, {
-              opacity: 0.3,
-              duration: 0.5
-            });
-          }
         }
       }
-    }, [activeView, selectedPolygonId]);
+    }
 
     // Animation loop
     const animate = () => {
