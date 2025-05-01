@@ -697,25 +697,16 @@ export default class PolygonRenderer {
         this.bounds.latCorrectionFactor
       )[0];
           
-      // Position at the centroid
-      if (polygon.centroid) {
-        const normalizedCoords = normalizeCoordinates(
-          [polygon.centroid],
-          this.bounds.centerLat,
-          this.bounds.centerLng,
-          this.bounds.scale,
-          this.bounds.latCorrectionFactor
-        )[0];
-                
-        // Position slightly above the land to avoid z-fighting
-        plane.position.set(normalizedCoords.x, 0.05, -normalizedCoords.y);
-      } else {
-        // Default position if no centroid
-        plane.position.set(0, 0.05, 0);
-      }
+      // Position slightly above the land to avoid z-fighting
+      plane.position.set(normalizedCoords.x, 0.05, -normalizedCoords.y);
+      
+      console.log(`Added flat coat of arms for ${polygon.id} owned by ${polygon.owner} at position:`, 
+        normalizedCoords.x, 0.05, -normalizedCoords.y);
     } else {
       // Default position if no centroid
       plane.position.set(0, 0.05, 0);
+      
+      console.log(`Added flat coat of arms for ${polygon.id} owned by ${polygon.owner} at default position`);
     }
     
     // Rotate to lay flat on the ground (90 degrees around X axis)
@@ -724,9 +715,6 @@ export default class PolygonRenderer {
     // Add to scene and store reference
     this.scene.add(plane);
     this.coatOfArmSprites[polygon.id] = plane;
-    
-    console.log(`Added flat coat of arms for ${polygon.id} owned by ${polygon.owner} at position:`, 
-      normalizedCoords.x, 0.05, -normalizedCoords.y);
   }
   
   // Add helper function to create a circular texture
