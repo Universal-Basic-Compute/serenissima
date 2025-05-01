@@ -115,6 +115,8 @@ export default class LODPolygon {
       color: '#e6d2a8', // Always use sand/beige color
       side: THREE.FrontSide,
       wireframe: false,
+      // Set stroke width to 0 to completely remove edges
+      wireframeLinewidth: 0,
       // Remove stroke/edge visibility
       polygonOffset: true,
       polygonOffsetFactor: 1,
@@ -148,9 +150,9 @@ export default class LODPolygon {
       steps: 1, // Reduce steps to prevent shadow artifacts
       depth: 0.05, // Increased depth for more island-like appearance
       bevelEnabled: true, // Enable bevels for smoother island edges
-      bevelThickness: 0.03, // Increased for smoother edges
-      bevelSize: 0.03, // Increased for smoother edges
-      bevelSegments: 5, // Increased for smoother bevels
+      bevelThickness: 0.04, // Increased for smoother edges
+      bevelSize: 0.04, // Increased for smoother edges
+      bevelSegments: 6, // Increased for smoother bevels
       UVGenerator: { // Add a custom UV generator for better texture mapping
         generateTopUV: function(geometry, vertices, indexA, indexB, indexC) {
           // Create UVs that map the entire texture to the face
@@ -199,8 +201,11 @@ export default class LODPolygon {
     
     // Update normals after modifying positions
     geometry.computeVertexNormals();
-    // Enable smooth shading
+    // Enable smooth shading for seamless appearance
     geometry.attributes.normal.needsUpdate = true;
+    
+    // Apply smooth shading to further reduce the appearance of edges
+    geometry.computeBoundingSphere();
     
     // Determine the color to use
     const landColor = this.determineLandColor();
@@ -212,9 +217,9 @@ export default class LODPolygon {
       metalness: 0.1, // Low metalness
       side: THREE.FrontSide,
       wireframe: false,
-      // Set the emissive color to match the fill color to hide edges
-      emissive: landColor,
-      emissiveIntensity: 0.1,
+      // Remove emissive properties to eliminate visible edges
+      // Set stroke width to 0 to completely remove edges
+      wireframeLinewidth: 0,
       // Add these important properties to prevent z-fighting:
       polygonOffset: true,
       polygonOffsetFactor: 1,
