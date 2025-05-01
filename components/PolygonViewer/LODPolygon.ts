@@ -238,29 +238,46 @@ export default class LODPolygon {
     meshes.forEach(mesh => {
       if (!mesh) return;
       
-      const material = mesh.material as THREE.MeshStandardMaterial;
+      const material = mesh.material as THREE.MeshBasicMaterial; // Changed from MeshStandardMaterial
+      
+      // Skip if material is undefined
+      if (!material) return;
       
       // Update material based on view mode
       if (activeView === 'land') {
         // For land view, use owner's color or generate one
         if (!this.isSelected) {
           if (this.ownerColor) {
-            material.color.set(this.ownerColor);
+            // Make sure material.color exists before calling set
+            if (material.color) {
+              material.color.set(this.ownerColor);
+            }
           } else if (this.polygon.owner) {
-            material.color.copy(this.generateColorFromUsername(this.polygon.owner));
+            // Make sure material.color exists before calling copy
+            if (material.color) {
+              const generatedColor = this.generateColorFromUsername(this.polygon.owner);
+              material.color.copy(generatedColor);
+            }
           } else {
-            material.color.set(new THREE.Color(0x7cac6a));
+            // Make sure material.color exists before setting
+            if (material.color) {
+              material.color.set(new THREE.Color(0x7cac6a));
+            }
           }
         }
-        material.roughness = 0.7;
-        material.metalness = 0.1;
+        
+        // Only set these properties if they exist on the material
+        if ('roughness' in material) material.roughness = 0.7;
+        if ('metalness' in material) material.metalness = 0.1;
       } else {
         // For other views, use sand color
-        if (!this.isSelected) {
+        if (!this.isSelected && material.color) {
           material.color.set('#e6d2a8');
         }
-        material.roughness = 0.7;
-        material.metalness = 0.1;
+        
+        // Only set these properties if they exist on the material
+        if ('roughness' in material) material.roughness = 0.7;
+        if ('metalness' in material) material.metalness = 0.1;
       }
       
       // Update material to apply changes
