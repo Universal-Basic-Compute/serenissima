@@ -472,7 +472,9 @@ export default function PolygonViewer() {
   useEffect(() => {
     const handleLandOwnershipChanged = (event: CustomEvent) => {
       const { landId, newOwner, transaction } = event.detail;
-      
+
+      console.log(`Land ownership changed event received: ${landId} now owned by ${newOwner}`);
+
       // Update the local state with the new owner
       const updatedPolygons = polygons.map(p => 
         p.id === landId ? { ...p, owner: newOwner as string | undefined } : p
@@ -487,27 +489,46 @@ export default function PolygonViewer() {
       
       // Update the polygon renderer if it exists
       if (polygonRendererRef.current) {
+        console.log(`Updating polygon owner in renderer: ${landId} -> ${newOwner}`);
         polygonRendererRef.current.updatePolygonOwner(landId, newOwner as string);
       }
       
       // If this is the currently selected polygon, make sure the panel stays open
       if (landId === selectedPolygonId) {
+        console.log('Selected polygon ownership changed, keeping panel open');
         // Dispatch event to keep panel open
         window.dispatchEvent(new CustomEvent('keepLandDetailsPanelOpen', {
           detail: { polygonId: landId }
         }));
       }
       
-      console.log(`Land ownership changed: ${landId} now owned by ${newOwner}`);
-      
       // Force an update of the polygon colors and coat of arms
       if (polygonRendererRef.current) {
+        console.log('Scheduling update of polygon colors and coat of arms');
+
+        // First immediate update
+        if (activeView === 'land') {
+          polygonRendererRef.current.updatePolygonOwnerColors();
+          polygonRendererRef.current.updateCoatOfArmsSprites();
+        }
+
+        // Then a delayed update to ensure everything is properly loaded
         setTimeout(() => {
+          console.log('Performing delayed update of polygon colors and coat of arms');
           if (activeView === 'land') {
             polygonRendererRef.current.updatePolygonOwnerColors();
             polygonRendererRef.current.updateCoatOfArmsSprites();
           }
-        }, 500);
+        }, 1000);
+
+        // And another update after a longer delay as a final check
+        setTimeout(() => {
+          console.log('Performing final update of polygon colors and coat of arms');
+          if (activeView === 'land') {
+            polygonRendererRef.current.updatePolygonOwnerColors();
+            polygonRendererRef.current.updateCoatOfArmsSprites();
+          }
+        }, 3000);
       }
     };
     

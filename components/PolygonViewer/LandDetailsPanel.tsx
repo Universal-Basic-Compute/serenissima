@@ -136,8 +136,13 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
   useEffect(() => {
     if (selectedPolygonId) {
       setIsLoading(true);
-      fetch(`${getApiBaseUrl()}/api/transaction/land/${selectedPolygonId}`)
-        .then(response => {
+      console.log(`Fetching transaction data for land ${selectedPolygonId}`);
+
+      // Function to fetch transaction with retry logic
+      const fetchTransactionWithRetry = async (retries = 3, delay = 1000) => {
+        try {
+          const response = await fetch(`${getApiBaseUrl()}/api/transaction/land/${selectedPolygonId}`);
+
           if (!response.ok) {
             if (response.status === 404) {
               // No transaction found, that's okay
@@ -147,9 +152,8 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
             }
             throw new Error(`Failed to fetch transaction: ${response.status} ${response.statusText}`);
           }
-          return response.json();
-        })
-        .then(data => {
+
+          const data = await response.json();
           if (data) {
             console.log(`Transaction data for land ${selectedPolygonId}:`, data);
             setTransaction(data);
@@ -157,12 +161,24 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
             console.log(`No transaction data returned for land ${selectedPolygonId}`);
             setTransaction(null);
           }
-        })
-        .catch(error => {
-          // Just log the error and continue without a transaction
-          console.error('Error fetching transaction:', error);
-          setTransaction(null);
-        })
+          return data;
+        } catch (error) {
+          console.error(`Error fetching transaction (attempt ${4-retries}/3):`, error);
+          if (retries > 1) {
+            console.log(`Retrying in ${delay}ms...`);
+            await new Promise(resolve => setTimeout(resolve, delay));
+            return fetchTransactionWithRetry(retries - 1, delay * 2);
+          } else {
+            // Last attempt failed, continue without a transaction
+            console.warn('All retry attempts failed, continuing without transaction data');
+            setTransaction(null);
+            return null;
+          }
+        }
+      };
+
+      // Start the fetch with retries
+      fetchTransactionWithRetry()
         .finally(() => {
           setIsLoading(false);
         });
