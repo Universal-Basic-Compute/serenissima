@@ -499,6 +499,16 @@ export default function PolygonViewer() {
       }
       
       console.log(`Land ownership changed: ${landId} now owned by ${newOwner}`);
+      
+      // Force an update of the polygon colors and coat of arms
+      if (polygonRendererRef.current) {
+        setTimeout(() => {
+          if (activeView === 'land') {
+            polygonRendererRef.current.updatePolygonOwnerColors();
+            polygonRendererRef.current.updateCoatOfArmsSprites();
+          }
+        }, 500);
+      }
     };
     
     // Add event listener for land ownership changes
@@ -507,7 +517,7 @@ export default function PolygonViewer() {
     return () => {
       window.removeEventListener('landOwnershipChanged', handleLandOwnershipChanged as EventListener);
     };
-  }, [polygons, landOwners, selectedPolygonId]);
+  }, [polygons, landOwners, selectedPolygonId, activeView]);
   
   // Add this useEffect to listen for compute balance changes
   useEffect(() => {

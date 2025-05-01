@@ -61,6 +61,27 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
       return;
     }
     
+    // Listen for profile updates
+    const handleProfileUpdate = (event: CustomEvent) => {
+      if (event.detail && event.detail.user_name === username) {
+        console.log(`Received profile update for ${username} with compute: ${event.detail.compute_amount}`);
+        setUserData({
+          username: event.detail.user_name,
+          firstName: event.detail.first_name || event.detail.user_name?.split(' ')[0] || 'Unknown',
+          lastName: event.detail.last_name || event.detail.user_name?.split(' ').slice(1).join(' ') || 'User',
+          coatOfArmsImage: event.detail.coat_of_arms_image,
+          familyMotto: event.detail.family_motto,
+          computeAmount: event.detail.compute_amount
+        });
+      }
+    };
+    
+    window.addEventListener('userProfileUpdated', handleProfileUpdate as EventListener);
+    
+    return () => {
+      window.removeEventListener('userProfileUpdated', handleProfileUpdate as EventListener);
+    };
+    
     // If we have a wallet address, fetch the user data
     if (walletAddress) {
       // Check cache first
