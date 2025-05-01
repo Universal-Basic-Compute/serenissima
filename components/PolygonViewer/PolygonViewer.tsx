@@ -398,6 +398,20 @@ export default function PolygonViewer() {
         console.log('Initializing with existing coat of arms data:', ownerCoatOfArmsMap);
         polygonRenderer.updateOwnerCoatOfArms(ownerCoatOfArmsMap);
       }
+    
+      // Force an update of the coat of arms sprites
+      if (Object.keys(users).length > 0) {
+        const coatOfArmsMap: Record<string, string> = {};
+        Object.values(users).forEach(user => {
+          if (user.user_name && user.coat_of_arms_image) {
+            coatOfArmsMap[user.user_name] = user.coat_of_arms_image;
+          }
+        });
+        if (Object.keys(coatOfArmsMap).length > 0) {
+          polygonRenderer.updateOwnerCoatOfArms(coatOfArmsMap);
+          polygonRenderer.updateViewMode(activeView);
+        }
+      }
       
       // Force an update of the coat of arms sprites
       if (Object.keys(users).length > 0) {

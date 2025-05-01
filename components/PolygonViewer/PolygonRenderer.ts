@@ -819,8 +819,8 @@ export default class PolygonRenderer {
     const texture = new THREE.Texture(canvas);
     texture.needsUpdate = true;
     
-    // Create a flat plane for the colored circle - 20% smaller
-    const planeSize = 1.28; // Reduced by 20% from 1.6
+    // Create a flat plane for the colored circle - increase size for better visibility
+    const planeSize = 2.5; // Increased for better visibility
     const geometry = new THREE.PlaneGeometry(planeSize, planeSize);
     
     // Create material with the texture
@@ -843,8 +843,8 @@ export default class PolygonRenderer {
       this.bounds.latCorrectionFactor
     )[0];
     
-    // Position higher above the land to avoid z-fighting - INCREASE THIS VALUE
-    plane.position.set(normalizedCoords.x, 0.15, -normalizedCoords.y);
+    // Position higher above the land to avoid z-fighting
+    plane.position.set(normalizedCoords.x, 0.25, -normalizedCoords.y); // Increased height
     
     // Rotate to lay flat on the ground (90 degrees around X axis)
     plane.rotation.x = -Math.PI / 2;
