@@ -335,6 +335,12 @@ export default function Home() {
       // When editing, use the existing username
       const username = userProfile ? userProfile.username : usernameInput.trim();
       
+      // If this is a new user (no userProfile), assign a random color from the palette
+      // Otherwise, use the selected color
+      const userColor = !userProfile 
+        ? veniceColorPalette[Math.floor(Math.random() * veniceColorPalette.length)]
+        : selectedColor;
+      
       console.log('Submitting profile data to backend:', {
         wallet_address: walletAddress,
         user_name: username,
@@ -343,7 +349,7 @@ export default function Home() {
         family_coat_of_arms: familyCoatOfArms.trim(),
         family_motto: familyMotto.trim(),
         coat_of_arms_image: coatOfArmsImage,
-        color: selectedColor
+        color: userColor
       });
           
       // Update the user record with the username, first name, last name, coat of arms, family motto, and image URL
@@ -360,7 +366,7 @@ export default function Home() {
           family_coat_of_arms: familyCoatOfArms.trim(),
           family_motto: familyMotto.trim(),
           coat_of_arms_image: coatOfArmsImage,
-          color: selectedColor
+          color: userColor
         }),
       });
       
