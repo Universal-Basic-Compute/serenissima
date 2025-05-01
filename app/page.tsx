@@ -1015,6 +1015,36 @@ export default function Home() {
     setIsGoogleLoaded(true);
   };
   
+  // Add a function to update a centroid
+  const updateCentroid = async (polygonId: string, newCentroid: {lat: number, lng: number}) => {
+    try {
+      const response = await fetch('/api/update-centroid', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: polygonId,
+          centroid: newCentroid
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to update centroid');
+      }
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        console.log(`Successfully updated centroid for ${polygonId}`);
+      } else {
+        console.error(`Failed to update centroid: ${data.error}`);
+      }
+    } catch (error) {
+      console.error('Error updating centroid:', error);
+    }
+  };
+
   // Add a function to load polygons onto the map
   const loadPolygonsOnMap = useCallback(() => {
     console.log('loadPolygonsOnMap called');
@@ -1036,13 +1066,19 @@ export default function Home() {
       polygon.setMap(null);
     });
     
+    // Clear existing centroid markers
+    Object.values(centroidMarkers).forEach(marker => {
+      marker.setMap(null);
+    });
+    
     // Reset selected polygon
     if (selectedPolygon) {
       setSelectedPolygon(null);
     }
     
-    // Reset active polygons
+    // Reset active polygons and centroid markers
     const newActiveLandPolygons = {};
+    const newCentroidMarkers = {};
     
     // Fetch polygons from API
     fetch('/api/get-polygons')
@@ -1076,6 +1112,46 @@ export default function Home() {
             
             // Store reference to polygon
             newActiveLandPolygons[polygon.id] = mapPolygon;
+            
+            // Create a centroid marker if centroid exists
+            if (polygon.centroid) {
+              const centroidMarker = new google.maps.Marker({
+                position: {
+                  lat: polygon.centroid.lat,
+                  lng: polygon.centroid.lng
+                },
+                map: centroidDragMode ? mapRef.current : null, // Only show if in centroid drag mode
+                draggable: centroidDragMode,
+                icon: {
+                  path: google.maps.SymbolPath.CIRCLE,
+                  scale: 7,
+                  fillColor: '#FF0000',
+                  fillOpacity: 0.7,
+                  strokeWeight: 2,
+                  strokeColor: '#FFFFFF'
+                },
+                title: `Centroid: ${polygon.id}`
+              });
+              
+              // Add drag event listeners
+              centroidMarker.addListener('dragstart', () => {
+                setIsDraggingCentroid(true);
+              });
+              
+              centroidMarker.addListener('dragend', async () => {
+                setIsDraggingCentroid(false);
+                const newPosition = centroidMarker.getPosition();
+                if (newPosition) {
+                  // Update the centroid in the backend
+                  await updateCentroid(polygon.id, {
+                    lat: newPosition.lat(),
+                    lng: newPosition.lng()
+                  });
+                }
+              });
+              
+              newCentroidMarkers[polygon.id] = centroidMarker;
+            }
           } else {
             console.warn(`Polygon ${index} (${polygon.id}) has invalid coordinates:`, polygon.coordinates);
           }
@@ -1083,11 +1159,12 @@ export default function Home() {
         
         console.log(`Added ${Object.keys(newActiveLandPolygons).length} polygons to map`);
         setActiveLandPolygons(newActiveLandPolygons);
+        setCentroidMarkers(newCentroidMarkers);
       })
       .catch(error => {
         console.error('Error loading polygons:', error);
       });
-  }, [isGoogleLoaded]);
+  }, [isGoogleLoaded, centroidDragMode]);
 
   // Add useEffect to load polygons when map is ready
   useEffect(() => {
@@ -1691,6 +1768,60 @@ export default function Home() {
             }`}
           >
             {deleteMode ? 'Cancel Delete' : 'Delete Polygon'}
+          </button>
+        </div>
+      )}
+      
+      {/* Centroid drag mode button */}
+      {isGoogleLoaded && (
+        <div className="absolute bottom-4 left-72 z-10">
+          <button
+            onClick={() => {
+              // Toggle centroid drag mode
+              const newMode = !centroidDragMode;
+              setCentroidDragMode(newMode);
+              
+              // Show/hide and enable/disable dragging for all centroid markers
+              Object.values(centroidMarkers).forEach(marker => {
+                marker.setMap(newMode ? mapRef.current : null);
+                marker.setDraggable(newMode);
+              });
+              
+              // Turn off other modes if enabling centroid drag mode
+              if (newMode) {
+                if (bridgeMode) {
+                  setBridgeMode(false);
+                  setBridgeStart(null);
+                  setBridgeStartLandId(null);
+                }
+                
+                if (deleteMode) {
+                  setDeleteMode(false);
+                  if (selectedMapPolygon) {
+                    selectedMapPolygon.setOptions({
+                      strokeColor: '#3388ff',
+                      strokeOpacity: 0.8,
+                      fillColor: '#3388ff',
+                      fillOpacity: 0.35
+                    });
+                  }
+                  setSelectedMapPolygon(null);
+                  setSelectedMapPolygonId(null);
+                }
+              }
+              
+              // Change cursor style based on centroid drag mode
+              if (mapRef.current) {
+                mapRef.current.setOptions({
+                  draggableCursor: newMode ? 'move' : ''
+                });
+              }
+            }}
+            className={`px-4 py-2 rounded shadow ${
+              centroidDragMode ? 'bg-purple-500 text-white' : 'bg-white'
+            }`}
+          >
+            {centroidDragMode ? 'Exit Centroid Mode' : 'Edit Centroids'}
           </button>
         </div>
       )}

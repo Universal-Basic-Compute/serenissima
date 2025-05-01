@@ -50,6 +50,9 @@ export default function MapPage() {
   const [bridgeStartLandId, setBridgeStartLandId] = useState<string | null>(null);
   const [activeLandPolygons, setActiveLandPolygons] = useState<{[id: string]: google.maps.Polygon}>({});
   const [bridgeStartMarker, setBridgeStartMarker] = useState<google.maps.Marker | null>(null);
+  const [centroidMarkers, setCentroidMarkers] = useState<{[id: string]: google.maps.Marker}>({});
+  const [isDraggingCentroid, setIsDraggingCentroid] = useState(false);
+  const [centroidDragMode, setCentroidDragMode] = useState(false);
   
   // Initialize wallet adapter
   useEffect(() => {
@@ -495,7 +498,7 @@ export default function MapPage() {
     if (mapRef.current && isGoogleLoaded) {
       loadPolygonsOnMap();
     }
-  }, [mapRef.current, isGoogleLoaded, loadPolygonsOnMap]);
+  }, [mapRef.current, isGoogleLoaded, loadPolygonsOnMap, centroidDragMode]);
 
   // Handle script load
   const handleScriptLoad = () => {
