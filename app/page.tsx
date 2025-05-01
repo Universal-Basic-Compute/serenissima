@@ -5,8 +5,8 @@ import { PhantomWalletAdapter } from '@solana/wallet-adapter-phantom';
 import { WalletReadyState } from '@solana/wallet-adapter-base';
 import dynamic from 'next/dynamic';
 import { GoogleMap, LoadScript, DrawingManager } from '@react-google-maps/api';
-import ComputeInvestModal from '../components/UI/ComputeInvestModal';
 import PlayerProfile from '../components/UI/PlayerProfile';
+import InvestComputeMenu from '../components/UI/InvestComputeMenu';
 import { transferComputeTokens } from '../lib/tokenUtils';
 import { investComputeInAirtable } from '../lib/airtableUtils';
 
@@ -45,7 +45,7 @@ export default function Home() {
   const [walletAdapter, setWalletAdapter] = useState<PhantomWalletAdapter | null>(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const [computeModalOpen, setComputeModalOpen] = useState(false);
+  const [investMenuOpen, setInvestMenuOpen] = useState(false);
   const [showUsernamePrompt, setShowUsernamePrompt] = useState(false);
   const [usernameInput, setUsernameInput] = useState('');
   const [firstName, setFirstName] = useState<string>('');
@@ -903,7 +903,7 @@ export default function Home() {
                 </div>
                 <button
                   onClick={() => {
-                    setComputeModalOpen(true);
+                    setInvestMenuOpen(true);
                     setDropdownOpen(false);
                   }}
                   className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-blue-500 hover:text-white transition-colors"
@@ -939,7 +939,7 @@ export default function Home() {
               <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-20">
                 <button
                   onClick={() => {
-                    setComputeModalOpen(true);
+                    setInvestMenuOpen(true);
                     setDropdownOpen(false);
                   }}
                   className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-blue-500 hover:text-white transition-colors"

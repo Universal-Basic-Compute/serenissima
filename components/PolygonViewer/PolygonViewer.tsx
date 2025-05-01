@@ -10,7 +10,7 @@ import InteractionManager from './InteractionManager';
 import ViewModeMenu from './ViewModeMenu';
 import LandDetailsPanel from './LandDetailsPanel';
 import ActionButton from '../UI/ActionButton';
-import ComputeInvestModal from '../UI/ComputeInvestModal';
+import InvestComputeMenu from '../UI/InvestComputeMenu';
 import usePolygonStore from '@/store/usePolygonStore';
 import BridgeRenderer from './BridgeRenderer';
 
@@ -19,7 +19,7 @@ export default function PolygonViewer() {
   const [infoVisible, setInfoVisible] = useState(false);
   const polygonMeshesRef = useRef<Record<string, THREE.Mesh>>({});
   const isInteractingWithPolygon = useRef(false);
-  const [computeModalOpen, setComputeModalOpen] = useState(false);
+  const [investMenuOpen, setInvestMenuOpen] = useState(false);
   
   // Get state from store
   const {
@@ -411,12 +411,13 @@ export default function PolygonViewer() {
         className="w-full h-full"
       />
       
-      {/* Compute Investment Modal */}
-      <ComputeInvestModal
-        isOpen={computeModalOpen}
-        onClose={() => setComputeModalOpen(false)}
-        onInvest={handleInvestCompute}
-      />
+      {/* Invest Compute Menu */}
+      {investMenuOpen && (
+        <InvestComputeMenu
+          onClose={() => setInvestMenuOpen(false)}
+          onInvest={handleInvestCompute}
+        />
+      )}
     </div>
   );
 }
