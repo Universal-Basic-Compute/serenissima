@@ -297,17 +297,27 @@ export default class PolygonRenderer {
   
   public updateOwnerCoatOfArms(ownerCoatOfArmsMap: Record<string, string>) {
     console.log('updateOwnerCoatOfArms called with data:', ownerCoatOfArmsMap);
+    
+    // Update the coat of arms map
     this.ownerCoatOfArmsMap = { ...this.ownerCoatOfArmsMap, ...ownerCoatOfArmsMap };
+    
+    // Update the users data with coat of arms information
+    Object.entries(ownerCoatOfArmsMap).forEach(([owner, url]) => {
+      if (this.users[owner]) {
+        this.users[owner].coat_of_arms_image = url;
+      }
+    });
+    
     console.log('Combined coat of arms map now has', Object.keys(this.ownerCoatOfArmsMap).length, 'entries');
+    
+    // Update the sprites
     this.updateCoatOfArmsSprites();
   }
 
   // Create and update coat of arms sprites with texture caching
   private updateCoatOfArmsSprites() {
     console.log('Updating coat of arms sprites, active view:', this.activeView);
-    console.log('Owner coat of arms map:', this.ownerCoatOfArmsMap);
-    console.log('Polygons with owners:', this.polygons.filter(p => p.owner));
-
+    
     // Remove existing sprites
     Object.values(this.coatOfArmSprites).forEach(sprite => {
       this.scene.remove(sprite);
@@ -326,18 +336,24 @@ export default class PolygonRenderer {
     // Log the polygons with owners and coat of arms
     const polygonsWithOwners = this.polygons.filter(p => 
       p.owner && 
-      p.centroid && 
-      this.ownerCoatOfArmsMap[p.owner]
+      p.centroid
     );
     
-    console.log(`Found ${polygonsWithOwners.length} polygons with owners and coat of arms`);
+    console.log(`Found ${polygonsWithOwners.length} polygons with owners`);
     
-    // Process each polygon with an owner and coat of arms
+    // Process each polygon with an owner
     polygonsWithOwners.forEach(polygon => {
       console.log(`Processing polygon ${polygon.id} with owner ${polygon.owner}`);
       
+      // Get the owner data from users
+      const ownerData = this.users[polygon.owner];
+      if (!ownerData) {
+        console.warn(`No user data found for owner ${polygon.owner}`);
+        return;
+      }
+      
       // Get the coat of arms URL
-      const coatOfArmsUrl = this.ownerCoatOfArmsMap[polygon.owner];
+      const coatOfArmsUrl = ownerData.coat_of_arms_image;
       console.log(`Coat of arms URL for ${polygon.owner}:`, coatOfArmsUrl);
       
       if (!coatOfArmsUrl) {
@@ -360,9 +376,8 @@ export default class PolygonRenderer {
               ownerColor = this.users[polygon.owner].color;
             }
           
-            // Always create circular texture with owner's color
+            // Create circular texture with owner's color
             const circularTexture = this.createCircularTexture(texture, ownerColor);
-            circularTexture.userData.isCircular = true;
             
             // Create sprite after texture is loaded
             this.createSpriteForPolygon(polygon, circularTexture);
@@ -383,11 +398,11 @@ export default class PolygonRenderer {
           ownerColor = this.users[polygon.owner].color;
         }
         
-        // Always apply circular mask to cached texture with owner's color
+        // Create circular texture with owner's color
         const circularTexture = this.createCircularTexture(textureCache[polygon.owner], ownerColor);
-        circularTexture.userData.isCircular = true;
-        textureCache[polygon.owner] = circularTexture;
-        this.createSpriteForPolygon(polygon, textureCache[polygon.owner]);
+        
+        // Create sprite with cached texture
+        this.createSpriteForPolygon(polygon, circularTexture);
       }
     });
   }
@@ -459,7 +474,7 @@ export default class PolygonRenderer {
       
       // Draw a circular clipping path
       ctx.beginPath();
-      ctx.arc(size/2, size/2, size/2, 0, Math.PI * 2);
+      ctx.arc(size/2, size/2, size/2 - 4, 0, Math.PI * 2);
       ctx.closePath();
       ctx.clip();
       
@@ -477,7 +492,7 @@ export default class PolygonRenderer {
       }
       
       // Add a circular border with the owner's color
-      ctx.strokeStyle = ownerColor; // Use the owner's color instead of hardcoded brown
+      ctx.strokeStyle = ownerColor; // Use the owner's color
       ctx.lineWidth = 8;
       ctx.stroke();
       
