@@ -443,11 +443,13 @@ export default function PolygonViewer() {
       event.preventDefault();
       
       // Adjust camera radius based on wheel direction
-      const zoomSpeed = 5;
+      // Increase zoom speed for faster zooming
+      const zoomSpeed = 10; // Increased from 5 to 10
       const delta = event.deltaY > 0 ? 1 : -1;
       
       // Update radius (distance from center)
-      cameraRadius = Math.max(20, Math.min(200, cameraRadius + delta * zoomSpeed));
+      // Allow zooming much closer and further away
+      cameraRadius = Math.max(5, Math.min(400, cameraRadius + delta * zoomSpeed));
       
       // Update camera position using current angles and new radius
       camera.position.x = cameraRadius * Math.sin(cameraPhi) * Math.cos(cameraTheta);
