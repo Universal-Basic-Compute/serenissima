@@ -1027,6 +1027,32 @@ export default function Home() {
       loadPolygonsOnMap();
     }
   }, [mapRef.current, isGoogleLoaded, loadPolygonsOnMap]);
+  
+  // Add this useEffect to ensure coat of arms are updated when users data changes
+  useEffect(() => {
+    if (polygonRendererRef.current && users && Object.keys(users).length > 0) {
+      console.log('Updating coat of arms from users data in PolygonViewer:', users);
+      
+      // Create a map of username to coat of arms URL
+      const coatOfArmsMap: Record<string, string> = {};
+      
+      Object.values(users).forEach(user => {
+        if (user.user_name && user.coat_of_arms_image) {
+          coatOfArmsMap[user.user_name] = user.coat_of_arms_image;
+          console.log(`Added coat of arms for ${user.user_name}:`, user.coat_of_arms_image);
+        }
+      });
+      
+      console.log('Created coat of arms map with', Object.keys(coatOfArmsMap).length, 'entries');
+      
+      // Force an update of the coat of arms sprites
+      setTimeout(() => {
+        if (polygonRendererRef.current) {
+          polygonRendererRef.current.updateOwnerCoatOfArms(coatOfArmsMap);
+        }
+      }, 1000); // Add a delay to ensure the renderer is ready
+    }
+  }, [users]);
 
   // Also add this to ensure polygons are loaded when the component mounts
   useEffect(() => {
