@@ -233,6 +233,39 @@ export default function PolygonViewer() {
       window.removeEventListener('polygonDeleted', handlePolygonDeleted);
     };
   }, [loadPolygons, loadLandOwners]);
+  
+  // Add an effect to listen for land ownership changes
+  useEffect(() => {
+    const handleLandOwnershipChanged = (event: CustomEvent) => {
+      const { landId, newOwner, transaction } = event.detail;
+      
+      // Update the local state with the new owner
+      const updatedPolygons = polygons.map(p => 
+        p.id === landId ? { ...p, owner: newOwner } : p
+      );
+      
+      // Update the polygons in the store
+      usePolygonStore.setState({ polygons: updatedPolygons });
+      
+      // Update the land owners map
+      const updatedLandOwners = { ...landOwners, [landId]: newOwner };
+      usePolygonStore.setState({ landOwners: updatedLandOwners });
+      
+      // Update the polygon renderer if it exists
+      if (polygonRendererRef.current) {
+        polygonRendererRef.current.updatePolygonOwner(landId, newOwner);
+      }
+      
+      console.log(`Land ownership changed: ${landId} now owned by ${newOwner}`);
+    };
+    
+    // Add event listener for land ownership changes
+    window.addEventListener('landOwnershipChanged', handleLandOwnershipChanged as EventListener);
+    
+    return () => {
+      window.removeEventListener('landOwnershipChanged', handleLandOwnershipChanged as EventListener);
+    };
+  }, [polygons, landOwners]);
 
   // Update info panel visibility when selectedPolygonId changes
   useEffect(() => {

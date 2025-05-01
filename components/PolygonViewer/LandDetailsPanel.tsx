@@ -254,21 +254,43 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
                         buyer: walletAddress  // Make sure this is included
                       }),
                     });
-                    
+                  
                     // Parse the response data regardless of status
                     const data = await response.json();
-                    
+                  
                     if (!response.ok) {
                       // Check if this is a "transaction already executed" error
                       if (data.detail && data.detail.includes("already executed")) {
-                        alert(`This land has already been acquired. The page will refresh to show the current owner.`);
-                        window.location.reload();
+                        alert(`This land has already been acquired. The information will be updated.`);
+                      
+                        // Fetch updated land data
+                        const landResponse = await fetch(`http://localhost:8000/api/land/${selectedPolygonId}`);
+                        if (landResponse.ok) {
+                          const landData = await landResponse.json();
+                        
+                          // Update local state
+                          if (landData && landData.user) {
+                            // Update the owner in the local state
+                            const updatedPolygons = polygons.map(p => 
+                              p.id === selectedPolygonId ? { ...p, owner: landData.user } : p
+                            );
+                          
+                            // Dispatch a custom event to notify other components
+                            window.dispatchEvent(new CustomEvent('landOwnershipChanged', {
+                              detail: { 
+                                landId: selectedPolygonId, 
+                                newOwner: landData.user
+                              }
+                            }));
+                          }
+                        }
+                      
                         return;
                       }
-                      
+                    
                       throw new Error(data.detail || 'Failed to execute transaction');
                     }
-                    
+                  
                     // Show success message styled as an official document
                     alert(
                       `\n╔══════════════════════════════════════════════════╗
@@ -289,9 +311,43 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
                       \n║                                                  ║
                       \n╚══════════════════════════════════════════════════╝`
                     );
+                  
+                    // Update local state without page reload
+                    // 1. Update the owner in the local state
+                    const updatedPolygons = polygons.map(p => 
+                      p.id === selectedPolygonId ? { ...p, owner: walletAddress } : p
+                    );
+                  
+                    // 2. Update the transaction to mark it as executed
+                    const updatedTransaction = {
+                      ...transaction,
+                      buyer: walletAddress,
+                      executed_at: new Date().toISOString()
+                    };
+                    setTransaction(updatedTransaction);
+                  
+                    // 3. Clear offers since the land has been sold
+                    setOffers([]);
+                  
+                    // 4. Dispatch a custom event to notify other components
+                    window.dispatchEvent(new CustomEvent('landOwnershipChanged', {
+                      detail: { 
+                        landId: selectedPolygonId, 
+                        newOwner: walletAddress,
+                        transaction: updatedTransaction
+                      }
+                    }));
+                  
+                    // 5. Fetch updated user data to reflect new compute balance
+                    const userResponse = await fetch(`http://localhost:8000/api/wallet/${walletAddress}`);
+                    if (userResponse.ok) {
+                      const userData = await userResponse.json();
                     
-                    // Refresh the page to update the UI
-                    window.location.reload();
+                      // Dispatch event to update user profile with new compute amount
+                      window.dispatchEvent(new CustomEvent('userProfileUpdated', {
+                        detail: userData
+                      }));
+                    }
                   } catch (error) {
                     console.error('Error executing transaction:', error);
                     alert('Failed to acquire land. Please try again.');

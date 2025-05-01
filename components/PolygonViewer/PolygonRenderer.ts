@@ -586,6 +586,45 @@ export default class PolygonRenderer {
     }
   }
 
+  // Add method to update polygon owner
+  public updatePolygonOwner(polygonId: string, newOwner: string) {
+    // Find the polygon in our list
+    const polygon = this.polygons.find(p => p.id === polygonId);
+    if (!polygon) return;
+    
+    // Update the polygon's owner
+    polygon.owner = newOwner;
+    
+    // Find the corresponding LOD polygon
+    const lodPolygon = this.lodPolygons.find(lp => 
+      lp.getMesh() === this.polygonMeshesRef.current[polygonId]
+    );
+    
+    if (!lodPolygon) return;
+    
+    // Get the owner's color from the users data
+    let ownerColor = null;
+    if (newOwner && this.users[newOwner] && this.users[newOwner].color) {
+      ownerColor = this.users[newOwner].color;
+    }
+    
+    // Get the owner's coat of arms URL if available
+    let ownerCoatOfArmsUrl = null;
+    if (newOwner && this.ownerCoatOfArmsMap && this.ownerCoatOfArmsMap[newOwner]) {
+      ownerCoatOfArmsUrl = this.ownerCoatOfArmsMap[newOwner];
+    }
+    
+    // Update the LOD polygon with the new owner's color and coat of arms
+    lodPolygon.updateOwner(newOwner, ownerColor);
+    
+    if (ownerCoatOfArmsUrl) {
+      lodPolygon.updateCoatOfArmsTexture(ownerCoatOfArmsUrl);
+    }
+    
+    // Update coat of arms sprites
+    this.updateCoatOfArmsSprites();
+  }
+
   public cleanup() {
     // Clean up all LOD polygons
     this.lodPolygons.forEach(lodPolygon => {

@@ -381,6 +381,43 @@ export default class LODPolygon {
     });
   }
   
+  // Add method to update owner
+  public updateOwner(newOwner: string, ownerColor: string | null = null) {
+    // Update the polygon's owner
+    this.polygon.owner = newOwner;
+    this.ownerColor = ownerColor;
+    
+    // Only update if we're in land view
+    if (this.activeView !== 'land') return;
+    
+    // Update the material color based on the new owner
+    if (!this.highDetailMesh) return;
+    
+    const material = this.highDetailMesh.material as THREE.MeshStandardMaterial;
+    
+    // Determine the color to use
+    let landColor;
+    if (ownerColor) {
+      // Use the owner's color if available
+      landColor = new THREE.Color(ownerColor);
+    } else if (newOwner) {
+      // Generate a random color based on the owner's username
+      landColor = this.generateColorFromUsername(newOwner);
+    } else {
+      // Default green color for unowned land
+      landColor = new THREE.Color(0x7cac6a);
+    }
+    
+    // Apply the new color if not selected
+    if (!this.isSelected) {
+      material.color.copy(landColor);
+      this.originalColor = landColor.clone();
+    }
+    
+    // Update material to apply changes
+    material.needsUpdate = true;
+  }
+
   public cleanup() {
     this.scene.remove(this.mesh);
     
