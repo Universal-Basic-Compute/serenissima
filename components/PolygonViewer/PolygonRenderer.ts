@@ -313,10 +313,40 @@ export default class PolygonRenderer {
     // Update the sprites
     this.updateCoatOfArmsSprites();
   }
+  
+  // Add a new method to create a colored circle sprite
+  private createColoredCircleSprite(polygon: Polygon, color: string) {
+    // Create a canvas
+    const canvas = document.createElement('canvas');
+    const size = 256;
+    canvas.width = size;
+    canvas.height = size;
+    
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    
+    // Draw a colored circle
+    ctx.beginPath();
+    ctx.arc(size/2, size/2, size/2 - 4, 0, Math.PI * 2);
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 8;
+    ctx.stroke();
+    
+    // Create a texture from the canvas
+    const texture = new THREE.Texture(canvas);
+    texture.needsUpdate = true;
+    
+    // Create a sprite with the texture
+    this.createSpriteForPolygon(polygon, texture);
+  }
 
   // Create and update coat of arms sprites with texture caching
   private updateCoatOfArmsSprites() {
     console.log('Updating coat of arms sprites, active view:', this.activeView);
+    console.log('Owner coat of arms map has', Object.keys(this.ownerCoatOfArmsMap).length, 'entries');
+    console.log('Users data has', Object.keys(this.users).length, 'entries');
     
     // Remove existing sprites
     Object.values(this.coatOfArmSprites).forEach(sprite => {
@@ -330,36 +360,16 @@ export default class PolygonRenderer {
       return;
     }
 
-    // Create a cache for textures to avoid loading the same texture multiple times
-    const textureCache: Record<string, THREE.Texture> = {};
-    
-    // Log the polygons with owners and coat of arms
-    const polygonsWithOwners = this.polygons.filter(p => 
-      p.owner && 
-      p.centroid
-    );
-    
+    // Log the polygons with owners
+    const polygonsWithOwners = this.polygons.filter(p => p.owner && p.centroid);
     console.log(`Found ${polygonsWithOwners.length} polygons with owners`);
     
     // Process each polygon with an owner
     polygonsWithOwners.forEach(polygon => {
       console.log(`Processing polygon ${polygon.id} with owner ${polygon.owner}`);
       
-      // Get the owner data from users
-      const ownerData = this.users[polygon.owner];
-      if (!ownerData) {
-        console.warn(`No user data found for owner ${polygon.owner}`);
-        return;
-      }
-      
-      // Get the coat of arms URL
-      const coatOfArmsUrl = ownerData.coat_of_arms_image;
-      console.log(`Coat of arms URL for ${polygon.owner}:`, coatOfArmsUrl);
-      
-      if (!coatOfArmsUrl) {
-        console.warn(`No coat of arms found for owner ${polygon.owner}`);
-        return;
-      }
+      // Get the coat of arms URL directly from the map
+      const coatOfArmsUrl = this.ownerCoatOfArmsMap[polygon.owner];
       
       // Get the owner's color from the users data
       let ownerColor = '#8B4513'; // Default brown color
@@ -367,38 +377,40 @@ export default class PolygonRenderer {
         ownerColor = this.users[polygon.owner].color;
       }
       
-      // Load texture if not already in cache
-      if (!textureCache[polygon.owner]) {
-        console.log(`Loading texture for ${polygon.owner}`);
-        textureCache[polygon.owner] = this.textureLoader.load(coatOfArmsUrl, 
-          // Success callback
-          (texture) => {
-            console.log(`Texture loaded successfully for ${polygon.owner}`);
-            texture.minFilter = THREE.LinearFilter; // Improve texture quality
-            
-            // Always create a circular texture with the owner's color
-            const circularTexture = this.createCircularTexture(texture, ownerColor);
-            
-            // Create sprite after texture is loaded
-            this.createSpriteForPolygon(polygon, circularTexture);
-          },
-          // Progress callback
-          undefined,
-          // Error callback
-          (error) => {
-            console.error(`Error loading texture for ${polygon.owner}:`, error);
-          }
-        );
-      } else {
-        // Use cached texture but still apply circular mask
-        console.log(`Using cached texture for ${polygon.owner}`);
-        
-        // Always create a new circular texture with the owner's color
-        const circularTexture = this.createCircularTexture(textureCache[polygon.owner], ownerColor);
-        
-        // Create sprite with circular texture
-        this.createSpriteForPolygon(polygon, circularTexture);
+      if (!coatOfArmsUrl) {
+        console.warn(`No coat of arms found for owner ${polygon.owner}, using color circle`);
+        // Create a colored circle sprite instead
+        this.createColoredCircleSprite(polygon, ownerColor);
+        return;
       }
+      
+      // Create a texture loader if needed
+      if (!this.textureLoader) {
+        this.textureLoader = new THREE.TextureLoader();
+      }
+      
+      // Load the texture
+      this.textureLoader.load(
+        coatOfArmsUrl,
+        // Success callback
+        (texture) => {
+          console.log(`Texture loaded successfully for ${polygon.owner}`);
+          
+          // Create circular texture
+          const circularTexture = this.createCircularTexture(texture, ownerColor);
+          
+          // Create sprite
+          this.createSpriteForPolygon(polygon, circularTexture);
+        },
+        // Progress callback
+        undefined,
+        // Error callback
+        (error) => {
+          console.error(`Error loading texture for ${polygon.owner}:`, error);
+          // Create a colored circle as fallback
+          this.createColoredCircleSprite(polygon, ownerColor);
+        }
+      );
     });
   }
 
@@ -407,7 +419,7 @@ export default class PolygonRenderer {
     const material = new THREE.SpriteMaterial({ 
       map: texture, // The texture should already be circular at this point
       transparent: true,
-      depthTest: true,
+      depthTest: false, // Change to false to ensure visibility
       depthWrite: false,
       sizeAttenuation: true
     });
@@ -423,26 +435,48 @@ export default class PolygonRenderer {
       this.bounds.latCorrectionFactor
     )[0];
     
-    // Position much closer to the ground - change from 10 to 1
-    sprite.position.set(normalizedCoords.x, 1, -normalizedCoords.y);
+    // Position higher above the ground for better visibility
+    sprite.position.set(normalizedCoords.x, 3, -normalizedCoords.y); // Increased height from 1 to 3
     
-    // Make sprites 2 times smaller (change from 2.4 to 1.2)
-    sprite.scale.set(1.2, 1.2, 1);
+    // Make sprites larger for better visibility
+    sprite.scale.set(2.5, 2.5, 1); // Increased from 1.2 to 2.5
     
     // Add to scene and store reference
     this.scene.add(sprite);
     this.coatOfArmSprites[polygon.id] = sprite;
     
     console.log(`Added coat of arms sprite for ${polygon.id} owned by ${polygon.owner} at position:`, 
-      normalizedCoords.x, 1, -normalizedCoords.y);
+      normalizedCoords.x, 3, -normalizedCoords.y);
   }
   
   // Add helper function to create a circular texture
   private createCircularTexture(texture: THREE.Texture, ownerColor: string = '#8B4513'): THREE.Texture {
     // Check if texture.image exists
     if (!texture.image) {
-      console.warn('Texture image is null, returning original texture');
-      return texture; // Return the original texture if image is missing
+      console.warn('Texture image is null, creating fallback texture');
+      
+      // Create a canvas for a fallback texture
+      const canvas = document.createElement('canvas');
+      const size = 256;
+      canvas.width = size;
+      canvas.height = size;
+      
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return texture;
+      
+      // Draw a colored circle as fallback
+      ctx.beginPath();
+      ctx.arc(size/2, size/2, size/2 - 4, 0, Math.PI * 2);
+      ctx.fillStyle = ownerColor;
+      ctx.fill();
+      ctx.strokeStyle = '#000000';
+      ctx.lineWidth = 8;
+      ctx.stroke();
+      
+      // Create a new texture from the canvas
+      const fallbackTexture = new THREE.Texture(canvas);
+      fallbackTexture.needsUpdate = true;
+      return fallbackTexture;
     }
     
     // Create a canvas to draw the circular mask
@@ -462,25 +496,28 @@ export default class PolygonRenderer {
       ctx.beginPath();
       ctx.arc(size/2, size/2, size/2 - 4, 0, Math.PI * 2);
       ctx.closePath();
-      ctx.clip();
       
-      // Fill with a background color to ensure transparency outside the circle
-      ctx.fillStyle = 'rgba(0,0,0,0)';
+      // Fill with the owner's color first as a background
+      ctx.fillStyle = ownerColor;
       ctx.fill();
       
-      // Draw the image - handle both HTMLImageElement and other image types
-      if (texture.image instanceof HTMLImageElement && texture.image.complete) {
-        // Image is an HTMLImageElement and is loaded
-        ctx.drawImage(texture.image, 0, 0, size, size);
-      } else if (texture.image) {
-        // For other image types or non-loaded images, try direct drawing
+      // Add a stroke around the circle
+      ctx.strokeStyle = '#000000';
+      ctx.lineWidth = 8;
+      ctx.stroke();
+      
+      // Create a new clipping path for the image
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(size/2, size/2, size/2 - 8, 0, Math.PI * 2);
+      ctx.clip();
+      
+      // Draw the image if it exists and is loaded
+      if (texture.image) {
         ctx.drawImage(texture.image, 0, 0, size, size);
       }
       
-      // Add a circular border with the owner's color
-      ctx.strokeStyle = ownerColor; // Use the owner's color
-      ctx.lineWidth = 8;
-      ctx.stroke();
+      ctx.restore();
       
       // Create a new texture from the canvas
       const circularTexture = new THREE.Texture(canvas);
@@ -490,26 +527,19 @@ export default class PolygonRenderer {
     } catch (error) {
       console.error('Error creating circular texture:', error);
       
-      // If there's an error, try a simpler approach
-      try {
-        // Clear and start over
-        ctx.clearRect(0, 0, size, size);
-        
-        // Draw a filled circle as a fallback
-        ctx.beginPath();
-        ctx.arc(size/2, size/2, size/2 - 4, 0, Math.PI * 2);
-        ctx.fillStyle = ownerColor; // Use the owner's color
-        ctx.fill();
-        
-        // Create a new texture from the canvas
-        const fallbackTexture = new THREE.Texture(canvas);
-        fallbackTexture.needsUpdate = true;
-        
-        return fallbackTexture;
-      } catch (e) {
-        // If all else fails, return the original texture
-        return texture;
-      }
+      // If there's an error, create a simple colored circle
+      ctx.clearRect(0, 0, size, size);
+      ctx.beginPath();
+      ctx.arc(size/2, size/2, size/2 - 4, 0, Math.PI * 2);
+      ctx.fillStyle = ownerColor;
+      ctx.fill();
+      ctx.strokeStyle = '#000000';
+      ctx.lineWidth = 8;
+      ctx.stroke();
+      
+      const fallbackTexture = new THREE.Texture(canvas);
+      fallbackTexture.needsUpdate = true;
+      return fallbackTexture;
     }
   }
 

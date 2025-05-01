@@ -162,9 +162,8 @@ export default function PolygonViewer() {
     
     // Add an additional timeout to ensure coat of arms are loaded
     const loadCoatOfArms = setTimeout(() => {
-      console.log('Checking if coat of arms need to be loaded...');
+      console.log('Forcing coat of arms update from delayed loader');
       if (polygonRendererRef.current && users && Object.keys(users).length > 0) {
-        console.log('Forcing coat of arms update from delayed loader');
         const coatOfArmsMap: Record<string, string> = {};
         
         Object.values(users).forEach(user => {
