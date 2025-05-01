@@ -8,6 +8,7 @@ import { GoogleMap, LoadScript, DrawingManager } from '@react-google-maps/api';
 import PlayerProfile from '../components/UI/PlayerProfile';
 import TransferComputeMenu from '../components/UI/TransferComputeMenu';
 import WithdrawComputeMenu from '../components/UI/WithdrawComputeMenu';
+import BackgroundMusic from '../components/UI/BackgroundMusic';
 import { transferComputeTokens } from '../lib/tokenUtils';
 import { transferComputeInAirtable } from '../lib/airtableUtils';
 
@@ -2000,6 +2001,9 @@ export default function Home() {
       
       {/* Always show the 3D Polygon Viewer regardless of wallet connection status */}
       <PolygonViewer />
+      
+      {/* Background Music Player */}
+      <BackgroundMusic initialVolume={0.3} autoplay={true} />
     </div>
   );
 }
