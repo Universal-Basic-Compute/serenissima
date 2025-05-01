@@ -67,7 +67,8 @@ export default function PolygonViewer() {
     }
   }, [selectedPolygonId]);
 
-  // Set up Three.js scene
+  // Set up Three.js scene - only depends on polygons, loading, activeView, and highQuality
+  // NOT dependent on selectedPolygonId to prevent scene recreation on selection
   useEffect(() => {
     if (!canvasRef.current || loading) return;
     
@@ -197,9 +198,18 @@ export default function PolygonViewer() {
       waterEffectRef.current = null;
       interactionManagerRef.current = null;
     };
-  }, [polygons, loading, activeView, highQuality, selectedPolygonId]);
+  }, [polygons, loading, activeView, highQuality]); // Removed selectedPolygonId dependency
   
   // We've removed the separate controls update loop to prevent camera resets
+  
+  // Add a separate effect to handle selection state changes
+  useEffect(() => {
+    // Only update selection state when selectedPolygonId changes
+    // This prevents recreating the entire scene
+    if (polygonRendererRef.current) {
+      polygonRendererRef.current.updateSelectionState(selectedPolygonId);
+    }
+  }, [selectedPolygonId]);
   
   if (loading) {
     return <div className="w-full h-full flex items-center justify-center">Loading polygons...</div>;

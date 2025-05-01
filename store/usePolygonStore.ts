@@ -48,7 +48,14 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
       });
     }
     
-    set({ selectedPolygonId: id });
+    // Use a function form of set to ensure we're not causing unnecessary rerenders
+    set(state => {
+      // Only update if the ID actually changed
+      if (state.selectedPolygonId !== id) {
+        return { selectedPolygonId: id };
+      }
+      return state; // Return unchanged state if ID is the same
+    });
   },
   
   loadPolygons: async () => {
