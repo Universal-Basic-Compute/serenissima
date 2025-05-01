@@ -112,7 +112,7 @@ export default class LODPolygon {
     
     // Create a simple material - CHANGED to MeshBasicMaterial
     const material = new THREE.MeshBasicMaterial({ 
-      color: this.activeView === 'land' ? '#7cac6a' : '#e6d2a8',
+      color: '#e6d2a8', // Always use sand/beige color
       side: THREE.FrontSide
     });
     
@@ -219,9 +219,9 @@ export default class LODPolygon {
         return new THREE.Color(this.ownerColor);
       } else if (this.polygon.owner) {
         // Instead of generating a color, use a default color
-        return new THREE.Color(0x7cac6a); // Default green color
+        return new THREE.Color(0xe6d2a8); // Default sand/beige color
       } else {
-        return new THREE.Color(0x7cac6a);
+        return new THREE.Color(0xe6d2a8); // Sand/beige color
       }
     } else {
       return new THREE.Color(0xe6d2a8);

@@ -402,7 +402,7 @@ export default class PolygonRenderer {
     sampleGeometry.rotateX(-Math.PI / 2);
     
     const sampleMaterial = new THREE.MeshStandardMaterial({
-      color: this.activeView === 'land' ? '#7cac6a' : '#e6d2a8', // More yellow/tan color
+      color: '#e6d2a8', // Always use sand/beige color
       map: this.activeView !== 'land' ? this.sandBaseColor : null,
       normalMap: this.activeView !== 'land' ? this.sandNormalMap : null,
       roughnessMap: this.activeView !== 'land' ? this.sandRoughnessMap : null,
