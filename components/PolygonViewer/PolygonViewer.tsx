@@ -345,8 +345,8 @@ export default function PolygonViewer() {
         scene: scene.scene,
         activeView,
         performanceMode: !highQuality,
-        width: 200,
-        height: 200
+        width: 300,  // Increased size for better coverage
+        height: 300  // Increased size for better coverage
       });
       waterEffectRef.current = waterEffect;
     };
@@ -421,8 +421,8 @@ export default function PolygonViewer() {
         sceneRef.current.controls.update();
       }
       
-      // Update water effect - less frequently for better performance
-      if (waterEffectRef.current && frameCount % 2 === 0) {
+      // Update water effect - every frame for smoother animation
+      if (waterEffectRef.current) {
         waterEffectRef.current.update(frameCount, !highQuality);
       }
       
