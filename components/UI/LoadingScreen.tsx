@@ -57,25 +57,34 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
     // Call the function to get a random image
     getRandomLoadingImage();
 
-    // Set up progress animation
+    // Set up progress animation with smoother easing
     const startTime = Date.now();
     const endTime = startTime + duration;
 
     const updateProgress = () => {
       const currentTime = Date.now();
       const elapsed = currentTime - startTime;
-      const newProgress = Math.min(100, (elapsed / duration) * 100);
+      
+      // Use a smoother easing function (cubic easing out)
+      // This creates a more natural acceleration/deceleration effect
+      const t = Math.min(1, elapsed / duration);
+      const easedProgress = 1 - Math.pow(1 - t, 3); // Cubic easing out
+      const newProgress = easedProgress * 100;
       
       setProgress(newProgress);
       
       if (currentTime < endTime) {
+        // Use a higher frequency for smoother updates
         requestAnimationFrame(updateProgress);
       } else {
+        // Ensure we reach exactly 100% at the end
+        setProgress(100);
         // When duration is complete, call the callback
         onLoadingComplete();
       }
     };
 
+    // Start the animation
     requestAnimationFrame(updateProgress);
   }, [duration, onLoadingComplete]);
 
@@ -112,10 +121,10 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
           The Most Serene Republic of Venice
         </p>
         
-        {/* Progress bar */}
+        {/* Progress bar with smoother transition */}
         <div className="w-64 md:w-96 h-2 bg-amber-900 rounded-full overflow-hidden mb-4">
           <div 
-            className="h-full bg-amber-500 transition-all duration-300 ease-out"
+            className="h-full bg-amber-500 transition-all duration-100 ease-out"
             style={{ width: `${progress}%` }}
           ></div>
         </div>
