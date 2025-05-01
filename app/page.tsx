@@ -102,6 +102,9 @@ export default function Home() {
     polygon: google.maps.Polygon;
   } | null>(null);
   
+  // Add state for users data
+  const [users, setUsers] = useState<Record<string, any>>({});
+  
   // Initialize wallet adapter
   useEffect(() => {
     console.log("Initializing wallet adapter...");
@@ -397,6 +400,33 @@ export default function Home() {
       alert(`Failed to update profile. Please try again. Error: ${error.message}`);
     }
   };
+
+  // Add function to load users data
+  const loadUsers = useCallback(async () => {
+    try {
+      const response = await fetch('http://localhost:8000/api/users');
+      if (response.ok) {
+        const data = await response.json();
+        if (data && Array.isArray(data)) {
+          const usersMap = {};
+          data.forEach(user => {
+            if (user.user_name) {
+              usersMap[user.user_name] = user;
+            }
+          });
+          setUsers(usersMap);
+          console.log('Loaded users data:', Object.keys(usersMap).length, 'users');
+        }
+      }
+    } catch (error) {
+      console.error('Error loading users data:', error);
+    }
+  }, []);
+
+  // Add effect to load users data when component mounts
+  useEffect(() => {
+    loadUsers();
+  }, [loadUsers]);
 
   // Add effect to log when transferMenuOpen changes
   useEffect(() => {
@@ -1030,8 +1060,8 @@ export default function Home() {
   
   // Add this useEffect to ensure coat of arms are updated when users data changes
   useEffect(() => {
-    if (polygonRendererRef.current && users && Object.keys(users).length > 0) {
-      console.log('Updating coat of arms from users data in PolygonViewer:', users);
+    if (users && Object.keys(users).length > 0) {
+      console.log('Users data loaded, ready for coat of arms updates:', Object.keys(users).length, 'users');
       
       // Create a map of username to coat of arms URL
       const coatOfArmsMap: Record<string, string> = {};
@@ -1039,18 +1069,11 @@ export default function Home() {
       Object.values(users).forEach(user => {
         if (user.user_name && user.coat_of_arms_image) {
           coatOfArmsMap[user.user_name] = user.coat_of_arms_image;
-          console.log(`Added coat of arms for ${user.user_name}:`, user.coat_of_arms_image);
+          console.log(`Added coat of arms for ${user.user_name}`);
         }
       });
       
       console.log('Created coat of arms map with', Object.keys(coatOfArmsMap).length, 'entries');
-      
-      // Force an update of the coat of arms sprites
-      setTimeout(() => {
-        if (polygonRendererRef.current) {
-          polygonRendererRef.current.updateOwnerCoatOfArms(coatOfArmsMap);
-        }
-      }, 1000); // Add a delay to ensure the renderer is ready
     }
   }, [users]);
 
