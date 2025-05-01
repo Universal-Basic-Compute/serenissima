@@ -91,9 +91,36 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
   // Initialize audio and play first track
   useEffect(() => {
     if (!isLoading && tracks.length > 0 && isPlaying && !currentTrack) {
-      playRandomTrack();
+      // Instead of immediately trying to play, set up the audio element first
+      const randomIndex = Math.floor(Math.random() * tracks.length);
+      const firstTrack = tracks[randomIndex];
+      setCurrentTrack(firstTrack);
+      
+      if (audioRef.current) {
+        audioRef.current.src = firstTrack;
+        audioRef.current.volume = volume;
+        
+        // Try to play, but handle the autoplay restriction gracefully
+        const playPromise = audioRef.current.play();
+        
+        if (playPromise !== undefined) {
+          playPromise.catch(error => {
+            // This will happen if autoplay is blocked
+            console.log('Autoplay prevented by browser:', error);
+            // Update state to show the correct play/pause button
+            setIsPlaying(false);
+            // Show a visual indicator that music is available
+            setShowControls(true); // Automatically show controls when autoplay is blocked
+            
+            // Hide controls after a few seconds
+            setTimeout(() => {
+              setShowControls(false);
+            }, 5000);
+          });
+        }
+      }
     }
-  }, [isLoading, tracks, isPlaying, currentTrack]);
+  }, [isLoading, tracks, isPlaying, currentTrack, volume]);
 
   // Handle track ending - play next random track
   useEffect(() => {
@@ -162,8 +189,8 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
       <div className="relative">
         <button 
           onClick={() => setShowControls(!showControls)}
-          className="bg-amber-700 text-white p-3 rounded-full shadow-lg hover:bg-amber-800 transition-colors"
-          title="Music Controls"
+          className={`bg-amber-700 text-white p-3 rounded-full shadow-lg hover:bg-amber-800 transition-colors ${!isPlaying && currentTrack ? 'animate-pulse' : ''}`}
+          title={isPlaying ? "Music Controls" : "Click to Play Music"}
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
