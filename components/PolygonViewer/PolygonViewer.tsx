@@ -536,6 +536,7 @@ export default function PolygonViewer() {
           id => polygonMeshesRef.current[id] === object
         );
         
+        // Only set as hovered if it's not the selected polygon
         if (hoveredId && hoveredId !== selectedPolygonId) {
           currentHoveredId = hoveredId;
         }
@@ -552,8 +553,12 @@ export default function PolygonViewer() {
             gsap.killTweensOf(previousHovered.material);
             
             // Reset to original values immediately
-            previousHovered.material.emissive.set(0, 0, 0);
-            previousHovered.material.emissiveIntensity = 0;
+            previousHovered.material.emissive.set(
+              previousHovered.userData.originalEmissive?.r || 0,
+              previousHovered.userData.originalEmissive?.g || 0,
+              previousHovered.userData.originalEmissive?.b || 0
+            );
+            previousHovered.material.emissiveIntensity = previousHovered.userData.originalEmissiveIntensity || 0;
           }
         }
         
@@ -561,6 +566,12 @@ export default function PolygonViewer() {
         if (currentHoveredId) {
           const newHovered = polygonMeshesRef.current[currentHoveredId];
           if (newHovered && newHovered.material) {
+            // Store original material properties if not already stored
+            if (!newHovered.userData.originalEmissive) {
+              newHovered.userData.originalEmissive = newHovered.material.emissive.clone();
+              newHovered.userData.originalEmissiveIntensity = newHovered.material.emissiveIntensity;
+            }
+            
             // Cancel any ongoing animations
             gsap.killTweensOf(newHovered.material.emissive);
             gsap.killTweensOf(newHovered.material);
@@ -691,7 +702,7 @@ export default function PolygonViewer() {
                 object.userData.originalEmissive = object.material.emissive.clone();
                 object.userData.originalEmissiveIntensity = object.material.emissiveIntensity;
               }
-              
+                
               // Animate selection effect - stronger than hover
               gsap.to(object.material.emissive, {
                 r: 0,    // 0x00/255
@@ -699,18 +710,18 @@ export default function PolygonViewer() {
                 b: 0,    // 0x00/255
                 duration: 0.5
               });
-              
+                
               gsap.to(object.material, {
                 emissiveIntensity: 0.8,
                 duration: 0.5
               });
-              
+                
               // Instead of using OutlinePass, let's create a simple outline effect
               // by duplicating the mesh and scaling it slightly larger
               if (!object.userData.outlineMesh) {
                 // Clone the geometry
                 const outlineGeometry = object.geometry.clone();
-                
+                  
                 // Create outline material
                 const outlineMaterial = new THREE.MeshBasicMaterial({
                   color: 0x00ff00,
@@ -719,18 +730,22 @@ export default function PolygonViewer() {
                   opacity: 0,
                   depthTest: true
                 });
-                
+                  
                 // Create outline mesh
                 const outlineMesh = new THREE.Mesh(outlineGeometry, outlineMaterial);
                 outlineMesh.scale.multiplyScalar(1.01); // Make it slightly larger
                 outlineMesh.position.copy(object.position);
                 outlineMesh.rotation.copy(object.rotation);
                 scene.add(outlineMesh);
-                
+                  
                 // Store reference to outline mesh
                 object.userData.outlineMesh = outlineMesh;
+              } else {
+                // If outline mesh already exists, make sure it's visible
+                object.userData.outlineMesh.visible = true;
+                scene.add(object.userData.outlineMesh);
               }
-              
+                
               // Animate the outline opacity
               gsap.to(object.userData.outlineMesh.material, {
                 opacity: 0.3,
@@ -782,6 +797,37 @@ export default function PolygonViewer() {
     // Add event listeners
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('click', handleMouseClick);
+    
+    // Effect to maintain selection when switching views
+    useEffect(() => {
+      // When switching to land view, restore selection effect if needed
+      if (activeView === 'land' && selectedPolygonId) {
+        const selectedPolygon = polygonMeshesRef.current[selectedPolygonId];
+        if (selectedPolygon && selectedPolygon.material) {
+          // Apply selection effect
+          gsap.to(selectedPolygon.material.emissive, {
+            r: 0,
+            g: 1.0,
+            b: 0,
+            duration: 0.5
+          });
+          
+          gsap.to(selectedPolygon.material, {
+            emissiveIntensity: 0.8,
+            duration: 0.5
+          });
+          
+          // Ensure outline is visible
+          if (selectedPolygon.userData.outlineMesh) {
+            selectedPolygon.userData.outlineMesh.visible = true;
+            gsap.to(selectedPolygon.userData.outlineMesh.material, {
+              opacity: 0.3,
+              duration: 0.5
+            });
+          }
+        }
+      }
+    }, [activeView, selectedPolygonId]);
 
     // Animation loop
     const animate = () => {
