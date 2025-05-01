@@ -165,10 +165,27 @@ export default class PolygonRenderer {
     console.log('Added sample polygon to scene');
   }
   
-  public update() {
+  public update(selectedPolygonId: string | null = null) {
     // Update LOD for all polygons
     this.lodPolygons.forEach(lodPolygon => {
       lodPolygon.updateLOD(this.camera.position);
+    });
+    
+    // Update selection state
+    this.updateSelectionState(selectedPolygonId);
+  }
+  
+  // Add this new method to update selection state
+  public updateSelectionState(selectedPolygonId: string | null) {
+    // Update selection state for all LOD polygons
+    this.lodPolygons.forEach(lodPolygon => {
+      const polygonId = this.polygons.find(
+        p => lodPolygon.getMesh() === this.polygonMeshesRef.current[p.id]
+      )?.id;
+      
+      if (polygonId) {
+        lodPolygon.updateSelectionState(polygonId === selectedPolygonId);
+      }
     });
   }
   

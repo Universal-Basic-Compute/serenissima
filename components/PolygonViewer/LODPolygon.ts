@@ -16,6 +16,8 @@ export default class LODPolygon {
   private sandNormalMap: THREE.Texture;
   private sandRoughnessMap: THREE.Texture;
   private distanceThreshold: number = 150;
+  private isSelected: boolean = false;
+  private originalColor: THREE.Color | null = null;
 
   constructor(
     scene: THREE.Scene,
@@ -176,5 +178,40 @@ export default class LODPolygon {
       this.highDetailMesh.geometry.dispose();
       (this.highDetailMesh.material as THREE.Material).dispose();
     }
+  }
+  
+  public updateSelectionState(isSelected: boolean) {
+    // If selection state hasn't changed, do nothing
+    if (this.isSelected === isSelected) return;
+    
+    this.isSelected = isSelected;
+    
+    // Apply visual changes to both high and low detail meshes
+    const meshes = [this.highDetailMesh, this.lowDetailMesh].filter(Boolean);
+    
+    meshes.forEach(mesh => {
+      if (!mesh) return;
+      
+      const material = mesh.material as THREE.MeshStandardMaterial;
+      
+      if (isSelected) {
+        // Store original color if not already stored
+        if (!this.originalColor) {
+          this.originalColor = material.color.clone();
+        }
+        
+        // Highlight the selected polygon with a bright color
+        material.color.set('#ffcc00'); // Bright yellow
+        material.emissive.set('#ff6600'); // Orange glow
+        material.emissiveIntensity = 0.3;
+      } else {
+        // Restore original color
+        if (this.originalColor) {
+          material.color.copy(this.originalColor);
+          material.emissive.set('#000000');
+          material.emissiveIntensity = 0;
+        }
+      }
+    });
   }
 }

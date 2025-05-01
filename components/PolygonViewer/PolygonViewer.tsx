@@ -140,9 +140,9 @@ export default function PolygonViewer() {
         waterEffectRef.current.update(frameCount, !highQuality);
       }
       
-      // Update polygon LOD
+      // Update polygon LOD and selection state
       if (polygonRendererRef.current) {
-        polygonRendererRef.current.update();
+        polygonRendererRef.current.update(selectedPolygonId);
       }
       
       frameCount++;
