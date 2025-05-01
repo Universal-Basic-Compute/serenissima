@@ -179,7 +179,7 @@ function isAirtableFormulaError(error: any): boolean {
          errorStr.includes('OR');
 }
 
-// Add this function to update user compute balances
+// Function to update user compute balances
 async function updateUserComputeBalances(seller: string, buyer: string, amount: number) {
   try {
     console.log(`Updating compute balances: ${seller} +${amount}, ${buyer} -${amount}`);
