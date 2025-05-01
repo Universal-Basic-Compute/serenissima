@@ -221,8 +221,7 @@ export default class LODPolygon {
       // Désactiver complètement la transparence
       transparent: false,
       opacity: 1.0,
-      // Utiliser un rendu plat sans effets d'éclairage
-      flatShading: true,
+      // Remove flatShading as it's not supported in MeshBasicMaterial
       // Augmenter encore plus les valeurs de polygonOffset
       polygonOffset: true,
       polygonOffsetFactor: 5,

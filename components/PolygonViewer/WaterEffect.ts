@@ -122,7 +122,7 @@ export default class WaterEffect {
   
   // Add method for Gerstner waves
   private applyGerstnerWaves(time: number) {
-    if (!this.water) return;
+    if (!this.water || !this.water.material || !this.water.material.uniforms) return;
     
     const waterUniforms = this.water.material.uniforms;
     
@@ -403,7 +403,9 @@ export default class WaterEffect {
       }
       
       // Apply Gerstner waves for more natural water movement - reduce frequency
-      this.applyGerstnerWaves(frameCount * 0.01); // Reduced from 0.025
+      if (typeof this.applyGerstnerWaves === 'function') {
+        this.applyGerstnerWaves(frameCount * 0.01); // Reduced from 0.025
+      }
       
       // Animate foam if it exists - slow down the foam movement more
       if (this.waterFoam && this.foamTexture && this.foamTexture.offset) {
@@ -440,6 +442,12 @@ export default class WaterEffect {
         shoreUniforms.time.value = frameCount * 0.02; // Reduced from 0.05
         
         try {
+          // Only proceed if all required objects exist
+          if (!this.renderer || !this.landCamera) {
+            console.warn('Renderer or landCamera not initialized');
+            return;
+          }
+          
           // Render land to texture
           const originalBackground = this.scene.background;
           this.scene.background = new THREE.Color(0x000000);
