@@ -393,9 +393,9 @@ export default class PolygonRenderer {
               this.PolygonMeshs.push(polygonMesh);
               
               // Store reference to the mesh
-              const mesh = polygonMesh.getMesh();
-              if (mesh) {
-                this.polygonMeshesRef.current[polygon.id] = mesh;
+              const polygonMeshInstance = polygonMesh.getMesh();
+              if (polygonMeshInstance) {
+                this.polygonMeshesRef.current[polygon.id] = polygonMeshInstance;
               }
               
               processedCount++;
