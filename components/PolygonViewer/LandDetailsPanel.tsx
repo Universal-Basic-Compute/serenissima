@@ -201,9 +201,6 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
               <p className="mt-1 font-semibold text-green-600">
                 {transaction.price.toLocaleString()} ducats
               </p>
-              <p className="mt-1 text-xs text-gray-500">
-                Seller: {transaction.seller}
-              </p>
             </div>
           )}
 
