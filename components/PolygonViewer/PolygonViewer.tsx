@@ -25,10 +25,69 @@ export default function PolygonViewer() {
   const [transferMenuOpen, setTransferMenuOpen] = useState(false);
   const [isFlushing, setIsFlushing] = useState(false);
   const [marketPanelVisible, setMarketPanelVisible] = useState(false);
+  const polygonRendererRef = useRef<any>(null);
   
   // Add refs at the top level of the component
   const hasLoadedDataRef = useRef<boolean>(false);
   const hasUpdatedCoatOfArmsRef = useRef<boolean>(false);
+  
+  // Function to update polygon colors
+  const updatePolygonColors = useCallback(() => {
+    if (polygonRendererRef.current && users && Object.keys(users).length > 0) {
+      console.log('Updating polygon colors with user data:', users);
+      
+      // Create a map of user colors
+      const colorMap: Record<string, string> = {};
+      Object.values(users).forEach(user => {
+        if (user.user_name) {
+          if (user.color) {
+            colorMap[user.user_name] = user.color;
+            console.log(`Added color for ${user.user_name}: ${user.color}`);
+          } else if (user.user_name === 'ConsiglioDeiDieci') {
+            // Special case for ConsiglioDeiDieci
+            colorMap[user.user_name] = '#8B0000'; // Dark red
+            console.log(`Added default color for ConsiglioDeiDieci: #8B0000`);
+          }
+        }
+      });
+      
+      // Always add ConsiglioDeiDieci if not present
+      if (!colorMap['ConsiglioDeiDieci']) {
+        colorMap['ConsiglioDeiDieci'] = '#8B0000'; // Dark red
+        console.log('Added missing ConsiglioDeiDieci with default color #8B0000');
+      }
+      
+      // Update colors in the renderer
+      if (Object.keys(colorMap).length > 0) {
+        polygonRendererRef.current.updateOwnerColors(colorMap);
+        // Force an update of owner colors
+        polygonRendererRef.current.updatePolygonOwnerColors();
+      }
+    }
+  }, [users]);
+
+  // Function to update coat of arms
+  const updateCoatOfArms = useCallback(() => {
+    if (polygonRendererRef.current && users && Object.keys(users).length > 0) {
+      console.log('Updating coat of arms with user data:', users);
+      
+      // Create a map of user coat of arms
+      const coatOfArmsMap: Record<string, string> = {};
+      Object.values(users).forEach(user => {
+        if (user.user_name && user.coat_of_arms_image) {
+          coatOfArmsMap[user.user_name] = user.coat_of_arms_image;
+          console.log(`Added coat of arms for ${user.user_name}:`, user.coat_of_arms_image);
+        }
+      });
+      
+      // Update coat of arms in the renderer
+      if (Object.keys(coatOfArmsMap).length > 0) {
+        polygonRendererRef.current.updateOwnerCoatOfArms(coatOfArmsMap);
+        // Force an update of coat of arms sprites
+        polygonRendererRef.current.updateCoatOfArmsSprites();
+      }
+    }
+  }, [users]);
   
   // Get state from store
   const {
