@@ -22,6 +22,7 @@
     "@react-google-maps/api": "^2.19.2",
     "@react-three/drei": "^9.88.0",
     "@react-three/fiber": "^8.15.11",
+    "@solana/spl-token": "^0.4.13",
     "@solana/wallet-adapter-base": "^0.9.26",
     "@solana/wallet-adapter-phantom": "^0.9.27",
     "@solana/web3.js": "^1.98.2",
