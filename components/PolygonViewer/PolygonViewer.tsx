@@ -3,6 +3,9 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { OutlinePass } from 'three/examples/jsm/postprocessing/OutlinePass';
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
 
 export default function PolygonViewer() {
   const canvasRef = useRef(null);
@@ -11,6 +14,9 @@ export default function PolygonViewer() {
   const [error, setError] = useState(null);
   const [highQuality, setHighQuality] = useState(false);
   const [activeView, setActiveView] = useState('buildings'); // 'buildings', 'transport', or 'land'
+  const [hoveredPolygonId, setHoveredPolygonId] = useState(null);
+  const [selectedPolygonId, setSelectedPolygonId] = useState(null);
+  const polygonMeshesRef = useRef({});
   
   // Define resetCamera at component level using useRef to store the function
   const resetCameraRef = useRef(() => {});
@@ -93,6 +99,10 @@ export default function PolygonViewer() {
     // Create a fog effect for depth
     scene.fog = new THREE.FogExp2('#1e5799', 0.0005); // Further reduced fog density for performance
     
+    // Create a raycaster for mouse interaction
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+    
     // Create a camera with a better initial position
     const camera = new THREE.PerspectiveCamera(
       60,
@@ -118,6 +128,11 @@ export default function PolygonViewer() {
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.2;
     renderer.outputColorSpace = THREE.SRGBColorSpace;
+    
+    // Set up EffectComposer for post-processing effects
+    const composer = new EffectComposer(renderer);
+    const renderPass = new RenderPass(scene, camera);
+    composer.addPass(renderPass);
     
     // Set up OrbitControls
     const controls = new OrbitControls(camera, renderer.domElement);
@@ -360,6 +375,9 @@ export default function PolygonViewer() {
             
             const mesh = new THREE.Mesh(geometry, sandMaterial);
             
+            // Store reference to the mesh
+            polygonMeshesRef.current[polygon.id] = mesh;
+            
             // Position at ground level
             mesh.position.y = 0;
             
@@ -468,6 +486,160 @@ export default function PolygonViewer() {
     // Add a frame counter for less frequent updates
     let frameCount = 0;
     
+    // Handle mouse move for hover effect
+    const handleMouseMove = (event) => {
+      // Calculate mouse position in normalized device coordinates (-1 to +1)
+      mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+      
+      // Only process hover in land view
+      if (activeView !== 'land') return;
+      
+      // Update the raycaster with the camera and mouse position
+      raycaster.setFromCamera(mouse, camera);
+      
+      // Get objects intersecting the ray
+      const intersects = raycaster.intersectObjects(scene.children, false);
+      
+      // Check if we're hovering over a polygon
+      if (intersects.length > 0) {
+        const object = intersects[0].object;
+        
+        // Find the polygon ID from our ref
+        const hoveredId = Object.keys(polygonMeshesRef.current).find(
+          id => polygonMeshesRef.current[id] === object
+        );
+        
+        if (hoveredId && hoveredId !== hoveredPolygonId && hoveredId !== selectedPolygonId) {
+          setHoveredPolygonId(hoveredId);
+          
+          // Apply glow effect to the hovered polygon
+          if (object.material) {
+            // Store original material properties if not already stored
+            if (!object.userData.originalEmissive) {
+              object.userData.originalEmissive = object.material.emissive.clone();
+              object.userData.originalEmissiveIntensity = object.material.emissiveIntensity;
+            }
+            
+            // Apply glow effect
+            object.material.emissive.set(0x88ff88);
+            object.material.emissiveIntensity = 0.5;
+          }
+        }
+      } else if (hoveredPolygonId) {
+        // Remove glow effect from previously hovered polygon
+        const previousHovered = polygonMeshesRef.current[hoveredPolygonId];
+        if (previousHovered && previousHovered.material) {
+          // Restore original material properties unless it's selected
+          if (hoveredPolygonId !== selectedPolygonId) {
+            previousHovered.material.emissive.copy(previousHovered.userData.originalEmissive || new THREE.Color(0x000000));
+            previousHovered.material.emissiveIntensity = previousHovered.userData.originalEmissiveIntensity || 0;
+          }
+        }
+        
+        setHoveredPolygonId(null);
+      }
+    };
+
+    // Handle mouse click for selection
+    const handleMouseClick = (event) => {
+      // Only process selection in land view
+      if (activeView !== 'land') return;
+      
+      // Update the raycaster with the camera and mouse position
+      raycaster.setFromCamera(mouse, camera);
+      
+      // Get objects intersecting the ray
+      const intersects = raycaster.intersectObjects(scene.children, false);
+      
+      // Check if we're clicking on a polygon
+      if (intersects.length > 0) {
+        const object = intersects[0].object;
+        
+        // Find the polygon ID from our ref
+        const clickedId = Object.keys(polygonMeshesRef.current).find(
+          id => polygonMeshesRef.current[id] === object
+        );
+        
+        if (clickedId) {
+          // If clicking the same polygon, deselect it
+          if (clickedId === selectedPolygonId) {
+            setSelectedPolygonId(null);
+            
+            // Remove selection effect
+            if (object.material) {
+              // Restore original material properties
+              object.material.emissive.copy(object.userData.originalEmissive || new THREE.Color(0x000000));
+              object.material.emissiveIntensity = object.userData.originalEmissiveIntensity || 0;
+            }
+          } else {
+            // Deselect previous selection if any
+            if (selectedPolygonId) {
+              const previousSelected = polygonMeshesRef.current[selectedPolygonId];
+              if (previousSelected && previousSelected.material) {
+                // Restore original material properties
+                previousSelected.material.emissive.copy(previousSelected.userData.originalEmissive || new THREE.Color(0x000000));
+                previousSelected.material.emissiveIntensity = previousSelected.userData.originalEmissiveIntensity || 0;
+              }
+            }
+            
+            // Select the new polygon
+            setSelectedPolygonId(clickedId);
+            
+            // Apply selection effect
+            if (object.material) {
+              // Store original material properties if not already stored
+              if (!object.userData.originalEmissive) {
+                object.userData.originalEmissive = object.material.emissive.clone();
+                object.userData.originalEmissiveIntensity = object.material.emissiveIntensity;
+              }
+              
+              // Apply selection effect - stronger than hover
+              object.material.emissive.set(0x00ff00);
+              object.material.emissiveIntensity = 0.8;
+              
+              // Create outline effect for the selected object
+              const outlinePass = new OutlinePass(
+                new THREE.Vector2(window.innerWidth, window.innerHeight),
+                scene,
+                camera
+              );
+              outlinePass.selectedObjects = [object];
+              outlinePass.edgeStrength = 3.0;
+              outlinePass.edgeGlow = 0.5;
+              outlinePass.edgeThickness = 1.0;
+              outlinePass.visibleEdgeColor.set(0x00ff00);
+              
+              // Remove any existing outline passes
+              composer.passes = composer.passes.filter(pass => !(pass instanceof OutlinePass));
+              
+              // Add the new outline pass
+              composer.addPass(outlinePass);
+            }
+          }
+        }
+      } else {
+        // Clicking on empty space, deselect current selection
+        if (selectedPolygonId) {
+          const previousSelected = polygonMeshesRef.current[selectedPolygonId];
+          if (previousSelected && previousSelected.material) {
+            // Restore original material properties
+            previousSelected.material.emissive.copy(previousSelected.userData.originalEmissive || new THREE.Color(0x000000));
+            previousSelected.material.emissiveIntensity = previousSelected.userData.originalEmissiveIntensity || 0;
+          }
+          
+          // Remove outline passes
+          composer.passes = composer.passes.filter(pass => !(pass instanceof OutlinePass));
+          
+          setSelectedPolygonId(null);
+        }
+      }
+    };
+
+    // Add event listeners
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('click', handleMouseClick);
+
     // Animation loop
     const animate = () => {
       requestAnimationFrame(animate);
@@ -507,7 +679,8 @@ export default function PolygonViewer() {
       
       frameCount++;
       
-      renderer.render(scene, camera);
+      // Use composer instead of renderer directly to include post-processing effects
+      composer.render();
     };
     
     animate();
@@ -532,6 +705,10 @@ export default function PolygonViewer() {
       if (typeof window !== 'undefined') {
         window.resetCameraView = undefined;
       }
+      
+      // Remove event listeners
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('click', handleMouseClick);
       
       // Dispose of Three.js resources
       scene.traverse((object) => {
@@ -604,6 +781,12 @@ export default function PolygonViewer() {
           <p>Found {polygons.length} polygon(s)</p>
         )}
       </div>
+      
+      {selectedPolygonId && (
+        <div className="absolute top-16 left-4 z-10 bg-white p-2 rounded shadow">
+          <p>Selected: {selectedPolygonId}</p>
+        </div>
+      )}
 
       {/* Existing buttons */}
       <div className="absolute bottom-4 right-4 z-10 flex gap-2">
