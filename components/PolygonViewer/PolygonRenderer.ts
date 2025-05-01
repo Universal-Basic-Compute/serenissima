@@ -345,6 +345,11 @@ export default class PolygonRenderer {
                 ownerColor, // Pass the owner's color
                 ownerCoatOfArmsUrl // Pass the owner's coat of arms URL
               );
+              
+              // Add this line to set a consistent render order based on polygon ID:
+              const renderOrderBase = 10; // Base value to ensure it's above water
+              const renderOrderOffset = parseInt(polygon.id.replace(/\D/g, '')) % 100 || 0; // Get a stable number from the ID
+              lodPolygon.getMesh().renderOrder = renderOrderBase + renderOrderOffset;
             
               this.lodPolygons.push(lodPolygon);
               

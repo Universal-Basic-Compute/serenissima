@@ -185,6 +185,7 @@ export default class WaterEffect {
     this.shoreMesh = new THREE.Mesh(shoreGeometry, shoreMaterial);
     this.shoreMesh.rotation.x = -Math.PI / 2;
     this.shoreMesh.position.y = -0.02; // Position slightly higher for better visibility
+    this.shoreMesh.renderOrder = 5; // Between water and land
     this.scene.add(this.shoreMesh);
     
     // Create higher resolution render target for land texture
@@ -237,7 +238,8 @@ export default class WaterEffect {
     
     this.water = new Water(this.waterGeometry, waterOptions);
     this.water.rotation.x = -Math.PI / 2;
-    this.water.position.y = -0.15; // Position water slightly lower than land
+    this.water.position.y = -0.2; // Position water even lower to avoid z-fighting
+    this.water.renderOrder = 0; // Ensure water renders before land
     this.water.visible = true;
     
     // Add the water to the scene

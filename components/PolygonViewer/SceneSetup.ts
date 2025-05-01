@@ -47,7 +47,7 @@ export default class SceneSetup {
       antialias: false, // Start without antialiasing for faster initial render
       powerPreference: 'high-performance',
       precision: this.performanceMode ? 'mediump' : 'highp', // Lower precision in performance mode
-      logarithmicDepthBuffer: false, // Disable for better performance
+      logarithmicDepthBuffer: true, // Enable logarithmic depth buffer to help with z-fighting
       shadowMapEnabled: false // Explicitly disable shadow maps at creation
     });
     this.renderer.setSize(window.innerWidth, window.innerHeight);

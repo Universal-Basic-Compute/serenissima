@@ -188,7 +188,14 @@ export default class LODPolygon {
       shadowSide: THREE.FrontSide, // Explicitly set shadowSide
       // Remove all shadow-related properties
       transparent: false,
-      opacity: 1.0
+      opacity: 1.0,
+      // Add these important properties to prevent z-fighting:
+      polygonOffset: true,
+      polygonOffsetFactor: 1,
+      polygonOffsetUnits: 1,
+      // Ensure depth settings are correct
+      depthTest: true,
+      depthWrite: true
     });
     
     this.highDetailMesh = new THREE.Mesh(geometry, material);
