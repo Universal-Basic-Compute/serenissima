@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
 
-// Cache the land owners data with a 5-minute expiration
+// Cache the land owners data with a longer expiration
 let cachedData: any = null;
 let cacheTimestamp: number = 0;
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
+const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes in milliseconds
+const FETCH_TIMEOUT = 20000; // 20 seconds timeout
 
 export async function GET() {
   try {
@@ -17,38 +18,64 @@ export async function GET() {
     
     console.log('Fetching fresh land ownership data from backend...');
     
-    // Fetch land ownership data from the backend
-    const response = await fetch('http://localhost:8000/api/lands', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      // Add a timeout to prevent hanging requests
-      signal: AbortSignal.timeout(10000) // 10 second timeout
-    });
-    
-    if (!response.ok) {
-      throw new Error(`Backend returned ${response.status}: ${response.statusText}`);
+    try {
+      // Fetch land ownership data from the backend with increased timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT);
+      
+      const response = await fetch('http://localhost:8000/api/lands', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
+      
+      if (!response.ok) {
+        throw new Error(`Backend returned ${response.status}: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      console.log(`Received ${data.length} land records from backend`);
+      
+      // Update the cache
+      cachedData = { success: true, lands: data };
+      cacheTimestamp = currentTime;
+      
+      // Set cache headers
+      const headers = new Headers();
+      headers.set('Cache-Control', 'public, max-age=1800'); // Cache for 30 minutes
+      
+      return NextResponse.json(cachedData, { headers });
+    } catch (fetchError) {
+      console.error('Error fetching from backend:', fetchError);
+      
+      // If we have stale cache, return it rather than failing
+      if (cachedData) {
+        console.log('Returning stale cached data due to fetch error');
+        return NextResponse.json({
+          ...cachedData,
+          _cached: true,
+          _stale: true,
+          _error: fetchError.message
+        });
+      }
+      
+      // If no cache exists, create an empty response
+      return NextResponse.json({
+        success: true,
+        lands: [],
+        _error: fetchError.message
+      });
     }
-    
-    const data = await response.json();
-    console.log(`Received ${data.length} land records from backend`);
-    
-    // Update the cache
-    cachedData = { success: true, lands: data };
-    cacheTimestamp = currentTime;
-    
-    // Set cache headers
-    const headers = new Headers();
-    headers.set('Cache-Control', 'public, max-age=300'); // Cache for 5 minutes
-    
-    return NextResponse.json(cachedData, { headers });
   } catch (error) {
-    console.error('Error fetching land ownership data:', error);
+    console.error('Error in GET handler:', error);
     
-    // If we have stale cache, return it rather than failing
+    // If we have any cache, return it rather than failing
     if (cachedData) {
-      console.log('Returning stale cached data due to fetch error');
+      console.log('Returning cached data due to handler error');
       return NextResponse.json({
         ...cachedData,
         _cached: true,
@@ -57,7 +84,7 @@ export async function GET() {
     }
     
     return NextResponse.json(
-      { success: false, error: 'Failed to fetch land ownership data' },
+      { success: false, error: 'Failed to fetch land ownership data', message: error.message },
       { status: 500 }
     );
   }
