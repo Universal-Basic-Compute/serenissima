@@ -6,7 +6,7 @@ interface LandDetailsPanelProps {
   selectedPolygonId: string | null;
   onClose: () => void;
   polygons: Polygon[];
-  landOwners: Record<string, string>; // Add landOwners prop
+  landOwners: Record<string, string>;
 }
 
 export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons, landOwners }: LandDetailsPanelProps) {
@@ -16,6 +16,9 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
   const selectedPolygon = selectedPolygonId 
     ? polygons.find(p => p.id === selectedPolygonId)
     : null;
+  
+  // Get the owner for the selected polygon
+  const owner = selectedPolygonId ? landOwners[selectedPolygonId] : null;
   
   // Show panel with animation when a polygon is selected
   useEffect(() => {
@@ -50,6 +53,15 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
         </div>
         
         <div className="space-y-4">
+          {/* Owner information - always show this section */}
+          <div>
+            <h3 className="text-sm font-medium text-gray-500">Architect</h3>
+            <p className="mt-1 font-semibold">
+              {owner ? owner : 'Available'}
+            </p>
+          </div>
+          
+          {/* Historical Name */}
           {selectedPolygon?.historicalName && (
             <div>
               <h3 className="text-sm font-medium text-gray-500">Historical Name</h3>
@@ -60,6 +72,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
             </div>
           )}
           
+          {/* Historical Description */}
           {selectedPolygon?.historicalDescription && (
             <div>
               <h3 className="text-sm font-medium text-gray-500">Historical Description</h3>
@@ -67,28 +80,11 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
             </div>
           )}
           
-          <div>
-            <h3 className="text-sm font-medium text-gray-500">Land ID</h3>
-            <p className="mt-1">{selectedPolygonId}</p>
-          </div>
-          
-          <div>
-            <h3 className="text-sm font-medium text-gray-500">
-              {selectedPolygonId && landOwners[selectedPolygonId] ? 'Owner' : 'Status'}
-            </h3>
-            <p className="mt-1">
-              {selectedPolygonId && landOwners[selectedPolygonId] 
-                ? landOwners[selectedPolygonId] 
-                : 'Available'}
-            </p>
-          </div>
-          
-          {selectedPolygon?.centroid && (
+          {/* Name Confidence if available */}
+          {selectedPolygon?.nameConfidence && (
             <div>
-              <h3 className="text-sm font-medium text-gray-500">Location</h3>
-              <p className="mt-1">
-                {selectedPolygon.centroid.lat.toFixed(6)}, {selectedPolygon.centroid.lng.toFixed(6)}
-              </p>
+              <h3 className="text-sm font-medium text-gray-500">Name Confidence</h3>
+              <p className="mt-1 text-sm">{selectedPolygon.nameConfidence}</p>
             </div>
           )}
           
