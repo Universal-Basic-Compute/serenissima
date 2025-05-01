@@ -249,22 +249,9 @@ export default class LODPolygon {
       if (activeView === 'land') {
         // For land view, use owner's color or generate one
         if (!this.isSelected) {
-          if (this.ownerColor) {
-            // Make sure material.color exists before calling set
-            if (material.color) {
-              material.color.set(this.ownerColor);
-            }
-          } else if (this.polygon.owner) {
-            // Make sure material.color exists before calling copy
-            if (material.color) {
-              const generatedColor = this.generateColorFromUsername(this.polygon.owner);
-              material.color.copy(generatedColor);
-            }
-          } else {
-            // Make sure material.color exists before setting
-            if (material.color) {
-              material.color.set(new THREE.Color(0x7cac6a));
-            }
+          const landColor = this.determineLandColor();
+          if (material.color) {
+            material.color.copy(landColor);
           }
         }
         
@@ -352,10 +339,16 @@ export default class LODPolygon {
           // Get the current material
           const currentMaterial = this.highDetailMesh.material as THREE.MeshBasicMaterial;
           
+          // Create a new material for sides with the correct color
+          const sidesMaterial = new THREE.MeshBasicMaterial({
+            color: this.determineLandColor(),
+            side: THREE.FrontSide
+          });
+          
           // Create a multi-material: coat of arms for top, original color for sides
           const materials = [
             material, // Top face (index 0)
-            currentMaterial // All other faces
+            sidesMaterial // All other faces
           ];
           
           // Apply materials to specific faces
