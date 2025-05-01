@@ -13,53 +13,62 @@ export async function GET(request: Request) {
     // Apply limit if specified
     const filesToProcess = limit > 0 ? files.slice(0, limit) : files;
     
-    // Process files in parallel using Promise.all for better performance
-    const polygonsPromises = filesToProcess.map(async file => {
-      const data = serverUtils.readJsonFromFile(file);
-      const id = file.replace('.json', '');
+    // Process files in smaller batches to avoid memory issues
+    const batchSize = 20;
+    const polygons = [];
+    
+    for (let i = 0; i < filesToProcess.length; i += batchSize) {
+      const batch = filesToProcess.slice(i, i + batchSize);
       
-      // Handle both old and new data formats
-      if (Array.isArray(data)) {
-        // Old format - just coordinates array
-        return {
-          id,
-          coordinates: data,
-          // Calculate centroid on-the-fly if not already stored
-          centroid: calculateCentroid(data)
-        };
-      } else if (data && data.coordinates) {
-        // If essential mode, return minimal data
-        if (essential) {
+      // Process this batch
+      const batchPromises = batch.map(async file => {
+        const data = serverUtils.readJsonFromFile(file);
+        const id = file.replace('.json', '');
+        
+        // Handle both old and new data formats
+        if (Array.isArray(data)) {
+          // Old format - just coordinates array
+          return {
+            id,
+            coordinates: data,
+            // Calculate centroid on-the-fly if not already stored
+            centroid: calculateCentroid(data)
+          };
+        } else if (data && data.coordinates) {
+          // If essential mode, return minimal data
+          if (essential) {
+            return {
+              id,
+              coordinates: data.coordinates,
+              centroid: data.centroid || calculateCentroid(data.coordinates)
+            };
+          }
+          
+          // New format with coordinates and centroid
           return {
             id,
             coordinates: data.coordinates,
-            centroid: data.centroid || calculateCentroid(data.coordinates)
+            centroid: data.centroid || calculateCentroid(data.coordinates),
+            // Include historical information if available
+            historicalName: data.historicalName,
+            englishName: data.englishName,
+            historicalDescription: data.historicalDescription,
+            nameConfidence: data.nameConfidence,
+            areaInSquareMeters: data.areaInSquareMeters
+          };
+        } else {
+          console.warn(`Invalid data format in ${file}`);
+          return {
+            id,
+            coordinates: [],
+            centroid: null
           };
         }
-        
-        // New format with coordinates and centroid
-        return {
-          id,
-          coordinates: data.coordinates,
-          centroid: data.centroid || calculateCentroid(data.coordinates),
-          // Include historical information if available
-          historicalName: data.historicalName,
-          englishName: data.englishName,
-          historicalDescription: data.historicalDescription,
-          nameConfidence: data.nameConfidence,
-          areaInSquareMeters: data.areaInSquareMeters
-        };
-      } else {
-        console.warn(`Invalid data format in ${file}`);
-        return {
-          id,
-          coordinates: [],
-          centroid: null
-        };
-      }
-    });
-    
-    const polygons = await Promise.all(polygonsPromises);
+      });
+      
+      const batchResults = await Promise.all(batchPromises);
+      polygons.push(...batchResults);
+    }
     
     // Set cache headers to allow browsers to cache the response
     const headers = new Headers();

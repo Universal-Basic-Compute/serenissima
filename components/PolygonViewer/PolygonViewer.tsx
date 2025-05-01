@@ -183,12 +183,21 @@ export default function PolygonViewer() {
       }
     }, 3000);
     
-    // Use web worker for heavy calculations if we have many polygons
-    if (polygons.length > 100) {
-      // Use web worker for heavy calculations
-      const worker = new Worker('/workers/geometryWorker.js');
+    // Use a reference for the web worker to ensure proper cleanup
+    const geometryWorker = useRef<Worker | null>(null);
+    
+    // Initialize the worker only once
+    useEffect(() => {
+      // Clean up any existing worker
+      if (geometryWorker.current) {
+        geometryWorker.current.terminate();
+      }
       
-      worker.onmessage = function(e) {
+      // Create a new worker
+      geometryWorker.current = new Worker('/workers/geometryWorker.js');
+      
+      // Set up message handler
+      geometryWorker.current.onmessage = function(e) {
         if (e.data.type === 'centroidsCalculated') {
           // Update centroids in store
           const centroids = e.data.results;
@@ -211,16 +220,42 @@ export default function PolygonViewer() {
         }
       };
       
-      // Send polygons without centroids to worker
-      const polygonsWithoutCentroids = polygons.filter(p => !p.centroid);
-      if (polygonsWithoutCentroids.length > 0) {
-        console.log(`Sending ${polygonsWithoutCentroids.length} polygons to worker for centroid calculation`);
-        worker.postMessage({
-          type: 'calculateCentroids',
-          data: { polygons: polygonsWithoutCentroids }
-        });
+      // Clean up worker on component unmount
+      return () => {
+        if (geometryWorker.current) {
+          geometryWorker.current.terminate();
+          geometryWorker.current = null;
+        }
+      };
+    }, []);
+    
+    // Send polygons to worker in smaller batches
+    useEffect(() => {
+      if (geometryWorker.current && polygons.length > 0) {
+        // Only process polygons without centroids
+        const polygonsWithoutCentroids = polygons.filter(p => !p.centroid);
+        
+        if (polygonsWithoutCentroids.length > 0) {
+          console.log(`Sending ${polygonsWithoutCentroids.length} polygons to worker for centroid calculation`);
+          
+          // Process in smaller batches to prevent worker overload
+          const batchSize = 20;
+          for (let i = 0; i < polygonsWithoutCentroids.length; i += batchSize) {
+            const batch = polygonsWithoutCentroids.slice(i, i + batchSize);
+            
+            // Add a small delay between batches
+            setTimeout(() => {
+              if (geometryWorker.current) {
+                geometryWorker.current.postMessage({
+                  type: 'calculateCentroids',
+                  data: { polygons: batch }
+                });
+              }
+            }, i * 50); // 50ms delay between batches
+          }
+        }
       }
-    }
+    }, [polygons]);
     
     return () => {
       clearTimeout(loadSecondaryData);

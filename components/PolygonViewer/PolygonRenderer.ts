@@ -271,8 +271,8 @@ export default class PolygonRenderer {
       );
       frustum.setFromProjectionMatrix(projScreenMatrix);
       
-      // Process polygons in batches to prevent UI freezing
-      const batchSize = 10; // Process 10 polygons at a time
+      // Process polygons in smaller batches with longer delays to prevent UI freezing
+      const batchSize = 5; // Reduced from 10 to 5 polygons at a time
       const totalPolygons = this.polygons.length;
       let processedCount = 0;
       
@@ -357,9 +357,9 @@ export default class PolygonRenderer {
           }
         }
         
-        // If there are more polygons to process, schedule the next batch
+        // If there are more polygons to process, schedule the next batch with increased delay
         if (endIdx < totalPolygons) {
-          setTimeout(() => processBatch(endIdx), 0);
+          setTimeout(() => processBatch(endIdx), 50); // Increased from 0 to 50ms
           console.log(`Processed ${processedCount}/${totalPolygons} polygons...`);
         } else {
           console.log(`Completed rendering all ${processedCount} polygons`);
