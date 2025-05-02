@@ -417,11 +417,72 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
                   </button>
                 </div>
                 
-                {/* Variant selection if available */}
+                {/* Variant selection if available - now as a carousel */}
                 {selectedBuilding.name && availableVariants.length > 1 && (
                   <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
                     <h3 className="text-lg font-medium text-amber-700 mb-2">Building Variants</h3>
-                    <div className="flex flex-wrap gap-2 justify-center">
+                    
+                    {/* Carousel Navigation */}
+                    <div className="flex items-center justify-between mb-2">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const currentIndex = availableVariants.indexOf(selectedVariant);
+                          const prevIndex = currentIndex > 0 ? currentIndex - 1 : availableVariants.length - 1;
+                          setSelectedVariant(availableVariants[prevIndex]);
+                        }}
+                        className="p-2 bg-amber-100 rounded-full hover:bg-amber-200 transition-colors"
+                        aria-label="Previous variant"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-amber-800" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      </button>
+                      
+                      <div className="text-amber-800 font-medium">
+                        {selectedVariant.charAt(0).toUpperCase() + selectedVariant.slice(1)}
+                        <span className="text-amber-500 text-sm ml-2">
+                          {availableVariants.indexOf(selectedVariant) + 1} / {availableVariants.length}
+                        </span>
+                      </div>
+                      
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const currentIndex = availableVariants.indexOf(selectedVariant);
+                          const nextIndex = currentIndex < availableVariants.length - 1 ? currentIndex + 1 : 0;
+                          setSelectedVariant(availableVariants[nextIndex]);
+                        }}
+                        className="p-2 bg-amber-100 rounded-full hover:bg-amber-200 transition-colors"
+                        aria-label="Next variant"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-amber-800" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                        </svg>
+                      </button>
+                    </div>
+                    
+                    {/* Variant Indicators */}
+                    <div className="flex justify-center space-x-1 mt-2">
+                      {availableVariants.map((variant, index) => (
+                        <button
+                          key={variant}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedVariant(variant);
+                          }}
+                          className={`w-2 h-2 rounded-full ${
+                            selectedVariant === variant 
+                              ? 'bg-amber-600' 
+                              : 'bg-amber-300 hover:bg-amber-400'
+                          }`}
+                          aria-label={`Select variant ${variant}`}
+                        />
+                      ))}
+                    </div>
+                    
+                    {/* Variant Name Display */}
+                    <div className="flex flex-wrap gap-2 justify-center mt-3">
                       {availableVariants.map(variant => (
                         <button
                           key={variant}
