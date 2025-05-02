@@ -819,6 +819,57 @@ export default function PolygonViewer() {
         }
       }
       
+      // Add a GUARANTEED fallback water plane that will always be visible
+      const createFallbackWater = () => {
+        console.log('Creating GUARANTEED fallback water plane');
+        
+        // Create a simple blue plane
+        const waterGeometry = new THREE.PlaneGeometry(10000, 10000);
+        const waterMaterial = new THREE.MeshBasicMaterial({
+          color: 0x4d94ff,
+          transparent: true,
+          opacity: 0.8,
+          depthTest: false,
+          depthWrite: false,
+          side: THREE.DoubleSide
+        });
+        
+        const waterMesh = new THREE.Mesh(waterGeometry, waterMaterial);
+        waterMesh.rotation.x = -Math.PI / 2;
+        waterMesh.position.y = 0.3; // Position it high enough to be visible
+        waterMesh.renderOrder = 500; // Lower than the main water but still high
+        
+        // Add user data for identification
+        waterMesh.userData.isFallbackWater = true;
+        waterMesh.userData.alwaysVisible = true;
+        
+        // Add to scene
+        if (sceneRef.current && sceneRef.current.scene) {
+          sceneRef.current.scene.add(waterMesh);
+        }
+      };
+
+      // Call this function immediately
+      createFallbackWater();
+
+      // Also set up an interval to check if the fallback water is still there
+      const fallbackWaterInterval = setInterval(() => {
+        if (sceneRef.current && sceneRef.current.scene) {
+          let fallbackWaterFound = false;
+          
+          sceneRef.current.scene.traverse(object => {
+            if (object.userData && object.userData.isFallbackWater) {
+              fallbackWaterFound = true;
+              object.visible = true; // Ensure it's visible
+            }
+          });
+          
+          if (!fallbackWaterFound) {
+            createFallbackWater();
+          }
+        }
+      }, 2000);
+      
       // Add error handling for WebGL context loss using the function defined outside
       canvasRef.current.addEventListener('webglcontextlost', handleContextLost as unknown as EventListener);
     
@@ -828,6 +879,14 @@ export default function PolygonViewer() {
     } catch (error) {
       console.error('Error setting up Three.js scene:', error);
     }
+    
+    // Clean up the interval in the return function
+    return () => {
+      if (typeof fallbackWaterInterval !== 'undefined') {
+        clearInterval(fallbackWaterInterval);
+      }
+      // ... other cleanup code ...
+    };
     
     // Add camera reference to window for debugging
     if (typeof window !== 'undefined' && sceneRef.current) {
@@ -1040,13 +1099,13 @@ export default function PolygonViewer() {
           isFirstRender = false;
           return;
         }
-      
+        
         // Skip frames based on performance mode
         if (!highQuality && frameCount % 2 !== 0) {
           frameCount++;
           return;
         }
-      
+        
         // Update controls to enable camera movement
         if (sceneRef.current && sceneRef.current.controls) {
           try {
@@ -1055,13 +1114,55 @@ export default function PolygonViewer() {
             // Silent fail
           }
         }
-      
+          
+        // FORCE water visibility check EVERY FRAME
+        const forceWaterVisibility = () => {
+          if (sceneRef.current && sceneRef.current.scene) {
+            // First check if water exists
+            let waterFound = false;
+            sceneRef.current.scene.traverse(object => {
+              if (object.userData && object.userData.isWaterMesh) {
+                waterFound = true;
+                // FORCE water to be visible
+                object.visible = true;
+                object.renderOrder = 1000;
+                  
+                // Force material update
+                if (object instanceof THREE.Mesh && object.material) {
+                  if (Array.isArray(object.material)) {
+                    object.material.forEach(mat => {
+                      if (mat) {
+                        mat.needsUpdate = true;
+                        mat.depthTest = false;
+                        mat.depthWrite = false;
+                      }
+                    });
+                  } else {
+                    object.material.needsUpdate = true;
+                    object.material.depthTest = false;
+                    object.material.depthWrite = false;
+                  }
+                }
+              }
+            });
+              
+            // If no water found, create it
+            if (!waterFound && sceneRef.current) {
+              console.log('EMERGENCY: No water found in scene, creating water');
+              sceneRef.current.createWater();
+            }
+          }
+        };
+          
+        // Call force water visibility check
+        forceWaterVisibility();
+        
         // Update water effect - EVERY frame for smoother animation
         if (sceneRef.current && sceneRef.current.water) {
           try {
             // Pass frameCount directly to water update for more varied animation
             sceneRef.current.water.update(frameCount);
-      
+        
             // Force water to be visible by ensuring its mesh is in the scene
             if (frameCount % 10 === 0) { // Check more frequently (every ~10 frames)
               const waterMesh = sceneRef.current.scene.children.find(
@@ -1073,22 +1174,26 @@ export default function PolygonViewer() {
               } else if (!waterMesh.visible) {
                 console.log('Water mesh found but not visible, making it visible');
                 waterMesh.visible = true;
-              
+                
                 // Ensure water is at the correct position
-                waterMesh.position.y = 0.05;
-              
+                waterMesh.position.y = 0.5; // Increased from 0.05 to 0.5
+                
                 // Force material update
                 if (waterMesh.material) {
                   waterMesh.material.needsUpdate = true;
+                  if (!Array.isArray(waterMesh.material)) {
+                    waterMesh.material.depthTest = false;
+                    waterMesh.material.depthWrite = false;
+                  }
                 }
               }
             }
-        
+          
             // Force additional water updates for more dynamic movement
             if (frameCount % 5 === 0) { // Every 5 frames
               sceneRef.current.water.update(frameCount + 10); // Add offset for variation
             }
-          
+            
             // Create random waves occasionally for more dynamic water
             if (frameCount % 120 === 0) { // Every ~2 seconds (assuming 60fps)
               if (typeof (sceneRef.current.water as any).createRandomWave === 'function') {

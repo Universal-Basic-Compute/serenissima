@@ -214,25 +214,34 @@ export default class SimpleWater {
       side: THREE.DoubleSide
     });
     
+    // FORCE VISIBILITY: Disable depth testing to ensure water is always drawn
+    if (this.waterMaterial) {
+      this.waterMaterial.depthTest = false;
+      this.waterMaterial.depthWrite = false;
+      this.waterMaterial.transparent = true;
+      this.waterMaterial.opacity = 0.9; // Slightly transparent to see land underneath
+    }
+    
     // Create the water mesh
     this.waterMesh = new THREE.Mesh(this.waterGeometry, this.waterMaterial);
     
-    // Position water at y=0 (surface level) - move higher for better visibility
-    this.waterMesh.position.y = 0.05; // Increased from 0.01 to 0.05 for better visibility
+    // FORCE VISIBILITY: Position water much higher to ensure it's visible
+    this.waterMesh.position.y = 0.5; // Dramatically increased from 0.05 to 0.5
     
     // Rotate the water plane to be horizontal
     this.waterMesh.rotation.x = -Math.PI / 2;
     
-    // Set render order to ensure water appears below land
-    this.waterMesh.renderOrder = 5;
+    // FORCE VISIBILITY: Make water render on top of everything
+    this.waterMesh.renderOrder = 1000; // Dramatically increased from 5
     
-    // Add user data flag to identify as water mesh
+    // FORCE VISIBILITY: Add user data flag for identification
     this.waterMesh.userData.isWaterMesh = true;
+    this.waterMesh.userData.alwaysVisible = true; // Add this flag
     
     // Add to scene
     this.scene.add(this.waterMesh);
     
-    console.log('Water surface created successfully');
+    console.log('Water surface created with FORCED visibility settings');
   }
   
   private getWaterColorForView(): number {

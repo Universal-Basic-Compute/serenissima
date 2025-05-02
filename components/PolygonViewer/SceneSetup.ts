@@ -267,15 +267,28 @@ export default class SceneSetup {
   
   // Add method to create water
   public createWater() {
-    console.log('Creating advanced water system...');
+    console.log('FORCE CREATING advanced water system...');
+    
+    // Remove any existing water first to prevent conflicts
+    this.scene.traverse(object => {
+      if (object.userData && object.userData.isWaterMesh) {
+        console.log('FORCE REMOVING existing water mesh');
+        this.scene.remove(object);
+      }
+    });
+    
+    if (this.water) {
+      console.log('FORCE CLEANING UP existing water instance');
+      this.water.cleanup();
+    }
     
     // Create a water effect with larger dimensions for better coverage
     this.water = new SimpleWater({
       scene: this.scene,
       activeView: this.activeView,
       performanceMode: this.performanceMode,
-      width: 2500, // Increased coverage
-      height: 2500  // Increased coverage
+      width: 5000, // DRAMATICALLY increased coverage
+      height: 5000  // DRAMATICALLY increased coverage
     });
     
     // If we have land positions, set them for water interaction
@@ -294,29 +307,30 @@ export default class SceneSetup {
       this.water.setLandPositions(defaultPositions);
     }
     
-    // Force multiple initial updates to ensure water is properly initialized
-    if (this.water) {
-      // Initial update
-      this.water.update(0);
-      
-      // Schedule additional updates with delays to ensure proper initialization
-      const updateTimes = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
-      updateTimes.forEach((time, index) => {
-        setTimeout(() => {
-          if (this.water) this.water.update(time);
-        }, 100 + index * 150); // Staggered updates for smoother initialization
-      });
-      
-      // Create some initial waves for immediate visual effect
-      setTimeout(() => {
-        for (let i = 0; i < 5; i++) {
-          // Call the createRandomWave method if it exists
-          if (this.water && typeof (this.water as any).createRandomWave === 'function') {
-            (this.water as any).createRandomWave();
-          }
-        }
-      }, 500);
+    // FORCE VISIBILITY: Immediately update water multiple times
+    for (let i = 0; i < 10; i++) {
+      if (this.water) this.water.update(i * 10);
     }
+    
+    // FORCE VISIBILITY: Create many random waves immediately
+    setTimeout(() => {
+      if (this.water && typeof (this.water as any).createRandomWave === 'function') {
+        for (let i = 0; i < 20; i++) {
+          (this.water as any).createRandomWave();
+        }
+      }
+    }, 100);
+    
+    // FORCE VISIBILITY: Check again after a delay to ensure water is still there
+    setTimeout(() => {
+      this.scene.traverse(object => {
+        if (object.userData && object.userData.isWaterMesh) {
+          console.log('FORCE UPDATE: Ensuring water mesh is still visible');
+          object.visible = true;
+          object.renderOrder = 1000;
+        }
+      });
+    }, 500);
     
     return this.water;
   }
