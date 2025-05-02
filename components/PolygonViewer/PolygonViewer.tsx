@@ -1152,6 +1152,13 @@ export default function PolygonViewer() {
     }
   }, [activeView, selectedPolygonId]);
   
+  // Add this effect to disable/enable interaction manager based on road creation mode
+  useEffect(() => {
+    if (interactionManagerRef.current) {
+      interactionManagerRef.current.setEnabled(!roadCreationActive);
+    }
+  }, [roadCreationActive]);
+  
   // Add a separate effect to handle selection state changes
   useEffect(() => {
     // Only update selection state when selectedPolygonId changes
