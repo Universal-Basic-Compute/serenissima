@@ -954,6 +954,11 @@ export default function PolygonViewer() {
           }
         }
       
+        // Update road visibility periodically to ensure roads are always visible
+        if (roadManagerRef.current && frameCount % 30 === 0) {
+          roadManagerRef.current.updateRoadVisibility();
+        }
+      
         // Update polygon LOD and selection state - less frequently for distant objects
         if (polygonRendererRef.current && (highQuality || frameCount % 3 === 0)) {
           try {

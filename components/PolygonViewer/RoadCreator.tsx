@@ -379,7 +379,7 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
     const curve = createCurvedPath(roadPoints);
     
     // Create road geometry
-    const roadWidth = 0.15; // Changed from 0.3 to 0.15 (2 times thinner)
+    const roadWidth = 0.105; // Changed from 0.15 to 0.105 (30% thinner)
     const roadGeometry = new THREE.BufferGeometry();
     const positions: number[] = [];
     const uvs: number[] = [];
@@ -438,18 +438,20 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
     roadGeometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
     roadGeometry.computeVertexNormals();
     
-    // Create road material
+    // Create road material with better visibility
     const roadMaterial = new THREE.MeshStandardMaterial({
       color: 0x555555,
       roughness: 0.8,
       metalness: 0.2,
       side: THREE.DoubleSide,
-      depthWrite: false // Add this to prevent z-fighting
+      depthWrite: false, // Keep this to prevent z-fighting
+      depthTest: true,   // Make sure depth testing is enabled
+      transparent: false // Disable transparency for better visibility
     });
     
     // Create road mesh
     const road = new THREE.Mesh(roadGeometry, roadMaterial);
-    road.renderOrder = 20; // Increased from 15 to 20 to ensure roads appear above other elements
+    road.renderOrder = 25; // Increased from 20 to 25 to ensure roads appear above other elements
     
     // Mark as road for special handling
     road.userData.isRoad = true;

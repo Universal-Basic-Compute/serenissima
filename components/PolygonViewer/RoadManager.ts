@@ -27,6 +27,16 @@ export default class RoadManager {
         texture.wrapT = THREE.RepeatWrapping;
         texture.repeat.set(1, 10);
         this.roadTexture = texture;
+          
+        // Force update existing roads with the new texture
+        this.roads.forEach(road => {
+          if (road.mesh && road.mesh.material) {
+            if (road.mesh.material instanceof THREE.MeshStandardMaterial) {
+              road.mesh.material.map = texture;
+              road.mesh.material.needsUpdate = true;
+            }
+          }
+        });
       },
       undefined,
       (error) => {
@@ -137,7 +147,7 @@ export default class RoadManager {
     const curve = this.createCurvedPath(points, curvature);
     
     // Create road geometry
-    const roadWidth = 0.15; // Changed from 0.3 to 0.15 (2 times thinner)
+    const roadWidth = 0.105; // Changed from 0.15 to 0.105 (30% thinner)
     const roadGeometry = new THREE.BufferGeometry();
     const positions: number[] = [];
     const uvs: number[] = [];
@@ -195,7 +205,7 @@ export default class RoadManager {
     roadGeometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
     roadGeometry.computeVertexNormals();
     
-    // Create road material with enhanced textures
+    // Create road material with enhanced textures and better visibility
     const roadMaterial = new THREE.MeshStandardMaterial({
       color: 0x555555,
       roughness: 0.8,
@@ -205,12 +215,14 @@ export default class RoadManager {
       roughnessMap: this.roadRoughnessMap,
       normalScale: new THREE.Vector2(1, 1),
       side: THREE.DoubleSide,
-      depthWrite: false // Add this to prevent z-fighting
+      depthWrite: false, // Keep this to prevent z-fighting
+      depthTest: true,   // Make sure depth testing is enabled
+      transparent: false // Disable transparency for better visibility
     });
     
     // Create road mesh
     const road = new THREE.Mesh(roadGeometry, roadMaterial);
-    road.renderOrder = 20; // Increased from 15 to 20 to ensure roads appear above other elements
+    road.renderOrder = 25; // Increased from 20 to 25 to ensure roads appear above other elements
     
     // Mark as road for special handling
     road.userData.isRoad = true;
@@ -232,6 +244,30 @@ export default class RoadManager {
       'centripetal',
       0.1 // Very low tension value for straighter roads
     );
+  }
+
+  // Add method to force update road visibility
+  public updateRoadVisibility(): void {
+    this.roads.forEach(road => {
+      if (road.mesh) {
+        // Ensure the material is properly configured
+        if (road.mesh.material instanceof THREE.MeshStandardMaterial) {
+          road.mesh.material.needsUpdate = true;
+        } else if (Array.isArray(road.mesh.material)) {
+          road.mesh.material.forEach(mat => {
+            if (mat instanceof THREE.MeshStandardMaterial) {
+              mat.needsUpdate = true;
+            }
+          });
+        }
+        
+        // Force the mesh to be visible
+        road.mesh.visible = true;
+        
+        // Ensure high render order
+        road.mesh.renderOrder = 25;
+      }
+    });
   }
 
   public cleanup(): void {
