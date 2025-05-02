@@ -147,7 +147,7 @@ export default class RoadManager {
     const curve = this.createCurvedPath(points, curvature);
     
     // Create road geometry
-    const roadWidth = 0.105; // Changed from 0.15 to 0.105 (30% thinner)
+    const roadWidth = 0.0735; // Changed from 0.105 to 0.0735 (30% thinner)
     const roadGeometry = new THREE.BufferGeometry();
     const positions: number[] = [];
     const uvs: number[] = [];
@@ -206,26 +206,20 @@ export default class RoadManager {
     roadGeometry.computeVertexNormals();
     
     // Create road material with enhanced textures and better visibility
-    const roadMaterial = new THREE.MeshStandardMaterial({
+    const roadMaterial = new THREE.MeshBasicMaterial({
       color: 0x555555,
-      roughness: 0.8,
-      metalness: 0.2,
-      map: this.roadTexture,
-      normalMap: this.roadNormalMap,
-      roughnessMap: this.roadRoughnessMap,
-      normalScale: new THREE.Vector2(1, 1),
       side: THREE.DoubleSide,
-      depthWrite: false, // Keep this to prevent z-fighting
-      depthTest: true,   // Make sure depth testing is enabled
-      transparent: false, // Disable transparency for better visibility
-      polygonOffset: true, // Add polygon offset to prevent z-fighting
-      polygonOffsetFactor: -4, // Use a negative value to push roads above terrain
-      polygonOffsetUnits: -4
+      depthWrite: false,
+      depthTest: true,
+      transparent: false,
+      polygonOffset: true,
+      polygonOffsetFactor: -10, // Increased from -4 to -10 for better visibility
+      polygonOffsetUnits: -10   // Increased from -4 to -10 for better visibility
     });
     
     // Create road mesh
     const road = new THREE.Mesh(roadGeometry, roadMaterial);
-    road.renderOrder = 30; // Increased from 25 to 30 for even higher priority
+    road.renderOrder = 100; // Increased from 30 to 100 for much higher priority
     
     // Mark as road for special handling
     road.userData.isRoad = true;
@@ -261,23 +255,23 @@ export default class RoadManager {
         road.mesh.visible = true;
         
         // Ensure high render order
-        road.mesh.renderOrder = 30;
+        road.mesh.renderOrder = 100; // Increased from 30 to 100
         
         // Ensure the material is properly configured
-        if (road.mesh.material instanceof THREE.MeshStandardMaterial) {
+        if (road.mesh.material instanceof THREE.MeshBasicMaterial) {
           road.mesh.material.needsUpdate = true;
           road.mesh.material.depthWrite = false;
           road.mesh.material.polygonOffset = true;
-          road.mesh.material.polygonOffsetFactor = -4;
-          road.mesh.material.polygonOffsetUnits = -4;
+          road.mesh.material.polygonOffsetFactor = -10; // Increased from -4 to -10
+          road.mesh.material.polygonOffsetUnits = -10;  // Increased from -4 to -10
         } else if (Array.isArray(road.mesh.material)) {
           road.mesh.material.forEach(mat => {
-            if (mat instanceof THREE.MeshStandardMaterial) {
+            if (mat instanceof THREE.MeshBasicMaterial) {
               mat.needsUpdate = true;
               mat.depthWrite = false;
               mat.polygonOffset = true;
-              mat.polygonOffsetFactor = -4;
-              mat.polygonOffsetUnits = -4;
+              mat.polygonOffsetFactor = -10; // Increased from -4 to -10
+              mat.polygonOffsetUnits = -10;  // Increased from -4 to -10
             }
           });
         }
