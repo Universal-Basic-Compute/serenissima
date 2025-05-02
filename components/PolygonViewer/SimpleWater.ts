@@ -79,19 +79,19 @@ export default class SimpleWater {
         float wave(vec2 position) {
           // Large slow waves
           float wave1 = sin(position.x * 0.5 + time * 0.5) * 
-                       cos(position.z * 0.4 + time * 0.3) * 0.8;
+                       cos(position.y * 0.4 + time * 0.3) * 0.8;
           
           // Medium waves
           float wave2 = sin(position.x * 1.0 + time * 0.8) * 
-                       sin(position.z * 1.3 + time * 0.6) * 0.4;
+                       sin(position.y * 1.3 + time * 0.6) * 0.4;
           
           // Small ripples
           float wave3 = sin(position.x * 2.5 + time * 1.5) * 
-                       sin(position.z * 2.8 + time * 1.7) * 0.2;
+                       sin(position.y * 2.8 + time * 1.7) * 0.2;
           
           // Micro detail
           float wave4 = sin(position.x * 5.0 + time * 2.5) * 
-                       sin(position.z * 5.5 + time * 2.2) * 0.1;
+                       sin(position.y * 5.5 + time * 2.2) * 0.1;
           
           // Combine all waves
           return wave1 + wave2 + wave3 + wave4;
@@ -116,11 +116,11 @@ export default class SimpleWater {
           
           // Calculate wave height
           vec3 pos = position;
-          float elevation = wave(position.xz);
+          float elevation = wave(position.xy);
           pos.y += elevation * 1.5; // Increased wave height
           
           // Calculate normal for lighting
-          vNormal = calculateNormal(position.xz);
+          vNormal = calculateNormal(position.xy);
           
           // Store elevation for fragment shader
           vElevation = elevation;
