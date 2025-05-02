@@ -663,6 +663,76 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
           isLoading={isPurchasing}
         />
       )}
+    </div>
+  );
+  
+  // Add the missing handleConfirmPurchase function
+  function handleConfirmPurchase() {
+    if (!selectedPolygonId || !transaction) return;
+    
+    setIsPurchasing(true);
+    
+    // Get the current wallet address
+    const walletAddress = sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress') || '';
+    
+    if (!walletAddress) {
+      alert('Please connect your wallet first');
+      setIsPurchasing(false);
+      setShowPurchaseConfirmation(false);
+      return;
+    }
+    
+    // Execute the transaction
+    fetch(`${getApiBaseUrl()}/api/transaction/${transaction.id}/execute`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        buyer: walletAddress
+      }),
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Failed to purchase land');
+      }
+      return response.json();
+    })
+    .then(data => {
+      // Show success message
+      alert(`Land purchased successfully! You are now the owner of ${selectedPolygon?.historicalName || 'this land'}.`);
+      
+      // Dispatch event to update the UI
+      window.dispatchEvent(new CustomEvent('landPurchased', {
+        detail: {
+          landId: selectedPolygonId,
+          transaction: data.transaction
+        }
+      }));
+      
+      // Dispatch event to update land ownership
+      window.dispatchEvent(new CustomEvent('landOwnershipChanged', {
+        detail: {
+          landId: selectedPolygonId,
+          newOwner: walletAddress,
+          transaction: data.transaction
+        }
+      }));
+      
+      // Close the confirmation dialog
+      setShowPurchaseConfirmation(false);
+      setIsPurchasing(false);
+      
+      // Force a refresh of the panel
+      setRefreshKey(prevKey => prevKey + 1);
+    })
+    .catch(error => {
+      console.error('Error purchasing land:', error);
+      alert('Failed to purchase land. Please try again.');
+      setIsPurchasing(false);
+      setShowPurchaseConfirmation(false);
+    });
+  }
       
     </div>
   );
