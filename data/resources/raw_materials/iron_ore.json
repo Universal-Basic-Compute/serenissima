@@ -1,0 +1,82 @@
+{
+    "id": "iron_ore",
+    "name": "Iron Ore",
+    "category": "raw_materials",
+    "subcategory": "metal_ore",
+    "icon": "icons/raw_materials/iron_ore.png",
+    "baseProperties": {
+      "baseValue": 10,
+      "weight": 5.0,
+      "volume": 1.0,
+      "stackSize": 40,
+      "perishable": false
+    },
+    "description": {
+      "short": "Unprocessed iron-bearing rock.",
+      "full": "Heavy mineral ore containing iron, mined from the mainland territories under Venetian control and imported from Alpine regions.",
+      "flavor": "From these humble stones of earth comes the skeleton of our ships, the strength of our tools, and the protection of our warriors—truly the bones of civilization."
+    },
+    "sourceInfo": {
+      "source": "territorial_and_imported",
+      "harvestMethod": "mining",
+      "locations": ["mainland_territories", "alpine_regions", "dalmatia"],
+      "availability": "common",
+      "seasonality": "year_round"
+    },
+    "qualityLevels": {
+      "available": ["poor", "common", "fine"],
+      "default": "common",
+      "effects": {
+        "poor": {"valueModifier": 0.7, "productionEfficiency": 0.8, "yieldModifier": 0.7},
+        "common": {"valueModifier": 1.0, "productionEfficiency": 1.0, "yieldModifier": 1.0},
+        "fine": {"valueModifier": 1.4, "productionEfficiency": 1.2, "yieldModifier": 1.3}
+      }
+    },
+    "productionUses": [
+      {
+        "process": "smelting",
+        "building": "foundry",
+        "role": "primary_material",
+        "outputResource": "iron"
+      }
+    ],
+    "substitutes": [],
+    "complements": [
+      {
+        "resourceId": "fuel",
+        "context": "smelting",
+        "relationship": "required"
+      }
+    ],
+    "transportation": {
+      "methods": {
+        "large_ship": {"capacity": 300, "efficiency": 1.0, "risk": 0.1},
+        "barge": {"capacity": 100, "efficiency": 0.9, "risk": 0.15}
+      },
+      "requirements": ["sturdy_vessel"],
+      "loadingTime": 20,
+      "restrictions": ["weight_limits"]
+    },
+    "storage": {
+      "compatible": {
+        "bulk_materials_yard": {"capacityMultiplier": 1.0, "preservation": 1.0},
+        "foundry": {"capacityMultiplier": 0.6, "preservation": 1.0}
+      },
+      "requirements": ["reinforced_flooring"],
+      "risks": ["moisture"],
+      "maxStorageTime": "unlimited"
+    },
+    "marketDynamics": {
+      "baseAvailability": 0.7,
+      "demandLevel": "steady",
+      "priceVolatility": 0.3,
+      "regionalFactors": [
+        {
+          "region": "arsenal",
+          "availabilityModifier": 1.2,
+          "priceModifier": 0.9
+        }
+      ],
+      "seasonalFactors": []
+    }
+  }

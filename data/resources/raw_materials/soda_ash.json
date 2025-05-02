@@ -1,0 +1,109 @@
+{
+    "id": "soda_ash",
+    "name": "Soda Ash",
+    "category": "raw_materials",
+    "subcategory": "mineral",
+    "icon": "icons/raw_materials/soda_ash.png",
+    "baseProperties": {
+      "baseValue": 8,
+      "weight": 2.0,
+      "volume": 1.0,
+      "stackSize": 50,
+      "perishable": false
+    },
+    "description": {
+      "short": "Alkaline material required for glassmaking.",
+      "full": "Imported alkali material derived from burned marine plants, primarily from Egypt and Syria. Essential for lowering the melting point of sand in glass production.",
+      "flavor": "The secret of true cristallo lies not in Venetian hands, but in distant shores where plants are transformed into the white powder that makes our glass shine like diamonds."
+    },
+    "sourceInfo": {
+      "source": "imported",
+      "harvestMethod": "plant_processing",
+      "locations": ["egypt", "syria", "levant"],
+      "availability": "uncommon",
+      "seasonality": "year_round"
+    },
+    "qualityLevels": {
+      "available": ["common", "fine", "superior"],
+      "default": "common",
+      "effects": {
+        "common": {"valueModifier": 1.0, "productionEfficiency": 1.0},
+        "fine": {"valueModifier": 1.5, "productionEfficiency": 1.2},
+        "superior": {"valueModifier": 2.5, "productionEfficiency": 1.5}
+      }
+    },
+    "productionUses": [
+      {
+        "process": "glassmaking",
+        "building": "glass_foundry",
+        "role": "flux_agent",
+        "outputResource": "molten_glass"
+      },
+      {
+        "process": "soap_making",
+        "building": "soap_workshop",
+        "role": "primary_ingredient",
+        "outputResource": "soap"
+      }
+    ],
+    "substitutes": [
+      {
+        "resourceId": "potash",
+        "efficiency": 0.8,
+        "qualityPenalty": 1,
+        "context": "glassmaking"
+      }
+    ],
+    "complements": [
+      {
+        "resourceId": "murano_sand",
+        "context": "glassmaking",
+        "relationship": "required"
+      }
+    ],
+    "transportation": {
+      "methods": {
+        "large_ship": {"capacity": 800, "efficiency": 1.0, "risk": 0.1},
+        "barge": {"capacity": 250, "efficiency": 0.9, "risk": 0.15},
+        "handcart": {"capacity": 6, "efficiency": 0.7, "risk": 0.2},
+        "porter": {"capacity": 2, "efficiency": 0.5, "risk": 0.25}
+      },
+      "requirements": ["dry_storage", "moisture_protection"],
+      "loadingTime": 6,
+      "restrictions": []
+    },
+    "storage": {
+      "compatible": {
+        "small_warehouse": {"capacityMultiplier": 1.0, "preservation": 0.95},
+        "secure_warehouse": {"capacityMultiplier": 1.0, "preservation": 1.0}
+      },
+      "requirements": ["dry", "sealed_containers"],
+      "risks": ["moisture", "contamination"],
+      "maxStorageTime": "unlimited"
+    },
+    "marketDynamics": {
+      "baseAvailability": 0.6,
+      "demandLevel": "high",
+      "priceVolatility": 0.5,
+      "regionalFactors": [
+        {
+          "region": "harbor_district",
+          "availabilityModifier": 1.2,
+          "priceModifier": 0.9
+        }
+      ],
+      "seasonalFactors": [
+        {
+          "season": "winter",
+          "availabilityModifier": 0.7,
+          "priceModifier": 1.3,
+          "note": "Reduced Mediterranean shipping"
+        }
+      ],
+      "tradeDisruptions": {
+        "factors": ["eastern_conflict", "naval_blockade", "trade_embargo"],
+        "impact": "severe"
+      }
+    }
+  }
+  

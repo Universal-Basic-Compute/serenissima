@@ -1,0 +1,99 @@
+{
+    "id": "silk_fabric",
+    "name": "Silk Fabric",
+    "category": "processed_materials",
+    "subcategory": "textile",
+    "baseValue": 60,
+    "weight": 0.5,
+    "volume": 0.8,
+    "stackSize": 15,
+    "description": "Finely woven silk fabric ready for dyeing or garment making.",
+    "longDescription": "Woven on specialized looms by master craftsmen, Venetian silk fabric represents the pinnacle of textile craftsmanship. These undyed fabrics await transformation into vibrant colored textiles through the city's sophisticated dyeing processes before becoming luxury garments and furnishings.",
+    "sprite": "assets/sprites/resources/silk_fabric.png",
+    "icon": "assets/icons/resources/silk_fabric.png",
+    "availableQualities": ["common", "fine", "superior", "exceptional", "masterwork"],
+    "defaultQuality": "fine",
+    
+    "processingFacility": "weaving_workshop",
+    "processingTime": 480,
+    "perishable": false,
+    "lightSensitivity": 0.4,
+    "specialHandling": ["clean_environment", "careful_folding"],
+    "qualityFactors": [
+      {"factor": "input_quality", "weight": 0.5},
+      {"factor": "loom_quality", "weight": 0.2},
+      {"factor": "worker_skill", "weight": 0.3}
+    ],
+    "patterns": [
+      {
+        "type": "plain",
+        "complexity": "low",
+        "value_multiplier": 1.0
+      },
+      {
+        "type": "twill",
+        "complexity": "medium",
+        "value_multiplier": 1.2
+      },
+      {
+        "type": "damask",
+        "complexity": "high",
+        "value_multiplier": 1.5,
+        "skill_requirement": 8
+      },
+      {
+        "type": "brocade",
+        "complexity": "very_high",
+        "value_multiplier": 2.0,
+        "skill_requirement": 10
+      }
+    ],
+    
+    "producedFrom": [
+      {
+        "inputs": [
+          {"resource": "prepared_silk", "amount": 18},
+          {"resource": "thread", "amount": 5}
+        ],
+        "building": "weaving_workshop",
+        "processingTime": 480
+      }
+    ],
+    "usedIn": [
+      {
+        "outputs": [
+          {"resource": "dyed_textiles", "amount": 28},
+          {"resource": "dye_waste", "amount": 2}
+        ],
+        "building": "dye_works",
+        "processingTime": 360
+      }
+    ],
+    
+    "transportOptions": {
+      "barge": {"capacity": 250, "efficiency": 0.95, "risk": 0.1},
+      "gondola": {"capacity": 20, "efficiency": 0.95, "risk": 0.1},
+      "handcart": {"capacity": 8, "efficiency": 0.9, "risk": 0.15},
+      "porter": {"capacity": 3, "efficiency": 0.85, "risk": 0.2}
+    },
+    "transportRequirements": ["weather_protection", "clean_handling"],
+    "loadingTime": 10,
+    "routeRestrictions": [],
+    
+    "storageOptions": {
+      "small_warehouse": {"capacityMultiplier": 0.9, "preservation": 0.9},
+      "weaving_workshop": {"capacityMultiplier": 0.6, "preservation": 1.0},
+      "dye_works": {"capacityMultiplier": 0.5, "preservation": 0.95}
+    },
+    "storageRequirements": ["dry", "clean", "pest_free", "dark"],
+    "specialStorageRisks": ["moisture", "pests", "light_exposure"],
+    "maxStorageTime": 10080,
+    
+    "marketDemand": "industry_primarily",
+    "priceFluctuationFactors": [
+      {"factor": "prepared_silk_availability", "weight": 0.4},
+      {"factor": "fashion_trends", "weight": 0.3},
+      {"factor": "dye_availability", "weight": 0.2},
+      {"factor": "season", "weight": 0.1}
+    ]
+  }

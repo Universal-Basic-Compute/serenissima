@@ -1,0 +1,102 @@
+{
+    "id": "molten_glass",
+    "name": "Molten Glass",
+    "category": "processed_materials",
+    "subcategory": "glass",
+    "baseValue": 20,
+    "weight": 3.0,
+    "volume": 1.0,
+    "stackSize": 15,
+    "description": "Heated glass ready for shaping by skilled glassblowers.",
+    "longDescription": "Molten glass is the essential intermediate product of Venice's renowned glass industry. Produced in the foundries of Murano, this carefully heated mixture of sand, soda ash, and minerals must be maintained at precise temperatures to allow glassblowers to shape it into Venice's famous glass products.",
+    "sprite": "assets/sprites/resources/molten_glass.png",
+    "icon": "assets/icons/resources/molten_glass.png",
+    "availableQualities": ["common", "fine", "superior"],
+    "defaultQuality": "common",
+    
+    "processingFacility": "glass_foundry",
+    "processingTime": 240,
+    "perishable": true,
+    "perishTime": 1440,
+    "coolingRate": 0.5,
+    "workingDuration": 120,
+    "temperatureRequirements": {
+      "minimum": 800,
+      "optimal": 1050,
+      "maximum": 1200
+    },
+    "specialHandling": ["heat_resistant_tools", "skilled_labor"],
+    "qualityFactors": [
+      {"factor": "input_quality", "weight": 0.6},
+      {"factor": "furnace_quality", "weight": 0.3},
+      {"factor": "worker_skill", "weight": 0.1}
+    ],
+    "varieties": [
+      {
+        "type": "cristallo",
+        "clarity": "high",
+        "required_inputs": ["high_quality_sand", "refined_soda_ash"],
+        "value_multiplier": 1.5
+      },
+      {
+        "type": "colored",
+        "clarity": "medium",
+        "required_inputs": ["minerals_colorants"],
+        "value_multiplier": 1.2
+      }
+    ],
+    
+    "producedFrom": [
+      {
+        "inputs": [
+          {"resource": "murano_sand", "amount": 10},
+          {"resource": "soda_ash", "amount": 5},
+          {"resource": "minerals_colorants", "amount": 2},
+          {"resource": "fuel", "amount": 20}
+        ],
+        "building": "glass_foundry",
+        "processingTime": 240
+      }
+    ],
+    "usedIn": [
+      {
+        "outputs": [
+          {"resource": "fine_glassware", "amount": 20},
+          {"resource": "decorative_glass", "amount": 10},
+          {"resource": "specialty_glass", "amount": 5}
+        ],
+        "building": "glassblower_workshop",
+        "processingTime": 360
+      }
+    ],
+    
+    "transportOptions": {
+      "specialized_cart": {
+        "capacity": 3,
+        "efficiency": 0.8,
+        "risk": 0.5,
+        "special": "heat_retention"
+      }
+    },
+    "transportRequirements": ["heat_retention", "careful_handling"],
+    "loadingTime": 15,
+    "routeRestrictions": ["short_distance_only", "no_bridges"],
+    
+    "storageOptions": {
+      "glass_foundry": {
+        "capacityMultiplier": 0.5,
+        "preservation": 0.8,
+        "special": "heated_storage"
+      }
+    },
+    "storageRequirements": ["heated"],
+    "specialStorageRisks": ["cooling", "contamination"],
+    "maxStorageTime": 360,
+    
+    "marketDemand": "industry_only",
+    "priceFluctuationFactors": [
+      {"factor": "glass_industry_activity", "weight": 0.7},
+      {"factor": "fuel_prices", "weight": 0.3}
+    ]
+  }
+  
