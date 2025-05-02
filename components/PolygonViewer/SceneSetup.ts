@@ -259,10 +259,18 @@ export default class SceneSetup {
   
   // Add method to create water
   public createWater() {
-    console.log('Water creation completely disabled in SceneSetup');
-    // Don't create any water
-    this.water = null;
-    return null;
+    console.log('Creating simple water effect...');
+    
+    // Create a simple water effect with larger dimensions
+    this.water = new SimpleWater({
+      scene: this.scene,
+      activeView: this.activeView,
+      performanceMode: this.performanceMode,
+      width: 500, // Increased from 300 to 500
+      height: 500  // Increased from 300 to 500
+    });
+    
+    return this.water;
   }
   
   private calculateSunPosition(): THREE.Vector3 {

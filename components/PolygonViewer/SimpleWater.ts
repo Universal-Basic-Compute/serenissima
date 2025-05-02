@@ -36,8 +36,63 @@ export default class SimpleWater {
   }
   
   private createWater() {
-    console.log('Water plane creation completely disabled');
-    this.waterMesh = null;
+    console.log('Creating enhanced water plane...');
+    
+    // Create a water plane with more segments for better wave animation
+    const geometry = new THREE.PlaneGeometry(
+      this.width * 4, // Double the size for better coverage
+      this.height * 4, // Double the size for better coverage
+      64, // Increase segments for smoother waves
+      64
+    );
+    
+    // Load water textures
+    const textureLoader = new THREE.TextureLoader();
+    
+    // Load water normal map with better error handling
+    const normalMap = textureLoader.load('/textures/waternormals.jpg', 
+      (texture) => {
+        console.log('Water normal map loaded successfully');
+        texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.set(8, 8); // Increase repeat for more detailed waves
+      },
+      undefined,
+      (error) => {
+        console.error('Error loading water normal map:', error);
+        // Create a fallback normal map
+        this.createFallbackNormalMap();
+      }
+    );
+    
+    // Create a more advanced material for water
+    const waterColor = new THREE.Color(this.getWaterColorForView());
+    const material = new THREE.MeshStandardMaterial({
+      color: waterColor,
+      transparent: true,
+      opacity: 0.95, // Increased opacity for better visibility
+      side: THREE.DoubleSide,
+      normalMap: normalMap,
+      normalScale: new THREE.Vector2(0.5, 0.5), // Increase normal intensity
+      metalness: 0.2,
+      roughness: 0.4
+    });
+    
+    // Create the water mesh
+    this.waterMesh = new THREE.Mesh(geometry, material);
+    
+    // Position water at y=-0.05 (closer to the land which is at y=0.1)
+    this.waterMesh.position.y = -0.05;
+    
+    // Rotate the water plane to be horizontal
+    this.waterMesh.rotation.x = -Math.PI / 2;
+    
+    // Set render order to ensure water appears below land
+    this.waterMesh.renderOrder = 5;
+    
+    // Add to scene
+    this.scene.add(this.waterMesh);
+    
+    console.log('Enhanced water mesh created successfully');
   }
   
   // Add this method to create a fallback normal map
