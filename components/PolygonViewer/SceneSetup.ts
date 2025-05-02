@@ -48,8 +48,8 @@ export default class SceneSetup {
       1000
     );
     
-    // Position camera higher up and looking down with a tilt
-    this.camera.position.set(0, 30, 30); // Even more tilted initial position with lower height and more Z offset
+    // Position camera to better view the water
+    this.camera.position.set(0, 20, 40); // Lower height, further back for better water visibility
     this.camera.lookAt(0, 0, 0);
     
     // Initialize renderer with settings to prevent z-fighting

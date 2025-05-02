@@ -40,8 +40,8 @@ export default class SimpleWater {
     
     // Create a water plane with more segments for better wave animation
     const geometry = new THREE.PlaneGeometry(
-      this.width * 2, 
-      this.height * 2,
+      this.width * 4, // Double the size for better coverage
+      this.height * 4, // Double the size for better coverage
       64, // Increase segments for smoother waves
       64
     );
@@ -69,7 +69,7 @@ export default class SimpleWater {
     const material = new THREE.MeshPhysicalMaterial({
       color: waterColor,
       transparent: true,
-      opacity: 0.9,
+      opacity: 0.95, // Increased opacity for better visibility
       side: THREE.DoubleSide,
       normalMap: normalMap,
       normalScale: new THREE.Vector2(0.5, 0.5), // Increase normal intensity
@@ -83,8 +83,8 @@ export default class SimpleWater {
     // Create the water mesh
     this.waterMesh = new THREE.Mesh(geometry, material);
     
-    // Position water at y=-0.1 (below the land which is at y=0.1)
-    this.waterMesh.position.y = -0.1;
+    // Position water at y=-0.05 (closer to the land which is at y=0.1)
+    this.waterMesh.position.y = -0.05;
     
     // Rotate the water plane to be horizontal
     this.waterMesh.rotation.x = -Math.PI / 2;

@@ -591,19 +591,19 @@ export default class WaterEffect {
   
   // Add helper method to create a simple water plane
   private createSimpleWaterPlane() {
-    // Create a large plane for water
+    // Create a larger plane for water
     const waterGeometry = new THREE.PlaneGeometry(
-      this.width * 2, 
-      this.height * 2,
+      this.width * 4, // Double the size for better coverage
+      this.height * 4, // Double the size for better coverage
       1,
       1
     );
     
-    // Create a simple blue material for water
+    // Create a simple blue material for water with higher opacity
     const waterMaterial = new THREE.MeshBasicMaterial({
       color: this.getWaterColorForView(),
       transparent: true,
-      opacity: 0.8
+      opacity: 0.95 // Increased opacity for better visibility
     });
     
     // Create the water mesh
