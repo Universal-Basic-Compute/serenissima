@@ -132,7 +132,7 @@ export default class SceneSetup {
     this.controls.maxPolarAngle = Math.PI / 3; // Limit to 60 degrees from vertical
     
     // Basic limits
-    this.controls.minDistance = 3.52; // Decreased by another 25% to allow zooming in further (4.69 * 0.75 = 3.52)
+    this.controls.minDistance = 1.76; // Decreased by 50% to allow zooming twice as close (3.52 * 0.5 = 1.76)
     this.controls.maxDistance = 50.63; // Decreased by another 25% to limit zooming out (67.5 * 0.75 = 50.63)
     
     // Enable panning with right mouse button and rotation with middle mouse button
