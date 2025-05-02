@@ -57,6 +57,8 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
     const handleClick = (event: MouseEvent) => {
       if (!active || event.button !== 0) return; // Only handle left clicks
       
+      console.log('Road Creator: Click detected');
+      
       // Calculate mouse position in normalized device coordinates
       mouseRef.current.x = (event.clientX / window.innerWidth) * 2 - 1;
       mouseRef.current.y = -(event.clientY / window.innerHeight) * 2 + 1;
@@ -64,18 +66,27 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
       // Update the raycaster with the camera and mouse position
       raycasterRef.current.setFromCamera(mouseRef.current, camera);
       
+      console.log('Road Creator: Raycasting for polygon intersections');
+      
       // First, check for intersections with polygon meshes
       const intersects = raycasterRef.current.intersectObjects(scene.children, true);
+      console.log(`Road Creator: Found ${intersects.length} intersections`);
       
       // Find the first intersection that is a polygon mesh
       let validIntersection = null;
       for (const intersect of intersects) {
         // Check if this is a polygon mesh (not water, not clouds, etc.)
         // Polygons are positioned at y=0.1 and have a small height
+        console.log(`Road Creator: Checking intersection with object:`, 
+          intersect.object.type, 
+          intersect.point.y, 
+          intersect.object.userData);
+        
         if (intersect.object instanceof THREE.Mesh && 
-            Math.abs(intersect.point.y - 0.1) < 0.1 && // Check if it's close to the polygon height
-            intersect.object.userData && 
-            !intersect.object.userData.isRoad) { // Make sure it's not another road
+            Math.abs(intersect.point.y - 0.1) < 0.2 && // Increased tolerance from 0.1 to 0.2
+            !intersect.object.userData?.isRoad) { // Make sure it's not another road
+          
+          console.log('Road Creator: Valid polygon intersection found');
           validIntersection = intersect;
           break;
         }
@@ -83,26 +94,33 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
       
       // If we found a valid intersection with a polygon
       if (validIntersection) {
+        console.log('Road Creator: Processing valid intersection', validIntersection.point);
+        
         // Use the intersection point instead of the ground plane
         const intersectionPoint = validIntersection.point;
         
         // Add point to the road
         const newPoints = [...points, intersectionPoint];
+        console.log(`Road Creator: Adding point at (${intersectionPoint.x}, ${intersectionPoint.y}, ${intersectionPoint.z})`);
+        console.log(`Road Creator: Total points now: ${newPoints.length}`);
         setPoints(newPoints);
         
         // If this is the first point, start placing mode
         if (newPoints.length === 1) {
+          console.log('Road Creator: Starting placing mode');
           setIsPlacing(true);
         }
         
         // If we have at least 2 points, update the preview
         if (newPoints.length >= 2) {
+          console.log('Road Creator: Creating road mesh preview');
           createRoadMesh(newPoints);
         }
         
         // Clear any error message
         setErrorMessage(null);
       } else {
+        console.log('Road Creator: No valid polygon intersection found');
         // Show error message
         setErrorMessage("Please click on a land polygon to place road points");
         
