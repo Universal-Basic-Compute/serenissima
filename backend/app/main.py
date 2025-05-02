@@ -1280,7 +1280,7 @@ async def execute_transaction(transaction_id: str, data: dict):
         # Update the land ownership if it's a land transaction
         if record["fields"].get("Type") == "land" and record["fields"].get("AssetId"):
             land_id = record["fields"].get("AssetId")
-            print(f"Updating land ownership for asset {land_id} to {buyer}")
+            print(f"Updating land ownership for asset {land_id} to {buyer_username}")
             
             # Check if land exists in Airtable
             try:
@@ -1293,19 +1293,21 @@ async def execute_transaction(transaction_id: str, data: dict):
                     land_record = land_records[0]
                     print(f"Found existing land record: {land_record['id']}")
                     
-                    # Update the owner
+                    # Update the owner with username
                     lands_table.update(land_record["id"], {
-                        "User": buyer
+                        "User": buyer_username,
+                        "Wallet": data.get("wallet", buyer)  # Keep the wallet address for reference
                     })
-                    print(f"Updated land owner in Airtable to {buyer}")
+                    print(f"Updated land owner in Airtable to {buyer_username}")
                 else:
                     # Create new land record
                     print(f"Land record not found, creating new record for {land_id}")
                     lands_table.create({
                         "LandId": land_id,
-                        "User": buyer
+                        "User": buyer_username,
+                        "Wallet": data.get("wallet", buyer)  # Keep the wallet address for reference
                     })
-                    print(f"Created new land record with owner {buyer}")
+                    print(f"Created new land record with owner {buyer_username}")
             except Exception as land_error:
                 print(f"ERROR updating land ownership in Airtable: {str(land_error)}")
                 traceback.print_exc(file=sys.stdout)
@@ -1314,7 +1316,7 @@ async def execute_transaction(transaction_id: str, data: dict):
         # Update the transaction with buyer and executed_at timestamp
         now = datetime.datetime.now().isoformat()
         updated_record = transactions_table.update(transaction_id, {
-            "Buyer": buyer,
+            "Buyer": buyer_username,  # Use username instead of wallet address
             "ExecutedAt": now,
             "UpdatedAt": now
         })
