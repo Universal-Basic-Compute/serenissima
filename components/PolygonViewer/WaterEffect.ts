@@ -568,7 +568,7 @@ export default class WaterEffect {
     this.time += 0.01;
     
     // Skip water creation and updates - we're using AdvancedWater instead
-    console.log('WaterEffect update disabled - using AdvancedWater instead');
+    // Removed console.log to prevent spam
   }
   
   public updateViewMode(activeView: ViewMode) {

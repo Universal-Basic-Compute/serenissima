@@ -266,8 +266,8 @@ export default class SceneSetup {
       scene: this.scene,
       activeView: this.activeView,
       performanceMode: this.performanceMode,
-      width: 600, // Increased from 500 to 600 for better coverage
-      height: 600  // Increased from 500 to 600 for better coverage
+      width: 800, // Increased from 600 to 800 for better coverage
+      height: 800  // Increased from 600 to 800 for better coverage
     });
     
     return this.water;

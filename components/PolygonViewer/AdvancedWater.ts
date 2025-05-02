@@ -104,7 +104,7 @@ export default class AdvancedWater {
         deepWaterColor: { value: new THREE.Color(this.getDeepWaterColorForView()) },
         foamColor: { value: new THREE.Color(0xffffff) },
         foamThreshold: { value: 0.08 },
-        waveHeight: { value: 0.5 } // Increased from 0.2 to 0.5
+        waveHeight: { value: 1.0 } // Increased from 0.5 to 1.0 for more visible waves
       },
       vertexShader: `
         uniform float time;
@@ -114,9 +114,9 @@ export default class AdvancedWater {
         
         // Improved wave function for more natural movement
         float getWave(vec2 position) {
-          float wave = sin(position.x * 10.0 + time * 1.5) * 0.1 +  // Increased amplitude and speed
-                      sin(position.y * 8.0 + time * 1.2) * 0.08 +   // Increased amplitude and speed
-                      sin(position.x * 6.0 + position.y * 6.0 + time * 1.8) * 0.06; // Increased amplitude and speed
+          float wave = sin(position.x * 10.0 + time * 1.5) * 0.2 +  // Doubled amplitude
+                      sin(position.y * 8.0 + time * 1.2) * 0.16 +   // Doubled amplitude
+                      sin(position.x * 6.0 + position.y * 6.0 + time * 1.8) * 0.12; // Doubled amplitude
           return wave;
         }
         
@@ -180,8 +180,8 @@ export default class AdvancedWater {
     // Create the water mesh
     this.waterMesh = new THREE.Mesh(this.waterGeometry, this.waterMaterial);
     
-    // Position water at y=-0.05 (slightly below land)
-    this.waterMesh.position.y = -0.05;
+    // Position water at y=0 (at the same level as land)
+    this.waterMesh.position.y = 0;
     
     // Rotate the water plane to be horizontal
     this.waterMesh.rotation.x = -Math.PI / 2;
@@ -378,7 +378,7 @@ export default class AdvancedWater {
   
   public update(frameCount: number) {
     // Update time
-    this.time += 0.025; // Increased from 0.015 to 0.025
+    this.time += 0.04; // Increased from 0.025 to 0.04 for faster animation
     
     // Get delta time for physics-based simulation
     const currentTime = this.clock.getElapsedTime();
