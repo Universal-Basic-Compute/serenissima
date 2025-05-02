@@ -261,13 +261,13 @@ export default class SceneSetup {
   public createWater() {
     console.log('Creating simple water effect...');
     
-    // Create a simple water effect
+    // Create a simple water effect with larger dimensions
     this.water = new SimpleWater({
       scene: this.scene,
       activeView: this.activeView,
       performanceMode: this.performanceMode,
-      width: 300, // Match the width used for clouds
-      height: 300  // Match the height used for clouds
+      width: 500, // Increased from 300 to 500
+      height: 500  // Increased from 300 to 500
     });
     
     return this.water;
