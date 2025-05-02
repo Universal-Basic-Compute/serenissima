@@ -263,121 +263,27 @@ export default class WaterEffect {
   }
   
   private createWaterMesh() {
-    // Create a higher resolution water geometry for better wave simulation
-    const resolution = this.performanceMode ? 64 : 128;
-    this.waterGeometry = new THREE.PlaneGeometry(
+    console.log('Creating simplified water mesh...');
+    
+    // Create a simple water plane with minimal geometry
+    const waterGeometry = new THREE.PlaneGeometry(
       this.width * 2, 
       this.height * 2,
-      resolution,
-      resolution
+      this.performanceMode ? 32 : 64, // Reduced resolution based on performance mode
+      this.performanceMode ? 32 : 64
     );
     
-    // Create water shader material
+    // Create a simple material for water with the appropriate color
     const waterColor = new THREE.Color(this.getWaterColorForView());
-    
-    // Define shader material for realistic water
-    this.waterMaterial = new THREE.ShaderMaterial({
-      uniforms: {
-        time: { value: 0.0 },
-        waterColor: { value: waterColor },
-        normalMap: { value: this.waterNormalMap },
-        waveHeight: { value: this.waveAmplitude },
-        waveSpeed: { value: this.waveSpeed },
-        resolution: { value: new THREE.Vector2(resolution, resolution) },
-        sunDirection: { value: new THREE.Vector3(0.5, 0.5, 0.0).normalize() }
-      },
-      vertexShader: `
-        uniform float time;
-        uniform float waveHeight;
-        uniform float waveSpeed;
-        
-        varying vec2 vUv;
-        varying vec3 vPosition;
-        varying vec3 vNormal;
-        
-        // Function to create Gerstner waves
-        vec3 gerstnerWave(vec3 position, float steepness, float wavelength, float speed, vec2 direction) {
-          direction = normalize(direction);
-          float k = 2.0 * 3.14159 / wavelength;
-          float f = k * (dot(direction, position.xz) - speed * time);
-          float a = steepness / k;
-          
-          return vec3(
-            direction.x * a * cos(f),
-            a * sin(f),
-            direction.y * a * cos(f)
-          );
-        }
-        
-        void main() {
-          vUv = uv;
-          vPosition = position;
-          
-          // Base position
-          vec3 pos = position;
-          
-          // Apply multiple Gerstner waves for more realistic water
-          vec3 wave1 = gerstnerWave(position, 0.1, 20.0, waveSpeed, vec2(1.0, 0.0));
-          vec3 wave2 = gerstnerWave(position, 0.05, 15.0, waveSpeed * 0.8, vec2(0.7, 0.7));
-          vec3 wave3 = gerstnerWave(position, 0.03, 10.0, waveSpeed * 1.2, vec2(0.0, 1.0));
-          
-          // Combine waves
-          pos += wave1 + wave2 + wave3;
-          
-          // Apply wave height
-          pos.y *= waveHeight;
-          
-          // Calculate normal for lighting
-          vec3 tangent1 = normalize(wave1 + wave2 + wave3);
-          vec3 tangent2 = normalize(cross(vec3(0.0, 1.0, 0.0), tangent1));
-          vNormal = normalize(cross(tangent1, tangent2));
-          
-          // Set final position
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
-        }
-      `,
-      fragmentShader: `
-        uniform vec3 waterColor;
-        uniform sampler2D normalMap;
-        uniform vec3 sunDirection;
-        
-        varying vec2 vUv;
-        varying vec3 vPosition;
-        varying vec3 vNormal;
-        
-        void main() {
-          // Sample normal map
-          vec3 normal = texture2D(normalMap, vUv).rgb * 2.0 - 1.0;
-          normal = normalize(normal);
-          
-          // Combine with vertex normal for more detail
-          vec3 finalNormal = normalize(vNormal + normal * 0.5);
-          
-          // Calculate fresnel effect for edge highlighting
-          float fresnel = pow(1.0 - max(0.0, dot(finalNormal, vec3(0.0, 1.0, 0.0))), 3.0);
-          
-          // Calculate sun reflection
-          float sunReflection = max(0.0, dot(reflect(-sunDirection, finalNormal), vec3(0.0, 1.0, 0.0)));
-          sunReflection = pow(sunReflection, 32.0);
-          
-          // Calculate depth-based color variation
-          float depth = smoothstep(0.0, 20.0, -vPosition.y);
-          vec3 depthColor = mix(waterColor, waterColor * 0.5, depth);
-          
-          // Final color with reflections and fresnel
-          vec3 finalColor = depthColor;
-          finalColor += vec3(1.0, 1.0, 0.8) * sunReflection * 0.5;
-          finalColor = mix(finalColor, vec3(0.8, 0.9, 1.0), fresnel * 0.5);
-          
-          gl_FragColor = vec4(finalColor, 0.9);
-        }
-      `,
+    const waterMaterial = new THREE.MeshBasicMaterial({
+      color: waterColor,
       transparent: true,
+      opacity: 0.8,
       side: THREE.DoubleSide
     });
     
     // Create the water mesh
-    this.waterMesh = new THREE.Mesh(this.waterGeometry, this.waterMaterial);
+    this.waterMesh = new THREE.Mesh(waterGeometry, waterMaterial);
     
     // Position water at y=0 (below the land which is at y=0.1)
     this.waterMesh.position.y = 0;
@@ -390,6 +296,8 @@ export default class WaterEffect {
     
     // Add to scene
     this.scene.add(this.waterMesh);
+    
+    console.log('Water mesh created successfully');
   }
   
   private initializeWaveSimulation() {
