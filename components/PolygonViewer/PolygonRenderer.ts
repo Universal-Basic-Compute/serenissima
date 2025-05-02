@@ -259,8 +259,67 @@ export default class PolygonRenderer {
   private createdPolygonIds = new Set<string>();
 
   private renderPolygons() {
-    console.log('Polygon rendering disabled');
-    // No geometry generation
+    console.log(`Rendering ${this.polygons.length} polygons`);
+    
+    // Create a texture loader if not already created
+    if (!this.textureLoader) {
+      this.textureLoader = new THREE.TextureLoader();
+    }
+    
+    // Process each polygon
+    this.polygons.forEach(polygon => {
+      // Skip if already created
+      if (this.createdPolygonIds.has(polygon.id)) {
+        return;
+      }
+      
+      try {
+        // Get owner color if available
+        let ownerColor = null;
+        if (polygon.owner) {
+          if (this.ownerColorMap[polygon.owner]) {
+            ownerColor = this.ownerColorMap[polygon.owner];
+          } else if (this.users[polygon.owner] && this.users[polygon.owner].color) {
+            ownerColor = this.users[polygon.owner].color;
+            // Store for future use
+            this.ownerColorMap[polygon.owner] = ownerColor;
+          } else if (polygon.owner === 'ConsiglioDeiDieci') {
+            // Special case for ConsiglioDeiDieci
+            ownerColor = '#8B0000'; // Dark red
+            this.ownerColorMap[polygon.owner] = ownerColor;
+          }
+        }
+        
+        // Get coat of arms URL if available
+        let ownerCoatOfArmsUrl = null;
+        if (polygon.owner && this.ownerCoatOfArmsMap[polygon.owner]) {
+          ownerCoatOfArmsUrl = this.ownerCoatOfArmsMap[polygon.owner];
+        }
+        
+        // Create polygon mesh
+        const polygonMesh = new PolygonMesh(
+          this.scene,
+          polygon,
+          this.bounds,
+          this.activeView,
+          this.performanceMode,
+          this.textureLoader,
+          ownerColor,
+          ownerCoatOfArmsUrl
+        );
+        
+        // Store reference to the mesh
+        this.PolygonMeshs.push(polygonMesh);
+        
+        // Mark as created
+        this.createdPolygonIds.add(polygon.id);
+        
+      } catch (error) {
+        console.error(`Error rendering polygon ${polygon.id}:`, error);
+      }
+    });
+    
+    console.log(`Created ${this.PolygonMeshs.length} polygon meshes`);
   }
   
   private createSamplePolygon() {

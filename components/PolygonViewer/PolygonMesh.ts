@@ -53,8 +53,75 @@ class PolygonMesh {
   }
   
   private createMesh() {
-    // Geometry generation removed
-    console.log('Geometry generation disabled for polygon mesh');
+    try {
+      // Skip if coordinates are invalid
+      if (!this.polygon.coordinates || this.polygon.coordinates.length < 3) {
+        console.warn(`Invalid polygon coordinates for ${this.polygon.id}`);
+        return;
+      }
+
+      // Normalize coordinates
+      const normalizedCoords = normalizeCoordinates(
+        this.polygon.coordinates,
+        this.bounds.centerLat,
+        this.bounds.centerLng,
+        this.bounds.scale,
+        this.bounds.latCorrectionFactor
+      );
+
+      // Create a shape from the normalized coordinates
+      const shape = createPolygonShape(normalizedCoords);
+
+      // Create extruded geometry with minimal height
+      const extrudeSettings = {
+        steps: 1,
+        depth: 0.2, // Very thin extrusion
+        bevelEnabled: false
+      };
+      
+      const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+
+      // Create sand texture material
+      const sandTexture = this.textureLoader.load('/textures/sand.jpg', (texture) => {
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.set(5, 5);
+      });
+
+      // Create materials for top and sides
+      const topMaterial = new THREE.MeshBasicMaterial({
+        map: sandTexture,
+        color: this.determineLandColor()
+      });
+      
+      const sideMaterial = new THREE.MeshBasicMaterial({
+        color: this.determineLandColor(),
+        transparent: true,
+        opacity: 0.8
+      });
+
+      // Create mesh with different materials for top and sides
+      const materials = [topMaterial, sideMaterial];
+      this.mesh = new THREE.Mesh(geometry, materials);
+      
+      // Position the mesh at y=0 to be flat on the water
+      this.mesh.position.y = 0;
+      
+      // Set render order to ensure land appears above water
+      this.mesh.renderOrder = 10;
+      
+      // Store reference to the mesh
+      if (this.polygon.id) {
+        this.polygonMeshesRef.current[this.polygon.id] = this.mesh;
+      }
+      
+      // Apply coat of arms texture if in land view and owner has one
+      if (this.activeView === 'land' && this.polygon.owner && this.ownerCoatOfArmsUrl) {
+        this.updateCoatOfArmsTexture(this.ownerCoatOfArmsUrl);
+      }
+    } catch (error) {
+      console.error(`Error creating mesh for polygon ${this.polygon.id}:`, error);
+    }
   }
   
   // Helper method to determine land color

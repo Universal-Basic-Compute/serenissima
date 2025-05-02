@@ -187,8 +187,9 @@ export default class WaterEffect {
   }
   
   private initializeWater() {
-    console.log('Water initialization disabled');
-    // No water is initialized to avoid geometry generation
+    console.log('Initializing water effect...');
+    // Create a simple water plane
+    this.createSimpleWaterPlane();
   }
   
   // Add a new method to create wave displacement
@@ -238,8 +239,32 @@ export default class WaterEffect {
   
   // Add helper method to create a simple water plane
   private createSimpleWaterPlane() {
-    console.log('Simple water plane creation disabled');
-    // No water plane is created to avoid geometry generation
+    // Create a large plane for water
+    const waterGeometry = new THREE.PlaneGeometry(
+      this.width * 2, 
+      this.height * 2,
+      1,
+      1
+    );
+    
+    // Create a simple blue material for water
+    const waterMaterial = new THREE.MeshBasicMaterial({
+      color: this.getWaterColorForView(),
+      transparent: true,
+      opacity: 0.8
+    });
+    
+    // Create the water mesh
+    this.waterMesh = new THREE.Mesh(waterGeometry, waterMaterial);
+    
+    // Position slightly below land to avoid z-fighting
+    this.waterMesh.position.y = -0.05;
+    
+    // Set render order to ensure water appears below land
+    this.waterMesh.renderOrder = 5;
+    
+    // Add to scene
+    this.scene.add(this.waterMesh);
   }
   
   public update(frameCount: number, performanceMode: boolean) {
