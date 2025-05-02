@@ -379,7 +379,7 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
     const curve = createCurvedPath(roadPoints);
     
     // Create road geometry
-    const roadWidth = 0.3; // Changed from 1.5 to 0.3 (5 times thinner)
+    const roadWidth = 0.15; // Changed from 0.3 to 0.15 (2 times thinner)
     const roadGeometry = new THREE.BufferGeometry();
     const positions: number[] = [];
     const uvs: number[] = [];
@@ -411,14 +411,14 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
       const v4 = new THREE.Vector3().subVectors(next, perpendicular);
       
       // First triangle
-      positions.push(v1.x, v1.y + 0.15, v1.z); // Slightly above polygons (0.15 instead of 0.05)
-      positions.push(v2.x, v2.y + 0.15, v2.z);
-      positions.push(v3.x, v3.y + 0.15, v3.z);
+      positions.push(v1.x, v1.y + 0.2, v1.z); // Increased from 0.15 to 0.2 to prevent z-fighting
+      positions.push(v2.x, v2.y + 0.2, v2.z);
+      positions.push(v3.x, v3.y + 0.2, v3.z);
       
       // Second triangle
-      positions.push(v2.x, v2.y + 0.15, v2.z);
-      positions.push(v4.x, v4.y + 0.15, v4.z);
-      positions.push(v3.x, v3.y + 0.15, v3.z);
+      positions.push(v2.x, v2.y + 0.2, v2.z);
+      positions.push(v4.x, v4.y + 0.2, v4.z);
+      positions.push(v3.x, v3.y + 0.2, v3.z);
       
       // UVs for texture mapping
       const segmentLength = current.distanceTo(next);
@@ -443,12 +443,13 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
       color: 0x555555,
       roughness: 0.8,
       metalness: 0.2,
-      side: THREE.DoubleSide
+      side: THREE.DoubleSide,
+      depthWrite: false // Add this to prevent z-fighting
     });
     
     // Create road mesh
     const road = new THREE.Mesh(roadGeometry, roadMaterial);
-    road.renderOrder = 15; // Above ground, below buildings
+    road.renderOrder = 20; // Increased from 15 to 20 to ensure roads appear above other elements
     
     // Mark as road for special handling
     road.userData.isRoad = true;
