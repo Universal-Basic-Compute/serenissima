@@ -131,7 +131,7 @@ export default class SceneSetup {
     this.controls.maxPolarAngle = Math.PI / 2 - 0.1;
     
     // Basic limits
-    this.controls.minDistance = 0.5; // Decreased to 0.5 to allow much more zooming in
+    this.controls.minDistance = 5; // Increased from 0.5 to 5 to prevent going through terrain
     this.controls.maxDistance = 64; // Reduced by 20% from 80 to 64
     
     // Enable panning with right mouse button and rotation with middle mouse button
