@@ -35,9 +35,11 @@ export default class RoadManager {
 
   public createRoad(points: THREE.Vector3[], curvature: number = 0.5): string {
     if (points.length < 2) {
-      console.error('Cannot create road with less than 2 points');
+      console.error('RoadManager: Cannot create road with less than 2 points');
       return '';
     }
+    
+    console.log(`RoadManager: Creating road with ${points.length} points and curvature ${curvature}`);
     
     // Create a unique ID for the road
     const id = `road-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
@@ -46,6 +48,7 @@ export default class RoadManager {
     const mesh = this.createRoadMesh(points, curvature);
     
     // Add to scene
+    console.log(`RoadManager: Adding road mesh to scene with ID ${id}`);
     this.scene.add(mesh);
     
     // Store the road
@@ -57,6 +60,7 @@ export default class RoadManager {
     };
     
     this.roads.push(road);
+    console.log(`RoadManager: Road created successfully, total roads: ${this.roads.length}`);
     
     return id;
   }

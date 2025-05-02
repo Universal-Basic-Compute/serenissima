@@ -1249,11 +1249,18 @@ export default function PolygonViewer() {
 
   // Add handler for road creation completion
   const handleRoadComplete = useCallback((roadPoints: THREE.Vector3[]) => {
+    console.log(`PolygonViewer: Road complete with ${roadPoints.length} points`);
+    
     if (roadManagerRef.current) {
       // Get the curvature value from a state variable or use a default
       const curvature = 0.5; // Default curvature
-      roadManagerRef.current.createRoad(roadPoints, curvature);
+      console.log(`PolygonViewer: Creating road with curvature ${curvature}`);
+      const roadId = roadManagerRef.current.createRoad(roadPoints, curvature);
+      console.log(`PolygonViewer: Road created with ID ${roadId}`);
+    } else {
+      console.error('PolygonViewer: Road manager not initialized');
     }
+    
     setRoadCreationActive(false);
   }, []);
 

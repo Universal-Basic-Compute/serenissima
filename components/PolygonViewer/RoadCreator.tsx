@@ -159,7 +159,9 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
 
     // Add this function to stop event propagation for all clicks
     const preventLandSelection = (event: MouseEvent) => {
-      // Stop propagation to prevent the click from reaching the polygon interaction handler
+      // Only stop propagation, don't prevent default
+      // This allows our own click handler to still work
+      console.log('Road Creator: Preventing click propagation to land selection');
       event.stopPropagation();
     };
 
@@ -196,9 +198,9 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
     for (const intersect of intersects) {
       // Check if this is a polygon mesh (not water, not clouds, etc.)
       if (intersect.object instanceof THREE.Mesh && 
-          Math.abs(intersect.point.y - 0.1) < 0.1 && // Check if it's close to the polygon height
-          intersect.object.userData && 
-          !intersect.object.userData.isRoad) { // Make sure it's not another road
+          Math.abs(intersect.point.y - 0.1) < 0.2 && // Increased tolerance from 0.1 to 0.2
+          !intersect.object.userData?.isRoad) { // Make sure it's not another road
+        
         validIntersection = intersect;
         break;
       }
@@ -221,10 +223,16 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
 
   // Create a road mesh from the given points
   const createRoadMesh = (roadPoints: THREE.Vector3[]) => {
-    if (roadPoints.length < 2) return;
+    if (roadPoints.length < 2) {
+      console.log('Road Creator: Not enough points to create road mesh');
+      return;
+    }
+    
+    console.log(`Road Creator: Creating road mesh with ${roadPoints.length} points`);
     
     // Remove existing preview mesh
     if (previewMesh) {
+      console.log('Road Creator: Removing existing preview mesh');
       scene.remove(previewMesh);
       if (previewMesh.geometry) previewMesh.geometry.dispose();
       if (previewMesh.material) {
@@ -248,6 +256,7 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
     // Sample points along the curve
     const numPoints = Math.max(roadPoints.length * 10, 50);
     const points = curve.getPoints(numPoints);
+    console.log(`Road Creator: Generated ${points.length} points along curve`);
     
     // Create road segments
     for (let i = 0; i < points.length - 1; i++) {
@@ -314,6 +323,7 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
     road.userData.isRoad = true;
     
     // Add to scene
+    console.log('Road Creator: Adding road mesh to scene');
     scene.add(road);
     setPreviewMesh(road);
   };
