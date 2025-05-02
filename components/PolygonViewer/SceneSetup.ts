@@ -132,8 +132,8 @@ export default class SceneSetup {
     this.controls.maxPolarAngle = Math.PI / 3; // Limit to 60 degrees from vertical
     
     // Basic limits
-    this.controls.minDistance = 10; // Increased minimum distance
-    this.controls.maxDistance = 80; // Increased maximum distance
+    this.controls.minDistance = 12.5; // Increased by 25% from 10
+    this.controls.maxDistance = 60; // Decreased by 25% from 80
     
     // Enable panning with right mouse button and rotation with middle mouse button
     this.controls.mouseButtons = {
