@@ -591,7 +591,7 @@
     "subcategory": "Trade Facilities",
     "tier": 2,
     "size": "Small",
-    "unlockCondition": "5,000 ducats total wealth, Merchant Guild membership",
+    "unlockCondition": "10,000 ducats capital, Merchant Guild membership",
     "calculationsAnalysis": "The Broker's Office represents specialized commercial services with modest infrastructure but significant returns. The construction cost of 1,000,000 ducats reflects the secure, professional space required, while the income of 20,000 ducats (2% return) represents the lucrative fees earned from facilitating transactions without inventory costs. The maintenance cost of 7,500 ducats (37.5% of income) creates a healthy profit margin reflecting the low-overhead nature of brokerage. The employment capacity of 4 represents the broker and administrative staff. The construction time of 2 days (172800000ms) reflects the relatively simple construction requirements. This building creates a strategic option for players to participate in trade without direct goods handling, reflecting Venice's sophisticated commercial ecosystem where intermediaries played crucial roles.",
     "shortDescription": "Specialized office for trade intermediaries who connect buyers with sellers for a commission.",
     "fullDescription": "The oil that keeps Venice's commercial machinery running smoothly, brokers facilitate transactions without ever taking ownership of goods. These offices feature secure document storage, private meeting rooms for confidential negotiations, and often a public-facing area where potential clients can make inquiries. Brokers specialize by industry or trade route, building networks of connections that make them invaluable intermediaries.",
