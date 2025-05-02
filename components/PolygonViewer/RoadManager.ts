@@ -253,7 +253,7 @@ export default class RoadManager {
       
       // Create road geometry
       const roadWidth = 0.15;
-      const roadGeometry = new THREE.BufferGeometry();
+      const roadGeometry = new THREE.BufferGeometry(); // Define roadGeometry here
       const positions: number[] = [];
       const uvs: number[] = [];
       
@@ -304,6 +304,36 @@ export default class RoadManager {
         uvs.push(1, (uOffset + segmentLength) * 10);
         uvs.push(0, (uOffset + segmentLength) * 10);
       }
+      
+      // Set attributes
+      roadGeometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+      roadGeometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+      roadGeometry.computeVertexNormals();
+      
+      // Create road material with better visibility
+      const roadMaterial = new THREE.MeshBasicMaterial({
+        color: 0x555555,
+        side: THREE.DoubleSide,
+        depthWrite: false,
+        depthTest: true,
+        transparent: false,
+        polygonOffset: true,
+        polygonOffsetFactor: -10,
+        polygonOffsetUnits: -10
+      });
+      
+      // Create road mesh
+      const road = new THREE.Mesh(roadGeometry, roadMaterial);
+      road.renderOrder = 100;
+      
+      // Mark as road for special handling
+      road.userData.isRoad = true;
+      road.userData.alwaysVisible = true;
+      
+      // Force the mesh to be visible
+      road.visible = true;
+      
+      return road;
     }
     
     // Set attributes
