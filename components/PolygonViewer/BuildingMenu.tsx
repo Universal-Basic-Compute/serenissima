@@ -625,7 +625,7 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
         )}
       </div>
     </div>
-  )  {/* Add closing parenthesis for the main return statement */}
+  )  /* Add closing parenthesis for the main return statement */
     
   {/* Placeable Building */}
   {placeableBuilding && (
