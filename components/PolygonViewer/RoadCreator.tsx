@@ -76,6 +76,7 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
       if (previewMesh) {
         try {
           if (scene) {
+            console.log("Road Creator: Cleaning up preview mesh on unmount");
             scene.remove(previewMesh);
           }
           
@@ -108,35 +109,8 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
         }
       }
       
-      // Also find and remove any orphaned road meshes
-      if (scene) {
-        try {
-          const roadMeshes = scene.children.filter(
-            child => child instanceof THREE.Mesh && child.userData && child.userData.isRoad
-          );
-          
-          roadMeshes.forEach(mesh => {
-            scene.remove(mesh);
-            if ((mesh as THREE.Mesh).geometry) {
-              (mesh as THREE.Mesh).geometry.dispose();
-            }
-            if ((mesh as THREE.Mesh).material) {
-              const material = (mesh as THREE.Mesh).material;
-              if (Array.isArray(material)) {
-                material.forEach(m => {
-                  if (m) m.dispose();
-                });
-              } else if (material) {
-                material.dispose();
-              }
-            }
-          });
-          
-          console.log(`Cleaned up ${roadMeshes.length} orphaned road meshes`);
-        } catch (error) {
-          console.error('Error cleaning up orphaned road meshes:', error);
-        }
-      }
+      // We don't want to remove actual roads, only the preview mesh
+      // Removing the section that finds and removes all road meshes
     };
   }, [scene, previewMesh, indicatorMesh]);
 
