@@ -19,7 +19,7 @@
     },
     "maintenanceCost": 40000,
     "constructionTime": 2592000000,
-    "incomeGeneration": 20000,
+    "incomeGeneration": 35000,
     "employmentCapacity": 10,
     "locationRequirements": {
       "districtRestrictions": "Central location in neighborhood, often facing campo",
@@ -543,7 +543,7 @@
     },
     "maintenanceCost": 100000,
     "constructionTime": 2592000000,
-    "incomeGeneration": 50000,
+    "incomeGeneration": 75000,
     "employmentCapacity": 50,
     "locationRequirements": {
       "districtRestrictions": "Some distance from dense residential, fresh air access",

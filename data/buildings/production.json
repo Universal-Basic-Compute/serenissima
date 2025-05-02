@@ -18,7 +18,7 @@
     },
     "maintenanceCost": 60000,
     "constructionTime": 604800000,
-    "incomeGeneration": 0,
+    "incomeGeneration": 35000,
     "employmentCapacity": 8,
     "productionInformation": {
       "inputResources": {
@@ -104,7 +104,7 @@
     },
     "maintenanceCost": 30000,
     "constructionTime": 432000000,
-    "incomeGeneration": 0,
+    "incomeGeneration": 22000,
     "employmentCapacity": 12,
     "productionInformation": {
       "inputResources": {
@@ -189,7 +189,7 @@
     },
     "maintenanceCost": 75000,
     "constructionTime": 1209600000,
-    "incomeGeneration": 0,
+    "incomeGeneration": 70000,
     "employmentCapacity": 40,
     "productionInformation": {
       "inputResources": {

@@ -17,7 +17,7 @@
     },
     "maintenanceCost": 15000,
     "constructionTime": 259200000,
-    "incomeGeneration": 6000,
+    "incomeGeneration": 12000,
     "employmentCapacity": 2,
     "locationRequirements": {
       "districtRestrictions": "Must be built on canal or lagoon frontage",

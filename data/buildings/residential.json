@@ -356,7 +356,7 @@
     },
     "maintenanceCost": 75000,
     "constructionTime": 1728000000,
-    "incomeGeneration": 100000,
+    "incomeGeneration": 130000,
     "residentsCapacity": 25,
     "locationRequirements": {
       "districtRestrictions": "Must be built directly on the Grand Canal",
