@@ -36,36 +36,48 @@ export default class SimpleWater {
   }
   
   private createWater() {
-    console.log('Creating simple water plane...');
+    console.log('Creating enhanced water plane...');
     
-    // Create a simple water plane with more segments for better appearance
+    // Create a water plane with more segments for better wave animation
     const geometry = new THREE.PlaneGeometry(
       this.width * 2, 
       this.height * 2,
-      32, // Use fixed number of segments regardless of performance mode
-      32
+      64, // Increase segments for smoother waves
+      64
     );
     
     // Load water textures
     const textureLoader = new THREE.TextureLoader();
     
-    // Load water normal map
-    const normalMap = textureLoader.load('/textures/waternormals.jpg', (texture) => {
-      texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-      texture.repeat.set(5, 5);
-    });
+    // Load water normal map with better error handling
+    const normalMap = textureLoader.load('/textures/waternormals.jpg', 
+      (texture) => {
+        console.log('Water normal map loaded successfully');
+        texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.set(8, 8); // Increase repeat for more detailed waves
+      },
+      undefined,
+      (error) => {
+        console.error('Error loading water normal map:', error);
+        // Create a fallback normal map
+        this.createFallbackNormalMap();
+      }
+    );
     
-    // Create a material for water with the appropriate color, higher opacity, and normal map
+    // Create a more advanced material for water
     const waterColor = new THREE.Color(this.getWaterColorForView());
-    const material = new THREE.MeshStandardMaterial({
+    const material = new THREE.MeshPhysicalMaterial({
       color: waterColor,
       transparent: true,
-      opacity: 0.9, // Increased opacity for better visibility
+      opacity: 0.9,
       side: THREE.DoubleSide,
       normalMap: normalMap,
-      normalScale: new THREE.Vector2(0.3, 0.3), // Adjust normal intensity
-      metalness: 0.1,
-      roughness: 0.5
+      normalScale: new THREE.Vector2(0.5, 0.5), // Increase normal intensity
+      metalness: 0.2,
+      roughness: 0.4,
+      clearcoat: 0.4, // Add clearcoat for more realistic water surface
+      clearcoatRoughness: 0.2,
+      envMapIntensity: 1.5 // Increase environment map intensity
     });
     
     // Create the water mesh
@@ -83,7 +95,41 @@ export default class SimpleWater {
     // Add to scene
     this.scene.add(this.waterMesh);
     
-    console.log('Water mesh created successfully');
+    console.log('Enhanced water mesh created successfully');
+  }
+  
+  // Add this method to create a fallback normal map
+  private createFallbackNormalMap() {
+    console.log('Creating fallback water normal map');
+    const canvas = document.createElement('canvas');
+    canvas.width = 256;
+    canvas.height = 256;
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      // Create a more complex wave pattern
+      for (let y = 0; y < canvas.height; y++) {
+        for (let x = 0; x < canvas.width; x++) {
+          // Create multiple overlapping sine waves for more realistic water
+          const r = Math.floor(127 * Math.sin((x / canvas.width) * Math.PI * 10) + 127);
+          const g = Math.floor(127 * Math.sin((y / canvas.height) * Math.PI * 10) + 127);
+          const b = 255; // Full blue for normal map
+          
+          ctx.fillStyle = `rgb(${r},${g},${b})`;
+          ctx.fillRect(x, y, 1, 1);
+        }
+      }
+      
+      const fallbackTexture = new THREE.CanvasTexture(canvas);
+      fallbackTexture.wrapS = fallbackTexture.wrapT = THREE.RepeatWrapping;
+      fallbackTexture.repeat.set(8, 8);
+      
+      // Apply to water mesh if it exists
+      if (this.waterMesh) {
+        const material = this.waterMesh.material as THREE.MeshPhysicalMaterial;
+        material.normalMap = fallbackTexture;
+        material.needsUpdate = true;
+      }
+    }
   }
   
   private getWaterColorForView(): number {
@@ -110,19 +156,46 @@ export default class SimpleWater {
     if (!this.waterMesh) return;
     
     // Get the material
-    const material = this.waterMesh.material as THREE.MeshStandardMaterial;
+    const material = this.waterMesh.material as THREE.MeshPhysicalMaterial;
     
     // Update normal map offset for wave animation
     if (material.normalMap) {
-      material.normalMap.offset.x = this.time * 0.05;
-      material.normalMap.offset.y = this.time * 0.03;
+      // Create more complex wave motion with multiple frequencies
+      material.normalMap.offset.x = Math.sin(this.time * 0.05) * 0.1 + this.time * 0.03;
+      material.normalMap.offset.y = Math.cos(this.time * 0.04) * 0.1 + this.time * 0.02;
       
-      // Vary normal scale slightly for more dynamic waves
-      const scale = 0.3 + Math.sin(this.time * 0.2) * 0.05;
+      // Vary normal scale for more dynamic waves
+      const scale = 0.4 + Math.sin(this.time * 0.1) * 0.1;
       material.normalScale.set(scale, scale);
+      
+      // Slightly vary the water color over time for more realism
+      const baseColor = new THREE.Color(this.getWaterColorForView());
+      const r = baseColor.r + Math.sin(this.time * 0.1) * 0.02;
+      const g = baseColor.g + Math.cos(this.time * 0.15) * 0.02;
+      const b = baseColor.b + Math.sin(this.time * 0.2) * 0.02;
+      material.color.setRGB(r, g, b);
       
       // Update material
       material.needsUpdate = true;
+    }
+    
+    // Animate the water geometry for more pronounced waves
+    if (this.waterMesh.geometry instanceof THREE.PlaneGeometry) {
+      const positions = this.waterMesh.geometry.attributes.position.array;
+      const count = positions.length / 3;
+      
+      for (let i = 0; i < count; i++) {
+        const x = positions[i * 3];
+        const z = positions[i * 3 + 2];
+        
+        // Create gentle waves with multiple frequencies
+        positions[i * 3 + 1] = 
+          Math.sin(x * 0.05 + this.time * 0.5) * 0.1 + 
+          Math.cos(z * 0.05 + this.time * 0.3) * 0.1;
+      }
+      
+      this.waterMesh.geometry.attributes.position.needsUpdate = true;
+      this.waterMesh.geometry.computeVertexNormals();
     }
   }
   
