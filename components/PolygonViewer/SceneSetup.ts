@@ -59,8 +59,13 @@ export default class SceneSetup {
       powerPreference: 'high-performance',
       precision: this.performanceMode ? 'mediump' : 'highp',
       logarithmicDepthBuffer: true, // Enable logarithmic depth buffer to prevent z-fighting
-      alpha: true // Add alpha channel to prevent white screen issues
+      alpha: true, // Add alpha channel to prevent white screen issues
+      stencil: true // Add stencil buffer for better rendering
     });
+    
+    // Enable alpha blending for proper transparency
+    this.renderer.setClearColor(0x000000, 0);
+    this.renderer.autoClear = true;
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.setPixelRatio(window.devicePixelRatio > 1 ? 2 : 1); // Use higher pixel ratio for better quality
     this.renderer.shadowMap.enabled = false; // Disable shadows completely
@@ -269,8 +274,8 @@ export default class SceneSetup {
       scene: this.scene,
       activeView: this.activeView,
       performanceMode: this.performanceMode,
-      width: 1500, // Increased from 1200 to 1500 for much better coverage
-      height: 1500 // Increased from 1200 to 1500 for much better coverage
+      width: 2000, // Increased from 1500 to 2000 for even better coverage
+      height: 2000 // Increased from 1500 to 2000 for even better coverage
     });
     
     // If we have land positions, set them for water interaction
@@ -291,6 +296,15 @@ export default class SceneSetup {
       setTimeout(() => {
         if (this.water) this.water.update(20);
       }, 500);
+      
+      // Add more updates for smoother initialization
+      setTimeout(() => {
+        if (this.water) this.water.update(30);
+      }, 1000);
+      
+      setTimeout(() => {
+        if (this.water) this.water.update(40);
+      }, 1500);
     }
     
     return this.water;

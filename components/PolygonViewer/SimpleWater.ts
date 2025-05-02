@@ -51,15 +51,15 @@ export default class SimpleWater {
   }
   
   private createWaterSurface() {
-    // Create water geometry - use a simple plane
+    // Create water geometry with higher resolution
     this.waterGeometry = new THREE.PlaneGeometry(
       this.width, 
       this.height, 
-      128, // Reduced complexity for better performance
-      128
+      256, // Increased from 128 for smoother waves
+      256
     );
     
-    // Create water shader material with simplified shader
+    // Create water shader material with improved shader
     const waterShader = {
       uniforms: {
         time: { value: 0.0 },
@@ -74,19 +74,19 @@ export default class SimpleWater {
         void main() {
           vUv = uv;
           
-          // Simple wave calculation
+          // More pronounced wave calculation
           float elevation = 
             sin(position.x * 0.5 + time * 0.5) * 
-            cos(position.z * 0.4 + time * 0.3) * 0.5 +
+            cos(position.z * 0.4 + time * 0.3) * 0.8 +
             sin(position.x * 1.0 + time * 0.8) * 
-            sin(position.z * 1.3 + time * 0.6) * 0.25 +
+            sin(position.z * 1.3 + time * 0.6) * 0.4 +
             sin(position.x * 2.5 + time * 1.5) * 
-            sin(position.z * 2.8 + time * 1.7) * 0.125;
+            sin(position.z * 2.8 + time * 1.7) * 0.2;
           
           vElevation = elevation;
           
           vec3 pos = position;
-          pos.y += elevation * 0.8; // Apply wave height
+          pos.y += elevation * 1.5; // Increased wave height multiplier from 0.8 to 1.5
           
           gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
         }
@@ -102,41 +102,44 @@ export default class SimpleWater {
           float depthFactor = smoothstep(-0.5, 0.5, vElevation);
           vec3 color = mix(deepWaterColor, waterColor, depthFactor);
           
-          // Add foam at wave peaks
-          if (vElevation > 0.25) {
-            float foamFactor = smoothstep(0.25, 0.5, vElevation);
+          // Add foam at wave peaks - more visible
+          if (vElevation > 0.2) { // Lower threshold from 0.25 to 0.2
+            float foamFactor = smoothstep(0.2, 0.4, vElevation);
             color = mix(color, vec3(1.0), foamFactor * 0.9);
           }
           
-          // Add subtle wave patterns
-          float pattern = sin(vUv.x * 100.0) * sin(vUv.y * 100.0) * 0.05;
-          color += pattern * vec3(0.1, 0.1, 0.3);
+          // Add subtle wave patterns - more pronounced
+          float pattern = sin(vUv.x * 100.0 + time * 0.5) * sin(vUv.y * 100.0 + time * 0.3) * 0.1; // Increased from 0.05 to 0.1
+          color += pattern * vec3(0.2, 0.2, 0.4); // Increased color impact
           
-          gl_FragColor = vec4(color, 1.0);
+          gl_FragColor = vec4(color, 0.9); // Add slight transparency (0.9 instead of 1.0)
         }
       `
     };
     
-    // Create the material
+    // Create the material with transparency enabled
     this.waterMaterial = new THREE.ShaderMaterial({
       uniforms: waterShader.uniforms,
       vertexShader: waterShader.vertexShader,
       fragmentShader: waterShader.fragmentShader,
-      transparent: false, // Set to false for better performance
+      transparent: true, // Enable transparency
       side: THREE.DoubleSide
     });
     
     // Create the water mesh
     this.waterMesh = new THREE.Mesh(this.waterGeometry, this.waterMaterial);
     
-    // Position water at y=0 (surface level)
-    this.waterMesh.position.y = -0.05;
+    // Position water at y=0 (surface level) - move higher for better visibility
+    this.waterMesh.position.y = 0.01; // Changed from -0.05 to 0.01 to be more visible
     
     // Rotate the water plane to be horizontal
     this.waterMesh.rotation.x = -Math.PI / 2;
     
     // Set render order to ensure water appears below land
     this.waterMesh.renderOrder = 5;
+    
+    // Add user data flag to identify as water mesh
+    this.waterMesh.userData.isWaterMesh = true;
     
     // Add to scene
     this.scene.add(this.waterMesh);
@@ -147,19 +150,19 @@ export default class SimpleWater {
   private getWaterColorForView(): number {
     switch (this.activeView) {
       case 'transport':
-        return 0x1ac6ff; // Bright blue
+        return 0x33ccff; // Brighter blue
       case 'resources':
-        return 0x00ffcc; // Teal
+        return 0x00ffdd; // Brighter teal
       case 'markets':
-        return 0x33ccff; // Steel blue
+        return 0x66ddff; // Brighter steel blue
       case 'governance':
-        return 0x8a7dff; // Slate blue
+        return 0x9988ff; // Brighter slate blue
       case 'land':
-        return 0x33ccff; // Sea blue
+        return 0x33ccff; // Brighter sea blue
       case 'buildings':
-        return 0x33ccff; // Turquoise
+        return 0x33ccff; // Brighter turquoise
       default:
-        return 0x33ccff; // Default blue
+        return 0x33ccff; // Default brighter blue
     }
   }
   
@@ -168,7 +171,7 @@ export default class SimpleWater {
       case 'transport':
         return 0x0088ff; // Deeper blue
       case 'resources':
-        return 0x00aa99; // Deeper teal
+        return 0x00aaaa; // Deeper teal
       case 'markets':
         return 0x0088cc; // Deeper steel blue
       case 'governance':
@@ -183,8 +186,8 @@ export default class SimpleWater {
   }
   
   public update(frameCount: number) {
-    // Update time
-    this.time += 0.05;
+    // Update time with faster speed
+    this.time += 0.1; // Doubled from 0.05 to 0.1
     
     // Skip if water mesh doesn't exist
     if (!this.waterMesh || !this.waterMaterial) return;
