@@ -578,13 +578,13 @@
     "fullDescription": "Venice's first line of defense against the sea, flood control stations manage the complex systems that protect the city during acqua alta (high water) events. Featuring monitoring equipment, barrier storage, pump systems, and emergency response capabilities, these facilities represent sophisticated engineering solutions to Venice's existential challenge. Their operators maintain constant vigilance against the lagoon's rising waters.",
     "flavorText": "The sea gives Venice life, commerce, and beauty—but would also reclaim it in an instant if we relaxed our vigilance even for a season.",
     "constructionCosts": {
-      "ducats": 6000,
+      "ducats": 6000000,
       "timber": 200,
       "bricks": 300,
       "stone": 400,
       "iron": 150
     },
-    "maintenanceCost": 60,
+    "maintenanceCost": 60000,
     "constructionTime": 1209600000,
     "incomeGeneration": 0,
     "employmentCapacity": 15,
@@ -651,15 +651,15 @@
     "fullDescription": "The workhorse of Venice's commercial infrastructure, small warehouses provide secure storage for merchandise and materials throughout the city. Featuring loading areas, organized storage systems, inventory management, and basic security, these practical facilities enable the smooth functioning of Venice's complex trade networks. Their flexible design accommodates a wide variety of goods from textiles to spices.",
     "flavorText": "The difference between a successful merchant and a ruined one often lies not in what they buy or sell, but in how they store their goods between these transactions.",
     "constructionCosts": {
-      "ducats": 1250,
+      "ducats": 1250000,
       "timber": 100,
       "bricks": 150,
       "stone": 100,
       "iron": 30
     },
-    "maintenanceCost": 12.5,
+    "maintenanceCost": 12500,
     "constructionTime": 259200000,
-    "incomeGeneration": 15,
+    "incomeGeneration": 15000,
     "employmentCapacity": 5,
     "locationRequirements": {
       "districtRestrictions": "Commercial districts, near transportation",
@@ -722,15 +722,15 @@
     "fullDescription": "The foundation of Venice's financial security, secure vaults provide maximum protection for the most valuable possessions. Featuring multiple security layers, controlled access, specialized storage environments, and often guard quarters, these facilities represent significant investment in physical security. Used by wealthy families, businesses, and banks, secure vaults protect everything from gold to crucial documents.",
     "flavorText": "Venice's greatest treasures lie not in her churches or palaces, but behind the iron doors and complex locks of her vaults—for true wealth requires both acquisition and protection.",
     "constructionCosts": {
-      "ducats": 5000,
+      "ducats": 5000000,
       "timber": 50,
       "bricks": 400,
       "stone": 500,
       "iron": 200
     },
-    "maintenanceCost": 40,
+    "maintenanceCost": 40000,
     "constructionTime": 864000000,
-    "incomeGeneration": 50,
+    "incomeGeneration": 50000,
     "employmentCapacity": 8,
     "locationRequirements": {
       "districtRestrictions": "Financial districts, secure areas near government centers",
@@ -795,15 +795,15 @@
     "fullDescription": "Essential to Venice's food security, granaries store the imported grain that feeds the city's population. Featuring specialized storage containers, pest control systems, inventory management, and often government oversight, these facilities protect against famine and price volatility. Venice's unique maritime position required substantial granary capacity to buffer against supply disruptions.",
     "flavorText": "A city may survive without gold in its treasury, but never without grain in its granaries—Venice keeps her freedom by ensuring the fullness of both.",
     "constructionCosts": {
-      "ducats": 3000,
+      "ducats": 3000000,
       "timber": 150,
       "bricks": 300,
       "stone": 250,
       "iron": 60
     },
-    "maintenanceCost": 25,
+    "maintenanceCost": 25000,
     "constructionTime": 604800000,
-    "incomeGeneration": 20,
+    "incomeGeneration": 20000,
     "employmentCapacity": 10,
     "locationRequirements": {
       "districtRestrictions": "Access to transportation, often near ports or canals",
@@ -868,15 +868,15 @@
     "fullDescription": "Supporting Venice's sophisticated wine trade, cellars provide the carefully controlled environment needed for proper aging and storage. Featuring temperature regulation, humidity control, specialized racks, inventory systems, and tasting areas, these facilities represent significant investment in quality preservation. Their specialized design preserves and enhances the value of wine holdings over time.",
     "flavorText": "Unlike gold, which merely sits in vaults accumulating dust, wine transforms in the darkness of the cellar—gaining value not just through scarcity, but through the alchemy of patience.",
     "constructionCosts": {
-      "ducats": 2000,
+      "ducats": 2000000,
       "timber": 80,
       "bricks": 200,
       "stone": 300,
       "iron": 40
     },
-    "maintenanceCost": 17.5,
+    "maintenanceCost": 17500,
     "constructionTime": 432000000,
-    "incomeGeneration": 25,
+    "incomeGeneration": 25000,
     "employmentCapacity": 5,
     "locationRequirements": {
       "districtRestrictions": "All districts, often beneath existing buildings",

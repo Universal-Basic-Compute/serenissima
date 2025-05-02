@@ -10,16 +10,16 @@
     "fullDescription": "The spiritual heart of each Venetian neighborhood, parish churches provide religious services, community gathering spaces, and social support. Featuring a main worship area, bell tower, side chapels, and often charitable facilities, these buildings serve as both religious centers and neighborhood focal points. Venice's distinctive layout resulted in an unusually high number of parish churches, each forming the center of a local community.",
     "flavorText": "The parish church marks both the geographical center of the neighborhood and the spiritual center of its people's lives—from baptism to burial, all significant moments pass through these doors.",
     "constructionCosts": {
-      "ducats": 7500,
+      "ducats": 7500000,
       "timber": 200,
       "bricks": 500,
       "stone": 800,
       "glass": 100,
       "marble": 150
     },
-    "maintenanceCost": 40,
+    "maintenanceCost": 40000,
     "constructionTime": 2592000000,
-    "incomeGeneration": 20,
+    "incomeGeneration": 20000,
     "employmentCapacity": 10,
     "locationRequirements": {
       "districtRestrictions": "Central location in neighborhood, often facing campo",
@@ -85,14 +85,14 @@
     "fullDescription": "Meeting the spiritual needs of private households or institutions, chapels provide dedicated worship spaces on a smaller scale than parish churches. Featuring an altar, devotional artwork, and often family memorials, these intimate religious spaces allow for private worship while demonstrating the owner's piety and status. Many Venetian noble families maintained private chapels within their palazzos or funded chapels within larger churches.",
     "flavorText": "The lord of the house may command all who dwell beneath his roof—save in the chapel, where all kneel equally before a higher authority.",
     "constructionCosts": {
-      "ducats": 2000,
+      "ducats": 2000000,
       "timber": 50,
       "bricks": 100,
       "stone": 150,
       "glass": 30,
       "marble": 40
     },
-    "maintenanceCost": 10,
+    "maintenanceCost": 10000,
     "constructionTime": 432000000,
     "incomeGeneration": 0,
     "employmentCapacity": 2,
@@ -158,16 +158,16 @@
     "fullDescription": "Handling local governance needs, town halls serve as administrative centers for Venice's districts. Featuring offices for district officials, public meeting spaces, record archives, and often small courtrooms, these buildings manage the day-to-day governance tasks below the level of the central government. Their accessible location and public service focus made them important neighborhood institutions.",
     "flavorText": "Between the lofty politics of the Senate and the daily concerns of the citizen lies the town hall—where grand policies become practical solutions to everyday problems.",
     "constructionCosts": {
-      "ducats": 5000,
+      "ducats": 5000000,
       "timber": 150,
       "bricks": 300,
       "stone": 400,
       "glass": 60,
       "marble": 80
     },
-    "maintenanceCost": 35,
+    "maintenanceCost": 35000,
     "constructionTime": 1209600000,
-    "incomeGeneration": 30,
+    "incomeGeneration": 30000,
     "employmentCapacity": 20,
     "locationRequirements": {
       "districtRestrictions": "Central district location, often on secondary campo",
@@ -233,16 +233,16 @@
     "fullDescription": "The physical embodiment of Venetian justice, courthouses provide spaces for legal proceedings from simple disputes to complex trials. Featuring multiple courtrooms, judicial offices, legal archives, and holding cells, these imposing buildings represent the rule of law in the Republic. Venice's sophisticated legal system required substantial facilities to manage its complex commercial and criminal jurisprudence.",
     "flavorText": "Between the stones of this building lie not just mortar, but the accumulated wisdom of centuries of law—for Venice conquers by trade, but endures by justice.",
     "constructionCosts": {
-      "ducats": 9000,
+      "ducats": 9000000,
       "timber": 200,
       "bricks": 400,
       "stone": 600,
       "glass": 80,
       "marble": 150
     },
-    "maintenanceCost": 50,
+    "maintenanceCost": 50000,
     "constructionTime": 1728000000,
-    "incomeGeneration": 40,
+    "incomeGeneration": 40000,
     "employmentCapacity": 30,
     "locationRequirements": {
       "districtRestrictions": "Government district, near other official buildings",
@@ -309,16 +309,16 @@
     "fullDescription": "Preserving the documentation that powers Venetian governance and commerce, archives securely store and organize vital records. Featuring specialized storage systems, reading rooms, copying facilities, and often restoration workshops, these buildings protect everything from property deeds to diplomatic treaties. Venice's sophisticated bureaucracy generated enormous volumes of documents requiring careful preservation and retrieval systems.",
     "flavorText": "The true power of Venice lies not in her ships or gold, but in these carefully preserved papers—for they contain the accumulated knowledge of centuries of statecraft and commerce.",
     "constructionCosts": {
-      "ducats": 3000,
+      "ducats": 3000000,
       "timber": 80,
       "bricks": 200,
       "stone": 300,
       "glass": 30,
       "iron": 50
     },
-    "maintenanceCost": 25,
+    "maintenanceCost": 25000,
     "constructionTime": 604800000,
-    "incomeGeneration": 17.5,
+    "incomeGeneration": 17500,
     "employmentCapacity": 15,
     "locationRequirements": {
       "districtRestrictions": "Government district, often near administrative centers",
@@ -384,16 +384,16 @@
     "fullDescription": "Training the sailors who power Venice's maritime empire, navigation schools teach crucial skills from basic seamanship to advanced celestial navigation. Featuring classrooms, navigation equipment, chart rooms, model ships, and often small observatories, these institutions ensure the continued excellence of Venetian maritime capabilities. Their specialized curriculum combines theoretical knowledge with practical experience.",
     "flavorText": "A ship without a navigator is merely driftwood with pretensions—here we transform ordinary men into masters of the sea itself.",
     "constructionCosts": {
-      "ducats": 3500,
+      "ducats": 3500000,
       "timber": 100,
       "bricks": 200,
       "stone": 300,
       "glass": 50,
       "iron": 30
     },
-    "maintenanceCost": 30,
+    "maintenanceCost": 30000,
     "constructionTime": 604800000,
-    "incomeGeneration": 25,
+    "incomeGeneration": 25000,
     "employmentCapacity": 15,
     "locationRequirements": {
       "districtRestrictions": "Maritime districts, preferably with water view",
@@ -459,16 +459,16 @@
     "fullDescription": "Nurturing the artistic talent that adorns Venice's buildings and collections, art academies provide formal training in various creative disciplines. Featuring studios with specialized lighting, sculpture workshops, model rooms, exhibition spaces, and often material preparation areas, these institutions combine technical instruction with artistic philosophy. Venice's distinctive artistic style developed within these academies.",
     "flavorText": "Talent without training is like a ship without a rudder—here we provide not just techniques, but the wisdom to know when to follow tradition and when to challenge it.",
     "constructionCosts": {
-      "ducats": 6000,
+      "ducats": 6000000,
       "timber": 150,
       "bricks": 300,
       "stone": 400,
       "glass": 80,
       "marble": 100
     },
-    "maintenanceCost": 40,
+    "maintenanceCost": 40000,
     "constructionTime": 1209600000,
-    "incomeGeneration": 35,
+    "incomeGeneration": 35000,
     "employmentCapacity": 25,
     "locationRequirements": {
       "districtRestrictions": "Cultural districts, often near churches or palaces",
@@ -610,16 +610,16 @@
     "fullDescription": "Protecting Venice from imported diseases, quarantine stations isolate ships, travelers, and goods for observation before permitting city entry. Featuring separated accommodation blocks, inspection areas, fumigation facilities, and secure boundaries, these complex facilities implement Venice's pioneering public health measures. The term 'quarantine' itself originates from Venice's forty-day isolation period (quaranta giorni).",
     "flavorText": "Forty days may seem a harsh price for entry to our city, but consider the alternative: the finest goods and richest merchants mean nothing if they bring the Black Death as an uninvited companion.",
     "constructionCosts": {
-      "ducats": 9000,
+      "ducats": 9000000,
       "timber": 200,
       "bricks": 500,
       "stone": 600,
       "glass": 50,
       "iron": 100
     },
-    "maintenanceCost": 60,
+    "maintenanceCost": 60000,
     "constructionTime": 1728000000,
-    "incomeGeneration": 40,
+    "incomeGeneration": 40000,
     "employmentCapacity": 30,
     "locationRequirements": {
       "districtRestrictions": "Isolated location, often on outer island or lagoon edge",
@@ -686,16 +686,16 @@
     "fullDescription": "Enriching Venetian cultural life, theaters provide venues for various performances from sophisticated dramas to popular entertainment. Featuring a stage, audience seating often in multiple tiers, backstage facilities, and sometimes refreshment areas, these buildings serve as important social gathering spaces. Venice's theater tradition blended intellectual content with spectacular staging and music.",
     "flavorText": "On this stage we hold a mirror to Venice herself—sometimes flattering, sometimes critical, but always revealing truths that might otherwise remain unspoken.",
     "constructionCosts": {
-      "ducats": 7500,
+      "ducats": 7500000,
       "timber": 250,
       "bricks": 400,
       "stone": 300,
       "glass": 60,
       "fabric": 100
     },
-    "maintenanceCost": 45,
+    "maintenanceCost": 45000,
     "constructionTime": 1209600000,
-    "incomeGeneration": 60,
+    "incomeGeneration": 60000,
     "employmentCapacity": 25,
     "locationRequirements": {
       "districtRestrictions": "Entertainment districts, cultural centers",
@@ -762,15 +762,15 @@
     "fullDescription": "Supporting public health through cleanliness, bath houses provide washing facilities for citizens without private baths. Featuring bathing pools of varying temperatures, steam rooms, changing areas, and often medicinal services, these establishments combine practical hygiene with social gathering. Venice's water-surrounded situation made public baths particularly important for controlling disease and maintaining cleanliness.",
     "flavorText": "Cleanliness of body promotes health of body, and the shared conversation of the baths promotes health of mind—thus a city with good bath houses benefits twice over.",
     "constructionCosts": {
-      "ducats": 2000,
+      "ducats": 2000000,
       "timber": 80,
       "bricks": 200,
       "stone": 150,
       "iron": 40
     },
-    "maintenanceCost": 17.5,
+    "maintenanceCost": 17500,
     "constructionTime": 432000000,
-    "incomeGeneration": 15,
+    "incomeGeneration": 15000,
     "employmentCapacity": 10,
     "locationRequirements": {
       "districtRestrictions": "Residential districts, community centers",

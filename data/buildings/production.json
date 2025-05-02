@@ -10,13 +10,13 @@
     "fullDescription": "The heart of Venetian glassmaking, foundries convert sand, soda ash, and minerals into the famed cristallo glass. Due to fire risks and to protect trade secrets, glass foundries are strictly limited to Murano island by order of the Republic. These specialized facilities feature massive furnaces that operate continuously at extreme temperatures.",
     "flavorText": "The furnaces of Murano burn day and night, crafting transparency from mere sand—perhaps the closest mortal men come to performing true alchemy.",
     "constructionCosts": {
-      "ducats": 2500,
+      "ducats": 2500000,
       "timber": 100,
       "bricks": 300,
       "stone": 200,
       "iron": 50
     },
-    "maintenanceCost": 60,
+    "maintenanceCost": 60000,
     "constructionTime": 604800000,
     "incomeGeneration": 0,
     "employmentCapacity": 8,
@@ -96,13 +96,13 @@
     "fullDescription": "The crucial first step in Venice's lucrative silk industry, these specialized facilities prepare raw silk through complex processes of washing, stretching, and treating. Featuring carefully controlled environments for humidity and temperature, silk conditioning houses require both technical expertise and significant water resources. The quality of Venetian textiles depends heavily on this initial preparation.",
     "flavorText": "Before the shimmer of silk can adorn a nobleman, it must first be bathed, stretched, and coaxed into perfection—like any Venetian preparing for a grand appearance.",
     "constructionCosts": {
-      "ducats": 1750,
+      "ducats": 1750000,
       "timber": 80,
       "bricks": 150,
       "stone": 100,
       "iron": 30
     },
-    "maintenanceCost": 30,
+    "maintenanceCost": 30000,
     "constructionTime": 432000000,
     "incomeGeneration": 0,
     "employmentCapacity": 12,
@@ -181,13 +181,13 @@
     "fullDescription": "The backbone of Venice's maritime power, private shipyards construct and maintain the merchant fleet that drives the city's commerce. Featuring slipways for vessel construction, specialized workshops for component fabrication, and direct water access, these industrial facilities require substantial space and resources. While not as large as the state-run Arsenal, private shipyards are vital to maintaining Venice's commercial fleet.",
     "flavorText": "From oak and pitch and canvas, we conjure vessels that will challenge the Mediterranean and return laden with the world's riches—or consign their investors to bankruptcy.",
     "constructionCosts": {
-      "ducats": 6000,
+      "ducats": 6000000,
       "timber": 300,
       "bricks": 200,
       "stone": 400,
       "iron": 100
     },
-    "maintenanceCost": 75,
+    "maintenanceCost": 75000,
     "constructionTime": 1209600000,
     "incomeGeneration": 0,
     "employmentCapacity": 40,
@@ -273,14 +273,14 @@
     "fullDescription": "The literal economic engine of Venice, the mint (Zecca) transforms gold and silver into the ducats and other coins that power commerce. Operating under the strictest security and quality control, this heavily guarded facility features specialized workshops for metal purification, coin striking, and verification. The consistent quality of Venetian currency was a key factor in the city's commercial dominance.",
     "flavorText": "All wealth flows from these walls—but never forget that each coin bears not just gold, but the very authority of the Republic itself.",
     "constructionCosts": {
-      "ducats": 10000,
+      "ducats": 10000000,
       "timber": 150,
       "bricks": 400,
       "stone": 600,
       "iron": 200,
       "marble": 100
     },
-    "maintenanceCost": 100,
+    "maintenanceCost": 100000,
     "constructionTime": 2592000000,
     "incomeGeneration": 0,
     "employmentCapacity": 50,
@@ -365,15 +365,15 @@
     "fullDescription": "A staple of every Venetian neighborhood, bakeries provide essential daily bread as well as sweet and savory pastries. Featuring stone ovens, preparation areas, and often a small retail space, these establishments operate from pre-dawn to serve the community. Their regulated prices and consistent operation made them crucial to urban food security in Renaissance Venice.",
     "flavorText": "The scent of fresh bread has ended more neighborhood disputes than any magistrate's decree—for even bitter enemies must still eat side by side.",
     "constructionCosts": {
-      "ducats": 400,
+      "ducats": 400000,
       "timber": 30,
       "bricks": 200,
       "stone": 100,
       "iron": 10
     },
-    "maintenanceCost": 7.5,
+    "maintenanceCost": 7500,
     "constructionTime": 172800000,
-    "incomeGeneration": 9,
+    "incomeGeneration": 9000,
     "employmentCapacity": 4,
     "productionInformation": {
       "inputResources": {
@@ -453,15 +453,15 @@
     "fullDescription": "The creative heart of Venice's famed glass industry, these workshops transform molten glass from foundries into exquisite finished pieces. Featuring glassblowing stations with specialized tools, annealing ovens for controlled cooling, and display areas for completed works, these facilities combine industrial process with artistic creativity. Master glassblowers command tremendous respect for their skill in manipulating this challenging material.",
     "flavorText": "Between the breath of the master and the heat of the furnace, ordinary sand is transformed into objects of such delicacy that they appear to defy the very nature of matter itself.",
     "constructionCosts": {
-      "ducats": 1500,
+      "ducats": 1500000,
       "timber": 60,
       "bricks": 150,
       "stone": 80,
       "iron": 40
     },
-    "maintenanceCost": 20,
+    "maintenanceCost": 20000,
     "constructionTime": 345600000,
-    "incomeGeneration": 30,
+    "incomeGeneration": 30000,
     "employmentCapacity": 6,
     "productionInformation": {
       "inputResources": {
@@ -544,13 +544,13 @@
     "fullDescription": "Essential to Venice's textile industry, dye works transform plain fabrics into the vibrant colors that made Venetian textiles famous throughout Europe. Featuring large vats for immersion, drying yards, and specialized processes for different colorants, these facilities require significant technical knowledge. Venice's trade connections gave it access to exotic dyestuffs from around the Mediterranean and beyond.",
     "flavorText": "The secret of our crimson is not merely in the kermes insects, but in water, time, and tradition passed from master to apprentice through generations of colored hands and careful eyes.",
     "constructionCosts": {
-      "ducats": 1400,
+      "ducats": 1400000,
       "timber": 70,
       "bricks": 180,
       "stone": 120,
       "iron": 50
     },
-    "maintenanceCost": 17.5,
+    "maintenanceCost": 17500,
     "constructionTime": 259200000,
     "incomeGeneration": 0,
     "employmentCapacity": 15,
@@ -635,15 +635,15 @@
     "fullDescription": "An essential service in any district, blacksmiths craft the metal components needed for construction, shipping, and daily life. Featuring a forge, anvils, quenching tanks, and metalworking tools, these workshops combine practical craftsmanship with industrial production. From nails and hinges to tools and decorative ironwork, blacksmiths support nearly every other industry in Venice.",
     "flavorText": "Without my hinges, your doors would not swing; without my nails, your ships would come apart; without my locks, your wealth would vanish—yet few think of the blacksmith until something breaks.",
     "constructionCosts": {
-      "ducats": 750,
+      "ducats": 750000,
       "timber": 60,
       "bricks": 200,
       "stone": 100,
       "iron": 30
     },
-    "maintenanceCost": 12.5,
+    "maintenanceCost": 12500,
     "constructionTime": 172800000,
-    "incomeGeneration": 15,
+    "incomeGeneration": 15000,
     "employmentCapacity": 5,
     "productionInformation": {
       "inputResources": {
@@ -726,16 +726,16 @@
     "fullDescription": "Representing the pinnacle of metalworking craftsmanship, goldsmith workshops create the finest jewelry and precious objects for Venice's elite. Featuring specialized tools for intricate work, secure facilities for valuable materials, and often a discreet showroom, these establishments combine artistic excellence with extreme security. Their creations symbolize wealth and status throughout Venetian society.",
     "flavorText": "Gold speaks of wealth, but in my hands it whispers of eternity—for while the merchant merely possesses gold, I transform it into legacy.",
     "constructionCosts": {
-      "ducats": 2500,
+      "ducats": 2500000,
       "timber": 40,
       "bricks": 100,
       "stone": 150,
       "iron": 30,
       "marble": 20
     },
-    "maintenanceCost": 35,
+    "maintenanceCost": 35000,
     "constructionTime": 432000000,
-    "incomeGeneration": 45,
+    "incomeGeneration": 45000,
     "employmentCapacity": 6,
     "productionInformation": {
       "inputResources": {
@@ -818,13 +818,13 @@
     "fullDescription": "Essential to Venice's intellectual and commercial life, paper mills transform rags and plant fibers into the paper used for books, documents, and correspondence. Featuring water-powered stamping hammers, drying facilities, and sizing baths, these industrial operations require significant water resources. Venice's early adoption of paper manufacturing supported its prominence in publishing and record-keeping.",
     "flavorText": "From discarded rags we create the very foundation of knowledge, commerce, and governance—for without paper, thoughts remain ephemeral and agreements merely spoken.",
     "constructionCosts": {
-      "ducats": 2250,
+      "ducats": 2250000,
       "timber": 150,
       "bricks": 200,
       "stone": 300,
       "iron": 80
     },
-    "maintenanceCost": 20,
+    "maintenanceCost": 20000,
     "constructionTime": 518400000,
     "incomeGeneration": 0,
     "employmentCapacity": 20,
@@ -910,15 +910,15 @@
     "fullDescription": "At the forefront of Renaissance information technology, printing houses use mechanical presses to produce multiple copies of texts and images. Featuring type-setting areas, printing presses, drying racks, and bindery facilities, these workshops revolutionized the spread of knowledge. Venice became an early center of printing, with its strategic position and trade networks facilitating distribution throughout Europe.",
     "flavorText": "What once required a monastery of scribes working for months can now be accomplished in days—we are not merely making books, but building a new age of knowledge itself.",
     "constructionCosts": {
-      "ducats": 3500,
+      "ducats": 3500000,
       "timber": 100,
       "bricks": 150,
       "stone": 200,
       "iron": 100
     },
-    "maintenanceCost": 30,
+    "maintenanceCost": 30000,
     "constructionTime": 604800000,
-    "incomeGeneration": 40,
+    "incomeGeneration": 40000,
     "employmentCapacity": 15,
     "productionInformation": {
       "inputResources": {

@@ -10,13 +10,13 @@
     "fullDescription": "A modest wooden structure housing Venice's vital fishing families. These humble cottages typically include a ground floor for nets and equipment with living quarters above. The proximity to water is essential for their livelihood.",
     "flavorText": "The fishermen rise before the bells of San Marco, for the lagoon's bounty favors the early and the bold.",
     "constructionCosts": {
-      "ducats": 400,
+      "ducats": 400000,
       "timber": 50,
       "bricks": 20
     },
-    "maintenanceCost": 2.5,
+    "maintenanceCost": 2500,
     "constructionTime": 172800000,
-    "incomeGeneration": 5,
+    "incomeGeneration": 5000,
     "residentsCapacity": 4,
     "locationRequirements": {
       "districtRestrictions": "Cannot be built in San Marco or Rialto",
@@ -72,14 +72,14 @@
     "fullDescription": "A practical combined living and working space for Venice's skilled artisans. The ground floor typically houses a workshop open to the street, while upper floors provide living quarters for the artisan's family. These buildings form the backbone of Venice's craft economy.",
     "flavorText": "The hands shape the clay, the wood, the glass—and in turn, they shape Venice itself.",
     "constructionCosts": {
-      "ducats": 750,
+      "ducats": 750000,
       "timber": 60,
       "bricks": 80,
       "stone": 30
     },
-    "maintenanceCost": 4,
+    "maintenanceCost": 4000,
     "constructionTime": 259200000,
-    "incomeGeneration": 9,
+    "incomeGeneration": 9000,
     "residentsCapacity": 5,
     "locationRequirements": {
       "districtRestrictions": "Cannot be built in San Marco",
@@ -135,15 +135,15 @@
     "fullDescription": "A respectable home for Venice's merchant class, featuring separate areas for business and family life. Typically includes a ground floor counting room or office, a piano nobile (noble floor) for family living, and often additional floors for storage or servants. Represents success in Venice's trading world.",
     "flavorText": "Ledgers below, living above—the merchant's house is a perfect balance of commerce and comfort, just as the merchant balances risk and reward.",
     "constructionCosts": {
-      "ducats": 1600,
+      "ducats": 1600000,
       "timber": 80,
       "bricks": 150,
       "stone": 100,
       "glass": 15
     },
-    "maintenanceCost": 7.5,
+    "maintenanceCost": 7500,
     "constructionTime": 345600000,
-    "incomeGeneration": 14,
+    "incomeGeneration": 14000,
     "residentsCapacity": 7,
     "locationRequirements": {
       "districtRestrictions": "Best suited to Cannaregio, Castello, or Dorsoduro",
@@ -202,16 +202,16 @@
     "fullDescription": "A practical yet prestigious home with a private water entrance (porta d'acqua) directly on a canal. These versatile buildings allow residents to receive goods and visitors directly by boat. The water-level entrance typically includes a small private dock and storage area, with living quarters above.",
     "flavorText": "In Venice, a door to the water is worth more than a door to the street—for water is the true street of the Serenissima.",
     "constructionCosts": {
-      "ducats": 2000,
+      "ducats": 2000000,
       "timber": 90,
       "bricks": 180,
       "stone": 150,
       "glass": 20,
       "marble": 10
     },
-    "maintenanceCost": 11,
+    "maintenanceCost": 11000,
     "constructionTime": 432000000,
-    "incomeGeneration": 17.5,
+    "incomeGeneration": 17500,
     "residentsCapacity": 8,
     "locationRequirements": {
       "districtRestrictions": "Must be built directly on a canal",
@@ -272,16 +272,16 @@
     "fullDescription": "A statement of wealth and status for Venice's noble families, the palazzo combines imposing architecture with practical business needs. Organized around a central courtyard, these buildings typically feature grand reception rooms, a family chapel, extensive servant quarters, and business offices. The facade displays the family's status through architectural refinement rather than ostentatious display.",
     "flavorText": "Stone and legacy intertwined—a patrician palazzo houses not merely a family, but a dynasty's ambitions across generations.",
     "constructionCosts": {
-      "ducats": 6000,
+      "ducats": 6000000,
       "timber": 200,
       "bricks": 500,
       "stone": 350,
       "glass": 80,
       "marble": 60
     },
-    "maintenanceCost": 30,
+    "maintenanceCost": 30000,
     "constructionTime": 864000000,
-    "incomeGeneration": 40,
+    "incomeGeneration": 40000,
     "residentsCapacity": 15,
     "locationRequirements": {
       "districtRestrictions": "Preferred in San Marco, Cannaregio, or Castello",
@@ -346,7 +346,7 @@
     "fullDescription": "The pinnacle of Venetian residential architecture, these magnificent palaces line the Grand Canal, their facades functioning as public displays of family power. Featuring enormous reception halls, multiple courtyards, private docks, and lavish decoration, these buildings combine Gothic, Byzantine, and Renaissance elements in a uniquely Venetian style. Only the wealthiest and most powerful families maintain such residences.",
     "flavorText": "The facade speaks to the canal, the canal speaks to the world—and both pronounce the glory of your house for generations to come.",
     "constructionCosts": {
-      "ducats": 15000,
+      "ducats": 15000000,
       "timber": 400,
       "bricks": 1000,
       "stone": 800,
@@ -354,9 +354,9 @@
       "marble": 200,
       "gold": 20
     },
-    "maintenanceCost": 75,
+    "maintenanceCost": 75000,
     "constructionTime": 1728000000,
-    "incomeGeneration": 100,
+    "incomeGeneration": 100000,
     "residentsCapacity": 25,
     "locationRequirements": {
       "districtRestrictions": "Must be built directly on the Grand Canal",
