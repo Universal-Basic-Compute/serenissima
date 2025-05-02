@@ -17,6 +17,12 @@ export default class SimpleWater {
   private height: number;
   private waterMesh: THREE.Mesh | null = null;
   private time: number = 0;
+  private waveSimulationData: Float32Array | null = null;
+  private waveVelocity: Float32Array | null = null;
+  private waveSimulationSize = 128; // Match with geometry segments
+  private damping = 0.98;
+  private waveSpeed = 0.05;
+  private lastUpdateTime = 0;
 
   constructor({
     scene,
@@ -36,14 +42,14 @@ export default class SimpleWater {
   }
   
   private createWater() {
-    console.log('Creating enhanced water plane with visible waves...');
+    console.log('Creating physically simulated water plane...');
     
     // Create a water plane with more segments for better wave animation
     const geometry = new THREE.PlaneGeometry(
-      this.width * 4, // Double the size for better coverage
-      this.height * 4, // Double the size for better coverage
-      64, // Increase segments for smoother waves
-      64
+      this.width * 4, 
+      this.height * 4, 
+      128, // Increase segments significantly for smoother waves
+      128
     );
     
     // Load water textures
@@ -69,12 +75,12 @@ export default class SimpleWater {
     const material = new THREE.MeshPhongMaterial({
       color: waterColor,
       transparent: true,
-      opacity: 0.95, // Increased opacity for better visibility
+      opacity: 0.95,
       side: THREE.DoubleSide,
       normalMap: normalMap,
-      normalScale: new THREE.Vector2(1.5, 1.5), // Increased normal intensity for more visible waves
-      shininess: 100, // Add shininess for better reflections
-      specular: 0x111111, // Add specular highlights
+      normalScale: new THREE.Vector2(1.5, 1.5),
+      shininess: 100,
+      specular: 0x111111,
     });
     
     // Create the water mesh
@@ -92,7 +98,10 @@ export default class SimpleWater {
     // Add to scene
     this.scene.add(this.waterMesh);
     
-    console.log('Enhanced water mesh created successfully');
+    // Initialize wave simulation data
+    this.initializeWaveSimulation();
+    
+    console.log('Enhanced water mesh with physical simulation created successfully');
   }
   
   // Add this method to create a fallback normal map
@@ -161,7 +170,7 @@ export default class SimpleWater {
       material.normalMap.offset.x = Math.sin(this.time * 0.05) * 0.2 + this.time * 0.05;
       material.normalMap.offset.y = Math.cos(this.time * 0.04) * 0.2 + this.time * 0.03;
       
-      // Vary normal scale for more dynamic waves - make this more pronounced
+      // Vary normal scale for more dynamic waves
       const scale = 1.0 + Math.sin(this.time * 0.1) * 0.5;
       material.normalScale.set(scale, scale);
       
@@ -176,25 +185,11 @@ export default class SimpleWater {
       material.needsUpdate = true;
     }
     
-    // Animate the water geometry for more pronounced waves
-    if (this.waterMesh.geometry instanceof THREE.PlaneGeometry) {
-      const positions = this.waterMesh.geometry.attributes.position.array;
-      const count = positions.length / 3;
-      
-      for (let i = 0; i < count; i++) {
-        const x = positions[i * 3];
-        const z = positions[i * 3 + 2];
-        
-        // Create more pronounced waves with multiple frequencies
-        positions[i * 3 + 1] = 
-          Math.sin(x * 0.05 + this.time * 0.5) * 0.2 + 
-          Math.cos(z * 0.05 + this.time * 0.3) * 0.2 +
-          Math.sin((x + z) * 0.03 + this.time * 0.2) * 0.1;
-      }
-      
-      this.waterMesh.geometry.attributes.position.needsUpdate = true;
-      this.waterMesh.geometry.computeVertexNormals();
-    }
+    // Update wave simulation
+    this.updateWaveSimulation();
+    
+    // Apply wave simulation to geometry
+    this.applyWavesToGeometry();
   }
   
   public updateViewMode(activeView: ViewMode) {
@@ -211,6 +206,133 @@ export default class SimpleWater {
     this.performanceMode = performanceMode;
   }
   
+  // Add method to initialize wave simulation
+  private initializeWaveSimulation() {
+    const size = this.waveSimulationSize;
+    this.waveSimulationData = new Float32Array(size * size);
+    this.waveVelocity = new Float32Array(size * size);
+    
+    // Initialize with small random values
+    for (let i = 0; i < size * size; i++) {
+      this.waveSimulationData[i] = (Math.random() * 2 - 1) * 0.01;
+      this.waveVelocity[i] = 0;
+    }
+    
+    this.lastUpdateTime = Date.now();
+  }
+
+  // Add method to update wave simulation using wave equation
+  private updateWaveSimulation() {
+    if (!this.waveSimulationData || !this.waveVelocity) return;
+    
+    const now = Date.now();
+    const deltaTime = Math.min(0.05, (now - this.lastUpdateTime) / 1000); // Cap at 50ms
+    this.lastUpdateTime = now;
+    
+    const size = this.waveSimulationSize;
+    const newWaveData = new Float32Array(size * size);
+    
+    // Add random wave sources occasionally
+    if (Math.random() < 0.03) {
+      const x = Math.floor(Math.random() * (size - 10)) + 5;
+      const y = Math.floor(Math.random() * (size - 10)) + 5;
+      const idx = y * size + x;
+      this.waveSimulationData[idx] += (Math.random() * 2 - 1) * 0.2;
+    }
+    
+    // Update wave simulation using the wave equation
+    for (let i = 1; i < size - 1; i++) {
+      for (let j = 1; j < size - 1; j++) {
+        const idx = i * size + j;
+        
+        // Get neighboring points
+        const up = (i - 1) * size + j;
+        const down = (i + 1) * size + j;
+        const left = i * size + (j - 1);
+        const right = i * size + (j + 1);
+        
+        // Calculate Laplacian (sum of neighbors - 4 * center)
+        const laplacian = 
+          this.waveSimulationData[up] + 
+          this.waveSimulationData[down] + 
+          this.waveSimulationData[left] + 
+          this.waveSimulationData[right] - 
+          4 * this.waveSimulationData[idx];
+        
+        // Update velocity using wave equation
+        this.waveVelocity[idx] += this.waveSpeed * laplacian;
+        
+        // Apply damping
+        this.waveVelocity[idx] *= this.damping;
+        
+        // Update height
+        newWaveData[idx] = this.waveSimulationData[idx] + this.waveVelocity[idx] * deltaTime;
+      }
+    }
+    
+    // Apply boundary conditions (fixed edges)
+    for (let i = 0; i < size; i++) {
+      newWaveData[i] = 0; // Top edge
+      newWaveData[i * size] = 0; // Left edge
+      newWaveData[i * size + (size - 1)] = 0; // Right edge
+      newWaveData[(size - 1) * size + i] = 0; // Bottom edge
+    }
+    
+    // Update wave data
+    this.waveSimulationData = newWaveData;
+  }
+
+  // Add method to apply wave simulation to geometry
+  private applyWavesToGeometry() {
+    if (!this.waterMesh || !this.waveSimulationData) return;
+    
+    // Get geometry
+    const geometry = this.waterMesh.geometry as THREE.PlaneGeometry;
+    const positions = geometry.attributes.position.array;
+    const size = this.waveSimulationSize;
+    
+    // Apply wave heights to geometry vertices
+    for (let i = 0; i < positions.length / 3; i++) {
+      // Get vertex position in local coordinates
+      const x = positions[i * 3];
+      const z = positions[i * 3 + 2];
+      
+      // Map to simulation grid coordinates (0 to 1)
+      const gridX = (x / (this.width * 4) + 0.5) * (size - 1);
+      const gridZ = (z / (this.height * 4) + 0.5) * (size - 1);
+      
+      // Get grid indices
+      const gx0 = Math.floor(gridX);
+      const gz0 = Math.floor(gridZ);
+      const gx1 = Math.min(gx0 + 1, size - 1);
+      const gz1 = Math.min(gz0 + 1, size - 1);
+      
+      // Get interpolation factors
+      const fx = gridX - gx0;
+      const fz = gridZ - gz0;
+      
+      // Get wave heights at grid points
+      const h00 = this.waveSimulationData[gz0 * size + gx0] || 0;
+      const h10 = this.waveSimulationData[gz0 * size + gx1] || 0;
+      const h01 = this.waveSimulationData[gz1 * size + gx0] || 0;
+      const h11 = this.waveSimulationData[gz1 * size + gx1] || 0;
+      
+      // Bilinear interpolation
+      const h0 = h00 * (1 - fx) + h10 * fx;
+      const h1 = h01 * (1 - fx) + h11 * fx;
+      const height = h0 * (1 - fz) + h1 * fz;
+      
+      // Apply height to vertex
+      positions[i * 3 + 1] = height * 0.5; // Scale factor for wave height
+    }
+    
+    // Update geometry
+    geometry.attributes.position.needsUpdate = true;
+    
+    // Recalculate normals for proper lighting
+    geometry.computeVertexNormals();
+  }
+
   public cleanup() {
     if (this.waterMesh) {
       this.scene.remove(this.waterMesh);
@@ -223,5 +345,9 @@ export default class SimpleWater {
         (this.waterMesh.material as THREE.Material).dispose();
       }
     }
+    
+    // Clear wave simulation data
+    this.waveSimulationData = null;
+    this.waveVelocity = null;
   }
 }
