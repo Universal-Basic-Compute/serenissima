@@ -1257,8 +1257,7 @@ async def execute_transaction(transaction_id: str, data: dict):
                     
                     # Update the owner
                     lands_table.update(land_record["id"], {
-                        "User": buyer,
-                        "Wallet": buyer
+                        "User": buyer
                     })
                     print(f"Updated land owner in Airtable to {buyer}")
                 else:
@@ -1266,8 +1265,7 @@ async def execute_transaction(transaction_id: str, data: dict):
                     print(f"Land record not found, creating new record for {land_id}")
                     lands_table.create({
                         "LandId": land_id,
-                        "User": buyer,
-                        "Wallet": buyer
+                        "User": buyer
                     })
                     print(f"Created new land record with owner {buyer}")
             except Exception as land_error:
