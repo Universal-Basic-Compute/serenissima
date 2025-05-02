@@ -981,7 +981,7 @@ export default function Home() {
           strokeOpacity: 0.8,
           fillColor: '#3388ff',
           fillOpacity: 0.35,
-          visible: true
+          visible: true // Ensure visibility is maintained
         });
       }
       
@@ -995,7 +995,7 @@ export default function Home() {
         strokeOpacity: 1.0,
         fillColor: '#ff0000',
         fillOpacity: 0.5,
-        visible: true
+        visible: true // Explicitly ensure visibility is maintained
       });
       
       return;
