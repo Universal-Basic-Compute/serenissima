@@ -49,7 +49,7 @@ export default class SceneSetup {
     );
     
     // Position camera higher up and looking down with a tilt
-    this.camera.position.set(0, 40, 20); // Added Z=20 to create a natural tilt
+    this.camera.position.set(0, 35, 25); // More tilted initial position with lower height and more Z offset
     this.camera.lookAt(0, 0, 0);
     
     // Initialize renderer with settings to prevent z-fighting
@@ -132,8 +132,8 @@ export default class SceneSetup {
     this.controls.maxPolarAngle = Math.PI / 3; // Limit to 60 degrees from vertical
     
     // Basic limits
-    this.controls.minDistance = 6.25; // Decreased by 50% to allow zooming in more
-    this.controls.maxDistance = 90; // Increased by 50% to allow zooming out more
+    this.controls.minDistance = 4.69; // Decreased by 25% more to allow zooming in further (6.25 * 0.75 = 4.69)
+    this.controls.maxDistance = 67.5; // Decreased by 25% to limit zooming out (90 * 0.75 = 67.5)
     
     // Enable panning with right mouse button and rotation with middle mouse button
     this.controls.mouseButtons = {
