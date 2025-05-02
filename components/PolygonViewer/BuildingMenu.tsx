@@ -625,31 +625,32 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
         )}
       </div>
     </div>
+  )  {/* Add closing parenthesis for the main return statement */}
     
-    {/* Placeable Building */}
-    {placeableBuilding && (
-      <PlaceableBuilding
-        buildingName={placeableBuilding.name.toLowerCase().replace(/\s+/g, '-')}
-        variant={placeableBuilding.variant}
-        onPlace={(position) => {
-          console.log(`Building placed at position: ${position.x}, ${position.y}`);
-          // Here you would add code to actually place the building in the world
-          
-          // Dispatch a custom event to notify other components about building placement
-          window.dispatchEvent(new CustomEvent('buildingPlaced', {
-            detail: {
-              buildingName: placeableBuilding.name,
-              variant: placeableBuilding.variant,
-              position
-            }
-          }));
-          
-          setPlaceableBuilding(null);
-        }}
-        onCancel={() => {
-          setPlaceableBuilding(null);
-        }}
-      />
-    )}
+  {/* Placeable Building */}
+  {placeableBuilding && (
+    <PlaceableBuilding
+      buildingName={placeableBuilding.name.toLowerCase().replace(/\s+/g, '-')}
+      variant={placeableBuilding.variant}
+      onPlace={(position) => {
+        console.log(`Building placed at position: ${position.x}, ${position.y}`);
+        // Here you would add code to actually place the building in the world
+        
+        // Dispatch a custom event to notify other components about building placement
+        window.dispatchEvent(new CustomEvent('buildingPlaced', {
+          detail: {
+            buildingName: placeableBuilding.name,
+            variant: placeableBuilding.variant,
+            position
+          }
+        }));
+        
+        setPlaceableBuilding(null);
+      }}
+      onCancel={() => {
+        setPlaceableBuilding(null);
+      }}
+    />
+  )}
   );
 }
