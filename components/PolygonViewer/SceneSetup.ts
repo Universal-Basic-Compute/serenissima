@@ -48,8 +48,8 @@ export default class SceneSetup {
       1000
     );
     
-    // Position camera higher up and looking down
-    this.camera.position.set(0, 40, 0);
+    // Position camera higher up and looking down with a tilt
+    this.camera.position.set(0, 40, 20); // Added Z=20 to create a natural tilt
     this.camera.lookAt(0, 0, 0);
     
     // Initialize renderer with settings to prevent z-fighting
@@ -132,18 +132,21 @@ export default class SceneSetup {
     this.controls.maxPolarAngle = Math.PI / 3; // Limit to 60 degrees from vertical
     
     // Basic limits
-    this.controls.minDistance = 12.5; // Increased by 25% from 10
-    this.controls.maxDistance = 60; // Decreased by 25% from 80
+    this.controls.minDistance = 6.25; // Decreased by 50% to allow zooming in more
+    this.controls.maxDistance = 90; // Increased by 50% to allow zooming out more
     
     // Enable panning with right mouse button and rotation with middle mouse button
     this.controls.mouseButtons = {
       LEFT: (THREE.MOUSE as any).NONE, // No action on left click
       MIDDLE: THREE.MOUSE.ROTATE, // Rotation on middle mouse button
-      RIGHT: THREE.MOUSE.PAN // Panning on right mouse button (unchanged)
+      RIGHT: THREE.MOUSE.PAN // Panning on right mouse button
     };
     
     // Make panning parallel to the ground plane
     this.controls.screenSpacePanning = true; // Changed to true for more intuitive panning
+    
+    // This will make right-click pan only in the XZ plane (horizontal) without changing Y (elevation)
+    this.controls.panningMode = THREE.HorizontalPanning;
     
     // Set initial target to center of scene
     this.controls.target.set(0, 0, 0);
