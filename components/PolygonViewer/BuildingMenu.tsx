@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Tab } from '@headlessui/react';
 import { getApiBaseUrl } from '@/lib/apiUtils';
 import BuildingModelViewer from '../UI/BuildingModelViewer';
+import PlaceableBuilding from '../PolygonViewer/PlaceableBuilding';
 
 interface Building {
   name: string;
@@ -43,6 +44,10 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
   const [selectedBuilding, setSelectedBuilding] = useState<Building | null>(null);
   const [selectedVariant, setSelectedVariant] = useState<string>("model");
   const [availableVariants, setAvailableVariants] = useState<string[]>([]);
+  const [placeableBuilding, setPlaceableBuilding] = useState<{
+    name: string;
+    variant: string;
+  } | null>(null);
   
   // Reset the selected variant and fetch available variants when a new building is selected
   useEffect(() => {
@@ -255,10 +260,10 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
                                     className="text-xs bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700"
                                     onClick={(e) => {
                                       e.stopPropagation(); // Prevent the parent div's onClick from firing
-                                      // Dispatch a custom event to notify other components about building selection
-                                      window.dispatchEvent(new CustomEvent('buildingSelected', {
-                                        detail: building
-                                      }));
+                                      setPlaceableBuilding({
+                                        name: building.name,
+                                        variant: 'model'
+                                      });
                                     }}
                                   >
                                     Build
@@ -421,10 +426,11 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
                     className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors"
                     onClick={(e) => {
                       e.stopPropagation();
-                      // Dispatch a custom event to notify other components about building selection
-                      window.dispatchEvent(new CustomEvent('buildingSelected', {
-                        detail: selectedBuilding
-                      }));
+                      setPlaceableBuilding({
+                        name: selectedBuilding.name,
+                        variant: selectedVariant
+                      });
+                      setSelectedBuilding(null); // Close the modal
                     }}
                   >
                     Build
@@ -543,13 +549,67 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
                       className="w-full px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors flex items-center justify-center"
                       onClick={(e) => {
                         e.stopPropagation();
-                        // Dispatch event to show 3D model in fullscreen
-                        window.dispatchEvent(new CustomEvent('showBuildingModel', {
-                          detail: {
-                            modelUrl: `/assets/buildings/models/${selectedBuilding.name.toLowerCase().replace(/\s+/g, '-')}/${selectedVariant}.glb`,
-                            buildingName: selectedBuilding.name
-                          }
-                        }));
+                        
+                        // Create a fullscreen modal for the 3D model
+                        const fullscreenModal = document.createElement('div');
+                        fullscreenModal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50';
+                        fullscreenModal.style.zIndex = '9999';
+                        
+                        // Create a container for the model viewer
+                        const modelContainer = document.createElement('div');
+                        modelContainer.className = 'relative w-[80vw] h-[80vh] bg-amber-50 rounded-lg border-4 border-amber-600 overflow-hidden';
+                        
+                        // Create a close button
+                        const closeButton = document.createElement('button');
+                        closeButton.className = 'absolute top-4 right-4 bg-amber-600 text-white p-2 rounded-full z-10 hover:bg-amber-700 transition-colors';
+                        closeButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>';
+                        
+                        // Add the close button to the model container
+                        modelContainer.appendChild(closeButton);
+                        
+                        // Add the model container to the fullscreen modal
+                        fullscreenModal.appendChild(modelContainer);
+                        
+                        // Add the fullscreen modal to the body
+                        document.body.appendChild(fullscreenModal);
+                        
+                        // Create a new model viewer element
+                        const modelViewer = document.createElement('div');
+                        modelViewer.id = 'fullscreen-model-viewer';
+                        modelViewer.className = 'w-full h-full';
+                        modelContainer.appendChild(modelViewer);
+                        
+                        // Use React's createRoot API to render the BuildingModelViewer component
+                        import('react-dom/client').then(({ createRoot }) => {
+                          import('../UI/BuildingModelViewer').then(({ default: BuildingModelViewer }) => {
+                            const root = createRoot(modelViewer);
+                            root.render(
+                              <BuildingModelViewer
+                                buildingName={selectedBuilding.name.toLowerCase().replace(/\s+/g, '-')}
+                                width={modelContainer.clientWidth}
+                                height={modelContainer.clientHeight}
+                                variant={selectedVariant}
+                              />
+                            );
+                          });
+                        });
+                        
+                        // Add event listener to close button
+                        closeButton.addEventListener('click', () => {
+                          // Unmount the React component first
+                          import('react-dom/client').then(({ createRoot }) => {
+                            try {
+                              // Try to unmount the component if possible
+                              const root = createRoot(modelViewer);
+                              root.unmount();
+                            } catch (e) {
+                              console.error('Error unmounting component:', e);
+                            }
+                            
+                            // Remove the modal from the DOM
+                            document.body.removeChild(fullscreenModal);
+                          });
+                        });
                       }}
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
@@ -565,5 +625,31 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
         )}
       </div>
     </div>
+    
+    {/* Placeable Building */}
+    {placeableBuilding && (
+      <PlaceableBuilding
+        buildingName={placeableBuilding.name.toLowerCase().replace(/\s+/g, '-')}
+        variant={placeableBuilding.variant}
+        onPlace={(position) => {
+          console.log(`Building placed at position: ${position.x}, ${position.y}`);
+          // Here you would add code to actually place the building in the world
+          
+          // Dispatch a custom event to notify other components about building placement
+          window.dispatchEvent(new CustomEvent('buildingPlaced', {
+            detail: {
+              buildingName: placeableBuilding.name,
+              variant: placeableBuilding.variant,
+              position
+            }
+          }));
+          
+          setPlaceableBuilding(null);
+        }}
+        onCancel={() => {
+          setPlaceableBuilding(null);
+        }}
+      />
+    )}
   );
 }
