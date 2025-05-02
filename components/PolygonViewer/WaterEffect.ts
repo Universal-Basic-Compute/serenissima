@@ -17,16 +17,25 @@ export default class WaterEffect {
   private width: number;
   private height: number;
   private renderer: THREE.WebGLRenderer;
-  private waterGeometry: THREE.PlaneGeometry;
-  private waterMaterial: THREE.ShaderMaterial = new THREE.ShaderMaterial();
-  private landPolygons: THREE.Mesh[] = [];
+  private waterMesh: THREE.Mesh | null = null;
+  private waterGeometry: THREE.PlaneGeometry | null = null;
+  private waterMaterial: THREE.ShaderMaterial | null = null;
   private time: number = 0;
-  private landPositions: Float32Array = new Float32Array();
-  private landBuffer: THREE.BufferAttribute = new THREE.BufferAttribute(new Float32Array(), 3);
   private clock: THREE.Clock = new THREE.Clock();
+  private textureLoader: THREE.TextureLoader;
+  private waterNormalMap: THREE.Texture | null = null;
+  private landPolygons: THREE.Mesh[] = [];
+  private shoreLinePoints: THREE.Vector3[] = [];
+  private waveSimulationActive: boolean = false;
+  private waveSimulationResolution: number = 64; // Resolution of wave simulation
+  private waveHeightMap: Float32Array | null = null;
+  private waveVelocityMap: Float32Array | null = null;
+  private waveDampingFactor: number = 0.98; // Damping factor for waves
+  private waveSpeed: number = 0.5; // Speed of wave propagation
+  private waveAmplitude: number = 0.2; // Maximum wave height
+  private lastUpdateTime: number = 0;
   private sunReflection: THREE.Mesh | null = null;
   private water: any = null;
-  private waterMesh: THREE.Mesh | null = null;
   private waterFoam: THREE.Mesh | null = null;
   private foamTexture: THREE.Texture | null = null;
   private shoreMesh: THREE.Mesh | null = null;
@@ -37,8 +46,8 @@ export default class WaterEffect {
   private causticTextures: THREE.Texture[] = [];
   private sunPosition: THREE.Vector3 = new THREE.Vector3();
   private sunDirection: THREE.Vector3 = new THREE.Vector3();
-  private textureLoader: THREE.TextureLoader;
-  private waterNormalMap: THREE.Texture | null = null;
+  private landPositions: Float32Array = new Float32Array();
+  private landBuffer: THREE.BufferAttribute = new THREE.BufferAttribute(new Float32Array(), 3);
   
   // Static properties
   private static textureLoader: THREE.TextureLoader | null = null;
@@ -59,6 +68,7 @@ export default class WaterEffect {
     this.width = width;
     this.height = height;
     this.renderer = renderer;
+    this.textureLoader = new THREE.TextureLoader();
     
     // Get the sun position from the scene if available
     const sunLight = this.scene.children.find(child => 
@@ -83,30 +93,390 @@ export default class WaterEffect {
     }
     this.textureLoader = WaterEffect.textureLoader || new THREE.TextureLoader();
     
-    // Create a simple placeholder water plane initially
-    this.waterGeometry = new THREE.PlaneGeometry(
-      width, 
-      height, 
-      performanceMode ? 4 : 16
-    );
+    // Initialize water with a slight delay to ensure land polygons are loaded
+    setTimeout(() => this.initializeWater(), 500);
     
-    // Create a fallback texture for water normal map
+    // Start the clock for time-based animations
+    this.clock.start();
+  }
+  
+  private initializeWater() {
+    console.log('Initializing 3D water simulation...');
+    
+    // Create a water normal map texture
+    this.loadWaterTextures();
+    
+    // Create the water mesh with shader material
+    this.createWaterMesh();
+    
+    // Initialize wave simulation
+    this.initializeWaveSimulation();
+    
+    // Collect land polygon information for shoreline detection
+    this.collectLandPolygons();
+    
+    // Set wave simulation active
+    this.waveSimulationActive = true;
+  }
+  
+  private loadWaterTextures() {
+    // Load water normal map for realistic wave appearance
+    this.textureLoader.load(
+      '/textures/waternormals.jpg',
+      (texture) => {
+        texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.set(5, 5);
+        this.waterNormalMap = texture;
+        
+        // Update material if it exists
+        if (this.waterMaterial) {
+          (this.waterMaterial as any).uniforms.normalMap.value = texture;
+          this.waterMaterial.needsUpdate = true;
+        }
+      },
+      undefined,
+      (error) => {
+        console.error('Error loading water normal map:', error);
+        // Create a fallback normal map
+        this.createFallbackNormalMap();
+      }
+    );
+  }
+  
+  private createFallbackNormalMap() {
+    // Create a canvas for a fallback normal map
     const canvas = document.createElement('canvas');
     canvas.width = 128;
     canvas.height = 128;
     const ctx = canvas.getContext('2d');
     if (ctx) {
-      ctx.fillStyle = '#8080ff'; // Blue color for normal map
-      ctx.fillRect(0, 0, 128, 128);
+      // Create a simple normal map pattern
+      for (let y = 0; y < canvas.height; y++) {
+        for (let x = 0; x < canvas.width; x++) {
+          // Create a wavy pattern
+          const r = Math.floor(127 * Math.sin((x / canvas.width) * Math.PI * 10) + 127);
+          const g = Math.floor(127 * Math.sin((y / canvas.height) * Math.PI * 10) + 127);
+          const b = 255; // Full blue for normal map
+          
+          ctx.fillStyle = `rgb(${r},${g},${b})`;
+          ctx.fillRect(x, y, 1, 1);
+        }
+      }
+      
+      const fallbackTexture = new THREE.CanvasTexture(canvas);
+      fallbackTexture.wrapS = fallbackTexture.wrapT = THREE.RepeatWrapping;
+      fallbackTexture.repeat.set(5, 5);
+      this.waterNormalMap = fallbackTexture;
+      
+      // Update material if it exists
+      if (this.waterMaterial) {
+        (this.waterMaterial as any).uniforms.normalMap.value = fallbackTexture;
+        this.waterMaterial.needsUpdate = true;
+      }
     }
-    const fallbackTexture = new THREE.CanvasTexture(canvas);
-    fallbackTexture.wrapS = THREE.RepeatWrapping;
-    fallbackTexture.wrapT = THREE.RepeatWrapping;
-    fallbackTexture.repeat.set(10, 10);
-    this.waterNormalMap = fallbackTexture;
+  }
+  
+  private createWaterMesh() {
+    // Create a higher resolution water geometry for better wave simulation
+    const resolution = this.performanceMode ? 64 : 128;
+    this.waterGeometry = new THREE.PlaneGeometry(
+      this.width * 2, 
+      this.height * 2,
+      resolution,
+      resolution
+    );
     
-    // Initialize water immediately instead of with delay
-    this.initializeWater();
+    // Create water shader material
+    const waterColor = new THREE.Color(this.getWaterColorForView());
+    
+    // Define shader material for realistic water
+    this.waterMaterial = new THREE.ShaderMaterial({
+      uniforms: {
+        time: { value: 0.0 },
+        waterColor: { value: waterColor },
+        normalMap: { value: this.waterNormalMap },
+        waveHeight: { value: this.waveAmplitude },
+        waveSpeed: { value: this.waveSpeed },
+        resolution: { value: new THREE.Vector2(resolution, resolution) },
+        sunDirection: { value: new THREE.Vector3(0.5, 0.5, 0.0).normalize() }
+      },
+      vertexShader: `
+        uniform float time;
+        uniform float waveHeight;
+        uniform float waveSpeed;
+        
+        varying vec2 vUv;
+        varying vec3 vPosition;
+        varying vec3 vNormal;
+        
+        // Function to create Gerstner waves
+        vec3 gerstnerWave(vec3 position, float steepness, float wavelength, float speed, vec2 direction) {
+          direction = normalize(direction);
+          float k = 2.0 * 3.14159 / wavelength;
+          float f = k * (dot(direction, position.xz) - speed * time);
+          float a = steepness / k;
+          
+          return vec3(
+            direction.x * a * cos(f),
+            a * sin(f),
+            direction.y * a * cos(f)
+          );
+        }
+        
+        void main() {
+          vUv = uv;
+          vPosition = position;
+          
+          // Base position
+          vec3 pos = position;
+          
+          // Apply multiple Gerstner waves for more realistic water
+          vec3 wave1 = gerstnerWave(position, 0.1, 20.0, waveSpeed, vec2(1.0, 0.0));
+          vec3 wave2 = gerstnerWave(position, 0.05, 15.0, waveSpeed * 0.8, vec2(0.7, 0.7));
+          vec3 wave3 = gerstnerWave(position, 0.03, 10.0, waveSpeed * 1.2, vec2(0.0, 1.0));
+          
+          // Combine waves
+          pos += wave1 + wave2 + wave3;
+          
+          // Apply wave height
+          pos.y *= waveHeight;
+          
+          // Calculate normal for lighting
+          vec3 tangent1 = normalize(wave1 + wave2 + wave3);
+          vec3 tangent2 = normalize(cross(vec3(0.0, 1.0, 0.0), tangent1));
+          vNormal = normalize(cross(tangent1, tangent2));
+          
+          // Set final position
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform vec3 waterColor;
+        uniform sampler2D normalMap;
+        uniform vec3 sunDirection;
+        
+        varying vec2 vUv;
+        varying vec3 vPosition;
+        varying vec3 vNormal;
+        
+        void main() {
+          // Sample normal map
+          vec3 normal = texture2D(normalMap, vUv).rgb * 2.0 - 1.0;
+          normal = normalize(normal);
+          
+          // Combine with vertex normal for more detail
+          vec3 finalNormal = normalize(vNormal + normal * 0.5);
+          
+          // Calculate fresnel effect for edge highlighting
+          float fresnel = pow(1.0 - max(0.0, dot(finalNormal, vec3(0.0, 1.0, 0.0))), 3.0);
+          
+          // Calculate sun reflection
+          float sunReflection = max(0.0, dot(reflect(-sunDirection, finalNormal), vec3(0.0, 1.0, 0.0)));
+          sunReflection = pow(sunReflection, 32.0);
+          
+          // Calculate depth-based color variation
+          float depth = smoothstep(0.0, 20.0, -vPosition.y);
+          vec3 depthColor = mix(waterColor, waterColor * 0.5, depth);
+          
+          // Final color with reflections and fresnel
+          vec3 finalColor = depthColor;
+          finalColor += vec3(1.0, 1.0, 0.8) * sunReflection * 0.5;
+          finalColor = mix(finalColor, vec3(0.8, 0.9, 1.0), fresnel * 0.5);
+          
+          gl_FragColor = vec4(finalColor, 0.9);
+        }
+      `,
+      transparent: true,
+      side: THREE.DoubleSide
+    });
+    
+    // Create the water mesh
+    this.waterMesh = new THREE.Mesh(this.waterGeometry, this.waterMaterial);
+    
+    // Position water at y=0 (below the land which is at y=0.1)
+    this.waterMesh.position.y = 0;
+    
+    // Rotate the water plane to be horizontal
+    this.waterMesh.rotation.x = -Math.PI / 2;
+    
+    // Set render order to ensure water appears below land
+    this.waterMesh.renderOrder = 5;
+    
+    // Add to scene
+    this.scene.add(this.waterMesh);
+  }
+  
+  private initializeWaveSimulation() {
+    // Initialize wave height and velocity maps
+    const size = this.waveSimulationResolution * this.waveSimulationResolution;
+    this.waveHeightMap = new Float32Array(size);
+    this.waveVelocityMap = new Float32Array(size);
+    
+    // Initialize with small random values for natural wave appearance
+    for (let i = 0; i < size; i++) {
+      this.waveHeightMap[i] = (Math.random() * 2 - 1) * 0.01;
+      this.waveVelocityMap[i] = 0;
+    }
+  }
+  
+  private collectLandPolygons() {
+    // Find all land polygon meshes in the scene
+    this.scene.traverse((object) => {
+      if (object instanceof THREE.Mesh && 
+          object.userData && 
+          object.userData.isLandPolygon) {
+        this.landPolygons.push(object);
+        
+        // Extract shoreline points from the polygon
+        if (object.geometry instanceof THREE.BufferGeometry) {
+          const position = object.geometry.attributes.position;
+          const count = position.count;
+          
+          // Extract points around the perimeter of the land
+          for (let i = 0; i < count; i++) {
+            const x = position.getX(i);
+            const y = position.getY(i);
+            const z = position.getZ(i);
+            
+            // Transform to world coordinates
+            const point = new THREE.Vector3(x, y, z);
+            point.applyMatrix4(object.matrixWorld);
+            
+            // Only add points that are on the edge (simplified approach)
+            if (i % 10 === 0) { // Sample every 10th point to reduce computation
+              this.shoreLinePoints.push(point);
+            }
+          }
+        }
+      }
+    });
+    
+    console.log(`Collected ${this.landPolygons.length} land polygons and ${this.shoreLinePoints.length} shoreline points`);
+  }
+  
+  private updateWaveSimulation(deltaTime: number) {
+    if (!this.waveHeightMap || !this.waveVelocityMap) return;
+    
+    const size = this.waveSimulationResolution;
+    const newHeightMap = new Float32Array(size * size);
+    
+    // Wave equation parameters
+    const c = this.waveSpeed; // Wave speed
+    const damping = this.waveDampingFactor;
+    
+    // Update wave simulation using the wave equation
+    for (let i = 0; i < size; i++) {
+      for (let j = 0; j < size; j++) {
+        const idx = i * size + j;
+        
+        // Skip boundary points
+        if (i === 0 || i === size - 1 || j === 0 || j === size - 1) {
+          newHeightMap[idx] = 0;
+          continue;
+        }
+        
+        // Get neighboring points
+        const up = (i - 1) * size + j;
+        const down = (i + 1) * size + j;
+        const left = i * size + (j - 1);
+        const right = i * size + (j + 1);
+        
+        // Calculate Laplacian (sum of neighbors - 4 * center)
+        const laplacian = 
+          this.waveHeightMap[up] + 
+          this.waveHeightMap[down] + 
+          this.waveHeightMap[left] + 
+          this.waveHeightMap[right] - 
+          4 * this.waveHeightMap[idx];
+        
+        // Update velocity using wave equation
+        this.waveVelocityMap[idx] += c * c * laplacian * deltaTime;
+        
+        // Apply damping
+        this.waveVelocityMap[idx] *= damping;
+        
+        // Update height
+        newHeightMap[idx] = this.waveHeightMap[idx] + this.waveVelocityMap[idx] * deltaTime;
+        
+        // Apply interaction with shoreline
+        // Map simulation coordinates to world coordinates
+        const worldX = (j / size - 0.5) * this.width * 2;
+        const worldZ = (i / size - 0.5) * this.height * 2;
+        const worldPoint = new THREE.Vector3(worldX, 0, worldZ);
+        
+        // Check distance to shoreline points
+        for (const shorePoint of this.shoreLinePoints) {
+          const distance = worldPoint.distanceTo(shorePoint);
+          if (distance < 5) { // Threshold for shore interaction
+            // Create wave reflection effect near shores
+            const factor = 1 - distance / 5;
+            newHeightMap[idx] *= (1 - factor * 0.5); // Reduce height near shores
+            
+            // Add some randomness for foam/ripple effect
+            if (Math.random() < 0.1) {
+              newHeightMap[idx] += (Math.random() * 2 - 1) * 0.02 * factor;
+            }
+          }
+        }
+      }
+    }
+    
+    // Add random waves occasionally
+    if (Math.random() < 0.05) {
+      const i = Math.floor(Math.random() * (size - 4)) + 2;
+      const j = Math.floor(Math.random() * (size - 4)) + 2;
+      const idx = i * size + j;
+      newHeightMap[idx] += (Math.random() * 2 - 1) * 0.1;
+    }
+    
+    // Swap height maps
+    this.waveHeightMap = newHeightMap;
+  }
+  
+  private applyWaveSimulationToMesh() {
+    if (!this.waterGeometry || !this.waveHeightMap) return;
+    
+    const positions = this.waterGeometry.attributes.position.array;
+    const size = this.waveSimulationResolution;
+    
+    // Map vertex positions to simulation grid
+    for (let i = 0; i < positions.length; i += 3) {
+      // Get normalized position in the range [0,1]
+      const x = (positions[i] / (this.width * 2)) + 0.5;
+      const z = (positions[i + 2] / (this.height * 2)) + 0.5;
+      
+      // Map to grid indices
+      const gridX = Math.floor(x * (size - 1));
+      const gridZ = Math.floor(z * (size - 1));
+      
+      // Bilinear interpolation for smoother waves
+      const fx = x * (size - 1) - gridX;
+      const fz = z * (size - 1) - gridZ;
+      
+      const idx00 = Math.min(Math.max(gridZ * size + gridX, 0), size * size - 1);
+      const idx10 = Math.min(Math.max(gridZ * size + gridX + 1, 0), size * size - 1);
+      const idx01 = Math.min(Math.max((gridZ + 1) * size + gridX, 0), size * size - 1);
+      const idx11 = Math.min(Math.max((gridZ + 1) * size + gridX + 1, 0), size * size - 1);
+      
+      // Interpolate wave height
+      const h00 = this.waveHeightMap[idx00];
+      const h10 = this.waveHeightMap[idx10];
+      const h01 = this.waveHeightMap[idx01];
+      const h11 = this.waveHeightMap[idx11];
+      
+      const h0 = h00 * (1 - fx) + h10 * fx;
+      const h1 = h01 * (1 - fx) + h11 * fx;
+      const height = h0 * (1 - fz) + h1 * fz;
+      
+      // Apply height to vertex
+      positions[i + 1] = height * this.waveAmplitude;
+    }
+    
+    // Update geometry
+    this.waterGeometry.attributes.position.needsUpdate = true;
+    
+    // Recalculate normals for proper lighting
+    this.waterGeometry.computeVertexNormals();
   }
   
   // Add method to create a sun reflection
@@ -186,18 +556,6 @@ export default class WaterEffect {
     // No geometry generation
   }
   
-  private initializeWater() {
-    console.log('Initializing water effect...');
-    // Create a simple water plane
-    this.createSimpleWaterPlane();
-  }
-  
-  // Add a new method to create wave displacement
-  private addWaveDisplacement(geometry: THREE.PlaneGeometry) {
-    // No wave displacement
-    console.log('Wave displacement disabled');
-  }
-  
   private loadFoamTexture() {
     console.log('Foam texture loading disabled');
     // No foam texture is loaded to avoid geometry generation
@@ -270,62 +628,29 @@ export default class WaterEffect {
     this.scene.add(this.waterMesh);
   }
   
-  public update(frameCount: number, performanceMode: boolean) {
-    try {
-      // Skip all updates if water isn't properly initialized
-      if (!this.waterMesh) {
-        return;
-      }
-      
-      // Animate water waves by updating vertex positions
-      if (frameCount % 5 === 0 && this.waterMesh.geometry) {
-        try {
-          const positions = this.waterMesh.geometry.attributes.position.array;
-          const time = frameCount * 0.01;
-          
-          for (let i = 0; i < positions.length; i += 3) {
-            const x = positions[i];
-            const z = positions[i + 2];
-            
-            // Create dynamic waves using time-based sine functions
-            positions[i + 1] = 
-              Math.sin(x * 0.5 + time) * 0.2 + 
-              Math.cos(z * 0.5 + time * 0.8) * 0.2;
-          }
-          
-          // Update geometry
-          this.waterMesh.geometry.attributes.position.needsUpdate = true;
-        } catch (error) {
-          // Silent fail
-        }
-      }
-      
-      // Animate sun reflection with additional checks
-      if (frameCount % 15 === 0 && this.sunReflection && this.sunReflection.scale) {
-        try {
-          const reflectionScale = 1.0 + Math.sin(frameCount * 0.01) * 0.05;
-          this.sunReflection.scale.set(reflectionScale, reflectionScale, 1);
-        } catch (error) {
-          // Silent fail
-        }
-      }
-      
-      // Update shore interaction with better error handling
-      if (this.shoreMesh && this.shoreMesh.material) {
-        try {
-          // Update shore material time uniform for wave animation
-          const shoreMaterial = this.shoreMesh.material as THREE.ShaderMaterial;
-          if (shoreMaterial.userData && shoreMaterial.userData.uniforms && shoreMaterial.userData.uniforms.time) {
-            // Use a smoother time increment for more fluid animation
-            shoreMaterial.userData.uniforms.time.value = frameCount * 0.005;
-            shoreMaterial.needsUpdate = true;
-          }
-        } catch (error) {
-          // Silent fail
-        }
-      }
-    } catch (error) {
-      // Silent fail for the entire update method
+  public update(frameCount: number, performanceMode: boolean = false) {
+    // Update time for shader animations
+    this.time += 0.01;
+    
+    // Get delta time for physics-based simulation
+    const currentTime = this.clock.getElapsedTime();
+    const deltaTime = Math.min(0.05, currentTime - this.lastUpdateTime); // Cap delta time to prevent instability
+    this.lastUpdateTime = currentTime;
+    
+    // Skip updates if water isn't properly initialized
+    if (!this.waterMesh || !this.waterMaterial) {
+      return;
+    }
+    
+    // Update shader uniforms
+    if (this.waterMaterial instanceof THREE.ShaderMaterial) {
+      this.waterMaterial.uniforms.time.value = this.time;
+    }
+    
+    // Update wave simulation at a reduced rate for performance
+    if (this.waveSimulationActive && frameCount % (performanceMode ? 5 : 2) === 0) {
+      this.updateWaveSimulation(deltaTime);
+      this.applyWaveSimulationToMesh();
     }
   }
   
@@ -336,102 +661,52 @@ export default class WaterEffect {
     this.activeView = activeView;
     
     // Get the water color for the new view
-    const waterColor = this.getWaterColorForView();
+    const waterColor = new THREE.Color(this.getWaterColorForView());
     
-    // Update water mesh color if it exists
-    if (this.waterMesh && this.waterMesh.material) {
-      try {
-        (this.waterMesh.material as THREE.MeshBasicMaterial).color.setHex(waterColor);
-        (this.waterMesh.material as THREE.MeshBasicMaterial).needsUpdate = true;
-      } catch (error) {
-        console.error('Error updating water color in view mode change:', error);
-      }
-    }
-    
-    // Update shore interaction color if it exists
-    if (this.shoreMesh && this.shoreMesh.material) {
-      try {
-        const shoreMaterial = this.shoreMesh.material as THREE.ShaderMaterial;
-        if (shoreMaterial.userData && shoreMaterial.userData.uniforms && shoreMaterial.userData.uniforms.waterColor) {
-          shoreMaterial.userData.uniforms.waterColor.value = new THREE.Color(waterColor);
-          shoreMaterial.needsUpdate = true;
-        }
-      } catch (error) {
-        console.error('Error updating shore material color:', error);
-      }
-    }
-    
-    // Keep foam and caustics disabled regardless of view mode
-    if (this.waterFoam) {
-      try {
-        (this.waterFoam.material as THREE.MeshBasicMaterial).opacity = 0;
-      } catch (error) {
-        console.error('Error updating water foam opacity:', error);
-      }
-    }
-    
-    if (this.causticMesh) {
-      try {
-        (this.causticMesh.material as THREE.MeshBasicMaterial).opacity = 0;
-      } catch (error) {
-        console.error('Error updating caustic mesh opacity:', error);
-      }
-    }
-    
-    if (this.causticLight) {
-      try {
-        this.causticLight.intensity = 0;
-      } catch (error) {
-        console.error('Error updating caustic light intensity:', error);
-      }
+    // Update water material color
+    if (this.waterMaterial instanceof THREE.ShaderMaterial) {
+      this.waterMaterial.uniforms.waterColor.value = waterColor;
+      this.waterMaterial.needsUpdate = true;
     }
   }
-
+  
   public updateQuality(performanceMode: boolean) {
     this.performanceMode = performanceMode;
     
-    // Add more robust null checks
-    if (!this.water || !this.water.material || !this.water.material.uniforms) {
-      console.log('Water not fully initialized, skipping quality update');
-      return;
+    // Adjust wave simulation resolution based on performance mode
+    if (performanceMode) {
+      this.waveSimulationResolution = 32;
+      this.waveAmplitude = 0.15;
+    } else {
+      this.waveSimulationResolution = 64;
+      this.waveAmplitude = 0.2;
     }
     
-    // Update water quality settings with additional null checks
-    const waterUniforms = this.water.material.uniforms;
+    // Reinitialize wave simulation with new resolution
+    this.initializeWaveSimulation();
     
-    // Adjust distortion scale based on performance mode with null check
-    if (waterUniforms && waterUniforms.distortionScale && waterUniforms.distortionScale.value !== undefined) {
-      waterUniforms.distortionScale.value = performanceMode ? 2.0 : 3.7;
-    }
-    
-    // Show/hide foam and caustics based on performance mode with null checks
-    if (this.waterFoam) {
-      this.waterFoam.visible = !performanceMode;
-    }
-    
-    if (this.causticMesh) {
-      this.causticMesh.visible = !performanceMode;
-    }
-    
-    if (this.causticLight) {
-      this.causticLight.intensity = performanceMode ? 0 : 0.5;
+    // Update shader parameters
+    if (this.waterMaterial instanceof THREE.ShaderMaterial) {
+      this.waterMaterial.uniforms.waveHeight.value = this.waveAmplitude;
     }
   }
   
   public cleanup() {
-    // Remove water and related objects from scene
+    // Remove water mesh from scene
     if (this.waterMesh) {
       this.scene.remove(this.waterMesh);
-      if (this.waterMesh.geometry) this.waterMesh.geometry.dispose();
-      if (this.waterMesh.material) {
-        if (Array.isArray(this.waterMesh.material)) {
-          this.waterMesh.material.forEach(m => m.dispose());
-        } else {
-          this.waterMesh.material.dispose();
-        }
+      
+      // Dispose of geometry and material
+      if (this.waterGeometry) {
+        this.waterGeometry.dispose();
+      }
+      
+      if (this.waterMaterial) {
+        this.waterMaterial.dispose();
       }
     }
     
+    // Remove water and related objects from scene
     if (this.waterFoam) {
       this.scene.remove(this.waterFoam);
       if (this.waterFoam.geometry) this.waterFoam.geometry.dispose();
@@ -491,6 +766,12 @@ export default class WaterEffect {
     
     // Clear references
     this.waterMesh = null;
+    this.waterGeometry = null;
+    this.waterMaterial = null;
+    this.waveHeightMap = null;
+    this.waveVelocityMap = null;
+    this.landPolygons = [];
+    this.shoreLinePoints = [];
     this.water = null;
   }
 }
