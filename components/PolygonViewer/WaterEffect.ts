@@ -257,8 +257,11 @@ export default class WaterEffect {
     // Create the water mesh
     this.waterMesh = new THREE.Mesh(waterGeometry, waterMaterial);
     
-    // Position slightly below land to avoid z-fighting
-    this.waterMesh.position.y = -0.05;
+    // Position water at y=0 (below the land which is at y=0.1)
+    this.waterMesh.position.y = 0;
+    
+    // Rotate the water plane to be horizontal
+    this.waterMesh.rotation.x = -Math.PI / 2;
     
     // Set render order to ensure water appears below land
     this.waterMesh.renderOrder = 5;

@@ -48,8 +48,9 @@ export default class SceneSetup {
       1000
     );
     
-    // Initial camera position - higher up and further back for a good overview
-    this.camera.position.set(0, 20, 20);
+    // Position camera higher up and looking down
+    this.camera.position.set(0, 40, 0);
+    this.camera.lookAt(0, 0, 0);
     
     // Initialize renderer with settings to prevent z-fighting
     this.renderer = new THREE.WebGLRenderer({ 
@@ -128,11 +129,11 @@ export default class SceneSetup {
     
     // Limit vertical rotation to prevent going under the map
     this.controls.minPolarAngle = 0;
-    this.controls.maxPolarAngle = Math.PI / 2 - 0.1;
+    this.controls.maxPolarAngle = Math.PI / 3; // Limit to 60 degrees from vertical
     
     // Basic limits
-    this.controls.minDistance = 5; // Increased from 0.5 to 5 to prevent going through terrain
-    this.controls.maxDistance = 64; // Reduced by 20% from 80 to 64
+    this.controls.minDistance = 10; // Increased minimum distance
+    this.controls.maxDistance = 80; // Increased maximum distance
     
     // Enable panning with right mouse button and rotation with middle mouse button
     this.controls.mouseButtons = {

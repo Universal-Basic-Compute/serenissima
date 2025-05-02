@@ -104,8 +104,11 @@ class PolygonMesh {
       const materials = [topMaterial, sideMaterial];
       this.mesh = new THREE.Mesh(geometry, materials);
       
-      // Position the mesh at y=0 to be flat on the water
-      this.mesh.position.y = 0;
+      // Position the mesh at y=0.1 instead of 0 to be above water
+      this.mesh.position.y = 0.1;
+      
+      // Rotate the mesh to make it face upward
+      this.mesh.rotation.x = -Math.PI / 2;
       
       // Set render order to ensure land appears above water
       this.mesh.renderOrder = 10;
