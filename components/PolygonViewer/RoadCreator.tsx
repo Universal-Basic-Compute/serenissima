@@ -649,7 +649,8 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
     console.log('Road Creator: Adding road mesh to scene');
     scene.add(road);
     setPreviewMesh(road);
-  };
+  }); // Added missing closing bracket for the catch block
+};
 
   // Create a curved path based on the points and curvature setting
   const createCurvedPath = (roadPoints: THREE.Vector3[]) => {
