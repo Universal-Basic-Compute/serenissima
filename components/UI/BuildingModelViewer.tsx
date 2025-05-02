@@ -1,10 +1,10 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 
 interface BuildingModelViewerProps {
-  modelPath: string;  // This will now be the base path, not the direct file path
+  buildingName: string;  // Just pass the building name instead of full path
   width?: number;
   height?: number;
   className?: string;
@@ -12,7 +12,7 @@ interface BuildingModelViewerProps {
 }
 
 const BuildingModelViewer: React.FC<BuildingModelViewerProps> = ({
-  modelPath,
+  buildingName,
   width = 150,
   height = 150,
   className = '',
@@ -21,6 +21,30 @@ const BuildingModelViewer: React.FC<BuildingModelViewerProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [availableVariants, setAvailableVariants] = useState<string[]>([]);
+  
+  // Construct the base path for the building models
+  const basePath = `/assets/buildings/models/${buildingName}`;
+  
+  // Function to load available variants
+  const loadAvailableVariants = useCallback(async () => {
+    try {
+      const response = await fetch(`/api/building-variants/${buildingName}`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.variants) {
+          setAvailableVariants(data.variants);
+        }
+      }
+    } catch (err) {
+      console.error('Error loading variants:', err);
+    }
+  }, [buildingName]);
+  
+  // Load available variants when component mounts
+  useEffect(() => {
+    loadAvailableVariants();
+  }, [loadAvailableVariants]);
   
   useEffect(() => {
     if (!containerRef.current) return;
@@ -63,11 +87,7 @@ const BuildingModelViewer: React.FC<BuildingModelViewerProps> = ({
     controls.autoRotateSpeed = 3; // Increased from 2 to 3
     
     // Construct the full path to the GLB file
-    // If modelPath already ends with .glb, use it directly
-    // Otherwise, construct the path with the variant
-    const fullModelPath = modelPath.endsWith('.glb') 
-      ? modelPath 
-      : `${modelPath}/${variant}.glb`;
+    const fullModelPath = `${basePath}/${variant}.glb`;
     
     const loadModel = async () => {
       setIsLoading(true);
@@ -137,7 +157,7 @@ const BuildingModelViewer: React.FC<BuildingModelViewerProps> = ({
       }
       renderer.dispose();
     };
-  }, [modelPath, width, height, variant]);
+  }, [basePath, width, height, variant]);
   
   return (
     <div 

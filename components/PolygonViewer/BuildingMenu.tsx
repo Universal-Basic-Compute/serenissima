@@ -42,11 +42,33 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
   const [loading, setLoading] = useState(true);
   const [selectedBuilding, setSelectedBuilding] = useState<Building | null>(null);
   const [selectedVariant, setSelectedVariant] = useState<string>("model");
+  const [availableVariants, setAvailableVariants] = useState<string[]>([]);
   
-  // Reset the selected variant when a new building is selected
+  // Reset the selected variant and fetch available variants when a new building is selected
   useEffect(() => {
     if (selectedBuilding) {
       setSelectedVariant("model");
+      
+      // Fetch available variants for this building
+      const buildingName = selectedBuilding.name.toLowerCase().replace(/\s+/g, '-');
+      
+      fetch(`/api/building-variants/${buildingName}`)
+        .then(response => {
+          if (response.ok) return response.json();
+          throw new Error('Failed to fetch variants');
+        })
+        .then(data => {
+          if (data.success && data.variants) {
+            setAvailableVariants(data.variants);
+            console.log(`Loaded ${data.variants.length} variants for ${buildingName}`);
+          } else {
+            setAvailableVariants(['model']); // Default to just 'model' if no variants found
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching variants:', error);
+          setAvailableVariants(['model']); // Default to just 'model' on error
+        });
     }
   }, [selectedBuilding]);
 
@@ -186,10 +208,10 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
                         >
                           <div className="flex items-start">
                             {/* 3D Model Viewer */}
-                            {building.assets?.models ? (
+                            {building.name ? (
                               <div className="mr-4 flex-shrink-0">
                                 <BuildingModelViewer 
-                                  modelPath={building.assets.models}
+                                  buildingName={building.name.toLowerCase().replace(/\s+/g, '-')}
                                   width={120}
                                   height={120}
                                   className="rounded bg-amber-100"
@@ -275,10 +297,10 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
                 </div>
                 
                 {/* 3D Model Viewer */}
-                {selectedBuilding.assets?.models ? (
+                {selectedBuilding.name ? (
                   <div className="mb-4 flex justify-center">
                     <BuildingModelViewer 
-                      modelPath={selectedBuilding.assets.models}
+                      buildingName={selectedBuilding.name.toLowerCase().replace(/\s+/g, '-')}
                       width={400}
                       height={400}
                       className="rounded bg-amber-100 border-2 border-amber-300 shadow-md"
@@ -396,11 +418,11 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
                 </div>
                 
                 {/* Variant selection if available */}
-                {selectedBuilding.assets?.models && selectedBuilding.assets?.variants && selectedBuilding.assets.variants.length > 0 && (
+                {selectedBuilding.name && availableVariants.length > 1 && (
                   <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
                     <h3 className="text-lg font-medium text-amber-700 mb-2">Building Variants</h3>
                     <div className="flex flex-wrap gap-2 justify-center">
-                      {selectedBuilding.assets.variants.map(variant => (
+                      {availableVariants.map(variant => (
                         <button
                           key={variant}
                           onClick={(e) => {
@@ -421,7 +443,7 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
                 )}
                 
                 {/* Additional model controls if available */}
-                {selectedBuilding.assets?.models && (
+                {selectedBuilding.name && (
                   <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
                     <h3 className="text-lg font-medium text-amber-700 mb-2">3D Model Controls</h3>
                     <p className="text-sm text-amber-600 mb-2">
@@ -434,7 +456,7 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
                         // Dispatch event to show 3D model in fullscreen
                         window.dispatchEvent(new CustomEvent('showBuildingModel', {
                           detail: {
-                            modelUrl: `${selectedBuilding.assets.models}/${selectedVariant}.glb`,
+                            modelUrl: `/assets/buildings/models/${selectedBuilding.name.toLowerCase().replace(/\s+/g, '-')}/${selectedVariant}.glb`,
                             buildingName: selectedBuilding.name
                           }
                         }));
