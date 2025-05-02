@@ -238,7 +238,9 @@ export default class RoadManager {
     
     // Remove all roads
     this.roads.forEach(road => {
-      this.scene.remove(road.mesh);
+      if (this.scene) {
+        this.scene.remove(road.mesh);
+      }
       
       if (road.mesh.geometry) {
         road.mesh.geometry.dispose();
@@ -246,8 +248,10 @@ export default class RoadManager {
       
       if (road.mesh.material) {
         if (Array.isArray(road.mesh.material)) {
-          road.mesh.material.forEach(m => m.dispose());
-        } else {
+          road.mesh.material.forEach(m => {
+            if (m) m.dispose();
+          });
+        } else if (road.mesh.material) {
           road.mesh.material.dispose();
         }
       }
@@ -271,24 +275,44 @@ export default class RoadManager {
       this.roadRoughnessMap = null;
     }
     
+    // Store a local reference to scene to avoid undefined issues during cleanup
+    const currentScene = this.scene;
+    
     // Find and remove any orphaned road meshes in the scene
-    this.scene.traverse((object) => {
-      if (object instanceof THREE.Mesh && object.userData && object.userData.isRoad) {
-        console.log('Found orphaned road mesh, removing it');
-        this.scene.remove(object);
+    if (currentScene) {
+      try {
+        const objectsToRemove: THREE.Object3D[] = [];
         
-        if (object.geometry) {
-          object.geometry.dispose();
-        }
-        
-        if (object.material) {
-          if (Array.isArray(object.material)) {
-            object.material.forEach(m => m.dispose());
-          } else {
-            object.material.dispose();
+        // First collect all objects to remove
+        currentScene.traverse((object) => {
+          if (object instanceof THREE.Mesh && object.userData && object.userData.isRoad) {
+            console.log('Found orphaned road mesh, removing it');
+            objectsToRemove.push(object);
           }
-        }
+        });
+        
+        // Then remove them in a separate step to avoid modifying the scene during traversal
+        objectsToRemove.forEach(object => {
+          currentScene.remove(object);
+          
+          if ((object as THREE.Mesh).geometry) {
+            (object as THREE.Mesh).geometry.dispose();
+          }
+          
+          if ((object as THREE.Mesh).material) {
+            const material = (object as THREE.Mesh).material;
+            if (Array.isArray(material)) {
+              material.forEach(m => {
+                if (m) m.dispose();
+              });
+            } else if (material) {
+              material.dispose();
+            }
+          }
+        });
+      } catch (error) {
+        console.error('Error cleaning up orphaned road meshes:', error);
       }
-    });
+    }
   }
 }
