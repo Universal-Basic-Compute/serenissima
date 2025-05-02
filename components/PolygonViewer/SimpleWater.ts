@@ -36,7 +36,7 @@ export default class SimpleWater {
   }
   
   private createWater() {
-    console.log('Creating enhanced water plane...');
+    console.log('Creating enhanced water plane with visible waves...');
     
     // Create a water plane with more segments for better wave animation
     const geometry = new THREE.PlaneGeometry(
@@ -64,17 +64,17 @@ export default class SimpleWater {
       }
     );
     
-    // Create a more advanced material for water
+    // Create a more advanced material for water with stronger normal effect
     const waterColor = new THREE.Color(this.getWaterColorForView());
-    const material = new THREE.MeshStandardMaterial({
+    const material = new THREE.MeshPhongMaterial({
       color: waterColor,
       transparent: true,
       opacity: 0.95, // Increased opacity for better visibility
       side: THREE.DoubleSide,
       normalMap: normalMap,
-      normalScale: new THREE.Vector2(0.5, 0.5), // Increase normal intensity
-      metalness: 0.2,
-      roughness: 0.4
+      normalScale: new THREE.Vector2(1.5, 1.5), // Increased normal intensity for more visible waves
+      shininess: 100, // Add shininess for better reflections
+      specular: 0x111111, // Add specular highlights
     });
     
     // Create the water mesh
@@ -153,23 +153,23 @@ export default class SimpleWater {
     if (!this.waterMesh) return;
     
     // Get the material
-    const material = this.waterMesh.material as THREE.MeshStandardMaterial;
+    const material = this.waterMesh.material as THREE.MeshPhongMaterial;
     
     // Update normal map offset for wave animation
     if (material.normalMap) {
       // Create more complex wave motion with multiple frequencies
-      material.normalMap.offset.x = Math.sin(this.time * 0.05) * 0.1 + this.time * 0.03;
-      material.normalMap.offset.y = Math.cos(this.time * 0.04) * 0.1 + this.time * 0.02;
+      material.normalMap.offset.x = Math.sin(this.time * 0.05) * 0.2 + this.time * 0.05;
+      material.normalMap.offset.y = Math.cos(this.time * 0.04) * 0.2 + this.time * 0.03;
       
-      // Vary normal scale for more dynamic waves
-      const scale = 0.4 + Math.sin(this.time * 0.1) * 0.1;
+      // Vary normal scale for more dynamic waves - make this more pronounced
+      const scale = 1.0 + Math.sin(this.time * 0.1) * 0.5;
       material.normalScale.set(scale, scale);
       
       // Slightly vary the water color over time for more realism
       const baseColor = new THREE.Color(this.getWaterColorForView());
-      const r = baseColor.r + Math.sin(this.time * 0.1) * 0.02;
-      const g = baseColor.g + Math.cos(this.time * 0.15) * 0.02;
-      const b = baseColor.b + Math.sin(this.time * 0.2) * 0.02;
+      const r = baseColor.r + Math.sin(this.time * 0.1) * 0.05;
+      const g = baseColor.g + Math.cos(this.time * 0.15) * 0.05;
+      const b = baseColor.b + Math.sin(this.time * 0.2) * 0.05;
       material.color.setRGB(r, g, b);
       
       // Update material
@@ -185,10 +185,11 @@ export default class SimpleWater {
         const x = positions[i * 3];
         const z = positions[i * 3 + 2];
         
-        // Create gentle waves with multiple frequencies
+        // Create more pronounced waves with multiple frequencies
         positions[i * 3 + 1] = 
-          Math.sin(x * 0.05 + this.time * 0.5) * 0.1 + 
-          Math.cos(z * 0.05 + this.time * 0.3) * 0.1;
+          Math.sin(x * 0.05 + this.time * 0.5) * 0.2 + 
+          Math.cos(z * 0.05 + this.time * 0.3) * 0.2 +
+          Math.sin((x + z) * 0.03 + this.time * 0.2) * 0.1;
       }
       
       this.waterMesh.geometry.attributes.position.needsUpdate = true;
