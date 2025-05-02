@@ -82,7 +82,7 @@ export default class Water {
       resolution - 1
     );
     
-    // Create water shader material
+    // Create water shader material with improved visibility
     const waterShader = {
       uniforms: {
         time: { value: 0.0 },
@@ -152,7 +152,8 @@ export default class Water {
           float pattern = sin(vUv.x * 100.0 + time) * sin(vUv.y * 100.0 + time * 0.7) * 0.03;
           color += pattern * vec3(0.1, 0.1, 0.3);
           
-          gl_FragColor = vec4(color, 0.9);
+          // Increase opacity for better visibility
+          gl_FragColor = vec4(color, 0.95);
         }
       `
     };
@@ -169,14 +170,14 @@ export default class Water {
     // Create the water mesh
     this.waterMesh = new THREE.Mesh(this.waterGeometry, this.waterMaterial);
     
-    // Position water at y=0 (same level as land)
-    this.waterMesh.position.y = 0;
+    // Position water at y=-0.1 (below land)
+    this.waterMesh.position.y = -0.1;
     
     // Rotate the water plane to be horizontal
     this.waterMesh.rotation.x = -Math.PI / 2;
     
     // Set render order to ensure water appears below land
-    this.waterMesh.renderOrder = 5;
+    this.waterMesh.renderOrder = 1;
     
     // Add to scene
     this.scene.add(this.waterMesh);
@@ -185,8 +186,8 @@ export default class Water {
   }
   
   private createParticleSystem() {
-    // Determine particle count based on performance mode
-    const particleCount = this.performanceMode ? 5000 : 15000;
+    // Determine particle count based on performance mode - reduce count
+    const particleCount = this.performanceMode ? 2000 : 5000; // Reduced from 5000/15000
     
     // Create particle geometry
     this.particleGeometry = new THREE.BufferGeometry();
@@ -201,13 +202,13 @@ export default class Water {
       
       // Random position within water bounds
       this.particlePositions[i3] = (Math.random() - 0.5) * this.width;
-      this.particlePositions[i3 + 1] = Math.random() * 0.5; // Height between 0 and 0.5
+      this.particlePositions[i3 + 1] = Math.random() * 0.2; // Height between 0 and 0.2 (reduced from 0.5)
       this.particlePositions[i3 + 2] = (Math.random() - 0.5) * this.height;
       
       // Random velocity
-      this.particleVelocities[i3] = (Math.random() - 0.5) * 0.02;
-      this.particleVelocities[i3 + 1] = Math.random() * 0.01;
-      this.particleVelocities[i3 + 2] = (Math.random() - 0.5) * 0.02;
+      this.particleVelocities[i3] = (Math.random() - 0.5) * 0.01; // Reduced from 0.02
+      this.particleVelocities[i3 + 1] = Math.random() * 0.005; // Reduced from 0.01
+      this.particleVelocities[i3 + 2] = (Math.random() - 0.5) * 0.01; // Reduced from 0.02
     }
     
     // Add positions to geometry
@@ -216,12 +217,12 @@ export default class Water {
       new THREE.BufferAttribute(this.particlePositions, 3)
     );
     
-    // Create particle material
+    // Create particle material with reduced size and opacity
     this.particleMaterial = new THREE.PointsMaterial({
       color: this.getWaterColorForView(),
-      size: this.performanceMode ? 0.2 : 0.15,
+      size: this.performanceMode ? 0.1 : 0.08, // Reduced from 0.2/0.15
       transparent: true,
-      opacity: 0.6,
+      opacity: 0.4, // Reduced from 0.6
       blending: THREE.AdditiveBlending,
       depthWrite: false
     });
@@ -230,7 +231,7 @@ export default class Water {
     this.particleSystem = new THREE.Points(this.particleGeometry, this.particleMaterial);
     
     // Position particle system at water level
-    this.particleSystem.position.y = 0;
+    this.particleSystem.position.y = -0.05; // Slightly below water surface
     
     // Add to scene
     this.scene.add(this.particleSystem);
@@ -501,19 +502,19 @@ export default class Water {
   private getWaterColorForView(): number {
     switch (this.activeView) {
       case 'transport':
-        return 0x4ac0ff; // Bright turquoise blue
+        return 0x66ccff; // Brighter blue for transport
       case 'resources':
-        return 0x3a7d6d; // Darker teal for resources
+        return 0x4ac0a0; // Brighter teal for resources
       case 'markets':
-        return 0x5d8aa8; // Steel blue for markets
+        return 0x6d9ecc; // Brighter steel blue for markets
       case 'governance':
-        return 0x483d8b; // Dark slate blue for governance
+        return 0x6a5acd; // Brighter slate blue for governance
       case 'land':
-        return 0x1ec3d4; // Enhanced light sea green for tropical island feel
+        return 0x33d6e8; // Brighter sea green for land view
       case 'buildings':
-        return 0x0088cc; // Deeper turquoise
+        return 0x33aaff; // Brighter turquoise
       default:
-        return 0x0088cc; // Deeper turquoise
+        return 0x33aaff; // Brighter turquoise
     }
   }
   
