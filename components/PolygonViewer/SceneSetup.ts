@@ -180,12 +180,81 @@ export default class SceneSetup {
   }
   
   private setupLights(activeView: ViewMode) {
-    console.log('Lights setup disabled');
-    // No lights are created to avoid geometry generation
+    // Add ambient light for general illumination
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+    this.scene.add(ambientLight);
+    
+    // Create the sun directional light
+    this.sunLight = new THREE.DirectionalLight(0xffffeb, 1.2);
+    this.sunLight.position.copy(this.calculateSunPosition());
+    this.sunLight.castShadow = false; // Keep shadows disabled for performance
+    this.scene.add(this.sunLight);
+    
+    // Create a sun sphere
+    const sunGeometry = new THREE.SphereGeometry(5, 16, 16);
+    const sunMaterial = new THREE.MeshBasicMaterial({ color: 0xffff80 });
+    this.sunSphere = new THREE.Mesh(sunGeometry, sunMaterial);
+    
+    // Position the sun far away in the sky
+    const sunPosition = this.calculateSunPosition();
+    this.sunSphere.position.copy(sunPosition);
+    this.scene.add(this.sunSphere);
+    
+    // Create a glow effect around the sun
+    const sunGlowGeometry = new THREE.SphereGeometry(8, 16, 16);
+    const sunGlowMaterial = new THREE.MeshBasicMaterial({ 
+      color: 0xffff99, 
+      transparent: true, 
+      opacity: 0.4,
+      side: THREE.BackSide 
+    });
+    this.sunGlow = new THREE.Mesh(sunGlowGeometry, sunGlowMaterial);
+    this.sunGlow.position.copy(sunPosition);
+    this.scene.add(this.sunGlow);
+    
+    // Start sun animation
+    this.animateSun();
   }
   
   private animateSun() {
-    // Do nothing - no sun animation
+    // Update sun position every minute
+    const updateSun = () => {
+      const newPosition = this.calculateSunPosition();
+      
+      // Update sun sphere position
+      this.sunSphere.position.copy(newPosition);
+      
+      // Update sun glow position
+      this.sunGlow.position.copy(newPosition);
+      
+      // Update directional light position
+      this.sunLight.position.copy(newPosition);
+      this.sunLight.lookAt(0, 0, 0);
+      
+      // Adjust light intensity based on sun height
+      const sunHeight = newPosition.y;
+      const normalizedHeight = Math.max(0, Math.min(1, sunHeight / 100));
+      
+      // Brighter at noon, dimmer at sunrise/sunset
+      this.sunLight.intensity = 0.8 + normalizedHeight * 0.7;
+      
+      // Change light color based on time of day
+      if (normalizedHeight < 0.3) {
+        // Sunrise/sunset - more orange
+        this.sunLight.color.setHex(0xffcc88);
+        this.sunSphere.material.color.setHex(0xffcc66);
+      } else {
+        // Daytime - more yellow-white
+        this.sunLight.color.setHex(0xffffeb);
+        this.sunSphere.material.color.setHex(0xffff80);
+      }
+    };
+    
+    // Update immediately
+    updateSun();
+    
+    // Then update every minute
+    setInterval(updateSun, 60000);
   }
   
   // Add method to create water
@@ -206,34 +275,49 @@ export default class SceneSetup {
     
     // Venezia coordinates (approximate)
     const latitude = 45.4; // Venezia latitude in degrees
+    const longitude = 12.3; // Venezia longitude in degrees
     
-    // Calculate sun position based on time of day
-    // This is a simplified model - for more accuracy you'd need solar calculations
+    // Day of year (0-365)
+    const start = new Date(now.getFullYear(), 0, 0);
+    const diff = (now.getTime() - start.getTime()) + ((start.getTimezoneOffset() - now.getTimezoneOffset()) * 60 * 1000);
+    const dayOfYear = Math.floor(diff / (1000 * 60 * 60 * 24));
     
-    // Map time to angle (0 at midnight, π at noon)
-    const sunAngle = ((timeOfDay - 12) / 12) * Math.PI;
+    // Calculate declination angle (simplified)
+    const declination = -23.45 * Math.cos(2 * Math.PI * (dayOfYear + 10) / 365);
     
-    // Calculate height based on time (highest at noon)
-    // Adjust for latitude - sun is lower in northern latitudes
-    const maxHeight = Math.cos((90 - latitude) * Math.PI / 180);
-    const height = Math.sin(sunAngle) * maxHeight;
+    // Calculate hour angle
+    const solarNoon = 12;
+    const hourAngle = 15 * (timeOfDay - solarNoon);
     
-    // Calculate east-west position (east in morning, west in evening)
-    const eastWest = Math.cos(sunAngle);
+    // Convert to radians
+    const latRad = latitude * Math.PI / 180;
+    const declRad = declination * Math.PI / 180;
+    const hourRad = hourAngle * Math.PI / 180;
     
-    // Calculate north-south position (more southern in winter, northern in summer)
-    // This is a very simplified seasonal adjustment
-    const month = now.getMonth(); // 0-11
-    const seasonalOffset = Math.cos(((month - 6) / 6) * Math.PI) * 0.4;
-    const northSouth = -seasonalOffset; // Negative because south is negative Z in Three.js
+    // Calculate solar elevation
+    const sinElevation = Math.sin(latRad) * Math.sin(declRad) + 
+                         Math.cos(latRad) * Math.cos(declRad) * Math.cos(hourRad);
+    const elevation = Math.asin(sinElevation);
     
-    // Create position vector
-    // X = east(+)/west(-), Y = up, Z = north(+)/south(-)
-    return new THREE.Vector3(
-      eastWest * 100,
-      Math.max(0.1, height) * 100, // Ensure sun is always at least slightly above horizon
-      northSouth * 100
-    );
+    // Calculate solar azimuth
+    const sinAzimuth = -Math.cos(declRad) * Math.sin(hourRad) / Math.cos(elevation);
+    const cosAzimuth = (Math.sin(declRad) - Math.sin(latRad) * sinElevation) / 
+                       (Math.cos(latRad) * Math.cos(elevation));
+    let azimuth = Math.atan2(sinAzimuth, cosAzimuth);
+    
+    // Convert elevation and azimuth to Cartesian coordinates
+    // Distance is arbitrary but large to place sun far away
+    const distance = 1000;
+    const height = Math.sin(elevation) * distance;
+    const projectedDistance = Math.cos(elevation) * distance;
+    const x = Math.sin(azimuth) * projectedDistance;
+    const z = -Math.cos(azimuth) * projectedDistance;
+    
+    // Ensure sun is always visible even at night (just very low in the sky)
+    const minHeight = -200; // Minimum height for night time
+    const adjustedHeight = Math.max(minHeight, height);
+    
+    return new THREE.Vector3(x, adjustedHeight, z);
   }
   
   
@@ -283,6 +367,14 @@ export default class SceneSetup {
     
     // Update clouds
     this.updateClouds(frameCount);
+    
+    // Update sun position occasionally (every 100 frames)
+    if (frameCount % 100 === 0) {
+      const newPosition = this.calculateSunPosition();
+      this.sunSphere.position.copy(newPosition);
+      this.sunGlow.position.copy(newPosition);
+      this.sunLight.position.copy(newPosition);
+    }
   }
   
   public updateQuality(highQuality: boolean) {
