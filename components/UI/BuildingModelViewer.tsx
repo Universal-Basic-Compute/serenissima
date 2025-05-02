@@ -2,22 +2,21 @@ import React, { useRef, useEffect, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
-import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader';
-import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader';
-import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader';
 
 interface BuildingModelViewerProps {
-  modelPath: string;
+  modelPath: string;  // This will now be the base path, not the direct file path
   width?: number;
   height?: number;
   className?: string;
+  variant?: string;   // Optional variant name
 }
 
 const BuildingModelViewer: React.FC<BuildingModelViewerProps> = ({
   modelPath,
   width = 150,
   height = 150,
-  className = ''
+  className = '',
+  variant = 'model'  // Default to 'model.glb' if no variant specified
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -63,58 +62,30 @@ const BuildingModelViewer: React.FC<BuildingModelViewerProps> = ({
     controls.autoRotate = true;
     controls.autoRotateSpeed = 3; // Increased from 2 to 3
     
-    // Determine which loader to use based on file extension
-    const fileExtension = modelPath.split('.').pop()?.toLowerCase();
+    // Construct the full path to the GLB file
+    // If modelPath already ends with .glb, use it directly
+    // Otherwise, construct the path with the variant
+    const fullModelPath = modelPath.endsWith('.glb') 
+      ? modelPath 
+      : `${modelPath}/${variant}.glb`;
     
     const loadModel = async () => {
       setIsLoading(true);
       setError(null);
       
       try {
-        let object;
+        // Only use GLTFLoader since we're only supporting GLB files now
+        const gltfLoader = new GLTFLoader();
+        const gltf = await new Promise<any>((resolve, reject) => {
+          gltfLoader.load(
+            fullModelPath,
+            resolve,
+            undefined,
+            reject
+          );
+        });
         
-        switch (fileExtension) {
-          case 'glb':
-          case 'gltf':
-            const gltfLoader = new GLTFLoader();
-            const gltf = await new Promise<any>((resolve, reject) => {
-              gltfLoader.load(
-                modelPath,
-                resolve,
-                undefined,
-                reject
-              );
-            });
-            object = gltf.scene;
-            break;
-            
-          case 'fbx':
-            const fbxLoader = new FBXLoader();
-            object = await new Promise<any>((resolve, reject) => {
-              fbxLoader.load(
-                modelPath,
-                resolve,
-                undefined,
-                reject
-              );
-            });
-            break;
-            
-          case 'obj':
-            const objLoader = new OBJLoader();
-            object = await new Promise<any>((resolve, reject) => {
-              objLoader.load(
-                modelPath,
-                resolve,
-                undefined,
-                reject
-              );
-            });
-            break;
-            
-          default:
-            throw new Error(`Unsupported file format: ${fileExtension}`);
-        }
+        const object = gltf.scene;
         
         // Center the model
         const box = new THREE.Box3().setFromObject(object);
@@ -166,7 +137,7 @@ const BuildingModelViewer: React.FC<BuildingModelViewerProps> = ({
       }
       renderer.dispose();
     };
-  }, [modelPath, width, height]);
+  }, [modelPath, width, height, variant]);
   
   return (
     <div 

@@ -72,11 +72,8 @@
       "Merchant position behind counter"
     ],
     "assets": {
-      "models": {
-        "glb": "/assets/buildings/models/market-stall/model.glb",
-        "fbx": "/assets/buildings/models/market-stall/model.fbx",
-        "obj": "/assets/buildings/models/market-stall/model.obj"
-      },
+      "models": "/assets/buildings/models/market-stall",
+      "variants": ["model", "winter", "festival"],
       "textures": "/assets/buildings/textures/market-stall/",
       "thumbnail": "/assets/buildings/thumbnails/market-stall.png"
     }
