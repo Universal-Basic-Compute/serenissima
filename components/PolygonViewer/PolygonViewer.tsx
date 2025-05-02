@@ -226,6 +226,29 @@ export default function PolygonViewer() {
     }
   }, []);
 
+  // Debug function to help understand what's happening with the polygons
+  const debugPolygons = () => {
+    console.log(`Total polygons loaded: ${polygons.length}`);
+    
+    if (polygons.length > 0) {
+      console.log('First few polygons:', polygons.slice(0, 5));
+      
+      // Check if polygons have valid coordinates
+      const validPolygons = polygons.filter(p => 
+        p.coordinates && p.coordinates.length >= 3
+      );
+      console.log(`Valid polygons with coordinates: ${validPolygons.length}`);
+      
+      // Check if polygons have centroids
+      const polygonsWithCentroids = polygons.filter(p => p.centroid);
+      console.log(`Polygons with centroids: ${polygonsWithCentroids.length}`);
+      
+      // Check if polygons have owners
+      const polygonsWithOwners = polygons.filter(p => p.owner);
+      console.log(`Polygons with owners: ${polygonsWithOwners.length}`);
+    }
+  };
+
   // Load polygons on mount with progressive loading
   useEffect(() => {
     if (!hasLoadedDataRef.current) {
@@ -235,7 +258,10 @@ export default function PolygonViewer() {
       hasLoadedDataRef.current = true;
       
       // First load polygons as they're most important
-      loadPolygons();
+      loadPolygons().then(() => {
+        // Debug polygons after loading
+        debugPolygons();
+      });
       
       // Set a timeout to force exit from loading state if it takes too long
       const loadingTimeout = setTimeout(() => {

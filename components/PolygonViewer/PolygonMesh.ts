@@ -75,10 +75,10 @@ class PolygonMesh {
       // Create a shape from the normalized coordinates
       const shape = createPolygonShape(normalizedCoords);
 
-      // Create extruded geometry with minimal height
+      // Create extruded geometry with increased height
       const extrudeSettings = {
         steps: 1,
-        depth: 0.05, // 75% less extrusion (0.2 * 0.25 = 0.05)
+        depth: 0.2, // Increased from 0.05 to 0.2 for better visibility
         bevelEnabled: false
       };
       
@@ -91,30 +91,32 @@ class PolygonMesh {
         texture.repeat.set(5, 5);
       });
 
-      // Create materials for top and sides
+      // Create materials with brighter colors for better visibility
       const topMaterial = new THREE.MeshBasicMaterial({
         map: sandTexture,
-        color: this.determineLandColor()
+        color: this.determineLandColor(),
+        transparent: false, // Disable transparency for better visibility
+        depthWrite: true // Enable depth writing
       });
       
       const sideMaterial = new THREE.MeshBasicMaterial({
         color: this.determineLandColor(),
-        transparent: true,
-        opacity: 0.8
+        transparent: false, // Disable transparency for better visibility
+        opacity: 1.0 // Full opacity
       });
 
       // Create mesh with different materials for top and sides
       const materials = [topMaterial, sideMaterial];
       this.mesh = new THREE.Mesh(geometry, materials);
       
-      // Position the mesh at y=0.1 instead of 0 to be above water
-      this.mesh.position.y = 0.1;
+      // Position the mesh higher above water
+      this.mesh.position.y = 0.3; // Increased from 0.1 to 0.3
       
       // Rotate the mesh to make it face upward
       this.mesh.rotation.x = -Math.PI / 2;
       
       // Set render order to ensure land appears above water
-      this.mesh.renderOrder = 10;
+      this.mesh.renderOrder = 20; // Increased from 10 to 20
       
       // Store reference to the mesh
       if (this.polygon.id) {
@@ -135,21 +137,21 @@ class PolygonMesh {
     if (this.activeView === 'land') {
       if (this.ownerColor) {
         // Blend the owner color with sand color for a more natural look
-        const sandColor = new THREE.Color(0xf0e6c8);
+        const sandColor = new THREE.Color(0xf5e9c8); // Brighter sand color
         const ownerColor = new THREE.Color(this.ownerColor);
-        return new THREE.Color().lerpColors(sandColor, ownerColor, 0.7);
+        return new THREE.Color().lerpColors(sandColor, ownerColor, 0.8); // Increased from 0.7 to 0.8
       } else if (this.polygon.owner) {
         // If we have an owner but no color, use a default color
         if (this.polygon.owner === 'ConsiglioDeiDieci') {
           // Special case for ConsiglioDeiDieci
-          return new THREE.Color(0x8B0000); // Dark red
+          return new THREE.Color(0xB30000); // Brighter red
         }
-        return new THREE.Color(0x7cac6a);
+        return new THREE.Color(0x8cd17a); // Brighter green
       } else {
-        return new THREE.Color(0xe6d2a8);
+        return new THREE.Color(0xf5e9c8); // Brighter sand color
       }
     } else {
-      return new THREE.Color(0xe6d2a8);
+      return new THREE.Color(0xf5e9c8); // Brighter sand color
     }
   }
   

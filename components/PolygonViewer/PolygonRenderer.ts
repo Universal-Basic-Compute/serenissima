@@ -261,6 +261,11 @@ export default class PolygonRenderer {
   private renderPolygons() {
     console.log(`Rendering ${this.polygons.length} polygons`);
     
+    // Debug: Log the first few polygons to check their data
+    if (this.polygons.length > 0) {
+      console.log('First few polygons:', this.polygons.slice(0, 5));
+    }
+    
     // Create a texture loader if not already created
     if (!this.textureLoader) {
       this.textureLoader = new THREE.TextureLoader();
