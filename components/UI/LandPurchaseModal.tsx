@@ -50,7 +50,22 @@ const LandPurchaseModal: React.FC<LandPurchaseModalProps> = ({
         return;
       }
       
-      console.log(`Starting purchase process for land ${landId} by wallet ${walletAddress}`);
+      // Get the username for this wallet
+      let username = null;
+      try {
+        const userResponse = await fetch(`${getApiBaseUrl()}/api/wallet/${walletAddress}`);
+        if (userResponse.ok) {
+          const userData = await userResponse.json();
+          username = userData.user_name;
+          console.log(`Found username ${username} for wallet ${walletAddress}`);
+        }
+      } catch (error) {
+        console.warn(`Could not get username for wallet ${walletAddress}:`, error);
+      }
+      
+      // Use username if available, otherwise use wallet address
+      const buyerIdentifier = username || walletAddress;
+      console.log(`Starting purchase process for land ${landId} by ${buyerIdentifier} (wallet: ${walletAddress})`);
       
       // First try the Next.js API route
       try {
@@ -63,10 +78,11 @@ const LandPurchaseModal: React.FC<LandPurchaseModalProps> = ({
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            buyer: walletAddress
+            buyer: buyerIdentifier,  // Use username instead of wallet address
+            wallet: walletAddress    // Also include wallet for reference
           }),
           // Add a timeout to prevent hanging requests
-          signal: AbortSignal.timeout(20000) // Increased from 15 to 20 second timeout
+          signal: AbortSignal.timeout(20000) // 20 second timeout
         });
       
         // Parse the response data regardless of status
@@ -328,7 +344,8 @@ const LandPurchaseModal: React.FC<LandPurchaseModalProps> = ({
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              buyer: walletAddress
+              buyer: buyerIdentifier,  // Use username instead of wallet address
+              wallet: walletAddress    // Also include wallet for reference
             }),
             // Add a timeout to prevent hanging requests
             signal: AbortSignal.timeout(20000) // Increased from 15 to 20 second timeout

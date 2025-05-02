@@ -14,26 +14,29 @@ function ensureTransactionsDirExists() {
   return TRANSACTIONS_DIR;
 }
 
-// Add a function to get username from wallet address
-async function getUsernameFromWallet(walletAddress: string): Promise<string | null> {
+// Add this function to get username from wallet address with better error handling
+async function getUsernameFromWallet(walletAddress: string): Promise<string> {
   try {
     const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
     const response = await fetch(`${apiBaseUrl}/api/wallet/${walletAddress}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      signal: AbortSignal.timeout(5000) // 5 second timeout
+      signal: AbortSignal.timeout(10000) // 10 second timeout
     });
     
     if (response.ok) {
       const data = await response.json();
-      return data.user_name || null;
+      if (data.user_name) {
+        console.log(`Found username ${data.user_name} for wallet ${walletAddress}`);
+        return data.user_name;
+      }
     }
-    return null;
+    
+    // If we couldn't get a username, use the wallet address as a fallback
+    console.warn(`Could not find username for wallet ${walletAddress}, using wallet as username`);
+    return walletAddress;
   } catch (error) {
-    console.warn(`Could not get username for wallet ${walletAddress}:`, error);
-    return null;
+    console.error(`Error getting username for wallet ${walletAddress}:`, error);
+    // Return the wallet address as a fallback
+    return walletAddress;
   }
 }
 
@@ -350,7 +353,9 @@ export async function POST(
       );
     }
     
-    console.log(`Processing transaction ${id} for buyer ${buyer}`);
+    // Convert wallet address to username
+    const buyerUsername = await getUsernameFromWallet(buyer);
+    console.log(`Processing transaction ${id} for buyer ${buyerUsername} (wallet: ${buyer})`);
     
     // First try to execute the transaction via the backend API
     try {
@@ -362,7 +367,10 @@ export async function POST(
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ buyer }),
+        body: JSON.stringify({ 
+          buyer: buyerUsername,  // Send username instead of wallet address
+          wallet: buyer  // Also send wallet for reference
+        }),
         // Add a timeout to prevent hanging requests
         signal: AbortSignal.timeout(10000) // 10 second timeout
       });

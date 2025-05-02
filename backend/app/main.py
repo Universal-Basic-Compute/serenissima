@@ -670,6 +670,17 @@ async def update_land_owner(land_id: str, data: dict):
         raise HTTPException(status_code=400, detail="Owner is required")
     
     try:
+        # Convert owner to username if it's a wallet address
+        owner_username = data["owner"]
+        if data["owner"].startswith("0x") or len(data["owner"]) > 30:
+            # Look up the username for this wallet
+            owner_records = users_table.all(formula=f"{{Wallet}}='{data['owner']}'")
+            if owner_records:
+                owner_username = owner_records[0]["fields"].get("Username", data["owner"])
+                print(f"Converted owner wallet {data['owner']} to username {owner_username}")
+            else:
+                print(f"Could not find username for wallet {data['owner']}, using wallet as username")
+        
         # Check if land exists
         formula = f"{{LandId}}='{land_id}'"
         print(f"Searching for land with formula: {formula}")
@@ -682,8 +693,8 @@ async def update_land_owner(land_id: str, data: dict):
             
             # Update the owner
             updated_record = lands_table.update(record["id"], {
-                "User": data["owner"],
-                "Wallet": data.get("wallet", data["owner"])  # Use wallet if provided, otherwise use owner
+                "User": owner_username,  # Use username instead of wallet address
+                "Wallet": data.get("wallet", data["owner"])  # Keep wallet for reference
             })
             
             return {
@@ -699,8 +710,8 @@ async def update_land_owner(land_id: str, data: dict):
             # Create new record
             fields = {
                 "LandId": land_id,
-                "User": data["owner"],
-                "Wallet": data.get("wallet", data["owner"])  # Use wallet if provided, otherwise use owner
+                "User": owner_username,  # Use username instead of wallet address
+                "Wallet": data.get("wallet", data["owner"])  # Keep wallet for reference
             }
             
             # Add optional fields if provided
@@ -831,6 +842,17 @@ async def create_transaction(transaction_data: TransactionRequest):
         raise HTTPException(status_code=400, detail="Price must be greater than 0")
     
     try:
+        # Convert seller to username if it's a wallet address
+        seller_username = transaction_data.seller
+        if transaction_data.seller.startswith("0x") or len(transaction_data.seller) > 30:
+            # Look up the username for this wallet
+            seller_records = users_table.all(formula=f"{{Wallet}}='{transaction_data.seller}'")
+            if seller_records:
+                seller_username = seller_records[0]["fields"].get("Username", transaction_data.seller)
+                print(f"Converted seller wallet {transaction_data.seller} to username {seller_username}")
+            else:
+                print(f"Could not find username for wallet {transaction_data.seller}, using wallet as username")
+        
         # Check if transaction already exists for this asset
         formula = f"AND({{AssetId}}='{transaction_data.asset_id}', {{Type}}='{transaction_data.type}', {{ExecutedAt}}=BLANK())"
         print(f"Searching for existing transaction with formula: {formula}")
@@ -861,14 +883,25 @@ async def create_transaction(transaction_data: TransactionRequest):
         fields = {
             "Type": transaction_data.type,
             "AssetId": transaction_data.asset_id,
-            "Seller": transaction_data.seller,
+            "Seller": seller_username,  # Use username instead of wallet address
             "Price": transaction_data.price,
             "CreatedAt": now,
             "UpdatedAt": now
         }
         
         if transaction_data.buyer:
-            fields["Buyer"] = transaction_data.buyer
+            # Convert buyer to username if it's a wallet address
+            buyer_username = transaction_data.buyer
+            if transaction_data.buyer.startswith("0x") or len(transaction_data.buyer) > 30:
+                # Look up the username for this wallet
+                buyer_records = users_table.all(formula=f"{{Wallet}}='{transaction_data.buyer}'")
+                if buyer_records:
+                    buyer_username = buyer_records[0]["fields"].get("Username", transaction_data.buyer)
+                    print(f"Converted buyer wallet {transaction_data.buyer} to username {buyer_username}")
+                else:
+                    print(f"Could not find username for wallet {transaction_data.buyer}, using wallet as username")
+            
+            fields["Buyer"] = buyer_username  # Use username instead of wallet address
             
         # Store land details as JSON in Notes field if this is a land transaction
         if transaction_data.type == "land":
@@ -1116,25 +1149,35 @@ async def execute_transaction(transaction_id: str, data: dict):
         price = record["fields"].get("Price", 0)
         buyer = data["buyer"]
         
-        # Normalize addresses for case-insensitive comparison
-        normalized_buyer = buyer.lower()
-        normalized_seller = seller.lower()
+        # Always use usernames for buyer and seller
+        # First, check if the buyer is a wallet address and convert to username if needed
+        buyer_username = buyer
+        if buyer.startswith("0x") or len(buyer) > 30:  # Simple check for wallet address
+            # Look up the username for this wallet
+            buyer_records = users_table.all(formula=f"{{Wallet}}='{buyer}'")
+            if buyer_records:
+                buyer_username = buyer_records[0]["fields"].get("Username", buyer)
+                print(f"Converted buyer wallet {buyer} to username {buyer_username}")
+            else:
+                print(f"Could not find username for wallet {buyer}, using wallet as username")
+        
+        # Same for seller
+        seller_username = seller
+        if seller.startswith("0x") or len(seller) > 30:
+            seller_records = users_table.all(formula=f"{{Wallet}}='{seller}'")
+            if seller_records:
+                seller_username = seller_records[0]["fields"].get("Username", seller)
+                print(f"Converted seller wallet {seller} to username {seller_username}")
+            else:
+                print(f"Could not find username for wallet {seller}, using wallet as username")
         
         # Transfer the price from buyer to seller first to ensure funds are available
-        if price > 0 and seller and buyer:
+        if price > 0 and seller_username and buyer_username:
             try:
-                # Get all users for lookup
-                all_users = users_table.all()
-                
-                # Find buyer record
-                buyer_records = [
-                    record for record in all_users 
-                    if record["fields"].get("Wallet", "").lower() == normalized_buyer or
-                       record["fields"].get("Username", "").lower() == normalized_buyer
-                ]
-                
+                # Find buyer record by username
+                buyer_records = users_table.all(formula=f"{{Username}}='{buyer_username}'")
                 if not buyer_records:
-                    raise HTTPException(status_code=404, detail=f"Buyer not found: {buyer}")
+                    raise HTTPException(status_code=404, detail=f"Buyer not found: {buyer_username}")
                 
                 buyer_record = buyer_records[0]
                 buyer_compute = buyer_record["fields"].get("ComputeAmount", 0)
@@ -1143,26 +1186,21 @@ async def execute_transaction(transaction_id: str, data: dict):
                 if buyer_compute < price:
                     raise HTTPException(status_code=400, detail=f"Buyer does not have enough compute. Required: {price}, Available: {buyer_compute}")
                 
-                # Find seller record
-                seller_records = [
-                    record for record in all_users 
-                    if record["fields"].get("Wallet", "").lower() == normalized_seller or
-                       record["fields"].get("Username", "").lower() == normalized_seller
-                ]
-                
+                # Find seller record by username
+                seller_records = users_table.all(formula=f"{{Username}}='{seller_username}'")
                 if not seller_records:
-                    raise HTTPException(status_code=404, detail=f"Seller not found: {seller}")
+                    raise HTTPException(status_code=404, detail=f"Seller not found: {seller_username}")
                 
                 seller_record = seller_records[0]
                 seller_compute = seller_record["fields"].get("ComputeAmount", 0)
                 
-                print(f"Transferring {price} compute from {buyer} (balance: {buyer_compute}) to {seller} (balance: {seller_compute})")
+                print(f"Transferring {price} compute from {buyer_username} (balance: {buyer_compute}) to {seller_username} (balance: {seller_compute})")
                 
                 # Create a transaction log entry before making changes
                 transaction_log = {
                     "transaction_id": transaction_id,
-                    "buyer": buyer,
-                    "seller": seller,
+                    "buyer": buyer_username,
+                    "seller": seller_username,
                     "price": price,
                     "buyer_before": buyer_compute,
                     "seller_before": seller_compute,
@@ -1190,8 +1228,8 @@ async def execute_transaction(transaction_id: str, data: dict):
                     transactions_table.create({
                         "Type": "transfer",
                         "AssetId": "compute_token",
-                        "Seller": seller,
-                        "Buyer": buyer,
+                        "Seller": seller_username,
+                        "Buyer": buyer_username,
                         "Price": price,
                         "CreatedAt": datetime.datetime.now().isoformat(),
                         "UpdatedAt": datetime.datetime.now().isoformat(),
@@ -1211,8 +1249,8 @@ async def execute_transaction(transaction_id: str, data: dict):
                 try:
                     failed_transaction = {
                         "transaction_id": transaction_id,
-                        "buyer": buyer,
-                        "seller": seller,
+                        "buyer": buyer_username,
+                        "seller": seller_username,
                         "price": price,
                         "error": str(balance_error),
                         "timestamp": datetime.datetime.now().isoformat(),
@@ -1223,8 +1261,8 @@ async def execute_transaction(transaction_id: str, data: dict):
                     transactions_table.create({
                         "Type": "error",
                         "AssetId": "compute_token",
-                        "Seller": seller,
-                        "Buyer": buyer,
+                        "Seller": seller_username,
+                        "Buyer": buyer_username,
                         "Price": price,
                         "CreatedAt": datetime.datetime.now().isoformat(),
                         "UpdatedAt": datetime.datetime.now().isoformat(),
@@ -1237,7 +1275,7 @@ async def execute_transaction(transaction_id: str, data: dict):
                     print(f"ERROR saving failed transaction record: {str(record_error)}")
                     traceback.print_exc(file=sys.stdout)
             
-            print(f"Transferred {price} compute from {buyer} to {seller}")
+            print(f"Transferred {price} compute from {buyer_username} to {seller_username}")
         
         # Update the land ownership if it's a land transaction
         if record["fields"].get("Type") == "land" and record["fields"].get("AssetId"):
