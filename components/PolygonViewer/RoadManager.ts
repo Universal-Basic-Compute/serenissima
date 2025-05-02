@@ -12,6 +12,8 @@ export default class RoadManager {
   private roads: Road[] = [];
   private textureLoader: THREE.TextureLoader;
   private roadTexture: THREE.Texture | null = null;
+  private roadNormalMap: THREE.Texture | null = null;
+  private roadRoughnessMap: THREE.Texture | null = null;
 
   constructor(scene: THREE.Scene) {
     this.scene = scene;
@@ -29,6 +31,36 @@ export default class RoadManager {
       undefined,
       (error) => {
         console.error('Error loading road texture:', error);
+      }
+    );
+    
+    // Load road normal map
+    this.textureLoader.load(
+      '/textures/road_normal.jpg',
+      (texture) => {
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.set(1, 10);
+        this.roadNormalMap = texture;
+      },
+      undefined,
+      (error) => {
+        console.error('Error loading road normal map:', error);
+      }
+    );
+    
+    // Load road roughness map
+    this.textureLoader.load(
+      '/textures/road_roughness.jpg',
+      (texture) => {
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.set(1, 10);
+        this.roadRoughnessMap = texture;
+      },
+      undefined,
+      (error) => {
+        console.error('Error loading road roughness map:', error);
       }
     );
   }
@@ -163,12 +195,15 @@ export default class RoadManager {
     roadGeometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
     roadGeometry.computeVertexNormals();
     
-    // Create road material
+    // Create road material with enhanced textures
     const roadMaterial = new THREE.MeshStandardMaterial({
       color: 0x555555,
       roughness: 0.8,
       metalness: 0.2,
       map: this.roadTexture,
+      normalMap: this.roadNormalMap,
+      roughnessMap: this.roadRoughnessMap,
+      normalScale: new THREE.Vector2(1, 1),
       side: THREE.DoubleSide
     });
     
@@ -220,10 +255,20 @@ export default class RoadManager {
     
     this.roads = [];
     
-    // Dispose of texture
+    // Dispose of textures
     if (this.roadTexture) {
       this.roadTexture.dispose();
       this.roadTexture = null;
+    }
+    
+    if (this.roadNormalMap) {
+      this.roadNormalMap.dispose();
+      this.roadNormalMap = null;
+    }
+    
+    if (this.roadRoughnessMap) {
+      this.roadRoughnessMap.dispose();
+      this.roadRoughnessMap = null;
     }
     
     // Find and remove any orphaned road meshes in the scene
