@@ -83,28 +83,65 @@ export default class RoadManager {
     
     console.log(`RoadManager: Creating road with ${points.length} points and curvature ${curvature}`);
     
-    // Create a unique ID for the road
-    const id = `road-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-    
-    // Create the road mesh
-    const mesh = this.createRoadMesh(points, curvature);
-    
-    // Add to scene
-    console.log(`RoadManager: Adding road mesh to scene with ID ${id}`);
-    this.scene.add(mesh);
-    
-    // Store the road
-    const road: Road = {
-      id,
-      points: points.map(p => p.clone()), // Clone points to avoid reference issues
-      mesh,
-      curvature
-    };
-    
-    this.roads.push(road);
-    console.log(`RoadManager: Road created successfully, total roads: ${this.roads.length}`);
-    
-    return id;
+    // Try to import the 3D utilities for path simplification
+    try {
+      // Dynamic import of utils3D
+      const utils3DModule = require('./utils3D');
+      const { simplifyPath } = utils3DModule;
+      
+      // Simplify the path to remove redundant points
+      const simplifiedPoints = simplifyPath(points, 0.05);
+      console.log(`RoadManager: Simplified path from ${points.length} to ${simplifiedPoints.length} points`);
+      
+      // Create a unique ID for the road
+      const id = `road-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+      
+      // Create the road mesh with simplified points
+      const mesh = this.createRoadMesh(simplifiedPoints, curvature);
+      
+      // Add to scene
+      console.log(`RoadManager: Adding road mesh to scene with ID ${id}`);
+      this.scene.add(mesh);
+      
+      // Store the road
+      const road: Road = {
+        id,
+        points: simplifiedPoints.map(p => p.clone()), // Clone points to avoid reference issues
+        mesh,
+        curvature
+      };
+      
+      this.roads.push(road);
+      console.log(`RoadManager: Road created successfully, total roads: ${this.roads.length}`);
+      
+      return id;
+    } catch (error) {
+      console.warn('Failed to import utils3D for path simplification:', error);
+      
+      // Fallback to original method
+      // Create a unique ID for the road
+      const id = `road-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+      
+      // Create the road mesh
+      const mesh = this.createRoadMesh(points, curvature);
+      
+      // Add to scene
+      console.log(`RoadManager: Adding road mesh to scene with ID ${id}`);
+      this.scene.add(mesh);
+      
+      // Store the road
+      const road: Road = {
+        id,
+        points: points.map(p => p.clone()), // Clone points to avoid reference issues
+        mesh,
+        curvature
+      };
+      
+      this.roads.push(road);
+      console.log(`RoadManager: Road created successfully, total roads: ${this.roads.length}`);
+      
+      return id;
+    }
   }
 
   public removeRoad(id: string): boolean {
@@ -143,61 +180,130 @@ export default class RoadManager {
   }
 
   private createRoadMesh(points: THREE.Vector3[], curvature: number): THREE.Mesh {
-    // Create a curved path based on the points
-    const curve = this.createCurvedPath(points, curvature);
-    
-    // Create road geometry
-    const roadWidth = 0.15; // Changed from 0.0735 back to 0.15 (make it thicker)
-    const roadGeometry = new THREE.BufferGeometry();
-    const positions: number[] = [];
-    const uvs: number[] = [];
-    
-    // Sample points along the curve
-    const numPoints = Math.max(points.length * 10, 50);
-    const curvePoints = curve.getPoints(numPoints);
-    
-    // Create road segments
-    for (let i = 0; i < curvePoints.length - 1; i++) {
-      const current = curvePoints[i];
-      const next = curvePoints[i + 1];
+    // Try to import the 3D utilities for smoother roads
+    try {
+      // Dynamic import of utils3D
+      const utils3DModule = require('./utils3D');
+      const { smoothPath } = utils3DModule;
       
-      // Calculate direction vector
-      const direction = new THREE.Vector3()
-        .subVectors(next, current)
-        .normalize();
+      // Smooth the road points for a more natural curve
+      const smoothedPoints = smoothPath(points, curvature, Math.max(points.length * 5, 20));
       
-      // Calculate perpendicular vector
-      const perpendicular = new THREE.Vector3(-direction.z, 0, direction.x)
-        .normalize()
-        .multiplyScalar(roadWidth / 2);
+      // Create a curved path based on the smoothed points
+      const curve = this.createCurvedPath(smoothedPoints, curvature);
       
-      // Create quad vertices
-      const v1 = new THREE.Vector3().addVectors(current, perpendicular);
-      const v2 = new THREE.Vector3().subVectors(current, perpendicular);
-      const v3 = new THREE.Vector3().addVectors(next, perpendicular);
-      const v4 = new THREE.Vector3().subVectors(next, perpendicular);
+      // Create road geometry
+      const roadWidth = 0.15; // Changed from 0.0735 back to 0.15 (make it thicker)
+      const roadGeometry = new THREE.BufferGeometry();
+      const positions: number[] = [];
+      const uvs: number[] = [];
       
-      // First triangle
-      positions.push(v1.x, v1.y + 0.2, v1.z); // Increased from 0.15 to 0.2 to prevent z-fighting
-      positions.push(v2.x, v2.y + 0.2, v2.z);
-      positions.push(v3.x, v3.y + 0.2, v3.z);
+      // Sample points along the curve
+      const numPoints = Math.max(points.length * 10, 50);
+      const curvePoints = curve.getPoints(numPoints);
       
-      // Second triangle
-      positions.push(v2.x, v2.y + 0.2, v2.z);
-      positions.push(v4.x, v4.y + 0.2, v4.z);
-      positions.push(v3.x, v3.y + 0.2, v3.z);
+      // Create road segments
+      for (let i = 0; i < curvePoints.length - 1; i++) {
+        const current = curvePoints[i];
+        const next = curvePoints[i + 1];
+        
+        // Calculate direction vector
+        const direction = new THREE.Vector3()
+          .subVectors(next, current)
+          .normalize();
+        
+        // Calculate perpendicular vector
+        const perpendicular = new THREE.Vector3(-direction.z, 0, direction.x)
+          .normalize()
+          .multiplyScalar(roadWidth / 2);
+        
+        // Create quad vertices
+        const v1 = new THREE.Vector3().addVectors(current, perpendicular);
+        const v2 = new THREE.Vector3().subVectors(current, perpendicular);
+        const v3 = new THREE.Vector3().addVectors(next, perpendicular);
+        const v4 = new THREE.Vector3().subVectors(next, perpendicular);
+        
+        // First triangle
+        positions.push(v1.x, v1.y + 0.2, v1.z); // Increased from 0.15 to 0.2 to prevent z-fighting
+        positions.push(v2.x, v2.y + 0.2, v2.z);
+        positions.push(v3.x, v3.y + 0.2, v3.z);
+        
+        // Second triangle
+        positions.push(v2.x, v2.y + 0.2, v2.z);
+        positions.push(v4.x, v4.y + 0.2, v4.z);
+        positions.push(v3.x, v3.y + 0.2, v3.z);
+        
+        // UVs for texture mapping
+        const segmentLength = current.distanceTo(next);
+        const uOffset = i / (curvePoints.length - 1);
+        
+        uvs.push(0, uOffset * 10);
+        uvs.push(1, uOffset * 10);
+        uvs.push(0, (uOffset + segmentLength) * 10);
+        
+        uvs.push(1, uOffset * 10);
+        uvs.push(1, (uOffset + segmentLength) * 10);
+        uvs.push(0, (uOffset + segmentLength) * 10);
+      }
+    } catch (error) {
+      console.warn('Failed to import utils3D, falling back to basic road creation:', error);
       
-      // UVs for texture mapping
-      const segmentLength = current.distanceTo(next);
-      const uOffset = i / (curvePoints.length - 1);
+      // Fallback to original method
+      const curve = this.createCurvedPath(points, curvature);
       
-      uvs.push(0, uOffset * 10);
-      uvs.push(1, uOffset * 10);
-      uvs.push(0, (uOffset + segmentLength) * 10);
+      // Create road geometry
+      const roadWidth = 0.15;
+      const roadGeometry = new THREE.BufferGeometry();
+      const positions: number[] = [];
+      const uvs: number[] = [];
       
-      uvs.push(1, uOffset * 10);
-      uvs.push(1, (uOffset + segmentLength) * 10);
-      uvs.push(0, (uOffset + segmentLength) * 10);
+      // Sample points along the curve
+      const numPoints = Math.max(points.length * 10, 50);
+      const curvePoints = curve.getPoints(numPoints);
+      
+      // Create road segments
+      for (let i = 0; i < curvePoints.length - 1; i++) {
+        const current = curvePoints[i];
+        const next = curvePoints[i + 1];
+        
+        // Calculate direction vector
+        const direction = new THREE.Vector3()
+          .subVectors(next, current)
+          .normalize();
+        
+        // Calculate perpendicular vector
+        const perpendicular = new THREE.Vector3(-direction.z, 0, direction.x)
+          .normalize()
+          .multiplyScalar(roadWidth / 2);
+        
+        // Create quad vertices
+        const v1 = new THREE.Vector3().addVectors(current, perpendicular);
+        const v2 = new THREE.Vector3().subVectors(current, perpendicular);
+        const v3 = new THREE.Vector3().addVectors(next, perpendicular);
+        const v4 = new THREE.Vector3().subVectors(next, perpendicular);
+        
+        // First triangle
+        positions.push(v1.x, v1.y + 0.2, v1.z);
+        positions.push(v2.x, v2.y + 0.2, v2.z);
+        positions.push(v3.x, v3.y + 0.2, v3.z);
+        
+        // Second triangle
+        positions.push(v2.x, v2.y + 0.2, v2.z);
+        positions.push(v4.x, v4.y + 0.2, v4.z);
+        positions.push(v3.x, v3.y + 0.2, v3.z);
+        
+        // UVs for texture mapping
+        const segmentLength = current.distanceTo(next);
+        const uOffset = i / (curvePoints.length - 1);
+        
+        uvs.push(0, uOffset * 10);
+        uvs.push(1, uOffset * 10);
+        uvs.push(0, (uOffset + segmentLength) * 10);
+        
+        uvs.push(1, uOffset * 10);
+        uvs.push(1, (uOffset + segmentLength) * 10);
+        uvs.push(0, (uOffset + segmentLength) * 10);
+      }
     }
     
     // Set attributes
@@ -237,13 +343,15 @@ export default class RoadManager {
       return new THREE.LineCurve3(points[0], points[1]);
     }
     
-    // For Venice, we want straighter roads regardless of the curvature setting
-    // Use a very low tension value (close to 0) for straighter segments
+    // For Venice, we want straighter roads but allow some curvature control
+    // Scale the curvature value to a reasonable range
+    const tension = Math.max(0.05, curvature * 0.2); // Range from 0.05 to 0.2
+    
     return new THREE.CatmullRomCurve3(
       points,
       false,
       'centripetal',
-      0.1 // Very low tension value for straighter roads
+      tension // Use the scaled tension value
     );
   }
 

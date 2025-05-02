@@ -424,12 +424,12 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
     }
     
     // For more points, use a polyline with minimal curvature
-    // Use a very low tension value (close to 0) for straighter segments
+    // Use the curvature value from the slider to control the tension
     return new THREE.CatmullRomCurve3(
       roadPoints,
       false,
       'centripetal',
-      0.1 // Very low tension value for straighter roads
+      Math.max(0.05, curvature * 0.2) // Scale curvature to a reasonable range (0.05-0.2)
     );
   };
 
@@ -448,7 +448,14 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
           max="1"
           step="0.01"
           value={curvature}
-          onChange={(e) => setCurvature(parseFloat(e.target.value))}
+          onChange={(e) => {
+            const newValue = parseFloat(e.target.value);
+            setCurvature(newValue);
+            // Update the preview if we have points
+            if (roadPoints.length >= 2) {
+              createRoadMesh(roadPoints);
+            }
+          }}
           className="w-32"
         />
         <span className="ml-2 text-sm">{Math.round(curvature * 100)}%</span>
