@@ -463,6 +463,98 @@ export default class RoadManager {
     }
   }
 
+  public saveRoadToAirtable(roadId: string, landId: string | null, userId: string | null): Promise<any> {
+    if (!roadId) {
+      console.error('Cannot save road: Missing road ID');
+      return Promise.reject(new Error('Missing road ID'));
+    }
+    
+    // Find the road by ID
+    const road = this.roads.find(r => r.id === roadId);
+    if (!road) {
+      console.error(`Road with ID ${roadId} not found`);
+      return Promise.reject(new Error(`Road with ID ${roadId} not found`));
+    }
+    
+    // Extract road points for saving
+    const roadPoints = road.points.map(point => ({
+      x: point.x,
+      y: point.y,
+      z: point.z
+    }));
+    
+    // Create road data object
+    const roadData = {
+      id: roadId,
+      type: 'road',
+      land_id: landId,
+      user_id: userId,
+      points: JSON.stringify(roadPoints),
+      curvature: road.curvature,
+      created_at: new Date().toISOString()
+    };
+    
+    // Send to API
+    return fetch('/api/save-road', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(roadData)
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`Failed to save road: ${response.status} ${response.statusText}`);
+      }
+      return response.json();
+    })
+    .then(data => {
+      console.log(`Road ${roadId} saved successfully:`, data);
+      return data;
+    })
+    .catch(error => {
+      console.error('Error saving road:', error);
+      throw error;
+    });
+  }
+  
+  public loadRoadsFromAirtable(): Promise<void> {
+    return fetch('/api/get-roads')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`Failed to load roads: ${response.status} ${response.statusText}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (data.success && Array.isArray(data.roads)) {
+          console.log(`Loading ${data.roads.length} roads from Airtable`);
+          
+          // Clear existing roads first
+          this.removeAllRoads();
+          
+          // Create each road
+          data.roads.forEach(roadData => {
+            try {
+              // Parse the points from the stored string
+              const points = JSON.parse(roadData.points).map(point => 
+                new THREE.Vector3(point.x, point.y, point.z)
+              );
+              
+              // Create the road with the stored curvature
+              const roadId = this.createRoad(points, roadData.curvature || 0.5);
+              console.log(`Loaded road ${roadId} from Airtable`);
+            } catch (error) {
+              console.error(`Error creating road from Airtable data:`, error);
+            }
+          });
+        }
+      })
+      .catch(error => {
+        console.error('Error loading roads from Airtable:', error);
+      });
+  }
+
   public cleanup(): void {
     console.log(`Cleaning up ${this.roads.length} roads`);
     
