@@ -1414,9 +1414,6 @@ export default function PolygonViewer() {
     console.log(`PolygonViewer: Road complete with ${roadPoints.length} points`);
     
     if (roadManagerRef.current) {
-      // Remove all existing roads first to prevent accumulation
-      roadManagerRef.current.removeAllRoads();
-      
       // Get the curvature value from a state variable or use a default
       const curvature = 0.5; // Default curvature
       console.log(`PolygonViewer: Creating road with curvature ${curvature}`);
