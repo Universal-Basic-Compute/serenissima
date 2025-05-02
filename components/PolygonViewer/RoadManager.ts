@@ -311,7 +311,7 @@ export default class RoadManager {
     roadGeometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
     roadGeometry.computeVertexNormals();
     
-    // Create road material with enhanced textures and better visibility
+    // Create road material with better visibility
     const roadMaterial = new THREE.MeshBasicMaterial({
       color: 0x555555,
       side: THREE.DoubleSide,
