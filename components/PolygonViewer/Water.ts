@@ -150,9 +150,20 @@ export default class Water {
             color = mix(color, vec3(1.0), foamFactor * 1.0); // Increased from 0.9 to 1.0
           }
           
+          // Add central light ray effect
+          float centerDist = abs(vUv.x - 0.5);
+          float lightRay = pow(1.0 - centerDist, 8.0) * 0.3;
+          
+          // Add horizontal striations
+          float striation = sin(vUv.y * 200.0 + time * 0.3) * 0.04;
+          
           // Add subtle wave patterns - much more pronounced
           float pattern = sin(vUv.x * 100.0 + time) * sin(vUv.y * 100.0 + time * 0.7) * 0.08; // Increased from 0.05 to 0.08
+          
+          // Combine all effects
           color += pattern * vec3(0.1, 0.1, 0.3);
+          color += lightRay * vec3(0.7, 0.8, 1.0);
+          color += striation * vec3(0.5, 0.7, 1.0);
           
           // Increase opacity for better visibility
           gl_FragColor = vec4(color, 1.0);

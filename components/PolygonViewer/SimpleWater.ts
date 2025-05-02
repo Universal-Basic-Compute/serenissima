@@ -109,9 +109,19 @@ export default class SimpleWater {
             color = mix(color, vec3(1.0), foamFactor * 0.9);
           }
           
+          // Add light ray effect
+          float lightRay = pow(abs(sin(vUv.x * 3.14159 * 2.0)), 20.0) * 0.15;
+          
+          // Add horizontal striations
+          float striation = sin(vUv.y * 150.0 + time * 0.2) * 0.03;
+          
           // Add subtle wave patterns - more pronounced
           float pattern = sin(vUv.x * 100.0 + time * 0.5) * sin(vUv.y * 100.0 + time * 0.3) * 0.1; // Increased from 0.05 to 0.1
+          
+          // Combine all effects
           color += pattern * vec3(0.2, 0.2, 0.4); // Increased color impact
+          color += lightRay * vec3(0.7, 0.8, 1.0);
+          color += striation * vec3(0.5, 0.7, 1.0);
           
           gl_FragColor = vec4(color, 0.7); // Reduced opacity from 0.9 to 0.7 for better land visibility
         }
