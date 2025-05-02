@@ -15,7 +15,7 @@
     },
     "maintenanceCost": 1000,
     "constructionTime": 86400000,
-    "incomeGeneration": 4000,
+    "incomeGeneration": 8000,
     "employmentCapacity": 1,
     "locationRequirements": {
       "districtRestrictions": "Must be placed in designated market areas or along commercial streets",
