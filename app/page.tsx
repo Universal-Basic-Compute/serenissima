@@ -964,7 +964,8 @@ export default function Home() {
             strokeColor: '#3388ff',
             strokeOpacity: 0.8,
             fillColor: '#3388ff',
-            fillOpacity: 0.35
+            fillOpacity: 0.35,
+            visible: true
           });
         }
         setSelectedMapPolygon(null);
@@ -978,7 +979,8 @@ export default function Home() {
           strokeColor: '#3388ff',
           strokeOpacity: 0.8,
           fillColor: '#3388ff',
-          fillOpacity: 0.35
+          fillOpacity: 0.35,
+          visible: true
         });
       }
       
@@ -991,7 +993,8 @@ export default function Home() {
         strokeColor: '#ff0000',
         strokeOpacity: 1.0,
         fillColor: '#ff0000',
-        fillOpacity: 0.5
+        fillOpacity: 0.5,
+        visible: true
       });
       
       return;
@@ -1082,7 +1085,8 @@ export default function Home() {
             strokeColor: '#3388ff',
             strokeOpacity: 0.8,
             fillColor: '#3388ff',
-            fillOpacity: 0.35
+            fillOpacity: 0.35,
+            visible: true
           });
         }
         
@@ -1097,7 +1101,8 @@ export default function Home() {
           strokeColor: '#ff0000',
           strokeOpacity: 1.0,
           fillColor: '#ff0000',
-          fillOpacity: 0.5
+          fillOpacity: 0.5,
+          visible: true
         });
       } else {
         // If we clicked on empty space, deselect the current polygon
@@ -1106,7 +1111,8 @@ export default function Home() {
             strokeColor: '#3388ff',
             strokeOpacity: 0.8,
             fillColor: '#3388ff',
-            fillOpacity: 0.35
+            fillOpacity: 0.35,
+            visible: true
           });
           setSelectedPolygon(null);
         }
@@ -1301,6 +1307,7 @@ export default function Home() {
               strokeWeight: 2,
               fillColor: '#3388ff',
               fillOpacity: 0.35,
+              visible: true,
               map: mapRef.current
             });
             
@@ -1965,7 +1972,8 @@ export default function Home() {
                     strokeColor: '#3388ff',
                     strokeOpacity: 0.8,
                     fillColor: '#3388ff',
-                    fillOpacity: 0.35
+                    fillOpacity: 0.35,
+                    visible: true
                   });
                 }
                 setSelectedMapPolygon(null);
@@ -2018,7 +2026,8 @@ export default function Home() {
                       strokeColor: '#3388ff',
                       strokeOpacity: 0.8,
                       fillColor: '#3388ff',
-                      fillOpacity: 0.35
+                      fillOpacity: 0.35,
+                      visible: true
                     });
                   }
                   setSelectedMapPolygon(null);
