@@ -51,45 +51,9 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
         }
       }
       
-      // IMPORTANT: Store a local reference to scene to avoid undefined issues during cleanup
-      const currentScene = scene;
-      
-      // Then check if scene exists before traversing
-      if (currentScene) {
-        try {
-          console.log('Road Creator: Removing orphaned road mesh on unmount');
-          
-          // Find and remove any orphaned road meshes
-          const objectsToRemove: THREE.Object3D[] = [];
-          
-          // First collect all objects to remove
-          currentScene.traverse((object) => {
-            if (object instanceof THREE.Mesh && object.userData && object.userData.isRoad) {
-              objectsToRemove.push(object);
-            }
-          });
-          
-          // Then remove them in a separate step to avoid modifying the scene during traversal
-          objectsToRemove.forEach(object => {
-            currentScene.remove(object);
-            
-            if ((object as THREE.Mesh).geometry) {
-              (object as THREE.Mesh).geometry.dispose();
-            }
-            
-            if ((object as THREE.Mesh).material) {
-              const material = (object as THREE.Mesh).material;
-              if (Array.isArray(material)) {
-                material.forEach(m => m.dispose());
-              } else {
-                material.dispose();
-              }
-            }
-          });
-        } catch (error) {
-          console.error('Error cleaning up orphaned road meshes:', error);
-        }
-      }
+      // We're not removing completed roads anymore, only the preview mesh
+      // This ensures that roads created by the user remain in the scene
+      // even after the RoadCreator component unmounts
     };
   }, [scene, previewMesh]);
 
