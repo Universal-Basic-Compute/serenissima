@@ -452,7 +452,7 @@ export default class SceneSetup {
   
   // Add update method to handle all animations
   public update(frameCount: number) {
-    // Update water if it exists
+    // Update water if it exists - ensure this runs every frame for smooth wave animation
     if (this.water) {
       this.water.update(frameCount);
     }

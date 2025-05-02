@@ -274,7 +274,7 @@ export default class SimpleWater {
   
   public update(frameCount: number) {
     // Update time with variable speed for more natural animation
-    const timeSpeed = 0.1 + Math.sin(frameCount * 0.001) * 0.02; // Subtle variation in speed
+    const timeSpeed = 0.12 + Math.sin(frameCount * 0.001) * 0.03; // Increased from 0.1/0.02 to 0.12/0.03
     this.time += timeSpeed;
     
     // Skip if water mesh doesn't exist
@@ -294,13 +294,29 @@ export default class SimpleWater {
       );
     }
     
-    // Periodically update sun color for time-of-day effect
-    if (this.waterMaterial.uniforms.sunColor && frameCount % 100 === 0) {
+    // Update sun color more frequently for more dynamic lighting
+    if (this.waterMaterial.uniforms.sunColor && frameCount % 60 === 0) { // Changed from 100 to 60
       const dayFactor = 0.5 + 0.5 * Math.sin(this.time * 0.01); // Day-night cycle
       const r = 1.0;
       const g = 0.9 + dayFactor * 0.1; // Slightly more yellow during day
       const b = 0.7 + dayFactor * 0.3; // More blue during day
       this.waterMaterial.uniforms.sunColor.value.setRGB(r, g, b);
+    }
+    
+    // Add occasional random wave pulses for more dynamic water
+    if (Math.random() < 0.01) { // 1% chance each frame
+      // Simulate a random wave pulse by temporarily increasing wave height
+      if (this.waterMaterial.uniforms.waveHeight) {
+        const originalHeight = this.waterMaterial.uniforms.waveHeight.value;
+        this.waterMaterial.uniforms.waveHeight.value = originalHeight * 1.2;
+        
+        // Reset after a short delay
+        setTimeout(() => {
+          if (this.waterMaterial && this.waterMaterial.uniforms.waveHeight) {
+            this.waterMaterial.uniforms.waveHeight.value = originalHeight;
+          }
+        }, 500);
+      }
     }
   }
   

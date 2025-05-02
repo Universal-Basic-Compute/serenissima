@@ -91,7 +91,7 @@ export default class Water {
         waterColor: { value: new THREE.Color(this.getWaterColorForView()) },
         deepWaterColor: { value: new THREE.Color(this.getDeepWaterColorForView()) },
         resolution: { value: new THREE.Vector2(resolution, resolution) },
-        waveHeight: { value: 2.5 },
+        waveHeight: { value: 3.5 }, // Increased from 2.5 to 3.5
         sunDirection: { value: new THREE.Vector3(0.5, 0.8, 0.2).normalize() },
         sunColor: { value: new THREE.Color(0xffffff) }
       },
@@ -103,25 +103,25 @@ export default class Water {
         varying vec3 vNormal;
         varying vec3 vViewPosition;
         
-        // Improved wave function with multiple frequencies
+        // Enhanced wave function with more pronounced waves
         float wave(vec2 position) {
           float result = 0.0;
           
-          // Large slow waves
-          result += sin(position.x * 0.5 + time * 0.5) * 
-                   cos(position.y * 0.4 + time * 0.3) * 1.2;
+          // Large primary waves with increased amplitude
+          result += sin(position.x * 0.3 + time * 0.4) * 
+                   cos(position.y * 0.2 + time * 0.3) * 1.8;
           
-          // Medium waves with more variation
-          result += sin(position.x * 1.0 + time * 0.8) * 
-                   sin(position.y * 1.3 + time * 0.6) * 0.7;
+          // Medium waves with more variation and higher amplitude
+          result += sin(position.x * 0.8 + time * 0.7) * 
+                   sin(position.y * 0.9 + time * 0.6) * 1.0;
           
-          // Small ripples with higher frequency
-          result += sin(position.x * 2.5 + time * 1.5) * 
-                   sin(position.y * 2.8 + time * 1.7) * 0.4;
+          // Small ripples with increased detail
+          result += sin(position.x * 2.0 + time * 1.2) * 
+                   sin(position.y * 2.2 + time * 1.4) * 0.6;
           
-          // Micro detail ripples
-          result += sin(position.x * 5.0 + time * 2.5) * 
-                   sin(position.y * 5.5 + time * 2.2) * 0.2;
+          // Micro detail with higher frequency
+          result += sin(position.x * 4.0 + time * 2.0) * 
+                   sin(position.y * 4.5 + time * 1.8) * 0.3;
                    
           return result;
         }
@@ -179,50 +179,51 @@ export default class Water {
         }
         
         void main() {
-          // Mix between deep and shallow water colors based on elevation
-          float depthFactor = smoothstep(-0.5, 0.5, vElevation);
+          // Increase contrast between deep and shallow water
+          float depthFactor = smoothstep(-0.7, 0.7, vElevation);
           vec3 color = mix(deepWaterColor, waterColor, depthFactor);
           
-          // Add foam at wave peaks with smoother transition
-          if (vElevation > 0.2) {
-            float foamFactor = smoothstep(0.2, 0.4, vElevation);
-            color = mix(color, vec3(1.0), foamFactor * 1.0);
+          // Add more pronounced foam at wave peaks
+          if (vElevation > 0.15) {
+            float foamFactor = smoothstep(0.15, 0.4, vElevation);
+            color = mix(color, vec3(1.0), foamFactor * 1.2);
           }
           
-          // Add specular highlight (sun reflection)
+          // Enhanced specular highlight
           vec3 viewDir = normalize(vViewPosition);
           vec3 reflectDir = reflect(-sunDirection, vNormal);
-          float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0);
-          vec3 specular = sunColor * spec * 0.5;
+          float spec = pow(max(dot(viewDir, reflectDir), 0.0), 64.0); // Increased from 32 to 64
+          vec3 specular = sunColor * spec * 0.8; // Increased from 0.5 to 0.8
           
-          // Add fresnel effect (more reflective at glancing angles)
-          float fresnelFactor = fresnel(vNormal, viewDir, 5.0);
-          color = mix(color, vec3(1.0), fresnelFactor * 0.3);
+          // More pronounced fresnel effect
+          float fresnelFactor = fresnel(vNormal, viewDir, 4.0);
+          color = mix(color, vec3(0.9, 0.95, 1.0), fresnelFactor * 0.4);
           
-          // Add central light ray effect
+          // Add more visible light ray effect
           float centerDist = abs(vUv.x - 0.5);
-          float lightRay = pow(1.0 - centerDist, 8.0) * 0.3;
+          float lightRay = pow(1.0 - centerDist, 8.0) * 0.4; // Increased from 0.3 to 0.4
           
-          // Add horizontal striations
-          float striation = sin(vUv.y * 200.0 + time * 0.3) * 0.04;
+          // Add more pronounced horizontal striations
+          float striation = sin(vUv.y * 150.0 + time * 0.3) * 0.06; // Increased from 0.04 to 0.06
           
-          // Add subtle wave patterns with more variation
-          float pattern = sin(vUv.x * 100.0 + time) * sin(vUv.y * 100.0 + time * 0.7) * 0.08;
-          pattern += sin(vUv.x * 50.0 - time * 0.5) * sin(vUv.y * 50.0 + time * 0.3) * 0.04;
+          // Add more visible wave patterns
+          float pattern = sin(vUv.x * 80.0 + time * 0.6) * sin(vUv.y * 80.0 + time * 0.4) * 0.15;
+          pattern += sin(vUv.x * 40.0 - time * 0.4) * sin(vUv.y * 40.0 + time * 0.3) * 0.08;
           
-          // Combine all effects
-          color += pattern * vec3(0.1, 0.1, 0.3);
-          color += lightRay * vec3(0.7, 0.8, 1.0);
-          color += striation * vec3(0.5, 0.7, 1.0);
-          color += specular;
-          
-          // Add subtle caustics effect
+          // Add more visible caustics effect
           float causticPattern = 
-            sin(vUv.x * 40.0 + time * 2.0) * 
-            sin(vUv.y * 40.0 + time * 1.7) * 0.05;
-          color += max(0.0, causticPattern) * vec3(0.3, 0.6, 1.0);
+            sin(vUv.x * 30.0 + time * 2.5) * 
+            sin(vUv.y * 30.0 + time * 2.0) * 0.08;
+          causticPattern = max(0.0, causticPattern);
           
-          gl_FragColor = vec4(color, 1.0);
+          // Combine all effects with increased intensity
+          color += pattern * vec3(0.3, 0.3, 0.5);
+          color += lightRay * vec3(0.8, 0.9, 1.0);
+          color += striation * vec3(0.6, 0.8, 1.0);
+          color += specular;
+          color += causticPattern * vec3(0.4, 0.7, 1.0);
+          
+          gl_FragColor = vec4(color, 0.95); // Slightly increased opacity
         }
       `
     };
@@ -704,7 +705,7 @@ export default class Water {
   
   public update(frameCount: number) {
     // Update time with variable speed for more natural animation
-    const timeSpeed = 0.08 + Math.sin(frameCount * 0.001) * 0.01; // Subtle variation in speed
+    const timeSpeed = 0.1 + Math.sin(frameCount * 0.001) * 0.02; // Increased from 0.08/0.01 to 0.1/0.02
     this.time += timeSpeed;
     
     // Get delta time for physics-based simulation with a minimum to prevent instability
@@ -726,8 +727,8 @@ export default class Water {
       ).normalize();
     }
     
-    // Update wave simulation with multiple steps for more stability
-    const subSteps = 2; // Divide deltaTime into smaller steps
+    // Update wave simulation with more substeps for smoother waves
+    const subSteps = 3; // Increased from 2 to 3 for more detailed simulation
     for (let i = 0; i < subSteps; i++) {
       this.updateWaveSimulation(deltaTime / subSteps);
     }
@@ -735,25 +736,25 @@ export default class Water {
     // Apply waves to geometry
     this.applyWavesToGeometry();
     
-    // Create random waves with variable frequency
+    // Create random waves with increased frequency
     // More waves during "stormy" periods, fewer during "calm" periods
     const stormFactor = 0.5 + 0.5 * Math.sin(this.time * 0.01); // Oscillates between 0 and 1
-    const waveChance = 0.03 + stormFactor * 0.04; // Between 0.03 and 0.07
+    const waveChance = 0.04 + stormFactor * 0.05; // Increased from 0.03/0.04 to 0.04/0.05
     
     if (Math.random() < waveChance) {
       this.createRandomWave();
     }
     
-    // Occasionally create a larger "boat wake" wave
-    if (Math.random() < 0.002) {
+    // Create larger "boat wake" waves more frequently
+    if (Math.random() < 0.003) { // Increased from 0.002 to 0.003
       // Create a directional wake
       const size = this.gridSize;
       const x = Math.floor(Math.random() * (size - 20)) + 10;
       const z = Math.floor(Math.random() * (size - 20)) + 10;
       const angle = Math.random() * Math.PI * 2;
-      const length = 15 + Math.random() * 10;
-      const width = 3 + Math.random() * 2;
-      const strength = 0.3 + Math.random() * 0.2;
+      const length = 18 + Math.random() * 12; // Increased from 15/10 to 18/12
+      const width = 4 + Math.random() * 2.5; // Increased from 3/2 to 4/2.5
+      const strength = 0.4 + Math.random() * 0.3; // Increased from 0.3/0.2 to 0.4/0.3
       
       for (let i = 0; i < size; i++) {
         for (let j = 0; j < size; j++) {
@@ -777,6 +778,36 @@ export default class Water {
             // Apply wake impulse
             if (this.waveGrid && idx < this.waveGrid.length) {
               this.waveGrid[idx] += strength * wakeFactor;
+            }
+          }
+        }
+      }
+    }
+    
+    // Add occasional large circular waves (like raindrops)
+    if (Math.random() < 0.002) {
+      const size = this.gridSize;
+      const x = Math.floor(Math.random() * (size - 20)) + 10;
+      const z = Math.floor(Math.random() * (size - 20)) + 10;
+      const radius = 5 + Math.random() * 3;
+      const strength = 0.5 + Math.random() * 0.3;
+      
+      for (let i = 0; i < size; i++) {
+        for (let j = 0; j < size; j++) {
+          const dx = j - x;
+          const dz = i - z;
+          const distSq = dx * dx + dz * dz;
+          
+          if (distSq < radius * radius) {
+            const idx = i * size + j;
+            const distFactor = 1 - Math.sqrt(distSq) / radius;
+            
+            // Create a circular wave with a depression in the center
+            const waveFactor = Math.sin(distFactor * Math.PI);
+            
+            // Apply wave impulse
+            if (this.waveGrid && idx < this.waveGrid.length) {
+              this.waveGrid[idx] += strength * waveFactor;
             }
           }
         }
