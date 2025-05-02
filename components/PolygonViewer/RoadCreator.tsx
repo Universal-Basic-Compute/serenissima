@@ -209,6 +209,40 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
       window.removeEventListener('contextmenu', handleRightClick);
       window.removeEventListener('click', preventLandSelection, true); // true for capture phase
       clearTimeout(enableClickTimeout); // Clear the timeout on cleanup
+      
+      // Clean up any remaining preview mesh
+      if (previewMesh) {
+        console.log('Road Creator: Cleaning up preview mesh on unmount');
+        scene.remove(previewMesh);
+        if (previewMesh.geometry) previewMesh.geometry.dispose();
+        if (previewMesh.material) {
+          if (Array.isArray(previewMesh.material)) {
+            previewMesh.material.forEach(m => m.dispose());
+          } else {
+            previewMesh.material.dispose();
+          }
+        }
+      }
+      
+      // Find and remove any orphaned road meshes
+      scene.traverse((object) => {
+        if (object instanceof THREE.Mesh && object.userData && object.userData.isRoad) {
+          console.log('Road Creator: Removing orphaned road mesh on unmount');
+          scene.remove(object);
+          
+          if (object.geometry) {
+            object.geometry.dispose();
+          }
+          
+          if (object.material) {
+            if (Array.isArray(object.material)) {
+              object.material.forEach(m => m.dispose());
+            } else {
+              object.material.dispose();
+            }
+          }
+        }
+      });
     };
   }, [active, camera, points, scene, onComplete, onCancel, previewMesh]);
 
@@ -216,8 +250,9 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
   const updateRoadPreview = () => {
     if (!isPlacing || points.length === 0) return;
     
-    // Remove existing preview mesh before creating a new one
+    // Always remove existing preview mesh before creating a new one
     if (previewMesh) {
+      console.log('Road Creator: Removing existing preview mesh');
       scene.remove(previewMesh);
       if (previewMesh.geometry) previewMesh.geometry.dispose();
       if (previewMesh.material) {
