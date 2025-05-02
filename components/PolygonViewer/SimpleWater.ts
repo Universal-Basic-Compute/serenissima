@@ -46,13 +46,26 @@ export default class SimpleWater {
       32
     );
     
-    // Create a simple material for water with the appropriate color and higher opacity
+    // Load water textures
+    const textureLoader = new THREE.TextureLoader();
+    
+    // Load water normal map
+    const normalMap = textureLoader.load('/textures/waternormals.jpg', (texture) => {
+      texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+      texture.repeat.set(5, 5);
+    });
+    
+    // Create a material for water with the appropriate color, higher opacity, and normal map
     const waterColor = new THREE.Color(this.getWaterColorForView());
-    const material = new THREE.MeshBasicMaterial({
+    const material = new THREE.MeshStandardMaterial({
       color: waterColor,
       transparent: true,
       opacity: 0.9, // Increased opacity for better visibility
-      side: THREE.DoubleSide
+      side: THREE.DoubleSide,
+      normalMap: normalMap,
+      normalScale: new THREE.Vector2(0.3, 0.3), // Adjust normal intensity
+      metalness: 0.1,
+      roughness: 0.5
     });
     
     // Create the water mesh
@@ -96,20 +109,21 @@ export default class SimpleWater {
     // Skip if water mesh doesn't exist
     if (!this.waterMesh) return;
     
-    // Animate water by moving vertices
-    const positions = (this.waterMesh.geometry as THREE.PlaneGeometry).attributes.position.array;
+    // Get the material
+    const material = this.waterMesh.material as THREE.MeshStandardMaterial;
     
-    for (let i = 0; i < positions.length; i += 3) {
-      const x = positions[i];
-      const z = positions[i + 2];
+    // Update normal map offset for wave animation
+    if (material.normalMap) {
+      material.normalMap.offset.x = this.time * 0.05;
+      material.normalMap.offset.y = this.time * 0.03;
       
-      // Simple wave animation
-      positions[i + 1] = Math.sin(x * 0.5 + this.time) * 0.2 + 
-                         Math.cos(z * 0.5 + this.time * 0.8) * 0.2;
+      // Vary normal scale slightly for more dynamic waves
+      const scale = 0.3 + Math.sin(this.time * 0.2) * 0.05;
+      material.normalScale.set(scale, scale);
+      
+      // Update material
+      material.needsUpdate = true;
     }
-    
-    // Update geometry
-    (this.waterMesh.geometry as THREE.PlaneGeometry).attributes.position.needsUpdate = true;
   }
   
   public updateViewMode(activeView: ViewMode) {
