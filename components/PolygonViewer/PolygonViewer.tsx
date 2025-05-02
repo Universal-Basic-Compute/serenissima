@@ -1379,7 +1379,10 @@ export default function PolygonViewer() {
       {activeView === 'buildings' && !roadCreationActive && (
         <div className="absolute bottom-4 right-4 z-10">
           <button
-            onClick={() => setRoadCreationActive(true)}
+            onClick={(e) => {
+              e.stopPropagation(); // Stop propagation to prevent the click from reaching other handlers
+              setRoadCreationActive(true);
+            }}
             className="bg-amber-600 text-white px-4 py-2 rounded-lg shadow-md hover:bg-amber-700 transition-colors flex items-center"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">

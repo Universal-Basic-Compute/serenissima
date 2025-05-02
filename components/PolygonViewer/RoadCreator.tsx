@@ -46,6 +46,12 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
   useEffect(() => {
     if (!active) return;
 
+    // Add a small delay before enabling click handling to prevent the initial click from being registered
+    let clickEnabled = false;
+    const enableClickTimeout = setTimeout(() => {
+      clickEnabled = true;
+    }, 100);
+
     const handleMouseMove = (event: MouseEvent) => {
       // Calculate mouse position in normalized device coordinates
       mouseRef.current.x = (event.clientX / window.innerWidth) * 2 - 1;
@@ -55,7 +61,7 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
     };
 
     const handleClick = (event: MouseEvent) => {
-      if (!active || event.button !== 0) return; // Only handle left clicks
+      if (!active || event.button !== 0 || !clickEnabled) return; // Only handle left clicks and only if clicks are enabled
       
       console.log('Road Creator: Click detected');
       
@@ -198,12 +204,27 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('contextmenu', handleRightClick);
       window.removeEventListener('click', preventLandSelection, true); // true for capture phase
+      clearTimeout(enableClickTimeout); // Clear the timeout on cleanup
     };
   }, [active, camera, points, scene, onComplete, onCancel, previewMesh]);
 
   // Update road preview when mouse moves
   const updateRoadPreview = () => {
     if (!isPlacing || points.length === 0) return;
+    
+    // Remove existing preview mesh before creating a new one
+    if (previewMesh) {
+      scene.remove(previewMesh);
+      if (previewMesh.geometry) previewMesh.geometry.dispose();
+      if (previewMesh.material) {
+        if (Array.isArray(previewMesh.material)) {
+          previewMesh.material.forEach(m => m.dispose());
+        } else {
+          previewMesh.material.dispose();
+        }
+      }
+      setPreviewMesh(null);
+    }
     
     // Update the raycaster with the camera and mouse position
     raycasterRef.current.setFromCamera(mouseRef.current, camera);

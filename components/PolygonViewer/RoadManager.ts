@@ -204,6 +204,8 @@ export default class RoadManager {
   }
 
   public cleanup(): void {
+    console.log(`Cleaning up ${this.roads.length} roads`);
+    
     // Remove all roads
     this.roads.forEach(road => {
       this.scene.remove(road.mesh);
@@ -228,5 +230,25 @@ export default class RoadManager {
       this.roadTexture.dispose();
       this.roadTexture = null;
     }
+    
+    // Find and remove any orphaned road meshes in the scene
+    this.scene.traverse((object) => {
+      if (object instanceof THREE.Mesh && object.userData && object.userData.isRoad) {
+        console.log('Found orphaned road mesh, removing it');
+        this.scene.remove(object);
+        
+        if (object.geometry) {
+          object.geometry.dispose();
+        }
+        
+        if (object.material) {
+          if (Array.isArray(object.material)) {
+            object.material.forEach(m => m.dispose());
+          } else {
+            object.material.dispose();
+          }
+        }
+      }
+    });
   }
 }
