@@ -1,0 +1,434 @@
+[
+  {
+    "building": "Bottega",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-01T21:48:04.108Z"
+  },
+  {
+    "building": "Merceria",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-01T21:53:15.369Z"
+  },
+  {
+    "building": "Apothecary",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-01T21:57:23.814Z"
+  },
+  {
+    "building": "Luxury Showroom",
+    "stage": "preview_task_failed",
+    "error": "[object Object]",
+    "timestamp": "2025-05-01T21:58:12.441Z"
+  },
+  {
+    "building": "Luxury Showroom",
+    "stage": "preview_task_incomplete",
+    "error": "[object Object]",
+    "timestamp": "2025-05-01T21:58:12.451Z"
+  },
+  {
+    "building": "Fondaco dei Tedeschi",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-01T22:03:16.863Z"
+  },
+  {
+    "building": "Eastern Merchant House",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-01T22:08:17.277Z"
+  },
+  {
+    "building": "Broker's Office",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-01T22:12:57.062Z"
+  },
+  {
+    "building": "Customs House",
+    "stage": "preview_task_incomplete",
+    "error": "[object Object]",
+    "timestamp": "2025-05-01T22:18:17.489Z"
+  },
+  {
+    "building": "Weighing Station",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-01T22:22:29.722Z"
+  },
+  {
+    "building": "Public Dock",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-01T22:26:58.709Z"
+  },
+  {
+    "building": "Private Dock",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-01T22:31:17.387Z"
+  },
+  {
+    "building": "Gondola Station",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-01T22:34:54.344Z"
+  },
+  {
+    "building": "Cargo Landing",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-01T22:40:35.170Z"
+  },
+  {
+    "building": "Bridge",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-01T22:44:32.775Z"
+  },
+  {
+    "building": "Cistern",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-01T22:49:23.501Z"
+  },
+  {
+    "building": "Public Well",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-01T22:54:13.459Z"
+  },
+  {
+    "building": "Canal Maintenance Office",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-01T22:59:02.126Z"
+  },
+  {
+    "building": "Flood Control Station",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-01T23:03:10.734Z"
+  },
+  {
+    "building": "Small Warehouse",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-01T23:06:58.003Z"
+  },
+  {
+    "building": "Secure Vault",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-01T23:10:13.823Z"
+  },
+  {
+    "building": "Granary",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-01T23:17:09.648Z"
+  },
+  {
+    "building": "Wine Cellar",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-01T23:20:25.458Z"
+  },
+  {
+    "building": "Arsenal Workshop",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-01T23:23:20.272Z"
+  },
+  {
+    "building": "Guard Post",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-01T23:28:10.623Z"
+  },
+  {
+    "building": "Watchtower",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-01T23:32:17.957Z"
+  },
+  {
+    "building": "Armory",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-01T23:35:33.865Z"
+  },
+  {
+    "building": "Naval Administration Office",
+    "stage": "refine_task_failed",
+    "error": "[object Object]",
+    "timestamp": "2025-05-01T23:36:23.796Z"
+  },
+  {
+    "building": "Naval Administration Office",
+    "stage": "refine_task_incomplete",
+    "error": "[object Object]",
+    "timestamp": "2025-05-01T23:36:23.806Z"
+  },
+  {
+    "building": "City Gate",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-01T23:40:06.209Z"
+  },
+  {
+    "building": "Harbor Chain Tower",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-01T23:44:33.955Z"
+  },
+  {
+    "building": "Arsenal Gate",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-01T23:48:42.569Z"
+  },
+  {
+    "building": "Defensive Bastion",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-01T23:53:11.946Z"
+  },
+  {
+    "building": "Prison",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-01T23:57:10.289Z"
+  },
+  {
+    "building": "Glass Foundry",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-02T00:02:19.768Z"
+  },
+  {
+    "building": "Silk Conditioning House",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-02T00:05:56.923Z"
+  },
+  {
+    "building": "Shipyard",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-02T00:09:23.621Z"
+  },
+  {
+    "building": "Mint",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-02T00:14:24.483Z"
+  },
+  {
+    "building": "Bakery",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-02T00:20:47.283Z"
+  },
+  {
+    "building": "Glassblower Workshop",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-02T00:24:35.288Z"
+  },
+  {
+    "building": "Dye Works",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-02T00:27:52.494Z"
+  },
+  {
+    "building": "Blacksmith",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-02T00:31:40.348Z"
+  },
+  {
+    "building": "Goldsmith Workshop",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-02T00:35:15.907Z"
+  },
+  {
+    "building": "Paper Mill",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-02T00:41:08.962Z"
+  },
+  {
+    "building": "Printing House",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-02T00:45:07.284Z"
+  },
+  {
+    "building": "Parish Church",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-02T00:49:49.063Z"
+  },
+  {
+    "building": "Chapel",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-02T00:54:06.863Z"
+  },
+  {
+    "building": "Town Hall",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-02T00:59:18.527Z"
+  },
+  {
+    "building": "Courthouse",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-02T01:03:47.616Z"
+  },
+  {
+    "building": "Public Archives",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-02T01:07:45.411Z"
+  },
+  {
+    "building": "Navigation School",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-02T01:11:20.994Z"
+  },
+  {
+    "building": "Art Academy",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-02T01:14:47.527Z"
+  },
+  {
+    "building": "Hospital",
+    "stage": "refine_task_failed",
+    "error": "[object Object]",
+    "timestamp": "2025-05-02T01:15:58.497Z"
+  },
+  {
+    "building": "Hospital",
+    "stage": "refine_task_incomplete",
+    "error": "[object Object]",
+    "timestamp": "2025-05-02T01:15:58.509Z"
+  },
+  {
+    "building": "Quarantine Station",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-02T01:20:43.194Z"
+  },
+  {
+    "building": "Theater",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-02T01:24:39.962Z"
+  },
+  {
+    "building": "Public Bath",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-02T01:27:48.430Z"
+  },
+  {
+    "building": "Fisherman's Cottage",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-02T01:32:48.846Z"
+  },
+  {
+    "building": "Artisan's House",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-02T01:37:18.336Z"
+  },
+  {
+    "building": "Merchant's House",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-02T01:42:07.307Z"
+  },
+  {
+    "building": "Canal House",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-02T01:47:18.485Z"
+  },
+  {
+    "building": "Patrician Palazzo",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-02T01:51:58.177Z"
+  },
+  {
+    "building": "Grand Canal Palace",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-02T01:57:19.432Z"
+  },
+  {
+    "building": "Doge's Palace",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-02T02:02:49.633Z"
+  },
+  {
+    "building": "St. Mark's Basilica",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-02T02:08:12.995Z"
+  },
+  {
+    "building": "Rialto Bridge",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-02T02:11:39.672Z"
+  },
+  {
+    "building": "Clocktower",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-02T02:15:26.715Z"
+  },
+  {
+    "building": "Glass Guild Hall",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-02T02:18:51.614Z"
+  },
+  {
+    "building": "Merchant Guild Hall",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-02T02:22:59.627Z"
+  },
+  {
+    "building": "Silk Guild Hall",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-02T02:26:36.260Z"
+  },
+  {
+    "building": "Shipwright Guild Hall",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-02T02:31:15.937Z"
+  },
+  {
+    "building": "Goldsmith Guild Hall",
+    "stage": "asset_download",
+    "error": "url is not defined",
+    "timestamp": "2025-05-02T02:34:53.086Z"
+  }
+]

@@ -1,665 +1,751 @@
 [
-    {
-      "name": "Arsenal Workshop",
-      "category": "Military & Defense",
-      "subcategory": "Naval Facilities",
-      "tier": 4,
-      "size": "Extra Large",
-      "unlockCondition": "Government license only, 30,000 ducats, Senate appointment",
-      
-      "shortDescription": "Specialized production facility within the Arsenal complex for building naval vessels and equipment.",
-      "fullDescription": "The industrial heart of Venice's naval power, Arsenal workshops represent the world's first standardized ship production facilities. Featuring specialized construction areas, material processing stations, equipment fabrication, and assembly zones, these massive structures enabled Venice to build ships at unprecedented speed and quality. Their advanced organization and scale astounded foreign visitors and projected Venetian power throughout the Mediterranean.",
-      "flavorText": "What other nations do in months, the Arsenal does in days; what they build individually, we create in series—for Venice's navy is not merely ships, but the perfected system that produces them.",
-      
-      "constructionCosts": {
-        "ducats": 25000,
-        "timber": 500,
-        "bricks": 800,
-        "stone": 1000,
-        "iron": 300,
-        "marble": 50
-      },
-      "maintenanceCost": 200,
-      "constructionTime": 3456000000,
-      "incomeGeneration": 0,
-      "employmentCapacity": 100,
-      
-      "locationRequirements": {
-        "districtRestrictions": "Arsenal district only, government authorization required",
-        "adjacentRequirements": "Deep water access, Arsenal complex integration",
-        "environmentalEffects": "Industrial activity, strategic importance, restricted access"
-      },
-      
-      "constructionPhase3DPrompt": "Renaissance Venetian Arsenal workshop under construction, massive naval industrial facility, part of the larger Arsenal complex, huge construction hall taking shape with overhead gantry system, specialized work zones for different ship components, material processing areas, strict security measures during construction, direct canal access being created for launched vessels, enormous roof trusses spanning wide production space, state engineers supervising all details, advanced construction techniques, scale dwarfing normal buildings, government oversight evident, isometric game perspective, stylized but detailed, sense of industrial-scale naval construction capabilities being created",
-      
-      "completedBuilding3DPrompt": "Completed Renaissance Venetian Arsenal workshop, impressive naval industrial facility featuring enormous construction hall where multiple warships are simultaneously being built in various stages, standardized workstations for different ship components, overhead gantry system for moving heavy parts, specialized craftsmen working on specific tasks, timber processing zone, sail fabrication area, cannon mounting station, rope-making section, strict organization with military efficiency, ships moving through progressive assembly stages, launching channel to waters, armed guards restricting access, state officials supervising operations, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of revolutionary industrial capacity, workers moving with practiced efficiency showing the world's first assembly-line production, scale and organization that made Venice's naval dominance possible, atmosphere of disciplined manufacturing combined with craftsmanship, state symbols prominently displayed showing government ownership",
-      
-      "gameplayInformation": {
-        "unlocks": ["Naval Ship Production", "State Military Contracts", "Arsenal System"],
-        "specialAbilities": ["Rapid warship construction", "Standardized naval production", "Military technology development"],
-        "upgradePath": ["Advanced Arsenal Facility (cutting-edge naval technology)"],
-        "reputationEffects": {
-          "Military": 30,
-          "Senate": 25,
-          "Arsenal Workers Guild": 25,
-          "Foreign Powers": 20
-        },
-        "riskFactors": {
-          "securityRisk": "Medium (strategic target)",
-          "industrial risk": "High (dangerous processes)",
-          "fireRisk": "Very High (wood, pitch, open flames)"
-        }
-      },
-      
-      "soundDesign": {
-        "ambientSound": "Intense industrial activity, hammering, sawing, orders being shouted",
-        "activitySounds": "Ship hull construction, material processing, coordinated team work",
-        "musicTheme": "Arsenale in Movimento"
-      },
-      
-      "seasonalEffects": {
-        "wartime": "Maximum production, extended hours",
-        "peacetime": "Maintenance focus, training, improvements",
-        "fleet commissioning": "Ceremonial launches, quality inspections"
-      },
-      
-      "aiInteractionPoints": ["Main construction hall", "Material processing zone", "Component assembly areas", "Ship launch channel", "Administration office", "Security checkpoint", "Naval design area", "Quality inspection station"]
+  {
+    "name": "Arsenal Workshop",
+    "category": "Military & Defense",
+    "subcategory": "Naval Facilities",
+    "tier": 4,
+    "size": "Extra Large",
+    "unlockCondition": "Government license only, 30,000 ducats, Senate appointment",
+    "shortDescription": "Specialized production facility within the Arsenal complex for building naval vessels and equipment.",
+    "fullDescription": "The industrial heart of Venice's naval power, Arsenal workshops represent the world's first standardized ship production facilities. Featuring specialized construction areas, material processing stations, equipment fabrication, and assembly zones, these massive structures enabled Venice to build ships at unprecedented speed and quality. Their advanced organization and scale astounded foreign visitors and projected Venetian power throughout the Mediterranean.",
+    "flavorText": "What other nations do in months, the Arsenal does in days; what they build individually, we create in series—for Venice's navy is not merely ships, but the perfected system that produces them.",
+    "constructionCosts": {
+      "ducats": 12500,
+      "timber": 500,
+      "bricks": 800,
+      "stone": 1000,
+      "iron": 300,
+      "marble": 50
     },
-    
-    {
-      "name": "Guard Post",
-      "category": "Military & Defense",
-      "subcategory": "Security Facilities",
-      "tier": 1,
-      "size": "Small",
-      "unlockCondition": "3,000 ducats, Security Guild connection or government approval",
-      
-      "shortDescription": "Security checkpoint monitoring access to specific areas and maintaining public order.",
-      "fullDescription": "Maintaining Venice's legendary internal security, guard posts provide visible security presence at key locations. Featuring observation positions, small detention areas, patrol coordination, and often checkpoint facilities, these practical security installations support Venice's extensive police functions. Their strategic placement throughout the city created an effective security network despite the complex urban layout.",
-      "flavorText": "Venice's greatest defense is not her walls or ships, but her watchful eyes—for a crime prevented through vigilance requires neither judges nor prisons.",
-      
-      "constructionCosts": {
-        "ducats": 2000,
-        "timber": 40,
-        "bricks": 100,
-        "stone": 150,
-        "iron": 30
-      },
-      "maintenanceCost": 25,
-      "constructionTime": 172800000,
-      "incomeGeneration": 15,
-      "employmentCapacity": 6,
-      
-      "locationRequirements": {
-        "districtRestrictions": "Strategic points, entry points, valuable areas",
-        "adjacentRequirements": "Good visibility, control point potential",
-        "environmentalEffects": "Increases security, reduces crime, creates official presence"
-      },
-      
-      "constructionPhase3DPrompt": "Renaissance Venetian guard post under construction, small security facility, strategic position with good visibility in all directions, elevated observation platform being built, secure office area for records and detention, checkpoint features if at entry point, official Venetian security symbols, construction showing security considerations in design, weapon storage area, patrol coordination space, isometric game perspective, stylized but detailed, focus on practical security functionality rather than imposing appearance",
-      
-      "completedBuilding3DPrompt": "Completed Renaissance Venetian guard post, practical security facility featuring elevated observation platform with clear visibility of surroundings, small but secure structure with official Venetian security symbols including Lion of St. Mark, checkpoint area where documents can be checked, small detention room for temporary holding, patrol coordination desk with area maps, weapons rack with halberds and other official equipment, guards in Venetian security uniforms monitoring the area, record keeping system for incidents, lanterns for night operation, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of vigilant security presence, strategic positioning showing control of movement, balance of accessibility for legitimate citizens and security against threats",
-      
-      "gameplayInformation": {
-        "unlocks": ["Security Patrols", "Access Control", "Crime Reduction"],
-        "specialAbilities": ["Area security enhancement", "Criminal detention", "Official presence"],
-        "upgradePath": ["Security Station (larger jurisdiction, enhanced capability)"],
-        "reputationEffects": {
-          "Security Forces": 15,
-          "Law-Abiding Citizens": 20,
-          "Criminals": -25,
-          "Government": 15
-        },
-        "riskFactors": {
-          "targetRisk": "Medium (symbol of authority)",
-          "corruptionRisk": "Medium (enforcement discretion)",
-          "staffingRisk": "Low (desirable positions)"
-        }
-      },
-      
-      "soundDesign": {
-        "ambientSound": "Boot steps on stone, keys jingling, official conversations",
-        "activitySounds": "Document checking, patrol departures, security alerts",
-        "musicTheme": "Consiglio dei Dieci"
-      },
-      
-      "seasonalEffects": {
-        "carnival": "Increased staffing, mask verification",
-        "night hours": "Lanterns lit, increased vigilance",
-        "diplomatic events": "Enhanced security, special procedures"
-      },
-      
-      "aiInteractionPoints": ["Checkpoint desk", "Observation platform", "Patrol dispatch point", "Detention area", "Document inspection station", "Weapons rack"]
+    "maintenanceCost": 100,
+    "constructionTime": 3456000000,
+    "incomeGeneration": 0,
+    "employmentCapacity": 100,
+    "locationRequirements": {
+      "districtRestrictions": "Arsenal district only, government authorization required",
+      "adjacentRequirements": "Deep water access, Arsenal complex integration",
+      "environmentalEffects": "Industrial activity, strategic importance, restricted access"
     },
-    
-    {
-      "name": "Watchtower",
-      "category": "Military & Defense",
-      "subcategory": "Security Facilities",
-      "tier": 2,
-      "size": "Medium",
-      "unlockCondition": "7,000 ducats, Security Guild connection or government approval",
-      
-      "shortDescription": "Elevated observation position for surveillance of surrounding areas and early warning.",
-      "fullDescription": "Providing critical observation capabilities, watchtowers enable surveillance of wide areas for security and navigation purposes. Featuring elevated viewing platforms, signal equipment, observer quarters, and often communication systems, these specialized structures extend visual control over key approaches to Venice. Their strategic placement helped secure the lagoon approaches against threats while assisting maritime navigation.",
-      "flavorText": "From these heights, we can see threats before they see us, ships before they signal, and weather before it arrives—proving that in both security and commerce, foreknowledge is the greatest advantage.",
-      
-      "constructionCosts": {
-        "ducats": 5000,
-        "timber": 80,
-        "bricks": 200,
-        "stone": 350,
-        "iron": 50
+    "constructionPhase3DPrompt": "Renaissance Venetian Arsenal workshop under construction, massive naval industrial facility, part of the larger Arsenal complex, huge construction hall taking shape with overhead gantry system, specialized work zones for different ship components, material processing areas, strict security measures during construction, direct canal access being created for launched vessels, enormous roof trusses spanning wide production space, state engineers supervising all details, advanced construction techniques, scale dwarfing normal buildings, government oversight evident, isometric game perspective, stylized but detailed, sense of industrial-scale naval construction capabilities being created",
+    "completedBuilding3DPrompt": "Completed Renaissance Venetian Arsenal workshop, impressive naval industrial facility featuring enormous construction hall where multiple warships are simultaneously being built in various stages, standardized workstations for different ship components, overhead gantry system for moving heavy parts, specialized craftsmen working on specific tasks, timber processing zone, sail fabrication area, cannon mounting station, rope-making section, strict organization with military efficiency, ships moving through progressive assembly stages, launching channel to waters, armed guards restricting access, state officials supervising operations, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of revolutionary industrial capacity, workers moving with practiced efficiency showing the world's first assembly-line production, scale and organization that made Venice's naval dominance possible, atmosphere of disciplined manufacturing combined with craftsmanship, state symbols prominently displayed showing government ownership",
+    "gameplayInformation": {
+      "unlocks": [
+        "Naval Ship Production",
+        "State Military Contracts",
+        "Arsenal System"
+      ],
+      "specialAbilities": [
+        "Rapid warship construction",
+        "Standardized naval production",
+        "Military technology development"
+      ],
+      "upgradePath": [
+        "Advanced Arsenal Facility (cutting-edge naval technology)"
+      ],
+      "reputationEffects": {
+        "Military": 30,
+        "Senate": 25,
+        "Arsenal Workers Guild": 25,
+        "Foreign Powers": 20
       },
-      "maintenanceCost": 35,
-      "constructionTime": 432000000,
-      "incomeGeneration": 0,
-      "employmentCapacity": 8,
-      
-      "locationRequirements": {
-        "districtRestrictions": "High points, strategic observation locations, approaches",
-        "adjacentRequirements": "Unobstructed views, supportive foundation",
-        "environmentalEffects": "Increased security visibility, surveillance presence"
-      },
-      
-      "constructionPhase3DPrompt": "Renaissance Venetian watchtower under construction, strategic observation structure, tall design prioritizing height for maximum visibility, substantial foundation ensuring stability, spiral staircase installation, elevated observation platform with views in all directions, signal fire brazier being positioned, weather protection features, secure entry point, quarters for watch personnel, security features to prevent unauthorized access, communication systems like bell or signal flags, isometric game perspective, stylized but detailed, focus on creating optimal visibility combined with practical functionality",
-      
-      "completedBuilding3DPrompt": "Completed Renaissance Venetian watchtower, impressive observation facility featuring tall stone structure with commanding views, elevated observation platform with protective railings, weather protection features including roof and windscreens, signal equipment including fire brazier for night signaling, flag system for coded communication, telescope or spyglass for distance viewing, watch captain's quarters, duty roster for continuous manning, logbook of observations, bell for alerting, narrow defensive windows on ascent, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of vigilant observation, strategic positioning showing clear views of important approaches, guards scanning horizon, signal flags ready, atmosphere of constant watchfulness",
-      
-      "gameplayInformation": {
-        "unlocks": ["Extended Surveillance", "Early Warning System", "Navigation Assistance"],
-        "specialAbilities": ["Threat detection", "Ship identification", "Weather monitoring", "Territory control"],
-        "upgradePath": ["Signal Tower (enhanced communication capabilities)"],
-        "reputationEffects": {
-          "Security Forces": 20,
-          "Maritime Guild": 15,
-          "Government": 20,
-          "Foreign Visitors": 10
-        },
-        "riskFactors": {
-          "targetRisk": "High (strategic infrastructure)",
-          "weatherRisk": "Medium (exposure, lightning)",
-          "visibilityRisk": "Medium (fog, conditions)"
-        }
-      },
-      
-      "soundDesign": {
-        "ambientSound": "Wind at height, flag flapping, distant city sounds",
-        "activitySounds": "Alerting bell, observation reports, signal operations",
-        "musicTheme": "Consiglio dei Dieci"
-      },
-      
-      "seasonalEffects": {
-        "fog": "Limited effectiveness, increased staffing",
-        "stormy weather": "Weather warning priority, signal system active",
-        "war threats": "Military observers added, continuous operation"
-      },
-      
-      "aiInteractionPoints": ["Main observation platform", "Signal equipment station", "Watch captain's post", "Communication desk", "Entry checkpoint", "Equipment storage"]
+      "riskFactors": {
+        "securityRisk": "Medium (strategic target)",
+        "industrial risk": "High (dangerous processes)",
+        "fireRisk": "Very High (wood, pitch, open flames)"
+      }
     },
-    
-    {
-      "name": "Armory",
-      "category": "Military & Defense",
-      "subcategory": "Security Facilities",
-      "tier": 3,
-      "size": "Large",
-      "unlockCondition": "15,000 ducats, Military Guild connection, government approval",
-      
-      "shortDescription": "Secure facility for weapons storage, maintenance, and distribution to security forces.",
-      "fullDescription": "Securing Venice's military equipment, armories store, maintain, and distribute weapons for defense forces. Featuring secure storage vaults, maintenance workshops, training areas, and distribution systems, these heavily protected facilities ensure weapon readiness while preventing unauthorized access. Their careful management reflected Venice's balance between maintaining defense capabilities and controlling internal security risks.",
-      "flavorText": "The finest weapon is useless if rusted when needed, lost when sought, or in untrained hands when danger arrives—here we ensure Venice's defense through order as much as steel.",
-      
-      "constructionCosts": {
-        "ducats": 12000,
-        "timber": 150,
-        "bricks": 400,
-        "stone": 600,
-        "iron": 200
-      },
-      "maintenanceCost": 80,
-      "constructionTime": 864000000,
-      "incomeGeneration": 0,
-      "employmentCapacity": 25,
-      
-      "locationRequirements": {
-        "districtRestrictions": "Secure areas, often near government centers",
-        "adjacentRequirements": "Defensive position, restricted access",
-        "environmentalEffects": "Increases security presence, creates strategic asset"
-      },
-      
-      "constructionPhase3DPrompt": "Renaissance Venetian armory under construction, specialized military facility, substantial security features including reinforced walls and limited access points, main storage halls with specific weapon type considerations, secure vaults for valuable equipment, maintenance workshops with specialized tools, weapon testing area, distribution processing center, training space for proper usage, administrative offices for inventory control, multiple security checkpoints, official military construction standards, isometric game perspective, stylized but detailed, focus on security and functionality over exterior appearance",
-      
-      "completedBuilding3DPrompt": "Completed Renaissance Venetian armory, impressive military storage facility featuring heavily secured entrance with guards and multiple locks, main hall containing organized racks of weapons by type (swords, pikes, halberds, crossbows), separate secure room for firearms and powder, armor storage with various protection types, maintenance workshop where armorers repair and maintain equipment, quality testing area, administrative office with detailed inventory records, training space for proper weapon usage, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of military order and readiness, meticulous organization showing Venetian administrative efficiency, security features visible throughout, proper handling protocols in evidence, officials conducting inventory checks, craftsmen maintaining weapons",
-      
-      "gameplayInformation": {
-        "unlocks": ["Military Equipment Access", "Security Force Arming", "Defense Readiness"],
-        "specialAbilities": ["Weapon maintenance", "Force equipment improvement", "Military training support"],
-        "upgradePath": ["Naval Armament Depot (specialized maritime weapons)"],
-        "reputationEffects": {
-          "Military Forces": 25,
-          "Security Guild": 20,
-          "Government": 20,
-          "Potential Enemies": -20
-        },
-        "riskFactors": {
-          "targetRisk": "Very High (strategic military asset)",
-          "securityRisk": "Medium (despite precautions)",
-          "explosionRisk": "Medium (powder storage)"
-        }
-      },
-      
-      "soundDesign": {
-        "ambientSound": "Metal on metal, weapon maintenance, guard movements",
-        "activitySounds": "Weapon testing, inventory checks, training sessions",
-        "musicTheme": "Processione Ducale"
-      },
-      
-      "seasonalEffects": {
-        "military campaigns": "Increased distribution activity, preparation",
-        "peacetime": "Maintenance focus, inventory management",
-        "civic ceremonies": "Ceremonial weapon preparation"
-      },
-      
-      "aiInteractionPoints": ["Main weapon storage hall", "Armor section", "Maintenance workshop", "Training area", "Administrative office", "Security checkpoint", "Distribution counter", "Testing range"]
+    "soundDesign": {
+      "ambientSound": "Intense industrial activity, hammering, sawing, orders being shouted",
+      "activitySounds": "Ship hull construction, material processing, coordinated team work",
+      "musicTheme": "Arsenale in Movimento"
     },
-    
-    {
-      "name": "Naval Administration Office",
-      "category": "Military & Defense",
-      "subcategory": "Naval Facilities",
-      "tier": 3,
-      "size": "Large",
-      "unlockCondition": "18,000 ducats, Admiralty connection, government appointment",
-      
-      "shortDescription": "Command and control center for Venice's naval forces, coordinating fleet operations and maintenance.",
-      "fullDescription": "Directing Venice's naval power, administration offices coordinate fleet operations, personnel, and logistics for the Republic's maritime forces. Featuring command centers, navigation archives, personnel management, and strategic planning facilities, these complex organizations managed Europe's most sophisticated naval operation. Their efficient administration enabled Venice to project power throughout the Mediterranean while defending the lagoon approaches.",
-      "flavorText": "Ships and sailors make a navy, but without the quill and ledger to direct them, they are merely wood and flesh without purpose—here we transform vessels and men into coordinated power.",
-      
-      "constructionCosts": {
-        "ducats": 16000,
-        "timber": 200,
-        "bricks": 300,
-        "stone": 500,
-        "glass": 60,
-        "marble": 80
-      },
-      "maintenanceCost": 120,
-      "constructionTime": 1209600000,
-      "incomeGeneration": 0,
-      "employmentCapacity": 40,
-      
-      "locationRequirements": {
-        "districtRestrictions": "Near Arsenal or government center, naval visibility",
-        "adjacentRequirements": "View of harbor, secure access, communication links",
-        "environmentalEffects": "Creates naval command presence, strategic coordination point"
-      },
-      
-      "constructionPhase3DPrompt": "Renaissance Venetian naval administration office under construction, military command facility, strategic location with harbor visibility, large map rooms taking shape, secure document storage for naval charts and orders, fleet coordination center, personnel management offices, signal station for ship communication, naval officer quarters, docking facilities for command vessels, diplomatic reception areas, naval archive with specialized storage, isometric game perspective, stylized but detailed, focus on creating effective command and control center for maritime operations",
-      
-      "completedBuilding3DPrompt": "Completed Renaissance Venetian naval administration office, impressive maritime command facility featuring grand strategy room with large table maps of Mediterranean, secure document room with naval charts and classified orders, admiral's office with view of harbor, personnel management section with crew manifests and assignments, signals office for ship communications using flags and messengers, naval archive containing historical campaigns and intelligence, formal reception area for diplomatic naval functions, dock for official vessels, uniformed naval officers consulting over charts, messengers coming and going with dispatches, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of naval command authority, organized naval administration, balance of military precision and strategic thinking, naval symbols and battle maps, atmosphere of maritime power coordination",
-      
-      "gameplayInformation": {
-        "unlocks": ["Naval Command", "Fleet Coordination", "Maritime Strategy"],
-        "specialAbilities": ["Naval mission planning", "Fleet personnel management", "Maritime diplomatic functions"],
-        "upgradePath": ["Admiralty Headquarters (highest naval command)"],
-        "reputationEffects": {
-          "Naval Officers": 30,
-          "Government": 25,
-          "Maritime Guild": 20,
-          "Foreign Powers": 15
-        },
-        "riskFactors": {
-          "espionageRisk": "High (valuable intelligence)",
-          "corruptionRisk": "Medium (powerful positions)",
-          "communicationRisk": "Medium (command breakdowns)"
-        }
-      },
-      
-      "soundDesign": {
-        "ambientSound": "Maps being moved, quiet strategic discussions, naval terminology",
-        "activitySounds": "Orders being dispatched, reports delivered, navigational calculations",
-        "musicTheme": "Processione Ducale"
-      },
-      
-      "seasonalEffects": {
-        "naval campaign seasons": "Increased activity, strategic planning",
-        "winter": "Fleet maintenance planning, training programs",
-        "diplomatic tensions": "Intelligence focus, readiness activities"
-      },
-      
-      "aiInteractionPoints": ["Strategy map room", "Admiral's office", "Communications center", "Personnel management desk", "Naval archive", "Diplomatic reception area", "Intelligence briefing room", "Officer's mess"]
+    "seasonalEffects": {
+      "wartime": "Maximum production, extended hours",
+      "peacetime": "Maintenance focus, training, improvements",
+      "fleet commissioning": "Ceremonial launches, quality inspections"
     },
-    
-    {
-      "name": "City Gate",
-      "category": "Military & Defense",
-      "subcategory": "Defensive Structures",
-      "tier": 3,
-      "size": "Large",
-      "unlockCondition": "20,000 ducats, government authorization, Engineering Guild approval",
-      
-      "shortDescription": "Fortified entrance point controlling access between districts or to the city itself.",
-      "fullDescription": "Regulating movement while providing defensive capabilities, city gates control access to key areas through fortified entry points. Featuring defensive architecture, checkpoint functions, guard facilities, and often customs inspection areas, these impressive structures combine practical control with symbolic authority. Though Venice's island nature limited traditional walls, gates controlled key access points and bridge approaches.",
-      "flavorText": "The gate speaks two messages simultaneously: to citizens it says 'you are protected,' while to potential enemies it declares 'you shall not pass'—both essential to the security of any great city.",
-      
-      "constructionCosts": {
-        "ducats": 15000,
-        "timber": 100,
-        "bricks": 400,
-        "stone": 800,
-        "iron": 150,
-        "marble": 100
-      },
-      "maintenanceCost": 70,
-      "constructionTime": 1728000000,
-      "incomeGeneration": 60,
-      "employmentCapacity": 20,
-      
-      "locationRequirements": {
-        "districtRestrictions": "Natural choke points, major access routes, district boundaries",
-        "adjacentRequirements": "Control of entry route, defensive position",
-        "environmentalEffects": "Controls movement, creates security checkpoint, symbolic boundary"
-      },
-      
-      "constructionPhase3DPrompt": "Renaissance Venetian city gate under construction, imposing fortified entrance, massive stone foundation ensuring stability, defensive architecture with guard posts and observation positions, main archway taking shape with space for portcullis, official checkpoint areas, customs inspection facilities, Venetian state symbols being carved, guard quarters and administrative offices, defensive features integrated with architectural beauty, engineers ensuring proper alignment with existing routes, isometric game perspective, stylized but detailed, focus on creating controlled access point balancing security with impressive civic architecture",
-      
-      "completedBuilding3DPrompt": "Completed Renaissance Venetian city gate, magnificent fortified entrance featuring imposing stone archway large enough for commercial traffic, ornate but functional design combining defensive features with civic pride, Lion of St. Mark prominently displayed, guard posts with armed sentries, checkpoint where documents and goods are inspected, customs area for taxable items, administrative offices for entry records, mechanisms for closing massive wooden doors in emergencies, defensive positions above archway, decorative elements showing Venetian artistic sensibility, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of controlled access point, balance of defensive capability and impressive architecture, flow of people and goods through regulated entrance, officials checking papers, guards maintaining vigilant watch, perfect expression of Venetian approach to security through controlled movement",
-      
-      "gameplayInformation": {
-        "unlocks": ["Access Control", "Defensive Position", "Customs Inspection"],
-        "specialAbilities": ["Movement regulation", "Security checkpoint", "Tax collection point", "Emergency closure"],
-        "upgradePath": ["Fortified Gateway (enhanced defensive capabilities)"],
-        "reputationEffects": {
-          "Security Forces": 20,
-          "Government": 25,
-          "Merchants": 10,
-          "Citizens": 15
-        },
-        "riskFactors": {
-          "congestionRisk": "High (bottleneck potential)",
-          "targetRisk": "High (strategic control point)",
-          "maintenanceRisk": "Medium (heavy usage)"
-        }
-      },
-      
-      "soundDesign": {
-        "ambientSound": "Passage of people and carts, guard challenges, gate mechanisms",
-        "activitySounds": "Document checking, customs inspections, traffic regulation",
-        "musicTheme": "Consiglio dei Dieci"
-      },
-      
-      "seasonalEffects": {
-        "heightened alert": "Increased inspections, restricted access",
-        "festivals": "Decorated with banners, ceremonial guards",
-        "trade fairs": "Maximum traffic, expedited processing"
-      },
-      
-      "aiInteractionPoints": ["Main archway", "Guard checkpoint", "Customs inspection area", "Administration office", "Defensive positions", "Waiting area", "Document verification station"]
+    "aiInteractionPoints": [
+      "Main construction hall",
+      "Material processing zone",
+      "Component assembly areas",
+      "Ship launch channel",
+      "Administration office",
+      "Security checkpoint",
+      "Naval design area",
+      "Quality inspection station"
+    ]
+  },
+  {
+    "name": "Guard Post",
+    "category": "Military & Defense",
+    "subcategory": "Security Facilities",
+    "tier": 1,
+    "size": "Small",
+    "unlockCondition": "3,000 ducats, Security Guild connection or government approval",
+    "shortDescription": "Security checkpoint monitoring access to specific areas and maintaining public order.",
+    "fullDescription": "Maintaining Venice's legendary internal security, guard posts provide visible security presence at key locations. Featuring observation positions, small detention areas, patrol coordination, and often checkpoint facilities, these practical security installations support Venice's extensive police functions. Their strategic placement throughout the city created an effective security network despite the complex urban layout.",
+    "flavorText": "Venice's greatest defense is not her walls or ships, but her watchful eyes—for a crime prevented through vigilance requires neither judges nor prisons.",
+    "constructionCosts": {
+      "ducats": 1000,
+      "timber": 40,
+      "bricks": 100,
+      "stone": 150,
+      "iron": 30
     },
-    
-    {
-      "name": "Harbor Chain Tower",
-      "category": "Military & Defense",
-      "subcategory": "Defensive Structures",
-      "tier": 3,
-      "size": "Medium",
-      "unlockCondition": "12,000 ducats, Naval Guild approval, government authorization",
-      
-      "shortDescription": "Fortified tower operating canal or harbor blocking chains to control naval access.",
-      "fullDescription": "Protecting Venice's vital waterways, harbor chain towers operate massive chain barriers that can physically block unauthorized naval access. Featuring chain winch mechanisms, guard stations, signal equipment, and defensive positions, these specialized structures implement a key defensive technology of medieval and Renaissance naval warfare. Their ability to close waterways gave Venice physical control over maritime approaches.",
-      "flavorText": "With the turn of this mechanism, we transform open water into impenetrable barrier—proving that Venetian ingenuity can alter the very nature of the sea when security demands it.",
-      
-      "constructionCosts": {
-        "ducats": 10000,
-        "timber": 100,
-        "bricks": 200,
-        "stone": 400,
-        "iron": 250
-      },
-      "maintenanceCost": 60,
-      "constructionTime": 864000000,
-      "incomeGeneration": 0,
-      "employmentCapacity": 10,
-      
-      "locationRequirements": {
-        "districtRestrictions": "Harbor entrances, strategic canal access points",
-        "adjacentRequirements": "Requires corresponding tower across waterway",
-        "environmentalEffects": "Controls water access, creates naval defensive point"
-      },
-      
-      "constructionPhase3DPrompt": "Renaissance Venetian harbor chain tower under construction, specialized defensive structure, substantial foundation reaching deep underwater, massive chain mechanism being installed with winch system, counterweights for easier operation, guard station with defensive capabilities, harbor observation platform, signal system for coordination with paired tower across waterway, defensive armaments being mounted, underwater chain anchor points, mechanism housing with security features, isometric game perspective, stylized but detailed, focus on the impressive engineering solution for physical water access control",
-      
-      "completedBuilding3DPrompt": "Completed Renaissance Venetian harbor chain tower, impressive defensive facility featuring substantial stone tower positioned at strategic waterway entrance, massive iron chain visible either deployed across waterway or wound around large winch mechanism, corresponding tower visible on opposite shore, operating team ready to deploy or retract chain on command, defensive positions with armaments to protect mechanism, observation platform with clear harbor views, signal system for communicating with naval forces, chain mechanism housing with security features, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of physical control over water access, engineering sophistication evident in mechanism design, strategic positioning showing defensive mindset, operators maintaining readiness, guards protecting vital defensive asset",
-      
-      "gameplayInformation": {
-        "unlocks": ["Waterway Control", "Harbor Defense", "Naval Access Regulation"],
-        "specialAbilities": ["Physical ship passage prevention", "Harbor security", "Selective access control"],
-        "upgradePath": ["Advanced Barrier System (faster operation, stronger chain)"],
-        "reputationEffects": {
-          "Naval Forces": 20,
-          "Security Forces": 20,
-          "Government": 25,
-          "Foreign Ships": -10
-        },
-        "riskFactors": {
-          "mechanicalRisk": "Medium (complex mechanism)",
-          "targetRisk": "Very High (critical defensive infrastructure)",
-          "maintenanceRisk": "Medium (water exposure, heavy chains)"
-        }
-      },
-      
-      "soundDesign": {
-        "ambientSound": "Chain mechanism creaking, water lapping, metal on metal",
-        "activitySounds": "Winch operation, alert signals, chain deployment splash",
-        "musicTheme": "Processione Ducale"
-      },
-      
-      "seasonalEffects": {
-        "fog": "Heightened alert, additional signal procedures",
-        "naval threats": "Readiness drills, continuous manning",
-        "storms": "Additional safety measures, mechanism security"
-      },
-      
-      "aiInteractionPoints": ["Chain operation mechanism", "Observation platform", "Signal station", "Guard post", "Maintenance area", "Chain anchor point", "Coordination office"]
+    "maintenanceCost": 12.5,
+    "constructionTime": 172800000,
+    "incomeGeneration": 7.5,
+    "employmentCapacity": 6,
+    "locationRequirements": {
+      "districtRestrictions": "Strategic points, entry points, valuable areas",
+      "adjacentRequirements": "Good visibility, control point potential",
+      "environmentalEffects": "Increases security, reduces crime, creates official presence"
     },
-    
-    {
-      "name": "Arsenal Gate",
-      "category": "Military & Defense",
-      "subcategory": "Naval Facilities",
-      "tier": 4,
-      "size": "Large",
-      "unlockCondition": "Government facility only, not privately constructable",
-      
-      "shortDescription": "Iconic fortified entrance to Venice's Arsenal naval complex, controlling access to restricted military zone.",
-      "fullDescription": "Guarding Venice's most strategic military asset, the Arsenal Gate controls access to the massive naval manufacturing complex. Featuring monumental architecture, heavy fortifications, strict security protocols, and impressive symbolic elements, this iconic structure represents Venetian naval power while enforcing strict access control. As the boundary between civilian Venice and its military heart, the gate balanced imposing presence with artistic sophistication.",
-      "flavorText": "Behind these doors lies not merely a shipyard, but the very source of Venetian power—where timber and iron become the ships that secure our trade, enforce our interests, and guarantee our independence.",
-      
-      "constructionCosts": {
-        "ducats": 30000,
-        "timber": 150,
-        "bricks": 400,
-        "stone": 1000,
-        "iron": 200,
-        "marble": 150
+    "constructionPhase3DPrompt": "Renaissance Venetian guard post under construction, small security facility, strategic position with good visibility in all directions, elevated observation platform being built, secure office area for records and detention, checkpoint features if at entry point, official Venetian security symbols, construction showing security considerations in design, weapon storage area, patrol coordination space, isometric game perspective, stylized but detailed, focus on practical security functionality rather than imposing appearance",
+    "completedBuilding3DPrompt": "Completed Renaissance Venetian guard post, practical security facility featuring elevated observation platform with clear visibility of surroundings, small but secure structure with official Venetian security symbols including Lion of St. Mark, checkpoint area where documents can be checked, small detention room for temporary holding, patrol coordination desk with area maps, weapons rack with halberds and other official equipment, guards in Venetian security uniforms monitoring the area, record keeping system for incidents, lanterns for night operation, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of vigilant security presence, strategic positioning showing control of movement, balance of accessibility for legitimate citizens and security against threats",
+    "gameplayInformation": {
+      "unlocks": [
+        "Security Patrols",
+        "Access Control",
+        "Crime Reduction"
+      ],
+      "specialAbilities": [
+        "Area security enhancement",
+        "Criminal detention",
+        "Official presence"
+      ],
+      "upgradePath": [
+        "Security Station (larger jurisdiction, enhanced capability)"
+      ],
+      "reputationEffects": {
+        "Security Forces": 15,
+        "Law-Abiding Citizens": 20,
+        "Criminals": -25,
+        "Government": 15
       },
-      "maintenanceCost": 100,
-      "constructionTime": 2592000000,
-      "incomeGeneration": 0,
-      "employmentCapacity": 30,
-      
-      "locationRequirements": {
-        "districtRestrictions": "Arsenal district entrance only, unique structure",
-        "adjacentRequirements": "Connection to Arsenal complex, defensive position",
-        "environmentalEffects": "Restricts access, creates military zone boundary, projects power"
-      },
-      
-      "constructionPhase3DPrompt": "Renaissance Venetian Arsenal Gate under construction, monumental military entrance, massive foundation for imposing structure, grand central arch taking shape, flanking towers with defensive positions, elaborate decorative elements including Lion of St. Mark being carved, substantial doors with reinforcement, security checkpoints and guard stations, administrator offices, military symbols and images of naval power, highest quality materials showing state importance, isometric game perspective, stylized but detailed, focus on creating impressive but functional military entrance combining security with symbolic projection of naval power",
-      
-      "completedBuilding3DPrompt": "Completed Renaissance Venetian Arsenal Gate, iconic military entrance featuring monumental stone structure with imposing central arch, famous Lion of St. Mark sculpture prominently displayed, twin defensive towers flanking entrance, massive reinforced wooden doors capable of sealing the complex, armed guards in Venetian naval uniforms maintaining strict access control, security checkpoint where credentials are verified, relief carvings showing Venetian naval prowess, administrator office managing authorized access, military banners and symbols of naval authority, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of boundary between civilian Venice and restricted military zone, perfect balance of practical security and symbolic power projection, atmosphere of military discipline and naval pride, officials checking authorization documents, arsenal workers queuing for entry verification",
-      
-      "gameplayInformation": {
-        "unlocks": ["Arsenal Access", "Naval Manufacturing", "Military Zone"],
-        "specialAbilities": ["Strict access control", "Military zone boundary", "Naval power symbol"],
-        "upgradePath": ["None - unique historical structure"],
-        "reputationEffects": {
-          "Military": 30,
-          "Government": 30,
-          "Foreign Visitors": 25,
-          "Citizens": 20
-        },
-        "riskFactors": {
-          "targetRisk": "Very High (symbolic and strategic target)",
-          "securityRisk": "Low (heavily guarded)",
-          "espionageRisk": "Medium (industrial secrets within)"
-        }
-      },
-      
-      "soundDesign": {
-        "ambientSound": "Naval commands, marching guards, massive doors operating",
-        "activitySounds": "Access verification, shift changes, official announcements",
-        "musicTheme": "Processione Ducale"
-      },
-      
-      "seasonalEffects": {
-        "naval reviews": "Ceremonial decoration, official visitors",
-        "heightened security": "Additional verification, restricted access",
-        "ship launches": "Coordinated security for public events"
-      },
-      
-      "aiInteractionPoints": ["Main entrance arch", "Security checkpoint", "Administrator's office", "Guard stations", "Worker verification area", "Official visitor reception", "Lion of St. Mark monument"]
+      "riskFactors": {
+        "targetRisk": "Medium (symbol of authority)",
+        "corruptionRisk": "Medium (enforcement discretion)",
+        "staffingRisk": "Low (desirable positions)"
+      }
     },
-    
-    {
-      "name": "Defensive Bastion",
-      "category": "Military & Defense",
-      "subcategory": "Defensive Structures",
-      "tier": 4,
-      "size": "Extra Large",
-      "unlockCondition": "25,000 ducats, government authorization, Military Guild approval",
-      
-      "shortDescription": "Fortified defensive position with artillery platforms protecting strategic approaches.",
-      "fullDescription": "Protecting Venice's vulnerable approaches, defensive bastions provided artillery positions and observation posts at strategic locations. Featuring angled walls designed for cannon placement, ammunition storage, garrison quarters, and often signal stations, these substantial fortifications represented Renaissance military engineering. Venice's unique lagoon position required specialized defensive structures rather than traditional city walls.",
-      "flavorText": "While other cities hide behind walls, Venice stands protected by water and resolve—yet where those natural defenses might be challenged, we ensure our cannons speak with decisive authority.",
-      
-      "constructionCosts": {
-        "ducats": 28000,
-        "timber": 200,
-        "bricks": 600,
-        "stone": 1200,
-        "iron": 300
-      },
-      "maintenanceCost": 150,
-      "constructionTime": 2592000000,
-      "incomeGeneration": 0,
-      "employmentCapacity": 40,
-      
-      "locationRequirements": {
-        "districtRestrictions": "Strategic defensive positions, vulnerable approaches",
-        "adjacentRequirements": "Commanding position, field of fire, supply access",
-        "environmentalEffects": "Creates military presence, security enhancement, strategic control"
-      },
-      
-      "constructionPhase3DPrompt": "Renaissance Venetian defensive bastion under construction, substantial military fortification, massive earthworks and foundation creating angled walls optimized for artillery, cannon platforms taking shape with geometric precision for maximum firing arcs, ammunition magazines with safety features, garrison quarters, command post with strategic visibility, reinforced construction designed to withstand bombardment, supply access routes, strategic positioning showing defensive mindset, military engineers supervising precise angles and measurements, isometric game perspective, stylized but detailed, focus on Renaissance military engineering principles applied to Venice's unique defensive needs",
-      
-      "completedBuilding3DPrompt": "Completed Renaissance Venetian defensive bastion, imposing military fortification featuring geometric angled walls designed to deflect incoming fire while supporting artillery, multiple cannon positions on elevated platforms with optimal firing arcs over approaches, ammunition magazines built into structure with safety features, garrison quarters for permanent defensive force, command post with maps and firing tables, signal station for communication with other defenses, Venetian military standards flying, artillery crews maintaining cannons, officers observing approaches, thick walls capable of absorbing bombardment, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of formidable defensive position, mathematical precision of Renaissance military engineering, strategic positioning demonstrating defensive control of vital approach, combination of defensive architecture and offensive firepower, soldiers conducting drills, gunners calculating range to targets",
-      
-      "gameplayInformation": {
-        "unlocks": ["Artillery Defense", "Strategic Control", "Military Presence"],
-        "specialAbilities": ["Approach denial", "Area defense", "Military control zone"],
-        "upgradePath": ["Advanced Star Fort (improved artillery placement, enhanced defense)"],
-        "reputationEffects": {
-          "Military": 30,
-          "Government": 25,
-          "Foreign Powers": 20,
-          "Potential Enemies": -30
-        },
-        "riskFactors": {
-          "targetRisk": "Very High (primary military target)",
-          "explosionRisk": "High (ammunition storage)",
-          "obsolescenceRisk": "Medium (evolving military technology)"
-        }
-      },
-      
-      "soundDesign": {
-        "ambientSound": "Flag flapping, distant cannon practice, garrison activity",
-        "activitySounds": "Artillery drills, military commands, defensive preparations",
-        "musicTheme": "Processione Ducale"
-      },
-      
-      "seasonalEffects": {
-        "conflict periods": "Maximum readiness, full manning",
-        "peacetime": "Training focus, maintenance operations",
-        "naval exercises": "Coordination with fleet, signaling practice"
-      },
-      
-      "aiInteractionPoints": ["Main artillery platform", "Command post", "Garrison quarters", "Ammunition magazine", "Observation point", "Signal station", "Supply depot", "Training area"]
+    "soundDesign": {
+      "ambientSound": "Boot steps on stone, keys jingling, official conversations",
+      "activitySounds": "Document checking, patrol departures, security alerts",
+      "musicTheme": "Consiglio dei Dieci"
     },
-    
-    {
-      "name": "Prison",
-      "category": "Military & Defense",
-      "subcategory": "Security Facilities",
-      "tier": 3,
-      "size": "Large",
-      "unlockCondition": "18,000 ducats, government authorization, Security Guild appointment",
-      
-      "shortDescription": "Detention facility for holding criminals and enemies of the state in secure conditions.",
-      "fullDescription": "Enforcing Venice's strict laws, prisons incarcerate criminals and political prisoners in secure facilities. Featuring multiple security levels, guard stations, prisoner housing, and administrative offices, these imposing institutions formed a key component of Venice's justice system. The Republic's famous prison adjacent to the Doge's Palace, connected by the Bridge of Sighs, symbolized the close relationship between government authority and punishment.",
-      "flavorText": "The shadow of the prison reminds all Venetians that while our laws may be complex and our courts sophisticated, the consequence of transgression remains simple and absolute—the loss of the very freedom that Venice herself treasures above all.",
-      
-      "constructionCosts": {
-        "ducats": 20000,
-        "timber": 150,
-        "bricks": 500,
-        "stone": 800,
-        "iron": 250
+    "seasonalEffects": {
+      "carnival": "Increased staffing, mask verification",
+      "night hours": "Lanterns lit, increased vigilance",
+      "diplomatic events": "Enhanced security, special procedures"
+    },
+    "aiInteractionPoints": [
+      "Checkpoint desk",
+      "Observation platform",
+      "Patrol dispatch point",
+      "Detention area",
+      "Document inspection station",
+      "Weapons rack"
+    ]
+  },
+  {
+    "name": "Watchtower",
+    "category": "Military & Defense",
+    "subcategory": "Security Facilities",
+    "tier": 2,
+    "size": "Medium",
+    "unlockCondition": "7,000 ducats, Security Guild connection or government approval",
+    "shortDescription": "Elevated observation position for surveillance of surrounding areas and early warning.",
+    "fullDescription": "Providing critical observation capabilities, watchtowers enable surveillance of wide areas for security and navigation purposes. Featuring elevated viewing platforms, signal equipment, observer quarters, and often communication systems, these specialized structures extend visual control over key approaches to Venice. Their strategic placement helped secure the lagoon approaches against threats while assisting maritime navigation.",
+    "flavorText": "From these heights, we can see threats before they see us, ships before they signal, and weather before it arrives—proving that in both security and commerce, foreknowledge is the greatest advantage.",
+    "constructionCosts": {
+      "ducats": 2500,
+      "timber": 80,
+      "bricks": 200,
+      "stone": 350,
+      "iron": 50
+    },
+    "maintenanceCost": 17.5,
+    "constructionTime": 432000000,
+    "incomeGeneration": 0,
+    "employmentCapacity": 8,
+    "locationRequirements": {
+      "districtRestrictions": "High points, strategic observation locations, approaches",
+      "adjacentRequirements": "Unobstructed views, supportive foundation",
+      "environmentalEffects": "Increased security visibility, surveillance presence"
+    },
+    "constructionPhase3DPrompt": "Renaissance Venetian watchtower under construction, strategic observation structure, tall design prioritizing height for maximum visibility, substantial foundation ensuring stability, spiral staircase installation, elevated observation platform with views in all directions, signal fire brazier being positioned, weather protection features, secure entry point, quarters for watch personnel, security features to prevent unauthorized access, communication systems like bell or signal flags, isometric game perspective, stylized but detailed, focus on creating optimal visibility combined with practical functionality",
+    "completedBuilding3DPrompt": "Completed Renaissance Venetian watchtower, impressive observation facility featuring tall stone structure with commanding views, elevated observation platform with protective railings, weather protection features including roof and windscreens, signal equipment including fire brazier for night signaling, flag system for coded communication, telescope or spyglass for distance viewing, watch captain's quarters, duty roster for continuous manning, logbook of observations, bell for alerting, narrow defensive windows on ascent, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of vigilant observation, strategic positioning showing clear views of important approaches, guards scanning horizon, signal flags ready, atmosphere of constant watchfulness",
+    "gameplayInformation": {
+      "unlocks": [
+        "Extended Surveillance",
+        "Early Warning System",
+        "Navigation Assistance"
+      ],
+      "specialAbilities": [
+        "Threat detection",
+        "Ship identification",
+        "Weather monitoring",
+        "Territory control"
+      ],
+      "upgradePath": [
+        "Signal Tower (enhanced communication capabilities)"
+      ],
+      "reputationEffects": {
+        "Security Forces": 20,
+        "Maritime Guild": 15,
+        "Government": 20,
+        "Foreign Visitors": 10
       },
-      "maintenanceCost": 100,
-      "constructionTime": 1728000000,
-      "incomeGeneration": 0,
-      "employmentCapacity": 35,
-      
-      "locationRequirements": {
-        "districtRestrictions": "Government district, often near judicial facilities",
-        "adjacentRequirements": "Secure location, limited access, isolation",
-        "environmentalEffects": "Creates security presence, deters crime, somber atmosphere"
+      "riskFactors": {
+        "targetRisk": "High (strategic infrastructure)",
+        "weatherRisk": "Medium (exposure, lightning)",
+        "visibilityRisk": "Medium (fog, conditions)"
+      }
+    },
+    "soundDesign": {
+      "ambientSound": "Wind at height, flag flapping, distant city sounds",
+      "activitySounds": "Alerting bell, observation reports, signal operations",
+      "musicTheme": "Consiglio dei Dieci"
+    },
+    "seasonalEffects": {
+      "fog": "Limited effectiveness, increased staffing",
+      "stormy weather": "Weather warning priority, signal system active",
+      "war threats": "Military observers added, continuous operation"
+    },
+    "aiInteractionPoints": [
+      "Main observation platform",
+      "Signal equipment station",
+      "Watch captain's post",
+      "Communication desk",
+      "Entry checkpoint",
+      "Equipment storage"
+    ]
+  },
+  {
+    "name": "Armory",
+    "category": "Military & Defense",
+    "subcategory": "Security Facilities",
+    "tier": 3,
+    "size": "Large",
+    "unlockCondition": "15,000 ducats, Military Guild connection, government approval",
+    "shortDescription": "Secure facility for weapons storage, maintenance, and distribution to security forces.",
+    "fullDescription": "Securing Venice's military equipment, armories store, maintain, and distribute weapons for defense forces. Featuring secure storage vaults, maintenance workshops, training areas, and distribution systems, these heavily protected facilities ensure weapon readiness while preventing unauthorized access. Their careful management reflected Venice's balance between maintaining defense capabilities and controlling internal security risks.",
+    "flavorText": "The finest weapon is useless if rusted when needed, lost when sought, or in untrained hands when danger arrives—here we ensure Venice's defense through order as much as steel.",
+    "constructionCosts": {
+      "ducats": 6000,
+      "timber": 150,
+      "bricks": 400,
+      "stone": 600,
+      "iron": 200
+    },
+    "maintenanceCost": 40,
+    "constructionTime": 864000000,
+    "incomeGeneration": 0,
+    "employmentCapacity": 25,
+    "locationRequirements": {
+      "districtRestrictions": "Secure areas, often near government centers",
+      "adjacentRequirements": "Defensive position, restricted access",
+      "environmentalEffects": "Increases security presence, creates strategic asset"
+    },
+    "constructionPhase3DPrompt": "Renaissance Venetian armory under construction, specialized military facility, substantial security features including reinforced walls and limited access points, main storage halls with specific weapon type considerations, secure vaults for valuable equipment, maintenance workshops with specialized tools, weapon testing area, distribution processing center, training space for proper usage, administrative offices for inventory control, multiple security checkpoints, official military construction standards, isometric game perspective, stylized but detailed, focus on security and functionality over exterior appearance",
+    "completedBuilding3DPrompt": "Completed Renaissance Venetian armory, impressive military storage facility featuring heavily secured entrance with guards and multiple locks, main hall containing organized racks of weapons by type (swords, pikes, halberds, crossbows), separate secure room for firearms and powder, armor storage with various protection types, maintenance workshop where armorers repair and maintain equipment, quality testing area, administrative office with detailed inventory records, training space for proper weapon usage, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of military order and readiness, meticulous organization showing Venetian administrative efficiency, security features visible throughout, proper handling protocols in evidence, officials conducting inventory checks, craftsmen maintaining weapons",
+    "gameplayInformation": {
+      "unlocks": [
+        "Military Equipment Access",
+        "Security Force Arming",
+        "Defense Readiness"
+      ],
+      "specialAbilities": [
+        "Weapon maintenance",
+        "Force equipment improvement",
+        "Military training support"
+      ],
+      "upgradePath": [
+        "Naval Armament Depot (specialized maritime weapons)"
+      ],
+      "reputationEffects": {
+        "Military Forces": 25,
+        "Security Guild": 20,
+        "Government": 20,
+        "Potential Enemies": -20
       },
-      
-      "constructionPhase3DPrompt": "Renaissance Venetian prison under construction, imposing detention facility, substantial security features being incorporated from foundation up, thick walls with minimal windows, complex locking systems being installed, cell blocks of varying security levels, guard stations at strategic points, administrative areas for prison management, separate processing zone for new prisoners, security measures preventing escape including water-facing considerations unique to Venice, isometric game perspective, stylized but detailed, focus on creating secure detention facility balancing punishment with Renaissance concepts of justice",
-      
-      "completedBuilding3DPrompt": "Completed Renaissance Venetian prison, formidable detention facility featuring intimidating stone exterior with minimal windows, heavily secured entrance with multiple checkpoints, various security level zones from minimum to maximum, individual cells with appropriate furnishing based on prisoner status, common areas for permitted activities, guard stations positioned for maximum visibility, administration offices where records are maintained, visitor area with security features, exercise yard with surveillance, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of grim justice and containment, guards in Venetian security uniforms maintaining order, prisoner processing area, atmosphere of punishment and state authority, connection to wider justice system through secure transport to courts, balance of humane conditions with necessary security appropriate to Renaissance era",
-      
-      "gameplayInformation": {
-        "unlocks": ["Criminal Detention", "Justice System Completion", "State Security"],
-        "specialAbilities": ["Criminal containment", "Punishment enforcement", "Security threat neutralization"],
-        "upgradePath": ["Reform Prison (improved conditions, rehabilitation)"],
-        "reputationEffects": {
-          "Security Forces": 25,
-          "Judiciary": 20,
-          "Government": 20,
-          "Criminals": -30
-        },
-        "riskFactors": {
-          "escapeRisk": "Low (high security)",
-          "publicReputationRisk": "Medium (treatment concerns)",
-          "corruptionRisk": "Medium (guard integrity)"
-        }
+      "riskFactors": {
+        "targetRisk": "Very High (strategic military asset)",
+        "securityRisk": "Medium (despite precautions)",
+        "explosionRisk": "Medium (powder storage)"
+      }
+    },
+    "soundDesign": {
+      "ambientSound": "Metal on metal, weapon maintenance, guard movements",
+      "activitySounds": "Weapon testing, inventory checks, training sessions",
+      "musicTheme": "Processione Ducale"
+    },
+    "seasonalEffects": {
+      "military campaigns": "Increased distribution activity, preparation",
+      "peacetime": "Maintenance focus, inventory management",
+      "civic ceremonies": "Ceremonial weapon preparation"
+    },
+    "aiInteractionPoints": [
+      "Main weapon storage hall",
+      "Armor section",
+      "Maintenance workshop",
+      "Training area",
+      "Administrative office",
+      "Security checkpoint",
+      "Distribution counter",
+      "Testing range"
+    ]
+  },
+  {
+    "name": "Naval Administration Office",
+    "category": "Military & Defense",
+    "subcategory": "Naval Facilities",
+    "tier": 3,
+    "size": "Large",
+    "unlockCondition": "18,000 ducats, Admiralty connection, government appointment",
+    "shortDescription": "Command and control center for Venice's naval forces, coordinating fleet operations and maintenance.",
+    "fullDescription": "Directing Venice's naval power, administration offices coordinate fleet operations, personnel, and logistics for the Republic's maritime forces. Featuring command centers, navigation archives, personnel management, and strategic planning facilities, these complex organizations managed Europe's most sophisticated naval operation. Their efficient administration enabled Venice to project power throughout the Mediterranean while defending the lagoon approaches.",
+    "flavorText": "Ships and sailors make a navy, but without the quill and ledger to direct them, they are merely wood and flesh without purpose—here we transform vessels and men into coordinated power.",
+    "constructionCosts": {
+      "ducats": 8000000,
+      "timber": 200,
+      "bricks": 300,
+      "stone": 500,
+      "glass": 60,
+      "marble": 80
+    },
+    "maintenanceCost": 60000,
+    "constructionTime": 1209600000,
+    "incomeGeneration": 0,
+    "employmentCapacity": 40,
+    "locationRequirements": {
+      "districtRestrictions": "Near Arsenal or government center, naval visibility",
+      "adjacentRequirements": "View of harbor, secure access, communication links",
+      "environmentalEffects": "Creates naval command presence, strategic coordination point"
+    },
+    "constructionPhase3DPrompt": "Renaissance Venetian naval administration office under construction, military command facility, strategic location with harbor visibility, large map rooms taking shape, secure document storage for naval charts and orders, fleet coordination center, personnel management offices, signal station for ship communication, naval officer quarters, docking facilities for command vessels, diplomatic reception areas, naval archive with specialized storage, isometric game perspective, stylized but detailed, focus on creating effective command and control center for maritime operations",
+    "completedBuilding3DPrompt": "Completed Renaissance Venetian naval administration office, impressive maritime command facility featuring grand strategy room with large table maps of Mediterranean, secure document room with naval charts and classified orders, admiral's office with view of harbor, personnel management section with crew manifests and assignments, signals office for ship communications using flags and messengers, naval archive containing historical campaigns and intelligence, formal reception area for diplomatic naval functions, dock for official vessels, uniformed naval officers consulting over charts, messengers coming and going with dispatches, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of naval command authority, organized naval administration, balance of military precision and strategic thinking, naval symbols and battle maps, atmosphere of maritime power coordination",
+    "gameplayInformation": {
+      "unlocks": [
+        "Naval Command",
+        "Fleet Coordination",
+        "Maritime Strategy"
+      ],
+      "specialAbilities": [
+        "Naval mission planning",
+        "Fleet personnel management",
+        "Maritime diplomatic functions"
+      ],
+      "upgradePath": [
+        "Admiralty Headquarters (highest naval command)"
+      ],
+      "reputationEffects": {
+        "Naval Officers": 30,
+        "Government": 25,
+        "Maritime Guild": 20,
+        "Foreign Powers": 15
       },
-      
-      "soundDesign": {
-        "ambientSound": "Cell doors, guard movements, distant prisoner sounds",
-        "activitySounds": "Lock mechanisms, prisoner processing, security checks",
-        "musicTheme": "Consiglio dei Dieci"
+      "riskFactors": {
+        "espionageRisk": "High (valuable intelligence)",
+        "corruptionRisk": "Medium (powerful positions)",
+        "communicationRisk": "Medium (command breakdowns)"
+      }
+    },
+    "soundDesign": {
+      "ambientSound": "Maps being moved, quiet strategic discussions, naval terminology",
+      "activitySounds": "Orders being dispatched, reports delivered, navigational calculations",
+      "musicTheme": "Processione Ducale"
+    },
+    "seasonalEffects": {
+      "naval campaign seasons": "Increased activity, strategic planning",
+      "winter": "Fleet maintenance planning, training programs",
+      "diplomatic tensions": "Intelligence focus, readiness activities"
+    },
+    "aiInteractionPoints": [
+      "Strategy map room",
+      "Admiral's office",
+      "Communications center",
+      "Personnel management desk",
+      "Naval archive",
+      "Diplomatic reception area",
+      "Intelligence briefing room",
+      "Officer's mess"
+    ]
+  },
+  {
+    "name": "City Gate",
+    "category": "Military & Defense",
+    "subcategory": "Defensive Structures",
+    "tier": 3,
+    "size": "Large",
+    "unlockCondition": "20,000 ducats, government authorization, Engineering Guild approval",
+    "shortDescription": "Fortified entrance point controlling access between districts or to the city itself.",
+    "fullDescription": "Regulating movement while providing defensive capabilities, city gates control access to key areas through fortified entry points. Featuring defensive architecture, checkpoint functions, guard facilities, and often customs inspection areas, these impressive structures combine practical control with symbolic authority. Though Venice's island nature limited traditional walls, gates controlled key access points and bridge approaches.",
+    "flavorText": "The gate speaks two messages simultaneously: to citizens it says 'you are protected,' while to potential enemies it declares 'you shall not pass'—both essential to the security of any great city.",
+    "constructionCosts": {
+      "ducats": 7500,
+      "timber": 100,
+      "bricks": 400,
+      "stone": 800,
+      "iron": 150,
+      "marble": 100
+    },
+    "maintenanceCost": 35,
+    "constructionTime": 1728000000,
+    "incomeGeneration": 30,
+    "employmentCapacity": 20,
+    "locationRequirements": {
+      "districtRestrictions": "Natural choke points, major access routes, district boundaries",
+      "adjacentRequirements": "Control of entry route, defensive position",
+      "environmentalEffects": "Controls movement, creates security checkpoint, symbolic boundary"
+    },
+    "constructionPhase3DPrompt": "Renaissance Venetian city gate under construction, imposing fortified entrance, massive stone foundation ensuring stability, defensive architecture with guard posts and observation positions, main archway taking shape with space for portcullis, official checkpoint areas, customs inspection facilities, Venetian state symbols being carved, guard quarters and administrative offices, defensive features integrated with architectural beauty, engineers ensuring proper alignment with existing routes, isometric game perspective, stylized but detailed, focus on creating controlled access point balancing security with impressive civic architecture",
+    "completedBuilding3DPrompt": "Completed Renaissance Venetian city gate, magnificent fortified entrance featuring imposing stone archway large enough for commercial traffic, ornate but functional design combining defensive features with civic pride, Lion of St. Mark prominently displayed, guard posts with armed sentries, checkpoint where documents and goods are inspected, customs area for taxable items, administrative offices for entry records, mechanisms for closing massive wooden doors in emergencies, defensive positions above archway, decorative elements showing Venetian artistic sensibility, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of controlled access point, balance of defensive capability and impressive architecture, flow of people and goods through regulated entrance, officials checking papers, guards maintaining vigilant watch, perfect expression of Venetian approach to security through controlled movement",
+    "gameplayInformation": {
+      "unlocks": [
+        "Access Control",
+        "Defensive Position",
+        "Customs Inspection"
+      ],
+      "specialAbilities": [
+        "Movement regulation",
+        "Security checkpoint",
+        "Tax collection point",
+        "Emergency closure"
+      ],
+      "upgradePath": [
+        "Fortified Gateway (enhanced defensive capabilities)"
+      ],
+      "reputationEffects": {
+        "Security Forces": 20,
+        "Government": 25,
+        "Merchants": 10,
+        "Citizens": 15
       },
-      
-      "seasonalEffects": {
-        "amnesty periods": "Selected releases, processing activity",
-        "high crime periods": "Increased population, enhanced security",
-        "festival security": "Special monitoring, temporary detention"
+      "riskFactors": {
+        "congestionRisk": "High (bottleneck potential)",
+        "targetRisk": "High (strategic control point)",
+        "maintenanceRisk": "Medium (heavy usage)"
+      }
+    },
+    "soundDesign": {
+      "ambientSound": "Passage of people and carts, guard challenges, gate mechanisms",
+      "activitySounds": "Document checking, customs inspections, traffic regulation",
+      "musicTheme": "Consiglio dei Dieci"
+    },
+    "seasonalEffects": {
+      "heightened alert": "Increased inspections, restricted access",
+      "festivals": "Decorated with banners, ceremonial guards",
+      "trade fairs": "Maximum traffic, expedited processing"
+    },
+    "aiInteractionPoints": [
+      "Main archway",
+      "Guard checkpoint",
+      "Customs inspection area",
+      "Administration office",
+      "Defensive positions",
+      "Waiting area",
+      "Document verification station"
+    ]
+  },
+  {
+    "name": "Harbor Chain Tower",
+    "category": "Military & Defense",
+    "subcategory": "Defensive Structures",
+    "tier": 3,
+    "size": "Medium",
+    "unlockCondition": "12,000 ducats, Naval Guild approval, government authorization",
+    "shortDescription": "Fortified tower operating canal or harbor blocking chains to control naval access.",
+    "fullDescription": "Protecting Venice's vital waterways, harbor chain towers operate massive chain barriers that can physically block unauthorized naval access. Featuring chain winch mechanisms, guard stations, signal equipment, and defensive positions, these specialized structures implement a key defensive technology of medieval and Renaissance naval warfare. Their ability to close waterways gave Venice physical control over maritime approaches.",
+    "flavorText": "With the turn of this mechanism, we transform open water into impenetrable barrier—proving that Venetian ingenuity can alter the very nature of the sea when security demands it.",
+    "constructionCosts": {
+      "ducats": 5000,
+      "timber": 100,
+      "bricks": 200,
+      "stone": 400,
+      "iron": 250
+    },
+    "maintenanceCost": 30,
+    "constructionTime": 864000000,
+    "incomeGeneration": 0,
+    "employmentCapacity": 10,
+    "locationRequirements": {
+      "districtRestrictions": "Harbor entrances, strategic canal access points",
+      "adjacentRequirements": "Requires corresponding tower across waterway",
+      "environmentalEffects": "Controls water access, creates naval defensive point"
+    },
+    "constructionPhase3DPrompt": "Renaissance Venetian harbor chain tower under construction, specialized defensive structure, substantial foundation reaching deep underwater, massive chain mechanism being installed with winch system, counterweights for easier operation, guard station with defensive capabilities, harbor observation platform, signal system for coordination with paired tower across waterway, defensive armaments being mounted, underwater chain anchor points, mechanism housing with security features, isometric game perspective, stylized but detailed, focus on the impressive engineering solution for physical water access control",
+    "completedBuilding3DPrompt": "Completed Renaissance Venetian harbor chain tower, impressive defensive facility featuring substantial stone tower positioned at strategic waterway entrance, massive iron chain visible either deployed across waterway or wound around large winch mechanism, corresponding tower visible on opposite shore, operating team ready to deploy or retract chain on command, defensive positions with armaments to protect mechanism, observation platform with clear harbor views, signal system for communicating with naval forces, chain mechanism housing with security features, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of physical control over water access, engineering sophistication evident in mechanism design, strategic positioning showing defensive mindset, operators maintaining readiness, guards protecting vital defensive asset",
+    "gameplayInformation": {
+      "unlocks": [
+        "Waterway Control",
+        "Harbor Defense",
+        "Naval Access Regulation"
+      ],
+      "specialAbilities": [
+        "Physical ship passage prevention",
+        "Harbor security",
+        "Selective access control"
+      ],
+      "upgradePath": [
+        "Advanced Barrier System (faster operation, stronger chain)"
+      ],
+      "reputationEffects": {
+        "Naval Forces": 20,
+        "Security Forces": 20,
+        "Government": 25,
+        "Foreign Ships": -10
       },
-      
-      "aiInteractionPoints": ["Main entrance security", "Guard stations", "Administrative offices", "Prisoner processing", "Visitation area", "Cell blocks", "Exercise yard", "Isolation cells"]
-    }
-  ]
+      "riskFactors": {
+        "mechanicalRisk": "Medium (complex mechanism)",
+        "targetRisk": "Very High (critical defensive infrastructure)",
+        "maintenanceRisk": "Medium (water exposure, heavy chains)"
+      }
+    },
+    "soundDesign": {
+      "ambientSound": "Chain mechanism creaking, water lapping, metal on metal",
+      "activitySounds": "Winch operation, alert signals, chain deployment splash",
+      "musicTheme": "Processione Ducale"
+    },
+    "seasonalEffects": {
+      "fog": "Heightened alert, additional signal procedures",
+      "naval threats": "Readiness drills, continuous manning",
+      "storms": "Additional safety measures, mechanism security"
+    },
+    "aiInteractionPoints": [
+      "Chain operation mechanism",
+      "Observation platform",
+      "Signal station",
+      "Guard post",
+      "Maintenance area",
+      "Chain anchor point",
+      "Coordination office"
+    ]
+  },
+  {
+    "name": "Arsenal Gate",
+    "category": "Military & Defense",
+    "subcategory": "Naval Facilities",
+    "tier": 4,
+    "size": "Large",
+    "unlockCondition": "Government facility only, not privately constructable",
+    "shortDescription": "Iconic fortified entrance to Venice's Arsenal naval complex, controlling access to restricted military zone.",
+    "fullDescription": "Guarding Venice's most strategic military asset, the Arsenal Gate controls access to the massive naval manufacturing complex. Featuring monumental architecture, heavy fortifications, strict security protocols, and impressive symbolic elements, this iconic structure represents Venetian naval power while enforcing strict access control. As the boundary between civilian Venice and its military heart, the gate balanced imposing presence with artistic sophistication.",
+    "flavorText": "Behind these doors lies not merely a shipyard, but the very source of Venetian power—where timber and iron become the ships that secure our trade, enforce our interests, and guarantee our independence.",
+    "constructionCosts": {
+      "ducats": 15000,
+      "timber": 150,
+      "bricks": 400,
+      "stone": 1000,
+      "iron": 200,
+      "marble": 150
+    },
+    "maintenanceCost": 50,
+    "constructionTime": 2592000000,
+    "incomeGeneration": 0,
+    "employmentCapacity": 30,
+    "locationRequirements": {
+      "districtRestrictions": "Arsenal district entrance only, unique structure",
+      "adjacentRequirements": "Connection to Arsenal complex, defensive position",
+      "environmentalEffects": "Restricts access, creates military zone boundary, projects power"
+    },
+    "constructionPhase3DPrompt": "Renaissance Venetian Arsenal Gate under construction, monumental military entrance, massive foundation for imposing structure, grand central arch taking shape, flanking towers with defensive positions, elaborate decorative elements including Lion of St. Mark being carved, substantial doors with reinforcement, security checkpoints and guard stations, administrator offices, military symbols and images of naval power, highest quality materials showing state importance, isometric game perspective, stylized but detailed, focus on creating impressive but functional military entrance combining security with symbolic projection of naval power",
+    "completedBuilding3DPrompt": "Completed Renaissance Venetian Arsenal Gate, iconic military entrance featuring monumental stone structure with imposing central arch, famous Lion of St. Mark sculpture prominently displayed, twin defensive towers flanking entrance, massive reinforced wooden doors capable of sealing the complex, armed guards in Venetian naval uniforms maintaining strict access control, security checkpoint where credentials are verified, relief carvings showing Venetian naval prowess, administrator office managing authorized access, military banners and symbols of naval authority, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of boundary between civilian Venice and restricted military zone, perfect balance of practical security and symbolic power projection, atmosphere of military discipline and naval pride, officials checking authorization documents, arsenal workers queuing for entry verification",
+    "gameplayInformation": {
+      "unlocks": [
+        "Arsenal Access",
+        "Naval Manufacturing",
+        "Military Zone"
+      ],
+      "specialAbilities": [
+        "Strict access control",
+        "Military zone boundary",
+        "Naval power symbol"
+      ],
+      "upgradePath": [
+        "None - unique historical structure"
+      ],
+      "reputationEffects": {
+        "Military": 30,
+        "Government": 30,
+        "Foreign Visitors": 25,
+        "Citizens": 20
+      },
+      "riskFactors": {
+        "targetRisk": "Very High (symbolic and strategic target)",
+        "securityRisk": "Low (heavily guarded)",
+        "espionageRisk": "Medium (industrial secrets within)"
+      }
+    },
+    "soundDesign": {
+      "ambientSound": "Naval commands, marching guards, massive doors operating",
+      "activitySounds": "Access verification, shift changes, official announcements",
+      "musicTheme": "Processione Ducale"
+    },
+    "seasonalEffects": {
+      "naval reviews": "Ceremonial decoration, official visitors",
+      "heightened security": "Additional verification, restricted access",
+      "ship launches": "Coordinated security for public events"
+    },
+    "aiInteractionPoints": [
+      "Main entrance arch",
+      "Security checkpoint",
+      "Administrator's office",
+      "Guard stations",
+      "Worker verification area",
+      "Official visitor reception",
+      "Lion of St. Mark monument"
+    ]
+  },
+  {
+    "name": "Defensive Bastion",
+    "category": "Military & Defense",
+    "subcategory": "Defensive Structures",
+    "tier": 4,
+    "size": "Extra Large",
+    "unlockCondition": "25,000 ducats, government authorization, Military Guild approval",
+    "shortDescription": "Fortified defensive position with artillery platforms protecting strategic approaches.",
+    "fullDescription": "Protecting Venice's vulnerable approaches, defensive bastions provided artillery positions and observation posts at strategic locations. Featuring angled walls designed for cannon placement, ammunition storage, garrison quarters, and often signal stations, these substantial fortifications represented Renaissance military engineering. Venice's unique lagoon position required specialized defensive structures rather than traditional city walls.",
+    "flavorText": "While other cities hide behind walls, Venice stands protected by water and resolve—yet where those natural defenses might be challenged, we ensure our cannons speak with decisive authority.",
+    "constructionCosts": {
+      "ducats": 14000,
+      "timber": 200,
+      "bricks": 600,
+      "stone": 1200,
+      "iron": 300
+    },
+    "maintenanceCost": 75,
+    "constructionTime": 2592000000,
+    "incomeGeneration": 0,
+    "employmentCapacity": 40,
+    "locationRequirements": {
+      "districtRestrictions": "Strategic defensive positions, vulnerable approaches",
+      "adjacentRequirements": "Commanding position, field of fire, supply access",
+      "environmentalEffects": "Creates military presence, security enhancement, strategic control"
+    },
+    "constructionPhase3DPrompt": "Renaissance Venetian defensive bastion under construction, substantial military fortification, massive earthworks and foundation creating angled walls optimized for artillery, cannon platforms taking shape with geometric precision for maximum firing arcs, ammunition magazines with safety features, garrison quarters, command post with strategic visibility, reinforced construction designed to withstand bombardment, supply access routes, strategic positioning showing defensive mindset, military engineers supervising precise angles and measurements, isometric game perspective, stylized but detailed, focus on Renaissance military engineering principles applied to Venice's unique defensive needs",
+    "completedBuilding3DPrompt": "Completed Renaissance Venetian defensive bastion, imposing military fortification featuring geometric angled walls designed to deflect incoming fire while supporting artillery, multiple cannon positions on elevated platforms with optimal firing arcs over approaches, ammunition magazines built into structure with safety features, garrison quarters for permanent defensive force, command post with maps and firing tables, signal station for communication with other defenses, Venetian military standards flying, artillery crews maintaining cannons, officers observing approaches, thick walls capable of absorbing bombardment, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of formidable defensive position, mathematical precision of Renaissance military engineering, strategic positioning demonstrating defensive control of vital approach, combination of defensive architecture and offensive firepower, soldiers conducting drills, gunners calculating range to targets",
+    "gameplayInformation": {
+      "unlocks": [
+        "Artillery Defense",
+        "Strategic Control",
+        "Military Presence"
+      ],
+      "specialAbilities": [
+        "Approach denial",
+        "Area defense",
+        "Military control zone"
+      ],
+      "upgradePath": [
+        "Advanced Star Fort (improved artillery placement, enhanced defense)"
+      ],
+      "reputationEffects": {
+        "Military": 30,
+        "Government": 25,
+        "Foreign Powers": 20,
+        "Potential Enemies": -30
+      },
+      "riskFactors": {
+        "targetRisk": "Very High (primary military target)",
+        "explosionRisk": "High (ammunition storage)",
+        "obsolescenceRisk": "Medium (evolving military technology)"
+      }
+    },
+    "soundDesign": {
+      "ambientSound": "Flag flapping, distant cannon practice, garrison activity",
+      "activitySounds": "Artillery drills, military commands, defensive preparations",
+      "musicTheme": "Processione Ducale"
+    },
+    "seasonalEffects": {
+      "conflict periods": "Maximum readiness, full manning",
+      "peacetime": "Training focus, maintenance operations",
+      "naval exercises": "Coordination with fleet, signaling practice"
+    },
+    "aiInteractionPoints": [
+      "Main artillery platform",
+      "Command post",
+      "Garrison quarters",
+      "Ammunition magazine",
+      "Observation point",
+      "Signal station",
+      "Supply depot",
+      "Training area"
+    ]
+  },
+  {
+    "name": "Prison",
+    "category": "Military & Defense",
+    "subcategory": "Security Facilities",
+    "tier": 3,
+    "size": "Large",
+    "unlockCondition": "18,000 ducats, government authorization, Security Guild appointment",
+    "shortDescription": "Detention facility for holding criminals and enemies of the state in secure conditions.",
+    "fullDescription": "Enforcing Venice's strict laws, prisons incarcerate criminals and political prisoners in secure facilities. Featuring multiple security levels, guard stations, prisoner housing, and administrative offices, these imposing institutions formed a key component of Venice's justice system. The Republic's famous prison adjacent to the Doge's Palace, connected by the Bridge of Sighs, symbolized the close relationship between government authority and punishment.",
+    "flavorText": "The shadow of the prison reminds all Venetians that while our laws may be complex and our courts sophisticated, the consequence of transgression remains simple and absolute—the loss of the very freedom that Venice herself treasures above all.",
+    "constructionCosts": {
+      "ducats": 10000,
+      "timber": 150,
+      "bricks": 500,
+      "stone": 800,
+      "iron": 250
+    },
+    "maintenanceCost": 50,
+    "constructionTime": 1728000000,
+    "incomeGeneration": 0,
+    "employmentCapacity": 35,
+    "locationRequirements": {
+      "districtRestrictions": "Government district, often near judicial facilities",
+      "adjacentRequirements": "Secure location, limited access, isolation",
+      "environmentalEffects": "Creates security presence, deters crime, somber atmosphere"
+    },
+    "constructionPhase3DPrompt": "Renaissance Venetian prison under construction, imposing detention facility, substantial security features being incorporated from foundation up, thick walls with minimal windows, complex locking systems being installed, cell blocks of varying security levels, guard stations at strategic points, administrative areas for prison management, separate processing zone for new prisoners, security measures preventing escape including water-facing considerations unique to Venice, isometric game perspective, stylized but detailed, focus on creating secure detention facility balancing punishment with Renaissance concepts of justice",
+    "completedBuilding3DPrompt": "Completed Renaissance Venetian prison, formidable detention facility featuring intimidating stone exterior with minimal windows, heavily secured entrance with multiple checkpoints, various security level zones from minimum to maximum, individual cells with appropriate furnishing based on prisoner status, common areas for permitted activities, guard stations positioned for maximum visibility, administration offices where records are maintained, visitor area with security features, exercise yard with surveillance, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of grim justice and containment, guards in Venetian security uniforms maintaining order, prisoner processing area, atmosphere of punishment and state authority, connection to wider justice system through secure transport to courts, balance of humane conditions with necessary security appropriate to Renaissance era",
+    "gameplayInformation": {
+      "unlocks": [
+        "Criminal Detention",
+        "Justice System Completion",
+        "State Security"
+      ],
+      "specialAbilities": [
+        "Criminal containment",
+        "Punishment enforcement",
+        "Security threat neutralization"
+      ],
+      "upgradePath": [
+        "Reform Prison (improved conditions, rehabilitation)"
+      ],
+      "reputationEffects": {
+        "Security Forces": 25,
+        "Judiciary": 20,
+        "Government": 20,
+        "Criminals": -30
+      },
+      "riskFactors": {
+        "escapeRisk": "Low (high security)",
+        "publicReputationRisk": "Medium (treatment concerns)",
+        "corruptionRisk": "Medium (guard integrity)"
+      }
+    },
+    "soundDesign": {
+      "ambientSound": "Cell doors, guard movements, distant prisoner sounds",
+      "activitySounds": "Lock mechanisms, prisoner processing, security checks",
+      "musicTheme": "Consiglio dei Dieci"
+    },
+    "seasonalEffects": {
+      "amnesty periods": "Selected releases, processing activity",
+      "high crime periods": "Increased population, enhanced security",
+      "festival security": "Special monitoring, temporary detention"
+    },
+    "aiInteractionPoints": [
+      "Main entrance security",
+      "Guard stations",
+      "Administrative offices",
+      "Prisoner processing",
+      "Visitation area",
+      "Cell blocks",
+      "Exercise yard",
+      "Isolation cells"
+    ]
+  }
+]

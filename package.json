@@ -19,6 +19,7 @@
     "prepare-lands": "node scripts/prepare-lands.js"
   },
   "dependencies": {
+    "@headlessui/react": "^2.2.2",
     "@react-google-maps/api": "^2.19.2",
     "@react-three/drei": "^9.88.0",
     "@react-three/fiber": "^8.15.11",
