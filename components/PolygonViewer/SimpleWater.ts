@@ -64,9 +64,9 @@ export default class SimpleWater {
       }
     );
     
-    // Create a more advanced material for water
+    // Create a more advanced material for water - use MeshStandardMaterial instead of MeshPhysicalMaterial
     const waterColor = new THREE.Color(this.getWaterColorForView());
-    const material = new THREE.MeshPhysicalMaterial({
+    const material = new THREE.MeshStandardMaterial({
       color: waterColor,
       transparent: true,
       opacity: 0.95, // Increased opacity for better visibility
@@ -74,10 +74,7 @@ export default class SimpleWater {
       normalMap: normalMap,
       normalScale: new THREE.Vector2(0.5, 0.5), // Increase normal intensity
       metalness: 0.2,
-      roughness: 0.4,
-      clearcoat: 0.4, // Add clearcoat for more realistic water surface
-      clearcoatRoughness: 0.2,
-      envMapIntensity: 1.5 // Increase environment map intensity
+      roughness: 0.4
     });
     
     // Create the water mesh
@@ -156,7 +153,7 @@ export default class SimpleWater {
     if (!this.waterMesh) return;
     
     // Get the material
-    const material = this.waterMesh.material as THREE.MeshPhysicalMaterial;
+    const material = this.waterMesh.material as THREE.MeshStandardMaterial;
     
     // Update normal map offset for wave animation
     if (material.normalMap) {
