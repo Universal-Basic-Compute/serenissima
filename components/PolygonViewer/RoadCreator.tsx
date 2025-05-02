@@ -20,6 +20,7 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
   const [curvature, setCurvature] = useState<number>(0.5); // 0 to 1
   const [isPlacing, setIsPlacing] = useState<boolean>(false);
   const [previewMesh, setPreviewMesh] = useState<THREE.Mesh | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const raycasterRef = useRef(new THREE.Raycaster());
   const mouseRef = useRef(new THREE.Vector2());
   const planeRef = useRef(new THREE.Plane(new THREE.Vector3(0, 1, 0), 0));
@@ -56,12 +57,35 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
     const handleClick = (event: MouseEvent) => {
       if (!active || event.button !== 0) return; // Only handle left clicks
       
-      // Get the intersection point with the ground plane
-      raycasterRef.current.setFromCamera(mouseRef.current, camera);
-      const intersectionPoint = new THREE.Vector3();
-      raycasterRef.current.ray.intersectPlane(planeRef.current, intersectionPoint);
+      // Calculate mouse position in normalized device coordinates
+      mouseRef.current.x = (event.clientX / window.innerWidth) * 2 - 1;
+      mouseRef.current.y = -(event.clientY / window.innerHeight) * 2 + 1;
       
-      if (intersectionPoint) {
+      // Update the raycaster with the camera and mouse position
+      raycasterRef.current.setFromCamera(mouseRef.current, camera);
+      
+      // First, check for intersections with polygon meshes
+      const intersects = raycasterRef.current.intersectObjects(scene.children, true);
+      
+      // Find the first intersection that is a polygon mesh
+      let validIntersection = null;
+      for (const intersect of intersects) {
+        // Check if this is a polygon mesh (not water, not clouds, etc.)
+        // Polygons are positioned at y=0.1 and have a small height
+        if (intersect.object instanceof THREE.Mesh && 
+            Math.abs(intersect.point.y - 0.1) < 0.1 && // Check if it's close to the polygon height
+            intersect.object.userData && 
+            !intersect.object.userData.isRoad) { // Make sure it's not another road
+          validIntersection = intersect;
+          break;
+        }
+      }
+      
+      // If we found a valid intersection with a polygon
+      if (validIntersection) {
+        // Use the intersection point instead of the ground plane
+        const intersectionPoint = validIntersection.point;
+        
         // Add point to the road
         const newPoints = [...points, intersectionPoint];
         setPoints(newPoints);
@@ -75,6 +99,17 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
         if (newPoints.length >= 2) {
           createRoadMesh(newPoints);
         }
+        
+        // Clear any error message
+        setErrorMessage(null);
+      } else {
+        // Show error message
+        setErrorMessage("Please click on a land polygon to place road points");
+        
+        // Clear the message after 2 seconds
+        setTimeout(() => {
+          setErrorMessage(null);
+        }, 2000);
       }
     };
 
@@ -141,12 +176,30 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
   const updateRoadPreview = () => {
     if (!isPlacing || points.length === 0) return;
     
-    // Get the intersection point with the ground plane
+    // Update the raycaster with the camera and mouse position
     raycasterRef.current.setFromCamera(mouseRef.current, camera);
-    const intersectionPoint = new THREE.Vector3();
-    raycasterRef.current.ray.intersectPlane(planeRef.current, intersectionPoint);
     
-    if (intersectionPoint) {
+    // First, check for intersections with polygon meshes
+    const intersects = raycasterRef.current.intersectObjects(scene.children, true);
+    
+    // Find the first intersection that is a polygon mesh
+    let validIntersection = null;
+    for (const intersect of intersects) {
+      // Check if this is a polygon mesh (not water, not clouds, etc.)
+      if (intersect.object instanceof THREE.Mesh && 
+          Math.abs(intersect.point.y - 0.1) < 0.1 && // Check if it's close to the polygon height
+          intersect.object.userData && 
+          !intersect.object.userData.isRoad) { // Make sure it's not another road
+        validIntersection = intersect;
+        break;
+      }
+    }
+    
+    // If we found a valid intersection with a polygon
+    if (validIntersection) {
+      // Use the intersection point instead of the ground plane
+      const intersectionPoint = validIntersection.point;
+      
       // Create a temporary array with the current points plus the mouse position
       const previewPoints = [...points, intersectionPoint];
       
@@ -209,14 +262,14 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
       const v4 = new THREE.Vector3().subVectors(next, perpendicular);
       
       // First triangle
-      positions.push(v1.x, v1.y + 0.05, v1.z); // Slightly above ground to prevent z-fighting
-      positions.push(v2.x, v2.y + 0.05, v2.z);
-      positions.push(v3.x, v3.y + 0.05, v3.z);
+      positions.push(v1.x, v1.y + 0.15, v1.z); // Slightly above polygons (0.15 instead of 0.05)
+      positions.push(v2.x, v2.y + 0.15, v2.z);
+      positions.push(v3.x, v3.y + 0.15, v3.z);
       
       // Second triangle
-      positions.push(v2.x, v2.y + 0.05, v2.z);
-      positions.push(v4.x, v4.y + 0.05, v4.z);
-      positions.push(v3.x, v3.y + 0.05, v3.z);
+      positions.push(v2.x, v2.y + 0.15, v2.z);
+      positions.push(v4.x, v4.y + 0.15, v4.z);
+      positions.push(v3.x, v3.y + 0.15, v3.z);
       
       // UVs for texture mapping
       const segmentLength = current.distanceTo(next);
@@ -247,6 +300,9 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
     // Create road mesh
     const road = new THREE.Mesh(roadGeometry, roadMaterial);
     road.renderOrder = 15; // Above ground, below buildings
+    
+    // Mark as road for special handling
+    road.userData.isRoad = true;
     
     // Add to scene
     scene.add(road);
@@ -320,6 +376,13 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
       <div className="mt-2 text-xs text-gray-600 text-center">
         Click to place points • Press ESC to cancel • Press Backspace to remove last point
       </div>
+      
+      {/* Error message */}
+      {errorMessage && (
+        <div className="mt-2 text-red-600 text-sm text-center">
+          {errorMessage}
+        </div>
+      )}
     </div>
   );
 };

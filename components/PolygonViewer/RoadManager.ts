@@ -132,14 +132,14 @@ export default class RoadManager {
       const v4 = new THREE.Vector3().subVectors(next, perpendicular);
       
       // First triangle
-      positions.push(v1.x, v1.y + 0.05, v1.z); // Slightly above ground to prevent z-fighting
-      positions.push(v2.x, v2.y + 0.05, v2.z);
-      positions.push(v3.x, v3.y + 0.05, v3.z);
+      positions.push(v1.x, v1.y + 0.15, v1.z); // Slightly above polygons (0.15 instead of 0.05)
+      positions.push(v2.x, v2.y + 0.15, v2.z);
+      positions.push(v3.x, v3.y + 0.15, v3.z);
       
       // Second triangle
-      positions.push(v2.x, v2.y + 0.05, v2.z);
-      positions.push(v4.x, v4.y + 0.05, v4.z);
-      positions.push(v3.x, v3.y + 0.05, v3.z);
+      positions.push(v2.x, v2.y + 0.15, v2.z);
+      positions.push(v4.x, v4.y + 0.15, v4.z);
+      positions.push(v3.x, v3.y + 0.15, v3.z);
       
       // UVs for texture mapping
       const segmentLength = current.distanceTo(next);
