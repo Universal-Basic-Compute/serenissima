@@ -34,7 +34,7 @@ export default class SceneSetup {
     
     // Initialize scene with a neutral background
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color('#f5f5f5'); // Light gray background
+    this.scene.background = new THREE.Color('#87CEEB'); // Light sky blue background
     
     // No fog for cleaner visuals
     // Set up scene to use orthographic rendering for flat appearance
@@ -266,13 +266,18 @@ export default class SceneSetup {
       scene: this.scene,
       activeView: this.activeView,
       performanceMode: this.performanceMode,
-      width: 800, // Large width for better coverage
-      height: 800 // Large height for better coverage
+      width: 1000, // Increased from 800 to 1000 for better coverage
+      height: 1000 // Increased from 800 to 1000 for better coverage
     });
     
     // If we have land positions, set them for water interaction
     if (this.scene.userData.landPositions && Array.isArray(this.scene.userData.landPositions)) {
       this.water.setLandPositions(this.scene.userData.landPositions);
+    }
+    
+    // Force an initial update to make sure water is visible
+    if (this.water) {
+      this.water.update(0);
     }
     
     return this.water;

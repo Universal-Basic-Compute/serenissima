@@ -145,7 +145,7 @@ export default class Water {
           color += pattern * vec3(0.1, 0.1, 0.3);
           
           // Increase opacity for better visibility
-          gl_FragColor = vec4(color, 0.95);
+          gl_FragColor = vec4(color, 1.0); // Changed from 0.95 to 1.0 for full opacity
         }
       `
     };
@@ -155,21 +155,21 @@ export default class Water {
       uniforms: waterShader.uniforms,
       vertexShader: waterShader.vertexShader,
       fragmentShader: waterShader.fragmentShader,
-      transparent: true,
+      transparent: false, // Changed from true to false for better visibility
       side: THREE.DoubleSide
     });
     
     // Create the water mesh
     this.waterMesh = new THREE.Mesh(this.waterGeometry, this.waterMaterial);
     
-    // Position water at y=-0.1 (below land)
-    this.waterMesh.position.y = -0.1;
+    // Position water at y=-0.2 (below land)
+    this.waterMesh.position.y = -0.2; // Changed from -0.1 to -0.2
     
     // Rotate the water plane to be horizontal
     this.waterMesh.rotation.x = -Math.PI / 2;
     
     // Set render order to ensure water appears below land
-    this.waterMesh.renderOrder = 1;
+    this.waterMesh.renderOrder = 0; // Changed from 1 to 0
     
     // Add to scene
     this.scene.add(this.waterMesh);
@@ -392,19 +392,19 @@ export default class Water {
   private getWaterColorForView(): number {
     switch (this.activeView) {
       case 'transport':
-        return 0x66ccff; // Brighter blue for transport
+        return 0x0099ff; // Brighter blue for transport
       case 'resources':
-        return 0x4ac0a0; // Brighter teal for resources
+        return 0x00ccaa; // Brighter teal for resources
       case 'markets':
-        return 0x6d9ecc; // Brighter steel blue for markets
+        return 0x0088cc; // Brighter steel blue for markets
       case 'governance':
         return 0x6a5acd; // Brighter slate blue for governance
       case 'land':
-        return 0x33d6e8; // Brighter sea green for land view
+        return 0x00aaff; // Brighter sea blue for land view
       case 'buildings':
-        return 0x33aaff; // Brighter turquoise
+        return 0x0099ff; // Brighter turquoise
       default:
-        return 0x33aaff; // Brighter turquoise
+        return 0x0099ff; // Brighter turquoise
     }
   }
   
@@ -413,17 +413,17 @@ export default class Water {
       case 'transport':
         return 0x0066cc; // Deeper blue for transport
       case 'resources':
-        return 0x1a5952; // Darker teal for resources
+        return 0x007766; // Darker teal for resources
       case 'markets':
-        return 0x2c4356; // Darker steel blue for markets
+        return 0x005588; // Darker steel blue for markets
       case 'governance':
-        return 0x27214d; // Darker slate blue for governance
+        return 0x483d8b; // Darker slate blue for governance
       case 'land':
-        return 0x0088a9; // Deeper sea green for land view
+        return 0x0066aa; // Deeper sea blue for land view
       case 'buildings':
-        return 0x005588; // Deep blue
+        return 0x0066aa; // Deep blue
       default:
-        return 0x005588; // Deep blue
+        return 0x0066aa; // Deep blue
     }
   }
   
