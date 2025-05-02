@@ -365,7 +365,7 @@
     "tier": 1,
     "size": "Small",
     "unlockCondition": "500 ducats capital, Bakers Guild connection",
-    "calculationsAnalysis": "The Bakery represents basic food production with modest but reliable returns. The construction cost of 400,000 ducats reflects the specialized oven and preparation areas required, while the income of 9,000 ducats (2.25% return) represents daily bread and pastry sales. The maintenance cost of 10,000 ducats (111% of income) creates a thin profit margin reflecting the price-controlled nature of this essential service. The employment capacity of 4 represents the baker, apprentices, and sales staff needed. The construction time of 2 days (172800000ms) reflects the straightforward construction requirements. This building creates an accessible investment in food production with appropriate guild requirements reflecting the historical importance of regulated bakeries in Venice's urban food system, where consistent bread supply at controlled prices was considered essential to social stability.",
+    "calculationsAnalysis": "The Bakery represents basic food production with modest but reliable returns. The construction cost of 400,000 ducats reflects the specialized oven and preparation areas required, while the income of 7,000 ducats (1.75% return) represents daily bread and pastry sales. The maintenance cost of 15,000 ducats (214% of income) creates a negative profit margin reflecting the price-controlled nature of this essential service that often required subsidies. The employment capacity of 4 represents the baker, apprentices, and sales staff needed. The construction time of 2 days (172800000ms) reflects the straightforward construction requirements. This building creates an accessible investment in food production with appropriate guild requirements reflecting the historical importance of regulated bakeries in Venice's urban food system, where consistent bread supply at controlled prices was considered essential to social stability.",
     "shortDescription": "Facility producing bread and pastries, an essential food service for the urban population.",
     "fullDescription": "A staple of every Venetian neighborhood, bakeries provide essential daily bread as well as sweet and savory pastries. Featuring stone ovens, preparation areas, and often a small retail space, these establishments operate from pre-dawn to serve the community. Their regulated prices and consistent operation made them crucial to urban food security in Renaissance Venice.",
     "flavorText": "The scent of fresh bread has ended more neighborhood disputes than any magistrate's decree—for even bitter enemies must still eat side by side.",
@@ -376,9 +376,9 @@
       "stone": 100,
       "iron": 10
     },
-    "maintenanceCost": 10000,
+    "maintenanceCost": 15000,
     "constructionTime": 172800000,
-    "incomeGeneration": 9000,
+    "incomeGeneration": 7000,
     "employmentCapacity": 4,
     "productionInformation": {
       "inputResources": {
@@ -638,7 +638,7 @@
     "tier": 1,
     "size": "Medium",
     "unlockCondition": "1,000 ducats capital, basic tools",
-    "calculationsAnalysis": "The Blacksmith represents basic metal production with modest but reliable returns. The construction cost of 750,000 ducats reflects the forge and specialized equipment required, while the income of 15,000 ducats (2% return) represents sales of metal goods and components. The maintenance cost of 15,000 ducats (100% of income) creates a thin profit margin reflecting the essential but competitive nature of basic metalworking. The employment capacity of 5 represents the blacksmith, apprentices, and assistants needed. The construction time of 2 days (172800000ms) reflects the straightforward construction requirements. This building creates an accessible investment in metal production that supports numerous other industries, reflecting the historical importance of blacksmiths in Venice's industrial ecosystem, where metal components were essential for shipbuilding, construction, and daily life.",
+    "calculationsAnalysis": "The Blacksmith represents basic metal production with modest but reliable returns. The construction cost of 750,000 ducats reflects the forge and specialized equipment required, while the income of 12,000 ducats (1.6% return) represents sales of metal goods and components. The maintenance cost of 20,000 ducats (167% of income) creates a negative profit margin reflecting the essential but resource-intensive nature of basic metalworking. The employment capacity of 5 represents the blacksmith, apprentices, and assistants needed. The construction time of 2 days (172800000ms) reflects the straightforward construction requirements. This building creates an accessible investment in metal production that supports numerous other industries, reflecting the historical importance of blacksmiths in Venice's industrial ecosystem, where metal components were essential for shipbuilding, construction, and daily life.",
     "shortDescription": "Workshop producing iron tools, fittings, and basic metal goods for everyday use.",
     "fullDescription": "An essential service in any district, blacksmiths craft the metal components needed for construction, shipping, and daily life. Featuring a forge, anvils, quenching tanks, and metalworking tools, these workshops combine practical craftsmanship with industrial production. From nails and hinges to tools and decorative ironwork, blacksmiths support nearly every other industry in Venice.",
     "flavorText": "Without my hinges, your doors would not swing; without my nails, your ships would come apart; without my locks, your wealth would vanish—yet few think of the blacksmith until something breaks.",
@@ -649,9 +649,9 @@
       "stone": 100,
       "iron": 30
     },
-    "maintenanceCost": 15000,
+    "maintenanceCost": 20000,
     "constructionTime": 172800000,
-    "incomeGeneration": 15000,
+    "incomeGeneration": 12000,
     "employmentCapacity": 5,
     "productionInformation": {
       "inputResources": {
