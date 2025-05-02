@@ -5,7 +5,7 @@ import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { ViewMode } from './types';
 import CloudSystem from './CloudSystem';
-import Water from './Water'; // Import the new Water class
+import SimpleWater from './Water'; // Import the Water class
 
 interface SceneSetupProps {
   canvas: HTMLCanvasElement;
@@ -270,7 +270,7 @@ export default class SceneSetup {
     console.log('Creating advanced water system...');
     
     // Create a water effect with larger dimensions for better coverage
-    this.water = new Water({
+    this.water = new SimpleWater({
       scene: this.scene,
       activeView: this.activeView,
       performanceMode: this.performanceMode,
