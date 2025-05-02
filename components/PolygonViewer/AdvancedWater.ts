@@ -81,8 +81,8 @@ export default class AdvancedWater {
       this.interactionPoints.push({
         x: (Math.random() - 0.5) * this.width,
         z: (Math.random() - 0.5) * this.height,
-        strength: Math.random() * 0.1 + 0.02, // Increased from 0.05 to 0.1
-        radius: Math.random() * 15 + 5 // Increased from 10 to 15
+        strength: Math.random() * 0.2 + 0.05, // Increased from 0.1+0.02 to 0.2+0.05
+        radius: Math.random() * 20 + 10 // Increased from 15+5 to 20+10
       });
     }
   }
@@ -104,7 +104,7 @@ export default class AdvancedWater {
         deepWaterColor: { value: new THREE.Color(this.getDeepWaterColorForView()) },
         foamColor: { value: new THREE.Color(0xffffff) },
         foamThreshold: { value: 0.08 },
-        waveHeight: { value: 0.2 }
+        waveHeight: { value: 0.5 } // Increased from 0.2 to 0.5
       },
       vertexShader: `
         uniform float time;
@@ -114,9 +114,9 @@ export default class AdvancedWater {
         
         // Improved wave function for more natural movement
         float getWave(vec2 position) {
-          float wave = sin(position.x * 10.0 + time) * 0.05 +
-                      sin(position.y * 8.0 + time * 0.8) * 0.04 +
-                      sin(position.x * 6.0 + position.y * 6.0 + time * 1.2) * 0.03;
+          float wave = sin(position.x * 10.0 + time * 1.5) * 0.1 +  // Increased amplitude and speed
+                      sin(position.y * 8.0 + time * 1.2) * 0.08 +   // Increased amplitude and speed
+                      sin(position.x * 6.0 + position.y * 6.0 + time * 1.8) * 0.06; // Increased amplitude and speed
           return wave;
         }
         
@@ -144,24 +144,24 @@ export default class AdvancedWater {
         
         void main() {
           // Create depth-based color gradient
-          float depthFactor = smoothstep(-0.05, 0.05, vElevation);
+          float depthFactor = smoothstep(-0.1, 0.1, vElevation); // Increased range for more visible gradient
           
           // Mix between deep and shallow water colors
           vec3 color = mix(deepWaterColor, waterColor, depthFactor);
           
           // Add foam at wave peaks
           if (vElevation > foamThreshold) {
-            float foamIntensity = smoothstep(foamThreshold, foamThreshold + 0.02, vElevation);
-            color = mix(color, foamColor, foamIntensity * 0.7);
+            float foamIntensity = smoothstep(foamThreshold, foamThreshold + 0.04, vElevation); // Increased range
+            color = mix(color, foamColor, foamIntensity * 0.8); // Increased intensity
           }
           
           // Add subtle wave patterns
-          float pattern = sin(vUv.x * 40.0 + time) * sin(vUv.y * 40.0 + time) * 0.05;
-          color += pattern * vec3(0.1, 0.1, 0.2);
+          float pattern = sin(vUv.x * 60.0 + time) * sin(vUv.y * 60.0 + time) * 0.08; // Increased frequency and amplitude
+          color += pattern * vec3(0.15, 0.15, 0.3); // Increased color contribution
           
           // Add subtle highlights
-          float highlight = max(0.0, sin(vUv.x * 30.0 + vUv.y * 20.0 + time * 0.5) * 0.1);
-          color += highlight * vec3(0.1, 0.1, 0.3);
+          float highlight = max(0.0, sin(vUv.x * 40.0 + vUv.y * 30.0 + time * 0.8) * 0.15); // Increased frequency and amplitude
+          color += highlight * vec3(0.15, 0.15, 0.4); // Increased color contribution
           
           gl_FragColor = vec4(color, 0.9);
         }
@@ -243,13 +243,13 @@ export default class AdvancedWater {
           4 * this.liquidHeightField[idx];
         
         // Increase wave speed for more visible waves
-        this.liquidVelocityField[idx] += this.waveSpeed * 1.5 * laplacian;
+        this.liquidVelocityField[idx] += this.waveSpeed * 3.0 * laplacian; // Increased from 1.5 to 3.0
         
         // Apply damping
         this.liquidVelocityField[idx] *= this.damping;
         
         // Update height
-        this.liquidHeightField[idx] += this.liquidVelocityField[idx] * deltaTime * 1.5;
+        this.liquidHeightField[idx] += this.liquidVelocityField[idx] * deltaTime * 3.0; // Increased from 1.5 to 3.0
       }
     }
     
@@ -265,11 +265,11 @@ export default class AdvancedWater {
     this.applyInteractionPoints();
     
     // Add more random interaction points for a livelier water surface
-    if (Math.random() < 0.03) { // Increased from 0.01 to 0.03
-      this.addRandomInteractionPoints(2); // Increased from 1 to 2
+    if (Math.random() < 0.05) { // Increased from 0.03 to 0.05
+      this.addRandomInteractionPoints(3); // Increased from 2 to 3
       
       // Remove old interaction points to keep the list manageable
-      if (this.interactionPoints.length > 30) { // Increased from 20 to 30
+      if (this.interactionPoints.length > 40) { // Increased from 30 to 40
         this.interactionPoints.shift();
       }
     }
@@ -300,9 +300,9 @@ export default class AdvancedWater {
             const idx = i * size + j;
             
             // Apply a sinusoidal disturbance that changes over time with increased amplitude
-            const time = this.time * 3; // Increased from 2 to 3
+            const time = this.time * 4; // Increased from 3 to 4
             const distFactor = 1 - Math.sqrt(distSq) / radiusInCells;
-            const strength = point.strength * distFactor * 2.0; // Doubled the strength
+            const strength = point.strength * distFactor * 4.0; // Increased from 2.0 to 4.0
             
             this.liquidHeightField[idx] += strength * Math.sin(time + distSq * 0.1);
           }
@@ -378,7 +378,7 @@ export default class AdvancedWater {
   
   public update(frameCount: number) {
     // Update time
-    this.time += 0.015; // Increased from 0.01 to 0.015
+    this.time += 0.025; // Increased from 0.015 to 0.025
     
     // Get delta time for physics-based simulation
     const currentTime = this.clock.getElapsedTime();
@@ -398,7 +398,7 @@ export default class AdvancedWater {
     this.applySimulationToGeometry();
     
     // Add occasional large waves
-    if (Math.random() < 0.005) {
+    if (Math.random() < 0.01) { // Increased from 0.005 to 0.01
       this.addLargeWave();
     }
   }
@@ -411,7 +411,7 @@ export default class AdvancedWater {
     
     // Choose a random edge to start the wave from
     const edge = Math.floor(Math.random() * 4);
-    const waveStrength = 0.15; // Strong wave
+    const waveStrength = 0.3; // Increased from 0.15 to 0.3
     
     switch (edge) {
       case 0: // Top edge
