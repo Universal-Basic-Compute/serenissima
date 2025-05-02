@@ -53,83 +53,8 @@ export default class CloudSystem {
   }
 
   private createClouds() {
-    if (!this.cloudTexture) {
-      console.error('Cannot create clouds: texture not loaded');
-      return;
-    }
-    
-    console.log('Creating cloud particles...');
-    
-    // Clear any existing clouds
-    while (this.clouds.children.length > 0) {
-      const cloud = this.clouds.children[0];
-      if (cloud instanceof THREE.Mesh) {
-        if (cloud.geometry) cloud.geometry.dispose();
-        if (cloud.material && !Array.isArray(cloud.material)) {
-          cloud.material.dispose();
-        }
-      }
-      this.clouds.remove(cloud);
-    }
-    this.cloudParticles = [];
-    
-    // Determine number of clouds based on performance mode
-    const cloudCount = this.performanceMode ? 15 : 30;
-    
-    // Create cloud planes with higher opacity
-    const cloudMaterial = new THREE.MeshLambertMaterial({
-      map: this.cloudTexture,
-      transparent: true,
-      opacity: 0.8, // Increased from 0.6 to 0.8
-      depthWrite: false // Ensure clouds don't interfere with depth buffer
-    });
-    
-    const size = Math.max(this.width, this.height) * 0.5;
-    const height = size * 0.5;
-    
-    // Create clouds at different heights for more depth
-    const heightLevels = [height, height + 10, height + 20];
-    
-    console.log(`Creating ${cloudCount} clouds at heights: ${heightLevels}`);
-    
-    for (let i = 0; i < cloudCount; i++) {
-      // Create a plane for each cloud - make them MUCH larger
-      const cloudSize = Math.random() * 50 + 50; // Increased from 30+30 to 50+50
-      const cloudGeometry = new THREE.PlaneGeometry(cloudSize, cloudSize);
-      
-      const cloud = new THREE.Mesh(cloudGeometry, cloudMaterial.clone());
-      
-      // Position clouds randomly in a large area above the scene
-      // Choose a random height level
-      const cloudHeight = heightLevels[Math.floor(Math.random() * heightLevels.length)];
-      
-      cloud.position.set(
-        (Math.random() - 0.5) * size * 2,
-        cloudHeight,
-        (Math.random() - 0.5) * size * 2
-      );
-      
-      // Rotate clouds to face up
-      cloud.rotation.x = -Math.PI / 2;
-      
-      // Add some random rotation for variety
-      cloud.rotation.z = Math.random() * Math.PI * 2;
-      
-      // Scale randomly for variety - increase the scale
-      const scale = Math.random() * 0.7 + 1.2; // Increased from 0.5+0.8 to 0.7+1.2
-      cloud.scale.set(scale, scale, scale);
-      
-      // Add random opacity for more depth - but keep it higher
-      (cloud.material as THREE.MeshLambertMaterial).opacity = 0.5 + Math.random() * 0.3; // Increased from 0.3+0.3 to 0.5+0.3
-      
-      this.clouds.add(cloud);
-      this.cloudParticles.push(cloud);
-    }
-    
-    console.log(`Created ${this.cloudParticles.length} cloud particles`);
-    
-    // Initially hide clouds
-    this.setVisibility(false);
+    console.log('Cloud creation disabled');
+    // No cloud geometry generation
   }
 
   public update(time: number) {

@@ -36,31 +36,8 @@ export default class SimpleWater {
   }
   
   private createWater() {
-    // Create a simple water plane
-    const waterGeometry = new THREE.PlaneGeometry(
-      this.width, 
-      this.height,
-      32, 32 // Higher resolution for better waves
-    );
-    
-    // Create a simple material with a blue color
-    const waterColor = this.getWaterColorForView();
-    const waterMaterial = new THREE.MeshBasicMaterial({
-      color: waterColor,
-      transparent: true,
-      opacity: 0.95, // Increased opacity to reduce transparency effects
-      side: THREE.FrontSide
-    });
-    
-    // Create the water mesh
-    this.waterMesh = new THREE.Mesh(waterGeometry, waterMaterial);
-    this.waterMesh.rotation.x = -Math.PI / 2; // Rotate to be horizontal
-    this.waterMesh.position.y = -0.5; // Position closer to land to reduce gap
-    this.waterMesh.renderOrder = -1; // Ensure water renders before land
-    
-    // Add to scene
-    this.scene.add(this.waterMesh);
-    console.log('Simple water plane added to scene at position y =', this.waterMesh.position.y);
+    console.log('Simple water creation disabled');
+    // No water geometry generation
   }
   
   private getWaterColorForView(): number {

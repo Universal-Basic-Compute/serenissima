@@ -176,62 +176,17 @@ export default class SceneSetup {
   }
   
   private setupLights(activeView: ViewMode) {
-    // Add warm ambient light for tropical feel
-    const ambientLight = new THREE.AmbientLight(0xfff0e0, 0.7); // Warmer color for tropical feel
+    // Add ambient light only
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
     this.scene.add(ambientLight);
     
-    // Calculate sun position based on current time of day in Venezia
-    const sunPosition = this.calculateSunPosition();
-    
-    // Add a directional light for the sun with warmer color
-    this.sunLight = new THREE.DirectionalLight(0xfff5e0, 1.2); // Warmer color and higher intensity
-    this.sunLight.position.copy(sunPosition);
+    // Add directional light without geometry
+    this.sunLight = new THREE.DirectionalLight(0xffffff, 1.2);
+    this.sunLight.position.set(100, 100, 100);
     this.sunLight.castShadow = false;
-    
-    // Make the light come from much further away (normalize and multiply)
-    this.sunLight.position.normalize().multiplyScalar(1000); // 1000 units away
-    
     this.scene.add(this.sunLight);
     
-    // Log to verify light setup
-    console.log('Sun light added at position:', this.sunLight.position);
-    
-    // Add a secondary light for fill
-    const fillLight = new THREE.DirectionalLight(0xadd8e6, 0.3); // Light blue fill light
-    fillLight.position.set(-50, 30, -50);
-    this.scene.add(fillLight);
-    
-    // Add a small sun sphere very far away
-    const sunGeometry = new THREE.SphereGeometry(50, 16, 16); // Larger sphere since it's far away
-    const sunMaterial = new THREE.MeshBasicMaterial({ 
-      color: 0xffffcc, 
-      transparent: true,
-      opacity: 0.8
-    });
-    
-    this.sunSphere = new THREE.Mesh(sunGeometry, sunMaterial);
-    this.sunSphere.position.copy(this.sunLight.position);
-    this.scene.add(this.sunSphere);
-    
-    // Add a subtle glow around the sun
-    const sunGlowGeometry = new THREE.SphereGeometry(80, 16, 16);
-    const sunGlowMaterial = new THREE.MeshBasicMaterial({
-      color: 0xffffee,
-      transparent: true,
-      opacity: 0.3,
-      side: THREE.BackSide
-    });
-    
-    this.sunGlow = new THREE.Mesh(sunGlowGeometry, sunGlowMaterial);
-    this.sunGlow.position.copy(this.sunLight.position);
-    this.scene.add(this.sunGlow);
-    
-    // Add water reflection light - a subtle blue light from below
-    const waterReflectionLight = new THREE.DirectionalLight(0x8ecbf5, 0.3);
-    waterReflectionLight.position.set(0, -10, 0); // Coming from below
-    waterReflectionLight.target.position.set(0, 0, 0);
-    this.scene.add(waterReflectionLight);
-    this.scene.add(waterReflectionLight.target);
+    console.log('Lights added without geometry');
   }
   
   private animateSun() {

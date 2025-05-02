@@ -426,66 +426,8 @@ export default class PolygonRenderer {
   }
   
   private createSamplePolygon() {
-    // Add a sample polygon for testing
-    const sampleShape = new THREE.Shape();
-    // Make the sample polygon wider to account for latitude correction
-    const sampleWidth = 10 / this.bounds.latCorrectionFactor;
-    sampleShape.moveTo(-sampleWidth, -10);
-    sampleShape.lineTo(-sampleWidth, 10);
-    sampleShape.lineTo(sampleWidth, 10);
-    sampleShape.lineTo(sampleWidth, -10);
-    
-    const extrudeSettings = {
-      steps: 1,
-      depth: 0.04, // 75% thinner
-      bevelEnabled: false // Disable bevel completely
-    };
-    
-    const sampleGeometry = new THREE.ExtrudeGeometry(sampleShape, extrudeSettings);
-    sampleGeometry.rotateX(-Math.PI / 2);
-    
-    const sampleMaterial = new THREE.MeshStandardMaterial({
-      color: '#e6d2a8', // Always use sand/beige color
-      map: this.activeView !== 'land' ? this.sandBaseColor : null,
-      normalMap: this.activeView !== 'land' ? this.sandNormalMap : null,
-      roughnessMap: this.activeView !== 'land' ? this.sandRoughnessMap : null,
-      roughness: 0.7,
-      metalness: 0.1,
-      side: THREE.FrontSide, // Changed from DoubleSide to FrontSide
-      flatShading: false,
-      wireframe: false,
-      // Remove polygon edges by setting these properties:
-      polygonOffset: true,
-      polygonOffsetFactor: 1,
-      polygonOffsetUnits: 1
-    });
-    
-    const sampleMesh = new THREE.Mesh(sampleGeometry, sampleMaterial);
-    sampleMesh.castShadow = false;
-    sampleMesh.receiveShadow = false;
-    
-    // Store the original material properties explicitly
-    sampleMesh.userData.originalEmissive = new THREE.Color(0, 0, 0);
-    sampleMesh.userData.originalEmissiveIntensity = 0;
-    
-    // Create a LOD polygon for the sample
-    const polygonMesh = new PolygonMesh(
-      this.scene,
-      { id: 'sample', coordinates: [] },
-      this.bounds,
-      this.activeView,
-      this.performanceMode,
-      this.textureLoader,
-      '#7cac6a' // Default green color for sample
-    );
-    
-    this.PolygonMeshs.push(polygonMesh);
-    const mesh = polygonMesh.getMesh();
-    if (mesh) {
-      this.polygonMeshesRef.current['sample'] = mesh;
-    }
-    
-    console.log('Added sample polygon to scene');
+    console.log('Sample polygon creation disabled');
+    // No geometry generation
   }
   
   public update(selectedPolygonId: string | null = null) {

@@ -111,32 +111,8 @@ export default class WaterEffect {
   
   // Add method to create a sun reflection
   private createSunReflection() {
-    // Get the sun position projected onto the water plane
-    const sunProjection = new THREE.Vector3();
-    sunProjection.copy(this.sunPosition);
-    
-    // Scale down the position to fit within the water plane
-    const maxDimension = Math.max(this.width, this.height);
-    const scale = maxDimension / (2 * sunProjection.length());
-    sunProjection.multiplyScalar(scale * 0.5);
-    
-    // Keep only the X and Z components for the water plane
-    sunProjection.y = -0.1; // Just above water level
-    
-    // Create a circular highlight that will represent the sun's reflection
-    const reflectionGeometry = new THREE.CircleGeometry(15, 32);
-    const reflectionMaterial = new THREE.MeshBasicMaterial({
-      color: 0xffffee,
-      transparent: true,
-      opacity: 0.4,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false
-    });
-    
-    this.sunReflection = new THREE.Mesh(reflectionGeometry, reflectionMaterial);
-    this.sunReflection.rotation.x = -Math.PI / 2;
-    this.sunReflection.position.copy(sunProjection);
-    this.scene.add(this.sunReflection);
+    console.log('Sun reflection creation disabled');
+    // No geometry generation
   }
   
   // Add method for Gerstner waves
@@ -206,173 +182,19 @@ export default class WaterEffect {
   
   // Add method to create shore interaction effect
   private createShoreInteraction() {
-    // Create a shader material that will highlight the shore areas
-    const shoreGeometry = new THREE.PlaneGeometry(this.width * 1.5, this.height * 1.5, 128, 128); // Reduced complexity
-    
-    // Initialize uniforms explicitly
-    const shoreUniforms = {
-      time: { value: 0 },
-      color: { value: new THREE.Color(0xffffff) },
-      landTexture: { value: null },
-      waterColor: { value: new THREE.Color(this.getWaterColorForView()) }
-    };
-    
-    // Custom shader material for shore effect with improved visibility
-    const shoreMaterial = new THREE.ShaderMaterial({
-      uniforms: shoreUniforms,
-      vertexShader: `
-        varying vec2 vUv;
-        void main() {
-          vUv = uv;
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-        }
-      `,
-      fragmentShader: `
-        uniform float time;
-        uniform vec3 color;
-        uniform vec3 waterColor;
-        uniform sampler2D landTexture;
-        varying vec2 vUv;
-        
-        void main() {
-          // Sample the land texture
-          vec4 landColor = texture2D(landTexture, vUv);
-          
-          // Calculate distance to land - use all channels for better detection
-          float landDistance = 1.0 - max(max(landColor.r, landColor.g), landColor.b);
-          
-          // Create more dynamic wave patterns with varying frequencies
-          float wave1 = sin(time * 0.5 + vUv.x * 10.0 + vUv.y * 8.0) * 0.5 + 0.5;
-          float wave2 = cos(time * 0.75 - vUv.x * 8.0 + vUv.y * 6.0) * 0.5 + 0.5;
-          float wave3 = sin(time * 0.3 + vUv.x * 5.0 - vUv.y * 7.0) * 0.5 + 0.5;
-          
-          // Mix waves for more natural look
-          float wave = mix(mix(wave1, wave2, 0.5), wave3, 0.3);
-          
-          // Enhanced shore effect with more dynamic foam
-          float shoreMask = smoothstep(0.0, 0.2, landDistance) * (1.0 - smoothstep(0.2, 0.6, landDistance));
-          
-          // Create more dynamic foam near shores
-          float foamIntensity = shoreMask * (
-            0.8 + 
-            0.2 * sin(time * 0.8 + vUv.x * 20.0 + vUv.y * 15.0) + 
-            0.3 * cos(time * 0.5 - vUv.x * 15.0 + vUv.y * 10.0)
-          );
-          
-          // Add foam color with more white and slight blue tint
-          vec3 foamColor = mix(waterColor, vec3(0.98, 0.99, 1.0), 0.9);
-          
-          // Add subtle variation to foam based on position
-          float foamVariation = sin(vUv.x * 40.0) * sin(vUv.y * 40.0) * 0.15 + 0.85;
-          
-          // Final color with higher opacity for visibility and variation
-          gl_FragColor = vec4(foamColor * foamVariation, foamIntensity * wave * 0.9);
-        }
-      `,
-      transparent: true,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false,
-      depthTest: true
-    });
-    
-    // Store a reference to the uniforms for easier access
-    shoreMaterial.userData = { uniforms: shoreUniforms };
-    
-    this.shoreMesh = new THREE.Mesh(shoreGeometry, shoreMaterial);
-    this.shoreMesh.rotation.x = -Math.PI / 2;
-    this.shoreMesh.position.y = -0.15; // Position lower to avoid z-fighting with land
-    this.shoreMesh.renderOrder = 2; // Lower render order to ensure it renders before land
-    this.scene.add(this.shoreMesh);
-    
-    // Create lower resolution render target for better performance
-    this.landRenderTarget = new THREE.WebGLRenderTarget(512, 512, {
-      minFilter: THREE.LinearFilter,
-      magFilter: THREE.LinearFilter,
-      format: THREE.RGBAFormat
-    });
-    
-    // Create camera for rendering land texture
-    this.landCamera = new THREE.OrthographicCamera(
-      -this.width/2, this.width/2, 
-      this.height/2, -this.height/2, 
-      0.1, 1000
-    );
-    this.landCamera.position.y = 10;
-    this.landCamera.lookAt(0, 0, 0);
+    console.log('Shore interaction creation disabled');
+    // No geometry generation
   }
   
   private initializeWater() {
-    try {
-      // Create a simple water plane with a blue color
-      const waterGeometry = new THREE.PlaneGeometry(
-        this.width * 1.5, 
-        this.height * 1.5,
-        32, 32  // Higher resolution for better waves
-      );
-      
-      // Create a simple material with a blue color
-      const waterColor = this.getWaterColorForView();
-      const waterMaterial = new THREE.MeshBasicMaterial({
-        color: waterColor,
-        transparent: true,
-        opacity: 0.8,
-        side: THREE.FrontSide
-      });
-      
-      // Create the water mesh
-      this.waterMesh = new THREE.Mesh(waterGeometry, waterMaterial);
-      this.waterMesh.rotation.x = -Math.PI / 2;
-      this.waterMesh.position.y = -0.7;  // Position below land
-      this.waterMesh.renderOrder = 0;    // Render before land
-      
-      // Add to scene
-      this.scene.add(this.waterMesh);
-      console.log('Simple water plane added to scene at position y =', this.waterMesh.position.y);
-      
-      // Add vertex displacement for waves
-      this.addWaveDisplacement(waterGeometry);
-      
-      // Store reference to water for other methods
-      this.water = this.waterMesh;
-      
-      // Add sun reflection with a delay to ensure water is properly initialized
-      setTimeout(() => {
-        try {
-          this.createSunReflection();
-        } catch (error) {
-          console.error('Error creating sun reflection:', error);
-        }
-      }, 1000);
-      
-      // Add shore interaction with a delay to ensure water is properly initialized
-      setTimeout(() => {
-        try {
-          this.createShoreInteraction();
-        } catch (error) {
-          console.error('Error creating shore interaction:', error);
-        }
-      }, 1500);
-    } catch (error) {
-      console.error('Error initializing water:', error);
-    }
+    console.log('Water initialization disabled');
+    // No water geometry generation
   }
   
   // Add a new method to create wave displacement
   private addWaveDisplacement(geometry: THREE.PlaneGeometry) {
-    const positions = geometry.attributes.position.array;
-    
-    // Add wave displacement to vertices
-    for (let i = 0; i < positions.length; i += 3) {
-      const x = positions[i];
-      const z = positions[i + 2];
-      
-      // Create gentle waves using sine functions
-      positions[i + 1] = Math.sin(x * 0.5) * 0.2 + Math.cos(z * 0.5) * 0.2;
-    }
-    
-    // Update geometry
-    geometry.attributes.position.needsUpdate = true;
-    geometry.computeVertexNormals();
+    // No wave displacement
+    console.log('Wave displacement disabled');
   }
   
   private loadFoamTexture() {
@@ -517,50 +339,14 @@ export default class WaterEffect {
   
   // Add method to create water
   public createWater() {
-    console.log('Creating simple water effect...');
-    
-    if (this.water) {
-      this.water.cleanup();
-    }
-    
-    // Create a simple water plane directly
-    this.createSimpleWaterPlane();
-    
-    console.log('Simple water effect created successfully');
+    console.log('Water creation disabled');
+    // No water geometry generation
   }
   
   // Add helper method to create a simple water plane
   private createSimpleWaterPlane() {
-    // Create a simple water plane with a blue color
-    const waterGeometry = new THREE.PlaneGeometry(
-      300, 
-      300,
-      32, 32  // Higher resolution for better waves
-    );
-    
-    // Create a simple material with a blue color
-    const waterColor = this.getWaterColorForView();
-    const waterMaterial = new THREE.MeshBasicMaterial({
-      color: waterColor,
-      transparent: true,
-      opacity: 0.8,
-      side: THREE.FrontSide,
-      // Ensure water is rendered behind land
-      depthWrite: true
-    });
-    
-    // Create the water mesh
-    this.waterMesh = new THREE.Mesh(waterGeometry, waterMaterial);
-    this.waterMesh.rotation.x = -Math.PI / 2;
-    this.waterMesh.position.y = -1.0;  // Position further below land to ensure clear separation
-    this.waterMesh.renderOrder = -1;   // Ensure water renders before land
-    
-    // Add to scene
-    this.scene.add(this.waterMesh);
-    console.log('Simple water plane added to scene at position y =', this.waterMesh.position.y);
-    
-    // Store reference to water for other methods
-    this.water = this.waterMesh;
+    console.log('Simple water plane creation disabled');
+    // No water geometry generation
   }
   
   public update(frameCount: number, performanceMode: boolean) {
