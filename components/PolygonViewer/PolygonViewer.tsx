@@ -1093,8 +1093,10 @@ export default function PolygonViewer() {
       // Force specific updates for land view
       if (activeView === 'land') {
         if (polygonRendererRef.current) {
-          polygonRendererRef.current.updatePolygonOwnerColors();
-          polygonRendererRef.current.updateCoatOfArmsSprites();
+          if (polygonRendererRef.current) {
+            polygonRendererRef.current.updatePolygonOwnerColors();
+            polygonRendererRef.current.updateCoatOfArmsSprites();
+          }
         }
       }
       
@@ -1246,8 +1248,10 @@ export default function PolygonViewer() {
       setTimeout(() => {
         if (activeView === 'land' && polygonRendererRef.current) {
           console.log('Forcing visual updates after quality change');
-          polygonRendererRef.current.updatePolygonOwnerColors();
-          polygonRendererRef.current.updateCoatOfArmsSprites();
+          if (polygonRendererRef.current) {
+            polygonRendererRef.current.updatePolygonOwnerColors();
+            polygonRendererRef.current.updateCoatOfArmsSprites();
+          }
         }
       }, 500);
     }
