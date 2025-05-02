@@ -188,19 +188,14 @@ export default class RoadManager {
       return new THREE.LineCurve3(points[0], points[1]);
     }
     
-    // For more points, use a curved path
-    if (curvature === 0) {
-      // No curvature - use a polyline
-      return new THREE.CatmullRomCurve3(points, false, 'centripetal', 0);
-    } else {
-      // Use Catmull-Rom curve with tension based on curvature
-      return new THREE.CatmullRomCurve3(
-        points,
-        false,
-        'centripetal',
-        1 - curvature // Convert curvature to tension (1 = straight, 0 = curved)
-      );
-    }
+    // For Venice, we want straighter roads regardless of the curvature setting
+    // Use a very low tension value (close to 0) for straighter segments
+    return new THREE.CatmullRomCurve3(
+      points,
+      false,
+      'centripetal',
+      0.1 // Very low tension value for straighter roads
+    );
   }
 
   public cleanup(): void {
