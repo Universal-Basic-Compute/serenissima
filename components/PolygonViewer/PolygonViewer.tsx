@@ -706,8 +706,9 @@ export default function PolygonViewer() {
         };
       }
       
-      // Create water effect directly
+      // Create water effect immediately
       if (sceneRef.current) {
+        console.log('Creating water effect from PolygonViewer');
         const water = sceneRef.current.createWater();
         waterEffectRef.current = water;
       }
