@@ -6,7 +6,7 @@
     "tier": 1,
     "size": "Small",
     "unlockCondition": "None - available from start",
-    "calculationsAnalysis": "The Fisherman's Cottage balances historical accuracy with gameplay progression. With a construction cost of 400,000 ducats and income of 12,000 ducats, it provides a 3% return per cycle, reflecting the modest but stable income of working-class housing. The maintenance cost of 2,500 ducats (about 21% of income) represents the ongoing repairs needed for wooden structures in Venice's humid environment. The residentsCapacity of 4 accurately reflects the typical fishing family size, while providing players with early population growth. This building serves as an accessible starting point for residential development with a reasonable payback period.",
+    "calculationsAnalysis": "The Fisherman's Cottage balances historical accuracy with gameplay progression. With a construction cost of 400,000 ducats and income of 12,000 ducats, it provides a 1.5% return per cycle, reflecting the modest but stable income of working-class housing. The maintenance cost of 6,000 ducats (50% of income) represents the ongoing repairs needed for wooden structures in Venice's humid environment. The residentsCapacity of 4 accurately reflects the typical fishing family size, while providing players with early population growth. This building serves as an accessible starting point for residential development with a reasonable payback period.",
     "shortDescription": "Simple wooden home for working class citizens near the water.",
     "fullDescription": "A modest wooden structure housing Venice's vital fishing families. These humble cottages typically include a ground floor for nets and equipment with living quarters above. The proximity to water is essential for their livelihood.",
     "flavorText": "The fishermen rise before the bells of San Marco, for the lagoon's bounty favors the early and the bold.",
@@ -15,7 +15,7 @@
       "timber": 50,
       "bricks": 20
     },
-    "maintenanceCost": 2500,
+    "maintenanceCost": 6000,
     "constructionTime": 172800000,
     "incomeGeneration": 12000,
     "residentsCapacity": 4,
