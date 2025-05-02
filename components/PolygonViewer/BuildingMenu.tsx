@@ -652,5 +652,4 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
       }}
     />
   )}
-  );
 }
