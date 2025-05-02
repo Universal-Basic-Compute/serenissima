@@ -297,6 +297,28 @@ export default function PolygonViewer() {
     }
   }, [loadPolygons, loadLandOwners, loadUsers, loadBridges, loading, users]); // Fix: Add proper dependencies
   
+  // Add a specific check to ensure water is created and visible
+  useEffect(() => {
+    if (sceneRef.current) {
+      // Create water if it doesn't exist
+      if (!sceneRef.current.water) {
+        console.log('Creating water effect from dedicated effect');
+        sceneRef.current.createWater();
+      }
+      
+      // Force water updates on a regular interval
+      const waterUpdateInterval = setInterval(() => {
+        if (sceneRef.current && sceneRef.current.water) {
+          sceneRef.current.water.update(Date.now());
+        }
+      }, 100); // Update every 100ms
+      
+      return () => {
+        clearInterval(waterUpdateInterval);
+      };
+    }
+  }, [sceneRef.current]);
+  
   // Calculate centroids directly in the main thread for polygons without centroids
   useEffect(() => {
     const polygonsWithoutCentroids = polygons.filter(p => !p.centroid);
