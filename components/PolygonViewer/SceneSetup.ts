@@ -32,9 +32,9 @@ export default class SceneSetup {
     this.performanceMode = !highQuality;
     this.activeView = activeView;
     
-    // Initialize scene with a neutral background
+    // Initialize scene with a deeper blue background to match water effect
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color('#87CEEB'); // Light sky blue background
+    this.scene.background = new THREE.Color('#1a75ff'); // Deeper blue background to match water
     
     // No fog for cleaner visuals
     // Set up scene to use orthographic rendering for flat appearance

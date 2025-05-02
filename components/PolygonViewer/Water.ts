@@ -406,38 +406,38 @@ export default class Water {
   private getWaterColorForView(): number {
     switch (this.activeView) {
       case 'transport':
-        return 0x1ac6ff; // Even brighter, more vibrant blue for transport
+        return 0x4d94ff; // Bright medium blue for transport
       case 'resources':
-        return 0x00ffcc; // Even brighter, more vibrant teal for resources
+        return 0x00e6e6; // Bright cyan for resources
       case 'markets':
-        return 0x33ccff; // Even brighter, more vibrant steel blue for markets
+        return 0x66ccff; // Light blue for markets
       case 'governance':
-        return 0x8a7dff; // Even brighter, more vibrant slate blue for governance
+        return 0x9999ff; // Lavender blue for governance
       case 'land':
-        return 0x33ccff; // Even brighter, more vibrant sea blue for land view
+        return 0x4d94ff; // Medium blue for land view
       case 'buildings':
-        return 0x33ccff; // Even brighter, more vibrant turquoise
+        return 0x4d94ff; // Medium blue for buildings
       default:
-        return 0x33ccff; // Even brighter, more vibrant turquoise
+        return 0x4d94ff; // Medium blue as default
     }
   }
   
   private getDeepWaterColorForView(): number {
     switch (this.activeView) {
       case 'transport':
-        return 0x0088ff; // Deeper, more vibrant blue for transport
+        return 0x0047b3; // Deep royal blue for transport
       case 'resources':
-        return 0x00aa99; // Deeper, more vibrant teal for resources
+        return 0x008080; // Teal for resources
       case 'markets':
-        return 0x0088cc; // Deeper, more vibrant steel blue for markets
+        return 0x0066cc; // Medium blue for markets
       case 'governance':
-        return 0x6a5fdb; // Deeper, more vibrant slate blue for governance
+        return 0x4d4dff; // Medium slate blue for governance
       case 'land':
-        return 0x0088dd; // Deeper, more vibrant sea blue for land view
+        return 0x0047b3; // Deep royal blue for land view
       case 'buildings':
-        return 0x0088dd; // Deeper, more vibrant blue
+        return 0x0047b3; // Deep royal blue for buildings
       default:
-        return 0x0088dd; // Deeper, more vibrant blue
+        return 0x0047b3; // Deep royal blue as default
     }
   }
   

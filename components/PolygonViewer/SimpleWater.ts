@@ -151,38 +151,38 @@ export default class SimpleWater {
   private getWaterColorForView(): number {
     switch (this.activeView) {
       case 'transport':
-        return 0x33ccff; // Brighter blue
+        return 0x4d94ff; // Bright medium blue for transport
       case 'resources':
-        return 0x00ffdd; // Brighter teal
+        return 0x00e6e6; // Bright cyan for resources
       case 'markets':
-        return 0x66ddff; // Brighter steel blue
+        return 0x66ccff; // Light blue for markets
       case 'governance':
-        return 0x9988ff; // Brighter slate blue
+        return 0x9999ff; // Lavender blue for governance
       case 'land':
-        return 0x33ccff; // Brighter sea blue
+        return 0x4d94ff; // Medium blue for land view
       case 'buildings':
-        return 0x33ccff; // Brighter turquoise
+        return 0x4d94ff; // Medium blue for buildings
       default:
-        return 0x33ccff; // Default brighter blue
+        return 0x4d94ff; // Medium blue as default
     }
   }
   
   private getDeepWaterColorForView(): number {
     switch (this.activeView) {
       case 'transport':
-        return 0x0088ff; // Deeper blue
+        return 0x0047b3; // Deep royal blue for transport
       case 'resources':
-        return 0x00aaaa; // Deeper teal
+        return 0x008080; // Teal for resources
       case 'markets':
-        return 0x0088cc; // Deeper steel blue
+        return 0x0066cc; // Medium blue for markets
       case 'governance':
-        return 0x6a5fdb; // Deeper slate blue
+        return 0x4d4dff; // Medium slate blue for governance
       case 'land':
-        return 0x0088dd; // Deeper sea blue
+        return 0x0047b3; // Deep royal blue for land view
       case 'buildings':
-        return 0x0088dd; // Deeper blue
+        return 0x0047b3; // Deep royal blue for buildings
       default:
-        return 0x0088dd; // Default deeper blue
+        return 0x0047b3; // Deep royal blue as default
     }
   }
   
