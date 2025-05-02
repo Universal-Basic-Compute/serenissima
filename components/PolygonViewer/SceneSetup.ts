@@ -5,8 +5,7 @@ import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { ViewMode } from './types';
 import CloudSystem from './CloudSystem';
-import SimpleWater from './SimpleWater';
-import Water from './SimpleWater'; // Alias SimpleWater as Water for compatibility
+import Water from './Water'; // Import the new Water class
 
 interface SceneSetupProps {
   canvas: HTMLCanvasElement;
@@ -268,15 +267,15 @@ export default class SceneSetup {
   
   // Add method to create water
   public createWater() {
-    console.log('Creating water system...');
+    console.log('Creating advanced water system...');
     
-    // Always use SimpleWater regardless of performance mode
-    this.water = new SimpleWater({
+    // Create a water effect with larger dimensions for better coverage
+    this.water = new Water({
       scene: this.scene,
       activeView: this.activeView,
       performanceMode: this.performanceMode,
-      width: this.performanceMode ? 2000 : 2500, // Adjust width based on performance mode
-      height: this.performanceMode ? 2000 : 2500 // Adjust height based on performance mode
+      width: 2500, // Increased coverage
+      height: 2500  // Increased coverage
     });
     
     // If we have land positions, set them for water interaction
@@ -296,19 +295,6 @@ export default class SceneSetup {
           if (this.water) this.water.update(time);
         }, 100 + index * 150); // Staggered updates for smoother initialization
       });
-      
-      // Add a final update after everything else has loaded
-      setTimeout(() => {
-        if (this.water) {
-          console.log('Performing final water initialization');
-          this.water.update(200);
-          
-          // Force a scene render to ensure water is visible
-          if (this.renderer) {
-            this.renderer.render(this.scene, this.camera);
-          }
-        }
-      }, 2000);
     }
     
     return this.water;

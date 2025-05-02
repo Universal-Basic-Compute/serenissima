@@ -23,9 +23,7 @@ export default class Water {
   private waterGeometry: THREE.PlaneGeometry | null = null;
   private waterMaterial: THREE.ShaderMaterial | null = null;
   
-  // Water simulation properties only
-  
-  // Wave simulation
+  // Physics simulation properties
   private waveGrid: Float32Array | null = null;
   private prevWaveGrid: Float32Array | null = null;
   private waveVelocity: Float32Array | null = null;
@@ -53,7 +51,7 @@ export default class Water {
   }
   
   private initializeWaterSystem() {
-    console.log('Initializing unified water system...');
+    console.log('Initializing physics-based water system...');
     
     // Create the water surface with shader-based waves
     this.createWaterSurface();
@@ -84,14 +82,14 @@ export default class Water {
       resolution - 1
     );
     
-    // Create water shader material with advanced effects
+    // Create water shader material with advanced physics-based effects
     const waterShader = {
       uniforms: {
         time: { value: 0.0 },
         waterColor: { value: new THREE.Color(this.getWaterColorForView()) },
         deepWaterColor: { value: new THREE.Color(this.getDeepWaterColorForView()) },
         resolution: { value: new THREE.Vector2(resolution, resolution) },
-        waveHeight: { value: 4.5 }, // Increased from 3.5 to 4.5 for more dramatic waves
+        waveHeight: { value: 5.0 }, // Increased amplitude for more dramatic waves
         sunDirection: { value: new THREE.Vector3(0.5, 0.8, 0.2).normalize() },
         sunColor: { value: new THREE.Color(0xffffff) }
       },
@@ -103,56 +101,37 @@ export default class Water {
         varying vec3 vNormal;
         varying vec3 vViewPosition;
         
-        // Enhanced wave function with more pronounced waves
-        float wave(vec2 position) {
-          float result = 0.0;
-          
-          // Large primary waves with increased amplitude
-          result += sin(position.x * 0.3 + time * 0.4) * 
-                   cos(position.y * 0.2 + time * 0.3) * 2.2; // Increased from 1.8 to 2.2
-          
-          // Medium waves with more variation and higher amplitude
-          result += sin(position.x * 0.8 + time * 0.7) * 
-                   sin(position.y * 0.9 + time * 0.6) * 1.3; // Increased from 1.0 to 1.3
-          
-          // Small ripples with increased detail
-          result += sin(position.x * 2.0 + time * 1.2) * 
-                   sin(position.y * 2.2 + time * 1.4) * 0.8; // Increased from 0.6 to 0.8
-          
-          // Micro detail with higher frequency
-          result += sin(position.x * 4.0 + time * 2.0) * 
-                   sin(position.y * 4.5 + time * 1.8) * 0.4; // Increased from 0.3 to 0.4
-                   
-          return result;
-        }
-        
         // Function to calculate normal from heightmap
-        vec3 calculateNormal(vec2 pos) {
-          float eps = 0.1;
+        vec3 calculateNormal(vec2 pos, float eps) {
+          vec3 normal = vec3(0.0);
           
-          float centerHeight = wave(pos);
-          float rightHeight = wave(pos + vec2(eps, 0.0));
-          float topHeight = wave(pos + vec2(0.0, eps));
+          // Use central differences for better accuracy
+          float center = vElevation;
+          float right = center + eps;
+          float left = center - eps;
+          float top = center + eps;
+          float bottom = center - eps;
           
-          vec3 dx = vec3(eps, rightHeight - centerHeight, 0.0);
-          vec3 dy = vec3(0.0, topHeight - centerHeight, eps);
+          // Calculate partial derivatives
+          float dX = (right - left) / (2.0 * eps);
+          float dZ = (top - bottom) / (2.0 * eps);
           
-          return normalize(cross(dx, dy));
+          // Cross product to get normal
+          normal = normalize(vec3(-dX, 1.0, -dZ));
+          return normal;
         }
         
         void main() {
           vUv = uv;
           
-          // Calculate wave height
+          // Pass through the vertex position for wave calculation in the fragment shader
           vec3 pos = position;
-          float elevation = wave(position.xz);
-          pos.y += elevation * waveHeight;
+          
+          // Store the original elevation for lighting calculations
+          vElevation = pos.y;
           
           // Calculate normal for lighting
-          vNormal = calculateNormal(position.xz);
-          
-          // Store elevation for fragment shader
-          vElevation = elevation;
+          vNormal = calculateNormal(position.xz, 0.1);
           
           // Calculate view position for reflections
           vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
@@ -186,44 +165,44 @@ export default class Water {
           // Add more pronounced foam at wave peaks
           if (vElevation > 0.15) {
             float foamFactor = smoothstep(0.15, 0.4, vElevation);
-            color = mix(color, vec3(1.0), foamFactor * 1.5); // Increased from 1.2 to 1.5
+            color = mix(color, vec3(1.0), foamFactor * 1.5);
           }
           
           // Enhanced specular highlight
           vec3 viewDir = normalize(vViewPosition);
           vec3 reflectDir = reflect(-sunDirection, vNormal);
-          float spec = pow(max(dot(viewDir, reflectDir), 0.0), 80.0); // Increased from 64 to 80
-          vec3 specular = sunColor * spec * 1.0; // Increased from 0.8 to 1.0
+          float spec = pow(max(dot(viewDir, reflectDir), 0.0), 80.0);
+          vec3 specular = sunColor * spec * 1.0;
           
           // More pronounced fresnel effect
-          float fresnelFactor = fresnel(vNormal, viewDir, 3.5); // Decreased from 4.0 to 3.5 for stronger effect
-          color = mix(color, vec3(0.9, 0.95, 1.0), fresnelFactor * 0.5); // Increased from 0.4 to 0.5
+          float fresnelFactor = fresnel(vNormal, viewDir, 3.5);
+          color = mix(color, vec3(0.9, 0.95, 1.0), fresnelFactor * 0.5);
           
           // Add more visible light ray effect
           float centerDist = abs(vUv.x - 0.5);
-          float lightRay = pow(1.0 - centerDist, 7.0) * 0.5; // Adjusted from 8.0/0.4 to 7.0/0.5
+          float lightRay = pow(1.0 - centerDist, 7.0) * 0.5;
           
           // Add more pronounced horizontal striations
-          float striation = sin(vUv.y * 150.0 + time * 0.3) * 0.08; // Increased from 0.06 to 0.08
+          float striation = sin(vUv.y * 150.0 + time * 0.3) * 0.08;
           
           // Add more visible wave patterns
-          float pattern = sin(vUv.x * 80.0 + time * 0.6) * sin(vUv.y * 80.0 + time * 0.4) * 0.2; // Increased from 0.15 to 0.2
-          pattern += sin(vUv.x * 40.0 - time * 0.4) * sin(vUv.y * 40.0 + time * 0.3) * 0.1; // Increased from 0.08 to 0.1
+          float pattern = sin(vUv.x * 80.0 + time * 0.6) * sin(vUv.y * 80.0 + time * 0.4) * 0.2;
+          pattern += sin(vUv.x * 40.0 - time * 0.4) * sin(vUv.y * 40.0 + time * 0.3) * 0.1;
           
           // Add more visible caustics effect
           float causticPattern = 
             sin(vUv.x * 30.0 + time * 2.5) * 
-            sin(vUv.y * 30.0 + time * 2.0) * 0.12; // Increased from 0.08 to 0.12
+            sin(vUv.y * 30.0 + time * 2.0) * 0.12;
           causticPattern = max(0.0, causticPattern);
           
           // Combine all effects with increased intensity
-          color += pattern * vec3(0.4, 0.4, 0.6); // Increased from 0.3/0.3/0.5 to 0.4/0.4/0.6
+          color += pattern * vec3(0.4, 0.4, 0.6);
           color += lightRay * vec3(0.8, 0.9, 1.0);
           color += striation * vec3(0.6, 0.8, 1.0);
           color += specular;
-          color += causticPattern * vec3(0.5, 0.8, 1.0); // Increased from 0.4/0.7/1.0 to 0.5/0.8/1.0
+          color += causticPattern * vec3(0.5, 0.8, 1.0);
           
-          gl_FragColor = vec4(color, 0.95); // Slightly increased opacity
+          gl_FragColor = vec4(color, 0.95);
         }
       `
     };
@@ -233,14 +212,14 @@ export default class Water {
       uniforms: waterShader.uniforms,
       vertexShader: waterShader.vertexShader,
       fragmentShader: waterShader.fragmentShader,
-      transparent: false,
+      transparent: true,
       side: THREE.DoubleSide
     });
     
     // Create the water mesh
     this.waterMesh = new THREE.Mesh(this.waterGeometry, this.waterMaterial);
     
-    // Position water at y=-0.05 (much higher than before for better visibility)
+    // Position water at y=-0.05 (slightly below ground level)
     this.waterMesh.position.y = -0.05;
     
     // Rotate the water plane to be horizontal
@@ -254,8 +233,6 @@ export default class Water {
     
     console.log('Water surface created successfully');
   }
-  
-  // Particle system removed to focus only on wave simulation
   
   private initializeWaveSimulation() {
     // Determine grid size based on performance mode
@@ -539,8 +516,6 @@ export default class Water {
     }
   }
   
-  // Particle update method removed
-  
   private applyWavesToGeometry() {
     if (!this.waterGeometry || !this.waveGrid) return;
     
@@ -705,7 +680,7 @@ export default class Water {
   
   public update(frameCount: number) {
     // Update time with variable speed for more natural animation
-    const timeSpeed = 0.1 + Math.sin(frameCount * 0.001) * 0.02; // Increased from 0.08/0.01 to 0.1/0.02
+    const timeSpeed = 0.1 + Math.sin(frameCount * 0.001) * 0.02;
     this.time += timeSpeed;
     
     // Get delta time for physics-based simulation with a minimum to prevent instability
@@ -728,7 +703,7 @@ export default class Water {
     }
     
     // Update wave simulation with more substeps for smoother waves
-    const subSteps = 3; // Increased from 2 to 3 for more detailed simulation
+    const subSteps = 3;
     for (let i = 0; i < subSteps; i++) {
       this.updateWaveSimulation(deltaTime / subSteps);
     }
@@ -739,22 +714,22 @@ export default class Water {
     // Create random waves with increased frequency
     // More waves during "stormy" periods, fewer during "calm" periods
     const stormFactor = 0.5 + 0.5 * Math.sin(this.time * 0.01); // Oscillates between 0 and 1
-    const waveChance = 0.04 + stormFactor * 0.05; // Increased from 0.03/0.04 to 0.04/0.05
+    const waveChance = 0.04 + stormFactor * 0.05;
     
     if (Math.random() < waveChance) {
       this.createRandomWave();
     }
     
     // Create larger "boat wake" waves more frequently
-    if (Math.random() < 0.003) { // Increased from 0.002 to 0.003
+    if (Math.random() < 0.003) {
       // Create a directional wake
       const size = this.gridSize;
       const x = Math.floor(Math.random() * (size - 20)) + 10;
       const z = Math.floor(Math.random() * (size - 20)) + 10;
       const angle = Math.random() * Math.PI * 2;
-      const length = 18 + Math.random() * 12; // Increased from 15/10 to 18/12
-      const width = 4 + Math.random() * 2.5; // Increased from 3/2 to 4/2.5
-      const strength = 0.4 + Math.random() * 0.3; // Increased from 0.3/0.2 to 0.4/0.3
+      const length = 18 + Math.random() * 12;
+      const width = 4 + Math.random() * 2.5;
+      const strength = 0.4 + Math.random() * 0.3;
       
       for (let i = 0; i < size; i++) {
         for (let j = 0; j < size; j++) {
@@ -826,8 +801,6 @@ export default class Water {
       this.waterMaterial.uniforms.deepWaterColor.value = new THREE.Color(this.getDeepWaterColorForView());
       this.waterMaterial.needsUpdate = true;
     }
-    
-    // Remove reference to undefined particleMaterial
   }
   
   public updateQuality(performanceMode: boolean) {
