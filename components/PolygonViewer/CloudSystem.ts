@@ -53,9 +53,53 @@ export default class CloudSystem {
   }
 
   private createClouds() {
-    console.log('Cloud creation disabled');
-    // No clouds are created to avoid geometry generation
-    this.cloudParticles = [];
+    // Skip if texture isn't loaded
+    if (!this.cloudTexture) {
+      console.log('Cannot create clouds: texture not loaded');
+      return;
+    }
+
+    console.log('Creating cloud particles...');
+    
+    // Create fewer clouds in performance mode
+    const cloudCount = this.performanceMode ? 15 : 30;
+    
+    // Create cloud material with proper transparency
+    const cloudMaterial = new THREE.MeshBasicMaterial({
+      map: this.cloudTexture,
+      transparent: true,
+      opacity: 0.7,
+      depthWrite: false, // Important for proper transparency
+      side: THREE.DoubleSide
+    });
+    
+    // Create cloud planes at various positions
+    for (let i = 0; i < cloudCount; i++) {
+      // Create a simple plane for each cloud
+      const size = Math.random() * 20 + 10;
+      const cloudGeometry = new THREE.PlaneGeometry(size, size);
+      const cloud = new THREE.Mesh(cloudGeometry, cloudMaterial);
+      
+      // Position clouds randomly in a large area
+      const spread = Math.max(this.width, this.height) * 0.8;
+      cloud.position.set(
+        (Math.random() - 0.5) * spread,
+        Math.random() * 20 + 30, // Height between 30-50 units
+        (Math.random() - 0.5) * spread
+      );
+      
+      // Random rotation
+      cloud.rotation.z = Math.random() * Math.PI * 2;
+      
+      // Add to cloud group
+      this.clouds.add(cloud);
+      this.cloudParticles.push(cloud);
+    }
+    
+    console.log(`Created ${this.cloudParticles.length} cloud particles`);
+    
+    // Make sure clouds are initially visible
+    this.clouds.visible = this.isVisible;
   }
 
   public update(time: number) {

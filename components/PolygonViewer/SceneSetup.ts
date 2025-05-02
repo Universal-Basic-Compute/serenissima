@@ -261,17 +261,14 @@ export default class SceneSetup {
     
     // Show clouds only when zoomed out
     const showClouds = this.camera.position.y > this.zoomThreshold;
-    if (frameCount % 100 === 0) { // Log only occasionally to avoid console spam
-      console.log(`Camera height: ${this.camera.position.y}, Cloud threshold: ${this.zoomThreshold}, Showing clouds: ${showClouds}`);
-    }
     
     try {
+      // Set cloud visibility based on camera height
       this.cloudSystem.setVisibility(showClouds);
       
-      // Update cloud animation
-      if (showClouds) {
-        this.cloudSystem.update(frameCount);
-      }
+      // Always update cloud animation regardless of visibility
+      // This ensures they're ready to be shown when we zoom out
+      this.cloudSystem.update(frameCount);
     } catch (error) {
       console.error('Error updating clouds:', error);
     }
