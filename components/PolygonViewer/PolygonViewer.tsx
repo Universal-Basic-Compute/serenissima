@@ -6,7 +6,6 @@ import * as THREE from 'three';
 import { calculateBounds } from './utils';
 import SceneSetup from './SceneSetup';
 import PolygonRenderer from './PolygonRenderer';
-import WaterEffect from './WaterEffect';
 import InteractionManager from './InteractionManager';
 import ViewModeMenu from './ViewModeMenu';
 import LandDetailsPanel from './LandDetailsPanel';
@@ -129,7 +128,6 @@ export default function PolygonViewer() {
   // References to our scene components
   const sceneRef = useRef<SceneSetup | null>(null);
   const polygonRendererRef = useRef<PolygonRenderer | null>(null);
-  const waterEffectRef = useRef<WaterEffect | null>(null);
   const interactionManagerRef = useRef<InteractionManager | null>(null);
   const bridgeRendererRef = useRef<BridgeRenderer | null>(null);
   
@@ -639,26 +637,26 @@ export default function PolygonViewer() {
 
   // Define these event handlers before they're used in the useEffect
   const handlePolygonAdded = useCallback(() => {
-    if (waterEffectRef.current) {
+    if (sceneRef.current && sceneRef.current.water) {
       console.log('Polygon added, updating water effects');
       setTimeout(() => {
-        if (waterEffectRef.current) {
-          waterEffectRef.current.update(0, !highQuality);
+        if (sceneRef.current && sceneRef.current.water) {
+          sceneRef.current.water.update(0);
         }
       }, 500);
     }
-  }, [highQuality]);
+  }, []);
 
   const handlePolygonDeleted = useCallback(() => {
-    if (waterEffectRef.current) {
+    if (sceneRef.current && sceneRef.current.water) {
       console.log('Polygon deleted, updating water effects');
       setTimeout(() => {
-        if (waterEffectRef.current) {
-          waterEffectRef.current.update(0, !highQuality);
+        if (sceneRef.current && sceneRef.current.water) {
+          sceneRef.current.water.update(0);
         }
       }, 500);
     }
-  }, [highQuality]);
+  }, []);
 
   // Set up Three.js scene - only depends on polygons and loading
   // NOT dependent on activeView, highQuality, or selectedPolygonId to prevent scene recreation
@@ -714,28 +712,12 @@ export default function PolygonViewer() {
       if (sceneRef.current) {
         console.log('Creating advanced water simulation from PolygonViewer');
         const water = sceneRef.current.createWater();
-        waterEffectRef.current = water;
         
         // Force an initial update to ensure water is visible
         if (water) {
           water.update(0);
         }
       }
-      
-      // Also create a WaterEffect for more advanced water features
-      const waterEffectTimeout = setTimeout(() => {
-        if (sceneRef.current) {
-          const waterEffect = new WaterEffect({
-            scene: sceneRef.current.scene,
-            activeView,
-            performanceMode: !highQuality,
-            width: bounds.scale * 200,
-            height: bounds.scale * 200,
-            renderer: sceneRef.current.renderer
-          });
-          waterEffectRef.current = waterEffect;
-        }
-      }, 500);
       
       // Add error handling for WebGL context loss using the function defined outside
       canvasRef.current.addEventListener('webglcontextlost', handleContextLost as unknown as EventListener);
@@ -976,14 +958,7 @@ export default function PolygonViewer() {
         }
       
         // Update water effect - every frame for smoother animation
-        if (waterEffectRef.current) {
-          try {
-            waterEffectRef.current.update(frameCount, !highQuality);
-          } catch (error) {
-            // Silent fail
-          }
-        } else if (sceneRef.current && sceneRef.current.water) {
-          // Use scene's water if waterEffectRef is not available
+        if (sceneRef.current && sceneRef.current.water) {
           try {
             sceneRef.current.water.update(frameCount);
           } catch (error) {
@@ -1041,7 +1016,6 @@ export default function PolygonViewer() {
       
       // Clean up all components
       if (interactionManagerRef.current) interactionManagerRef.current.cleanup();
-      if (waterEffectRef.current) waterEffectRef.current.cleanup();
       if (polygonRendererRef.current) polygonRendererRef.current.cleanup();
       if (bridgeRendererRef.current) bridgeRendererRef.current.cleanup();
       if (roadManagerRef.current) roadManagerRef.current.cleanup();
@@ -1063,7 +1037,6 @@ export default function PolygonViewer() {
       // Clear references
       sceneRef.current = null;
       polygonRendererRef.current = null;
-      waterEffectRef.current = null;
       interactionManagerRef.current = null;
       bridgeRendererRef.current = null;
     };
@@ -1230,8 +1203,8 @@ export default function PolygonViewer() {
         setMarketPanelVisible(activeView === 'markets');
         
         // Update water effect
-        if (waterEffectRef.current) {
-          waterEffectRef.current.updateViewMode(activeView);
+        if (sceneRef.current.water) {
+          sceneRef.current.water.updateViewMode(activeView);
         }
         
         // Update polygon renderer
@@ -1282,11 +1255,6 @@ export default function PolygonViewer() {
       
       // Update scene quality
       sceneRef.current.updateQuality(highQuality);
-      
-      // Update water effect
-      if (waterEffectRef.current) {
-        waterEffectRef.current.updateQuality(!highQuality);
-      }
       
       // Update polygon renderer
       if (polygonRendererRef.current) {
