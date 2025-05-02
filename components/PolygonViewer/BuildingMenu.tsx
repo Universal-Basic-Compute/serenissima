@@ -630,8 +630,8 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
   {/* Placeable Building */}
   {placeableBuilding && (
     <PlaceableBuilding
-      buildingName={placeableBuilding.name.toLowerCase().replace(/\s+/g, '-')}
-      variant={placeableBuilding.variant}
+      buildingName={placeableBuilding?.name.toLowerCase().replace(/\s+/g, '-')}
+      variant={placeableBuilding?.variant}
       onPlace={(position) => {
         console.log(`Building placed at position: ${position.x}, ${position.y}`);
         // Here you would add code to actually place the building in the world
@@ -639,8 +639,8 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
         // Dispatch a custom event to notify other components about building placement
         window.dispatchEvent(new CustomEvent('buildingPlaced', {
           detail: {
-            buildingName: placeableBuilding.name,
-            variant: placeableBuilding.variant,
+            buildingName: placeableBuilding?.name,
+            variant: placeableBuilding?.variant,
             position
           }
         }));

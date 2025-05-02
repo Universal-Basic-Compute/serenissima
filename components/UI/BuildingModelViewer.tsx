@@ -257,7 +257,7 @@ const BuildingModelViewer: React.FC<BuildingModelViewerProps> = ({
         // Remove any error text elements
         const textElements = containerRef.current.querySelectorAll('div');
         textElements.forEach(el => {
-          if (containerRef.current.contains(el)) {
+          if (containerRef.current && containerRef.current.contains(el)) {
             containerRef.current.removeChild(el);
           }
         });
