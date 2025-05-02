@@ -318,6 +318,7 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
           previewMesh.material.dispose();
         }
       }
+      setPreviewMesh(null); // Add this line to ensure we clear the reference
     }
     
     // Create a curved path based on the points
