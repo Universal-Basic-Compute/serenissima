@@ -129,7 +129,7 @@ const BuildingModelViewer: React.FC<BuildingModelViewerProps> = ({
             undefined,
             (error) => {
               console.error('Error loading model:', error);
-              reject(new Error(`Failed to load model: ${error.message}`));
+              reject(new Error(`Failed to load model: ${error instanceof Error ? error.message : String(error)}`));
             }
           );
         });

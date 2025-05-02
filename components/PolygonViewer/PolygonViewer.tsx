@@ -508,8 +508,10 @@ export default function PolygonViewer() {
 
         // First immediate update
         if (activeView === 'land') {
-          polygonRendererRef.current.updatePolygonOwnerColors();
-          polygonRendererRef.current.updateCoatOfArmsSprites();
+          if (polygonRendererRef.current) {
+            polygonRendererRef.current.updatePolygonOwnerColors();
+            polygonRendererRef.current.updateCoatOfArmsSprites();
+          }
         }
 
         // Then a delayed update to ensure everything is properly loaded
@@ -1130,8 +1132,10 @@ export default function PolygonViewer() {
       
       // Force specific updates for land view
       if (activeView === 'land') {
-        polygonRendererRef.current.updatePolygonOwnerColors();
-        polygonRendererRef.current.updateCoatOfArmsSprites();
+        if (polygonRendererRef.current) {
+          polygonRendererRef.current.updatePolygonOwnerColors();
+          polygonRendererRef.current.updateCoatOfArmsSprites();
+        }
       }
       
       // Force a render

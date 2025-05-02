@@ -88,7 +88,7 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
     // If we have a wallet address, fetch the user data
     if (walletAddress) {
       // Check cache first
-      if (walletAddress && userProfileCache[walletAddress]) {
+      if (walletAddress && typeof walletAddress === 'string' && userProfileCache[walletAddress]) {
         setUserData(userProfileCache[walletAddress]);
         return;
       }
