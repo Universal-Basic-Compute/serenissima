@@ -146,7 +146,7 @@ export default class SceneSetup {
     this.controls.screenSpacePanning = true; // Changed to true for more intuitive panning
     
     // This will make right-click pan only in the XZ plane (horizontal) without changing Y (elevation)
-    this.controls.panningMode = THREE.HorizontalPanning;
+    this.controls.screenSpacePanning = false; // This will make panning parallel to the ground plane
     
     // Set initial target to center of scene
     this.controls.target.set(0, 0, 0);
