@@ -75,7 +75,7 @@ class PolygonMesh {
       // Create extruded geometry with minimal height
       const extrudeSettings = {
         steps: 1,
-        depth: 0.2, // Very thin extrusion
+        depth: 0.05, // 75% less extrusion (0.2 * 0.25 = 0.05)
         bevelEnabled: false
       };
       
