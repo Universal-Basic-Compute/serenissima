@@ -551,8 +551,8 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
             const newValue = parseFloat(e.target.value);
             setCurvature(newValue);
             // Update the preview if we have points
-            if (roadPoints.length >= 2) {
-              createRoadMesh(roadPoints);
+            if (points.length >= 2) {
+              createRoadMesh(points);
             }
           }}
           className="w-32"
@@ -589,6 +589,13 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
       {errorMessage && (
         <div className="mt-2 text-red-600 text-sm text-center">
           {errorMessage}
+        </div>
+      )}
+      
+      {/* Snapping indicator */}
+      {snapPoint && (
+        <div className="mt-2 text-green-600 text-sm text-center">
+          Snapping to nearest edge or road
         </div>
       )}
     </div>
