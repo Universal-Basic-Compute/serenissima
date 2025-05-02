@@ -55,7 +55,8 @@
       {
         "inputs": [
           {"resource": "timber", "amount": 80},
-          {"resource": "iron_fittings", "amount": 10}
+          {"resource": "iron_fittings", "amount": 10},
+          {"resource": "pitch", "amount": 15}
         ],
         "building": "shipyard_workshop",
         "processingTime": 720

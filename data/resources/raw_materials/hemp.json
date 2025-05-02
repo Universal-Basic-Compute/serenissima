@@ -1,0 +1,120 @@
+{
+    "id": "hemp",
+    "name": "Hemp",
+    "category": "raw_materials",
+    "subcategory": "textile_fiber",
+    "icon": "icons/raw_materials/hemp.png",
+    "baseProperties": {
+      "baseValue": 15,
+      "weight": 1.2,
+      "volume": 1.5,
+      "stackSize": 30,
+      "perishable": false
+    },
+    "description": {
+      "short": "Strong natural fiber used for rope and sailcloth.",
+      "full": "Durable plant fibers harvested from hemp plants grown on the Venetian mainland and imported from surrounding regions. Essential for maritime industries.",
+      "flavor": "Without these humble fibers, no ship would sail, no cargo would be secured, and Venice's maritime empire would unravel like a poorly spun thread."
+    },
+    "sourceInfo": {
+      "source": "territorial_and_imported",
+      "harvestMethod": "agriculture",
+      "locations": ["mainland_territories", "dalmatia", "lombardy"],
+      "availability": "common",
+      "seasonality": {
+        "harvest": "summer",
+        "peak": "late_summer",
+        "note": "Requires processing after harvest to extract fibers"
+      }
+    },
+    "qualityLevels": {
+      "available": ["poor", "common", "fine"],
+      "default": "common",
+      "effects": {
+        "poor": {"valueModifier": 0.7, "productionEfficiency": 0.8, "durabilityModifier": 0.7},
+        "common": {"valueModifier": 1.0, "productionEfficiency": 1.0, "durabilityModifier": 1.0},
+        "fine": {"valueModifier": 1.4, "productionEfficiency": 1.2, "durabilityModifier": 1.3}
+      }
+    },
+    "productionUses": [
+      {
+        "process": "fiber_processing",
+        "building": "fiber_workshop",
+        "role": "primary_material",
+        "outputResource": "processed_hemp"
+      },
+      {
+        "process": "rope_making",
+        "building": "rope_works",
+        "role": "primary_material",
+        "outputResource": "rope"
+      },
+      {
+        "process": "weaving",
+        "building": "weaving_workshop",
+        "role": "primary_material",
+        "outputResource": "sailcloth"
+      }
+    ],
+    "substitutes": [
+      {
+        "resourceId": "flax",
+        "efficiency": 0.8,
+        "qualityPenalty": 1,
+        "context": "sailcloth_production"
+      }
+    ],
+    "complements": [
+      {
+        "resourceId": "water",
+        "context": "fiber_processing",
+        "relationship": "required"
+      }
+    ],
+    "transportation": {
+      "methods": {
+        "large_ship": {"capacity": 400, "efficiency": 1.0, "risk": 0.1},
+        "barge": {"capacity": 150, "efficiency": 0.9, "risk": 0.15},
+        "cart": {"capacity": 20, "efficiency": 0.8, "risk": 0.2}
+      },
+      "requirements": ["dry_storage"],
+      "loadingTime": 10,
+      "restrictions": []
+    },
+    "storage": {
+      "compatible": {
+        "warehouse": {"capacityMultiplier": 1.0, "preservation": 1.0},
+        "rope_works": {"capacityMultiplier": 0.7, "preservation": 1.0},
+        "weaving_workshop": {"capacityMultiplier": 0.7, "preservation": 1.0}
+      },
+      "requirements": ["dry", "ventilated"],
+      "risks": ["moisture", "pests", "fire"],
+      "maxStorageTime": 43200
+    },
+    "marketDynamics": {
+      "baseAvailability": 0.8,
+      "demandLevel": "high",
+      "priceVolatility": 0.3,
+      "regionalFactors": [
+        {
+          "region": "arsenal",
+          "availabilityModifier": 1.3,
+          "priceModifier": 0.9
+        }
+      ],
+      "seasonalFactors": [
+        {
+          "season": "autumn",
+          "availabilityModifier": 1.4,
+          "priceModifier": 0.8,
+          "note": "Post-harvest abundance"
+        },
+        {
+          "season": "spring",
+          "availabilityModifier": 0.7,
+          "priceModifier": 1.2,
+          "note": "Pre-harvest scarcity"
+        }
+      ]
+    }
+  }

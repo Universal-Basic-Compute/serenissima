@@ -37,7 +37,7 @@
         "process": "smelting",
         "building": "foundry",
         "role": "primary_material",
-        "outputResource": "iron"
+        "outputResource": "processed_iron"
       }
     ],
     "substitutes": [],

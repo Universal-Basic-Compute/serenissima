@@ -54,7 +54,7 @@
     "producedFrom": [
       {
         "inputs": [
-          {"resource": "iron", "amount": 20},
+          {"resource": "processed_iron", "amount": 20},
           {"resource": "fuel", "amount": 25}
         ],
         "building": "blacksmith",

@@ -39,7 +39,7 @@
     "required_skill": "shipbuilding:8",
     "production_time": 4320,
     "inputs": [
-      {"resource": "shaped_timber", "amount": 80, "quality_impact": 0.4},
+      {"resource": "ship_components", "amount": 10, "quality_impact": 0.4},
       {"resource": "sailcloth", "amount": 30, "quality_impact": 0.1},
       {"resource": "rope", "amount": 40, "quality_impact": 0.1},
       {"resource": "iron_fittings", "amount": 30, "quality_impact": 0.2},

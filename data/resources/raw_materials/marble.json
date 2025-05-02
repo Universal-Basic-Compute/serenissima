@@ -64,7 +64,7 @@
         "process": "stonecutting",
         "building": "stonecutter_workshop",
         "role": "primary_material",
-        "outputResource": "marble_blocks"
+        "outputResource": "cut_stone"
       },
       {
         "process": "sculpture",

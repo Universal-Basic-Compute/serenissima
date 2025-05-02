@@ -71,7 +71,7 @@
         "process": "salting",
         "building": "salting_house",
         "role": "primary_ingredient",
-        "outputResource": "salted_fish"
+        "outputResource": "preserved_fish"
       }
     ],
     "substitutes": [],
