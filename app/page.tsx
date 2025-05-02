@@ -1393,8 +1393,10 @@ export default function Home() {
       
       // Force additional updates for land view
       if (activeView === 'land' && polygonRendererRef.current) {
-        polygonRendererRef.current.updatePolygonOwnerColors();
-        polygonRendererRef.current.updateCoatOfArmsSprites();
+        if (polygonRendererRef.current) {
+          polygonRendererRef.current.updatePolygonOwnerColors();
+          polygonRendererRef.current.updateCoatOfArmsSprites();
+        }
       }
     };
     

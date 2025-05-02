@@ -477,7 +477,7 @@ export default function PolygonViewer() {
         // Then a delayed update to ensure everything is properly loaded
         setTimeout(() => {
           console.log('Performing delayed update of polygon colors and coat of arms');
-          if (activeView === 'land') {
+          if (activeView === 'land' && polygonRendererRef.current) {
             polygonRendererRef.current.updatePolygonOwnerColors();
             polygonRendererRef.current.updateCoatOfArmsSprites();
           }
@@ -486,7 +486,7 @@ export default function PolygonViewer() {
         // And another update after a longer delay as a final check
         setTimeout(() => {
           console.log('Performing final update of polygon colors and coat of arms');
-          if (activeView === 'land') {
+          if (activeView === 'land' && polygonRendererRef.current) {
             polygonRendererRef.current.updatePolygonOwnerColors();
             polygonRendererRef.current.updateCoatOfArmsSprites();
           }
