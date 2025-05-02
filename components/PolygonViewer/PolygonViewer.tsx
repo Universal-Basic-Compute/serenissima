@@ -18,6 +18,8 @@ import BackgroundMusic from '../UI/BackgroundMusic';
 import usePolygonStore from '@/store/usePolygonStore';
 import BridgeRenderer from './BridgeRenderer';
 import LandPurchaseModal from '../UI/LandPurchaseModal';
+import RoadCreator from './RoadCreator';
+import RoadManager from './RoadManager';
 
 export default function PolygonViewer() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -40,6 +42,8 @@ export default function PolygonViewer() {
   });
   
   const [buildingMenuVisible, setBuildingMenuVisible] = useState(false);
+  const [roadCreationActive, setRoadCreationActive] = useState(false);
+  const roadManagerRef = useRef<RoadManager | null>(null);
   
   // Add refs at the top level of the component
   const hasLoadedDataRef = useRef<boolean>(false);
@@ -773,6 +777,11 @@ export default function PolygonViewer() {
     
     checkTextureFiles();
     
+    // Initialize road manager
+    if (sceneRef.current) {
+      roadManagerRef.current = new RoadManager(sceneRef.current.scene);
+    }
+    
     // Progressive initialization of components
     
     // Step 1: Initialize polygon renderer first (most important)
@@ -1030,6 +1039,7 @@ export default function PolygonViewer() {
       if (waterEffectRef.current) waterEffectRef.current.cleanup();
       if (polygonRendererRef.current) polygonRendererRef.current.cleanup();
       if (bridgeRendererRef.current) bridgeRendererRef.current.cleanup();
+      if (roadManagerRef.current) roadManagerRef.current.cleanup();
       if (sceneRef.current) sceneRef.current.cleanup();
       
       // Remove event listeners
@@ -1230,6 +1240,21 @@ export default function PolygonViewer() {
     }
   }, [activeView, loadLandOwners, users]);
 
+  // Add handler for road creation completion
+  const handleRoadComplete = useCallback((roadPoints: THREE.Vector3[]) => {
+    if (roadManagerRef.current) {
+      // Get the curvature value from a state variable or use a default
+      const curvature = 0.5; // Default curvature
+      roadManagerRef.current.createRoad(roadPoints, curvature);
+    }
+    setRoadCreationActive(false);
+  }, []);
+
+  // Add handler for road creation cancellation
+  const handleRoadCancel = useCallback(() => {
+    setRoadCreationActive(false);
+  }, []);
+
   // Add a separate effect to handle quality changes
   useEffect(() => {
     // Update quality when highQuality changes
@@ -1336,6 +1361,21 @@ export default function PolygonViewer() {
       {/* Add the Land Details Panel */}
       {LandDetailsPanelMemo}
       
+      {/* Add Create Road button when in building view */}
+      {activeView === 'buildings' && !roadCreationActive && (
+        <div className="absolute bottom-4 right-4 z-10">
+          <button
+            onClick={() => setRoadCreationActive(true)}
+            className="bg-amber-600 text-white px-4 py-2 rounded-lg shadow-md hover:bg-amber-700 transition-colors flex items-center"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V3zm1 4h10a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V8a1 1 0 011-1z" clipRule="evenodd" />
+            </svg>
+            Create Road
+          </button>
+        </div>
+      )}
+      
       {/* Add the Market Panel */}
       <MarketPanel 
         visible={marketPanelVisible}
@@ -1376,6 +1416,17 @@ export default function PolygonViewer() {
           setSelectedPolygonId(null);
         }}
       />
+      
+      {/* Road Creator */}
+      {roadCreationActive && sceneRef.current && (
+        <RoadCreator
+          scene={sceneRef.current.scene}
+          camera={sceneRef.current.camera}
+          active={roadCreationActive}
+          onComplete={handleRoadComplete}
+          onCancel={handleRoadCancel}
+        />
+      )}
     </div>
   );
 }

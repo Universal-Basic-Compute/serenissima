@@ -384,6 +384,26 @@ export default class SceneSetup {
       this.sunGlow.position.copy(newPosition);
       this.sunLight.position.copy(newPosition);
     }
+    
+    // Make sure roads are properly lit
+    this.scene.traverse((object) => {
+      if (object instanceof THREE.Mesh && 
+          object.userData && 
+          object.userData.isRoad) {
+        // Ensure road materials are updated with lighting
+        if (object.material) {
+          if (Array.isArray(object.material)) {
+            object.material.forEach(mat => {
+              if (mat instanceof THREE.MeshStandardMaterial) {
+                mat.needsUpdate = true;
+              }
+            });
+          } else if (object.material instanceof THREE.MeshStandardMaterial) {
+            object.material.needsUpdate = true;
+          }
+        }
+      }
+    });
   }
   
   public updateQuality(highQuality: boolean) {
