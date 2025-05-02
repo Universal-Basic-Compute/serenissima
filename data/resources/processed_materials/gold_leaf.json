@@ -1,0 +1,105 @@
+{
+    "id": "gold_leaf",
+    "name": "Gold Leaf",
+    "category": "processed_materials",
+    "subcategory": "decorative",
+    "baseValue": 60,
+    "weight": 0.1,
+    "volume": 0.2,
+    "stackSize": 50,
+    "description": "Extremely thin sheets of gold used for decoration and gilding.",
+    "longDescription": "Created by skilled gold beaters who hammer gold into impossibly thin sheets, gold leaf adds luxurious brilliance to Venetian art, architecture, and fine goods. Its application requires specialized techniques and tools, but the resulting shimmer transforms ordinary objects into extraordinary treasures.",
+    "sprite": "assets/sprites/resources/gold_leaf.png",
+    "icon": "assets/icons/resources/gold_leaf.png",
+    "availableQualities": ["common", "fine", "superior"],
+    "defaultQuality": "fine",
+    
+    "processingFacility": "gold_beater_workshop",
+    "processingTime": 720,
+    "perishable": false,
+    "fragility": 0.9,
+    "specialHandling": ["extremely_careful_handling", "static_prevention"],
+    "qualityFactors": [
+      {"factor": "input_quality", "weight": 0.7},
+      {"factor": "worker_skill", "weight": 0.2},
+      {"factor": "tools_quality", "weight": 0.1}
+    ],
+    "varieties": [
+      {
+        "type": "standard_leaf",
+        "thickness": "thin",
+        "value_multiplier": 1.0,
+        "primary_use": "general_gilding"
+      },
+      {
+        "type": "extra_thin",
+        "thickness": "very_thin",
+        "value_multiplier": 1.3,
+        "primary_use": "fine_detail_work"
+      },
+      {
+        "type": "double_thick",
+        "thickness": "medium",
+        "value_multiplier": 0.9,
+        "primary_use": "exterior_gilding"
+      }
+    ],
+    
+    "producedFrom": [
+      {
+        "inputs": [
+          {"resource": "gold", "amount": 1},
+          {"resource": "tools", "amount": 1}
+        ],
+        "building": "gold_beater_workshop",
+        "processingTime": 720
+      }
+    ],
+    "usedIn": [
+      {
+        "outputs": [
+          {"resource": "fine_glassware", "amount": 20}
+        ],
+        "building": "glassblower_workshop",
+        "processingTime": 360
+      },
+      {
+        "outputs": [
+          {"resource": "luxury_silk_garments", "amount": 10}
+        ],
+        "building": "tailor_workshop",
+        "processingTime": 480
+      },
+      {
+        "outputs": [
+          {"resource": "books", "amount": 30}
+        ],
+        "building": "printing_house",
+        "processingTime": 720
+      }
+    ],
+    
+    "transportOptions": {
+      "specialized_carrier": {"capacity": 10, "efficiency": 1.0, "risk": 0.1},
+      "porter": {"capacity": 5, "efficiency": 0.9, "risk": 0.2}
+    },
+    "transportRequirements": ["specialized_containers", "windless_conditions", "careful_handling"],
+    "loadingTime": 15,
+    "routeRestrictions": ["avoid_windy_areas", "avoid_crowds"],
+    
+    "storageOptions": {
+      "secure_warehouse": {"capacityMultiplier": 0.7, "preservation": 0.9},
+      "gold_beater_workshop": {"capacityMultiplier": 1.0, "preservation": 1.0},
+      "artisan_workshop": {"capacityMultiplier": 0.5, "preservation": 0.95}
+    },
+    "storageRequirements": ["dry", "static_free", "secure", "specialized_containers"],
+    "specialStorageRisks": ["static_damage", "crushing", "theft"],
+    "maxStorageTime": "unlimited",
+    
+    "marketDemand": "high",
+    "priceFluctuationFactors": [
+      {"factor": "gold_availability", "weight": 0.6},
+      {"factor": "luxury_goods_demand", "weight": 0.2},
+      {"factor": "artistic_commissions", "weight": 0.2}
+    ]
+  }

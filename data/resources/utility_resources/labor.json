@@ -1,0 +1,232 @@
+{
+  "id": "labor",
+  "name": "Labor",
+  "category": "utility_resources",
+  "subcategory": "workforce",
+  "baseValue": 5,
+  "weight": 0,
+  "volume": 0,
+  "stackSize": 100,
+  "description": "Human workforce available for various economic activities. Represents the collective labor capacity of Venice's population.",
+  "lore": "From the Arsenal workers who could assemble a ship in a day to the delicate hands of Burano lacemakers, Venice's prosperity was built on the skill and sweat of its diverse workforce. The Republic's guild system organized labor into specialized categories, each with its own regulations, training requirements, and social standing.",
+  "sprite": "assets/sprites/resources/labor.png",
+  "icon": "assets/icons/resources/labor.png",
+  "soundEffect": "assets/audio/resources/labor_ambient.mp3",
+  
+  "availableQualities": ["unskilled", "skilled", "master"],
+  "defaultQuality": "skilled",
+  
+  "qualityEffects": {
+    "unskilled": {
+      "valueModifier": 0.6,
+      "productionEfficiency": 0.7,
+      "qualityImpact": 0.6,
+      "description": "Basic labor requiring minimal training, suitable for simple tasks and assistant roles."
+    },
+    "skilled": {
+      "valueModifier": 1.0,
+      "productionEfficiency": 1.0,
+      "qualityImpact": 1.0,
+      "description": "Trained workers with guild certification, capable of standard production tasks."
+    },
+    "master": {
+      "valueModifier": 2.0,
+      "productionEfficiency": 1.3,
+      "qualityImpact": 1.5,
+      "description": "Highly experienced craftspeople with exceptional skill, capable of creating superior products."
+    }
+  },
+  
+  "variants": [
+    {
+      "id": "artisanal_labor",
+      "name": "Artisanal Labor",
+      "valueModifier": 1.3,
+      "properties": ["specialized", "guild_regulated"],
+      "primaryUse": "luxury_production",
+      "industries": ["glassmaking", "jewelry", "lacemaking", "fine_textiles"]
+    },
+    {
+      "id": "industrial_labor",
+      "name": "Industrial Labor",
+      "valueModifier": 1.0,
+      "properties": ["physically_demanding", "organized"],
+      "primaryUse": "mass_production",
+      "industries": ["shipbuilding", "metalworking", "construction", "rope_making"]
+    },
+    {
+      "id": "service_labor",
+      "name": "Service Labor",
+      "valueModifier": 0.9,
+      "properties": ["customer_facing", "flexible"],
+      "primaryUse": "commerce_and_services",
+      "industries": ["trade", "hospitality", "transportation", "domestic_service"]
+    },
+    {
+      "id": "administrative_labor",
+      "name": "Administrative Labor",
+      "valueModifier": 1.2,
+      "properties": ["educated", "literate"],
+      "primaryUse": "governance_and_commerce",
+      "industries": ["government", "banking", "record_keeping", "trade_houses"]
+    }
+  ],
+  
+  "seasonalAvailability": {
+    "spring": 1.0,
+    "summer": 0.9,
+    "autumn": 1.0,
+    "winter": 1.1
+  },
+  
+  "seasonalDemand": {
+    "spring": 1.1,
+    "summer": 1.0,
+    "autumn": 1.0,
+    "winter": 0.9
+  },
+  
+  "marketDynamics": {
+    "basePrice": 5,
+    "volatility": 0.2,
+    "elasticity": 0.5,
+    "strategicImportance": "critical"
+  },
+  
+  "sources": [
+    {
+      "type": "local_population",
+      "locations": ["all_districts"],
+      "reliability": 0.9,
+      "quality": "varies",
+      "costFactor": 1.0,
+      "affectedBy": ["population_health", "living_conditions", "food_availability"]
+    },
+    {
+      "type": "immigrant_workers",
+      "locations": ["harbor_districts", "industrial_areas"],
+      "reliability": 0.7,
+      "quality": "varies",
+      "costFactor": 0.8,
+      "affectedBy": ["political_relations", "economic_conditions", "housing_availability"]
+    },
+    {
+      "type": "seasonal_workers",
+      "locations": ["specific_industries"],
+      "reliability": 0.6,
+      "quality": "varies",
+      "costFactor": 1.2,
+      "affectedBy": ["season", "harvest_conditions", "competing_opportunities"]
+    }
+  ],
+  
+  "workConditions": {
+    "workingHours": {
+      "standard": 10,
+      "seasonal_variation": true,
+      "daylight_dependent": true
+    },
+    "healthRisks": {
+      "industrial": 0.3,
+      "artisanal": 0.2,
+      "service": 0.1,
+      "administrative": 0.05
+    },
+    "restRequirements": {
+      "daily": 8,
+      "weekly": "one_day",
+      "religious_holidays": true
+    }
+  },
+  
+  "skillDevelopment": {
+    "apprenticeship": {
+      "duration": 2880,
+      "cost": 200,
+      "success_rate": 0.8
+    },
+    "guild_advancement": {
+      "requirements": ["experience", "masterpiece", "fee_payment"],
+      "time_to_master": 8640
+    },
+    "specialization_paths": [
+      {"path": "technical_mastery", "value_increase": 0.5},
+      {"path": "artistic_excellence", "value_increase": 0.6},
+      {"path": "production_efficiency", "value_increase": 0.4},
+      {"path": "innovation", "value_increase": 0.7}
+    ]
+  },
+  
+  "usedBy": [
+    {
+      "building": "glass_foundry",
+      "quantity": 10,
+      "skill_requirement": "skilled",
+      "notes": "Specialized glassworking skills required"
+    },
+    {
+      "building": "shipyard",
+      "quantity": 50,
+      "skill_requirement": "mixed",
+      "notes": "Combination of master shipwrights and unskilled assistants"
+    },
+    {
+      "building": "lace_workshop",
+      "quantity": 15,
+      "skill_requirement": "master",
+      "notes": "Extremely fine detail work"
+    },
+    {
+      "building": "construction_site",
+      "quantity": 30,
+      "skill_requirement": "unskilled",
+      "notes": "Basic construction labor with skilled supervision"
+    }
+  ],
+  
+  "producedBy": [
+    {
+      "building": "residential_district",
+      "quantity": "variable",
+      "inputs": [{"resource": "food", "quantity": 1}, {"resource": "housing", "quantity": 0.2}],
+      "productionTime": 24,
+      "productionNotes": "Daily labor regeneration requires adequate living conditions"
+    },
+    {
+      "building": "guild_hall",
+      "quantity": "specialized",
+      "inputs": [{"resource": "education", "quantity": 1}, {"resource": "apprenticeship", "quantity": 0.1}],
+      "productionTime": 720,
+      "productionNotes": "Skilled labor development through guild training"
+    }
+  ],
+  
+  "relatedResources": {
+    "complementary": ["tools", "workshops", "raw_materials"],
+    "substitutes": ["mechanical_equipment", "outsourced_production"],
+    "byproducts": ["craftsmanship", "innovation", "cultural_production"]
+  },
+  
+  "economicEffects": {
+    "price_increase": {
+      "production_costs": 1.3,
+      "construction_time": 1.2,
+      "goods_prices": 1.1
+    },
+    "shortages": {
+      "production_slowdown": true,
+      "quality_reduction": true,
+      "innovation_decrease": true
+    }
+  },
+  
+  "regulations": {
+    "guild_control": "strict",
+    "working_conditions": "regulated_by_industry",
+    "wage_controls": "minimum_standards",
+    "foreign_worker_restrictions": "varies_by_industry",
+    "child_labor_rules": "apprenticeship_system"
+  },
+  
+  "historicalNotes": "Venice's labor force was highly organized through the guild system, which regulated training, quality standards, and working conditions. The city's diverse economy required specialized skills, from the shipbuilders of the Arsenal to the glassblowers of Murano and the lacemakers of Burano. Labor shortages were a recurring challenge, particularly after plague outbreaks, leading to periodic immigration policies to attract skilled workers from the mainland and beyond. The Republic maintained a delicate balance between protecting guild privileges and ensuring sufficient workforce for its vital industries."
+}

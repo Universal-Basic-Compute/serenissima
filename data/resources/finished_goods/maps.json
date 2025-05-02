@@ -1,0 +1,180 @@
+{
+  "id": "maps",
+  "name": "Maps",
+  "category": "finished_goods",
+  "subcategory": "navigational_tools",
+  "description": "Detailed navigational charts and geographical maps produced by Venetian cartographers. Essential tools for maritime trade and exploration, and prized by collectors and scholars.",
+  "icon": "icons/resources/maps.png",
+  "model": "models/resources/maps.glb",
+  
+  "base_properties": {
+    "base_value": 45,
+    "weight": 0.5,
+    "volume": 0.3,
+    "stack_size": 10,
+    "perishable": false,
+    "moisture_sensitivity": 0.8
+  },
+  
+  "market_properties": {
+    "luxury_level": 5,
+    "target_customers": ["ship_captains", "merchants", "naval_officers", "scholars", "collectors"],
+    "fashion_sensitivity": 0.2,
+    "export_value_multiplier": 1.3,
+    "market_demand": "high",
+    "price_volatility": 0.3,
+    "seasonal_demand": {
+      "spring": 1.3,
+      "summer": 1.1,
+      "autumn": 0.9,
+      "winter": 0.7
+    }
+  },
+  
+  "production_properties": {
+    "producer_building": "cartographer_workshop",
+    "production_complexity": 7,
+    "required_skill": "cartography:5",
+    "production_time": 960,
+    "batch_size": 5,
+    "inputs": [
+      {"resource": "paper", "amount": 3, "quality_impact": 0.3},
+      {"resource": "ink", "amount": 1, "quality_impact": 0.2},
+      {"resource": "navigational_data", "amount": 1, "quality_impact": 0.5}
+    ]
+  },
+  
+  "quality_variations": {
+    "available_qualities": ["common", "fine", "superior", "masterwork"],
+    "default_quality": "fine",
+    "quality_multipliers": {
+      "common": {"value": 0.7, "accuracy": 0.7, "detail": 0.6},
+      "fine": {"value": 1.0, "accuracy": 1.0, "detail": 1.0},
+      "superior": {"value": 1.8, "accuracy": 1.3, "detail": 1.5},
+      "masterwork": {"value": 3.0, "accuracy": 1.6, "detail": 2.0}
+    },
+    "quality_factors": [
+      {"factor": "cartographer_skill", "weight": 0.5},
+      {"factor": "data_quality", "weight": 0.3},
+      {"factor": "material_quality", "weight": 0.2}
+    ]
+  },
+  
+  "varieties": [
+    {
+      "type": "portolan_chart",
+      "production_difficulty": "high",
+      "popularity": "very_high",
+      "value_multiplier": 1.2,
+      "primary_use": "maritime_navigation",
+      "model_variant": "models/resources/maps_portolan.glb"
+    },
+    {
+      "type": "world_map",
+      "production_difficulty": "very_high",
+      "popularity": "high",
+      "value_multiplier": 1.5,
+      "primary_use": "reference_collection",
+      "model_variant": "models/resources/maps_world.glb"
+    },
+    {
+      "type": "city_plan",
+      "production_difficulty": "medium",
+      "popularity": "medium",
+      "value_multiplier": 0.9,
+      "primary_use": "urban_planning",
+      "model_variant": "models/resources/maps_city.glb"
+    },
+    {
+      "type": "trade_route_map",
+      "production_difficulty": "high",
+      "popularity": "high",
+      "value_multiplier": 1.3,
+      "primary_use": "merchant_planning",
+      "model_variant": "models/resources/maps_trade.glb"
+    }
+  ],
+  
+  "cartographic_features": [
+    {
+      "feature": "compass_rose",
+      "complexity": "medium",
+      "value_addition": 5
+    },
+    {
+      "feature": "detailed_coastlines",
+      "complexity": "high",
+      "value_addition": 10
+    },
+    {
+      "feature": "depth_soundings",
+      "complexity": "high",
+      "value_addition": 15
+    },
+    {
+      "feature": "decorative_illustrations",
+      "complexity": "very_high",
+      "value_addition": 20
+    },
+    {
+      "feature": "gold_leaf_embellishment",
+      "complexity": "high",
+      "value_addition": 25,
+      "materials": ["gold_leaf"]
+    }
+  ],
+  
+  "usage_properties": {
+    "uses": ["navigation", "trade_planning", "military_operations", "education", "collection"],
+    "special_features": ["strategic_value", "intellectual_property", "artistic_merit"],
+    "complementary_resources": ["compass", "navigational_instruments", "books"]
+  },
+  
+  "intellectual_properties": {
+    "accuracy_level": "high",
+    "proprietary_information": true,
+    "state_secrets": "some_regions",
+    "export_restrictions": "certain_types",
+    "copying_protection": "guild_regulations"
+  },
+  
+  "transport_properties": {
+    "transport_methods": {
+      "courier": {"capacity": 5, "efficiency": 1.0, "risk": 0.1},
+      "secure_chest": {"capacity": 20, "efficiency": 0.9, "risk": 0.15}
+    },
+    "special_requirements": ["moisture_protection", "flat_storage", "secure_handling"],
+    "loading_time": 5,
+    "route_restrictions": []
+  },
+  
+  "storage_properties": {
+    "storage_facilities": {
+      "cartographer_workshop": {"capacity_multiplier": 1.0, "preservation": 1.0},
+      "naval_office": {"capacity_multiplier": 0.8, "preservation": 0.95},
+      "merchant_office": {"capacity_multiplier": 0.6, "preservation": 0.9}
+    },
+    "storage_requirements": ["dry", "flat", "protected_from_light", "secure"],
+    "special_risks": ["moisture_damage", "ink_fading", "theft_of_information"],
+    "max_storage_time": "unlimited"
+  },
+  
+  "production_chain_position": {
+    "predecessors": [
+      {"resource": "paper", "facility": "paper_mill"},
+      {"resource": "ink", "facility": "ink_maker"},
+      {"resource": "navigational_data", "facility": "naval_office"}
+    ],
+    "successors": [
+      {"resource": "navigation_service", "facility": "shipping_company"},
+      {"resource": "military_intelligence", "facility": "naval_command"}
+    ]
+  },
+  
+  "historical_notes": {
+    "introduction_year": 1300,
+    "notable_producers": ["Fra Mauro", "Venetian Cartographers Guild"],
+    "historical_significance": "Venetian cartography represented the cutting edge of geographical knowledge in the late medieval and Renaissance periods. The Republic's extensive maritime trade network provided a constant flow of new geographical information, while its position as a crossroads of cultures allowed for the synthesis of different cartographic traditions. Venetian maps were highly prized throughout Europe for their accuracy and detail, particularly their portolan charts for Mediterranean navigation.",
+    "historical_markets": ["Venetian naval officers", "Mediterranean merchants", "European explorers", "Ottoman navigators"]
+  }
+}

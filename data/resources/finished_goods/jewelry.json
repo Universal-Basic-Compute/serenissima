@@ -1,0 +1,185 @@
+{
+  "id": "jewelry",
+  "name": "Jewelry",
+  "category": "finished_goods",
+  "subcategory": "luxury_goods",
+  "description": "Exquisite ornamental pieces crafted from precious metals and gems. Venetian jewelry combines Byzantine, Islamic, and European influences into distinctive styles sought by elites across the Mediterranean.",
+  "icon": "icons/resources/jewelry.png",
+  "model": "models/resources/jewelry.glb",
+  
+  "base_properties": {
+    "base_value": 80,
+    "weight": 0.2,
+    "volume": 0.1,
+    "stack_size": 10,
+    "perishable": false,
+    "fragile": true,
+    "breakage_risk": 0.1
+  },
+  
+  "market_properties": {
+    "luxury_level": 7,
+    "target_customers": ["nobility", "wealthy_merchants", "patrician_families", "foreign_elites"],
+    "fashion_sensitivity": 0.6,
+    "export_value_multiplier": 1.6,
+    "market_demand": "high",
+    "price_volatility": 0.3,
+    "seasonal_demand": {
+      "spring": 1.1,
+      "summer": 0.9,
+      "autumn": 0.8,
+      "winter": 1.3
+    }
+  },
+  
+  "production_properties": {
+    "producer_building": "goldsmith_workshop",
+    "production_complexity": 8,
+    "required_skill": "goldsmithing:6",
+    "production_time": 720,
+    "batch_size": 5,
+    "inputs": [
+      {"resource": "gold", "amount": 1, "quality_impact": 0.5},
+      {"resource": "silver", "amount": 1, "optional": true, "quality_impact": 0.2},
+      {"resource": "gems", "amount": 2, "optional": true, "quality_impact": 0.3},
+      {"resource": "tools", "amount": 1, "quality_impact": 0.1}
+    ]
+  },
+  
+  "quality_variations": {
+    "available_qualities": ["common", "fine", "superior", "masterwork", "legendary"],
+    "default_quality": "fine",
+    "quality_multipliers": {
+      "common": {"value": 0.7, "prestige": 0.6, "craftsmanship": 0.7},
+      "fine": {"value": 1.0, "prestige": 1.0, "craftsmanship": 1.0},
+      "superior": {"value": 1.8, "prestige": 1.8, "craftsmanship": 1.5},
+      "masterwork": {"value": 3.0, "prestige": 3.0, "craftsmanship": 2.0},
+      "legendary": {"value": 6.0, "prestige": 6.0, "craftsmanship": 3.0}
+    },
+    "quality_factors": [
+      {"factor": "material_quality", "weight": 0.4},
+      {"factor": "worker_skill", "weight": 0.5},
+      {"factor": "tools_quality", "weight": 0.1}
+    ]
+  },
+  
+  "varieties": [
+    {
+      "type": "necklace",
+      "production_difficulty": "high",
+      "popularity": "very_high",
+      "value_multiplier": 1.2,
+      "material_requirement": "high",
+      "model_variant": "models/resources/jewelry_necklace.glb"
+    },
+    {
+      "type": "ring",
+      "production_difficulty": "medium",
+      "popularity": "high",
+      "value_multiplier": 0.8,
+      "material_requirement": "low",
+      "model_variant": "models/resources/jewelry_ring.glb"
+    },
+    {
+      "type": "earrings",
+      "production_difficulty": "medium",
+      "popularity": "high",
+      "value_multiplier": 0.9,
+      "material_requirement": "medium",
+      "model_variant": "models/resources/jewelry_earrings.glb"
+    },
+    {
+      "type": "brooch",
+      "production_difficulty": "high",
+      "popularity": "medium",
+      "value_multiplier": 1.0,
+      "material_requirement": "medium",
+      "model_variant": "models/resources/jewelry_brooch.glb"
+    },
+    {
+      "type": "ceremonial_piece",
+      "production_difficulty": "very_high",
+      "popularity": "low",
+      "value_multiplier": 2.5,
+      "material_requirement": "very_high",
+      "model_variant": "models/resources/jewelry_ceremonial.glb"
+    }
+  ],
+  
+  "design_styles": [
+    {
+      "style": "byzantine_influenced",
+      "complexity": "high",
+      "popularity": "medium",
+      "value_multiplier": 1.2,
+      "characteristic": "elaborate_filigree"
+    },
+    {
+      "style": "islamic_motifs",
+      "complexity": "high",
+      "popularity": "medium",
+      "value_multiplier": 1.3,
+      "characteristic": "geometric_patterns"
+    },
+    {
+      "style": "venetian_gothic",
+      "complexity": "very_high",
+      "popularity": "high",
+      "value_multiplier": 1.4,
+      "characteristic": "ornate_detailing"
+    },
+    {
+      "style": "classical_revival",
+      "complexity": "medium",
+      "popularity": "medium",
+      "value_multiplier": 1.1,
+      "characteristic": "greco_roman_motifs"
+    }
+  ],
+  
+  "usage_properties": {
+    "uses": ["personal_adornment", "status_symbol", "wealth_storage", "diplomatic_gift"],
+    "special_features": ["heirloom_quality", "investment_value", "cultural_significance"],
+    "complementary_resources": ["luxury_silk_garments", "fine_clothing", "secure_storage"]
+  },
+  
+  "transport_properties": {
+    "transport_methods": {
+      "armed_escort": {"capacity": 20, "efficiency": 1.0, "risk": 0.05},
+      "secure_chest": {"capacity": 10, "efficiency": 1.0, "risk": 0.1}
+    },
+    "special_requirements": ["armed_guards", "secure_containers", "discreet_handling"],
+    "loading_time": 5,
+    "route_restrictions": ["secure_routes_only", "daylight_preferred"]
+  },
+  
+  "storage_properties": {
+    "storage_facilities": {
+      "secure_vault": {"capacity_multiplier": 1.0, "preservation": 1.0},
+      "goldsmith_workshop": {"capacity_multiplier": 0.5, "preservation": 1.0},
+      "wealthy_household": {"capacity_multiplier": 0.3, "preservation": 0.95}
+    },
+    "storage_requirements": ["high_security", "humidity_control", "inventory_tracking"],
+    "special_risks": ["theft", "tarnishing", "damage"],
+    "max_storage_time": "unlimited"
+  },
+  
+  "production_chain_position": {
+    "predecessors": [
+      {"resource": "gold", "facility": "goldsmith"},
+      {"resource": "silver", "facility": "silversmith"},
+      {"resource": "gems", "facility": "gem_cutter"}
+    ],
+    "successors": [
+      {"resource": "prestige", "facility": "noble_household"},
+      {"resource": "export_revenue", "facility": "trading_house"}
+    ]
+  },
+  
+  "historical_notes": {
+    "introduction_year": 1100,
+    "notable_producers": ["Venetian Goldsmiths Guild", "Rialto Jewelers"],
+    "historical_significance": "Venetian jewelry represented a fusion of Eastern and Western styles, reflecting the city's position as a crossroads of cultures. The goldsmith trade was strictly regulated, with high standards enforced to maintain Venice's reputation for quality. Jewelry served not only as personal adornment but as portable wealth, diplomatic gifts, and markers of social status.",
+    "historical_markets": ["Venetian nobility", "European courts", "Byzantine elites", "Ottoman nobility"]
+  }
+}

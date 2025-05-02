@@ -1,0 +1,105 @@
+{
+    "id": "olive_oil",
+    "name": "Olive Oil",
+    "category": "processed_materials",
+    "subcategory": "food",
+    "baseValue": 20,
+    "weight": 2.0,
+    "volume": 1.0,
+    "stackSize": 15,
+    "description": "Pressed oil from olives, used in cooking and various industries.",
+    "longDescription": "This golden liquid is pressed from olives grown in Venetian mainland territories and imported from across the Mediterranean. Essential for Venetian cuisine and used in industries from soap-making to lamp fuel, olive oil represents one of the fundamental commodities of Mediterranean life.",
+    "sprite": "assets/sprites/resources/olive_oil.png",
+    "icon": "assets/icons/resources/olive_oil.png",
+    "availableQualities": ["common", "fine", "superior", "exceptional"],
+    "defaultQuality": "common",
+    
+    "processingFacility": "oil_press",
+    "processingTime": 240,
+    "perishable": true,
+    "perishTime": 10080,
+    "specialHandling": ["sealed_containers", "protect_from_light"],
+    "qualityFactors": [
+      {"factor": "input_quality", "weight": 0.7},
+      {"factor": "press_quality", "weight": 0.2},
+      {"factor": "worker_skill", "weight": 0.1}
+    ],
+    "varieties": [
+      {
+        "type": "common_oil",
+        "acidity": "medium",
+        "value_multiplier": 1.0,
+        "primary_use": "cooking"
+      },
+      {
+        "type": "first_press",
+        "acidity": "low",
+        "value_multiplier": 1.5,
+        "primary_use": "fine_cuisine"
+      },
+      {
+        "type": "lamp_oil",
+        "acidity": "high",
+        "value_multiplier": 0.7,
+        "primary_use": "lighting"
+      }
+    ],
+    
+    "producedFrom": [
+      {
+        "inputs": [
+          {"resource": "olives", "amount": 25}
+        ],
+        "building": "oil_press",
+        "processingTime": 240
+      }
+    ],
+    "usedIn": [
+      {
+        "outputs": [
+          {"resource": "prepared_meal", "amount": 20}
+        ],
+        "building": "tavern",
+        "processingTime": 120
+      },
+      {
+        "outputs": [
+          {"resource": "soap", "amount": 15}
+        ],
+        "building": "soap_workshop",
+        "processingTime": 180
+      },
+      {
+        "outputs": [
+          {"resource": "preserved_fish", "amount": 10}
+        ],
+        "building": "salting_house",
+        "processingTime": 360
+      }
+    ],
+    
+    "transportOptions": {
+      "barge": {"capacity": 150, "efficiency": 0.9, "risk": 0.15},
+      "cart": {"capacity": 20, "efficiency": 0.9, "risk": 0.2},
+      "porter": {"capacity": 4, "efficiency": 0.8, "risk": 0.25}
+    },
+    "transportRequirements": ["sealed_containers", "careful_handling"],
+    "loadingTime": 10,
+    "routeRestrictions": [],
+    
+    "storageOptions": {
+      "warehouse": {"capacityMultiplier": 1.0, "preservation": 0.95},
+      "tavern": {"capacityMultiplier": 0.5, "preservation": 0.9},
+      "household": {"capacityMultiplier": 0.3, "preservation": 0.85}
+    },
+    "storageRequirements": ["cool", "dark", "sealed_containers"],
+    "specialStorageRisks": ["rancidity", "contamination"],
+    "maxStorageTime": 10080,
+    
+    "marketDemand": "high",
+    "priceFluctuationFactors": [
+      {"factor": "olive_harvest", "weight": 0.6},
+      {"factor": "season", "weight": 0.2},
+      {"factor": "trade_conditions", "weight": 0.2}
+    ]
+  }

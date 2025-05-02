@@ -1,0 +1,164 @@
+{
+    "id": "dyestuffs",
+    "name": "Dyestuffs",
+    "category": "raw_materials",
+    "subcategory": "colorants",
+    "icon": "icons/raw_materials/dyestuffs.png",
+    "baseProperties": {
+      "baseValue": 35,
+      "weight": 0.5,
+      "volume": 0.5,
+      "stackSize": 20,
+      "perishable": true,
+      "perishTime": 10080
+    },
+    "description": {
+      "short": "Rare colorants for textile dyeing.",
+      "full": "Precious natural substances imported from around the world that provide vibrant, lasting colors for Venetian textiles. These rare materials are a cornerstone of Venice's luxury textile industry.",
+      "flavor": "Each shade represents a journey across seas and continents—the crimson of kermes beetles, the purple of murex shells, the blue of distant indigo plants. In these tiny grains of color lies the secret to Venice's most splendid fabrics."
+    },
+    "sourceInfo": {
+      "source": "imported",
+      "harvestMethod": "various",
+      "locations": ["levant", "india", "persia", "north_africa", "americas"],
+      "availability": "rare",
+      "seasonality": "varies_by_type"
+    },
+    "qualityLevels": {
+      "available": ["common", "fine", "superior", "exceptional"],
+      "default": "common",
+      "effects": {
+        "common": {"valueModifier": 1.0, "colorFastness": 0.8, "vibrancy": 0.8},
+        "fine": {"valueModifier": 1.5, "colorFastness": 1.0, "vibrancy": 1.0},
+        "superior": {"valueModifier": 2.5, "colorFastness": 1.3, "vibrancy": 1.3},
+        "exceptional": {"valueModifier": 4.0, "colorFastness": 1.6, "vibrancy": 1.6}
+      }
+    },
+    "varieties": [
+      {
+        "type": "kermes",
+        "color": "crimson",
+        "source": "insect",
+        "origin": "mediterranean",
+        "rarity": "high",
+        "valueModifier": 1.8
+      },
+      {
+        "type": "indigo",
+        "color": "blue",
+        "source": "plant",
+        "origin": "india",
+        "rarity": "high",
+        "valueModifier": 1.7
+      },
+      {
+        "type": "murex",
+        "color": "purple",
+        "source": "mollusk",
+        "origin": "mediterranean",
+        "rarity": "very_high",
+        "valueModifier": 3.0
+      },
+      {
+        "type": "saffron",
+        "color": "yellow",
+        "source": "flower",
+        "origin": "persia",
+        "rarity": "high",
+        "valueModifier": 2.0
+      },
+      {
+        "type": "madder",
+        "color": "red",
+        "source": "root",
+        "origin": "europe",
+        "rarity": "medium",
+        "valueModifier": 1.2
+      },
+      {
+        "type": "woad",
+        "color": "blue",
+        "source": "plant",
+        "origin": "europe",
+        "rarity": "low",
+        "valueModifier": 0.9
+      }
+    ],
+    "productionUses": [
+      {
+        "process": "textile_dyeing",
+        "building": "dye_works",
+        "role": "primary_ingredient",
+        "outputResource": "dyed_textiles"
+      },
+      {
+        "process": "pigment_making",
+        "building": "pigment_workshop",
+        "role": "primary_ingredient",
+        "outputResource": "pigments"
+      }
+    ],
+    "substitutes": [
+      {
+        "resourceId": "local_plant_dyes",
+        "efficiency": 0.6,
+        "qualityPenalty": 2,
+        "context": "textile_dyeing"
+      }
+    ],
+    "complements": [
+      {
+        "resourceId": "mordants",
+        "context": "textile_dyeing",
+        "relationship": "required"
+      },
+      {
+        "resourceId": "clean_water",
+        "context": "textile_dyeing",
+        "relationship": "required"
+      }
+    ],
+    "transportation": {
+      "methods": {
+        "large_ship": {"capacity": 100, "efficiency": 1.0, "risk": 0.15},
+        "barge": {"capacity": 30, "efficiency": 0.9, "risk": 0.2},
+        "porter": {"capacity": 2, "efficiency": 0.9, "risk": 0.1}
+      },
+      "requirements": ["moisture_protection", "contamination_prevention", "security"],
+      "loadingTime": 8,
+      "restrictions": []
+    },
+    "storage": {
+      "compatible": {
+        "secure_warehouse": {"capacityMultiplier": 1.0, "preservation": 0.95},
+        "dye_works": {"capacityMultiplier": 0.7, "preservation": 1.0}
+      },
+      "requirements": ["dry", "cool", "dark", "secure"],
+      "risks": ["moisture", "light_exposure", "theft", "contamination"],
+      "maxStorageTime": 10080
+    },
+    "marketDynamics": {
+      "baseAvailability": 0.4,
+      "demandLevel": "high",
+      "priceVolatility": 0.6,
+      "regionalFactors": [
+        {
+          "region": "rialto",
+          "availabilityModifier": 1.3,
+          "priceModifier": 0.9
+        }
+      ],
+      "seasonalFactors": [
+        {
+          "season": "winter",
+          "availabilityModifier": 0.7,
+          "priceModifier": 1.3,
+          "note": "Reduced shipping"
+        }
+      ],
+      "tradeDisruptions": {
+        "factors": ["eastern_conflict", "trade_route_closure", "embargo"],
+        "impact": "severe"
+      }
+    }
+  }
