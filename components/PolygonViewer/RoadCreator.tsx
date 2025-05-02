@@ -26,6 +26,48 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
   const mouseRef = useRef(new THREE.Vector2());
   const planeRef = useRef(new THREE.Plane(new THREE.Vector3(0, 1, 0), 0));
 
+  // Create indicator mesh for road placement
+  const createIndicatorMesh = (position: THREE.Vector3) => {
+    // Remove existing indicator if any
+    if (indicatorMesh) {
+      scene.remove(indicatorMesh);
+      if (indicatorMesh.geometry) indicatorMesh.geometry.dispose();
+      if (indicatorMesh.material) {
+        if (Array.isArray(indicatorMesh.material)) {
+          indicatorMesh.material.forEach(m => m.dispose());
+        } else {
+          indicatorMesh.material.dispose();
+        }
+      }
+    }
+
+    // Create a circle geometry for the indicator
+    const geometry = new THREE.CircleGeometry(0.3, 32);
+    const material = new THREE.MeshBasicMaterial({
+      color: snapPoint ? 0x00ff00 : 0xffaa00, // Green if snapped, orange otherwise
+      transparent: true,
+      opacity: 0.7,
+      side: THREE.DoubleSide,
+      depthWrite: false
+    });
+
+    const indicator = new THREE.Mesh(geometry, material);
+    
+    // Position the indicator
+    indicator.position.copy(position);
+    indicator.position.y += 0.25; // Position slightly above the ground
+    
+    // Rotate to be horizontal
+    indicator.rotation.x = -Math.PI / 2;
+    
+    // Set high render order to ensure visibility
+    indicator.renderOrder = 100;
+    
+    // Add to scene
+    scene.add(indicator);
+    setIndicatorMesh(indicator);
+  };
+
   // Clean up when component unmounts or becomes inactive
   useEffect(() => {
     return () => {
@@ -49,6 +91,19 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
           }
         } catch (error) {
           console.error('Error cleaning up preview mesh:', error);
+        }
+      }
+      
+      // Clean up indicator mesh
+      if (indicatorMesh) {
+        scene.remove(indicatorMesh);
+        if (indicatorMesh.geometry) indicatorMesh.geometry.dispose();
+        if (indicatorMesh.material) {
+          if (Array.isArray(indicatorMesh.material)) {
+            indicatorMesh.material.forEach(m => m.dispose());
+          } else {
+            indicatorMesh.material.dispose();
+          }
         }
       }
       
@@ -82,7 +137,7 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
         }
       }
     };
-  }, [scene, previewMesh]);
+  }, [scene, previewMesh, indicatorMesh]);
 
   // Set up event listeners when active
   useEffect(() => {
@@ -753,6 +808,13 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
       {errorMessage && (
         <div className="mt-2 text-red-600 text-sm text-center">
           {errorMessage}
+        </div>
+      )}
+      
+      {/* Snapping indicator */}
+      {snapPoint && (
+        <div className="mt-2 text-green-600 text-sm text-center">
+          Snapping to nearest edge or road
         </div>
       )}
       
