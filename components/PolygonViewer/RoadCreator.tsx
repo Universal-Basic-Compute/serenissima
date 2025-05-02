@@ -22,6 +22,7 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
   const [previewMesh, setPreviewMesh] = useState<THREE.Mesh | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [snapPoint, setSnapPoint] = useState<THREE.Vector3 | null>(null);
+  const [indicatorMesh, setIndicatorMesh] = useState<THREE.Mesh | null>(null);
   const raycasterRef = useRef(new THREE.Raycaster());
   const mouseRef = useRef(new THREE.Vector2());
   const planeRef = useRef(new THREE.Plane(new THREE.Vector3(0, 1, 0), 0));
