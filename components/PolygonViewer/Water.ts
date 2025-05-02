@@ -60,6 +60,16 @@ export default class Water {
     
     // Initialize wave simulation
     this.initializeWaveSimulation();
+    
+    // Mark the water mesh for identification
+    if (this.waterMesh) {
+      this.waterMesh.userData.isWaterMesh = true;
+    }
+    
+    // Create initial waves for immediate visual effect
+    for (let i = 0; i < 10; i++) {
+      this.createRandomWave();
+    }
   }
   
   private createWaterSurface() {
@@ -81,7 +91,7 @@ export default class Water {
         waterColor: { value: new THREE.Color(this.getWaterColorForView()) },
         deepWaterColor: { value: new THREE.Color(this.getDeepWaterColorForView()) },
         resolution: { value: new THREE.Vector2(resolution, resolution) },
-        waveHeight: { value: 0.8 }
+        waveHeight: { value: 1.5 } // Increased from 0.8 to 1.5 for more visible waves
       },
       vertexShader: `
         uniform float time;
@@ -93,17 +103,17 @@ export default class Water {
         float wave(vec2 position) {
           float result = 0.0;
           
-          // Large slow waves
+          // Large slow waves - increased amplitude
           result += sin(position.x * 0.5 + time * 0.5) * 
-                   cos(position.y * 0.4 + time * 0.3) * 0.5;
+                   cos(position.y * 0.4 + time * 0.3) * 0.8;
           
-          // Medium waves
+          // Medium waves - increased amplitude
           result += sin(position.x * 1.0 + time * 0.8) * 
-                   sin(position.y * 1.3 + time * 0.6) * 0.25;
+                   sin(position.y * 1.3 + time * 0.6) * 0.4;
           
-          // Small ripples
+          // Small ripples - increased amplitude
           result += sin(position.x * 2.5 + time * 1.5) * 
-                   sin(position.y * 2.8 + time * 1.7) * 0.125;
+                   sin(position.y * 2.8 + time * 1.7) * 0.2;
                    
           return result;
         }
@@ -134,18 +144,18 @@ export default class Water {
           float depthFactor = smoothstep(-0.5, 0.5, vElevation);
           vec3 color = mix(deepWaterColor, waterColor, depthFactor);
           
-          // Add foam at wave peaks
-          if (vElevation > 0.3) {
-            float foamFactor = smoothstep(0.3, 0.5, vElevation);
-            color = mix(color, vec3(1.0), foamFactor * 0.7);
+          // Add foam at wave peaks - more visible foam
+          if (vElevation > 0.25) { // Lower threshold from 0.3 to 0.25
+            float foamFactor = smoothstep(0.25, 0.45, vElevation);
+            color = mix(color, vec3(1.0), foamFactor * 0.9); // Increased from 0.7 to 0.9
           }
           
-          // Add subtle wave patterns
-          float pattern = sin(vUv.x * 100.0 + time) * sin(vUv.y * 100.0 + time * 0.7) * 0.03;
+          // Add subtle wave patterns - more pronounced
+          float pattern = sin(vUv.x * 100.0 + time) * sin(vUv.y * 100.0 + time * 0.7) * 0.05; // Increased from 0.03 to 0.05
           color += pattern * vec3(0.1, 0.1, 0.3);
           
           // Increase opacity for better visibility
-          gl_FragColor = vec4(color, 1.0); // Changed from 0.95 to 1.0 for full opacity
+          gl_FragColor = vec4(color, 1.0);
         }
       `
     };
@@ -155,21 +165,21 @@ export default class Water {
       uniforms: waterShader.uniforms,
       vertexShader: waterShader.vertexShader,
       fragmentShader: waterShader.fragmentShader,
-      transparent: false, // Changed from true to false for better visibility
+      transparent: false,
       side: THREE.DoubleSide
     });
     
     // Create the water mesh
     this.waterMesh = new THREE.Mesh(this.waterGeometry, this.waterMaterial);
     
-    // Position water at y=-0.2 (below land)
-    this.waterMesh.position.y = -0.2; // Changed from -0.1 to -0.2
+    // Position water at y=-0.15 (slightly higher than before for better visibility)
+    this.waterMesh.position.y = -0.15;
     
     // Rotate the water plane to be horizontal
     this.waterMesh.rotation.x = -Math.PI / 2;
     
-    // Set render order to ensure water appears below land
-    this.waterMesh.renderOrder = 0; // Changed from 1 to 0
+    // Set render order to ensure water appears below land but above background
+    this.waterMesh.renderOrder = 5;
     
     // Add to scene
     this.scene.add(this.waterMesh);
@@ -210,7 +220,7 @@ export default class Water {
     
     const size = this.gridSize;
     const damping = 0.98;
-    const waveSpeed = 0.05;
+    const waveSpeed = 0.15; // Increased from 0.05 to 0.15 for more active waves
     
     // Save current wave grid
     for (let i = 0; i < size * size; i++) {
@@ -311,9 +321,9 @@ export default class Water {
     const x = Math.floor(Math.random() * (size - 10)) + 5;
     const z = Math.floor(Math.random() * (size - 10)) + 5;
     
-    // Random radius and strength
+    // Random radius and strength - increased strength
     const radius = Math.floor(Math.random() * 5) + 3;
-    const strength = (Math.random() * 0.1) + 0.05;
+    const strength = (Math.random() * 0.2) + 0.1; // Doubled from (0.1 + 0.05) to (0.2 + 0.1)
     
     // Create wave
     for (let i = Math.max(1, z - radius); i < Math.min(size - 1, z + radius); i++) {
@@ -378,8 +388,12 @@ export default class Water {
       const h1 = h01 * (1 - fx) + h11 * fx;
       const height = h0 * (1 - fz) + h1 * fz;
       
-      // Apply height to vertex
-      positions[i3 + 1] = height;
+      // Apply height to vertex with additional sine wave for more movement
+      const additionalWave = 
+        Math.sin(x * 0.2 + this.time * 0.7) * 
+        Math.cos(z * 0.2 + this.time * 0.5) * 0.1;
+      
+      positions[i3 + 1] = height + additionalWave;
     }
     
     // Update geometry
@@ -392,44 +406,44 @@ export default class Water {
   private getWaterColorForView(): number {
     switch (this.activeView) {
       case 'transport':
-        return 0x0099ff; // Brighter blue for transport
+        return 0x00b3ff; // Brighter, more saturated blue for transport
       case 'resources':
-        return 0x00ccaa; // Brighter teal for resources
+        return 0x00e6c0; // Brighter, more saturated teal for resources
       case 'markets':
-        return 0x0088cc; // Brighter steel blue for markets
+        return 0x00a3e6; // Brighter, more saturated steel blue for markets
       case 'governance':
-        return 0x6a5acd; // Brighter slate blue for governance
+        return 0x7b68ee; // Brighter, more saturated slate blue for governance
       case 'land':
-        return 0x00aaff; // Brighter sea blue for land view
+        return 0x00c3ff; // Brighter, more saturated sea blue for land view
       case 'buildings':
-        return 0x0099ff; // Brighter turquoise
+        return 0x00b3ff; // Brighter, more saturated turquoise
       default:
-        return 0x0099ff; // Brighter turquoise
+        return 0x00b3ff; // Brighter, more saturated turquoise
     }
   }
   
   private getDeepWaterColorForView(): number {
     switch (this.activeView) {
       case 'transport':
-        return 0x0066cc; // Deeper blue for transport
+        return 0x0077e6; // Deeper, more saturated blue for transport
       case 'resources':
-        return 0x007766; // Darker teal for resources
+        return 0x008877; // Darker, more saturated teal for resources
       case 'markets':
-        return 0x005588; // Darker steel blue for markets
+        return 0x0066a3; // Darker, more saturated steel blue for markets
       case 'governance':
-        return 0x483d8b; // Darker slate blue for governance
+        return 0x5a4fcb; // Darker, more saturated slate blue for governance
       case 'land':
-        return 0x0066aa; // Deeper sea blue for land view
+        return 0x0077c2; // Deeper, more saturated sea blue for land view
       case 'buildings':
-        return 0x0066aa; // Deep blue
+        return 0x0077c2; // Deeper, more saturated blue
       default:
-        return 0x0066aa; // Deep blue
+        return 0x0077c2; // Deeper, more saturated blue
     }
   }
   
   public update(frameCount: number) {
-    // Update time
-    this.time += 0.03;
+    // Update time - increased speed for more visible animation
+    this.time += 0.05; // Increased from 0.03 to 0.05
     
     // Get delta time for physics-based simulation
     const deltaTime = Math.min(0.05, this.clock.getDelta());
@@ -445,6 +459,11 @@ export default class Water {
     
     // Apply waves to geometry
     this.applyWavesToGeometry();
+    
+    // Create random waves more frequently (every ~20 frames instead of ~100)
+    if (Math.random() < 0.05) {
+      this.createRandomWave();
+    }
   }
   
   public updateViewMode(activeView: ViewMode) {
@@ -459,11 +478,7 @@ export default class Water {
       this.waterMaterial.needsUpdate = true;
     }
     
-    // Update particle color
-    if (this.particleMaterial) {
-      this.particleMaterial.color.set(this.getWaterColorForView());
-      this.particleMaterial.needsUpdate = true;
-    }
+    // Remove reference to undefined particleMaterial
   }
   
   public updateQuality(performanceMode: boolean) {

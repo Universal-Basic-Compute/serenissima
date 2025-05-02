@@ -948,7 +948,19 @@ export default function PolygonViewer() {
         // Update water effect - every frame for smoother animation
         if (sceneRef.current && sceneRef.current.water) {
           try {
+            // Pass frameCount directly to water update for more varied animation
             sceneRef.current.water.update(frameCount);
+          
+            // Force water to be visible by ensuring its mesh is in the scene
+            if (frameCount % 60 === 0) { // Check every ~1 second
+              const waterMesh = sceneRef.current.scene.children.find(
+                child => child.userData && child.userData.isWaterMesh
+              );
+              if (!waterMesh) {
+                console.log('Water mesh not found in scene, recreating water');
+                sceneRef.current.createWater();
+              }
+            }
           } catch (error) {
             // Silent fail
           }

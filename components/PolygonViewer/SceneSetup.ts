@@ -266,8 +266,8 @@ export default class SceneSetup {
       scene: this.scene,
       activeView: this.activeView,
       performanceMode: this.performanceMode,
-      width: 1000, // Increased from 800 to 1000 for better coverage
-      height: 1000 // Increased from 800 to 1000 for better coverage
+      width: 1200, // Increased from 1000 to 1200 for even better coverage
+      height: 1200 // Increased from 1000 to 1200 for even better coverage
     });
     
     // If we have land positions, set them for water interaction
@@ -275,9 +275,19 @@ export default class SceneSetup {
       this.water.setLandPositions(this.scene.userData.landPositions);
     }
     
-    // Force an initial update to make sure water is visible
+    // Force multiple initial updates to ensure water is properly initialized
     if (this.water) {
+      // Initial update
       this.water.update(0);
+      
+      // Schedule additional updates with delays to ensure proper initialization
+      setTimeout(() => {
+        if (this.water) this.water.update(10);
+      }, 100);
+      
+      setTimeout(() => {
+        if (this.water) this.water.update(20);
+      }, 500);
     }
     
     return this.water;
