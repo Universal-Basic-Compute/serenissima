@@ -21,6 +21,7 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
   const [isPlacing, setIsPlacing] = useState<boolean>(false);
   const [previewMesh, setPreviewMesh] = useState<THREE.Mesh | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [snapPoint, setSnapPoint] = useState<THREE.Vector3 | null>(null);
   const raycasterRef = useRef(new THREE.Raycaster());
   const mouseRef = useRef(new THREE.Vector2());
   const planeRef = useRef(new THREE.Plane(new THREE.Vector3(0, 1, 0), 0));
@@ -284,11 +285,147 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
     
     // If we found a valid intersection with a polygon
     if (validIntersection) {
-      // Use the intersection point instead of the ground plane
       const intersectionPoint = validIntersection.point;
       
+      // Check for snapping to polygon edges or existing roads
+      let snappedPoint = null;
+      const SNAP_THRESHOLD_WORLD = 0.5; // Distance in world units to snap
+      
+      // 1. Try to snap to polygon edges
+      const polygonMeshes = scene.children.filter(
+        child => child instanceof THREE.Mesh && 
+        !child.userData?.isRoad && 
+        Math.abs(child.position.y - 0.1) < 0.2
+      );
+      
+      let closestEdgePoint = null;
+      let minEdgeDistance = SNAP_THRESHOLD_WORLD;
+      
+      for (const mesh of polygonMeshes) {
+        if (!(mesh instanceof THREE.Mesh) || !mesh.geometry) continue;
+        
+        // Extract polygon vertices
+        const position = mesh.geometry.attributes.position;
+        const vertices = [];
+        
+        for (let i = 0; i < position.count; i++) {
+          vertices.push(new THREE.Vector3(
+            position.getX(i),
+            position.getY(i),
+            position.getZ(i)
+          ));
+        }
+        
+        // Convert to world coordinates
+        const worldVertices = vertices.map(v => {
+          const worldVertex = v.clone();
+          mesh.localToWorld(worldVertex);
+          return worldVertex;
+        });
+        
+        // Find closest point on edges
+        for (let i = 0; i < worldVertices.length; i++) {
+          const start = worldVertices[i];
+          const end = worldVertices[(i + 1) % worldVertices.length];
+          
+          // Find closest point on this edge segment
+          const edge = new THREE.Line3(start, end);
+          const closestPoint = new THREE.Vector3();
+          edge.closestPointToPoint(intersectionPoint, true, closestPoint);
+          
+          const distance = closestPoint.distanceTo(intersectionPoint);
+          
+          if (distance < minEdgeDistance) {
+            minEdgeDistance = distance;
+            closestEdgePoint = closestPoint;
+          }
+        }
+      }
+      
+      // 2. Try to snap to existing roads
+      const roadMeshes = scene.children.filter(
+        child => child instanceof THREE.Mesh && child.userData?.isRoad
+      );
+      
+      let closestRoadPoint = null;
+      let minRoadDistance = SNAP_THRESHOLD_WORLD;
+      
+      for (const mesh of roadMeshes) {
+        if (!(mesh instanceof THREE.Mesh) || !mesh.geometry) continue;
+        
+        // Extract road vertices
+        const position = mesh.geometry.attributes.position;
+        const vertices = [];
+        
+        for (let i = 0; i < position.count; i++) {
+          vertices.push(new THREE.Vector3(
+            position.getX(i),
+            position.getY(i),
+            position.getZ(i)
+          ));
+        }
+        
+        // Convert to world coordinates
+        const worldVertices = vertices.map(v => {
+          const worldVertex = v.clone();
+          mesh.localToWorld(worldVertex);
+          return worldVertex;
+        });
+        
+        // Find closest point on road segments
+        for (let i = 0; i < worldVertices.length - 1; i += 3) {
+          // Roads are triangles, so we need to check each edge of the triangle
+          const v1 = worldVertices[i];
+          const v2 = worldVertices[i + 1];
+          const v3 = worldVertices[i + 2];
+          
+          const edges = [
+            new THREE.Line3(v1, v2),
+            new THREE.Line3(v2, v3),
+            new THREE.Line3(v3, v1)
+          ];
+          
+          for (const edge of edges) {
+            const closestPoint = new THREE.Vector3();
+            edge.closestPointToPoint(intersectionPoint, true, closestPoint);
+            
+            const distance = closestPoint.distanceTo(intersectionPoint);
+            
+            if (distance < minRoadDistance) {
+              minRoadDistance = distance;
+              closestRoadPoint = closestPoint;
+            }
+          }
+        }
+      }
+      
+      // 3. Also try to snap to existing points in the current road
+      let closestExistingPoint = null;
+      let minExistingDistance = SNAP_THRESHOLD_WORLD;
+      
+      for (const point of points) {
+        const distance = point.distanceTo(intersectionPoint);
+        
+        if (distance < minExistingDistance) {
+          minExistingDistance = distance;
+          closestExistingPoint = point;
+        }
+      }
+      
+      // Choose the closest snap point among all options
+      if (closestEdgePoint && minEdgeDistance < minRoadDistance && minEdgeDistance < minExistingDistance) {
+        snappedPoint = closestEdgePoint;
+      } else if (closestRoadPoint && minRoadDistance < minExistingDistance) {
+        snappedPoint = closestRoadPoint;
+      } else if (closestExistingPoint) {
+        snappedPoint = closestExistingPoint;
+      }
+      
+      // Use the snapped point if available, otherwise use the intersection point
+      const finalPoint = snappedPoint || intersectionPoint;
+      
       // Create a temporary array with the current points plus the mouse position
-      const previewPoints = [...points, intersectionPoint];
+      const previewPoints = [...points, finalPoint];
       
       // Update the preview mesh if we have at least 2 points
       if (previewPoints.length >= 2) {

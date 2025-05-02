@@ -343,16 +343,19 @@ export default class RoadManager {
       return new THREE.LineCurve3(points[0], points[1]);
     }
     
-    // For Venice, we want straighter roads but allow some curvature control
-    // Scale the curvature value to a reasonable range
-    const tension = Math.max(0.05, curvature * 0.2); // Range from 0.05 to 0.2
-    
-    return new THREE.CatmullRomCurve3(
+    // For Venice, we want straighter roads with sharp corners for snapped points
+    // Use a very low tension value for straighter segments
+    const curve = new THREE.CatmullRomCurve3(
       points,
       false,
       'centripetal',
-      tension // Use the scaled tension value
+      0.1 // Very low tension value for straighter roads
     );
+    
+    // Set the curve type to ensure sharp corners at snapped points
+    curve.curveType = 'centripetal';
+    
+    return curve;
   }
 
   // Add method to force update road visibility
