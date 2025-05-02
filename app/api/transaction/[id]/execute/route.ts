@@ -323,7 +323,6 @@ function isAirtableFormulaError(error: any): boolean {
     console.error('Error updating user compute balances:', error);
     return false;
   }
-}
 
 export async function POST(
   request: Request,
