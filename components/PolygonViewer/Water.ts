@@ -91,7 +91,7 @@ export default class Water {
         waterColor: { value: new THREE.Color(this.getWaterColorForView()) },
         deepWaterColor: { value: new THREE.Color(this.getDeepWaterColorForView()) },
         resolution: { value: new THREE.Vector2(resolution, resolution) },
-        waveHeight: { value: 1.5 } // Increased from 0.8 to 1.5 for more visible waves
+        waveHeight: { value: 2.5 } // Increased from 1.5 to 2.5 for much more visible waves
       },
       vertexShader: `
         uniform float time;
@@ -103,17 +103,17 @@ export default class Water {
         float wave(vec2 position) {
           float result = 0.0;
           
-          // Large slow waves - increased amplitude
+          // Large slow waves - significantly increased amplitude
           result += sin(position.x * 0.5 + time * 0.5) * 
-                   cos(position.y * 0.4 + time * 0.3) * 0.8;
+                   cos(position.y * 0.4 + time * 0.3) * 1.2;
           
-          // Medium waves - increased amplitude
+          // Medium waves - significantly increased amplitude
           result += sin(position.x * 1.0 + time * 0.8) * 
-                   sin(position.y * 1.3 + time * 0.6) * 0.4;
+                   sin(position.y * 1.3 + time * 0.6) * 0.7;
           
-          // Small ripples - increased amplitude
+          // Small ripples - significantly increased amplitude
           result += sin(position.x * 2.5 + time * 1.5) * 
-                   sin(position.y * 2.8 + time * 1.7) * 0.2;
+                   sin(position.y * 2.8 + time * 1.7) * 0.4;
                    
           return result;
         }
@@ -144,14 +144,14 @@ export default class Water {
           float depthFactor = smoothstep(-0.5, 0.5, vElevation);
           vec3 color = mix(deepWaterColor, waterColor, depthFactor);
           
-          // Add foam at wave peaks - more visible foam
-          if (vElevation > 0.25) { // Lower threshold from 0.3 to 0.25
-            float foamFactor = smoothstep(0.25, 0.45, vElevation);
-            color = mix(color, vec3(1.0), foamFactor * 0.9); // Increased from 0.7 to 0.9
+          // Add foam at wave peaks - much more visible foam
+          if (vElevation > 0.2) { // Lower threshold from 0.25 to 0.2
+            float foamFactor = smoothstep(0.2, 0.4, vElevation);
+            color = mix(color, vec3(1.0), foamFactor * 1.0); // Increased from 0.9 to 1.0
           }
           
-          // Add subtle wave patterns - more pronounced
-          float pattern = sin(vUv.x * 100.0 + time) * sin(vUv.y * 100.0 + time * 0.7) * 0.05; // Increased from 0.03 to 0.05
+          // Add subtle wave patterns - much more pronounced
+          float pattern = sin(vUv.x * 100.0 + time) * sin(vUv.y * 100.0 + time * 0.7) * 0.08; // Increased from 0.05 to 0.08
           color += pattern * vec3(0.1, 0.1, 0.3);
           
           // Increase opacity for better visibility
@@ -172,14 +172,14 @@ export default class Water {
     // Create the water mesh
     this.waterMesh = new THREE.Mesh(this.waterGeometry, this.waterMaterial);
     
-    // Position water at y=-0.15 (slightly higher than before for better visibility)
-    this.waterMesh.position.y = -0.15;
+    // Position water at y=-0.05 (much higher than before for better visibility)
+    this.waterMesh.position.y = -0.05;
     
     // Rotate the water plane to be horizontal
     this.waterMesh.rotation.x = -Math.PI / 2;
     
     // Set render order to ensure water appears below land but above background
-    this.waterMesh.renderOrder = 5;
+    this.waterMesh.renderOrder = 8;
     
     // Add to scene
     this.scene.add(this.waterMesh);
@@ -406,44 +406,44 @@ export default class Water {
   private getWaterColorForView(): number {
     switch (this.activeView) {
       case 'transport':
-        return 0x00b3ff; // Brighter, more saturated blue for transport
+        return 0x1ac6ff; // Even brighter, more vibrant blue for transport
       case 'resources':
-        return 0x00e6c0; // Brighter, more saturated teal for resources
+        return 0x00ffcc; // Even brighter, more vibrant teal for resources
       case 'markets':
-        return 0x00a3e6; // Brighter, more saturated steel blue for markets
+        return 0x33ccff; // Even brighter, more vibrant steel blue for markets
       case 'governance':
-        return 0x7b68ee; // Brighter, more saturated slate blue for governance
+        return 0x8a7dff; // Even brighter, more vibrant slate blue for governance
       case 'land':
-        return 0x00c3ff; // Brighter, more saturated sea blue for land view
+        return 0x33ccff; // Even brighter, more vibrant sea blue for land view
       case 'buildings':
-        return 0x00b3ff; // Brighter, more saturated turquoise
+        return 0x33ccff; // Even brighter, more vibrant turquoise
       default:
-        return 0x00b3ff; // Brighter, more saturated turquoise
+        return 0x33ccff; // Even brighter, more vibrant turquoise
     }
   }
   
   private getDeepWaterColorForView(): number {
     switch (this.activeView) {
       case 'transport':
-        return 0x0077e6; // Deeper, more saturated blue for transport
+        return 0x0088ff; // Deeper, more vibrant blue for transport
       case 'resources':
-        return 0x008877; // Darker, more saturated teal for resources
+        return 0x00aa99; // Deeper, more vibrant teal for resources
       case 'markets':
-        return 0x0066a3; // Darker, more saturated steel blue for markets
+        return 0x0088cc; // Deeper, more vibrant steel blue for markets
       case 'governance':
-        return 0x5a4fcb; // Darker, more saturated slate blue for governance
+        return 0x6a5fdb; // Deeper, more vibrant slate blue for governance
       case 'land':
-        return 0x0077c2; // Deeper, more saturated sea blue for land view
+        return 0x0088dd; // Deeper, more vibrant sea blue for land view
       case 'buildings':
-        return 0x0077c2; // Deeper, more saturated blue
+        return 0x0088dd; // Deeper, more vibrant blue
       default:
-        return 0x0077c2; // Deeper, more saturated blue
+        return 0x0088dd; // Deeper, more vibrant blue
     }
   }
   
   public update(frameCount: number) {
     // Update time - increased speed for more visible animation
-    this.time += 0.05; // Increased from 0.03 to 0.05
+    this.time += 0.08; // Increased from 0.05 to 0.08 for faster animation
     
     // Get delta time for physics-based simulation
     const deltaTime = Math.min(0.05, this.clock.getDelta());

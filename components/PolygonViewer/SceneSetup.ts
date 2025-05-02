@@ -49,7 +49,7 @@ export default class SceneSetup {
     );
     
     // Position camera to better view the water
-    this.camera.position.set(0, 20, 40); // Lower height, further back for better water visibility
+    this.camera.position.set(0, 25, 45); // Higher and further back for better water visibility
     this.camera.lookAt(0, 0, 0);
     
     // Initialize renderer with settings to prevent z-fighting
@@ -266,8 +266,8 @@ export default class SceneSetup {
       scene: this.scene,
       activeView: this.activeView,
       performanceMode: this.performanceMode,
-      width: 1200, // Increased from 1000 to 1200 for even better coverage
-      height: 1200 // Increased from 1000 to 1200 for even better coverage
+      width: 1500, // Increased from 1200 to 1500 for much better coverage
+      height: 1500 // Increased from 1200 to 1500 for much better coverage
     });
     
     // If we have land positions, set them for water interaction

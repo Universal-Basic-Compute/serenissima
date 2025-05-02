@@ -712,10 +712,23 @@ export default function PolygonViewer() {
       if (sceneRef.current) {
         console.log('Creating advanced water simulation from PolygonViewer');
         const water = sceneRef.current.createWater();
-        
-        // Force an initial update to ensure water is visible
+      
+        // Force multiple initial updates to ensure water is visible
         if (water) {
           water.update(0);
+        
+          // Schedule additional updates with delays
+          setTimeout(() => {
+            if (water) water.update(10);
+          }, 100);
+        
+          setTimeout(() => {
+            if (water) water.update(20);
+          }, 300);
+        
+          setTimeout(() => {
+            if (water) water.update(30);
+          }, 600);
         }
       }
       
@@ -950,9 +963,9 @@ export default function PolygonViewer() {
           try {
             // Pass frameCount directly to water update for more varied animation
             sceneRef.current.water.update(frameCount);
-          
+        
             // Force water to be visible by ensuring its mesh is in the scene
-            if (frameCount % 60 === 0) { // Check every ~1 second
+            if (frameCount % 30 === 0) { // Check every ~0.5 seconds (more frequent)
               const waterMesh = sceneRef.current.scene.children.find(
                 child => child.userData && child.userData.isWaterMesh
               );
@@ -960,6 +973,11 @@ export default function PolygonViewer() {
                 console.log('Water mesh not found in scene, recreating water');
                 sceneRef.current.createWater();
               }
+            }
+          
+            // Force additional water updates for more dynamic movement
+            if (frameCount % 5 === 0) { // Every 5 frames
+              sceneRef.current.water.update(frameCount + 10); // Add offset for variation
             }
           } catch (error) {
             // Silent fail
