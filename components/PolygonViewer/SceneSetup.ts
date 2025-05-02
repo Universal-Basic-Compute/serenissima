@@ -305,16 +305,30 @@ export default class SceneSetup {
         object.visible = true;
         
         // Ensure high render order
-        object.renderOrder = 30;
+        object.renderOrder = 100; // Increased from 30 to 100
         
         // Update material
         if (object.material) {
           if (Array.isArray(object.material)) {
             object.material.forEach(mat => {
-              if (mat) mat.needsUpdate = true;
+              if (mat) {
+                mat.needsUpdate = true;
+                if (mat instanceof THREE.MeshBasicMaterial || mat instanceof THREE.MeshStandardMaterial) {
+                  mat.depthWrite = false;
+                  mat.polygonOffset = true;
+                  mat.polygonOffsetFactor = -10;
+                  mat.polygonOffsetUnits = -10;
+                }
+              }
             });
           } else {
             object.material.needsUpdate = true;
+            if (object.material instanceof THREE.MeshBasicMaterial || object.material instanceof THREE.MeshStandardMaterial) {
+              object.material.depthWrite = false;
+              object.material.polygonOffset = true;
+              object.material.polygonOffsetFactor = -10;
+              object.material.polygonOffsetUnits = -10;
+            }
           }
         }
       }
