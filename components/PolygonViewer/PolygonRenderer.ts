@@ -562,49 +562,8 @@ export default class PolygonRenderer {
 
   // Add this helper method to create a flat texture on the land for a polygon
   private createFlatTextureForPolygon(polygon: Polygon, texture: THREE.Texture) {
-    // Create a flat plane for the coat of arms
-    const planeSize = 4; // Size of the plane
-    const geometry = new THREE.PlaneGeometry(planeSize, planeSize);
-    
-    // Create material with the texture
-    const material = new THREE.MeshBasicMaterial({ 
-      map: texture,
-      transparent: true,
-      side: THREE.DoubleSide,
-      depthWrite: true
-    });
-    
-    // Create mesh
-    const plane = new THREE.Mesh(geometry, material);
-    
-    // Position at the centroid
-    if (polygon.centroid) {
-      const normalizedCoords = normalizeCoordinates(
-        [polygon.centroid],
-        this.bounds.centerLat,
-        this.bounds.centerLng,
-        this.bounds.scale,
-        this.bounds.latCorrectionFactor
-      )[0];
-          
-      // Position slightly above the land to avoid z-fighting
-      plane.position.set(normalizedCoords.x, 0.05, -normalizedCoords.y);
-      
-      console.log(`Added flat coat of arms for ${polygon.id} owned by ${polygon.owner} at position:`, 
-        normalizedCoords.x, 0.05, -normalizedCoords.y);
-    } else {
-      // Default position if no centroid
-      plane.position.set(0, 0.05, 0);
-      
-      console.log(`Added flat coat of arms for ${polygon.id} owned by ${polygon.owner} at default position`);
-    }
-    
-    // Rotate to lay flat on the ground (90 degrees around X axis)
-    plane.rotation.x = -Math.PI / 2;
-    
-    // Add to scene and store reference
-    this.scene.add(plane);
-    this.coatOfArmSprites[polygon.id] = plane;
+    console.log(`Flat texture creation disabled for polygon ${polygon.id}`);
+    // No textures are created to avoid geometry generation
   }
   
   // Add helper function to create a circular texture
@@ -715,69 +674,8 @@ export default class PolygonRenderer {
   
   // Add a new method to create a colored circle on the land
   private createColoredCircleOnLand(polygon: Polygon, color: string) {
-    // Create a canvas
-    const canvas = document.createElement('canvas');
-    const size = 256; // Larger canvas for better quality
-    canvas.width = size;
-    canvas.height = size;
-    
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    
-    // Draw a colored circle with border
-    ctx.beginPath();
-    ctx.arc(size/2, size/2, size/2 - 8, 0, Math.PI * 2);
-    ctx.fillStyle = color;
-    ctx.fill();
-    ctx.strokeStyle = '#FFFFFF';
-    ctx.lineWidth = 8;
-    ctx.stroke();
-    
-    // Create a texture from the canvas
-    const texture = new THREE.Texture(canvas);
-    texture.needsUpdate = true;
-    
-    // Create a flat plane for the colored circle - increase size for better visibility
-    const planeSize = 2.5; // Increased for better visibility
-    const geometry = new THREE.PlaneGeometry(planeSize, planeSize);
-    
-    // Create material with the texture
-    const material = new THREE.MeshBasicMaterial({ 
-      map: texture,
-      transparent: true,
-      side: THREE.DoubleSide,
-      depthWrite: true
-    });
-    
-    // Create mesh
-    const plane = new THREE.Mesh(geometry, material);
-    
-    // Position at the centroid
-    if (polygon.centroid) {
-      const normalizedCoords = normalizeCoordinates(
-        [polygon.centroid],
-        this.bounds.centerLat,
-        this.bounds.centerLng,
-        this.bounds.scale,
-        this.bounds.latCorrectionFactor
-      )[0];
-          
-      // Position higher above the land to avoid z-fighting
-      plane.position.set(normalizedCoords.x, 0.5, -normalizedCoords.y); // Increased height even more
-    } else {
-      // Default position if no centroid
-      plane.position.set(0, 0.5, 0);
-    }
-    
-    // Rotate to lay flat on the ground (90 degrees around X axis)
-    plane.rotation.x = -Math.PI / 2;
-    
-    // Set a very high renderOrder to ensure it's always on top
-    plane.renderOrder = 20;
-    
-    // Add to scene and store reference
-    this.scene.add(plane);
-    this.coatOfArmSprites[polygon.id] = plane;
+    console.log(`Colored circle creation disabled for polygon ${polygon.id}`);
+    // No colored circles are created to avoid geometry generation
   }
 
   // Add method to update polygon owner
@@ -898,68 +796,8 @@ export default class PolygonRenderer {
 
   // Add method to create shore effects for islands
   private createShoreEffects() {
-    if (this.performanceMode) return; // Skip in performance mode
-    
-    console.log('Creating shore effects for islands...');
-    
-    this.polygons.forEach(polygon => {
-      if (!polygon.coordinates || polygon.coordinates.length < 3) return;
-      
-      const normalizedCoords = normalizeCoordinates(
-        polygon.coordinates,
-        this.bounds.centerLat,
-        this.bounds.centerLng,
-        this.bounds.scale,
-        this.bounds.latCorrectionFactor
-      );
-      
-      // Create a slightly larger shape for the shore
-      const shoreShape = createPolygonShape(normalizedCoords);
-      
-      // Create a slightly larger extrusion for the shore
-      const shoreExtrudeSettings = {
-        steps: 1,
-        depth: 0.01,  // Very thin
-        bevelEnabled: true,
-        bevelThickness: 0.2,
-        bevelSize: 0.3,
-        bevelSegments: 3
-      };
-      
-      const shoreGeometry = new THREE.ExtrudeGeometry(shoreShape, shoreExtrudeSettings);
-      shoreGeometry.rotateX(-Math.PI / 2);
-      
-      // Create a gradient material for the shore
-      const shoreMaterial = new THREE.MeshStandardMaterial({
-        color: 0xf0e68c,  // Light sand color
-        roughness: 1.0,
-        metalness: 0.0,
-        transparent: true,
-        opacity: 0.7,
-        side: THREE.FrontSide
-      });
-      
-      // Load custom sand texture for the shore
-      this.textureLoader.load('/textures/sand.jpg', 
-        (texture) => {
-          texture.wrapS = THREE.RepeatWrapping;
-          texture.wrapT = THREE.RepeatWrapping;
-          texture.repeat.set(8, 8);  // More repetition for smaller detail
-          shoreMaterial.map = texture;
-          shoreMaterial.needsUpdate = true;
-          console.log('Shore sand texture loaded successfully');
-        },
-        undefined,
-        (error) => {
-          console.error('Error loading shore sand texture:', error);
-        }
-      );
-      
-      const shoreMesh = new THREE.Mesh(shoreGeometry, shoreMaterial);
-      shoreMesh.position.y = -0.05;  // Position slightly below the main land
-      
-      this.scene.add(shoreMesh);
-    });
+    console.log('Shore effects creation disabled');
+    // No shore effects are created to avoid geometry generation
   }
   
   public cleanup() {

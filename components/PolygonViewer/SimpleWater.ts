@@ -37,7 +37,8 @@ export default class SimpleWater {
   
   private createWater() {
     console.log('Simple water creation disabled');
-    // No water geometry generation
+    // No water is created to avoid geometry generation
+    this.waterMesh = null;
   }
   
   private getWaterColorForView(): number {

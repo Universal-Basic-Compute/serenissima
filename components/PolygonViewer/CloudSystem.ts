@@ -54,7 +54,8 @@ export default class CloudSystem {
 
   private createClouds() {
     console.log('Cloud creation disabled');
-    // No cloud geometry generation
+    // No clouds are created to avoid geometry generation
+    this.cloudParticles = [];
   }
 
   public update(time: number) {

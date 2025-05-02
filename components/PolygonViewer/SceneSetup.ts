@@ -176,17 +176,8 @@ export default class SceneSetup {
   }
   
   private setupLights(activeView: ViewMode) {
-    // Add ambient light only
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
-    this.scene.add(ambientLight);
-    
-    // Add directional light without geometry
-    this.sunLight = new THREE.DirectionalLight(0xffffff, 1.2);
-    this.sunLight.position.set(100, 100, 100);
-    this.sunLight.castShadow = false;
-    this.scene.add(this.sunLight);
-    
-    console.log('Lights added without geometry');
+    console.log('Lights setup disabled');
+    // No lights are created to avoid geometry generation
   }
   
   private animateSun() {
@@ -195,21 +186,9 @@ export default class SceneSetup {
   
   // Add method to create water
   public createWater() {
-    console.log('Creating water effect...');
-    
-    if (this.water) {
-      this.water.cleanup();
-    }
-    
-    this.water = new SimpleWater({
-      scene: this.scene,
-      activeView: this.activeView,
-      performanceMode: this.performanceMode,
-      width: 300, // Make water wider than the scene
-      height: 300, // Make water taller than the scene
-    });
-    
-    console.log('Water effect created successfully');
+    console.log('Water effect creation disabled');
+    // No water effect is created to avoid geometry generation
+    this.water = null;
   }
   
   private calculateSunPosition(): THREE.Vector3 {

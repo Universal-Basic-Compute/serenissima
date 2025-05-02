@@ -112,7 +112,7 @@ export default class WaterEffect {
   // Add method to create a sun reflection
   private createSunReflection() {
     console.log('Sun reflection creation disabled');
-    // No geometry generation
+    // No sun reflection is created to avoid geometry generation
   }
   
   // Add method for Gerstner waves
@@ -188,7 +188,7 @@ export default class WaterEffect {
   
   private initializeWater() {
     console.log('Water initialization disabled');
-    // No water geometry generation
+    // No water is initialized to avoid geometry generation
   }
   
   // Add a new method to create wave displacement
@@ -198,95 +198,13 @@ export default class WaterEffect {
   }
   
   private loadFoamTexture() {
-    if (!WaterEffect.foamTexture) {
-      WaterEffect.foamTexture = WaterEffect.textureLoader!.load(
-        'https://threejs.org/examples/textures/foam.jpg',
-        (texture) => {
-          texture.wrapS = THREE.RepeatWrapping;
-          texture.wrapT = THREE.RepeatWrapping;
-          texture.repeat.set(20, 20); // Reduced repeat for less visual noise
-          
-          // Create foam mesh with lower opacity
-          const foamGeometry = new THREE.PlaneGeometry(this.width * 1.5, this.height * 1.5);
-          const foamMaterial = new THREE.MeshBasicMaterial({
-            map: texture,
-            transparent: true,
-            opacity: 0.3, // Reduced opacity to minimize flickering
-            blending: THREE.AdditiveBlending,
-            depthWrite: false,
-            depthTest: true
-          });
-          
-          this.waterFoam = new THREE.Mesh(foamGeometry, foamMaterial);
-          this.waterFoam.rotation.x = -Math.PI / 2;
-          this.waterFoam.position.y = -0.25; // Position lower to avoid z-fighting
-          this.waterFoam.renderOrder = 1; // Same render order as water
-          this.scene.add(this.waterFoam);
-          this.foamTexture = texture;
-        }
-      );
-    } else {
-      // Use cached foam texture with lower opacity
-      const foamGeometry = new THREE.PlaneGeometry(this.width * 1.5, this.height * 1.5);
-      const foamMaterial = new THREE.MeshBasicMaterial({
-        map: WaterEffect.foamTexture,
-        transparent: true,
-        opacity: 0.3, // Reduced opacity
-        blending: THREE.AdditiveBlending,
-        depthWrite: false,
-        depthTest: true
-      });
-      
-      this.waterFoam = new THREE.Mesh(foamGeometry, foamMaterial);
-      this.waterFoam.rotation.x = -Math.PI / 2;
-      this.waterFoam.position.y = -0.25; // Position lower
-      this.waterFoam.renderOrder = 1; // Same render order as water
-      this.scene.add(this.waterFoam);
-      this.foamTexture = WaterEffect.foamTexture;
-    }
+    console.log('Foam texture loading disabled');
+    // No foam texture is loaded to avoid geometry generation
   }
   
   private loadCausticTextures() {
-    // Load caustic textures for underwater light effects
-    if (!WaterEffect.causticTextures) {
-      WaterEffect.causticTextures = [];
-      const causticCount = 16;
-      
-      for (let i = 0; i < causticCount; i++) {
-        const num = i < 10 ? `0${i}` : i;
-        const url = `https://threejs.org/examples/textures/caustics/caustics_${num}.jpg`;
-        
-        const texture = WaterEffect.textureLoader!.load(url);
-        texture.wrapS = THREE.RepeatWrapping;
-        texture.wrapT = THREE.RepeatWrapping;
-        WaterEffect.causticTextures.push(texture);
-      }
-      
-      this.causticTextures = WaterEffect.causticTextures;
-    } else {
-      this.causticTextures = WaterEffect.causticTextures;
-    }
-    
-    // Create caustic light with zero intensity (effectively disabled)
-    this.causticLight = new THREE.DirectionalLight(0xffffff, 0);
-    this.causticLight.position.set(0, 10, 0);
-    this.causticLight.lookAt(0, 0, 0);
-    this.scene.add(this.causticLight);
-    
-    // Create caustic projection mesh with zero opacity
-    const causticGeometry = new THREE.PlaneGeometry(this.width, this.height);
-    const causticMaterial = new THREE.MeshBasicMaterial({
-      map: this.causticTextures[0],
-      transparent: true,
-      opacity: 0, // Set to 0 to completely hide caustics
-      blending: THREE.NoBlending, // Change blending mode
-      depthWrite: false
-    });
-    
-    this.causticMesh = new THREE.Mesh(causticGeometry, causticMaterial);
-    this.causticMesh.rotation.x = -Math.PI / 2;
-    this.causticMesh.position.y = -0.25;
-    this.scene.add(this.causticMesh);
+    console.log('Caustic textures loading disabled');
+    // No caustic textures are loaded to avoid geometry generation
   }
   
   private getWaterColorForView(): number {
@@ -308,45 +226,20 @@ export default class WaterEffect {
   
   // Add method to create a more realistic water surface
   private createRealisticWaterSurface() {
-    if (!this.water || this.performanceMode) return;
-    
-    try {
-      // Add subtle height variation to water geometry for more realistic waves
-      const waterGeometry = this.water.geometry as THREE.PlaneGeometry;
-      const position = waterGeometry.attributes.position;
-      
-      for (let i = 0; i < position.count; i++) {
-        const x = position.getX(i);
-        const z = position.getZ(i);
-        
-        // Add very subtle height variation based on position
-        // This creates a gentle undulating effect
-        const height = 
-          Math.sin(x * 0.05) * 0.1 + 
-          Math.cos(z * 0.04) * 0.1 +
-          Math.sin(x * 0.03 + z * 0.02) * 0.05;
-        
-        position.setY(i, height);
-      }
-      
-      // Update geometry
-      position.needsUpdate = true;
-      waterGeometry.computeVertexNormals();
-    } catch (error) {
-      console.warn('Error creating realistic water surface:', error);
-    }
+    console.log('Realistic water surface creation disabled');
+    // No water surface is created to avoid geometry generation
   }
   
   // Add method to create water
   public createWater() {
     console.log('Water creation disabled');
-    // No water geometry generation
+    // No water is created to avoid geometry generation
   }
   
   // Add helper method to create a simple water plane
   private createSimpleWaterPlane() {
     console.log('Simple water plane creation disabled');
-    // No water geometry generation
+    // No water plane is created to avoid geometry generation
   }
   
   public update(frameCount: number, performanceMode: boolean) {
