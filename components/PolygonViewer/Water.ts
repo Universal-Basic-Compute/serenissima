@@ -84,38 +84,60 @@ export default class Water {
       resolution - 1
     );
     
-    // Create water shader material with improved visibility
+    // Create water shader material with advanced effects
     const waterShader = {
       uniforms: {
         time: { value: 0.0 },
         waterColor: { value: new THREE.Color(this.getWaterColorForView()) },
         deepWaterColor: { value: new THREE.Color(this.getDeepWaterColorForView()) },
         resolution: { value: new THREE.Vector2(resolution, resolution) },
-        waveHeight: { value: 2.5 } // Increased from 1.5 to 2.5 for much more visible waves
+        waveHeight: { value: 2.5 },
+        sunDirection: { value: new THREE.Vector3(0.5, 0.8, 0.2).normalize() },
+        sunColor: { value: new THREE.Color(0xffffff) }
       },
       vertexShader: `
         uniform float time;
         uniform float waveHeight;
         varying vec2 vUv;
         varying float vElevation;
+        varying vec3 vNormal;
+        varying vec3 vViewPosition;
         
-        // Procedural wave function
+        // Improved wave function with multiple frequencies
         float wave(vec2 position) {
           float result = 0.0;
           
-          // Large slow waves - significantly increased amplitude
+          // Large slow waves
           result += sin(position.x * 0.5 + time * 0.5) * 
                    cos(position.y * 0.4 + time * 0.3) * 1.2;
           
-          // Medium waves - significantly increased amplitude
+          // Medium waves with more variation
           result += sin(position.x * 1.0 + time * 0.8) * 
                    sin(position.y * 1.3 + time * 0.6) * 0.7;
           
-          // Small ripples - significantly increased amplitude
+          // Small ripples with higher frequency
           result += sin(position.x * 2.5 + time * 1.5) * 
                    sin(position.y * 2.8 + time * 1.7) * 0.4;
+          
+          // Micro detail ripples
+          result += sin(position.x * 5.0 + time * 2.5) * 
+                   sin(position.y * 5.5 + time * 2.2) * 0.2;
                    
           return result;
+        }
+        
+        // Function to calculate normal from heightmap
+        vec3 calculateNormal(vec2 pos) {
+          float eps = 0.1;
+          
+          float centerHeight = wave(pos);
+          float rightHeight = wave(pos + vec2(eps, 0.0));
+          float topHeight = wave(pos + vec2(0.0, eps));
+          
+          vec3 dx = vec3(eps, rightHeight - centerHeight, 0.0);
+          vec3 dy = vec3(0.0, topHeight - centerHeight, eps);
+          
+          return normalize(cross(dx, dy));
         }
         
         void main() {
@@ -126,29 +148,56 @@ export default class Water {
           float elevation = wave(position.xz);
           pos.y += elevation * waveHeight;
           
+          // Calculate normal for lighting
+          vNormal = calculateNormal(position.xz);
+          
           // Store elevation for fragment shader
           vElevation = elevation;
           
-          gl_Position = projectionMatrix * modelMatrix * viewMatrix * vec4(pos, 1.0);
+          // Calculate view position for reflections
+          vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
+          vViewPosition = -mvPosition.xyz;
+          
+          gl_Position = projectionMatrix * mvPosition;
         }
       `,
       fragmentShader: `
         uniform vec3 waterColor;
         uniform vec3 deepWaterColor;
         uniform float time;
+        uniform vec3 sunDirection;
+        uniform vec3 sunColor;
+        
         varying vec2 vUv;
         varying float vElevation;
+        varying vec3 vNormal;
+        varying vec3 vViewPosition;
+        
+        // Fresnel approximation
+        float fresnel(vec3 normal, vec3 viewDir, float power) {
+          return pow(1.0 - max(0.0, dot(normalize(normal), normalize(viewDir))), power);
+        }
         
         void main() {
           // Mix between deep and shallow water colors based on elevation
           float depthFactor = smoothstep(-0.5, 0.5, vElevation);
           vec3 color = mix(deepWaterColor, waterColor, depthFactor);
           
-          // Add foam at wave peaks - much more visible foam
-          if (vElevation > 0.2) { // Lower threshold from 0.25 to 0.2
+          // Add foam at wave peaks with smoother transition
+          if (vElevation > 0.2) {
             float foamFactor = smoothstep(0.2, 0.4, vElevation);
-            color = mix(color, vec3(1.0), foamFactor * 1.0); // Increased from 0.9 to 1.0
+            color = mix(color, vec3(1.0), foamFactor * 1.0);
           }
+          
+          // Add specular highlight (sun reflection)
+          vec3 viewDir = normalize(vViewPosition);
+          vec3 reflectDir = reflect(-sunDirection, vNormal);
+          float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0);
+          vec3 specular = sunColor * spec * 0.5;
+          
+          // Add fresnel effect (more reflective at glancing angles)
+          float fresnelFactor = fresnel(vNormal, viewDir, 5.0);
+          color = mix(color, vec3(1.0), fresnelFactor * 0.3);
           
           // Add central light ray effect
           float centerDist = abs(vUv.x - 0.5);
@@ -157,15 +206,22 @@ export default class Water {
           // Add horizontal striations
           float striation = sin(vUv.y * 200.0 + time * 0.3) * 0.04;
           
-          // Add subtle wave patterns - much more pronounced
-          float pattern = sin(vUv.x * 100.0 + time) * sin(vUv.y * 100.0 + time * 0.7) * 0.08; // Increased from 0.05 to 0.08
+          // Add subtle wave patterns with more variation
+          float pattern = sin(vUv.x * 100.0 + time) * sin(vUv.y * 100.0 + time * 0.7) * 0.08;
+          pattern += sin(vUv.x * 50.0 - time * 0.5) * sin(vUv.y * 50.0 + time * 0.3) * 0.04;
           
           // Combine all effects
           color += pattern * vec3(0.1, 0.1, 0.3);
           color += lightRay * vec3(0.7, 0.8, 1.0);
           color += striation * vec3(0.5, 0.7, 1.0);
+          color += specular;
           
-          // Increase opacity for better visibility
+          // Add subtle caustics effect
+          float causticPattern = 
+            sin(vUv.x * 40.0 + time * 2.0) * 
+            sin(vUv.y * 40.0 + time * 1.7) * 0.05;
+          color += max(0.0, causticPattern) * vec3(0.3, 0.6, 1.0);
+          
           gl_FragColor = vec4(color, 1.0);
         }
       `
