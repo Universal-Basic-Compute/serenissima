@@ -760,7 +760,7 @@ export default function PolygonViewer() {
       }, 500);
       
       // Add error handling for WebGL context loss using the function defined outside
-      canvasRef.current.addEventListener('webglcontextlost', handleContextLost);
+      canvasRef.current.addEventListener('webglcontextlost', handleContextLost as unknown as EventListener);
     
       // Add custom event listeners for polygon changes to update water effects
       window.addEventListener('polygonAdded', handlePolygonAdded);
@@ -1062,7 +1062,7 @@ export default function PolygonViewer() {
       
       // Remove event listeners
       if (canvasRef.current) {
-        canvasRef.current.removeEventListener('webglcontextlost', handleContextLost);
+        canvasRef.current.removeEventListener('webglcontextlost', handleContextLost as unknown as EventListener);
       }
       window.removeEventListener('polygonAdded', handlePolygonAdded);
       window.removeEventListener('polygonDeleted', handlePolygonDeleted);
@@ -1135,7 +1135,7 @@ export default function PolygonViewer() {
       }
       
       // Force a render
-      if (sceneRef.current && sceneRef.current.scene.userData.forceRender) {
+      if (sceneRef.current && sceneRef.current.scene && sceneRef.current.scene.userData && sceneRef.current.scene.userData.forceRender) {
         sceneRef.current.scene.userData.forceRender();
       }
     }

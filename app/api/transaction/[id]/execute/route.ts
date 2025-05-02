@@ -202,9 +202,6 @@ function isAirtableFormulaError(error: any): boolean {
          errorStr.includes('Invalid formula') ||
          errorStr.includes('OR');
 }
-
-// Function to update user compute balances
-async function updateUserComputeBalances(seller: string, buyer: string, amount: number) {
   try {
     console.log(`Updating compute balances: ${seller} +${amount}, ${buyer} -${amount}`);
     
@@ -592,10 +589,37 @@ export async function POST(
     if (transaction.type === 'land' && transaction.asset_id) {
       console.log(`Updating land ownership for asset ${transaction.asset_id}`);
               
-      // We already have the username from earlier, no need to fetch again
-      // ALWAYS use the username if available, otherwise fall back to wallet address
-      // This ensures consistency in ownership attribution
-      console.log(`Setting land owner to ${ownerToSet} (username: ${buyerUsername}, wallet: ${buyer})`);
+      // Get the username for the buyer's wallet address with retry logic
+      let buyerUsername = null;
+      let retryCount = 0;
+      const maxRetries = 3;
+        
+      while (retryCount < maxRetries && buyerUsername === null) {
+        try {
+          console.log(`Attempt ${retryCount + 1} to get username for wallet ${buyer}`);
+          buyerUsername = await getUsernameFromWallet(buyer);
+          if (buyerUsername) {
+            console.log(`Successfully retrieved username: ${buyerUsername} for wallet ${buyer}`);
+          } else {
+            console.warn(`No username found for wallet ${buyer} on attempt ${retryCount + 1}`);
+          }
+        } catch (error) {
+          console.error(`Error getting username on attempt ${retryCount + 1}:`, error);
+        }
+          
+        if (buyerUsername === null && retryCount < maxRetries - 1) {
+          // Wait with exponential backoff before retrying
+          const delay = Math.pow(2, retryCount) * 1000;
+          console.log(`Waiting ${delay}ms before retry ${retryCount + 2}`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+        }
+          
+        retryCount++;
+      }
+        
+      // Use the username if available, otherwise fall back to wallet address
+      const ownerToSet = buyerUsername || buyer;
+      console.log(`Setting land owner to: ${ownerToSet} (username: ${buyerUsername}, wallet: ${buyer})`);
               
       // Try multiple possible file paths for the land data
       const possiblePaths = [

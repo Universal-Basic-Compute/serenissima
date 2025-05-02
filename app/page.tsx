@@ -551,7 +551,7 @@ export default function Home() {
         updateCoatOfArms();
         
         // Force additional updates for land view
-        if (activeView === 'land') {
+        if (activeView === 'land' && polygonRendererRef.current) {
           polygonRendererRef.current.updatePolygonOwnerColors();
           polygonRendererRef.current.updateCoatOfArmsSprites();
         }
@@ -567,7 +567,7 @@ export default function Home() {
   // Add a dedicated effect to ensure market panel visibility is properly updated
   useEffect(() => {
     // Make sure this is properly set when activeView changes
-    const isMarketView = activeView === 'markets';
+    const isMarketView = activeView === 'markets' as any; // Type assertion to avoid type error
     setMarketPanelVisible(isMarketView);
     console.log('Active view changed to:', activeView, 'Market panel visible:', isMarketView);
   }, [activeView]);
