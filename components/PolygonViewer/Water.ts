@@ -91,7 +91,7 @@ export default class Water {
         waterColor: { value: new THREE.Color(this.getWaterColorForView()) },
         deepWaterColor: { value: new THREE.Color(this.getDeepWaterColorForView()) },
         resolution: { value: new THREE.Vector2(resolution, resolution) },
-        waveHeight: { value: 3.5 }, // Increased from 2.5 to 3.5
+        waveHeight: { value: 4.5 }, // Increased from 3.5 to 4.5 for more dramatic waves
         sunDirection: { value: new THREE.Vector3(0.5, 0.8, 0.2).normalize() },
         sunColor: { value: new THREE.Color(0xffffff) }
       },
@@ -109,19 +109,19 @@ export default class Water {
           
           // Large primary waves with increased amplitude
           result += sin(position.x * 0.3 + time * 0.4) * 
-                   cos(position.y * 0.2 + time * 0.3) * 1.8;
+                   cos(position.y * 0.2 + time * 0.3) * 2.2; // Increased from 1.8 to 2.2
           
           // Medium waves with more variation and higher amplitude
           result += sin(position.x * 0.8 + time * 0.7) * 
-                   sin(position.y * 0.9 + time * 0.6) * 1.0;
+                   sin(position.y * 0.9 + time * 0.6) * 1.3; // Increased from 1.0 to 1.3
           
           // Small ripples with increased detail
           result += sin(position.x * 2.0 + time * 1.2) * 
-                   sin(position.y * 2.2 + time * 1.4) * 0.6;
+                   sin(position.y * 2.2 + time * 1.4) * 0.8; // Increased from 0.6 to 0.8
           
           // Micro detail with higher frequency
           result += sin(position.x * 4.0 + time * 2.0) * 
-                   sin(position.y * 4.5 + time * 1.8) * 0.3;
+                   sin(position.y * 4.5 + time * 1.8) * 0.4; // Increased from 0.3 to 0.4
                    
           return result;
         }
@@ -186,42 +186,42 @@ export default class Water {
           // Add more pronounced foam at wave peaks
           if (vElevation > 0.15) {
             float foamFactor = smoothstep(0.15, 0.4, vElevation);
-            color = mix(color, vec3(1.0), foamFactor * 1.2);
+            color = mix(color, vec3(1.0), foamFactor * 1.5); // Increased from 1.2 to 1.5
           }
           
           // Enhanced specular highlight
           vec3 viewDir = normalize(vViewPosition);
           vec3 reflectDir = reflect(-sunDirection, vNormal);
-          float spec = pow(max(dot(viewDir, reflectDir), 0.0), 64.0); // Increased from 32 to 64
-          vec3 specular = sunColor * spec * 0.8; // Increased from 0.5 to 0.8
+          float spec = pow(max(dot(viewDir, reflectDir), 0.0), 80.0); // Increased from 64 to 80
+          vec3 specular = sunColor * spec * 1.0; // Increased from 0.8 to 1.0
           
           // More pronounced fresnel effect
-          float fresnelFactor = fresnel(vNormal, viewDir, 4.0);
-          color = mix(color, vec3(0.9, 0.95, 1.0), fresnelFactor * 0.4);
+          float fresnelFactor = fresnel(vNormal, viewDir, 3.5); // Decreased from 4.0 to 3.5 for stronger effect
+          color = mix(color, vec3(0.9, 0.95, 1.0), fresnelFactor * 0.5); // Increased from 0.4 to 0.5
           
           // Add more visible light ray effect
           float centerDist = abs(vUv.x - 0.5);
-          float lightRay = pow(1.0 - centerDist, 8.0) * 0.4; // Increased from 0.3 to 0.4
+          float lightRay = pow(1.0 - centerDist, 7.0) * 0.5; // Adjusted from 8.0/0.4 to 7.0/0.5
           
           // Add more pronounced horizontal striations
-          float striation = sin(vUv.y * 150.0 + time * 0.3) * 0.06; // Increased from 0.04 to 0.06
+          float striation = sin(vUv.y * 150.0 + time * 0.3) * 0.08; // Increased from 0.06 to 0.08
           
           // Add more visible wave patterns
-          float pattern = sin(vUv.x * 80.0 + time * 0.6) * sin(vUv.y * 80.0 + time * 0.4) * 0.15;
-          pattern += sin(vUv.x * 40.0 - time * 0.4) * sin(vUv.y * 40.0 + time * 0.3) * 0.08;
+          float pattern = sin(vUv.x * 80.0 + time * 0.6) * sin(vUv.y * 80.0 + time * 0.4) * 0.2; // Increased from 0.15 to 0.2
+          pattern += sin(vUv.x * 40.0 - time * 0.4) * sin(vUv.y * 40.0 + time * 0.3) * 0.1; // Increased from 0.08 to 0.1
           
           // Add more visible caustics effect
           float causticPattern = 
             sin(vUv.x * 30.0 + time * 2.5) * 
-            sin(vUv.y * 30.0 + time * 2.0) * 0.08;
+            sin(vUv.y * 30.0 + time * 2.0) * 0.12; // Increased from 0.08 to 0.12
           causticPattern = max(0.0, causticPattern);
           
           // Combine all effects with increased intensity
-          color += pattern * vec3(0.3, 0.3, 0.5);
+          color += pattern * vec3(0.4, 0.4, 0.6); // Increased from 0.3/0.3/0.5 to 0.4/0.4/0.6
           color += lightRay * vec3(0.8, 0.9, 1.0);
           color += striation * vec3(0.6, 0.8, 1.0);
           color += specular;
-          color += causticPattern * vec3(0.4, 0.7, 1.0);
+          color += causticPattern * vec3(0.5, 0.8, 1.0); // Increased from 0.4/0.7/1.0 to 0.5/0.8/1.0
           
           gl_FragColor = vec4(color, 0.95); // Slightly increased opacity
         }
