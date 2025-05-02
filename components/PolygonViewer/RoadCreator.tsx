@@ -157,11 +157,19 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
       }
     };
 
+    // Add this function to stop event propagation for all clicks
+    const preventLandSelection = (event: MouseEvent) => {
+      // Stop propagation to prevent the click from reaching the polygon interaction handler
+      event.stopPropagation();
+    };
+
     // Add event listeners
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('click', handleClick);
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('contextmenu', handleRightClick);
+    // Add this event listener to capture clicks before they reach other handlers
+    window.addEventListener('click', preventLandSelection, true); // true for capture phase
 
     return () => {
       // Remove event listeners
@@ -169,6 +177,7 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
       window.removeEventListener('click', handleClick);
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('contextmenu', handleRightClick);
+      window.removeEventListener('click', preventLandSelection, true); // true for capture phase
     };
   }, [active, camera, points, scene, onComplete, onCancel, previewMesh]);
 

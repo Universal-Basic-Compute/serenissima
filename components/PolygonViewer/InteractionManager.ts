@@ -30,6 +30,7 @@ export default class InteractionManager {
   private mouseDownPosition = { x: 0, y: 0 };
   private hoveredPolygonId: string | null;
   private setHoveredPolygonId: (id: string | null) => void;
+  private enabled: boolean = true;
 
   constructor({
     camera,
@@ -79,11 +80,17 @@ export default class InteractionManager {
   }
   
   private onMouseDown(event: MouseEvent) {
+    // Skip if disabled
+    if (!this.enabled) return;
+    
     this.mouseDownPosition = { x: event.clientX, y: event.clientY };
     this.isDragging = false;
   }
   
   private onMouseMove(event: MouseEvent) {
+    // Skip if disabled
+    if (!this.enabled) return;
+    
     // If mouse is down and has moved more than a few pixels, consider it a drag
     if (event.buttons > 0) {
       const dx = Math.abs(event.clientX - this.mouseDownPosition.x);
@@ -143,6 +150,9 @@ export default class InteractionManager {
   }
   
   private onMouseClick(event: MouseEvent) {
+    // Skip if disabled
+    if (!this.enabled) return;
+    
     // Prevent processing if already handling a click
     if (this.isProcessingClick) return;
     
@@ -222,6 +232,10 @@ export default class InteractionManager {
   
   public updateViewMode(activeView: ViewMode) {
     this.activeView = activeView;
+  }
+  
+  public setEnabled(enabled: boolean) {
+    this.enabled = enabled;
   }
   
   public cleanup() {
