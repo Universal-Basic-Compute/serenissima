@@ -23,12 +23,7 @@ export default class Water {
   private waterGeometry: THREE.PlaneGeometry | null = null;
   private waterMaterial: THREE.ShaderMaterial | null = null;
   
-  // Particle system for water effects
-  private particleSystem: THREE.Points | null = null;
-  private particleGeometry: THREE.BufferGeometry | null = null;
-  private particleMaterial: THREE.PointsMaterial | null = null;
-  private particlePositions: Float32Array | null = null;
-  private particleVelocities: Float32Array | null = null;
+  // Water simulation properties only
   
   // Wave simulation
   private waveGrid: Float32Array | null = null;
@@ -62,9 +57,6 @@ export default class Water {
     
     // Create the water surface with shader-based waves
     this.createWaterSurface();
-    
-    // Create particle system for water effects
-    this.createParticleSystem();
     
     // Initialize wave simulation
     this.initializeWaveSimulation();
@@ -185,59 +177,7 @@ export default class Water {
     console.log('Water surface created successfully');
   }
   
-  private createParticleSystem() {
-    // Determine particle count based on performance mode - reduce count
-    const particleCount = this.performanceMode ? 2000 : 5000; // Reduced from 5000/15000
-    
-    // Create particle geometry
-    this.particleGeometry = new THREE.BufferGeometry();
-    
-    // Create particle positions and velocities
-    this.particlePositions = new Float32Array(particleCount * 3);
-    this.particleVelocities = new Float32Array(particleCount * 3);
-    
-    // Initialize particles with random positions within water bounds
-    for (let i = 0; i < particleCount; i++) {
-      const i3 = i * 3;
-      
-      // Random position within water bounds
-      this.particlePositions[i3] = (Math.random() - 0.5) * this.width;
-      this.particlePositions[i3 + 1] = Math.random() * 0.2; // Height between 0 and 0.2 (reduced from 0.5)
-      this.particlePositions[i3 + 2] = (Math.random() - 0.5) * this.height;
-      
-      // Random velocity
-      this.particleVelocities[i3] = (Math.random() - 0.5) * 0.01; // Reduced from 0.02
-      this.particleVelocities[i3 + 1] = Math.random() * 0.005; // Reduced from 0.01
-      this.particleVelocities[i3 + 2] = (Math.random() - 0.5) * 0.01; // Reduced from 0.02
-    }
-    
-    // Add positions to geometry
-    this.particleGeometry.setAttribute(
-      'position', 
-      new THREE.BufferAttribute(this.particlePositions, 3)
-    );
-    
-    // Create particle material with reduced size and opacity
-    this.particleMaterial = new THREE.PointsMaterial({
-      color: this.getWaterColorForView(),
-      size: this.performanceMode ? 0.1 : 0.08, // Reduced from 0.2/0.15
-      transparent: true,
-      opacity: 0.4, // Reduced from 0.6
-      blending: THREE.AdditiveBlending,
-      depthWrite: false
-    });
-    
-    // Create particle system
-    this.particleSystem = new THREE.Points(this.particleGeometry, this.particleMaterial);
-    
-    // Position particle system at water level
-    this.particleSystem.position.y = -0.05; // Slightly below water surface
-    
-    // Add to scene
-    this.scene.add(this.particleSystem);
-    
-    console.log('Water particle system created successfully');
-  }
+  // Particle system removed to focus only on wave simulation
   
   private initializeWaveSimulation() {
     // Determine grid size based on performance mode
@@ -393,57 +333,7 @@ export default class Water {
     }
   }
   
-  private updateParticles(deltaTime: number) {
-    if (!this.particlePositions || !this.particleVelocities || !this.particleGeometry) return;
-    
-    const particleCount = this.particlePositions.length / 3;
-    const halfWidth = this.width / 2;
-    const halfHeight = this.height / 2;
-    
-    // Update each particle
-    for (let i = 0; i < particleCount; i++) {
-      const i3 = i * 3;
-      
-      // Update position based on velocity
-      this.particlePositions[i3] += this.particleVelocities[i3] * deltaTime * 60;
-      this.particlePositions[i3 + 1] += this.particleVelocities[i3 + 1] * deltaTime * 60;
-      this.particlePositions[i3 + 2] += this.particleVelocities[i3 + 2] * deltaTime * 60;
-      
-      // Add some wave motion
-      this.particlePositions[i3 + 1] += 
-        Math.sin(this.time + this.particlePositions[i3] * 0.1) * 0.002 +
-        Math.cos(this.time + this.particlePositions[i3 + 2] * 0.1) * 0.002;
-      
-      // Boundary checks
-      if (this.particlePositions[i3] < -halfWidth) {
-        this.particlePositions[i3] = halfWidth;
-      } else if (this.particlePositions[i3] > halfWidth) {
-        this.particlePositions[i3] = -halfWidth;
-      }
-      
-      if (this.particlePositions[i3 + 2] < -halfHeight) {
-        this.particlePositions[i3 + 2] = halfHeight;
-      } else if (this.particlePositions[i3 + 2] > halfHeight) {
-        this.particlePositions[i3 + 2] = -halfHeight;
-      }
-      
-      // Keep particles near the surface
-      if (this.particlePositions[i3 + 1] < 0) {
-        this.particlePositions[i3 + 1] = Math.random() * 0.5;
-      } else if (this.particlePositions[i3 + 1] > 0.5) {
-        this.particlePositions[i3 + 1] = 0;
-      }
-      
-      // Occasionally change velocity
-      if (Math.random() < 0.01) {
-        this.particleVelocities[i3] = (Math.random() - 0.5) * 0.02;
-        this.particleVelocities[i3 + 2] = (Math.random() - 0.5) * 0.02;
-      }
-    }
-    
-    // Update particle geometry
-    this.particleGeometry.attributes.position.needsUpdate = true;
-  }
+  // Particle update method removed
   
   private applyWavesToGeometry() {
     if (!this.waterGeometry || !this.waveGrid) return;
@@ -555,9 +445,6 @@ export default class Water {
     
     // Apply waves to geometry
     this.applyWavesToGeometry();
-    
-    // Update particles
-    this.updateParticles(deltaTime);
   }
   
   public updateViewMode(activeView: ViewMode) {
@@ -603,28 +490,10 @@ export default class Water {
       }
     }
     
-    // Remove particle system
-    if (this.particleSystem) {
-      this.scene.remove(this.particleSystem);
-      
-      if (this.particleGeometry) {
-        this.particleGeometry.dispose();
-      }
-      
-      if (this.particleMaterial) {
-        this.particleMaterial.dispose();
-      }
-    }
-    
     // Clear references
     this.waterMesh = null;
     this.waterGeometry = null;
     this.waterMaterial = null;
-    this.particleSystem = null;
-    this.particleGeometry = null;
-    this.particleMaterial = null;
-    this.particlePositions = null;
-    this.particleVelocities = null;
     this.waveGrid = null;
     this.prevWaveGrid = null;
     this.waveVelocity = null;
