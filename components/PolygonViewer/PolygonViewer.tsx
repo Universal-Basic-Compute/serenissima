@@ -966,9 +966,35 @@ export default function PolygonViewer() {
           }
         }
       
-        // Update road visibility periodically to ensure roads are always visible
-        if (roadManagerRef.current && frameCount % 30 === 0) {
+        // Update road visibility EVERY frame instead of periodically
+        if (roadManagerRef.current) {
           roadManagerRef.current.updateRoadVisibility();
+        }
+        
+        // Force update of all road meshes in the scene
+        if (sceneRef.current && sceneRef.current.scene) {
+          sceneRef.current.scene.traverse((object) => {
+            if (object instanceof THREE.Mesh && 
+                object.userData && 
+                (object.userData.isRoad || object.userData.alwaysVisible)) {
+              // Force visibility
+              object.visible = true;
+              
+              // Ensure high render order
+              object.renderOrder = 30;
+              
+              // Update material
+              if (object.material) {
+                if (Array.isArray(object.material)) {
+                  object.material.forEach(mat => {
+                    if (mat) mat.needsUpdate = true;
+                  });
+                } else {
+                  object.material.needsUpdate = true;
+                }
+              }
+            }
+          });
         }
       
         // Update polygon LOD and selection state - less frequently for distant objects

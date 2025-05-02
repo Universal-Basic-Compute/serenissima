@@ -405,6 +405,9 @@ export default class SceneSetup {
       this.sunLight.position.copy(newPosition);
     }
     
+    // Ensure roads are always visible
+    this.ensureRoadsVisible();
+    
     // Make sure roads are properly lit
     this.scene.traverse((object) => {
       if (object instanceof THREE.Mesh && 

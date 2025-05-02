@@ -217,15 +217,22 @@ export default class RoadManager {
       side: THREE.DoubleSide,
       depthWrite: false, // Keep this to prevent z-fighting
       depthTest: true,   // Make sure depth testing is enabled
-      transparent: false // Disable transparency for better visibility
+      transparent: false, // Disable transparency for better visibility
+      polygonOffset: true, // Add polygon offset to prevent z-fighting
+      polygonOffsetFactor: -4, // Use a negative value to push roads above terrain
+      polygonOffsetUnits: -4
     });
     
     // Create road mesh
     const road = new THREE.Mesh(roadGeometry, roadMaterial);
-    road.renderOrder = 25; // Increased from 20 to 25 to ensure roads appear above other elements
+    road.renderOrder = 30; // Increased from 25 to 30 for even higher priority
     
     // Mark as road for special handling
     road.userData.isRoad = true;
+    road.userData.alwaysVisible = true; // Add this flag for special handling
+    
+    // Force the mesh to be visible
+    road.visible = true;
     
     return road;
   }
@@ -250,22 +257,35 @@ export default class RoadManager {
   public updateRoadVisibility(): void {
     this.roads.forEach(road => {
       if (road.mesh) {
-        // Ensure the material is properly configured
-        if (road.mesh.material instanceof THREE.MeshStandardMaterial) {
-          road.mesh.material.needsUpdate = true;
-        } else if (Array.isArray(road.mesh.material)) {
-          road.mesh.material.forEach(mat => {
-            if (mat instanceof THREE.MeshStandardMaterial) {
-              mat.needsUpdate = true;
-            }
-          });
-        }
-        
         // Force the mesh to be visible
         road.mesh.visible = true;
         
         // Ensure high render order
-        road.mesh.renderOrder = 25;
+        road.mesh.renderOrder = 30;
+        
+        // Ensure the material is properly configured
+        if (road.mesh.material instanceof THREE.MeshStandardMaterial) {
+          road.mesh.material.needsUpdate = true;
+          road.mesh.material.depthWrite = false;
+          road.mesh.material.polygonOffset = true;
+          road.mesh.material.polygonOffsetFactor = -4;
+          road.mesh.material.polygonOffsetUnits = -4;
+        } else if (Array.isArray(road.mesh.material)) {
+          road.mesh.material.forEach(mat => {
+            if (mat instanceof THREE.MeshStandardMaterial) {
+              mat.needsUpdate = true;
+              mat.depthWrite = false;
+              mat.polygonOffset = true;
+              mat.polygonOffsetFactor = -4;
+              mat.polygonOffsetUnits = -4;
+            }
+          });
+        }
+        
+        // Force geometry update
+        if (road.mesh.geometry) {
+          road.mesh.geometry.attributes.position.needsUpdate = true;
+        }
       }
     });
   }
