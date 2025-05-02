@@ -10,7 +10,7 @@
     "fullDescription": "The political heart of Venice, the Doge's Palace (Palazzo Ducale) houses the Republic's key governmental institutions. Featuring the Great Council chamber, Senate hall, Doge's apartments, judicial facilities, and administrative offices, this architectural masterpiece combines practical governance with symbolic authority. Its distinctive design represents Venice's unique political identity, balancing power between the Doge, aristocracy, and complex council system.",
     "flavorText": "These walls have witnessed a thousand years of decisions that shaped Venice and beyond—for while emperors may command with swords, the true art of governance is found in these chambers where words, votes, and laws determine the fate of nations.",
     "constructionCosts": {
-      "ducats": 50000,
+      "ducats": 50000000,
       "timber": 500,
       "bricks": 1000,
       "stone": 2000,
@@ -18,7 +18,7 @@
       "marble": 500,
       "gold": 100
     },
-    "maintenanceCost": 250,
+    "maintenanceCost": 250000,
     "constructionTime": 7776000000,
     "incomeGeneration": 0,
     "employmentCapacity": 200,
@@ -87,7 +87,7 @@
     "fullDescription": "The spiritual center of Venice, St. Mark's Basilica (Basilica di San Marco) serves as both religious cathedral and state church. Featuring Byzantine-influenced architecture, spectacular golden mosaics, the famous quadriga horses, and St. Mark's relics, this magnificent structure blends Eastern and Western traditions. As the Doge's personal chapel and venue for state ceremonies, it represents the fusion of religious and political authority in Venetian governance.",
     "flavorText": "Gold above, marble below, and centuries of prayer in between—this basilica stands not merely as a church, but as Venice's spiritual foundation and the treasure house of her most sacred relics and memories.",
     "constructionCosts": {
-      "ducats": 60000,
+      "ducats": 60000000,
       "timber": 400,
       "bricks": 1000,
       "stone": 2000,
@@ -95,9 +95,9 @@
       "marble": 800,
       "gold": 200
     },
-    "maintenanceCost": 200,
+    "maintenanceCost": 200000,
     "constructionTime": 10368000000,
-    "incomeGeneration": 50,
+    "incomeGeneration": 50000,
     "employmentCapacity": 60,
     "locationRequirements": {
       "districtRestrictions": "San Marco district only, adjacent to Doge's Palace",
@@ -164,15 +164,15 @@
     "fullDescription": "The commercial artery connecting Venice's governmental and financial centers, the Rialto Bridge spans the Grand Canal at its narrowest point. Featuring a single bold stone arch, rows of shops on either side of the central pathway, and distinctive architectural details, this engineering marvel combines practical transportation with commercial opportunity. As a symbol of Venice's commercial prowess and engineering skill, it remains one of the city's most recognizable landmarks.",
     "flavorText": "Some bridges merely connect two shores, but the Rialto connects commerce with governance, tradition with innovation, and engineering with art—all in a single, perfect arch that seems to defy gravity while defining Venice.",
     "constructionCosts": {
-      "ducats": 35000,
+      "ducats": 35000000,
       "timber": 300,
       "bricks": 500,
       "stone": 1500,
       "marble": 200
     },
-    "maintenanceCost": 150,
+    "maintenanceCost": 150000,
     "constructionTime": 5184000000,
-    "incomeGeneration": 150,
+    "incomeGeneration": 150000,
     "employmentCapacity": 30,
     "locationRequirements": {
       "districtRestrictions": "Grand Canal at narrowest point between San Marco and Rialto",
@@ -239,14 +239,14 @@
     "fullDescription": "Regulating Venetian life through public timekeeping, the Clock Tower (Torre dell'Orologio) combines practical function with astronomical artistry. Featuring an ornate blue and gold clockface, zodiac indicators, automated figures striking the hours, and a bell at the top, this sophisticated mechanism represented cutting-edge Renaissance technology. Its prominent position overlooking St. Mark's Square symbolized Venice's orderly governance and scientific advancement.",
     "flavorText": "How better to demonstrate the Republic's mastery over commerce than to measure and display time itself—for in Venice, even the hours are counted, regulated, and transformed into the rhythm of prosperity.",
     "constructionCosts": {
-      "ducats": 20000,
+      "ducats": 20000000,
       "timber": 100,
       "bricks": 300,
       "stone": 500,
       "iron": 200,
       "gold": 50
     },
-    "maintenanceCost": 75,
+    "maintenanceCost": 75000,
     "constructionTime": 3456000000,
     "incomeGeneration": 0,
     "employmentCapacity": 5,
@@ -315,16 +315,16 @@
     "fullDescription": "Regulating Venice's world-renowned glass industry, the Glass Guild Hall serves as administrative center and knowledge repository for this crucial craft. Featuring meeting chambers, demonstration facilities, archives of designs and techniques, and ceremonial spaces, this distinguished institution maintains quality standards while protecting trade secrets. Located on Murano island, it governs every aspect of Venetian glassmaking from apprenticeships to export regulations.",
     "flavorText": "Within these walls we preserve not merely the techniques of our craft, but its very soul—for while any furnace can melt sand, only the true traditions of Murano transform it into miracles of transparency and color.",
     "constructionCosts": {
-      "ducats": 12500,
+      "ducats": 12500000,
       "timber": 150,
       "bricks": 300,
       "stone": 500,
       "glass": 200,
       "marble": 60
     },
-    "maintenanceCost": 60,
+    "maintenanceCost": 60000,
     "constructionTime": 1728000000,
-    "incomeGeneration": 75,
+    "incomeGeneration": 75000,
     "employmentCapacity": 20,
     "locationRequirements": {
       "districtRestrictions": "Murano Island only, prominent location",
@@ -392,16 +392,16 @@
     "fullDescription": "Coordinating Venice's vast commercial networks, the Merchant Guild Hall serves as the central institution for trading activities and relationships. Featuring grand meeting halls, contract rooms, price-setting chambers, foreign trade offices, and extensive archives, this imposing institution regulates every aspect of Venetian commerce. Its strategic location near the Rialto emphasizes its central role in the Republic's commercial success and international trading power.",
     "flavorText": "Ships and goods are merely the visible manifestations of trade—the true art of commerce lives here, where relationships are cultivated, standards maintained, and the invisible networks of trust and credit span continents and cultures.",
     "constructionCosts": {
-      "ducats": 15000,
+      "ducats": 15000000,
       "timber": 200,
       "bricks": 400,
       "stone": 600,
       "glass": 100,
       "marble": 100
     },
-    "maintenanceCost": 75,
+    "maintenanceCost": 75000,
     "constructionTime": 2160000000,
-    "incomeGeneration": 100,
+    "incomeGeneration": 100000,
     "employmentCapacity": 40,
     "locationRequirements": {
       "districtRestrictions": "Rialto district, commercial center proximity",
@@ -469,16 +469,16 @@
     "fullDescription": "Regulating Venice's lucrative textile trade, the Silk Guild Hall administers this sophisticated industry from raw material import to finished luxury products. Featuring material testing facilities, pattern archives, quality control chambers, fashion design spaces, and international trade offices, this influential institution maintained Venice's reputation for textile excellence. Its regulation of everything from dye standards to weaving techniques ensured consistent quality in one of Venice's most profitable industries.",
     "flavorText": "The silk thread is delicate yet strong, simple yet refined—much like the regulations that govern our craft, which must be strict enough to ensure quality yet flexible enough to permit the innovation that keeps Venice at fashion's forefront.",
     "constructionCosts": {
-      "ducats": 12000,
+      "ducats": 12000000,
       "timber": 150,
       "bricks": 300,
       "stone": 450,
       "glass": 80,
       "marble": 70
     },
-    "maintenanceCost": 65,
+    "maintenanceCost": 65000,
     "constructionTime": 1728000000,
-    "incomeGeneration": 85,
+    "incomeGeneration": 85000,
     "employmentCapacity": 30,
     "locationRequirements": {
       "districtRestrictions": "Near textile district, commercial visibility",
@@ -546,16 +546,16 @@
     "fullDescription": "Overseeing Venice's crucial shipbuilding industry, the Shipwright Guild Hall regulates the construction techniques and standards that maintained the Republic's naval superiority. Featuring design archives, model testing facilities, timber quality control, technical libraries, and training spaces, this specialized institution ensured consistent excellence in both merchant and naval vessels. Its regulations governed everything from material selection to construction techniques across Venice's numerous shipyards.",
     "flavorText": "The ship is the most complex machine of our age, and the most vital to our prosperity—thus each nail, plank, and rope must meet standards forged from centuries of experience, triumph, and occasional tragedy at sea.",
     "constructionCosts": {
-      "ducats": 13000,
+      "ducats": 13000000,
       "timber": 250,
       "bricks": 300,
       "stone": 400,
       "iron": 150,
       "glass": 60
     },
-    "maintenanceCost": 70,
+    "maintenanceCost": 70000,
     "constructionTime": 1728000000,
-    "incomeGeneration": 90,
+    "incomeGeneration": 90000,
     "employmentCapacity": 25,
     "locationRequirements": {
       "districtRestrictions": "Near shipbuilding districts, water visibility",
@@ -623,16 +623,16 @@
     "fullDescription": "Regulating Venice's prestigious precious metals industry, the Goldsmith Guild Hall ensures the quality and authenticity of gold and silver work throughout the city. Featuring metal testing laboratories, design archives, gem assessment facilities, security vaults, and demonstration spaces, this exclusive institution maintains strict standards on materials and craftsmanship. Its certification was required for all precious metal works, ensuring consistent quality in this high-value industry.",
     "flavorText": "Gold may seem unchangeable, but the craftsman's hand transforms it from mere wealth to immortal beauty—our guild ensures that when the Venetian mark is struck on gold, both the metal and the craftsmanship are beyond reproach.",
     "constructionCosts": {
-      "ducats": 11000,
+      "ducats": 11000000,
       "timber": 100,
       "bricks": 250,
       "stone": 400,
       "gold": 30,
       "marble": 80
     },
-    "maintenanceCost": 60,
+    "maintenanceCost": 60000,
     "constructionTime": 1296000000,
-    "incomeGeneration": 80,
+    "incomeGeneration": 80000,
     "employmentCapacity": 20,
     "locationRequirements": {
       "districtRestrictions": "Secure area, often near government district",
