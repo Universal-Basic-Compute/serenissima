@@ -147,7 +147,7 @@ export default class RoadManager {
     const curve = this.createCurvedPath(points, curvature);
     
     // Create road geometry
-    const roadWidth = 0.0735; // Changed from 0.105 to 0.0735 (30% thinner)
+    const roadWidth = 0.15; // Changed from 0.0735 to 0.15 (make it thicker)
     const roadGeometry = new THREE.BufferGeometry();
     const positions: number[] = [];
     const uvs: number[] = [];
@@ -282,6 +282,74 @@ export default class RoadManager {
         }
       }
     });
+  }
+
+  // Add a method to remove all roads
+  public removeAllRoads(): void {
+    console.log(`Removing all ${this.roads.length} roads`);
+    
+    // Remove all roads from the scene and dispose of resources
+    this.roads.forEach(road => {
+      if (this.scene) {
+        this.scene.remove(road.mesh);
+      }
+      
+      if (road.mesh.geometry) {
+        road.mesh.geometry.dispose();
+      }
+      
+      if (road.mesh.material) {
+        if (Array.isArray(road.mesh.material)) {
+          road.mesh.material.forEach(m => {
+            if (m) m.dispose();
+          });
+        } else if (road.mesh.material) {
+          road.mesh.material.dispose();
+        }
+      }
+    });
+    
+    // Clear the roads array
+    this.roads = [];
+    
+    // Also find and remove any orphaned road meshes
+    if (this.scene) {
+      try {
+        const objectsToRemove: THREE.Object3D[] = [];
+        
+        // First collect all objects to remove
+        this.scene.traverse((object) => {
+          if (object instanceof THREE.Mesh && object.userData && object.userData.isRoad) {
+            console.log('Found orphaned road mesh, removing it');
+            objectsToRemove.push(object);
+          }
+        });
+        
+        // Then remove them in a separate step
+        objectsToRemove.forEach(object => {
+          this.scene.remove(object);
+          
+          if ((object as THREE.Mesh).geometry) {
+            (object as THREE.Mesh).geometry.dispose();
+          }
+          
+          if ((object as THREE.Mesh).material) {
+            const material = (object as THREE.Mesh).material;
+            if (Array.isArray(material)) {
+              material.forEach(m => {
+                if (m) m.dispose();
+              });
+            } else if (material) {
+              material.dispose();
+            }
+          }
+        });
+        
+        console.log(`Removed ${objectsToRemove.length} orphaned road meshes`);
+      } catch (error) {
+        console.error('Error removing orphaned road meshes:', error);
+      }
+    }
   }
 
   public cleanup(): void {

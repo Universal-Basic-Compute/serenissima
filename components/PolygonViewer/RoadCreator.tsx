@@ -324,7 +324,7 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
     const curve = createCurvedPath(roadPoints);
     
     // Create road geometry
-    const roadWidth = 0.0735; // Changed from 0.105 to 0.0735 (30% thinner)
+    const roadWidth = 0.15; // Changed from 0.0735 to 0.15 (make it thicker)
     const roadGeometry = new THREE.BufferGeometry();
     const positions: number[] = [];
     const uvs: number[] = [];
