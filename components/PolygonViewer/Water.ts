@@ -231,56 +231,96 @@ export default class Water {
     
     const size = this.gridSize;
     const damping = 0.98;
-    const waveSpeed = 0.15; // Increased from 0.05 to 0.15 for more active waves
+    const waveSpeed = 0.15;
     
     // Save current wave grid
     for (let i = 0; i < size * size; i++) {
       this.prevWaveGrid[i] = this.waveGrid[i];
     }
     
-    // Update wave simulation using wave equation
+    // Update wave simulation using improved wave equation
     for (let i = 1; i < size - 1; i++) {
       for (let j = 1; j < size - 1; j++) {
         const idx = i * size + j;
         
-        // Get neighboring points
+        // Get neighboring points (including diagonals for more natural propagation)
         const up = (i - 1) * size + j;
         const down = (i + 1) * size + j;
         const left = i * size + (j - 1);
         const right = i * size + (j + 1);
+        const upLeft = (i - 1) * size + (j - 1);
+        const upRight = (i - 1) * size + (j + 1);
+        const downLeft = (i + 1) * size + (j - 1);
+        const downRight = (i + 1) * size + (j + 1);
         
-        // Calculate Laplacian (sum of neighbors - 4 * center)
+        // Calculate improved Laplacian with diagonal contributions
         const laplacian = 
           this.waveGrid[up] + 
           this.waveGrid[down] + 
           this.waveGrid[left] + 
           this.waveGrid[right] - 
           4 * this.waveGrid[idx];
+          
+        // Add diagonal contributions with lower weight
+        const diagonalLaplacian = 
+          (this.waveGrid[upLeft] + 
+           this.waveGrid[upRight] + 
+           this.waveGrid[downLeft] + 
+           this.waveGrid[downRight] - 
+           4 * this.waveGrid[idx]) * 0.3;
+        
+        // Combine both laplacians
+        const combinedLaplacian = laplacian + diagonalLaplacian;
         
         // Update velocity using wave equation
-        this.waveVelocity[idx] += waveSpeed * laplacian;
+        this.waveVelocity[idx] += waveSpeed * combinedLaplacian;
         
-        // Apply damping
-        this.waveVelocity[idx] *= damping;
+        // Apply variable damping based on position (more damping near edges)
+        const edgeFactor = Math.min(
+          i / 10, (size - i) / 10,
+          j / 10, (size - j) / 10
+        );
+        const localDamping = damping * (1.0 - 0.1 * Math.max(0, 1 - edgeFactor));
+        
+        this.waveVelocity[idx] *= localDamping;
         
         // Update height
         this.waveGrid[idx] += this.waveVelocity[idx] * deltaTime;
       }
     }
     
-    // Apply boundary conditions (fixed edges)
+    // Apply improved boundary conditions (absorbing boundaries)
     for (let i = 0; i < size; i++) {
-      this.waveGrid[i] = 0; // Top edge
-      this.waveGrid[i * size] = 0; // Left edge
-      this.waveGrid[i * size + (size - 1)] = 0; // Right edge
-      this.waveGrid[(size - 1) * size + i] = 0; // Bottom edge
+      // Gradually reduce wave height near boundaries instead of setting to zero
+      for (let d = 0; d < 3; d++) {
+        if (i + d < size) {
+          const dampFactor = 0.7 - (d * 0.2); // Stronger damping closer to edge
+          
+          // Top edge
+          this.waveGrid[d * size + i] *= dampFactor;
+          this.waveVelocity[d * size + i] *= dampFactor;
+          
+          // Bottom edge
+          this.waveGrid[(size - 1 - d) * size + i] *= dampFactor;
+          this.waveVelocity[(size - 1 - d) * size + i] *= dampFactor;
+          
+          // Left edge
+          this.waveGrid[i * size + d] *= dampFactor;
+          this.waveVelocity[i * size + d] *= dampFactor;
+          
+          // Right edge
+          this.waveGrid[i * size + (size - 1 - d)] *= dampFactor;
+          this.waveVelocity[i * size + (size - 1 - d)] *= dampFactor;
+        }
+      }
     }
     
     // Apply land interactions
     this.applyLandInteractions();
     
-    // Create occasional random waves
-    if (Math.random() < 0.01) {
+    // Create occasional random waves with varying probability based on time
+    const waveProb = 0.01 + 0.005 * Math.sin(Date.now() * 0.0001);
+    if (Math.random() < waveProb) {
       this.createRandomWave();
     }
   }
@@ -301,10 +341,15 @@ export default class Water {
       // Skip if outside grid
       if (gridX < 0 || gridX >= size || gridZ < 0 || gridZ >= size) continue;
       
-      // Create small ripples around land
-      const radius = 3;
-      const strength = 0.05;
+      // Create more varied ripples around land
+      const radius = 4; // Increased radius
+      const strength = 0.06; // Slightly increased strength
       
+      // Add time-based variation to make ripples more dynamic
+      const timeVariation = Math.sin(this.time * 0.5 + landPos.x * 0.1) * 0.5 + 0.5;
+      const adjustedStrength = strength * (0.8 + timeVariation * 0.4);
+      
+      // Create ripple pattern with more variation
       for (let i = Math.max(1, gridZ - radius); i < Math.min(size - 1, gridZ + radius); i++) {
         for (let j = Math.max(1, gridX - radius); j < Math.min(size - 1, gridX + radius); j++) {
           const dx = j - gridX;
@@ -315,8 +360,50 @@ export default class Water {
             const idx = i * size + j;
             const distFactor = 1 - Math.sqrt(distSq) / radius;
             
-            // Create small ripple effect
-            this.waveGrid[idx] += strength * distFactor * Math.sin(this.time * 2);
+            // Create more complex ripple effect with multiple frequencies
+            const ripple = 
+              Math.sin(this.time * 2.0 + landPos.x * 0.05) * 0.6 + 
+              Math.sin(this.time * 3.2 + landPos.z * 0.05) * 0.4;
+            
+            // Apply ripple with distance falloff
+            this.waveGrid[idx] += adjustedStrength * distFactor * ripple;
+            
+            // Add some velocity for more dynamic effect
+            this.waveVelocity[idx] += adjustedStrength * distFactor * 0.02 * 
+              Math.sin(this.time * 4.0 + (landPos.x + landPos.z) * 0.1);
+          }
+        }
+      }
+      
+      // Occasionally create a larger wave from land (like a boat wake)
+      if (Math.random() < 0.001) {
+        const wakeAngle = Math.random() * Math.PI * 2;
+        const wakeLength = radius * 2;
+        const wakeWidth = radius * 0.7;
+        const wakeStrength = strength * 3;
+        
+        for (let i = Math.max(1, gridZ - radius * 3); i < Math.min(size - 1, gridZ + radius * 3); i++) {
+          for (let j = Math.max(1, gridX - radius * 3); j < Math.min(size - 1, gridX + radius * 3); j++) {
+            const dx = j - gridX;
+            const dz = i - gridZ;
+            
+            // Distance along wake direction
+            const alongDist = dx * Math.cos(wakeAngle) + dz * Math.sin(wakeAngle);
+            
+            // Distance perpendicular to wake direction
+            const perpDist = Math.abs(dx * Math.sin(wakeAngle) - dz * Math.cos(wakeAngle));
+            
+            if (alongDist > 0 && alongDist < wakeLength && perpDist < wakeWidth) {
+              const idx = i * size + j;
+              
+              // Taper the wake based on distance
+              const alongFactor = 1 - alongDist / wakeLength;
+              const perpFactor = 1 - perpDist / wakeWidth;
+              const wakeFactor = alongFactor * perpFactor;
+              
+              // Apply wake impulse
+              this.waveGrid[idx] += wakeStrength * wakeFactor;
+            }
           }
         }
       }
@@ -328,27 +415,68 @@ export default class Water {
     
     const size = this.gridSize;
     
-    // Random position in grid
+    // Random position in grid with more variation
     const x = Math.floor(Math.random() * (size - 10)) + 5;
     const z = Math.floor(Math.random() * (size - 10)) + 5;
     
-    // Random radius and strength - increased strength
-    const radius = Math.floor(Math.random() * 5) + 3;
-    const strength = (Math.random() * 0.2) + 0.1; // Doubled from (0.1 + 0.05) to (0.2 + 0.1)
+    // More varied radius and strength
+    const radius = Math.floor(Math.random() * 7) + 3; // Increased max radius
+    const strength = (Math.random() * 0.25) + 0.1; // More variation in strength
     
-    // Create wave
-    for (let i = Math.max(1, z - radius); i < Math.min(size - 1, z + radius); i++) {
-      for (let j = Math.max(1, x - radius); j < Math.min(size - 1, x + radius); j++) {
+    // Determine wave type (0: circular, 1: elliptical, 2: directional)
+    const waveType = Math.floor(Math.random() * 3);
+    
+    // Create wave with different patterns based on type
+    for (let i = Math.max(1, z - radius * 1.5); i < Math.min(size - 1, z + radius * 1.5); i++) {
+      for (let j = Math.max(1, x - radius * 1.5); j < Math.min(size - 1, x + radius * 1.5); j++) {
         const dx = j - x;
         const dz = i - z;
-        const distSq = dx * dx + dz * dz;
         
-        if (distSq < radius * radius) {
-          const idx = i * size + j;
-          const distFactor = 1 - Math.sqrt(distSq) / radius;
+        let distFactor = 0;
+        
+        if (waveType === 0) {
+          // Circular wave
+          const distSq = dx * dx + dz * dz;
+          if (distSq < radius * radius) {
+            distFactor = 1 - Math.sqrt(distSq) / radius;
+          }
+        } 
+        else if (waveType === 1) {
+          // Elliptical wave
+          const stretchFactor = 0.7 + Math.random() * 0.6; // Random stretch
+          const distSq = dx * dx + (dz * dz) / (stretchFactor * stretchFactor);
+          if (distSq < radius * radius) {
+            distFactor = 1 - Math.sqrt(distSq) / radius;
+          }
+        }
+        else {
+          // Directional wave (like a wake)
+          const angle = Math.random() * Math.PI * 2; // Random direction
+          const dirX = Math.cos(angle);
+          const dirZ = Math.sin(angle);
           
-          // Apply wave impulse
-          this.waveGrid[idx] += strength * distFactor;
+          // Distance along direction
+          const alongDist = dx * dirX + dz * dirZ;
+          
+          // Distance perpendicular to direction
+          const perpDist = Math.abs(dx * dirZ - dz * dirX);
+          
+          if (alongDist > -radius && alongDist < radius * 2 && perpDist < radius * 0.5) {
+            // Taper the wave based on distance along direction
+            const alongFactor = 1 - Math.abs(alongDist - radius * 0.5) / (radius * 1.5);
+            const perpFactor = 1 - perpDist / (radius * 0.5);
+            distFactor = alongFactor * perpFactor;
+          }
+        }
+        
+        if (distFactor > 0) {
+          const idx = i * size + j;
+          
+          // Apply wave impulse with a bit of randomness
+          this.waveGrid[idx] += strength * distFactor * (0.9 + Math.random() * 0.2);
+          
+          // Add some velocity for more dynamic waves
+          this.waveVelocity[idx] += strength * distFactor * 0.5 * (Math.random() * 0.4 - 0.2);
         }
       }
     }
@@ -363,7 +491,13 @@ export default class Water {
     const size = this.gridSize;
     const vertexCount = positions.length / 3;
     
-    // Apply wave heights to geometry vertices
+    // Create or update normal attribute if needed
+    if (!this.waterGeometry.attributes.normal) {
+      this.waterGeometry.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(vertexCount * 3), 3));
+    }
+    const normals = this.waterGeometry.attributes.normal.array;
+    
+    // Apply wave heights to geometry vertices with improved interpolation
     for (let i = 0; i < vertexCount; i++) {
       const i3 = i * 3;
       
@@ -394,24 +528,84 @@ export default class Water {
       const h01 = this.waveGrid[gz1 * size + gx0] || 0;
       const h11 = this.waveGrid[gz1 * size + gx1] || 0;
       
-      // Bilinear interpolation
-      const h0 = h00 * (1 - fx) + h10 * fx;
-      const h1 = h01 * (1 - fx) + h11 * fx;
-      const height = h0 * (1 - fz) + h1 * fz;
+      // Improved cubic interpolation for smoother results
+      const wx = fx * fx * (3 - 2 * fx); // Cubic interpolation weight
+      const wz = fz * fz * (3 - 2 * fz); // Cubic interpolation weight
       
-      // Apply height to vertex with additional sine wave for more movement
-      const additionalWave = 
+      // Apply cubic interpolation
+      const h0 = h00 * (1 - wx) + h10 * wx;
+      const h1 = h01 * (1 - wx) + h11 * wx;
+      const height = h0 * (1 - wz) + h1 * wz;
+      
+      // Apply multiple layers of waves for more detail
+      const smallWave = 
         Math.sin(x * 0.2 + this.time * 0.7) * 
         Math.cos(z * 0.2 + this.time * 0.5) * 0.1;
+        
+      const microWave = 
+        Math.sin(x * 0.8 + this.time * 1.3) * 
+        Math.sin(z * 0.7 + this.time * 1.1) * 0.03;
       
-      positions[i3 + 1] = height + additionalWave;
+      // Combine all wave components
+      positions[i3 + 1] = height + smallWave + microWave;
+      
+      // Calculate normals directly for better lighting
+      // Get heights of neighboring points for normal calculation
+      const eps = 0.1; // Small offset for normal calculation
+      
+      // Sample heights at neighboring points
+      const hL = this.sampleHeight(gridX - eps, gridZ);
+      const hR = this.sampleHeight(gridX + eps, gridZ);
+      const hT = this.sampleHeight(gridX, gridZ - eps);
+      const hB = this.sampleHeight(gridX, gridZ + eps);
+      
+      // Calculate normal using central differences
+      const nx = (hL - hR) / (2 * eps);
+      const nz = (hT - hB) / (2 * eps);
+      
+      // Normalize the normal vector
+      const nl = Math.sqrt(nx * nx + 1 + nz * nz);
+      normals[i3] = nx / nl;
+      normals[i3 + 1] = 1 / nl;
+      normals[i3 + 2] = nz / nl;
     }
     
     // Update geometry
     this.waterGeometry.attributes.position.needsUpdate = true;
+    this.waterGeometry.attributes.normal.needsUpdate = true;
+  }
+  
+  // Helper method to sample wave height at any point using bilinear interpolation
+  private sampleHeight(gridX: number, gridZ: number): number {
+    if (!this.waveGrid) return 0;
     
-    // Recalculate normals for proper lighting
-    this.waterGeometry.computeVertexNormals();
+    const size = this.gridSize;
+    
+    // Clamp to grid bounds
+    gridX = Math.max(0, Math.min(size - 1, gridX));
+    gridZ = Math.max(0, Math.min(size - 1, gridZ));
+    
+    // Get grid indices
+    const gx0 = Math.floor(gridX);
+    const gz0 = Math.floor(gridZ);
+    const gx1 = Math.min(gx0 + 1, size - 1);
+    const gz1 = Math.min(gz0 + 1, size - 1);
+    
+    // Get interpolation factors
+    const fx = gridX - gx0;
+    const fz = gridZ - gz0;
+    
+    // Get wave heights at grid points
+    const h00 = this.waveGrid[gz0 * size + gx0] || 0;
+    const h10 = this.waveGrid[gz0 * size + gx1] || 0;
+    const h01 = this.waveGrid[gz1 * size + gx0] || 0;
+    const h11 = this.waveGrid[gz1 * size + gx1] || 0;
+    
+    // Bilinear interpolation
+    const h0 = h00 * (1 - fx) + h10 * fx;
+    const h1 = h01 * (1 - fx) + h11 * fx;
+    
+    return h0 * (1 - fz) + h1 * fz;
   }
   
   private getWaterColorForView(): number {
@@ -453,11 +647,12 @@ export default class Water {
   }
   
   public update(frameCount: number) {
-    // Update time - increased speed for more visible animation
-    this.time += 0.08; // Increased from 0.05 to 0.08 for faster animation
+    // Update time with variable speed for more natural animation
+    const timeSpeed = 0.08 + Math.sin(frameCount * 0.001) * 0.01; // Subtle variation in speed
+    this.time += timeSpeed;
     
-    // Get delta time for physics-based simulation
-    const deltaTime = Math.min(0.05, this.clock.getDelta());
+    // Get delta time for physics-based simulation with a minimum to prevent instability
+    const deltaTime = Math.min(0.05, Math.max(0.01, this.clock.getDelta()));
     
     // Skip if water mesh doesn't exist
     if (!this.waterMesh || !this.waterMaterial) return;
@@ -465,15 +660,71 @@ export default class Water {
     // Update shader uniforms
     this.waterMaterial.uniforms.time.value = this.time;
     
-    // Update wave simulation
-    this.updateWaveSimulation(deltaTime);
+    // Update sun direction based on time for dynamic lighting
+    if (this.waterMaterial.uniforms.sunDirection) {
+      const sunAngle = this.time * 0.05;
+      this.waterMaterial.uniforms.sunDirection.value.set(
+        Math.cos(sunAngle),
+        0.8,
+        Math.sin(sunAngle)
+      ).normalize();
+    }
+    
+    // Update wave simulation with multiple steps for more stability
+    const subSteps = 2; // Divide deltaTime into smaller steps
+    for (let i = 0; i < subSteps; i++) {
+      this.updateWaveSimulation(deltaTime / subSteps);
+    }
     
     // Apply waves to geometry
     this.applyWavesToGeometry();
     
-    // Create random waves more frequently (every ~20 frames instead of ~100)
-    if (Math.random() < 0.05) {
+    // Create random waves with variable frequency
+    // More waves during "stormy" periods, fewer during "calm" periods
+    const stormFactor = 0.5 + 0.5 * Math.sin(this.time * 0.01); // Oscillates between 0 and 1
+    const waveChance = 0.03 + stormFactor * 0.04; // Between 0.03 and 0.07
+    
+    if (Math.random() < waveChance) {
       this.createRandomWave();
+    }
+    
+    // Occasionally create a larger "boat wake" wave
+    if (Math.random() < 0.002) {
+      // Create a directional wake
+      const size = this.gridSize;
+      const x = Math.floor(Math.random() * (size - 20)) + 10;
+      const z = Math.floor(Math.random() * (size - 20)) + 10;
+      const angle = Math.random() * Math.PI * 2;
+      const length = 15 + Math.random() * 10;
+      const width = 3 + Math.random() * 2;
+      const strength = 0.3 + Math.random() * 0.2;
+      
+      for (let i = 0; i < size; i++) {
+        for (let j = 0; j < size; j++) {
+          const dx = j - x;
+          const dz = i - z;
+          
+          // Distance along wake direction
+          const alongDist = dx * Math.cos(angle) + dz * Math.sin(angle);
+          
+          // Distance perpendicular to wake direction
+          const perpDist = Math.abs(dx * Math.sin(angle) - dz * Math.cos(angle));
+          
+          if (alongDist > -width/2 && alongDist < length && perpDist < width) {
+            const idx = i * size + j;
+            
+            // Taper the wake based on distance
+            const alongFactor = 1 - Math.max(0, alongDist) / length;
+            const perpFactor = 1 - perpDist / width;
+            const wakeFactor = alongFactor * perpFactor;
+            
+            // Apply wake impulse
+            if (this.waveGrid && idx < this.waveGrid.length) {
+              this.waveGrid[idx] += strength * wakeFactor;
+            }
+          }
+        }
+      }
     }
   }
   

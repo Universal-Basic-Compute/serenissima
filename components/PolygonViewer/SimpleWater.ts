@@ -51,63 +51,125 @@ export default class SimpleWater {
   }
   
   private createWaterSurface() {
-    // Create water geometry with higher resolution
+    // Create water geometry with higher resolution for smoother waves
     this.waterGeometry = new THREE.PlaneGeometry(
       this.width, 
       this.height, 
-      256, // Increased from 128 for smoother waves
-      256
+      this.performanceMode ? 256 : 384, // Increased resolution
+      this.performanceMode ? 256 : 384
     );
     
-    // Create water shader material with improved shader
+    // Create water shader material with advanced effects
     const waterShader = {
       uniforms: {
         time: { value: 0.0 },
         waterColor: { value: new THREE.Color(this.getWaterColorForView()) },
-        deepWaterColor: { value: new THREE.Color(this.getDeepWaterColorForView()) }
+        deepWaterColor: { value: new THREE.Color(this.getDeepWaterColorForView()) },
+        sunPosition: { value: new THREE.Vector3(500, 300, 100) },
+        sunColor: { value: new THREE.Color(0xffffeb) }
       },
       vertexShader: `
         uniform float time;
         varying vec2 vUv;
         varying float vElevation;
+        varying vec3 vNormal;
+        varying vec3 vViewPosition;
+        
+        // Improved wave function with multiple frequencies and amplitudes
+        float wave(vec2 position) {
+          // Large slow waves
+          float wave1 = sin(position.x * 0.5 + time * 0.5) * 
+                       cos(position.z * 0.4 + time * 0.3) * 0.8;
+          
+          // Medium waves
+          float wave2 = sin(position.x * 1.0 + time * 0.8) * 
+                       sin(position.z * 1.3 + time * 0.6) * 0.4;
+          
+          // Small ripples
+          float wave3 = sin(position.x * 2.5 + time * 1.5) * 
+                       sin(position.z * 2.8 + time * 1.7) * 0.2;
+          
+          // Micro detail
+          float wave4 = sin(position.x * 5.0 + time * 2.5) * 
+                       sin(position.z * 5.5 + time * 2.2) * 0.1;
+          
+          // Combine all waves
+          return wave1 + wave2 + wave3 + wave4;
+        }
+        
+        // Function to calculate normal from heightmap
+        vec3 calculateNormal(vec2 pos) {
+          float eps = 0.1;
+          
+          float centerHeight = wave(pos);
+          float rightHeight = wave(pos + vec2(eps, 0.0));
+          float topHeight = wave(pos + vec2(0.0, eps));
+          
+          vec3 dx = vec3(eps, rightHeight - centerHeight, 0.0);
+          vec3 dy = vec3(0.0, topHeight - centerHeight, eps);
+          
+          return normalize(cross(dx, dy));
+        }
         
         void main() {
           vUv = uv;
           
-          // More pronounced wave calculation
-          float elevation = 
-            sin(position.x * 0.5 + time * 0.5) * 
-            cos(position.z * 0.4 + time * 0.3) * 0.8 +
-            sin(position.x * 1.0 + time * 0.8) * 
-            sin(position.z * 1.3 + time * 0.6) * 0.4 +
-            sin(position.x * 2.5 + time * 1.5) * 
-            sin(position.z * 2.8 + time * 1.7) * 0.2;
+          // Calculate wave height
+          vec3 pos = position;
+          float elevation = wave(position.xz);
+          pos.y += elevation * 1.5; // Increased wave height
           
+          // Calculate normal for lighting
+          vNormal = calculateNormal(position.xz);
+          
+          // Store elevation for fragment shader
           vElevation = elevation;
           
-          vec3 pos = position;
-          pos.y += elevation * 1.5; // Increased wave height multiplier from 0.8 to 1.5
+          // Calculate view position for reflections
+          vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
+          vViewPosition = -mvPosition.xyz;
           
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+          gl_Position = projectionMatrix * mvPosition;
         }
       `,
       fragmentShader: `
         uniform vec3 waterColor;
         uniform vec3 deepWaterColor;
-        uniform float time; // Add time uniform to fragment shader
+        uniform float time;
+        uniform vec3 sunPosition;
+        uniform vec3 sunColor;
+        
         varying vec2 vUv;
         varying float vElevation;
+        varying vec3 vNormal;
+        varying vec3 vViewPosition;
+        
+        // Fresnel approximation
+        float fresnel(vec3 normal, vec3 viewDir, float power) {
+          return pow(1.0 - max(0.0, dot(normalize(normal), normalize(viewDir))), power);
+        }
         
         void main() {
           // Mix between deep and shallow water colors based on elevation
           float depthFactor = smoothstep(-0.5, 0.5, vElevation);
           vec3 color = mix(deepWaterColor, waterColor, depthFactor);
           
-          // Add foam at wave peaks - more visible
-          if (vElevation > 0.2) { // Lower threshold from 0.25 to 0.2
+          // Add foam at wave peaks with smoother transition
+          if (vElevation > 0.2) {
             float foamFactor = smoothstep(0.2, 0.4, vElevation);
             color = mix(color, vec3(1.0), foamFactor * 0.9);
           }
+          
+          // Add specular highlight (sun reflection)
+          vec3 viewDir = normalize(vViewPosition);
+          vec3 sunDir = normalize(sunPosition);
+          vec3 halfwayDir = normalize(sunDir + viewDir);
+          float spec = pow(max(dot(vNormal, halfwayDir), 0.0), 64.0);
+          vec3 specular = sunColor * spec * 0.6;
+          
+          // Add fresnel effect (more reflective at glancing angles)
+          float fresnelFactor = fresnel(vNormal, viewDir, 5.0);
+          color = mix(color, vec3(0.8, 0.9, 1.0), fresnelFactor * 0.3);
           
           // Add light ray effect
           float lightRay = pow(abs(sin(vUv.x * 3.14159 * 2.0)), 20.0) * 0.15;
@@ -115,15 +177,29 @@ export default class SimpleWater {
           // Add horizontal striations
           float striation = sin(vUv.y * 150.0 + time * 0.2) * 0.03;
           
-          // Add subtle wave patterns - more pronounced
-          float pattern = sin(vUv.x * 100.0 + time * 0.5) * sin(vUv.y * 100.0 + time * 0.3) * 0.1; // Increased from 0.05 to 0.1
+          // Add subtle wave patterns with more variation
+          float pattern = sin(vUv.x * 100.0 + time * 0.5) * sin(vUv.y * 100.0 + time * 0.3) * 0.1;
+          pattern += sin(vUv.x * 50.0 - time * 0.3) * sin(vUv.y * 50.0 + time * 0.2) * 0.05;
+          
+          // Add caustics effect
+          float causticPattern = 
+            sin(vUv.x * 40.0 + time * 2.0) * 
+            sin(vUv.y * 40.0 + time * 1.7) * 0.05;
+          causticPattern = max(0.0, causticPattern);
           
           // Combine all effects
-          color += pattern * vec3(0.2, 0.2, 0.4); // Increased color impact
+          color += pattern * vec3(0.2, 0.2, 0.4);
           color += lightRay * vec3(0.7, 0.8, 1.0);
           color += striation * vec3(0.5, 0.7, 1.0);
+          color += specular;
+          color += causticPattern * vec3(0.3, 0.6, 1.0);
           
-          gl_FragColor = vec4(color, 0.7); // Reduced opacity from 0.9 to 0.7 for better land visibility
+          // Add subtle color variation based on time
+          float colorShift = sin(time * 0.1) * 0.05;
+          color.b += colorShift;
+          color.g += colorShift * 0.5;
+          
+          gl_FragColor = vec4(color, 0.8); // Slightly increased opacity for better visibility
         }
       `
     };
@@ -197,14 +273,35 @@ export default class SimpleWater {
   }
   
   public update(frameCount: number) {
-    // Update time with faster speed
-    this.time += 0.1; // Doubled from 0.05 to 0.1
+    // Update time with variable speed for more natural animation
+    const timeSpeed = 0.1 + Math.sin(frameCount * 0.001) * 0.02; // Subtle variation in speed
+    this.time += timeSpeed;
     
     // Skip if water mesh doesn't exist
     if (!this.waterMesh || !this.waterMaterial) return;
     
     // Update shader uniforms
     this.waterMaterial.uniforms.time.value = this.time;
+    
+    // Update sun position for dynamic lighting
+    if (this.waterMaterial.uniforms.sunPosition) {
+      const sunAngle = this.time * 0.05;
+      const sunHeight = 300 + Math.sin(this.time * 0.02) * 100;
+      this.waterMaterial.uniforms.sunPosition.value.set(
+        Math.cos(sunAngle) * 500,
+        sunHeight,
+        Math.sin(sunAngle) * 500
+      );
+    }
+    
+    // Periodically update sun color for time-of-day effect
+    if (this.waterMaterial.uniforms.sunColor && frameCount % 100 === 0) {
+      const dayFactor = 0.5 + 0.5 * Math.sin(this.time * 0.01); // Day-night cycle
+      const r = 1.0;
+      const g = 0.9 + dayFactor * 0.1; // Slightly more yellow during day
+      const b = 0.7 + dayFactor * 0.3; // More blue during day
+      this.waterMaterial.uniforms.sunColor.value.setRGB(r, g, b);
+    }
   }
   
   public updateViewMode(activeView: ViewMode) {

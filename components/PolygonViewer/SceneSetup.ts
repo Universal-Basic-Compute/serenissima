@@ -267,16 +267,32 @@ export default class SceneSetup {
   
   // Add method to create water
   public createWater() {
-    console.log('Creating simple water system...');
+    console.log('Creating advanced water system...');
     
-    // Create a water effect with larger dimensions for better coverage
-    this.water = new SimpleWater({
-      scene: this.scene,
-      activeView: this.activeView,
-      performanceMode: this.performanceMode,
-      width: 2000, // Increased from 1500 to 2000 for even better coverage
-      height: 2000 // Increased from 1500 to 2000 for even better coverage
-    });
+    // Determine which water implementation to use based on performance mode
+    const useAdvancedWater = !this.performanceMode;
+    
+    if (useAdvancedWater) {
+      console.log('Using full water simulation for high quality mode');
+      // Create a water effect with larger dimensions for better coverage
+      this.water = new Water({
+        scene: this.scene,
+        activeView: this.activeView,
+        performanceMode: this.performanceMode,
+        width: 2500, // Increased coverage
+        height: 2500  // Increased coverage
+      });
+    } else {
+      console.log('Using simple water for performance mode');
+      // Use SimpleWater for performance mode
+      this.water = new SimpleWater({
+        scene: this.scene,
+        activeView: this.activeView,
+        performanceMode: this.performanceMode,
+        width: 2000,
+        height: 2000
+      });
+    }
     
     // If we have land positions, set them for water interaction
     if (this.scene.userData.landPositions && Array.isArray(this.scene.userData.landPositions)) {
@@ -289,22 +305,25 @@ export default class SceneSetup {
       this.water.update(0);
       
       // Schedule additional updates with delays to ensure proper initialization
-      setTimeout(() => {
-        if (this.water) this.water.update(10);
-      }, 100);
+      const updateTimes = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
+      updateTimes.forEach((time, index) => {
+        setTimeout(() => {
+          if (this.water) this.water.update(time);
+        }, 100 + index * 150); // Staggered updates for smoother initialization
+      });
       
+      // Add a final update after everything else has loaded
       setTimeout(() => {
-        if (this.water) this.water.update(20);
-      }, 500);
-      
-      // Add more updates for smoother initialization
-      setTimeout(() => {
-        if (this.water) this.water.update(30);
-      }, 1000);
-      
-      setTimeout(() => {
-        if (this.water) this.water.update(40);
-      }, 1500);
+        if (this.water) {
+          console.log('Performing final water initialization');
+          this.water.update(200);
+          
+          // Force a scene render to ensure water is visible
+          if (this.renderer) {
+            this.renderer.render(this.scene, this.camera);
+          }
+        }
+      }, 2000);
     }
     
     return this.water;
