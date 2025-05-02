@@ -5,7 +5,7 @@ import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { ViewMode } from './types';
 import CloudSystem from './CloudSystem';
-import Water from './Water';
+import SimpleWater from './SimpleWater';
 
 interface SceneSetupProps {
   canvas: HTMLCanvasElement;
@@ -25,7 +25,7 @@ export default class SceneSetup {
   private sunGlow: THREE.Mesh = new THREE.Mesh();
   private cloudSystem: CloudSystem | null = null;
   private zoomThreshold: number = 40; // Changed from 70 to 40 - Threshold for showing clouds
-  public water: Water | null = null; // Reference to water effect
+  public water: SimpleWater | null = null; // Reference to water effect
   private activeView: ViewMode;
   
   constructor({ canvas, activeView, highQuality }: SceneSetupProps) {
@@ -157,6 +157,9 @@ export default class SceneSetup {
     // Add lights with a slight delay to improve initial loading
     setTimeout(() => this.setupLights(activeView), 100);
     
+    // Create water immediately
+    this.createWater();
+    
     // Add window resize handler
     window.addEventListener('resize', this.handleResize);
     
@@ -259,10 +262,10 @@ export default class SceneSetup {
   
   // Add method to create water
   public createWater() {
-    console.log('Creating unified water system...');
+    console.log('Creating simple water system...');
     
     // Create a water effect with larger dimensions for better coverage
-    this.water = new Water({
+    this.water = new SimpleWater({
       scene: this.scene,
       activeView: this.activeView,
       performanceMode: this.performanceMode,
