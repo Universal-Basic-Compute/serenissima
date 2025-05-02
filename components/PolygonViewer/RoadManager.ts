@@ -461,45 +461,6 @@ export default class RoadManager {
         console.error('Error removing orphaned road meshes:', error);
       }
     }
-    
-    // Also find and remove any orphaned road meshes
-    if (this.scene) {
-      try {
-        const objectsToRemove: THREE.Object3D[] = [];
-        
-        // First collect all objects to remove
-        this.scene.traverse((object) => {
-          if (object instanceof THREE.Mesh && object.userData && object.userData.isRoad) {
-            console.log('Found orphaned road mesh, removing it');
-            objectsToRemove.push(object);
-          }
-        });
-        
-        // Then remove them in a separate step
-        objectsToRemove.forEach(object => {
-          this.scene.remove(object);
-          
-          if ((object as THREE.Mesh).geometry) {
-            (object as THREE.Mesh).geometry.dispose();
-          }
-          
-          if ((object as THREE.Mesh).material) {
-            const material = (object as THREE.Mesh).material;
-            if (Array.isArray(material)) {
-              material.forEach(m => {
-                if (m) m.dispose();
-              });
-            } else if (material) {
-              material.dispose();
-            }
-          }
-        });
-        
-        console.log(`Removed ${objectsToRemove.length} orphaned road meshes`);
-      } catch (error) {
-        console.error('Error removing orphaned road meshes:', error);
-      }
-    }
   }
 
   public cleanup(): void {

@@ -52,9 +52,35 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
         }
       }
       
-      // We're not removing completed roads anymore, only the preview mesh
-      // This ensures that roads created by the user remain in the scene
-      // even after the RoadCreator component unmounts
+      // Also find and remove any orphaned road meshes
+      if (scene) {
+        try {
+          const roadMeshes = scene.children.filter(
+            child => child instanceof THREE.Mesh && child.userData && child.userData.isRoad
+          );
+          
+          roadMeshes.forEach(mesh => {
+            scene.remove(mesh);
+            if ((mesh as THREE.Mesh).geometry) {
+              (mesh as THREE.Mesh).geometry.dispose();
+            }
+            if ((mesh as THREE.Mesh).material) {
+              const material = (mesh as THREE.Mesh).material;
+              if (Array.isArray(material)) {
+                material.forEach(m => {
+                  if (m) m.dispose();
+                });
+              } else if (material) {
+                material.dispose();
+              }
+            }
+          });
+          
+          console.log(`Cleaned up ${roadMeshes.length} orphaned road meshes`);
+        } catch (error) {
+          console.error('Error cleaning up orphaned road meshes:', error);
+        }
+      }
     };
   }, [scene, previewMesh]);
 
