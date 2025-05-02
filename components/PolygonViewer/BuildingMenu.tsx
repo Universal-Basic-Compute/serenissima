@@ -438,19 +438,8 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
                     
                     {/* Carousel Container */}
                     <div className="relative">
-                      {/* Main Carousel Display */}
-                      <div className="flex justify-center mb-4">
-                        <BuildingModelViewer 
-                          buildingName={selectedBuilding.name.toLowerCase().replace(/\s+/g, '-')}
-                          width={400}
-                          height={400}
-                          className="rounded bg-amber-100 border-2 border-amber-300 shadow-md"
-                          variant={selectedVariant}
-                        />
-                      </div>
-                      
                       {/* Carousel Navigation */}
-                      <div className="absolute top-1/2 left-0 right-0 transform -translate-y-1/2 flex justify-between px-2 pointer-events-none">
+                      <div className="flex justify-between px-2 mt-4">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -458,13 +447,22 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
                             const prevIndex = currentIndex > 0 ? currentIndex - 1 : availableVariants.length - 1;
                             setSelectedVariant(availableVariants[prevIndex]);
                           }}
-                          className="p-2 bg-amber-100 rounded-full hover:bg-amber-200 transition-colors shadow-md pointer-events-auto"
+                          className="p-2 bg-amber-100 rounded-full hover:bg-amber-200 transition-colors shadow-md"
                           aria-label="Previous variant"
                         >
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-amber-800" viewBox="0 0 20 20" fill="currentColor">
                             <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
                           </svg>
                         </button>
+                        
+                        <div className="text-center">
+                          <span className="text-amber-800 font-medium text-lg">
+                            {selectedVariant.charAt(0).toUpperCase() + selectedVariant.slice(1)}
+                          </span>
+                          <span className="text-amber-500 text-sm ml-2">
+                            {availableVariants.indexOf(selectedVariant) + 1} / {availableVariants.length}
+                          </span>
+                        </div>
                         
                         <button
                           onClick={(e) => {
@@ -473,7 +471,7 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
                             const nextIndex = currentIndex < availableVariants.length - 1 ? currentIndex + 1 : 0;
                             setSelectedVariant(availableVariants[nextIndex]);
                           }}
-                          className="p-2 bg-amber-100 rounded-full hover:bg-amber-200 transition-colors shadow-md pointer-events-auto"
+                          className="p-2 bg-amber-100 rounded-full hover:bg-amber-200 transition-colors shadow-md"
                           aria-label="Next variant"
                         >
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-amber-800" viewBox="0 0 20 20" fill="currentColor">
