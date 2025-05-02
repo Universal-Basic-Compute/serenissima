@@ -410,24 +410,20 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
 
   // Create a curved path based on the points and curvature setting
   const createCurvedPath = (roadPoints: THREE.Vector3[]) => {
+    // For Venice, we want straighter roads regardless of the curvature setting
     if (roadPoints.length === 2) {
       // For just two points, use a straight line
       return new THREE.LineCurve3(roadPoints[0], roadPoints[1]);
     }
     
-    // For more points, use a curved path
-    if (curvature === 0) {
-      // No curvature - use a polyline
-      return new THREE.CatmullRomCurve3(roadPoints, false, 'centripetal', 0);
-    } else {
-      // Use Catmull-Rom curve with tension based on curvature
-      return new THREE.CatmullRomCurve3(
-        roadPoints,
-        false,
-        'centripetal',
-        1 - curvature // Convert curvature to tension (1 = straight, 0 = curved)
-      );
-    }
+    // For more points, use a polyline with minimal curvature
+    // Use a very low tension value (close to 0) for straighter segments
+    return new THREE.CatmullRomCurve3(
+      roadPoints,
+      false,
+      'centripetal',
+      0.1 // Very low tension value for straighter roads
+    );
   };
 
   // Render UI controls
