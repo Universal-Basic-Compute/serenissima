@@ -515,6 +515,38 @@ export default function Home() {
   useEffect(() => {
     loadUsers();
   }, [loadUsers]);
+  
+  // Function to ensure all polygons remain visible
+  const ensurePolygonsVisible = useCallback(() => {
+    console.log('Ensuring all polygons remain visible');
+    Object.values(activeLandPolygons).forEach(polygon => {
+      if (!polygon.getVisible()) {
+        console.log('Found invisible polygon, making it visible');
+        polygon.setVisible(true);
+      }
+    });
+  }, [activeLandPolygons]);
+  
+  // Periodically check and ensure polygon visibility
+  useEffect(() => {
+    const visibilityInterval = setInterval(ensurePolygonsVisible, 1000);
+    return () => clearInterval(visibilityInterval);
+  }, [ensurePolygonsVisible, activeLandPolygons]);
+  
+  // Listen for view mode changes
+  useEffect(() => {
+    const handleViewModeChange = () => {
+      console.log('View mode changed, ensuring polygon visibility');
+      // Wait a moment for the view to update
+      setTimeout(ensurePolygonsVisible, 100);
+    };
+    
+    window.addEventListener('viewModeChanged', handleViewModeChange);
+    
+    return () => {
+      window.removeEventListener('viewModeChanged', handleViewModeChange);
+    };
+  }, [ensurePolygonsVisible]);
 
   // Add effect to check users data and update polygon renderer
   useEffect(() => {
@@ -558,8 +590,11 @@ export default function Home() {
           }
         }
       }
+      
+      // Ensure polygons remain visible after renderer updates
+      setTimeout(ensurePolygonsVisible, 200);
     }
-  }, [users, activeView, updatePolygonColors, updateCoatOfArms]);
+  }, [users, activeView, updatePolygonColors, updateCoatOfArms, ensurePolygonsVisible]);
   
   // Add effect to log when transferMenuOpen changes
   useEffect(() => {
@@ -945,6 +980,14 @@ export default function Home() {
     // Skip if we're dragging a centroid
     if (isDraggingCentroid) return;
     
+    // Ensure all polygons are visible before processing the click
+    Object.values(activeLandPolygons).forEach(polygon => {
+      if (!polygon.getVisible()) {
+        console.log('Making invisible polygon visible before processing click');
+        polygon.setVisible(true);
+      }
+    });
+    
     if (deleteMode) {
       // Find which polygon was clicked
       let clickedPolygonId = null;
@@ -997,6 +1040,19 @@ export default function Home() {
         fillOpacity: 0.5,
         visible: true // Explicitly ensure visibility is maintained
       });
+      
+      console.log('Selected polygon styling applied, visibility set to true');
+      
+      // Check if something is changing the visibility later
+      setTimeout(() => {
+        if (clickedPolygon) {
+          console.log('Checking polygon visibility after 500ms:', clickedPolygon.getVisible());
+          if (!clickedPolygon.getVisible()) {
+            console.log('Polygon visibility was changed to false! Restoring...');
+            clickedPolygon.setVisible(true);
+          }
+        }
+      }, 500);
       
       return;
     }
@@ -1207,6 +1263,30 @@ export default function Home() {
     if (isGoogleLoaded) {
       console.log('Loading polygons on map load...');
       loadPolygonsOnMap();
+      
+      // Set up a MutationObserver to detect when the PolygonViewer might be affecting polygon visibility
+      if (typeof window !== 'undefined' && window.MutationObserver) {
+        const observer = new MutationObserver((mutations) => {
+          // Check if any mutations might affect our polygons
+          const relevantMutation = mutations.some(mutation => 
+            mutation.target.nodeName === 'CANVAS' || 
+            (mutation.target as Element).classList?.contains('polygon-viewer')
+          );
+          
+          if (relevantMutation) {
+            console.log('Detected DOM changes that might affect polygons, ensuring visibility');
+            setTimeout(ensurePolygonsVisible, 100);
+          }
+        });
+        
+        // Start observing the document with the configured parameters
+        observer.observe(document.body, { 
+          childList: true, 
+          subtree: true,
+          attributes: true,
+          attributeFilter: ['style', 'class']
+        });
+      }
     }
   };
 
