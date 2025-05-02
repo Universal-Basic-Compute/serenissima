@@ -133,6 +133,7 @@ export default class WaterEffect {
           (this.waterMaterial as any).uniforms.normalMap.value = texture;
           this.waterMaterial.needsUpdate = true;
         }
+        console.log('Water normal map loaded successfully');
       },
       undefined,
       (error) => {
@@ -141,6 +142,42 @@ export default class WaterEffect {
         this.createFallbackNormalMap();
       }
     );
+  }
+  
+  // Add this new method to create a fallback normal map
+  private createFallbackNormalMap() {
+    console.log('Creating fallback water normal map');
+    // Create a canvas for a fallback normal map
+    const canvas = document.createElement('canvas');
+    canvas.width = 128;
+    canvas.height = 128;
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      // Create a simple normal map pattern
+      for (let y = 0; y < canvas.height; y++) {
+        for (let x = 0; x < canvas.width; x++) {
+          // Create a wavy pattern
+          const r = Math.floor(127 * Math.sin((x / canvas.width) * Math.PI * 10) + 127);
+          const g = Math.floor(127 * Math.sin((y / canvas.height) * Math.PI * 10) + 127);
+          const b = 255; // Full blue for normal map
+          
+          ctx.fillStyle = `rgb(${r},${g},${b})`;
+          ctx.fillRect(x, y, 1, 1);
+        }
+      }
+      
+      const fallbackTexture = new THREE.CanvasTexture(canvas);
+      fallbackTexture.wrapS = fallbackTexture.wrapT = THREE.RepeatWrapping;
+      fallbackTexture.repeat.set(5, 5);
+      this.waterNormalMap = fallbackTexture;
+      
+      // Update material if it exists
+      if (this.waterMaterial) {
+        (this.waterMaterial as any).uniforms.normalMap.value = fallbackTexture;
+        this.waterMaterial.needsUpdate = true;
+      }
+      console.log('Fallback water normal map created successfully');
+    }
   }
   
   private createFallbackNormalMap() {
