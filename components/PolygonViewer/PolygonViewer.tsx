@@ -1440,7 +1440,7 @@ export default function PolygonViewer() {
       />
       
       {/* Road Creator */}
-      {roadCreationActive && sceneRef.current && (
+      {roadCreationActive && sceneRef.current && sceneRef.current.scene && (
         <RoadCreator
           scene={sceneRef.current.scene}
           camera={sceneRef.current.camera}

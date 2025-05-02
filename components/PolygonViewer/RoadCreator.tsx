@@ -225,24 +225,26 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
       }
       
       // Find and remove any orphaned road meshes
-      scene.traverse((object) => {
-        if (object instanceof THREE.Mesh && object.userData && object.userData.isRoad) {
-          console.log('Road Creator: Removing orphaned road mesh on unmount');
-          scene.remove(object);
-          
-          if (object.geometry) {
-            object.geometry.dispose();
-          }
-          
-          if (object.material) {
-            if (Array.isArray(object.material)) {
-              object.material.forEach(m => m.dispose());
-            } else {
-              object.material.dispose();
+      if (scene) {
+        scene.traverse((object) => {
+          if (object instanceof THREE.Mesh && object.userData && object.userData.isRoad) {
+            console.log('Road Creator: Removing orphaned road mesh on unmount');
+            scene.remove(object);
+            
+            if (object.geometry) {
+              object.geometry.dispose();
+            }
+            
+            if (object.material) {
+              if (Array.isArray(object.material)) {
+                object.material.forEach(m => m.dispose());
+              } else {
+                object.material.dispose();
+              }
             }
           }
-        }
-      });
+        });
+      }
     };
   }, [active, camera, points, scene, onComplete, onCancel, previewMesh]);
 
