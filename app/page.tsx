@@ -916,7 +916,8 @@ export default function Home() {
         strokeColor: '#3388ff',
         strokeOpacity: 0.8,
         fillColor: '#3388ff',
-        fillOpacity: 0.35
+        fillOpacity: 0.35,
+        visible: true // Explicitly ensure visibility is maintained
       });
       setSelectedPolygon(null);
     }
