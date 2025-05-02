@@ -49,67 +49,68 @@ const BuildingModelViewer: React.FC<BuildingModelViewerProps> = ({
   useEffect(() => {
     if (!containerRef.current) return;
     
-    // Initialize Three.js scene
-    const scene = new THREE.Scene();
-    
-    // Use a warmer background color - amber/beige tone
-    scene.background = new THREE.Color(0xf5e9d6); // Warm beige color
-    
-    // Add ambient light with warmer tone
-    const ambientLight = new THREE.AmbientLight(0xfff0dd, 0.6); // Warmer ambient light with higher intensity
-    scene.add(ambientLight);
-    
-    // Add directional light with warmer tone
-    const directionalLight = new THREE.DirectionalLight(0xfff0dd, 1.2); // Warmer directional light with higher intensity
-    directionalLight.position.set(5, 10, 7.5);
-    scene.add(directionalLight);
-    
-    // Add a secondary fill light from opposite direction for better illumination
-    const fillLight = new THREE.DirectionalLight(0xffeedd, 0.8);
-    fillLight.position.set(-5, 5, -7.5);
-    scene.add(fillLight);
-    
-    // Add a subtle rim light for better edge definition
-    const rimLight = new THREE.DirectionalLight(0xffffee, 0.5);
-    rimLight.position.set(0, -5, 0);
-    scene.add(rimLight);
-    
-    // Add camera
-    const camera = new THREE.PerspectiveCamera(
-      45, 
-      width / height, 
-      0.1, 
-      1000
-    );
-    camera.position.z = 5;
-    camera.position.y = 2;
-    
-    // Add renderer with improved settings
-    const renderer = new THREE.WebGLRenderer({ 
-      antialias: true,
-      alpha: true,
-      preserveDrawingBuffer: true // Needed for taking screenshots
-    });
-    renderer.setSize(width, height);
-    renderer.setPixelRatio(window.devicePixelRatio);
-    
-    // Enable shadow mapping for better visual quality
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    
-    // Enable tone mapping for more realistic lighting
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.2;
-    
-    containerRef.current.appendChild(renderer.domElement);
-    
-    // Add orbit controls
-    const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.25;
-    controls.enableZoom = true;
-    controls.autoRotate = true;
-    controls.autoRotateSpeed = 3; // Increased from 2 to 3
+    // Initialize Three.js scene - wrap in try/catch for error handling
+    try {
+      const scene = new THREE.Scene();
+      
+      // Use a warmer background color - amber/beige tone
+      scene.background = new THREE.Color(0xf5e9d6); // Warm beige color
+      
+      // Add ambient light with warmer tone
+      const ambientLight = new THREE.AmbientLight(0xfff0dd, 0.6); // Warmer ambient light with higher intensity
+      scene.add(ambientLight);
+      
+      // Add directional light with warmer tone
+      const directionalLight = new THREE.DirectionalLight(0xfff0dd, 1.2); // Warmer directional light with higher intensity
+      directionalLight.position.set(5, 10, 7.5);
+      scene.add(directionalLight);
+      
+      // Add a secondary fill light from opposite direction for better illumination
+      const fillLight = new THREE.DirectionalLight(0xffeedd, 0.8);
+      fillLight.position.set(-5, 5, -7.5);
+      scene.add(fillLight);
+      
+      // Add a subtle rim light for better edge definition
+      const rimLight = new THREE.DirectionalLight(0xffffee, 0.5);
+      rimLight.position.set(0, -5, 0);
+      scene.add(rimLight);
+      
+      // Add camera
+      const camera = new THREE.PerspectiveCamera(
+        45, 
+        width / height, 
+        0.1, 
+        1000
+      );
+      camera.position.z = 5;
+      camera.position.y = 2;
+      
+      // Add renderer with improved settings
+      const renderer = new THREE.WebGLRenderer({ 
+        antialias: true,
+        alpha: true,
+        preserveDrawingBuffer: true // Needed for taking screenshots
+      });
+      renderer.setSize(width, height);
+      renderer.setPixelRatio(window.devicePixelRatio);
+      
+      // Enable shadow mapping for better visual quality
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      
+      // Enable tone mapping for more realistic lighting
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.2;
+      
+      containerRef.current.appendChild(renderer.domElement);
+      
+      // Add orbit controls
+      const controls = new OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.25;
+      controls.enableZoom = true;
+      controls.autoRotate = true;
+      controls.autoRotateSpeed = 3; // Increased from 2 to 3
     
     // Construct the full path to the GLB file
     const fullModelPath = `${basePath}/${variant}.glb`;
@@ -126,9 +127,17 @@ const BuildingModelViewer: React.FC<BuildingModelViewerProps> = ({
             fullModelPath,
             resolve,
             undefined,
-            reject
+            (error) => {
+              console.error('Error loading model:', error);
+              reject(new Error(`Failed to load model: ${error.message}`));
+            }
           );
         });
+        
+        // Check if the model loaded correctly
+        if (!gltf || !gltf.scene) {
+          throw new Error('Model loaded but scene is missing');
+        }
         
         const object = gltf.scene;
         
@@ -173,11 +182,13 @@ const BuildingModelViewer: React.FC<BuildingModelViewerProps> = ({
         
         scene.add(object);
         
-        // Add a subtle ground plane with shadow
+        // Add a subtle ground plane with shadow - use a safer material
         const groundGeometry = new THREE.PlaneGeometry(10, 10);
-        const groundMaterial = new THREE.ShadowMaterial({ 
+        const groundMaterial = new THREE.MeshBasicMaterial({ 
+          color: 0x000000,
+          transparent: true,
           opacity: 0.3,
-          color: 0x000000
+          depthWrite: false
         });
         const ground = new THREE.Mesh(groundGeometry, groundMaterial);
         ground.rotation.x = -Math.PI / 2;
@@ -194,16 +205,43 @@ const BuildingModelViewer: React.FC<BuildingModelViewerProps> = ({
         console.error('Error loading model:', err);
         setError(`Failed to load model: ${err instanceof Error ? err.message : String(err)}`);
         setIsLoading(false);
+        
+        // Create a fallback object to display when model loading fails
+        const geometry = new THREE.BoxGeometry(1, 1, 1);
+        const material = new THREE.MeshBasicMaterial({ color: 0xcc5500 }); // Amber color
+        const fallbackMesh = new THREE.Mesh(geometry, material);
+        scene.add(fallbackMesh);
+        
+        // Add text to indicate error
+        const textDiv = document.createElement('div');
+        textDiv.style.position = 'absolute';
+        textDiv.style.top = '50%';
+        textDiv.style.left = '50%';
+        textDiv.style.transform = 'translate(-50%, -50%)';
+        textDiv.style.color = 'white';
+        textDiv.style.backgroundColor = 'rgba(0,0,0,0.5)';
+        textDiv.style.padding = '5px';
+        textDiv.style.borderRadius = '3px';
+        textDiv.style.fontSize = '10px';
+        textDiv.style.textAlign = 'center';
+        textDiv.innerText = 'Model Error';
+        containerRef.current?.appendChild(textDiv);
       }
     };
     
     loadModel();
     
-    // Animation loop
+    // Animation loop with error handling
     const animate = () => {
-      requestAnimationFrame(animate);
-      controls.update();
-      renderer.render(scene, camera);
+      try {
+        requestAnimationFrame(animate);
+        controls.update();
+        renderer.render(scene, camera);
+      } catch (error) {
+        console.error('Animation error:', error);
+        // Don't rethrow - just log the error and continue
+        // This prevents the entire component from crashing
+      }
     };
     
     animate();
@@ -213,8 +251,42 @@ const BuildingModelViewer: React.FC<BuildingModelViewerProps> = ({
       if (containerRef.current && containerRef.current.contains(renderer.domElement)) {
         containerRef.current.removeChild(renderer.domElement);
       }
-      renderer.dispose();
+      
+      // Remove any error text elements
+      const textElements = containerRef.current?.querySelectorAll('div');
+      textElements?.forEach(el => {
+        if (containerRef.current?.contains(el)) {
+          containerRef.current.removeChild(el);
+        }
+      });
+      
+      // Properly dispose of Three.js objects to prevent memory leaks
+      try {
+        renderer.dispose();
+        // Dispose of geometries and materials
+        scene.traverse((object) => {
+          if (object instanceof THREE.Mesh) {
+            if (object.geometry) object.geometry.dispose();
+            
+            if (object.material) {
+              if (Array.isArray(object.material)) {
+                object.material.forEach(material => material.dispose());
+              } else {
+                object.material.dispose();
+              }
+            }
+          }
+        });
+      } catch (error) {
+        console.error('Error during cleanup:', error);
+      }
     };
+  } catch (setupError) {
+    // Handle errors during scene setup
+    console.error('Error setting up 3D scene:', setupError);
+    setError(`Failed to initialize 3D viewer: ${setupError instanceof Error ? setupError.message : String(setupError)}`);
+    setIsLoading(false);
+  }
   }, [basePath, width, height, variant]);
   
   return (
