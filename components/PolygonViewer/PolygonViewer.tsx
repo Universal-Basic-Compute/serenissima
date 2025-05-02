@@ -828,6 +828,17 @@ export default function PolygonViewer() {
     // Initialize road manager
     if (sceneRef.current) {
       roadManagerRef.current = new RoadManager(sceneRef.current.scene);
+      
+      // Load roads from Airtable
+      if (roadManagerRef.current) {
+        roadManagerRef.current.loadRoadsFromAirtable()
+          .then(() => {
+            console.log('Roads loaded from Airtable');
+          })
+          .catch(error => {
+            console.error('Failed to load roads from Airtable:', error);
+          });
+      }
     }
     
     // Progressive initialization of components
@@ -1349,12 +1360,30 @@ export default function PolygonViewer() {
       console.log(`PolygonViewer: Creating road with curvature ${curvature}`);
       const roadId = roadManagerRef.current.createRoad(roadPoints, curvature);
       console.log(`PolygonViewer: Road created with ID ${roadId}`);
+      
+      // Get the current wallet address
+      const walletAddress = sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress');
+      
+      // Save the road to Airtable
+      if (roadId) {
+        roadManagerRef.current.saveRoadToAirtable(roadId, selectedPolygonId, walletAddress)
+          .then(response => {
+            console.log('Road saved to Airtable:', response);
+            // Show success message
+            alert('Road created successfully!');
+          })
+          .catch(error => {
+            console.error('Failed to save road to Airtable:', error);
+            // Show error message but don't remove the road from the scene
+            alert('Road created but failed to save to database. It may disappear when you reload the page.');
+          });
+      }
     } else {
       console.error('PolygonViewer: Road manager not initialized');
     }
     
     setRoadCreationActive(false);
-  }, []);
+  }, [selectedPolygonId]);
 
   // Add handler for road creation cancellation
   const handleRoadCancel = useCallback(() => {
