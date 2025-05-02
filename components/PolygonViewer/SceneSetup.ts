@@ -259,9 +259,18 @@ export default class SceneSetup {
   
   // Add method to create water
   public createWater() {
-    console.log('Water effect creation disabled');
-    // No water effect is created to avoid geometry generation
-    this.water = null;
+    console.log('Creating simple water effect...');
+    
+    // Create a simple water effect
+    this.water = new SimpleWater({
+      scene: this.scene,
+      activeView: this.activeView,
+      performanceMode: this.performanceMode,
+      width: 300, // Match the width used for clouds
+      height: 300  // Match the height used for clouds
+    });
+    
+    return this.water;
   }
   
   private calculateSunPosition(): THREE.Vector3 {

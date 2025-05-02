@@ -706,7 +706,13 @@ export default function PolygonViewer() {
         };
       }
       
-      // Create water effect directly instead of using sceneSetup.createWater()
+      // Create water effect directly
+      if (sceneRef.current) {
+        const water = sceneRef.current.createWater();
+        waterEffectRef.current = water;
+      }
+      
+      // Also create a WaterEffect for more advanced water features
       const waterEffectTimeout = setTimeout(() => {
         if (sceneRef.current) {
           const waterEffect = new WaterEffect({
@@ -848,7 +854,10 @@ export default function PolygonViewer() {
     const initWaterEffect = () => {
       console.log('Creating water effect...');
       if (sceneRef.current) {
-        // Create our own water effect reference
+        // First create the simple water from SceneSetup
+        const water = sceneRef.current.createWater();
+        
+        // Then create our own water effect reference for advanced features
         const waterEffect = new WaterEffect({
           scene: sceneRef.current.scene,
           activeView,
