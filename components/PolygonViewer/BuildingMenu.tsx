@@ -630,7 +630,7 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
   {/* Placeable Building */}
   {placeableBuilding && (
     <PlaceableBuilding
-      buildingName={placeableBuilding?.name.toLowerCase().replace(/\s+/g, '-')}
+      buildingName={placeableBuilding?.name?.toLowerCase().replace(/\s+/g, '-') || ''}
       variant={placeableBuilding?.variant}
       onPlace={(position) => {
         console.log(`Building placed at position: ${position.x}, ${position.y}`);
