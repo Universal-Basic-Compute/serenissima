@@ -552,8 +552,9 @@ export default class WaterEffect {
   
   // Add method to create water
   public createWater() {
-    console.log('Water creation completely disabled');
+    console.log('WaterEffect.createWater disabled - using AdvancedWater from SceneSetup instead');
     // No water is created
+    return null;
   }
   
   // Add helper method to create a simple water plane
@@ -566,26 +567,8 @@ export default class WaterEffect {
     // Update time for shader animations
     this.time += 0.01;
     
-    // Get delta time for physics-based simulation
-    const currentTime = this.clock.getElapsedTime();
-    const deltaTime = Math.min(0.05, currentTime - this.lastUpdateTime); // Cap delta time to prevent instability
-    this.lastUpdateTime = currentTime;
-    
-    // Skip updates if water isn't properly initialized
-    if (!this.waterMesh || !this.waterMaterial) {
-      return;
-    }
-    
-    // Update shader uniforms
-    if (this.waterMaterial instanceof THREE.ShaderMaterial) {
-      this.waterMaterial.uniforms.time.value = this.time;
-    }
-    
-    // Update wave simulation at a reduced rate for performance
-    if (this.waveSimulationActive && frameCount % (performanceMode ? 5 : 2) === 0) {
-      this.updateWaveSimulation(deltaTime);
-      this.applyWaveSimulationToMesh();
-    }
+    // Skip water creation and updates - we're using AdvancedWater instead
+    console.log('WaterEffect update disabled - using AdvancedWater instead');
   }
   
   public updateViewMode(activeView: ViewMode) {

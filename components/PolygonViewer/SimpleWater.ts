@@ -42,66 +42,9 @@ export default class SimpleWater {
   }
   
   private createWater() {
-    console.log('Creating physically simulated water plane...');
-    
-    // Create a water plane with more segments for better wave animation
-    const geometry = new THREE.PlaneGeometry(
-      this.width * 4, 
-      this.height * 4, 
-      128, // Increase segments significantly for smoother waves
-      128
-    );
-    
-    // Load water textures
-    const textureLoader = new THREE.TextureLoader();
-    
-    // Load water normal map with better error handling
-    const normalMap = textureLoader.load('/textures/waternormals.jpg', 
-      (texture) => {
-        console.log('Water normal map loaded successfully');
-        texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-        texture.repeat.set(8, 8); // Increase repeat for more detailed waves
-      },
-      undefined,
-      (error) => {
-        console.error('Error loading water normal map:', error);
-        // Create a fallback normal map
-        this.createFallbackNormalMap();
-      }
-    );
-    
-    // Create a more advanced material for water with stronger normal effect
-    const waterColor = new THREE.Color(this.getWaterColorForView());
-    const material = new THREE.MeshPhongMaterial({
-      color: waterColor,
-      transparent: true,
-      opacity: 0.95,
-      side: THREE.DoubleSide,
-      normalMap: normalMap,
-      normalScale: new THREE.Vector2(1.5, 1.5),
-      shininess: 100,
-      specular: 0x111111,
-    });
-    
-    // Create the water mesh
-    this.waterMesh = new THREE.Mesh(geometry, material);
-    
-    // Position water at y=-0.05 (closer to the land which is at y=0.1)
-    this.waterMesh.position.y = -0.05;
-    
-    // Rotate the water plane to be horizontal
-    this.waterMesh.rotation.x = -Math.PI / 2;
-    
-    // Set render order to ensure water appears below land
-    this.waterMesh.renderOrder = 5;
-    
-    // Add to scene
-    this.scene.add(this.waterMesh);
-    
-    // Initialize wave simulation data
-    this.initializeWaveSimulation();
-    
-    console.log('Enhanced water mesh with physical simulation created successfully');
+    console.log('SimpleWater.createWater disabled - using AdvancedWater instead');
+    // No water mesh is created - we're using AdvancedWater instead
+    this.waterMesh = null;
   }
   
   // Add this method to create a fallback normal map
@@ -156,40 +99,8 @@ export default class SimpleWater {
   }
   
   public update(frameCount: number) {
-    this.time += 0.01;
-    
-    // Skip if water mesh doesn't exist
-    if (!this.waterMesh) return;
-    
-    // Get the material
-    const material = this.waterMesh.material as THREE.MeshPhongMaterial;
-    
-    // Update normal map offset for wave animation
-    if (material.normalMap) {
-      // Create more complex wave motion with multiple frequencies
-      material.normalMap.offset.x = Math.sin(this.time * 0.05) * 0.2 + this.time * 0.05;
-      material.normalMap.offset.y = Math.cos(this.time * 0.04) * 0.2 + this.time * 0.03;
-      
-      // Vary normal scale for more dynamic waves
-      const scale = 1.0 + Math.sin(this.time * 0.1) * 0.5;
-      material.normalScale.set(scale, scale);
-      
-      // Slightly vary the water color over time for more realism
-      const baseColor = new THREE.Color(this.getWaterColorForView());
-      const r = baseColor.r + Math.sin(this.time * 0.1) * 0.05;
-      const g = baseColor.g + Math.cos(this.time * 0.15) * 0.05;
-      const b = baseColor.b + Math.sin(this.time * 0.2) * 0.05;
-      material.color.setRGB(r, g, b);
-      
-      // Update material
-      material.needsUpdate = true;
-    }
-    
-    // Update wave simulation
-    this.updateWaveSimulation();
-    
-    // Apply wave simulation to geometry
-    this.applyWavesToGeometry();
+    // SimpleWater update disabled - using AdvancedWater instead
+    console.log('SimpleWater.update disabled - using AdvancedWater instead');
   }
   
   public updateViewMode(activeView: ViewMode) {
