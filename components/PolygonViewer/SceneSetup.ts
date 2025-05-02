@@ -293,6 +293,34 @@ export default class SceneSetup {
     return this.water;
   }
   
+  // Add a method to ensure roads are always visible
+  public ensureRoadsVisible() {
+    if (!this.scene) return;
+    
+    this.scene.traverse((object) => {
+      if (object instanceof THREE.Mesh && 
+          object.userData && 
+          (object.userData.isRoad || object.userData.alwaysVisible)) {
+        // Force visibility
+        object.visible = true;
+        
+        // Ensure high render order
+        object.renderOrder = 30;
+        
+        // Update material
+        if (object.material) {
+          if (Array.isArray(object.material)) {
+            object.material.forEach(mat => {
+              if (mat) mat.needsUpdate = true;
+            });
+          } else {
+            object.material.needsUpdate = true;
+          }
+        }
+      }
+    });
+  }
+  
   private calculateSunPosition(): THREE.Vector3 {
     // Get current time
     const now = new Date();
