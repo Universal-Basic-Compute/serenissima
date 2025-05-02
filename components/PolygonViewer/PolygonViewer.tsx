@@ -851,20 +851,8 @@ export default function PolygonViewer() {
     const initWaterEffect = () => {
       console.log('Creating water effect...');
       if (sceneRef.current) {
-        // First create the simple water from SceneSetup
+        // Create the water from SceneSetup
         const water = sceneRef.current.createWater();
-        
-        // Then create our own water effect reference for advanced features
-        const waterEffect = new WaterEffect({
-          scene: sceneRef.current.scene,
-          activeView,
-          performanceMode: !highQuality,
-          width: bounds.scale * 200,
-          height: bounds.scale * 200,
-          renderer: sceneRef.current.renderer  // Pass the renderer
-        });
-        waterEffectRef.current = waterEffect;
-        
         console.log('Water effect initialized successfully');
       } else {
         console.warn('Cannot create water effect: scene reference is null');
