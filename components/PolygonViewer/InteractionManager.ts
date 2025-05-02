@@ -153,6 +153,12 @@ export default class InteractionManager {
     // Skip if disabled
     if (!this.enabled) return;
     
+    // Skip if this click is for road creation
+    if ((event as any).isRoadCreationClick) {
+      console.log('InteractionManager: Skipping click handling for road creation');
+      return;
+    }
+    
     // Prevent processing if already handling a click
     if (this.isProcessingClick) return;
     

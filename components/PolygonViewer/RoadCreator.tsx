@@ -65,6 +65,9 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
       
       console.log('Road Creator: Click detected');
       
+      // Mark this event as handled by the road creator to prevent other handlers from processing it
+      (event as any).isRoadCreationClick = true;
+      
       // Calculate mouse position in normalized device coordinates
       mouseRef.current.x = (event.clientX / window.innerWidth) * 2 - 1;
       mouseRef.current.y = -(event.clientY / window.innerHeight) * 2 + 1;
@@ -181,12 +184,13 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
       }
     };
 
-    // Add this function to stop event propagation for all clicks
+    // Add this function to mark events for road creation
     const preventLandSelection = (event: MouseEvent) => {
-      // Only stop propagation, don't prevent default
-      // This allows our own click handler to still work
-      console.log('Road Creator: Preventing click propagation to land selection');
-      event.stopPropagation();
+      // Don't stop propagation here, as it's preventing our own click handler from working
+      // Instead, we'll use a flag to indicate that the click is for road creation
+      console.log('Road Creator: Marking event for road creation');
+      // Add a custom property to the event to mark it
+      (event as any).isRoadCreationClick = true;
     };
 
     // Add event listeners
