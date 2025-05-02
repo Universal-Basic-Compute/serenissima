@@ -2,7 +2,8 @@ const fs = require('fs');
 const path = require('path');
 
 // Define the multiplier
-const MULTIPLIER = 0.5;
+const MULTIPLIER = 1000;
+const THRESHOLD = 100000;
 
 // Define the directory containing building files
 const BUILDINGS_DIR = path.join('data', 'buildings');
@@ -29,19 +30,19 @@ buildingFiles.forEach(filename => {
     
     // Modify each building
     buildings.forEach(building => {
-      // Multiply ducats in constructionCosts by MULTIPLIER
-      if (building.constructionCosts && building.constructionCosts.ducats) {
+      // Check if ducats is less than threshold before multiplying
+      if (building.constructionCosts && building.constructionCosts.ducats && building.constructionCosts.ducats < THRESHOLD) {
         building.constructionCosts.ducats *= MULTIPLIER;
-      }
-      
-      // Multiply incomeGeneration by MULTIPLIER
-      if (building.incomeGeneration !== undefined) {
-        building.incomeGeneration *= MULTIPLIER;
-      }
-      
-      // Multiply maintenanceCost by MULTIPLIER
-      if (building.maintenanceCost !== undefined) {
-        building.maintenanceCost *= MULTIPLIER;
+        
+        // Also multiply incomeGeneration if it exists and is less than threshold
+        if (building.incomeGeneration !== undefined) {
+          building.incomeGeneration *= MULTIPLIER;
+        }
+        
+        // Also multiply maintenanceCost if it exists and is less than threshold
+        if (building.maintenanceCost !== undefined) {
+          building.maintenanceCost *= MULTIPLIER;
+        }
       }
     });
     
