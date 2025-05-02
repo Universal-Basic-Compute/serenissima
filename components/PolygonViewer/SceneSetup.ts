@@ -6,6 +6,7 @@ import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { ViewMode } from './types';
 import CloudSystem from './CloudSystem';
 import SimpleWater from './SimpleWater';
+import Water from './SimpleWater'; // Alias SimpleWater as Water for compatibility
 
 interface SceneSetupProps {
   canvas: HTMLCanvasElement;
@@ -267,32 +268,16 @@ export default class SceneSetup {
   
   // Add method to create water
   public createWater() {
-    console.log('Creating advanced water system...');
+    console.log('Creating water system...');
     
-    // Determine which water implementation to use based on performance mode
-    const useAdvancedWater = !this.performanceMode;
-    
-    if (useAdvancedWater) {
-      console.log('Using full water simulation for high quality mode');
-      // Create a water effect with larger dimensions for better coverage
-      this.water = new Water({
-        scene: this.scene,
-        activeView: this.activeView,
-        performanceMode: this.performanceMode,
-        width: 2500, // Increased coverage
-        height: 2500  // Increased coverage
-      });
-    } else {
-      console.log('Using simple water for performance mode');
-      // Use SimpleWater for performance mode
-      this.water = new SimpleWater({
-        scene: this.scene,
-        activeView: this.activeView,
-        performanceMode: this.performanceMode,
-        width: 2000,
-        height: 2000
-      });
-    }
+    // Always use SimpleWater regardless of performance mode
+    this.water = new SimpleWater({
+      scene: this.scene,
+      activeView: this.activeView,
+      performanceMode: this.performanceMode,
+      width: this.performanceMode ? 2000 : 2500, // Adjust width based on performance mode
+      height: this.performanceMode ? 2000 : 2500 // Adjust height based on performance mode
+    });
     
     // If we have land positions, set them for water interaction
     if (this.scene.userData.landPositions && Array.isArray(this.scene.userData.landPositions)) {
