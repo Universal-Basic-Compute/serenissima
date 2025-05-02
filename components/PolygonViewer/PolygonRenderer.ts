@@ -266,6 +266,9 @@ export default class PolygonRenderer {
       this.textureLoader = new THREE.TextureLoader();
     }
     
+    // Collect land positions for water interaction
+    const landPositions: THREE.Vector3[] = [];
+    
     // Process each polygon
     this.polygons.forEach(polygon => {
       // Skip if already created
@@ -315,12 +318,30 @@ export default class PolygonRenderer {
         // Mark as created
         this.createdPolygonIds.add(polygon.id);
         
+        // Add land position for water interaction
+        if (polygon.centroid) {
+          // Convert centroid to 3D position
+          const normalizedCoord = normalizeCoordinates(
+            [polygon.centroid],
+            this.bounds.centerLat,
+            this.bounds.centerLng,
+            this.bounds.scale,
+            this.bounds.latCorrectionFactor
+          )[0];
+          
+          landPositions.push(new THREE.Vector3(normalizedCoord.x, 0, normalizedCoord.y));
+        }
+        
       } catch (error) {
         console.error(`Error rendering polygon ${polygon.id}:`, error);
       }
     });
     
     console.log(`Created ${this.PolygonMeshs.length} polygon meshes`);
+    
+    // Store land positions in scene for water interaction
+    this.scene.userData.landPositions = landPositions;
+    console.log(`Collected ${landPositions.length} land positions for water interaction`);
   }
   
   private createSamplePolygon() {

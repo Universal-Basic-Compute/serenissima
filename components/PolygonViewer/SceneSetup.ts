@@ -5,7 +5,7 @@ import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { ViewMode } from './types';
 import CloudSystem from './CloudSystem';
-import AdvancedWater from './AdvancedWater';
+import Water from './Water';
 
 interface SceneSetupProps {
   canvas: HTMLCanvasElement;
@@ -25,7 +25,7 @@ export default class SceneSetup {
   private sunGlow: THREE.Mesh = new THREE.Mesh();
   private cloudSystem: CloudSystem | null = null;
   private zoomThreshold: number = 40; // Changed from 70 to 40 - Threshold for showing clouds
-  public water: AdvancedWater | null = null; // Reference to water effect
+  public water: Water | null = null; // Reference to water effect
   private activeView: ViewMode;
   
   constructor({ canvas, activeView, highQuality }: SceneSetupProps) {
@@ -259,16 +259,21 @@ export default class SceneSetup {
   
   // Add method to create water
   public createWater() {
-    console.log('Creating advanced liquid simulation water...');
+    console.log('Creating unified water system...');
     
     // Create a water effect with larger dimensions for better coverage
-    this.water = new AdvancedWater({
+    this.water = new Water({
       scene: this.scene,
       activeView: this.activeView,
       performanceMode: this.performanceMode,
-      width: 800, // Increased from 600 to 800 for better coverage
-      height: 800  // Increased from 600 to 800 for better coverage
+      width: 800, // Large width for better coverage
+      height: 800 // Large height for better coverage
     });
+    
+    // If we have land positions, set them for water interaction
+    if (this.scene.userData.landPositions && Array.isArray(this.scene.userData.landPositions)) {
+      this.water.setLandPositions(this.scene.userData.landPositions);
+    }
     
     return this.water;
   }
