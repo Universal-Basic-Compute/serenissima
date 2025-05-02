@@ -733,6 +733,4 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
       setShowPurchaseConfirmation(false);
     });
   }
-  );
-  
 }
