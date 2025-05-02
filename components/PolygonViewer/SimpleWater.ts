@@ -94,6 +94,7 @@ export default class SimpleWater {
       fragmentShader: `
         uniform vec3 waterColor;
         uniform vec3 deepWaterColor;
+        uniform float time; // Add time uniform to fragment shader
         varying vec2 vUv;
         varying float vElevation;
         
