@@ -323,6 +323,32 @@ export default function PolygonViewer() {
     }
   }, [loadPolygons, loadLandOwners, loadUsers, loadBridges, loading, users]); // Fix: Add proper dependencies
   
+  // Add a function to ensure water is visible
+  const ensureWaterIsVisible = useCallback(() => {
+    if (sceneRef.current && sceneRef.current.scene) {
+      // Force water to be visible
+      const waterMesh = sceneRef.current.scene.children.find(
+        child => child.userData && child.userData.isWaterMesh
+      );
+      
+      if (waterMesh) {
+        // Ensure water is visible
+        waterMesh.visible = true;
+        
+        // Ensure water is at the correct position (slightly above ground level for better visibility)
+        waterMesh.position.y = 0.05;
+        
+        // Force material update
+        if (waterMesh.material) {
+          waterMesh.material.needsUpdate = true;
+        }
+      } else if (sceneRef.current.water === null) {
+        console.log('Water mesh not found in scene, recreating water');
+        sceneRef.current.createWater();
+      }
+    }
+  }, []);
+  
   // Add a specific check to ensure water is created and visible
   useEffect(() => {
     if (sceneRef.current) {
@@ -336,14 +362,27 @@ export default function PolygonViewer() {
       const waterUpdateInterval = setInterval(() => {
         if (sceneRef.current && sceneRef.current.water) {
           sceneRef.current.water.update(Date.now());
+          ensureWaterIsVisible();
         }
       }, 100); // Update every 100ms
       
+      // Additional check to ensure water is created after a delay
+      const waterCreationTimeout = setTimeout(() => {
+        if (!sceneRef.current?.water) {
+          console.log('Water still not created after delay, forcing creation');
+          if (sceneRef.current) {
+            sceneRef.current.createWater();
+          }
+        }
+        ensureWaterIsVisible();
+      }, 2000);
+      
       return () => {
         clearInterval(waterUpdateInterval);
+        clearTimeout(waterCreationTimeout);
       };
     }
-  }, [sceneRef.current]);
+  }, [sceneRef.current, ensureWaterIsVisible]);
   
   // Calculate centroids directly in the main thread for polygons without centroids
   useEffect(() => {
@@ -1031,6 +1070,17 @@ export default function PolygonViewer() {
               if (!waterMesh) {
                 console.log('Water mesh not found in scene, recreating water');
                 sceneRef.current.createWater();
+              } else if (!waterMesh.visible) {
+                console.log('Water mesh found but not visible, making it visible');
+                waterMesh.visible = true;
+              
+                // Ensure water is at the correct position
+                waterMesh.position.y = 0.05;
+              
+                // Force material update
+                if (waterMesh.material) {
+                  waterMesh.material.needsUpdate = true;
+                }
               }
             }
         
@@ -1038,9 +1088,21 @@ export default function PolygonViewer() {
             if (frameCount % 5 === 0) { // Every 5 frames
               sceneRef.current.water.update(frameCount + 10); // Add offset for variation
             }
+          
+            // Create random waves occasionally for more dynamic water
+            if (frameCount % 120 === 0) { // Every ~2 seconds (assuming 60fps)
+              if (typeof (sceneRef.current.water as any).createRandomWave === 'function') {
+                (sceneRef.current.water as any).createRandomWave();
+              }
+            }
           } catch (error) {
             // Silent fail
           }
+        } else if (frameCount % 60 === 0 && sceneRef.current) { // Check every second
+          // If water doesn't exist, create it
+          console.log('Water not found, creating water in animation loop');
+          sceneRef.current.createWater();
+          ensureWaterIsVisible();
         }
       
         // Update road visibility EVERY frame instead of periodically

@@ -66,7 +66,8 @@ export default class SimpleWater {
         waterColor: { value: new THREE.Color(this.getWaterColorForView()) },
         deepWaterColor: { value: new THREE.Color(this.getDeepWaterColorForView()) },
         sunPosition: { value: new THREE.Vector3(500, 300, 100) },
-        sunColor: { value: new THREE.Color(0xffffeb) }
+        sunColor: { value: new THREE.Color(0xffffeb) },
+        waveHeight: { value: 2.0 } // Add wave height uniform for more control
       },
       vertexShader: `
         uniform float time;
@@ -217,7 +218,7 @@ export default class SimpleWater {
     this.waterMesh = new THREE.Mesh(this.waterGeometry, this.waterMaterial);
     
     // Position water at y=0 (surface level) - move higher for better visibility
-    this.waterMesh.position.y = 0.01; // Changed from -0.05 to 0.01 to be more visible
+    this.waterMesh.position.y = 0.05; // Increased from 0.01 to 0.05 for better visibility
     
     // Rotate the water plane to be horizontal
     this.waterMesh.rotation.x = -Math.PI / 2;
@@ -308,7 +309,7 @@ export default class SimpleWater {
       // Simulate a random wave pulse by temporarily increasing wave height
       if (this.waterMaterial.uniforms.waveHeight) {
         const originalHeight = this.waterMaterial.uniforms.waveHeight.value;
-        this.waterMaterial.uniforms.waveHeight.value = originalHeight * 1.2;
+        this.waterMaterial.uniforms.waveHeight.value = originalHeight * 1.5; // Increased from 1.2 to 1.5
         
         // Reset after a short delay
         setTimeout(() => {
@@ -317,6 +318,31 @@ export default class SimpleWater {
           }
         }, 500);
       }
+    }
+    
+    // Ensure water mesh is visible
+    if (this.waterMesh && !this.waterMesh.visible) {
+      console.log('Water mesh was invisible, making it visible');
+      this.waterMesh.visible = true;
+    }
+  }
+  
+  // Add method to create random waves for more dynamic water
+  public createRandomWave() {
+    // Skip if water mesh doesn't exist
+    if (!this.waterMesh || !this.waterMaterial) return;
+    
+    // Temporarily increase wave height for a more dramatic effect
+    if (this.waterMaterial.uniforms.waveHeight) {
+      const originalHeight = this.waterMaterial.uniforms.waveHeight.value;
+      this.waterMaterial.uniforms.waveHeight.value = originalHeight * 2.0;
+      
+      // Reset after a short delay
+      setTimeout(() => {
+        if (this.waterMaterial && this.waterMaterial.uniforms.waveHeight) {
+          this.waterMaterial.uniforms.waveHeight.value = originalHeight;
+        }
+      }, 800);
     }
   }
   

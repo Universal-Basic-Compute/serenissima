@@ -281,6 +281,17 @@ export default class SceneSetup {
     // If we have land positions, set them for water interaction
     if (this.scene.userData.landPositions && Array.isArray(this.scene.userData.landPositions)) {
       this.water.setLandPositions(this.scene.userData.landPositions);
+    } else {
+      // Create some default land positions for water interaction if none exist
+      const defaultPositions = [];
+      for (let i = 0; i < 20; i++) {
+        defaultPositions.push(new THREE.Vector3(
+          (Math.random() - 0.5) * 100,
+          0,
+          (Math.random() - 0.5) * 100
+        ));
+      }
+      this.water.setLandPositions(defaultPositions);
     }
     
     // Force multiple initial updates to ensure water is properly initialized
@@ -295,6 +306,16 @@ export default class SceneSetup {
           if (this.water) this.water.update(time);
         }, 100 + index * 150); // Staggered updates for smoother initialization
       });
+      
+      // Create some initial waves for immediate visual effect
+      setTimeout(() => {
+        for (let i = 0; i < 5; i++) {
+          // Call the createRandomWave method if it exists
+          if (this.water && typeof (this.water as any).createRandomWave === 'function') {
+            (this.water as any).createRandomWave();
+          }
+        }
+      }, 500);
     }
     
     return this.water;
@@ -440,7 +461,13 @@ export default class SceneSetup {
   public update(frameCount: number) {
     // Update water if it exists - ensure this runs every frame for smooth wave animation
     if (this.water) {
+      // Update multiple times per frame for more dynamic waves
       this.water.update(frameCount);
+      
+      // Add occasional extra updates for more dynamic movement
+      if (frameCount % 3 === 0) {
+        this.water.update(frameCount + 10); // Add offset for variation
+      }
     }
     
     // Update clouds
