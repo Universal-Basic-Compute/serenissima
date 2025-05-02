@@ -776,6 +776,19 @@ export default function PolygonViewer() {
       // Update the store with the modified users data
       usePolygonStore.setState({ users: updatedUsers });
     }
+    
+    // Add a fallback rendering mechanism
+    const ensureRendering = () => {
+      if (sceneRef.current && sceneRef.current.renderer && sceneRef.current.scene && sceneRef.current.camera) {
+        console.log('Forcing fallback render');
+        try {
+          // Try direct rendering first
+          sceneRef.current.renderer.render(sceneRef.current.scene, sceneRef.current.camera);
+        } catch (error) {
+          console.error('Error in fallback rendering:', error);
+        }
+      }
+    };
 
     try {
       // Initialize scene
@@ -794,6 +807,15 @@ export default function PolygonViewer() {
           }
         };
       }
+      
+      // Force rendering multiple times during initialization
+      setTimeout(ensureRendering, 100);
+      setTimeout(ensureRendering, 500);
+      setTimeout(ensureRendering, 1000);
+      setTimeout(ensureRendering, 2000);
+
+      // Set up a periodic rendering check
+      const renderingInterval = setInterval(ensureRendering, 5000);
       
       // Create water effect immediately
       if (sceneRef.current) {
@@ -884,6 +906,9 @@ export default function PolygonViewer() {
     return () => {
       if (typeof fallbackWaterInterval !== 'undefined') {
         clearInterval(fallbackWaterInterval);
+      }
+      if (typeof renderingInterval !== 'undefined') {
+        clearInterval(renderingInterval);
       }
       // ... other cleanup code ...
     };
@@ -1097,6 +1122,11 @@ export default function PolygonViewer() {
         // Skip some frames at the beginning for better initial performance
         if (isFirstRender) {
           isFirstRender = false;
+          
+          // Force a simple render on first frame
+          if (sceneRef.current && sceneRef.current.renderer) {
+            sceneRef.current.renderer.render(sceneRef.current.scene, sceneRef.current.camera);
+          }
           return;
         }
         
@@ -1287,12 +1317,43 @@ export default function PolygonViewer() {
               // Render the scene
               sceneRef.current.composer.render();
             } catch (error) {
-              // Silent fail - don't log errors for every frame
+              console.error('Composer render failed, using fallback direct rendering');
+              if (sceneRef.current && sceneRef.current.renderer) {
+                try {
+                  sceneRef.current.renderer.render(sceneRef.current.scene, sceneRef.current.camera);
+                } catch (innerError) {
+                  console.error('Fallback rendering also failed:', innerError);
+                }
+              }
             }
           }
         }
+        
+        frameCount++;
       } catch (error) {
-        // Silent fail for the entire animation loop
+        console.error('Animation loop error:', error);
+        
+        // Emergency fallback render
+        if (sceneRef.current && sceneRef.current.renderer) {
+          try {
+            sceneRef.current.renderer.render(sceneRef.current.scene, sceneRef.current.camera);
+          } catch (fallbackError) {
+            // Last resort - create a new renderer
+            if (canvasRef.current && sceneRef.current) {
+              try {
+                const emergencyRenderer = new THREE.WebGLRenderer({ 
+                  canvas: canvasRef.current,
+                  antialias: false,
+                  alpha: true
+                });
+                emergencyRenderer.setSize(window.innerWidth, window.innerHeight);
+                emergencyRenderer.render(sceneRef.current.scene, sceneRef.current.camera);
+              } catch (emergencyError) {
+                // Give up
+              }
+            }
+          }
+        }
       }
     };
     

@@ -36,10 +36,6 @@ export default class SceneSetup {
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color('#1a75ff'); // Deeper blue background to match water
     
-    // No fog for cleaner visuals
-    // Set up scene to use orthographic rendering for flat appearance
-    this.scene.userData.flatRendering = true;
-    
     // Create a camera with a better initial position
     this.camera = new THREE.PerspectiveCamera(
       60,
@@ -52,28 +48,22 @@ export default class SceneSetup {
     this.camera.position.set(0, 25, 45); // Higher and further back for better water visibility
     this.camera.lookAt(0, 0, 0);
     
-    // Initialize renderer with settings to prevent z-fighting
+    // Initialize renderer with simpler settings to prevent white screen
     this.renderer = new THREE.WebGLRenderer({ 
       canvas,
-      antialias: true, // Enable antialiasing to reduce jagged edges
-      powerPreference: 'high-performance',
-      precision: this.performanceMode ? 'mediump' : 'highp',
-      logarithmicDepthBuffer: true, // Enable logarithmic depth buffer to prevent z-fighting
-      alpha: true, // Add alpha channel to prevent white screen issues
-      stencil: true // Add stencil buffer for better rendering
+      antialias: false, // Disable antialiasing initially
+      powerPreference: 'default',
+      precision: 'mediump',
+      logarithmicDepthBuffer: false, // Disable logarithmic depth buffer initially
+      alpha: true
     });
     
-    // Enable alpha blending for proper transparency
-    this.renderer.setClearColor(0x000000, 0);
-    this.renderer.autoClear = true;
+    // Use simpler renderer settings
+    this.renderer.setClearColor(0x1a75ff, 1); // Set clear color with full opacity
     this.renderer.setSize(window.innerWidth, window.innerHeight);
-    this.renderer.setPixelRatio(window.devicePixelRatio > 1 ? 2 : 1); // Use higher pixel ratio for better quality
-    this.renderer.shadowMap.enabled = false; // Disable shadows completely
-    this.renderer.shadowMap.autoUpdate = false; // Explicitly disable shadow map updates
-    this.renderer.outputColorSpace = THREE.SRGBColorSpace;
+    this.renderer.setPixelRatio(1); // Use standard pixel ratio
+    this.renderer.shadowMap.enabled = false;
     this.renderer.sortObjects = true; // Activate object sorting by the renderer
-    // Set pixel ratio explicitly to prevent blurry edges
-    this.renderer.setPixelRatio(window.devicePixelRatio > 1 ? window.devicePixelRatio : 1);
     
     // Set up a simple EffectComposer initially
     this.composer = new EffectComposer(this.renderer);
@@ -131,6 +121,21 @@ export default class SceneSetup {
     this.controls.enablePan = true;
     this.controls.enableRotate = true;
     this.controls.enableZoom = true;
+    
+    // Add a simple ambient light immediately
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1);
+    this.scene.add(ambientLight);
+    
+    // Add a simple test object to verify rendering
+    const testGeometry = new THREE.BoxGeometry(10, 10, 10);
+    const testMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+    const testCube = new THREE.Mesh(testGeometry, testMaterial);
+    testCube.position.set(0, 5, 0);
+    testCube.userData.isTestCube = true;
+    this.scene.add(testCube);
+    
+    // Force an initial render
+    this.renderer.render(this.scene, this.camera);
     
     // Limit vertical rotation to prevent going under the map
     this.controls.minPolarAngle = 0;
@@ -540,6 +545,19 @@ export default class SceneSetup {
     if (this.controls) {
       this.controls.dispose();
     }
+    
+    // Remove test cube if it exists
+    this.scene.traverse(object => {
+      if (object.userData && object.userData.isTestCube) {
+        this.scene.remove(object);
+        if ((object as THREE.Mesh).geometry) {
+          (object as THREE.Mesh).geometry.dispose();
+        }
+        if ((object as THREE.Mesh).material) {
+          ((object as THREE.Mesh).material as THREE.Material).dispose();
+        }
+      }
+    });
     
     // Dispose of Three.js resources - add null checks
     if (this.sunSphere) {
