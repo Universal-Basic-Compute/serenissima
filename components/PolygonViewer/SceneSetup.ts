@@ -49,7 +49,7 @@ export default class SceneSetup {
     );
     
     // Initial camera position - higher up and further back for a good overview
-    this.camera.position.set(0, 80, 80);
+    this.camera.position.set(0, 40, 40);
     
     // Initialize renderer with settings to prevent z-fighting
     this.renderer = new THREE.WebGLRenderer({ 
@@ -132,7 +132,7 @@ export default class SceneSetup {
     
     // Basic limits
     this.controls.minDistance = 0.5; // Decreased to 0.5 to allow much more zooming in
-    this.controls.maxDistance = 100; // Keep the max distance the same
+    this.controls.maxDistance = 80; // Reduced by 20% from 100 to 80
     
     // Enable panning with right mouse button and rotation with middle mouse button
     this.controls.mouseButtons = {
