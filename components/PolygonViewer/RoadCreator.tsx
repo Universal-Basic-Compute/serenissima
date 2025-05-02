@@ -28,15 +28,53 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
   // Clean up when component unmounts or becomes inactive
   useEffect(() => {
     return () => {
-      if (previewMesh && scene) {
-        scene.remove(previewMesh);
-        if (previewMesh.geometry) previewMesh.geometry.dispose();
-        if (previewMesh.material) {
-          if (Array.isArray(previewMesh.material)) {
-            previewMesh.material.forEach(m => m.dispose());
-          } else {
-            previewMesh.material.dispose();
+      // First check if previewMesh exists and remove it
+      if (previewMesh) {
+        try {
+          if (scene) {
+            scene.remove(previewMesh);
           }
+          
+          if (previewMesh.geometry) {
+            previewMesh.geometry.dispose();
+          }
+          
+          if (previewMesh.material) {
+            if (Array.isArray(previewMesh.material)) {
+              previewMesh.material.forEach(m => m.dispose());
+            } else {
+              previewMesh.material.dispose();
+            }
+          }
+        } catch (error) {
+          console.error('Error cleaning up preview mesh:', error);
+        }
+      }
+      
+      // Then check if scene exists before traversing
+      if (scene) {
+        try {
+          // Find and remove any orphaned road meshes
+          scene.traverse((object) => {
+            if (object instanceof THREE.Mesh && object.userData && object.userData.isRoad) {
+              console.log('Road Creator: Removing orphaned road mesh on unmount');
+              scene.remove(object);
+              
+              if (object.geometry) {
+                object.geometry.dispose();
+              }
+              
+              if (object.material) {
+                if (Array.isArray(object.material)) {
+                  object.material.forEach(m => m.dispose());
+                } else {
+                  object.material.dispose();
+                }
+              }
+            }
+          });
+        } catch (error) {
+          console.error('Error cleaning up orphaned road meshes:', error);
         }
       }
     };
