@@ -32,9 +32,9 @@ export default class SceneSetup {
     this.performanceMode = !highQuality;
     this.activeView = activeView;
     
-    // Initialize scene with a light blue background
+    // Initialize scene with a neutral background
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color('#e6f7ff'); // Light blue background
+    this.scene.background = new THREE.Color('#f5f5f5'); // Light gray background
     
     // No fog for cleaner visuals
     // Set up scene to use orthographic rendering for flat appearance
@@ -259,18 +259,10 @@ export default class SceneSetup {
   
   // Add method to create water
   public createWater() {
-    console.log('Creating simple water effect...');
-    
-    // Create a simple water effect with larger dimensions
-    this.water = new SimpleWater({
-      scene: this.scene,
-      activeView: this.activeView,
-      performanceMode: this.performanceMode,
-      width: 500, // Increased from 300 to 500
-      height: 500  // Increased from 300 to 500
-    });
-    
-    return this.water;
+    console.log('Water creation completely disabled in SceneSetup');
+    // Don't create any water
+    this.water = null;
+    return null;
   }
   
   private calculateSunPosition(): THREE.Vector3 {

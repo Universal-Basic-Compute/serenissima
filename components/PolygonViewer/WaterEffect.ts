@@ -263,41 +263,8 @@ export default class WaterEffect {
   }
   
   private createWaterMesh() {
-    console.log('Creating simplified water mesh...');
-    
-    // Create a simple water plane with minimal geometry
-    const waterGeometry = new THREE.PlaneGeometry(
-      this.width * 2, 
-      this.height * 2,
-      this.performanceMode ? 32 : 64, // Reduced resolution based on performance mode
-      this.performanceMode ? 32 : 64
-    );
-    
-    // Create a simple material for water with the appropriate color
-    const waterColor = new THREE.Color(this.getWaterColorForView());
-    const waterMaterial = new THREE.MeshBasicMaterial({
-      color: waterColor,
-      transparent: true,
-      opacity: 0.8,
-      side: THREE.DoubleSide
-    });
-    
-    // Create the water mesh
-    this.waterMesh = new THREE.Mesh(waterGeometry, waterMaterial);
-    
-    // Position water at y=0 (below the land which is at y=0.1)
-    this.waterMesh.position.y = 0;
-    
-    // Rotate the water plane to be horizontal
-    this.waterMesh.rotation.x = -Math.PI / 2;
-    
-    // Set render order to ensure water appears below land
-    this.waterMesh.renderOrder = 5;
-    
-    // Add to scene
-    this.scene.add(this.waterMesh);
-    
-    console.log('Water mesh created successfully');
+    console.log('Water mesh creation completely disabled');
+    this.waterMesh = null;
   }
   
   private initializeWaveSimulation() {
@@ -585,41 +552,14 @@ export default class WaterEffect {
   
   // Add method to create water
   public createWater() {
-    console.log('Water creation disabled');
-    // No water is created to avoid geometry generation
+    console.log('Water creation completely disabled');
+    // No water is created
   }
   
   // Add helper method to create a simple water plane
   private createSimpleWaterPlane() {
-    // Create a larger plane for water
-    const waterGeometry = new THREE.PlaneGeometry(
-      this.width * 4, // Double the size for better coverage
-      this.height * 4, // Double the size for better coverage
-      1,
-      1
-    );
-    
-    // Create a simple blue material for water with higher opacity
-    const waterMaterial = new THREE.MeshBasicMaterial({
-      color: this.getWaterColorForView(),
-      transparent: true,
-      opacity: 0.95 // Increased opacity for better visibility
-    });
-    
-    // Create the water mesh
-    this.waterMesh = new THREE.Mesh(waterGeometry, waterMaterial);
-    
-    // Position water at y=0 (below the land which is at y=0.1)
-    this.waterMesh.position.y = 0;
-    
-    // Rotate the water plane to be horizontal
-    this.waterMesh.rotation.x = -Math.PI / 2;
-    
-    // Set render order to ensure water appears below land
-    this.waterMesh.renderOrder = 5;
-    
-    // Add to scene
-    this.scene.add(this.waterMesh);
+    console.log('Simple water plane creation completely disabled');
+    // No water plane is created
   }
   
   public update(frameCount: number, performanceMode: boolean = false) {

@@ -36,12 +36,8 @@ export default class SimpleWater {
   }
   
   private createWater() {
-    console.log('Water plane creation disabled');
-    
-    // Don't create any water mesh
+    console.log('Water plane creation completely disabled');
     this.waterMesh = null;
-    
-    console.log('Water mesh creation skipped');
   }
   
   // Add this method to create a fallback normal map
