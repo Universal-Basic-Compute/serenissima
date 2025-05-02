@@ -259,15 +259,15 @@ export default class SceneSetup {
   
   // Add method to create water
   public createWater() {
-    console.log('Creating simple water effect...');
+    console.log('Creating advanced liquid simulation water...');
     
-    // Create a simple water effect with larger dimensions
+    // Create a water effect with larger dimensions for better coverage
     this.water = new SimpleWater({
       scene: this.scene,
       activeView: this.activeView,
       performanceMode: this.performanceMode,
-      width: 500, // Increased from 300 to 500
-      height: 500  // Increased from 300 to 500
+      width: 600, // Increased from 500 to 600 for better coverage
+      height: 600  // Increased from 500 to 600 for better coverage
     });
     
     return this.water;

@@ -712,9 +712,14 @@ export default function PolygonViewer() {
       
       // Create water effect immediately
       if (sceneRef.current) {
-        console.log('Creating water effect from PolygonViewer');
+        console.log('Creating advanced water simulation from PolygonViewer');
         const water = sceneRef.current.createWater();
         waterEffectRef.current = water;
+        
+        // Force an initial update to ensure water is visible
+        if (water) {
+          water.update(0);
+        }
       }
       
       // Also create a WaterEffect for more advanced water features
