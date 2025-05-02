@@ -305,7 +305,8 @@ export default class PolygonRenderer {
           this.performanceMode,
           this.textureLoader,
           ownerColor,
-          ownerCoatOfArmsUrl
+          ownerCoatOfArmsUrl,
+          this.polygonMeshesRef
         );
         
         // Store reference to the mesh

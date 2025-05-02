@@ -16,6 +16,7 @@ class PolygonMesh {
   private originalMaterial: any = null;
   private ownerColor: string | null = null;
   private coatOfArmsSprite: THREE.Sprite | null = null;
+  private polygonMeshesRef: MutableRefObject<Record<string, THREE.Mesh>>;
 
   constructor(
     scene: THREE.Scene,
@@ -25,7 +26,8 @@ class PolygonMesh {
     performanceMode: boolean,
     textureLoader: THREE.TextureLoader,
     ownerColor: string | null = null,
-    ownerCoatOfArmsUrl: string | null = null
+    ownerCoatOfArmsUrl: string | null = null,
+    polygonMeshesRef: MutableRefObject<Record<string, THREE.Mesh>>
   ) {
     console.log(`Creating polygon mesh for ${polygon.id}`);
     this.scene = scene;
@@ -35,6 +37,7 @@ class PolygonMesh {
     this.performanceMode = performanceMode;
     this.textureLoader = textureLoader;
     this.ownerColor = ownerColor;
+    this.polygonMeshesRef = polygonMeshesRef;
     
     // Create the polygon mesh
     this.createMesh();
