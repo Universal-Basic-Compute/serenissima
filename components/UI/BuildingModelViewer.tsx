@@ -248,37 +248,40 @@ const BuildingModelViewer: React.FC<BuildingModelViewerProps> = ({
     
     // Cleanup
     return () => {
-      if (containerRef.current && containerRef.current.contains(renderer.domElement)) {
-        containerRef.current.removeChild(renderer.domElement);
-      }
-      
-      // Remove any error text elements
-      const textElements = containerRef.current?.querySelectorAll('div');
-      textElements?.forEach(el => {
-        if (containerRef.current?.contains(el)) {
-          containerRef.current.removeChild(el);
+      if (containerRef.current) {
+        // Remove the renderer's canvas
+        if (containerRef.current.contains(renderer.domElement)) {
+          containerRef.current.removeChild(renderer.domElement);
         }
-      });
-      
-      // Properly dispose of Three.js objects to prevent memory leaks
-      try {
-        renderer.dispose();
-        // Dispose of geometries and materials
-        scene.traverse((object) => {
-          if (object instanceof THREE.Mesh) {
-            if (object.geometry) object.geometry.dispose();
-            
-            if (object.material) {
-              if (Array.isArray(object.material)) {
-                object.material.forEach(material => material.dispose());
-              } else {
-                object.material.dispose();
-              }
-            }
+          
+        // Remove any error text elements
+        const textElements = containerRef.current.querySelectorAll('div');
+        textElements.forEach(el => {
+          if (containerRef.current.contains(el)) {
+            containerRef.current.removeChild(el);
           }
         });
-      } catch (error) {
-        console.error('Error during cleanup:', error);
+          
+        // Properly dispose of Three.js objects to prevent memory leaks
+        try {
+          renderer.dispose();
+          // Dispose of geometries and materials
+          scene.traverse((object) => {
+            if (object instanceof THREE.Mesh) {
+              if (object.geometry) object.geometry.dispose();
+                
+              if (object.material) {
+                if (Array.isArray(object.material)) {
+                  object.material.forEach(material => material.dispose());
+                } else {
+                  object.material.dispose();
+                }
+              }
+            }
+          });
+        } catch (error) {
+          console.error('Error during cleanup:', error);
+        }
       }
     };
   } catch (setupError) {

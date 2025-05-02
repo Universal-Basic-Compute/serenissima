@@ -241,15 +241,29 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
                                 <div className="text-amber-700 font-medium">
                                   {building.constructionCosts.ducats.toLocaleString()} ⚜️
                                 </div>
-                                <button 
-                                  className="text-xs bg-amber-600 text-white px-2 py-1 rounded hover:bg-amber-700"
-                                  onClick={(e) => {
-                                    e.stopPropagation(); // Prevent the parent div's onClick from firing
-                                    setSelectedBuilding(building);
-                                  }}
-                                >
-                                  Details
-                                </button>
+                                <div className="flex space-x-2"> {/* Add this wrapper div with space-x-2 */}
+                                  <button 
+                                    className="text-xs bg-amber-600 text-white px-2 py-1 rounded hover:bg-amber-700"
+                                    onClick={(e) => {
+                                      e.stopPropagation(); // Prevent the parent div's onClick from firing
+                                      setSelectedBuilding(building);
+                                    }}
+                                  >
+                                    Details
+                                  </button>
+                                  <button 
+                                    className="text-xs bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700"
+                                    onClick={(e) => {
+                                      e.stopPropagation(); // Prevent the parent div's onClick from firing
+                                      // Dispatch a custom event to notify other components about building selection
+                                      window.dispatchEvent(new CustomEvent('buildingSelected', {
+                                        detail: building
+                                      }));
+                                    }}
+                                  >
+                                    Build
+                                  </button>
+                                </div>
                               </div>
                             </div>
                           </div>
