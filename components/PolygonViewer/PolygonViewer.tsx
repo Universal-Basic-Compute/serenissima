@@ -25,7 +25,7 @@ import BackgroundMusic from '../UI/BackgroundMusic';
 import usePolygonStore from '@/store/usePolygonStore';
 import BridgeRenderer from './BridgeRenderer';
 import LandPurchaseModal from '../UI/LandPurchaseModal';
-import RoadCreator from './RoadCreator';
+import RoadCreator from '../PolygonViewer/RoadCreator';
 import RoadManager from './RoadManager';
 import { eventBus, EventTypes } from '../../lib/eventBus';
 

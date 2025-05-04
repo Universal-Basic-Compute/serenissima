@@ -189,6 +189,52 @@ The rendering architecture includes robust error handling:
 6. **Self-Healing**: Components attempt to recover from errors automatically
 7. **Isolation**: Errors in one component don't crash the entire application
 
+## Road Creation System
+
+The road creation system follows the facade pattern to separate UI concerns from Three.js rendering:
+
+```typescript
+// RoadCreatorFacade handles Three.js operations
+export class RoadCreatorFacade {
+  constructor(scene: THREE.Scene, camera: THREE.PerspectiveCamera);
+  
+  // Mouse interaction
+  public updateMousePosition(clientX: number, clientY: number): void;
+  public findIntersection(): THREE.Vector3 | null;
+  
+  // Road creation
+  public createIndicatorMesh(position: THREE.Vector3, isSnapped?: boolean): void;
+  public createRoadMesh(roadPoints: THREE.Vector3[], curvature: number): THREE.Mesh | null;
+  public findSnapPoint(position: THREE.Vector3, existingPoints: THREE.Vector3[]): THREE.Vector3 | null;
+  
+  // Cleanup
+  public dispose(): void;
+}
+
+// RoadCreator component uses the facade for UI interactions
+const RoadCreator: React.FC<RoadCreatorProps> = ({
+  scene,
+  camera,
+  active,
+  onComplete,
+  onCancel
+}) => {
+  // UI state management
+  const [points, setPoints] = useState<THREE.Vector3[]>([]);
+  const [curvature, setCurvature] = useState<number>(0.5);
+  
+  // Use the facade for Three.js operations
+  const roadCreatorRef = useRef<RoadCreatorFacade | null>(null);
+  
+  // UI rendering
+  return (
+    <div className="road-creator-ui">
+      {/* UI controls */}
+    </div>
+  );
+};
+```
+
 ### Error Handling Example: CloudSystem
 
 The `CloudSystem` class demonstrates comprehensive error handling:
