@@ -219,7 +219,7 @@ export default class SceneSetup {
     this.scene.traverse((object) => {
       if (object instanceof THREE.Mesh && 
           object.userData && 
-          (object.userData.isRoad || object.userData.alwaysVisible)) {
+          (object.userData.isRoad || object.userData.alwaysVisible || object.userData.isPolygon)) {
         // Force visibility
         object.visible = true;
         
@@ -380,15 +380,18 @@ export default class SceneSetup {
       this.sunLight.position.copy(newPosition);
     }
     
-    // Ensure roads are always visible
+    // Ensure roads and polygons are always visible
     this.ensureRoadsVisible();
     
-    // Make sure roads are properly lit
+    // Make sure roads and polygons are properly lit
     this.scene.traverse((object) => {
       if (object instanceof THREE.Mesh && 
           object.userData && 
-          object.userData.isRoad) {
-        // Ensure road materials are updated with lighting
+          (object.userData.isRoad || object.userData.isPolygon)) {
+        // Force visibility
+        object.visible = true;
+        
+        // Ensure materials are updated with lighting
         if (object.material) {
           if (Array.isArray(object.material)) {
             object.material.forEach(mat => {

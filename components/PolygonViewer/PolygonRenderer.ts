@@ -308,6 +308,15 @@ export default class PolygonRenderer {
         mesh.rotation.x = -Math.PI / 2;
         mesh.position.y = 0.1; // Slightly above ground
         
+        // Add userData to identify this as a polygon that should always be visible
+        mesh.userData = {
+          isPolygon: true,
+          alwaysVisible: true
+        };
+        
+        // Set a high render order to ensure it renders on top
+        mesh.renderOrder = 50;
+        
         // Add to scene
         this.scene.add(mesh);
         
@@ -348,6 +357,9 @@ export default class PolygonRenderer {
     });
     
     console.log(`Created ${this.PolygonMeshs.length} polygon meshes`);
+    
+    // Start a periodic check to ensure polygons remain visible
+    setInterval(() => this.ensurePolygonsVisible(), 1000);
   }
   
   private createSamplePolygon() {
@@ -426,6 +438,13 @@ export default class PolygonRenderer {
             mesh.material.needsUpdate = true;
           }
         }
+      }
+    });
+    
+    // Also check the direct references in polygonMeshesRef
+    Object.values(this.polygonMeshesRef.current).forEach(mesh => {
+      if (mesh) {
+        mesh.visible = true;
       }
     });
     

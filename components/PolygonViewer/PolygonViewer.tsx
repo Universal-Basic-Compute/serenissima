@@ -714,13 +714,18 @@ export default function PolygonViewer() {
       // Add a simple animation loop
       const animate = () => {
         const animationId = requestAnimationFrame(animate);
-        
+    
         try {
           // Update controls
           if (sceneRef.current && sceneRef.current.controls) {
             sceneRef.current.controls.update();
           }
-          
+      
+          // Ensure polygons are visible
+          if (polygonRendererRef.current) {
+            polygonRendererRef.current.ensurePolygonsVisible();
+          }
+      
           // Render the scene
           if (sceneRef.current && sceneRef.current.renderer && sceneRef.current.scene && sceneRef.current.camera) {
             sceneRef.current.renderer.render(sceneRef.current.scene, sceneRef.current.camera);
