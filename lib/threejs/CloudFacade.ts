@@ -13,6 +13,7 @@ export class CloudFacade {
   private performanceMode: boolean = false;
   private width: number;
   private height: number;
+  private isDisposed: boolean = false;
 
   /**
    * Create a new cloud facade
@@ -107,10 +108,22 @@ export class CloudFacade {
    * Clean up resources
    */
   public dispose(): void {
+    if (this.isDisposed) return;
+    this.isDisposed = true;
+    
+    console.log('Disposing CloudFacade resources');
+    
     if (this.cloudSystem) {
-      this.cloudSystem.dispose();
+      try {
+        this.cloudSystem.dispose();
+      } catch (error) {
+        console.error('Error disposing CloudSystem:', error);
+      }
       this.cloudSystem = null;
     }
+    
+    // Clear references to help garbage collection
+    this.scene = null as unknown as THREE.Scene;
   }
 }
 
