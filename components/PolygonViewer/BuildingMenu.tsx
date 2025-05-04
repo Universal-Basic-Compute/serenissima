@@ -1,44 +1,11 @@
 /**
- * TODO: Refactor according to architecture
- * - Move building data fetching to a BuildingService in the service layer
- * - Use state management for building data instead of component state
- * - Implement error boundaries for better error handling
- * - Separate presentation from data fetching logic
+ * Building menu component for browsing and placing buildings
  */
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Tab } from '@headlessui/react';
-import { getApiBaseUrl } from '@/lib/apiUtils';
 import BuildingModelViewer from '../UI/BuildingModelViewer';
 import PlaceableBuilding from '../PolygonViewer/PlaceableBuilding';
-
-interface Building {
-  name: string;
-  category: string;
-  subcategory: string;
-  tier: number;
-  size: string;
-  unlockCondition: string;
-  shortDescription: string;
-  fullDescription: string;
-  flavorText: string;
-  constructionCosts: {
-    ducats: number;
-    [key: string]: number;
-  };
-  maintenanceCost: number;
-  constructionTime: number;
-  assets?: {
-    models?: string;  // This will now be the base path to the models directory
-    variants?: string[];  // Optional list of variant names (without .glb extension)
-    thumbnail?: string;
-  };
-  [key: string]: any; // For other properties
-}
-
-interface BuildingCategory {
-  name: string;
-  buildings: Building[];
-}
+import { buildingService, Building, BuildingCategory } from '@/lib/services/BuildingService';
 
 interface BuildingMenuProps {
   visible: boolean;
@@ -56,99 +23,44 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
     variant: string;
   } | null>(null);
   
-  // Reset the selected variant and fetch available variants when a new building is selected
+  // Fetch available variants when a new building is selected
   useEffect(() => {
     if (selectedBuilding) {
       setSelectedVariant("model");
       
-      // Fetch available variants for this building
-      const buildingName = selectedBuilding.name.toLowerCase().replace(/\s+/g, '-');
-      
-      fetch(`/api/building-variants/${buildingName}`)
-        .then(response => {
-          if (response.ok) return response.json();
-          throw new Error('Failed to fetch variants');
-        })
-        .then(data => {
-          if (data.success && data.variants) {
-            setAvailableVariants(data.variants);
-            console.log(`Loaded ${data.variants.length} variants for ${buildingName}`);
-          } else {
-            setAvailableVariants(['model']); // Default to just 'model' if no variants found
-          }
-        })
-        .catch(error => {
+      // Use the BuildingService to fetch variants
+      const fetchVariants = async () => {
+        try {
+          const variants = await buildingService.getBuildingVariants(selectedBuilding.name);
+          setAvailableVariants(variants);
+        } catch (error) {
           console.error('Error fetching variants:', error);
           setAvailableVariants(['model']); // Default to just 'model' on error
-        });
+        }
+      };
+      
+      fetchVariants();
     }
   }, [selectedBuilding]);
 
-  // Memoized function to load building data
-  const loadBuildingData = useCallback(async () => {
+  // Function to load building data
+  const loadBuildingData = async () => {
     setLoading(true);
     try {
-      // Load all building categories
-      const categoryFiles = [
-        'residential',
-        'commercial',
-        'production',
-        'infrastructure',
-        'public&government',
-        'military&defence',
-        'special'
-      ];
-
-      const loadedCategories: BuildingCategory[] = [];
-      const apiBaseUrl = getApiBaseUrl();
-
-      for (const category of categoryFiles) {
-        try {
-          console.log(`Fetching buildings for category: ${category}`);
-          
-          // Try the Next.js API route first
-          let response = await fetch(`/api/buildings/${category}`, {
-            signal: AbortSignal.timeout(5000) // 5 second timeout
-          });
-          
-          // If that fails, try the direct backend API
-          if (!response.ok) {
-            console.log(`Falling back to direct API for ${category}`);
-            response = await fetch(`${apiBaseUrl}/api/buildings/${category}`, {
-              signal: AbortSignal.timeout(5000) // 5 second timeout
-            });
-          }
-          
-          if (response.ok) {
-            const buildings = await response.json();
-            console.log(`Loaded ${buildings.length} buildings for category ${category}`);
-            
-            loadedCategories.push({
-              name: category.charAt(0).toUpperCase() + category.slice(1).replace('&', ' & '),
-              buildings: buildings
-            });
-          } else {
-            console.warn(`Failed to load buildings for ${category}: ${response.status}`);
-          }
-        } catch (error) {
-          console.error(`Error loading ${category} buildings:`, error);
-        }
-      }
-
-      console.log(`Total categories loaded: ${loadedCategories.length}`);
+      const loadedCategories = await buildingService.getBuildingCategories();
       setCategories(loadedCategories);
     } catch (error) {
       console.error('Error loading building data:', error);
     } finally {
       setLoading(false);
     }
-  }, []);
+  };
 
   // Load building data when the menu becomes visible
   useEffect(() => {
     if (!visible) return;
     loadBuildingData();
-  }, [visible, loadBuildingData]);
+  }, [visible]);
 
   if (!visible) return null;
 
