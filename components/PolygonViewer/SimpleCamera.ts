@@ -14,17 +14,18 @@ export default class SimpleCamera {
       1000 // Far clipping plane
     );
     
-    // Position camera
-    this.camera.position.set(0, 30, 60);
+    // Position camera to see both land and water
+    this.camera.position.set(0, 40, 80);
     this.camera.lookAt(0, 0, 0);
     
     // Create controls
     this.controls = new OrbitControls(this.camera, domElement);
     
     // Configure controls
-    this.controls.enableDamping = false;
-    this.controls.minPolarAngle = 0;
-    this.controls.maxPolarAngle = Math.PI / 3; // Limit to 60 degrees from vertical
+    this.controls.enableDamping = true;
+    this.controls.dampingFactor = 0.05;
+    this.controls.minPolarAngle = 0.1; // Allow more downward angle to see water
+    this.controls.maxPolarAngle = Math.PI / 2.5; // Limit to 72 degrees from vertical
     this.controls.minDistance = 5;
     this.controls.maxDistance = 100;
     this.controls.screenSpacePanning = false;

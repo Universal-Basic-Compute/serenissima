@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import SimpleCamera from './SimpleCamera';
 import SimplePolygonRenderer from './SimplePolygonRenderer';
+import SimpleWater from './SimpleWater';
 import { calculateBounds } from './utils';
 
 export default function SimpleViewer() {
@@ -16,6 +17,7 @@ export default function SimpleViewer() {
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const cameraControllerRef = useRef<SimpleCamera | null>(null);
   const polygonRendererRef = useRef<SimplePolygonRenderer | null>(null);
+  const waterRef = useRef<SimpleWater | null>(null);
   
   // Load polygons
   useEffect(() => {
@@ -66,6 +68,14 @@ export default function SimpleViewer() {
     });
     polygonRendererRef.current = polygonRenderer;
     
+    // Create water
+    const waterSize = Math.max(bounds.scale * 500, 1000); // Make water large enough to cover the scene
+    const water = new SimpleWater({
+      scene,
+      size: waterSize
+    });
+    waterRef.current = water;
+    
     // Add ambient light
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
     scene.add(ambientLight);
@@ -81,6 +91,10 @@ export default function SimpleViewer() {
       
       if (cameraController) {
         cameraController.update();
+      }
+      
+      if (waterRef.current) {
+        waterRef.current.update();
       }
       
       renderer.render(scene, cameraController.camera);
@@ -107,6 +121,7 @@ export default function SimpleViewer() {
     return () => {
       window.removeEventListener('resize', handleResize);
       
+      if (waterRef.current) waterRef.current.cleanup();
       if (polygonRenderer) polygonRenderer.cleanup();
       if (cameraController) cameraController.cleanup();
       if (renderer) renderer.dispose();
