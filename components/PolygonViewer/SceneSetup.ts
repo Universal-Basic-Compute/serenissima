@@ -28,8 +28,8 @@ export default class SceneSetup {
     this.performanceMode = !highQuality;
     this.activeView = activeView;
     
-    // Initialize ThreeJS facade
-    this.threejs = new ThreeJSFacade(canvas);
+    // Initialize ThreeJS facade with logarithmic depth buffer
+    this.threejs = new ThreeJSFacade(canvas, { logarithmicDepthBuffer: true });
     
     // Get references to THREE.js objects
     this.scene = this.threejs.getScene();

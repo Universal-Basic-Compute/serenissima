@@ -44,10 +44,11 @@ export default function SimpleViewer() {
     scene.background = new THREE.Color('#87CEEB'); // Light sky blue
     sceneRef.current = scene;
     
-    // Create renderer
+    // Create renderer with logarithmic depth buffer
     const renderer = new THREE.WebGLRenderer({ 
       canvas: canvasRef.current,
-      antialias: true
+      antialias: true,
+      logarithmicDepthBuffer: true  // Enable logarithmic depth buffer to prevent z-fighting
     });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(window.devicePixelRatio);

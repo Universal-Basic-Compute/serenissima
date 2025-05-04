@@ -309,6 +309,13 @@ export default class PolygonRenderer {
         mesh.position.y = 0.2; // Increase height to ensure clear separation from water
         mesh.renderOrder = 1; // Ensure it renders after water
         
+        // Add polygon offset to prevent z-fighting
+        if (mesh.material instanceof THREE.Material) {
+          mesh.material.polygonOffset = true;
+          mesh.material.polygonOffsetFactor = 1;
+          mesh.material.polygonOffsetUnits = 1;
+        }
+        
         // Apply polygon offset to prevent z-fighting
         if (mesh.material instanceof THREE.MeshStandardMaterial) {
           mesh.material.polygonOffset = true;

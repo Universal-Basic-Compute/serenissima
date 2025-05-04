@@ -54,7 +54,10 @@ export default class SimpleWater {
 
     // Position water - CRITICAL CHANGE: Position water MUCH lower than land
     water.rotation.x = -Math.PI / 2;
-    water.position.y = -5; // Position water 5 units below origin (land is at 0.5)
+    water.position.y = -10; // Position water 10 units below origin (land is at 0.5)
+    
+    // Set render order to ensure water renders before land
+    water.renderOrder = 0;
     
     // With this large separation, z-fighting should be completely eliminated
 

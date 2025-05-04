@@ -10,8 +10,8 @@ export default class SimpleCamera {
     this.camera = new THREE.PerspectiveCamera(
       60, // Field of view
       window.innerWidth / window.innerHeight, // Aspect ratio
-      0.1, // Near clipping plane
-      1000 // Far clipping plane
+      1, // Near clipping plane (increased from 0.1 to reduce depth range)
+      500 // Far clipping plane (decreased from 1000 to reduce depth range)
     );
     
     // Position camera closer for the smaller water area
