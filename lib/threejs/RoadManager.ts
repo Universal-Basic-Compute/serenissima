@@ -1,6 +1,16 @@
 import * as THREE from 'three';
 
 /**
+ * Interface for road data structure
+ */
+interface Road {
+  id: string;
+  points: THREE.Vector3[];
+  mesh: THREE.Mesh;
+  curvature: number;
+}
+
+/**
  * Manages road creation, rendering and persistence in the 3D scene
  * Part of the rendering layer in the architecture
  */
@@ -13,16 +23,6 @@ export class RoadManager {
   private roadRoughnessMap: THREE.Texture | null = null;
   private roadGeometryCache: Map<string, THREE.BufferGeometry> | null = null;
   private isDisposed: boolean = false;
-
-  /**
-   * Interface for road data structure
-   */
-  interface Road {
-    id: string;
-    points: THREE.Vector3[];
-    mesh: THREE.Mesh;
-    curvature: number;
-  }
 
   /**
    * Creates a new RoadManager
