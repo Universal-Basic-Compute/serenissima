@@ -1,27 +1,3 @@
-import * as THREE from 'three';
-import { ViewMode } from './types';
-
-interface SimpleWaterProps {
-  scene: THREE.Scene;
-  activeView: ViewMode;
-  performanceMode: boolean;
-  width: number;
-  height: number;
-}
-
-export default class SimpleWater {
-  private scene: THREE.Scene;
-  private activeView: ViewMode;
-  private performanceMode: boolean;
-  private width: number;
-  private height: number;
-  private time: number = 0;
-  private clock: THREE.Clock = new THREE.Clock();
-  
-  // Water surface
-  private waterMesh: THREE.Mesh | null = null;
-  private waterGeometry: THREE.PlaneGeometry | null = null;
-  private waterMaterial: THREE.ShaderMaterial | null = null;
   
   constructor({
     scene,

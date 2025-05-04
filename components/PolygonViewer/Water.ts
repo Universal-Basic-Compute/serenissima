@@ -1,35 +1,3 @@
-import * as THREE from 'three';
-import { ViewMode } from './types';
-
-interface WaterProps {
-  scene: THREE.Scene;
-  activeView: ViewMode;
-  performanceMode: boolean;
-  width: number;
-  height: number;
-}
-
-export default class Water {
-  private scene: THREE.Scene;
-  private activeView: ViewMode;
-  private performanceMode: boolean;
-  private width: number;
-  private height: number;
-  private time: number = 0;
-  private clock: THREE.Clock = new THREE.Clock();
-  
-  // Water surface
-  private waterMesh: THREE.Mesh | THREE.Points | null = null;
-  private waterPlane: THREE.Mesh | null = null;
-  private waterGeometry: THREE.PlaneGeometry | null = null;
-  private waterMaterial: THREE.ShaderMaterial | null = null;
-  
-  // Physics simulation properties
-  private waveGrid: Float32Array | null = null;
-  private prevWaveGrid: Float32Array | null = null;
-  private waveVelocity: Float32Array | null = null;
-  private gridSize: number = 0;
-  private landPositions: THREE.Vector3[] = [];
   
   constructor({
     scene,
