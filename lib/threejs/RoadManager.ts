@@ -23,7 +23,8 @@ export class RoadManager {
   private roadTexture: THREE.Texture | null = null;
   private roadNormalMap: THREE.Texture | null = null;
   private roadRoughnessMap: THREE.Texture | null = null;
-  private roadGeometryCache: Map<string, THREE.BufferGeometry> | null = null;
+  private roadGeometryCache: Map<string, THREE.BufferGeometry> = new Map();
+  private geometryUsageCount: Map<string, number> = new Map();
   private isDisposed: boolean = false;
   private roadService: RoadService;
 
@@ -355,6 +356,34 @@ export class RoadManager {
   }
 
   /**
+   * Generates a cache key for road geometry based on its properties
+   * @param points Array of 3D points defining the road path
+   * @param curvature Road curvature factor
+   * @returns A string key for caching
+   */
+  private generateGeometryCacheKey(points: THREE.Vector3[], curvature: number): string {
+    try {
+      // Create a simplified representation of points for the key
+      // We don't use the exact points to allow for reuse of similar geometries
+      const simplifiedPoints = points.map((p, i) => {
+        // Only use every 3rd point for the key to allow more reuse
+        if (i % 3 === 0) {
+          // Round coordinates to reduce unique variations
+          return `${Math.round(p.x * 10) / 10},${Math.round(p.y * 10) / 10},${Math.round(p.z * 10) / 10}`;
+        }
+        return '';
+      }).filter(p => p !== '').join('|');
+      
+      // Include point count and curvature in the key
+      return `${points.length}:${Math.round(curvature * 10) / 10}:${simplifiedPoints}`;
+    } catch (error) {
+      log.warn('Error generating geometry cache key:', error);
+      // Fallback to a simple key that will be less effective for caching
+      return `${points.length}:${curvature}`;
+    }
+  }
+
+  /**
    * Creates a mesh for a road
    * @param points Array of 3D points defining the road path
    * @param curvature Road curvature factor (0-1)
@@ -362,10 +391,6 @@ export class RoadManager {
    */
   private createRoadMesh(points: THREE.Vector3[], curvature: number): THREE.Mesh | null {
     try {
-    // Create a static road geometry cache to avoid recreating similar geometries
-    if (!this.roadGeometryCache) {
-      this.roadGeometryCache = new Map();
-    }
     
     // Try to import the 3D utilities for smoother roads
     try {
@@ -444,10 +469,20 @@ export class RoadManager {
         uvs.push(0, (uOffset + segmentLength) * 10);
       }
       
-      // Set attributes
-      roadGeometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-      roadGeometry.setAttribute('normal', new THREE.Float32BufferAttribute(normals, 3));
-      roadGeometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+          // Set attributes
+          roadGeometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+          roadGeometry.setAttribute('normal', new THREE.Float32BufferAttribute(normals, 3));
+          roadGeometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+          
+          // Store in cache for future reuse
+          this.roadGeometryCache.set(cacheKey, roadGeometry.clone());
+          this.geometryUsageCount.set(cacheKey, 1);
+          
+          log.info(`Created and cached new road geometry (key: ${cacheKey})`);
+          
+          // Limit cache size to prevent memory issues
+          this.pruneGeometryCache();
+        }
       
       // Create road material with better visibility
       const roadMaterial = new THREE.MeshBasicMaterial({
@@ -496,11 +531,26 @@ export class RoadManager {
         const curve = this.createCurvedPath(points, curvature);
         
         try {
-          // Create road geometry
-          const roadWidth = 0.15;
-          const roadGeometry = new THREE.BufferGeometry();
-          const positions: number[] = [];
-          const uvs: number[] = [];
+          // Generate a cache key for this geometry
+          const cacheKey = this.generateGeometryCacheKey(points, curvature);
+          
+          // Check if we already have this geometry in cache
+          let roadGeometry: THREE.BufferGeometry;
+          if (this.roadGeometryCache.has(cacheKey)) {
+            // Reuse existing geometry
+            roadGeometry = this.roadGeometryCache.get(cacheKey)!.clone();
+            
+            // Update usage count
+            const currentCount = this.geometryUsageCount.get(cacheKey) || 0;
+            this.geometryUsageCount.set(cacheKey, currentCount + 1);
+            
+            log.info(`Reusing cached road geometry in fallback mode (key: ${cacheKey}, usage: ${currentCount + 1})`);
+          } else {
+            // Create new road geometry
+            const roadWidth = 0.15;
+            roadGeometry = new THREE.BufferGeometry();
+            const positions: number[] = [];
+            const uvs: number[] = [];
       
       // Sample points along the curve
       const numPoints = Math.max(points.length * 10, 50);
@@ -550,10 +600,20 @@ export class RoadManager {
         uvs.push(0, (uOffset + segmentLength) * 10);
       }
       
-      // Set attributes
-      roadGeometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-      roadGeometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
-      roadGeometry.computeVertexNormals();
+            // Set attributes
+            roadGeometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+            roadGeometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+            roadGeometry.computeVertexNormals();
+            
+            // Store in cache for future reuse
+            this.roadGeometryCache.set(cacheKey, roadGeometry.clone());
+            this.geometryUsageCount.set(cacheKey, 1);
+            
+            log.info(`Created and cached new road geometry in fallback mode (key: ${cacheKey})`);
+            
+            // Limit cache size to prevent memory issues
+            this.pruneGeometryCache();
+          }
       
       // Create road material with better visibility
       const roadMaterial = new THREE.MeshBasicMaterial({
@@ -597,6 +657,57 @@ export class RoadManager {
     } catch (unexpectedError) {
       log.error('Unexpected error in createRoadMesh:', unexpectedError);
       return null;
+    }
+  }
+
+  /**
+   * Prunes the geometry cache when it gets too large
+   * Removes least used geometries first
+   */
+  private pruneGeometryCache(): void {
+    try {
+      const MAX_CACHE_SIZE = 50; // Maximum number of cached geometries
+      
+      if (this.roadGeometryCache.size <= MAX_CACHE_SIZE) {
+        return; // Cache is still within limits
+      }
+      
+      log.info(`Pruning geometry cache (current size: ${this.roadGeometryCache.size})`);
+      
+      // Convert to array for sorting
+      const entries = Array.from(this.geometryUsageCount.entries());
+      
+      // Sort by usage count (ascending)
+      entries.sort((a, b) => a[1] - b[1]);
+      
+      // Remove least used entries until we're under the limit
+      const entriesToRemove = entries.slice(0, entries.length - MAX_CACHE_SIZE);
+      
+      for (const [key, count] of entriesToRemove) {
+        try {
+          // Get the geometry before removing it from cache
+          const geometry = this.roadGeometryCache.get(key);
+          
+          // Remove from caches
+          this.roadGeometryCache.delete(key);
+          this.geometryUsageCount.delete(key);
+          
+          // Dispose of the geometry
+          if (geometry) {
+            geometry.dispose();
+          }
+          
+          log.info(`Removed geometry from cache (key: ${key}, usage count: ${count})`);
+        } catch (error) {
+          log.warn(`Error removing geometry from cache (key: ${key}):`, error);
+          // Continue with other entries
+        }
+      }
+      
+      log.info(`Geometry cache pruned (new size: ${this.roadGeometryCache.size})`);
+    } catch (error) {
+      log.error('Error pruning geometry cache:', error);
+      // Method fails gracefully
     }
   }
 
@@ -1115,8 +1226,19 @@ export class RoadManager {
     // Clear geometry cache
     try {
       if (this.roadGeometryCache) {
+        // Dispose of all cached geometries
+        this.roadGeometryCache.forEach((geometry, key) => {
+          try {
+            geometry.dispose();
+            log.info(`Disposed of cached geometry (key: ${key})`);
+          } catch (geometryError) {
+            log.warn(`Error disposing cached geometry (key: ${key}):`, geometryError);
+          }
+        });
+        
         this.roadGeometryCache.clear();
-        this.roadGeometryCache = null;
+        this.geometryUsageCount.clear();
+        log.info('Road geometry cache cleared');
       }
     } catch (cacheError) {
       log.warn('Error clearing road geometry cache:', cacheError);

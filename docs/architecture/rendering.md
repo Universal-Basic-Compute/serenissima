@@ -166,6 +166,7 @@ The rendering architecture includes several performance optimizations:
 5. **Throttling**: Limit update frequency for non-critical operations
 6. **Lazy Loading**: Load assets only when needed
 7. **Memory Management**: Properly dispose of unused resources
+8. **Geometry Sharing**: Cache and reuse similar geometries between objects
 
 ## Memory Management
 
