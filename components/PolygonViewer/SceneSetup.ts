@@ -344,19 +344,3 @@ export default class SceneSetup {
     this.threejs.dispose();
   }
 }
-  // Update method called by animation callback
-  private update(time: number): void {
-    // Update clouds
-    this.updateClouds(Math.floor(time));
-    
-    // Update sun position occasionally
-    if (Math.floor(time) % 100 === 0) {
-      const newPosition = this.calculateSunPosition();
-      this.sunSphere.position.copy(newPosition);
-      this.sunGlow.position.copy(newPosition);
-      this.sunLight.position.copy(newPosition);
-    }
-    
-    // Ensure roads and polygons are always visible
-    this.ensureRoadsVisible();
-  }
