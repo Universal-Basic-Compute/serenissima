@@ -1,16 +1,15 @@
 /**
- * TODO: Refactor according to architecture
- * - Move to lib/threejs directory as part of the rendering layer
- * - Implement facade pattern to hide Three.js complexity
- * - Separate rendering logic from data management
- * - Improve performance with object pooling and LOD
- * - Add better error handling with graceful degradation
+ * Polygon renderer using facade pattern to hide Three.js complexity
+ * - Implements clean interface for polygon rendering
+ * - Separates rendering logic from data management
+ * - Provides better error handling with graceful degradation
  */
 import * as THREE from 'three';
 import { MutableRefObject } from 'react';
 import { Polygon, ViewMode } from './types';
-import { normalizeCoordinates, createPolygonShape } from './utils';
-import PolygonMesh from './PolygonMesh';
+import { normalizeCoordinates } from './utils';
+import { PolygonRendererFacade } from '../../lib/threejs/PolygonRendererFacade';
+import { PolygonMeshFacade } from '../../lib/threejs/PolygonMeshFacade';
 
 interface PolygonRendererProps {
   scene: THREE.Scene;
@@ -36,31 +35,16 @@ export default class PolygonRenderer {
   private activeView: ViewMode;
   private performanceMode: boolean;
   private polygonMeshesRef: MutableRefObject<Record<string, THREE.Mesh>>;
-  private textureLoader: THREE.TextureLoader;
-  private sandBaseColor: THREE.Texture;
-  private sandNormalMap: THREE.Texture;
-  private sandRoughnessMap: THREE.Texture;
-  private polygonMesh: PolygonMesh[] = [];
   private ownerCoatOfArmsMap: Record<string, string> = {}; // Map of owner to coat of arms URL
   public hasUpdatedCoatOfArms: boolean = false; // Flag to track if coat of arms have been updated
-  
-  // Add a method to create a sprite for the coat of arms
-  // Add method to create a sprite for the coat of arms
   private coatOfArmSprites: Record<string, THREE.Object3D | THREE.Mesh> = {};
   private ownerColorMap: Record<string, string> = {}; // Map of owner to color
   private users: Record<string, any> = {}; // Store users data
-  private PolygonMeshs: PolygonMesh[] = []; // Store PolygonMesh instances
-  private coatOfArmsSprite: THREE.Sprite | null = null;
-  private ownerColor: string | null = null;
-  private polygon: any = {}; // Store current polygon data
-
-  // Create a static texture loader to be shared across instances
-  private static sharedTextureLoader: THREE.TextureLoader | null = null;
-  private static sharedTextures: {
-    sandBaseColor?: THREE.Texture;
-    sandNormalMap?: THREE.Texture;
-    sandRoughnessMap?: THREE.Texture;
-  } = {};
+  private polygonMeshes: PolygonMeshFacade[] = []; // Store PolygonMesh instances
+  private createdPolygonIds = new Set<string>();
+  
+  // Facade for Three.js operations
+  private facade: PolygonRendererFacade;
   
   // Add static method for optimized texture loading
   private static loadOptimizedTexture(url: string, callback?: (texture: THREE.Texture) => void): THREE.Texture {
@@ -124,6 +108,9 @@ export default class PolygonRenderer {
     this.performanceMode = performanceMode;
     this.polygonMeshesRef = polygonMeshesRef;
     
+    // Initialize the facade
+    this.facade = new PolygonRendererFacade(scene);
+    
     // Store users data
     this.users = users || {};
     
@@ -143,143 +130,51 @@ export default class PolygonRenderer {
         };
       }
       
-      Object.values(users).forEach(user => {
-        if (user.user_name) {
-          // Store coat of arms image if available
-          if (user.coat_of_arms_image) {
-            this.ownerCoatOfArmsMap[user.user_name] = user.coat_of_arms_image;
-          }
-          
-          // Store color if available - ensure we check for null/undefined
-          if (user.color) {
-            this.ownerColorMap[user.user_name] = user.color;
-            console.log(`Stored color for ${user.user_name}: ${user.color}`);
-          } else if (user.user_name === 'ConsiglioDeiDieci') {
-            // Provide a default color for ConsiglioDeiDieci if missing
-            this.ownerColorMap[user.user_name] = '#8B0000'; // Dark red
-            console.log(`Assigned default color for ConsiglioDeiDieci: #8B0000`);
-          }
-        }
-      });
+      // Process user data once
+      this.processUserData(users);
       
       // Always ensure ConsiglioDeiDieci has a color
       if (!this.ownerColorMap['ConsiglioDeiDieci']) {
         this.ownerColorMap['ConsiglioDeiDieci'] = '#8B0000'; // Dark red
         console.log('Added missing ConsiglioDeiDieci color in PolygonRenderer');
       }
-      
-      console.log(`Processed ${Object.keys(this.ownerCoatOfArmsMap).length} coat of arms and ${Object.keys(this.ownerColorMap).length} colors from users data`);
     }
-    
-    // Create shore effects for islands
-    setTimeout(() => this.createShoreEffects(), 1000);
-    
-    // Initialize texture loader explicitly
-    this.textureLoader = new THREE.TextureLoader();
-    
-    // Process users data to create coat of arms map and color map
-    if (users) {
-      Object.values(users).forEach(user => {
-        if (user.user_name) {
-          // Store coat of arms image if available
-          if (user.coat_of_arms_image) {
-            this.ownerCoatOfArmsMap[user.user_name] = user.coat_of_arms_image;
-          }
-          
-          // Store color if available
-          if (user.color) {
-            this.ownerColorMap[user.user_name] = user.color;
-          }
-        }
-      });
-      console.log(`Processed ${Object.keys(this.ownerCoatOfArmsMap).length} coat of arms and ${Object.keys(this.ownerColorMap).length} colors from users data`);
-    }
-    
-    // Use shared texture loader or create one if it doesn't exist
-    if (!PolygonRenderer.sharedTextureLoader) {
-      PolygonRenderer.sharedTextureLoader = new THREE.TextureLoader();
-      PolygonRenderer.sharedTextureLoader.setCrossOrigin('anonymous');
-    }
-    this.textureLoader = PolygonRenderer.sharedTextureLoader;
-    
-    // Load shared textures if they don't exist yet
-    if (!PolygonRenderer.sharedTextures.sandBaseColor) {
-      console.log('Loading shared textures...');
-      
-      // Load sand texture directly
-      PolygonRenderer.sharedTextures.sandBaseColor = this.textureLoader.load(
-        '/textures/sand.jpg',
-        (texture) => {
-          // Configure texture settings once loaded
-          texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-          texture.repeat.set(1.25, 1.25);
-          texture.needsUpdate = true;
-          console.log('Sand base color texture loaded successfully');
-        },
-        undefined,
-        (error) => {
-          console.error('Error loading sand base color texture:', error);
-        }
-      );
-      
-      // Load normal map directly
-      PolygonRenderer.sharedTextures.sandNormalMap = this.textureLoader.load(
-        '/textures/sand_normal.jpg',
-        (texture) => {
-          texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-          texture.repeat.set(1.25, 1.25);
-          texture.needsUpdate = true;
-          console.log('Sand normal map texture loaded successfully');
-        },
-        undefined,
-        (error) => {
-          console.error('Error loading sand normal map texture:', error);
-        }
-      );
-      
-      // Load roughness map directly
-      PolygonRenderer.sharedTextures.sandRoughnessMap = this.textureLoader.load(
-        '/textures/sand_roughness.jpg',
-        (texture) => {
-          texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-          texture.repeat.set(1.25, 1.25);
-          texture.needsUpdate = true;
-          console.log('Sand roughness map texture loaded successfully');
-        },
-        undefined,
-        (error) => {
-          console.error('Error loading sand roughness map texture:', error);
-        }
-      );
-    }
-    
-    // Use the shared textures
-    this.sandBaseColor = PolygonRenderer.sharedTextures.sandBaseColor!;
-    this.sandNormalMap = PolygonRenderer.sharedTextures.sandNormalMap!;
-    this.sandRoughnessMap = PolygonRenderer.sharedTextures.sandRoughnessMap!;
     
     // Render polygons with a slight delay to allow the UI to render first
     setTimeout(() => this.renderPolygons(), 0);
-    
   }
   
-  // Add a set to track created polygon IDs
-  private createdPolygonIds = new Set<string>();
+  /**
+   * Process user data to extract colors and coat of arms
+   */
+  private processUserData(users: Record<string, any>): void {
+    Object.values(users).forEach(user => {
+      if (user.user_name) {
+        // Store coat of arms image if available
+        if (user.coat_of_arms_image) {
+          this.ownerCoatOfArmsMap[user.user_name] = user.coat_of_arms_image;
+        }
+        
+        // Store color if available - ensure we check for null/undefined
+        if (user.color) {
+          this.ownerColorMap[user.user_name] = user.color;
+          console.log(`Stored color for ${user.user_name}: ${user.color}`);
+        } else if (user.user_name === 'ConsiglioDeiDieci') {
+          // Provide a default color for ConsiglioDeiDieci if missing
+          this.ownerColorMap[user.user_name] = '#8B0000'; // Dark red
+          console.log(`Assigned default color for ConsiglioDeiDieci: #8B0000`);
+        }
+      }
+    });
+    
+    console.log(`Processed ${Object.keys(this.ownerCoatOfArmsMap).length} coat of arms and ${Object.keys(this.ownerColorMap).length} colors from users data`);
+  }
 
   private renderPolygons() {
     console.log(`Rendering ${this.polygons.length} polygons`);
     
-    // Create a material with sand texture for all polygons
-    const sandMaterial = new THREE.MeshStandardMaterial({
-      map: this.sandBaseColor,
-      normalMap: this.sandNormalMap,
-      roughnessMap: this.sandRoughnessMap,
-      color: 0xf5e9c8, // Sand color
-      side: THREE.DoubleSide,
-      transparent: false,
-      roughness: 0.8,
-      metalness: 0.1
-    });
+    // Get a standard material from the facade
+    const sandMaterial = this.facade.createLandMaterial();
     
     // Process each polygon
     this.polygons.forEach(polygon => {
@@ -294,95 +189,72 @@ export default class PolygonRenderer {
           return;
         }
         
-        // Normalize coordinates
-        const normalizedCoords = normalizeCoordinates(
-          polygon.coordinates,
-          this.bounds.centerLat,
-          this.bounds.centerLng,
-          this.bounds.scale,
-          this.bounds.latCorrectionFactor
+        // Get owner color if available
+        let ownerColor = null;
+        if (polygon.owner) {
+          ownerColor = this.getOwnerColor(polygon.owner);
+        }
+        
+        // Get owner coat of arms if available
+        let ownerCoatOfArmsUrl = null;
+        if (polygon.owner && this.ownerCoatOfArmsMap[polygon.owner]) {
+          ownerCoatOfArmsUrl = this.ownerCoatOfArmsMap[polygon.owner];
+        }
+        
+        // Create a PolygonMeshFacade instance
+        const textureLoader = new THREE.TextureLoader();
+        const polygonMesh = new PolygonMeshFacade(
+          this.scene,
+          polygon,
+          this.bounds,
+          this.activeView,
+          this.performanceMode,
+          textureLoader,
+          ownerColor,
+          ownerCoatOfArmsUrl
         );
         
-        // Create a simple shape
-        const shape = createPolygonShape(normalizedCoords);
+        const mesh = polygonMesh.getMesh();
         
-        // Create geometry from shape
-        const geometry = new THREE.ShapeGeometry(shape);
-        
-        // Create mesh with sand material
-        const mesh = new THREE.Mesh(geometry, sandMaterial.clone());
-        
-        // Ensure mesh is flat on the ground
-        mesh.rotation.x = -Math.PI / 2;
-        mesh.position.y = 0.2; // Increase height to ensure clear separation from water
-        mesh.renderOrder = 1; // Ensure it renders after water
-        
-        // Add polygon offset to prevent z-fighting
-        if (mesh.material instanceof THREE.Material) {
-          mesh.material.polygonOffset = true;
-          mesh.material.polygonOffsetFactor = 1;
-          mesh.material.polygonOffsetUnits = 1;
+        if (mesh) {
+          // Store reference in the ref object
+          this.polygonMeshesRef.current[polygon.id] = mesh;
+          
+          // Mark as created
+          this.createdPolygonIds.add(polygon.id);
+          
+          // Store reference to the facade
+          this.polygonMeshes.push(polygonMesh);
         }
-        
-        // Apply polygon offset to prevent z-fighting
-        if (mesh.material instanceof THREE.MeshStandardMaterial) {
-          mesh.material.polygonOffset = true;
-          mesh.material.polygonOffsetFactor = 1;
-          mesh.material.polygonOffsetUnits = 1;
-        }
-        
-        // Add userData to identify this as a polygon that should always be visible
-        mesh.userData = {
-          isPolygon: true,
-          alwaysVisible: true
-        };
-        
-        // Set a high render order to ensure it renders on top
-        mesh.renderOrder = 50;
-        
-        // Add to scene
-        this.scene.add(mesh);
-        
-        // Store reference
-        this.polygonMeshesRef.current[polygon.id] = mesh;
-        
-        // Mark as created
-        this.createdPolygonIds.add(polygon.id);
-        
-        // Create a simple PolygonMesh wrapper
-        const polygonMesh = {
-          getMesh: () => mesh,
-          updateViewMode: () => {},
-          updateSelectionState: () => {},
-          updateHoverState: () => {},
-          updateQuality: () => {},
-          updateOwner: () => {},
-          updateCoatOfArmsTexture: () => {},
-          cleanup: () => {
-            this.scene.remove(mesh);
-            geometry.dispose();
-            if (mesh.material) {
-              if (Array.isArray(mesh.material)) {
-                mesh.material.forEach(m => m.dispose());
-              } else {
-                mesh.material.dispose();
-              }
-            }
-          }
-        };
-        
-        // Store reference to the mesh
-        this.PolygonMeshs.push(polygonMesh as any);
-        
       } catch (error) {
         console.error(`Error rendering polygon ${polygon.id}:`, error);
       }
     });
     
-    console.log(`Created ${this.PolygonMeshs.length} polygon meshes`);
+    console.log(`Created ${this.polygonMeshes.length} polygon meshes`);
     
     // Start a periodic check to ensure polygons remain visible
     setInterval(() => this.ensurePolygonsVisible(), 1000);
+  }
+  
+  /**
+   * Get the color for an owner
+   */
+  private getOwnerColor(owner: string): string | null {
+    if (this.ownerColorMap[owner]) {
+      return this.ownerColorMap[owner];
+    } else if (this.users[owner] && this.users[owner].color) {
+      const color = this.users[owner].color;
+      // Cache for future use
+      this.ownerColorMap[owner] = color;
+      return color;
+    } else if (owner === 'ConsiglioDeiDieci') {
+      // Special case for ConsiglioDeiDieci
+      return '#8B0000'; // Dark red
+    }
+    
+    // Default color
+    return '#7cac6a'; // Default green color
   }
   
   private createSamplePolygon() {
@@ -441,9 +313,12 @@ export default class PolygonRenderer {
     this.updateSelectionState(selectedPolygonId);
   }
   
-  // Add method to ensure polygons are visible
+  /**
+   * Ensure all polygons are visible
+   */
   public ensurePolygonsVisible() {
-    this.PolygonMeshs.forEach(polygonMesh => {
+    // Check all polygon meshes
+    this.polygonMeshes.forEach(polygonMesh => {
       const mesh = polygonMesh.getMesh();
       if (mesh) {
         // Force visibility
@@ -470,15 +345,15 @@ export default class PolygonRenderer {
     });
     
     // Force a render to apply changes
-    if (this.scene.userData.forceRender) {
-      this.scene.userData.forceRender();
-    }
+    this.facade.forceRender();
   }
   
-  // Add this new method to update selection state
+  /**
+   * Update selection state for polygons
+   */
   public updateSelectionState(selectedPolygonId: string | null) {
-    // Update selection state for all LOD polygons
-    this.PolygonMeshs.forEach(polygonMesh => {
+    // Update selection state for all polygons
+    this.polygonMeshes.forEach(polygonMesh => {
       try {
         const polygonId = this.polygons.find(
           p => p && polygonMesh.getMesh() === this.polygonMeshesRef.current[p.id]
@@ -494,6 +369,9 @@ export default class PolygonRenderer {
     });
   }
   
+  /**
+   * Update view mode for all polygons
+   */
   public updateViewMode(activeView: ViewMode) {
     // Skip update if view hasn't changed
     if (this.activeView === activeView) {
@@ -503,8 +381,8 @@ export default class PolygonRenderer {
     
     this.activeView = activeView;
     
-    // Update all LOD polygons with the new view mode
-    this.PolygonMeshs.forEach(polygonMesh => {
+    // Update all polygons with the new view mode
+    this.polygonMeshes.forEach(polygonMesh => {
       polygonMesh.updateViewMode(activeView);
     });
     
@@ -524,7 +402,9 @@ export default class PolygonRenderer {
     console.log(`View mode updated to ${activeView}, coat of arms sprites updated`);
   }
   
-  // Add method to update all polygon owner colors
+  /**
+   * Update colors for all polygon owners
+   */
   public updatePolygonOwnerColors() {
     console.log('Updating all polygon owner colors with', Object.keys(this.ownerColorMap).length, 'colors');
     
@@ -540,58 +420,18 @@ export default class PolygonRenderer {
         console.log(`Processing polygon ${polygon.id} owned by ${polygon.owner}`);
         
         // Find the corresponding PolygonMesh
-        const polygonMesh = this.PolygonMeshs.find(pm => {
+        const polygonMesh = this.polygonMeshes.find(pm => {
           const mesh = pm.getMesh();
           return mesh && this.polygonMeshesRef.current[polygon.id] === mesh;
         });
         
         if (polygonMesh) {
           // Get the owner's color
-          let ownerColor = null;
-          if (this.ownerColorMap[polygon.owner]) {
-            ownerColor = this.ownerColorMap[polygon.owner];
-            console.log(`Using stored color for ${polygon.owner}: ${ownerColor}`);
-          } else if (this.users[polygon.owner] && this.users[polygon.owner].color) {
-            ownerColor = this.users[polygon.owner].color;
-            // Store for future use
-            this.ownerColorMap[polygon.owner] = ownerColor;
-            console.log(`Found color for ${polygon.owner} in users data: ${ownerColor}`);
-          } else if (polygon.owner === 'ConsiglioDeiDieci') {
-            // Special case for ConsiglioDeiDieci
-            ownerColor = '#8B0000'; // Dark red
-            this.ownerColorMap[polygon.owner] = ownerColor;
-            console.log(`Using hardcoded color for ConsiglioDeiDieci: ${ownerColor}`);
-          } else {
-            // Use default color if no owner color is specified
-            ownerColor = '#7cac6a'; // Default green color
-          }
+          const ownerColor = this.getOwnerColor(polygon.owner);
           
           if (ownerColor) {
             console.log(`Applying color ${ownerColor} to polygon ${polygon.id} owned by ${polygon.owner}`);
             polygonMesh.updateOwner(polygon.owner, ownerColor);
-            
-            // Force material update
-            const mesh = polygonMesh.getMesh();
-            if (mesh) {
-              if (Array.isArray(mesh.material)) {
-                mesh.material.forEach(mat => {
-                  if (mat instanceof THREE.MeshBasicMaterial) {
-                    mat.needsUpdate = true;
-                  }
-                });
-              } else if (mesh.material instanceof THREE.MeshBasicMaterial) {
-                mesh.material.needsUpdate = true;
-              }
-              
-              // Ensure the mesh is completely flat
-              if (mesh.geometry) {
-                const positions = mesh.geometry.attributes.position.array;
-                for (let i = 1; i < positions.length; i += 3) {
-                  positions[i] = 0; // Force Y coordinate to 0
-                }
-                mesh.geometry.attributes.position.needsUpdate = true;
-              }
-            }
           }
         } else {
           console.warn(`Could not find PolygonMesh for polygon ${polygon.id}`);
@@ -600,20 +440,24 @@ export default class PolygonRenderer {
     });
     
     // Force a render to apply changes
-    if (this.scene.userData.forceRender) {
-      this.scene.userData.forceRender();
-    }
+    this.facade.forceRender();
   }
 
+  /**
+   * Update quality settings for all polygons
+   */
   public updateQuality(performanceMode: boolean) {
     this.performanceMode = performanceMode;
     
-    // Update all LOD polygons with the new quality setting
-    this.PolygonMeshs.forEach(polygonMesh => {
+    // Update all polygons with the new quality setting
+    this.polygonMeshes.forEach(polygonMesh => {
       polygonMesh.updateQuality(performanceMode);
     });
   }
   
+  /**
+   * Update coat of arms for owners
+   */
   public updateOwnerCoatOfArms(ownerCoatOfArmsMap: Record<string, string>) {
     console.log('updateOwnerCoatOfArms called with data:', ownerCoatOfArmsMap);
     
@@ -644,7 +488,9 @@ export default class PolygonRenderer {
     this.hasUpdatedCoatOfArms = true;
   }
   
-  // Add method to update owner colors
+  /**
+   * Update colors for owners
+   */
   public updateOwnerColors(colorMap: Record<string, string>) {
     console.log('updateOwnerColors called with data:', colorMap);
     
@@ -674,13 +520,15 @@ export default class PolygonRenderer {
   
   // This method is replaced by createColoredCircleOnLand
 
-  // Create and update coat of arms as flat textures on the land
+  /**
+   * Update coat of arms sprites for all polygons
+   */
   public updateCoatOfArmsSprites() {
     console.log('Updating coat of arms sprites, active view:', this.activeView);
     
     // Remove existing coat of arms objects
     Object.values(this.coatOfArmSprites).forEach(obj => {
-      this.scene.remove(obj);
+      this.facade.removeFromScene(obj);
       if (obj instanceof THREE.Mesh) {
         if (obj.geometry) obj.geometry.dispose();
         if (obj.material) {
@@ -716,25 +564,11 @@ export default class PolygonRenderer {
       // Get the coat of arms URL
       const coatOfArmsUrl = this.ownerCoatOfArmsMap[polygon.owner];
       
-      // Get the owner's color from the users data
-      let ownerColor = '#8B4513'; // Default brown color
-      if (this.ownerColorMap[polygon.owner]) {
-        ownerColor = this.ownerColorMap[polygon.owner];
-        console.log(`Using cached color for ${polygon.owner}: ${ownerColor}`);
-      } else if (this.users[polygon.owner] && this.users[polygon.owner].color) {
-        ownerColor = this.users[polygon.owner].color;
-        // Cache the color for future use
-        this.ownerColorMap[polygon.owner] = ownerColor;
-        console.log(`Using color from users data for ${polygon.owner}: ${ownerColor}`);
-      } else if (polygon.owner === 'ConsiglioDeiDieci') {
-        // Special case for ConsiglioDeiDieci
-        ownerColor = '#8B0000'; // Dark red
-        this.ownerColorMap[polygon.owner] = ownerColor;
-        console.log(`Using hardcoded color for ConsiglioDeiDieci: ${ownerColor}`);
-      }
+      // Get the owner's color
+      const ownerColor = this.getOwnerColor(polygon.owner);
       
       // Find the corresponding PolygonMesh
-      const polygonMesh = this.PolygonMeshs.find(pm => {
+      const polygonMesh = this.polygonMeshes.find(pm => {
         const mesh = pm.getMesh();
         return mesh && this.polygonMeshesRef.current[polygon.id] === mesh;
       });
@@ -754,14 +588,12 @@ export default class PolygonRenderer {
       } else if (polygon.centroid) {
         console.log(`Creating colored circle for ${polygon.id} with color: ${ownerColor}`);
         // Create a colored circle texture on the land as fallback
-        this.createColoredCircleOnLand(polygon, ownerColor);
+        this.createColoredCircleOnLand(polygon, ownerColor || '#8B4513');
       }
     });
     
     // Force a render to apply the changes
-    if (this.scene.userData.forceRender) {
-      this.scene.userData.forceRender();
-    }
+    this.facade.forceRender();
   }
 
   // Add this helper method to create a flat texture on the land for a polygon
@@ -914,7 +746,9 @@ export default class PolygonRenderer {
     }
   }
   
-  // Add a new method to create a colored circle on the land
+  /**
+   * Create a colored circle on the land for a polygon
+   */
   private createColoredCircleOnLand(polygon: Polygon, color: string) {
     if (!polygon.centroid) {
       console.warn(`Cannot create colored circle for polygon ${polygon.id} - no centroid`);
@@ -931,24 +765,14 @@ export default class PolygonRenderer {
         this.bounds.latCorrectionFactor
       )[0];
       
-      // Create a circle geometry
-      const circleGeometry = new THREE.CircleGeometry(0.5, 32);
-      const circleMaterial = new THREE.MeshBasicMaterial({
-        color: color,
-        transparent: true,
-        opacity: 0.8,
-        side: THREE.DoubleSide,
-        depthWrite: false
-      });
+      // Create position vector
+      const position = new THREE.Vector3(normalizedCoord.x, 0.05, normalizedCoord.y);
       
-      // Create mesh and position it
-      const circleMesh = new THREE.Mesh(circleGeometry, circleMaterial);
-      circleMesh.position.set(normalizedCoord.x, 0.05, normalizedCoord.y); // Slightly above ground
-      circleMesh.rotation.x = -Math.PI / 2; // Rotate to lie flat
-      circleMesh.renderOrder = 10; // Ensure it renders on top
+      // Create circle using the facade
+      const circleMesh = this.facade.createColoredCircle(position, color, 0.5);
       
       // Add to scene
-      this.scene.add(circleMesh);
+      this.facade.addToScene(circleMesh);
       
       // Store reference
       this.coatOfArmSprites[polygon.id] = circleMesh;
@@ -959,7 +783,9 @@ export default class PolygonRenderer {
     }
   }
 
-  // Add method to update polygon owner
+  /**
+   * Update the owner of a polygon
+   */
   public updatePolygonOwner(polygonId: string, newOwner: string) {
     console.log(`PolygonRenderer.updatePolygonOwner called for ${polygonId} with new owner ${newOwner}`);
     
@@ -975,7 +801,7 @@ export default class PolygonRenderer {
     console.log(`Updated polygon ${polygonId} owner to ${newOwner} in data model`);
     
     // Find the corresponding PolygonMesh
-    const polygonMesh = this.PolygonMeshs.find(pm => 
+    const polygonMesh = this.polygonMeshes.find(pm => 
       pm.getMesh() === this.polygonMeshesRef.current[polygonId]
     );
     
@@ -984,44 +810,14 @@ export default class PolygonRenderer {
       return;
     }
     
-    // Get the owner's color from the users data with better error handling
-    let ownerColor = null;
-    try {
-      if (newOwner) {
-        if (this.ownerColorMap[newOwner]) {
-          ownerColor = this.ownerColorMap[newOwner];
-          console.log(`Using stored color for ${newOwner}: ${ownerColor}`);
-        } else if (this.users[newOwner] && this.users[newOwner].color) {
-          ownerColor = this.users[newOwner].color;
-          // Also store in the color map for future use
-          this.ownerColorMap[newOwner] = ownerColor;
-          console.log(`Found color for ${newOwner} in users data: ${ownerColor}`);
-        } else if (newOwner === 'ConsiglioDeiDieci') {
-          // Special case for ConsiglioDeiDieci
-          ownerColor = '#8B0000'; // Dark red
-          this.ownerColorMap[newOwner] = ownerColor;
-          console.log(`Using hardcoded color for ConsiglioDeiDieci: ${ownerColor}`);
-        } else {
-          // Use default color if no owner color is specified
-          ownerColor = '#7cac6a'; // Default green color
-          console.log(`Using default color for ${newOwner}: ${ownerColor}`);
-        }
-      }
-    } catch (error) {
-      console.error(`Error getting color for owner ${newOwner}:`, error);
-      // Use default color if there was an error
-      ownerColor = '#7cac6a'; // Default green color
-    }
+    // Get the owner's color
+    const ownerColor = this.getOwnerColor(newOwner);
     
     // Get the owner's coat of arms URL if available
     let ownerCoatOfArmsUrl = null;
-    try {
-      if (newOwner && this.ownerCoatOfArmsMap && this.ownerCoatOfArmsMap[newOwner]) {
-        ownerCoatOfArmsUrl = this.ownerCoatOfArmsMap[newOwner];
-        console.log(`Found coat of arms for ${newOwner}: ${ownerCoatOfArmsUrl}`);
-      }
-    } catch (error) {
-      console.error(`Error getting coat of arms for owner ${newOwner}:`, error);
+    if (newOwner && this.ownerCoatOfArmsMap && this.ownerCoatOfArmsMap[newOwner]) {
+      ownerCoatOfArmsUrl = this.ownerCoatOfArmsMap[newOwner];
+      console.log(`Found coat of arms for ${newOwner}: ${ownerCoatOfArmsUrl}`);
     }
     
     // Update the PolygonMesh with the new owner's color and coat of arms
@@ -1038,26 +834,20 @@ export default class PolygonRenderer {
     }
     
     // Update coat of arms sprites
-    try {
-      console.log('Updating coat of arms sprites');
-      this.updateCoatOfArmsSprites();
-    } catch (error) {
-      console.error('Error updating coat of arms sprites:', error);
-    }
+    this.updateCoatOfArmsSprites();
     
     // Force a render to apply changes
-    if (this.scene.userData.forceRender) {
-      console.log('Forcing render to apply changes');
-      this.scene.userData.forceRender();
-    }
+    this.facade.forceRender();
   }
   
-  // Add method to update hover state
+  /**
+   * Update hover state for polygons
+   */
   public updateHoverState(hoveredPolygonId: string | null) {
     console.log('Updating hover state for polygon:', hoveredPolygonId);
     
-    // Update hover state for all LOD polygons
-    this.PolygonMeshs.forEach(polygonMesh => {
+    // Update hover state for all polygons
+    this.polygonMeshes.forEach(polygonMesh => {
       if (!polygonMesh) return;
       
       try {
@@ -1081,21 +871,24 @@ export default class PolygonRenderer {
     // No shore effects are created to avoid geometry generation
   }
   
+  /**
+   * Clean up resources
+   */
   public cleanup() {
-    console.log(`Cleaning up PolygonRenderer with ${this.PolygonMeshs.length} meshes`);
+    console.log(`Cleaning up PolygonRenderer with ${this.polygonMeshes.length} meshes`);
     
-    // Clean up all LOD polygons
-    this.PolygonMeshs.forEach(polygonMesh => {
+    // Clean up all polygon meshes
+    this.polygonMeshes.forEach(polygonMesh => {
       polygonMesh.cleanup();
     });
     
     // Clear the arrays and maps
-    this.PolygonMeshs = [];
+    this.polygonMeshes = [];
     this.createdPolygonIds.clear();
     
-    // Clean up coat of arms objects (planes or sprites)
+    // Clean up coat of arms objects
     Object.values(this.coatOfArmSprites).forEach(obj => {
-      this.scene.remove(obj);
+      this.facade.removeFromScene(obj);
       if (obj instanceof THREE.Mesh) {
         if (obj.geometry) obj.geometry.dispose();
         if (obj.material) {
@@ -1113,9 +906,7 @@ export default class PolygonRenderer {
     });
     this.coatOfArmSprites = {};
     
-    // Dispose of textures
-    this.sandBaseColor.dispose();
-    this.sandNormalMap.dispose();
-    this.sandRoughnessMap.dispose();
+    // Dispose of the facade
+    this.facade.dispose();
   }
 }

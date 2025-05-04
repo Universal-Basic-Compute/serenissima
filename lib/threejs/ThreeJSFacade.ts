@@ -5,6 +5,7 @@ import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 
 /**
  * A facade for THREE.js scene management to reduce coupling
+ * Provides a simplified interface to Three.js functionality
  */
 export class ThreeJSFacade {
   private scene: THREE.Scene;
