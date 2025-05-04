@@ -49,7 +49,7 @@ export default class SceneSetup {
     // Initialize renderer with simpler settings
     this.renderer = new THREE.WebGLRenderer({ 
       canvas,
-      antialias: false, // Disable antialiasing for better performance
+      antialias: true, // Enable antialiasing for smoother edges
       powerPreference: 'default',
       precision: 'mediump', // Use medium precision for better performance
       logarithmicDepthBuffer: false, // Disable logarithmic depth buffer for better performance
@@ -59,7 +59,7 @@ export default class SceneSetup {
     // Use simpler renderer settings
     this.renderer.setClearColor(0x87CEEB, 1); // Set clear color with full opacity (light sky blue)
     this.renderer.setSize(window.innerWidth, window.innerHeight);
-    this.renderer.setPixelRatio(1); // Use standard pixel ratio for better performance
+    this.renderer.setPixelRatio(window.devicePixelRatio); // Use device pixel ratio for better quality
     this.renderer.shadowMap.enabled = false;
     
     // Set up a simple EffectComposer

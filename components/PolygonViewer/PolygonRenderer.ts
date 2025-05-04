@@ -261,12 +261,16 @@ export default class PolygonRenderer {
   private renderPolygons() {
     console.log(`Rendering ${this.polygons.length} polygons`);
     
-    // Create a simple material for all polygons
-    const simpleMaterial = new THREE.MeshBasicMaterial({
-      color: 0x3388ff, // Blue color
+    // Create a material with sand texture for all polygons
+    const sandMaterial = new THREE.MeshStandardMaterial({
+      map: this.sandBaseColor,
+      normalMap: this.sandNormalMap,
+      roughnessMap: this.sandRoughnessMap,
+      color: 0xf5e9c8, // Sand color
       side: THREE.DoubleSide,
-      transparent: true,
-      opacity: 0.8
+      transparent: false,
+      roughness: 0.8,
+      metalness: 0.1
     });
     
     // Process each polygon
@@ -297,8 +301,8 @@ export default class PolygonRenderer {
         // Create geometry from shape
         const geometry = new THREE.ShapeGeometry(shape);
         
-        // Create mesh with simple material
-        const mesh = new THREE.Mesh(geometry, simpleMaterial.clone());
+        // Create mesh with sand material
+        const mesh = new THREE.Mesh(geometry, sandMaterial.clone());
         
         // Ensure mesh is flat on the ground
         mesh.rotation.x = -Math.PI / 2;
@@ -362,6 +366,18 @@ export default class PolygonRenderer {
       coordinates: sampleCoordinates,
       centroid: { lat: 45.4381, lng: 12.3345 }
     };
+    
+    // Create a material with sand texture
+    const sandMaterial = new THREE.MeshStandardMaterial({
+      map: this.sandBaseColor,
+      normalMap: this.sandNormalMap,
+      roughnessMap: this.sandRoughnessMap,
+      color: 0xf5e9c8, // Sand color
+      side: THREE.DoubleSide,
+      transparent: false,
+      roughness: 0.8,
+      metalness: 0.1
+    });
     
     // Create a polygon mesh for the sample
     const polygonMesh = new PolygonMesh(
