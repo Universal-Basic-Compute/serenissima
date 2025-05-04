@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { RoadCreationManager } from '@/lib/threejs/RoadCreationManager';
+import roadService from '@/services/RoadService';
 
 interface RoadCreatorProps {
   scene: THREE.Scene;
   camera: THREE.PerspectiveCamera;
   active: boolean;
-  onComplete: (roadPoints: THREE.Vector3[]) => void;
+  onComplete: (roadPoints: THREE.Vector3[], roadId?: string) => void;
   onCancel: () => void;
 }
 
@@ -189,7 +190,25 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
         <button
           onClick={() => {
             if (managerRef.current && pointCount >= 2) {
-              onComplete(managerRef.current.getPoints());
+              const points = managerRef.current.getPoints();
+              
+              // Save the road using the service
+              try {
+                const savedRoad = roadService.saveRoad(
+                  points, 
+                  curvature
+                );
+                console.log('Road saved successfully:', savedRoad);
+                
+                // Pass both points and road ID to parent component
+                onComplete(points, savedRoad.id);
+              } catch (error) {
+                console.error('Failed to save road:', error);
+                setErrorMessage('Failed to save road. Please try again.');
+                
+                // Still pass the points even if saving failed
+                onComplete(points);
+              }
             }
           }}
           disabled={pointCount < 2}
@@ -224,6 +243,11 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
       {/* Point counter */}
       <div className="mt-2 text-xs text-gray-700 text-center">
         Points: {pointCount} {pointCount >= 2 ? '(Ready to complete)' : ''}
+      </div>
+      
+      {/* Road service status */}
+      <div className="mt-1 text-xs text-gray-500 text-center">
+        Roads will be saved automatically
       </div>
     </div>
   );

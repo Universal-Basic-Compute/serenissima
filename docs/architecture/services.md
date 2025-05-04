@@ -95,6 +95,34 @@ export class WalletService {
 }
 ```
 
+### RoadService
+
+Manages road data persistence and retrieval.
+
+```typescript
+export interface RoadData {
+  id: string;
+  points: { x: number; y: number; z: number }[];
+  curvature: number;
+  createdBy?: string;
+  landId?: string;
+  createdAt?: string;
+}
+
+export class RoadService {
+  public static getInstance(): RoadService;
+  public saveRoad(points: THREE.Vector3[], curvature: number, userId?: string, landId?: string): RoadData;
+  public getRoads(): RoadData[];
+  public getRoadById(id: string): RoadData | undefined;
+  public deleteRoad(id: string): boolean;
+  public updateRoad(id: string, updates: Partial<RoadData>): RoadData | null;
+  public convertPoints(points: THREE.Vector3[]): { x: number; y: number; z: number }[];
+  public convertToVector3Points(points: { x: number; y: number; z: number }[]): THREE.Vector3[];
+  public saveRoadToServer(roadId: string): Promise<boolean>;
+  public loadRoadsFromServer(): Promise<RoadData[]>;
+}
+```
+
 ## Service Registration and Discovery
 
 Services are registered and discovered through a simple service locator pattern:
