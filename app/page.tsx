@@ -1295,7 +1295,6 @@ export default function Home() {
           attributeFilter: ['style', 'class']
         });
       }
-    }
   };
 
   // Handle drawing manager load
