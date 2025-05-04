@@ -59,7 +59,7 @@ export default function SimpleViewer() {
     cameraControllerRef.current = cameraController;
     
     // Create water only (no polygons)
-    const waterSize = Math.max(bounds.scale * 1000, 2000);
+    const waterSize = Math.max(bounds.scale * 500, 1000); // Reduced from 1000, 2000 to 500, 1000
     const water = new SimpleWater({
       scene,
       size: waterSize

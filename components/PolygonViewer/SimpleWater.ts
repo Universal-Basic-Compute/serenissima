@@ -14,8 +14,8 @@ export default class SimpleWater {
 
   constructor({ scene, size }: SimpleWaterProps) {
     this.scene = scene;
-    // Increase water size by 50% to ensure it extends beyond view
-    this.size = size * 1.5;
+    // Reduce the water size multiplier from 1.5 to 0.8
+    this.size = size * 0.8;
     this.clock = new THREE.Clock();
     
     // Create water
@@ -26,15 +26,15 @@ export default class SimpleWater {
   }
 
   private createWater(): Water {
-    // Water geometry - make it larger
+    // Water geometry - make it smaller
     const waterGeometry = new THREE.PlaneGeometry(this.size, this.size);
 
     // Water texture
     const textureLoader = new THREE.TextureLoader();
     const waterNormals = textureLoader.load('/textures/waternormals.jpg', (texture) => {
       texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-      // Increase repeat for more detailed waves
-      texture.repeat.set(8, 8);
+      // Increase repeat for more detailed waves in the smaller area
+      texture.repeat.set(4, 4); // Reduced from 8 to 4 for the smaller area
     });
 
     // Water material - adjust colors for more blue appearance
@@ -47,7 +47,7 @@ export default class SimpleWater {
         sunDirection: new THREE.Vector3(0, 1, 0),
         sunColor: 0xffffff,
         waterColor: 0x0047ab, // Deep royal blue
-        distortionScale: 4.5,  // Increased from 3.7 for more pronounced waves
+        distortionScale: 3.0,  // Reduced from 4.5 for smaller waves in the smaller area
         fog: false
       }
     );
@@ -63,8 +63,8 @@ export default class SimpleWater {
 
   public update(): void {
     if (this.water.material instanceof THREE.ShaderMaterial) {
-      // Update water animation - slow down slightly for more realistic ocean movement
-      this.water.material.uniforms['time'].value += this.clock.getDelta() * 0.4;
+      // Update water animation - slow down for smaller area
+      this.water.material.uniforms['time'].value += this.clock.getDelta() * 0.3;
     }
   }
 
