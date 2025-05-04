@@ -1,0 +1,75 @@
+# Component Architecture
+
+La Serenissima uses a component-based architecture with React. Components are organized by responsibility and follow a hierarchical structure.
+
+## Component Categories
+
+1. **Page Components**: Top-level components that represent entire pages
+2. **Feature Components**: Components that implement specific features
+3. **UI Components**: Reusable UI elements
+4. **3D Components**: Components related to 3D rendering
+
+## Component Hierarchy
+
+```
+App
+├── Map (Page)
+│   ├── PolygonViewer (Feature)
+│   │   ├── SceneSetup
+│   │   ├── PolygonRenderer
+│   │   ├── InteractionManager
+│   │   ├── CloudSystem
+│   │   ├── SimpleWater
+│   │   └── ViewModeMenu
+│   ├── LandDetailsPanel (Feature)
+│   ├── MarketPanel (Feature)
+│   ├── BuildingMenu (Feature)
+│   └── WalletStatus (UI)
+└── Other Pages...
+```
+
+## Component Responsibilities
+
+### Page Components
+
+- Handle routing and page-level state
+- Compose feature components
+- Manage page-level effects and lifecycle
+
+### Feature Components
+
+- Implement specific application features
+- Manage feature-specific state
+- Communicate with services and state management
+
+### UI Components
+
+- Provide reusable UI elements
+- Accept props for customization
+- Maintain internal state when necessary
+- Should be presentational and not contain business logic
+
+### 3D Components
+
+- Handle 3D rendering and interaction
+- Encapsulate Three.js functionality
+- Communicate through well-defined interfaces
+- Follow facade pattern to simplify Three.js complexity
+
+## Component Communication
+
+Components should communicate through:
+
+1. **Props**: For parent-child communication
+2. **Event Bus**: For communication between unrelated components
+3. **State Management**: For shared state
+4. **Service Layer**: For business logic and data access
+
+## Component Design Guidelines
+
+1. **Single Responsibility**: Each component should do one thing well
+2. **Prop Validation**: Use TypeScript interfaces for prop validation
+3. **Controlled Components**: Prefer controlled components over uncontrolled
+4. **Error Boundaries**: Use error boundaries to prevent cascading failures
+5. **Performance Optimization**: Use memoization and virtualization when appropriate
+6. **Accessibility**: Ensure components are accessible
