@@ -327,83 +327,153 @@ class PolygonMesh {
     this.coatOfArmsSprite = null;
   }
   
-  // Update selection state
+  // Update selection state with improved performance
   public updateSelectionState(isSelected: boolean) {
     if (this.isSelected === isSelected || !this.mesh) return; // Early return if state hasn't changed
     
     this.isSelected = isSelected;
     
     try {
-      const material = Array.isArray(this.mesh.material) 
-        ? this.mesh.material[0] as THREE.MeshBasicMaterial
-        : this.mesh.material as THREE.MeshBasicMaterial;
+      // Handle both array and single material cases
+      const materials = Array.isArray(this.mesh.material) 
+        ? this.mesh.material as THREE.MeshBasicMaterial[]
+        : [this.mesh.material as THREE.MeshBasicMaterial];
       
-      if (!material) return;
-      
-      if (isSelected) {
-        if (!this.originalColor && material.color) {
-          this.originalColor = material.color.clone();
-        }
+      // Process each material
+      materials.forEach(material => {
+        if (!material || !material.color) return;
         
-        if (material.color) {
+        if (isSelected) {
+          // Store original color if not already stored
+          if (!this.originalColor) {
+            this.originalColor = material.color.clone();
+          }
+          
+          // Set selection color - bright gold
           material.color.set('#ffcc00');
+          
+          // Add a slight emissive glow for better visibility
+          if (material instanceof THREE.MeshStandardMaterial) {
+            material.emissive = new THREE.Color('#553300');
+          }
+          
+          // Increase opacity for better visibility
+          if (material.transparent) {
+            this.originalMaterial = {
+              opacity: material.opacity,
+              transparent: material.transparent
+            };
+            material.opacity = 0.9;
+          }
+        } else {
+          // Restore original color
+          if (this.originalColor) {
+            material.color.copy(this.originalColor);
+          }
+          
+          // Remove emissive glow
+          if (material instanceof THREE.MeshStandardMaterial) {
+            material.emissive.set('#000000');
+          }
+          
+          // Restore original opacity
+          if (this.originalMaterial && material.transparent) {
+            material.opacity = this.originalMaterial.opacity;
+          }
         }
         
-        // Use a consistent height but higher render order for selected polygons
-        this.mesh.renderOrder = 30; // Higher render order for selected polygons
-        
+        // Mark material for update
         material.needsUpdate = true;
+      });
+      
+      // Update render order for better visibility
+      if (isSelected) {
+        this.mesh.renderOrder = 30; // Higher render order for selected polygons
       } else {
-        if (this.originalColor && material.color) {
-          material.color.copy(this.originalColor);
-          
-          // Reset render order to base value
-          this.mesh.renderOrder = 10; // Reset to the same value as initial render order
-          
-          material.needsUpdate = true;
-        }
+        this.mesh.renderOrder = 10; // Reset to base value
       }
+      
+      // Force an update of the mesh
+      this.mesh.visible = true;
     } catch (error) {
       console.error('Error updating selection state:', error);
     }
   }
   
-  // Update hover state
+  // Update hover state with improved performance
   public updateHoverState(isHovered: boolean) {
+    // Skip if state hasn't changed, mesh is missing, or polygon is already selected
     if (this.isHovered === isHovered || !this.mesh || this.isSelected) return;
     
     this.isHovered = isHovered;
     
-    const material = Array.isArray(this.mesh.material)
-      ? this.mesh.material[0] as THREE.MeshBasicMaterial
-      : this.mesh.material as THREE.MeshBasicMaterial;
-    
-    if (!material) return;
-    
-    if (isHovered) {
-      if (!this.originalColor && material.color) {
-        this.originalColor = material.color.clone();
-      }
+    try {
+      // Handle both array and single material cases
+      const materials = Array.isArray(this.mesh.material) 
+        ? this.mesh.material as THREE.MeshBasicMaterial[]
+        : [this.mesh.material as THREE.MeshBasicMaterial];
       
-      if (this.activeView === 'land' && material.color) {
-        const color = material.color.clone();
-        color.multiplyScalar(1.5);
-        material.color.copy(color);
-      }
-      
-      // Use consistent height but higher render order for hovered polygons
-      this.mesh.renderOrder = 25; // Higher than base but lower than selected
-      
-      material.needsUpdate = true;
-    } else {
-      if (this.originalColor && material.color) {
-        material.color.copy(this.originalColor);
+      // Process each material
+      materials.forEach(material => {
+        if (!material || !material.color) return;
         
-        // Reset render order to base value
-        this.mesh.renderOrder = 10; // Reset to the same value as initial render order
+        if (isHovered) {
+          // Store original color if not already stored
+          if (!this.originalColor) {
+            this.originalColor = material.color.clone();
+          }
+          
+          // Brighten the color for hover effect
+          if (this.activeView === 'land') {
+            const color = material.color.clone();
+            // Use HSL to increase lightness without changing hue
+            const hsl = { h: 0, s: 0, l: 0 };
+            color.getHSL(hsl);
+            hsl.l = Math.min(1, hsl.l * 1.3); // Increase lightness by 30%
+            color.setHSL(hsl.h, hsl.s, hsl.l);
+            material.color.copy(color);
+          } else {
+            // For other views, just brighten slightly
+            const color = material.color.clone();
+            color.multiplyScalar(1.2);
+            material.color.copy(color);
+          }
+          
+          // Increase opacity slightly for better visibility
+          if (material.transparent && material.opacity < 0.9) {
+            this.originalMaterial = {
+              opacity: material.opacity,
+              transparent: material.transparent
+            };
+            material.opacity = Math.min(1, material.opacity * 1.2);
+          }
+        } else {
+          // Restore original color
+          if (this.originalColor) {
+            material.color.copy(this.originalColor);
+          }
+          
+          // Restore original opacity
+          if (this.originalMaterial && material.transparent) {
+            material.opacity = this.originalMaterial.opacity;
+          }
+        }
         
+        // Mark material for update
         material.needsUpdate = true;
+      });
+      
+      // Update render order for better visibility
+      if (isHovered) {
+        this.mesh.renderOrder = 25; // Higher than base but lower than selected
+      } else {
+        this.mesh.renderOrder = 10; // Reset to base value
       }
+      
+      // Force visibility
+      this.mesh.visible = true;
+    } catch (error) {
+      console.error('Error updating hover state:', error);
     }
   }
   

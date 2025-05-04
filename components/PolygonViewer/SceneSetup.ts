@@ -313,10 +313,29 @@ export default class SceneSetup {
   
   
   private handleResize = () => {
-    this.camera.aspect = window.innerWidth / window.innerHeight;
+    // Get actual window dimensions
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    
+    // Update camera aspect ratio
+    this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
-    this.composer.setSize(window.innerWidth, window.innerHeight);
+    
+    // Update renderer size
+    this.renderer.setSize(width, height);
+    
+    // Update composer size
+    this.composer.setSize(width, height);
+    
+    // Force a render to apply changes immediately
+    if (this.composer) {
+      this.composer.render();
+    } else if (this.renderer) {
+      this.renderer.render(this.scene, this.camera);
+    }
+    
+    // Log resize for debugging
+    console.log(`Resized renderer to ${width}x${height}`);
   };
   
   public updateControlsState(isInteractingWithPolygon: boolean) {

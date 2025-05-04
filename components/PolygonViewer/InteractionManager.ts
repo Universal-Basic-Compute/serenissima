@@ -87,9 +87,20 @@ export default class InteractionManager {
     this.isDragging = false;
   }
   
+  // Throttle mouse move events
+  private lastMoveTime = 0;
+  private moveThrottleInterval = 16; // ms (roughly 60fps)
+  
   private onMouseMove(event: MouseEvent) {
     // Skip if disabled
     if (!this.enabled) return;
+    
+    // Throttle mouse move events for better performance
+    const now = performance.now();
+    if (now - this.lastMoveTime < this.moveThrottleInterval) {
+      return;
+    }
+    this.lastMoveTime = now;
     
     // If mouse is down and has moved more than a few pixels, consider it a drag
     if (event.buttons > 0) {
@@ -108,27 +119,27 @@ export default class InteractionManager {
     // Update the raycaster with the camera and mouse position
     this.raycaster.setFromCamera(this.mouse, this.camera);
     
-    // IMPORTANT CHANGE: Use recursive=true to check all children of objects
-    // This ensures we detect all meshes, including those in LOD groups
-    const intersects = this.raycaster.intersectObjects(this.scene.children, true);
+    // Optimize raycasting by filtering objects first
+    const potentialTargets = [];
+    for (const id in this.polygonMeshesRef.current) {
+      const mesh = this.polygonMeshesRef.current[id];
+      if (mesh && mesh.visible) {
+        potentialTargets.push(mesh);
+      }
+    }
+    
+    // Only raycast against potential polygon targets
+    const intersects = this.raycaster.intersectObjects(potentialTargets, false);
     
     // Check if we're hovering over a polygon
     if (intersects.length > 0) {
-      // Find the first intersected object that is a polygon mesh or its child
+      // Find the first intersected object that is a polygon mesh
       for (const intersect of intersects) {
-        // Get the object or its parent if it's a child mesh
         const object = intersect.object;
-        let targetObject = object;
-        
-        // Traverse up the parent chain to find the root mesh
-        while (targetObject.parent && !(targetObject instanceof THREE.Mesh)) {
-          targetObject = targetObject.parent;
-        }
         
         // Find the polygon ID from our ref
         const hoveredId = Object.keys(this.polygonMeshesRef.current).find(
-          id => this.polygonMeshesRef.current[id] === targetObject || 
-               this.polygonMeshesRef.current[id] === object
+          id => this.polygonMeshesRef.current[id] === object
         );
         
         if (hoveredId) {
@@ -136,6 +147,9 @@ export default class InteractionManager {
             // Update hover state
             this.setHoveredPolygonId(hoveredId);
             this.hoveredPolygonId = hoveredId;
+            
+            // Set cursor to pointer to indicate interactivity
+            document.body.style.cursor = 'pointer';
           }
           return; // Exit after finding the first valid polygon
         }
@@ -146,6 +160,9 @@ export default class InteractionManager {
     if (this.hoveredPolygonId) {
       this.setHoveredPolygonId(null);
       this.hoveredPolygonId = null;
+      
+      // Reset cursor
+      document.body.style.cursor = 'default';
     }
   }
   
@@ -173,6 +190,15 @@ export default class InteractionManager {
       return;
     }
     
+    // Calculate distance moved from mousedown position
+    const dx = Math.abs(event.clientX - this.mouseDownPosition.x);
+    const dy = Math.abs(event.clientY - this.mouseDownPosition.y);
+    
+    // If moved more than a few pixels, consider it a drag not a click
+    if (dx > 5 || dy > 5) {
+      return;
+    }
+    
     this.isProcessingClick = true;
     
     try {
@@ -183,26 +209,27 @@ export default class InteractionManager {
       // Update the raycaster with the camera and mouse position
       this.raycaster.setFromCamera(this.mouse, this.camera);
       
-      // IMPORTANT CHANGE: Use recursive=true to check all children of objects
-      const intersects = this.raycaster.intersectObjects(this.scene.children, true);
+      // Optimize raycasting by filtering objects first
+      const potentialTargets = [];
+      for (const id in this.polygonMeshesRef.current) {
+        const mesh = this.polygonMeshesRef.current[id];
+        if (mesh && mesh.visible) {
+          potentialTargets.push(mesh);
+        }
+      }
+      
+      // Only raycast against potential polygon targets
+      const intersects = this.raycaster.intersectObjects(potentialTargets, false);
       
       // Check if we're clicking on a polygon
       if (intersects.length > 0) {
-        // Find the first intersected object that is a polygon mesh or its child
+        // Find the first intersected object that is a polygon mesh
         for (const intersect of intersects) {
-          // Get the object or its parent if it's a child mesh
           const object = intersect.object;
-          let targetObject = object;
-          
-          // Traverse up the parent chain to find the root mesh
-          while (targetObject.parent && !(targetObject instanceof THREE.Mesh)) {
-            targetObject = targetObject.parent;
-          }
           
           // Find the polygon ID from our ref
           const clickedId = Object.keys(this.polygonMeshesRef.current).find(
-            id => this.polygonMeshesRef.current[id] === targetObject || 
-                 this.polygonMeshesRef.current[id] === object
+            id => this.polygonMeshesRef.current[id] === object
           );
           
           if (clickedId) {
@@ -217,16 +244,67 @@ export default class InteractionManager {
             this.setSelectedPolygonId(newSelectedId);
             this.selectedPolygonId = newSelectedId;
             
+            // Dispatch a custom event for the selection
+            window.dispatchEvent(new CustomEvent('polygonSelected', {
+              detail: { polygonId: newSelectedId }
+            }));
+            
             this.isProcessingClick = false;
             return; // Exit after finding the first valid polygon
           }
         }
       } 
       
+      // If we get here, we didn't hit any polygon
+      
+      // Try a second pass with a wider ray if we didn't hit anything
+      // This helps with small or thin polygons that might be hard to click
+      if (intersects.length === 0) {
+        // Increase the raycaster's precision for small objects
+        const originalLinePrecision = this.raycaster.params.Line?.threshold || 1;
+        const originalPointsPrecision = this.raycaster.params.Points?.threshold || 1;
+        
+        this.raycaster.params.Line = { threshold: originalLinePrecision * 2 };
+        this.raycaster.params.Points = { threshold: originalPointsPrecision * 2 };
+        
+        // Try again with increased precision
+        const secondPassIntersects = this.raycaster.intersectObjects(potentialTargets, false);
+        
+        // Reset precision
+        this.raycaster.params.Line = { threshold: originalLinePrecision };
+        this.raycaster.params.Points = { threshold: originalPointsPrecision };
+        
+        if (secondPassIntersects.length > 0) {
+          const object = secondPassIntersects[0].object;
+          const clickedId = Object.keys(this.polygonMeshesRef.current).find(
+            id => this.polygonMeshesRef.current[id] === object
+          );
+          
+          if (clickedId) {
+            console.log(`Second pass selection: ${clickedId}`);
+            const newSelectedId = clickedId === this.selectedPolygonId ? null : clickedId;
+            this.setSelectedPolygonId(newSelectedId);
+            this.selectedPolygonId = newSelectedId;
+            
+            window.dispatchEvent(new CustomEvent('polygonSelected', {
+              detail: { polygonId: newSelectedId }
+            }));
+            
+            this.isProcessingClick = false;
+            return;
+          }
+        }
+      }
+      
       // Clicking on empty space, deselect current selection
       if (this.selectedPolygonId) {
         this.setSelectedPolygonId(null);
         this.selectedPolygonId = null;
+        
+        // Dispatch deselection event
+        window.dispatchEvent(new CustomEvent('polygonSelected', {
+          detail: { polygonId: null }
+        }));
       }
       
       this.isProcessingClick = false;
