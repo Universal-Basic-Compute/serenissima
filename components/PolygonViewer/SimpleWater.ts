@@ -52,11 +52,11 @@ export default class SimpleWater {
       }
     );
 
-    // Position water - CRITICAL CHANGE: Keep water at a consistent lower position
+    // Position water - CRITICAL CHANGE: Position water MUCH lower than land
     water.rotation.x = -Math.PI / 2;
-    water.position.y = 0; // Set to 0 as our baseline (land will be positioned above this)
+    water.position.y = -5; // Position water 5 units below origin (land is at 0.5)
     
-    // No need for render order or polygon offset when there's clear physical separation
+    // With this large separation, z-fighting should be completely eliminated
 
     return water;
   }
