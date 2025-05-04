@@ -52,19 +52,11 @@ export default class SimpleWater {
       }
     );
 
-    // Position water - CRITICAL CHANGES HERE
+    // Position water - CRITICAL CHANGE: Keep water at a consistent lower position
     water.rotation.x = -Math.PI / 2;
-    water.position.y = -0.5; // Lower it more to ensure clear separation from land
+    water.position.y = 0; // Set to 0 as our baseline (land will be positioned above this)
     
-    // IMPORTANT: Set renderOrder to ensure water always renders before land
-    water.renderOrder = -1;
-    
-    // IMPORTANT: Apply polygon offset to prevent z-fighting
-    if (water.material instanceof THREE.ShaderMaterial) {
-      water.material.polygonOffset = true;
-      water.material.polygonOffsetFactor = -1;
-      water.material.polygonOffsetUnits = -1;
-    }
+    // No need for render order or polygon offset when there's clear physical separation
 
     return water;
   }
