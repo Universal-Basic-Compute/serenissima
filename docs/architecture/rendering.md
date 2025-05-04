@@ -123,7 +123,7 @@ export default class PolygonRenderer {
 The `InteractionManager` class handles user interaction with 3D objects:
 
 ```typescript
-export default class InteractionManager {
+export class InteractionManager {
   constructor({
     camera,
     scene,

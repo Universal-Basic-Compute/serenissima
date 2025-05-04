@@ -14,7 +14,7 @@ import * as THREE from 'three';
 import { calculateBounds } from './utils';
 import SceneSetup from './SceneSetup';
 import PolygonRenderer from './PolygonRenderer';
-import InteractionManager from './InteractionManager';
+import { InteractionManager } from '../../lib/threejs/InteractionManager';
 import ViewModeMenu from './ViewModeMenu';
 import LandDetailsPanel from './LandDetailsPanel';
 import MarketPanel from './MarketPanel';

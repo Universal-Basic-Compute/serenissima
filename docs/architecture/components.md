@@ -17,7 +17,6 @@ App
 │   ├── PolygonViewer (Feature)
 │   │   ├── SceneSetup
 │   │   ├── PolygonRenderer
-│   │   ├── InteractionManager
 │   │   ├── CloudSystem
 │   │   ├── SimpleWater
 │   │   └── ViewModeMenu
