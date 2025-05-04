@@ -323,66 +323,7 @@ export default function PolygonViewer() {
     }
   }, [loadPolygons, loadLandOwners, loadUsers, loadBridges, loading, users]); // Fix: Add proper dependencies
   
-  // Add a function to ensure water is visible
-  const ensureWaterIsVisible = useCallback(() => {
-    if (sceneRef.current && sceneRef.current.scene) {
-      // Force water to be visible
-      const waterMesh = sceneRef.current.scene.children.find(
-        child => child.userData && child.userData.isWaterMesh
-      );
-      
-      if (waterMesh) {
-        // Ensure water is visible
-        waterMesh.visible = true;
-        
-        // Ensure water is at the correct position (slightly above ground level for better visibility)
-        waterMesh.position.y = 0.05;
-        
-        // Force material update
-        if (waterMesh.material) {
-          waterMesh.material.needsUpdate = true;
-        }
-      } else if (sceneRef.current.water === null) {
-        console.log('Water mesh not found in scene, recreating water');
-        sceneRef.current.createWater();
-      }
-    }
-  }, []);
   
-  // Add a specific check to ensure water is created and visible
-  useEffect(() => {
-    if (sceneRef.current) {
-      // Create water if it doesn't exist
-      if (!sceneRef.current.water) {
-        console.log('Creating water effect from dedicated effect');
-        sceneRef.current.createWater();
-      }
-      
-      // Force water updates on a regular interval
-      const waterUpdateInterval = setInterval(() => {
-        if (sceneRef.current && sceneRef.current.water) {
-          sceneRef.current.water.update(Date.now());
-          ensureWaterIsVisible();
-        }
-      }, 100); // Update every 100ms
-      
-      // Additional check to ensure water is created after a delay
-      const waterCreationTimeout = setTimeout(() => {
-        if (!sceneRef.current?.water) {
-          console.log('Water still not created after delay, forcing creation');
-          if (sceneRef.current) {
-            sceneRef.current.createWater();
-          }
-        }
-        ensureWaterIsVisible();
-      }, 2000);
-      
-      return () => {
-        clearInterval(waterUpdateInterval);
-        clearTimeout(waterCreationTimeout);
-      };
-    }
-  }, [sceneRef.current, ensureWaterIsVisible]);
   
   // Calculate centroids directly in the main thread for polygons without centroids
   useEffect(() => {
@@ -1042,17 +983,6 @@ export default function PolygonViewer() {
       }
     };
     
-    // Step 2: Initialize water effect
-    const initWaterEffect = () => {
-      console.log('Creating water effect...');
-      if (sceneRef.current) {
-        // Create the water from SceneSetup
-        const water = sceneRef.current.createWater();
-        console.log('Water effect initialized successfully');
-      } else {
-        console.warn('Cannot create water effect: scene reference is null');
-      }
-    };
     
     // Step 3: Initialize interaction manager
     const initInteractionManager = () => {
@@ -1090,7 +1020,6 @@ export default function PolygonViewer() {
     initPolygonRenderer(); // Start with polygons immediately
     
     // Schedule the rest with increasing delays
-    const waterEffectTimer = setTimeout(initWaterEffect, 500); // Increased delay to ensure polygons are rendered first
     const interactionManagerTimer = setTimeout(initInteractionManager, 600);
     const bridgeRendererTimer = setTimeout(initBridgeRenderer, 700);
     
@@ -1145,100 +1074,6 @@ export default function PolygonViewer() {
           }
         }
           
-        // FORCE water visibility check EVERY FRAME
-        const forceWaterVisibility = () => {
-          if (sceneRef.current && sceneRef.current.scene) {
-            // First check if water exists
-            let waterFound = false;
-            sceneRef.current.scene.traverse(object => {
-              if (object.userData && object.userData.isWaterMesh) {
-                waterFound = true;
-                // FORCE water to be visible
-                object.visible = true;
-                object.renderOrder = 1000;
-                  
-                // Force material update
-                if (object instanceof THREE.Mesh && object.material) {
-                  if (Array.isArray(object.material)) {
-                    object.material.forEach(mat => {
-                      if (mat) {
-                        mat.needsUpdate = true;
-                        mat.depthTest = false;
-                        mat.depthWrite = false;
-                      }
-                    });
-                  } else {
-                    object.material.needsUpdate = true;
-                    object.material.depthTest = false;
-                    object.material.depthWrite = false;
-                  }
-                }
-              }
-            });
-              
-            // If no water found, create it
-            if (!waterFound && sceneRef.current) {
-              console.log('EMERGENCY: No water found in scene, creating water');
-              sceneRef.current.createWater();
-            }
-          }
-        };
-          
-        // Call force water visibility check
-        forceWaterVisibility();
-        
-        // Update water effect - EVERY frame for smoother animation
-        if (sceneRef.current && sceneRef.current.water) {
-          try {
-            // Pass frameCount directly to water update for more varied animation
-            sceneRef.current.water.update(frameCount);
-        
-            // Force water to be visible by ensuring its mesh is in the scene
-            if (frameCount % 10 === 0) { // Check more frequently (every ~10 frames)
-              const waterMesh = sceneRef.current.scene.children.find(
-                child => child.userData && child.userData.isWaterMesh
-              );
-              if (!waterMesh) {
-                console.log('Water mesh not found in scene, recreating water');
-                sceneRef.current.createWater();
-              } else if (!waterMesh.visible) {
-                console.log('Water mesh found but not visible, making it visible');
-                waterMesh.visible = true;
-                
-                // Ensure water is at the correct position
-                waterMesh.position.y = 0.5; // Increased from 0.05 to 0.5
-                
-                // Force material update
-                if (waterMesh.material) {
-                  waterMesh.material.needsUpdate = true;
-                  if (!Array.isArray(waterMesh.material)) {
-                    waterMesh.material.depthTest = false;
-                    waterMesh.material.depthWrite = false;
-                  }
-                }
-              }
-            }
-          
-            // Force additional water updates for more dynamic movement
-            if (frameCount % 5 === 0) { // Every 5 frames
-              sceneRef.current.water.update(frameCount + 10); // Add offset for variation
-            }
-            
-            // Create random waves occasionally for more dynamic water
-            if (frameCount % 120 === 0) { // Every ~2 seconds (assuming 60fps)
-              if (typeof (sceneRef.current.water as any).createRandomWave === 'function') {
-                (sceneRef.current.water as any).createRandomWave();
-              }
-            }
-          } catch (error) {
-            // Silent fail
-          }
-        } else if (frameCount % 60 === 0 && sceneRef.current) { // Check every second
-          // If water doesn't exist, create it
-          console.log('Water not found, creating water in animation loop');
-          sceneRef.current.createWater();
-          ensureWaterIsVisible();
-        }
       
         // Update road visibility EVERY frame instead of periodically
         if (roadManagerRef.current) {
@@ -1379,7 +1214,6 @@ export default function PolygonViewer() {
       window.removeEventListener('polygonDeleted', handlePolygonDeleted);
     
       // Clear all timers
-      clearTimeout(waterEffectTimer);
       clearTimeout(interactionManagerTimer);
       clearTimeout(bridgeRendererTimer);
       clearTimeout(coatOfArmsTimer);
@@ -1552,10 +1386,6 @@ export default function PolygonViewer() {
         // Update market panel visibility based on active view
         setMarketPanelVisible(activeView === 'markets');
         
-        // Update water effect
-        if (sceneRef.current.water) {
-          sceneRef.current.water.updateViewMode(activeView);
-        }
         
         // Update polygon renderer
         if (polygonRendererRef.current) {

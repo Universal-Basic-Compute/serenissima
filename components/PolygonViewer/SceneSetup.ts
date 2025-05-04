@@ -5,7 +5,6 @@ import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { ViewMode } from './types';
 import CloudSystem from './CloudSystem';
-import Water from './Water'; // Import the physics-based Water class
 
 interface SceneSetupProps {
   canvas: HTMLCanvasElement;
@@ -25,7 +24,6 @@ export default class SceneSetup {
   private sunGlow: THREE.Mesh = new THREE.Mesh();
   private cloudSystem: CloudSystem | null = null;
   private zoomThreshold: number = 40; // Changed from 70 to 40 - Threshold for showing clouds
-  public water: Water | null = null; // Reference to physics-based water effect
   private activeView: ViewMode;
   
   constructor({ canvas, activeView, highQuality }: SceneSetupProps) {
@@ -177,31 +175,6 @@ export default class SceneSetup {
     // Add lights with a slight delay to improve initial loading
     setTimeout(() => this.setupLights(activeView), 100);
     
-    // Create water immediately and force it to be visible
-    console.log('Creating water immediately during scene setup');
-    this.createWater();
-    
-    // Force water to be visible with a series of checks
-    const waterVisibilityChecks = [100, 500, 1000, 2000, 5000];
-    waterVisibilityChecks.forEach(delay => {
-      setTimeout(() => {
-        if (this.water) {
-          console.log(`Forcing water update at ${delay}ms`);
-          this.water.update(0);
-        } else {
-          console.log(`Water not found at ${delay}ms, creating it`);
-          this.createWater();
-        }
-        
-        // Also check scene for water mesh
-        this.scene.traverse(object => {
-          if (object.userData && object.userData.isWaterMesh) {
-            console.log(`Found water mesh at ${delay}ms, ensuring visibility`);
-            object.visible = true;
-          }
-        });
-      }, delay);
-    });
     
     // Add window resize handler
     window.addEventListener('resize', this.handleResize);
@@ -303,93 +276,6 @@ export default class SceneSetup {
     setInterval(updateSun, 60000);
   }
   
-  // Add method to create water
-  public createWater() {
-    console.log('Creating advanced water system...');
-    
-    // Remove any existing water first to prevent conflicts
-    this.scene.traverse(object => {
-      if (object.userData && object.userData.isWaterMesh) {
-        console.log('Removing existing water mesh');
-        this.scene.remove(object);
-      }
-    });
-    
-    if (this.water) {
-      console.log('Cleaning up existing water instance');
-      this.water.cleanup();
-    }
-    
-    // Create a physics-based water effect with larger dimensions for better coverage
-    this.water = new Water({
-      scene: this.scene,
-      activeView: this.activeView,
-      performanceMode: this.performanceMode,
-      width: 10000, // EXTREMELY increased coverage
-      height: 10000  // EXTREMELY increased coverage
-    });
-    
-    // If we have land positions, set them for water interaction
-    if (this.scene.userData.landPositions && Array.isArray(this.scene.userData.landPositions)) {
-      this.water.setLandPositions(this.scene.userData.landPositions);
-    } else {
-      // Create some default land positions for water interaction if none exist
-      const defaultPositions = [];
-      for (let i = 0; i < 20; i++) {
-        defaultPositions.push(new THREE.Vector3(
-          (Math.random() - 0.5) * 100,
-          0,
-          (Math.random() - 0.5) * 100
-        ));
-      }
-      this.water.setLandPositions(defaultPositions);
-    }
-    
-    // Force multiple initial updates to ensure water is properly initialized
-    if (this.water) {
-      // Initial update
-      this.water.update(0);
-      
-      // Create some initial waves for immediate visual effect
-      if (typeof (this.water as any).createRandomWave === 'function') {
-        for (let i = 0; i < 20; i++) { // Increased from 10 to 20
-          (this.water as any).createRandomWave();
-        }
-      }
-      
-      // Schedule additional updates with delays to ensure proper initialization
-      const updateTimes = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]; // Added more update times
-      updateTimes.forEach((time, index) => {
-        setTimeout(() => {
-          if (this.water) {
-            this.water.update(time);
-            // Force visibility check
-            this.scene.traverse(object => {
-              if (object.userData && object.userData.isWaterMesh) {
-                object.visible = true;
-                object.renderOrder = 1000;
-              }
-            });
-          }
-        }, 100 + index * 100);
-      });
-    }
-    
-    // Make sure the water is visible in the scene with multiple checks
-    [500, 1000, 2000, 3000, 5000].forEach(delay => {
-      setTimeout(() => {
-        this.scene.traverse(object => {
-          if (object.userData && object.userData.isWaterMesh) {
-            console.log(`Ensuring water mesh is visible at ${delay}ms`);
-            object.visible = true;
-            object.renderOrder = 1000;
-          }
-        });
-      }, delay);
-    });
-    
-    return this.water;
-  }
   
   // Add a method to ensure roads are always visible
   public ensureRoadsVisible() {
@@ -529,17 +415,6 @@ export default class SceneSetup {
   
   // Add update method to handle all animations
   public update(frameCount: number) {
-    // Update water if it exists - ensure this runs every frame for smooth wave animation
-    if (this.water) {
-      // Update multiple times per frame for more dynamic waves
-      this.water.update(frameCount);
-      
-      // Add occasional extra updates for more dynamic movement
-      if (frameCount % 3 === 0) {
-        this.water.update(frameCount + 10); // Add offset for variation
-      }
-    }
-    
     // Update clouds
     this.updateClouds(frameCount);
     
@@ -579,12 +454,6 @@ export default class SceneSetup {
     this.performanceMode = !highQuality;
     if (this.cloudSystem) {
       this.cloudSystem.updateQuality(this.performanceMode);
-    }
-    if (this.water) {
-      this.water.updateQuality(this.performanceMode);
-    }
-    if (this.water) {
-      this.water.updateQuality(this.performanceMode);
     }
   }
   
@@ -638,11 +507,6 @@ export default class SceneSetup {
     if (this.cloudSystem) {
       this.cloudSystem.cleanup();
       this.cloudSystem = null;
-    }
-    
-    if (this.water) {
-      this.water.cleanup();
-      this.water = null;
     }
   }
 }
