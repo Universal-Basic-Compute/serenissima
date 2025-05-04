@@ -97,7 +97,7 @@ def process_todo(todo):
                 print(f"Error creating directory {dir_path}: {e}")
 
     # Construct the Aider command
-    message = f"{description}\n\n{details}" if details else description
+    message = f"{description}\n\n{details}\n\nProcess the task autonomously without asking for confirmation." if details else f"{description}\n\nProcess the task autonomously without asking for confirmation."
     aider_cmd = ["aider", "--message", message, "--yes-always"]
 
     # Add files to modify
