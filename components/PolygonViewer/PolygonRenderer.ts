@@ -420,8 +420,6 @@ export default class PolygonRenderer {
   
   // Add method to ensure polygons are visible
   public ensurePolygonsVisible() {
-    console.log(`Ensuring visibility of ${this.PolygonMeshs.length} polygon meshes`);
-    
     this.PolygonMeshs.forEach(polygonMesh => {
       const mesh = polygonMesh.getMesh();
       if (mesh) {

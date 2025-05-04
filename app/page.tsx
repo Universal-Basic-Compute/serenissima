@@ -518,10 +518,8 @@ export default function Home() {
   
   // Function to ensure all polygons remain visible
   const ensurePolygonsVisible = useCallback(() => {
-    console.log('Ensuring all polygons remain visible');
     Object.values(activeLandPolygons).forEach(polygon => {
       if (!polygon.getVisible()) {
-        console.log('Found invisible polygon, making it visible');
         polygon.setVisible(true);
       }
     });

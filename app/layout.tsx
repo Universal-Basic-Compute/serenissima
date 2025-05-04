@@ -28,7 +28,9 @@ export default function RootLayout({
       // Filter out specific messages
       if (
         message.includes('Camera position changed') ||
-        message.includes('Map or Google Maps API not ready')
+        message.includes('Map or Google Maps API not ready') ||
+        message.includes('Ensuring visibility of') ||
+        message.includes('Ensuring all polygons remain visible')
       ) {
         return;
       }
