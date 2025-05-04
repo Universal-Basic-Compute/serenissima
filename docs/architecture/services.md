@@ -106,12 +106,83 @@ const userService = ServiceLocator.get<UserService>('userService');
 
 ## Error Handling
 
-Services should handle errors gracefully and provide meaningful error messages. Errors should be:
+Services use a structured error handling approach with typed errors. All service errors extend from a base `ServiceError` class:
 
-1. Typed with TypeScript
-2. Include context information
-3. Be catchable by consumers
-4. Not expose implementation details
+```typescript
+// Base error class
+export class ServiceError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'ServiceError';
+  }
+}
+
+// Specific error types
+export class ApiError extends ServiceError {
+  public status: number;
+  public endpoint: string;
+  
+  constructor(message: string, status: number, endpoint: string) {
+    super(`API Error (${status}): ${message} [${endpoint}]`);
+    this.name = 'ApiError';
+    this.status = status;
+    this.endpoint = endpoint;
+  }
+}
+```
+
+Service methods should:
+
+1. Document which errors they might throw
+2. Include context information in errors
+3. Catch and convert generic errors to typed errors
+4. Log errors appropriately
+
+Example usage:
+
+```typescript
+/**
+ * Connect wallet
+ * @throws {ValidationError} If address is invalid
+ * @throws {ApiError} If API request fails
+ */
+public async connectWallet(address: string): Promise<UserProfile | null> {
+  if (!address || address.trim() === '') {
+    throw new ValidationError('Wallet address cannot be empty', 'address');
+  }
+  
+  try {
+    // API call logic
+  } catch (error) {
+    if (error instanceof ApiError) {
+      log.error(error);
+      throw error;
+    }
+    
+    throw new ApiError(
+      error instanceof Error ? error.message : 'Unknown error',
+      500,
+      endpoint
+    );
+  }
+}
+```
+
+Consumers should handle these typed errors appropriately:
+
+```typescript
+try {
+  await userService.connectWallet(address);
+} catch (error) {
+  if (error instanceof ValidationError) {
+    // Handle validation error
+  } else if (error instanceof ApiError) {
+    // Handle API error
+  } else {
+    // Handle unexpected error
+  }
+}
+```
 
 ## Testing Services
 

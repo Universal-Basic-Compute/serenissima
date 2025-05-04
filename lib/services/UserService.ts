@@ -1,12 +1,19 @@
 /**
  * TODO: Refactor according to architecture
- * - Implement proper error handling with typed errors
  * - Add comprehensive logging
  * - Implement caching strategy for user data
  * - Add unit tests for service methods
  */
 import { getApiBaseUrl } from '../apiUtils';
 import { eventBus, EventTypes } from '../eventBus';
+import { log } from '../logUtils';
+import { 
+  ApiError, 
+  AuthenticationError, 
+  DataFormatError, 
+  NotFoundError, 
+  ValidationError 
+} from '../errors/ServiceErrors';
 
 export interface UserProfile {
   username: string;
@@ -50,17 +57,24 @@ export class UserService {
    * Load all users from the API
    */
   public async loadUsers(): Promise<Record<string, any>> {
+    const endpoint = `${getApiBaseUrl()}/api/users`;
+    
     try {
-      const response = await fetch(`${getApiBaseUrl()}/api/users`);
+      log.info('Loading users from API');
+      const response = await fetch(endpoint);
       
       if (!response.ok) {
-        throw new Error(`Failed to load users: ${response.status}`);
+        throw new ApiError(
+          'Failed to load users', 
+          response.status, 
+          endpoint
+        );
       }
       
       const data = await response.json();
       
       if (!data || !Array.isArray(data)) {
-        throw new Error('Invalid users data format');
+        throw new DataFormatError('Expected array of users');
       }
       
       // Convert array to record
@@ -68,6 +82,8 @@ export class UserService {
       data.forEach(user => {
         if (user.user_name) {
           usersRecord[user.user_name] = user;
+        } else {
+          log.warn('Found user without user_name', user);
         }
       });
       
@@ -75,6 +91,7 @@ export class UserService {
       
       // Ensure ConsiglioDeiDieci is always present
       if (!this.users['ConsiglioDeiDieci']) {
+        log.info('Adding default ConsiglioDeiDieci user');
         this.users['ConsiglioDeiDieci'] = {
           user_name: 'ConsiglioDeiDieci',
           color: '#8B0000', // Dark red
@@ -84,11 +101,24 @@ export class UserService {
       
       // Notify listeners that users data has been loaded
       eventBus.emit(EventTypes.USERS_DATA_LOADED);
+      log.info(`Loaded ${Object.keys(this.users).length} users`);
       
       return this.users;
     } catch (error) {
-      console.error('Error loading users:', error);
-      return {};
+      if (error instanceof ApiError || 
+          error instanceof DataFormatError) {
+        log.error(error);
+        // Re-throw typed errors
+        throw error;
+      }
+      
+      // Convert generic errors to typed errors
+      log.error('Unexpected error loading users:', error);
+      throw new ApiError(
+        error instanceof Error ? error.message : 'Unknown error',
+        500,
+        endpoint
+      );
     }
   }
   
@@ -101,9 +131,21 @@ export class UserService {
   
   /**
    * Get a user by username
+   * @throws {ValidationError} If username is invalid
+   * @throws {NotFoundError} If user is not found
    */
   public getUserByUsername(username: string): any {
-    return this.users[username];
+    if (!username || typeof username !== 'string') {
+      throw new ValidationError('Invalid username', 'username');
+    }
+    
+    const user = this.users[username];
+    
+    if (!user) {
+      throw new NotFoundError('User', username);
+    }
+    
+    return user;
   }
   
   /**
@@ -122,8 +164,19 @@ export class UserService {
   
   /**
    * Connect wallet
+   * @throws {ValidationError} If address is invalid
+   * @throws {ApiError} If API request fails
    */
   public async connectWallet(address: string): Promise<UserProfile | null> {
+    // Validate wallet address
+    if (!address || typeof address !== 'string' || address.trim() === '') {
+      throw new ValidationError('Wallet address cannot be empty', 'address');
+    }
+    
+    // Normalize address
+    address = address.trim();
+    
+    log.info(`Connecting wallet: ${address}`);
     this.walletAddress = address;
     
     // Store wallet address
@@ -131,16 +184,29 @@ export class UserService {
     localStorage.setItem('walletAddress', address);
     
     // Fetch user profile
+    const endpoint = `${getApiBaseUrl()}/api/wallet/${address}`;
+    
     try {
-      const response = await fetch(`${getApiBaseUrl()}/api/wallet/${address}`);
+      const response = await fetch(endpoint);
       
       if (!response.ok) {
-        throw new Error(`Failed to fetch user profile: ${response.status}`);
+        if (response.status === 404) {
+          log.info(`No user profile found for wallet: ${address}`);
+          return null;
+        }
+        
+        throw new ApiError(
+          'Failed to fetch user profile', 
+          response.status, 
+          endpoint
+        );
       }
       
       const data = await response.json();
       
       if (data.user_name) {
+        log.info(`Found user profile for wallet: ${address}, username: ${data.user_name}`);
+        
         // Create user profile
         this.currentUser = {
           username: data.user_name,
@@ -163,10 +229,20 @@ export class UserService {
         return this.currentUser;
       }
       
+      log.info(`No username found for wallet: ${address}`);
       return null;
     } catch (error) {
-      console.error('Error fetching user profile:', error);
-      return null;
+      if (error instanceof ApiError) {
+        log.error(error);
+        throw error;
+      }
+      
+      log.error('Unexpected error connecting wallet:', error);
+      throw new ApiError(
+        error instanceof Error ? error.message : 'Unknown error',
+        500,
+        endpoint
+      );
     }
   }
   
@@ -188,14 +264,25 @@ export class UserService {
   
   /**
    * Update user profile
+   * @throws {AuthenticationError} If wallet is not connected
+   * @throws {ValidationError} If profile data is invalid
+   * @throws {ApiError} If API request fails
    */
   public async updateUserProfile(profile: Partial<UserProfile>): Promise<UserProfile | null> {
     if (!this.walletAddress) {
-      throw new Error('Wallet not connected');
+      throw new AuthenticationError('Wallet must be connected to update profile');
     }
     
+    // Validate profile data
+    if (profile.username === '') {
+      throw new ValidationError('Username cannot be empty', 'username');
+    }
+    
+    log.info(`Updating profile for wallet: ${this.walletAddress}`);
+    const endpoint = `${getApiBaseUrl()}/api/wallet`;
+    
     try {
-      const response = await fetch(`${getApiBaseUrl()}/api/wallet`, {
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -213,10 +300,20 @@ export class UserService {
       });
       
       if (!response.ok) {
-        throw new Error(`Failed to update profile: ${response.status}`);
+        throw new ApiError(
+          'Failed to update profile', 
+          response.status, 
+          endpoint
+        );
       }
       
       const data = await response.json();
+      
+      if (!data) {
+        throw new DataFormatError('Empty response from server');
+      }
+      
+      log.info(`Profile updated successfully for wallet: ${this.walletAddress}`);
       
       // Update current user
       this.currentUser = {
@@ -234,8 +331,20 @@ export class UserService {
       
       return this.currentUser;
     } catch (error) {
-      console.error('Error updating profile:', error);
-      throw error;
+      if (error instanceof ApiError || 
+          error instanceof ValidationError || 
+          error instanceof AuthenticationError ||
+          error instanceof DataFormatError) {
+        log.error(error);
+        throw error;
+      }
+      
+      log.error('Unexpected error updating profile:', error);
+      throw new ApiError(
+        error instanceof Error ? error.message : 'Unknown error',
+        500,
+        endpoint
+      );
     }
   }
   
