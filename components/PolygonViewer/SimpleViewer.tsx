@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import SimpleCamera from './SimpleCamera';
 import SimpleWater from './SimpleWater';
+import SimplePolygonRenderer from './SimplePolygonRenderer';
 import { calculateBounds } from './utils';
 
 export default function SimpleViewer() {
@@ -16,6 +17,7 @@ export default function SimpleViewer() {
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const cameraControllerRef = useRef<SimpleCamera | null>(null);
   const waterRef = useRef<SimpleWater | null>(null);
+  const polygonRendererRef = useRef<SimplePolygonRenderer | null>(null);
   
   // Load polygons (still needed to calculate bounds)
   useEffect(() => {
@@ -58,13 +60,21 @@ export default function SimpleViewer() {
     const cameraController = new SimpleCamera(renderer.domElement);
     cameraControllerRef.current = cameraController;
     
-    // Create water only (no polygons)
-    const waterSize = Math.max(bounds.scale * 500, 1000); // Reduced from 1000, 2000 to 500, 1000
+    // Create water first (so it's rendered first)
+    const waterSize = Math.max(bounds.scale * 500, 1000);
     const water = new SimpleWater({
       scene,
       size: waterSize
     });
     waterRef.current = water;
+    
+    // Create polygon renderer after water
+    const polygonRenderer = new SimplePolygonRenderer({
+      scene,
+      polygons,
+      bounds
+    });
+    polygonRendererRef.current = polygonRenderer;
     
     // Add ambient light
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
@@ -111,6 +121,7 @@ export default function SimpleViewer() {
     return () => {
       window.removeEventListener('resize', handleResize);
       
+      if (polygonRendererRef.current) polygonRendererRef.current.cleanup();
       if (waterRef.current) waterRef.current.cleanup();
       if (cameraController) cameraController.cleanup();
       if (renderer) renderer.dispose();
@@ -133,7 +144,7 @@ export default function SimpleViewer() {
   if (loading) {
     return (
       <div className="w-full h-full flex items-center justify-center">
-        <div className="text-lg">Loading water...</div>
+        <div className="text-lg">Loading Venice...</div>
       </div>
     );
   }
