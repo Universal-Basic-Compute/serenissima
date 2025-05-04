@@ -71,138 +71,68 @@ export default class Water {
   }
   
   private createWaterSurface() {
-    // Determine grid resolution based on performance mode
-    const resolution = this.performanceMode ? 128 : 256;
+    // Create a much simpler water implementation that will definitely be visible
+    console.log('Creating GUARANTEED visible water surface');
     
-    // Create water geometry
+    // Use a simple plane with animated vertex displacement
+    const resolution = 128; // Lower resolution for better performance
     this.waterGeometry = new THREE.PlaneGeometry(
       this.width, 
       this.height, 
-      resolution - 1, 
-      resolution - 1
+      resolution, 
+      resolution
     );
     
-    // Create water shader material with advanced physics-based effects
+    // Create a simple shader material with very obvious waves
     const waterShader = {
       uniforms: {
         time: { value: 0.0 },
-        waterColor: { value: new THREE.Color(this.getWaterColorForView()) },
-        deepWaterColor: { value: new THREE.Color(this.getDeepWaterColorForView()) },
-        resolution: { value: new THREE.Vector2(resolution, resolution) },
-        waveHeight: { value: 5.0 }, // Increased amplitude for more dramatic waves
-        sunDirection: { value: new THREE.Vector3(0.5, 0.8, 0.2).normalize() },
-        sunColor: { value: new THREE.Color(0xffffff) }
+        waterColor: { value: new THREE.Color(this.getWaterColorForView()) }, // Bright blue
+        deepWaterColor: { value: new THREE.Color(this.getDeepWaterColorForView()) }, // Deep blue
       },
       vertexShader: `
         uniform float time;
-        uniform float waveHeight;
         varying vec2 vUv;
         varying float vElevation;
-        varying vec3 vNormal;
-        varying vec3 vViewPosition;
-        
-        // Function to calculate normal from heightmap
-        vec3 calculateNormal(vec2 pos, float eps) {
-          vec3 normal = vec3(0.0);
-          
-          // Use central differences for better accuracy
-          float center = vElevation;
-          float right = center + eps;
-          float left = center - eps;
-          float top = center + eps;
-          float bottom = center - eps;
-          
-          // Calculate partial derivatives
-          float dX = (right - left) / (2.0 * eps);
-          float dZ = (top - bottom) / (2.0 * eps);
-          
-          // Cross product to get normal
-          normal = normalize(vec3(-dX, 1.0, -dZ));
-          return normal;
-        }
         
         void main() {
           vUv = uv;
           
-          // Pass through the vertex position for wave calculation in the fragment shader
-          vec3 pos = position;
+          // Create very obvious waves
+          float wave1 = sin(position.x * 0.05 + time * 0.5) * 
+                       cos(position.y * 0.05 + time * 0.3) * 2.0;
           
-          // Store the original elevation for lighting calculations
-          vElevation = pos.y;
+          float wave2 = sin(position.x * 0.1 + time * 0.7) * 
+                       sin(position.y * 0.1 + time * 0.4) * 1.0;
           
-          // Calculate normal for lighting
-          vNormal = calculateNormal(position.xz, 0.1);
+          // Combine waves with high amplitude
+          float elevation = wave1 + wave2;
+          vElevation = elevation;
           
-          // Calculate view position for reflections
-          vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
-          vViewPosition = -mvPosition.xyz;
+          // Apply elevation to vertex
+          vec3 newPosition = position;
+          newPosition.z += elevation * 3.0; // VERY exaggerated height
           
-          gl_Position = projectionMatrix * mvPosition;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(newPosition, 1.0);
         }
       `,
       fragmentShader: `
         uniform vec3 waterColor;
         uniform vec3 deepWaterColor;
-        uniform float time;
-        uniform vec3 sunDirection;
-        uniform vec3 sunColor;
-        
         varying vec2 vUv;
         varying float vElevation;
-        varying vec3 vNormal;
-        varying vec3 vViewPosition;
-        
-        // Fresnel approximation
-        float fresnel(vec3 normal, vec3 viewDir, float power) {
-          return pow(1.0 - max(0.0, dot(normalize(normal), normalize(viewDir))), power);
-        }
         
         void main() {
-          // Increase contrast between deep and shallow water
-          float depthFactor = smoothstep(-0.7, 0.7, vElevation);
+          // Mix colors based on elevation for more visible waves
+          float depthFactor = smoothstep(-2.0, 2.0, vElevation);
           vec3 color = mix(deepWaterColor, waterColor, depthFactor);
           
-          // Add more pronounced foam at wave peaks
-          if (vElevation > 0.15) {
-            float foamFactor = smoothstep(0.15, 0.4, vElevation);
-            color = mix(color, vec3(1.0), foamFactor * 1.5);
+          // Add white caps at wave peaks
+          if (vElevation > 1.5) {
+            color = mix(color, vec3(1.0), (vElevation - 1.5) * 0.5);
           }
           
-          // Enhanced specular highlight
-          vec3 viewDir = normalize(vViewPosition);
-          vec3 reflectDir = reflect(-sunDirection, vNormal);
-          float spec = pow(max(dot(viewDir, reflectDir), 0.0), 80.0);
-          vec3 specular = sunColor * spec * 1.0;
-          
-          // More pronounced fresnel effect
-          float fresnelFactor = fresnel(vNormal, viewDir, 3.5);
-          color = mix(color, vec3(0.9, 0.95, 1.0), fresnelFactor * 0.5);
-          
-          // Add more visible light ray effect
-          float centerDist = abs(vUv.x - 0.5);
-          float lightRay = pow(1.0 - centerDist, 7.0) * 0.5;
-          
-          // Add more pronounced horizontal striations
-          float striation = sin(vUv.y * 150.0 + time * 0.3) * 0.08;
-          
-          // Add more visible wave patterns
-          float pattern = sin(vUv.x * 80.0 + time * 0.6) * sin(vUv.y * 80.0 + time * 0.4) * 0.2;
-          pattern += sin(vUv.x * 40.0 - time * 0.4) * sin(vUv.y * 40.0 + time * 0.3) * 0.1;
-          
-          // Add more visible caustics effect
-          float causticPattern = 
-            sin(vUv.x * 30.0 + time * 2.5) * 
-            sin(vUv.y * 30.0 + time * 2.0) * 0.12;
-          causticPattern = max(0.0, causticPattern);
-          
-          // Combine all effects with increased intensity
-          color += pattern * vec3(0.4, 0.4, 0.6);
-          color += lightRay * vec3(0.8, 0.9, 1.0);
-          color += striation * vec3(0.6, 0.8, 1.0);
-          color += specular;
-          color += causticPattern * vec3(0.5, 0.8, 1.0);
-          
-          gl_FragColor = vec4(color, 0.95);
+          gl_FragColor = vec4(color, 0.9);
         }
       `
     };
@@ -227,23 +157,22 @@ export default class Water {
     // Create the water mesh
     this.waterMesh = new THREE.Mesh(this.waterGeometry, this.waterMaterial);
     
-    // FORCE VISIBILITY: Position water much higher to ensure it's visible
-    this.waterMesh.position.y = 1.0; // Dramatically increased from 0.5 to 1.0
-    
-    // Rotate the water plane to be horizontal
+    // Position water at y=0 and rotate to be horizontal
     this.waterMesh.rotation.x = -Math.PI / 2;
+    this.waterMesh.position.y = 0;
     
-    // FORCE VISIBILITY: Make water render on top of everything
-    this.waterMesh.renderOrder = 1000; // Dramatically increased from 8
+    // Force visibility
+    this.waterMesh.visible = true;
+    this.waterMesh.renderOrder = 1000;
     
-    // FORCE VISIBILITY: Add user data flag for identification
+    // Add user data for identification
     this.waterMesh.userData.isWaterMesh = true;
-    this.waterMesh.userData.alwaysVisible = true; // Add this flag
+    this.waterMesh.userData.alwaysVisible = true;
     
     // Add to scene
     this.scene.add(this.waterMesh);
     
-    console.log('Water surface created with FORCED visibility settings');
+    console.log('GUARANTEED water surface created');
   }
   
   private initializeWaveSimulation() {
@@ -691,114 +620,25 @@ export default class Water {
   }
   
   public update(frameCount: number) {
-    // Update time with variable speed for more natural animation
-    const timeSpeed = 0.1 + Math.sin(frameCount * 0.001) * 0.02;
-    this.time += timeSpeed;
-    
-    // Get delta time for physics-based simulation with a minimum to prevent instability
-    const deltaTime = Math.min(0.05, Math.max(0.01, this.clock.getDelta()));
+    // Update time with fixed speed for consistent animation
+    this.time += 0.05;
     
     // Skip if water mesh doesn't exist
-    if (!this.waterMesh || !this.waterMaterial) return;
+    if (!this.waterMesh || !this.waterMaterial) {
+      console.log('Water mesh or material missing, recreating water');
+      this.initializeWaterSystem();
+      return;
+    }
     
     // Update shader uniforms
     this.waterMaterial.uniforms.time.value = this.time;
     
-    // Update sun direction based on time for dynamic lighting
-    if (this.waterMaterial.uniforms.sunDirection) {
-      const sunAngle = this.time * 0.05;
-      this.waterMaterial.uniforms.sunDirection.value.set(
-        Math.cos(sunAngle),
-        0.8,
-        Math.sin(sunAngle)
-      ).normalize();
-    }
+    // Force visibility every frame
+    this.waterMesh.visible = true;
     
-    // Update wave simulation with more substeps for smoother waves
-    const subSteps = 3;
-    for (let i = 0; i < subSteps; i++) {
-      this.updateWaveSimulation(deltaTime / subSteps);
-    }
-    
-    // Apply waves to geometry
-    this.applyWavesToGeometry();
-    
-    // Create random waves with increased frequency
-    // More waves during "stormy" periods, fewer during "calm" periods
-    const stormFactor = 0.5 + 0.5 * Math.sin(this.time * 0.01); // Oscillates between 0 and 1
-    const waveChance = 0.04 + stormFactor * 0.05;
-    
-    if (Math.random() < waveChance) {
-      this.createRandomWave();
-    }
-    
-    // Create larger "boat wake" waves more frequently
-    if (Math.random() < 0.003) {
-      // Create a directional wake
-      const size = this.gridSize;
-      const x = Math.floor(Math.random() * (size - 20)) + 10;
-      const z = Math.floor(Math.random() * (size - 20)) + 10;
-      const angle = Math.random() * Math.PI * 2;
-      const length = 18 + Math.random() * 12;
-      const width = 4 + Math.random() * 2.5;
-      const strength = 0.4 + Math.random() * 0.3;
-      
-      for (let i = 0; i < size; i++) {
-        for (let j = 0; j < size; j++) {
-          const dx = j - x;
-          const dz = i - z;
-          
-          // Distance along wake direction
-          const alongDist = dx * Math.cos(angle) + dz * Math.sin(angle);
-          
-          // Distance perpendicular to wake direction
-          const perpDist = Math.abs(dx * Math.sin(angle) - dz * Math.cos(angle));
-          
-          if (alongDist > -width/2 && alongDist < length && perpDist < width) {
-            const idx = i * size + j;
-            
-            // Taper the wake based on distance
-            const alongFactor = 1 - Math.max(0, alongDist) / length;
-            const perpFactor = 1 - perpDist / width;
-            const wakeFactor = alongFactor * perpFactor;
-            
-            // Apply wake impulse
-            if (this.waveGrid && idx < this.waveGrid.length) {
-              this.waveGrid[idx] += strength * wakeFactor;
-            }
-          }
-        }
-      }
-    }
-    
-    // Add occasional large circular waves (like raindrops)
-    if (Math.random() < 0.002) {
-      const size = this.gridSize;
-      const x = Math.floor(Math.random() * (size - 20)) + 10;
-      const z = Math.floor(Math.random() * (size - 20)) + 10;
-      const radius = 5 + Math.random() * 3;
-      const strength = 0.5 + Math.random() * 0.3;
-      
-      for (let i = 0; i < size; i++) {
-        for (let j = 0; j < size; j++) {
-          const dx = j - x;
-          const dz = i - z;
-          const distSq = dx * dx + dz * dz;
-          
-          if (distSq < radius * radius) {
-            const idx = i * size + j;
-            const distFactor = 1 - Math.sqrt(distSq) / radius;
-            
-            // Create a circular wave with a depression in the center
-            const waveFactor = Math.sin(distFactor * Math.PI);
-            
-            // Apply wave impulse
-            if (this.waveGrid && idx < this.waveGrid.length) {
-              this.waveGrid[idx] += strength * waveFactor;
-            }
-          }
-        }
-      }
+    // Log every 100 frames to confirm water is updating
+    if (frameCount % 100 === 0) {
+      console.log('Water animation updating, time:', this.time);
     }
   }
   

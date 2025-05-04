@@ -177,8 +177,31 @@ export default class SceneSetup {
     // Add lights with a slight delay to improve initial loading
     setTimeout(() => this.setupLights(activeView), 100);
     
-    // Create water immediately
+    // Create water immediately and force it to be visible
+    console.log('Creating water immediately during scene setup');
     this.createWater();
+    
+    // Force water to be visible with a series of checks
+    const waterVisibilityChecks = [100, 500, 1000, 2000, 5000];
+    waterVisibilityChecks.forEach(delay => {
+      setTimeout(() => {
+        if (this.water) {
+          console.log(`Forcing water update at ${delay}ms`);
+          this.water.update(0);
+        } else {
+          console.log(`Water not found at ${delay}ms, creating it`);
+          this.createWater();
+        }
+        
+        // Also check scene for water mesh
+        this.scene.traverse(object => {
+          if (object.userData && object.userData.isWaterMesh) {
+            console.log(`Found water mesh at ${delay}ms, ensuring visibility`);
+            object.visible = true;
+          }
+        });
+      }, delay);
+    });
     
     // Add window resize handler
     window.addEventListener('resize', this.handleResize);
@@ -302,8 +325,8 @@ export default class SceneSetup {
       scene: this.scene,
       activeView: this.activeView,
       performanceMode: this.performanceMode,
-      width: 5000, // Dramatically increased coverage
-      height: 5000  // Dramatically increased coverage
+      width: 10000, // EXTREMELY increased coverage
+      height: 10000  // EXTREMELY increased coverage
     });
     
     // If we have land positions, set them for water interaction
@@ -329,30 +352,41 @@ export default class SceneSetup {
       
       // Create some initial waves for immediate visual effect
       if (typeof (this.water as any).createRandomWave === 'function') {
-        for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < 20; i++) { // Increased from 10 to 20
           (this.water as any).createRandomWave();
         }
       }
       
       // Schedule additional updates with delays to ensure proper initialization
-      const updateTimes = [10, 20, 30, 40, 50];
+      const updateTimes = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]; // Added more update times
       updateTimes.forEach((time, index) => {
         setTimeout(() => {
-          if (this.water) this.water.update(time);
+          if (this.water) {
+            this.water.update(time);
+            // Force visibility check
+            this.scene.traverse(object => {
+              if (object.userData && object.userData.isWaterMesh) {
+                object.visible = true;
+                object.renderOrder = 1000;
+              }
+            });
+          }
         }, 100 + index * 100);
       });
     }
     
-    // Make sure the water is visible in the scene
-    setTimeout(() => {
-      this.scene.traverse(object => {
-        if (object.userData && object.userData.isWaterMesh) {
-          console.log('Ensuring water mesh is visible');
-          object.visible = true;
-          object.renderOrder = 1000;
-        }
-      });
-    }, 500);
+    // Make sure the water is visible in the scene with multiple checks
+    [500, 1000, 2000, 3000, 5000].forEach(delay => {
+      setTimeout(() => {
+        this.scene.traverse(object => {
+          if (object.userData && object.userData.isWaterMesh) {
+            console.log(`Ensuring water mesh is visible at ${delay}ms`);
+            object.visible = true;
+            object.renderOrder = 1000;
+          }
+        });
+      }, delay);
+    });
     
     return this.water;
   }
