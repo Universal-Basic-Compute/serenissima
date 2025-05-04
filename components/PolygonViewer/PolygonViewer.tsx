@@ -665,25 +665,11 @@ export default function PolygonViewer() {
 
   // Define these event handlers before they're used in the useEffect
   const handlePolygonAdded = useCallback(() => {
-    if (sceneRef.current && sceneRef.current.water) {
-      console.log('Polygon added, updating water effects');
-      setTimeout(() => {
-        if (sceneRef.current && sceneRef.current.water) {
-          sceneRef.current.water.update(0);
-        }
-      }, 500);
-    }
+    console.log('Polygon added');
   }, []);
 
   const handlePolygonDeleted = useCallback(() => {
-    if (sceneRef.current && sceneRef.current.water) {
-      console.log('Polygon deleted, updating water effects');
-      setTimeout(() => {
-        if (sceneRef.current && sceneRef.current.water) {
-          sceneRef.current.water.update(0);
-        }
-      }, 500);
-    }
+    console.log('Polygon deleted');
   }, []);
 
   // Set up Three.js scene - only depends on polygons and loading
@@ -758,85 +744,12 @@ export default function PolygonViewer() {
       // Set up a periodic rendering check
       const renderingInterval = setInterval(ensureRendering, 5000);
       
-      // Create water effect immediately
-      if (sceneRef.current) {
-        console.log('Creating advanced water simulation from PolygonViewer');
-        const water = sceneRef.current.createWater();
-      
-        // Force multiple initial updates to ensure water is visible
-        if (water) {
-          water.update(0);
-        
-          // Schedule additional updates with delays
-          setTimeout(() => {
-            if (water) water.update(10);
-          }, 100);
-        
-          setTimeout(() => {
-            if (water) water.update(20);
-          }, 300);
-        
-          setTimeout(() => {
-            if (water) water.update(30);
-          }, 600);
-        }
-      }
-      
-      // Add a GUARANTEED fallback water plane that will always be visible
-      const createFallbackWater = () => {
-        console.log('Creating GUARANTEED fallback water plane');
-        
-        // Create a simple blue plane
-        const waterGeometry = new THREE.PlaneGeometry(10000, 10000);
-        const waterMaterial = new THREE.MeshBasicMaterial({
-          color: 0x4d94ff,
-          transparent: true,
-          opacity: 0.8,
-          depthTest: false,
-          depthWrite: false,
-          side: THREE.DoubleSide
-        });
-        
-        const waterMesh = new THREE.Mesh(waterGeometry, waterMaterial);
-        waterMesh.rotation.x = -Math.PI / 2;
-        waterMesh.position.y = 0.3; // Position it high enough to be visible
-        waterMesh.renderOrder = 500; // Lower than the main water but still high
-        
-        // Add user data for identification
-        waterMesh.userData.isFallbackWater = true;
-        waterMesh.userData.alwaysVisible = true;
-        
-        // Add to scene
-        if (sceneRef.current && sceneRef.current.scene) {
-          sceneRef.current.scene.add(waterMesh);
-        }
-      };
-
-      // Call this function immediately
-      createFallbackWater();
-
-      // Also set up an interval to check if the fallback water is still there
-      const fallbackWaterInterval = setInterval(() => {
-        if (sceneRef.current && sceneRef.current.scene) {
-          let fallbackWaterFound = false;
-          
-          sceneRef.current.scene.traverse(object => {
-            if (object.userData && object.userData.isFallbackWater) {
-              fallbackWaterFound = true;
-              object.visible = true; // Ensure it's visible
-            }
-          });
-          
-          if (!fallbackWaterFound) {
-            createFallbackWater();
-          }
-        }
-      }, 2000);
+      // No water effect needed
       
       // Add error handling for WebGL context loss using the function defined outside
       canvasRef.current.addEventListener('webglcontextlost', handleContextLost as unknown as EventListener);
     
-      // Add custom event listeners for polygon changes to update water effects
+      // Add custom event listeners for polygon changes
       window.addEventListener('polygonAdded', handlePolygonAdded);
       window.addEventListener('polygonDeleted', handlePolygonDeleted);
     } catch (error) {
@@ -845,9 +758,6 @@ export default function PolygonViewer() {
     
     // Clean up the interval in the return function
     return () => {
-      if (typeof fallbackWaterInterval !== 'undefined') {
-        clearInterval(fallbackWaterInterval);
-      }
       if (typeof renderingInterval !== 'undefined') {
         clearInterval(renderingInterval);
       }

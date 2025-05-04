@@ -30,9 +30,9 @@ export default class SceneSetup {
     this.performanceMode = !highQuality;
     this.activeView = activeView;
     
-    // Initialize scene with a deeper blue background to match water effect
+    // Initialize scene with a neutral background
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color('#1a75ff'); // Deeper blue background to match water
+    this.scene.background = new THREE.Color('#87CEEB'); // Light sky blue background
     
     // Create a camera with a better initial position
     this.camera = new THREE.PerspectiveCamera(
@@ -42,8 +42,8 @@ export default class SceneSetup {
       1000
     );
     
-    // Position camera to better view the water
-    this.camera.position.set(0, 30, 60); // Higher and further back for better water visibility
+    // Position camera to view the scene
+    this.camera.position.set(0, 30, 60); // Higher and further back for better scene visibility
     this.camera.lookAt(0, 0, 0);
     
     // Initialize renderer with simpler settings to prevent white screen
@@ -57,7 +57,7 @@ export default class SceneSetup {
     });
     
     // Use simpler renderer settings
-    this.renderer.setClearColor(0x1a75ff, 1); // Set clear color with full opacity
+    this.renderer.setClearColor(0x87CEEB, 1); // Set clear color with full opacity (light sky blue)
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.setPixelRatio(1); // Use standard pixel ratio
     this.renderer.shadowMap.enabled = false;
