@@ -1205,8 +1205,23 @@ export default function PolygonViewer() {
       // Force an initial update
       forceVisualUpdate();
       
+      // Force an additional update after a short delay to ensure everything is visible
+      setTimeout(() => {
+        if (polygonRendererRef.current) {
+          console.log('Forcing polygon visibility check');
+          polygonRendererRef.current.ensurePolygonsVisible();
+        }
+      }, 1000);
+      
       // Set up a timer to periodically force updates
-      const timer = setInterval(forceVisualUpdate, 5000);
+      const timer = setInterval(() => {
+        forceVisualUpdate();
+        
+        // Also explicitly ensure polygons are visible
+        if (polygonRendererRef.current) {
+          polygonRendererRef.current.ensurePolygonsVisible();
+        }
+      }, 5000);
       
       return () => {
         clearInterval(timer);

@@ -46,22 +46,23 @@ export default class SceneSetup {
     this.camera.position.set(0, 30, 60); // Higher and further back for better scene visibility
     this.camera.lookAt(0, 0, 0);
     
-    // Initialize renderer with simpler settings to prevent white screen
+    // Initialize renderer with settings to ensure visibility
     this.renderer = new THREE.WebGLRenderer({ 
       canvas,
-      antialias: false, // Disable antialiasing initially
+      antialias: true, // Enable antialiasing for better quality
       powerPreference: 'default',
-      precision: 'mediump',
-      logarithmicDepthBuffer: false, // Disable logarithmic depth buffer initially
+      precision: 'highp', // Use high precision for better rendering
+      logarithmicDepthBuffer: true, // Enable logarithmic depth buffer for better depth handling
       alpha: true
     });
     
-    // Use simpler renderer settings
+    // Use renderer settings that ensure visibility
     this.renderer.setClearColor(0x87CEEB, 1); // Set clear color with full opacity (light sky blue)
     this.renderer.setSize(window.innerWidth, window.innerHeight);
-    this.renderer.setPixelRatio(1); // Use standard pixel ratio
+    this.renderer.setPixelRatio(window.devicePixelRatio || 1); // Use device pixel ratio for better quality
     this.renderer.shadowMap.enabled = false;
     this.renderer.sortObjects = true; // Activate object sorting by the renderer
+    this.renderer.outputEncoding = THREE.sRGBEncoding; // Use sRGB encoding for better color accuracy
     
     // Set up a simple EffectComposer initially
     this.composer = new EffectComposer(this.renderer);

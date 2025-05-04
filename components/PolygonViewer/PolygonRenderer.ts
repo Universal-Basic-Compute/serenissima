@@ -304,7 +304,7 @@ export default class PolygonRenderer {
           ownerCoatOfArmsUrl = this.ownerCoatOfArmsMap[polygon.owner];
         }
         
-        // Create polygon mesh
+        // IMPORTANT: Create polygon mesh - ensure this is not disabled
         const polygonMesh = new PolygonMesh(
           this.scene,
           polygon,
@@ -350,14 +350,76 @@ export default class PolygonRenderer {
   }
   
   private createSamplePolygon() {
-    console.log('Sample polygon creation disabled');
-    // No geometry generation
+    console.log('Creating sample polygon for testing');
+    
+    // Create a simple sample polygon for testing visibility
+    const sampleCoordinates = [
+      { lat: 45.4371, lng: 12.3345 },
+      { lat: 45.4381, lng: 12.3355 },
+      { lat: 45.4391, lng: 12.3345 },
+      { lat: 45.4381, lng: 12.3335 }
+    ];
+    
+    const samplePolygon = {
+      id: 'sample-test-polygon',
+      coordinates: sampleCoordinates,
+      centroid: { lat: 45.4381, lng: 12.3345 }
+    };
+    
+    // Create a polygon mesh for the sample
+    const polygonMesh = new PolygonMesh(
+      this.scene,
+      samplePolygon,
+      this.bounds,
+      this.activeView,
+      this.performanceMode,
+      this.textureLoader,
+      '#FF0000', // Bright red for visibility
+      null,
+      this.polygonMeshesRef
+    );
+    
+    // Store reference to the mesh
+    this.PolygonMeshs.push(polygonMesh);
+    
+    console.log('Sample test polygon created for visibility testing');
   }
   
   public update(selectedPolygonId: string | null = null) {
-    // No need to update LOD anymore
-    // Just update selection state
+    // Ensure all polygons are visible
+    this.ensurePolygonsVisible();
+    
+    // Update selection state
     this.updateSelectionState(selectedPolygonId);
+  }
+  
+  // Add method to ensure polygons are visible
+  public ensurePolygonsVisible() {
+    console.log(`Ensuring visibility of ${this.PolygonMeshs.length} polygon meshes`);
+    
+    this.PolygonMeshs.forEach(polygonMesh => {
+      const mesh = polygonMesh.getMesh();
+      if (mesh) {
+        // Force visibility
+        mesh.visible = true;
+        
+        // Force material update
+        if (mesh.material) {
+          if (Array.isArray(mesh.material)) {
+            mesh.material.forEach(mat => {
+              if (mat) mat.needsUpdate = true;
+            });
+          } else {
+            mesh.material.needsUpdate = true;
+          }
+        }
+      }
+    });
+    
+    // Force a render to apply changes
+    if (this.scene.userData.forceRender) {
+      this.scene.userData.forceRender();
+    }
   }
   
   // Add this new method to update selection state
@@ -648,8 +710,46 @@ export default class PolygonRenderer {
 
   // Add this helper method to create a flat texture on the land for a polygon
   private createFlatTextureForPolygon(polygon: Polygon, texture: THREE.Texture) {
-    console.log(`Flat texture creation disabled for polygon ${polygon.id}`);
-    // No textures are created to avoid geometry generation
+    if (!polygon.centroid) {
+      console.warn(`Cannot create flat texture for polygon ${polygon.id} - no centroid`);
+      return;
+    }
+    
+    try {
+      // Convert centroid to 3D position
+      const normalizedCoord = normalizeCoordinates(
+        [polygon.centroid],
+        this.bounds.centerLat,
+        this.bounds.centerLng,
+        this.bounds.scale,
+        this.bounds.latCorrectionFactor
+      )[0];
+      
+      // Create a plane geometry for the texture
+      const planeGeometry = new THREE.PlaneGeometry(1, 1);
+      const planeMaterial = new THREE.MeshBasicMaterial({
+        map: texture,
+        transparent: true,
+        side: THREE.DoubleSide,
+        depthWrite: false
+      });
+      
+      // Create mesh and position it
+      const planeMesh = new THREE.Mesh(planeGeometry, planeMaterial);
+      planeMesh.position.set(normalizedCoord.x, 0.1, normalizedCoord.y); // Slightly above ground
+      planeMesh.rotation.x = -Math.PI / 2; // Rotate to lie flat
+      planeMesh.renderOrder = 10; // Ensure it renders on top
+      
+      // Add to scene
+      this.scene.add(planeMesh);
+      
+      // Store reference
+      this.coatOfArmSprites[polygon.id] = planeMesh;
+      
+      console.log(`Created flat texture for polygon ${polygon.id} at position:`, normalizedCoord);
+    } catch (error) {
+      console.error(`Error creating flat texture for polygon ${polygon.id}:`, error);
+    }
   }
   
   // Add helper function to create a circular texture
@@ -760,8 +860,47 @@ export default class PolygonRenderer {
   
   // Add a new method to create a colored circle on the land
   private createColoredCircleOnLand(polygon: Polygon, color: string) {
-    console.log(`Colored circle creation disabled for polygon ${polygon.id}`);
-    // No colored circles are created to avoid geometry generation
+    if (!polygon.centroid) {
+      console.warn(`Cannot create colored circle for polygon ${polygon.id} - no centroid`);
+      return;
+    }
+    
+    try {
+      // Convert centroid to 3D position
+      const normalizedCoord = normalizeCoordinates(
+        [polygon.centroid],
+        this.bounds.centerLat,
+        this.bounds.centerLng,
+        this.bounds.scale,
+        this.bounds.latCorrectionFactor
+      )[0];
+      
+      // Create a circle geometry
+      const circleGeometry = new THREE.CircleGeometry(0.5, 32);
+      const circleMaterial = new THREE.MeshBasicMaterial({
+        color: color,
+        transparent: true,
+        opacity: 0.8,
+        side: THREE.DoubleSide,
+        depthWrite: false
+      });
+      
+      // Create mesh and position it
+      const circleMesh = new THREE.Mesh(circleGeometry, circleMaterial);
+      circleMesh.position.set(normalizedCoord.x, 0.05, normalizedCoord.y); // Slightly above ground
+      circleMesh.rotation.x = -Math.PI / 2; // Rotate to lie flat
+      circleMesh.renderOrder = 10; // Ensure it renders on top
+      
+      // Add to scene
+      this.scene.add(circleMesh);
+      
+      // Store reference
+      this.coatOfArmSprites[polygon.id] = circleMesh;
+      
+      console.log(`Created colored circle for polygon ${polygon.id} at position:`, normalizedCoord);
+    } catch (error) {
+      console.error(`Error creating colored circle for polygon ${polygon.id}:`, error);
+    }
   }
 
   // Add method to update polygon owner
