@@ -406,12 +406,27 @@ export class RoadManager {
           // Create a curved path based on the smoothed points
           const curve = this.createCurvedPath(smoothedPoints, curvature);
       
-      // Create road geometry
-      const roadWidth = 0.15; // Changed from 0.0735 back to 0.15 (make it thicker)
-      const roadGeometry = new THREE.BufferGeometry();
-      const positions: number[] = [];
-      const uvs: number[] = [];
-      const normals: number[] = []; // Add normals for better lighting
+          // Generate a cache key for this geometry
+          const cacheKey = this.generateGeometryCacheKey(smoothedPoints, curvature);
+          
+          // Check if we already have this geometry in cache
+          let roadGeometry: THREE.BufferGeometry;
+          if (this.roadGeometryCache.has(cacheKey)) {
+            // Reuse existing geometry
+            roadGeometry = this.roadGeometryCache.get(cacheKey)!.clone();
+            
+            // Update usage count
+            const currentCount = this.geometryUsageCount.get(cacheKey) || 0;
+            this.geometryUsageCount.set(cacheKey, currentCount + 1);
+            
+            log.info(`Reusing cached road geometry (key: ${cacheKey}, usage: ${currentCount + 1})`);
+          } else {
+            // Create new road geometry
+            const roadWidth = 0.15; // Changed from 0.0735 back to 0.15 (make it thicker)
+            roadGeometry = new THREE.BufferGeometry();
+            const positions: number[] = [];
+            const uvs: number[] = [];
+            const normals: number[] = []; // Add normals for better lighting
       
       // Sample points along the curve
       const numPoints = Math.max(points.length * 10, 50);
