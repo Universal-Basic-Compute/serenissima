@@ -1422,28 +1422,5 @@ export class RoadManager {
     }
   }
   
-  // Add this function to save bridge to file
-  const saveBridgeToFile = (bridge: any) => {
-    // Send bridge data to the API
-    fetch('/api/save-bridge', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(bridge)
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        console.log(`Bridge created: ${data.filename}`);
-        alert(`Bridge created between lands ${bridge.startLandId} and ${bridge.endLandId}`);
-      } else {
-        console.error('Failed to save bridge:', data.error);
-        alert('Failed to create bridge');
-      }
-    })
-    .catch(error => {
-      console.error('Error saving bridge:', error);
-      alert('Error creating bridge');
-    });
-  }
 }
 }
