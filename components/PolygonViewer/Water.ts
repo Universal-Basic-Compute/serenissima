@@ -19,7 +19,8 @@ export default class Water {
   private clock: THREE.Clock = new THREE.Clock();
   
   // Water surface
-  private waterMesh: THREE.Mesh | null = null;
+  private waterMesh: THREE.Mesh | THREE.Points | null = null;
+  private waterPlane: THREE.Mesh | null = null;
   private waterGeometry: THREE.PlaneGeometry | null = null;
   private waterMaterial: THREE.ShaderMaterial | null = null;
   
@@ -71,108 +72,150 @@ export default class Water {
   }
   
   private createWaterSurface() {
-    // Create a much simpler water implementation that will definitely be visible
-    console.log('Creating GUARANTEED visible water surface');
+    console.log('Creating particle-based water surface...');
     
-    // Use a simple plane with animated vertex displacement
-    const resolution = 128; // Lower resolution for better performance
-    this.waterGeometry = new THREE.PlaneGeometry(
-      this.width, 
-      this.height, 
-      resolution, 
-      resolution
-    );
+    // Create a base water plane for color and basic appearance
+    const waterPlaneGeometry = new THREE.PlaneGeometry(this.width, this.height, 1, 1);
+    const waterPlaneMaterial = new THREE.MeshBasicMaterial({
+      color: this.getWaterColorForView(),
+      transparent: true,
+      opacity: 0.7,
+      depthWrite: false
+    });
     
-    // Create a simple shader material with very obvious waves
-    const waterShader = {
+    const waterPlane = new THREE.Mesh(waterPlaneGeometry, waterPlaneMaterial);
+    waterPlane.rotation.x = -Math.PI / 2;
+    waterPlane.position.y = -0.5;
+    waterPlane.renderOrder = 1;
+    this.scene.add(waterPlane);
+    
+    // Create particle system for water surface
+    const particleCount = this.performanceMode ? 10000 : 20000;
+    const particleGeometry = new THREE.BufferGeometry();
+    
+    // Create particle positions - distribute across water surface
+    const positions = new Float32Array(particleCount * 3);
+    const velocities = new Float32Array(particleCount * 3);
+    const colors = new Float32Array(particleCount * 3);
+    const sizes = new Float32Array(particleCount);
+    
+    const halfWidth = this.width / 2;
+    const halfHeight = this.height / 2;
+    const waterColor = new THREE.Color(this.getWaterColorForView());
+    const deepWaterColor = new THREE.Color(this.getDeepWaterColorForView());
+    
+    for (let i = 0; i < particleCount; i++) {
+      const i3 = i * 3;
+      
+      // Position particles in a grid pattern across the water surface
+      positions[i3] = (Math.random() * this.width) - halfWidth;
+      positions[i3 + 1] = 0; // Start at water level
+      positions[i3 + 2] = (Math.random() * this.height) - halfHeight;
+      
+      // Initial velocities - small random values
+      velocities[i3] = (Math.random() - 0.5) * 0.05;
+      velocities[i3 + 1] = (Math.random() - 0.5) * 0.1;
+      velocities[i3 + 2] = (Math.random() - 0.5) * 0.05;
+      
+      // Mix between deep and shallow water colors
+      const colorMix = Math.random();
+      const particleColor = new THREE.Color().lerpColors(deepWaterColor, waterColor, colorMix);
+      colors[i3] = particleColor.r;
+      colors[i3 + 1] = particleColor.g;
+      colors[i3 + 2] = particleColor.b;
+      
+      // Vary particle sizes for more natural look
+      sizes[i] = Math.random() * 2 + 1;
+    }
+    
+    particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    particleGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+    particleGeometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+    
+    // Store velocities for animation
+    particleGeometry.userData.velocities = velocities;
+    
+    // Create particle material with custom shader
+    const particleMaterial = new THREE.ShaderMaterial({
       uniforms: {
-        time: { value: 0.0 },
-        waterColor: { value: new THREE.Color(this.getWaterColorForView()) }, // Bright blue
-        deepWaterColor: { value: new THREE.Color(this.getDeepWaterColorForView()) }, // Deep blue
+        time: { value: 0 },
+        pointTexture: { value: this.createParticleTexture() }
       },
       vertexShader: `
+        attribute float size;
+        attribute vec3 color;
+        varying vec3 vColor;
         uniform float time;
-        varying vec2 vUv;
-        varying float vElevation;
         
         void main() {
-          vUv = uv;
+          vColor = color;
           
-          // Create very obvious waves
-          float wave1 = sin(position.x * 0.05 + time * 0.5) * 
-                       cos(position.y * 0.05 + time * 0.3) * 2.0;
+          // Apply wave motion to particles
+          vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
           
-          float wave2 = sin(position.x * 0.1 + time * 0.7) * 
-                       sin(position.y * 0.1 + time * 0.4) * 1.0;
-          
-          // Combine waves with high amplitude
-          float elevation = wave1 + wave2;
-          vElevation = elevation;
-          
-          // Apply elevation to vertex
-          vec3 newPosition = position;
-          newPosition.z += elevation * 3.0; // VERY exaggerated height
-          
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(newPosition, 1.0);
+          // Size attenuation based on distance
+          gl_PointSize = size * (300.0 / -mvPosition.z);
+          gl_Position = projectionMatrix * mvPosition;
         }
       `,
       fragmentShader: `
-        uniform vec3 waterColor;
-        uniform vec3 deepWaterColor;
-        varying vec2 vUv;
-        varying float vElevation;
+        uniform sampler2D pointTexture;
+        varying vec3 vColor;
         
         void main() {
-          // Mix colors based on elevation for more visible waves
-          float depthFactor = smoothstep(-2.0, 2.0, vElevation);
-          vec3 color = mix(deepWaterColor, waterColor, depthFactor);
+          gl_FragColor = vec4(vColor, 1.0) * texture2D(pointTexture, gl_PointCoord);
           
-          // Add white caps at wave peaks
-          if (vElevation > 1.5) {
-            color = mix(color, vec3(1.0), (vElevation - 1.5) * 0.5);
-          }
-          
-          gl_FragColor = vec4(color, 0.9);
+          // Discard nearly transparent pixels
+          if (gl_FragColor.a < 0.1) discard;
         }
-      `
-    };
-    
-    // Create the material
-    this.waterMaterial = new THREE.ShaderMaterial({
-      uniforms: waterShader.uniforms,
-      vertexShader: waterShader.vertexShader,
-      fragmentShader: waterShader.fragmentShader,
+      `,
+      blending: THREE.AdditiveBlending,
+      depthTest: false,
       transparent: true,
-      side: THREE.DoubleSide
+      vertexColors: true
     });
     
-    // FORCE VISIBILITY: Disable depth testing to ensure water is always drawn
-    if (this.waterMaterial) {
-      this.waterMaterial.depthTest = false;
-      this.waterMaterial.depthWrite = false;
-      this.waterMaterial.transparent = true;
-      this.waterMaterial.opacity = 0.9; // Slightly transparent to see land underneath
-    }
+    // Create the particle system
+    const particleSystem = new THREE.Points(particleGeometry, particleMaterial);
+    particleSystem.position.y = 0;
+    particleSystem.renderOrder = 10;
+    particleSystem.userData.isWaterMesh = true;
+    particleSystem.userData.isParticleWater = true;
+    this.scene.add(particleSystem);
     
-    // Create the water mesh
-    this.waterMesh = new THREE.Mesh(this.waterGeometry, this.waterMaterial);
+    // Store references
+    this.waterMesh = particleSystem;
+    this.waterPlane = waterPlane;
     
-    // Position water at y=0 and rotate to be horizontal
-    this.waterMesh.rotation.x = -Math.PI / 2;
-    this.waterMesh.position.y = 0;
+    console.log('Particle-based water system created with', particleCount, 'particles');
+  }
+  
+  // Add this helper method to create a particle texture
+  private createParticleTexture() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 128;
+    canvas.height = 128;
     
-    // Force visibility
-    this.waterMesh.visible = true;
-    this.waterMesh.renderOrder = 1000;
+    const context = canvas.getContext('2d');
+    if (!context) return new THREE.Texture();
     
-    // Add user data for identification
-    this.waterMesh.userData.isWaterMesh = true;
-    this.waterMesh.userData.alwaysVisible = true;
+    // Create a circular gradient for each particle
+    const gradient = context.createRadialGradient(
+      canvas.width / 2, canvas.height / 2, 0,
+      canvas.width / 2, canvas.height / 2, canvas.width / 2
+    );
     
-    // Add to scene
-    this.scene.add(this.waterMesh);
+    gradient.addColorStop(0, 'rgba(255,255,255,1)');
+    gradient.addColorStop(0.2, 'rgba(255,255,255,0.8)');
+    gradient.addColorStop(0.4, 'rgba(255,255,255,0.4)');
+    gradient.addColorStop(1, 'rgba(255,255,255,0)');
     
-    console.log('GUARANTEED water surface created');
+    context.fillStyle = gradient;
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    
+    const texture = new THREE.Texture(canvas);
+    texture.needsUpdate = true;
+    return texture;
   }
   
   private initializeWaveSimulation() {
@@ -620,25 +663,142 @@ export default class Water {
   }
   
   public update(frameCount: number) {
-    // Update time with fixed speed for consistent animation
+    // Update time
     this.time += 0.05;
     
     // Skip if water mesh doesn't exist
-    if (!this.waterMesh || !this.waterMaterial) {
-      console.log('Water mesh or material missing, recreating water');
+    if (!this.waterMesh) {
+      console.log('Water mesh missing, recreating water');
       this.initializeWaterSystem();
       return;
     }
     
-    // Update shader uniforms
-    this.waterMaterial.uniforms.time.value = this.time;
+    // Update particle positions for wave effect
+    if (this.waterMesh.userData.isParticleWater) {
+      const geometry = this.waterMesh.geometry;
+      const positions = geometry.attributes.position.array;
+      const velocities = geometry.userData.velocities;
+      const count = positions.length / 3;
+      
+      for (let i = 0; i < count; i++) {
+        const i3 = i * 3;
+        
+        // Get current position
+        const x = positions[i3];
+        const y = positions[i3 + 1];
+        const z = positions[i3 + 2];
+        
+        // Apply wave forces
+        // 1. Base oscillation
+        const waveHeight = Math.sin(x * 0.05 + this.time * 0.5) * 
+                           Math.cos(z * 0.05 + this.time * 0.3) * 0.5;
+        
+        // 2. Secondary waves
+        const secondaryWave = Math.sin(x * 0.1 + this.time * 0.7) * 
+                             Math.sin(z * 0.1 + this.time * 0.4) * 0.3;
+        
+        // 3. Small ripples
+        const ripples = Math.sin(x * 0.3 + this.time * 1.1) * 
+                       Math.sin(z * 0.3 + this.time * 0.9) * 0.1;
+        
+        // Calculate target height
+        const targetHeight = waveHeight + secondaryWave + ripples;
+        
+        // Apply velocity changes using a spring model
+        const springStrength = 0.03;
+        const damping = 0.95;
+        
+        // Accelerate towards target height
+        velocities[i3 + 1] += (targetHeight - y) * springStrength;
+        
+        // Apply damping to prevent excessive oscillation
+        velocities[i3] *= damping;
+        velocities[i3 + 1] *= damping;
+        velocities[i3 + 2] *= damping;
+        
+        // Update position with velocity
+        positions[i3] += velocities[i3];
+        positions[i3 + 1] += velocities[i3 + 1];
+        positions[i3 + 2] += velocities[i3 + 2];
+        
+        // Add random jitter for more natural movement
+        if (Math.random() < 0.01) {
+          velocities[i3] += (Math.random() - 0.5) * 0.01;
+          velocities[i3 + 2] += (Math.random() - 0.5) * 0.01;
+        }
+        
+        // Create occasional splashes
+        if (Math.random() < 0.0005) {
+          velocities[i3 + 1] += Math.random() * 0.2;
+        }
+      }
+      
+      // Update geometry
+      geometry.attributes.position.needsUpdate = true;
+      
+      // Update shader uniforms
+      if ((this.waterMesh.material as THREE.ShaderMaterial).uniforms) {
+        (this.waterMesh.material as THREE.ShaderMaterial).uniforms.time.value = this.time;
+      }
+    }
+    
+    // Update base water plane color based on view mode
+    if (this.waterPlane && frameCount % 100 === 0) {
+      (this.waterPlane.material as THREE.MeshBasicMaterial).color.set(this.getWaterColorForView());
+    }
     
     // Force visibility every frame
-    this.waterMesh.visible = true;
+    if (this.waterMesh) {
+      this.waterMesh.visible = true;
+    }
+    
+    if (this.waterPlane) {
+      this.waterPlane.visible = true;
+    }
+    
+    // Create random waves occasionally
+    if (Math.random() < 0.01) {
+      this.createRandomWave();
+    }
     
     // Log every 100 frames to confirm water is updating
     if (frameCount % 100 === 0) {
-      console.log('Water animation updating, time:', this.time);
+      console.log('Particle water animation updating, time:', this.time);
+    }
+  }
+  
+  // Add this method to create random waves
+  public createRandomWave() {
+    if (!this.waterMesh || !this.waterMesh.userData.isParticleWater) return;
+    
+    const geometry = this.waterMesh.geometry;
+    const positions = geometry.attributes.position.array;
+    const velocities = geometry.userData.velocities;
+    const count = positions.length / 3;
+    
+    // Choose a random epicenter for the wave
+    const epicenterX = (Math.random() - 0.5) * this.width;
+    const epicenterZ = (Math.random() - 0.5) * this.height;
+    const waveStrength = Math.random() * 0.5 + 0.2;
+    const waveRadius = Math.random() * 20 + 10;
+    
+    // Apply impulse to particles near the epicenter
+    for (let i = 0; i < count; i++) {
+      const i3 = i * 3;
+      
+      const x = positions[i3];
+      const z = positions[i3 + 2];
+      
+      // Calculate distance from epicenter
+      const dx = x - epicenterX;
+      const dz = z - epicenterZ;
+      const distance = Math.sqrt(dx * dx + dz * dz);
+      
+      // Apply impulse if within radius
+      if (distance < waveRadius) {
+        const falloff = 1 - (distance / waveRadius);
+        velocities[i3 + 1] += waveStrength * falloff;
+      }
     }
   }
   
@@ -670,17 +830,39 @@ export default class Water {
     if (this.waterMesh) {
       this.scene.remove(this.waterMesh);
       
-      if (this.waterGeometry) {
-        this.waterGeometry.dispose();
+      if (this.waterMesh.geometry) {
+        this.waterMesh.geometry.dispose();
       }
       
-      if (this.waterMaterial) {
-        this.waterMaterial.dispose();
+      if (this.waterMesh.material) {
+        if (Array.isArray(this.waterMesh.material)) {
+          this.waterMesh.material.forEach(m => m.dispose());
+        } else {
+          this.waterMesh.material.dispose();
+        }
+      }
+    }
+    
+    // Remove water plane
+    if (this.waterPlane) {
+      this.scene.remove(this.waterPlane);
+      
+      if (this.waterPlane.geometry) {
+        this.waterPlane.geometry.dispose();
+      }
+      
+      if (this.waterPlane.material) {
+        if (Array.isArray(this.waterPlane.material)) {
+          this.waterPlane.material.forEach(m => m.dispose());
+        } else {
+          this.waterPlane.material.dispose();
+        }
       }
     }
     
     // Clear references
     this.waterMesh = null;
+    this.waterPlane = null;
     this.waterGeometry = null;
     this.waterMaterial = null;
     this.waveGrid = null;
