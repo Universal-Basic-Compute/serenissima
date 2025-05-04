@@ -48,13 +48,15 @@ export default class SimplePolygonRenderer {
   }
   
   private renderPolygons() {
-    // Create a material
+    // Create a material with sand texture and improved appearance
     const material = new THREE.MeshStandardMaterial({
       map: this.sandTexture,
       color: this.sandTexture ? 0xffffff : 0xf5e9c8, // Use texture color or sand color
       side: THREE.DoubleSide,
       roughness: 0.8,
-      metalness: 0.1
+      metalness: 0.1,
+      // Add slight bumpiness to the land
+      bumpScale: 0.05
     });
     
     // Process each polygon
@@ -77,15 +79,24 @@ export default class SimplePolygonRenderer {
         // Create shape
         const shape = createPolygonShape(normalizedCoords);
         
-        // Create geometry
-        const geometry = new THREE.ShapeGeometry(shape);
+        // Create geometry with slight extrusion for elevation
+        const extrudeSettings = {
+          depth: 0.2,  // Increased from 0 to 0.2 for slight elevation
+          bevelEnabled: true,
+          bevelSegments: 1,
+          bevelSize: 0.1,
+          bevelThickness: 0.1
+        };
+        
+        // Use ExtrudeGeometry instead of ShapeGeometry for elevation
+        const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
         
         // Create mesh
         const mesh = new THREE.Mesh(geometry, material.clone());
         
-        // Position mesh
-        mesh.rotation.x = -Math.PI / 2; // Flat on the ground
-        mesh.position.y = 0.1; // Slightly above ground
+        // Position mesh - adjust rotation to make top surface flat
+        mesh.rotation.x = -Math.PI / 2;
+        mesh.position.y = 0.1; // Keep slightly above water level
         
         // Add to scene
         this.scene.add(mesh);

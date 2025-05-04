@@ -14,27 +14,30 @@ export default class SimpleWater {
 
   constructor({ scene, size }: SimpleWaterProps) {
     this.scene = scene;
-    this.size = size;
+    // Increase water size by 50% to ensure it extends beyond view
+    this.size = size * 1.5;
     this.clock = new THREE.Clock();
     
     // Create water
     this.water = this.createWater();
     this.scene.add(this.water);
     
-    console.log('Water created with size:', size);
+    console.log('Water created with size:', this.size);
   }
 
   private createWater(): Water {
-    // Water geometry
+    // Water geometry - make it larger
     const waterGeometry = new THREE.PlaneGeometry(this.size, this.size);
 
     // Water texture
     const textureLoader = new THREE.TextureLoader();
     const waterNormals = textureLoader.load('/textures/waternormals.jpg', (texture) => {
       texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+      // Increase repeat for more detailed waves
+      texture.repeat.set(8, 8);
     });
 
-    // Water material
+    // Water material - adjust colors for more blue appearance
     const water = new Water(
       waterGeometry,
       {
@@ -43,23 +46,23 @@ export default class SimpleWater {
         waterNormals: waterNormals,
         sunDirection: new THREE.Vector3(0, 1, 0),
         sunColor: 0xffffff,
-        waterColor: 0x001e0f,
-        distortionScale: 3.7,
+        waterColor: 0x0047ab, // Changed to a deeper royal blue (from 0x001e0f)
+        distortionScale: 4.5,  // Increased from 3.7 for more pronounced waves
         fog: false
       }
     );
 
-    // Position water
+    // Position water - lower it slightly more to ensure it's below land
     water.rotation.x = -Math.PI / 2;
-    water.position.y = -0.1; // Slightly below ground level
+    water.position.y = -0.2; // Changed from -0.1 to -0.2 to ensure it's below land
 
     return water;
   }
 
   public update(): void {
     if (this.water.material instanceof THREE.ShaderMaterial) {
-      // Update water animation
-      this.water.material.uniforms['time'].value += this.clock.getDelta() * 0.5;
+      // Update water animation - slow down slightly for more realistic ocean movement
+      this.water.material.uniforms['time'].value += this.clock.getDelta() * 0.4;
     }
   }
 

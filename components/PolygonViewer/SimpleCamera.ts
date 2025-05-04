@@ -14,8 +14,8 @@ export default class SimpleCamera {
       1000 // Far clipping plane
     );
     
-    // Position camera to see both land and water
-    this.camera.position.set(0, 40, 80);
+    // Position camera higher and further back for a better view of the water
+    this.camera.position.set(0, 60, 120);
     this.camera.lookAt(0, 0, 0);
     
     // Create controls
@@ -26,8 +26,8 @@ export default class SimpleCamera {
     this.controls.dampingFactor = 0.05;
     this.controls.minPolarAngle = 0.1; // Allow more downward angle to see water
     this.controls.maxPolarAngle = Math.PI / 2.5; // Limit to 72 degrees from vertical
-    this.controls.minDistance = 5;
-    this.controls.maxDistance = 100;
+    this.controls.minDistance = 10; // Increase min distance to prevent getting too close
+    this.controls.maxDistance = 200; // Increase max distance to allow zooming out more
     this.controls.screenSpacePanning = false;
     
     // Set initial target

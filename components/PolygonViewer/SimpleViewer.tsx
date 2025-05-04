@@ -69,7 +69,7 @@ export default function SimpleViewer() {
     polygonRendererRef.current = polygonRenderer;
     
     // Create water
-    const waterSize = Math.max(bounds.scale * 500, 1000); // Make water large enough to cover the scene
+    const waterSize = Math.max(bounds.scale * 1000, 2000); // Doubled from 500 to 1000, and min size from 1000 to 2000
     const water = new SimpleWater({
       scene,
       size: waterSize
