@@ -96,7 +96,15 @@ export default class SimplePolygonRenderer {
         
         // Position mesh - adjust rotation to make top surface flat
         mesh.rotation.x = -Math.PI / 2;
-        mesh.position.y = 0.1; // Keep slightly above water level
+        mesh.position.y = 0.2; // Increase height to ensure clear separation from water
+        mesh.renderOrder = 1; // Ensure it renders after water
+        
+        // Apply polygon offset to prevent z-fighting
+        if (mesh.material instanceof THREE.MeshStandardMaterial) {
+          mesh.material.polygonOffset = true;
+          mesh.material.polygonOffsetFactor = 1;
+          mesh.material.polygonOffsetUnits = 1;
+        }
         
         // Add to scene
         this.scene.add(mesh);
