@@ -100,9 +100,9 @@ def process_todo(todo):
     message = f"{description}\n\n{details}" if details else description
     aider_cmd = ["aider", "--message", message, "--yes-always"]
 
-    # Add files to read
+    # Add files to modify
     for file in valid_files:
-        aider_cmd.extend(["--read", file])
+        aider_cmd.extend(["--file", file])
 
     # Execute Aider command
     print(f"Executing: {' '.join(aider_cmd)}")
