@@ -18,6 +18,7 @@ Services are implemented as TypeScript classes with well-defined interfaces. Eac
 3. Hide implementation details
 4. Be testable in isolation
 5. Follow the singleton pattern when appropriate
+6. Implement appropriate caching strategies
 
 ## Core Services
 
@@ -44,6 +45,8 @@ export class UserService {
   public connectWallet(address: string): Promise<UserProfile | null>;
   public disconnectWallet(): void;
   public updateUserProfile(profile: Partial<UserProfile>): Promise<UserProfile | null>;
+  public configureCaching(config: Partial<CacheConfig>): void;
+  public clearCache(): void;
 }
 ```
 

@@ -1,7 +1,6 @@
 /**
  * TODO: Refactor according to architecture
  * - Add comprehensive logging
- * - Implement caching strategy for user data
  * - Add unit tests for service methods
  */
 import { getApiBaseUrl } from '../apiUtils';
@@ -14,6 +13,18 @@ import {
   NotFoundError, 
   ValidationError 
 } from '../errors/ServiceErrors';
+
+// Cache configuration
+interface CacheConfig {
+  enabled: boolean;
+  ttl: number; // Time-to-live in milliseconds
+}
+
+// Cache entry with expiration
+interface CacheEntry<T> {
+  data: T;
+  timestamp: number;
+}
 
 export interface UserProfile {
   username: string;
@@ -34,6 +45,17 @@ export class UserService {
   private users: Record<string, any> = {};
   private currentUser: UserProfile | null = null;
   private walletAddress: string | null = null;
+  
+  // Cache storage
+  private usersCache: CacheEntry<Record<string, any>> | null = null;
+  private userByUsernameCache: Map<string, CacheEntry<any>> = new Map();
+  private userByWalletCache: Map<string, CacheEntry<UserProfile | null>> = new Map();
+  
+  // Cache configuration
+  private cacheConfig: CacheConfig = {
+    enabled: true,
+    ttl: 5 * 60 * 1000 // 5 minutes default TTL
+  };
   
   constructor() {
     log.info('Initializing UserService');
@@ -57,6 +79,16 @@ export class UserService {
           hasCoatOfArms: !!this.currentUser.coatOfArmsImage,
           hasMotto: !!this.currentUser.familyMotto
         });
+        
+        // Initialize cache with stored profile if wallet address exists
+        if (this.walletAddress && this.currentUser) {
+          this.setCacheEntry(
+            this.userByWalletCache, 
+            this.walletAddress, 
+            this.currentUser
+          );
+          log.debug('Initialized user by wallet cache with stored profile');
+        }
       } catch (e) {
         log.error('Error parsing stored user profile:', e);
       }
@@ -68,13 +100,99 @@ export class UserService {
     eventBus.subscribe(EventTypes.WALLET_CHANGED, this.handleWalletChanged.bind(this));
     log.debug('Subscribed to WALLET_CHANGED events');
     
+    // Listen for cache invalidation events
+    eventBus.subscribe(EventTypes.USER_PROFILE_UPDATED, this.invalidateUserCache.bind(this));
+    log.debug('Subscribed to USER_PROFILE_UPDATED events for cache invalidation');
+    
     log.info('UserService initialized successfully');
+  }
+  
+  /**
+   * Configure the cache settings
+   */
+  public configureCaching(config: Partial<CacheConfig>): void {
+    this.cacheConfig = {
+      ...this.cacheConfig,
+      ...config
+    };
+    
+    log.info('Cache configuration updated', this.cacheConfig);
+    
+    // Clear cache if disabled
+    if (!this.cacheConfig.enabled) {
+      this.clearCache();
+    }
+  }
+  
+  /**
+   * Clear all caches
+   */
+  public clearCache(): void {
+    log.info('Clearing all user data caches');
+    this.usersCache = null;
+    this.userByUsernameCache.clear();
+    this.userByWalletCache.clear();
+    log.debug('All user data caches cleared');
+  }
+  
+  /**
+   * Check if a cache entry is valid
+   */
+  private isCacheValid<T>(entry: CacheEntry<T> | null | undefined): boolean {
+    if (!this.cacheConfig.enabled || !entry) {
+      return false;
+    }
+    
+    const now = Date.now();
+    return (now - entry.timestamp) < this.cacheConfig.ttl;
+  }
+  
+  /**
+   * Set a cache entry with current timestamp
+   */
+  private setCacheEntry<K, T>(cache: Map<K, CacheEntry<T>>, key: K, data: T): void {
+    if (!this.cacheConfig.enabled) {
+      return;
+    }
+    
+    cache.set(key, {
+      data,
+      timestamp: Date.now()
+    });
+  }
+  
+  /**
+   * Invalidate cache for a specific user
+   */
+  private invalidateUserCache(user: UserProfile): void {
+    if (!user) return;
+    
+    log.debug(`Invalidating cache for user: ${user.username}`);
+    
+    // Remove from username cache
+    this.userByUsernameCache.delete(user.username);
+    
+    // Remove from wallet cache if wallet address exists
+    if (user.walletAddress) {
+      this.userByWalletCache.delete(user.walletAddress);
+    }
+    
+    // Invalidate users cache since it might contain this user
+    this.usersCache = null;
+    
+    log.debug('User cache invalidated');
   }
   
   /**
    * Load all users from the API
    */
   public async loadUsers(): Promise<Record<string, any>> {
+    // Check cache first
+    if (this.isCacheValid(this.usersCache)) {
+      log.info('Returning users from cache');
+      return this.usersCache.data;
+    }
+    
     const endpoint = `${getApiBaseUrl()}/api/users`;
     
     log.info(`Fetching users from endpoint: ${endpoint}`);
@@ -143,6 +261,17 @@ export class UserService {
         };
       }
       
+      // Update cache
+      this.usersCache = {
+        data: this.users,
+        timestamp: Date.now()
+      };
+      log.debug('Updated users cache');
+      
+      // Clear individual user caches as they might be stale
+      this.userByUsernameCache.clear();
+      log.debug('Cleared user by username cache');
+      
       // Notify listeners that users data has been loaded
       log.debug('Emitting USERS_DATA_LOADED event');
       eventBus.emit(EventTypes.USERS_DATA_LOADED);
@@ -189,12 +318,23 @@ export class UserService {
       throw new ValidationError('Invalid username', 'username');
     }
     
+    // Check cache first
+    const cachedEntry = this.userByUsernameCache.get(username);
+    if (this.isCacheValid(cachedEntry)) {
+      log.debug(`Returning user from cache: ${username}`);
+      return cachedEntry.data;
+    }
+    
     const user = this.users[username];
     
     if (!user) {
       log.warn(`User not found with username: ${username}`);
       throw new NotFoundError('User', username);
     }
+    
+    // Update cache
+    this.setCacheEntry(this.userByUsernameCache, username, user);
+    log.debug(`Updated cache for user: ${username}`);
     
     log.debug(`Successfully retrieved user: ${username}`);
     return user;
@@ -243,6 +383,25 @@ export class UserService {
     sessionStorage.setItem('walletAddress', address);
     localStorage.setItem('walletAddress', address);
     
+    // Check cache first
+    const cachedEntry = this.userByWalletCache.get(address);
+    if (this.isCacheValid(cachedEntry)) {
+      log.info(`Returning user profile from cache for wallet: ${maskedAddress}`);
+      this.currentUser = cachedEntry.data;
+      
+      if (this.currentUser) {
+        log.debug(`Cached profile found for wallet: ${maskedAddress}, username: ${this.currentUser.username}`);
+        
+        // Notify listeners
+        log.debug('Emitting USER_PROFILE_UPDATED event');
+        eventBus.emit(EventTypes.USER_PROFILE_UPDATED, this.currentUser);
+      } else {
+        log.debug(`Cached null profile for wallet: ${maskedAddress}`);
+      }
+      
+      return this.currentUser;
+    }
+    
     // Fetch user profile
     const endpoint = `${getApiBaseUrl()}/api/wallet/${address}`;
     log.debug(`Fetching user profile from endpoint: ${endpoint}`);
@@ -259,6 +418,11 @@ export class UserService {
       if (!response.ok) {
         if (response.status === 404) {
           log.info(`No user profile found for wallet: ${maskedAddress}`);
+          
+          // Cache the null result
+          this.setCacheEntry(this.userByWalletCache, address, null);
+          log.debug(`Cached null result for wallet: ${maskedAddress}`);
+          
           return null;
         }
         
@@ -304,6 +468,24 @@ export class UserService {
           walletAddress: address
         };
         
+        // Update cache
+        this.setCacheEntry(this.userByWalletCache, address, this.currentUser);
+        log.debug(`Updated cache for wallet: ${maskedAddress}`);
+        
+        // Also cache by username
+        this.setCacheEntry(this.userByUsernameCache, this.currentUser.username, {
+          user_name: this.currentUser.username,
+          first_name: this.currentUser.firstName,
+          last_name: this.currentUser.lastName,
+          coat_of_arms_image: this.currentUser.coatOfArmsImage,
+          family_motto: this.currentUser.familyMotto,
+          family_coat_of_arms: this.currentUser.familyCoatOfArms,
+          compute_amount: this.currentUser.computeAmount,
+          color: this.currentUser.color,
+          wallet_address: address
+        });
+        log.debug(`Also cached user by username: ${this.currentUser.username}`);
+        
         // Store in localStorage
         log.debug('Storing user profile in local storage');
         localStorage.setItem('userProfile', JSON.stringify(this.currentUser));
@@ -319,6 +501,11 @@ export class UserService {
       }
       
       log.info(`No username found for wallet: ${maskedAddress}`);
+      
+      // Cache the null result
+      this.setCacheEntry(this.userByWalletCache, address, null);
+      log.debug(`Cached null result for wallet: ${maskedAddress}`);
+      
       return null;
     } catch (error) {
       if (error instanceof ApiError) {
@@ -346,10 +533,18 @@ export class UserService {
         `${this.walletAddress.substring(0, 6)}...${this.walletAddress.substring(this.walletAddress.length - 4)}` : 
         'none';
       log.debug(`Disconnecting wallet: ${maskedAddress}`);
+      
+      // Remove from wallet cache
+      this.userByWalletCache.delete(this.walletAddress);
+      log.debug(`Removed wallet from cache: ${maskedAddress}`);
     }
     
     if (this.currentUser) {
       log.debug(`Clearing user profile for: ${this.currentUser.username}`);
+      
+      // Remove from username cache
+      this.userByUsernameCache.delete(this.currentUser.username);
+      log.debug(`Removed username from cache: ${this.currentUser.username}`);
     }
     
     this.walletAddress = null;
@@ -479,6 +674,27 @@ export class UserService {
         previousComputeAmount,
         newComputeAmount: this.currentUser.computeAmount
       });
+      
+      // Update caches
+      if (this.currentUser.username) {
+        // Update username cache with API format
+        this.setCacheEntry(this.userByUsernameCache, this.currentUser.username, {
+          user_name: this.currentUser.username,
+          first_name: this.currentUser.firstName,
+          last_name: this.currentUser.lastName,
+          coat_of_arms_image: this.currentUser.coatOfArmsImage,
+          family_motto: this.currentUser.familyMotto,
+          family_coat_of_arms: this.currentUser.familyCoatOfArms,
+          compute_amount: this.currentUser.computeAmount,
+          color: this.currentUser.color,
+          wallet_address: this.walletAddress
+        });
+        log.debug(`Updated username cache for: ${this.currentUser.username}`);
+      }
+      
+      // Update wallet cache
+      this.setCacheEntry(this.userByWalletCache, this.walletAddress, this.currentUser);
+      log.debug(`Updated wallet cache for: ${maskedAddress}`);
       
       // Store in localStorage
       log.debug('Storing updated profile in local storage');
