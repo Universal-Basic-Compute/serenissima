@@ -228,7 +228,7 @@ export default class Water {
     this.waterMesh = new THREE.Mesh(this.waterGeometry, this.waterMaterial);
     
     // FORCE VISIBILITY: Position water much higher to ensure it's visible
-    this.waterMesh.position.y = 0.5; // Dramatically increased from -0.05 to 0.5
+    this.waterMesh.position.y = 1.0; // Dramatically increased from 0.5 to 1.0
     
     // Rotate the water plane to be horizontal
     this.waterMesh.rotation.x = -Math.PI / 2;

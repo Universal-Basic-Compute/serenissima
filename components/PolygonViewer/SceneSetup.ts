@@ -45,7 +45,7 @@ export default class SceneSetup {
     );
     
     // Position camera to better view the water
-    this.camera.position.set(0, 25, 45); // Higher and further back for better water visibility
+    this.camera.position.set(0, 30, 60); // Higher and further back for better water visibility
     this.camera.lookAt(0, 0, 0);
     
     // Initialize renderer with simpler settings to prevent white screen
@@ -133,9 +133,19 @@ export default class SceneSetup {
     testCube.position.set(0, 5, 0);
     testCube.userData.isTestCube = true;
     this.scene.add(testCube);
-    
+  
     // Force an initial render
     this.renderer.render(this.scene, this.camera);
+  
+    // Remove test cube after 3 seconds
+    setTimeout(() => {
+      if (testCube && testCube.parent) {
+        this.scene.remove(testCube);
+        testGeometry.dispose();
+        testMaterial.dispose();
+        console.log('Test cube removed after successful rendering');
+      }
+    }, 3000);
     
     // Limit vertical rotation to prevent going under the map
     this.controls.minPolarAngle = 0;
@@ -272,18 +282,18 @@ export default class SceneSetup {
   
   // Add method to create water
   public createWater() {
-    console.log('FORCE CREATING advanced water system...');
+    console.log('Creating advanced water system...');
     
     // Remove any existing water first to prevent conflicts
     this.scene.traverse(object => {
       if (object.userData && object.userData.isWaterMesh) {
-        console.log('FORCE REMOVING existing water mesh');
+        console.log('Removing existing water mesh');
         this.scene.remove(object);
       }
     });
     
     if (this.water) {
-      console.log('FORCE CLEANING UP existing water instance');
+      console.log('Cleaning up existing water instance');
       this.water.cleanup();
     }
     
@@ -292,8 +302,8 @@ export default class SceneSetup {
       scene: this.scene,
       activeView: this.activeView,
       performanceMode: this.performanceMode,
-      width: 5000, // DRAMATICALLY increased coverage
-      height: 5000  // DRAMATICALLY increased coverage
+      width: 5000, // Dramatically increased coverage
+      height: 5000  // Dramatically increased coverage
     });
     
     // If we have land positions, set them for water interaction
@@ -312,25 +322,32 @@ export default class SceneSetup {
       this.water.setLandPositions(defaultPositions);
     }
     
-    // FORCE VISIBILITY: Immediately update water multiple times
-    for (let i = 0; i < 10; i++) {
-      if (this.water) this.water.update(i * 10);
-    }
-    
-    // FORCE VISIBILITY: Create many random waves immediately
-    setTimeout(() => {
-      if (this.water && typeof (this.water as any).createRandomWave === 'function') {
-        for (let i = 0; i < 20; i++) {
+    // Force multiple initial updates to ensure water is properly initialized
+    if (this.water) {
+      // Initial update
+      this.water.update(0);
+      
+      // Create some initial waves for immediate visual effect
+      if (typeof (this.water as any).createRandomWave === 'function') {
+        for (let i = 0; i < 10; i++) {
           (this.water as any).createRandomWave();
         }
       }
-    }, 100);
+      
+      // Schedule additional updates with delays to ensure proper initialization
+      const updateTimes = [10, 20, 30, 40, 50];
+      updateTimes.forEach((time, index) => {
+        setTimeout(() => {
+          if (this.water) this.water.update(time);
+        }, 100 + index * 100);
+      });
+    }
     
-    // FORCE VISIBILITY: Check again after a delay to ensure water is still there
+    // Make sure the water is visible in the scene
     setTimeout(() => {
       this.scene.traverse(object => {
         if (object.userData && object.userData.isWaterMesh) {
-          console.log('FORCE UPDATE: Ensuring water mesh is still visible');
+          console.log('Ensuring water mesh is visible');
           object.visible = true;
           object.renderOrder = 1000;
         }
