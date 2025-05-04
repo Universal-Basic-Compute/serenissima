@@ -1,10 +1,7 @@
 import * as THREE from 'three';
-// Use dynamic imports with type assertions
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
-import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { ViewMode } from './types';
 import CloudSystem from './CloudSystem';
+import { ThreeJSFacade } from '../../lib/threejs/ThreeJSFacade';
 
 interface SceneSetupProps {
   canvas: HTMLCanvasElement;
@@ -16,107 +13,37 @@ export default class SceneSetup {
   public scene: THREE.Scene;
   public camera: THREE.PerspectiveCamera;
   public renderer: THREE.WebGLRenderer;
-  public controls: OrbitControls;
-  public composer: EffectComposer;
+  public controls: any;
+  public composer: any;
+  private threejs: ThreeJSFacade;
   private performanceMode: boolean;
   private sunLight: THREE.DirectionalLight = new THREE.DirectionalLight();
   private sunSphere: THREE.Mesh = new THREE.Mesh();
   private sunGlow: THREE.Mesh = new THREE.Mesh();
   private cloudSystem: CloudSystem | null = null;
-  private zoomThreshold: number = 40; // Changed from 70 to 40 - Threshold for showing clouds
+  private zoomThreshold: number = 40; // Threshold for showing clouds
   private activeView: ViewMode;
   
   constructor({ canvas, activeView, highQuality }: SceneSetupProps) {
     this.performanceMode = !highQuality;
     this.activeView = activeView;
     
-    // Initialize scene with a neutral background
-    this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color('#87CEEB'); // Light sky blue background
+    // Initialize ThreeJS facade
+    this.threejs = new ThreeJSFacade(canvas);
     
-    // Create a camera with a better initial position
-    this.camera = new THREE.PerspectiveCamera(
-      60,
-      window.innerWidth / window.innerHeight, 
-      0.1, 
-      1000
-    );
-    
-    // Position camera to view the scene
-    this.camera.position.set(0, 30, 60); // Higher and further back for better scene visibility
-    this.camera.lookAt(0, 0, 0);
-    
-    // Initialize renderer with simpler settings
-    this.renderer = new THREE.WebGLRenderer({ 
-      canvas,
-      antialias: true, // Enable antialiasing for smoother edges
-      powerPreference: 'default',
-      precision: 'mediump', // Use medium precision for better performance
-      logarithmicDepthBuffer: false, // Disable logarithmic depth buffer for better performance
-      alpha: true
-    });
-    
-    // Use simpler renderer settings
-    this.renderer.setClearColor(0x87CEEB, 1); // Set clear color with full opacity (light sky blue)
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
-    this.renderer.setPixelRatio(window.devicePixelRatio); // Use device pixel ratio for better quality
-    this.renderer.shadowMap.enabled = false;
-    
-    // Set up a simple EffectComposer
-    this.composer = new EffectComposer(this.renderer);
-    const renderPass = new RenderPass(this.scene, this.camera);
-    this.composer.addPass(renderPass);
-    
-    // Set up OrbitControls with minimal configuration
-    this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-    this.controls.enableDamping = false;
-    this.controls.enableZoom = true;
-    this.controls.enablePan = true;
-    this.controls.enableRotate = true;
-    
-    // Add a simple ambient light immediately
-    const ambientLight = new THREE.AmbientLight(0xffffff, 1);
-    this.scene.add(ambientLight);
-    
-    // Force an initial render
-    this.renderer.render(this.scene, this.camera);
-    
-    // Limit vertical rotation to prevent going under the map
-    this.controls.minPolarAngle = 0;
-    this.controls.maxPolarAngle = Math.PI / 3; // Limit to 60 degrees from vertical
-    
-    // Basic limits
-    this.controls.minDistance = 1.76; // Decreased by 50% to allow zooming twice as close (3.52 * 0.5 = 1.76)
-    this.controls.maxDistance = 50.63; // Decreased by another 25% to limit zooming out (67.5 * 0.75 = 50.63)
-    
-    // Enable panning with right mouse button and rotation with middle mouse button
-    this.controls.mouseButtons = {
-      LEFT: (THREE.MOUSE as any).NONE, // No action on left click
-      MIDDLE: THREE.MOUSE.ROTATE, // Rotation on middle mouse button
-      RIGHT: THREE.MOUSE.PAN // Panning on right mouse button
-    };
-    
-    // Set panning behavior
-    // Using screenSpacePanning=false makes right-click pan only in the XZ plane (horizontal)
-    // without changing Y (elevation), which is more intuitive for a map view
-    this.controls.screenSpacePanning = false;
-    
-    // Set initial target to center of scene
-    this.controls.target.set(0, 0, 0);
-    
-    // Call the update method during initialization
-    this.controls.update();
+    // Get references to THREE.js objects
+    this.scene = this.threejs.getScene();
+    this.camera = this.threejs.getCamera();
+    this.renderer = this.threejs.getRenderer();
+    this.controls = this.threejs.getControls();
+    this.composer = null; // We'll use the one in the facade
     
     // Add lights with a slight delay to improve initial loading
     setTimeout(() => this.setupLights(activeView), 100);
     
-    
-    // Add window resize handler
-    window.addEventListener('resize', this.handleResize);
-    
+    // Create cloud system with a delay
     setTimeout(() => {
       console.log('Creating cloud system...');
-      // Create cloud system with a delay to prioritize initial scene loading
       this.cloudSystem = new CloudSystem({
         scene: this.scene,
         width: 300, // Increased width for wider cloud coverage
@@ -139,19 +66,18 @@ export default class SceneSetup {
           }
         }, 500);
       }
-    }, 2000); // Reduced from 3000 to 2000 ms
+    }, 2000);
+    
+    // Add animation callback for updates
+    this.threejs.addAnimationCallback(this.update.bind(this));
   }
   
   private setupLights(activeView: ViewMode) {
-    // Add ambient light for general illumination
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-    this.scene.add(ambientLight);
-    
     // Create the sun directional light
     this.sunLight = new THREE.DirectionalLight(0xffffeb, 1.2);
     this.sunLight.position.copy(this.calculateSunPosition());
     this.sunLight.castShadow = false; // Keep shadows disabled for performance
-    this.scene.add(this.sunLight);
+    this.threejs.addObject(this.sunLight);
     
     // Create a sun sphere
     const sunGeometry = new THREE.SphereGeometry(5, 16, 16);
@@ -161,7 +87,7 @@ export default class SceneSetup {
     // Position the sun far away in the sky
     const sunPosition = this.calculateSunPosition();
     this.sunSphere.position.copy(sunPosition);
-    this.scene.add(this.sunSphere);
+    this.threejs.addObject(this.sunSphere);
     
     // Create a glow effect around the sun
     const sunGlowGeometry = new THREE.SphereGeometry(8, 16, 16);
@@ -173,13 +99,13 @@ export default class SceneSetup {
     });
     this.sunGlow = new THREE.Mesh(sunGlowGeometry, sunGlowMaterial);
     this.sunGlow.position.copy(sunPosition);
-    this.scene.add(this.sunGlow);
+    this.threejs.addObject(this.sunGlow);
     
     // Start sun animation
     this.animateSun();
     
     // Lower the zoom threshold to make clouds visible sooner
-    this.zoomThreshold = 20; // Changed from 40 to 20
+    this.zoomThreshold = 20;
   }
   
   private animateSun() {
@@ -323,31 +249,7 @@ export default class SceneSetup {
   }
   
   
-  private handleResize = () => {
-    // Get actual window dimensions
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-    
-    // Update camera aspect ratio
-    this.camera.aspect = width / height;
-    this.camera.updateProjectionMatrix();
-    
-    // Update renderer size
-    this.renderer.setSize(width, height);
-    
-    // Update composer size
-    this.composer.setSize(width, height);
-    
-    // Force a render to apply changes immediately
-    if (this.composer) {
-      this.composer.render();
-    } else if (this.renderer) {
-      this.renderer.render(this.scene, this.camera);
-    }
-    
-    // Log resize for debugging
-    console.log(`Resized renderer to ${width}x${height}`);
-  };
+  // We don't need the handleResize method anymore as it's handled by the facade
   
   public updateControlsState(isInteractingWithPolygon: boolean) {
     if (isInteractingWithPolygon) {
@@ -432,55 +334,29 @@ export default class SceneSetup {
   }
   
   public cleanup() {
-    // Remove event listeners
-    window.removeEventListener('resize', this.handleResize);
-    
-    // Dispose of controls
-    if (this.controls) {
-      this.controls.dispose();
-    }
-    
-    // Remove test cube if it exists
-    this.scene.traverse(object => {
-      if (object.userData && object.userData.isTestCube) {
-        this.scene.remove(object);
-        if ((object as THREE.Mesh).geometry) {
-          (object as THREE.Mesh).geometry.dispose();
-        }
-        if ((object as THREE.Mesh).material) {
-          ((object as THREE.Mesh).material as THREE.Material).dispose();
-        }
-      }
-    });
-    
-    // Dispose of Three.js resources - add null checks
-    if (this.sunSphere) {
-      this.scene.remove(this.sunSphere);
-      if (this.sunSphere.geometry) {
-        this.sunSphere.geometry.dispose();
-      }
-      if (this.sunSphere.material) {
-        (this.sunSphere.material as THREE.Material).dispose();
-      }
-    }
-    
-    if (this.sunGlow) {
-      this.scene.remove(this.sunGlow);
-      if (this.sunGlow.geometry) {
-        this.sunGlow.geometry.dispose();
-      }
-      if (this.sunGlow.material) {
-        (this.sunGlow.material as THREE.Material).dispose();
-      }
-    }
-    
-    if (this.sunLight) {
-      this.scene.remove(this.sunLight);
-    }
-    
+    // Clean up cloud system
     if (this.cloudSystem) {
       this.cloudSystem.cleanup();
       this.cloudSystem = null;
     }
+    
+    // Dispose of ThreeJS facade - this will handle all THREE.js resource cleanup
+    this.threejs.dispose();
   }
 }
+  // Update method called by animation callback
+  private update(time: number): void {
+    // Update clouds
+    this.updateClouds(Math.floor(time));
+    
+    // Update sun position occasionally
+    if (Math.floor(time) % 100 === 0) {
+      const newPosition = this.calculateSunPosition();
+      this.sunSphere.position.copy(newPosition);
+      this.sunGlow.position.copy(newPosition);
+      this.sunLight.position.copy(newPosition);
+    }
+    
+    // Ensure roads and polygons are always visible
+    this.ensureRoadsVisible();
+  }
