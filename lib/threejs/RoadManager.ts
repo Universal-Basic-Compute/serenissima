@@ -1373,7 +1373,7 @@ export class RoadManager {
       this.scene = null;
     }
   }
-}
+
   /**
    * Helper method to dispose of all textures on a material
    * @param material The material to clean up
@@ -1417,3 +1417,4 @@ export class RoadManager {
       log.warn('Error disposing textures from material:', error);
     }
   }
+}
