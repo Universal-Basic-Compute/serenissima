@@ -495,6 +495,9 @@ export default class PolygonRenderer {
       this.updatePolygonOwnerColors();
     }
     
+    // Ensure all polygons remain visible after view mode change
+    setTimeout(() => this.ensurePolygonsVisible(), 100);
+    
     console.log(`View mode updated to ${activeView}, coat of arms sprites updated`);
   }
   
