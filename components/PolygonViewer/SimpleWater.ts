@@ -1,3 +1,10 @@
+/**
+ * TODO: Refactor according to architecture
+ * - Move to lib/threejs directory as part of the rendering layer
+ * - Implement facade pattern to hide Three.js complexity
+ * - Add performance optimizations for different quality levels
+ * - Improve resource management in cleanup method
+ */
 import * as THREE from 'three';
 import { Water } from 'three/examples/jsm/objects/Water.js';
 

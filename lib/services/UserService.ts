@@ -1,3 +1,10 @@
+/**
+ * TODO: Refactor according to architecture
+ * - Implement proper error handling with typed errors
+ * - Add comprehensive logging
+ * - Implement caching strategy for user data
+ * - Add unit tests for service methods
+ */
 import { getApiBaseUrl } from '../apiUtils';
 import { eventBus, EventTypes } from '../eventBus';
 

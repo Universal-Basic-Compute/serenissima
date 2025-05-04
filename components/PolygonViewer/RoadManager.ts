@@ -1,3 +1,11 @@
+/**
+ * TODO: Refactor according to architecture
+ * - Move to lib/threejs directory as part of the rendering layer
+ * - Move data persistence to service layer
+ * - Implement proper error handling
+ * - Add geometry sharing for better performance
+ * - Improve resource management in cleanup method
+ */
 import * as THREE from 'three';
 
 interface Road {

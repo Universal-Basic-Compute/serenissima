@@ -1,3 +1,11 @@
+/**
+ * TODO: Refactor according to architecture
+ * - Move to lib/threejs directory as part of the rendering layer
+ * - Implement facade pattern to hide Three.js complexity
+ * - Separate rendering logic from data management
+ * - Improve performance with object pooling and LOD
+ * - Add better error handling with graceful degradation
+ */
 import * as THREE from 'three';
 import { MutableRefObject } from 'react';
 import { Polygon, ViewMode } from './types';

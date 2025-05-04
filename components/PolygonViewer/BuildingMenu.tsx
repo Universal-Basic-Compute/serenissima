@@ -1,3 +1,10 @@
+/**
+ * TODO: Refactor according to architecture
+ * - Move building data fetching to a BuildingService in the service layer
+ * - Use state management for building data instead of component state
+ * - Implement error boundaries for better error handling
+ * - Separate presentation from data fetching logic
+ */
 import React, { useState, useEffect, useCallback } from 'react';
 import { Tab } from '@headlessui/react';
 import { getApiBaseUrl } from '@/lib/apiUtils';

@@ -1,3 +1,11 @@
+/**
+ * TODO: Refactor according to architecture
+ * - Separate UI from road creation logic
+ * - Move Three.js specific code to rendering layer
+ * - Use service layer for road data persistence
+ * - Implement proper error handling
+ * - Add performance optimizations
+ */
 import React, { useState, useEffect, useRef } from 'react';
 import * as THREE from 'three';
 

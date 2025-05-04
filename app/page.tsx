@@ -1,3 +1,11 @@
+/**
+ * TODO: Refactor according to architecture
+ * - Separate UI from business logic
+ * - Move wallet and user management to service layer
+ * - Use state management for application state
+ * - Implement proper error boundaries
+ * - Break down into smaller, focused components
+ */
 'use client';
 
 import { useEffect, useRef, useState, useCallback } from 'react';

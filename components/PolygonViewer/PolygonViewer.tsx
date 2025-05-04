@@ -1,3 +1,11 @@
+/**
+ * TODO: Refactor according to architecture
+ * - Separate rendering concerns from component logic
+ * - Move data fetching to service layer
+ * - Implement proper state management using Zustand
+ * - Add error boundaries for better error handling
+ * - Reduce component complexity by breaking into smaller components
+ */
 'use client';
 
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react';

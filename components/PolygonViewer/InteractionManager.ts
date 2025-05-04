@@ -1,3 +1,11 @@
+/**
+ * TODO: Refactor according to architecture
+ * - Move to lib/threejs directory as part of the rendering layer
+ * - Implement facade pattern to hide Three.js complexity
+ * - Use event bus consistently for all interactions
+ * - Add throttling for better performance
+ * - Improve error handling
+ */
 import * as THREE from 'three';
 import { MutableRefObject } from 'react';
 import { ViewMode } from './types';
