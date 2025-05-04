@@ -423,7 +423,7 @@ export class PolygonMeshFacade implements Poolable {
     
     this.originalColor = null;
   }
-}
+
   /**
    * Update existing mesh with new polygon data
    */
@@ -569,3 +569,4 @@ export class PolygonMeshFacade implements Poolable {
     
     return simplifiedGeometry;
   }
+}
