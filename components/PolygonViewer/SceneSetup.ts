@@ -46,105 +46,40 @@ export default class SceneSetup {
     this.camera.position.set(0, 30, 60); // Higher and further back for better scene visibility
     this.camera.lookAt(0, 0, 0);
     
-    // Initialize renderer with settings to ensure visibility
+    // Initialize renderer with simpler settings
     this.renderer = new THREE.WebGLRenderer({ 
       canvas,
-      antialias: true, // Enable antialiasing for better quality
+      antialias: false, // Disable antialiasing for better performance
       powerPreference: 'default',
-      precision: 'highp', // Use high precision for better rendering
-      logarithmicDepthBuffer: true, // Enable logarithmic depth buffer for better depth handling
+      precision: 'mediump', // Use medium precision for better performance
+      logarithmicDepthBuffer: false, // Disable logarithmic depth buffer for better performance
       alpha: true
     });
     
-    // Use renderer settings that ensure visibility
+    // Use simpler renderer settings
     this.renderer.setClearColor(0x87CEEB, 1); // Set clear color with full opacity (light sky blue)
     this.renderer.setSize(window.innerWidth, window.innerHeight);
-    this.renderer.setPixelRatio(window.devicePixelRatio || 1); // Use device pixel ratio for better quality
+    this.renderer.setPixelRatio(1); // Use standard pixel ratio for better performance
     this.renderer.shadowMap.enabled = false;
-    this.renderer.sortObjects = true; // Activate object sorting by the renderer
-    this.renderer.outputEncoding = THREE.sRGBEncoding; // Use sRGB encoding for better color accuracy
     
-    // Set up a simple EffectComposer initially
+    // Set up a simple EffectComposer
     this.composer = new EffectComposer(this.renderer);
     const renderPass = new RenderPass(this.scene, this.camera);
     this.composer.addPass(renderPass);
     
-    // Enhance renderer after initial load
-    setTimeout(() => {
-      console.log('Enhancing renderer quality...');
-      // No fog for cleaner visuals
-      
-      // Enhance renderer settings based on performance mode
-      if (!this.performanceMode) {
-        (this.renderer as any).antialias = true;
-        this.renderer.setPixelRatio(window.devicePixelRatio > 1 ? 2 : 1);
-        this.renderer.shadowMap.enabled = false; // Keep shadows disabled even in high quality mode
-        this.renderer.shadowMap.autoUpdate = false; // Explicitly disable shadow map updates
-        this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        this.renderer.toneMappingExposure = 1.2;
-      } else {
-        // Keep minimal settings in performance mode
-        this.renderer.setPixelRatio(1);
-        this.renderer.shadowMap.enabled = false;
-        this.renderer.shadowMap.autoUpdate = false; // Explicitly disable shadow map updates
-        this.renderer.toneMapping = THREE.NoToneMapping;
-      }
-    }, 2000); // Delay enhancement by 2 seconds
-    
     // Set up OrbitControls with minimal configuration
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-
-    // Add camera movement detection
-    this.camera.userData.isMoving = false;
-    this.controls.addEventListener('start', () => {
-      this.camera.userData.isMoving = true;
-    });
-    this.controls.addEventListener('end', () => {
-      this.camera.userData.isMoving = false;
-    });
-
-    // Disable all automatic behaviors
-    this.controls.autoRotate = false;
     this.controls.enableDamping = false;
-    
-    // Prevent automatic camera resets
-    this.controls.saveState = function() {}; // Override with empty function
-    this.controls.reset = function() {}; // Override with empty function
-
-    // Make controls very simple
-    this.controls.rotateSpeed = 0.5;
-    this.controls.zoomSpeed = 0.5;
-    this.controls.panSpeed = 1.5; // Increased from 0.5 to 1.5 for more responsive panning
-
-    // Ensure controls are explicitly enabled
+    this.controls.enableZoom = true;
     this.controls.enablePan = true;
     this.controls.enableRotate = true;
-    this.controls.enableZoom = true;
     
     // Add a simple ambient light immediately
     const ambientLight = new THREE.AmbientLight(0xffffff, 1);
     this.scene.add(ambientLight);
     
-    // Add a simple test object to verify rendering
-    const testGeometry = new THREE.BoxGeometry(10, 10, 10);
-    const testMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-    const testCube = new THREE.Mesh(testGeometry, testMaterial);
-    testCube.position.set(0, 5, 0);
-    testCube.userData.isTestCube = true;
-    this.scene.add(testCube);
-  
     // Force an initial render
     this.renderer.render(this.scene, this.camera);
-  
-    // Remove test cube after 3 seconds
-    setTimeout(() => {
-      if (testCube && testCube.parent) {
-        this.scene.remove(testCube);
-        testGeometry.dispose();
-        testMaterial.dispose();
-        console.log('Test cube removed after successful rendering');
-      }
-    }, 3000);
     
     // Limit vertical rotation to prevent going under the map
     this.controls.minPolarAngle = 0;

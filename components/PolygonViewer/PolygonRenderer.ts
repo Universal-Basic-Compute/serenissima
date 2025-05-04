@@ -261,18 +261,13 @@ export default class PolygonRenderer {
   private renderPolygons() {
     console.log(`Rendering ${this.polygons.length} polygons`);
     
-    // Debug: Log the first few polygons to check their data
-    if (this.polygons.length > 0) {
-      console.log('First few polygons:', this.polygons.slice(0, 5));
-    }
-    
-    // Create a texture loader if not already created
-    if (!this.textureLoader) {
-      this.textureLoader = new THREE.TextureLoader();
-    }
-    
-    // Collect land positions for water interaction
-    const landPositions: THREE.Vector3[] = [];
+    // Create a simple material for all polygons
+    const simpleMaterial = new THREE.MeshBasicMaterial({
+      color: 0x3388ff, // Blue color
+      side: THREE.DoubleSide,
+      transparent: true,
+      opacity: 0.8
+    });
     
     // Process each polygon
     this.polygons.forEach(polygon => {
@@ -282,60 +277,66 @@ export default class PolygonRenderer {
       }
       
       try {
-        // Get owner color if available
-        let ownerColor = null;
-        if (polygon.owner) {
-          if (this.ownerColorMap[polygon.owner]) {
-            ownerColor = this.ownerColorMap[polygon.owner];
-          } else if (this.users[polygon.owner] && this.users[polygon.owner].color) {
-            ownerColor = this.users[polygon.owner].color;
-            // Store for future use
-            this.ownerColorMap[polygon.owner] = ownerColor;
-          } else if (polygon.owner === 'ConsiglioDeiDieci') {
-            // Special case for ConsiglioDeiDieci
-            ownerColor = '#8B0000'; // Dark red
-            this.ownerColorMap[polygon.owner] = ownerColor;
-          }
+        if (!polygon.coordinates || polygon.coordinates.length < 3) {
+          console.warn(`Invalid polygon coordinates for ${polygon.id}`);
+          return;
         }
         
-        // Get coat of arms URL if available
-        let ownerCoatOfArmsUrl = null;
-        if (polygon.owner && this.ownerCoatOfArmsMap[polygon.owner]) {
-          ownerCoatOfArmsUrl = this.ownerCoatOfArmsMap[polygon.owner];
-        }
-        
-        // IMPORTANT: Create polygon mesh - ensure this is not disabled
-        const polygonMesh = new PolygonMesh(
-          this.scene,
-          polygon,
-          this.bounds,
-          this.activeView,
-          this.performanceMode,
-          this.textureLoader,
-          ownerColor,
-          ownerCoatOfArmsUrl,
-          this.polygonMeshesRef
+        // Normalize coordinates
+        const normalizedCoords = normalizeCoordinates(
+          polygon.coordinates,
+          this.bounds.centerLat,
+          this.bounds.centerLng,
+          this.bounds.scale,
+          this.bounds.latCorrectionFactor
         );
         
-        // Store reference to the mesh
-        this.PolygonMeshs.push(polygonMesh);
+        // Create a simple shape
+        const shape = createPolygonShape(normalizedCoords);
+        
+        // Create geometry from shape
+        const geometry = new THREE.ShapeGeometry(shape);
+        
+        // Create mesh with simple material
+        const mesh = new THREE.Mesh(geometry, simpleMaterial.clone());
+        
+        // Ensure mesh is flat on the ground
+        mesh.rotation.x = -Math.PI / 2;
+        mesh.position.y = 0.1; // Slightly above ground
+        
+        // Add to scene
+        this.scene.add(mesh);
+        
+        // Store reference
+        this.polygonMeshesRef.current[polygon.id] = mesh;
         
         // Mark as created
         this.createdPolygonIds.add(polygon.id);
         
-        // Add land position for water interaction
-        if (polygon.centroid) {
-          // Convert centroid to 3D position
-          const normalizedCoord = normalizeCoordinates(
-            [polygon.centroid],
-            this.bounds.centerLat,
-            this.bounds.centerLng,
-            this.bounds.scale,
-            this.bounds.latCorrectionFactor
-          )[0];
-          
-          landPositions.push(new THREE.Vector3(normalizedCoord.x, 0, normalizedCoord.y));
-        }
+        // Create a simple PolygonMesh wrapper
+        const polygonMesh = {
+          getMesh: () => mesh,
+          updateViewMode: () => {},
+          updateSelectionState: () => {},
+          updateHoverState: () => {},
+          updateQuality: () => {},
+          updateOwner: () => {},
+          updateCoatOfArmsTexture: () => {},
+          cleanup: () => {
+            this.scene.remove(mesh);
+            geometry.dispose();
+            if (mesh.material) {
+              if (Array.isArray(mesh.material)) {
+                mesh.material.forEach(m => m.dispose());
+              } else {
+                mesh.material.dispose();
+              }
+            }
+          }
+        };
+        
+        // Store reference to the mesh
+        this.PolygonMeshs.push(polygonMesh as any);
         
       } catch (error) {
         console.error(`Error rendering polygon ${polygon.id}:`, error);
@@ -343,10 +344,6 @@ export default class PolygonRenderer {
     });
     
     console.log(`Created ${this.PolygonMeshs.length} polygon meshes`);
-    
-    // Store land positions in scene for water interaction
-    this.scene.userData.landPositions = landPositions;
-    console.log(`Collected ${landPositions.length} land positions for water interaction`);
   }
   
   private createSamplePolygon() {
