@@ -181,15 +181,47 @@ Proper memory management is critical for 3D applications. The architecture inclu
 
 ## Error Handling
 
-The rendering architecture includes robust error handling:
+The rendering architecture includes robust error handling with multiple layers of protection:
 
-1. **Graceful Degradation**: Fall back to simpler rendering when errors occur
-2. **Error Recovery**: Attempt to recover from rendering errors
-3. **Error Logging**: Log rendering errors for debugging
-4. **User Feedback**: Provide feedback to users when rendering fails
-5. **Fallback Modes**: Implement progressive fallback modes for critical components
+1. **Graceful Degradation**: Falls back to simpler rendering when errors occur
+   - Progressive fallback modes from detailed to simplified representations
+   - Automatic switching to wireframe mode when textures fail
+   - Fallback to colored boxes when geometry creation fails
+
+2. **Error Recovery**: Actively attempts to recover from rendering errors
+   - Scheduled recovery attempts for failed polygon rendering
+   - Automatic retry of texture loading with simplified formats
+   - Memory leak prevention during error states
+
+3. **Error Logging**: Comprehensive logging of rendering errors
+   - Categorized error types for better diagnostics
+   - Context-aware error messages with entity IDs
+   - Error rate tracking to detect systemic issues
+
+4. **User Feedback**: Provides appropriate feedback when rendering fails
+   - Visual indicators for fallback rendering modes
+   - Console warnings for developers
+   - Performance metrics to identify bottlenecks
+
+5. **Fallback Modes**: Implements progressive fallback modes for critical components
+   - Simplified map representation when critical rendering fails
+   - Minimal wireframe representation as last resort
+   - Placeholder textures during loading
+
 6. **Self-Healing**: Components attempt to recover from errors automatically
+   - Periodic recovery attempts for failed entities
+   - Automatic texture regeneration when loading fails
+   - Resource cleanup to prevent memory leaks
+
 7. **Isolation**: Errors in one component don't crash the entire application
+   - Error boundaries around critical rendering components
+   - Independent polygon rendering with failure isolation
+   - Shared resource management with redundancy
+
+8. **Error Handling Utilities**: Reusable error handling patterns
+   - `withErrorHandling` wrapper for consistent error handling
+   - `RenderingErrorHandler` singleton for centralized error management
+   - Fallback geometry and material generators
 
 ## Road Creation System
 
