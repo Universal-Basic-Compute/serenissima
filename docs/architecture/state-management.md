@@ -48,6 +48,14 @@ interface BuildingState {
   error: string | null;
 }
 
+interface RoadState {
+  roads: RoadData[];
+  selectedRoadId: string | null;
+  editMode: boolean;
+  loading: boolean;
+  error: string | null;
+}
+
 interface TransactionState {
   transactions: Transaction[];
   loading: boolean;
@@ -136,6 +144,32 @@ export const useBuildingStore = create<BuildingState & BuildingActions>((set, ge
   
   setSelectedBuilding: (building) => set({ selectedBuilding: building }),
   setSelectedVariant: (variant) => set({ selectedVariant: variant }),
+  // ...other actions
+}));
+
+// Road store
+export const useRoadStore = create<RoadState & RoadActions>((set, get) => ({
+  roads: [],
+  selectedRoadId: null,
+  editMode: false,
+  loading: false,
+  error: null,
+  
+  loadRoads: async () => {
+    set({ loading: true, error: null });
+    try {
+      const roadService = RoadService.getInstance();
+      const roads = await roadService.loadRoadsFromServer();
+      set({ roads, loading: false });
+      return roads;
+    } catch (error) {
+      set({ error: error.message, loading: false });
+      throw error;
+    }
+  },
+  
+  setSelectedRoadId: (id) => set({ selectedRoadId: id }),
+  setEditMode: (editMode) => set({ editMode }),
   // ...other actions
 }));
 

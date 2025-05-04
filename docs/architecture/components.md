@@ -41,6 +41,7 @@ App
 - Implement specific application features
 - Manage feature-specific state
 - Communicate with services and state management
+- Delegate data persistence to service layer
 
 ### UI Components
 

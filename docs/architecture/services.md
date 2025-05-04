@@ -123,6 +123,14 @@ export class RoadService {
 }
 ```
 
+The RoadService follows the singleton pattern and provides methods for:
+
+1. **Data Persistence**: Saving and loading roads from local storage
+2. **Data Retrieval**: Getting all roads or specific roads by ID
+3. **Data Manipulation**: Creating, updating, and deleting roads
+4. **Data Conversion**: Converting between THREE.Vector3 and plain objects
+5. **Server Synchronization**: Saving roads to and loading roads from the server
+
 ## Service Registration and Discovery
 
 Services are registered and discovered through a simple service locator pattern:

@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { RoadService, RoadData } from '../services/RoadService';
 
 /**
  * Interface for road data structure
@@ -23,6 +24,7 @@ export class RoadManager {
   private roadRoughnessMap: THREE.Texture | null = null;
   private roadGeometryCache: Map<string, THREE.BufferGeometry> | null = null;
   private isDisposed: boolean = false;
+  private roadService: RoadService;
 
   /**
    * Creates a new RoadManager
@@ -31,6 +33,7 @@ export class RoadManager {
   constructor(scene: THREE.Scene) {
     this.scene = scene;
     this.textureLoader = new THREE.TextureLoader();
+    this.roadService = RoadService.getInstance();
     
     // Load road texture
     this.textureLoader.load(
@@ -92,9 +95,16 @@ export class RoadManager {
    * Creates a new road in the scene
    * @param points Array of 3D points defining the road path
    * @param curvature Road curvature factor (0-1)
+   * @param userId Optional creator user ID
+   * @param landId Optional associated land ID
    * @returns ID of the created road
    */
-  public createRoad(points: THREE.Vector3[], curvature: number = 0.5): string {
+  public createRoad(
+    points: THREE.Vector3[], 
+    curvature: number = 0.5,
+    userId?: string,
+    landId?: string
+  ): string {
     if (this.isDisposed) return '';
     
     if (points.length < 2) {
@@ -114,19 +124,24 @@ export class RoadManager {
       const simplifiedPoints = simplifyPath(points, 0.05);
       console.log(`RoadManager: Simplified path from ${points.length} to ${simplifiedPoints.length} points`);
       
-      // Create a unique ID for the road
-      const id = `road-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+      // Save to service and get ID
+      const roadData = this.roadService.saveRoad(
+        simplifiedPoints.map(p => p.clone()), // Clone points to avoid reference issues
+        curvature,
+        userId,
+        landId
+      );
       
       // Create the road mesh with simplified points
       const mesh = this.createRoadMesh(simplifiedPoints, curvature);
       
       // Add to scene
-      console.log(`RoadManager: Adding road mesh to scene with ID ${id}`);
+      console.log(`RoadManager: Adding road mesh to scene with ID ${roadData.id}`);
       this.scene.add(mesh);
       
       // Store the road
       const road: Road = {
-        id,
+        id: roadData.id,
         points: simplifiedPoints.map(p => p.clone()), // Clone points to avoid reference issues
         mesh,
         curvature
@@ -135,24 +150,29 @@ export class RoadManager {
       this.roads.push(road);
       console.log(`RoadManager: Road created successfully, total roads: ${this.roads.length}`);
       
-      return id;
+      return roadData.id;
     } catch (error) {
       console.warn('Failed to import utils3D for path simplification:', error);
       
       // Fallback to original method
-      // Create a unique ID for the road
-      const id = `road-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+      // Save to service and get ID
+      const roadData = this.roadService.saveRoad(
+        points.map(p => p.clone()), // Clone points to avoid reference issues
+        curvature,
+        userId,
+        landId
+      );
       
       // Create the road mesh
       const mesh = this.createRoadMesh(points, curvature);
       
       // Add to scene
-      console.log(`RoadManager: Adding road mesh to scene with ID ${id}`);
+      console.log(`RoadManager: Adding road mesh to scene with ID ${roadData.id}`);
       this.scene.add(mesh);
       
       // Store the road
       const road: Road = {
-        id,
+        id: roadData.id,
         points: points.map(p => p.clone()), // Clone points to avoid reference issues
         mesh,
         curvature
@@ -161,7 +181,7 @@ export class RoadManager {
       this.roads.push(road);
       console.log(`RoadManager: Road created successfully, total roads: ${this.roads.length}`);
       
-      return id;
+      return roadData.id;
     }
   }
 
@@ -199,6 +219,9 @@ export class RoadManager {
     
     // Remove from array
     this.roads.splice(index, 1);
+    
+    // Remove from service
+    this.roadService.deleteRoad(id);
     
     return true;
   }
@@ -530,6 +553,9 @@ export class RoadManager {
           road.mesh.material.dispose();
         }
       }
+      
+      // Delete from service
+      this.roadService.deleteRoad(road.id);
     });
     
     // Clear the roads array
@@ -576,13 +602,11 @@ export class RoadManager {
   }
 
   /**
-   * Saves a road to Airtable
+   * Saves a road to the server via the service
    * @param roadId ID of the road to save
-   * @param landId ID of the land the road is associated with
-   * @param userId ID of the user who created the road
-   * @returns Promise resolving to the API response
+   * @returns Promise resolving to true if successful
    */
-  public saveRoadToAirtable(roadId: string, landId: string | null, userId: string | null): Promise<any> {
+  public saveRoadToServer(roadId: string): Promise<boolean> {
     if (this.isDisposed) return Promise.reject(new Error('RoadManager is disposed'));
     
     if (!roadId) {
@@ -590,95 +614,52 @@ export class RoadManager {
       return Promise.reject(new Error('Missing road ID'));
     }
     
-    // Find the road by ID
-    const road = this.roads.find(r => r.id === roadId);
-    if (!road) {
-      console.error(`Road with ID ${roadId} not found`);
-      return Promise.reject(new Error(`Road with ID ${roadId} not found`));
-    }
-    
-    // Extract road points for saving
-    const roadPoints = road.points.map(point => ({
-      x: point.x,
-      y: point.y,
-      z: point.z
-    }));
-    
-    // Create road data object
-    const roadData = {
-      id: roadId,
-      type: 'road',
-      land_id: landId,
-      user_id: userId,
-      points: JSON.stringify(roadPoints),
-      curvature: road.curvature,
-      created_at: new Date().toISOString()
-    };
-    
-    // Send to API
-    return fetch('/api/save-road', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(roadData)
-    })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error(`Failed to save road: ${response.status} ${response.statusText}`);
-      }
-      return response.json();
-    })
-    .then(data => {
-      console.log(`Road ${roadId} saved successfully:`, data);
-      return data;
-    })
-    .catch(error => {
-      console.error('Error saving road:', error);
-      throw error;
-    });
+    return this.roadService.saveRoadToServer(roadId);
   }
   
   /**
-   * Loads roads from Airtable
+   * Loads roads from the server via the service
    * @returns Promise that resolves when roads are loaded
    */
-  public loadRoadsFromAirtable(): Promise<void> {
+  public loadRoadsFromServer(): Promise<void> {
     if (this.isDisposed) return Promise.reject(new Error('RoadManager is disposed'));
     
-    return fetch('/api/get-roads')
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(`Failed to load roads: ${response.status} ${response.statusText}`);
-        }
-        return response.json();
-      })
-      .then(data => {
-        if (data.success && Array.isArray(data.roads)) {
-          console.log(`Loading ${data.roads.length} roads from Airtable`);
-          
-          // Clear existing roads first
-          this.removeAllRoads();
-          
-          // Create each road
-          data.roads.forEach(roadData => {
-            try {
-              // Parse the points from the stored string
-              const points = JSON.parse(roadData.points).map(point => 
-                new THREE.Vector3(point.x, point.y, point.z)
-              );
-              
-              // Create the road with the stored curvature
-              const roadId = this.createRoad(points, roadData.curvature || 0.5);
-              console.log(`Loaded road ${roadId} from Airtable`);
-            } catch (error) {
-              console.error(`Error creating road from Airtable data:`, error);
-            }
-          });
-        }
+    return this.roadService.loadRoadsFromServer()
+      .then(roadDataArray => {
+        console.log(`Loading ${roadDataArray.length} roads from server`);
+        
+        // Clear existing roads first
+        this.removeAllRoads();
+        
+        // Create each road
+        roadDataArray.forEach(roadData => {
+          try {
+            // Convert the points to Vector3
+            const points = this.roadService.convertToVector3Points(roadData.points);
+            
+            // Create the road mesh
+            const mesh = this.createRoadMesh(points, roadData.curvature || 0.5);
+            
+            // Add to scene
+            this.scene.add(mesh);
+            
+            // Store the road
+            const road: Road = {
+              id: roadData.id,
+              points,
+              mesh,
+              curvature: roadData.curvature || 0.5
+            };
+            
+            this.roads.push(road);
+            console.log(`Loaded road ${roadData.id} from server`);
+          } catch (error) {
+            console.error(`Error creating road from server data:`, error);
+          }
+        });
       })
       .catch(error => {
-        console.error('Error loading roads from Airtable:', error);
+        console.error('Error loading roads from server:', error);
         throw error;
       });
   }
