@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { ViewMode } from './types';
-import { CloudSystem } from '../../lib/threejs/CloudSystem';
+import { CloudSystem } from '@/lib/threejs/CloudSystem';
 import { ThreeJSFacade } from '../../lib/threejs/ThreeJSFacade';
 
 interface SceneSetupProps {
