@@ -129,6 +129,15 @@ export default class SceneSetup {
         console.log('Initializing clouds and setting visibility');
         this.cloudSystem.update(0);
         this.cloudSystem.setVisibility(true); // Force visibility initially
+        
+        // Add a second update after a short delay to ensure clouds are properly initialized
+        setTimeout(() => {
+          if (this.cloudSystem) {
+            console.log('Second cloud initialization');
+            this.cloudSystem.update(100);
+            this.cloudSystem.setVisibility(true);
+          }
+        }, 500);
       }
     }, 2000); // Reduced from 3000 to 2000 ms
   }
