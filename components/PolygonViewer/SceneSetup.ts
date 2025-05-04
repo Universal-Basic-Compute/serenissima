@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { ViewMode } from './types';
-import CloudSystem from './CloudSystem';
+import { CloudSystem } from '../../lib/threejs/CloudSystem';
 import { ThreeJSFacade } from '../../lib/threejs/ThreeJSFacade';
 
 interface SceneSetupProps {
@@ -336,7 +336,7 @@ export default class SceneSetup {
   public cleanup() {
     // Clean up cloud system
     if (this.cloudSystem) {
-      this.cloudSystem.cleanup();
+      this.cloudSystem.dispose();
       this.cloudSystem = null;
     }
     
