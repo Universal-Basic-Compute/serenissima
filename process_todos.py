@@ -11,22 +11,49 @@ def load_todos():
         return json.load(f)
 
 # Process TODOs in batches of 3
-def process_todos(todos, batch_size=3):
+def process_todos(todos, batch_size=3, start_from=0):
     total_todos = len(todos)
-    print(f"Processing {total_todos} TODOs in batches of {batch_size}...")
+    print(f"Processing {total_todos} TODOs in batches of {batch_size}, starting from index {start_from}...")
 
-    for i in range(0, total_todos, batch_size):
+    # Create log file if it doesn't exist
+    if not os.path.exists('todo_progress.log'):
+        with open('todo_progress.log', 'w') as log_file:
+            log_file.write(f"TODO Processing Log - Started at {time.strftime('%Y-%m-%d %H:%M:%S')}\n")
+            log_file.write(f"Total TODOs: {total_todos}, Batch Size: {batch_size}, Starting Index: {start_from}\n\n")
+
+    for i in range(start_from, total_todos, batch_size):
         batch = todos[i:i+batch_size]
-        print(f"\n{'='*80}\nProcessing batch {i//batch_size + 1} of {(total_todos + batch_size - 1)//batch_size}")
+        batch_num = i//batch_size + 1
+        total_batches = (total_todos + batch_size - 1)//batch_size
+        
+        print(f"\n{'='*80}")
+        print(f"Processing batch {batch_num} of {total_batches} (TODOs {i+1}-{min(i+batch_size, total_todos)} of {total_todos})")
+        
+        with open('todo_progress.log', 'a') as log_file:
+            log_file.write(f"Starting batch {batch_num} of {total_batches} at {time.strftime('%Y-%m-%d %H:%M:%S')}\n")
 
-        for todo in batch:
+        for j, todo in enumerate(batch):
+            todo_index = i + j
+            print(f"\nProcessing TODO {todo_index + 1}/{total_todos}: {todo.get('id', 'Unknown')}")
             process_todo(todo)
+            
+            # Save current progress to a file so we can resume if needed
+            with open('todo_last_processed.txt', 'w') as f:
+                f.write(str(todo_index + 1))
+                
             # Add a short delay between TODOs to avoid overwhelming the system
-            time.sleep(2)
+            if j < len(batch) - 1:  # Don't delay after the last item in batch
+                print(f"Waiting 2 seconds before next TODO...")
+                time.sleep(2)
 
         # Add a longer delay between batches
-        print(f"Completed batch {i//batch_size + 1}. Waiting before next batch...")
-        time.sleep(10)
+        if i + batch_size < total_todos:  # Don't delay after the last batch
+            print(f"Completed batch {batch_num}. Waiting 10 seconds before next batch...")
+            
+            with open('todo_progress.log', 'a') as log_file:
+                log_file.write(f"Completed batch {batch_num} at {time.strftime('%Y-%m-%d %H:%M:%S')}\n")
+                
+            time.sleep(10)
 
 # Process a single TODO
 def process_todo(todo):
@@ -42,15 +69,32 @@ def process_todo(todo):
 
     # Verify files exist
     valid_files = []
+    missing_files = []
     for file in files:
         if Path(file).exists():
             valid_files.append(file)
         else:
-            print(f"Warning: File {file} does not exist, skipping")
-
+            missing_files.append(file)
+            print(f"Warning: File {file} does not exist")
+    
+    # Check if we have enough valid files to proceed
     if not valid_files:
         print(f"Error: No valid files found for TODO {todo_id}, skipping")
         return
+    
+    # Log missing files but continue if we have at least some valid files
+    if missing_files:
+        print(f"Note: {len(missing_files)} files were not found but continuing with {len(valid_files)} valid files")
+    
+    # Check if we need to create any directories for missing files
+    for file in missing_files:
+        dir_path = os.path.dirname(file)
+        if dir_path and not os.path.exists(dir_path):
+            try:
+                os.makedirs(dir_path, exist_ok=True)
+                print(f"Created directory: {dir_path}")
+            except Exception as e:
+                print(f"Error creating directory {dir_path}: {e}")
 
     # Construct the Aider command
     message = f"{description}\n\n{details}" if details else description
@@ -63,7 +107,7 @@ def process_todo(todo):
     # Execute Aider command
     print(f"Executing: {' '.join(aider_cmd)}")
     try:
-        result = subprocess.run(aider_cmd, capture_output=True, text=True)
+        result = subprocess.run(aider_cmd, capture_output=True, text=True, timeout=300)  # 5 minute timeout
 
         # Print the output
         print("\nAider Output:")
@@ -78,15 +122,64 @@ def process_todo(todo):
             print(f"Warning: Aider exited with code {result.returncode}")
         else:
             print(f"Successfully processed TODO {todo_id}")
+            
+        # Log completion to a file
+        with open('todo_progress.log', 'a') as log_file:
+            timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
+            log_file.write(f"{timestamp} - {todo_id}: {'Success' if result.returncode == 0 else 'Failed'}\n")
 
+    except subprocess.TimeoutExpired:
+        print(f"Error: Aider command timed out after 5 minutes for TODO {todo_id}")
+        with open('todo_progress.log', 'a') as log_file:
+            timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
+            log_file.write(f"{timestamp} - {todo_id}: Timeout\n")
     except Exception as e:
         print(f"Error executing Aider: {e}")
+        with open('todo_progress.log', 'a') as log_file:
+            timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
+            log_file.write(f"{timestamp} - {todo_id}: Error - {str(e)}\n")
 
 # Main function
 def main():
+    import argparse
+    
+    parser = argparse.ArgumentParser(description='Process TODOs from a JSON file')
+    parser.add_argument('--batch-size', type=int, default=3, help='Number of TODOs to process in each batch')
+    parser.add_argument('--start-from', type=int, default=0, help='Index of the first TODO to process')
+    parser.add_argument('--resume', action='store_true', help='Resume from last processed TODO')
+    parser.add_argument('--todo-id', type=str, help='Process a specific TODO by ID')
+    args = parser.parse_args()
+    
     todos = load_todos()
-    process_todos(todos)
+    
+    # Process a specific TODO by ID
+    if args.todo_id:
+        for todo in todos:
+            if todo.get('id') == args.todo_id:
+                print(f"Processing single TODO: {args.todo_id}")
+                process_todo(todo)
+                return
+        print(f"Error: TODO with ID {args.todo_id} not found")
+        return
+    
+    # Resume from last processed TODO
+    start_index = args.start_from
+    if args.resume:
+        try:
+            with open('todo_last_processed.txt', 'r') as f:
+                start_index = int(f.read().strip())
+                print(f"Resuming from TODO #{start_index}")
+        except FileNotFoundError:
+            print("No saved progress found, starting from the beginning")
+        except ValueError:
+            print("Invalid saved progress, starting from the beginning")
+    
+    process_todos(todos, args.batch_size, start_index)
     print("\nAll TODOs processed!")
+    
+    # Mark completion in log
+    with open('todo_progress.log', 'a') as log_file:
+        log_file.write(f"\nProcessing completed at {time.strftime('%Y-%m-%d %H:%M:%S')}\n")
 
 if __name__ == "__main__":
     main()
