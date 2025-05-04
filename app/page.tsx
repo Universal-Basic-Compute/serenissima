@@ -14,6 +14,7 @@ import LoadingScreen from '../components/UI/LoadingScreen';
 import SuccessAlert from '../components/UI/SuccessAlert';
 import { transferComputeTokens } from '../lib/tokenUtils';
 import { transferComputeInAirtable } from '../lib/airtableUtils';
+import { eventBus, EventTypes } from '../lib/eventBus';
 
 // Import PolygonViewer with no SSR to avoid hydration issues
 const PolygonViewer = dynamic(() => import('../components/PolygonViewer/PolygonViewer'), {
