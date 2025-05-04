@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import * as THREE from 'three';
 import { RoadCreationManager } from '@/lib/threejs/RoadCreationManager';
 import roadService from '@/services/RoadService';
 import { log } from '@/lib/logUtils';
+import { throttle, debounce } from '@/lib/performanceUtils';
 
 interface RoadCreatorProps {
   scene: THREE.Scene;
@@ -28,9 +29,14 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [snapPoint, setSnapPoint] = useState<THREE.Vector3 | null>(null);
   const [pointCount, setPointCount] = useState<number>(0);
+  const [lastFrameTime, setLastFrameTime] = useState<number>(0);
+  const [performanceMode, setPerformanceMode] = useState<boolean>(false);
   
-  // Ref for the road creation manager
+  // Refs for the road creation manager and performance monitoring
   const managerRef = useRef<RoadCreationManager | null>(null);
+  const frameCountRef = useRef<number>(0);
+  const mouseMoveCountRef = useRef<number>(0);
+  const lastPerformanceCheckRef = useRef<number>(Date.now());
   
   // Initialize the road creation manager
   useEffect(() => {
@@ -60,6 +66,62 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
     };
   }, [active, scene, camera, onCancel]);
 
+  // Create throttled and debounced handlers
+  const throttledMouseMoveRef = useRef(throttle((event: MouseEvent) => {
+    if (!managerRef.current) return;
+    
+    try {
+      // Count mouse moves for performance monitoring
+      mouseMoveCountRef.useRef++;
+      
+      // Update mouse position in the manager
+      managerRef.current.updateMousePosition(event.clientX, event.clientY);
+      
+      // In performance mode, only update UI state every few frames
+      if (!performanceMode || frameCountRef.current % 3 === 0) {
+        setSnapPoint(managerRef.current.getSnapPoint());
+      }
+    } catch (error) {
+      log.error('RoadCreator: Error during mouse move handling', error);
+    }
+  }, performanceMode ? 50 : 16)); // Throttle more aggressively in performance mode
+  
+  // Animation frame handler for smoother updates
+  const animationFrameHandler = useCallback(() => {
+    if (!active || !managerRef.current) return;
+    
+    const currentTime = performance.now();
+    frameCountRef.current++;
+    
+    // Check performance every second
+    if (currentTime - lastPerformanceCheckRef.current > 1000) {
+      const fps = frameCountRef.current;
+      const mouseMoves = mouseMoveCountRef.current;
+      
+      // If performance is suffering, enable performance mode
+      if (fps < 30 || mouseMoves > 100) {
+        if (!performanceMode) {
+          log.info('RoadCreator: Enabling performance mode due to low FPS or high mouse event count');
+          setPerformanceMode(true);
+        }
+      } else if (performanceMode && fps > 50 && mouseMoves < 50) {
+        // If performance is good, disable performance mode
+        log.info('RoadCreator: Disabling performance mode as performance has improved');
+        setPerformanceMode(false);
+      }
+      
+      // Reset counters
+      frameCountRef.current = 0;
+      mouseMoveCountRef.current = 0;
+      lastPerformanceCheckRef.current = currentTime;
+    }
+    
+    // Request next frame
+    if (active) {
+      requestAnimationFrame(animationFrameHandler);
+    }
+  }, [active, performanceMode]);
+  
   // Set up event listeners when active
   useEffect(() => {
     if (!active || !managerRef.current) return;
@@ -69,20 +131,12 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
     const enableClickTimeout = setTimeout(() => {
       clickEnabled = true;
     }, 100);
+    
+    // Start animation frame loop for smooth updates
+    requestAnimationFrame(animationFrameHandler);
 
     const handleMouseMove = (event: MouseEvent) => {
-      if (!managerRef.current) return;
-      
-      try {
-        // Update mouse position in the manager
-        managerRef.current.updateMousePosition(event.clientX, event.clientY);
-        
-        // Update UI state based on manager state
-        setSnapPoint(managerRef.current.getSnapPoint());
-      } catch (error) {
-        log.error('RoadCreator: Error during mouse move handling', error);
-        // Don't show error to user for every mouse move, just log it
-      }
+      throttledMouseMoveRef.current(event);
     };
 
     const handleClick = (event: MouseEvent) => {
@@ -190,8 +244,8 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
       (event as any).isRoadCreationClick = true;
     };
 
-    // Add event listeners
-    window.addEventListener('mousemove', handleMouseMove);
+    // Create a passive event listener for mouse move to improve performance
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
     window.addEventListener('click', handleClick);
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('contextmenu', handleRightClick);
@@ -205,12 +259,27 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
       window.removeEventListener('contextmenu', handleRightClick);
       window.removeEventListener('click', preventLandSelection, true);
       clearTimeout(enableClickTimeout);
+      
+      // Cancel any pending throttled or debounced operations
+      if (throttledMouseMoveRef.current.cancel) {
+        throttledMouseMoveRef.current.cancel();
+      }
     };
-  }, [active, pointCount, onComplete, onCancel]);
+  }, [active, pointCount, onComplete, onCancel, animationFrameHandler]);
 
-  // Render UI controls
+  // Memoize expensive calculations
+  const roadPoints = useMemo(() => {
+    return managerRef.current?.getPoints() || [];
+  }, [pointCount]);
+  
+  // Render UI controls - memoize the entire component to prevent unnecessary re-renders
   return (
     <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-30 bg-white p-4 rounded-lg shadow-lg border-2 border-amber-600">
+      {performanceMode && (
+        <div className="absolute top-0 right-0 bg-yellow-500 text-white text-xs px-1 rounded-bl">
+          Performance Mode
+        </div>
+      )}
       <div className="text-center mb-2 font-medium text-amber-800">
         Road Creator
       </div>
@@ -247,11 +316,15 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
         <button
           onClick={() => {
             if (managerRef.current && pointCount >= 2) {
-              const points = managerRef.current.getPoints();
+              // Use memoized points to avoid recalculation
+              const points = roadPoints;
               
               // Save the road using the service
               try {
                 log.info(`RoadCreator: Attempting to save road with ${points.length} points and curvature ${curvature}`);
+                
+                // Show loading state
+                setErrorMessage('Saving road...');
                 
                 // Create a timeout to handle potential hanging requests
                 const timeoutId = setTimeout(() => {
@@ -259,8 +332,13 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
                   setErrorMessage('Road saving is taking longer than expected...');
                 }, 3000);
                 
+                // For complex roads with many points, simplify before saving if in performance mode
+                const pointsToSave = performanceMode && points.length > 20 
+                  ? simplifyRoadPoints(points, 0.1) // Simplify with tolerance based on complexity
+                  : points;
+                
                 const savedRoad = roadService.saveRoad(
-                  points, 
+                  pointsToSave, 
                   curvature
                 );
                 
