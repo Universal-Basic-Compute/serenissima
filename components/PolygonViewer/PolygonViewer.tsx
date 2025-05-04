@@ -673,7 +673,6 @@ export default function PolygonViewer() {
   }, []);
 
   // Set up Three.js scene - only depends on polygons and loading
-  // NOT dependent on activeView, highQuality, or selectedPolygonId to prevent scene recreation
   useEffect(() => {
     if (!canvasRef.current || loading) return;
     
@@ -685,73 +684,62 @@ export default function PolygonViewer() {
     
     console.log(`Setting up Three.js scene`);
 
-    // Calculate bounds for all polygons outside the try block to make it accessible to all nested functions
+    // Calculate bounds for all polygons
     const bounds = calculateBounds(polygons);
     console.log('Calculated bounds:', bounds);
     
-    // Ensure ConsiglioDeiDieci exists in users data
-    if (!users['ConsiglioDeiDieci']) {
-      console.warn('ConsiglioDeiDieci not found in users data during scene setup! Adding default entry.');
-      const updatedUsers = {
-        ...users,
-        'ConsiglioDeiDieci': {
-          user_name: 'ConsiglioDeiDieci',
-          color: '#8B0000', // Dark red
-          coat_of_arms_image: null
-        }
-      };
-      // Update the store with the modified users data
-      usePolygonStore.setState({ users: updatedUsers });
-    }
-    
-    // Add a fallback rendering mechanism
-    const ensureRendering = () => {
-      if (sceneRef.current && sceneRef.current.renderer && sceneRef.current.scene && sceneRef.current.camera) {
-        console.log('Forcing fallback render');
-        try {
-          // Try direct rendering first
-          sceneRef.current.renderer.render(sceneRef.current.scene, sceneRef.current.camera);
-        } catch (error) {
-          console.error('Error in fallback rendering:', error);
-        }
-      }
-    };
-
     try {
       // Initialize scene
       const sceneSetup = new SceneSetup({
         canvas: canvasRef.current,
-        activeView, // We'll still pass activeView, but handle view changes separately
+        activeView,
         highQuality
       });
       sceneRef.current = sceneSetup;
       
-      // Add a method forceRender to the scene
-      if (sceneRef.current) {
-        sceneRef.current.scene.userData.forceRender = () => {
-          if (sceneRef.current && sceneRef.current.renderer) {
+      // Initialize polygon renderer immediately
+      console.log('Initializing polygon renderer');
+      const polygonRenderer = new PolygonRenderer({
+        scene: sceneRef.current.scene,
+        camera: sceneRef.current.camera,
+        polygons,
+        bounds,
+        activeView,
+        performanceMode: !highQuality,
+        polygonMeshesRef,
+        users
+      });
+      polygonRendererRef.current = polygonRenderer;
+      
+      // Add a simple animation loop
+      const animate = () => {
+        const animationId = requestAnimationFrame(animate);
+        
+        try {
+          // Update controls
+          if (sceneRef.current && sceneRef.current.controls) {
+            sceneRef.current.controls.update();
+          }
+          
+          // Render the scene
+          if (sceneRef.current && sceneRef.current.renderer && sceneRef.current.scene && sceneRef.current.camera) {
             sceneRef.current.renderer.render(sceneRef.current.scene, sceneRef.current.camera);
           }
-        };
-      }
+        } catch (error) {
+          console.error('Animation loop error:', error);
+        }
+      };
       
-      // Force rendering multiple times during initialization
-      setTimeout(ensureRendering, 100);
-      setTimeout(ensureRendering, 500);
-      setTimeout(ensureRendering, 1000);
-      setTimeout(ensureRendering, 2000);
-
-      // Set up a periodic rendering check
-      const renderingInterval = setInterval(ensureRendering, 5000);
+      // Start animation loop
+      const animationId = requestAnimationFrame(animate);
       
-      // No water effect needed
-      
-      // Add error handling for WebGL context loss using the function defined outside
-      canvasRef.current.addEventListener('webglcontextlost', handleContextLost as unknown as EventListener);
-    
-      // Add custom event listeners for polygon changes
-      window.addEventListener('polygonAdded', handlePolygonAdded);
-      window.addEventListener('polygonDeleted', handlePolygonDeleted);
+      // Cleanup
+      return () => {
+        cancelAnimationFrame(animationId);
+        
+        if (polygonRendererRef.current) polygonRendererRef.current.cleanup();
+        if (sceneRef.current) sceneRef.current.cleanup();
+      };
     } catch (error) {
       console.error('Error setting up Three.js scene:', error);
     }
