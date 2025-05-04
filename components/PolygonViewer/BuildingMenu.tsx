@@ -1,11 +1,12 @@
 /**
  * Building menu component for browsing and placing buildings
  */
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Tab } from '@headlessui/react';
 import BuildingModelViewer from '../UI/BuildingModelViewer';
 import PlaceableBuilding from '../PolygonViewer/PlaceableBuilding';
-import { buildingService, Building, BuildingCategory } from '@/lib/services/BuildingService';
+import { Building } from '@/lib/services/BuildingService';
+import useBuildingStore from '@/store/useBuildingStore';
 
 interface BuildingMenuProps {
   visible: boolean;
@@ -13,54 +14,36 @@ interface BuildingMenuProps {
 }
 
 export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
-  const [categories, setCategories] = useState<BuildingCategory[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedBuilding, setSelectedBuilding] = useState<Building | null>(null);
-  const [selectedVariant, setSelectedVariant] = useState<string>("model");
-  const [availableVariants, setAvailableVariants] = useState<string[]>([]);
-  const [placeableBuilding, setPlaceableBuilding] = useState<{
-    name: string;
-    variant: string;
-  } | null>(null);
+  // Get state and actions from the store
+  const { 
+    categories, 
+    loading, 
+    selectedBuilding, 
+    selectedVariant, 
+    availableVariants, 
+    placeableBuilding,
+    loadBuildingCategories,
+    getBuildingVariants,
+    setSelectedBuilding,
+    setSelectedVariant,
+    setPlaceableBuilding
+  } = useBuildingStore();
   
   // Fetch available variants when a new building is selected
   useEffect(() => {
     if (selectedBuilding) {
       setSelectedVariant("model");
       
-      // Use the BuildingService to fetch variants
-      const fetchVariants = async () => {
-        try {
-          const variants = await buildingService.getBuildingVariants(selectedBuilding.name);
-          setAvailableVariants(variants);
-        } catch (error) {
-          console.error('Error fetching variants:', error);
-          setAvailableVariants(['model']); // Default to just 'model' on error
-        }
-      };
-      
-      fetchVariants();
+      // Fetch variants from the store
+      getBuildingVariants(selectedBuilding.name);
     }
-  }, [selectedBuilding]);
-
-  // Function to load building data
-  const loadBuildingData = async () => {
-    setLoading(true);
-    try {
-      const loadedCategories = await buildingService.getBuildingCategories();
-      setCategories(loadedCategories);
-    } catch (error) {
-      console.error('Error loading building data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [selectedBuilding, getBuildingVariants, setSelectedVariant]);
 
   // Load building data when the menu becomes visible
   useEffect(() => {
     if (!visible) return;
-    loadBuildingData();
-  }, [visible]);
+    loadBuildingCategories();
+  }, [visible, loadBuildingCategories]);
 
   if (!visible) return null;
 

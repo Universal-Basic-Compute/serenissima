@@ -38,6 +38,16 @@ interface PolygonState {
   error: string | null;
 }
 
+interface BuildingState {
+  categories: BuildingCategory[];
+  selectedBuilding: Building | null;
+  selectedVariant: string;
+  availableVariants: string[];
+  placeableBuilding: { name: string; variant: string } | null;
+  loading: boolean;
+  error: string | null;
+}
+
 interface TransactionState {
   transactions: Transaction[];
   loading: boolean;
@@ -98,6 +108,34 @@ export const usePolygonStore = create<PolygonState & PolygonActions>((set, get) 
   setSelectedPolygonId: (id) => set({ selectedPolygonId: id }),
   setHoveredPolygonId: (id) => set({ hoveredPolygonId: id }),
   setActiveView: (view) => set({ activeView: view }),
+  // ...other actions
+}));
+
+// Building store
+export const useBuildingStore = create<BuildingState & BuildingActions>((set, get) => ({
+  categories: [],
+  selectedBuilding: null,
+  selectedVariant: 'model',
+  availableVariants: [],
+  placeableBuilding: null,
+  loading: false,
+  error: null,
+  
+  loadBuildingCategories: async () => {
+    set({ loading: true, error: null });
+    try {
+      // Fetch building data from API
+      // ...
+      set({ categories: loadedCategories, loading: false });
+      return loadedCategories;
+    } catch (error) {
+      set({ error: error.message, loading: false });
+      throw error;
+    }
+  },
+  
+  setSelectedBuilding: (building) => set({ selectedBuilding: building }),
+  setSelectedVariant: (variant) => set({ selectedVariant: variant }),
   // ...other actions
 }));
 
