@@ -81,25 +81,26 @@ export default class SimplePolygonRenderer {
         
         // Create geometry with slight extrusion for elevation
         const extrudeSettings = {
-          depth: 0.3,  // Increased from 0.2 to 0.3 for more elevation
+          depth: 0.3,  // Thickness of the land
           bevelEnabled: true,
           bevelSegments: 1,
           bevelSize: 0.1,
           bevelThickness: 0.1
         };
-        
+      
         // Use ExtrudeGeometry instead of ShapeGeometry for elevation
         const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
-        
+      
         // Create mesh
         const mesh = new THREE.Mesh(geometry, material.clone());
-        
+      
         // Position mesh - adjust rotation to make top surface flat
         mesh.rotation.x = -Math.PI / 2;
-      
-        // IMPORTANT: Position the land higher above the water to prevent z-fighting
-        mesh.position.y = 0.5; // Increased from 0.2 to 0.5 to ensure clear separation
-      
+    
+        // IMPORTANT: Position the land at y=0, which is 5 units above the water (at y=-5)
+        // This ensures a clear physical separation between water and land
+        mesh.position.y = 0;
+    
         // No need for render order or polygon offset when there's clear physical separation
         
         // Add to scene
