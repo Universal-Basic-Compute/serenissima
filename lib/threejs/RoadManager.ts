@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { RoadService, RoadData } from '../services/RoadService';
+import { log } from '../logUtils';
 
 /**
  * Interface for road data structure
@@ -31,64 +32,100 @@ export class RoadManager {
    * @param scene The THREE.js scene to add roads to
    */
   constructor(scene: THREE.Scene) {
-    this.scene = scene;
-    this.textureLoader = new THREE.TextureLoader();
-    this.roadService = RoadService.getInstance();
-    
-    // Load road texture
-    this.textureLoader.load(
-      '/textures/road.jpg',
-      (texture) => {
-        texture.wrapS = THREE.RepeatWrapping;
-        texture.wrapT = THREE.RepeatWrapping;
-        texture.repeat.set(1, 10);
-        this.roadTexture = texture;
-          
-        // Force update existing roads with the new texture
-        this.roads.forEach(road => {
-          if (road.mesh && road.mesh.material) {
-            if (road.mesh.material instanceof THREE.MeshStandardMaterial) {
-              road.mesh.material.map = texture;
-              road.mesh.material.needsUpdate = true;
-            }
+    try {
+      this.scene = scene;
+      this.textureLoader = new THREE.TextureLoader();
+      this.roadService = RoadService.getInstance();
+      
+      // Load road texture
+      this.textureLoader.load(
+        '/textures/road.jpg',
+        (texture) => {
+          try {
+            texture.wrapS = THREE.RepeatWrapping;
+            texture.wrapT = THREE.RepeatWrapping;
+            texture.repeat.set(1, 10);
+            this.roadTexture = texture;
+              
+            // Force update existing roads with the new texture
+            this.roads.forEach(road => {
+              try {
+                if (road.mesh && road.mesh.material) {
+                  if (road.mesh.material instanceof THREE.MeshStandardMaterial) {
+                    road.mesh.material.map = texture;
+                    road.mesh.material.needsUpdate = true;
+                  }
+                }
+              } catch (textureUpdateError) {
+                log.warn('Failed to update road texture for a road:', textureUpdateError);
+                // Continue with other roads even if one fails
+              }
+            });
+          } catch (textureSetupError) {
+            log.error('Error setting up road texture:', textureSetupError);
           }
-        });
-      },
-      undefined,
-      (error) => {
-        console.error('Error loading road texture:', error);
-      }
-    );
+        },
+        undefined,
+        (error) => {
+          log.error('Error loading road texture:', error);
+        }
+      );
+    } catch (constructorError) {
+      log.error('Failed to initialize RoadManager:', constructorError);
+      this.isDisposed = true; // Mark as disposed to prevent further operations
+    }
     
     // Load road normal map
-    this.textureLoader.load(
-      '/textures/road_normal.jpg',
-      (texture) => {
-        texture.wrapS = THREE.RepeatWrapping;
-        texture.wrapT = THREE.RepeatWrapping;
-        texture.repeat.set(1, 10);
-        this.roadNormalMap = texture;
-      },
-      undefined,
-      (error) => {
-        console.error('Error loading road normal map:', error);
-      }
-    );
+    try {
+      this.textureLoader.load(
+        '/textures/road_normal.jpg',
+        (texture) => {
+          try {
+            texture.wrapS = THREE.RepeatWrapping;
+            texture.wrapT = THREE.RepeatWrapping;
+            texture.repeat.set(1, 10);
+            this.roadNormalMap = texture;
+          } catch (normalMapSetupError) {
+            log.warn('Error setting up road normal map:', normalMapSetupError);
+            // Continue without normal map
+          }
+        },
+        undefined,
+        (error) => {
+          log.warn('Error loading road normal map:', error);
+          // Continue without normal map
+        }
+      );
+    } catch (normalMapError) {
+      log.warn('Failed to initialize road normal map loader:', normalMapError);
+      // Continue without normal map
+    }
     
     // Load road roughness map
-    this.textureLoader.load(
-      '/textures/road_roughness.jpg',
-      (texture) => {
-        texture.wrapS = THREE.RepeatWrapping;
-        texture.wrapT = THREE.RepeatWrapping;
-        texture.repeat.set(1, 10);
-        this.roadRoughnessMap = texture;
-      },
-      undefined,
-      (error) => {
-        console.error('Error loading road roughness map:', error);
-      }
-    );
+    try {
+      this.textureLoader.load(
+        '/textures/road_roughness.jpg',
+        (texture) => {
+          try {
+            texture.wrapS = THREE.RepeatWrapping;
+            texture.wrapT = THREE.RepeatWrapping;
+            texture.repeat.set(1, 10);
+            this.roadRoughnessMap = texture;
+          } catch (roughnessMapSetupError) {
+            log.warn('Error setting up road roughness map:', roughnessMapSetupError);
+            // Continue without roughness map
+          }
+        },
+        undefined,
+        (error) => {
+          log.warn('Error loading road roughness map:', error);
+          // Continue without roughness map
+        }
+      );
+    } catch (roughnessMapError) {
+      log.warn('Failed to initialize road roughness map loader:', roughnessMapError);
+      // Continue without roughness map
+    }
   }
 
   /**
@@ -107,12 +144,13 @@ export class RoadManager {
   ): string {
     if (this.isDisposed) return '';
     
-    if (points.length < 2) {
-      console.error('RoadManager: Cannot create road with less than 2 points');
-      return '';
-    }
-    
-    console.log(`RoadManager: Creating road with ${points.length} points and curvature ${curvature}`);
+    try {
+      if (points.length < 2) {
+        log.error('RoadManager: Cannot create road with less than 2 points');
+        return '';
+      }
+      
+      log.info(`RoadManager: Creating road with ${points.length} points and curvature ${curvature}`);
     
     // Try to import the 3D utilities for path simplification
     try {
@@ -120,68 +158,111 @@ export class RoadManager {
       const utils3DModule = require('./utils3D');
       const { simplifyPath } = utils3DModule;
       
-      // Simplify the path to remove redundant points
-      const simplifiedPoints = simplifyPath(points, 0.05);
-      console.log(`RoadManager: Simplified path from ${points.length} to ${simplifiedPoints.length} points`);
-      
-      // Save to service and get ID
-      const roadData = this.roadService.saveRoad(
-        simplifiedPoints.map(p => p.clone()), // Clone points to avoid reference issues
-        curvature,
-        userId,
-        landId
-      );
-      
-      // Create the road mesh with simplified points
-      const mesh = this.createRoadMesh(simplifiedPoints, curvature);
-      
-      // Add to scene
-      console.log(`RoadManager: Adding road mesh to scene with ID ${roadData.id}`);
-      this.scene.add(mesh);
-      
-      // Store the road
-      const road: Road = {
-        id: roadData.id,
-        points: simplifiedPoints.map(p => p.clone()), // Clone points to avoid reference issues
-        mesh,
-        curvature
-      };
-      
-      this.roads.push(road);
-      console.log(`RoadManager: Road created successfully, total roads: ${this.roads.length}`);
-      
-      return roadData.id;
+      try {
+        // Simplify the path to remove redundant points
+        const simplifiedPoints = simplifyPath(points, 0.05);
+        log.info(`RoadManager: Simplified path from ${points.length} to ${simplifiedPoints.length} points`);
+        
+        try {
+          // Save to service and get ID
+          const roadData = this.roadService.saveRoad(
+            simplifiedPoints.map(p => p.clone()), // Clone points to avoid reference issues
+            curvature,
+            userId,
+            landId
+          );
+          
+          try {
+            // Create the road mesh with simplified points
+            const mesh = this.createRoadMesh(simplifiedPoints, curvature);
+            
+            if (!mesh) {
+              throw new Error('Failed to create road mesh');
+            }
+            
+            // Add to scene
+            log.info(`RoadManager: Adding road mesh to scene with ID ${roadData.id}`);
+            this.scene.add(mesh);
+            
+            // Store the road
+            const road: Road = {
+              id: roadData.id,
+              points: simplifiedPoints.map(p => p.clone()), // Clone points to avoid reference issues
+              mesh,
+              curvature
+            };
+            
+            this.roads.push(road);
+            log.info(`RoadManager: Road created successfully, total roads: ${this.roads.length}`);
+            
+            return roadData.id;
+          } catch (meshError) {
+            log.error('Failed to create or add road mesh:', meshError);
+            // Try to clean up the saved road data since we couldn't create the mesh
+            this.roadService.deleteRoad(roadData.id);
+            throw meshError;
+          }
+        } catch (saveError) {
+          log.error('Failed to save road to service:', saveError);
+          throw saveError;
+        }
+      } catch (simplifyError) {
+        log.warn('Failed to simplify path:', simplifyError);
+        throw simplifyError;
+      }
     } catch (error) {
-      console.warn('Failed to import utils3D for path simplification:', error);
+      log.warn('Failed to import utils3D for path simplification:', error);
       
       // Fallback to original method
-      // Save to service and get ID
-      const roadData = this.roadService.saveRoad(
-        points.map(p => p.clone()), // Clone points to avoid reference issues
-        curvature,
-        userId,
-        landId
-      );
-      
-      // Create the road mesh
-      const mesh = this.createRoadMesh(points, curvature);
-      
-      // Add to scene
-      console.log(`RoadManager: Adding road mesh to scene with ID ${roadData.id}`);
-      this.scene.add(mesh);
-      
-      // Store the road
-      const road: Road = {
-        id: roadData.id,
-        points: points.map(p => p.clone()), // Clone points to avoid reference issues
-        mesh,
-        curvature
-      };
-      
-      this.roads.push(road);
-      console.log(`RoadManager: Road created successfully, total roads: ${this.roads.length}`);
-      
-      return roadData.id;
+      try {
+        // Save to service and get ID
+        const roadData = this.roadService.saveRoad(
+          points.map(p => p.clone()), // Clone points to avoid reference issues
+          curvature,
+          userId,
+          landId
+        );
+        
+        try {
+          // Create the road mesh
+          const mesh = this.createRoadMesh(points, curvature);
+          
+          if (!mesh) {
+            throw new Error('Failed to create road mesh in fallback mode');
+          }
+          
+          // Add to scene
+          log.info(`RoadManager: Adding road mesh to scene with ID ${roadData.id} (fallback mode)`);
+          this.scene.add(mesh);
+          
+          // Store the road
+          const road: Road = {
+            id: roadData.id,
+            points: points.map(p => p.clone()), // Clone points to avoid reference issues
+            mesh,
+            curvature
+          };
+          
+          this.roads.push(road);
+          log.info(`RoadManager: Road created successfully in fallback mode, total roads: ${this.roads.length}`);
+          
+          return roadData.id;
+        } catch (meshError) {
+          log.error('Failed to create or add road mesh in fallback mode:', meshError);
+          // Try to clean up the saved road data since we couldn't create the mesh
+          this.roadService.deleteRoad(roadData.id);
+          return '';
+        }
+      } catch (saveError) {
+        log.error('Failed to save road to service in fallback mode:', saveError);
+        return '';
+      }
+    }
+    
+    // Final catch-all error handler
+    } catch (unexpectedError) {
+      log.error('Unexpected error in createRoad:', unexpectedError);
+      return '';
     }
   }
 
@@ -193,37 +274,76 @@ export class RoadManager {
   public removeRoad(id: string): boolean {
     if (this.isDisposed) return false;
     
-    const index = this.roads.findIndex(road => road.id === id);
-    
-    if (index === -1) {
-      console.warn(`Road with ID ${id} not found`);
+    try {
+      const index = this.roads.findIndex(road => road.id === id);
+      
+      if (index === -1) {
+        log.warn(`Road with ID ${id} not found`);
+        return false;
+      }
+      
+      try {
+        // Remove from scene
+        const road = this.roads[index];
+        this.scene.remove(road.mesh);
+        
+        try {
+          // Dispose of geometry and material
+          if (road.mesh.geometry) {
+            road.mesh.geometry.dispose();
+          }
+          
+          if (road.mesh.material) {
+            if (Array.isArray(road.mesh.material)) {
+              road.mesh.material.forEach(m => {
+                try {
+                  if (m) m.dispose();
+                } catch (materialDisposeError) {
+                  log.warn(`Failed to dispose of road material:`, materialDisposeError);
+                }
+              });
+            } else {
+              try {
+                road.mesh.material.dispose();
+              } catch (materialDisposeError) {
+                log.warn(`Failed to dispose of road material:`, materialDisposeError);
+              }
+            }
+          }
+        } catch (resourceDisposeError) {
+          log.warn(`Error disposing road resources:`, resourceDisposeError);
+          // Continue with removal even if resource disposal fails
+        }
+        
+        // Remove from array
+        this.roads.splice(index, 1);
+        
+        try {
+          // Remove from service
+          this.roadService.deleteRoad(id);
+        } catch (serviceDeleteError) {
+          log.error(`Failed to delete road from service:`, serviceDeleteError);
+          // Continue with removal even if service deletion fails
+        }
+        
+        return true;
+      } catch (sceneRemoveError) {
+        log.error(`Error removing road from scene:`, sceneRemoveError);
+        
+        // Try to remove from array and service even if scene removal fails
+        try {
+          this.roads.splice(index, 1);
+          this.roadService.deleteRoad(id);
+        } catch (cleanupError) {
+          log.error(`Failed cleanup after scene removal error:`, cleanupError);
+        }
+        
+        return false;
+      }
+    } catch (error) {
+      log.error(`Unexpected error in removeRoad:`, error);
       return false;
     }
-    
-    // Remove from scene
-    const road = this.roads[index];
-    this.scene.remove(road.mesh);
-    
-    // Dispose of geometry and material
-    if (road.mesh.geometry) {
-      road.mesh.geometry.dispose();
-    }
-    
-    if (road.mesh.material) {
-      if (Array.isArray(road.mesh.material)) {
-        road.mesh.material.forEach(m => m.dispose());
-      } else {
-        road.mesh.material.dispose();
-      }
-    }
-    
-    // Remove from array
-    this.roads.splice(index, 1);
-    
-    // Remove from service
-    this.roadService.deleteRoad(id);
-    
-    return true;
   }
 
   /**
@@ -240,7 +360,8 @@ export class RoadManager {
    * @param curvature Road curvature factor (0-1)
    * @returns THREE.js mesh for the road
    */
-  private createRoadMesh(points: THREE.Vector3[], curvature: number): THREE.Mesh {
+  private createRoadMesh(points: THREE.Vector3[], curvature: number): THREE.Mesh | null {
+    try {
     // Create a static road geometry cache to avoid recreating similar geometries
     if (!this.roadGeometryCache) {
       this.roadGeometryCache = new Map();
@@ -252,11 +373,13 @@ export class RoadManager {
       const utils3DModule = require('./utils3D');
       const { smoothPath } = utils3DModule;
       
-      // Smooth the road points for a more natural curve
-      const smoothedPoints = smoothPath(points, curvature, Math.max(points.length * 5, 20));
-      
-      // Create a curved path based on the smoothed points
-      const curve = this.createCurvedPath(smoothedPoints, curvature);
+      try {
+        // Smooth the road points for a more natural curve
+        const smoothedPoints = smoothPath(points, curvature, Math.max(points.length * 5, 20));
+        
+        try {
+          // Create a curved path based on the smoothed points
+          const curve = this.createCurvedPath(smoothedPoints, curvature);
       
       // Create road geometry
       const roadWidth = 0.15; // Changed from 0.0735 back to 0.15 (make it thicker)
@@ -356,19 +479,28 @@ export class RoadManager {
       // Force the mesh to be visible
       road.visible = true;
       
-      return road;
+          return road;
+        } catch (curveError) {
+          log.error('Failed to create curved path:', curveError);
+          throw curveError;
+        }
+      } catch (smoothError) {
+        log.error('Failed to smooth path:', smoothError);
+        throw smoothError;
+      }
+    } catch (utils3DError) {
+      log.warn('Failed to import utils3D, falling back to basic road creation:', utils3DError);
       
-    } catch (error) {
-      console.warn('Failed to import utils3D, falling back to basic road creation:', error);
-      
-      // Fallback to original method
-      const curve = this.createCurvedPath(points, curvature);
-      
-      // Create road geometry
-      const roadWidth = 0.15;
-      const roadGeometry = new THREE.BufferGeometry();
-      const positions: number[] = [];
-      const uvs: number[] = [];
+      try {
+        // Fallback to original method
+        const curve = this.createCurvedPath(points, curvature);
+        
+        try {
+          // Create road geometry
+          const roadWidth = 0.15;
+          const roadGeometry = new THREE.BufferGeometry();
+          const positions: number[] = [];
+          const uvs: number[] = [];
       
       // Sample points along the curve
       const numPoints = Math.max(points.length * 10, 50);
@@ -453,7 +585,18 @@ export class RoadManager {
       // Force the mesh to be visible
       road.visible = true;
       
-      return road;
+          return road;
+        } catch (geometryError) {
+          log.error('Failed to create road geometry in fallback mode:', geometryError);
+          return null;
+        }
+      } catch (curveError) {
+        log.error('Failed to create curved path in fallback mode:', curveError);
+        return null;
+      }
+    } catch (unexpectedError) {
+      log.error('Unexpected error in createRoadMesh:', unexpectedError);
+      return null;
     }
   }
 
@@ -464,24 +607,42 @@ export class RoadManager {
    * @returns THREE.js curve
    */
   private createCurvedPath(points: THREE.Vector3[], curvature: number): THREE.Curve<THREE.Vector3> {
-    if (points.length === 2) {
-      // For just two points, use a straight line
-      return new THREE.LineCurve3(points[0], points[1]);
+    try {
+      if (points.length === 2) {
+        // For just two points, use a straight line
+        return new THREE.LineCurve3(points[0], points[1]);
+      }
+      
+      try {
+        // For Venice, we want straighter roads with sharp corners for snapped points
+        // Use a very low tension value for straighter segments
+        const curve = new THREE.CatmullRomCurve3(
+          points,
+          false,
+          'centripetal',
+          0.1 // Very low tension value for straighter roads
+        );
+        
+        // Set the curve type to ensure sharp corners at snapped points
+        curve.curveType = 'centripetal';
+        
+        return curve;
+      } catch (curveError) {
+        log.error('Failed to create CatmullRomCurve3:', curveError);
+        
+        // Fallback to a simple line curve connecting the first and last points
+        log.warn('Falling back to simple line curve');
+        return new THREE.LineCurve3(points[0], points[points.length - 1]);
+      }
+    } catch (error) {
+      log.error('Unexpected error in createCurvedPath:', error);
+      
+      // Ultimate fallback - create a minimal valid curve
+      // This ensures we always return something rather than throwing
+      const fallbackPoint1 = new THREE.Vector3(0, 0, 0);
+      const fallbackPoint2 = new THREE.Vector3(0, 0, 1);
+      return new THREE.LineCurve3(fallbackPoint1, fallbackPoint2);
     }
-    
-    // For Venice, we want straighter roads with sharp corners for snapped points
-    // Use a very low tension value for straighter segments
-    const curve = new THREE.CatmullRomCurve3(
-      points,
-      false,
-      'centripetal',
-      0.1 // Very low tension value for straighter roads
-    );
-    
-    // Set the curve type to ensure sharp corners at snapped points
-    curve.curveType = 'centripetal';
-    
-    return curve;
   }
 
   /**
@@ -491,39 +652,64 @@ export class RoadManager {
   public updateRoadVisibility(): void {
     if (this.isDisposed) return;
     
-    this.roads.forEach(road => {
-      if (road.mesh) {
-        // Force the mesh to be visible
-        road.mesh.visible = true;
-        
-        // Ensure high render order
-        road.mesh.renderOrder = 100; // Increased from 30 to 100
-        
-        // Ensure the material is properly configured
-        if (road.mesh.material instanceof THREE.MeshBasicMaterial) {
-          road.mesh.material.needsUpdate = true;
-          road.mesh.material.depthWrite = false;
-          road.mesh.material.polygonOffset = true;
-          road.mesh.material.polygonOffsetFactor = -10; // Increased from -4 to -10
-          road.mesh.material.polygonOffsetUnits = -10;  // Increased from -4 to -10
-        } else if (Array.isArray(road.mesh.material)) {
-          road.mesh.material.forEach(mat => {
-            if (mat instanceof THREE.MeshBasicMaterial) {
-              mat.needsUpdate = true;
-              mat.depthWrite = false;
-              mat.polygonOffset = true;
-              mat.polygonOffsetFactor = -10; // Increased from -4 to -10
-              mat.polygonOffsetUnits = -10;  // Increased from -4 to -10
+    try {
+      this.roads.forEach(road => {
+        try {
+          if (road && road.mesh) {
+            // Force the mesh to be visible
+            road.mesh.visible = true;
+            
+            // Ensure high render order
+            road.mesh.renderOrder = 100; // Increased from 30 to 100
+            
+            try {
+              // Ensure the material is properly configured
+              if (road.mesh.material instanceof THREE.MeshBasicMaterial) {
+                road.mesh.material.needsUpdate = true;
+                road.mesh.material.depthWrite = false;
+                road.mesh.material.polygonOffset = true;
+                road.mesh.material.polygonOffsetFactor = -10; // Increased from -4 to -10
+                road.mesh.material.polygonOffsetUnits = -10;  // Increased from -4 to -10
+              } else if (Array.isArray(road.mesh.material)) {
+                road.mesh.material.forEach(mat => {
+                  try {
+                    if (mat instanceof THREE.MeshBasicMaterial) {
+                      mat.needsUpdate = true;
+                      mat.depthWrite = false;
+                      mat.polygonOffset = true;
+                      mat.polygonOffsetFactor = -10; // Increased from -4 to -10
+                      mat.polygonOffsetUnits = -10;  // Increased from -4 to -10
+                    }
+                  } catch (materialError) {
+                    log.warn('Error updating individual material:', materialError);
+                    // Continue with other materials
+                  }
+                });
+              }
+            } catch (materialError) {
+              log.warn('Error updating road material:', materialError);
+              // Continue with other aspects of visibility
             }
-          });
+            
+            try {
+              // Force geometry update
+              if (road.mesh.geometry && road.mesh.geometry.attributes.position) {
+                road.mesh.geometry.attributes.position.needsUpdate = true;
+              }
+            } catch (geometryError) {
+              log.warn('Error updating road geometry:', geometryError);
+              // Continue with other roads
+            }
+          }
+        } catch (roadError) {
+          log.warn('Error updating road visibility for a road:', roadError);
+          // Continue with other roads
         }
-        
-        // Force geometry update
-        if (road.mesh.geometry) {
-          road.mesh.geometry.attributes.position.needsUpdate = true;
-        }
-      }
-    });
+      });
+    } catch (error) {
+      log.error('Unexpected error in updateRoadVisibility:', error);
+      // Method fails gracefully
+    }
   }
 
   /**
@@ -532,34 +718,59 @@ export class RoadManager {
   public removeAllRoads(): void {
     if (this.isDisposed) return;
     
-    console.log(`Removing all ${this.roads.length} roads`);
-    
-    // Remove all roads from the scene and dispose of resources
-    this.roads.forEach(road => {
-      if (this.scene) {
-        this.scene.remove(road.mesh);
-      }
+    try {
+      log.info(`Removing all ${this.roads.length} roads`);
       
-      if (road.mesh.geometry) {
-        road.mesh.geometry.dispose();
-      }
+      // Create a copy of the roads array to avoid modification during iteration
+      const roadsToRemove = [...this.roads];
       
-      if (road.mesh.material) {
-        if (Array.isArray(road.mesh.material)) {
-          road.mesh.material.forEach(m => {
-            if (m) m.dispose();
-          });
-        } else if (road.mesh.material) {
-          road.mesh.material.dispose();
+      // Remove all roads from the scene and dispose of resources
+      roadsToRemove.forEach(road => {
+        try {
+          if (this.scene && road.mesh) {
+            this.scene.remove(road.mesh);
+          }
+          
+          try {
+            if (road.mesh && road.mesh.geometry) {
+              road.mesh.geometry.dispose();
+            }
+          } catch (geometryError) {
+            log.warn(`Error disposing road geometry:`, geometryError);
+          }
+          
+          try {
+            if (road.mesh && road.mesh.material) {
+              if (Array.isArray(road.mesh.material)) {
+                road.mesh.material.forEach(m => {
+                  try {
+                    if (m) m.dispose();
+                  } catch (materialError) {
+                    log.warn(`Error disposing road material:`, materialError);
+                  }
+                });
+              } else if (road.mesh.material) {
+                road.mesh.material.dispose();
+              }
+            }
+          } catch (materialError) {
+            log.warn(`Error disposing road materials:`, materialError);
+          }
+          
+          try {
+            // Delete from service
+            this.roadService.deleteRoad(road.id);
+          } catch (serviceError) {
+            log.warn(`Error deleting road from service:`, serviceError);
+          }
+        } catch (roadError) {
+          log.error(`Error removing road:`, roadError);
+          // Continue with other roads
         }
-      }
+      });
       
-      // Delete from service
-      this.roadService.deleteRoad(road.id);
-    });
-    
-    // Clear the roads array
-    this.roads = [];
+      // Clear the roads array
+      this.roads = [];
     
     // Also find and remove any orphaned road meshes
     if (this.scene) {
@@ -568,36 +779,63 @@ export class RoadManager {
         
         // First collect all objects to remove
         this.scene.traverse((object) => {
-          if (object instanceof THREE.Mesh && object.userData && object.userData.isRoad) {
-            console.log('Found orphaned road mesh, removing it');
-            objectsToRemove.push(object);
+          try {
+            if (object instanceof THREE.Mesh && object.userData && object.userData.isRoad) {
+              log.info('Found orphaned road mesh, removing it');
+              objectsToRemove.push(object);
+            }
+          } catch (traverseError) {
+            log.warn('Error during scene traversal:', traverseError);
+            // Continue traversal
           }
         });
         
         // Then remove them in a separate step
         objectsToRemove.forEach(object => {
-          this.scene.remove(object);
-          
-          if ((object as THREE.Mesh).geometry) {
-            (object as THREE.Mesh).geometry.dispose();
-          }
-          
-          if ((object as THREE.Mesh).material) {
-            const material = (object as THREE.Mesh).material;
-            if (Array.isArray(material)) {
-              material.forEach(m => {
-                if (m) m.dispose();
-              });
-            } else if (material) {
-              material.dispose();
+          try {
+            this.scene.remove(object);
+            
+            try {
+              if ((object as THREE.Mesh).geometry) {
+                (object as THREE.Mesh).geometry.dispose();
+              }
+            } catch (geometryError) {
+              log.warn('Error disposing orphaned mesh geometry:', geometryError);
             }
+            
+            try {
+              if ((object as THREE.Mesh).material) {
+                const material = (object as THREE.Mesh).material;
+                if (Array.isArray(material)) {
+                  material.forEach(m => {
+                    try {
+                      if (m) m.dispose();
+                    } catch (materialError) {
+                      log.warn('Error disposing orphaned mesh material:', materialError);
+                    }
+                  });
+                } else if (material) {
+                  material.dispose();
+                }
+              }
+            } catch (materialError) {
+              log.warn('Error disposing orphaned mesh materials:', materialError);
+            }
+          } catch (objectError) {
+            log.error('Error removing orphaned mesh:', objectError);
+            // Continue with other objects
           }
         });
         
-        console.log(`Removed ${objectsToRemove.length} orphaned road meshes`);
+        log.info(`Removed ${objectsToRemove.length} orphaned road meshes`);
       } catch (error) {
-        console.error('Error removing orphaned road meshes:', error);
+        log.error('Error removing orphaned road meshes:', error);
       }
+    }
+    } catch (unexpectedError) {
+      log.error('Unexpected error in removeAllRoads:', unexpectedError);
+      // Try to reset the roads array as a last resort
+      this.roads = [];
     }
   }
 
@@ -609,12 +847,28 @@ export class RoadManager {
   public saveRoadToServer(roadId: string): Promise<boolean> {
     if (this.isDisposed) return Promise.reject(new Error('RoadManager is disposed'));
     
-    if (!roadId) {
-      console.error('Cannot save road: Missing road ID');
-      return Promise.reject(new Error('Missing road ID'));
+    try {
+      if (!roadId) {
+        log.error('Cannot save road: Missing road ID');
+        return Promise.reject(new Error('Missing road ID'));
+      }
+      
+      // Check if the road exists before trying to save it
+      const roadExists = this.roads.some(road => road.id === roadId);
+      if (!roadExists) {
+        log.warn(`Cannot save road: Road with ID ${roadId} not found in RoadManager`);
+        return Promise.reject(new Error(`Road with ID ${roadId} not found`));
+      }
+      
+      return this.roadService.saveRoadToServer(roadId)
+        .catch(error => {
+          log.error(`Error saving road ${roadId} to server:`, error);
+          throw error; // Re-throw to allow caller to handle
+        });
+    } catch (error) {
+      log.error('Unexpected error in saveRoadToServer:', error);
+      return Promise.reject(error);
     }
-    
-    return this.roadService.saveRoadToServer(roadId);
   }
   
   /**
@@ -624,44 +878,89 @@ export class RoadManager {
   public loadRoadsFromServer(): Promise<void> {
     if (this.isDisposed) return Promise.reject(new Error('RoadManager is disposed'));
     
-    return this.roadService.loadRoadsFromServer()
-      .then(roadDataArray => {
-        console.log(`Loading ${roadDataArray.length} roads from server`);
-        
-        // Clear existing roads first
-        this.removeAllRoads();
-        
-        // Create each road
-        roadDataArray.forEach(roadData => {
+    try {
+      return this.roadService.loadRoadsFromServer()
+        .then(roadDataArray => {
           try {
-            // Convert the points to Vector3
-            const points = this.roadService.convertToVector3Points(roadData.points);
+            log.info(`Loading ${roadDataArray.length} roads from server`);
             
-            // Create the road mesh
-            const mesh = this.createRoadMesh(points, roadData.curvature || 0.5);
+            // Clear existing roads first
+            try {
+              this.removeAllRoads();
+            } catch (removeError) {
+              log.error('Error clearing existing roads:', removeError);
+              // Continue with loading even if clearing fails
+            }
             
-            // Add to scene
-            this.scene.add(mesh);
+            // Track successful and failed roads
+            let successCount = 0;
+            let failCount = 0;
             
-            // Store the road
-            const road: Road = {
-              id: roadData.id,
-              points,
-              mesh,
-              curvature: roadData.curvature || 0.5
-            };
+            // Create each road
+            roadDataArray.forEach(roadData => {
+              try {
+                if (!roadData || !roadData.id || !roadData.points || !Array.isArray(roadData.points)) {
+                  log.warn('Invalid road data received from server:', roadData);
+                  failCount++;
+                  return; // Skip this road
+                }
+                
+                // Convert the points to Vector3
+                const points = this.roadService.convertToVector3Points(roadData.points);
+                
+                if (points.length < 2) {
+                  log.warn(`Road ${roadData.id} has insufficient points (${points.length}), skipping`);
+                  failCount++;
+                  return; // Skip this road
+                }
+                
+                // Create the road mesh
+                const mesh = this.createRoadMesh(points, roadData.curvature || 0.5);
+                
+                if (!mesh) {
+                  log.error(`Failed to create mesh for road ${roadData.id}, skipping`);
+                  failCount++;
+                  return; // Skip this road
+                }
+                
+                // Add to scene
+                this.scene.add(mesh);
+                
+                // Store the road
+                const road: Road = {
+                  id: roadData.id,
+                  points,
+                  mesh,
+                  curvature: roadData.curvature || 0.5
+                };
+                
+                this.roads.push(road);
+                log.info(`Loaded road ${roadData.id} from server`);
+                successCount++;
+              } catch (roadError) {
+                log.error(`Error creating road ${roadData?.id || 'unknown'} from server data:`, roadError);
+                failCount++;
+                // Continue with other roads
+              }
+            });
             
-            this.roads.push(road);
-            console.log(`Loaded road ${roadData.id} from server`);
-          } catch (error) {
-            console.error(`Error creating road from server data:`, error);
+            log.info(`Road loading complete: ${successCount} successful, ${failCount} failed`);
+          } catch (processingError) {
+            log.error('Error processing roads from server:', processingError);
+            throw processingError;
           }
+        })
+        .catch(error => {
+          log.error('Error loading roads from server:', error);
+          
+          // Return a resolved promise to prevent cascading failures
+          // The error has been logged, but we don't want to break the application
+          return Promise.resolve();
         });
-      })
-      .catch(error => {
-        console.error('Error loading roads from server:', error);
-        throw error;
-      });
+    } catch (unexpectedError) {
+      log.error('Unexpected error in loadRoadsFromServer:', unexpectedError);
+      return Promise.resolve(); // Prevent application crash
+    }
   }
 
   /**
@@ -670,47 +969,80 @@ export class RoadManager {
   public dispose(): void {
     if (this.isDisposed) return;
     
-    this.isDisposed = true;
-    console.log(`Cleaning up ${this.roads.length} roads`);
-    
-    // Remove all roads
-    this.roads.forEach(road => {
-      if (this.scene) {
-        this.scene.remove(road.mesh);
-      }
+    try {
+      this.isDisposed = true;
+      log.info(`Cleaning up ${this.roads.length} roads`);
       
-      if (road.mesh.geometry) {
-        road.mesh.geometry.dispose();
-      }
+      // Create a copy of the roads array to avoid modification during iteration
+      const roadsToDispose = [...this.roads];
       
-      if (road.mesh.material) {
-        if (Array.isArray(road.mesh.material)) {
-          road.mesh.material.forEach(m => {
-            if (m) m.dispose();
-          });
-        } else if (road.mesh.material) {
-          road.mesh.material.dispose();
+      // Remove all roads
+      roadsToDispose.forEach(road => {
+        try {
+          if (this.scene && road.mesh) {
+            this.scene.remove(road.mesh);
+          }
+          
+          try {
+            if (road.mesh && road.mesh.geometry) {
+              road.mesh.geometry.dispose();
+            }
+          } catch (geometryError) {
+            log.warn(`Error disposing road geometry during cleanup:`, geometryError);
+          }
+          
+          try {
+            if (road.mesh && road.mesh.material) {
+              if (Array.isArray(road.mesh.material)) {
+                road.mesh.material.forEach(m => {
+                  try {
+                    if (m) m.dispose();
+                  } catch (materialError) {
+                    log.warn(`Error disposing road material during cleanup:`, materialError);
+                  }
+                });
+              } else if (road.mesh.material) {
+                road.mesh.material.dispose();
+              }
+            }
+          } catch (materialError) {
+            log.warn(`Error disposing road materials during cleanup:`, materialError);
+          }
+        } catch (roadError) {
+          log.error(`Error disposing road during cleanup:`, roadError);
+          // Continue with other roads
         }
+      });
+      
+      this.roads = [];
+      
+      // Dispose of textures
+      try {
+        if (this.roadTexture) {
+          this.roadTexture.dispose();
+          this.roadTexture = null;
+        }
+      } catch (textureError) {
+        log.warn('Error disposing road texture:', textureError);
       }
-    });
-    
-    this.roads = [];
-    
-    // Dispose of textures
-    if (this.roadTexture) {
-      this.roadTexture.dispose();
-      this.roadTexture = null;
-    }
-    
-    if (this.roadNormalMap) {
-      this.roadNormalMap.dispose();
-      this.roadNormalMap = null;
-    }
-    
-    if (this.roadRoughnessMap) {
-      this.roadRoughnessMap.dispose();
-      this.roadRoughnessMap = null;
-    }
+      
+      try {
+        if (this.roadNormalMap) {
+          this.roadNormalMap.dispose();
+          this.roadNormalMap = null;
+        }
+      } catch (normalMapError) {
+        log.warn('Error disposing road normal map:', normalMapError);
+      }
+      
+      try {
+        if (this.roadRoughnessMap) {
+          this.roadRoughnessMap.dispose();
+          this.roadRoughnessMap = null;
+        }
+      } catch (roughnessMapError) {
+        log.warn('Error disposing road roughness map:', roughnessMapError);
+      }
     
     // Store a local reference to scene to avoid undefined issues during cleanup
     const currentScene = this.scene;
@@ -721,41 +1053,81 @@ export class RoadManager {
         const objectsToRemove: THREE.Object3D[] = [];
         
         // First collect all objects to remove
-        currentScene.traverse((object) => {
-          if (object instanceof THREE.Mesh && object.userData && object.userData.isRoad) {
-            console.log('Found orphaned road mesh, removing it');
-            objectsToRemove.push(object);
-          }
-        });
+        try {
+          currentScene.traverse((object) => {
+            try {
+              if (object instanceof THREE.Mesh && object.userData && object.userData.isRoad) {
+                log.info('Found orphaned road mesh during cleanup, removing it');
+                objectsToRemove.push(object);
+              }
+            } catch (traverseError) {
+              log.warn('Error during scene traversal for cleanup:', traverseError);
+              // Continue traversal
+            }
+          });
+        } catch (traverseError) {
+          log.error('Error traversing scene for cleanup:', traverseError);
+        }
         
         // Then remove them in a separate step to avoid modifying the scene during traversal
         objectsToRemove.forEach(object => {
-          currentScene.remove(object);
-          
-          if ((object as THREE.Mesh).geometry) {
-            (object as THREE.Mesh).geometry.dispose();
-          }
-          
-          if ((object as THREE.Mesh).material) {
-            const material = (object as THREE.Mesh).material;
-            if (Array.isArray(material)) {
-              material.forEach(m => {
-                if (m) m.dispose();
-              });
-            } else if (material) {
-              material.dispose();
+          try {
+            currentScene.remove(object);
+            
+            try {
+              if ((object as THREE.Mesh).geometry) {
+                (object as THREE.Mesh).geometry.dispose();
+              }
+            } catch (geometryError) {
+              log.warn('Error disposing orphaned mesh geometry during cleanup:', geometryError);
             }
+            
+            try {
+              if ((object as THREE.Mesh).material) {
+                const material = (object as THREE.Mesh).material;
+                if (Array.isArray(material)) {
+                  material.forEach(m => {
+                    try {
+                      if (m) m.dispose();
+                    } catch (materialError) {
+                      log.warn('Error disposing orphaned mesh material during cleanup:', materialError);
+                    }
+                  });
+                } else if (material) {
+                  material.dispose();
+                }
+              }
+            } catch (materialError) {
+              log.warn('Error disposing orphaned mesh materials during cleanup:', materialError);
+            }
+          } catch (objectError) {
+            log.error('Error removing orphaned mesh during cleanup:', objectError);
+            // Continue with other objects
           }
         });
+        
+        log.info(`Removed ${objectsToRemove.length} orphaned road meshes during cleanup`);
       } catch (error) {
-        console.error('Error cleaning up orphaned road meshes:', error);
+        log.error('Error cleaning up orphaned road meshes:', error);
       }
     }
     
     // Clear geometry cache
-    if (this.roadGeometryCache) {
-      this.roadGeometryCache.clear();
-      this.roadGeometryCache = null;
+    try {
+      if (this.roadGeometryCache) {
+        this.roadGeometryCache.clear();
+        this.roadGeometryCache = null;
+      }
+    } catch (cacheError) {
+      log.warn('Error clearing road geometry cache:', cacheError);
+    }
+    
+    log.info('RoadManager disposed successfully');
+    } catch (unexpectedError) {
+      log.error('Unexpected error during RoadManager disposal:', unexpectedError);
+      // Mark as disposed even if there was an error
+      this.isDisposed = true;
+      this.roads = [];
     }
   }
 }
