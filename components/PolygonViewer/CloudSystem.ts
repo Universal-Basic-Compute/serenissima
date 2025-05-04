@@ -22,13 +22,24 @@ export default class CloudSystem {
   constructor({ scene, width, height, performanceMode }: CloudSystemProps) {
     console.warn('CloudSystem is deprecated. Use CloudFacade from lib/threejs/CloudFacade instead.');
     
-    // Create a CloudFacade instance to handle all the functionality
-    this.cloudFacade = new CloudFacade(scene, {
-      width,
-      height,
-      performanceMode,
-      visible: false // Start invisible by default
-    });
+    try {
+      // Create a CloudFacade instance to handle all the functionality
+      this.cloudFacade = new CloudFacade(scene, {
+        width,
+        height,
+        performanceMode,
+        visible: false // Start invisible by default
+      });
+    } catch (error) {
+      console.error('Error initializing CloudFacade in deprecated CloudSystem:', error);
+      // Create a fallback facade with error handling
+      this.cloudFacade = new CloudFacade(scene || new THREE.Scene(), {
+        width: width || 300,
+        height: height || 300,
+        performanceMode: true, // Use performance mode for fallback
+        visible: false
+      });
+    }
   }
 
   /**
@@ -36,7 +47,12 @@ export default class CloudSystem {
    * @param time Current animation time
    */
   public update(time: number): void {
-    this.cloudFacade.update(time);
+    try {
+      this.cloudFacade.update(time);
+    } catch (error) {
+      console.warn('Error updating deprecated CloudSystem:', error);
+      // Silent fail to prevent application crashes
+    }
   }
 
   /**
@@ -44,7 +60,12 @@ export default class CloudSystem {
    * @param visible Whether clouds should be visible
    */
   public setVisibility(visible: boolean): void {
-    this.cloudFacade.setVisible(visible);
+    try {
+      this.cloudFacade.setVisible(visible);
+    } catch (error) {
+      console.warn('Error setting visibility in deprecated CloudSystem:', error);
+      // Silent fail to prevent application crashes
+    }
   }
 
   /**
@@ -52,13 +73,23 @@ export default class CloudSystem {
    * @param performanceMode Whether to use lower quality for better performance
    */
   public updateQuality(performanceMode: boolean): void {
-    this.cloudFacade.setPerformanceMode(performanceMode);
+    try {
+      this.cloudFacade.setPerformanceMode(performanceMode);
+    } catch (error) {
+      console.warn('Error updating quality in deprecated CloudSystem:', error);
+      // Silent fail to prevent application crashes
+    }
   }
 
   /**
    * Clean up resources
    */
   public cleanup(): void {
-    this.cloudFacade.dispose();
+    try {
+      this.cloudFacade.dispose();
+    } catch (error) {
+      console.warn('Error disposing deprecated CloudSystem:', error);
+      // Silent fail to prevent application crashes
+    }
   }
 }
