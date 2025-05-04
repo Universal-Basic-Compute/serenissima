@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { RoadCreationManager } from '@/lib/threejs/RoadCreationManager';
 import roadService from '@/services/RoadService';
+import { log } from '@/lib/logUtils';
 
 interface RoadCreatorProps {
   scene: THREE.Scene;
@@ -34,16 +35,30 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
   // Initialize the road creation manager
   useEffect(() => {
     if (active && !managerRef.current) {
-      managerRef.current = new RoadCreationManager(scene, camera);
+      try {
+        managerRef.current = new RoadCreationManager(scene, camera);
+        log.info('RoadCreator: Road creation manager initialized successfully');
+      } catch (error) {
+        log.error('RoadCreator: Failed to initialize road creation manager', error);
+        setErrorMessage('Failed to initialize road creation tools. Please refresh the page and try again.');
+        // Notify parent component of failure
+        setTimeout(() => onCancel(), 2000);
+      }
     }
     
     return () => {
       if (managerRef.current) {
-        managerRef.current.dispose();
-        managerRef.current = null;
+        try {
+          managerRef.current.dispose();
+          log.info('RoadCreator: Road creation manager disposed successfully');
+        } catch (error) {
+          log.error('RoadCreator: Error disposing road creation manager', error);
+        } finally {
+          managerRef.current = null;
+        }
       }
     };
-  }, [active, scene, camera]);
+  }, [active, scene, camera, onCancel]);
 
   // Set up event listeners when active
   useEffect(() => {
@@ -58,36 +73,51 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
     const handleMouseMove = (event: MouseEvent) => {
       if (!managerRef.current) return;
       
-      // Update mouse position in the manager
-      managerRef.current.updateMousePosition(event.clientX, event.clientY);
-      
-      // Update UI state based on manager state
-      setSnapPoint(managerRef.current.getSnapPoint());
+      try {
+        // Update mouse position in the manager
+        managerRef.current.updateMousePosition(event.clientX, event.clientY);
+        
+        // Update UI state based on manager state
+        setSnapPoint(managerRef.current.getSnapPoint());
+      } catch (error) {
+        log.error('RoadCreator: Error during mouse move handling', error);
+        // Don't show error to user for every mouse move, just log it
+      }
     };
 
     const handleClick = (event: MouseEvent) => {
       if (!active || event.button !== 0 || !clickEnabled || !managerRef.current) return;
       
-      console.log('Road Creator: Click detected');
+      log.info('RoadCreator: Click detected');
       
-      // Mark this event as handled by the road creator
-      (event as any).isRoadCreationClick = true;
-      
-      // Handle click in the manager
-      const newPoint = managerRef.current.handleClick();
-      
-      if (newPoint) {
-        console.log(`Road Creator: Adding point at (${newPoint.x}, ${newPoint.y}, ${newPoint.z})`);
+      try {
+        // Mark this event as handled by the road creator
+        (event as any).isRoadCreationClick = true;
         
-        // Update point count for UI
-        setPointCount(managerRef.current.getPoints().length);
+        // Handle click in the manager
+        const newPoint = managerRef.current.handleClick();
         
-        // Clear any error message
-        setErrorMessage(null);
-      } else {
-        console.log('Road Creator: No valid polygon intersection found');
-        // Show error message
-        setErrorMessage("Please click on a land polygon to place road points");
+        if (newPoint) {
+          log.info(`RoadCreator: Adding point at (${newPoint.x.toFixed(2)}, ${newPoint.y.toFixed(2)}, ${newPoint.z.toFixed(2)})`);
+          
+          // Update point count for UI
+          setPointCount(managerRef.current.getPoints().length);
+          
+          // Clear any error message
+          setErrorMessage(null);
+        } else {
+          log.warn('RoadCreator: No valid polygon intersection found');
+          // Show error message
+          setErrorMessage("Please click on a land polygon to place road points");
+          
+          // Clear the message after 2 seconds
+          setTimeout(() => {
+            setErrorMessage(null);
+          }, 2000);
+        }
+      } catch (error) {
+        log.error('RoadCreator: Error handling click event', error);
+        setErrorMessage("Failed to place road point. Please try again.");
         
         // Clear the message after 2 seconds
         setTimeout(() => {
@@ -99,17 +129,32 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
     const handleKeyDown = (event: KeyboardEvent) => {
       if (!managerRef.current) return;
       
-      if (event.key === 'Escape') {
-        // Cancel road creation
-        onCancel();
-      } else if (event.key === 'Enter' && pointCount >= 2) {
-        // Complete road creation
-        onComplete(managerRef.current.getPoints());
-      } else if (event.key === 'Backspace' || event.key === 'Delete') {
-        // Remove the last point
-        if (managerRef.current.removeLastPoint()) {
-          setPointCount(managerRef.current.getPoints().length);
+      try {
+        if (event.key === 'Escape') {
+          // Cancel road creation
+          log.info('RoadCreator: Cancelling road creation via Escape key');
+          onCancel();
+        } else if (event.key === 'Enter' && pointCount >= 2) {
+          // Complete road creation
+          log.info('RoadCreator: Completing road creation via Enter key');
+          onComplete(managerRef.current.getPoints());
+        } else if (event.key === 'Backspace' || event.key === 'Delete') {
+          // Remove the last point
+          log.info('RoadCreator: Removing last point via Backspace/Delete key');
+          if (managerRef.current.removeLastPoint()) {
+            setPointCount(managerRef.current.getPoints().length);
+          } else {
+            log.warn('RoadCreator: No points to remove');
+          }
         }
+      } catch (error) {
+        log.error('RoadCreator: Error handling key event', error);
+        setErrorMessage("An error occurred. Please try again.");
+        
+        // Clear the message after 2 seconds
+        setTimeout(() => {
+          setErrorMessage(null);
+        }, 2000);
       }
     };
 
@@ -118,12 +163,24 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
       
       if (!managerRef.current) return;
       
-      if (pointCount >= 2) {
-        // Complete the road on right-click
-        onComplete(managerRef.current.getPoints());
-      } else {
-        // Cancel if we don't have enough points
-        onCancel();
+      try {
+        if (pointCount >= 2) {
+          // Complete the road on right-click
+          log.info('RoadCreator: Completing road creation via right-click');
+          onComplete(managerRef.current.getPoints());
+        } else {
+          // Cancel if we don't have enough points
+          log.info('RoadCreator: Cancelling road creation via right-click (not enough points)');
+          onCancel();
+        }
+      } catch (error) {
+        log.error('RoadCreator: Error handling right-click event', error);
+        setErrorMessage("An error occurred. Please try again.");
+        
+        // Clear the message after 2 seconds
+        setTimeout(() => {
+          setErrorMessage(null);
+        }, 2000);
       }
     };
 
@@ -194,21 +251,51 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
               
               // Save the road using the service
               try {
+                log.info(`RoadCreator: Attempting to save road with ${points.length} points and curvature ${curvature}`);
+                
+                // Create a timeout to handle potential hanging requests
+                const timeoutId = setTimeout(() => {
+                  log.warn('RoadCreator: Road saving operation is taking too long');
+                  setErrorMessage('Road saving is taking longer than expected...');
+                }, 3000);
+                
                 const savedRoad = roadService.saveRoad(
                   points, 
                   curvature
                 );
-                console.log('Road saved successfully:', savedRoad);
+                
+                // Clear the timeout
+                clearTimeout(timeoutId);
+                
+                log.info('RoadCreator: Road saved successfully:', savedRoad);
                 
                 // Pass both points and road ID to parent component
                 onComplete(points, savedRoad.id);
               } catch (error) {
-                console.error('Failed to save road:', error);
-                setErrorMessage('Failed to save road. Please try again.');
+                log.error('RoadCreator: Failed to save road:', error);
                 
-                // Still pass the points even if saving failed
+                // Provide more detailed error message based on the error type
+                let errorMsg = 'Failed to save road. Please try again.';
+                
+                if (error instanceof Error) {
+                  if (error.message.includes('network') || error.message.includes('connection')) {
+                    errorMsg = 'Network error while saving road. Please check your connection and try again.';
+                  } else if (error.message.includes('permission') || error.message.includes('unauthorized')) {
+                    errorMsg = 'You do not have permission to create roads in this area.';
+                  } else if (error.message.includes('invalid')) {
+                    errorMsg = 'Invalid road data. Please try creating a different road path.';
+                  }
+                }
+                
+                setErrorMessage(errorMsg);
+                
+                // Still pass the points even if saving failed, so the UI can recover
+                log.info('RoadCreator: Continuing with points despite save failure');
                 onComplete(points);
               }
+            } else {
+              log.warn('RoadCreator: Attempted to complete road with insufficient points');
+              setErrorMessage('At least 2 points are required to create a road.');
             }
           }}
           disabled={pointCount < 2}
@@ -249,6 +336,46 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
       <div className="mt-1 text-xs text-gray-500 text-center">
         Roads will be saved automatically
       </div>
+      
+      {/* Recovery options - shown when there are errors but we have points */}
+      {errorMessage && pointCount >= 2 && (
+        <div className="mt-2 flex justify-center space-x-2">
+          <button
+            onClick={() => {
+              log.info('RoadCreator: User chose to retry road saving');
+              setErrorMessage(null);
+              // Trigger the Complete Road button's onClick handler
+              if (managerRef.current) {
+                try {
+                  const points = managerRef.current.getPoints();
+                  const savedRoad = roadService.saveRoad(points, curvature);
+                  log.info('RoadCreator: Road saved successfully on retry:', savedRoad);
+                  onComplete(points, savedRoad.id);
+                } catch (retryError) {
+                  log.error('RoadCreator: Failed to save road on retry:', retryError);
+                  setErrorMessage('Still unable to save road. Continuing without saving.');
+                  // Continue anyway after a brief delay
+                  setTimeout(() => onComplete(managerRef.current?.getPoints() || []), 1500);
+                }
+              }
+            }}
+            className="px-2 py-0.5 text-xs bg-blue-500 text-white rounded hover:bg-blue-600"
+          >
+            Retry
+          </button>
+          <button
+            onClick={() => {
+              log.info('RoadCreator: User chose to continue without saving');
+              if (managerRef.current) {
+                onComplete(managerRef.current.getPoints());
+              }
+            }}
+            className="px-2 py-0.5 text-xs bg-gray-500 text-white rounded hover:bg-gray-600"
+          >
+            Continue Anyway
+          </button>
+        </div>
+      )}
     </div>
   );
 };
