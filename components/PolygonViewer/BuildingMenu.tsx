@@ -1,14 +1,13 @@
 /**
  * Building menu component for browsing and placing buildings
  */
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Tab } from '@headlessui/react';
 import BuildingModelViewer from '../UI/BuildingModelViewer';
 import PlaceableBuilding from '../PolygonViewer/PlaceableBuilding';
 import { Building } from '@/lib/services/BuildingService';
-import useBuildingStore from '@/store/useBuildingStore';
 import ErrorBoundary from '../UI/ErrorBoundary';
-import { log } from '@/lib/logUtils';
+import { useBuildingMenu } from '@/hooks/useBuildingMenu';
 
 interface BuildingMenuProps {
   visible: boolean;
@@ -16,36 +15,25 @@ interface BuildingMenuProps {
 }
 
 export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
-  // Get state and actions from the store
-  const { 
-    categories, 
-    loading, 
-    selectedBuilding, 
-    selectedVariant, 
-    availableVariants, 
+  // Use the custom hook to handle all building menu logic
+  const {
+    categories,
+    loading,
+    selectedBuilding,
+    selectedVariant,
+    availableVariants,
     placeableBuilding,
+    handleSelectBuilding,
+    handleSelectVariant,
+    handlePlaceBuilding,
+    handlePlacementComplete,
+    handleCancelPlacement,
+    handleCloseDetailModal,
+    handlePreviousVariant,
+    handleNextVariant,
     loadBuildingCategories,
-    getBuildingVariants,
-    setSelectedBuilding,
-    setSelectedVariant,
-    setPlaceableBuilding
-  } = useBuildingStore();
-  
-  // Fetch available variants when a new building is selected
-  useEffect(() => {
-    if (selectedBuilding) {
-      setSelectedVariant("model");
-      
-      // Fetch variants from the store
-      getBuildingVariants(selectedBuilding.name);
-    }
-  }, [selectedBuilding, getBuildingVariants, setSelectedVariant]);
-
-  // Load building data when the menu becomes visible
-  useEffect(() => {
-    if (!visible) return;
-    loadBuildingCategories();
-  }, [visible, loadBuildingCategories]);
+    setSelectedBuilding
+  } = useBuildingMenu(visible);
 
   if (!visible) return null;
 
@@ -140,7 +128,7 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
                           className="bg-amber-50 rounded-lg p-4 border border-amber-200 hover:border-amber-400 cursor-pointer transition-colors"
                           onClick={(e) => {
                             e.stopPropagation(); // Ensure the click doesn't bubble up
-                            setSelectedBuilding(building);
+                            handleSelectBuilding(building);
                           }}
                         >
                           <div className="flex items-start">
@@ -183,7 +171,7 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
                                     className="text-xs bg-amber-600 text-white px-2 py-1 rounded hover:bg-amber-700"
                                     onClick={(e) => {
                                       e.stopPropagation(); // Prevent the parent div's onClick from firing
-                                      setSelectedBuilding(building);
+                                      handleSelectBuilding(building);
                                     }}
                                   >
                                     Details
@@ -192,10 +180,7 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
                                     className="text-xs bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700"
                                     onClick={(e) => {
                                       e.stopPropagation(); // Prevent the parent div's onClick from firing
-                                      setPlaceableBuilding({
-                                        name: building.name,
-                                        variant: 'model'
-                                      });
+                                      handlePlaceBuilding(building, 'model');
                                     }}
                                   >
                                     Build
@@ -224,7 +209,7 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
                   <div className="flex justify-between items-start mb-4">
                     <h2 className="text-2xl font-serif text-red-800">Error Loading Building Details</h2>
                     <button 
-                      onClick={() => setSelectedBuilding(null)}
+                      onClick={() => handleCloseDetailModal()}
                       className="text-red-700 hover:text-red-900 transition-colors"
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -246,7 +231,7 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
                       onClick={() => {
                         // Force a re-render of the building details
                         const currentBuilding = {...selectedBuilding};
-                        setSelectedBuilding(null);
+                        handleCloseDetailModal();
                         setTimeout(() => setSelectedBuilding(currentBuilding), 100);
                       }}
                       className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
@@ -275,7 +260,7 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
                   <button 
                     onClick={(e) => {
                       e.stopPropagation();
-                      setSelectedBuilding(null);
+                      handleCloseDetailModal();
                     }}
                     className="text-amber-700 hover:text-amber-900 transition-colors"
                   >
@@ -390,7 +375,7 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
                   <button 
                     onClick={(e) => {
                       e.stopPropagation();
-                      setSelectedBuilding(null);
+                      handleCloseDetailModal();
                     }}
                     className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
                   >
@@ -400,11 +385,7 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
                     className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors"
                     onClick={(e) => {
                       e.stopPropagation();
-                      setPlaceableBuilding({
-                        name: selectedBuilding.name,
-                        variant: selectedVariant
-                      });
-                      setSelectedBuilding(null); // Close the modal
+                      handlePlaceBuilding(selectedBuilding, selectedVariant);
                     }}
                   >
                     Build
@@ -423,9 +404,7 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            const currentIndex = availableVariants.indexOf(selectedVariant);
-                            const prevIndex = currentIndex > 0 ? currentIndex - 1 : availableVariants.length - 1;
-                            setSelectedVariant(availableVariants[prevIndex]);
+                            handlePreviousVariant();
                           }}
                           className="p-2 bg-amber-100 rounded-full hover:bg-amber-200 transition-colors shadow-md"
                           aria-label="Previous variant"
@@ -447,9 +426,7 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            const currentIndex = availableVariants.indexOf(selectedVariant);
-                            const nextIndex = currentIndex < availableVariants.length - 1 ? currentIndex + 1 : 0;
-                            setSelectedVariant(availableVariants[nextIndex]);
+                            handleNextVariant();
                           }}
                           className="p-2 bg-amber-100 rounded-full hover:bg-amber-200 transition-colors shadow-md"
                           aria-label="Next variant"
@@ -478,7 +455,7 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
                           key={variant}
                           onClick={(e) => {
                             e.stopPropagation();
-                            setSelectedVariant(variant);
+                            handleSelectVariant(variant);
                           }}
                           className={`w-3 h-3 rounded-full transition-colors ${
                             selectedVariant === variant 
@@ -497,7 +474,7 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
                           key={variant}
                           onClick={(e) => {
                             e.stopPropagation();
-                            setSelectedVariant(variant);
+                            handleSelectVariant(variant);
                           }}
                           className={`px-3 py-1 rounded text-sm ${
                             selectedVariant === variant 
@@ -615,7 +592,7 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
             </p>
             <div className="flex justify-end space-x-3">
               <button 
-                onClick={() => setPlaceableBuilding(null)}
+                onClick={() => handleCancelPlacement()}
                 className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
               >
                 Cancel
@@ -624,7 +601,7 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
                 onClick={() => {
                   // Reset the placeable building to try again
                   const currentBuilding = {...placeableBuilding};
-                  setPlaceableBuilding(null);
+                  handleCancelPlacement();
                   setTimeout(() => setPlaceableBuilding(currentBuilding), 100);
                 }}
                 className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
@@ -639,24 +616,8 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
       <PlaceableBuilding
         buildingName={placeableBuilding?.name?.toLowerCase().replace(/\s+/g, '-') || ''}
         variant={placeableBuilding?.variant}
-        onPlace={(position) => {
-          log.info(`Building placed at position: ${position.x}, ${position.y}`);
-          // Here you would add code to actually place the building in the world
-          
-          // Dispatch a custom event to notify other components about building placement
-          window.dispatchEvent(new CustomEvent('buildingPlaced', {
-            detail: {
-              buildingName: placeableBuilding?.name,
-              variant: placeableBuilding?.variant,
-              position
-            }
-          }));
-          
-          setPlaceableBuilding(null);
-        }}
-        onCancel={() => {
-          setPlaceableBuilding(null);
-        }}
+        onPlace={handlePlacementComplete}
+        onCancel={handleCancelPlacement}
       />
     </ErrorBoundary>
   )}

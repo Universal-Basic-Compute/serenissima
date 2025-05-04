@@ -1,0 +1,124 @@
+import { useEffect, useState } from 'react';
+import useBuildingStore from '@/store/useBuildingStore';
+import { Building } from '@/lib/services/BuildingService';
+import { log } from '@/lib/logUtils';
+
+/**
+ * Custom hook to handle building menu logic
+ */
+export function useBuildingMenu(visible: boolean) {
+  // Get state and actions from the store
+  const { 
+    categories, 
+    loading, 
+    selectedBuilding, 
+    selectedVariant, 
+    availableVariants, 
+    placeableBuilding,
+    loadBuildingCategories,
+    getBuildingVariants,
+    setSelectedBuilding,
+    setSelectedVariant,
+    setAvailableVariants,
+    setPlaceableBuilding
+  } = useBuildingStore();
+
+  // Fetch available variants when a new building is selected
+  useEffect(() => {
+    if (selectedBuilding) {
+      setSelectedVariant("model");
+      
+      // Fetch variants from the store
+      getBuildingVariants(selectedBuilding.name);
+    }
+  }, [selectedBuilding, getBuildingVariants, setSelectedVariant]);
+
+  // Load building data when the menu becomes visible
+  useEffect(() => {
+    if (!visible) return;
+    loadBuildingCategories();
+  }, [visible, loadBuildingCategories]);
+
+  // Function to handle building selection
+  const handleSelectBuilding = (building: Building) => {
+    setSelectedBuilding(building);
+  };
+
+  // Function to handle variant selection
+  const handleSelectVariant = (variant: string) => {
+    setSelectedVariant(variant);
+  };
+
+  // Function to handle building placement
+  const handlePlaceBuilding = (building: Building, variant: string = 'model') => {
+    setPlaceableBuilding({
+      name: building.name,
+      variant: variant
+    });
+    setSelectedBuilding(null); // Close the modal if open
+  };
+
+  // Function to handle building placement completion
+  const handlePlacementComplete = (position: { x: number, y: number }) => {
+    log.info(`Building placed at position: ${position.x}, ${position.y}`);
+    
+    // Dispatch a custom event to notify other components about building placement
+    window.dispatchEvent(new CustomEvent('buildingPlaced', {
+      detail: {
+        buildingName: placeableBuilding?.name,
+        variant: placeableBuilding?.variant,
+        position
+      }
+    }));
+    
+    setPlaceableBuilding(null);
+  };
+
+  // Function to cancel building placement
+  const handleCancelPlacement = () => {
+    setPlaceableBuilding(null);
+  };
+
+  // Function to close the building detail modal
+  const handleCloseDetailModal = () => {
+    setSelectedBuilding(null);
+  };
+
+  // Function to navigate to previous variant
+  const handlePreviousVariant = () => {
+    const currentIndex = availableVariants.indexOf(selectedVariant);
+    const prevIndex = currentIndex > 0 ? currentIndex - 1 : availableVariants.length - 1;
+    setSelectedVariant(availableVariants[prevIndex]);
+  };
+
+  // Function to navigate to next variant
+  const handleNextVariant = () => {
+    const currentIndex = availableVariants.indexOf(selectedVariant);
+    const nextIndex = currentIndex < availableVariants.length - 1 ? currentIndex + 1 : 0;
+    setSelectedVariant(availableVariants[nextIndex]);
+  };
+
+  return {
+    // State
+    categories,
+    loading,
+    selectedBuilding,
+    selectedVariant,
+    availableVariants,
+    placeableBuilding,
+    
+    // Actions
+    handleSelectBuilding,
+    handleSelectVariant,
+    handlePlaceBuilding,
+    handlePlacementComplete,
+    handleCancelPlacement,
+    handleCloseDetailModal,
+    handlePreviousVariant,
+    handleNextVariant,
+    
+    // Original store actions (for advanced use cases)
+    loadBuildingCategories,
+    setSelectedBuilding
+  };
+}

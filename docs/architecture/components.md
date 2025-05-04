@@ -77,3 +77,7 @@ Components should communicate through:
    - Allow users to retry or recover from errors
 5. **Performance Optimization**: Use memoization and virtualization when appropriate
 6. **Accessibility**: Ensure components are accessible
+7. **Separation of Concerns**: Separate presentation from business logic
+   - Use custom hooks for data fetching and state management
+   - Keep components focused on rendering
+   - Move complex logic out of components
