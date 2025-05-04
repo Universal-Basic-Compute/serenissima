@@ -435,61 +435,61 @@ export class RoadManager {
             const uvs: number[] = [];
             const normals: number[] = []; // Add normals for better lighting
       
-      // Sample points along the curve
-      const numPoints = Math.max(points.length * 10, 50);
-      const curvePoints = curve.getPoints(numPoints);
-      
-      // Create road segments
-      for (let i = 0; i < curvePoints.length - 1; i++) {
-        const current = curvePoints[i];
-        const next = curvePoints[i + 1];
-        
-        // Calculate direction vector
-        const direction = new THREE.Vector3()
-          .subVectors(next, current)
-          .normalize();
-        
-        // Calculate perpendicular vector
-        const perpendicular = new THREE.Vector3(-direction.z, 0, direction.x)
-          .normalize()
-          .multiplyScalar(roadWidth / 2);
-        
-        // Create quad vertices
-        const v1 = new THREE.Vector3().addVectors(current, perpendicular);
-        const v2 = new THREE.Vector3().subVectors(current, perpendicular);
-        const v3 = new THREE.Vector3().addVectors(next, perpendicular);
-        const v4 = new THREE.Vector3().subVectors(next, perpendicular);
-        
-        // Height offset to prevent z-fighting
-        const heightOffset = 0.25; // Increased from 0.2 to 0.25
-        
-        // First triangle
-        positions.push(v1.x, v1.y + heightOffset, v1.z);
-        positions.push(v2.x, v2.y + heightOffset, v2.z);
-        positions.push(v3.x, v3.y + heightOffset, v3.z);
-        
-        // Second triangle
-        positions.push(v2.x, v2.y + heightOffset, v2.z);
-        positions.push(v4.x, v4.y + heightOffset, v4.z);
-        positions.push(v3.x, v3.y + heightOffset, v3.z);
-        
-        // Add normals (all pointing up)
-        for (let j = 0; j < 6; j++) {
-          normals.push(0, 1, 0);
-        }
-        
-        // UVs for texture mapping
-        const segmentLength = current.distanceTo(next);
-        const uOffset = i / (curvePoints.length - 1);
-        
-        uvs.push(0, uOffset * 10);
-        uvs.push(1, uOffset * 10);
-        uvs.push(0, (uOffset + segmentLength) * 10);
-        
-        uvs.push(1, uOffset * 10);
-        uvs.push(1, (uOffset + segmentLength) * 10);
-        uvs.push(0, (uOffset + segmentLength) * 10);
-      }
+            // Sample points along the curve
+            const numPoints = Math.max(points.length * 10, 50);
+            const curvePoints = curve.getPoints(numPoints);
+            
+            // Create road segments
+            for (let i = 0; i < curvePoints.length - 1; i++) {
+              const current = curvePoints[i];
+              const next = curvePoints[i + 1];
+              
+              // Calculate direction vector
+              const direction = new THREE.Vector3()
+                .subVectors(next, current)
+                .normalize();
+              
+              // Calculate perpendicular vector
+              const perpendicular = new THREE.Vector3(-direction.z, 0, direction.x)
+                .normalize()
+                .multiplyScalar(roadWidth / 2);
+              
+              // Create quad vertices
+              const v1 = new THREE.Vector3().addVectors(current, perpendicular);
+              const v2 = new THREE.Vector3().subVectors(current, perpendicular);
+              const v3 = new THREE.Vector3().addVectors(next, perpendicular);
+              const v4 = new THREE.Vector3().subVectors(next, perpendicular);
+              
+              // Height offset to prevent z-fighting
+              const heightOffset = 0.25; // Increased from 0.2 to 0.25
+              
+              // First triangle
+              positions.push(v1.x, v1.y + heightOffset, v1.z);
+              positions.push(v2.x, v2.y + heightOffset, v2.z);
+              positions.push(v3.x, v3.y + heightOffset, v3.z);
+              
+              // Second triangle
+              positions.push(v2.x, v2.y + heightOffset, v2.z);
+              positions.push(v4.x, v4.y + heightOffset, v4.z);
+              positions.push(v3.x, v3.y + heightOffset, v3.z);
+              
+              // Add normals (all pointing up)
+              for (let j = 0; j < 6; j++) {
+                normals.push(0, 1, 0);
+              }
+              
+              // UVs for texture mapping
+              const segmentLength = current.distanceTo(next);
+              const uOffset = i / (curvePoints.length - 1);
+              
+              uvs.push(0, uOffset * 10);
+              uvs.push(1, uOffset * 10);
+              uvs.push(0, (uOffset + segmentLength) * 10);
+              
+              uvs.push(1, uOffset * 10);
+              uvs.push(1, (uOffset + segmentLength) * 10);
+              uvs.push(0, (uOffset + segmentLength) * 10);
+            }
       
           // Set attributes
           roadGeometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
@@ -518,28 +518,28 @@ export class RoadManager {
         polygonOffsetUnits: -12   // Increased from -10 to -12 for even better visibility
       });
           
-      // Track material for disposal
-      this.disposableResources.push(roadMaterial);
-      
-      // Apply texture if available
-      if (this.roadTexture) {
-        roadMaterial.map = this.roadTexture;
-        roadMaterial.needsUpdate = true;
-      }
-      
-      // Create road mesh
-      const road = new THREE.Mesh(roadGeometry, roadMaterial);
-      road.renderOrder = 120; // Increased from 100 to 120 for even higher priority
+          // Track material for disposal
+          this.disposableResources.push(roadMaterial);
           
-      // Mark as road for special handling
-      road.userData.isRoad = true;
-      road.userData.alwaysVisible = true;
-      road.userData.renderPriority = 'high';
-      road.userData.roadId = roadData?.id; // Store road ID for easier cleanup
-      
-      // Force the mesh to be visible
-      road.visible = true;
-      
+          // Apply texture if available
+          if (this.roadTexture) {
+            roadMaterial.map = this.roadTexture;
+            roadMaterial.needsUpdate = true;
+          }
+          
+          // Create road mesh
+          const road = new THREE.Mesh(roadGeometry, roadMaterial);
+          road.renderOrder = 120; // Increased from 100 to 120 for even higher priority
+              
+          // Mark as road for special handling
+          road.userData.isRoad = true;
+          road.userData.alwaysVisible = true;
+          road.userData.renderPriority = 'high';
+          road.userData.roadId = roadData?.id; // Store road ID for easier cleanup
+          
+          // Force the mesh to be visible
+          road.visible = true;
+          
           return road;
         } catch (curveError) {
           log.error('Failed to create curved path:', curveError);
@@ -578,53 +578,53 @@ export class RoadManager {
             const positions: number[] = [];
             const uvs: number[] = [];
       
-      // Sample points along the curve
-      const numPoints = Math.max(points.length * 10, 50);
-      const curvePoints = curve.getPoints(numPoints);
-      
-      // Create road segments
-      for (let i = 0; i < curvePoints.length - 1; i++) {
-        const current = curvePoints[i];
-        const next = curvePoints[i + 1];
-        
-        // Calculate direction vector
-        const direction = new THREE.Vector3()
-          .subVectors(next, current)
-          .normalize();
-        
-        // Calculate perpendicular vector
-        const perpendicular = new THREE.Vector3(-direction.z, 0, direction.x)
-          .normalize()
-          .multiplyScalar(roadWidth / 2);
-        
-        // Create quad vertices
-        const v1 = new THREE.Vector3().addVectors(current, perpendicular);
-        const v2 = new THREE.Vector3().subVectors(current, perpendicular);
-        const v3 = new THREE.Vector3().addVectors(next, perpendicular);
-        const v4 = new THREE.Vector3().subVectors(next, perpendicular);
-        
-        // First triangle
-        positions.push(v1.x, v1.y + 0.25, v1.z); // Increased height offset
-        positions.push(v2.x, v2.y + 0.25, v2.z);
-        positions.push(v3.x, v3.y + 0.25, v3.z);
-        
-        // Second triangle
-        positions.push(v2.x, v2.y + 0.25, v2.z);
-        positions.push(v4.x, v4.y + 0.25, v4.z);
-        positions.push(v3.x, v3.y + 0.25, v3.z);
-        
-        // UVs for texture mapping
-        const segmentLength = current.distanceTo(next);
-        const uOffset = i / (curvePoints.length - 1);
-        
-        uvs.push(0, uOffset * 10);
-        uvs.push(1, uOffset * 10);
-        uvs.push(0, (uOffset + segmentLength) * 10);
-        
-        uvs.push(1, uOffset * 10);
-        uvs.push(1, (uOffset + segmentLength) * 10);
-        uvs.push(0, (uOffset + segmentLength) * 10);
-      }
+            // Sample points along the curve
+            const numPoints = Math.max(points.length * 10, 50);
+            const curvePoints = curve.getPoints(numPoints);
+            
+            // Create road segments
+            for (let i = 0; i < curvePoints.length - 1; i++) {
+              const current = curvePoints[i];
+              const next = curvePoints[i + 1];
+              
+              // Calculate direction vector
+              const direction = new THREE.Vector3()
+                .subVectors(next, current)
+                .normalize();
+              
+              // Calculate perpendicular vector
+              const perpendicular = new THREE.Vector3(-direction.z, 0, direction.x)
+                .normalize()
+                .multiplyScalar(roadWidth / 2);
+              
+              // Create quad vertices
+              const v1 = new THREE.Vector3().addVectors(current, perpendicular);
+              const v2 = new THREE.Vector3().subVectors(current, perpendicular);
+              const v3 = new THREE.Vector3().addVectors(next, perpendicular);
+              const v4 = new THREE.Vector3().subVectors(next, perpendicular);
+              
+              // First triangle
+              positions.push(v1.x, v1.y + 0.25, v1.z); // Increased height offset
+              positions.push(v2.x, v2.y + 0.25, v2.z);
+              positions.push(v3.x, v3.y + 0.25, v3.z);
+              
+              // Second triangle
+              positions.push(v2.x, v2.y + 0.25, v2.z);
+              positions.push(v4.x, v4.y + 0.25, v4.z);
+              positions.push(v3.x, v3.y + 0.25, v3.z);
+              
+              // UVs for texture mapping
+              const segmentLength = current.distanceTo(next);
+              const uOffset = i / (curvePoints.length - 1);
+              
+              uvs.push(0, uOffset * 10);
+              uvs.push(1, uOffset * 10);
+              uvs.push(0, (uOffset + segmentLength) * 10);
+              
+              uvs.push(1, uOffset * 10);
+              uvs.push(1, (uOffset + segmentLength) * 10);
+              uvs.push(0, (uOffset + segmentLength) * 10);
+            }
       
             // Set attributes
             roadGeometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
@@ -641,36 +641,36 @@ export class RoadManager {
             this.pruneGeometryCache();
           }
       
-      // Create road material with better visibility
-      const roadMaterial = new THREE.MeshBasicMaterial({
-        color: 0x555555,
-        side: THREE.DoubleSide,
-        depthWrite: false,
-        depthTest: true,
-        transparent: false,
-        polygonOffset: true,
-        polygonOffsetFactor: -12, // Increased for better visibility
-        polygonOffsetUnits: -12
-      });
-      
-      // Apply texture if available
-      if (this.roadTexture) {
-        roadMaterial.map = this.roadTexture;
-        roadMaterial.needsUpdate = true;
-      }
-      
-      // Create road mesh
-      const road = new THREE.Mesh(roadGeometry, roadMaterial);
-      road.renderOrder = 120; // Higher priority
-      
-      // Mark as road for special handling
-      road.userData.isRoad = true;
-      road.userData.alwaysVisible = true;
-      road.userData.renderPriority = 'high';
-      
-      // Force the mesh to be visible
-      road.visible = true;
-      
+          // Create road material with better visibility
+          const roadMaterial = new THREE.MeshBasicMaterial({
+            color: 0x555555,
+            side: THREE.DoubleSide,
+            depthWrite: false,
+            depthTest: true,
+            transparent: false,
+            polygonOffset: true,
+            polygonOffsetFactor: -12, // Increased for better visibility
+            polygonOffsetUnits: -12
+          });
+          
+          // Apply texture if available
+          if (this.roadTexture) {
+            roadMaterial.map = this.roadTexture;
+            roadMaterial.needsUpdate = true;
+          }
+          
+          // Create road mesh
+          const road = new THREE.Mesh(roadGeometry, roadMaterial);
+          road.renderOrder = 120; // Higher priority
+          
+          // Mark as road for special handling
+          road.userData.isRoad = true;
+          road.userData.alwaysVisible = true;
+          road.userData.renderPriority = 'high';
+          
+          // Force the mesh to be visible
+          road.visible = true;
+          
           return road;
         } catch (geometryError) {
           log.error('Failed to create road geometry in fallback mode:', geometryError);
