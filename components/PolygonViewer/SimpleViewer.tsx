@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import SimpleCamera from './SimpleCamera';
-import SimplePolygonRenderer from './SimplePolygonRenderer';
 import SimpleWater from './SimpleWater';
 import { calculateBounds } from './utils';
 
@@ -16,10 +15,9 @@ export default function SimpleViewer() {
   const sceneRef = useRef<THREE.Scene | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const cameraControllerRef = useRef<SimpleCamera | null>(null);
-  const polygonRendererRef = useRef<SimplePolygonRenderer | null>(null);
   const waterRef = useRef<SimpleWater | null>(null);
   
-  // Load polygons
+  // Load polygons (still needed to calculate bounds)
   useEffect(() => {
     fetch('/api/get-polygons')
       .then(response => response.json())
@@ -53,23 +51,15 @@ export default function SimpleViewer() {
     renderer.setPixelRatio(window.devicePixelRatio);
     rendererRef.current = renderer;
     
-    // Calculate bounds for all polygons
+    // Calculate bounds for all polygons (still needed for water size)
     const bounds = calculateBounds(polygons);
     
     // Create camera controller
     const cameraController = new SimpleCamera(renderer.domElement);
     cameraControllerRef.current = cameraController;
     
-    // Create polygon renderer
-    const polygonRenderer = new SimplePolygonRenderer({
-      scene,
-      polygons,
-      bounds
-    });
-    polygonRendererRef.current = polygonRenderer;
-    
-    // Create water
-    const waterSize = Math.max(bounds.scale * 1000, 2000); // Doubled from 500 to 1000, and min size from 1000 to 2000
+    // Create water only (no polygons)
+    const waterSize = Math.max(bounds.scale * 1000, 2000);
     const water = new SimpleWater({
       scene,
       size: waterSize
@@ -122,7 +112,6 @@ export default function SimpleViewer() {
       window.removeEventListener('resize', handleResize);
       
       if (waterRef.current) waterRef.current.cleanup();
-      if (polygonRenderer) polygonRenderer.cleanup();
       if (cameraController) cameraController.cleanup();
       if (renderer) renderer.dispose();
       
@@ -144,7 +133,7 @@ export default function SimpleViewer() {
   if (loading) {
     return (
       <div className="w-full h-full flex items-center justify-center">
-        <div className="text-lg">Loading map data...</div>
+        <div className="text-lg">Loading water...</div>
       </div>
     );
   }
