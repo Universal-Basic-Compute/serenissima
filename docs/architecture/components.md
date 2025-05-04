@@ -71,5 +71,9 @@ Components should communicate through:
 2. **Prop Validation**: Use TypeScript interfaces for prop validation
 3. **Controlled Components**: Prefer controlled components over uncontrolled
 4. **Error Boundaries**: Use error boundaries to prevent cascading failures
+   - Wrap complex components with error boundaries
+   - Provide meaningful fallback UIs
+   - Log errors for debugging
+   - Allow users to retry or recover from errors
 5. **Performance Optimization**: Use memoization and virtualization when appropriate
 6. **Accessibility**: Ensure components are accessible

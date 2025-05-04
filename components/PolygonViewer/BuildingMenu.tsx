@@ -7,6 +7,8 @@ import BuildingModelViewer from '../UI/BuildingModelViewer';
 import PlaceableBuilding from '../PolygonViewer/PlaceableBuilding';
 import { Building } from '@/lib/services/BuildingService';
 import useBuildingStore from '@/store/useBuildingStore';
+import ErrorBoundary from '../UI/ErrorBoundary';
+import { log } from '@/lib/logUtils';
 
 interface BuildingMenuProps {
   visible: boolean;
@@ -48,12 +50,40 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
   if (!visible) return null;
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-30 transform transition-transform duration-300 ease-in-out" 
-      onClick={(e) => {
-        // Only stop propagation, don't close the menu when clicking inside
-        e.stopPropagation();
+    <ErrorBoundary 
+      componentName="BuildingMenu"
+      onError={(error, errorInfo) => {
+        log.error('BuildingMenu error:', error, errorInfo);
       }}
+      fallback={
+        <div className="fixed inset-x-0 bottom-0 z-30 bg-amber-50 border-t-4 border-red-600 shadow-lg p-6">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-2xl font-serif text-red-800">Error Loading Buildings</h2>
+            <button 
+              onClick={onClose}
+              className="text-red-700 hover:text-red-900 transition-colors"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <p className="text-red-700 mb-4">We encountered an error while loading the building menu. Please try again later.</p>
+          <button 
+            onClick={() => loadBuildingCategories()}
+            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+      }
     >
+      <div className="fixed inset-x-0 bottom-0 z-30 transform transition-transform duration-300 ease-in-out" 
+        onClick={(e) => {
+          // Only stop propagation, don't close the menu when clicking inside
+          e.stopPropagation();
+        }}
+      >
       <div className="bg-amber-50 border-t-4 border-amber-600 shadow-lg max-h-[70vh] overflow-hidden flex flex-col">
         {/* Header */}
         <div className="flex justify-between items-center p-4 border-b border-amber-300">
@@ -186,7 +216,49 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
 
         {/* Building Detail Modal */}
         {selectedBuilding && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-40 p-4">
+          <ErrorBoundary
+            componentName="BuildingDetailModal"
+            fallback={
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-40 p-4">
+                <div className="bg-amber-50 rounded-lg shadow-xl max-w-md w-full p-6">
+                  <div className="flex justify-between items-start mb-4">
+                    <h2 className="text-2xl font-serif text-red-800">Error Loading Building Details</h2>
+                    <button 
+                      onClick={() => setSelectedBuilding(null)}
+                      className="text-red-700 hover:text-red-900 transition-colors"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                  <p className="text-red-700 mb-4">
+                    We encountered an error while loading the details for this building. Please try again.
+                  </p>
+                  <div className="flex justify-end space-x-3">
+                    <button 
+                      onClick={() => setSelectedBuilding(null)}
+                      className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                    >
+                      Close
+                    </button>
+                    <button 
+                      onClick={() => {
+                        // Force a re-render of the building details
+                        const currentBuilding = {...selectedBuilding};
+                        setSelectedBuilding(null);
+                        setTimeout(() => setSelectedBuilding(currentBuilding), 100);
+                      }}
+                      className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                    >
+                      Try Again
+                    </button>
+                  </div>
+                </div>
+              </div>
+            }
+          >
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-40 p-4">
             <div className="bg-amber-50 rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-auto">
               <div className="p-6">
                 <div className="flex justify-between items-start mb-4">
@@ -524,6 +596,7 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
               </div>
             </div>
           </div>
+          </ErrorBoundary>
         )}
       </div>
     </div>
@@ -531,27 +604,61 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
     
   {/* Placeable Building */}
   {placeableBuilding && (
-    <PlaceableBuilding
-      buildingName={placeableBuilding?.name?.toLowerCase().replace(/\s+/g, '-') || ''}
-      variant={placeableBuilding?.variant}
-      onPlace={(position) => {
-        console.log(`Building placed at position: ${position.x}, ${position.y}`);
-        // Here you would add code to actually place the building in the world
-        
-        // Dispatch a custom event to notify other components about building placement
-        window.dispatchEvent(new CustomEvent('buildingPlaced', {
-          detail: {
-            buildingName: placeableBuilding?.name,
-            variant: placeableBuilding?.variant,
-            position
-          }
-        }));
-        
-        setPlaceableBuilding(null);
-      }}
-      onCancel={() => {
-        setPlaceableBuilding(null);
-      }}
-    />
+    <ErrorBoundary 
+      componentName="PlaceableBuilding"
+      fallback={
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg shadow-xl max-w-md">
+            <h3 className="text-xl font-medium text-red-800 mb-4">Building Placement Error</h3>
+            <p className="text-gray-700 mb-4">
+              There was an error while trying to place the building. Please try again.
+            </p>
+            <div className="flex justify-end space-x-3">
+              <button 
+                onClick={() => setPlaceableBuilding(null)}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={() => {
+                  // Reset the placeable building to try again
+                  const currentBuilding = {...placeableBuilding};
+                  setPlaceableBuilding(null);
+                  setTimeout(() => setPlaceableBuilding(currentBuilding), 100);
+                }}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+              >
+                Try Again
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+    >
+      <PlaceableBuilding
+        buildingName={placeableBuilding?.name?.toLowerCase().replace(/\s+/g, '-') || ''}
+        variant={placeableBuilding?.variant}
+        onPlace={(position) => {
+          log.info(`Building placed at position: ${position.x}, ${position.y}`);
+          // Here you would add code to actually place the building in the world
+          
+          // Dispatch a custom event to notify other components about building placement
+          window.dispatchEvent(new CustomEvent('buildingPlaced', {
+            detail: {
+              buildingName: placeableBuilding?.name,
+              variant: placeableBuilding?.variant,
+              position
+            }
+          }));
+          
+          setPlaceableBuilding(null);
+        }}
+        onCancel={() => {
+          setPlaceableBuilding(null);
+        }}
+      />
+    </ErrorBoundary>
   )}
 }
+</ErrorBoundary>
