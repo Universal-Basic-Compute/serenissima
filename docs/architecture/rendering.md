@@ -167,6 +167,7 @@ The rendering architecture includes several performance optimizations:
 6. **Lazy Loading**: Load assets only when needed
 7. **Memory Management**: Properly dispose of unused resources
 8. **Geometry Sharing**: Cache and reuse similar geometries between objects
+8. **Geometry Sharing**: Cache and reuse similar geometries between objects
 
 ## Memory Management
 
