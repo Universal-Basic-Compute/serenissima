@@ -54,7 +54,7 @@ def process_todo(todo):
 
     # Construct the Aider command
     message = f"{description}\n\n{details}" if details else description
-    aider_cmd = ["aider", "--message", message]
+    aider_cmd = ["aider", "--message", message, "--yes-always"]
 
     # Add files to read
     for file in valid_files:
