@@ -1,12 +1,14 @@
 import * as THREE from 'three';
 import { Polygon, ViewMode } from '../../components/PolygonViewer/types';
 import { normalizeCoordinates, createPolygonShape } from '../../components/PolygonViewer/utils';
+import { Poolable } from './ObjectPool';
 
 /**
  * Facade for managing a single polygon mesh
  * Hides Three.js implementation details
+ * Implements Poolable interface for object pooling
  */
-export class PolygonMeshFacade {
+export class PolygonMeshFacade implements Poolable {
   private scene: THREE.Scene;
   private polygon: Polygon;
   private bounds: any;
@@ -20,6 +22,9 @@ export class PolygonMeshFacade {
   private ownerColor: string | null = null;
   private ownerCoatOfArmsUrl: string | null = null;
   private isDisposed: boolean = false;
+  private isActive: boolean = false;
+  private originalGeometry: THREE.BufferGeometry | null = null;
+  private simplifiedGeometries: Map<number, THREE.BufferGeometry> = new Map();
 
   constructor(
     scene: THREE.Scene,
@@ -42,6 +47,64 @@ export class PolygonMeshFacade {
     
     // Create the mesh
     this.createMesh();
+  }
+  
+  /**
+   * Configure the polygon mesh with new data
+   * Used when reusing objects from the pool
+   */
+  public configure(
+    polygon: Polygon,
+    bounds: any,
+    activeView: ViewMode,
+    performanceMode: boolean,
+    ownerColor: string | null = null,
+    ownerCoatOfArmsUrl: string | null = null
+  ): void {
+    this.polygon = polygon;
+    this.bounds = bounds;
+    this.activeView = activeView;
+    this.performanceMode = performanceMode;
+    this.ownerColor = ownerColor;
+    this.ownerCoatOfArmsUrl = ownerCoatOfArmsUrl;
+    
+    // Create the mesh if it doesn't exist
+    if (!this.mesh) {
+      this.createMesh();
+    } else {
+      // Update existing mesh with new data
+      this.updateMeshWithNewData();
+    }
+  }
+  
+  /**
+   * Reset the object for reuse from the pool
+   */
+  public reset(): void {
+    this.isSelected = false;
+    this.isHovered = false;
+    
+    if (this.mesh) {
+      this.scene.remove(this.mesh);
+      
+      // Don't dispose geometry here, we'll reuse it
+      // Just clear the mesh reference
+      this.mesh = null;
+    }
+  }
+  
+  /**
+   * Check if the object is active in the pool
+   */
+  public isActive(): boolean {
+    return this.isActive;
+  }
+  
+  /**
+   * Set the active state of the object
+   */
+  public setActive(active: boolean): void {
+    this.isActive = active;
   }
   
   /**
@@ -96,6 +159,9 @@ export class PolygonMeshFacade {
       
       // Add to scene
       this.scene.add(this.mesh);
+      
+      // Store original geometry for LOD
+      this.originalGeometry = geometry.clone();
       
       // Store original color for hover/selection effects
       if (material instanceof THREE.MeshBasicMaterial) {
@@ -327,6 +393,17 @@ export class PolygonMeshFacade {
     if (this.mesh) {
       this.scene.remove(this.mesh);
       
+      // Dispose of all geometries
+      if (this.originalGeometry) {
+        this.originalGeometry.dispose();
+        this.originalGeometry = null;
+      }
+      
+      this.simplifiedGeometries.forEach(geometry => {
+        geometry.dispose();
+      });
+      this.simplifiedGeometries.clear();
+      
       if (this.mesh.geometry) {
         this.mesh.geometry.dispose();
       }
@@ -347,3 +424,148 @@ export class PolygonMeshFacade {
     this.originalColor = null;
   }
 }
+  /**
+   * Update existing mesh with new polygon data
+   */
+  private updateMeshWithNewData(): void {
+    if (!this.mesh) return;
+    
+    try {
+      // Update material based on the new data
+      const material = this.createMaterial();
+      
+      if (Array.isArray(this.mesh.material)) {
+        // Replace all materials
+        this.mesh.material.forEach(mat => mat.dispose());
+        this.mesh.material = material;
+      } else {
+        // Replace single material
+        if (this.mesh.material) this.mesh.material.dispose();
+        this.mesh.material = material;
+      }
+      
+      // Update geometry if needed
+      if (this.polygon.coordinates && this.polygon.coordinates.length >= 3) {
+        // Only recreate geometry if coordinates have changed
+        // This is a performance optimization
+        this.updateGeometry();
+      }
+      
+      // Store original color for hover/selection effects
+      if (material instanceof THREE.MeshBasicMaterial) {
+        this.originalColor = material.color.clone();
+      }
+    } catch (error) {
+      console.error('Error updating mesh with new data:', error);
+    }
+  }
+  
+  /**
+   * Update geometry with new coordinates
+   */
+  private updateGeometry(): void {
+    if (!this.mesh || !this.polygon.coordinates) return;
+    
+    try {
+      // Normalize coordinates
+      const normalizedCoords = normalizeCoordinates(
+        this.polygon.coordinates,
+        this.bounds.centerLat,
+        this.bounds.centerLng,
+        this.bounds.scale,
+        this.bounds.latCorrectionFactor
+      );
+      
+      // Create shape from normalized coordinates
+      const shape = createPolygonShape(normalizedCoords);
+      
+      // Create geometry from shape
+      const geometry = new THREE.ShapeGeometry(shape);
+      
+      // Store original geometry for LOD
+      this.originalGeometry = geometry.clone();
+      
+      // Apply the new geometry
+      if (this.mesh.geometry) {
+        this.mesh.geometry.dispose();
+      }
+      this.mesh.geometry = geometry;
+      
+      // Clear simplified geometries cache
+      this.simplifiedGeometries.forEach(g => g.dispose());
+      this.simplifiedGeometries.clear();
+    } catch (error) {
+      console.error('Error updating geometry:', error);
+    }
+  }
+  /**
+   * Apply a simplified geometry based on detail level
+   */
+  public applyLOD(detailLevel: number): void {
+    if (!this.mesh || !this.originalGeometry) return;
+    
+    // If detail level is 1.0, use original geometry
+    if (detailLevel >= 0.99) {
+      this.mesh.geometry = this.originalGeometry;
+      return;
+    }
+    
+    // Round detail level to nearest 0.1 to limit number of cached geometries
+    const roundedDetailLevel = Math.round(detailLevel * 10) / 10;
+    
+    // Check if we already have a simplified geometry for this detail level
+    if (this.simplifiedGeometries.has(roundedDetailLevel)) {
+      this.mesh.geometry = this.simplifiedGeometries.get(roundedDetailLevel)!;
+      return;
+    }
+    
+    // Create a simplified geometry
+    const simplifiedGeometry = this.createSimplifiedGeometry(roundedDetailLevel);
+    
+    // Cache it for future use
+    this.simplifiedGeometries.set(roundedDetailLevel, simplifiedGeometry);
+    
+    // Apply it to the mesh
+    this.mesh.geometry = simplifiedGeometry;
+  }
+  
+  /**
+   * Create a simplified version of the geometry
+   */
+  private createSimplifiedGeometry(detailLevel: number): THREE.BufferGeometry {
+    // This is a simplified implementation - in a real app, you would use
+    // a proper geometry simplification algorithm
+    
+    if (!this.originalGeometry) {
+      throw new Error('Original geometry is null');
+    }
+    
+    // Create a clone of the original geometry
+    const simplifiedGeometry = this.originalGeometry.clone();
+    
+    // If the geometry has an index buffer, we can simplify by removing vertices
+    if (simplifiedGeometry.index) {
+      const originalIndices = Array.from(simplifiedGeometry.index.array);
+      const totalTriangles = originalIndices.length / 3;
+      
+      // Calculate how many triangles to keep
+      const trianglesToKeep = Math.max(1, Math.floor(totalTriangles * detailLevel));
+      
+      // Create a new index buffer with fewer triangles
+      const newIndices = new Uint16Array(trianglesToKeep * 3);
+      
+      // Keep every nth triangle
+      const step = Math.max(1, Math.floor(totalTriangles / trianglesToKeep));
+      
+      for (let i = 0, j = 0; i < trianglesToKeep && j < totalTriangles; i++, j += step) {
+        newIndices[i * 3] = originalIndices[j * 3];
+        newIndices[i * 3 + 1] = originalIndices[j * 3 + 1];
+        newIndices[i * 3 + 2] = originalIndices[j * 3 + 2];
+      }
+      
+      // Update the index buffer
+      simplifiedGeometry.setIndex(new THREE.BufferAttribute(newIndices, 1));
+    }
+    
+    return simplifiedGeometry;
+  }
