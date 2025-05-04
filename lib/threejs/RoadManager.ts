@@ -27,6 +27,7 @@ export class RoadManager {
   private geometryUsageCount: Map<string, number> = new Map();
   private isDisposed: boolean = false;
   private roadService: RoadService;
+  private disposableResources: Array<{ dispose: () => void }> = [];
 
   /**
    * Creates a new RoadManager
@@ -47,6 +48,8 @@ export class RoadManager {
             texture.wrapT = THREE.RepeatWrapping;
             texture.repeat.set(1, 10);
             this.roadTexture = texture;
+            // Track for disposal
+            this.disposableResources.push(texture);
               
             // Force update existing roads with the new texture
             this.roads.forEach(road => {
@@ -86,6 +89,8 @@ export class RoadManager {
             texture.wrapT = THREE.RepeatWrapping;
             texture.repeat.set(1, 10);
             this.roadNormalMap = texture;
+            // Track for disposal
+            this.disposableResources.push(texture);
           } catch (normalMapSetupError) {
             log.warn('Error setting up road normal map:', normalMapSetupError);
             // Continue without normal map
@@ -112,6 +117,8 @@ export class RoadManager {
             texture.wrapT = THREE.RepeatWrapping;
             texture.repeat.set(1, 10);
             this.roadRoughnessMap = texture;
+            // Track for disposal
+            this.disposableResources.push(texture);
           } catch (roughnessMapSetupError) {
             log.warn('Error setting up road roughness map:', roughnessMapSetupError);
             // Continue without roughness map
@@ -155,8 +162,8 @@ export class RoadManager {
     
     // Try to import the 3D utilities for path simplification
     try {
-      // Dynamic import of utils3D
-      const utils3DModule = require('./utils3D');
+      // Import from the correct location
+      const utils3DModule = require('../PolygonViewer/utils3D');
       const { simplifyPath } = utils3DModule;
       
       try {
@@ -394,8 +401,8 @@ export class RoadManager {
     
     // Try to import the 3D utilities for smoother roads
     try {
-      // Dynamic import of utils3D
-      const utils3DModule = require('./utils3D');
+      // Import from the correct location
+      const utils3DModule = require('../PolygonViewer/utils3D');
       const { smoothPath } = utils3DModule;
       
       try {
@@ -510,6 +517,9 @@ export class RoadManager {
         polygonOffsetFactor: -12, // Increased from -10 to -12 for even better visibility
         polygonOffsetUnits: -12   // Increased from -10 to -12 for even better visibility
       });
+          
+      // Track material for disposal
+      this.disposableResources.push(roadMaterial);
       
       // Apply texture if available
       if (this.roadTexture) {
@@ -520,11 +530,12 @@ export class RoadManager {
       // Create road mesh
       const road = new THREE.Mesh(roadGeometry, roadMaterial);
       road.renderOrder = 120; // Increased from 100 to 120 for even higher priority
-      
+          
       // Mark as road for special handling
       road.userData.isRoad = true;
       road.userData.alwaysVisible = true;
       road.userData.renderPriority = 'high';
+      road.userData.roadId = roadData?.id; // Store road ID for easier cleanup
       
       // Force the mesh to be visible
       road.visible = true;
@@ -1111,6 +1122,20 @@ export class RoadManager {
           
           try {
             if (road.mesh && road.mesh.geometry) {
+              // Properly dispose of geometry buffers
+              if (road.mesh.geometry.index) {
+                road.mesh.geometry.index.array = null;
+              }
+              
+              // Dispose of all geometry attributes
+              Object.keys(road.mesh.geometry.attributes).forEach(attributeName => {
+                const attribute = road.mesh.geometry.attributes[attributeName];
+                if (attribute) {
+                  attribute.array = null;
+                  road.mesh.geometry.deleteAttribute(attributeName);
+                }
+              });
+              
               road.mesh.geometry.dispose();
             }
           } catch (geometryError) {
@@ -1122,17 +1147,28 @@ export class RoadManager {
               if (Array.isArray(road.mesh.material)) {
                 road.mesh.material.forEach(m => {
                   try {
-                    if (m) m.dispose();
+                    if (m) {
+                      // Dispose of all textures on the material
+                      this.disposeTexturesFromMaterial(m);
+                      m.dispose();
+                    }
                   } catch (materialError) {
                     log.warn(`Error disposing road material during cleanup:`, materialError);
                   }
                 });
               } else if (road.mesh.material) {
+                // Dispose of all textures on the material
+                this.disposeTexturesFromMaterial(road.mesh.material);
                 road.mesh.material.dispose();
               }
             }
           } catch (materialError) {
             log.warn(`Error disposing road materials during cleanup:`, materialError);
+          }
+          
+          // Clear all references to help garbage collection
+          if (road.mesh) {
+            road.mesh.userData = {};
           }
         } catch (roadError) {
           log.error(`Error disposing road during cleanup:`, roadError);
@@ -1169,102 +1205,215 @@ export class RoadManager {
       } catch (roughnessMapError) {
         log.warn('Error disposing road roughness map:', roughnessMapError);
       }
-    
-    // Store a local reference to scene to avoid undefined issues during cleanup
-    const currentScene = this.scene;
-    
-    // Find and remove any orphaned road meshes in the scene
-    if (currentScene) {
+      
+      // Dispose of all tracked resources
       try {
-        const objectsToRemove: THREE.Object3D[] = [];
-        
-        // First collect all objects to remove
-        try {
-          currentScene.traverse((object) => {
-            try {
-              if (object instanceof THREE.Mesh && object.userData && object.userData.isRoad) {
-                log.info('Found orphaned road mesh during cleanup, removing it');
-                objectsToRemove.push(object);
-              }
-            } catch (traverseError) {
-              log.warn('Error during scene traversal for cleanup:', traverseError);
-              // Continue traversal
-            }
-          });
-        } catch (traverseError) {
-          log.error('Error traversing scene for cleanup:', traverseError);
-        }
-        
-        // Then remove them in a separate step to avoid modifying the scene during traversal
-        objectsToRemove.forEach(object => {
+        this.disposableResources.forEach(resource => {
           try {
-            currentScene.remove(object);
-            
-            try {
-              if ((object as THREE.Mesh).geometry) {
-                (object as THREE.Mesh).geometry.dispose();
-              }
-            } catch (geometryError) {
-              log.warn('Error disposing orphaned mesh geometry during cleanup:', geometryError);
+            if (resource && typeof resource.dispose === 'function') {
+              resource.dispose();
             }
-            
+          } catch (resourceError) {
+            log.warn('Error disposing tracked resource:', resourceError);
+          }
+        });
+        this.disposableResources = [];
+      } catch (resourcesError) {
+        log.warn('Error disposing tracked resources:', resourcesError);
+      }
+      
+      // Dispose of the texture loader
+      try {
+        if (this.textureLoader) {
+          // Release any references the texture loader might hold
+          (this.textureLoader as any) = null;
+        }
+      } catch (loaderError) {
+        log.warn('Error disposing texture loader:', loaderError);
+      }
+    
+      // Store a local reference to scene to avoid undefined issues during cleanup
+      const currentScene = this.scene;
+      
+      // Find and remove any orphaned road meshes in the scene
+      if (currentScene) {
+        try {
+          const objectsToRemove: THREE.Object3D[] = [];
+          
+          // First collect all objects to remove
+          try {
+            currentScene.traverse((object) => {
+              try {
+                if (object instanceof THREE.Mesh && object.userData && 
+                    (object.userData.isRoad || object.userData.roadId)) {
+                  log.info('Found orphaned road mesh during cleanup, removing it');
+                  objectsToRemove.push(object);
+                }
+              } catch (traverseError) {
+                log.warn('Error during scene traversal for cleanup:', traverseError);
+                // Continue traversal
+              }
+            });
+          } catch (traverseError) {
+            log.error('Error traversing scene for cleanup:', traverseError);
+          }
+          
+          // Then remove them in a separate step to avoid modifying the scene during traversal
+          objectsToRemove.forEach(object => {
             try {
-              if ((object as THREE.Mesh).material) {
-                const material = (object as THREE.Mesh).material;
-                if (Array.isArray(material)) {
-                  material.forEach(m => {
-                    try {
-                      if (m) m.dispose();
-                    } catch (materialError) {
-                      log.warn('Error disposing orphaned mesh material during cleanup:', materialError);
+              currentScene.remove(object);
+              
+              try {
+                if ((object as THREE.Mesh).geometry) {
+                  // Properly dispose of geometry buffers
+                  const geometry = (object as THREE.Mesh).geometry;
+                  if (geometry.index) {
+                    geometry.index.array = null;
+                  }
+                  
+                  // Dispose of all geometry attributes
+                  Object.keys(geometry.attributes).forEach(attributeName => {
+                    const attribute = geometry.attributes[attributeName];
+                    if (attribute) {
+                      attribute.array = null;
+                      geometry.deleteAttribute(attributeName);
                     }
                   });
-                } else if (material) {
-                  material.dispose();
+                  
+                  geometry.dispose();
                 }
+              } catch (geometryError) {
+                log.warn('Error disposing orphaned mesh geometry during cleanup:', geometryError);
               }
-            } catch (materialError) {
-              log.warn('Error disposing orphaned mesh materials during cleanup:', materialError);
+              
+              try {
+                if ((object as THREE.Mesh).material) {
+                  const material = (object as THREE.Mesh).material;
+                  if (Array.isArray(material)) {
+                    material.forEach(m => {
+                      try {
+                        if (m) {
+                          // Dispose of all textures on the material
+                          this.disposeTexturesFromMaterial(m);
+                          m.dispose();
+                        }
+                      } catch (materialError) {
+                        log.warn('Error disposing orphaned mesh material during cleanup:', materialError);
+                      }
+                    });
+                  } else if (material) {
+                    // Dispose of all textures on the material
+                    this.disposeTexturesFromMaterial(material);
+                    material.dispose();
+                  }
+                }
+              } catch (materialError) {
+                log.warn('Error disposing orphaned mesh materials during cleanup:', materialError);
+              }
+              
+              // Clear all references to help garbage collection
+              object.userData = {};
+            } catch (objectError) {
+              log.error('Error removing orphaned mesh during cleanup:', objectError);
+              // Continue with other objects
             }
-          } catch (objectError) {
-            log.error('Error removing orphaned mesh during cleanup:', objectError);
-            // Continue with other objects
-          }
-        });
-        
-        log.info(`Removed ${objectsToRemove.length} orphaned road meshes during cleanup`);
-      } catch (error) {
-        log.error('Error cleaning up orphaned road meshes:', error);
+          });
+          
+          log.info(`Removed ${objectsToRemove.length} orphaned road meshes during cleanup`);
+        } catch (error) {
+          log.error('Error cleaning up orphaned road meshes:', error);
+        }
       }
-    }
-    
-    // Clear geometry cache
-    try {
-      if (this.roadGeometryCache) {
-        // Dispose of all cached geometries
-        this.roadGeometryCache.forEach((geometry, key) => {
-          try {
-            geometry.dispose();
-            log.info(`Disposed of cached geometry (key: ${key})`);
-          } catch (geometryError) {
-            log.warn(`Error disposing cached geometry (key: ${key}):`, geometryError);
-          }
-        });
-        
-        this.roadGeometryCache.clear();
-        this.geometryUsageCount.clear();
-        log.info('Road geometry cache cleared');
+      
+      // Clear geometry cache
+      try {
+        if (this.roadGeometryCache) {
+          // Dispose of all cached geometries
+          this.roadGeometryCache.forEach((geometry, key) => {
+            try {
+              if (geometry) {
+                // Dispose of any attributes and index buffers
+                if (geometry.index) {
+                  geometry.index.array = null;
+                }
+                
+                Object.keys(geometry.attributes).forEach(attributeName => {
+                  const attribute = geometry.attributes[attributeName];
+                  if (attribute) {
+                    attribute.array = null;
+                    geometry.deleteAttribute(attributeName);
+                  }
+                });
+                
+                geometry.dispose();
+                log.info(`Disposed of cached geometry (key: ${key})`);
+              }
+            } catch (geometryError) {
+              log.warn(`Error disposing cached geometry (key: ${key}):`, geometryError);
+            }
+          });
+          
+          this.roadGeometryCache.clear();
+          this.geometryUsageCount.clear();
+          log.info('Road geometry cache cleared');
+        }
+      } catch (cacheError) {
+        log.warn('Error clearing road geometry cache:', cacheError);
       }
-    } catch (cacheError) {
-      log.warn('Error clearing road geometry cache:', cacheError);
-    }
-    
-    log.info('RoadManager disposed successfully');
+      
+      // Clear references to help garbage collection
+      this.scene = null;
+      
+      log.info('RoadManager disposed successfully');
     } catch (unexpectedError) {
       log.error('Unexpected error during RoadManager disposal:', unexpectedError);
       // Mark as disposed even if there was an error
       this.isDisposed = true;
       this.roads = [];
+      this.scene = null;
     }
   }
 }
+  /**
+   * Helper method to dispose of all textures on a material
+   * @param material The material to clean up
+   */
+  private disposeTexturesFromMaterial(material: THREE.Material): void {
+    try {
+      // Check for standard material properties
+      if (material instanceof THREE.MeshStandardMaterial || 
+          material instanceof THREE.MeshPhysicalMaterial ||
+          material instanceof THREE.MeshBasicMaterial ||
+          material instanceof THREE.MeshLambertMaterial ||
+          material instanceof THREE.MeshPhongMaterial) {
+        
+        // Dispose of all possible texture maps
+        if (material.map) material.map.dispose();
+        if (material.normalMap) material.normalMap.dispose();
+        if (material.roughnessMap) material.roughnessMap.dispose();
+        if (material.metalnessMap) material.metalnessMap.dispose();
+        if (material.aoMap) material.aoMap.dispose();
+        if (material.emissiveMap) material.emissiveMap.dispose();
+        if (material.bumpMap) material.bumpMap.dispose();
+        if (material.displacementMap) material.displacementMap.dispose();
+        if (material.envMap) material.envMap.dispose();
+        if (material.lightMap) material.lightMap.dispose();
+        if (material.alphaMap) material.alphaMap.dispose();
+        
+        // Clear references
+        material.map = null;
+        material.normalMap = null;
+        material.roughnessMap = null;
+        material.metalnessMap = null;
+        material.aoMap = null;
+        material.emissiveMap = null;
+        material.bumpMap = null;
+        material.displacementMap = null;
+        material.envMap = null;
+        material.lightMap = null;
+        material.alphaMap = null;
+      }
+    } catch (error) {
+      log.warn('Error disposing textures from material:', error);
+    }
+  }
