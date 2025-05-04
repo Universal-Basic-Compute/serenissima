@@ -2,10 +2,22 @@ import React, { useState, useEffect } from 'react';
 import { getApiBaseUrl } from '@/lib/apiUtils';
 import PlayerProfile from '../UI/PlayerProfile';
 import AnimatedDucats from '../UI/AnimatedDucats';
+import { eventBus, EventTypes } from '../../lib/eventBus';
+
+import { userService } from '../../lib/services/UserService';
 
 // Add a function to get username from wallet address
 const getUsernameFromWallet = async (walletAddress: string): Promise<string | null> => {
   try {
+    // First check if we already have this user in our service
+    const users = userService.getUsers();
+    for (const username in users) {
+      if (users[username].wallet_address === walletAddress) {
+        return username;
+      }
+    }
+    
+    // If not found, fetch from API
     const response = await fetch(`${getApiBaseUrl()}/api/wallet/${walletAddress}`);
     if (response.ok) {
       const data = await response.json();
@@ -169,16 +181,14 @@ const MarketPanel: React.FC<MarketPanelProps> = ({ visible, onClose }) => {
       const username = await getUsernameFromWallet(walletAddress);
       const ownerToSet = username || walletAddress;
       
-      // Dispatch event to update user profile with new compute amount
-      window.dispatchEvent(new CustomEvent('landOwnershipChanged', {
-        detail: { 
-          landId: transaction.asset_id, 
-          newOwner: ownerToSet // Use username instead of wallet address
-        }
-      }));
+      // Use event bus to update land ownership
+      eventBus.emit(EventTypes.LAND_OWNERSHIP_CHANGED, { 
+        landId: transaction.asset_id, 
+        newOwner: ownerToSet // Use username instead of wallet address
+      });
       
       // Refresh user profile
-      window.dispatchEvent(new CustomEvent('userProfileUpdated'));
+      eventBus.emit(EventTypes.USER_PROFILE_UPDATED);
     } catch (error) {
       console.error('Error executing transaction:', error);
       alert(`Failed to complete purchase: ${error instanceof Error ? error.message : String(error)}`);

@@ -1,5 +1,6 @@
 import { ViewMode } from './types';
 import IconButton from '../UI/IconButton';
+import { eventBus, EventTypes } from '../../lib/eventBus';
 
 interface ViewModeMenuProps {
   activeView: ViewMode;
@@ -7,6 +8,12 @@ interface ViewModeMenuProps {
 }
 
 export default function ViewModeMenu({ activeView, setActiveView }: ViewModeMenuProps) {
+  // Create a wrapper function to emit the view mode change event
+  const handleViewModeChange = (view: ViewMode) => {
+    setActiveView(view);
+    // Emit event to notify other components about the view mode change
+    eventBus.emit(EventTypes.VIEW_MODE_CHANGED);
+  };
   // Helper function to check if a view is disabled
   const isDisabled = (view: ViewMode): boolean => {
     return view !== 'buildings' && view !== 'land' && view !== 'markets';
@@ -45,7 +52,7 @@ export default function ViewModeMenu({ activeView, setActiveView }: ViewModeMenu
       
       {/* Markets View - Now Enabled */}
       <IconButton 
-        onClick={() => activeView !== 'markets' ? setActiveView('markets') : null}
+        onClick={() => activeView !== 'markets' ? handleViewModeChange('markets') : null}
         active={activeView === 'markets'}
         title={viewDescriptions.markets}
         activeColor="amber"
@@ -90,7 +97,7 @@ export default function ViewModeMenu({ activeView, setActiveView }: ViewModeMenu
       </IconButton>
       
       <IconButton 
-        onClick={() => activeView !== 'buildings' ? setActiveView('buildings') : null}
+        onClick={() => activeView !== 'buildings' ? handleViewModeChange('buildings') : null}
         active={activeView === 'buildings'}
         title={viewDescriptions.buildings}
         activeColor="amber"
@@ -105,7 +112,7 @@ export default function ViewModeMenu({ activeView, setActiveView }: ViewModeMenu
       </IconButton>
       
       <IconButton 
-        onClick={() => activeView !== 'land' ? setActiveView('land') : null}
+        onClick={() => activeView !== 'land' ? handleViewModeChange('land') : null}
         active={activeView === 'land'}
         title={viewDescriptions.land}
         activeColor="amber"

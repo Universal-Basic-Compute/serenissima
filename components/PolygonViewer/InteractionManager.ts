@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { MutableRefObject } from 'react';
 import { ViewMode } from './types';
+import { eventBus, EventTypes } from '../../lib/eventBus';
 
 interface InteractionManagerProps {
   camera: THREE.PerspectiveCamera;
@@ -57,12 +58,10 @@ export default class InteractionManager {
     // Store the original setHoveredPolygonId function
     const originalSetHoveredPolygonId = setHoveredPolygonId;
     
-    // Modify the setHoveredPolygonId function to dispatch a custom event
+    // Modify the setHoveredPolygonId function to use the event bus
     this.setHoveredPolygonId = (id: string | null) => {
-      // Dispatch a custom event for hover state changes
-      window.dispatchEvent(new CustomEvent('polygonHover', {
-        detail: { polygonId: id }
-      }));
+      // Use event bus for hover state changes
+      eventBus.emit(EventTypes.POLYGON_HOVER, { polygonId: id });
       
       // Call the original setHoveredPolygonId function
       originalSetHoveredPolygonId(id);
@@ -148,6 +147,9 @@ export default class InteractionManager {
             this.setHoveredPolygonId(hoveredId);
             this.hoveredPolygonId = hoveredId;
             
+            // Use event bus for hover events
+            eventBus.emit(EventTypes.POLYGON_HOVER, { polygonId: hoveredId });
+            
             // Set cursor to pointer to indicate interactivity
             document.body.style.cursor = 'pointer';
           }
@@ -160,6 +162,9 @@ export default class InteractionManager {
     if (this.hoveredPolygonId) {
       this.setHoveredPolygonId(null);
       this.hoveredPolygonId = null;
+      
+      // Use event bus for hover end events
+      eventBus.emit(EventTypes.POLYGON_HOVER, { polygonId: null });
       
       // Reset cursor
       document.body.style.cursor = 'default';
@@ -244,10 +249,8 @@ export default class InteractionManager {
             this.setSelectedPolygonId(newSelectedId);
             this.selectedPolygonId = newSelectedId;
             
-            // Dispatch a custom event for the selection
-            window.dispatchEvent(new CustomEvent('polygonSelected', {
-              detail: { polygonId: newSelectedId }
-            }));
+            // Use event bus instead of direct DOM events
+            eventBus.emit(EventTypes.POLYGON_SELECTED, { polygonId: newSelectedId });
             
             this.isProcessingClick = false;
             return; // Exit after finding the first valid polygon
@@ -286,9 +289,7 @@ export default class InteractionManager {
             this.setSelectedPolygonId(newSelectedId);
             this.selectedPolygonId = newSelectedId;
             
-            window.dispatchEvent(new CustomEvent('polygonSelected', {
-              detail: { polygonId: newSelectedId }
-            }));
+            eventBus.emit(EventTypes.POLYGON_SELECTED, { polygonId: newSelectedId });
             
             this.isProcessingClick = false;
             return;
@@ -301,10 +302,8 @@ export default class InteractionManager {
         this.setSelectedPolygonId(null);
         this.selectedPolygonId = null;
         
-        // Dispatch deselection event
-        window.dispatchEvent(new CustomEvent('polygonSelected', {
-          detail: { polygonId: null }
-        }));
+        // Use event bus for deselection
+        eventBus.emit(EventTypes.POLYGON_SELECTED, { polygonId: null });
       }
       
       this.isProcessingClick = false;

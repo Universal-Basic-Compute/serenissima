@@ -539,10 +539,11 @@ export default function Home() {
       setTimeout(ensurePolygonsVisible, 100);
     };
     
-    window.addEventListener('viewModeChanged', handleViewModeChange);
+    // Use event bus for view mode changes
+    const subscription = eventBus.subscribe(EventTypes.VIEW_MODE_CHANGED, handleViewModeChange);
     
     return () => {
-      window.removeEventListener('viewModeChanged', handleViewModeChange);
+      subscription.unsubscribe();
     };
   }, [ensurePolygonsVisible]);
 

@@ -7,6 +7,7 @@ import PlayerProfile from '../UI/PlayerProfile';
 import LandPurchaseConfirmation from '../UI/LandPurchaseConfirmation';
 import AnimatedDucats from '../UI/AnimatedDucats';
 import { Polygon } from './types';
+import { eventBus, EventTypes } from '../../lib/eventBus';
 
 interface LandDetailsPanelProps {
   selectedPolygonId: string | null;
@@ -51,17 +52,17 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
   
   // Add this effect to listen for land purchase events
   useEffect(() => {
-    const handleLandPurchase = (event: CustomEvent) => {
+    const handleLandPurchase = (data: any) => {
       // Force a panel update if the selected land is the one that was just purchased
-      if (event.detail.landId === selectedPolygonId) {
+      if (data.landId === selectedPolygonId) {
         console.log('Land purchase detected, refreshing panel');
         // Force a refresh of the data
         setRefreshKey(prevKey => prevKey + 1);
         
         // Update transaction data locally
-        if (event.detail.transaction) {
-          console.log('Updating transaction data locally:', event.detail.transaction);
-          setTransaction(event.detail.transaction);
+        if (data.transaction) {
+          console.log('Updating transaction data locally:', data.transaction);
+          setTransaction(data.transaction);
           
           // Set flag to indicate a transaction was just completed
           setJustCompletedTransaction(true);
@@ -70,18 +71,17 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
         // Force the panel to stay visible
         setIsVisible(true);
         
-        // Dispatch event to keep panel open
-        console.log('Dispatching keepLandDetailsPanelOpen event');
-        window.dispatchEvent(new CustomEvent('keepLandDetailsPanelOpen', {
-          detail: { polygonId: selectedPolygonId }
-        }));
+        // Use event bus to keep panel open
+        console.log('Emitting keepLandDetailsPanelOpen event');
+        eventBus.emit(EventTypes.KEEP_LAND_DETAILS_PANEL_OPEN, { polygonId: selectedPolygonId });
       }
     };
 
-    window.addEventListener('landPurchased', handleLandPurchase as EventListener);
+    // Subscribe to land purchase events using the event bus
+    const subscription = eventBus.subscribe(EventTypes.LAND_PURCHASED, handleLandPurchase);
     
     return () => {
-      window.removeEventListener('landPurchased', handleLandPurchase as EventListener);
+      subscription.unsubscribe();
     };
   }, [selectedPolygonId]);
   
@@ -102,17 +102,18 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
   
   // Add this useEffect to listen for the custom event to keep panel open
   useEffect(() => {
-    const handleKeepOpen = (event: CustomEvent) => {
-      if (event.detail.polygonId === selectedPolygonId) {
+    const handleKeepOpen = (data: any) => {
+      if (data.polygonId === selectedPolygonId) {
         console.log('Keeping land details panel open for', selectedPolygonId);
         setIsVisible(true);
       }
     };
     
-    window.addEventListener('keepLandDetailsPanelOpen', handleKeepOpen as EventListener);
+    // Subscribe to keep panel open events using the event bus
+    const subscription = eventBus.subscribe(EventTypes.KEEP_LAND_DETAILS_PANEL_OPEN, handleKeepOpen);
     
     return () => {
-      window.removeEventListener('keepLandDetailsPanelOpen', handleKeepOpen as EventListener);
+      subscription.unsubscribe();
     };
   }, [selectedPolygonId]);
   
@@ -702,22 +703,18 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
       // Show success message
       alert(`Land purchased successfully! You are now the owner of ${selectedPolygon?.historicalName || 'this land'}.`);
       
-      // Dispatch event to update the UI
-      window.dispatchEvent(new CustomEvent('landPurchased', {
-        detail: {
-          landId: selectedPolygonId,
-          transaction: data.transaction
-        }
-      }));
+      // Use event bus to update the UI
+      eventBus.emit(EventTypes.LAND_PURCHASED, {
+        landId: selectedPolygonId,
+        transaction: data.transaction
+      });
       
-      // Dispatch event to update land ownership
-      window.dispatchEvent(new CustomEvent('landOwnershipChanged', {
-        detail: {
-          landId: selectedPolygonId,
-          newOwner: walletAddress,
-          transaction: data.transaction
-        }
-      }));
+      // Use event bus to update land ownership
+      eventBus.emit(EventTypes.LAND_OWNERSHIP_CHANGED, {
+        landId: selectedPolygonId,
+        newOwner: walletAddress,
+        transaction: data.transaction
+      });
       
       // Close the confirmation dialog
       setShowPurchaseConfirmation(false);

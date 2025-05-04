@@ -19,6 +19,7 @@ import BridgeRenderer from './BridgeRenderer';
 import LandPurchaseModal from '../UI/LandPurchaseModal';
 import RoadCreator from './RoadCreator';
 import RoadManager from './RoadManager';
+import { eventBus, EventTypes } from '../../lib/eventBus';
 
 export default function PolygonViewer() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -460,8 +461,8 @@ export default function PolygonViewer() {
   
   // Add an effect to listen for land ownership changes
   useEffect(() => {
-    const handleLandOwnershipChanged = (event: CustomEvent) => {
-      const { landId, newOwner, transaction } = event.detail;
+    const handleLandOwnershipChanged = (data: any) => {
+      const { landId, newOwner, transaction } = data;
 
       console.log(`Land ownership changed event received: ${landId} now owned by ${newOwner}`);
 
@@ -486,10 +487,8 @@ export default function PolygonViewer() {
       // If this is the currently selected polygon, make sure the panel stays open
       if (landId === selectedPolygonId) {
         console.log('Selected polygon ownership changed, keeping panel open');
-        // Dispatch event to keep panel open
-        window.dispatchEvent(new CustomEvent('keepLandDetailsPanelOpen', {
-          detail: { polygonId: landId }
-        }));
+        // Use event bus to keep panel open
+        eventBus.emit(EventTypes.KEEP_LAND_DETAILS_PANEL_OPEN, { polygonId: landId });
       }
       
       // Force an update of the polygon colors and coat of arms
@@ -524,18 +523,18 @@ export default function PolygonViewer() {
       }
     };
     
-    // Add event listener for land ownership changes
-    window.addEventListener('landOwnershipChanged', handleLandOwnershipChanged as EventListener);
+    // Use event bus for land ownership changes
+    const subscription = eventBus.subscribe(EventTypes.LAND_OWNERSHIP_CHANGED, handleLandOwnershipChanged);
     
     return () => {
-      window.removeEventListener('landOwnershipChanged', handleLandOwnershipChanged as EventListener);
+      subscription.unsubscribe();
     };
   }, [polygons, landOwners, selectedPolygonId, activeView]);
   
   // Add this useEffect to listen for compute balance changes
   useEffect(() => {
-    const handleComputeBalanceChanged = (event: CustomEvent) => {
-      const { buyer, seller, amount } = event.detail;
+    const handleComputeBalanceChanged = (data: any) => {
+      const { buyer, seller, amount } = data;
       
       console.log(`Compute balance changed event received: ${seller} +${amount}, ${buyer} -${amount}`);
       
@@ -573,11 +572,9 @@ export default function PolygonViewer() {
                 }
               }
               
-              // Dispatch event to update UI components
-              console.log('Dispatching userProfileUpdated event');
-              window.dispatchEvent(new CustomEvent('userProfileUpdated', {
-                detail: data
-              }));
+              // Use event bus to update UI components
+              console.log('Emitting userProfileUpdated event');
+              eventBus.emit(EventTypes.USER_PROFILE_UPDATED, data);
             }
           } catch (error) {
             console.error(`Error fetching updated user profile (attempt ${4-retries}/3):`, error);
@@ -593,44 +590,46 @@ export default function PolygonViewer() {
       }
     };
     
-    window.addEventListener('computeBalanceChanged', handleComputeBalanceChanged as EventListener);
+    // Use event bus for compute balance changes
+    const subscription = eventBus.subscribe(EventTypes.COMPUTE_BALANCE_CHANGED, handleComputeBalanceChanged);
     
     return () => {
-      window.removeEventListener('computeBalanceChanged', handleComputeBalanceChanged as EventListener);
+      subscription.unsubscribe();
     };
   }, [loadUsers]);
 
   // Add this useEffect to listen for the showLandPurchaseModal event
   useEffect(() => {
-    const handleShowPurchaseModal = (event: CustomEvent) => {
-      console.log('Show purchase modal event received:', event.detail);
+    const handleShowPurchaseModal = (data: any) => {
+      console.log('Show purchase modal event received:', data);
       
       // Validate the transaction data before showing the modal
-      if (!event.detail.transaction) {
+      if (!data.transaction) {
         console.error('Missing transaction data in showLandPurchaseModal event');
         alert('Cannot process purchase: Missing transaction data');
         return;
       }
       
-      if (!event.detail.landId) {
+      if (!data.landId) {
         console.error('Missing landId in showLandPurchaseModal event');
         alert('Cannot process purchase: Missing land ID');
         return;
       }
       
       setPurchaseModalData({
-        landId: event.detail.landId,
-        landName: event.detail.landName,
-        transaction: event.detail.transaction,
-        onComplete: event.detail.onComplete
+        landId: data.landId,
+        landName: data.landName,
+        transaction: data.transaction,
+        onComplete: data.onComplete
       });
       setPurchaseModalVisible(true);
     };
     
-    window.addEventListener('showLandPurchaseModal', handleShowPurchaseModal as EventListener);
+    // Use event bus for showing purchase modal
+    const subscription = eventBus.subscribe(EventTypes.SHOW_LAND_PURCHASE_MODAL, handleShowPurchaseModal);
     
     return () => {
-      window.removeEventListener('showLandPurchaseModal', handleShowPurchaseModal as EventListener);
+      subscription.unsubscribe();
     };
   }, []);
 
