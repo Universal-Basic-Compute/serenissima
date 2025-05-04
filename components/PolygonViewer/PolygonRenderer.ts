@@ -306,7 +306,15 @@ export default class PolygonRenderer {
         
         // Ensure mesh is flat on the ground
         mesh.rotation.x = -Math.PI / 2;
-        mesh.position.y = 0.1; // Slightly above ground
+        mesh.position.y = 0.2; // Increase height to ensure clear separation from water
+        mesh.renderOrder = 1; // Ensure it renders after water
+        
+        // Apply polygon offset to prevent z-fighting
+        if (mesh.material instanceof THREE.MeshStandardMaterial) {
+          mesh.material.polygonOffset = true;
+          mesh.material.polygonOffsetFactor = 1;
+          mesh.material.polygonOffsetUnits = 1;
+        }
         
         // Add userData to identify this as a polygon that should always be visible
         mesh.userData = {

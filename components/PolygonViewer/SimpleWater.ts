@@ -46,15 +46,25 @@ export default class SimpleWater {
         waterNormals: waterNormals,
         sunDirection: new THREE.Vector3(0, 1, 0),
         sunColor: 0xffffff,
-        waterColor: 0x0047ab, // Changed to a deeper royal blue (from 0x001e0f)
+        waterColor: 0x0047ab, // Deep royal blue
         distortionScale: 4.5,  // Increased from 3.7 for more pronounced waves
         fog: false
       }
     );
 
-    // Position water - lower it slightly more to ensure it's below land
+    // Position water - CRITICAL CHANGES HERE
     water.rotation.x = -Math.PI / 2;
-    water.position.y = -0.2; // Changed from -0.1 to -0.2 to ensure it's below land
+    water.position.y = -0.5; // Lower it more to ensure clear separation from land
+    
+    // IMPORTANT: Set renderOrder to ensure water always renders before land
+    water.renderOrder = -1;
+    
+    // IMPORTANT: Apply polygon offset to prevent z-fighting
+    if (water.material instanceof THREE.ShaderMaterial) {
+      water.material.polygonOffset = true;
+      water.material.polygonOffsetFactor = -1;
+      water.material.polygonOffsetUnits = -1;
+    }
 
     return water;
   }
