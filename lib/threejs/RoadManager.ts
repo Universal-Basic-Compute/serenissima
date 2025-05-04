@@ -491,32 +491,32 @@ export class RoadManager {
               uvs.push(0, (uOffset + segmentLength) * 10);
             }
       
-          // Set attributes
-          roadGeometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-          roadGeometry.setAttribute('normal', new THREE.Float32BufferAttribute(normals, 3));
-          roadGeometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
-          
-          // Store in cache for future reuse
-          this.roadGeometryCache.set(cacheKey, roadGeometry.clone());
-          this.geometryUsageCount.set(cacheKey, 1);
-          
-          log.info(`Created and cached new road geometry (key: ${cacheKey})`);
-          
-          // Limit cache size to prevent memory issues
-          this.pruneGeometryCache();
-        }
-      
-      // Create road material with better visibility
-      const roadMaterial = new THREE.MeshBasicMaterial({
-        color: 0x555555,
-        side: THREE.DoubleSide,
-        depthWrite: false,
-        depthTest: true,
-        transparent: false,
-        polygonOffset: true,
-        polygonOffsetFactor: -12, // Increased from -10 to -12 for even better visibility
-        polygonOffsetUnits: -12   // Increased from -10 to -12 for even better visibility
-      });
+            // Set attributes
+            roadGeometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+            roadGeometry.setAttribute('normal', new THREE.Float32BufferAttribute(normals, 3));
+            roadGeometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+            
+            // Store in cache for future reuse
+            this.roadGeometryCache.set(cacheKey, roadGeometry.clone());
+            this.geometryUsageCount.set(cacheKey, 1);
+            
+            log.info(`Created and cached new road geometry (key: ${cacheKey})`);
+            
+            // Limit cache size to prevent memory issues
+            this.pruneGeometryCache();
+          }
+        
+          // Create road material with better visibility
+          const roadMaterial = new THREE.MeshBasicMaterial({
+            color: 0x555555,
+            side: THREE.DoubleSide,
+            depthWrite: false,
+            depthTest: true,
+            transparent: false,
+            polygonOffset: true,
+            polygonOffsetFactor: -12, // Increased from -10 to -12 for even better visibility
+            polygonOffsetUnits: -12   // Increased from -10 to -12 for even better visibility
+          });
           
           // Track material for disposal
           this.disposableResources.push(roadMaterial);
