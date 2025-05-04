@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { ViewMode } from './types';
-import { CloudSystem } from '@/lib/threejs/CloudSystem';
+import { CloudFacade } from '@/lib/threejs/CloudFacade';
 import { ThreeJSFacade } from '../../lib/threejs/ThreeJSFacade';
 
 interface SceneSetupProps {
@@ -20,7 +20,7 @@ export default class SceneSetup {
   private sunLight: THREE.DirectionalLight = new THREE.DirectionalLight();
   private sunSphere: THREE.Mesh = new THREE.Mesh();
   private sunGlow: THREE.Mesh = new THREE.Mesh();
-  private cloudSystem: CloudSystem | null = null;
+  private cloudSystem: CloudFacade | null = null;
   private zoomThreshold: number = 40; // Threshold for showing clouds
   private activeView: ViewMode;
   
@@ -44,8 +44,7 @@ export default class SceneSetup {
     // Create cloud system with a delay
     setTimeout(() => {
       console.log('Creating cloud system...');
-      this.cloudSystem = new CloudSystem({
-        scene: this.scene,
+      this.cloudSystem = new CloudFacade(this.scene, {
         width: 300, // Increased width for wider cloud coverage
         height: 300, // Increased height for wider cloud coverage
         performanceMode: this.performanceMode
@@ -55,14 +54,14 @@ export default class SceneSetup {
       if (this.cloudSystem) {
         console.log('Initializing clouds and setting visibility');
         this.cloudSystem.update(0);
-        this.cloudSystem.setVisibility(true); // Force visibility initially
+        this.cloudSystem.setVisible(true); // Force visibility initially
         
         // Add a second update after a short delay to ensure clouds are properly initialized
         setTimeout(() => {
           if (this.cloudSystem) {
             console.log('Second cloud initialization');
             this.cloudSystem.update(100);
-            this.cloudSystem.setVisibility(true);
+            this.cloudSystem.setVisible(true);
           }
         }, 500);
       }
@@ -271,7 +270,7 @@ export default class SceneSetup {
     
     try {
       // Set cloud visibility based on camera height
-      this.cloudSystem.setVisibility(showClouds);
+      this.cloudSystem.setVisible(showClouds);
       
       // Always update cloud animation regardless of visibility
       // This ensures they're ready to be shown when we zoom out
@@ -329,7 +328,7 @@ export default class SceneSetup {
   public updateQuality(highQuality: boolean) {
     this.performanceMode = !highQuality;
     if (this.cloudSystem) {
-      this.cloudSystem.updateQuality(this.performanceMode);
+      this.cloudSystem.setPerformanceMode(this.performanceMode);
     }
   }
   
