@@ -194,6 +194,16 @@ export default class CloudSystem {
     
     this.isVisible = visible;
     this.clouds.visible = visible;
+    
+    // Add debug logging
+    console.log(`Cloud visibility set to: ${visible}`);
+    
+    // Force update of all cloud particles
+    this.cloudParticles.forEach(cloud => {
+      if (cloud) {
+        cloud.visible = visible;
+      }
+    });
   }
 
   public updateQuality(performanceMode: boolean) {

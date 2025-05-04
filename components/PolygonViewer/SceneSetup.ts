@@ -168,6 +168,9 @@ export default class SceneSetup {
     
     // Start sun animation
     this.animateSun();
+    
+    // Lower the zoom threshold to make clouds visible sooner
+    this.zoomThreshold = 20; // Changed from 40 to 20
   }
   
   private animateSun() {
@@ -362,6 +365,11 @@ export default class SceneSetup {
       // Always update cloud animation regardless of visibility
       // This ensures they're ready to be shown when we zoom out
       this.cloudSystem.update(frameCount);
+      
+      // Add debug logging to help diagnose the issue
+      if (frameCount % 100 === 0) {
+        console.log(`Camera height: ${this.camera.position.y}, Clouds visible: ${showClouds}, Threshold: ${this.zoomThreshold}`);
+      }
     } catch (error) {
       console.error('Error updating clouds:', error);
     }
