@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import * as THREE from 'three';
-import { RoadCreatorFacade } from '@/lib/threejs/RoadCreatorFacade';
+import { RoadCreationManager } from '@/lib/threejs/RoadCreationManager';
 
 interface RoadCreatorProps {
   scene: THREE.Scene;
@@ -12,7 +12,7 @@ interface RoadCreatorProps {
 
 /**
  * RoadCreator component for creating roads in the 3D scene
- * UI component that uses RoadCreatorFacade for Three.js operations
+ * UI component that uses RoadCreationManager for Three.js operations
  */
 const RoadCreator: React.FC<RoadCreatorProps> = ({
   scene,
@@ -21,33 +21,32 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
   onComplete,
   onCancel
 }) => {
-  // State
-  const [points, setPoints] = useState<THREE.Vector3[]>([]);
+  // State for UI feedback
   const [curvature, setCurvature] = useState<number>(0.5); // 0 to 1
-  const [isPlacing, setIsPlacing] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [snapPoint, setSnapPoint] = useState<THREE.Vector3 | null>(null);
+  const [pointCount, setPointCount] = useState<number>(0);
   
-  // Refs
-  const roadCreatorRef = useRef<RoadCreatorFacade | null>(null);
+  // Ref for the road creation manager
+  const managerRef = useRef<RoadCreationManager | null>(null);
   
-  // Initialize the road creator facade
+  // Initialize the road creation manager
   useEffect(() => {
-    if (active && !roadCreatorRef.current) {
-      roadCreatorRef.current = new RoadCreatorFacade(scene, camera);
+    if (active && !managerRef.current) {
+      managerRef.current = new RoadCreationManager(scene, camera);
     }
     
     return () => {
-      if (roadCreatorRef.current) {
-        roadCreatorRef.current.dispose();
-        roadCreatorRef.current = null;
+      if (managerRef.current) {
+        managerRef.current.dispose();
+        managerRef.current = null;
       }
     };
   }, [active, scene, camera]);
 
   // Set up event listeners when active
   useEffect(() => {
-    if (!active || !roadCreatorRef.current) return;
+    if (!active || !managerRef.current) return;
 
     // Add a small delay before enabling click handling to prevent the initial click from being registered
     let clickEnabled = false;
@@ -56,45 +55,31 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
     }, 100);
 
     const handleMouseMove = (event: MouseEvent) => {
-      if (!roadCreatorRef.current) return;
+      if (!managerRef.current) return;
       
-      // Update mouse position in the facade
-      roadCreatorRef.current.updateMousePosition(event.clientX, event.clientY);
+      // Update mouse position in the manager
+      managerRef.current.updateMousePosition(event.clientX, event.clientY);
       
-      // Update road preview
-      updateRoadPreview();
+      // Update UI state based on manager state
+      setSnapPoint(managerRef.current.getSnapPoint());
     };
 
     const handleClick = (event: MouseEvent) => {
-      if (!active || event.button !== 0 || !clickEnabled || !roadCreatorRef.current) return;
+      if (!active || event.button !== 0 || !clickEnabled || !managerRef.current) return;
       
       console.log('Road Creator: Click detected');
       
       // Mark this event as handled by the road creator
       (event as any).isRoadCreationClick = true;
       
-      // Update mouse position in the facade
-      roadCreatorRef.current.updateMousePosition(event.clientX, event.clientY);
+      // Handle click in the manager
+      const newPoint = managerRef.current.handleClick();
       
-      // Find intersection with polygon meshes
-      const intersectionPoint = roadCreatorRef.current.findIntersection();
-      
-      if (intersectionPoint) {
-        console.log(`Road Creator: Adding point at (${intersectionPoint.x}, ${intersectionPoint.y}, ${intersectionPoint.z})`);
+      if (newPoint) {
+        console.log(`Road Creator: Adding point at (${newPoint.x}, ${newPoint.y}, ${newPoint.z})`);
         
-        // Add point to the road
-        const newPoints = [...points, intersectionPoint];
-        setPoints(newPoints);
-        
-        // If this is the first point, start placing mode
-        if (newPoints.length === 1) {
-          setIsPlacing(true);
-        }
-        
-        // If we have at least 2 points, update the preview
-        if (newPoints.length >= 2) {
-          roadCreatorRef.current.createRoadMesh(newPoints, curvature);
-        }
+        // Update point count for UI
+        setPointCount(managerRef.current.getPoints().length);
         
         // Clear any error message
         setErrorMessage(null);
@@ -111,27 +96,18 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
     };
 
     const handleKeyDown = (event: KeyboardEvent) => {
+      if (!managerRef.current) return;
+      
       if (event.key === 'Escape') {
         // Cancel road creation
         onCancel();
-      } else if (event.key === 'Enter' && points.length >= 2) {
+      } else if (event.key === 'Enter' && pointCount >= 2) {
         // Complete road creation
-        onComplete(points);
+        onComplete(managerRef.current.getPoints());
       } else if (event.key === 'Backspace' || event.key === 'Delete') {
         // Remove the last point
-        if (points.length > 0 && roadCreatorRef.current) {
-          const newPoints = [...points];
-          newPoints.pop();
-          setPoints(newPoints);
-          
-          if (newPoints.length >= 2) {
-            // Update preview with remaining points
-            roadCreatorRef.current.createRoadMesh(newPoints, curvature);
-          }
-          
-          if (newPoints.length === 0) {
-            setIsPlacing(false);
-          }
+        if (managerRef.current.removeLastPoint()) {
+          setPointCount(managerRef.current.getPoints().length);
         }
       }
     };
@@ -139,9 +115,11 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
     const handleRightClick = (event: MouseEvent) => {
       event.preventDefault();
       
-      if (points.length >= 2) {
+      if (!managerRef.current) return;
+      
+      if (pointCount >= 2) {
         // Complete the road on right-click
-        onComplete(points);
+        onComplete(managerRef.current.getPoints());
       } else {
         // Cancel if we don't have enough points
         onCancel();
@@ -170,37 +148,7 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
       window.removeEventListener('click', preventLandSelection, true);
       clearTimeout(enableClickTimeout);
     };
-  }, [active, points, curvature, onComplete, onCancel]);
-
-  // Update road preview when mouse moves
-  const updateRoadPreview = () => {
-    if (!isPlacing || points.length === 0 || !roadCreatorRef.current) return;
-    
-    // Find intersection with polygon meshes
-    const intersectionPoint = roadCreatorRef.current.findIntersection();
-    
-    if (intersectionPoint) {
-      // Find snap point if available
-      const snappedPoint = roadCreatorRef.current.findSnapPoint(intersectionPoint, points);
-      
-      // Update snap point state for UI feedback
-      setSnapPoint(snappedPoint);
-      
-      // Use the snapped point if available, otherwise use the intersection point
-      const finalPoint = snappedPoint || intersectionPoint;
-      
-      // Create indicator at the current point
-      roadCreatorRef.current.createIndicatorMesh(finalPoint, !!snappedPoint);
-      
-      // Create a temporary array with the current points plus the mouse position
-      const previewPoints = [...points, finalPoint];
-      
-      // Update the preview mesh if we have at least 2 points
-      if (previewPoints.length >= 2) {
-        roadCreatorRef.current.createRoadMesh(previewPoints, curvature);
-      }
-    }
-  };
+  }, [active, pointCount, onComplete, onCancel]);
 
   // Render UI controls
   return (
@@ -220,9 +168,9 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
           onChange={(e) => {
             const newValue = parseFloat(e.target.value);
             setCurvature(newValue);
-            // Update the preview if we have points
-            if (points.length >= 2 && roadCreatorRef.current) {
-              roadCreatorRef.current.createRoadMesh(points, newValue);
+            // Update the curvature in the manager
+            if (managerRef.current) {
+              managerRef.current.setCurvature(newValue);
             }
           }}
           className="w-32"
@@ -239,10 +187,14 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
         </button>
         
         <button
-          onClick={() => onComplete(points)}
-          disabled={points.length < 2}
+          onClick={() => {
+            if (managerRef.current && pointCount >= 2) {
+              onComplete(managerRef.current.getPoints());
+            }
+          }}
+          disabled={pointCount < 2}
           className={`px-3 py-1 rounded ${
-            points.length < 2
+            pointCount < 2
               ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
               : 'bg-amber-600 text-white hover:bg-amber-700 transition-colors'
           }`}
@@ -268,6 +220,11 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
           Snapping to nearest edge or road
         </div>
       )}
+      
+      {/* Point counter */}
+      <div className="mt-2 text-xs text-gray-700 text-center">
+        Points: {pointCount} {pointCount >= 2 ? '(Ready to complete)' : ''}
+      </div>
     </div>
   );
 };

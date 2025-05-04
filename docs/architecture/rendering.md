@@ -191,10 +191,10 @@ The rendering architecture includes robust error handling:
 
 ## Road Creation System
 
-The road creation system follows the facade pattern to separate UI concerns from Three.js rendering:
+The road creation system follows a layered architecture to separate UI concerns from Three.js rendering:
 
 ```typescript
-// RoadCreatorFacade handles Three.js operations
+// RoadCreatorFacade handles low-level Three.js operations
 export class RoadCreatorFacade {
   constructor(scene: THREE.Scene, camera: THREE.PerspectiveCamera);
   
@@ -211,7 +211,25 @@ export class RoadCreatorFacade {
   public dispose(): void;
 }
 
-// RoadCreator component uses the facade for UI interactions
+// RoadCreationManager coordinates between UI and Three.js
+export class RoadCreationManager {
+  constructor(scene: THREE.Scene, camera: THREE.PerspectiveCamera);
+  
+  // Public API for UI component
+  public updateMousePosition(clientX: number, clientY: number): void;
+  public handleClick(): THREE.Vector3 | null;
+  public removeLastPoint(): boolean;
+  public setCurvature(value: number): void;
+  public getPoints(): THREE.Vector3[];
+  public getSnapPoint(): THREE.Vector3 | null;
+  public clearPoints(): void;
+  public dispose(): void;
+  
+  // Private implementation
+  private updateRoadPreview(): void;
+}
+
+// RoadCreator component focuses solely on UI concerns
 const RoadCreator: React.FC<RoadCreatorProps> = ({
   scene,
   camera,
@@ -220,11 +238,11 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
   onCancel
 }) => {
   // UI state management
-  const [points, setPoints] = useState<THREE.Vector3[]>([]);
   const [curvature, setCurvature] = useState<number>(0.5);
+  const [pointCount, setPointCount] = useState<number>(0);
   
-  // Use the facade for Three.js operations
-  const roadCreatorRef = useRef<RoadCreatorFacade | null>(null);
+  // Use the manager for coordinating with Three.js
+  const managerRef = useRef<RoadCreationManager | null>(null);
   
   // UI rendering
   return (
@@ -234,6 +252,12 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
   );
 };
 ```
+
+This three-layer architecture provides several benefits:
+1. **Separation of Concerns**: UI logic is separated from Three.js implementation
+2. **Testability**: Each layer can be tested independently
+3. **Maintainability**: Changes to one layer don't affect others
+4. **Reusability**: The facade and manager can be reused with different UI components
 
 ### Error Handling Example: CloudSystem
 
