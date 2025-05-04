@@ -17,8 +17,7 @@ def process_todos(todos, batch_size=3):
 
     for i in range(0, total_todos, batch_size):
         batch = todos[i:i+batch_size]
-        print(f"\n{'='*80}\nProcessing batch {i//batch_size + 1} of {(total_todos +
-batch_size - 1)//batch_size}")
+        print(f"\n{'='*80}\nProcessing batch {i//batch_size + 1} of {(total_todos + batch_size - 1)//batch_size}")
 
         for todo in batch:
             process_todo(todo)
