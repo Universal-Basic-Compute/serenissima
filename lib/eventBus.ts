@@ -52,6 +52,16 @@ export class EventBus {
       });
     }
   }
+  
+  /**
+   * Subscribe to an event with a simpler syntax
+   * @param event Event name
+   * @param callback Function to call when event is emitted
+   * @returns Subscription object with unsubscribe method
+   */
+  on(event: string, callback: Function): EventSubscription {
+    return this.subscribe(event, callback);
+  }
 }
 
 // Create a singleton instance for global use
@@ -72,5 +82,9 @@ export const EventTypes = {
   BUILDING_PLACED: 'buildingPlaced',
   VIEW_MODE_CHANGED: 'viewModeChanged',
   POLYGONS_LOADED: 'polygonsLoaded',
-  POLYGON_DELETED: 'polygonDeleted'
+  POLYGON_DELETED: 'polygonDeleted',
+  // New event types for the refactored architecture
+  OWNER_COLORS_UPDATED: 'ownerColorsUpdated',
+  OWNER_COAT_OF_ARMS_UPDATED: 'ownerCoatOfArmsUpdated',
+  POLYGON_OWNER_UPDATED: 'polygonOwnerUpdated'
 };
