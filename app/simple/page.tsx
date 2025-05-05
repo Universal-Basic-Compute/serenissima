@@ -53,6 +53,106 @@ export default function SimplePage() {
     computeAmount?: number;
     walletAddress?: string;
   } | null>(null);
+  
+  // Add the handleUsernameSubmit function inside the component
+  const handleUsernameSubmit = async () => {
+    // When editing a profile, we need to ensure all required fields are present
+    // When creating a new profile, we need username, first name, and last name
+    if ((!userProfile && (!usernameInput.trim() || !firstName.trim() || !lastName.trim())) || 
+        (userProfile && (!firstName.trim() || !lastName.trim()))) {
+      alert('Please fill in all required fields');
+      return;
+    }
+    
+    if (!walletAddress) {
+      alert('Wallet connection is required');
+      return;
+    }
+    
+    try {
+      // When editing, use the existing username
+      const username = userProfile ? userProfile.username : usernameInput.trim();
+      
+      // If this is a new user (no userProfile), assign a random color from the palette
+      // Otherwise, use the selected color
+      const userColor = !userProfile 
+        ? veniceColorPalette[Math.floor(Math.random() * veniceColorPalette.length)]
+        : selectedColor;
+      
+      console.log('Submitting profile data to backend:', {
+        wallet_address: walletAddress,
+        user_name: username,
+        first_name: firstName.trim(),
+        last_name: lastName.trim(),
+        family_coat_of_arms: familyCoatOfArms.trim(),
+        family_motto: familyMotto.trim(),
+        coat_of_arms_image: coatOfArmsImage,
+        color: userColor
+      });
+          
+      // Update the user record with the username, first name, last name, coat of arms, family motto, and image URL
+      const response = await fetch(`${getApiBaseUrl()}/api/wallet`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          wallet_address: walletAddress,
+          user_name: username,
+          first_name: firstName.trim(),
+          last_name: lastName.trim(),
+          family_coat_of_arms: familyCoatOfArms.trim(),
+          family_motto: familyMotto.trim(),
+          coat_of_arms_image: coatOfArmsImage,
+          color: userColor
+        }),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(`Failed to update profile: ${errorData.detail || response.statusText}`);
+      }
+      
+      const data = await response.json();
+      console.log('Profile updated successfully:', data);
+      
+      // Create updated user profile object
+      const updatedProfile = {
+        username: username,
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        coatOfArmsImage: coatOfArmsImage,
+        familyMotto: familyMotto.trim(),
+        familyCoatOfArms: familyCoatOfArms.trim(),
+        computeAmount: data.compute_amount,
+        color: selectedColor
+      };
+      
+      // Update the user profile state
+      setUserProfile(updatedProfile);
+      
+      // Also store the updated profile in localStorage for persistence
+      localStorage.setItem('userProfile', JSON.stringify(updatedProfile));
+      
+      // Dispatch a custom event to notify other components about the profile update
+      window.dispatchEvent(new CustomEvent('userProfileUpdated', { 
+        detail: updatedProfile 
+      }));
+      
+      // Close the prompt
+      setShowUsernamePrompt(false);
+      
+      // Show success message
+      if (userProfile) {
+        alert(`Your noble identity has been updated, ${firstName} ${lastName}!`);
+      } else {
+        alert(`Welcome to La Serenissima, ${firstName} ${lastName}!`);
+      }
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      alert(`Failed to update profile. Please try again. Error: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  };
 
   // Venice-themed color palette
   const veniceColorPalette = [
@@ -967,105 +1067,6 @@ const generateCoatOfArmsImage = async () => {
   }
 };
 
-// Add the handleUsernameSubmit function
-const handleUsernameSubmit = async () => {
-  // When editing a profile, we need to ensure all required fields are present
-  // When creating a new profile, we need username, first name, and last name
-  if ((!userProfile && (!usernameInput.trim() || !firstName.trim() || !lastName.trim())) || 
-      (userProfile && (!firstName.trim() || !lastName.trim()))) {
-    alert('Please fill in all required fields');
-    return;
-  }
-  
-  if (!walletAddress) {
-    alert('Wallet connection is required');
-    return;
-  }
-  
-  try {
-    // When editing, use the existing username
-    const username = userProfile ? userProfile.username : usernameInput.trim();
-    
-    // If this is a new user (no userProfile), assign a random color from the palette
-    // Otherwise, use the selected color
-    const userColor = !userProfile 
-      ? veniceColorPalette[Math.floor(Math.random() * veniceColorPalette.length)]
-      : selectedColor;
-    
-    console.log('Submitting profile data to backend:', {
-      wallet_address: walletAddress,
-      user_name: username,
-      first_name: firstName.trim(),
-      last_name: lastName.trim(),
-      family_coat_of_arms: familyCoatOfArms.trim(),
-      family_motto: familyMotto.trim(),
-      coat_of_arms_image: coatOfArmsImage,
-      color: userColor
-    });
-        
-    // Update the user record with the username, first name, last name, coat of arms, family motto, and image URL
-    const response = await fetch(`${getApiBaseUrl()}/api/wallet`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        wallet_address: walletAddress,
-        user_name: username,
-        first_name: firstName.trim(),
-        last_name: lastName.trim(),
-        family_coat_of_arms: familyCoatOfArms.trim(),
-        family_motto: familyMotto.trim(),
-        coat_of_arms_image: coatOfArmsImage,
-        color: userColor
-      }),
-    });
-    
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(`Failed to update profile: ${errorData.detail || response.statusText}`);
-    }
-    
-    const data = await response.json();
-    console.log('Profile updated successfully:', data);
-    
-    // Create updated user profile object
-    const updatedProfile = {
-      username: username,
-      firstName: firstName.trim(),
-      lastName: lastName.trim(),
-      coatOfArmsImage: coatOfArmsImage,
-      familyMotto: familyMotto.trim(),
-      familyCoatOfArms: familyCoatOfArms.trim(),
-      computeAmount: data.compute_amount,
-      color: selectedColor
-    };
-    
-    // Update the user profile state
-    setUserProfile(updatedProfile);
-    
-    // Also store the updated profile in localStorage for persistence
-    localStorage.setItem('userProfile', JSON.stringify(updatedProfile));
-    
-    // Dispatch a custom event to notify other components about the profile update
-    window.dispatchEvent(new CustomEvent('userProfileUpdated', { 
-      detail: updatedProfile 
-    }));
-    
-    // Close the prompt
-    setShowUsernamePrompt(false);
-    
-    // Show success message
-    if (userProfile) {
-      alert(`Your noble identity has been updated, ${firstName} ${lastName}!`);
-    } else {
-      alert(`Welcome to La Serenissima, ${firstName} ${lastName}!`);
-    }
-  } catch (error) {
-    console.error('Error updating profile:', error);
-    alert(`Failed to update profile. Please try again. Error: ${error instanceof Error ? error.message : String(error)}`);
-  }
-};
 
 // Add the handleTransferCompute function
 const handleTransferCompute = async (amount: number) => {
