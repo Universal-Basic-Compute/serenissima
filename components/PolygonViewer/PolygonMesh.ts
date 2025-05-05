@@ -75,10 +75,10 @@ class PolygonMesh {
       // Create a shape from the normalized coordinates
       const shape = createPolygonShape(normalizedCoords);
 
-      // Create extruded geometry with reduced height
+      // Create extruded geometry with minimal height
       const extrudeSettings = {
         steps: 1,
-        depth: 0.05, // Reduced from 0.2 to 0.05 to make polygons thinner
+        depth: 0.001, // Make it extremely thin
         bevelEnabled: false
       };
       
@@ -109,8 +109,8 @@ class PolygonMesh {
       const materials = [topMaterial, sideMaterial];
       this.mesh = new THREE.Mesh(geometry, materials);
       
-      // Position the mesh appropriately above water
-      this.mesh.position.y = 0; // Change from 0.15 to 0
+      // Position the mesh exactly at water level
+      this.mesh.position.y = 0;
       
       // Rotate the mesh to make it face upward
       this.mesh.rotation.x = -Math.PI / 2;

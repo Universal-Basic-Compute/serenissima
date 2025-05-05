@@ -136,7 +136,7 @@ export default class SceneSetup {
     // Create the sun directional light
     this.sunLight = new THREE.DirectionalLight(0xffffeb, 1.2);
     this.sunLight.position.copy(this.calculateSunPosition());
-    this.sunLight.castShadow = false; // Keep shadows disabled for performance
+    this.sunLight.castShadow = false; // Ensure shadows are disabled
     this.threejs.addObject(this.sunLight);
     
     // Initialize water with a delay

@@ -57,15 +57,10 @@ export default class SimplePolygonRenderer {
       side: THREE.DoubleSide,
       roughness: 0.8,
       metalness: 0.1,
-      // Reduce bumpiness for thinner land
-      bumpScale: 0.02,
-      // Remove all properties that might emphasize edges
       wireframe: false,
       flatShading: false,
-      // Add these properties to further reduce edge visibility
-      polygonOffset: true,
-      polygonOffsetFactor: 1,
-      polygonOffsetUnits: 1
+      // Remove polygon offset properties
+      polygonOffset: false
     });
     
     // Process each polygon
@@ -100,9 +95,9 @@ export default class SimplePolygonRenderer {
 
         // Create geometry with minimal extrusion for elevation
         const extrudeSettings = {
-          depth: 0.005,  // Reduce depth even further to 0.005 (almost flat)
-          bevelEnabled: false, // Disable bevels completely
-          curveSegments: 6 // Keep curve segments for smoother shape edges
+          depth: 0.001,  // Make it even flatter
+          bevelEnabled: false,
+          curveSegments: 6
         };
       
         // Use ExtrudeGeometry instead of ShapeGeometry for elevation

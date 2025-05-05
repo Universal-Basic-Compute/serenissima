@@ -141,14 +141,12 @@ export class PolygonMeshFacade implements Poolable {
       
       // Configure mesh properties
       this.mesh.rotation.x = -Math.PI / 2;
-      this.mesh.position.y = 0.2; // Slightly above water
+      this.mesh.position.y = 0; // Exactly at water level
       this.mesh.renderOrder = 1;
       
-      // Apply polygon offset to prevent z-fighting
+      // Remove polygon offset
       if (material instanceof THREE.Material) {
-        material.polygonOffset = true;
-        material.polygonOffsetFactor = 1;
-        material.polygonOffsetUnits = 1;
+        material.polygonOffset = false;
       }
       
       // Add userData to identify this as a polygon
