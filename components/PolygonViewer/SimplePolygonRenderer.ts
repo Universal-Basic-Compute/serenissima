@@ -31,11 +31,6 @@ export default class SimplePolygonRenderer {
   private coatOfArmsDragPlane: THREE.Plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
   private dragRaycaster: THREE.Raycaster = new THREE.Raycaster();
   private dragIntersection: THREE.Vector3 = new THREE.Vector3();
-  private isDraggingCoatOfArms: boolean = false;
-  private draggedCoatOfArmsId: string | null = null;
-  private coatOfArmsDragPlane: THREE.Plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
-  private dragRaycaster: THREE.Raycaster = new THREE.Raycaster();
-  private dragIntersection: THREE.Vector3 = new THREE.Vector3();
   
   // Properties for hover and click detection
   private raycaster: THREE.Raycaster;
