@@ -76,10 +76,8 @@ export default class SimplePolygonRenderer {
         // Render polygons once texture is loaded
         this.renderPolygons();
         
-        // Create coat of arms sprites if in land view
-        if (this.activeView === 'land') {
-          this.createCoatOfArmsSprites();
-        }
+        // Fetch and apply land owners, then create coat of arms sprites
+        this.fetchAndApplyLandOwners();
       },
       undefined,
       (error) => {
@@ -87,10 +85,8 @@ export default class SimplePolygonRenderer {
         // Render polygons without texture if loading fails
         this.renderPolygons();
         
-        // Create coat of arms sprites if in land view
-        if (this.activeView === 'land') {
-          this.createCoatOfArmsSprites();
-        }
+        // Fetch and apply land owners, then create coat of arms sprites
+        this.fetchAndApplyLandOwners();
       }
     );
   }
@@ -104,12 +100,8 @@ export default class SimplePolygonRenderer {
       roughness: 0.8,
       metalness: 0.1,
       wireframe: false,
-      flatShading: false,
-      // Remove polygon offset properties
-      polygonOffset: false,
-      // Disable shadows
-      castShadow: false,
-      receiveShadow: false
+      flatShading: false
+      // Removed invalid properties that cause WebGL warnings
     });
     
     // Process each polygon
@@ -491,6 +483,93 @@ export default class SimplePolygonRenderer {
     }
   }
 
+  /**
+   * Fetch land owners data and apply to polygons
+   */
+  private async fetchAndApplyLandOwners() {
+    console.log('Fetching land owners data...');
+    try {
+      const response = await fetch('/api/get-land-owners');
+      if (response.ok) {
+        const data = await response.json();
+        if (data.lands && Array.isArray(data.lands)) {
+          console.log(`Received ${data.lands.length} land owner records`);
+          
+          // Create a map of land ID to owner
+          const landOwnersMap: Record<string, string> = {};
+          data.lands.forEach((land: any) => {
+            if (land.id && land.owner) {
+              landOwnersMap[land.id] = land.owner;
+            }
+          });
+          
+          console.log(`Created land owners map with ${Object.keys(landOwnersMap).length} entries`);
+          
+          // Apply owners to polygons
+          let updatedCount = 0;
+          this.polygons.forEach(polygon => {
+            if (polygon.id && landOwnersMap[polygon.id]) {
+              polygon.owner = landOwnersMap[polygon.id];
+              updatedCount++;
+            }
+          });
+          
+          console.log(`Updated ${updatedCount} polygons with owner information`);
+          
+          // If no owners were found or applied, use default owners
+          if (updatedCount === 0) {
+            this.assignDefaultOwners();
+          } else {
+            // Now that we have owners, create coat of arms sprites
+            this.createCoatOfArmsSprites();
+          }
+        } else {
+          // No lands data, use default owners
+          this.assignDefaultOwners();
+        }
+      } else {
+        console.error('Failed to fetch land owners:', response.status, response.statusText);
+        // Use default owners as fallback
+        this.assignDefaultOwners();
+      }
+    } catch (error) {
+      console.error('Error fetching land owners:', error);
+      // Use default owners as fallback
+      this.assignDefaultOwners();
+    }
+  }
+  
+  /**
+   * Assign default owners to polygons for demonstration
+   */
+  private assignDefaultOwners() {
+    console.log('No land owners found, assigning default owners for demonstration');
+    
+    // Get available owners from the coat of arms map
+    const availableOwners = Object.keys(this.ownerCoatOfArmsMap);
+    if (availableOwners.length === 0) {
+      console.warn('No available owners with coat of arms');
+      return;
+    }
+    
+    // Assign owners to a subset of polygons for demonstration
+    const polygonsToAssign = Math.min(10, this.polygons.length);
+    for (let i = 0; i < polygonsToAssign; i++) {
+      const polygon = this.polygons[i];
+      if (polygon && polygon.id) {
+        // Assign an owner from the available owners
+        const ownerIndex = i % availableOwners.length;
+        polygon.owner = availableOwners[ownerIndex];
+        console.log(`Assigned default owner ${polygon.owner} to polygon ${polygon.id}`);
+      }
+    }
+    
+    console.log(`Assigned default owners to ${polygonsToAssign} polygons`);
+    
+    // Create coat of arms sprites with the new owners
+    this.createCoatOfArmsSprites();
+  }
+  
   public cleanup() {
     // Remove meshes from scene and dispose resources
     this.meshes.forEach(mesh => {
