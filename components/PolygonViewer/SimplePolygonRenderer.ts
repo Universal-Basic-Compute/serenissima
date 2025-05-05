@@ -100,7 +100,7 @@ export default class SimplePolygonRenderer {
 
         // Create geometry with minimal extrusion for elevation
         const extrudeSettings = {
-          depth: 0.02,  // Reduce depth from 0.05 to 0.02 for thinner land
+          depth: 0.005,  // Reduce depth even further to 0.005 (almost flat)
           bevelEnabled: false, // Disable bevels completely
           curveSegments: 6 // Keep curve segments for smoother shape edges
         };
@@ -128,7 +128,7 @@ export default class SimplePolygonRenderer {
         mesh.rotation.x = -Math.PI / 2;
     
         // Position the land exactly at water level
-        mesh.position.y = -5.0; // Position land exactly at water level
+        mesh.position.y = -5.005; // Position land slightly below water level, with just the top surface visible
     
         // No need for render order or polygon offset when there's clear physical separation
         
