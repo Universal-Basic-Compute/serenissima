@@ -305,22 +305,16 @@ export default class SimplePolygonRenderer {
         return;
       }
       
-      // Check if polygon has coordinates for shaped coat of arms
-      if (polygon.coordinates && polygon.coordinates.length >= 3) {
-        this.createPolygonShapedCoatOfArms(polygon, coatOfArmsUrl, ownerValue);
-        createdCount++;
-      } else {
-        // Fallback to circular coat of arms if no coordinates
-        this.createCircularCoatOfArms(polygon, coatOfArmsUrl);
-        createdCount++;
-      }
+      // Always use circular coat of arms for simplicity and performance
+      this.createCircularCoatOfArms(polygon, coatOfArmsUrl);
+      createdCount++;
     });
     
     console.log(`Created ${createdCount} coat of arms sprites`);
   }
   
   /**
-   * Create a circular coat of arms sprite (original implementation)
+   * Create a circular coat of arms sprite
    */
   private createCircularCoatOfArms(polygon: any, coatOfArmsUrl: string) {
     if (!polygon.centroid) return;
@@ -434,186 +428,12 @@ export default class SimplePolygonRenderer {
   
   /**
    * Create a coat of arms that follows the polygon shape
+   * This method is kept for reference but is no longer used
+   * All coat of arms are now created using createCircularCoatOfArms for simplicity and performance
    */
   private createPolygonShapedCoatOfArms(polygon: any, coatOfArmsUrl: string, ownerName: string) {
-    if (!polygon.coordinates || !polygon.centroid) return;
-    
-    // Convert coordinates to normalized space
-    const normalizedCoords = normalizeCoordinates(
-      polygon.coordinates,
-      this.bounds.centerLat,
-      this.bounds.centerLng,
-      this.bounds.scale,
-      this.bounds.latCorrectionFactor
-    );
-    
-    // Always use centroid for positioning
-    const positionCoord = polygon.centroid;
-    
-    // Calculate the centroid position
-    const centroidPos = normalizeCoordinates(
-      [positionCoord],
-      this.bounds.centerLat,
-      this.bounds.centerLng,
-      this.bounds.scale,
-      this.bounds.latCorrectionFactor
-    )[0];
-    
-    // Create a raycaster to find the exact height of the land at this position
-    const raycaster = new THREE.Raycaster();
-    const direction = new THREE.Vector3(0, -1, 0); // Cast ray downward
-    const origin = new THREE.Vector3(centroidPos.x, 10, -centroidPos.y); // Start from above
-    raycaster.set(origin, direction);
-    
-    // Find all meshes in the scene that could be land
-    const landMeshes: THREE.Mesh[] = [];
-    this.scene.traverse(object => {
-      if (object instanceof THREE.Mesh && 
-          object.material instanceof THREE.MeshStandardMaterial && 
-          !object.userData.isCoatOfArms) { // Avoid coat of arms meshes
-        landMeshes.push(object);
-      }
-    });
-    
-    // Find the intersection with land
-    const intersects = raycaster.intersectObjects(landMeshes);
-    
-    // Default height if no intersection found
-    let yPosition = 0.05;
-    
-    // If we found an intersection, use that height (plus a small offset)
-    if (intersects.length > 0) {
-      yPosition = intersects[0].point.y + 0.01; // 0.01 units above the land
-      console.log(`Found land intersection for ${polygon.id} at height ${yPosition}`);
-    }
-    
-    // Create a canvas to draw the masked image
-    const canvas = document.createElement('canvas');
-    const size = 512;
-    canvas.width = size;
-    canvas.height = size;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    
-    // Calculate bounds of the polygon
-    const bounds = this.calculatePolygonBounds(normalizedCoords);
-    
-    // Load the coat of arms texture - handle both external and local URLs
-    const textureUrl = coatOfArmsUrl.startsWith('http') 
-      ? coatOfArmsUrl 
-      : `${window.location.origin}${coatOfArmsUrl}`;
-      
-    this.textureLoader.load(
-      textureUrl,
-      (texture) => {
-        // Draw the polygon shape on the canvas
-        ctx.beginPath();
-        
-        // Scale and center the polygon shape to fit the canvas
-        const scale = Math.min(size / bounds.width, size / bounds.height) * 0.8;
-        const offsetX = size/2 - (bounds.minX + bounds.width/2) * scale;
-        const offsetY = size/2 - (bounds.minY + bounds.height/2) * scale;
-        
-        // Draw the polygon path
-        ctx.moveTo(
-          normalizedCoords[0].x * scale + offsetX,
-          normalizedCoords[0].y * scale + offsetY
-        );
-        for (let i = 1; i < normalizedCoords.length; i++) {
-          ctx.lineTo(
-            normalizedCoords[i].x * scale + offsetX,
-            normalizedCoords[i].y * scale + offsetY
-          );
-        }
-        ctx.closePath();
-        
-        // Create clipping region
-        ctx.save();
-        ctx.clip();
-        
-        // Draw the coat of arms image inside the clipped region
-        // INVERT THE IMAGE by translating and scaling the canvas
-        if (texture.image) {
-          const aspectRatio = texture.image.width / texture.image.height;
-          let drawWidth = size;
-          let drawHeight = size / aspectRatio;
-          if (drawHeight > size) {
-            drawHeight = size;
-            drawWidth = size * aspectRatio;
-          }
-          const imgX = (size - drawWidth) / 2;
-          const imgY = (size - drawHeight) / 2;
-          
-          // Save context state before transformations
-          ctx.save();
-          
-          // Translate to center of canvas
-          ctx.translate(size/2, size/2);
-          // Scale y by -1 to flip vertically
-          ctx.scale(1, -1);
-          // Translate back
-          ctx.translate(-size/2, -size/2);
-          
-          // Draw the image
-          ctx.drawImage(texture.image, imgX, imgY, drawWidth, drawHeight);
-          
-          // Restore context state
-          ctx.restore();
-        }
-        
-        // Add a border around the polygon
-        ctx.restore();
-        ctx.lineWidth = 4;
-        ctx.strokeStyle = '#FFFFFF';
-        ctx.stroke();
-        
-        // REMOVED: Owner name text display
-        
-        // Create a texture from the canvas
-        const maskedTexture = new THREE.CanvasTexture(canvas);
-        
-        // Create a material with the masked texture
-        const material = new THREE.MeshBasicMaterial({
-          map: maskedTexture,
-          transparent: true,
-          side: THREE.DoubleSide,
-          depthWrite: false
-        });
-        
-        // Create a plane geometry for the texture
-        const planeGeometry = new THREE.PlaneGeometry(1, 1);
-        const mesh = new THREE.Mesh(planeGeometry, material);
-        
-        // Position at the centroid with the calculated y position
-        mesh.position.set(centroidPos.x, yPosition, -centroidPos.y);
-        mesh.rotation.x = -Math.PI / 2 + Math.PI; // Invert orientation by adding PI (180 degrees)
-        mesh.renderOrder = 10;
-        
-        // Mark this mesh as a coat of arms to avoid raycasting against it
-        mesh.userData.isCoatOfArms = true;
-    
-        // Scale based on polygon size - MAKE BIGGER
-        const maxDim = Math.max(bounds.width, bounds.height);
-        const sceneScale = this.bounds.scale;
-        const baseScale = Math.max(0.25350, sceneScale / 1975); // Increased by another 20%
-        mesh.scale.set(maxDim * baseScale * 1, maxDim * baseScale * 1, 1); // Reduced both dimensions (2 -> 1)
-        
-        // Add to scene
-        this.scene.add(mesh);
-        
-        // Add metadata
-        mesh.userData.isCoatOfArms = true;
-        mesh.userData.polygonId = polygon.id;
-        
-        this.coatOfArmsSprites[polygon.id] = mesh;
-      },
-      undefined,
-      (error) => {
-        console.error(`Failed to load coat of arms texture for ${polygon.id}:`, error);
-        // Fallback to circular coat of arms if texture loading fails
-        this.createCircularCoatOfArms(polygon, coatOfArmsUrl);
-      }
-    );
+    // Simply delegate to the circular method for consistency
+    this.createCircularCoatOfArms(polygon, coatOfArmsUrl);
   }
   
   /**
