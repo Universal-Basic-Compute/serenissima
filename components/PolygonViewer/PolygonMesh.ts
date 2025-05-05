@@ -151,7 +151,7 @@ class PolygonMesh {
     if (this.activeView === 'land') {
       if (this.ownerColor) {
         // Blend the owner color with sand color for a more natural look
-        const sandColor = new THREE.Color(0xfff0c0); // Lighter, more yellow sand color
+        const sandColor = new THREE.Color(0xfff5d0); // Even lighter, more yellow sand color
         const ownerColor = new THREE.Color(this.ownerColor);
         return new THREE.Color().lerpColors(sandColor, ownerColor, 0.8); // Increased from 0.7 to 0.8
       } else if (this.polygon.owner) {
@@ -162,10 +162,10 @@ class PolygonMesh {
         }
         return new THREE.Color(0x8cd17a); // Brighter green
       } else {
-        return new THREE.Color(0xfff0c0); // Lighter, more yellow sand color
+        return new THREE.Color(0xfff5d0); // Even lighter, more yellow sand color
       }
     } else {
-      return new THREE.Color(0xfff0c0); // Lighter, more yellow sand color
+      return new THREE.Color(0xfff5d0); // Even lighter, more yellow sand color
     }
   }
   

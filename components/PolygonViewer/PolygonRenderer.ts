@@ -258,7 +258,7 @@ export default class PolygonRenderer {
       () => this.facade.createLandMaterial(),
       RenderingErrorType.MATERIAL_CREATION,
       'sand-material',
-      () => this.errorHandler.createFallbackMaterial('#f5e9c8') // Fallback sand color
+      () => this.errorHandler.createFallbackMaterial('#fff5d0') // Lighter, more yellow fallback sand color
     );
     
     // Track success and failure counts
@@ -400,7 +400,7 @@ export default class PolygonRenderer {
       // Create a simple marker at the centroid
       const geometry = new THREE.CircleGeometry(0.3, 8); // Simplified geometry
       const material = new THREE.MeshBasicMaterial({
-        color: polygon.owner ? this.getOwnerColor(polygon.owner) || '#FF00FF' : '#FF00FF',
+        color: polygon.owner ? this.getOwnerColor(polygon.owner) || '#FFF5D0' : '#FFF5D0', // Lighter, more yellow
         side: THREE.DoubleSide,
         transparent: true,
         opacity: 0.7,
@@ -1023,7 +1023,7 @@ export default class PolygonRenderer {
       // Draw a colored circle as fallback
       ctx.beginPath();
       ctx.arc(size/2, size/2, size/2 - 4, 0, Math.PI * 2);
-      ctx.fillStyle = '#8B4513'; // Default brown color
+      ctx.fillStyle = '#FFF5D0'; // Lighter, more yellow sand color
       ctx.fill();
       ctx.strokeStyle = '#FFFFFF';
       ctx.lineWidth = 8;
@@ -1099,7 +1099,7 @@ export default class PolygonRenderer {
       ctx.clearRect(0, 0, size, size);
       ctx.beginPath();
       ctx.arc(size/2, size/2, size/2 - 4, 0, Math.PI * 2);
-      ctx.fillStyle = '#8B4513'; // Default brown color
+      ctx.fillStyle = '#FFF5D0'; // Lighter, more yellow sand color
       ctx.fill();
       ctx.strokeStyle = '#FFFFFF';
       ctx.lineWidth = 8;

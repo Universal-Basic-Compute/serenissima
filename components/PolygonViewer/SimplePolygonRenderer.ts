@@ -45,7 +45,7 @@ export default class SimplePolygonRenderer {
     users = {},
     camera = null,
     onLandSelected = null,
-    sandColor = 0xfff0c0 // Add this parameter with default value
+    sandColor = 0xfff5d0 // Add this parameter with default value - lighter, more yellow
   }: SimplePolygonRendererProps & { 
     activeView?: string;
     users?: Record<string, any>;
