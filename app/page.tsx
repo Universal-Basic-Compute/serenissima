@@ -60,34 +60,41 @@ export default function Home() {
   
   // Force exit loading state after a timeout
   useEffect(() => {
-    // Single timer to force exit from loading state
     console.log('Setting up loading state management');
     
-    const loadingTimer = setTimeout(() => {
-      console.log('Primary timer: Forcing exit from loading state after timeout');
+    // Primary timer - longest duration
+    const primaryTimer = setTimeout(() => {
+      console.log('Primary timer: Forcing exit from loading state');
       setIsLoading(false);
-      
-      // Also ensure polygon store loading state is cleared
-      const currentLoading = usePolygonStore.getState().loading;
-      if (currentLoading) {
-        console.log('Clearing polygon store loading state');
-        usePolygonStore.setState({ loading: false });
-      }
-    }, 8000); // 8 seconds timeout
+      usePolygonStore.getState().setLoading(false);
+    }, 8000);
     
-    // Add a shorter backup timer for diagnostics only
-    const backupTimer = setTimeout(() => {
-      console.log('Backup timer: Still loading after 5s');
-      console.log('Proceeding with app initialization');
-      
-      // Don't set loading state here, just log diagnostics
+    // Secondary timer - medium duration
+    const secondaryTimer = setTimeout(() => {
+      console.log('Secondary timer: Checking loading state');
+      if (isLoading) {
+        console.log('Still loading after secondary timer, forcing exit');
+        setIsLoading(false);
+        usePolygonStore.getState().setLoading(false);
+      }
     }, 5000);
     
+    // Emergency timer - shortest duration
+    const emergencyTimer = setTimeout(() => {
+      console.log('Emergency timer: Final loading state check');
+      if (isLoading || usePolygonStore.getState().loading) {
+        console.log('EMERGENCY: Still loading after all timers, forcing exit');
+        setIsLoading(false);
+        usePolygonStore.getState().setLoading(false);
+      }
+    }, 3000);
+    
     return () => {
-      clearTimeout(loadingTimer);
-      clearTimeout(backupTimer);
+      clearTimeout(primaryTimer);
+      clearTimeout(secondaryTimer);
+      clearTimeout(emergencyTimer);
     };
-  }, [setIsLoading]); // Add setIsLoading as a dependency
+  }, [isLoading, setIsLoading]);
   
   // State for wallet connection
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
@@ -2306,7 +2313,24 @@ export default function Home() {
       )}
       
       {/* Always show the 3D Polygon Viewer regardless of wallet connection status */}
-      <PolygonViewer />
+      {!isLoading && (
+        <>
+          {/* Fallback component that will show if PolygonViewer fails */}
+          <div className="absolute inset-0 z-10 pointer-events-none">
+            <div className="w-full h-full flex flex-col items-center justify-center bg-amber-50 bg-opacity-0">
+              <button 
+                onClick={() => window.location.reload()}
+                className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors pointer-events-auto opacity-0 hover:opacity-100 transition-opacity"
+              >
+                Reload Page
+              </button>
+            </div>
+          </div>
+          
+          {/* Dynamic import of PolygonViewer */}
+          <PolygonViewer />
+        </>
+      )}
       
       </div>
     </>

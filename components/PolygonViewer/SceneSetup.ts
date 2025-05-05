@@ -29,18 +29,27 @@ export default class SceneSetup {
     this.performanceMode = !highQuality;
     this.activeView = activeView;
     
-    // Initialize ThreeJS facade with logarithmic depth buffer
-    this.threejs = new ThreeJSFacade(canvas, { logarithmicDepthBuffer: true });
-    
-    // Get references to THREE.js objects
-    this.scene = this.threejs.getScene();
-    this.camera = this.threejs.getCamera();
-    this.renderer = this.threejs.getRenderer();
-    this.controls = this.threejs.getControls();
-    this.composer = null; // We'll use the one in the facade
-    
-    // Add lights with a slight delay to improve initial loading
-    setTimeout(() => this.setupLights(activeView), 100);
+    try {
+      console.log('Initializing ThreeJS facade');
+      // Initialize ThreeJS facade with logarithmic depth buffer
+      this.threejs = new ThreeJSFacade(canvas, { logarithmicDepthBuffer: true });
+      
+      // Get references to THREE.js objects
+      this.scene = this.threejs.getScene();
+      this.camera = this.threejs.getCamera();
+      this.renderer = this.threejs.getRenderer();
+      this.controls = this.threejs.getControls();
+      this.composer = null; // We'll use the one in the facade
+      
+      console.log('ThreeJS facade initialized successfully');
+      
+      // Add a force render method to the scene for other components to use
+      this.scene.userData.forceRender = () => {
+        this.threejs.forceRender();
+      };
+      
+      // Add lights with a slight delay to improve initial loading
+      setTimeout(() => this.setupLights(activeView), 100);
     
     // Create cloud system with a delay
     setTimeout(() => {
@@ -70,6 +79,55 @@ export default class SceneSetup {
     
     // Add animation callback for updates
     this.threejs.addAnimationCallback(this.update.bind(this));
+    
+    console.log('SceneSetup initialization complete');
+  } catch (error) {
+    console.error('Failed to initialize SceneSetup:', error);
+    // Create minimal scene as fallback
+    this.createMinimalScene(canvas);
+  }
+}
+
+// Add this method to create a minimal scene as fallback
+private createMinimalScene(canvas: HTMLCanvasElement) {
+  console.log('Creating minimal fallback scene');
+  
+  try {
+    // Create minimal scene
+    this.scene = new THREE.Scene();
+    this.scene.background = new THREE.Color('#87CEEB');
+    
+    // Create minimal camera
+    this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+    this.camera.position.set(0, 10, 20);
+    this.camera.lookAt(0, 0, 0);
+    
+    // Create minimal renderer
+    this.renderer = new THREE.WebGLRenderer({ canvas, antialias: false });
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    
+    // Create minimal controls
+    const OrbitControls = require('three/examples/jsm/controls/OrbitControls').OrbitControls;
+    this.controls = new OrbitControls(this.camera, canvas);
+    
+    // Add a simple plane to represent water
+    const planeGeometry = new THREE.PlaneGeometry(100, 100);
+    const planeMaterial = new THREE.MeshBasicMaterial({ color: 0x3366cc });
+    const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+    plane.rotation.x = -Math.PI / 2;
+    this.scene.add(plane);
+    
+    // Set up minimal animation loop
+    const animate = () => {
+      requestAnimationFrame(animate);
+      this.controls.update();
+      this.renderer.render(this.scene, this.camera);
+    };
+    animate();
+    
+    console.log('Minimal fallback scene created');
+  } catch (error) {
+    console.error('Failed to create minimal fallback scene:', error);
   }
   
   private waterFacade: WaterFacade | null = null;

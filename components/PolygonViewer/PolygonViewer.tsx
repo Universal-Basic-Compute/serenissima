@@ -679,19 +679,36 @@ export default function PolygonViewer() {
       });
       sceneRef.current = sceneSetup;
       
-      // Initialize polygon renderer immediately
-      console.log('Initializing polygon renderer');
-      const polygonRenderer = new PolygonRenderer({
-        scene: sceneRef.current.scene,
-        camera: sceneRef.current.camera,
-        polygons,
-        bounds,
-        activeView,
-        performanceMode: !highQuality,
-        polygonMeshesRef,
-        users
-      });
-      polygonRendererRef.current = polygonRenderer;
+      // Initialize polygon renderer with error handling
+      try {
+        console.log('Initializing polygon renderer');
+        const polygonRenderer = new PolygonRenderer({
+          scene: sceneRef.current.scene,
+          camera: sceneRef.current.camera,
+          polygons,
+          bounds,
+          activeView,
+          performanceMode: !highQuality,
+          polygonMeshesRef,
+          users
+        });
+        polygonRendererRef.current = polygonRenderer;
+        console.log('Polygon renderer initialized successfully');
+      } catch (error) {
+        console.error('Failed to initialize polygon renderer:', error);
+        // Create a minimal fallback renderer if possible
+        try {
+          console.log('Creating fallback renderer');
+          // Simple fallback that just shows a plane
+          const geometry = new THREE.PlaneGeometry(100, 100);
+          const material = new THREE.MeshBasicMaterial({ color: 0x3366cc });
+          const plane = new THREE.Mesh(geometry, material);
+          plane.rotation.x = -Math.PI / 2;
+          sceneRef.current.scene.add(plane);
+        } catch (fallbackError) {
+          console.error('Failed to create fallback renderer:', fallbackError);
+        }
+      }
       
       // Add a simple animation loop
       const animate = () => {
@@ -1464,6 +1481,18 @@ export default function PolygonViewer() {
     <ThreeDErrorBoundary 
       onError={handleRenderingError}
       resetKey={`${activeView}-${highQuality}-${polygons.length}`}
+      fallback={
+        <div className="w-full h-full flex flex-col items-center justify-center bg-amber-50">
+          <h2 className="text-2xl font-serif text-amber-800 mb-4">Rendering Error</h2>
+          <p className="text-amber-600 mb-6">The Council of Ten is investigating this issue.</p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors"
+          >
+            Reload Page
+          </button>
+        </div>
+      }
     >
       <div className="w-screen h-screen">
         {/* View mode menu */}

@@ -23,7 +23,16 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
       onLoadingComplete();
     }, duration);
     
-    return () => clearTimeout(timer);
+    // Add a shorter backup timer as a failsafe
+    const backupTimer = setTimeout(() => {
+      console.log('LoadingScreen: Backup timer triggered');
+      onLoadingComplete();
+    }, Math.min(duration * 0.7, 3500)); // 70% of duration or max 3.5 seconds
+    
+    return () => {
+      clearTimeout(timer);
+      clearTimeout(backupTimer);
+    };
   }, [duration, onLoadingComplete]);
 
   useEffect(() => {
