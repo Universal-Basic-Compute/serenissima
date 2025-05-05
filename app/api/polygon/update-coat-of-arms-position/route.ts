@@ -31,8 +31,16 @@ export async function POST(request: Request) {
     // Update the coat of arms center
     polygonData.coatOfArmsCenter = position;
     
+    // Log the update for debugging
+    console.log(`Updating coat of arms position for polygon ${polygonId}:`, position);
+    console.log('Updated polygon data:', polygonData);
+    
     // Write the updated data back to the file
     fs.writeFileSync(filePath, JSON.stringify(polygonData, null, 2));
+    
+    // Verify the file was written correctly
+    const verifiedData = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+    console.log(`Verification - polygon ${polygonId} coatOfArmsCenter:`, verifiedData.coatOfArmsCenter);
     
     // Also update in Airtable if needed
     try {

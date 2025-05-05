@@ -227,6 +227,14 @@ export default function PolygonViewer() {
       // Check if polygons have owners
       const polygonsWithOwners = polygons.filter(p => p.owner);
       console.log(`Polygons with owners: ${polygonsWithOwners.length}`);
+      
+      // Check if polygons have coat of arms centers
+      const polygonsWithCoatOfArmsCenter = polygons.filter(p => p.coatOfArmsCenter);
+      console.log(`Polygons with coatOfArmsCenter: ${polygonsWithCoatOfArmsCenter.length}`);
+      if (polygonsWithCoatOfArmsCenter.length > 0) {
+        console.log('Sample polygons with coatOfArmsCenter:', 
+          polygonsWithCoatOfArmsCenter.slice(0, 3).map(p => ({ id: p.id, position: p.coatOfArmsCenter })));
+      }
     }
   };
 
@@ -1275,6 +1283,14 @@ export default function PolygonViewer() {
   useEffect(() => {
     if (activeView === 'land' && polygonRendererRef.current) {
       console.log('Land view active, updating coat of arms sprites');
+      
+      // Debug: Log polygons with coatOfArmsCenter
+      const polygonsWithCoatOfArmsCenter = polygons.filter(p => p.coatOfArmsCenter);
+      console.log(`Found ${polygonsWithCoatOfArmsCenter.length} polygons with coatOfArmsCenter in view mode change`);
+      if (polygonsWithCoatOfArmsCenter.length > 0) {
+        console.log('Sample polygons with coatOfArmsCenter:', 
+          polygonsWithCoatOfArmsCenter.slice(0, 3).map(p => ({ id: p.id, position: p.coatOfArmsCenter })));
+      }
       
       // Schedule multiple updates to ensure everything is visible
       // First immediate update

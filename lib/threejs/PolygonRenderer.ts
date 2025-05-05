@@ -156,6 +156,14 @@ private convertPositionToLatLng(position: THREE.Vector3): { lat: number, lng: nu
   // Get the bounds to determine the scale
   const bounds = this.bounds;
   
+  // Validate input
+  if (!position || typeof position.x !== 'number' || isNaN(position.x) || 
+      typeof position.z !== 'number' || isNaN(position.z)) {
+    console.error(`Invalid position: ${JSON.stringify(position)}`);
+    // Return a default position to prevent errors
+    return { lat: bounds.minLat, lng: bounds.minLng };
+  }
+  
   // Calculate the scale factors
   const latScale = (bounds.maxLat - bounds.minLat) / (bounds.maxZ - bounds.minZ);
   const lngScale = (bounds.maxLng - bounds.minLng) / (bounds.maxX - bounds.minX);
@@ -180,6 +188,13 @@ private saveCoatOfArmsPosition(polygonId: string, position: { lat: number, lng: 
   
   console.log(`Saving coat of arms position for polygon ${polygonId}:`, position);
   
+  // Validate position data
+  if (!position || typeof position.lat !== 'number' || isNaN(position.lat) || 
+      typeof position.lng !== 'number' || isNaN(position.lng)) {
+    console.error(`Invalid position data for polygon ${polygonId}:`, position);
+    return;
+  }
+  
   // Send the update to the server
   fetch(`${apiBaseUrl}/api/polygon/update-coat-of-arms-position`, {
     method: 'POST',
@@ -200,6 +215,7 @@ private saveCoatOfArmsPosition(polygonId: string, position: { lat: number, lng: 
         const polygon = this.polygons.find(p => p.id === polygonId);
         if (polygon) {
           polygon.coatOfArmsCenter = position;
+          console.log(`Updated local polygon data with coatOfArmsCenter:`, polygon.coatOfArmsCenter);
         }
         
         // Notify about the change using the event bus
@@ -210,6 +226,14 @@ private saveCoatOfArmsPosition(polygonId: string, position: { lat: number, lng: 
         
         // Force an update of the coat of arms sprites to reflect the new position
         this.updateCoatOfArmsSprites();
+        
+        // Verify that the position was saved correctly
+        setTimeout(() => {
+          const updatedPolygon = this.polygons.find(p => p.id === polygonId);
+          if (updatedPolygon) {
+            console.log(`Verification - polygon ${polygonId} coatOfArmsCenter:`, updatedPolygon.coatOfArmsCenter);
+          }
+        }, 1000);
       } else {
         console.error('Failed to update coat of arms position:', data.error);
       }
@@ -228,6 +252,13 @@ private saveCoatOfArmsPosition(polygonId: string, position: { lat: number, lng: 
 private convertLatLngToPosition(lat: number, lng: number): THREE.Vector3 {
   // Get the bounds to determine the scale
   const bounds = this.bounds;
+  
+  // Validate input
+  if (typeof lat !== 'number' || isNaN(lat) || typeof lng !== 'number' || isNaN(lng)) {
+    console.error(`Invalid lat/lng values: lat=${lat}, lng=${lng}`);
+    // Return a default position to prevent errors
+    return new THREE.Vector3(0, 5, 0);
+  }
   
   // Calculate the scale factors
   const zScale = (bounds.maxZ - bounds.minZ) / (bounds.maxLat - bounds.minLat);
@@ -253,6 +284,11 @@ import { eventBus, EventTypes } from '../eventBus';
  */
 public updateCoatOfArmsSprites(): void {
   console.log('Updating coat of arms sprites');
+  
+  // Debug: Log polygons with coatOfArmsCenter
+  const polygonsWithCoatOfArms = this.polygons.filter(p => p.coatOfArmsCenter);
+  console.log(`Found ${polygonsWithCoatOfArms.length} polygons with coatOfArmsCenter:`, 
+    polygonsWithCoatOfArms.map(p => ({ id: p.id, position: p.coatOfArmsCenter })));
   
   // Clear the sprite map
   this.coatOfArmsSprites.clear();
