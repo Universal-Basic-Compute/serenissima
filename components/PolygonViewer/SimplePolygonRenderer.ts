@@ -292,85 +292,244 @@ export default class SimplePolygonRenderer {
         return;
       }
       
-      // Convert centroid to 3D position
-      const normalizedCoord = normalizeCoordinates(
-        [polygon.centroid],
-        this.bounds.centerLat,
-        this.bounds.centerLng,
-        this.bounds.scale,
-        this.bounds.latCorrectionFactor
-      )[0];
-      
-      // Add a debug sphere at the centroid position to visualize it
-      // Uncomment this line to see where centroids are located
-      // const debugSphere = addDebugSphere(new THREE.Vector3(normalizedCoord.x, 0, normalizedCoord.y));
-      
-      // Create a plane geometry for the texture
-      const sceneScale = this.bounds.scale;
-      const spriteScale = Math.max(1, sceneScale / 500); // Dynamic scaling based on scene
-      const planeGeometry = new THREE.PlaneGeometry(spriteScale, spriteScale);
-      const planeMaterial = new THREE.MeshBasicMaterial({
-        map: null, // Will be set when texture loads
-        transparent: true,
-        side: THREE.DoubleSide,
-        depthTest: true,
-        depthWrite: false
-      });
-      
-      // Create a sprite material
-      const spriteMaterial = new THREE.SpriteMaterial({
-        map: null, // Will be set when texture loads
-        transparent: true,
-        depthTest: true,
-        depthWrite: false
-      });
-      
-      // Create mesh and position it
-      const plane = new THREE.Mesh(planeGeometry, planeMaterial);
-      plane.position.set(normalizedCoord.x, 0.2, -normalizedCoord.y);
-      plane.rotation.x = -Math.PI / 2; // Rotate to lie flat on the ground
-      plane.renderOrder = 10; // Ensure it renders on top of land
-      
-      // Add to scene
-      this.scene.add(plane);
-      
-      // Store reference
-      this.coatOfArmsSprites[polygon.id] = plane;
-      createdCount++;
-      
-      // Load the texture
-      this.textureLoader.load(
-        coatOfArmsUrl,
-        (texture) => {
-          console.log(`Loaded texture for ${polygon.id} from ${coatOfArmsUrl}`);
-          // Create a circular texture
-          const circularTexture = this.createCircularTexture(texture);
-          
-          // Apply the texture to the plane material
-          if (planeMaterial) {
-            planeMaterial.map = circularTexture;
-            planeMaterial.needsUpdate = true;
-            
-            // Adjust plane scale based on texture aspect ratio and scene scale
-            if (texture.image && texture.image.width && texture.image.height) {
-              const aspectRatio = texture.image.width / texture.image.height;
-              const sceneScale = this.bounds.scale;
-              const baseScale = Math.max(0.125, sceneScale / 4000); // 4x smaller base scale
-              plane.scale.set(baseScale * aspectRatio, baseScale, 1);
-            }
-          }
-        },
-        undefined,
-        (error) => {
-          console.error(`Failed to load coat of arms texture for ${polygon.id}:`, error);
-          // Remove the plane if texture loading fails
-          this.scene.remove(plane);
-          delete this.coatOfArmsSprites[polygon.id];
-        }
-      );
+      // Check if polygon has coordinates for shaped coat of arms
+      if (polygon.coordinates && polygon.coordinates.length >= 3) {
+        this.createPolygonShapedCoatOfArms(polygon, coatOfArmsUrl, ownerValue);
+        createdCount++;
+      } else {
+        // Fallback to circular coat of arms if no coordinates
+        this.createCircularCoatOfArms(polygon, coatOfArmsUrl);
+        createdCount++;
+      }
     });
     
     console.log(`Created ${createdCount} coat of arms sprites`);
+  }
+  
+  /**
+   * Create a circular coat of arms sprite (original implementation)
+   */
+  private createCircularCoatOfArms(polygon: any, coatOfArmsUrl: string) {
+    if (!polygon.centroid) return;
+    
+    // Convert centroid to 3D position
+    const normalizedCoord = normalizeCoordinates(
+      [polygon.centroid],
+      this.bounds.centerLat,
+      this.bounds.centerLng,
+      this.bounds.scale,
+      this.bounds.latCorrectionFactor
+    )[0];
+    
+    // Create a plane geometry for the texture
+    const sceneScale = this.bounds.scale;
+    const spriteScale = Math.max(1, sceneScale / 500); // Dynamic scaling based on scene
+    const planeGeometry = new THREE.PlaneGeometry(spriteScale, spriteScale);
+    const planeMaterial = new THREE.MeshBasicMaterial({
+      map: null, // Will be set when texture loads
+      transparent: true,
+      side: THREE.DoubleSide,
+      depthTest: true,
+      depthWrite: false
+    });
+    
+    // Create mesh and position it
+    const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+    plane.position.set(normalizedCoord.x, 0.2, -normalizedCoord.y);
+    plane.rotation.x = -Math.PI / 2; // Rotate to lie flat on the ground
+    plane.renderOrder = 10; // Ensure it renders on top of land
+    
+    // Add to scene
+    this.scene.add(plane);
+    
+    // Store reference
+    this.coatOfArmsSprites[polygon.id] = plane;
+    
+    // Load the texture
+    this.textureLoader.load(
+      coatOfArmsUrl,
+      (texture) => {
+        console.log(`Loaded texture for ${polygon.id} from ${coatOfArmsUrl}`);
+        // Create a circular texture
+        const circularTexture = this.createCircularTexture(texture);
+        
+        // Apply the texture to the plane material
+        if (planeMaterial) {
+          planeMaterial.map = circularTexture;
+          planeMaterial.needsUpdate = true;
+          
+          // Adjust plane scale based on texture aspect ratio and scene scale
+          if (texture.image && texture.image.width && texture.image.height) {
+            const aspectRatio = texture.image.width / texture.image.height;
+            const sceneScale = this.bounds.scale;
+            const baseScale = Math.max(0.125, sceneScale / 4000); // 4x smaller base scale
+            plane.scale.set(baseScale * aspectRatio, baseScale, 1);
+          }
+        }
+      },
+      undefined,
+      (error) => {
+        console.error(`Failed to load coat of arms texture for ${polygon.id}:`, error);
+        // Remove the plane if texture loading fails
+        this.scene.remove(plane);
+        delete this.coatOfArmsSprites[polygon.id];
+      }
+    );
+  }
+  
+  /**
+   * Create a coat of arms that follows the polygon shape
+   */
+  private createPolygonShapedCoatOfArms(polygon: any, coatOfArmsUrl: string, ownerName: string) {
+    if (!polygon.coordinates || !polygon.centroid) return;
+    
+    // Convert coordinates to normalized space
+    const normalizedCoords = normalizeCoordinates(
+      polygon.coordinates,
+      this.bounds.centerLat,
+      this.bounds.centerLng,
+      this.bounds.scale,
+      this.bounds.latCorrectionFactor
+    );
+    
+    // Create a canvas to draw the masked image
+    const canvas = document.createElement('canvas');
+    const size = 512;
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    
+    // Calculate bounds of the polygon
+    const bounds = this.calculatePolygonBounds(normalizedCoords);
+    
+    // Load the coat of arms texture
+    this.textureLoader.load(
+      coatOfArmsUrl,
+      (texture) => {
+        // Draw the polygon shape on the canvas
+        ctx.beginPath();
+        
+        // Scale and center the polygon shape to fit the canvas
+        const scale = Math.min(size / bounds.width, size / bounds.height) * 0.8;
+        const offsetX = size/2 - (bounds.minX + bounds.width/2) * scale;
+        const offsetY = size/2 - (bounds.minY + bounds.height/2) * scale;
+        
+        // Draw the polygon path
+        ctx.moveTo(
+          normalizedCoords[0].x * scale + offsetX,
+          normalizedCoords[0].y * scale + offsetY
+        );
+        for (let i = 1; i < normalizedCoords.length; i++) {
+          ctx.lineTo(
+            normalizedCoords[i].x * scale + offsetX,
+            normalizedCoords[i].y * scale + offsetY
+          );
+        }
+        ctx.closePath();
+        
+        // Create clipping region
+        ctx.save();
+        ctx.clip();
+        
+        // Draw the coat of arms image inside the clipped region
+        if (texture.image) {
+          const aspectRatio = texture.image.width / texture.image.height;
+          let drawWidth = size;
+          let drawHeight = size / aspectRatio;
+          if (drawHeight > size) {
+            drawHeight = size;
+            drawWidth = size * aspectRatio;
+          }
+          const imgX = (size - drawWidth) / 2;
+          const imgY = (size - drawHeight) / 2;
+          
+          ctx.drawImage(texture.image, imgX, imgY, drawWidth, drawHeight);
+        }
+        
+        // Add a border around the polygon
+        ctx.restore();
+        ctx.lineWidth = 4;
+        ctx.strokeStyle = '#FFFFFF';
+        ctx.stroke();
+        
+        // Add owner name text if desired
+        if (ownerName) {
+          ctx.font = 'bold 24px Arial';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillStyle = '#FFFFFF';
+          ctx.strokeStyle = '#000000';
+          ctx.lineWidth = 3;
+          ctx.strokeText(ownerName, size/2, size/2);
+          ctx.fillText(ownerName, size/2, size/2);
+        }
+        
+        // Create a texture from the canvas
+        const maskedTexture = new THREE.CanvasTexture(canvas);
+        
+        // Create a material with the masked texture
+        const material = new THREE.MeshBasicMaterial({
+          map: maskedTexture,
+          transparent: true,
+          side: THREE.DoubleSide,
+          depthWrite: false
+        });
+        
+        // Create a plane geometry for the texture
+        const planeGeometry = new THREE.PlaneGeometry(1, 1);
+        const mesh = new THREE.Mesh(planeGeometry, material);
+        
+        // Position at the centroid
+        const centroidPos = normalizeCoordinates(
+          [polygon.centroid],
+          this.bounds.centerLat,
+          this.bounds.centerLng,
+          this.bounds.scale,
+          this.bounds.latCorrectionFactor
+        )[0];
+        
+        mesh.position.set(centroidPos.x, 0.05, -centroidPos.y);
+        mesh.rotation.x = -Math.PI / 2;
+        mesh.renderOrder = 10;
+        
+        // Scale based on polygon size
+        const maxDim = Math.max(bounds.width, bounds.height);
+        const sceneScale = this.bounds.scale;
+        const baseScale = Math.max(0.125, sceneScale / 4000);
+        mesh.scale.set(maxDim * baseScale, maxDim * baseScale, 1);
+        
+        // Add to scene
+        this.scene.add(mesh);
+        this.coatOfArmsSprites[polygon.id] = mesh;
+      },
+      undefined,
+      (error) => {
+        console.error(`Failed to load coat of arms texture for ${polygon.id}:`, error);
+        // Fallback to circular coat of arms if texture loading fails
+        this.createCircularCoatOfArms(polygon, coatOfArmsUrl);
+      }
+    );
+  }
+  
+  /**
+   * Helper to calculate polygon bounds
+   */
+  private calculatePolygonBounds(coords: {x: number, y: number}[]) {
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    
+    coords.forEach(coord => {
+      minX = Math.min(minX, coord.x);
+      maxX = Math.max(maxX, coord.x);
+      minY = Math.min(minY, coord.y);
+      maxY = Math.max(maxY, coord.y);
+    });
+    
+    return {
+      minX, minY,
+      width: maxX - minX,
+      height: maxY - minY
+    };
   }
 
   /**

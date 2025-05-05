@@ -373,6 +373,119 @@ export class PolygonRendererFacade {
   }
   
   /**
+   * Create a polygon-shaped texture from an existing texture
+   */
+  public createPolygonShapedTexture(
+    texture: THREE.Texture, 
+    polygonCoords: {x: number, y: number}[],
+    ownerName?: string
+  ): THREE.Texture {
+    if (this.isDisposed) {
+      throw new Error('PolygonRendererFacade has been disposed');
+    }
+    
+    // Check if texture.image exists
+    if (!texture.image || polygonCoords.length < 3) {
+      console.warn('Invalid texture image or polygon coordinates, falling back to circular texture');
+      return this.createCircularTexture(texture);
+    }
+    
+    // Calculate bounds of the polygon
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    polygonCoords.forEach(coord => {
+      minX = Math.min(minX, coord.x);
+      maxX = Math.max(maxX, coord.x);
+      minY = Math.min(minY, coord.y);
+      maxY = Math.max(maxY, coord.y);
+    });
+    
+    const width = maxX - minX;
+    const height = maxY - minY;
+    
+    // Create a canvas to draw the masked image
+    const canvas = document.createElement('canvas');
+    const size = 512; // Use a power of 2 for better texture performance
+    canvas.width = size;
+    canvas.height = size;
+    
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return texture; // Fallback if context creation fails
+    
+    try {
+      // Clear the canvas first
+      ctx.clearRect(0, 0, size, size);
+      
+      // Draw the polygon shape on the canvas
+      ctx.beginPath();
+      
+      // Scale and center the polygon shape to fit the canvas
+      const scale = Math.min(size / width, size / height) * 0.8;
+      const offsetX = size/2 - (minX + width/2) * scale;
+      const offsetY = size/2 - (minY + height/2) * scale;
+      
+      // Draw the polygon path
+      ctx.moveTo(
+        polygonCoords[0].x * scale + offsetX,
+        polygonCoords[0].y * scale + offsetY
+      );
+      for (let i = 1; i < polygonCoords.length; i++) {
+        ctx.lineTo(
+          polygonCoords[i].x * scale + offsetX,
+          polygonCoords[i].y * scale + offsetY
+        );
+      }
+      ctx.closePath();
+      
+      // Create clipping region
+      ctx.save();
+      ctx.clip();
+      
+      // Draw the coat of arms image inside the clipped region
+      if (texture.image) {
+        const aspectRatio = texture.image.width / texture.image.height;
+        let drawWidth = size;
+        let drawHeight = size / aspectRatio;
+        if (drawHeight > size) {
+          drawHeight = size;
+          drawWidth = size * aspectRatio;
+        }
+        const imgX = (size - drawWidth) / 2;
+        const imgY = (size - drawHeight) / 2;
+        
+        ctx.drawImage(texture.image, imgX, imgY, drawWidth, drawHeight);
+      }
+      
+      // Restore context and add a border
+      ctx.restore();
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = '#FFFFFF';
+      ctx.stroke();
+      
+      // Add owner name text if provided
+      if (ownerName) {
+        ctx.font = 'bold 24px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = '#FFFFFF';
+        ctx.strokeStyle = '#000000';
+        ctx.lineWidth = 3;
+        ctx.strokeText(ownerName, size/2, size/2);
+        ctx.fillText(ownerName, size/2, size/2);
+      }
+      
+      // Create a new texture from the canvas
+      const shapedTexture = new THREE.Texture(canvas);
+      shapedTexture.needsUpdate = true;
+      
+      return shapedTexture;
+    } catch (error) {
+      console.error('Error creating polygon-shaped texture:', error);
+      // Fall back to circular texture on error
+      return this.createCircularTexture(texture);
+    }
+  }
+  
+  /**
    * Force a render update
    */
   public forceRender(): void {
