@@ -282,6 +282,97 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
     };
   }, [loadUsers]);
   
+  // Add handlers for coat of arms dragging
+  const [isDraggingCoatOfArms, setIsDraggingCoatOfArms] = useState(false);
+  const [draggedCoatOfArmsId, setDraggedCoatOfArmsId] = useState<string | null>(null);
+  
+  const handleMouseDown = useCallback((event: MouseEvent) => {
+    if (!polygonRendererRef.current || !cameraControllerRef.current) return;
+    
+    // Only handle in land view
+    if (activeView !== 'land') return;
+    
+    // Create a raycaster
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2(
+      (event.clientX / window.innerWidth) * 2 - 1,
+      -(event.clientY / window.innerHeight) * 2 + 1
+    );
+    
+    // Update the raycaster
+    raycaster.setFromCamera(mouse, cameraControllerRef.current.camera);
+    
+    // Get all coat of arms sprites
+    const coatOfArmsSprites = Object.values(polygonRendererRef.current.coatOfArmsSprites);
+    
+    // Find intersections
+    const intersects = raycaster.intersectObjects(coatOfArmsSprites, true);
+    
+    if (intersects.length > 0) {
+      // Find the polygon ID from the intersected object
+      let clickedId = null;
+      
+      // Check if the object or its parent has the polygonId
+      let targetObject = intersects[0].object;
+      while (targetObject && !clickedId) {
+        if (targetObject.userData && targetObject.userData.polygonId) {
+          clickedId = targetObject.userData.polygonId;
+        }
+        targetObject = targetObject.parent;
+      }
+      
+      // If we found a polygon ID, start dragging
+      if (clickedId) {
+        setIsDraggingCoatOfArms(true);
+        setDraggedCoatOfArmsId(clickedId);
+        polygonRendererRef.current.startDraggingCoatOfArms(
+          clickedId, 
+          cameraControllerRef.current.camera, 
+          event.clientX, 
+          event.clientY
+        );
+        
+        // Prevent other click handlers
+        event.stopPropagation();
+      }
+    }
+  }, [activeView]);
+  
+  const handleMouseMove = useCallback((event: MouseEvent) => {
+    if (isDraggingCoatOfArms && draggedCoatOfArmsId && polygonRendererRef.current && cameraControllerRef.current) {
+      polygonRendererRef.current.updateDraggingCoatOfArms(
+        cameraControllerRef.current.camera,
+        event.clientX,
+        event.clientY
+      );
+      
+      // Prevent other handlers while dragging
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  }, [isDraggingCoatOfArms, draggedCoatOfArmsId]);
+  
+  const handleMouseUp = useCallback(() => {
+    if (isDraggingCoatOfArms && polygonRendererRef.current) {
+      polygonRendererRef.current.stopDraggingCoatOfArms();
+      setIsDraggingCoatOfArms(false);
+      setDraggedCoatOfArmsId(null);
+    }
+  }, [isDraggingCoatOfArms]);
+  
+  // Add event listeners for dragging
+  useEffect(() => {
+    window.addEventListener('mousedown', handleMouseDown);
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+    
+    return () => {
+      window.removeEventListener('mousedown', handleMouseDown);
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [handleMouseDown, handleMouseMove, handleMouseUp]);
+  
   // Update water quality when parent component changes quality mode
   useEffect(() => {
     if (waterRef.current) {

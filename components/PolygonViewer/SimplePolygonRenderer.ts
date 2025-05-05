@@ -31,6 +31,11 @@ export default class SimplePolygonRenderer {
   private coatOfArmsDragPlane: THREE.Plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
   private dragRaycaster: THREE.Raycaster = new THREE.Raycaster();
   private dragIntersection: THREE.Vector3 = new THREE.Vector3();
+  private isDraggingCoatOfArms: boolean = false;
+  private draggedCoatOfArmsId: string | null = null;
+  private coatOfArmsDragPlane: THREE.Plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+  private dragRaycaster: THREE.Raycaster = new THREE.Raycaster();
+  private dragIntersection: THREE.Vector3 = new THREE.Vector3();
   
   // Properties for hover and click detection
   private raycaster: THREE.Raycaster;
@@ -339,9 +344,12 @@ export default class SimplePolygonRenderer {
   private createCircularCoatOfArms(polygon: any, coatOfArmsUrl: string) {
     if (!polygon.centroid) return;
     
+    // Use coatOfArmsCenter if available, otherwise use centroid
+    const positionCoord = polygon.coatOfArmsCenter || polygon.centroid;
+    
     // Convert centroid to 3D position
     const normalizedCoord = normalizeCoordinates(
-      [polygon.centroid],
+      [positionCoord],
       this.bounds.centerLat,
       this.bounds.centerLng,
       this.bounds.scale,
@@ -400,6 +408,11 @@ export default class SimplePolygonRenderer {
     // Add to scene
     this.scene.add(plane);
     
+    // Add metadata for dragging
+    plane.userData.isCoatOfArms = true;
+    plane.userData.polygonId = polygon.id;
+    plane.userData.isDraggable = true;
+    
     // Store reference
     this.coatOfArmsSprites[polygon.id] = plane;
     
@@ -454,9 +467,12 @@ export default class SimplePolygonRenderer {
       this.bounds.latCorrectionFactor
     );
     
+    // Use coatOfArmsCenter if available, otherwise use centroid
+    const positionCoord = polygon.coatOfArmsCenter || polygon.centroid;
+    
     // Calculate the centroid position
     const centroidPos = normalizeCoordinates(
-      [polygon.centroid],
+      [positionCoord],
       this.bounds.centerLat,
       this.bounds.centerLng,
       this.bounds.scale,
@@ -604,6 +620,12 @@ export default class SimplePolygonRenderer {
         
         // Add to scene
         this.scene.add(mesh);
+        
+        // Add metadata for dragging
+        mesh.userData.isCoatOfArms = true;
+        mesh.userData.polygonId = polygon.id;
+        mesh.userData.isDraggable = true;
+        
         this.coatOfArmsSprites[polygon.id] = mesh;
       },
       undefined,
