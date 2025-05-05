@@ -101,11 +101,8 @@ export default class SimplePolygonRenderer {
         // Create geometry with minimal extrusion for elevation
         const extrudeSettings = {
           depth: 0.05,  // Keep thin
-          bevelEnabled: true,
-          bevelSegments: 4, // Increase from 2 to 4 for even smoother edges
-          bevelSize: 0.01, // Reduce from 0.02 to 0.01 for nearly invisible bevels
-          bevelThickness: 0.01, // Reduce from 0.02 to 0.01 for thinner bevels
-          curveSegments: 6 // Add more curve segments for smoother shape edges
+          bevelEnabled: false, // Disable bevels completely
+          curveSegments: 6 // Keep curve segments for smoother shape edges
         };
       
         // Use ExtrudeGeometry instead of ShapeGeometry for elevation
