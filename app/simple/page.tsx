@@ -184,6 +184,55 @@ export default function SimplePage() {
     };
   }, []);
   
+  // Function to flush all caches
+  const flushAllCaches = () => {
+    console.log('Flushing all caches...');
+    
+    try {
+      // Clear localStorage
+      localStorage.clear();
+      console.log('localStorage cleared');
+      
+      // Clear sessionStorage
+      sessionStorage.clear();
+      console.log('sessionStorage cleared');
+      
+      // Clear any in-memory caches
+      if (window._polygonSnapshotCache) {
+        window._polygonSnapshotCache = { result: null, deps: null };
+        console.log('Polygon snapshot cache cleared');
+      }
+      
+      // Clear any cached textures
+      if (typeof THREE !== 'undefined' && THREE.Cache) {
+        THREE.Cache.clear();
+        console.log('THREE.js texture cache cleared');
+      }
+      
+      // Reset any global state
+      if (window.getCachedSnapshot) {
+        delete window.getCachedSnapshot;
+        console.log('getCachedSnapshot function removed');
+      }
+      
+      // Show success message
+      setCacheCleared(true);
+      
+      // Hide success message after 3 seconds
+      setTimeout(() => {
+        setCacheCleared(false);
+      }, 3000);
+      
+      // Reload the page after a short delay
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
+    } catch (error) {
+      console.error('Error clearing caches:', error);
+      alert(`Error clearing caches: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  };
+
   // Function to generate coat of arms image
   const generateCoatOfArmsImage = async () => {
     if (!familyCoatOfArms.trim()) {
@@ -392,6 +441,26 @@ export default function SimplePage() {
           Reload
         </button>
         <span>Simple Viewer</span>
+      </div>
+      
+      {/* Cache flush button */}
+      <div className="fixed bottom-4 right-4 z-50">
+        <button
+          onClick={flushAllCaches}
+          className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg shadow-lg flex items-center"
+          title="Clear all caches and reload the page"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
+          </svg>
+          Flush Caches
+        </button>
+        
+        {cacheCleared && (
+          <div className="absolute top-0 right-0 mt-[-40px] bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg animate-fade-out">
+            Caches cleared!
+          </div>
+        )}
       </div>
       
       {/* Top Navigation Bar */}
@@ -900,6 +969,16 @@ export default function SimplePage() {
         onClose={() => setSuccessMessage(null)}
       />
     )}
+    <style jsx>{`
+      @keyframes fadeOut {
+        0% { opacity: 1; }
+        70% { opacity: 1; }
+        100% { opacity: 0; }
+      }
+      .animate-fade-out {
+        animation: fadeOut 3s forwards;
+      }
+    `}</style>
     </>
   );
 }

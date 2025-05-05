@@ -73,6 +73,7 @@ export default function Home() {
   const [isGeneratingImage, setIsGeneratingImage] = useState<boolean>(false);
   const [selectedColor, setSelectedColor] = useState<string>('#8B4513'); // Default brown color
   const [successMessage, setSuccessMessage] = useState<{message: string, signature: string} | null>(null);
+  const [cacheCleared, setCacheCleared] = useState<boolean>(false);
   
   // Venice-themed color palette
   const veniceColorPalette = [
