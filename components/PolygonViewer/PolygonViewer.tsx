@@ -900,7 +900,8 @@ export default function PolygonViewer() {
         hoveredPolygonId: null,
         setHoveredPolygonId,
         selectedPolygonId,
-        setSelectedPolygonId
+        setSelectedPolygonId,
+        polygonRendererRef
       });
       interactionManagerRef.current = interactionManager;
     };

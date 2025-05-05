@@ -42,7 +42,7 @@ export class InteractionFacade {
     this.raycaster.setFromCamera(this.mouse, this.camera);
     
     // Return intersections
-    return this.raycaster.intersectObjects(objects, false);
+    return this.raycaster.intersectObjects(objects, true); // Changed to true to include descendants
   }
 
   /**

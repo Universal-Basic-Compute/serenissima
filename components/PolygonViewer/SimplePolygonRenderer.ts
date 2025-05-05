@@ -26,6 +26,11 @@ export default class SimplePolygonRenderer {
   private coatOfArmsSprites: Record<string, THREE.Object3D> = {};
   private ownerCoatOfArmsMap: Record<string, string> = {};
   private users: Record<string, any> = {};
+  private isDraggingCoatOfArms: boolean = false;
+  private draggedCoatOfArmsId: string | null = null;
+  private coatOfArmsDragPlane: THREE.Plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+  private dragRaycaster: THREE.Raycaster = new THREE.Raycaster();
+  private dragIntersection: THREE.Vector3 = new THREE.Vector3();
   
   constructor({ scene, polygons, bounds, activeView = 'land', users = {} }: SimplePolygonRendererProps & { 
     activeView?: string;
@@ -854,6 +859,109 @@ export default class SimplePolygonRenderer {
     this.createCoatOfArmsSprites();
   }
   
+  // Add methods to handle coat of arms dragging
+  public startDraggingCoatOfArms(polygonId: string, camera: THREE.Camera, mouseX: number, mouseY: number): void {
+    const sprite = this.coatOfArmsSprites[polygonId];
+    if (sprite) {
+      this.isDraggingCoatOfArms = true;
+      this.draggedCoatOfArmsId = polygonId;
+      sprite.userData.isDragging = true;
+      
+      // Set up the drag plane at the sprite's current height
+      this.coatOfArmsDragPlane.constant = -sprite.position.y;
+      
+      // Update mouse position for initial drag position
+      this.updateDraggingCoatOfArms(camera, mouseX, mouseY);
+    }
+  }
+
+  public updateDraggingCoatOfArms(camera: THREE.Camera, mouseX: number, mouseY: number): void {
+    if (!this.isDraggingCoatOfArms || !this.draggedCoatOfArmsId) return;
+    
+    const sprite = this.coatOfArmsSprites[this.draggedCoatOfArmsId];
+    if (!sprite) return;
+    
+    // Calculate normalized device coordinates
+    const mouse = new THREE.Vector2(
+      (mouseX / window.innerWidth) * 2 - 1,
+      -(mouseY / window.innerHeight) * 2 + 1
+    );
+    
+    // Set up raycaster
+    this.dragRaycaster.setFromCamera(mouse, camera);
+    
+    // Find intersection with the drag plane
+    if (this.dragRaycaster.ray.intersectPlane(this.coatOfArmsDragPlane, this.dragIntersection)) {
+      // Update sprite position, keeping the same y value
+      sprite.position.x = this.dragIntersection.x;
+      sprite.position.z = this.dragIntersection.z;
+    }
+  }
+
+  public stopDraggingCoatOfArms(): void {
+    if (!this.isDraggingCoatOfArms || !this.draggedCoatOfArmsId) return;
+    
+    const sprite = this.coatOfArmsSprites[this.draggedCoatOfArmsId];
+    if (!sprite) return;
+    
+    // Find the polygon
+    const polygon = this.polygons.find(p => p.id === this.draggedCoatOfArmsId);
+    if (polygon) {
+      // Convert 3D position back to lat/lng coordinates
+      const worldPos = new THREE.Vector3(sprite.position.x, 0, sprite.position.z);
+      
+      // Convert from normalized coordinates back to lat/lng
+      const latLng = this.convertToLatLng(worldPos);
+      
+      // Update the polygon's coatOfArmsCenter
+      polygon.coatOfArmsCenter = latLng;
+      
+      // Save to backend
+      this.saveCoatOfArmsCenterToBackend(polygon.id, latLng);
+    }
+    
+    // Reset dragging state
+    sprite.userData.isDragging = false;
+    this.isDraggingCoatOfArms = false;
+    this.draggedCoatOfArmsId = null;
+  }
+
+  // Helper method to convert from 3D position to lat/lng
+  private convertToLatLng(position: THREE.Vector3): Coordinate {
+    // Reverse the normalization process
+    const lat = position.x / this.bounds.scale * this.bounds.latCorrectionFactor + this.bounds.centerLat;
+    const lng = -position.z / this.bounds.scale + this.bounds.centerLng;
+    
+    return { lat, lng };
+  }
+
+  // Method to save the coat of arms center to the backend
+  private saveCoatOfArmsCenterToBackend(polygonId: string, center: any): void {
+    console.log(`Saving coat of arms center for polygon ${polygonId}:`, center);
+    
+    fetch('/api/update-coat-of-arms-center', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        polygonId,
+        center
+      }),
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        console.log(`Successfully saved coat of arms center for polygon ${polygonId}`);
+      } else {
+        console.error(`Failed to save coat of arms center: ${data.error}`);
+      }
+    })
+    .catch(error => {
+      console.error('Error saving coat of arms center:', error);
+    });
+  }
+
   public cleanup() {
     // Remove meshes from scene and dispose resources
     this.meshes.forEach(mesh => {
