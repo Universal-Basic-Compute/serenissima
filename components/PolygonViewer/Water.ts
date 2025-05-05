@@ -35,11 +35,11 @@ export class Water {
         quality: this.quality,
         position: { y: -0.5 }, // Position slightly below land
         color: 0x00142a, // Deep rich blue color
-        distortionScale: 4.0, // Increased from 3.5 for more pronounced waves
+        distortionScale: 4.5, // Further increased for more dramatic waves
         flowDirection: { x: 0.05, y: 0.05 },
-        flowSpeed: 0.3,
+        flowSpeed: 0.35, // Slightly increased flow speed
         skipAnimationWhenOffscreen: true,
-        opacity: 0.95 // Further increased opacity for better visibility
+        opacity: 0.98 // Almost fully opaque for maximum visibility
       });
 
       console.log('Water initialized successfully');
