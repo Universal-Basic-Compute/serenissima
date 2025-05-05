@@ -1412,26 +1412,42 @@ export default function PolygonViewer() {
 
   if (loading) {
     return (
-      <div className="w-full h-full flex flex-col items-center justify-center bg-amber-50">
-        <div className="text-amber-800 text-2xl font-serif mb-4">Mapping the Venetian Republic...</div>
-        <div className="text-amber-600 italic text-lg">The Council of Ten is preparing the charts of La Serenissima</div>
-        <div className="mt-6 flex flex-col items-center">
-          <div className="w-24 h-24 border-t-4 border-amber-600 rounded-full animate-spin mb-4"></div>
-          <div className="text-amber-700 text-sm">
-            Loading resources... Please wait a moment.
+      <ThreeDErrorBoundary 
+        onError={handleRenderingError}
+        resetKey={`${activeView}-${highQuality}-${polygons.length}`}
+        fallback={
+          <div className="w-full h-full flex flex-col items-center justify-center bg-amber-50">
+            <h2 className="text-2xl font-serif text-amber-800 mb-4">Rendering Error</h2>
+            <p className="text-amber-600 mb-6">The Council of Ten is investigating this issue.</p>
+            <button 
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors"
+            >
+              Reload Page
+            </button>
           </div>
-          <div className="mt-2 w-64 h-2 bg-amber-100 rounded-full overflow-hidden">
-            <div className="h-full bg-amber-600 animate-pulse"></div>
+        }
+      >
+        <div className="w-full h-full flex flex-col items-center justify-center bg-amber-50">
+          <div className="text-amber-800 text-2xl font-serif mb-4">Mapping the Venetian Republic...</div>
+          <div className="text-amber-600 italic text-lg">The Council of Ten is preparing the charts of La Serenissima</div>
+          <div className="mt-6 flex flex-col items-center">
+            <div className="w-24 h-24 border-t-4 border-amber-600 rounded-full animate-spin mb-4"></div>
+            <div className="text-amber-700 text-sm">
+              Loading resources... Please wait a moment.
+            </div>
+            <div className="mt-2 w-64 h-2 bg-amber-100 rounded-full overflow-hidden">
+              <div className="h-full bg-amber-600 animate-pulse"></div>
+            </div>
+            <button 
+              onClick={() => usePolygonStore.setState({ loading: false })}
+              className="mt-6 px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors"
+            >
+              Continue Anyway
+            </button>
           </div>
-          <button 
-            onClick={() => usePolygonStore.setState({ loading: false })}
-            className="mt-6 px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors"
-          >
-            Continue Anyway
-          </button>
         </div>
-      </div>
-    </ThreeDErrorBoundary>
+      </ThreeDErrorBoundary>
     );
   }
   
