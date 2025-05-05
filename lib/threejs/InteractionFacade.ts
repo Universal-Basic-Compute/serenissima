@@ -144,4 +144,39 @@ export class InteractionFacade {
   public dispose(): void {
     this.isDisposed = true;
   }
+  
+  /**
+   * Cast a ray from a specific point and direction
+   * @param origin Ray origin point
+   * @param direction Ray direction
+   * @param objects Objects to check for intersections
+   * @returns Array of intersections
+   */
+  public castRayFromPoint(
+    origin: THREE.Vector3, 
+    direction: THREE.Vector3,
+    objects: THREE.Object3D[]
+  ): THREE.Intersection[] {
+    if (this.isDisposed) return [];
+    
+    // Set up the raycaster with the provided origin and direction
+    this.raycaster.set(origin, direction.normalize());
+    
+    // Return intersections
+    return this.raycaster.intersectObjects(objects, true);
+  }
+  
+  /**
+   * Create a ray from the camera through the current mouse position
+   * @returns Ray from camera through mouse position
+   */
+  public createMouseRay(): THREE.Ray {
+    if (this.isDisposed) return new THREE.Ray();
+    
+    // Update the raycaster with the camera and mouse position
+    this.raycaster.setFromCamera(this.mouse, this.camera);
+    
+    // Return the ray
+    return this.raycaster.ray;
+  }
 }

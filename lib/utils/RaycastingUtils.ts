@@ -22,6 +22,24 @@ export class RaycastingUtils {
   }
   
   /**
+   * Create a plane perpendicular to the camera at a specific point
+   * @param camera The camera to use for orientation
+   * @param point The point the plane should pass through
+   * @returns A plane perpendicular to the camera direction
+   */
+  public static createDragPlane(camera: THREE.Camera, point: THREE.Vector3): THREE.Plane {
+    // Get camera direction
+    const cameraDirection = new THREE.Vector3();
+    camera.getWorldDirection(cameraDirection);
+    
+    // Create a plane perpendicular to the camera direction
+    return new THREE.Plane().setFromNormalAndCoplanarPoint(
+      cameraDirection,
+      point
+    );
+  }
+  
+  /**
    * Find the closest point on any object to the given point
    * @param point Point to check from
    * @param objects Objects to check against

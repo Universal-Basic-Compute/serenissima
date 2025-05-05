@@ -1295,6 +1295,12 @@ export default function PolygonViewer() {
           polygonRendererRef.current.updateCoatOfArmsSprites();
         }
       }, 2000);
+      
+      // Initialize coat of arms drag and drop if not already initialized
+      if (polygonRendererRef.current && canvasRef.current) {
+        console.log('Initializing coat of arms drag and drop');
+        polygonRendererRef.current.initCoatOfArmsDragDrop(canvasRef.current);
+      }
     }
   }, [activeView]);
   
@@ -1348,6 +1354,12 @@ export default function PolygonViewer() {
             
             // Force an update of coat of arms sprites
             polygonRendererRef.current.updateCoatOfArmsSprites();
+            
+            // Initialize coat of arms drag and drop
+            if (canvasRef.current) {
+              console.log('Initializing coat of arms drag and drop');
+              polygonRendererRef.current.initCoatOfArmsDragDrop(canvasRef.current);
+            }
             
             // If we have users data, apply it again to ensure it's displayed
             if (users && Object.keys(users).length > 0) {

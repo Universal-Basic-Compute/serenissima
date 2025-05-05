@@ -92,5 +92,6 @@ export const EventTypes = {
   INTERACTION_MOUSE_DOWN: 'interactionMouseDown',
   INTERACTION_MOUSE_MOVE: 'interactionMouseMove',
   INTERACTION_DRAG: 'interactionDrag',
-  INTERACTION_DRAG_END: 'interactionDragEnd'
+  INTERACTION_DRAG_END: 'interactionDragEnd',
+  POLYGON_UPDATED: 'polygonUpdated'
 };
