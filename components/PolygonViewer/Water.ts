@@ -38,7 +38,8 @@ export class Water {
         distortionScale: 3.5,
         flowDirection: { x: 0.05, y: 0.05 },
         flowSpeed: 0.3,
-        skipAnimationWhenOffscreen: true
+        skipAnimationWhenOffscreen: true,
+        opacity: 0.9 // Higher opacity for better visibility
       });
 
       console.log('Water initialized successfully');

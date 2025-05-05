@@ -28,6 +28,7 @@ export interface WaterFacadeProps {
   flowDirection?: { x?: number; y?: number };
   flowSpeed?: number;
   skipAnimationWhenOffscreen?: boolean;
+  opacity?: number; // Add opacity parameter
 }
 
 /**
@@ -57,6 +58,7 @@ export class WaterFacade {
   private shorelineEffect: boolean = true;
   private shorelineIntensity: number = 4.5; // Increased from 3.5
   private shorelineDistance: number = 15.0; // Distance in units that shoreline effect extends
+  private opacity: number; // Add opacity property
 
   /**
    * Create a new WaterFacade
@@ -98,6 +100,7 @@ export class WaterFacade {
       y: options.flowDirection?.y || 0
     };
     this.flowSpeed = options.flowSpeed || 0.3;
+    this.opacity = options.opacity !== undefined ? options.opacity : 0.8; // Higher default opacity
     
     try {
       // Create water
@@ -160,7 +163,8 @@ export class WaterFacade {
           sunColor: 0xffffff,
           waterColor: this.color,
           distortionScale: this.distortionScale,
-          fog: false
+          fog: false,
+          alpha: this.opacity // Add opacity parameter
         }
       );
 
@@ -202,7 +206,7 @@ export class WaterFacade {
       const waterMaterial = new THREE.MeshBasicMaterial({
         color: this.color,
         transparent: true,
-        opacity: 0.8,
+        opacity: this.opacity, // Use the opacity property
         side: THREE.DoubleSide
       });
       
@@ -239,7 +243,7 @@ export class WaterFacade {
       const waterMaterial = new THREE.MeshBasicMaterial({
         color: this.color,
         transparent: true,
-        opacity: 0.6,
+        opacity: this.opacity, // Use the opacity property
         side: THREE.DoubleSide
       });
       
@@ -655,6 +659,30 @@ export class WaterFacade {
   }
   
   /**
+   * Set water opacity
+   * @param opacity New opacity value (0-1)
+   */
+  public setOpacity(opacity: number): void {
+    if (this.isDisposed) return;
+    
+    try {
+      this.opacity = Math.max(0, Math.min(1, opacity));
+      
+      if (this.water && this.water.material instanceof THREE.ShaderMaterial) {
+        // Update alpha value in the shader
+        if (this.water.material.uniforms['alpha']) {
+          this.water.material.uniforms['alpha'].value = this.opacity;
+        }
+      } else if (this.water && this.water.material instanceof THREE.MeshBasicMaterial) {
+        // Update fallback material opacity
+        this.water.material.opacity = this.opacity;
+      }
+    } catch (error) {
+      console.warn('Error updating water opacity:', error);
+    }
+  }
+  
+  /**
    * Register land objects for shoreline effects
    * @param objects Array of land objects to consider for shoreline effects
    */
@@ -964,6 +992,7 @@ if (shoreFactor > 0.01) {
     updateInterval: number;
     skipAnimationWhenOffscreen: boolean;
     isOnScreen: boolean;
+    opacity: number; // Add opacity to state
   } {
     return {
       size: this.size,
@@ -976,7 +1005,8 @@ if (shoreFactor > 0.01) {
       fallbackMode: this.fallbackMode,
       updateInterval: this.updateInterval,
       skipAnimationWhenOffscreen: this.skipAnimationWhenOffscreen,
-      isOnScreen: this.isOnScreen
+      isOnScreen: this.isOnScreen,
+      opacity: this.opacity // Include opacity in returned state
     };
   }
 
