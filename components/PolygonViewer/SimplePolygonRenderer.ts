@@ -321,6 +321,34 @@ export default class SimplePolygonRenderer {
       this.bounds.latCorrectionFactor
     )[0];
     
+    // Create a raycaster to find the exact height of the land
+    const raycaster = new THREE.Raycaster();
+    const direction = new THREE.Vector3(0, -1, 0); // Cast ray downward
+    const origin = new THREE.Vector3(normalizedCoord.x, 10, -normalizedCoord.y); // Start from above
+    raycaster.set(origin, direction);
+    
+    // Find all meshes in the scene that could be land
+    const landMeshes: THREE.Mesh[] = [];
+    this.scene.traverse(object => {
+      if (object instanceof THREE.Mesh && 
+          object.material instanceof THREE.MeshStandardMaterial && 
+          !object.userData.isCoatOfArms) { // Avoid coat of arms meshes
+        landMeshes.push(object);
+      }
+    });
+    
+    // Find the intersection with land
+    const intersects = raycaster.intersectObjects(landMeshes);
+    
+    // Default height if no intersection found
+    let yPosition = 0.2;
+    
+    // If we found an intersection, use that height (plus a small offset)
+    if (intersects.length > 0) {
+      yPosition = intersects[0].point.y + 0.01; // 0.01 units above the land
+      console.log(`Found land intersection for ${polygon.id} at height ${yPosition}`);
+    }
+    
     // Create a plane geometry for the texture
     const sceneScale = this.bounds.scale;
     const spriteScale = Math.max(1, sceneScale / 500); // Reduced scale (2 -> 1) and increased divisor (250 -> 500)
@@ -333,11 +361,14 @@ export default class SimplePolygonRenderer {
       depthWrite: false
     });
     
-    // Create mesh and position it
+    // Create mesh and position it with the calculated y position
     const plane = new THREE.Mesh(planeGeometry, planeMaterial);
-    plane.position.set(normalizedCoord.x, 0.2, -normalizedCoord.y);
+    plane.position.set(normalizedCoord.x, yPosition, -normalizedCoord.y);
     plane.rotation.x = -Math.PI / 2 + Math.PI; // Rotate to lie flat and invert orientation
     plane.renderOrder = 10; // Ensure it renders on top of land
+    
+    // Mark this mesh as a coat of arms to avoid raycasting against it
+    plane.userData.isCoatOfArms = true;
     
     // Add to scene
     this.scene.add(plane);
