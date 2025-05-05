@@ -1110,10 +1110,14 @@ export default class SimplePolygonRenderer {
       }
       
       if (highlight) {
-        // Scale up slightly
-        object.scale.multiplyScalar(1.2);
+        // Scale up slightly - reduce from 1.2 to 1.1 for a more subtle effect
+        if (object.userData.originalScale) {
+          object.scale.copy(object.userData.originalScale).multiplyScalar(1.1);
+        } else {
+          object.scale.multiplyScalar(1.1);
+        }
         
-        // Add glow effect by changing material
+        // Add glow effect by changing material - make the color change more subtle
         if (object.material) {
           const material = object.material as THREE.Material;
           
@@ -1123,8 +1127,18 @@ export default class SimplePolygonRenderer {
               material.userData.originalColor = material.color.clone();
             }
             
-            // Brighten the color
-            material.color.set(0xffff00); // Yellow highlight
+            // Use a more subtle highlight color - blend with original color
+            if (material.userData.originalColor) {
+              // Create a new color that's a blend between original and highlight
+              const highlightColor = new THREE.Color(0xffcc00); // Slightly less intense yellow
+              const blendFactor = 0.3; // 30% highlight, 70% original
+              
+              material.color.copy(material.userData.originalColor);
+              material.color.lerp(highlightColor, blendFactor);
+            } else {
+              // Fallback if original color not stored
+              material.color.set(0xffcc00); // Slightly less intense yellow
+            }
             material.needsUpdate = true;
           }
         }
@@ -1134,7 +1148,7 @@ export default class SimplePolygonRenderer {
           object.scale.copy(object.userData.originalScale);
         } else {
           // Fallback if original scale not stored
-          object.scale.divideScalar(1.2);
+          object.scale.divideScalar(1.1);
         }
         
         // Restore original material properties
