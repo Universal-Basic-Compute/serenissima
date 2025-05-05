@@ -127,9 +127,8 @@ export default class SimplePolygonRenderer {
         // Position mesh - adjust rotation to make top surface flat
         mesh.rotation.x = -Math.PI / 2;
     
-        // Position the land just slightly above the water level
-        // Use a very small offset to keep it visually close but prevent z-fighting
-        mesh.position.y = -5.01; // Position land almost at water level (water is at -5.0)
+        // Position the land exactly at water level
+        mesh.position.y = -5.0; // Position land exactly at water level
     
         // No need for render order or polygon offset when there's clear physical separation
         
