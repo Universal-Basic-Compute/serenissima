@@ -318,7 +318,8 @@ export default class SimplePolygonRenderer {
       const sprite = new THREE.Sprite(spriteMaterial);
       
       // Position the sprite correctly - lower height to be closer to land
-      sprite.position.set(normalizedCoord.x, 0.2, normalizedCoord.y);
+      // Invert the z-coordinate to ensure proper north-south orientation
+      sprite.position.set(normalizedCoord.x, 0.2, -normalizedCoord.y);
       
       // Adjust scale based on scene size
       const sceneScale = this.bounds.scale;
