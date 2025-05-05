@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { Water } from 'three/examples/jsm/objects/Water.js';
 import { RenderingErrorType, RenderingErrorHandler } from '../errorHandling';
+import { RaycastingUtils } from '../utils/RaycastingUtils';
 
 /**
  * Enum for water quality levels with more granular options
@@ -51,6 +52,11 @@ export class WaterFacade {
   private isDisposed: boolean = false;
   private errorHandler = RenderingErrorHandler.getInstance();
   private fallbackMode: boolean = false;
+  private landObjects: THREE.Object3D[] = [];
+  private boundaryPoints: THREE.Vector3[] = [];
+  private shorelineEffect: boolean = true;
+  private shorelineIntensity: number = 1.0;
+  private shorelineDistance: number = 5.0; // Distance in units that shoreline effect extends
 
   /**
    * Create a new WaterFacade
@@ -429,6 +435,16 @@ export class WaterFacade {
             );
           }
         }
+        
+        // Update shoreline effect if needed
+        if (this.shorelineEffect && this.boundaryPoints.length > 0 && 
+            this.water.material.userData.hasShorelineEffect) {
+          // Periodically update boundary points to account for any moving land objects
+          if (Math.random() < 0.01) { // ~1% chance per frame to update
+            this.extractBoundaryPoints();
+            this.water.material.uniforms.shorelinePoints.value = this.boundaryPoints;
+          }
+        }
       }
     } catch (error) {
       // Silent fail for animation updates
@@ -635,6 +651,197 @@ export class WaterFacade {
       this.water.visible = visible;
     } catch (error) {
       console.warn('Error updating water visibility:', error);
+    }
+  }
+  
+  /**
+   * Register land objects for shoreline effects
+   * @param objects Array of land objects to consider for shoreline effects
+   */
+  public registerLandObjects(objects: THREE.Object3D[]): void {
+    if (this.isDisposed) return;
+    
+    this.landObjects = objects;
+    
+    // Extract boundary points from land objects
+    this.extractBoundaryPoints();
+    
+    // Update water shader with new boundary information
+    this.updateShorelineEffect();
+  }
+
+  /**
+   * Extract boundary points from land objects
+   * @private
+   */
+  private extractBoundaryPoints(): void {
+    this.boundaryPoints = [];
+    
+    // Process each land object
+    this.landObjects.forEach(object => {
+      if (object instanceof THREE.Mesh && object.geometry) {
+        try {
+          // Get the vertices from the geometry
+          const positions = object.geometry.getAttribute('position');
+          
+          if (positions) {
+            // Sample boundary points (we don't need all vertices, just the outline)
+            const boundaryIndices = this.findBoundaryIndices(object.geometry);
+            
+            // Convert local vertices to world space and add to boundary points
+            for (let i = 0; i < boundaryIndices.length; i++) {
+              const index = boundaryIndices[i];
+              const vertex = new THREE.Vector3(
+                positions.getX(index),
+                positions.getY(index),
+                positions.getZ(index)
+              );
+              
+              // Transform to world space
+              vertex.applyMatrix4(object.matrixWorld);
+              
+              // Only add points at water level (y ≈ 0)
+              if (Math.abs(vertex.y) < 0.1) {
+                this.boundaryPoints.push(vertex);
+              }
+            }
+          }
+        } catch (error) {
+          console.warn('Error extracting boundary points:', error);
+        }
+      }
+    });
+    
+    console.log(`Extracted ${this.boundaryPoints.length} boundary points for shoreline effect`);
+  }
+
+  /**
+   * Find boundary indices of a geometry (simplified version)
+   * @private
+   */
+  private findBoundaryIndices(geometry: THREE.BufferGeometry): number[] {
+    // This is a simplified approach - in a full implementation,
+    // you would use a proper boundary extraction algorithm
+    
+    const indices: number[] = [];
+    const positions = geometry.getAttribute('position');
+    
+    // For simplicity, we'll sample every Nth vertex
+    const samplingRate = Math.max(1, Math.floor(positions.count / 100));
+    
+    for (let i = 0; i < positions.count; i += samplingRate) {
+      indices.push(i);
+    }
+    
+    return indices;
+  }
+
+  /**
+   * Update water shader with shoreline effect
+   * @private
+   */
+  private updateShorelineEffect(): void {
+    if (this.isDisposed || !this.water || !this.shorelineEffect || this.boundaryPoints.length === 0) return;
+    
+    try {
+      if (this.water.material instanceof THREE.ShaderMaterial) {
+        const material = this.water.material;
+        
+        // Check if we need to modify the shader
+        if (!material.userData.hasShorelineEffect) {
+          // Add custom uniforms for shoreline effect
+          material.uniforms.shorelinePoints = { value: this.boundaryPoints };
+          material.uniforms.shorelineIntensity = { value: this.shorelineIntensity };
+          material.uniforms.shorelineDistance = { value: this.shorelineDistance };
+          
+          // Modify fragment shader to include shoreline effect
+          const fragmentShader = material.fragmentShader;
+          
+          // Add uniform declarations
+          let modifiedShader = fragmentShader.replace(
+            'uniform float time;',
+            'uniform float time;\nuniform float shorelineIntensity;\nuniform float shorelineDistance;\nuniform vec3 shorelinePoints[' + this.boundaryPoints.length + '];'
+          );
+          
+          // Add shoreline calculation function
+          modifiedShader = modifiedShader.replace(
+            'void main() {',
+            `
+float calculateShorelineFactor(vec3 position) {
+  float minDist = 1000.0;
+  
+  // Find distance to closest shoreline point
+  for(int i = 0; i < ${this.boundaryPoints.length}; i++) {
+    float dist = distance(position.xz, shorelinePoints[i].xz);
+    minDist = min(minDist, dist);
+  }
+  
+  // Calculate effect factor based on distance
+  return 1.0 - smoothstep(0.0, shorelineDistance, minDist);
+}
+
+void main() {`
+          );
+          
+          // Modify wave calculation to include shoreline effect
+          modifiedShader = modifiedShader.replace(
+            'vec4 info = texture2D( mirrorSampler, coords );',
+            `vec4 info = texture2D( mirrorSampler, coords );
+            
+// Apply shoreline effect
+float shoreFactor = calculateShorelineFactor(vWorldPosition) * shorelineIntensity;
+if (shoreFactor > 0.01) {
+  // Increase wave height near shore
+  info.r += shoreFactor * 0.2;
+  
+  // Add foam near shore
+  info.g = mix(info.g, 1.0, shoreFactor * 0.7);
+  
+  // Adjust wave direction to flow parallel to shore
+  info.b = mix(info.b, 0.5, shoreFactor * 0.3);
+}`
+          );
+          
+          // Update the shader
+          material.fragmentShader = modifiedShader;
+          material.needsUpdate = true;
+          
+          // Mark as modified
+          material.userData.hasShorelineEffect = true;
+        } else {
+          // Just update the uniform values
+          material.uniforms.shorelinePoints.value = this.boundaryPoints;
+          material.uniforms.shorelineIntensity.value = this.shorelineIntensity;
+          material.uniforms.shorelineDistance.value = this.shorelineDistance;
+        }
+      }
+    } catch (error) {
+      console.error('Error updating shoreline effect:', error);
+    }
+  }
+
+  /**
+   * Set shoreline effect properties
+   * @param enabled Whether shoreline effect is enabled
+   * @param intensity Intensity of the shoreline effect (0-1)
+   * @param distance Distance the effect extends from shore
+   */
+  public setShorelineEffect(enabled: boolean, intensity?: number, distance?: number): void {
+    if (this.isDisposed) return;
+    
+    this.shorelineEffect = enabled;
+    
+    if (intensity !== undefined) {
+      this.shorelineIntensity = Math.max(0, Math.min(1, intensity));
+    }
+    
+    if (distance !== undefined) {
+      this.shorelineDistance = Math.max(0.1, distance);
+    }
+    
+    // Update the effect if enabled
+    if (enabled) {
+      this.updateShorelineEffect();
     }
   }
 

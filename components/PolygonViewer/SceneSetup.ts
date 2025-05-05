@@ -147,6 +147,24 @@ export default class SceneSetup {
         size: 300, // Match the size used for clouds
         quality: this.performanceMode ? 'low' : 'high'
       });
+      
+      // Connect land objects to water after a short delay to ensure they're loaded
+      setTimeout(() => {
+        // Find all land objects in the scene
+        const landObjects: THREE.Object3D[] = [];
+        this.scene.traverse(object => {
+          if (object instanceof THREE.Mesh && 
+              object.userData && 
+              (object.userData.isPolygon || object.userData.isLand)) {
+            landObjects.push(object);
+          }
+        });
+        
+        // Connect land to water
+        if (landObjects.length > 0) {
+          this.connectLandToWater(landObjects);
+        }
+      }, 2000); // Wait 2 seconds for land to be fully loaded
     }, 1500);
     
     // Create a sun sphere
@@ -366,6 +384,7 @@ export default class SceneSetup {
       this.waterFacade.update();
     }
     
+    
     // Update sun position occasionally (every 100 frames)
     if (frameCount % 100 === 0) {
       const newPosition = this.calculateSunPosition();
@@ -408,6 +427,18 @@ export default class SceneSetup {
     }
     if (this.waterFacade) {
       this.waterFacade.setQuality(this.performanceMode ? 'low' : 'high');
+    }
+  }
+  
+  /**
+   * Connect land objects to water for shoreline effects
+   * @param landObjects Array of land objects to consider for shoreline effects
+   */
+  public connectLandToWater(landObjects: THREE.Object3D[]): void {
+    if (this.waterFacade) {
+      console.log(`Connecting ${landObjects.length} land objects to water system`);
+      this.waterFacade.registerLandObjects(landObjects);
+      this.waterFacade.setShorelineEffect(true, 0.8, 3.0);
     }
   }
   

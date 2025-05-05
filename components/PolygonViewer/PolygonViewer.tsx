@@ -1221,6 +1221,33 @@ export default function PolygonViewer() {
     }
   }, [activeView, forceVisualUpdate]);
   
+  // Add effect to connect land objects to water
+  useEffect(() => {
+    // Wait for both scene and polygon renderer to be initialized
+    if (sceneRef.current && polygonRendererRef.current) {
+      // Wait a bit to ensure all polygons are rendered
+      const timer = setTimeout(() => {
+        // Find all land objects in the scene
+        const landObjects: THREE.Object3D[] = [];
+        sceneRef.current.scene.traverse(object => {
+          if (object instanceof THREE.Mesh && 
+              object.userData && 
+              (object.userData.isPolygon || object.userData.isLand)) {
+            landObjects.push(object);
+          }
+        });
+        
+        // Connect land to water
+        if (landObjects.length > 0 && sceneRef.current) {
+          console.log(`Connecting ${landObjects.length} land objects to water`);
+          sceneRef.current.connectLandToWater(landObjects);
+        }
+      }, 3000); // Wait 3 seconds for everything to be fully loaded
+      
+      return () => clearTimeout(timer);
+    }
+  }, [sceneRef.current, polygonRendererRef.current]);
+  
   // Add this effect to ensure coat of arms are updated when view mode changes
   useEffect(() => {
     if (activeView === 'land' && polygonRendererRef.current) {

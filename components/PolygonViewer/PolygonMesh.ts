@@ -128,6 +128,10 @@ class PolygonMesh {
       // Set render order to ensure land appears above water
       this.mesh.renderOrder = 20; // Increased from 10 to 20
       
+      // Mark as land object for water interaction
+      this.mesh.userData.isPolygon = true;
+      this.mesh.userData.isLand = true;
+      
       // Store reference to the mesh
       if (this.polygon.id) {
         this.polygonMeshesRef.current[this.polygon.id] = this.mesh;
