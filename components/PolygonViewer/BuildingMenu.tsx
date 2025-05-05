@@ -622,5 +622,3 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
     </ErrorBoundary>
   )}
 }
-</ErrorBoundary>
-}
