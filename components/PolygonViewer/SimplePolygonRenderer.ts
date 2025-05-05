@@ -32,16 +32,38 @@ export default class SimplePolygonRenderer {
   private dragRaycaster: THREE.Raycaster = new THREE.Raycaster();
   private dragIntersection: THREE.Vector3 = new THREE.Vector3();
   
-  constructor({ scene, polygons, bounds, activeView = 'land', users = {} }: SimplePolygonRendererProps & { 
+  // Properties for hover and click detection
+  private raycaster: THREE.Raycaster;
+  private mouse: THREE.Vector2;
+  private camera: THREE.Camera | null = null;
+  private hoveredCoatOfArms: string | null = null;
+  private selectedCoatOfArms: string | null = null;
+  private onLandSelected: ((landId: string) => void) | null = null;
+  
+  constructor({ 
+    scene, 
+    polygons, 
+    bounds, 
+    activeView = 'land', 
+    users = {},
+    camera = null,
+    onLandSelected = null
+  }: SimplePolygonRendererProps & { 
     activeView?: string;
     users?: Record<string, any>;
+    camera?: THREE.Camera | null;
+    onLandSelected?: ((landId: string) => void) | null;
   }) {
     this.scene = scene;
     this.polygons = polygons;
     this.bounds = bounds;
     this.activeView = activeView;
     this.users = users;
+    this.camera = camera;
+    this.onLandSelected = onLandSelected;
     this.textureLoader = new THREE.TextureLoader();
+    this.raycaster = new THREE.Raycaster();
+    this.mouse = new THREE.Vector2();
     
     // Process users data to extract coat of arms
     if (users) {
@@ -962,6 +984,161 @@ export default class SimplePolygonRenderer {
     });
   }
 
+  // Handle mouse movement for hover effects
+  public handleMouseMove(event: MouseEvent, container: HTMLElement) {
+    if (!this.camera || this.activeView !== 'land') return;
+    
+    // Calculate mouse position in normalized device coordinates (-1 to +1)
+    const rect = container.getBoundingClientRect();
+    this.mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+    
+    // Update the raycaster
+    this.raycaster.setFromCamera(this.mouse, this.camera);
+    
+    // Find intersections with coat of arms sprites
+    const coatOfArmsObjects = Object.values(this.coatOfArmsSprites);
+    const intersects = this.raycaster.intersectObjects(coatOfArmsObjects);
+    
+    // Reset hover state
+    if (this.hoveredCoatOfArms && this.hoveredCoatOfArms !== this.selectedCoatOfArms) {
+      const prevHovered = this.coatOfArmsSprites[this.hoveredCoatOfArms];
+      if (prevHovered) {
+        this.setCoatOfArmsHighlight(prevHovered, false);
+      }
+      this.hoveredCoatOfArms = null;
+      document.body.style.cursor = 'default';
+    }
+    
+    // Set new hover state if found
+    if (intersects.length > 0) {
+      // Find the land ID from the intersected object
+      const landId = this.findLandIdFromObject(intersects[0].object);
+      if (landId && landId !== this.selectedCoatOfArms) {
+        this.hoveredCoatOfArms = landId;
+        const hovered = this.coatOfArmsSprites[landId];
+        this.setCoatOfArmsHighlight(hovered, true);
+        document.body.style.cursor = 'pointer';
+      }
+    }
+  }
+
+  // Handle mouse clicks for selection
+  public handleMouseClick(event: MouseEvent, container: HTMLElement) {
+    if (!this.camera || this.activeView !== 'land') return;
+    
+    // Calculate mouse position in normalized device coordinates (-1 to +1)
+    const rect = container.getBoundingClientRect();
+    this.mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+    
+    // Update the raycaster
+    this.raycaster.setFromCamera(this.mouse, this.camera);
+    
+    // Find intersections with coat of arms sprites
+    const coatOfArmsObjects = Object.values(this.coatOfArmsSprites);
+    const intersects = this.raycaster.intersectObjects(coatOfArmsObjects);
+    
+    // Handle selection
+    if (intersects.length > 0) {
+      const landId = this.findLandIdFromObject(intersects[0].object);
+      if (landId) {
+        // If already selected, do nothing (keep it selected)
+        if (this.selectedCoatOfArms === landId) {
+          return;
+        }
+        
+        // Deselect previous selection
+        if (this.selectedCoatOfArms) {
+          const prevSelected = this.coatOfArmsSprites[this.selectedCoatOfArms];
+          if (prevSelected) {
+            this.setCoatOfArmsHighlight(prevSelected, false);
+          }
+        }
+        
+        // Select new
+        this.selectedCoatOfArms = landId;
+        const selected = this.coatOfArmsSprites[landId];
+        this.setCoatOfArmsHighlight(selected, true);
+        
+        // Notify callback
+        if (this.onLandSelected) {
+          this.onLandSelected(landId);
+        }
+      }
+    }
+  }
+
+  // Helper method to find land ID from a mesh
+  private findLandIdFromObject(object: THREE.Object3D): string | null {
+    for (const [landId, sprite] of Object.entries(this.coatOfArmsSprites)) {
+      if (sprite === object) {
+        return landId;
+      }
+    }
+    return null;
+  }
+
+  // Helper method to highlight/unhighlight a coat of arms
+  private setCoatOfArmsHighlight(object: THREE.Object3D, highlight: boolean) {
+    if (object instanceof THREE.Mesh) {
+      // Store original scale if not already stored
+      if (!object.userData.originalScale && highlight) {
+        object.userData.originalScale = object.scale.clone();
+      }
+      
+      if (highlight) {
+        // Scale up slightly
+        object.scale.multiplyScalar(1.2);
+        
+        // Add glow effect by changing material
+        if (object.material) {
+          const material = object.material as THREE.Material;
+          
+          if (material instanceof THREE.MeshBasicMaterial) {
+            // Store original color if not already stored
+            if (!material.userData.originalColor) {
+              material.userData.originalColor = material.color.clone();
+            }
+            
+            // Brighten the color
+            material.color.set(0xffff00); // Yellow highlight
+            material.needsUpdate = true;
+          }
+        }
+      } else {
+        // Restore original scale if available
+        if (object.userData.originalScale) {
+          object.scale.copy(object.userData.originalScale);
+        } else {
+          // Fallback if original scale not stored
+          object.scale.divideScalar(1.2);
+        }
+        
+        // Restore original material properties
+        if (object.material) {
+          const material = object.material as THREE.Material;
+          
+          if (material instanceof THREE.MeshBasicMaterial && material.userData.originalColor) {
+            material.color.copy(material.userData.originalColor);
+            material.needsUpdate = true;
+          }
+        }
+      }
+    }
+  }
+
+  // Method to deselect the current selection
+  public deselectLand() {
+    if (this.selectedCoatOfArms) {
+      const selected = this.coatOfArmsSprites[this.selectedCoatOfArms];
+      if (selected) {
+        this.setCoatOfArmsHighlight(selected, false);
+      }
+      this.selectedCoatOfArms = null;
+    }
+  }
+
   public cleanup() {
     // Remove meshes from scene and dispose resources
     this.meshes.forEach(mesh => {
@@ -996,5 +1173,10 @@ export default class SimplePolygonRenderer {
       this.sharedMaterial.dispose();
       this.sharedMaterial = null;
     }
+    
+    // Reset hover and selection
+    this.hoveredCoatOfArms = null;
+    this.selectedCoatOfArms = null;
+    document.body.style.cursor = 'default';
   }
 }

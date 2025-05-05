@@ -7,6 +7,7 @@ import { WaterFacade as SimpleWater, WaterQualityLevel } from './SimpleWater';
 import SimplePolygonRenderer from './SimplePolygonRenderer';
 import { calculateBounds } from './utils';
 import { getApiBaseUrl } from '@/lib/apiUtils';
+import LandDetailsPanel from './LandDetailsPanel'; // Import the existing panel
 
 export default function SimpleViewer({ qualityMode = 'high', activeView = 'land' }: {
   qualityMode: 'high' | 'performance';
@@ -23,6 +24,10 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
   const cameraControllerRef = useRef<SimpleCamera | null>(null);
   const waterRef = useRef<SimpleWater | null>(null);
   const polygonRendererRef = useRef<SimplePolygonRenderer | null>(null);
+  
+  // State for land selection and details panel
+  const [selectedPolygonId, setSelectedPolygonId] = useState<string | null>(null);
+  const [landOwners, setLandOwners] = useState<Record<string, string>>({});
   
   // Define loadUsers as a reusable function
   const loadUsers = useCallback(async () => {
@@ -80,6 +85,58 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
       });
   }, []);
   
+  // Fetch land owners
+  useEffect(() => {
+    const fetchLandOwners = async () => {
+      try {
+        const response = await fetch('/api/get-land-owners');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.lands && Array.isArray(data.lands)) {
+            const ownersMap: Record<string, string> = {};
+            data.lands.forEach((land: any) => {
+              if (land.id && land.owner) {
+                ownersMap[land.id] = land.owner;
+              }
+            });
+            setLandOwners(ownersMap);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching land owners:', error);
+      }
+    };
+    
+    fetchLandOwners();
+  }, []);
+  
+  // Event handlers for mouse interaction
+  const handleMouseMove = (event: MouseEvent) => {
+    if (polygonRendererRef.current && canvasRef.current) {
+      polygonRendererRef.current.handleMouseMove(event, canvasRef.current);
+    }
+  };
+
+  const handleMouseClick = (event: MouseEvent) => {
+    if (polygonRendererRef.current && canvasRef.current) {
+      polygonRendererRef.current.handleMouseClick(event, canvasRef.current);
+    }
+  };
+  
+  // Add event listeners for mouse interaction
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (canvas) {
+      canvas.addEventListener('mousemove', handleMouseMove);
+      canvas.addEventListener('click', handleMouseClick);
+      
+      return () => {
+        canvas.removeEventListener('mousemove', handleMouseMove);
+        canvas.removeEventListener('click', handleMouseClick);
+      };
+    }
+  }, []);
+  
   // Set up Three.js scene
   useEffect(() => {
     if (!canvasRef.current || loading || polygons.length === 0) return;
@@ -116,13 +173,18 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
     });
     waterRef.current = water;
     
-    // Create polygon renderer after water, passing activeView and users
+    // Create polygon renderer after water, passing activeView, users, camera, and selection callback
     const polygonRenderer = new SimplePolygonRenderer({
       scene,
       polygons,
       bounds,
       activeView,
-      users
+      users,
+      camera: cameraController.camera, // Pass the camera
+      onLandSelected: (landId) => {
+        // Handle land selection
+        setSelectedPolygonId(landId);
+      }
     });
     polygonRendererRef.current = polygonRenderer;
     
@@ -238,6 +300,20 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
   return (
     <div className="w-screen h-screen">
       <canvas ref={canvasRef} className="w-full h-full" />
+      
+      {/* Land Details Panel */}
+      <LandDetailsPanel
+        selectedPolygonId={selectedPolygonId}
+        onClose={() => {
+          setSelectedPolygonId(null);
+          // Also deselect in the renderer
+          if (polygonRendererRef.current) {
+            polygonRendererRef.current.deselectLand();
+          }
+        }}
+        polygons={polygons}
+        landOwners={landOwners}
+      />
     </div>
   );
 }
