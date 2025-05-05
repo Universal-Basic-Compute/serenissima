@@ -88,7 +88,10 @@ export default class SimplePolygonRenderer {
       wireframe: false,
       flatShading: false,
       // Remove polygon offset properties
-      polygonOffset: false
+      polygonOffset: false,
+      // Disable shadows
+      castShadow: false,
+      receiveShadow: false
     });
     
     // Process each polygon

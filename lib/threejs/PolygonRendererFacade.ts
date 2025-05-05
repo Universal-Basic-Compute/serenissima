@@ -124,7 +124,15 @@ export class PolygonRendererFacade {
       side: THREE.DoubleSide,
       transparent: false,
       roughness: 0.8,
-      metalness: 0.1
+      metalness: 0.1,
+      // Remove shadow properties
+      castShadow: false,
+      receiveShadow: false,
+      // Remove any depth offset that might create shadow-like effects
+      depthWrite: true,
+      polygonOffset: false,
+      polygonOffsetFactor: 0,
+      polygonOffsetUnits: 0
     });
   }
   
@@ -150,6 +158,10 @@ export class PolygonRendererFacade {
     if (material instanceof THREE.Material) {
       material.polygonOffset = false;
     }
+    
+    // Disable shadows
+    mesh.castShadow = false;
+    mesh.receiveShadow = false;
     
     // Add userData to identify this as a polygon
     mesh.userData = {

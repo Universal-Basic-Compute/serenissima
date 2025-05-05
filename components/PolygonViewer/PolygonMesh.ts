@@ -96,18 +96,28 @@ class PolygonMesh {
         map: sandTexture,
         color: this.determineLandColor(),
         transparent: false, // Disable transparency for better visibility
-        depthWrite: true // Enable depth writing
+        depthWrite: true, // Enable depth writing
+        // Disable shadows
+        castShadow: false,
+        receiveShadow: false
       });
       
       const sideMaterial = new THREE.MeshBasicMaterial({
         color: this.determineLandColor(),
         transparent: false, // Disable transparency for better visibility
-        opacity: 1.0 // Full opacity
+        opacity: 1.0, // Full opacity
+        // Disable shadows
+        castShadow: false,
+        receiveShadow: false
       });
 
       // Create mesh with different materials for top and sides
       const materials = [topMaterial, sideMaterial];
       this.mesh = new THREE.Mesh(geometry, materials);
+      
+      // Disable shadows on the mesh itself
+      this.mesh.castShadow = false;
+      this.mesh.receiveShadow = false;
       
       // Position the mesh exactly at water level
       this.mesh.position.y = 0;

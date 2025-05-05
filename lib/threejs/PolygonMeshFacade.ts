@@ -181,7 +181,10 @@ export class PolygonMeshFacade implements Poolable {
       
       return new THREE.MeshBasicMaterial({
         color: landColor,
-        side: THREE.DoubleSide
+        side: THREE.DoubleSide,
+        // Remove shadow properties
+        castShadow: false,
+        receiveShadow: false
       });
     } else {
       // Other views - use standard material with textures
@@ -190,7 +193,10 @@ export class PolygonMeshFacade implements Poolable {
         side: THREE.DoubleSide,
         transparent: false,
         roughness: 0.8,
-        metalness: 0.1
+        metalness: 0.1,
+        // Remove shadow properties
+        castShadow: false,
+        receiveShadow: false
       });
     }
   }
