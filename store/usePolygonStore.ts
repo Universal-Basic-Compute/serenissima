@@ -1,8 +1,10 @@
 import { create } from 'zustand';
 import { getApiBaseUrl } from '@/lib/apiUtils';
 import { ViewMode, Polygon } from '@/components/PolygonViewer/types';
+import { eventBus, EventTypes } from '@/lib/eventBus';
 
 interface PolygonState {
+  // Data state
   polygons: Polygon[];
   loading: boolean;
   error: string | null;
@@ -12,8 +14,24 @@ interface PolygonState {
   selectedPolygonId: string | null;
   landOwners: Record<string, string>; // Map of land ID to owner
   users: Record<string, any>; // Map of username to user data
+  bridges: any[];
+  ownerCoatOfArmsMap: Record<string, string>;
   
-  // Actions
+  // UI state
+  infoVisible: boolean;
+  transferMenuOpen: boolean;
+  marketPanelVisible: boolean;
+  purchaseModalVisible: boolean;
+  purchaseModalData: {
+    landId: string | null;
+    landName?: string;
+    transaction: any;
+    onComplete?: () => void;
+  };
+  buildingMenuVisible: boolean;
+  roadCreationActive: boolean;
+  
+  // Data actions
   setPolygons: (polygons: Polygon[]) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
@@ -24,9 +42,26 @@ interface PolygonState {
   loadPolygons: () => Promise<void>;
   loadLandOwners: () => Promise<void>;
   loadUsers: () => Promise<void>;
+  loadBridges: () => Promise<void>;
+  loadOwnerCoatOfArms: () => Promise<void>;
+  
+  // UI actions
+  setInfoVisible: (visible: boolean) => void;
+  setTransferMenuOpen: (open: boolean) => void;
+  setMarketPanelVisible: (visible: boolean) => void;
+  setPurchaseModalVisible: (visible: boolean) => void;
+  setPurchaseModalData: (data: {
+    landId: string | null;
+    landName?: string;
+    transaction: any;
+    onComplete?: () => void;
+  }) => void;
+  setBuildingMenuVisible: (visible: boolean) => void;
+  setRoadCreationActive: (active: boolean) => void;
 }
 
 const usePolygonStore = create<PolygonState>((set, get) => ({
+  // Data state
   polygons: [],
   loading: true,
   error: null,
@@ -36,7 +71,24 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
   selectedPolygonId: null,
   landOwners: {},
   users: {},
+  bridges: [],
+  ownerCoatOfArmsMap: {},
   
+  // UI state
+  infoVisible: false,
+  transferMenuOpen: false,
+  marketPanelVisible: false,
+  purchaseModalVisible: false,
+  purchaseModalData: {
+    landId: null,
+    landName: undefined,
+    transaction: null,
+    onComplete: undefined
+  },
+  buildingMenuVisible: false,
+  roadCreationActive: false,
+  
+  // Data actions
   setPolygons: (polygons) => set({ polygons }),
   setLoading: (loading) => set({ loading }),
   setError: (error) => set({ error }),
@@ -62,6 +114,15 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
       return state; // Return unchanged state if ID is the same
     });
   },
+  
+  // UI actions
+  setInfoVisible: (visible) => set({ infoVisible: visible }),
+  setTransferMenuOpen: (open) => set({ transferMenuOpen: open }),
+  setMarketPanelVisible: (visible) => set({ marketPanelVisible: visible }),
+  setPurchaseModalVisible: (visible) => set({ purchaseModalVisible: visible }),
+  setPurchaseModalData: (data) => set({ purchaseModalData: data }),
+  setBuildingMenuVisible: (visible) => set({ buildingMenuVisible: visible }),
+  setRoadCreationActive: (active) => set({ roadCreationActive: active }),
   
   loadPolygons: async () => {
     try {
@@ -423,6 +484,44 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
       }
     } catch (error) {
       console.error('Error loading users:', error);
+    }
+  },
+  
+  loadBridges: async () => {
+    try {
+      const response = await fetch('/api/get-bridges');
+      const data = await response.json();
+      set({ bridges: data.bridges || [] });
+    } catch (error) {
+      console.error('Error loading bridges:', error);
+    }
+  },
+  
+  loadOwnerCoatOfArms: async () => {
+    try {
+      const response = await fetch(`${getApiBaseUrl()}/api/users/coat-of-arms`);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch owner coat of arms: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log('Owner coat of arms data:', data);
+      
+      if (data.success && data.users) {
+        // Create a map of owner username to coat of arms URL
+        const coatOfArmsMap: Record<string, string> = {};
+        
+        data.users.forEach((user: any) => {
+          if (user.user_name && user.coat_of_arms_image) {
+            coatOfArmsMap[user.user_name] = user.coat_of_arms_image;
+          }
+        });
+        
+        console.log('Processed coat of arms map:', coatOfArmsMap);
+        set({ ownerCoatOfArmsMap: coatOfArmsMap });
+      }
+    } catch (error) {
+      console.error('Error loading owner coat of arms:', error);
     }
   }
 }));

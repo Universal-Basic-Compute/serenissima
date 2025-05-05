@@ -32,27 +32,42 @@ import { eventBus, EventTypes } from '../../lib/eventBus';
 
 export default function PolygonViewer() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [infoVisible, setInfoVisible] = useState(false);
   const polygonMeshesRef = useRef<Record<string, THREE.Mesh>>({});
   const isInteractingWithPolygon = useRef(false);
-  const [transferMenuOpen, setTransferMenuOpen] = useState(false);
-  const [marketPanelVisible, setMarketPanelVisible] = useState(false);
-  const [purchaseModalVisible, setPurchaseModalVisible] = useState(false);
-  const [purchaseModalData, setPurchaseModalData] = useState<{
-    landId: string | null;
-    landName?: string;
-    transaction: any;
-    onComplete?: () => void;
-  }>({
-    landId: null,
-    landName: undefined,
-    transaction: null,
-    onComplete: undefined
-  });
-  
-  const [buildingMenuVisible, setBuildingMenuVisible] = useState(false);
-  const [roadCreationActive, setRoadCreationActive] = useState(false);
   const roadManagerRef = useRef<RoadManager | null>(null);
+  
+  // Get UI state from store
+  const {
+    infoVisible,
+    transferMenuOpen,
+    marketPanelVisible,
+    purchaseModalVisible,
+    purchaseModalData,
+    buildingMenuVisible,
+    roadCreationActive,
+    setInfoVisible,
+    setTransferMenuOpen,
+    setMarketPanelVisible,
+    setPurchaseModalVisible,
+    setPurchaseModalData,
+    setBuildingMenuVisible,
+    setRoadCreationActive
+  } = usePolygonStore(state => ({
+    infoVisible: state.infoVisible,
+    transferMenuOpen: state.transferMenuOpen,
+    marketPanelVisible: state.marketPanelVisible,
+    purchaseModalVisible: state.purchaseModalVisible,
+    purchaseModalData: state.purchaseModalData,
+    buildingMenuVisible: state.buildingMenuVisible,
+    roadCreationActive: state.roadCreationActive,
+    setInfoVisible: state.setInfoVisible,
+    setTransferMenuOpen: state.setTransferMenuOpen,
+    setMarketPanelVisible: state.setMarketPanelVisible,
+    setPurchaseModalVisible: state.setPurchaseModalVisible,
+    setPurchaseModalData: state.setPurchaseModalData,
+    setBuildingMenuVisible: state.setBuildingMenuVisible,
+    setRoadCreationActive: state.setRoadCreationActive
+  }));
   
   // Add refs at the top level of the component
   const hasLoadedDataRef = useRef<boolean>(false);
@@ -68,13 +83,17 @@ export default function PolygonViewer() {
     selectedPolygonId,
     landOwners,
     users,
+    bridges,
+    ownerCoatOfArmsMap,
     setActiveView,
     toggleQuality,
     setHoveredPolygonId,
     setSelectedPolygonId,
     loadPolygons,
     loadLandOwners,
-    loadUsers
+    loadUsers,
+    loadBridges,
+    loadOwnerCoatOfArms
   } = usePolygonStore();
   
   // Function to update polygon colors
@@ -135,13 +154,6 @@ export default function PolygonViewer() {
     }
   }, [users]);
   
-  // References to our scene components
-  const sceneRef = useRef<SceneSetup | null>(null);
-  const polygonRendererRef = useRef<PolygonRenderer | null>(null);
-  const interactionManagerRef = useRef<InteractionManager | null>(null);
-  const bridgeRendererRef = useRef<BridgeRenderer | null>(null);
-  
-  
   // Handler for closing the land details panel
   const handleCloseLandDetails = useCallback(() => {
     setSelectedPolygonId(null);
@@ -187,54 +199,11 @@ export default function PolygonViewer() {
   
   // Removed effect that stores resetCamera function on window
   
-  // Add this to the state
-  const [bridges, setBridges] = useState([]);
-  const [ownerCoatOfArmsMap, setOwnerCoatOfArmsMap] = useState<Record<string, string>>({});
-
-  // Add this function to load bridges
-  const loadBridges = useCallback(async () => {
-    try {
-      const response = await fetch('/api/get-bridges');
-      const data = await response.json();
-      setBridges(data.bridges || []);
-    } catch (error) {
-      console.error('Error loading bridges:', error);
-    }
-  }, []);
-  
-  // Add this function to load owner coat of arms
-  const loadOwnerCoatOfArms = useCallback(async () => {
-    try {
-      const response = await fetch(`${getApiBaseUrl()}/api/users/coat-of-arms`);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch owner coat of arms: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      console.log('Owner coat of arms data:', data);
-      
-      if (data.success && data.users) {
-        // Create a map of owner username to coat of arms URL
-        const coatOfArmsMap: Record<string, string> = {};
-        
-        data.users.forEach((user: any) => {
-          if (user.user_name && user.coat_of_arms_image) {
-            coatOfArmsMap[user.user_name] = user.coat_of_arms_image;
-          }
-        });
-        
-        console.log('Processed coat of arms map:', coatOfArmsMap);
-        setOwnerCoatOfArmsMap(coatOfArmsMap);
-        
-        // Update the polygon renderer if it exists
-        if (polygonRendererRef.current) {
-          polygonRendererRef.current.updateOwnerCoatOfArms(coatOfArmsMap);
-        }
-      }
-    } catch (error) {
-      console.error('Error loading owner coat of arms:', error);
-    }
-  }, []);
+  // References to our scene components
+  const sceneRef = useRef<SceneSetup | null>(null);
+  const polygonRendererRef = useRef<PolygonRenderer | null>(null);
+  const interactionManagerRef = useRef<InteractionManager | null>(null);
+  const bridgeRendererRef = useRef<BridgeRenderer | null>(null);
 
   // Debug function to help understand what's happening with the polygons
   const debugPolygons = () => {
@@ -640,7 +609,7 @@ export default function PolygonViewer() {
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [setPurchaseModalData, setPurchaseModalVisible]);
 
   // Update info panel visibility when selectedPolygonId changes
   useEffect(() => {
@@ -653,7 +622,7 @@ export default function PolygonViewer() {
       }, 300);
       return () => clearTimeout(timer);
     }
-  }, [selectedPolygonId]);
+  }, [selectedPolygonId, setInfoVisible]);
 
   // Define handleContextLost outside of useEffect to make it available in cleanup
   const handleContextLost = useCallback((event: WebGLContextEvent) => {
@@ -1238,7 +1207,7 @@ export default function PolygonViewer() {
     } else {
       setBuildingMenuVisible(false);
     }
-  }, [activeView, selectedPolygonId]);
+  }, [activeView, selectedPolygonId, setBuildingMenuVisible]);
   
   // Add this effect to disable/enable interaction manager based on road creation mode
   useEffect(() => {
@@ -1329,7 +1298,7 @@ export default function PolygonViewer() {
         }
       }
     }
-  }, [activeView, loadLandOwners, users]);
+  }, [activeView, loadLandOwners, users, setMarketPanelVisible]);
 
   // Add handler for road creation completion
   const handleRoadComplete = useCallback((roadPoints: THREE.Vector3[]) => {
