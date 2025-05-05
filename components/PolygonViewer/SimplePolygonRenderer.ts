@@ -317,14 +317,18 @@ export default class SimplePolygonRenderer {
         depthWrite: false
       });
       
-      // Create mesh and position it
-      const plane = new THREE.Mesh(planeGeometry, planeMaterial);
-      plane.position.set(normalizedCoord.x, 0.2, -normalizedCoord.y);
-      plane.rotation.x = -Math.PI / 2; // Rotate to lie flat on the ground
-      plane.renderOrder = 10; // Ensure it renders on top of land
+      // Create a sprite material
+      const spriteMaterial = new THREE.SpriteMaterial({
+        map: null, // Will be set when texture loads
+        transparent: true,
+        depthTest: true,
+        depthWrite: false
+      });
       
-      // Ensure sprites render on top of land
-      sprite.renderOrder = 10;
+      // Create sprite and position it
+      const sprite = new THREE.Sprite(spriteMaterial);
+      sprite.position.set(normalizedCoord.x, 0.2, -normalizedCoord.y);
+      sprite.renderOrder = 10; // Ensure it renders on top of land
       
       // Add to scene
       this.scene.add(sprite);
