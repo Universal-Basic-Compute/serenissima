@@ -175,6 +175,56 @@ The rendering pipeline follows these steps:
 5. **Interaction Handling**: Handle user interaction with 3D objects
 6. **Cleanup**: Dispose of resources when components unmount
 
+## Facade Pattern Implementation
+
+The rendering system uses the facade pattern to hide Three.js complexity:
+
+### WaterFacade
+
+The `WaterFacade` provides a simplified interface to Three.js water rendering:
+
+```typescript
+export interface WaterFacadeProps {
+  scene: THREE.Scene;
+  size: number;
+  quality?: 'high' | 'medium' | 'low';
+  position?: { x?: number; y?: number; z?: number };
+  color?: string | number;
+  distortionScale?: number;
+  flowDirection?: { x?: number; y?: number };
+  flowSpeed?: number;
+}
+
+export class WaterFacade {
+  constructor(options: WaterFacadeProps);
+  
+  // Update methods
+  public update(deltaTime?: number): void;
+  
+  // Configuration methods
+  public setQuality(quality: 'high' | 'medium' | 'low'): void;
+  public setColor(color: string | number): void;
+  public setPosition(position: { x?: number; y?: number; z?: number }): void;
+  public setSize(size: number): void;
+  public setFlow(direction: { x?: number; y?: number }, speed?: number): void;
+  public setDistortion(scale: number): void;
+  public setVisibility(visible: boolean): void;
+  
+  // State methods
+  public getState(): { /* water properties */ };
+  
+  // Cleanup
+  public dispose(): void;
+}
+```
+
+This facade provides several benefits:
+1. **Simplified Interface**: Hides complex Three.js water implementation details
+2. **Error Handling**: Includes comprehensive error handling with fallbacks
+3. **Performance Options**: Provides quality settings for different performance levels
+4. **Resource Management**: Properly manages Three.js resources
+5. **Consistent API**: Follows the same pattern as other facade classes
+
 ## Performance Optimization
 
 The rendering architecture includes several performance optimizations:
