@@ -105,7 +105,8 @@ tsc.on('close', (code) => {
     console.log(jsonOutput);
   }
   
-  // Exit with appropriate code
+  // Exit with code 0 if no errors were found, regardless of the TypeScript compiler's exit code
+  // This ensures the script is considered successful when there are no TypeScript errors
   process.exit(errors.length > 0 ? 1 : 0);
 });
 
