@@ -721,11 +721,23 @@ export class WaterFacade {
         const p1 = this.boundaryPoints[i];
         const p2 = this.boundaryPoints[i + 1];
         
-        // Add midpoint between consecutive points
+        // Add three interpolated points between consecutive points instead of just one
         interpolatedPoints.push(new THREE.Vector3(
-          (p1.x + p2.x) / 2,
-          (p1.y + p2.y) / 2,
-          (p1.z + p2.z) / 2
+          p1.x + (p2.x - p1.x) * 0.25,
+          p1.y + (p2.y - p1.y) * 0.25,
+          p1.z + (p2.z - p1.z) * 0.25
+        ));
+        
+        interpolatedPoints.push(new THREE.Vector3(
+          p1.x + (p2.x - p1.x) * 0.5,
+          p1.y + (p2.y - p1.y) * 0.5,
+          p1.z + (p2.z - p1.z) * 0.5
+        ));
+        
+        interpolatedPoints.push(new THREE.Vector3(
+          p1.x + (p2.x - p1.x) * 0.75,
+          p1.y + (p2.y - p1.y) * 0.75,
+          p1.z + (p2.z - p1.z) * 0.75
         ));
       }
       
@@ -862,20 +874,24 @@ void main() {`
             'vec4 info = texture2D( mirrorSampler, coords );',
             `vec4 info = texture2D( mirrorSampler, coords );
             
-// Apply shoreline effect
+// Apply enhanced shoreline effect
 float shoreFactor = calculateShorelineFactor(vWorldPosition) * shorelineIntensity;
 if (shoreFactor > 0.01) {
-  // Increase wave height near shore - enhanced effect
-  info.r += shoreFactor * 0.4;
+  // Increase wave height near shore - significantly enhanced
+  info.r += shoreFactor * 0.6;
   
-  // Add foam near shore - more pronounced foam
-  info.g = mix(info.g, 1.0, shoreFactor * 0.9);
+  // Add much more pronounced foam near shore
+  info.g = mix(info.g, 1.0, shoreFactor * 0.95);
   
-  // Adjust wave direction to flow parallel to shore
-  info.b = mix(info.b, 0.5, shoreFactor * 0.5);
+  // Add wave distortion near shore
+  info.b = mix(info.b, 0.5, shoreFactor * 0.7);
   
-  // Add slight color variation near shore for visual emphasis
-  reflectedColor = mix(reflectedColor, vec3(0.8, 0.9, 1.0), shoreFactor * 0.3);
+  // Add stronger color variation near shore for visual emphasis
+  reflectedColor = mix(reflectedColor, vec3(0.9, 0.95, 1.0), shoreFactor * 0.5);
+  
+  // Add additional foam patterns based on position and time
+  float foamPattern = sin(vWorldPosition.x * 2.0 + time * 0.5) * sin(vWorldPosition.z * 2.0 + time * 0.7) * 0.5 + 0.5;
+  info.g = mix(info.g, info.g * foamPattern, shoreFactor * 0.3);
 }`
           );
           
