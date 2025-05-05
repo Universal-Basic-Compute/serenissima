@@ -12,6 +12,7 @@ interface SimplePolygonRendererProps {
     scale: number;
     latCorrectionFactor: number;
   };
+  sandColor?: number; // Add this line
 }
 
 export default class SimplePolygonRenderer {
@@ -26,6 +27,7 @@ export default class SimplePolygonRenderer {
   private coatOfArmsSprites: Record<string, THREE.Object3D> = {};
   private ownerCoatOfArmsMap: Record<string, string> = {};
   private users: Record<string, any> = {};
+  private sandColor: number = 0xfff0c0; // Default to lighter, more yellow sand color
   
   // Properties for hover and click detection
   private raycaster: THREE.Raycaster;
@@ -117,7 +119,7 @@ export default class SimplePolygonRenderer {
     // Create a single shared material for all polygons
     this.sharedMaterial = new THREE.MeshStandardMaterial({
       map: this.sandTexture,
-      color: this.sandTexture ? 0xffffff : 0xf5e9c8, // Use texture color or sand color
+      color: this.sandTexture ? 0xffffff : this.sandColor, // Use texture color or custom sand color
       side: THREE.DoubleSide,
       roughness: 0.8,
       metalness: 0.1,

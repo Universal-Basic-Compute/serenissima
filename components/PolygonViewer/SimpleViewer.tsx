@@ -184,7 +184,8 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
       onLandSelected: (landId) => {
         // Handle land selection
         setSelectedPolygonId(landId);
-      }
+      },
+      sandColor: 0xfff0c0 // Add this line to make land lighter and more yellow
     });
     polygonRendererRef.current = polygonRenderer;
     
