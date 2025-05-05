@@ -67,11 +67,9 @@ export default function Home() {
     // Add a shorter backup timer in case wallet initialization is causing issues
     const backupTimer = setTimeout(() => {
       if (isLoading) {
-        console.log('Backup timer: Still loading after 5s, checking wallet status...');
-        // If wallet adapter is initializing, we can proceed with loading
-        if (walletAdapter) {
-          console.log('Wallet adapter exists, proceeding with app initialization');
-        }
+        console.log('Backup timer: Still loading after 5s');
+        // Don't reference walletAdapter here, just proceed with loading
+        console.log('Proceeding with app initialization');
       }
     }, 5000); // 5 seconds backup check
     
@@ -79,7 +77,7 @@ export default function Home() {
       clearTimeout(loadingTimer);
       clearTimeout(backupTimer);
     };
-  }, [isLoading, walletAdapter]);
+  }, [isLoading]); // Remove walletAdapter from dependencies
   
   // State for wallet connection
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
