@@ -134,6 +134,45 @@ export default function Home() {
   const [marketPanelVisible, setMarketPanelVisible] = useState(false);
   const polygonRendererRef = useRef<any>(null);
   
+  // Define getSnapshotWithCache function early in the component
+  const getSnapshotWithCache = useCallback((getSnapshotFn, dependencies) => {
+    // Check if window and getCachedSnapshot exist
+    if (typeof window !== 'undefined' && window.getCachedSnapshot) {
+      return window.getCachedSnapshot(getSnapshotFn, dependencies);
+    }
+    
+    // If the global helper isn't available, implement the caching logic directly
+    const depsString = JSON.stringify(dependencies);
+    
+    // Use a static property to store the cached values between renders
+    if (!getSnapshotWithCache.cache) {
+      getSnapshotWithCache.cache = {
+        result: null,
+        deps: null
+      };
+    }
+    
+    // Check if we can use the cached result
+    if (
+      getSnapshotWithCache.cache.result && 
+      getSnapshotWithCache.cache.deps === depsString
+    ) {
+      return getSnapshotWithCache.cache.result;
+    }
+    
+    // Calculate new result
+    const result = getSnapshotFn();
+    
+    // Cache the result and dependencies
+    getSnapshotWithCache.cache.result = result;
+    getSnapshotWithCache.cache.deps = depsString;
+    
+    return result;
+  }, []);
+  
+  // Initialize the cache property
+  getSnapshotWithCache.cache = null;
+  
   // Initialize wallet adapter
   useEffect(() => {
     console.log("Initializing wallet adapter...");
@@ -1571,44 +1610,7 @@ export default function Home() {
     setIsGoogleLoaded(true);
   };
   
-  // Add a function to help PolygonViewer with snapshot caching
-  const getSnapshotWithCache = useCallback((getSnapshotFn, dependencies) => {
-    // Check if window and getCachedSnapshot exist
-    if (typeof window !== 'undefined' && window.getCachedSnapshot) {
-      return window.getCachedSnapshot(getSnapshotFn, dependencies);
-    }
-    
-    // If the global helper isn't available, implement the caching logic directly
-    const depsString = JSON.stringify(dependencies);
-    
-    // Use a ref to store the cached values between renders
-    if (!getSnapshotWithCache.cache) {
-      getSnapshotWithCache.cache = {
-        result: null,
-        deps: null
-      };
-    }
-    
-    // Check if we can use the cached result
-    if (
-      getSnapshotWithCache.cache.result && 
-      getSnapshotWithCache.cache.deps === depsString
-    ) {
-      return getSnapshotWithCache.cache.result;
-    }
-    
-    // Calculate new result
-    const result = getSnapshotFn();
-    
-    // Cache the result and dependencies
-    getSnapshotWithCache.cache.result = result;
-    getSnapshotWithCache.cache.deps = depsString;
-    
-    return result;
-  }, []);
-
-  // Add a static property to the function to store cache
-  getSnapshotWithCache.cache = null;
+  // Function was moved to the top of the component
 
   // Create drawing manager options with client-side safety
   const [drawingManagerOptions, setDrawingManagerOptions] = useState({
@@ -2343,6 +2345,9 @@ export default function Home() {
             </button>
           </div>
         </div>
+        
+        {/* Ensure the function is available globally as a fallback */}
+        {typeof window !== 'undefined' && (window.getSnapshotWithCache = getSnapshotWithCache)}
         
         {/* Dynamic import of PolygonViewer with snapshot caching prop */}
         <PolygonViewer 
