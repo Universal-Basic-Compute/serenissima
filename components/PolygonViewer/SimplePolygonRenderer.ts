@@ -44,12 +44,14 @@ export default class SimplePolygonRenderer {
     activeView = 'land', 
     users = {},
     camera = null,
-    onLandSelected = null
+    onLandSelected = null,
+    sandColor = 0xfff0c0 // Add this parameter with default value
   }: SimplePolygonRendererProps & { 
     activeView?: string;
     users?: Record<string, any>;
     camera?: THREE.Camera | null;
     onLandSelected?: ((landId: string) => void) | null;
+    sandColor?: number; // Add this to the type
   }) {
     this.scene = scene;
     this.polygons = polygons;
@@ -58,6 +60,7 @@ export default class SimplePolygonRenderer {
     this.users = users;
     this.camera = camera;
     this.onLandSelected = onLandSelected;
+    this.sandColor = sandColor; // Store the sand color
     this.textureLoader = new THREE.TextureLoader();
     this.raycaster = new THREE.Raycaster();
     this.mouse = new THREE.Vector2();
