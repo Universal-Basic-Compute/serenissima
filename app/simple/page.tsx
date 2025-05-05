@@ -190,17 +190,17 @@ export default function SimplePage() {
       alert('Please enter a description of your family coat of arms first');
       return;
     }
-    
+      
     try {
       setIsGeneratingImage(true);
-      
-      // Import the utility function dynamically to reduce initial load time
-      const { generateCoatOfArmsImage } = await import('@/utils/coatOfArmsUtils');
+        
+      // Import the utility function directly
+      const { generateCoatOfArmsImage } = await import('../../utils/coatOfArmsUtils');
       const imageUrl = await generateCoatOfArmsImage(familyCoatOfArms);
-      
+        
       // Update state with the local image URL
       setCoatOfArmsImage(imageUrl);
-      
+        
     } catch (error) {
       console.error('Error generating coat of arms image:', error);
       alert(`Failed to generate image: ${error instanceof Error ? error.message : String(error)}`);
@@ -1020,17 +1020,17 @@ const generateCoatOfArmsImage = async () => {
     alert('Please enter a description of your family coat of arms first');
     return;
   }
-  
+    
   try {
     setIsGeneratingImage(true);
-    
-    // Import the utility function dynamically to reduce initial load time
-    const { generateCoatOfArmsImage } = await import('@/utils/coatOfArmsUtils');
+      
+    // Import the utility function directly
+    const { generateCoatOfArmsImage } = await import('../utils/coatOfArmsUtils');
     const imageUrl = await generateCoatOfArmsImage(familyCoatOfArms);
-    
+      
     // Update state with the local image URL
     setCoatOfArmsImage(imageUrl);
-    
+      
   } catch (error) {
     console.error('Error generating coat of arms image:', error);
     alert(`Failed to generate image: ${error instanceof Error ? error.message : String(error)}`);
