@@ -376,11 +376,15 @@ export default class SimplePolygonRenderer {
     // Store reference
     this.coatOfArmsSprites[polygon.id] = plane;
     
-    // Load the texture
+    // Load the texture - handle both external and local URLs
+    const textureUrl = coatOfArmsUrl.startsWith('http') 
+      ? coatOfArmsUrl 
+      : `${window.location.origin}${coatOfArmsUrl}`;
+      
     this.textureLoader.load(
-      coatOfArmsUrl,
+      textureUrl,
       (texture) => {
-        console.log(`Loaded texture for ${polygon.id} from ${coatOfArmsUrl}`);
+        console.log(`Loaded texture for ${polygon.id} from ${textureUrl}`);
         // Create a circular texture with inverted orientation
         const circularTexture = this.createCircularTexture(texture, true); // Added invert parameter
         
