@@ -91,7 +91,7 @@ export class WaterFacade {
     };
     this.color = typeof options.color === 'string' 
       ? new THREE.Color(options.color).getHex() 
-      : (options.color || 0x0047ab); // Deep royal blue default
+      : (options.color || 0x001e4d); // Much deeper blue color
     this.distortionScale = options.distortionScale || this.getDefaultDistortionScale();
     this.flowDirection = {
       x: options.flowDirection?.x || 0,
