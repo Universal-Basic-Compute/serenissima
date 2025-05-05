@@ -85,7 +85,9 @@ function processCentroids() {
         // Create new data structure with centroid
         const updatedData = {
           coordinates: coordinates,
-          centroid: centroid
+          centroid: centroid,
+          // Store the original centroid as center
+          center: centroid
         };
         
         // Save updated data back to file
@@ -100,6 +102,12 @@ function processCentroids() {
       const centroid = calculateCentroid(coordinates.coordinates);
       
       if (centroid) {
+        // Store the current centroid as center if it doesn't exist yet
+        if (!coordinates.center) {
+          coordinates.center = coordinates.centroid;
+        }
+        
+        // Update the centroid
         coordinates.centroid = centroid;
         saveJsonToFile(file, coordinates);
         updatedCount++;
