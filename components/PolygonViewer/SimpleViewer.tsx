@@ -123,7 +123,7 @@ export default function SimpleViewer() {
       window.removeEventListener('resize', handleResize);
       
       if (polygonRendererRef.current) polygonRendererRef.current.cleanup();
-      if (waterRef.current) waterRef.current.cleanup();
+      if (waterRef.current) waterRef.current.dispose();
       if (cameraController) cameraController.cleanup();
       if (renderer) renderer.dispose();
       
