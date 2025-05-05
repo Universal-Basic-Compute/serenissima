@@ -25,7 +25,7 @@ export default function SimplePage() {
   const [marketPanelVisible, setMarketPanelVisible] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  // Sidebar is always compact
   
   // Wallet and user state
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
@@ -171,33 +171,13 @@ export default function SimplePage() {
       <SimpleViewer qualityMode={qualityMode} />
       
       {/* Left Side Menu */}
-      <div className={`absolute left-0 top-0 bottom-0 bg-black/70 text-white transition-all duration-300 z-20 flex flex-col ${sidebarCollapsed ? 'w-16' : 'w-64'}`}>
-        {/* Toggle button */}
-        <button 
-          onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-          className="absolute -right-4 top-8 bg-amber-600 text-white w-8 h-8 rounded-full flex items-center justify-center shadow-lg z-10"
-        >
-          {sidebarCollapsed ? (
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-            </svg>
-          ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
-            </svg>
-          )}
-        </button>
-        
+      <div className="absolute left-0 top-0 bottom-0 bg-black/70 text-white z-20 flex flex-col w-16">
         {/* Logo */}
-        <div className={`p-4 border-b border-gray-700 flex items-center ${sidebarCollapsed ? 'justify-center' : 'justify-start'}`}>
-          {sidebarCollapsed ? (
-            <span className="text-2xl font-serif text-amber-500">V</span>
-          ) : (
-            <span className="text-2xl font-serif text-amber-500">Venezia</span>
-          )}
+        <div className="p-4 border-b border-gray-700 flex items-center justify-center">
+          <span className="text-2xl font-serif text-amber-500">V</span>
         </div>
         
-        {/* Menu Items */}
+        {/* Menu Items - in the correct order from main page */}
         <div className="flex-1 overflow-y-auto py-4">
           <ul className="space-y-2 px-2">
             <li>
@@ -206,9 +186,9 @@ export default function SimplePage() {
                 className={`w-full flex items-center p-2 rounded-lg transition-colors ${
                   activeView === 'land' ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700'
                 }`}
+                title="Land"
               >
-                <FaHome className={`${sidebarCollapsed ? 'mx-auto' : 'mr-3'} h-5 w-5`} />
-                {!sidebarCollapsed && <span>Land</span>}
+                <FaHome className="mx-auto h-5 w-5" />
               </button>
             </li>
             <li>
@@ -217,9 +197,9 @@ export default function SimplePage() {
                 className={`w-full flex items-center p-2 rounded-lg transition-colors ${
                   activeView === 'buildings' ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700'
                 }`}
+                title="Buildings"
               >
-                <FaBuilding className={`${sidebarCollapsed ? 'mx-auto' : 'mr-3'} h-5 w-5`} />
-                {!sidebarCollapsed && <span>Buildings</span>}
+                <FaBuilding className="mx-auto h-5 w-5" />
               </button>
             </li>
             <li>
@@ -228,9 +208,9 @@ export default function SimplePage() {
                 className={`w-full flex items-center p-2 rounded-lg transition-colors ${
                   activeView === 'transport' ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700'
                 }`}
+                title="Transport"
               >
-                <FaRoad className={`${sidebarCollapsed ? 'mx-auto' : 'mr-3'} h-5 w-5`} />
-                {!sidebarCollapsed && <span>Transport</span>}
+                <FaRoad className="mx-auto h-5 w-5" />
               </button>
             </li>
             <li>
@@ -239,9 +219,9 @@ export default function SimplePage() {
                 className={`w-full flex items-center p-2 rounded-lg transition-colors ${
                   activeView === 'resources' ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700'
                 }`}
+                title="Resources"
               >
-                <FaTree className={`${sidebarCollapsed ? 'mx-auto' : 'mr-3'} h-5 w-5`} />
-                {!sidebarCollapsed && <span>Resources</span>}
+                <FaTree className="mx-auto h-5 w-5" />
               </button>
             </li>
             <li>
@@ -253,9 +233,9 @@ export default function SimplePage() {
                 className={`w-full flex items-center p-2 rounded-lg transition-colors ${
                   activeView === 'markets' ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700'
                 }`}
+                title="Markets"
               >
-                <FaStore className={`${sidebarCollapsed ? 'mx-auto' : 'mr-3'} h-5 w-5`} />
-                {!sidebarCollapsed && <span>Markets</span>}
+                <FaStore className="mx-auto h-5 w-5" />
               </button>
             </li>
             <li>
@@ -264,21 +244,17 @@ export default function SimplePage() {
                 className={`w-full flex items-center p-2 rounded-lg transition-colors ${
                   activeView === 'governance' ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700'
                 }`}
+                title="Governance"
               >
-                <FaLandmark className={`${sidebarCollapsed ? 'mx-auto' : 'mr-3'} h-5 w-5`} />
-                {!sidebarCollapsed && <span>Governance</span>}
+                <FaLandmark className="mx-auto h-5 w-5" />
               </button>
             </li>
           </ul>
         </div>
         
         {/* Bottom section */}
-        <div className={`p-4 border-t border-gray-700 ${sidebarCollapsed ? 'text-center' : ''}`}>
-          {sidebarCollapsed ? (
-            <div className="text-xs text-gray-400">v1.0</div>
-          ) : (
-            <div className="text-xs text-gray-400">La Serenissima v1.0</div>
-          )}
+        <div className="p-4 border-t border-gray-700 text-center">
+          <div className="text-xs text-gray-400">v1.0</div>
         </div>
       </div>
       
