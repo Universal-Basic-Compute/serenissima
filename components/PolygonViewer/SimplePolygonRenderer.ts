@@ -21,12 +21,30 @@ export default class SimplePolygonRenderer {
   private textureLoader: THREE.TextureLoader;
   private sandTexture: THREE.Texture | null = null;
   private sharedMaterial: THREE.MeshStandardMaterial | null = null;
+  private activeView: string = 'land'; // Default to land view
+  private coatOfArmsSprites: Record<string, THREE.Sprite> = {};
+  private ownerCoatOfArmsMap: Record<string, string> = {};
+  private users: Record<string, any> = {};
   
-  constructor({ scene, polygons, bounds }: SimplePolygonRendererProps) {
+  constructor({ scene, polygons, bounds, activeView = 'land', users = {} }: SimplePolygonRendererProps & { 
+    activeView?: string;
+    users?: Record<string, any>;
+  }) {
     this.scene = scene;
     this.polygons = polygons;
     this.bounds = bounds;
+    this.activeView = activeView;
+    this.users = users;
     this.textureLoader = new THREE.TextureLoader();
+    
+    // Process users data to extract coat of arms
+    if (users) {
+      Object.values(users).forEach(user => {
+        if (user.user_name && user.coat_of_arms_image) {
+          this.ownerCoatOfArmsMap[user.user_name] = user.coat_of_arms_image;
+        }
+      });
+    }
     
     // Load sand texture
     this.textureLoader.load(
@@ -39,12 +57,22 @@ export default class SimplePolygonRenderer {
         
         // Render polygons once texture is loaded
         this.renderPolygons();
+        
+        // Create coat of arms sprites if in land view
+        if (this.activeView === 'land') {
+          this.createCoatOfArmsSprites();
+        }
       },
       undefined,
       (error) => {
         console.error('Error loading texture:', error);
         // Render polygons without texture if loading fails
         this.renderPolygons();
+        
+        // Create coat of arms sprites if in land view
+        if (this.activeView === 'land') {
+          this.createCoatOfArmsSprites();
+        }
       }
     );
   }
@@ -141,6 +169,229 @@ export default class SimplePolygonRenderer {
     console.log(`Rendered ${this.meshes.length} polygons`);
   }
   
+  /**
+   * Create coat of arms sprites for all polygons with owners
+   */
+  private createCoatOfArmsSprites() {
+    console.log('Creating coat of arms sprites for land view');
+    
+    // Remove any existing sprites
+    Object.values(this.coatOfArmsSprites).forEach(sprite => {
+      this.scene.remove(sprite);
+    });
+    this.coatOfArmsSprites = {};
+    
+    // Only create sprites if in land view
+    if (this.activeView !== 'land') {
+      return;
+    }
+    
+    // Process each polygon with an owner and centroid
+    this.polygons.forEach(polygon => {
+      if (!polygon.owner || !polygon.centroid) return;
+      
+      // Get the coat of arms URL for the owner
+      const coatOfArmsUrl = this.ownerCoatOfArmsMap[polygon.owner];
+      if (!coatOfArmsUrl) return;
+      
+      // Convert centroid to 3D position
+      const normalizedCoord = normalizeCoordinates(
+        [polygon.centroid],
+        this.bounds.centerLat,
+        this.bounds.centerLng,
+        this.bounds.scale,
+        this.bounds.latCorrectionFactor
+      )[0];
+      
+      // Create a sprite material
+      const spriteMaterial = new THREE.SpriteMaterial({
+        map: null, // Will be set when texture loads
+        transparent: true,
+        depthTest: true,
+        depthWrite: false,
+        sizeAttenuation: true
+      });
+      
+      // Create the sprite
+      const sprite = new THREE.Sprite(spriteMaterial);
+      sprite.position.set(normalizedCoord.x, 0.5, normalizedCoord.y); // Position above land
+      sprite.scale.set(2, 2, 1); // Initial scale
+      
+      // Add to scene
+      this.scene.add(sprite);
+      
+      // Store reference
+      this.coatOfArmsSprites[polygon.id] = sprite;
+      
+      // Load the texture
+      this.textureLoader.load(
+        coatOfArmsUrl,
+        (texture) => {
+          // Create a circular texture
+          const circularTexture = this.createCircularTexture(texture);
+          
+          // Apply the texture to the sprite material
+          spriteMaterial.map = circularTexture;
+          
+          // Adjust sprite scale based on texture aspect ratio
+          if (texture.image && texture.image.width && texture.image.height) {
+            const aspectRatio = texture.image.width / texture.image.height;
+            sprite.scale.set(2 * aspectRatio, 2, 1);
+          }
+        },
+        undefined,
+        (error) => {
+          console.error(`Failed to load coat of arms texture for ${polygon.id}:`, error);
+          // Remove the sprite if texture loading fails
+          this.scene.remove(sprite);
+          delete this.coatOfArmsSprites[polygon.id];
+        }
+      );
+    });
+    
+    console.log(`Created ${Object.keys(this.coatOfArmsSprites).length} coat of arms sprites`);
+  }
+
+  /**
+   * Create a circular texture from an existing texture
+   */
+  private createCircularTexture(texture: THREE.Texture): THREE.Texture {
+    // Check if texture.image exists
+    if (!texture.image) {
+      console.warn('Texture image is null, creating fallback texture');
+      
+      // Create a canvas for a fallback texture
+      const canvas = document.createElement('canvas');
+      const size = 256;
+      canvas.width = size;
+      canvas.height = size;
+      
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return texture;
+      
+      // Draw a colored circle as fallback
+      ctx.beginPath();
+      ctx.arc(size/2, size/2, size/2 - 4, 0, Math.PI * 2);
+      ctx.fillStyle = '#8B4513'; // Default brown color
+      ctx.fill();
+      ctx.strokeStyle = '#FFFFFF';
+      ctx.lineWidth = 8;
+      ctx.stroke();
+      
+      // Create a new texture from the canvas
+      const fallbackTexture = new THREE.Texture(canvas);
+      fallbackTexture.needsUpdate = true;
+      return fallbackTexture;
+    }
+    
+    // Create a canvas to draw the circular mask
+    const canvas = document.createElement('canvas');
+    const size = 512; // Increased size for better quality
+    canvas.width = size;
+    canvas.height = size;
+    
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return texture; // Fallback if context creation fails
+    
+    try {
+      // Clear the canvas first
+      ctx.clearRect(0, 0, size, size);
+      
+      // Draw a circular clipping path
+      ctx.beginPath();
+      ctx.arc(size/2, size/2, size/2 - 4, 0, Math.PI * 2);
+      ctx.closePath();
+      
+      // Add a white stroke around the circle
+      ctx.strokeStyle = '#FFFFFF';
+      ctx.lineWidth = 8;
+      ctx.stroke();
+      
+      // Create a new clipping path for the image
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(size/2, size/2, size/2 - 12, 0, Math.PI * 2);
+      ctx.clip();
+      
+      // Calculate dimensions to maintain aspect ratio
+      let drawWidth = size - 24;
+      let drawHeight = size - 24;
+      let offsetX = 12;
+      let offsetY = 12;
+      
+      if (texture.image.width > texture.image.height) {
+        // Landscape image
+        drawHeight = (texture.image.height / texture.image.width) * (size - 24);
+        offsetY = (size - drawHeight) / 2;
+      } else if (texture.image.height > texture.image.width) {
+        // Portrait image
+        drawWidth = (texture.image.width / texture.image.height) * (size - 24);
+        offsetX = (size - drawWidth) / 2;
+      }
+      
+      // Draw the image with proper aspect ratio
+      if (texture.image) {
+        ctx.drawImage(texture.image, offsetX, offsetY, drawWidth, drawHeight);
+      }
+      
+      ctx.restore();
+      
+      // Create a new texture from the canvas
+      const circularTexture = new THREE.Texture(canvas);
+      circularTexture.needsUpdate = true;
+      
+      return circularTexture;
+    } catch (error) {
+      console.error('Error creating circular texture:', error);
+      
+      // If there's an error, create a simple colored circle
+      ctx.clearRect(0, 0, size, size);
+      ctx.beginPath();
+      ctx.arc(size/2, size/2, size/2 - 4, 0, Math.PI * 2);
+      ctx.fillStyle = '#8B4513'; // Default brown color
+      ctx.fill();
+      ctx.strokeStyle = '#FFFFFF';
+      ctx.lineWidth = 8;
+      ctx.stroke();
+      
+      const fallbackTexture = new THREE.Texture(canvas);
+      fallbackTexture.needsUpdate = true;
+      return fallbackTexture;
+    }
+  }
+
+  /**
+   * Update the active view and refresh coat of arms sprites
+   */
+  public updateViewMode(activeView: string) {
+    if (this.activeView === activeView) return;
+    
+    this.activeView = activeView;
+    
+    // Update coat of arms sprites based on view mode
+    if (activeView === 'land') {
+      this.createCoatOfArmsSprites();
+    } else {
+      // Remove coat of arms sprites if not in land view
+      Object.values(this.coatOfArmsSprites).forEach(sprite => {
+        this.scene.remove(sprite);
+      });
+      this.coatOfArmsSprites = {};
+    }
+  }
+
+  /**
+   * Update the coat of arms map with new data
+   */
+  public updateCoatOfArms(ownerCoatOfArmsMap: Record<string, string>) {
+    this.ownerCoatOfArmsMap = { ...this.ownerCoatOfArmsMap, ...ownerCoatOfArmsMap };
+    
+    // Refresh coat of arms sprites if in land view
+    if (this.activeView === 'land') {
+      this.createCoatOfArmsSprites();
+    }
+  }
+
   public cleanup() {
     // Remove meshes from scene and dispose resources
     this.meshes.forEach(mesh => {
@@ -151,6 +402,18 @@ export default class SimplePolygonRenderer {
     
     // Clear array
     this.meshes = [];
+    
+    // Remove coat of arms sprites
+    Object.values(this.coatOfArmsSprites).forEach(sprite => {
+      this.scene.remove(sprite);
+      if (sprite.material) {
+        if (sprite.material instanceof THREE.SpriteMaterial && sprite.material.map) {
+          sprite.material.map.dispose();
+        }
+        sprite.material.dispose();
+      }
+    });
+    this.coatOfArmsSprites = {};
     
     // Dispose texture
     if (this.sandTexture) {

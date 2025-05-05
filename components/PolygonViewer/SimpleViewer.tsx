@@ -6,11 +6,13 @@ import SimpleCamera from './SimpleCamera';
 import { WaterFacade as SimpleWater, WaterQualityLevel } from './SimpleWater';
 import SimplePolygonRenderer from './SimplePolygonRenderer';
 import { calculateBounds } from './utils';
+import { getApiBaseUrl } from '@/lib/apiUtils';
 
-export default function SimpleViewer({ qualityMode = 'high' }) {
+export default function SimpleViewer({ qualityMode = 'high', activeView = 'land' }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [polygons, setPolygons] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [users, setUsers] = useState<Record<string, any>>({});
   
   // References to our scene components
   const sceneRef = useRef<THREE.Scene | null>(null);
@@ -18,6 +20,42 @@ export default function SimpleViewer({ qualityMode = 'high' }) {
   const cameraControllerRef = useRef<SimpleCamera | null>(null);
   const waterRef = useRef<SimpleWater | null>(null);
   const polygonRendererRef = useRef<SimplePolygonRenderer | null>(null);
+  
+  // Load users data
+  useEffect(() => {
+    const loadUsers = async () => {
+      try {
+        const response = await fetch(`${getApiBaseUrl()}/api/users`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data && Array.isArray(data)) {
+            const usersMap: Record<string, any> = {};
+            data.forEach(user => {
+              if (user.user_name) {
+                usersMap[user.user_name] = user;
+              }
+            });
+            
+            // Ensure ConsiglioDeiDieci is always present
+            if (!usersMap['ConsiglioDeiDieci']) {
+              usersMap['ConsiglioDeiDieci'] = {
+                user_name: 'ConsiglioDeiDieci',
+                color: '#8B0000', // Dark red
+                coat_of_arms_image: null
+              };
+            }
+            
+            setUsers(usersMap);
+            console.log('Loaded users data:', Object.keys(usersMap).length, 'users');
+          }
+        }
+      } catch (error) {
+        console.error('Error loading users data:', error);
+      }
+    };
+    
+    loadUsers();
+  }, []);
   
   // Load polygons (still needed to calculate bounds)
   useEffect(() => {
@@ -71,11 +109,13 @@ export default function SimpleViewer({ qualityMode = 'high' }) {
     });
     waterRef.current = water;
     
-    // Create polygon renderer after water
+    // Create polygon renderer after water, passing activeView and users
     const polygonRenderer = new SimplePolygonRenderer({
       scene,
       polygons,
-      bounds
+      bounds,
+      activeView,
+      users
     });
     polygonRendererRef.current = polygonRenderer;
     
@@ -142,7 +182,14 @@ export default function SimpleViewer({ qualityMode = 'high' }) {
         }
       });
     };
-  }, [polygons, loading, qualityMode]);
+  }, [polygons, loading, qualityMode, activeView, users]);
+  
+  // Update view mode when activeView changes
+  useEffect(() => {
+    if (polygonRendererRef.current) {
+      polygonRendererRef.current.updateViewMode(activeView);
+    }
+  }, [activeView]);
   
   // Update water quality when parent component changes quality mode
   useEffect(() => {

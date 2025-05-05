@@ -168,7 +168,7 @@ export default function SimplePage() {
     <>
     <div className="relative w-full h-screen">
       {/* Main 3D Viewer (should be first in the DOM for proper layering) */}
-      <SimpleViewer qualityMode={qualityMode} />
+      <SimpleViewer qualityMode={qualityMode} activeView={activeView} />
       
       {/* Left Side Menu */}
       <div className="absolute left-0 top-0 bottom-0 bg-black/70 text-white z-20 flex flex-col w-16">
