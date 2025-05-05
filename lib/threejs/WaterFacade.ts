@@ -55,8 +55,8 @@ export class WaterFacade {
   private landObjects: THREE.Object3D[] = [];
   private boundaryPoints: THREE.Vector3[] = [];
   private shorelineEffect: boolean = true;
-  private shorelineIntensity: number = 2.0; // Increased from 1.0
-  private shorelineDistance: number = 8.0; // Distance in units that shoreline effect extends
+  private shorelineIntensity: number = 3.5; // Increased from 2.0
+  private shorelineDistance: number = 12.0; // Distance in units that shoreline effect extends
 
   /**
    * Create a new WaterFacade
@@ -844,8 +844,14 @@ float calculateShorelineFactor(vec3 position) {
     minDist = min(minDist, dist);
   }
   
-  // Calculate effect factor based on distance
-  return 1.0 - smoothstep(0.0, shorelineDistance, minDist);
+  // Calculate effect factor based on distance with a sharper falloff
+  float factor = 1.0 - smoothstep(0.0, shorelineDistance, minDist);
+  
+  // Add some noise to the shoreline factor for more natural appearance
+  float noise = sin(position.x * 0.3 + position.z * 0.5 + time * 0.2) * 0.1 + 0.1;
+  
+  // Enhance the factor with noise but ensure it still fades to zero at the distance
+  return factor * (1.0 + noise * factor);
 }
 
 void main() {`
@@ -903,7 +909,7 @@ if (shoreFactor > 0.01) {
     this.shorelineEffect = enabled;
     
     if (intensity !== undefined) {
-      this.shorelineIntensity = Math.max(0, Math.min(3.0, intensity)); // Increased max intensity to 3.0 from 2.0
+      this.shorelineIntensity = Math.max(0, Math.min(5.0, intensity)); // Increased max intensity to 5.0 from 3.0
     }
     
     if (distance !== undefined) {
