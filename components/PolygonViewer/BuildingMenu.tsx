@@ -623,5 +623,4 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
   )}
 }
 </ErrorBoundary>
-  ); // Add the missing closing parenthesis for the main return statement
 }
