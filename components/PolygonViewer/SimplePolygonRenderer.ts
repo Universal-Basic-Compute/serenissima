@@ -323,7 +323,7 @@ export default class SimplePolygonRenderer {
     
     // Create a plane geometry for the texture
     const sceneScale = this.bounds.scale;
-    const spriteScale = Math.max(2, sceneScale / 250); // Doubled scale and halved divisor for larger sprites
+    const spriteScale = Math.max(1, sceneScale / 500); // Reduced scale (2 -> 1) and increased divisor (250 -> 500)
     const planeGeometry = new THREE.PlaneGeometry(spriteScale, spriteScale);
     const planeMaterial = new THREE.MeshBasicMaterial({
       map: null, // Will be set when texture loads
@@ -350,8 +350,8 @@ export default class SimplePolygonRenderer {
       coatOfArmsUrl,
       (texture) => {
         console.log(`Loaded texture for ${polygon.id} from ${coatOfArmsUrl}`);
-        // Create a circular texture
-        const circularTexture = this.createCircularTexture(texture);
+        // Create a circular texture with inverted orientation
+        const circularTexture = this.createCircularTexture(texture, true); // Added invert parameter
         
         // Apply the texture to the plane material
         if (planeMaterial) {
@@ -362,8 +362,8 @@ export default class SimplePolygonRenderer {
           if (texture.image && texture.image.width && texture.image.height) {
             const aspectRatio = texture.image.width / texture.image.height;
             const sceneScale = this.bounds.scale;
-            const baseScale = Math.max(0.25, sceneScale / 2000); // Doubled scale factor
-            plane.scale.set(baseScale * aspectRatio * 2, baseScale * 2, 1); // Doubled both dimensions
+            const baseScale = Math.max(0.125, sceneScale / 4000); // Reduced scale (0.25 -> 0.125) and increased divisor (2000 -> 4000)
+            plane.scale.set(baseScale * aspectRatio, baseScale, 1); // Removed the multiplier (2 -> 1)
           }
         }
       },
@@ -433,6 +433,7 @@ export default class SimplePolygonRenderer {
         ctx.clip();
         
         // Draw the coat of arms image inside the clipped region
+        // INVERT THE IMAGE by translating and scaling the canvas
         if (texture.image) {
           const aspectRatio = texture.image.width / texture.image.height;
           let drawWidth = size;
@@ -444,7 +445,21 @@ export default class SimplePolygonRenderer {
           const imgX = (size - drawWidth) / 2;
           const imgY = (size - drawHeight) / 2;
           
+          // Save context state before transformations
+          ctx.save();
+          
+          // Translate to center of canvas
+          ctx.translate(size/2, size/2);
+          // Scale y by -1 to flip vertically
+          ctx.scale(1, -1);
+          // Translate back
+          ctx.translate(-size/2, -size/2);
+          
+          // Draw the image
           ctx.drawImage(texture.image, imgX, imgY, drawWidth, drawHeight);
+          
+          // Restore context state
+          ctx.restore();
         }
         
         // Add a border around the polygon
@@ -453,17 +468,7 @@ export default class SimplePolygonRenderer {
         ctx.strokeStyle = '#FFFFFF';
         ctx.stroke();
         
-        // Add owner name text if desired
-        if (ownerName) {
-          ctx.font = 'bold 24px Arial';
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.fillStyle = '#FFFFFF';
-          ctx.strokeStyle = '#000000';
-          ctx.lineWidth = 3;
-          ctx.strokeText(ownerName, size/2, size/2);
-          ctx.fillText(ownerName, size/2, size/2);
-        }
+        // REMOVED: Owner name text display
         
         // Create a texture from the canvas
         const maskedTexture = new THREE.CanvasTexture(canvas);
@@ -493,11 +498,11 @@ export default class SimplePolygonRenderer {
         mesh.rotation.x = -Math.PI / 2 + Math.PI; // Invert orientation by adding PI (180 degrees)
         mesh.renderOrder = 10;
     
-        // Scale based on polygon size
+        // Scale based on polygon size - MAKE SMALLER
         const maxDim = Math.max(bounds.width, bounds.height);
         const sceneScale = this.bounds.scale;
-        const baseScale = Math.max(0.25, sceneScale / 2000); // Doubled scale factor
-        mesh.scale.set(maxDim * baseScale * 2, maxDim * baseScale * 2, 1); // Doubled both dimensions
+        const baseScale = Math.max(0.125, sceneScale / 4000); // Reduced scale factor (0.25 -> 0.125)
+        mesh.scale.set(maxDim * baseScale * 1, maxDim * baseScale * 1, 1); // Reduced both dimensions (2 -> 1)
         
         // Add to scene
         this.scene.add(mesh);
@@ -535,7 +540,7 @@ export default class SimplePolygonRenderer {
   /**
    * Create a circular texture from an existing texture
    */
-  private createCircularTexture(texture: THREE.Texture): THREE.Texture {
+  private createCircularTexture(texture: THREE.Texture, invert: boolean = false): THREE.Texture {
     // Check if texture.image exists
     if (!texture.image) {
       console.warn('Texture image is null, creating fallback texture');
@@ -609,9 +614,28 @@ export default class SimplePolygonRenderer {
         offsetX = (size - drawWidth) / 2;
       }
       
-      // Draw the image with proper aspect ratio
+      // Draw the image with proper aspect ratio and inversion if needed
       if (texture.image) {
-        ctx.drawImage(texture.image, offsetX, offsetY, drawWidth, drawHeight);
+        if (invert) {
+          // Save context state before transformations
+          ctx.save();
+          
+          // Translate to center of canvas
+          ctx.translate(size/2, size/2);
+          // Scale y by -1 to flip vertically
+          ctx.scale(1, -1);
+          // Translate back
+          ctx.translate(-size/2, -size/2);
+          
+          // Draw the image
+          ctx.drawImage(texture.image, offsetX, offsetY, drawWidth, drawHeight);
+          
+          // Restore context state
+          ctx.restore();
+        } else {
+          // Draw normally without inversion
+          ctx.drawImage(texture.image, offsetX, offsetY, drawWidth, drawHeight);
+        }
       }
       
       ctx.restore();
