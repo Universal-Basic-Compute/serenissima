@@ -1577,7 +1577,7 @@ export default function Home() {
         >
           Reload
         </button>
-        <span className="ml-2">Polygons: {polygons.length}</span>
+        <span className="ml-2">Polygons: {Object.keys(activeLandPolygons).length}</span>
       </div>
       
       {/* Minimal fallback removed */}
