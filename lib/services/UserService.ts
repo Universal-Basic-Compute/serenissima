@@ -20,6 +20,9 @@ interface CacheConfig {
   ttl: number; // Time-to-live in milliseconds
 }
 
+// Create and export a singleton instance
+export const userService = UserService.getInstance();
+
 // Cache entry with expiration
 interface CacheEntry<T> {
   data: T;
