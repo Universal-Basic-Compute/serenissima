@@ -60,25 +60,34 @@ export default function Home() {
   
   // Force exit loading state after a timeout
   useEffect(() => {
+    // Single timer to force exit from loading state
+    console.log('Setting up loading state management');
+    
     const loadingTimer = setTimeout(() => {
-      console.log('Forcing exit from loading state after timeout');
+      console.log('Primary timer: Forcing exit from loading state after timeout');
       setIsLoading(false);
+      
+      // Also ensure polygon store loading state is cleared
+      const currentLoading = usePolygonStore.getState().loading;
+      if (currentLoading) {
+        console.log('Clearing polygon store loading state');
+        usePolygonStore.setState({ loading: false });
+      }
     }, 8000); // 8 seconds timeout
     
-    // Add a shorter backup timer in case wallet initialization is causing issues
+    // Add a shorter backup timer for diagnostics only
     const backupTimer = setTimeout(() => {
-      if (isLoading) {
-        console.log('Backup timer: Still loading after 5s');
-        // Don't reference walletAdapter here, just proceed with loading
-        console.log('Proceeding with app initialization');
-      }
-    }, 5000); // 5 seconds backup check
+      console.log('Backup timer: Still loading after 5s');
+      console.log('Proceeding with app initialization');
+      
+      // Don't set loading state here, just log diagnostics
+    }, 5000);
     
     return () => {
       clearTimeout(loadingTimer);
       clearTimeout(backupTimer);
     };
-  }, [isLoading]); // Remove walletAdapter from dependencies
+  }, []); // No dependencies needed
   
   // State for wallet connection
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
@@ -568,18 +577,12 @@ export default function Home() {
   useEffect(() => {
     loadUsers();
     
-    // Force exit from loading state after a timeout
-    const loadingTimeout = setTimeout(() => {
-      // Get the current loading state from the store
-      const currentLoading = usePolygonStore.getState().loading;
-      if (currentLoading) {
-        console.log('Forcing exit from loading state after timeout');
-        usePolygonStore.setState({ loading: false });
-      }
-    }, 10000); // 10 second timeout
+    // No additional timeout here - the main loading timer handles both states
     
-    return () => clearTimeout(loadingTimeout);
-  }, [loadUsers]); // Remove loading from dependencies
+    return () => {
+      // Just cleanup, no need for additional timers
+    };
+  }, [loadUsers]);
   
   // Function to ensure all polygons remain visible
   const ensurePolygonsVisible = useCallback(() => {
