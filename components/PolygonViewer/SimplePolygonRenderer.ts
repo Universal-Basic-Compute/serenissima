@@ -23,7 +23,7 @@ export default class SimplePolygonRenderer {
   private sandTexture: THREE.Texture | null = null;
   private sharedMaterial: THREE.MeshStandardMaterial | null = null;
   private activeView: string = 'land'; // Default to land view
-  private coatOfArmsSprites: Record<string, THREE.Sprite> = {};
+  private coatOfArmsSprites: Record<string, THREE.Object3D> = {};
   private ownerCoatOfArmsMap: Record<string, string> = {};
   private users: Record<string, any> = {};
   
@@ -320,6 +320,7 @@ export default class SimplePolygonRenderer {
       // Position the sprite correctly - lower height to be closer to land
       // Invert the z-coordinate to ensure proper north-south orientation
       sprite.position.set(normalizedCoord.x, 0.2, -normalizedCoord.y);
+      sprite.rotation.x = Math.PI / 2; // Rotate 90 degrees around X axis to face down
       
       // Adjust scale based on scene size
       const sceneScale = this.bounds.scale;
