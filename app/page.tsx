@@ -625,6 +625,49 @@ export default function Home() {
     updatePolygonColors();
     updateCoatOfArms();
   }, [updatePolygonColors, updateCoatOfArms]);
+  
+  // Add caching for polygon renderer snapshot to prevent infinite loops
+  useEffect(() => {
+    // Add this to the global window object so PolygonViewer can access it
+    if (typeof window !== 'undefined') {
+      // Create cache storage
+      window._polygonSnapshotCache = {
+        result: null,
+        deps: null
+      };
+      
+      // Add a helper function to get cached snapshot
+      window.getCachedSnapshot = (getSnapshotFn, deps) => {
+        const currentDepsString = JSON.stringify(deps);
+        
+        // Use cached result if dependencies haven't changed
+        if (
+          window._polygonSnapshotCache.result && 
+          window._polygonSnapshotCache.deps && 
+          currentDepsString === window._polygonSnapshotCache.deps
+        ) {
+          return window._polygonSnapshotCache.result;
+        }
+        
+        // Calculate new result
+        const result = getSnapshotFn();
+        
+        // Cache the result and dependencies
+        window._polygonSnapshotCache.result = result;
+        window._polygonSnapshotCache.deps = currentDepsString;
+        
+        return result;
+      };
+    }
+    
+    return () => {
+      // Clean up on unmount
+      if (typeof window !== 'undefined') {
+        delete window._polygonSnapshotCache;
+        delete window.getCachedSnapshot;
+      }
+    };
+  }, []);
 
   // Handle compute transfer
   const handleTransferCompute = async (amount: number) => {
@@ -1527,6 +1570,15 @@ export default function Home() {
   const handleScriptLoad = () => {
     setIsGoogleLoaded(true);
   };
+  
+  // Add a function to help PolygonViewer with snapshot caching
+  const getSnapshotWithCache = useCallback((getSnapshotFn, dependencies) => {
+    if (typeof window !== 'undefined' && window.getCachedSnapshot) {
+      return window.getCachedSnapshot(getSnapshotFn, dependencies);
+    }
+    // Fallback to direct execution if cache mechanism isn't available
+    return getSnapshotFn();
+  }, []);
 
   // Create drawing manager options with client-side safety
   const [drawingManagerOptions, setDrawingManagerOptions] = useState({
@@ -2262,8 +2314,10 @@ export default function Home() {
           </div>
         </div>
         
-        {/* Dynamic import of PolygonViewer */}
-        <PolygonViewer />
+        {/* Dynamic import of PolygonViewer with snapshot caching prop */}
+        <PolygonViewer 
+          getSnapshotWithCache={getSnapshotWithCache}
+        />
       </>
       
       </div>
