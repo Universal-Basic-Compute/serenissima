@@ -27,7 +27,7 @@ export default class SimplePolygonRenderer {
   private coatOfArmsSprites: Record<string, THREE.Object3D> = {};
   private ownerCoatOfArmsMap: Record<string, string> = {};
   private users: Record<string, any> = {};
-  private sandColor: number = 0xfff0c0; // Default to lighter, more yellow sand color
+  private sandColor: number = 0xfff5d0; // Default to even lighter, more yellow sand color
   
   // Properties for hover and click detection
   private raycaster: THREE.Raycaster;
