@@ -27,7 +27,7 @@ export default class SimpleCamera {
     this.controls.minPolarAngle = 0.1; // Allow more downward angle to see water
     this.controls.maxPolarAngle = Math.PI / 2.5; // Limit to 72 degrees from vertical
     this.controls.minDistance = 2.5; // Allow zooming in 50% more (from 5 to 2.5)
-    this.controls.maxDistance = 75; // Allow zooming out 50% less (from 150 to 75)
+    this.controls.maxDistance = 52.5; // Allow zooming out 30% less than current value (75 * 0.7 = 52.5)
     this.controls.screenSpacePanning = true; // Enable screen space panning
     
     // Disable left mouse button for rotation (button 0)
