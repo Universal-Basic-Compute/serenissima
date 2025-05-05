@@ -56,7 +56,10 @@ export default class SimplePolygonRenderer {
       roughness: 0.8,
       metalness: 0.1,
       // Add slight bumpiness to the land
-      bumpScale: 0.05
+      bumpScale: 0.05,
+      // Remove visible edges by setting these properties
+      wireframe: false,
+      flatShading: false
     });
     
     // Process each polygon
@@ -83,13 +86,16 @@ export default class SimplePolygonRenderer {
         const extrudeSettings = {
           depth: 0.15,  // Reduce from 0.3 to 0.15 for thinner land
           bevelEnabled: true,
-          bevelSegments: 1,
+          bevelSegments: 2, // Increase from 1 to 2 for smoother edges
           bevelSize: 0.05, // Reduce from 0.1 to 0.05
           bevelThickness: 0.05 // Reduce from 0.1 to 0.05
         };
       
         // Use ExtrudeGeometry instead of ShapeGeometry for elevation
         const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+        
+        // Smooth the geometry to reduce visible edges
+        geometry.computeVertexNormals();
       
         // Create mesh
         const mesh = new THREE.Mesh(geometry, material.clone());
