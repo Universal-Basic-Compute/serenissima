@@ -1573,12 +1573,42 @@ export default function Home() {
   
   // Add a function to help PolygonViewer with snapshot caching
   const getSnapshotWithCache = useCallback((getSnapshotFn, dependencies) => {
+    // Check if window and getCachedSnapshot exist
     if (typeof window !== 'undefined' && window.getCachedSnapshot) {
       return window.getCachedSnapshot(getSnapshotFn, dependencies);
     }
-    // Fallback to direct execution if cache mechanism isn't available
-    return getSnapshotFn();
+    
+    // If the global helper isn't available, implement the caching logic directly
+    const depsString = JSON.stringify(dependencies);
+    
+    // Use a ref to store the cached values between renders
+    if (!getSnapshotWithCache.cache) {
+      getSnapshotWithCache.cache = {
+        result: null,
+        deps: null
+      };
+    }
+    
+    // Check if we can use the cached result
+    if (
+      getSnapshotWithCache.cache.result && 
+      getSnapshotWithCache.cache.deps === depsString
+    ) {
+      return getSnapshotWithCache.cache.result;
+    }
+    
+    // Calculate new result
+    const result = getSnapshotFn();
+    
+    // Cache the result and dependencies
+    getSnapshotWithCache.cache.result = result;
+    getSnapshotWithCache.cache.deps = depsString;
+    
+    return result;
   }, []);
+
+  // Add a static property to the function to store cache
+  getSnapshotWithCache.cache = null;
 
   // Create drawing manager options with client-side safety
   const [drawingManagerOptions, setDrawingManagerOptions] = useState({
@@ -2317,6 +2347,7 @@ export default function Home() {
         {/* Dynamic import of PolygonViewer with snapshot caching prop */}
         <PolygonViewer 
           getSnapshotWithCache={getSnapshotWithCache}
+          ref={polygonRendererRef}
         />
       </>
       
