@@ -17,6 +17,8 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
   const [polygons, setPolygons] = useState([]);
   const [loading, setLoading] = useState(true);
   const [users, setUsers] = useState<Record<string, any>>({});
+  const [isDraggingCoatOfArms, setIsDraggingCoatOfArms] = useState(false);
+  const [draggedCoatOfArmsId, setDraggedCoatOfArmsId] = useState<string | null>(null);
   
   // References to our scene components
   const sceneRef = useRef<THREE.Scene | null>(null);
