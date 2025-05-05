@@ -971,6 +971,8 @@ export default class SimplePolygonRenderer {
     const lat = position.x / this.bounds.scale * this.bounds.latCorrectionFactor + this.bounds.centerLat;
     const lng = -position.z / this.bounds.scale + this.bounds.centerLng;
     
+    console.log(`Converting position (${position.x.toFixed(2)}, ${position.y.toFixed(2)}, ${position.z.toFixed(2)}) to lat/lng (${lat.toFixed(6)}, ${lng.toFixed(6)})`);
+    
     return { lat, lng };
   }
 
@@ -992,6 +994,16 @@ export default class SimplePolygonRenderer {
     .then(data => {
       if (data.success) {
         console.log(`Successfully saved coat of arms center for polygon ${polygonId}`);
+        
+        // Update the local polygon data
+        const polygon = this.polygons.find(p => p.id === polygonId);
+        if (polygon) {
+          polygon.coatOfArmsCenter = center;
+          console.log(`Updated local polygon data with coatOfArmsCenter:`, polygon.coatOfArmsCenter);
+        }
+        
+        // Force a refresh of the coat of arms sprites
+        this.createCoatOfArmsSprites();
       } else {
         console.error(`Failed to save coat of arms center: ${data.error}`);
       }
