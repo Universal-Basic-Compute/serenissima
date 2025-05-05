@@ -55,8 +55,8 @@ export class WaterFacade {
   private landObjects: THREE.Object3D[] = [];
   private boundaryPoints: THREE.Vector3[] = [];
   private shorelineEffect: boolean = true;
-  private shorelineIntensity: number = 3.5; // Increased from 2.0
-  private shorelineDistance: number = 12.0; // Distance in units that shoreline effect extends
+  private shorelineIntensity: number = 4.5; // Increased from 3.5
+  private shorelineDistance: number = 15.0; // Distance in units that shoreline effect extends
 
   /**
    * Create a new WaterFacade
@@ -668,6 +668,13 @@ export class WaterFacade {
     
     // Update water shader with new boundary information
     this.updateShorelineEffect();
+    
+    // Force an update to apply changes immediately
+    if (this.water && this.water.material instanceof THREE.ShaderMaterial) {
+      this.water.material.needsUpdate = true;
+    }
+    
+    console.log(`Registered ${objects.length} land objects for shoreline effect`);
   }
 
   /**
@@ -685,7 +692,7 @@ export class WaterFacade {
           const positions = object.geometry.getAttribute('position');
           
           if (positions) {
-            // Sample boundary points (we don't need all vertices, just the outline)
+            // Sample more points along the boundary
             const boundaryIndices = this.findBoundaryIndices(object.geometry);
             
             // Convert local vertices to world space and add to boundary points
@@ -700,9 +707,11 @@ export class WaterFacade {
               // Transform to world space
               vertex.applyMatrix4(object.matrixWorld);
               
-              // Only add points at water level (y ≈ 0)
-              // Increased tolerance to catch more boundary points
-              if (Math.abs(vertex.y) < 0.2) {
+              // Increase tolerance to capture more boundary points
+              // We want points at or very near water level
+              if (Math.abs(vertex.y) < 0.5) {
+                // Force y to exactly 0 to ensure intersection with water
+                vertex.y = 0;
                 this.boundaryPoints.push(vertex);
               }
             }
@@ -721,24 +730,14 @@ export class WaterFacade {
         const p1 = this.boundaryPoints[i];
         const p2 = this.boundaryPoints[i + 1];
         
-        // Add three interpolated points between consecutive points instead of just one
-        interpolatedPoints.push(new THREE.Vector3(
-          p1.x + (p2.x - p1.x) * 0.25,
-          p1.y + (p2.y - p1.y) * 0.25,
-          p1.z + (p2.z - p1.z) * 0.25
-        ));
-        
-        interpolatedPoints.push(new THREE.Vector3(
-          p1.x + (p2.x - p1.x) * 0.5,
-          p1.y + (p2.y - p1.y) * 0.5,
-          p1.z + (p2.z - p1.z) * 0.5
-        ));
-        
-        interpolatedPoints.push(new THREE.Vector3(
-          p1.x + (p2.x - p1.x) * 0.75,
-          p1.y + (p2.y - p1.y) * 0.75,
-          p1.z + (p2.z - p1.z) * 0.75
-        ));
+        // Add five interpolated points between consecutive points for higher density
+        for (let t = 0.1; t < 1.0; t += 0.2) {
+          interpolatedPoints.push(new THREE.Vector3(
+            p1.x + (p2.x - p1.x) * t,
+            0, // Force y to exactly 0
+            p1.z + (p2.z - p1.z) * t
+          ));
+        }
       }
       
       // Add interpolated points to boundary points
@@ -857,13 +856,14 @@ float calculateShorelineFactor(vec3 position) {
   }
   
   // Calculate effect factor based on distance with a sharper falloff
-  float factor = 1.0 - smoothstep(0.0, shorelineDistance, minDist);
+  // Use a quadratic falloff for more natural appearance
+  float factor = 1.0 - smoothstep(0.0, shorelineDistance, minDist * minDist / shorelineDistance);
   
   // Add some noise to the shoreline factor for more natural appearance
-  float noise = sin(position.x * 0.3 + position.z * 0.5 + time * 0.2) * 0.1 + 0.1;
+  float noise = sin(position.x * 0.5 + position.z * 0.7 + time * 0.3) * 0.15 + 0.15;
   
   // Enhance the factor with noise but ensure it still fades to zero at the distance
-  return factor * (1.0 + noise * factor);
+  return pow(factor, 0.8) * (1.0 + noise * factor);
 }
 
 void main() {`
