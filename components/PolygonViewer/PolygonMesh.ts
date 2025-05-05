@@ -84,41 +84,61 @@ class PolygonMesh {
       
       const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
 
-      // Create sand texture material
+      // Create sand texture material with normal and roughness maps
       const sandTexture = this.textureLoader.load('/textures/sand.jpg', (texture) => {
         texture.wrapS = THREE.RepeatWrapping;
         texture.wrapT = THREE.RepeatWrapping;
         texture.repeat.set(5, 5);
       });
 
+      // Add normal map
+      const sandNormalMap = this.textureLoader.load('/textures/sand_normal.jpg', (texture) => {
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.set(5, 5);
+      });
+
+      // Add roughness map
+      const sandRoughnessMap = this.textureLoader.load('/textures/sand_roughness.jpg', (texture) => {
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.set(5, 5);
+      });
+
       // Create materials with brighter colors for better visibility
-      const topMaterial = new THREE.MeshBasicMaterial({
-        // Restore the texture
+      // Change from MeshBasicMaterial to MeshStandardMaterial to receive light
+      const topMaterial = new THREE.MeshStandardMaterial({
         map: sandTexture,
+        normalMap: sandNormalMap,
+        roughnessMap: sandRoughnessMap,
         color: this.determineLandColor(),
-        transparent: false, // Disable transparency for better visibility
-        depthWrite: true, // Enable depth writing
-        // Disable shadows
-        castShadow: false,
-        receiveShadow: false
+        transparent: false,
+        depthWrite: true,
+        roughness: 0.8,
+        metalness: 0.1,
+        // Enable shadows
+        castShadow: true,
+        receiveShadow: true
       });
       
-      const sideMaterial = new THREE.MeshBasicMaterial({
+      const sideMaterial = new THREE.MeshStandardMaterial({
         color: this.determineLandColor(),
-        transparent: false, // Disable transparency for better visibility
-        opacity: 1.0, // Full opacity
-        // Disable shadows
-        castShadow: false,
-        receiveShadow: false
+        transparent: false,
+        opacity: 1.0,
+        roughness: 0.9,
+        metalness: 0.0,
+        // Enable shadows
+        castShadow: true,
+        receiveShadow: true
       });
 
       // Create mesh with different materials for top and sides
       const materials = [topMaterial, sideMaterial];
       this.mesh = new THREE.Mesh(geometry, materials);
       
-      // Disable shadows on the mesh itself
-      this.mesh.castShadow = false;
-      this.mesh.receiveShadow = false;
+      // Enable shadows on the mesh itself
+      this.mesh.castShadow = true;
+      this.mesh.receiveShadow = true;
       
       // Position the mesh exactly at water level
       this.mesh.position.y = 0;

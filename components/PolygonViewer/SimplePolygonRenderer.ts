@@ -22,12 +22,15 @@ export default class SimplePolygonRenderer {
   private meshes: THREE.Mesh[] = [];
   private textureLoader: THREE.TextureLoader;
   private sandTexture: THREE.Texture | null = null;
+  private sandNormalMap: THREE.Texture | null = null;
+  private sandRoughnessMap: THREE.Texture | null = null;
   private sharedMaterial: THREE.MeshStandardMaterial | null = null;
   private activeView: string = 'land'; // Default to land view
   private coatOfArmsSprites: Record<string, THREE.Object3D> = {};
   private ownerCoatOfArmsMap: Record<string, string> = {};
   private users: Record<string, any> = {};
   private sandColor: number = 0xfff5d0; // Default to even lighter, more yellow sand color
+  private textureLoadAttempts: number = 0;
   
   // Properties for hover and click detection
   private raycaster: THREE.Raycaster;
@@ -100,22 +103,70 @@ export default class SimplePolygonRenderer {
         texture.repeat.set(1, 1);
         this.sandTexture = texture;
         
-        // Render polygons once texture is loaded
-        this.renderPolygons();
-        
-        // Fetch and apply land owners, then create coat of arms sprites
-        this.fetchAndApplyLandOwners();
+        // Check if all textures are loaded before rendering
+        this.checkTexturesAndRender();
       },
       undefined,
       (error) => {
-        console.error('Error loading texture:', error);
-        // Render polygons without texture if loading fails
-        this.renderPolygons();
-        
-        // Fetch and apply land owners, then create coat of arms sprites
-        this.fetchAndApplyLandOwners();
+        console.error('Error loading sand texture:', error);
+        this.textureLoadAttempts++;
+        // Check if all textures are loaded before rendering
+        this.checkTexturesAndRender();
       }
     );
+    
+    // Load normal map
+    this.textureLoader.load(
+      '/textures/sand_normal.jpg',
+      (texture) => {
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.set(1, 1);
+        this.sandNormalMap = texture;
+        
+        // Check if all textures are loaded before rendering
+        this.checkTexturesAndRender();
+      },
+      undefined,
+      (error) => {
+        console.error('Error loading sand normal map:', error);
+        this.textureLoadAttempts++;
+        // Continue without normal map if loading fails
+        this.checkTexturesAndRender();
+      }
+    );
+    
+    // Load roughness map
+    this.textureLoader.load(
+      '/textures/sand_roughness.jpg',
+      (texture) => {
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.set(1, 1);
+        this.sandRoughnessMap = texture;
+        
+        // Check if all textures are loaded before rendering
+        this.checkTexturesAndRender();
+      },
+      undefined,
+      (error) => {
+        console.error('Error loading sand roughness map:', error);
+        this.textureLoadAttempts++;
+        // Continue without roughness map if loading fails
+        this.checkTexturesAndRender();
+      }
+    );
+  }
+  
+  // Add a helper method to check if all textures are loaded and render if they are
+  private checkTexturesAndRender() {
+    // If we have the base texture or all texture loading attempts have failed, render the polygons
+    if (this.sandTexture || (this.textureLoadAttempts >= 3)) {
+      this.renderPolygons();
+      
+      // Fetch and apply land owners, then create coat of arms sprites
+      this.fetchAndApplyLandOwners();
+    }
   }
   
   private renderPolygons() {
@@ -123,13 +174,18 @@ export default class SimplePolygonRenderer {
     this.sharedMaterial = new THREE.MeshStandardMaterial({
       // Restore the texture
       map: this.sandTexture,
+      // Add normal and roughness maps
+      normalMap: this.sandNormalMap,
+      roughnessMap: this.sandRoughnessMap,
       color: this.sandColor, // Use our lighter yellow sand color directly
       side: THREE.DoubleSide,
       roughness: 0.8,
       metalness: 0.1,
       wireframe: false,
-      flatShading: false
-      // Removed invalid properties that cause WebGL warnings
+      flatShading: false,
+      // Enable shadows
+      castShadow: true,
+      receiveShadow: true
     });
     
     // Process each polygon
@@ -195,6 +251,10 @@ export default class SimplePolygonRenderer {
         mesh.position.y = 0; // Change from -5.005 to 0
     
         // No need for render order or polygon offset when there's clear physical separation
+        
+        // Enable shadows on the mesh
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
         
         // Add to scene
         this.scene.add(mesh);
@@ -956,10 +1016,20 @@ export default class SimplePolygonRenderer {
     });
     this.coatOfArmsSprites = {};
     
-    // Dispose texture
+    // Dispose textures
     if (this.sandTexture) {
       this.sandTexture.dispose();
       this.sandTexture = null;
+    }
+    
+    if (this.sandNormalMap) {
+      this.sandNormalMap.dispose();
+      this.sandNormalMap = null;
+    }
+    
+    if (this.sandRoughnessMap) {
+      this.sandRoughnessMap.dispose();
+      this.sandRoughnessMap = null;
     }
     
     // Dispose of shared material
