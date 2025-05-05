@@ -193,7 +193,7 @@ export default class SimplePolygonRenderer {
   /**
    * Create coat of arms sprites for all polygons with owners
    */
-  private createCoatOfArmsSprites() {
+  public createCoatOfArmsSprites() {
     console.log('Creating coat of arms sprites for land view');
     
     // Remove any existing sprites
@@ -204,19 +204,26 @@ export default class SimplePolygonRenderer {
     
     // Only create sprites if in land view
     if (this.activeView !== 'land') {
+      console.log('Not in land view, skipping coat of arms sprites');
       return;
     }
     
     // Get all users from UserService to ensure we have the latest data
-    const userService = getUserService();
-    const users = userService.getUsers();
+    let serviceUsers = {};
+    try {
+      const userService = getUserService();
+      serviceUsers = userService.getUsers();
+      console.log('Got users from UserService:', Object.keys(serviceUsers).length);
+    } catch (error) {
+      console.warn('Error getting users from UserService:', error);
+    }
     
     // Update our local ownerCoatOfArmsMap with the latest data
-    if (users && Object.keys(users).length > 0) {
-      Object.values(users).forEach(user => {
+    if (serviceUsers && Object.keys(serviceUsers).length > 0) {
+      Object.values(serviceUsers).forEach(user => {
         if (user.user_name && user.coat_of_arms_image) {
           this.ownerCoatOfArmsMap[user.user_name] = user.coat_of_arms_image;
-          console.log(`Found coat of arms for ${user.user_name}: ${user.coat_of_arms_image}`);
+          console.log(`Found coat of arms from service for ${user.user_name}: ${user.coat_of_arms_image}`);
         }
       });
     }
@@ -234,10 +241,38 @@ export default class SimplePolygonRenderer {
     // Log the available coat of arms data
     console.log('Available coat of arms:', Object.keys(this.ownerCoatOfArmsMap));
     
+    // Count polygons with owners and centroids
+    let polygonsWithOwners = 0;
+    let polygonsWithCentroids = 0;
+    let polygonsWithBoth = 0;
+    let polygonsWithMatchingOwners = 0;
+    
+    this.polygons.forEach(polygon => {
+      if (polygon.owner) {
+        polygonsWithOwners++;
+        if (polygon.centroid) {
+          polygonsWithBoth++;
+          if (this.ownerCoatOfArmsMap[polygon.owner]) {
+            polygonsWithMatchingOwners++;
+          }
+        }
+      }
+      if (polygon.centroid) {
+        polygonsWithCentroids++;
+      }
+    });
+    
+    console.log(`Polygons stats: ${this.polygons.length} total, ${polygonsWithOwners} with owners, ${polygonsWithCentroids} with centroids, ${polygonsWithBoth} with both, ${polygonsWithMatchingOwners} with matching owners`);
+    
     // Process each polygon with an owner and centroid
     let createdCount = 0;
     this.polygons.forEach(polygon => {
-      if (!polygon.owner || !polygon.centroid) {
+      if (!polygon.owner) {
+        return;
+      }
+      
+      if (!polygon.centroid) {
+        console.log(`Polygon ${polygon.id} has owner ${polygon.owner} but no centroid`);
         return;
       }
       
