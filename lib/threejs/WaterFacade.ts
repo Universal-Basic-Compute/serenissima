@@ -166,7 +166,7 @@ export class WaterFacade {
 
       // Position water
       water.rotation.x = -Math.PI / 2;
-      water.position.set(this.position.x, 0, this.position.z); // Change y position to 0
+      water.position.set(this.position.x, 0, this.position.z); // Ensure water is at exactly y=0
       
       // Set render order to ensure water renders before land
       water.renderOrder = 0;
@@ -878,20 +878,20 @@ void main() {`
 float shoreFactor = calculateShorelineFactor(vWorldPosition) * shorelineIntensity;
 if (shoreFactor > 0.01) {
   // Increase wave height near shore - significantly enhanced
-  info.r += shoreFactor * 0.6;
+  info.r += shoreFactor * 0.8;
   
   // Add much more pronounced foam near shore
-  info.g = mix(info.g, 1.0, shoreFactor * 0.95);
+  info.g = mix(info.g, 1.0, shoreFactor * 0.98);
   
   // Add wave distortion near shore
-  info.b = mix(info.b, 0.5, shoreFactor * 0.7);
+  info.b = mix(info.b, 0.5, shoreFactor * 0.8);
   
   // Add stronger color variation near shore for visual emphasis
-  reflectedColor = mix(reflectedColor, vec3(0.9, 0.95, 1.0), shoreFactor * 0.5);
+  reflectedColor = mix(reflectedColor, vec3(0.95, 0.98, 1.0), shoreFactor * 0.7);
   
   // Add additional foam patterns based on position and time
-  float foamPattern = sin(vWorldPosition.x * 2.0 + time * 0.5) * sin(vWorldPosition.z * 2.0 + time * 0.7) * 0.5 + 0.5;
-  info.g = mix(info.g, info.g * foamPattern, shoreFactor * 0.3);
+  float foamPattern = sin(vWorldPosition.x * 3.0 + time * 0.7) * sin(vWorldPosition.z * 3.0 + time * 0.9) * 0.5 + 0.5;
+  info.g = mix(info.g, info.g * foamPattern, shoreFactor * 0.4);
 }`
           );
           
