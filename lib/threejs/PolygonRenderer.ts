@@ -1,4 +1,4 @@
-// Add these properties to the PolygonRenderer class
+// Properties for coat of arms drag and drop functionality
 private isDraggingCoatOfArms: boolean = false;
 private draggedCoatOfArmsId: string | null = null;
 private draggedSprite: THREE.Sprite | null = null;
@@ -210,3 +210,6 @@ private saveCoatOfArmsPosition(polygonId: string, position: { lat: number, lng: 
       console.error('Error saving coat of arms position:', error);
     });
 }
+// Add import for getApiBaseUrl and eventBus at the top of the file
+import { getApiBaseUrl } from '../apiUtils';
+import { eventBus, EventTypes } from '../eventBus';
