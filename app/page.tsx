@@ -19,7 +19,6 @@ import PlayerProfile from '../components/UI/PlayerProfile';
 import TransferComputeMenu from '../components/UI/TransferComputeMenu';
 import WithdrawComputeMenu from '../components/UI/WithdrawComputeMenu';
 import BackgroundMusic from '../components/UI/BackgroundMusic';
-import LoadingScreen from '../components/UI/LoadingScreen';
 import SuccessAlert from '../components/UI/SuccessAlert';
 import { transferComputeTokens } from '../lib/tokenUtils';
 import { transferComputeInAirtable } from '../lib/airtableUtils';
@@ -55,58 +54,7 @@ const polygonOptions = {
 const libraries = ['drawing', 'geometry'];
 
 export default function Home() {
-  // State for loading screen
-  const [isLoading, setIsLoading] = useState(true);
-  
-  // Force exit loading state after a timeout - simplified and more robust
-  useEffect(() => {
-    console.log('Setting up loading state management');
-    
-    // Always ensure loading is true initially
-    setIsLoading(true);
-    usePolygonStore.setState({ loading: true });
-    
-    // Set a flag to track if we've already exited loading state
-    let hasExitedLoading = false;
-    
-    const exitLoading = () => {
-      if (!hasExitedLoading) {
-        console.log('Exiting loading state');
-        hasExitedLoading = true;
-        setIsLoading(false);
-        usePolygonStore.setState({ loading: false });
-      }
-    };
-    
-    // Single reliable timer with a longer timeout
-    const loadingTimer = setTimeout(() => {
-      console.log('Loading timer: Forcing exit from loading state');
-      exitLoading();
-    }, 8000); // Increased to 8 seconds to ensure content has time to load
-    
-    // Also listen for the 'DOMContentLoaded' event as a backup
-    const handleDOMContentLoaded = () => {
-      console.log('DOMContentLoaded event fired');
-      // Add a small delay to allow React to finish rendering
-      setTimeout(() => {
-        // Don't exit loading immediately, give more time
-        setTimeout(exitLoading, 2000);
-      }, 500);
-    };
-    
-    // Add event listener for DOMContentLoaded if document is not already loaded
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', handleDOMContentLoaded);
-    } else {
-      // Document already loaded, schedule exit with a longer delay
-      setTimeout(exitLoading, 2000);
-    }
-    
-    return () => {
-      clearTimeout(loadingTimer);
-      document.removeEventListener('DOMContentLoaded', handleDOMContentLoaded);
-    };
-  }, []);
+  // No loading state needed
   
   // State for wallet connection
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
@@ -1661,59 +1609,15 @@ export default function Home() {
         >
           Reload
         </button>
-        <span>Loading: {isLoading ? 'Yes' : 'No'}</span>
-        <span className="ml-2">Store Loading: {usePolygonStore.getState().loading ? 'Yes' : 'No'}</span>
         <span className="ml-2">Polygons: {polygons.length}</span>
       </div>
       
-      {/* Absolute minimal fallback that will always show */}
-      <div className="fixed inset-0 z-[9999] bg-amber-50 flex items-center justify-center" 
-           style={{display: isLoading ? 'flex' : 'none'}}>
-        <div className="text-center">
-          <h2 className="text-2xl font-serif text-amber-800 mb-4">Loading La Serenissima</h2>
-          <div className="w-24 h-24 border-t-4 border-amber-600 rounded-full animate-spin mb-4 mx-auto"></div>
-          <p className="text-amber-600 mb-6">The Council of Ten is preparing the map...</p>
-          <button 
-            onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors"
-          >
-            Reload Page
-          </button>
-        </div>
-      </div>
+      {/* Minimal fallback removed */}
       
       <div className="relative w-screen h-screen">
       
-      {/* Absolute minimal fallback that will always show */}
-      <div className="fixed inset-0 z-[9999] bg-amber-50 flex items-center justify-center" 
-           style={{display: isLoading ? 'flex' : 'none'}}>
-        <div className="text-center">
-          <h2 className="text-2xl font-serif text-amber-800 mb-4">Loading La Serenissima</h2>
-          <div className="w-24 h-24 border-t-4 border-amber-600 rounded-full animate-spin mb-4 mx-auto"></div>
-          <p className="text-amber-600 mb-6">The Council of Ten is preparing the map...</p>
-          <button 
-            onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors"
-          >
-            Reload Page
-          </button>
-        </div>
-      </div>
       
-      {/* Loading Screen */}
-      {(isLoading || usePolygonStore.getState().loading) && (
-        <LoadingScreen 
-          onLoadingComplete={() => {
-            console.log('Loading screen complete callback triggered');
-            // Add a small delay before setting loading to false
-            setTimeout(() => {
-              setIsLoading(false);
-              usePolygonStore.setState({ loading: false });
-            }, 500);
-          }}
-          duration={7000} // Increased from 5000 to 7000 (7 seconds)
-        />
-      )}
+      {/* Loading screen removed */}
     
       {/* Transfer Compute Menu - moved to top level */}
       {transferMenuOpen && (
@@ -2377,26 +2281,22 @@ export default function Home() {
       )}
       
       {/* Always show the 3D Polygon Viewer regardless of wallet connection status */}
-      {!isLoading ? (
-        <>
-          {/* Fallback component that will show if PolygonViewer fails */}
-          <div className="absolute inset-0 z-10 pointer-events-none">
-            <div className="w-full h-full flex flex-col items-center justify-center bg-amber-50 bg-opacity-0">
-              <button 
-                onClick={() => window.location.reload()}
-                className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors pointer-events-auto opacity-0 hover:opacity-100 transition-opacity"
-              >
-                Reload Page
-              </button>
-            </div>
+      <>
+        {/* Fallback component that will show if PolygonViewer fails */}
+        <div className="absolute inset-0 z-10 pointer-events-none">
+          <div className="w-full h-full flex flex-col items-center justify-center bg-amber-50 bg-opacity-0">
+            <button 
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors pointer-events-auto opacity-0 hover:opacity-100 transition-opacity"
+            >
+              Reload Page
+            </button>
           </div>
-          
-          {/* Dynamic import of PolygonViewer */}
-          <PolygonViewer />
-        </>
-      ) : (
-        <FallbackComponent />
-      )}
+        </div>
+        
+        {/* Dynamic import of PolygonViewer */}
+        <PolygonViewer />
+      </>
       
       </div>
     </>

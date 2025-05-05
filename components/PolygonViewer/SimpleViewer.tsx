@@ -159,13 +159,7 @@ export default function SimpleViewer({ qualityMode = 'high' }) {
     };
   }, []);
   
-  if (loading) {
-    return (
-      <div className="w-full h-full flex items-center justify-center">
-        <div className="text-lg">Loading Venice...</div>
-      </div>
-    );
-  }
+  // No loading check needed
   
   return (
     <div className="w-screen h-screen">

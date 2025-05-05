@@ -63,7 +63,7 @@ interface PolygonState {
 const usePolygonStore = create<PolygonState>((set, get) => ({
   // Data state
   polygons: [],
-  loading: false, // Changed from true to false
+  loading: false, // Always false to prevent loading screen
   error: null,
   activeView: 'land', // Default to land view
   highQuality: true, // Changed to true to enable high quality mode by default
@@ -90,7 +90,7 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
   
   // Data actions
   setPolygons: (polygons) => set({ polygons }),
-  setLoading: (loading) => set({ loading }),
+  setLoading: () => set({ loading: false }), // Always set to false
   setError: (error) => set({ error }),
   setActiveView: (view: ViewMode) => {
     // Allow switching to buildings, land, or markets view
@@ -128,8 +128,8 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
     try {
       console.log('Starting to load polygons...');
       
-      // Don't set loading state
-      // set({ loading: true, error: null });
+      // Ensure loading is false
+      set({ loading: false, error: null });
       
       // First try to load from cache to avoid network requests entirely
       const cacheKey = 'polygons_cache';
