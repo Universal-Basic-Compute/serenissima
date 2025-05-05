@@ -62,11 +62,22 @@ export default function Home() {
   useEffect(() => {
     console.log('Setting up loading state management');
     
+    // Set a flag to track if we've already exited loading state
+    let hasExitedLoading = false;
+    
+    const exitLoading = () => {
+      if (!hasExitedLoading) {
+        console.log('Exiting loading state');
+        hasExitedLoading = true;
+        setIsLoading(false);
+        usePolygonStore.setState({ loading: false });
+      }
+    };
+    
     // Primary timer - longest duration
     const primaryTimer = setTimeout(() => {
       console.log('Primary timer: Forcing exit from loading state');
-      setIsLoading(false);
-      usePolygonStore.setState({ loading: false });
+      exitLoading();
     }, 8000);
     
     // Secondary timer - medium duration
@@ -74,8 +85,7 @@ export default function Home() {
       console.log('Secondary timer: Checking loading state');
       if (isLoading) {
         console.log('Still loading after secondary timer, forcing exit');
-        setIsLoading(false);
-        usePolygonStore.setState({ loading: false });
+        exitLoading();
       }
     }, 5000);
     
@@ -84,8 +94,7 @@ export default function Home() {
       console.log('Emergency timer: Final loading state check');
       if (isLoading || usePolygonStore.getState().loading) {
         console.log('EMERGENCY: Still loading after all timers, forcing exit');
-        setIsLoading(false);
-        usePolygonStore.setState({ loading: false });
+        exitLoading();
       }
     }, 3000);
     
@@ -504,6 +513,11 @@ export default function Home() {
       
       // Create a map of user colors
       const colorMap: Record<string, string> = {};
+      
+      // Always add ConsiglioDeiDieci first with the correct color
+      colorMap['ConsiglioDeiDieci'] = '#8B0000'; // Dark red
+      console.log('Added ConsiglioDeiDieci with color #8B0000');
+      
       Object.values(users).forEach(user => {
         if (user.user_name) {
           if (user.color) {
@@ -516,12 +530,6 @@ export default function Home() {
           }
         }
       });
-      
-      // Always add ConsiglioDeiDieci if not present
-      if (!colorMap['ConsiglioDeiDieci']) {
-        colorMap['ConsiglioDeiDieci'] = '#8B0000'; // Dark red
-        console.log('Added missing ConsiglioDeiDieci with default color #8B0000');
-      }
       
       // Update colors in the renderer
       if (Object.keys(colorMap).length > 0) {
@@ -1626,6 +1634,20 @@ export default function Home() {
     }
   }, [isGoogleLoaded]);
 
+  // Add a simple fallback component that will always render
+  const FallbackComponent = () => (
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-amber-50">
+      <h2 className="text-2xl font-serif text-amber-800 mb-4">Loading La Serenissima</h2>
+      <p className="text-amber-600 mb-6">The Council of Ten is preparing the map...</p>
+      <button 
+        onClick={() => window.location.reload()}
+        className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors"
+      >
+        Reload Page
+      </button>
+    </div>
+  );
+
   return (
     <>
       {/* Debug overlay - will show even if other components fail */}
@@ -2328,7 +2350,7 @@ export default function Home() {
       )}
       
       {/* Always show the 3D Polygon Viewer regardless of wallet connection status */}
-      {!isLoading && (
+      {!isLoading ? (
         <>
           {/* Fallback component that will show if PolygonViewer fails */}
           <div className="absolute inset-0 z-10 pointer-events-none">
@@ -2345,6 +2367,8 @@ export default function Home() {
           {/* Dynamic import of PolygonViewer */}
           <PolygonViewer />
         </>
+      ) : (
+        <FallbackComponent />
       )}
       
       </div>

@@ -18,20 +18,39 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
   // Force completion after the specified duration
   useEffect(() => {
     console.log('LoadingScreen: Setting up forced completion timer');
+    
+    // Set a flag to track if we've already completed
+    let hasCompleted = false;
+    
+    const completeLoading = () => {
+      if (!hasCompleted) {
+        console.log('LoadingScreen: Completing loading');
+        hasCompleted = true;
+        onLoadingComplete();
+      }
+    };
+    
     const timer = setTimeout(() => {
       console.log('LoadingScreen: Forcing completion after timeout');
-      onLoadingComplete();
+      completeLoading();
     }, duration);
     
     // Add a shorter backup timer as a failsafe
     const backupTimer = setTimeout(() => {
       console.log('LoadingScreen: Backup timer triggered');
-      onLoadingComplete();
+      completeLoading();
     }, Math.min(duration * 0.7, 3500)); // 70% of duration or max 3.5 seconds
+    
+    // Add an emergency timer as a final failsafe
+    const emergencyTimer = setTimeout(() => {
+      console.log('LoadingScreen: Emergency timer triggered');
+      completeLoading();
+    }, 2000); // 2 seconds absolute maximum
     
     return () => {
       clearTimeout(timer);
       clearTimeout(backupTimer);
+      clearTimeout(emergencyTimer);
     };
   }, [duration, onLoadingComplete]);
 
