@@ -87,7 +87,7 @@ export default function Home() {
       clearTimeout(loadingTimer);
       clearTimeout(backupTimer);
     };
-  }, []); // No dependencies needed
+  }, [setIsLoading]); // Add setIsLoading as a dependency
   
   // State for wallet connection
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
