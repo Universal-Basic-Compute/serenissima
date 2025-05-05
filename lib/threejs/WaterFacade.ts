@@ -693,15 +693,47 @@ export class WaterFacade {
       }
       
       if (this.water.material) {
+        // Dispose of textures in the material
+        if (this.water.material instanceof THREE.ShaderMaterial) {
+          const uniforms = this.water.material.uniforms;
+          if (uniforms) {
+            // Dispose of all textures in uniforms
+            Object.keys(uniforms).forEach(key => {
+              const uniform = uniforms[key];
+              if (uniform && uniform.value instanceof THREE.Texture) {
+                uniform.value.dispose();
+              }
+            });
+          }
+        } else if (this.water.material instanceof THREE.MeshBasicMaterial) {
+          // For fallback mode with basic material
+          if (this.water.material.map) {
+            this.water.material.map.dispose();
+          }
+        }
+        
+        // Dispose of the material itself
         if (Array.isArray(this.water.material)) {
           this.water.material.forEach(material => material.dispose());
         } else {
           this.water.material.dispose();
         }
       }
+      
+      // Dispose of any additional resources specific to Water
+      if (this.water.userData && this.water.userData.waterUniforms) {
+        const waterUniforms = this.water.userData.waterUniforms;
+        Object.keys(waterUniforms).forEach(key => {
+          const uniform = waterUniforms[key];
+          if (uniform && uniform.value instanceof THREE.Texture) {
+            uniform.value.dispose();
+          }
+        });
+      }
     }
     
-    // Clear references
+    // Clear references to help garbage collection
     this.water = null;
+    this.clock = null;
   }
 }
