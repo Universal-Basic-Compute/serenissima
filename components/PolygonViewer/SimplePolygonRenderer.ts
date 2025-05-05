@@ -97,9 +97,9 @@ export default class SimplePolygonRenderer {
         // Position mesh - adjust rotation to make top surface flat
         mesh.rotation.x = -Math.PI / 2;
     
-        // IMPORTANT: Position the land at y=0, which is 5 units above the water (at y=-5)
-        // This ensures a clear physical separation between water and land
-        mesh.position.y = 0;
+        // MODIFIED: Position the land just slightly above the water level
+        // Water is at y=-5, so we'll position land at y=-4.9 (just 0.1 units above)
+        mesh.position.y = -4.9;
     
         // No need for render order or polygon offset when there's clear physical separation
         
