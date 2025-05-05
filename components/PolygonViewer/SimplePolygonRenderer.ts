@@ -55,8 +55,8 @@ export default class SimplePolygonRenderer {
       side: THREE.DoubleSide,
       roughness: 0.8,
       metalness: 0.1,
-      // Add slight bumpiness to the land
-      bumpScale: 0.05,
+      // Reduce bumpiness for thinner land
+      bumpScale: 0.02,
       // Remove visible edges by setting these properties
       wireframe: false,
       flatShading: false
@@ -84,11 +84,11 @@ export default class SimplePolygonRenderer {
         
         // Create geometry with minimal extrusion for elevation
         const extrudeSettings = {
-          depth: 0.15,  // Reduce from 0.3 to 0.15 for thinner land
+          depth: 0.05,  // Reduce from 0.15 to 0.05 for much thinner land
           bevelEnabled: true,
           bevelSegments: 2, // Increase from 1 to 2 for smoother edges
-          bevelSize: 0.05, // Reduce from 0.1 to 0.05
-          bevelThickness: 0.05 // Reduce from 0.1 to 0.05
+          bevelSize: 0.02, // Reduce from 0.05 to 0.02 for smaller bevels
+          bevelThickness: 0.02 // Reduce from 0.05 to 0.02 for thinner bevels
         };
       
         // Use ExtrudeGeometry instead of ShapeGeometry for elevation
@@ -108,7 +108,7 @@ export default class SimplePolygonRenderer {
     
         // Position the land just slightly above the water level
         // Use a very small offset to keep it visually close but prevent z-fighting
-        mesh.position.y = -4.99; // Change from -4.9 to -4.99
+        mesh.position.y = -5.05; // Adjust from -4.99 to -5.05 to account for thinner geometry
     
         // No need for render order or polygon offset when there's clear physical separation
         
