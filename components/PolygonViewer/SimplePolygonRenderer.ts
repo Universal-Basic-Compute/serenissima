@@ -248,11 +248,14 @@ export default class SimplePolygonRenderer {
     let polygonsWithMatchingOwners = 0;
     
     this.polygons.forEach(polygon => {
-      if (polygon.owner) {
+      // Check for both 'owner' and 'User' properties
+      const ownerValue = polygon.owner || polygon.User;
+    
+      if (ownerValue) {
         polygonsWithOwners++;
         if (polygon.centroid) {
           polygonsWithBoth++;
-          if (this.ownerCoatOfArmsMap[polygon.owner]) {
+          if (this.ownerCoatOfArmsMap[ownerValue]) {
             polygonsWithMatchingOwners++;
           }
         }
@@ -267,21 +270,24 @@ export default class SimplePolygonRenderer {
     // Process each polygon with an owner and centroid
     let createdCount = 0;
     this.polygons.forEach(polygon => {
-      if (!polygon.owner) {
+      // Check for both 'owner' and 'User' properties
+      const ownerValue = polygon.owner || polygon.User;
+    
+      if (!ownerValue) {
         return;
       }
-      
+    
       if (!polygon.centroid) {
-        console.log(`Polygon ${polygon.id} has owner ${polygon.owner} but no centroid`);
+        console.log(`Polygon ${polygon.id} has owner ${ownerValue} but no centroid`);
         return;
       }
-      
-      console.log(`Processing polygon ${polygon.id} with owner ${polygon.owner}`);
-      
+    
+      console.log(`Processing polygon ${polygon.id} with owner ${ownerValue}`);
+    
       // Get the coat of arms URL for the owner
-      const coatOfArmsUrl = this.ownerCoatOfArmsMap[polygon.owner];
+      const coatOfArmsUrl = this.ownerCoatOfArmsMap[ownerValue];
       if (!coatOfArmsUrl) {
-        console.log(`No coat of arms found for owner ${polygon.owner}`);
+        console.log(`No coat of arms found for owner ${ownerValue}`);
         return;
       }
       
