@@ -17,16 +17,29 @@ export async function GET() {
     }).all();
     
     // Transform records to our format
-    const roads = records.map(record => ({
-      id: record.id,
-      name: record.get('Name') as string,
-      land_id: record.get('Land') as string,
-      owner: record.get('Owner') as string,
-      points: record.get('Position') as string,
-      curvature: record.get('Curvature') as number,
-      created_at: record.get('CreatedAt') as string,
-      status: record.get('Status') as string
-    }));
+    const roads = records.map(record => {
+      // Parse the Position field which contains the road points
+      let points = record.get('Position');
+      if (typeof points === 'string') {
+        try {
+          points = JSON.parse(points);
+        } catch (e) {
+          console.error('Error parsing road points:', e);
+          points = [];
+        }
+      }
+      
+      return {
+        id: record.id,
+        name: record.get('Name') as string,
+        land_id: record.get('Land') as string,
+        owner: record.get('Owner') as string,
+        points: points,
+        curvature: record.get('Curvature') as number,
+        created_at: record.get('CreatedAt') as string,
+        status: record.get('Status') as string
+      };
+    });
     
     return NextResponse.json({
       success: true,

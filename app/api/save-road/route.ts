@@ -28,13 +28,19 @@ export async function POST(request: Request) {
       userId = 'ConsiglioDeiDieci'; // Default to Council of Ten if no user specified
     }
     
+    // Stringify the points array if it's not already a string
+    let pointsData = data.points;
+    if (typeof pointsData !== 'string') {
+      pointsData = JSON.stringify(pointsData);
+    }
+    
     // Create record in Airtable
     const record = await buildingsTable.create({
       Type: 'road',
       Name: `Road ${data.id.split('-').pop()}`, // Generate a name based on the ID
       Land: data.land_id || '',
       Owner: userId,
-      Position: data.points, // Store the road points as a string
+      Position: pointsData, // Store the road points as a string
       Curvature: data.curvature || 0.5,
       CreatedAt: data.created_at || new Date().toISOString(),
       Status: 'active'

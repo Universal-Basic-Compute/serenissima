@@ -232,4 +232,99 @@ export class RoadService {
       return this.roads; // Return cached roads on error
     }
   }
+  
+  /**
+   * Save a road to Airtable
+   * @param roadId Road ID
+   * @param landId Optional associated land ID
+   * @param walletAddress Optional creator wallet address
+   * @returns Promise resolving to the saved road data
+   */
+  public async saveRoadToAirtable(roadId: string, landId?: string, walletAddress?: string): Promise<any> {
+    try {
+      const road = this.getRoadById(roadId);
+      if (!road) {
+        throw new Error(`Road with ID ${roadId} not found`);
+      }
+      
+      const response = await fetch('/api/save-road', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          id: road.id,
+          type: 'road',
+          points: road.points,
+          curvature: road.curvature,
+          land_id: landId,
+          user_id: walletAddress,
+          created_at: road.createdAt
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Server responded with ${response.status}: ${response.statusText}`);
+      }
+      
+      const result = await response.json();
+      console.log(`RoadService: Saved road ${roadId} to Airtable`);
+      
+      return result;
+    } catch (error) {
+      console.error('Failed to save road to Airtable:', error);
+      throw error;
+    }
+  }
+  
+  /**
+   * Load roads from Airtable
+   * @returns Promise resolving to array of road data
+   */
+  public async loadRoadsFromAirtable(): Promise<RoadData[]> {
+    try {
+      const response = await fetch('/api/get-roads');
+      
+      if (!response.ok) {
+        throw new Error(`Server responded with ${response.status}: ${response.statusText}`);
+      }
+      
+      const result = await response.json();
+      
+      if (result.success && Array.isArray(result.roads)) {
+        // Transform the Airtable format to our RoadData format
+        const transformedRoads: RoadData[] = result.roads.map((road: any) => {
+          // Parse the points string if needed
+          let points = road.points;
+          if (typeof points === 'string') {
+            try {
+              points = JSON.parse(points);
+            } catch (e) {
+              console.error('Failed to parse road points:', e);
+              points = [];
+            }
+          }
+          
+          return {
+            id: road.id,
+            points: points,
+            curvature: road.curvature || 0.5,
+            createdBy: road.owner,
+            landId: road.land_id,
+            createdAt: road.created_at
+          };
+        });
+        
+        this.roads = transformedRoads;
+        this.saveRoadsToStorage(); // Cache the data locally
+        console.log(`RoadService: Loaded ${this.roads.length} roads from Airtable`);
+        return this.roads;
+      } else {
+        throw new Error('Invalid response format from Airtable');
+      }
+    } catch (error) {
+      console.error('Failed to load roads from Airtable:', error);
+      return this.roads; // Return cached roads on error
+    }
+  }
 }

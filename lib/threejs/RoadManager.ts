@@ -1431,6 +1431,7 @@ export class RoadManager {
     if (this.isDisposed) return Promise.reject(new Error('RoadManager is disposed'));
     
     try {
+      log.info('RoadManager: Loading roads from Airtable');
       return this.roadService.loadRoadsFromAirtable()
         .then(roadDataArray => {
           try {

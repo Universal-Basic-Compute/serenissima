@@ -322,21 +322,21 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
               // Save the road using the service
               try {
                 log.info(`RoadCreator: Attempting to save road with ${points.length} points and curvature ${curvature}`);
-                
+                  
                 // Show loading state
                 setErrorMessage('Saving road...');
-                
+                  
                 // Create a timeout to handle potential hanging requests
                 const timeoutId = setTimeout(() => {
                   log.warn('RoadCreator: Road saving operation is taking too long');
                   setErrorMessage('Road saving is taking longer than expected...');
                 }, 3000);
-                
+                  
                 // For complex roads with many points, simplify before saving if in performance mode
                 const pointsToSave = performanceMode && points.length > 20 
-                  ? simplifyRoadPoints(points, 0.1) // Simplify with tolerance based on complexity
+                  ? points.filter((_, i) => i % 2 === 0) // Simple filtering for performance mode
                   : points;
-                
+                  
                 const savedRoad = roadService.saveRoad(
                   pointsToSave, 
                   curvature
