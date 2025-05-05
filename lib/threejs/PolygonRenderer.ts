@@ -153,15 +153,18 @@ private updateMousePosition(clientX: number, clientY: number): void {
  * @returns The corresponding lat/lng coordinates
  */
 private convertPositionToLatLng(position: THREE.Vector3): { lat: number, lng: number } {
-  // This conversion depends on how your coordinate system is set up
-  // For this implementation, we'll use a simple mapping where:
-  // - x corresponds to longitude
-  // - z corresponds to latitude
-  // You may need to adjust this based on your specific coordinate system
-  return {
-    lat: position.z,
-    lng: position.x
-  };
+  // Get the bounds to determine the scale
+  const bounds = this.bounds;
+  
+  // Calculate the scale factors
+  const latScale = (bounds.maxLat - bounds.minLat) / (bounds.maxZ - bounds.minZ);
+  const lngScale = (bounds.maxLng - bounds.minLng) / (bounds.maxX - bounds.minX);
+  
+  // Calculate the lat/lng
+  const lat = bounds.minLat + (position.z - bounds.minZ) * latScale;
+  const lng = bounds.minLng + (position.x - bounds.minX) * lngScale;
+  
+  return { lat, lng };
 }
 
 /**
@@ -202,6 +205,9 @@ private saveCoatOfArmsPosition(polygonId: string, position: { lat: number, lng: 
           polygonId,
           updates: { coatOfArmsCenter: position }
         });
+        
+        // Force an update of the coat of arms sprites to reflect the new position
+        this.updateCoatOfArmsSprites();
       } else {
         console.error('Failed to update coat of arms position:', data.error);
       }
@@ -210,6 +216,82 @@ private saveCoatOfArmsPosition(polygonId: string, position: { lat: number, lng: 
       console.error('Error saving coat of arms position:', error);
     });
 }
+
+/**
+ * Convert lat/lng to 3D position
+ * @param lat Latitude
+ * @param lng Longitude
+ * @returns 3D position
+ */
+private convertLatLngToPosition(lat: number, lng: number): THREE.Vector3 {
+  // Get the bounds to determine the scale
+  const bounds = this.bounds;
+  
+  // Calculate the scale factors
+  const zScale = (bounds.maxZ - bounds.minZ) / (bounds.maxLat - bounds.minLat);
+  const xScale = (bounds.maxX - bounds.minX) / (bounds.maxLng - bounds.minLng);
+  
+  // Calculate the position
+  const z = bounds.minZ + (lat - bounds.minLat) * zScale;
+  const x = bounds.minX + (lng - bounds.minLng) * xScale;
+  
+  // Use a fixed height or calculate based on your terrain
+  const y = 0; // You might want to adjust this
+  
+  return new THREE.Vector3(x, y, z);
+}
 // Add import for getApiBaseUrl and eventBus at the top of the file
 import { getApiBaseUrl } from '../apiUtils';
 import { eventBus, EventTypes } from '../eventBus';
+
+/**
+ * Update coat of arms sprites based on current data
+ */
+public updateCoatOfArmsSprites(): void {
+  // Clear the sprite map
+  this.coatOfArmsSprites.clear();
+  
+  // Remove existing coat of arms sprites
+  this.scene.traverse((object) => {
+    if (object instanceof THREE.Sprite && object.userData && object.userData.isCoatOfArms) {
+      this.scene.remove(object);
+    }
+  });
+  
+  // Create new coat of arms sprites
+  this.polygons.forEach(polygon => {
+    if (polygon.owner && this.ownerCoatOfArmsMap[polygon.owner]) {
+      // Determine the position - use coatOfArmsCenter if available, otherwise use centroid
+      const position = polygon.coatOfArmsCenter || polygon.centroid;
+      if (!position) return;
+      
+      console.log(`Creating coat of arms for polygon ${polygon.id} at position:`, position);
+      
+      // Create the sprite
+      const texture = this.loadCoatOfArmsTexture(this.ownerCoatOfArmsMap[polygon.owner]);
+      const material = new THREE.SpriteMaterial({ map: texture, transparent: true });
+      const sprite = new THREE.Sprite(material);
+      
+      // Set position
+      const worldPosition = this.convertLatLngToPosition(position.lat, position.lng);
+      sprite.position.copy(worldPosition);
+      sprite.position.y += 5; // Adjust height above the polygon
+      
+      // Set scale
+      sprite.scale.set(10, 10, 1);
+      
+      // Add metadata
+      sprite.userData = {
+        isCoatOfArms: true,
+        polygonId: polygon.id,
+        owner: polygon.owner
+      };
+      
+      // Add to scene
+      this.scene.add(sprite);
+      
+      // Store in map
+      this.coatOfArmsSprites.set(polygon.id, sprite);
+    }
+  });
+}
