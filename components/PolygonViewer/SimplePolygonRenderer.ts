@@ -361,7 +361,7 @@ export default class SimplePolygonRenderer {
     
     // Create a plane geometry for the texture
     const sceneScale = this.bounds.scale;
-    const spriteScale = Math.max(1, sceneScale / 500); // Reduced scale (2 -> 1) and increased divisor (250 -> 500)
+    const spriteScale = Math.max(0.5, sceneScale / 1000); // Reduced by half from Math.max(1, sceneScale / 500)
     const planeGeometry = new THREE.PlaneGeometry(spriteScale, spriteScale);
     const planeMaterial = new THREE.MeshBasicMaterial({
       map: null, // Will be set when texture loads
@@ -411,7 +411,7 @@ export default class SimplePolygonRenderer {
           if (texture.image && texture.image.width && texture.image.height) {
             const aspectRatio = texture.image.width / texture.image.height;
             const sceneScale = this.bounds.scale;
-            const baseScale = Math.max(0.25350, sceneScale / 1975); // Increased by another 20%
+            const baseScale = Math.max(0.12675, sceneScale / 3950); // Reduced by half from 0.25350 and 1975
             plane.scale.set(baseScale * aspectRatio, baseScale, 1); // Removed the multiplier (2 -> 1)
           }
         }
