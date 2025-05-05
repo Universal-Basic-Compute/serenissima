@@ -1221,6 +1221,33 @@ export default function PolygonViewer() {
     }
   }, [activeView, forceVisualUpdate]);
   
+  // Add this effect to ensure coat of arms are updated when view mode changes
+  useEffect(() => {
+    if (activeView === 'land' && polygonRendererRef.current) {
+      console.log('Land view active, updating coat of arms sprites');
+      
+      // Schedule multiple updates to ensure everything is visible
+      // First immediate update
+      polygonRendererRef.current.updateCoatOfArmsSprites();
+      
+      // Then a delayed update to ensure everything is loaded
+      setTimeout(() => {
+        if (polygonRendererRef.current) {
+          console.log('Performing delayed update of coat of arms sprites');
+          polygonRendererRef.current.updateCoatOfArmsSprites();
+        }
+      }, 500);
+      
+      // And another update after a longer delay as a final check
+      setTimeout(() => {
+        if (polygonRendererRef.current) {
+          console.log('Performing final update of coat of arms sprites');
+          polygonRendererRef.current.updateCoatOfArmsSprites();
+        }
+      }, 2000);
+    }
+  }, [activeView]);
+  
   // Effect to show/hide the building menu based on activeView
   useEffect(() => {
     // Show building menu when in buildings view and a polygon is selected

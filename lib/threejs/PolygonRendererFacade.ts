@@ -171,7 +171,7 @@ export class PolygonRendererFacade {
   public createColoredCircle(
     position: THREE.Vector3,
     color: string,
-    size: number = 0.5
+    size: number = 0.8
   ): THREE.Mesh {
     if (this.isDisposed) {
       throw new Error('PolygonRendererFacade has been disposed');
@@ -182,7 +182,7 @@ export class PolygonRendererFacade {
     const circleMaterial = new THREE.MeshBasicMaterial({
       color: color,
       transparent: true,
-      opacity: 0.8,
+      opacity: 0.9,
       side: THREE.DoubleSide,
       depthWrite: false
     });
@@ -190,9 +190,9 @@ export class PolygonRendererFacade {
     // Create mesh and position it
     const circleMesh = new THREE.Mesh(circleGeometry, circleMaterial);
     circleMesh.position.copy(position);
-    circleMesh.position.y = 0.05; // Slightly above ground
+    circleMesh.position.y = 0.15; // Higher above ground for better visibility
     circleMesh.rotation.x = -Math.PI / 2; // Rotate to lie flat
-    circleMesh.renderOrder = 10; // Ensure it renders on top
+    circleMesh.renderOrder = 100; // Ensure it renders on top of everything
     
     return circleMesh;
   }

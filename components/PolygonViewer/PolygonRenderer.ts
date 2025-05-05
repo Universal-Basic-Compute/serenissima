@@ -859,7 +859,7 @@ export default class PolygonRenderer {
     
     // Process each polygon with an owner
     this.polygons.forEach(polygon => {
-      if (!polygon.owner || !polygon.id) return;
+      if (!polygon.owner || !polygon.id || !polygon.centroid) return;
       
       const success = withErrorHandling(
         () => {
@@ -871,24 +871,54 @@ export default class PolygonRenderer {
           // Get the owner's color
           const ownerColor = this.getOwnerColor(polygon.owner);
           
-          // Find the corresponding PolygonMesh
-          const polygonMesh = this.polygonMeshes.find(pm => {
-            const mesh = pm.getMesh();
-            return mesh && this.polygonMeshesRef.current[polygon.id] === mesh;
-          });
-          
-          if (!polygonMesh) {
-            log.warn(`Could not find PolygonMesh for ${polygon.id}`);
-            return false;
-          }
-          
-          // Always update the owner color first
-          polygonMesh.updateOwner(polygon.owner, ownerColor);
+          // Convert centroid to 3D position
+          const normalizedCoord = normalizeCoordinates(
+            [polygon.centroid],
+            this.bounds.centerLat,
+            this.bounds.centerLng,
+            this.bounds.scale,
+            this.bounds.latCorrectionFactor
+          )[0];
           
           if (coatOfArmsUrl) {
-            log.debug(`Applying coat of arms texture for ${polygon.id} with URL: ${coatOfArmsUrl}`);
-            // Apply the coat of arms texture directly to the land shape
-            polygonMesh.updateCoatOfArmsTexture(coatOfArmsUrl);
+            log.debug(`Creating coat of arms sprite for ${polygon.id} at position:`, normalizedCoord);
+            
+            // Load the texture with error handling
+            const texture = this.facade.loadTexture(
+              coatOfArmsUrl,
+              (loadedTexture) => {
+                // Create a circular texture
+                const circularTexture = this.facade.createCircularTexture(loadedTexture);
+                
+                // Create a plane geometry for the texture
+                const planeGeometry = new THREE.PlaneGeometry(1.5, 1.5);
+                const planeMaterial = new THREE.MeshBasicMaterial({
+                  map: circularTexture,
+                  transparent: true,
+                  side: THREE.DoubleSide,
+                  depthWrite: false
+                });
+                
+                // Create mesh and position it
+                const planeMesh = new THREE.Mesh(planeGeometry, planeMaterial);
+                planeMesh.position.set(normalizedCoord.x, 0.2, normalizedCoord.y); // Higher above ground
+                planeMesh.rotation.x = -Math.PI / 2; // Rotate to lie flat
+                planeMesh.renderOrder = 100; // Ensure it renders on top of everything
+                
+                // Add to scene
+                this.facade.addToScene(planeMesh);
+                
+                // Store reference
+                this.coatOfArmSprites[polygon.id] = planeMesh;
+                
+                log.debug(`Created coat of arms for polygon ${polygon.id} at position:`, normalizedCoord);
+              },
+              (error) => {
+                log.error(`Failed to load coat of arms texture for ${polygon.id}:`, error);
+                // Create a colored circle as fallback
+                this.createColoredCircleOnLand(polygon, ownerColor || '#8B4513');
+              }
+            );
           } else if (polygon.centroid) {
             log.debug(`Creating colored circle for ${polygon.id} with color: ${ownerColor}`);
             // Create a colored circle texture on the land as fallback
