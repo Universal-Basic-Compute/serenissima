@@ -8,7 +8,10 @@ import SimplePolygonRenderer from './SimplePolygonRenderer';
 import { calculateBounds } from './utils';
 import { getApiBaseUrl } from '@/lib/apiUtils';
 
-export default function SimpleViewer({ qualityMode = 'high', activeView = 'land' }) {
+export default function SimpleViewer({ qualityMode = 'high', activeView = 'land' }: {
+  qualityMode: 'high' | 'performance';
+  activeView: 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance';
+}) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [polygons, setPolygons] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -219,21 +222,18 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
   
   // Update water quality when parent component changes quality mode
   useEffect(() => {
-    // This will be controlled by the parent component now
-    const handleQualityChange = (event: CustomEvent) => {
-      if (waterRef.current && event.detail) {
-        waterRef.current.setQuality(event.detail === 'high' ? 'high' : 'medium');
-      }
-    };
-    
-    window.addEventListener('qualityModeChanged', handleQualityChange as EventListener);
-    
-    return () => {
-      window.removeEventListener('qualityModeChanged', handleQualityChange as EventListener);
-    };
-  }, []);
+    if (waterRef.current) {
+      waterRef.current.setQuality(qualityMode === 'high' ? 'high' : 'medium');
+    }
+  }, [qualityMode]);
   
-  // No loading check needed
+  // Update quality mode when it changes from parent
+  useEffect(() => {
+    console.log('Quality mode changed to:', qualityMode);
+    if (waterRef.current) {
+      waterRef.current.setQuality(qualityMode === 'high' ? 'high' : 'medium');
+    }
+  }, [qualityMode]);
   
   return (
     <div className="w-screen h-screen">
