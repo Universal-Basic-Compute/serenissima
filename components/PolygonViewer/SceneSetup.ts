@@ -87,15 +87,10 @@ export default class SceneSetup {
       // Create minimal scene as fallback
       this.createMinimalScene(canvas);
     }
-  } catch (error) {
-    console.error('Failed to initialize SceneSetup:', error);
-    // Create minimal scene as fallback
-    this.createMinimalScene(canvas);
   }
-}
-
-// Add this method to create a minimal scene as fallback
-private createMinimalScene(canvas: HTMLCanvasElement) {
+  
+  // Add this method to create a minimal scene as fallback
+  private createMinimalScene(canvas: HTMLCanvasElement) {
   console.log('Creating minimal fallback scene');
   
   try {
