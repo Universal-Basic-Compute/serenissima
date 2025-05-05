@@ -89,6 +89,9 @@ Components should communicate through:
    - Provide meaningful fallback UIs
    - Log errors for debugging
    - Allow users to retry or recover from errors
+   - Use specialized error boundaries for different component types:
+     - `ErrorBoundary`: Generic error boundary for all components
+     - `ThreeDErrorBoundary`: Specialized for 3D/Three.js components with WebGL-specific error handling
 5. **Performance Optimization**: Use memoization and virtualization when appropriate
 6. **Accessibility**: Ensure components are accessible
 7. **Separation of Concerns**: Separate presentation from business logic

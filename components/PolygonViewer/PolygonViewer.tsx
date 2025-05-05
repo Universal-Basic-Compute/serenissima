@@ -3,12 +3,14 @@
  * - Separate rendering concerns from component logic
  * - Move data fetching to service layer
  * - Implement proper state management using Zustand
- * - Add error boundaries for better error handling
+ * - ✅ Add error boundaries for better error handling
  * - Reduce component complexity by breaking into smaller components
  */
 'use client';
 
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import ThreeDErrorBoundary from '../ErrorBoundary/ThreeDErrorBoundary';
+import { log } from '@/lib/logUtils';
 import { getApiBaseUrl } from '@/lib/apiUtils';
 import * as THREE from 'three';
 import { calculateBounds } from './utils';
@@ -1433,13 +1435,33 @@ export default function PolygonViewer() {
     );
   }
   
-  return (
-    <div className="w-screen h-screen">
-      {/* View mode menu */}
-      {ViewModeMenuMemo}
+  // Function to handle errors in the 3D components
+  const handleRenderingError = useCallback((error: Error, errorInfo: React.ErrorInfo) => {
+    log.error('PolygonViewer rendering error:', error, errorInfo);
+    
+    // Try to clean up resources to prevent memory leaks
+    try {
+      if (sceneRef.current) sceneRef.current.cleanup();
+      if (polygonRendererRef.current) polygonRendererRef.current.cleanup();
+      if (interactionManagerRef.current) interactionManagerRef.current.cleanup();
+      if (bridgeRendererRef.current) bridgeRendererRef.current.cleanup();
+      if (roadManagerRef.current) roadManagerRef.current.cleanup();
+    } catch (cleanupError) {
+      log.error('Error during cleanup after rendering failure:', cleanupError);
+    }
+  }, []);
 
-      {/* Add the Land Details Panel */}
-      {LandDetailsPanelMemo}
+  return (
+    <ThreeDErrorBoundary 
+      onError={handleRenderingError}
+      resetKey={`${activeView}-${highQuality}-${polygons.length}`}
+    >
+      <div className="w-screen h-screen">
+        {/* View mode menu */}
+        {ViewModeMenuMemo}
+
+        {/* Add the Land Details Panel */}
+        {LandDetailsPanelMemo}
       
       {/* Add Create Road button when in building view */}
       {activeView === 'buildings' && !roadCreationActive && (
@@ -1510,6 +1532,7 @@ export default function PolygonViewer() {
           onCancel={handleRoadCancel}
         />
       )}
-    </div>
+      </div>
+    </ThreeDErrorBoundary>
   );
 }

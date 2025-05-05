@@ -10,6 +10,7 @@ This document outlines the target architecture for La Serenissima, a 3D interact
 4. **Event-Driven Communication**: Use events for loose coupling between components
 5. **Centralized State Management**: Single source of truth for application state
 6. **Progressive Enhancement**: Core functionality works without advanced features
+7. **Resilient Error Handling**: Graceful degradation when errors occur
 
 ## Architecture Layers
 
