@@ -423,6 +423,43 @@ export default class SimplePolygonRenderer {
       this.bounds.latCorrectionFactor
     );
     
+    // Calculate the centroid position
+    const centroidPos = normalizeCoordinates(
+      [polygon.centroid],
+      this.bounds.centerLat,
+      this.bounds.centerLng,
+      this.bounds.scale,
+      this.bounds.latCorrectionFactor
+    )[0];
+    
+    // Create a raycaster to find the exact height of the land at this position
+    const raycaster = new THREE.Raycaster();
+    const direction = new THREE.Vector3(0, -1, 0); // Cast ray downward
+    const origin = new THREE.Vector3(centroidPos.x, 10, -centroidPos.y); // Start from above
+    raycaster.set(origin, direction);
+    
+    // Find all meshes in the scene that could be land
+    const landMeshes: THREE.Mesh[] = [];
+    this.scene.traverse(object => {
+      if (object instanceof THREE.Mesh && 
+          object.material instanceof THREE.MeshStandardMaterial && 
+          !object.userData.isCoatOfArms) { // Avoid coat of arms meshes
+        landMeshes.push(object);
+      }
+    });
+    
+    // Find the intersection with land
+    const intersects = raycaster.intersectObjects(landMeshes);
+    
+    // Default height if no intersection found
+    let yPosition = 0.05;
+    
+    // If we found an intersection, use that height (plus a small offset)
+    if (intersects.length > 0) {
+      yPosition = intersects[0].point.y + 0.01; // 0.01 units above the land
+      console.log(`Found land intersection for ${polygon.id} at height ${yPosition}`);
+    }
+    
     // Create a canvas to draw the masked image
     const canvas = document.createElement('canvas');
     const size = 512;
@@ -520,18 +557,13 @@ export default class SimplePolygonRenderer {
         const planeGeometry = new THREE.PlaneGeometry(1, 1);
         const mesh = new THREE.Mesh(planeGeometry, material);
         
-        // Position at the centroid
-        const centroidPos = normalizeCoordinates(
-          [polygon.centroid],
-          this.bounds.centerLat,
-          this.bounds.centerLng,
-          this.bounds.scale,
-          this.bounds.latCorrectionFactor
-        )[0];
-    
-        mesh.position.set(centroidPos.x, 0.05, -centroidPos.y);
+        // Position at the centroid with the calculated y position
+        mesh.position.set(centroidPos.x, yPosition, -centroidPos.y);
         mesh.rotation.x = -Math.PI / 2 + Math.PI; // Invert orientation by adding PI (180 degrees)
         mesh.renderOrder = 10;
+        
+        // Mark this mesh as a coat of arms to avoid raycasting against it
+        mesh.userData.isCoatOfArms = true;
     
         // Scale based on polygon size - MAKE BIGGER
         const maxDim = Math.max(bounds.width, bounds.height);
