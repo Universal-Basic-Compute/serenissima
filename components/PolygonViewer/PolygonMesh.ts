@@ -93,7 +93,8 @@ class PolygonMesh {
 
       // Create materials with brighter colors for better visibility
       const topMaterial = new THREE.MeshBasicMaterial({
-        map: sandTexture,
+        // Remove texture to allow the color to show through fully
+        // map: sandTexture,
         color: this.determineLandColor(),
         transparent: false, // Disable transparency for better visibility
         depthWrite: true, // Enable depth writing
@@ -151,9 +152,9 @@ class PolygonMesh {
     if (this.activeView === 'land') {
       if (this.ownerColor) {
         // Blend the owner color with sand color for a more natural look
-        const sandColor = new THREE.Color(0xfff5d0); // Even lighter, more yellow sand color
+        const sandColor = new THREE.Color(0xfff8e0); // Much lighter, more yellow sand color
         const ownerColor = new THREE.Color(this.ownerColor);
-        return new THREE.Color().lerpColors(sandColor, ownerColor, 0.8); // Increased from 0.7 to 0.8
+        return new THREE.Color().lerpColors(sandColor, ownerColor, 0.7); // Reduced from 0.8 to 0.7 to show more of the sand color
       } else if (this.polygon.owner) {
         // If we have an owner but no color, use a default color
         if (this.polygon.owner === 'ConsiglioDeiDieci') {
@@ -162,10 +163,10 @@ class PolygonMesh {
         }
         return new THREE.Color(0x8cd17a); // Brighter green
       } else {
-        return new THREE.Color(0xfff5d0); // Even lighter, more yellow sand color
+        return new THREE.Color(0xfff8e0); // Much lighter, more yellow sand color
       }
     } else {
-      return new THREE.Color(0xfff5d0); // Even lighter, more yellow sand color
+      return new THREE.Color(0xfff8e0); // Much lighter, more yellow sand color
     }
   }
   

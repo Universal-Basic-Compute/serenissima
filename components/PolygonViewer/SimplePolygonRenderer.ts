@@ -45,7 +45,7 @@ export default class SimplePolygonRenderer {
     users = {},
     camera = null,
     onLandSelected = null,
-    sandColor = 0xfff5d0 // Add this parameter with default value - lighter, more yellow
+    sandColor = 0xfff8e0 // Changed to an even lighter, more yellow sand color
   }: SimplePolygonRendererProps & { 
     activeView?: string;
     users?: Record<string, any>;
@@ -121,8 +121,9 @@ export default class SimplePolygonRenderer {
   private renderPolygons() {
     // Create a single shared material for all polygons
     this.sharedMaterial = new THREE.MeshStandardMaterial({
-      map: this.sandTexture,
-      color: this.sandTexture ? 0xffffff : this.sandColor, // Use texture color or custom sand color
+      // Remove texture to allow the color to show through fully
+      // map: this.sandTexture,
+      color: this.sandColor, // Use our lighter yellow sand color directly
       side: THREE.DoubleSide,
       roughness: 0.8,
       metalness: 0.1,

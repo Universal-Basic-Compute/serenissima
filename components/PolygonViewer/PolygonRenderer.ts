@@ -1023,7 +1023,7 @@ export default class PolygonRenderer {
       // Draw a colored circle as fallback
       ctx.beginPath();
       ctx.arc(size/2, size/2, size/2 - 4, 0, Math.PI * 2);
-      ctx.fillStyle = '#FFF5D0'; // Lighter, more yellow sand color
+      ctx.fillStyle = '#FFF8E0'; // Much lighter, more yellow sand color
       ctx.fill();
       ctx.strokeStyle = '#FFFFFF';
       ctx.lineWidth = 8;
