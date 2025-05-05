@@ -22,6 +22,7 @@ export default class SceneSetup {
   private sunSphere: THREE.Mesh = new THREE.Mesh();
   private sunGlow: THREE.Mesh = new THREE.Mesh();
   private cloudSystem: CloudFacade | null = null;
+  private waterFacade: WaterFacade | null = null;
   private zoomThreshold: number = 40; // Threshold for showing clouds
   private activeView: ViewMode;
   
@@ -129,8 +130,7 @@ private createMinimalScene(canvas: HTMLCanvasElement) {
   } catch (error) {
     console.error('Failed to create minimal fallback scene:', error);
   }
-  
-  private waterFacade: WaterFacade | null = null;
+}
   
   private setupLights(activeView: ViewMode) {
     // Create the sun directional light
