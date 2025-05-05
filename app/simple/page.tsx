@@ -182,46 +182,13 @@ export default function SimplePage() {
           <ul className="space-y-2 px-2">
             <li>
               <button
-                onClick={() => setActiveView('land')}
+                onClick={() => setActiveView('governance')}
                 className={`w-full flex items-center p-2 rounded-lg transition-colors ${
-                  activeView === 'land' ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700'
+                  activeView === 'governance' ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700'
                 }`}
-                title="Land"
+                title="Governance"
               >
-                <FaHome className="mx-auto h-5 w-5" />
-              </button>
-            </li>
-            <li>
-              <button
-                onClick={() => setActiveView('buildings')}
-                className={`w-full flex items-center p-2 rounded-lg transition-colors ${
-                  activeView === 'buildings' ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700'
-                }`}
-                title="Buildings"
-              >
-                <FaBuilding className="mx-auto h-5 w-5" />
-              </button>
-            </li>
-            <li>
-              <button
-                onClick={() => setActiveView('transport')}
-                className={`w-full flex items-center p-2 rounded-lg transition-colors ${
-                  activeView === 'transport' ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700'
-                }`}
-                title="Transport"
-              >
-                <FaRoad className="mx-auto h-5 w-5" />
-              </button>
-            </li>
-            <li>
-              <button
-                onClick={() => setActiveView('resources')}
-                className={`w-full flex items-center p-2 rounded-lg transition-colors ${
-                  activeView === 'resources' ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700'
-                }`}
-                title="Resources"
-              >
-                <FaTree className="mx-auto h-5 w-5" />
+                <FaLandmark className="mx-auto h-5 w-5" />
               </button>
             </li>
             <li>
@@ -240,13 +207,46 @@ export default function SimplePage() {
             </li>
             <li>
               <button
-                onClick={() => setActiveView('governance')}
+                onClick={() => setActiveView('resources')}
                 className={`w-full flex items-center p-2 rounded-lg transition-colors ${
-                  activeView === 'governance' ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700'
+                  activeView === 'resources' ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700'
                 }`}
-                title="Governance"
+                title="Resources"
               >
-                <FaLandmark className="mx-auto h-5 w-5" />
+                <FaTree className="mx-auto h-5 w-5" />
+              </button>
+            </li>
+            <li>
+              <button
+                onClick={() => setActiveView('transport')}
+                className={`w-full flex items-center p-2 rounded-lg transition-colors ${
+                  activeView === 'transport' ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700'
+                }`}
+                title="Transport"
+              >
+                <FaRoad className="mx-auto h-5 w-5" />
+              </button>
+            </li>
+            <li>
+              <button
+                onClick={() => setActiveView('buildings')}
+                className={`w-full flex items-center p-2 rounded-lg transition-colors ${
+                  activeView === 'buildings' ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700'
+                }`}
+                title="Buildings"
+              >
+                <FaBuilding className="mx-auto h-5 w-5" />
+              </button>
+            </li>
+            <li>
+              <button
+                onClick={() => setActiveView('land')}
+                className={`w-full flex items-center p-2 rounded-lg transition-colors ${
+                  activeView === 'land' ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700'
+                }`}
+                title="Land"
+              >
+                <FaHome className="mx-auto h-5 w-5" />
               </button>
             </li>
           </ul>
