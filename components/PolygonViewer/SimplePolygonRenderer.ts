@@ -362,7 +362,7 @@ export default class SimplePolygonRenderer {
           if (texture.image && texture.image.width && texture.image.height) {
             const aspectRatio = texture.image.width / texture.image.height;
             const sceneScale = this.bounds.scale;
-            const baseScale = Math.max(0.21125, sceneScale / 2370); // Increased by another 30%
+            const baseScale = Math.max(0.25350, sceneScale / 1975); // Increased by another 20%
             plane.scale.set(baseScale * aspectRatio, baseScale, 1); // Removed the multiplier (2 -> 1)
           }
         }
@@ -505,7 +505,7 @@ export default class SimplePolygonRenderer {
         // Scale based on polygon size - MAKE BIGGER
         const maxDim = Math.max(bounds.width, bounds.height);
         const sceneScale = this.bounds.scale;
-        const baseScale = Math.max(0.21125, sceneScale / 2370); // Increased by another 30%
+        const baseScale = Math.max(0.25350, sceneScale / 1975); // Increased by another 20%
         mesh.scale.set(maxDim * baseScale * 1, maxDim * baseScale * 1, 1); // Reduced both dimensions (2 -> 1)
         
         // Add to scene
