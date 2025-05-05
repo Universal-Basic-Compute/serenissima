@@ -19,7 +19,6 @@ const SimpleViewer = dynamic(() => import('../../components/PolygonViewer/Simple
 
 export default function SimplePage() {
   // UI state
-  const [showControls, setShowControls] = useState(true);
   const [showInfo, setShowInfo] = useState(false);
   const [activeView, setActiveView] = useState<'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance'>('land');
   const [qualityMode, setQualityMode] = useState<'high' | 'performance'>('high');
@@ -443,42 +442,6 @@ export default function SimplePage() {
         </button>
       )}
       
-      {/* Controls Panel */}
-      {showControls && (
-        <div className="absolute bottom-4 left-4 bg-black/70 text-white p-4 rounded-lg max-w-xs border-2 border-amber-600 shadow-lg">
-          <h2 className="text-lg font-serif font-bold mb-2 text-amber-400">Camera Controls</h2>
-          <ul className="space-y-1 text-sm">
-            <li className="flex items-center"><span className="text-amber-400 mr-2">•</span> Left-click + drag: Rotate camera</li>
-            <li className="flex items-center"><span className="text-amber-400 mr-2">•</span> Right-click + drag: Pan camera</li>
-            <li className="flex items-center"><span className="text-amber-400 mr-2">•</span> Scroll wheel: Zoom in/out</li>
-            <li className="flex items-center"><span className="text-amber-400 mr-2">•</span> Double-click: Reset view</li>
-          </ul>
-          
-          <h2 className="text-lg font-serif font-bold mt-4 mb-2 text-amber-400">View Options</h2>
-          <div className="grid grid-cols-2 gap-2">
-            <button 
-              className={`px-2 py-1 rounded text-sm transition-colors ${
-                qualityMode === 'high' 
-                  ? 'bg-amber-500 text-black font-bold' 
-                  : 'bg-gray-700 text-white hover:bg-gray-600'
-              }`}
-              onClick={() => setQualityMode('high')}
-            >
-              High Quality
-            </button>
-            <button 
-              className={`px-2 py-1 rounded text-sm transition-colors ${
-                qualityMode === 'performance' 
-                  ? 'bg-amber-500 text-black font-bold' 
-                  : 'bg-gray-700 text-white hover:bg-gray-600'
-              }`}
-              onClick={() => setQualityMode('performance')}
-            >
-              Performance
-            </button>
-          </div>
-        </div>
-      )}
       
       {/* Information Panel */}
       {showInfo && (
@@ -505,23 +468,6 @@ export default function SimplePage() {
         </div>
       )}
       
-      {/* Bottom Right Menu */}
-      <div className="absolute bottom-4 right-4 bg-black/70 text-white p-4 rounded-lg border-2 border-amber-600 shadow-lg">
-        <div className="grid grid-cols-2 gap-2">
-          <button className="px-3 py-2 bg-green-700 hover:bg-green-600 rounded text-white text-sm transition-colors border border-green-500 font-serif">
-            Create Land
-          </button>
-          <button className="px-3 py-2 bg-red-700 hover:bg-red-600 rounded text-white text-sm transition-colors border border-red-500 font-serif">
-            Delete Land
-          </button>
-          <button className="px-3 py-2 bg-blue-700 hover:bg-blue-600 rounded text-white text-sm transition-colors border border-blue-500 font-serif">
-            Add Bridge
-          </button>
-          <button className="px-3 py-2 bg-purple-700 hover:bg-purple-600 rounded text-white text-sm transition-colors border border-purple-500 font-serif">
-            Add Road
-          </button>
-        </div>
-      </div>
       
     </div>
     
