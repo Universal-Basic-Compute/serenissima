@@ -859,14 +859,17 @@ void main() {`
 // Apply shoreline effect
 float shoreFactor = calculateShorelineFactor(vWorldPosition) * shorelineIntensity;
 if (shoreFactor > 0.01) {
-  // Increase wave height near shore
-  info.r += shoreFactor * 0.2;
+  // Increase wave height near shore - enhanced effect
+  info.r += shoreFactor * 0.4;
   
-  // Add foam near shore
-  info.g = mix(info.g, 1.0, shoreFactor * 0.7);
+  // Add foam near shore - more pronounced foam
+  info.g = mix(info.g, 1.0, shoreFactor * 0.9);
   
   // Adjust wave direction to flow parallel to shore
-  info.b = mix(info.b, 0.5, shoreFactor * 0.3);
+  info.b = mix(info.b, 0.5, shoreFactor * 0.5);
+  
+  // Add slight color variation near shore for visual emphasis
+  reflectedColor = mix(reflectedColor, vec3(0.8, 0.9, 1.0), shoreFactor * 0.3);
 }`
           );
           
