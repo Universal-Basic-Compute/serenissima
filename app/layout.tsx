@@ -38,6 +38,21 @@ export default function RootLayout({
       originalConsoleLog(...args);
     };
     
+    // Add error handler for unhandled errors
+    const handleError = (event) => {
+      console.error('Unhandled error:', event.error || event.message);
+      // Log to analytics or monitoring service if available
+    };
+    
+    // Add error handler for unhandled promise rejections
+    const handleUnhandledRejection = (event) => {
+      console.error('Unhandled promise rejection:', event.reason);
+      // Log to analytics or monitoring service if available
+    };
+    
+    window.addEventListener('error', handleError);
+    window.addEventListener('unhandledrejection', handleUnhandledRejection);
+    
     // Register service worker for offline support
     if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
       // Wait until the page is fully loaded
@@ -62,6 +77,10 @@ export default function RootLayout({
     return () => {
       // Restore original console.log when component unmounts
       console.log = originalConsoleLog;
+      
+      // Remove event listeners
+      window.removeEventListener('error', handleError);
+      window.removeEventListener('unhandledrejection', handleUnhandledRejection);
     };
   }, []);
 

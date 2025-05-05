@@ -58,9 +58,12 @@ export default function Home() {
   // State for loading screen
   const [isLoading, setIsLoading] = useState(true);
   
-  // Force exit loading state after a timeout
+  // Force exit loading state after a timeout - simplified and more robust
   useEffect(() => {
-    console.log('Setting up loading state management');
+    console.log('Setting up simplified loading state management');
+    
+    // Always ensure loading is true initially
+    setIsLoading(true);
     
     // Set a flag to track if we've already exited loading state
     let hasExitedLoading = false;
@@ -74,36 +77,32 @@ export default function Home() {
       }
     };
     
-    // Primary timer - longest duration
-    const primaryTimer = setTimeout(() => {
-      console.log('Primary timer: Forcing exit from loading state');
+    // Single reliable timer with a reasonable timeout
+    const loadingTimer = setTimeout(() => {
+      console.log('Loading timer: Forcing exit from loading state');
       exitLoading();
-    }, 8000);
+    }, 5000); // 5 seconds is usually enough for initial loading
     
-    // Secondary timer - medium duration
-    const secondaryTimer = setTimeout(() => {
-      console.log('Secondary timer: Checking loading state');
-      if (isLoading) {
-        console.log('Still loading after secondary timer, forcing exit');
-        exitLoading();
-      }
-    }, 5000);
+    // Also listen for the 'DOMContentLoaded' event as a backup
+    const handleDOMContentLoaded = () => {
+      console.log('DOMContentLoaded event fired');
+      // Add a small delay to allow React to finish rendering
+      setTimeout(exitLoading, 500);
+    };
     
-    // Emergency timer - shortest duration
-    const emergencyTimer = setTimeout(() => {
-      console.log('Emergency timer: Final loading state check');
-      if (isLoading || usePolygonStore.getState().loading) {
-        console.log('EMERGENCY: Still loading after all timers, forcing exit');
-        exitLoading();
-      }
-    }, 3000);
+    // Add event listener for DOMContentLoaded if document is not already loaded
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', handleDOMContentLoaded);
+    } else {
+      // Document already loaded, schedule exit with a small delay
+      setTimeout(exitLoading, 500);
+    }
     
     return () => {
-      clearTimeout(primaryTimer);
-      clearTimeout(secondaryTimer);
-      clearTimeout(emergencyTimer);
+      clearTimeout(loadingTimer);
+      document.removeEventListener('DOMContentLoaded', handleDOMContentLoaded);
     };
-  }, [isLoading, setIsLoading]);
+  }, []);
   
   // State for wallet connection
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
@@ -1663,19 +1662,23 @@ export default function Home() {
         <span className="ml-2">Polygons: {polygons.length}</span>
       </div>
       
-      <div className="relative w-screen h-screen">
-      {/* Debug overlay - will show even if other components fail */}
-      <div className="fixed top-0 left-0 z-50 bg-white p-2 text-xs">
-        <button 
-          onClick={() => window.location.reload()}
-          className="bg-red-500 text-white px-2 py-1 rounded mr-2"
-        >
-          Reload
-        </button>
-        <span>Loading: {isLoading ? 'Yes' : 'No'}</span>
-        <span className="ml-2">Store Loading: {usePolygonStore.getState().loading ? 'Yes' : 'No'}</span>
-        <span className="ml-2">Polygons: {polygons.length}</span>
+      {/* Absolute minimal fallback that will always show */}
+      <div className="fixed inset-0 z-[9999] bg-amber-50 flex items-center justify-center" 
+           style={{display: isLoading ? 'flex' : 'none'}}>
+        <div className="text-center">
+          <h2 className="text-2xl font-serif text-amber-800 mb-4">Loading La Serenissima</h2>
+          <div className="w-24 h-24 border-t-4 border-amber-600 rounded-full animate-spin mb-4 mx-auto"></div>
+          <p className="text-amber-600 mb-6">The Council of Ten is preparing the map...</p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors"
+          >
+            Reload Page
+          </button>
+        </div>
       </div>
+      
+      <div className="relative w-screen h-screen">
       
       {/* Loading Screen */}
       {isLoading && (

@@ -15,7 +15,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
   const [imageError, setImageError] = useState(false);
   const [hasError, setHasError] = useState(false);
   
-  // Force completion after the specified duration
+  // Force completion after the specified duration - simplified and more robust
   useEffect(() => {
     console.log('LoadingScreen: Setting up forced completion timer');
     
@@ -30,93 +30,107 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
       }
     };
     
+    // Single reliable timer
     const timer = setTimeout(() => {
       console.log('LoadingScreen: Forcing completion after timeout');
       completeLoading();
-    }, duration);
+    }, Math.min(duration, 5000)); // Cap at 5 seconds maximum
     
-    // Add a shorter backup timer as a failsafe
-    const backupTimer = setTimeout(() => {
-      console.log('LoadingScreen: Backup timer triggered');
-      completeLoading();
-    }, Math.min(duration * 0.7, 3500)); // 70% of duration or max 3.5 seconds
+    // Add visibility change detection as a backup
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        console.log('LoadingScreen: Document became visible');
+        // Small delay to allow rendering
+        setTimeout(completeLoading, 300);
+      }
+    };
     
-    // Add an emergency timer as a final failsafe
-    const emergencyTimer = setTimeout(() => {
-      console.log('LoadingScreen: Emergency timer triggered');
-      completeLoading();
-    }, 2000); // 2 seconds absolute maximum
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    // Also trigger completion when images load or fail
+    const handleImageLoad = () => {
+      console.log('LoadingScreen: Image loaded');
+      // Small delay to allow rendering
+      setTimeout(completeLoading, 300);
+    };
     
     return () => {
       clearTimeout(timer);
-      clearTimeout(backupTimer);
-      clearTimeout(emergencyTimer);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [duration, onLoadingComplete]);
 
   useEffect(() => {
-    // Function to get random loading image
+    // Function to get random loading image - simplified with better error handling
     const getRandomLoadingImage = async () => {
       try {
         console.log('Fetching loading images from API...');
+        
+        // Set a timeout for the fetch operation
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000);
+        
         // Fetch the list of files from the loading directory
-        const response = await fetch('/api/list-loading-images');
-        console.log('API response status:', response.status);
+        const response = await fetch('/api/list-loading-images', {
+          signal: controller.signal
+        }).catch(error => {
+          console.warn('Fetch failed, using fallback image:', error);
+          return null;
+        });
         
-        if (!response.ok) {
-          throw new Error(`Failed to fetch loading images: ${response.status}`);
-        }
+        clearTimeout(timeoutId);
         
-        const data = await response.json();
-        console.log('API response data:', data);
-        
-        if (data.success && data.images && data.images.length > 0) {
-          // Select a random image from the returned list
-          const randomImage = data.images[Math.floor(Math.random() * data.images.length)];
-          console.log('Selected loading image:', randomImage);
-          
-          // Précharger l'image pour s'assurer qu'elle est disponible
-          const img = new window.Image(); // Use the browser's native Image constructor
-          console.log('Created Image object, starting to load:', randomImage);
-          
-          img.onload = () => {
-            console.log('Image loaded successfully:', randomImage);
-            setLoadingImage(randomImage);
-            setImageError(false);
-          };
-          
-          img.onerror = (e) => {
-            console.error('Error preloading image:', randomImage, e);
-            setImageError(true);
-            setLoadingImage('/loading/fallback.jpg');
-          };
-          
-          // Add a timeout to detect if image loading takes too long
-          const timeoutId = setTimeout(() => {
-            console.warn('Image loading timeout for:', randomImage);
-            if (!loadingImage) {
-              setImageError(true);
-              setLoadingImage('/loading/fallback.jpg');
-            }
-          }, 5000);
-          
-          img.src = randomImage;
-        } else {
-          // Fallback to a default image if no images are found
-          console.warn('No loading images found, using fallback');
+        // If fetch failed or response is not ok, use fallback immediately
+        if (!response || !response.ok) {
+          console.warn('API response not ok, using fallback image');
           setLoadingImage('/loading/fallback.jpg');
+          return;
         }
+        
+        const data = await response.json().catch(error => {
+          console.warn('Failed to parse JSON, using fallback image:', error);
+          return null;
+        });
+        
+        // If data parsing failed or no images, use fallback
+        if (!data || !data.success || !data.images || data.images.length === 0) {
+          console.warn('No valid images in API response, using fallback');
+          setLoadingImage('/loading/fallback.jpg');
+          return;
+        }
+        
+        // Select a random image from the returned list
+        const randomImage = data.images[Math.floor(Math.random() * data.images.length)];
+        console.log('Selected loading image:', randomImage);
+        
+        // Use a static fallback image path that we know exists
+        const fallbackImagePath = '/loading/fallback.jpg';
+        
+        // Set fallback immediately so something shows
+        setLoadingImage(fallbackImagePath);
+        
+        // Then try to load the random image
+        const img = new window.Image();
+        
+        img.onload = () => {
+          console.log('Image loaded successfully:', randomImage);
+          setLoadingImage(randomImage);
+          setImageError(false);
+        };
+        
+        img.onerror = (e) => {
+          console.error('Error preloading image:', randomImage, e);
+          // Keep using the fallback that's already set
+        };
+        
+        // Start loading the image
+        img.src = randomImage;
+        
       } catch (error) {
         console.error('Critical error in loading screen:', error);
         setHasError(true);
         setImageError(true);
         setLoadingImage('/loading/fallback.jpg');
-        
-        // Force completion after a short delay if there's a critical error
-        setTimeout(() => {
-          console.log('LoadingScreen: Forcing completion after critical error');
-          onLoadingComplete();
-        }, 2000);
       }
     };
 
