@@ -56,8 +56,8 @@ export class WaterFacade {
   private landObjects: THREE.Object3D[] = [];
   private boundaryPoints: THREE.Vector3[] = [];
   private shorelineEffect: boolean = true;
-  private shorelineIntensity: number = 4.5; // Increased from 3.5
-  private shorelineDistance: number = 15.0; // Distance in units that shoreline effect extends
+  private shorelineIntensity: number = 5.0; // Increased to maximum for more dramatic shoreline effects
+  private shorelineDistance: number = 18.0; // Increased distance for wider shoreline effect
   private opacity: number; // Add opacity property
 
   /**
@@ -915,11 +915,11 @@ if (shoreFactor > 0.01) {
   info.b = mix(info.b, 0.5, shoreFactor * 0.8);
   
   // Add stronger color variation near shore for visual emphasis
-  reflectedColor = mix(reflectedColor, vec3(0.95, 0.98, 1.0), shoreFactor * 0.7);
+  reflectedColor = mix(reflectedColor, vec3(0.95, 0.98, 1.0), shoreFactor * 0.85);
   
-  // Add additional foam patterns based on position and time
-  float foamPattern = sin(vWorldPosition.x * 3.0 + time * 0.7) * sin(vWorldPosition.z * 3.0 + time * 0.9) * 0.5 + 0.5;
-  info.g = mix(info.g, info.g * foamPattern, shoreFactor * 0.4);
+  // Add additional foam patterns based on position and time - enhanced pattern
+  float foamPattern = sin(vWorldPosition.x * 3.5 + time * 0.8) * sin(vWorldPosition.z * 3.5 + time * 1.0) * 0.5 + 0.5;
+  info.g = mix(info.g, info.g * foamPattern, shoreFactor * 0.6);
 }`
           );
           
