@@ -186,6 +186,15 @@ export default class SimplePolygonRenderer {
    * Create coat of arms sprites for all polygons with owners
    */
   public createCoatOfArmsSprites() {
+    // Add debug visualization to help with positioning
+    const addDebugSphere = (position: THREE.Vector3, color: number = 0xff0000) => {
+      const debugGeometry = new THREE.SphereGeometry(0.05, 8, 8);
+      const debugMaterial = new THREE.MeshBasicMaterial({ color: color });
+      const debugSphere = new THREE.Mesh(debugGeometry, debugMaterial);
+      debugSphere.position.copy(position);
+      this.scene.add(debugSphere);
+      return debugSphere;
+    };
     console.log('Creating coat of arms sprites for land view');
     
     // Remove any existing sprites
@@ -292,6 +301,10 @@ export default class SimplePolygonRenderer {
         this.bounds.latCorrectionFactor
       )[0];
       
+      // Add a debug sphere at the centroid position to visualize it
+      // Uncomment this line to see where centroids are located
+      // const debugSphere = addDebugSphere(new THREE.Vector3(normalizedCoord.x, 0, normalizedCoord.y));
+      
       // Create a sprite material
       const spriteMaterial = new THREE.SpriteMaterial({
         map: null, // Will be set when texture loads
@@ -303,8 +316,17 @@ export default class SimplePolygonRenderer {
       
       // Create the sprite
       const sprite = new THREE.Sprite(spriteMaterial);
-      sprite.position.set(normalizedCoord.x, 0.5, normalizedCoord.y); // Position above land
-      sprite.scale.set(2, 2, 1); // Initial scale
+      
+      // Position the sprite correctly - lower height to be closer to land
+      sprite.position.set(normalizedCoord.x, 0.2, normalizedCoord.y);
+      
+      // Adjust scale based on scene size
+      const sceneScale = this.bounds.scale;
+      const spriteScale = Math.max(1, sceneScale / 500); // Dynamic scaling based on scene
+      sprite.scale.set(spriteScale, spriteScale, 1);
+      
+      // Ensure sprites render on top of land
+      sprite.renderOrder = 10;
       
       // Add to scene
       this.scene.add(sprite);
@@ -324,10 +346,12 @@ export default class SimplePolygonRenderer {
           // Apply the texture to the sprite material
           spriteMaterial.map = circularTexture;
           
-          // Adjust sprite scale based on texture aspect ratio
+          // Adjust sprite scale based on texture aspect ratio and scene scale
           if (texture.image && texture.image.width && texture.image.height) {
             const aspectRatio = texture.image.width / texture.image.height;
-            sprite.scale.set(2 * aspectRatio, 2, 1);
+            const sceneScale = this.bounds.scale;
+            const baseScale = Math.max(0.5, sceneScale / 1000); // Smaller base scale
+            sprite.scale.set(baseScale * aspectRatio, baseScale, 1);
           }
         },
         undefined,
