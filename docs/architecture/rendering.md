@@ -118,11 +118,29 @@ export default class PolygonRenderer {
 }
 ```
 
-### InteractionManager
+### InteractionFacade and InteractionManager
 
-The `InteractionManager` class handles user interaction with 3D objects:
+The interaction system uses a facade pattern to hide Three.js complexity:
 
 ```typescript
+// InteractionFacade provides a simplified interface to Three.js raycasting
+export class InteractionFacade {
+  constructor(camera: THREE.PerspectiveCamera);
+  
+  // Mouse position and raycasting
+  public updateMousePosition(clientX: number, clientY: number): void;
+  public castRay(objects: THREE.Object3D[]): THREE.Intersection[];
+  public findIntersectedObjectId(objectsMap: Record<string, THREE.Object3D>): string | null;
+  public findIntersectedObjectIdWithIncreasedPrecision(objectsMap: Record<string, THREE.Object3D>): string | null;
+  
+  // Utility methods
+  public hasMovedSignificantly(x: number, y: number, refX: number, refY: number, threshold?: number): boolean;
+  
+  // Cleanup
+  public dispose(): void;
+}
+
+// InteractionManager uses the facade to handle user interactions
 export class InteractionManager {
   constructor({
     camera,

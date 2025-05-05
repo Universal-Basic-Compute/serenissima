@@ -52,9 +52,23 @@ App
 ### 3D Components
 
 - Handle 3D rendering and interaction
-- Encapsulate Three.js functionality
+- Encapsulate Three.js functionality through facade pattern
 - Communicate through well-defined interfaces
-- Follow facade pattern to simplify Three.js complexity
+- Separate business logic from rendering details
+
+#### Facade Pattern Implementation
+
+The 3D components use the facade pattern to hide Three.js complexity:
+
+1. **Facade Classes**: Provide simplified interfaces to Three.js functionality
+   - `SceneFacade`: Manages scene, camera, renderer, and animation loop
+   - `InteractionFacade`: Handles raycasting and object selection
+   - `RenderingFacade`: Manages rendering pipeline and post-processing
+
+2. **Manager Classes**: Use facades to implement higher-level functionality
+   - `InteractionManager`: Uses `InteractionFacade` for user interaction
+   - `PolygonRenderer`: Uses rendering facades for polygon visualization
+   - `RoadCreationManager`: Uses facades for road creation UI
 
 ## Component Communication
 
