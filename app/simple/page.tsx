@@ -164,8 +164,9 @@ export default function SimplePage() {
   }, []);
 
   return (
+    <>
     <div className="relative w-full h-screen">
-      {/* Debug overlay - will show even if other components fail */}
+      {/* Debug overlay - will show even if other components fails */}
       <div className="fixed top-0 left-0 z-50 bg-white p-2 text-xs">
         <button 
           onClick={() => window.location.reload()}
@@ -786,6 +787,7 @@ export default function SimplePage() {
         onClose={() => setSuccessMessage(null)}
       />
     )}
+    </>
   );
 }
 // Add the connectWallet function
