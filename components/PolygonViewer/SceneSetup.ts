@@ -52,36 +52,41 @@ export default class SceneSetup {
       // Add lights with a slight delay to improve initial loading
       setTimeout(() => this.setupLights(activeView), 100);
     
-    // Create cloud system with a delay
-    setTimeout(() => {
-      console.log('Creating cloud system...');
-      this.cloudSystem = new CloudFacade(this.scene, {
-        width: 300, // Increased width for wider cloud coverage
-        height: 300, // Increased height for wider cloud coverage
-        performanceMode: this.performanceMode
-      });
-      
-      // Force an initial update to position clouds and make them visible
-      if (this.cloudSystem) {
-        console.log('Initializing clouds and setting visibility');
-        this.cloudSystem.update(0);
-        this.cloudSystem.setVisible(true); // Force visibility initially
+      // Create cloud system with a delay
+      setTimeout(() => {
+        console.log('Creating cloud system...');
+        this.cloudSystem = new CloudFacade(this.scene, {
+          width: 300, // Increased width for wider cloud coverage
+          height: 300, // Increased height for wider cloud coverage
+          performanceMode: this.performanceMode
+        });
         
-        // Add a second update after a short delay to ensure clouds are properly initialized
-        setTimeout(() => {
-          if (this.cloudSystem) {
-            console.log('Second cloud initialization');
-            this.cloudSystem.update(100);
-            this.cloudSystem.setVisible(true);
-          }
-        }, 500);
-      }
-    }, 2000);
-    
-    // Add animation callback for updates
-    this.threejs.addAnimationCallback(this.update.bind(this));
-    
-    console.log('SceneSetup initialization complete');
+        // Force an initial update to position clouds and make them visible
+        if (this.cloudSystem) {
+          console.log('Initializing clouds and setting visibility');
+          this.cloudSystem.update(0);
+          this.cloudSystem.setVisible(true); // Force visibility initially
+          
+          // Add a second update after a short delay to ensure clouds are properly initialized
+          setTimeout(() => {
+            if (this.cloudSystem) {
+              console.log('Second cloud initialization');
+              this.cloudSystem.update(100);
+              this.cloudSystem.setVisible(true);
+            }
+          }, 500);
+        }
+      }, 2000);
+      
+      // Add animation callback for updates
+      this.threejs.addAnimationCallback(this.update.bind(this));
+      
+      console.log('SceneSetup initialization complete');
+    } catch (error) {
+      console.error('Failed to initialize SceneSetup:', error);
+      // Create minimal scene as fallback
+      this.createMinimalScene(canvas);
+    }
   } catch (error) {
     console.error('Failed to initialize SceneSetup:', error);
     // Create minimal scene as fallback

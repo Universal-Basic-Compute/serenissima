@@ -66,7 +66,7 @@ export default function Home() {
     const primaryTimer = setTimeout(() => {
       console.log('Primary timer: Forcing exit from loading state');
       setIsLoading(false);
-      usePolygonStore.getState().setLoading(false);
+      usePolygonStore.setState({ loading: false });
     }, 8000);
     
     // Secondary timer - medium duration
@@ -75,7 +75,7 @@ export default function Home() {
       if (isLoading) {
         console.log('Still loading after secondary timer, forcing exit');
         setIsLoading(false);
-        usePolygonStore.getState().setLoading(false);
+        usePolygonStore.setState({ loading: false });
       }
     }, 5000);
     
@@ -85,7 +85,7 @@ export default function Home() {
       if (isLoading || usePolygonStore.getState().loading) {
         console.log('EMERGENCY: Still loading after all timers, forcing exit');
         setIsLoading(false);
-        usePolygonStore.getState().setLoading(false);
+        usePolygonStore.setState({ loading: false });
       }
     }, 3000);
     
@@ -1636,7 +1636,9 @@ export default function Home() {
         >
           Reload
         </button>
-        <span>Wallet: {walletAddress ? walletAddress.slice(0, 6) + '...' : 'Not connected'}</span>
+        <span>Loading: {isLoading ? 'Yes' : 'No'}</span>
+        <span className="ml-2">Store Loading: {usePolygonStore.getState().loading ? 'Yes' : 'No'}</span>
+        <span className="ml-2">Polygons: {polygons.length}</span>
       </div>
       
       <div className="relative w-screen h-screen">

@@ -1431,6 +1431,7 @@ export default function PolygonViewer() {
           </button>
         </div>
       </div>
+    </ThreeDErrorBoundary>
     );
   }
   
