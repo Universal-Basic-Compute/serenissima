@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { normalizeCoordinates, createPolygonShape } from './utils';
+import { userService } from '../../lib/services/UserService';
 
 interface SimplePolygonRendererProps {
   scene: THREE.Scene;
@@ -42,8 +43,24 @@ export default class SimplePolygonRenderer {
       Object.values(users).forEach(user => {
         if (user.user_name && user.coat_of_arms_image) {
           this.ownerCoatOfArmsMap[user.user_name] = user.coat_of_arms_image;
+          console.log(`Initialized coat of arms for ${user.user_name}: ${user.coat_of_arms_image}`);
         }
       });
+    }
+    
+    // Also try to get users from UserService
+    try {
+      const serviceUsers = userService.getUsers();
+      if (serviceUsers && Object.keys(serviceUsers).length > 0) {
+        Object.values(serviceUsers).forEach(user => {
+          if (user.user_name && user.coat_of_arms_image) {
+            this.ownerCoatOfArmsMap[user.user_name] = user.coat_of_arms_image;
+            console.log(`Initialized coat of arms from service for ${user.user_name}: ${user.coat_of_arms_image}`);
+          }
+        });
+      }
+    } catch (error) {
+      console.warn('Error getting users from UserService:', error);
     }
     
     // Load sand texture
@@ -189,13 +206,47 @@ export default class SimplePolygonRenderer {
       return;
     }
     
+    // Get all users from UserService to ensure we have the latest data
+    const users = userService.getUsers();
+    
+    // Update our local ownerCoatOfArmsMap with the latest data
+    if (users && Object.keys(users).length > 0) {
+      Object.values(users).forEach(user => {
+        if (user.user_name && user.coat_of_arms_image) {
+          this.ownerCoatOfArmsMap[user.user_name] = user.coat_of_arms_image;
+          console.log(`Found coat of arms for ${user.user_name}: ${user.coat_of_arms_image}`);
+        }
+      });
+    }
+    
+    // Also check our users prop for any coat of arms data
+    if (this.users) {
+      Object.values(this.users).forEach(user => {
+        if (user.user_name && user.coat_of_arms_image) {
+          this.ownerCoatOfArmsMap[user.user_name] = user.coat_of_arms_image;
+          console.log(`Found coat of arms in users prop for ${user.user_name}: ${user.coat_of_arms_image}`);
+        }
+      });
+    }
+    
+    // Log the available coat of arms data
+    console.log('Available coat of arms:', Object.keys(this.ownerCoatOfArmsMap));
+    
     // Process each polygon with an owner and centroid
+    let createdCount = 0;
     this.polygons.forEach(polygon => {
-      if (!polygon.owner || !polygon.centroid) return;
+      if (!polygon.owner || !polygon.centroid) {
+        return;
+      }
+      
+      console.log(`Processing polygon ${polygon.id} with owner ${polygon.owner}`);
       
       // Get the coat of arms URL for the owner
       const coatOfArmsUrl = this.ownerCoatOfArmsMap[polygon.owner];
-      if (!coatOfArmsUrl) return;
+      if (!coatOfArmsUrl) {
+        console.log(`No coat of arms found for owner ${polygon.owner}`);
+        return;
+      }
       
       // Convert centroid to 3D position
       const normalizedCoord = normalizeCoordinates(
@@ -225,11 +276,13 @@ export default class SimplePolygonRenderer {
       
       // Store reference
       this.coatOfArmsSprites[polygon.id] = sprite;
+      createdCount++;
       
       // Load the texture
       this.textureLoader.load(
         coatOfArmsUrl,
         (texture) => {
+          console.log(`Loaded texture for ${polygon.id} from ${coatOfArmsUrl}`);
           // Create a circular texture
           const circularTexture = this.createCircularTexture(texture);
           
@@ -252,7 +305,7 @@ export default class SimplePolygonRenderer {
       );
     });
     
-    console.log(`Created ${Object.keys(this.coatOfArmsSprites).length} coat of arms sprites`);
+    console.log(`Created ${createdCount} coat of arms sprites`);
   }
 
   /**

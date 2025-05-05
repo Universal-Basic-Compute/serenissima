@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import * as THREE from 'three';
 import SimpleCamera from './SimpleCamera';
 import { WaterFacade as SimpleWater, WaterQualityLevel } from './SimpleWater';
@@ -21,41 +21,45 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
   const waterRef = useRef<SimpleWater | null>(null);
   const polygonRendererRef = useRef<SimplePolygonRenderer | null>(null);
   
-  // Load users data
-  useEffect(() => {
-    const loadUsers = async () => {
-      try {
-        const response = await fetch(`${getApiBaseUrl()}/api/users`);
-        if (response.ok) {
-          const data = await response.json();
-          if (data && Array.isArray(data)) {
-            const usersMap: Record<string, any> = {};
-            data.forEach(user => {
-              if (user.user_name) {
-                usersMap[user.user_name] = user;
-              }
-            });
-            
-            // Ensure ConsiglioDeiDieci is always present
-            if (!usersMap['ConsiglioDeiDieci']) {
-              usersMap['ConsiglioDeiDieci'] = {
-                user_name: 'ConsiglioDeiDieci',
-                color: '#8B0000', // Dark red
-                coat_of_arms_image: null
-              };
+  // Define loadUsers as a reusable function
+  const loadUsers = useCallback(async () => {
+    try {
+      const response = await fetch(`${getApiBaseUrl()}/api/users`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data && Array.isArray(data)) {
+          const usersMap: Record<string, any> = {};
+          data.forEach(user => {
+            if (user.user_name) {
+              usersMap[user.user_name] = user;
             }
-            
-            setUsers(usersMap);
-            console.log('Loaded users data:', Object.keys(usersMap).length, 'users');
+          });
+          
+          // Ensure ConsiglioDeiDieci is always present
+          if (!usersMap['ConsiglioDeiDieci']) {
+            usersMap['ConsiglioDeiDieci'] = {
+              user_name: 'ConsiglioDeiDieci',
+              color: '#8B0000', // Dark red
+              coat_of_arms_image: null
+            };
           }
+          
+          setUsers(usersMap);
+          console.log('Loaded users data:', Object.keys(usersMap).length, 'users');
+          return usersMap;
         }
-      } catch (error) {
-        console.error('Error loading users data:', error);
       }
-    };
-    
-    loadUsers();
+      return {};
+    } catch (error) {
+      console.error('Error loading users data:', error);
+      return {};
+    }
   }, []);
+  
+  // Load users data on mount
+  useEffect(() => {
+    loadUsers();
+  }, [loadUsers]);
   
   // Load polygons (still needed to calculate bounds)
   useEffect(() => {
@@ -190,6 +194,28 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
       polygonRendererRef.current.updateViewMode(activeView);
     }
   }, [activeView]);
+  
+  // Add effect to update coat of arms when user data changes
+  useEffect(() => {
+    const handleUserProfileUpdated = (event: CustomEvent) => {
+      console.log('User profile updated event detected in SimpleViewer');
+      if (polygonRendererRef.current) {
+        // Reload users data
+        loadUsers().then(() => {
+          // Update coat of arms in the renderer
+          if (polygonRendererRef.current) {
+            polygonRendererRef.current.createCoatOfArmsSprites();
+          }
+        });
+      }
+    };
+    
+    window.addEventListener('userProfileUpdated', handleUserProfileUpdated as EventListener);
+    
+    return () => {
+      window.removeEventListener('userProfileUpdated', handleUserProfileUpdated as EventListener);
+    };
+  }, [loadUsers]);
   
   // Update water quality when parent component changes quality mode
   useEffect(() => {
