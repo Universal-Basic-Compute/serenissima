@@ -6,7 +6,7 @@ import { Tab } from '@headlessui/react';
 import BuildingModelViewer from '../UI/BuildingModelViewer';
 import PlaceableBuilding from '../PolygonViewer/PlaceableBuilding';
 import { Building } from '@/lib/services/BuildingService';
-import ErrorBoundary from '../UI/ErrorBoundary';
+import ErrorBoundary from '../ErrorBoundary/ErrorBoundary';
 import { useBuildingMenu } from '@/hooks/useBuildingMenu';
 import { log } from '@/lib/logUtils';
 
