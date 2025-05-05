@@ -361,10 +361,7 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
     }
   }, [isDraggingCoatOfArms]);
   
-  // Add handlers for coat of arms dragging
-  const [isDraggingCoatOfArms, setIsDraggingCoatOfArms] = useState(false);
-  const [draggedCoatOfArmsId, setDraggedCoatOfArmsId] = useState<string | null>(null);
-  
+  // Add handlers for coat of arms dragging - already defined above, using existing state
   const handleMouseDown = useCallback((event: MouseEvent) => {
     if (!polygonRendererRef.current || !cameraControllerRef.current) return;
     
