@@ -57,6 +57,15 @@ export default function Home() {
   // State for loading screen
   const [isLoading, setIsLoading] = useState(true);
   
+  // Force exit loading state after a timeout
+  useEffect(() => {
+    const loadingTimer = setTimeout(() => {
+      setIsLoading(false);
+    }, 8000); // 8 seconds timeout
+    
+    return () => clearTimeout(loadingTimer);
+  }, []);
+  
   // State for wallet connection
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [walletAdapter, setWalletAdapter] = useState<PhantomWalletAdapter | null>(null);
@@ -228,6 +237,27 @@ export default function Home() {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+  
+  // Ensure ConsiglioDeiDieci exists with proper color
+  useEffect(() => {
+    if (users && Object.keys(users).length > 0) {
+      const updatedUsers = { ...users };
+      
+      if (!updatedUsers['ConsiglioDeiDieci']) {
+        console.log('Adding ConsiglioDeiDieci to users data');
+        updatedUsers['ConsiglioDeiDieci'] = {
+          user_name: 'ConsiglioDeiDieci',
+          color: '#8B0000', // Dark red
+          coat_of_arms_image: null
+        };
+        setUsers(updatedUsers);
+      } else if (!updatedUsers['ConsiglioDeiDieci'].color) {
+        console.log('Adding color to ConsiglioDeiDieci');
+        updatedUsers['ConsiglioDeiDieci'].color = '#8B0000'; // Dark red
+        setUsers(updatedUsers);
+      }
+    }
+  }, [users]);
   
   // Add this useEffect to check wallet connection status
   useEffect(() => {
@@ -523,7 +553,17 @@ export default function Home() {
   // Add effect to load users data when component mounts
   useEffect(() => {
     loadUsers();
-  }, [loadUsers]);
+    
+    // Force exit from loading state after a timeout
+    const loadingTimeout = setTimeout(() => {
+      if (loading) {
+        console.log('Forcing exit from loading state after timeout');
+        usePolygonStore.setState({ loading: false });
+      }
+    }, 10000); // 10 second timeout
+    
+    return () => clearTimeout(loadingTimeout);
+  }, [loadUsers, loading]);
   
   // Function to ensure all polygons remain visible
   const ensurePolygonsVisible = useCallback(() => {
@@ -561,24 +601,35 @@ export default function Home() {
     if (users && Object.keys(users).length > 0) {
       console.log('Users data loaded:', users);
       
+      // Create a copy of users to modify
+      const updatedUsers = { ...users };
+      let needsUpdate = false;
+      
       // Check if ConsiglioDeiDieci is in the users data
-      if (users['ConsiglioDeiDieci']) {
-        console.log('ConsiglioDeiDieci user data:', users['ConsiglioDeiDieci']);
-        console.log('ConsiglioDeiDieci color:', users['ConsiglioDeiDieci'].color);
+      if (updatedUsers['ConsiglioDeiDieci']) {
+        console.log('ConsiglioDeiDieci user data:', updatedUsers['ConsiglioDeiDieci']);
+        console.log('ConsiglioDeiDieci color:', updatedUsers['ConsiglioDeiDieci'].color);
         
         // If ConsiglioDeiDieci has no color, add a default color
-        if (!users['ConsiglioDeiDieci'].color) {
+        if (!updatedUsers['ConsiglioDeiDieci'].color) {
           console.warn('ConsiglioDeiDieci has no color defined in user data! Adding default color.');
-          users['ConsiglioDeiDieci'].color = '#8B0000'; // Dark red
+          updatedUsers['ConsiglioDeiDieci'].color = '#8B0000'; // Dark red
+          needsUpdate = true;
         }
       } else {
         // If ConsiglioDeiDieci is missing, add it with default values
         console.warn('ConsiglioDeiDieci not found in users data! Adding default entry.');
-        users['ConsiglioDeiDieci'] = {
+        updatedUsers['ConsiglioDeiDieci'] = {
           user_name: 'ConsiglioDeiDieci',
           color: '#8B0000', // Dark red
           coat_of_arms_image: null
         };
+        needsUpdate = true;
+      }
+      
+      // Update the store if needed
+      if (needsUpdate) {
+        usePolygonStore.setState({ users: updatedUsers });
       }
       
       // Force an update of the polygon renderer with the users data
@@ -1550,7 +1601,19 @@ export default function Home() {
   }, [isGoogleLoaded]);
 
   return (
-    <div className="relative w-screen h-screen">
+    <>
+      {/* Debug overlay - will show even if other components fail */}
+      <div className="fixed top-0 left-0 z-50 bg-white p-2 text-xs">
+        <button 
+          onClick={() => window.location.reload()}
+          className="bg-red-500 text-white px-2 py-1 rounded mr-2"
+        >
+          Reload
+        </button>
+        <span>Wallet: {walletAddress ? walletAddress.slice(0, 6) + '...' : 'Not connected'}</span>
+      </div>
+      
+      <div className="relative w-screen h-screen">
       {/* Loading Screen */}
       {isLoading && (
         <LoadingScreen 
@@ -2223,6 +2286,7 @@ export default function Home() {
       {/* Always show the 3D Polygon Viewer regardless of wallet connection status */}
       <PolygonViewer />
       
-    </div>
+      </div>
+    </>
   );
 }

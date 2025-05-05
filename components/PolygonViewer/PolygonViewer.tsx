@@ -242,18 +242,19 @@ export default function PolygonViewer() {
       loadPolygons().then(() => {
         // Debug polygons after loading
         debugPolygons();
+      }).catch(error => {
+        console.error('Error loading polygons:', error);
+        // Force exit from loading state on error
+        usePolygonStore.setState({ loading: false });
       });
       
       // Set a timeout to force exit from loading state if it takes too long
       const loadingTimeout = setTimeout(() => {
         if (loading) {
           console.log('Loading timeout reached, forcing exit from loading state');
-          // Fix: Don't call setState inside useEffect callback
-          setTimeout(() => {
-            usePolygonStore.setState({ loading: false });
-          }, 0);
+          usePolygonStore.setState({ loading: false });
         }
-      }, 30000); // 30 second timeout
+      }, 15000); // 15 second timeout
       
       // Add a listener to detect when polygons are loaded
       const handlePolygonsLoaded = () => {
@@ -653,7 +654,9 @@ export default function PolygonViewer() {
 
   // Set up Three.js scene - only depends on polygons and loading
   useEffect(() => {
-    if (!canvasRef.current || loading) return;
+    if (!canvasRef.current) return;
+    
+    // Don't wait for loading to complete - this helps prevent white screen
     
     // Prevent multiple initializations
     if (sceneRef.current) {
@@ -1403,6 +1406,12 @@ export default function PolygonViewer() {
           <div className="mt-2 w-64 h-2 bg-amber-100 rounded-full overflow-hidden">
             <div className="h-full bg-amber-600 animate-pulse"></div>
           </div>
+          <button 
+            onClick={() => usePolygonStore.setState({ loading: false })}
+            className="mt-6 px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors"
+          >
+            Continue Anyway
+          </button>
         </div>
       </div>
     );

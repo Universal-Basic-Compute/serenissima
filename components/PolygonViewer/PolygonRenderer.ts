@@ -241,6 +241,12 @@ export default class PolygonRenderer {
       }
     });
     
+    // Always ensure ConsiglioDeiDieci has a color
+    if (!this.ownerColorMap['ConsiglioDeiDieci']) {
+      this.ownerColorMap['ConsiglioDeiDieci'] = '#8B0000'; // Dark red
+      console.log('Added missing ConsiglioDeiDieci color in processUserData');
+    }
+    
     console.log(`Processed ${Object.keys(this.ownerCoatOfArmsMap).length} coat of arms and ${Object.keys(this.ownerColorMap).length} colors from users data`);
   }
 
