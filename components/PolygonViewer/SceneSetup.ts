@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { ViewMode } from './types';
 import { CloudFacade } from '@/lib/threejs/CloudFacade';
 import { ThreeJSFacade } from '../../lib/threejs/ThreeJSFacade';
+import { WaterFacade } from '../../lib/threejs/WaterFacade';
 
 interface SceneSetupProps {
   canvas: HTMLCanvasElement;
@@ -71,12 +72,24 @@ export default class SceneSetup {
     this.threejs.addAnimationCallback(this.update.bind(this));
   }
   
+  private waterFacade: WaterFacade | null = null;
+  
   private setupLights(activeView: ViewMode) {
     // Create the sun directional light
     this.sunLight = new THREE.DirectionalLight(0xffffeb, 1.2);
     this.sunLight.position.copy(this.calculateSunPosition());
     this.sunLight.castShadow = false; // Keep shadows disabled for performance
     this.threejs.addObject(this.sunLight);
+    
+    // Initialize water with a delay
+    setTimeout(() => {
+      console.log('Creating water system...');
+      this.waterFacade = new WaterFacade({
+        scene: this.scene,
+        size: 300, // Match the size used for clouds
+        quality: this.performanceMode ? 'low' : 'high'
+      });
+    }, 1500);
     
     // Create a sun sphere
     const sunGeometry = new THREE.SphereGeometry(5, 16, 16);
@@ -290,6 +303,11 @@ export default class SceneSetup {
     // Update clouds
     this.updateClouds(frameCount);
     
+    // Update water
+    if (this.waterFacade) {
+      this.waterFacade.update();
+    }
+    
     // Update sun position occasionally (every 100 frames)
     if (frameCount % 100 === 0) {
       const newPosition = this.calculateSunPosition();
@@ -330,6 +348,9 @@ export default class SceneSetup {
     if (this.cloudSystem) {
       this.cloudSystem.setPerformanceMode(this.performanceMode);
     }
+    if (this.waterFacade) {
+      this.waterFacade.setQuality(this.performanceMode ? 'low' : 'high');
+    }
   }
   
   public cleanup() {
@@ -337,6 +358,12 @@ export default class SceneSetup {
     if (this.cloudSystem) {
       this.cloudSystem.dispose();
       this.cloudSystem = null;
+    }
+    
+    // Clean up water system
+    if (this.waterFacade) {
+      this.waterFacade.dispose();
+      this.waterFacade = null;
     }
     
     // Dispose of ThreeJS facade - this will handle all THREE.js resource cleanup
