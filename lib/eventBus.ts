@@ -86,5 +86,11 @@ export const EventTypes = {
   // New event types for the refactored architecture
   OWNER_COLORS_UPDATED: 'ownerColorsUpdated',
   OWNER_COAT_OF_ARMS_UPDATED: 'ownerCoatOfArmsUpdated',
-  POLYGON_OWNER_UPDATED: 'polygonOwnerUpdated'
+  POLYGON_OWNER_UPDATED: 'polygonOwnerUpdated',
+  // Interaction events
+  INTERACTION_CLICK: 'interactionClick',
+  INTERACTION_MOUSE_DOWN: 'interactionMouseDown',
+  INTERACTION_MOUSE_MOVE: 'interactionMouseMove',
+  INTERACTION_DRAG: 'interactionDrag',
+  INTERACTION_DRAG_END: 'interactionDragEnd'
 };

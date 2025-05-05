@@ -9,30 +9,25 @@ interface InteractionManagerProps {
   scene: THREE.Scene;
   polygonMeshesRef: MutableRefObject<Record<string, THREE.Mesh>>;
   activeView: ViewMode;
-  hoveredPolygonId: string | null;
-  setHoveredPolygonId: (id: string | null) => void;
-  selectedPolygonId: string | null;
-  setSelectedPolygonId: (id: string | null) => void;
 }
 
 /**
  * Manages user interactions with 3D objects in the scene
  * Uses InteractionFacade to abstract Three.js complexity
+ * Uses EventBus for communication with other components
  */
 export class InteractionManager {
   private scene: THREE.Scene;
   private polygonMeshesRef: MutableRefObject<Record<string, THREE.Mesh>>;
   private activeView: ViewMode;
-  private selectedPolygonId: string | null;
-  private setSelectedPolygonId: (id: string | null) => void;
+  private selectedPolygonId: string | null = null;
   private handleMouseClick: (event: MouseEvent) => void;
   private handleMouseDown: (event: MouseEvent) => void;
   private handleMouseMove: (event: MouseEvent) => void;
   private isProcessingClick: boolean = false;
   private isDragging: boolean = false;
   private mouseDownPosition = { x: 0, y: 0 };
-  private hoveredPolygonId: string | null;
-  private setHoveredPolygonId: (id: string | null) => void;
+  private hoveredPolygonId: string | null = null;
   private enabled: boolean = true;
   
   // Facade for Three.js interaction
@@ -46,33 +41,19 @@ export class InteractionManager {
     camera,
     scene,
     polygonMeshesRef,
-    activeView,
-    hoveredPolygonId,
-    setHoveredPolygonId,
-    selectedPolygonId,
-    setSelectedPolygonId
+    activeView
   }: InteractionManagerProps) {
     this.scene = scene;
     this.polygonMeshesRef = polygonMeshesRef;
     this.activeView = activeView;
-    this.selectedPolygonId = selectedPolygonId;
-    this.setSelectedPolygonId = setSelectedPolygonId;
-    this.hoveredPolygonId = hoveredPolygonId;
     
     // Create the interaction facade
     this.interactionFacade = new InteractionFacade(camera);
     
-    // Store the original setHoveredPolygonId function
-    const originalSetHoveredPolygonId = setHoveredPolygonId;
-    
-    // Modify the setHoveredPolygonId function to use the event bus
-    this.setHoveredPolygonId = (id: string | null) => {
-      // Use event bus for hover state changes
-      eventBus.emit(EventTypes.POLYGON_HOVER, { polygonId: id });
-      
-      // Call the original setHoveredPolygonId function
-      originalSetHoveredPolygonId(id);
-    };
+    // Subscribe to relevant events
+    eventBus.subscribe(EventTypes.POLYGON_SELECTED, (data: { polygonId: string | null }) => {
+      this.selectedPolygonId = data.polygonId;
+    });
     
     // Bind methods to this instance
     this.handleMouseClick = this.onMouseClick.bind(this);
@@ -91,6 +72,13 @@ export class InteractionManager {
     
     this.mouseDownPosition = { x: event.clientX, y: event.clientY };
     this.isDragging = false;
+    
+    // Emit mouse down event
+    eventBus.emit(EventTypes.INTERACTION_MOUSE_DOWN, {
+      x: event.clientX,
+      y: event.clientY,
+      button: event.button
+    });
   }
   
   private onMouseMove(event: MouseEvent) {
@@ -104,6 +92,13 @@ export class InteractionManager {
     }
     this.lastMoveTime = now;
     
+    // Emit mouse move event with coordinates
+    eventBus.emit(EventTypes.INTERACTION_MOUSE_MOVE, {
+      x: event.clientX,
+      y: event.clientY,
+      buttons: event.buttons
+    });
+    
     // If mouse is down and has moved more than a few pixels, consider it a drag
     if (event.buttons > 0) {
       const isDragging = this.interactionFacade.hasMovedSignificantly(
@@ -116,6 +111,12 @@ export class InteractionManager {
       
       if (isDragging) {
         this.isDragging = true;
+        eventBus.emit(EventTypes.INTERACTION_DRAG, {
+          x: event.clientX,
+          y: event.clientY,
+          startX: this.mouseDownPosition.x,
+          startY: this.mouseDownPosition.y
+        });
       }
       return; // Skip hover detection during dragging
     }
@@ -128,8 +129,8 @@ export class InteractionManager {
     
     if (hoveredId) {
       if (this.hoveredPolygonId !== hoveredId) {
-        // Update hover state
-        this.setHoveredPolygonId(hoveredId);
+        // Update hover state through event bus
+        eventBus.emit(EventTypes.POLYGON_HOVER, { polygonId: hoveredId });
         this.hoveredPolygonId = hoveredId;
         
         // Set cursor to pointer to indicate interactivity
@@ -137,7 +138,7 @@ export class InteractionManager {
       }
     } else if (this.hoveredPolygonId) {
       // If we're not hovering over any polygon but we were before
-      this.setHoveredPolygonId(null);
+      eventBus.emit(EventTypes.POLYGON_HOVER, { polygonId: null });
       this.hoveredPolygonId = null;
       
       // Reset cursor
@@ -166,6 +167,10 @@ export class InteractionManager {
     // CRITICAL: Check if this is a drag end event rather than a true click
     if (this.isDragging) {
       this.isDragging = false;
+      eventBus.emit(EventTypes.INTERACTION_DRAG_END, {
+        x: event.clientX,
+        y: event.clientY
+      });
       return;
     }
     
@@ -182,6 +187,13 @@ export class InteractionManager {
     this.isProcessingClick = true;
     
     try {
+      // Emit raw click event
+      eventBus.emit(EventTypes.INTERACTION_CLICK, {
+        x: event.clientX,
+        y: event.clientY,
+        button: event.button
+      });
+      
       // Update mouse position in the facade
       this.interactionFacade.updateMousePosition(event.clientX, event.clientY);
       
@@ -206,19 +218,13 @@ export class InteractionManager {
         // Otherwise, always select the new polygon
         const newSelectedId = clickedId === this.selectedPolygonId ? null : clickedId;
         
-        // Update selection state
-        this.setSelectedPolygonId(newSelectedId);
-        this.selectedPolygonId = newSelectedId;
-        
-        // Use event bus for selection events
+        // Update selection state through event bus only
         eventBus.emit(EventTypes.POLYGON_SELECTED, { polygonId: newSelectedId });
+        this.selectedPolygonId = newSelectedId;
       } else if (this.selectedPolygonId) {
         // Clicking on empty space, deselect current selection
-        this.setSelectedPolygonId(null);
-        this.selectedPolygonId = null;
-        
-        // Use event bus for deselection
         eventBus.emit(EventTypes.POLYGON_SELECTED, { polygonId: null });
+        this.selectedPolygonId = null;
       }
       
       this.isProcessingClick = false;

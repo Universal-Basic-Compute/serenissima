@@ -61,6 +61,7 @@ Events are defined as constants to ensure consistency:
 
 ```typescript
 export const EventTypes = {
+  // Domain events
   POLYGON_SELECTED: 'polygonSelected',
   POLYGON_HOVER: 'polygonHover',
   LAND_OWNERSHIP_CHANGED: 'landOwnershipChanged',
@@ -74,7 +75,19 @@ export const EventTypes = {
   BUILDING_PLACED: 'buildingPlaced',
   VIEW_MODE_CHANGED: 'viewModeChanged',
   POLYGONS_LOADED: 'polygonsLoaded',
-  POLYGON_DELETED: 'polygonDeleted'
+  POLYGON_DELETED: 'polygonDeleted',
+  
+  // UI interaction events
+  INTERACTION_CLICK: 'interactionClick',
+  INTERACTION_MOUSE_DOWN: 'interactionMouseDown',
+  INTERACTION_MOUSE_MOVE: 'interactionMouseMove',
+  INTERACTION_DRAG: 'interactionDrag',
+  INTERACTION_DRAG_END: 'interactionDragEnd',
+  
+  // Rendering events
+  OWNER_COLORS_UPDATED: 'ownerColorsUpdated',
+  OWNER_COAT_OF_ARMS_UPDATED: 'ownerCoatOfArmsUpdated',
+  POLYGON_OWNER_UPDATED: 'polygonOwnerUpdated'
 };
 ```
 
@@ -173,6 +186,63 @@ Example:
  *   newOwner: 'user-456',
  *   previousOwner: 'user-789',
  *   timestamp: Date.now()
+ * });
+ */
+```
+
+### Interaction Events
+
+```typescript
+/**
+ * INTERACTION_CLICK
+ * 
+ * Emitted when a user clicks in the 3D scene.
+ * 
+ * Data:
+ * - x: number - The client X coordinate of the click
+ * - y: number - The client Y coordinate of the click
+ * - button: number - The mouse button used (0 = left, 1 = middle, 2 = right)
+ * 
+ * Emitters:
+ * - InteractionManager
+ * 
+ * Handlers:
+ * - PolygonViewer
+ * - BuildingPlacer
+ * - RoadCreationManager
+ * 
+ * Example:
+ * eventBus.emit(EventTypes.INTERACTION_CLICK, {
+ *   x: 250,
+ *   y: 300,
+ *   button: 0
+ * });
+ */
+
+/**
+ * INTERACTION_DRAG
+ * 
+ * Emitted when a user drags in the 3D scene.
+ * 
+ * Data:
+ * - x: number - The current client X coordinate
+ * - y: number - The current client Y coordinate
+ * - startX: number - The starting X coordinate of the drag
+ * - startY: number - The starting Y coordinate of the drag
+ * 
+ * Emitters:
+ * - InteractionManager
+ * 
+ * Handlers:
+ * - CameraController
+ * - SelectionBox
+ * 
+ * Example:
+ * eventBus.emit(EventTypes.INTERACTION_DRAG, {
+ *   x: 300,
+ *   y: 350,
+ *   startX: 250,
+ *   startY: 300
  * });
  */
 ```
