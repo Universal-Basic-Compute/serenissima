@@ -403,9 +403,13 @@ export default class SimplePolygonRenderer {
     // Calculate bounds of the polygon
     const bounds = this.calculatePolygonBounds(normalizedCoords);
     
-    // Load the coat of arms texture
+    // Load the coat of arms texture - handle both external and local URLs
+    const textureUrl = coatOfArmsUrl.startsWith('http') 
+      ? coatOfArmsUrl 
+      : `${window.location.origin}${coatOfArmsUrl}`;
+      
     this.textureLoader.load(
-      coatOfArmsUrl,
+      textureUrl,
       (texture) => {
         // Draw the polygon shape on the canvas
         ctx.beginPath();

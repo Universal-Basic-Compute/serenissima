@@ -194,7 +194,8 @@ export default function SimplePage() {
     try {
       setIsGeneratingImage(true);
       
-      const response = await fetch(`${getApiBaseUrl()}/api/generate-coat-of-arms`, {
+      // First, generate the image using the AI service
+      const generateResponse = await fetch(`${getApiBaseUrl()}/api/generate-coat-of-arms`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -204,17 +205,47 @@ export default function SimplePage() {
         }),
       });
       
-      if (!response.ok) {
+      if (!generateResponse.ok) {
         throw new Error('Failed to generate coat of arms image');
       }
       
-      const data = await response.json();
+      const generateData = await generateResponse.json();
       
-      if (data.success && data.image_url) {
-        setCoatOfArmsImage(data.image_url);
-      } else {
-        throw new Error(data.error || 'Failed to generate image');
+      if (!generateData.success || !generateData.image_url) {
+        throw new Error(generateData.error || 'Failed to generate image');
       }
+      
+      // Now, fetch the generated image and save it to our server
+      const imageResponse = await fetch(generateData.image_url);
+      if (!imageResponse.ok) {
+        throw new Error('Failed to fetch generated image');
+      }
+      
+      const imageBlob = await imageResponse.blob();
+      
+      // Create a FormData object to upload the image
+      const formData = new FormData();
+      formData.append('image', imageBlob, 'coat-of-arms.png');
+      
+      // Upload to our server
+      const uploadResponse = await fetch('/api/upload-coat-of-arms', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (!uploadResponse.ok) {
+        throw new Error('Failed to save image to server');
+      }
+      
+      const uploadData = await uploadResponse.json();
+      
+      if (!uploadData.success) {
+        throw new Error(uploadData.error || 'Failed to save image');
+      }
+      
+      // Update state with the local image URL
+      setCoatOfArmsImage(uploadData.image_url);
+      
     } catch (error) {
       console.error('Error generating coat of arms image:', error);
       alert(`Failed to generate image: ${error instanceof Error ? error.message : String(error)}`);

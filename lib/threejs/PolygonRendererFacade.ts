@@ -221,8 +221,13 @@ export class PolygonRendererFacade {
     
     const texture = new THREE.Texture();
     
+    // Handle both external and local URLs
+    const textureUrl = url.startsWith('http') 
+      ? url 
+      : `${window.location.origin}${url}`;
+    
     this.textureLoader.load(
-      url,
+      textureUrl,
       (loadedTexture) => {
         texture.image = loadedTexture.image;
         texture.needsUpdate = true;
@@ -230,7 +235,7 @@ export class PolygonRendererFacade {
       },
       undefined,
       (error) => {
-        console.error(`Error loading texture ${url}:`, error);
+        console.error(`Error loading texture ${textureUrl}:`, error);
         if (onError) onError(error);
       }
     );

@@ -883,9 +883,13 @@ export default class PolygonRenderer {
           if (coatOfArmsUrl) {
             log.debug(`Creating coat of arms sprite for ${polygon.id} at position:`, normalizedCoord);
             
-            // Load the texture with error handling
+            // Load the texture with error handling - handle both external and local URLs
+            const textureUrl = coatOfArmsUrl.startsWith('http') 
+              ? coatOfArmsUrl 
+              : `${window.location.origin}${coatOfArmsUrl}`;
+              
             const texture = this.facade.loadTexture(
-              coatOfArmsUrl,
+              textureUrl,
               (loadedTexture) => {
                 // Create a circular texture
                 const circularTexture = this.facade.createCircularTexture(loadedTexture);
