@@ -258,7 +258,26 @@ export default class PolygonRenderer {
       () => this.facade.createLandMaterial(),
       RenderingErrorType.MATERIAL_CREATION,
       'sand-material',
-      () => this.errorHandler.createFallbackMaterial('#fff5d0') // Lighter, more yellow fallback sand color
+      () => {
+        // Create a fallback material with texture
+        const fallbackMaterial = this.errorHandler.createFallbackMaterial('#fff5d0');
+        
+        // Try to load a texture for the fallback material
+        try {
+          const textureLoader = new THREE.TextureLoader();
+          textureLoader.load('/textures/sand.jpg', (texture) => {
+            texture.wrapS = THREE.RepeatWrapping;
+            texture.wrapT = THREE.RepeatWrapping;
+            texture.repeat.set(5, 5);
+            fallbackMaterial.map = texture;
+            fallbackMaterial.needsUpdate = true;
+          });
+        } catch (e) {
+          console.error('Failed to load texture for fallback material:', e);
+        }
+        
+        return fallbackMaterial;
+      }
     );
     
     // Track success and failure counts
