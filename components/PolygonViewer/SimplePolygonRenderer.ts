@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { BufferGeometryUtils } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { normalizeCoordinates, createPolygonShape } from './utils';
 
 interface SimplePolygonRendererProps {
@@ -108,12 +109,17 @@ export default class SimplePolygonRenderer {
         };
       
         // Use ExtrudeGeometry instead of ShapeGeometry for elevation
-        const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+        let geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
         
         // Apply more aggressive smoothing to the geometry
         geometry.computeVertexNormals();
-        // Merge vertices to eliminate tiny gaps
-        geometry.mergeVertices();
+        
+        // Merge vertices to eliminate tiny gaps using BufferGeometryUtils
+        if (BufferGeometryUtils && BufferGeometryUtils.mergeVertices) {
+          geometry = BufferGeometryUtils.mergeVertices(geometry);
+        } else {
+          console.warn('BufferGeometryUtils.mergeVertices not available, skipping vertex merging');
+        }
       
         // Create mesh with shared material
         const mesh = new THREE.Mesh(geometry, this.sharedMaterial);
