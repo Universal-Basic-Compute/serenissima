@@ -208,15 +208,6 @@ export default class SimplePolygonRenderer {
    * Create coat of arms sprites for all polygons with owners
    */
   public createCoatOfArmsSprites() {
-    // Add debug visualization to help with positioning
-    const addDebugSphere = (position: THREE.Vector3, color: number = 0xff0000) => {
-      const debugGeometry = new THREE.SphereGeometry(0.05, 8, 8);
-      const debugMaterial = new THREE.MeshBasicMaterial({ color: color });
-      const debugSphere = new THREE.Mesh(debugGeometry, debugMaterial);
-      debugSphere.position.copy(position);
-      this.scene.add(debugSphere);
-      return debugSphere;
-    };
     console.log('Creating coat of arms sprites for land view');
     
     // Remove any existing sprites
@@ -334,7 +325,7 @@ export default class SimplePolygonRenderer {
   private createCircularCoatOfArms(polygon: any, coatOfArmsUrl: string) {
     if (!polygon.centroid) return;
     
-    // Use centroid for positioning
+    // Always use centroid for positioning
     const positionCoord = polygon.centroid;
     
     // Convert centroid to 3D position
