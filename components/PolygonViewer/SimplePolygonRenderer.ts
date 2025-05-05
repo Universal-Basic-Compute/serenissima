@@ -323,7 +323,7 @@ export default class SimplePolygonRenderer {
     
     // Create a plane geometry for the texture
     const sceneScale = this.bounds.scale;
-    const spriteScale = Math.max(1, sceneScale / 500); // Dynamic scaling based on scene
+    const spriteScale = Math.max(2, sceneScale / 250); // Doubled scale and halved divisor for larger sprites
     const planeGeometry = new THREE.PlaneGeometry(spriteScale, spriteScale);
     const planeMaterial = new THREE.MeshBasicMaterial({
       map: null, // Will be set when texture loads
@@ -336,7 +336,7 @@ export default class SimplePolygonRenderer {
     // Create mesh and position it
     const plane = new THREE.Mesh(planeGeometry, planeMaterial);
     plane.position.set(normalizedCoord.x, 0.2, -normalizedCoord.y);
-    plane.rotation.x = -Math.PI / 2; // Rotate to lie flat on the ground
+    plane.rotation.x = -Math.PI / 2 + Math.PI; // Rotate to lie flat and invert orientation
     plane.renderOrder = 10; // Ensure it renders on top of land
     
     // Add to scene
@@ -362,8 +362,8 @@ export default class SimplePolygonRenderer {
           if (texture.image && texture.image.width && texture.image.height) {
             const aspectRatio = texture.image.width / texture.image.height;
             const sceneScale = this.bounds.scale;
-            const baseScale = Math.max(0.125, sceneScale / 4000); // 4x smaller base scale
-            plane.scale.set(baseScale * aspectRatio, baseScale, 1);
+            const baseScale = Math.max(0.25, sceneScale / 2000); // Doubled scale factor
+            plane.scale.set(baseScale * aspectRatio * 2, baseScale * 2, 1); // Doubled both dimensions
           }
         }
       },
@@ -488,16 +488,16 @@ export default class SimplePolygonRenderer {
           this.bounds.scale,
           this.bounds.latCorrectionFactor
         )[0];
-        
+    
         mesh.position.set(centroidPos.x, 0.05, -centroidPos.y);
-        mesh.rotation.x = -Math.PI / 2;
+        mesh.rotation.x = -Math.PI / 2 + Math.PI; // Invert orientation by adding PI (180 degrees)
         mesh.renderOrder = 10;
-        
+    
         // Scale based on polygon size
         const maxDim = Math.max(bounds.width, bounds.height);
         const sceneScale = this.bounds.scale;
-        const baseScale = Math.max(0.125, sceneScale / 4000);
-        mesh.scale.set(maxDim * baseScale, maxDim * baseScale, 1);
+        const baseScale = Math.max(0.25, sceneScale / 2000); // Doubled scale factor
+        mesh.scale.set(maxDim * baseScale * 2, maxDim * baseScale * 2, 1); // Doubled both dimensions
         
         // Add to scene
         this.scene.add(mesh);
