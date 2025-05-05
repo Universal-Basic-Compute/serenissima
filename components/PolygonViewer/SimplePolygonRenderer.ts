@@ -305,27 +305,23 @@ export default class SimplePolygonRenderer {
       // Uncomment this line to see where centroids are located
       // const debugSphere = addDebugSphere(new THREE.Vector3(normalizedCoord.x, 0, normalizedCoord.y));
       
-      // Create a sprite material
-      const spriteMaterial = new THREE.SpriteMaterial({
-        map: null, // Will be set when texture loads
-        transparent: true,
-        depthTest: true,
-        depthWrite: false,
-        sizeAttenuation: true
-      });
-      
-      // Create the sprite
-      const sprite = new THREE.Sprite(spriteMaterial);
-      
-      // Position the sprite correctly - lower height to be closer to land
-      // Invert the z-coordinate to ensure proper north-south orientation
-      sprite.position.set(normalizedCoord.x, 0.2, -normalizedCoord.y);
-      sprite.rotation.x = Math.PI / 2; // Rotate 90 degrees around X axis to face down
-      
-      // Adjust scale based on scene size
+      // Create a plane geometry for the texture
       const sceneScale = this.bounds.scale;
       const spriteScale = Math.max(1, sceneScale / 500); // Dynamic scaling based on scene
-      sprite.scale.set(spriteScale, spriteScale, 1);
+      const planeGeometry = new THREE.PlaneGeometry(spriteScale, spriteScale);
+      const planeMaterial = new THREE.MeshBasicMaterial({
+        map: null, // Will be set when texture loads
+        transparent: true,
+        side: THREE.DoubleSide,
+        depthTest: true,
+        depthWrite: false
+      });
+      
+      // Create mesh and position it
+      const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+      plane.position.set(normalizedCoord.x, 0.2, -normalizedCoord.y);
+      plane.rotation.x = -Math.PI / 2; // Rotate to lie flat on the ground
+      plane.renderOrder = 10; // Ensure it renders on top of land
       
       // Ensure sprites render on top of land
       sprite.renderOrder = 10;
