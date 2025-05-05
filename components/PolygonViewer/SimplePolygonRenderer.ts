@@ -325,16 +325,17 @@ export default class SimplePolygonRenderer {
         depthWrite: false
       });
       
-      // Create sprite and position it
-      const sprite = new THREE.Sprite(spriteMaterial);
-      sprite.position.set(normalizedCoord.x, 0.2, -normalizedCoord.y);
-      sprite.renderOrder = 10; // Ensure it renders on top of land
+      // Create mesh and position it
+      const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+      plane.position.set(normalizedCoord.x, 0.2, -normalizedCoord.y);
+      plane.rotation.x = -Math.PI / 2; // Rotate to lie flat on the ground
+      plane.renderOrder = 10; // Ensure it renders on top of land
       
       // Add to scene
-      this.scene.add(sprite);
+      this.scene.add(plane);
       
       // Store reference
-      this.coatOfArmsSprites[polygon.id] = sprite;
+      this.coatOfArmsSprites[polygon.id] = plane;
       createdCount++;
       
       // Load the texture
@@ -345,22 +346,25 @@ export default class SimplePolygonRenderer {
           // Create a circular texture
           const circularTexture = this.createCircularTexture(texture);
           
-          // Apply the texture to the sprite material
-          spriteMaterial.map = circularTexture;
-          
-          // Adjust sprite scale based on texture aspect ratio and scene scale
-          if (texture.image && texture.image.width && texture.image.height) {
-            const aspectRatio = texture.image.width / texture.image.height;
-            const sceneScale = this.bounds.scale;
-            const baseScale = Math.max(0.5, sceneScale / 1000); // Smaller base scale
-            sprite.scale.set(baseScale * aspectRatio, baseScale, 1);
+          // Apply the texture to the plane material
+          if (planeMaterial) {
+            planeMaterial.map = circularTexture;
+            planeMaterial.needsUpdate = true;
+            
+            // Adjust plane scale based on texture aspect ratio and scene scale
+            if (texture.image && texture.image.width && texture.image.height) {
+              const aspectRatio = texture.image.width / texture.image.height;
+              const sceneScale = this.bounds.scale;
+              const baseScale = Math.max(0.5, sceneScale / 1000); // Smaller base scale
+              plane.scale.set(baseScale * aspectRatio, baseScale, 1);
+            }
           }
         },
         undefined,
         (error) => {
           console.error(`Failed to load coat of arms texture for ${polygon.id}:`, error);
-          // Remove the sprite if texture loading fails
-          this.scene.remove(sprite);
+          // Remove the plane if texture loading fails
+          this.scene.remove(plane);
           delete this.coatOfArmsSprites[polygon.id];
         }
       );
