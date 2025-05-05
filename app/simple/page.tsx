@@ -84,6 +84,45 @@ export default function SimplePage() {
     };
   }, []);
   
+  // Add the function to generate the coat of arms image
+  const generateCoatOfArmsImage = async () => {
+    if (!familyCoatOfArms.trim()) {
+      alert('Please enter a description of your family coat of arms first');
+      return;
+    }
+    
+    try {
+      setIsGeneratingImage(true);
+      
+      const response = await fetch(`${getApiBaseUrl()}/api/generate-coat-of-arms`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          description: familyCoatOfArms
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to generate coat of arms image');
+      }
+      
+      const data = await response.json();
+      
+      if (data.success && data.image_url) {
+        setCoatOfArmsImage(data.image_url);
+      } else {
+        throw new Error(data.error || 'Failed to generate image');
+      }
+    } catch (error) {
+      console.error('Error generating coat of arms image:', error);
+      alert(`Failed to generate image: ${error instanceof Error ? error.message : String(error)}`);
+    } finally {
+      setIsGeneratingImage(false);
+    }
+  };
+  
   // Initialize wallet adapter
   useEffect(() => {
     console.log("Initializing wallet adapter...");
