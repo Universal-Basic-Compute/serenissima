@@ -569,14 +569,16 @@ export default function Home() {
     
     // Force exit from loading state after a timeout
     const loadingTimeout = setTimeout(() => {
-      if (loading) {
+      // Get the current loading state from the store
+      const currentLoading = usePolygonStore.getState().loading;
+      if (currentLoading) {
         console.log('Forcing exit from loading state after timeout');
         usePolygonStore.setState({ loading: false });
       }
     }, 10000); // 10 second timeout
     
     return () => clearTimeout(loadingTimeout);
-  }, [loadUsers, loading]);
+  }, [loadUsers]); // Remove loading from dependencies
   
   // Function to ensure all polygons remain visible
   const ensurePolygonsVisible = useCallback(() => {
