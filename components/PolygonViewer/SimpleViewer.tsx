@@ -338,7 +338,7 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
     }
   }, [activeView]);
   
-  const handleMouseMove = useCallback((event: MouseEvent) => {
+  const handleCoatOfArmsDrag = useCallback((event: MouseEvent) => {
     if (isDraggingCoatOfArms && draggedCoatOfArmsId && polygonRendererRef.current && cameraControllerRef.current) {
       polygonRendererRef.current.updateDraggingCoatOfArms(
         cameraControllerRef.current.camera,
@@ -363,15 +363,15 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
   // Add event listeners for dragging
   useEffect(() => {
     window.addEventListener('mousedown', handleMouseDown);
-    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mousemove', handleCoatOfArmsDrag);
     window.addEventListener('mouseup', handleMouseUp);
     
     return () => {
       window.removeEventListener('mousedown', handleMouseDown);
-      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mousemove', handleCoatOfArmsDrag);
       window.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [handleMouseDown, handleMouseMove, handleMouseUp]);
+  }, [handleMouseDown, handleCoatOfArmsDrag, handleMouseUp]);
   
   // Update water quality when parent component changes quality mode
   useEffect(() => {
