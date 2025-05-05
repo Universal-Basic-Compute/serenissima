@@ -107,6 +107,19 @@ export class UserService {
     log.info('UserService initialized successfully');
   }
   
+  // Singleton instance
+  private static instance: UserService | null = null;
+  
+  /**
+   * Get the singleton instance of UserService
+   */
+  public static getInstance(): UserService {
+    if (!UserService.instance) {
+      UserService.instance = new UserService();
+    }
+    return UserService.instance;
+  }
+  
   /**
    * Configure the cache settings
    */
