@@ -184,7 +184,7 @@ export default function SimplePage() {
     };
   }, []);
   
-  // Add the function to generate the coat of arms image
+  // Function to generate coat of arms image
   const generateCoatOfArmsImage = async () => {
     if (!familyCoatOfArms.trim()) {
       alert('Please enter a description of your family coat of arms first');
@@ -194,57 +194,12 @@ export default function SimplePage() {
     try {
       setIsGeneratingImage(true);
       
-      // First, generate the image using the AI service
-      const generateResponse = await fetch(`${getApiBaseUrl()}/api/generate-coat-of-arms`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          description: familyCoatOfArms
-        }),
-      });
-      
-      if (!generateResponse.ok) {
-        throw new Error('Failed to generate coat of arms image');
-      }
-      
-      const generateData = await generateResponse.json();
-      
-      if (!generateData.success || !generateData.image_url) {
-        throw new Error(generateData.error || 'Failed to generate image');
-      }
-      
-      // Now, fetch the generated image and save it to our server
-      const imageResponse = await fetch(generateData.image_url);
-      if (!imageResponse.ok) {
-        throw new Error('Failed to fetch generated image');
-      }
-      
-      const imageBlob = await imageResponse.blob();
-      
-      // Create a FormData object to upload the image
-      const formData = new FormData();
-      formData.append('image', imageBlob, 'coat-of-arms.png');
-      
-      // Upload to our server
-      const uploadResponse = await fetch('/api/upload-coat-of-arms', {
-        method: 'POST',
-        body: formData,
-      });
-      
-      if (!uploadResponse.ok) {
-        throw new Error('Failed to save image to server');
-      }
-      
-      const uploadData = await uploadResponse.json();
-      
-      if (!uploadData.success) {
-        throw new Error(uploadData.error || 'Failed to save image');
-      }
+      // Import the utility function dynamically to reduce initial load time
+      const { generateCoatOfArmsImage } = await import('@/utils/coatOfArmsUtils');
+      const imageUrl = await generateCoatOfArmsImage(familyCoatOfArms);
       
       // Update state with the local image URL
-      setCoatOfArmsImage(uploadData.image_url);
+      setCoatOfArmsImage(imageUrl);
       
     } catch (error) {
       console.error('Error generating coat of arms image:', error);
@@ -1059,7 +1014,7 @@ const storeWalletInAirtable = async (walletAddress: string) => {
   }
 };
 
-// Add the generateCoatOfArmsImage function
+// Function to generate coat of arms image
 const generateCoatOfArmsImage = async () => {
   if (!familyCoatOfArms.trim()) {
     alert('Please enter a description of your family coat of arms first');
@@ -1069,27 +1024,13 @@ const generateCoatOfArmsImage = async () => {
   try {
     setIsGeneratingImage(true);
     
-    const response = await fetch(`${getApiBaseUrl()}/api/generate-coat-of-arms`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        description: familyCoatOfArms
-      }),
-    });
+    // Import the utility function dynamically to reduce initial load time
+    const { generateCoatOfArmsImage } = await import('@/utils/coatOfArmsUtils');
+    const imageUrl = await generateCoatOfArmsImage(familyCoatOfArms);
     
-    if (!response.ok) {
-      throw new Error('Failed to generate coat of arms image');
-    }
+    // Update state with the local image URL
+    setCoatOfArmsImage(imageUrl);
     
-    const data = await response.json();
-    
-    if (data.success && data.image_url) {
-      setCoatOfArmsImage(data.image_url);
-    } else {
-      throw new Error(data.error || 'Failed to generate image');
-    }
   } catch (error) {
     console.error('Error generating coat of arms image:', error);
     alert(`Failed to generate image: ${error instanceof Error ? error.message : String(error)}`);
