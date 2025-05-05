@@ -171,7 +171,7 @@ export class RoadManager {
       // Try to import the 3D utilities for path simplification
       try {
         // Import from the correct location
-        const utils3DModule = require('../PolygonViewer/utils3D');
+        const utils3DModule = require('../../components/PolygonViewer/utils3D');
         const { simplifyPath } = utils3DModule;
         
         try {
@@ -407,7 +407,7 @@ export class RoadManager {
       // Try to import the 3D utilities for smoother roads
       try {
         // Import from the correct location
-        const utils3DModule = require('../PolygonViewer/utils3D');
+        const utils3DModule = require('../../components/PolygonViewer/utils3D');
         const { smoothPath } = utils3DModule;
         
         try {
