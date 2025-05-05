@@ -1,57 +1,42 @@
+// This file is deprecated and will be removed in a future update
+// Please use lib/threejs/WaterFacade.ts directly
+
 import * as THREE from 'three';
 import { WaterFacade, WaterQualityLevel } from '../../lib/threejs/WaterFacade';
 
+// Re-export the WaterFacade and WaterQualityLevel for backward compatibility
+export { WaterFacade, WaterQualityLevel };
+
 /**
- * Creates and manages water for the 3D scene
+ * @deprecated Use WaterFacade directly instead
  */
 export class Water {
   private waterFacade: WaterFacade | null = null;
-  private scene: THREE.Scene;
-  private size: number;
-  private quality: WaterQualityLevel;
 
   /**
-   * Create a new Water instance
-   * @param scene The THREE.Scene to add water to
-   * @param size The size of the water plane
-   * @param quality The quality level for water rendering
+   * @deprecated Use WaterFacade directly instead
    */
   constructor(scene: THREE.Scene, size: number, quality: WaterQualityLevel = WaterQualityLevel.MEDIUM) {
-    this.scene = scene;
-    this.size = size;
-    this.quality = quality;
-    this.initialize();
+    console.warn('Water class is deprecated. Please use WaterFacade directly.');
+    
+    // Create water with the current settings
+    this.waterFacade = new WaterFacade({
+      scene: scene,
+      size: size,
+      quality: quality,
+      position: { y: -0.5 },
+      color: 0x001020, // Deep, dark blue color
+      distortionScale: 4.5,
+      flowDirection: { x: 0.05, y: 0.05 },
+      flowSpeed: 0.35,
+      skipAnimationWhenOffscreen: true,
+      opacity: 0.98,
+      brightness: 0.3
+    });
   }
 
   /**
-   * Initialize the water
-   */
-  private initialize(): void {
-    try {
-      // Create water with a deep blue color
-      this.waterFacade = new WaterFacade({
-        scene: this.scene,
-        size: this.size,
-        quality: this.quality,
-        position: { y: -0.5 }, // Position slightly below land
-        color: 0x001020, // Deep, dark blue color
-        distortionScale: 4.5, // Further increased for more dramatic waves
-        flowDirection: { x: 0.05, y: 0.05 },
-        flowSpeed: 0.35, // Slightly increased flow speed
-        skipAnimationWhenOffscreen: true,
-        opacity: 0.98, // Almost fully opaque for maximum visibility
-        brightness: 0.3 // Lower brightness to make the water appear darker
-      });
-
-      console.log('Water initialized successfully');
-    } catch (error) {
-      console.error('Failed to initialize water:', error);
-    }
-  }
-
-  /**
-   * Update water animation
-   * @param deltaTime Delta time in seconds
+   * @deprecated Use WaterFacade.update() directly
    */
   public update(deltaTime: number): void {
     if (this.waterFacade) {
@@ -60,19 +45,16 @@ export class Water {
   }
 
   /**
-   * Set water quality
-   * @param quality New quality level
+   * @deprecated Use WaterFacade.setQuality() directly
    */
   public setQuality(quality: WaterQualityLevel): void {
-    this.quality = quality;
     if (this.waterFacade) {
       this.waterFacade.setQuality(quality);
     }
   }
 
   /**
-   * Register land objects for shoreline effects
-   * @param objects Array of land objects
+   * @deprecated Use WaterFacade.registerLandObjects() directly
    */
   public registerLandObjects(objects: THREE.Object3D[]): void {
     if (this.waterFacade) {
@@ -81,7 +63,7 @@ export class Water {
   }
 
   /**
-   * Clean up resources
+   * @deprecated Use WaterFacade.dispose() directly
    */
   public dispose(): void {
     if (this.waterFacade) {

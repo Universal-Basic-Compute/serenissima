@@ -1,5 +1,4 @@
-// This file has been moved to lib/threejs/WaterFacade.ts
-// Please update your imports to use the new location
+// This file is deprecated and will be removed in a future update
+// Please use lib/threejs/WaterFacade.ts directly
 
-// Re-export only the WaterFacade class and WaterQualityLevel enum
 export { WaterFacade, WaterQualityLevel } from '../../lib/threejs/WaterFacade';
