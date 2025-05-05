@@ -1015,12 +1015,14 @@ export default class SimplePolygonRenderer {
     this.mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
     this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
     
-    // Update the raycaster
+    // Update the raycaster with increased precision
     this.raycaster.setFromCamera(this.mouse, this.camera);
+    this.raycaster.params.Line.threshold = 0.1; // Increase line detection threshold
+    this.raycaster.params.Points.threshold = 0.1; // Increase point detection threshold
     
     // Find intersections with coat of arms sprites
     const coatOfArmsObjects = Object.values(this.coatOfArmsSprites);
-    const intersects = this.raycaster.intersectObjects(coatOfArmsObjects);
+    const intersects = this.raycaster.intersectObjects(coatOfArmsObjects, true); // Add true to check descendants
     
     // Reset hover state
     if (this.hoveredCoatOfArms && this.hoveredCoatOfArms !== this.selectedCoatOfArms) {
@@ -1034,8 +1036,23 @@ export default class SimplePolygonRenderer {
     
     // Set new hover state if found
     if (intersects.length > 0) {
-      // Find the land ID from the intersected object
-      const landId = this.findLandIdFromObject(intersects[0].object);
+      // Find the land ID from the intersected object or its ancestors
+      let landId = null;
+      let currentObj = intersects[0].object;
+      
+      // Traverse up the parent chain to find the object with polygonId
+      while (currentObj && !landId) {
+        if (currentObj.userData && currentObj.userData.polygonId) {
+          landId = currentObj.userData.polygonId;
+        }
+        currentObj = currentObj.parent;
+      }
+      
+      // If no polygonId found in the hierarchy, try the direct lookup method
+      if (!landId) {
+        landId = this.findLandIdFromObject(intersects[0].object);
+      }
+      
       if (landId && landId !== this.selectedCoatOfArms) {
         this.hoveredCoatOfArms = landId;
         const hovered = this.coatOfArmsSprites[landId];
@@ -1054,16 +1071,34 @@ export default class SimplePolygonRenderer {
     this.mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
     this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
     
-    // Update the raycaster
+    // Update the raycaster with increased precision
     this.raycaster.setFromCamera(this.mouse, this.camera);
+    this.raycaster.params.Line.threshold = 0.1; // Increase line detection threshold
+    this.raycaster.params.Points.threshold = 0.1; // Increase point detection threshold
     
     // Find intersections with coat of arms sprites
     const coatOfArmsObjects = Object.values(this.coatOfArmsSprites);
-    const intersects = this.raycaster.intersectObjects(coatOfArmsObjects);
+    const intersects = this.raycaster.intersectObjects(coatOfArmsObjects, true); // Add true to check descendants
     
     // Handle selection
     if (intersects.length > 0) {
-      const landId = this.findLandIdFromObject(intersects[0].object);
+      // Find the land ID from the intersected object or its ancestors
+      let landId = null;
+      let currentObj = intersects[0].object;
+      
+      // Traverse up the parent chain to find the object with polygonId
+      while (currentObj && !landId) {
+        if (currentObj.userData && currentObj.userData.polygonId) {
+          landId = currentObj.userData.polygonId;
+        }
+        currentObj = currentObj.parent;
+      }
+      
+      // If no polygonId found in the hierarchy, try the direct lookup method
+      if (!landId) {
+        landId = this.findLandIdFromObject(intersects[0].object);
+      }
+      
       if (landId) {
         // If already selected, do nothing (keep it selected)
         if (this.selectedCoatOfArms === landId) {
@@ -1093,11 +1128,31 @@ export default class SimplePolygonRenderer {
 
   // Helper method to find land ID from a mesh
   private findLandIdFromObject(object: THREE.Object3D): string | null {
+    // First check if the object itself has the polygonId
+    if (object.userData && object.userData.polygonId) {
+      return object.userData.polygonId;
+    }
+    
+    // Then check if it's a direct match with one of our sprites
     for (const [landId, sprite] of Object.entries(this.coatOfArmsSprites)) {
       if (sprite === object) {
         return landId;
       }
+      
+      // Also check if the object is a child of the sprite
+      if (sprite.children) {
+        let isChild = false;
+        sprite.traverse((child) => {
+          if (child === object) {
+            isChild = true;
+          }
+        });
+        if (isChild) {
+          return landId;
+        }
+      }
     }
+    
     return null;
   }
 
