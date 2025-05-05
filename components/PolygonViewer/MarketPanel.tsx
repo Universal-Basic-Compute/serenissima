@@ -4,12 +4,13 @@ import PlayerProfile from '../UI/PlayerProfile';
 import AnimatedDucats from '../UI/AnimatedDucats';
 import { eventBus, EventTypes } from '../../lib/eventBus';
 
-import { userService } from '../../lib/services/UserService';
+import { getUserService } from '../../lib/services/UserService';
 
 // Add a function to get username from wallet address
 const getUsernameFromWallet = async (walletAddress: string): Promise<string | null> => {
   try {
     // First check if we already have this user in our service
+    const userService = getUserService();
     const users = userService.getUsers();
     for (const username in users) {
       if (users[username].wallet_address === walletAddress) {

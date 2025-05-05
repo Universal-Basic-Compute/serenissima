@@ -20,8 +20,16 @@ interface CacheConfig {
   ttl: number; // Time-to-live in milliseconds
 }
 
-// Create and export a singleton instance
-export const userService = UserService.getInstance();
+// Create a singleton instance but don't export it directly
+// Instead, provide a getter function to prevent circular dependencies
+let userServiceInstance: UserService | null = null;
+
+export function getUserService(): UserService {
+  if (!userServiceInstance) {
+    userServiceInstance = UserService.getInstance();
+  }
+  return userServiceInstance;
+}
 
 // Cache entry with expiration
 interface CacheEntry<T> {

@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { normalizeCoordinates, createPolygonShape } from './utils';
-import { userService } from '../../lib/services/UserService';
+import { getUserService } from '../../lib/services/UserService';
 
 interface SimplePolygonRendererProps {
   scene: THREE.Scene;
@@ -50,6 +50,7 @@ export default class SimplePolygonRenderer {
     
     // Also try to get users from UserService
     try {
+      const userService = getUserService();
       const serviceUsers = userService.getUsers();
       if (serviceUsers && Object.keys(serviceUsers).length > 0) {
         Object.values(serviceUsers).forEach(user => {
