@@ -894,8 +894,8 @@ export default class PolygonRenderer {
                 // Create a circular texture
                 const circularTexture = this.facade.createCircularTexture(loadedTexture);
                 
-                // Create a plane geometry for the texture
-                const planeGeometry = new THREE.PlaneGeometry(1.5, 1.5);
+                // Create a plane geometry for the texture (half the original size)
+                const planeGeometry = new THREE.PlaneGeometry(0.75, 0.75);
                 const planeMaterial = new THREE.MeshBasicMaterial({
                   map: circularTexture,
                   transparent: true,
@@ -1134,8 +1134,8 @@ export default class PolygonRenderer {
         // Create position vector
         const position = new THREE.Vector3(normalizedCoord.x, 0.05, normalizedCoord.y);
         
-        // Create circle using the facade
-        const circleMesh = this.facade.createColoredCircle(position, color, 0.5);
+        // Create circle using the facade (half the original size)
+        const circleMesh = this.facade.createColoredCircle(position, color, 0.25);
         
         // Add to scene
         this.facade.addToScene(circleMesh);
