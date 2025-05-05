@@ -355,7 +355,7 @@ export default class SimplePolygonRenderer {
             if (texture.image && texture.image.width && texture.image.height) {
               const aspectRatio = texture.image.width / texture.image.height;
               const sceneScale = this.bounds.scale;
-              const baseScale = Math.max(0.5, sceneScale / 1000); // Smaller base scale
+              const baseScale = Math.max(0.125, sceneScale / 4000); // 4x smaller base scale
               plane.scale.set(baseScale * aspectRatio, baseScale, 1);
             }
           }
