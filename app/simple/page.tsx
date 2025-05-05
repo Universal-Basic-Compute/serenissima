@@ -195,7 +195,7 @@ export default function SimplePage() {
       setIsGeneratingImage(true);
         
       // Import the utility function directly
-      const { generateCoatOfArmsImage } = await import('../../utils/coatOfArmsUtils');
+      const { generateCoatOfArmsImage } = await import('@/app/utils/coatOfArmsUtils');
       const imageUrl = await generateCoatOfArmsImage(familyCoatOfArms);
         
       // Update state with the local image URL
@@ -1025,7 +1025,7 @@ const generateCoatOfArmsImage = async () => {
     setIsGeneratingImage(true);
       
     // Import the utility function directly
-    const { generateCoatOfArmsImage } = await import('../utils/coatOfArmsUtils');
+    const { generateCoatOfArmsImage } = await import('@/app/utils/coatOfArmsUtils');
     const imageUrl = await generateCoatOfArmsImage(familyCoatOfArms);
       
     // Update state with the local image URL
