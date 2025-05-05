@@ -235,9 +235,6 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
       // If we get here, we couldn't load any real data, so show a sample polygon
       console.log('Using sample polygon as fallback');
       
-      // Clear the timeout since we're manually setting the state
-      clearTimeout(loadingTimeout);
-      
       set({
         polygons: [{
           id: 'sample',
@@ -247,8 +244,8 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
             { lat: 1, lng: 1 },
             { lat: 1, lng: 0 }
           ]
-        }],
-        loading: false
+        }]
+        // Don't set loading: false here
       });
       
       // Dispatch event to notify that polygons are loaded
