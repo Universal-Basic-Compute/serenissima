@@ -30,18 +30,18 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
       }
     };
     
-    // Single reliable timer
+    // Single reliable timer with a longer timeout
     const timer = setTimeout(() => {
       console.log('LoadingScreen: Forcing completion after timeout');
       completeLoading();
-    }, Math.min(duration, 5000)); // Cap at 5 seconds maximum
+    }, duration); // Use the full duration
     
     // Add visibility change detection as a backup
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
         console.log('LoadingScreen: Document became visible');
         // Small delay to allow rendering
-        setTimeout(completeLoading, 300);
+        setTimeout(completeLoading, 1000); // Increased from 300ms to 1000ms
       }
     };
     
@@ -51,7 +51,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
     const handleImageLoad = () => {
       console.log('LoadingScreen: Image loaded');
       // Small delay to allow rendering
-      setTimeout(completeLoading, 300);
+      setTimeout(completeLoading, 1000); // Increased from 300ms to 1000ms
     };
     
     return () => {

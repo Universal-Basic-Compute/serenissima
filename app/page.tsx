@@ -60,10 +60,11 @@ export default function Home() {
   
   // Force exit loading state after a timeout - simplified and more robust
   useEffect(() => {
-    console.log('Setting up simplified loading state management');
+    console.log('Setting up loading state management');
     
     // Always ensure loading is true initially
     setIsLoading(true);
+    usePolygonStore.setState({ loading: true });
     
     // Set a flag to track if we've already exited loading state
     let hasExitedLoading = false;
@@ -77,25 +78,28 @@ export default function Home() {
       }
     };
     
-    // Single reliable timer with a reasonable timeout
+    // Single reliable timer with a longer timeout
     const loadingTimer = setTimeout(() => {
       console.log('Loading timer: Forcing exit from loading state');
       exitLoading();
-    }, 5000); // 5 seconds is usually enough for initial loading
+    }, 8000); // Increased to 8 seconds to ensure content has time to load
     
     // Also listen for the 'DOMContentLoaded' event as a backup
     const handleDOMContentLoaded = () => {
       console.log('DOMContentLoaded event fired');
       // Add a small delay to allow React to finish rendering
-      setTimeout(exitLoading, 500);
+      setTimeout(() => {
+        // Don't exit loading immediately, give more time
+        setTimeout(exitLoading, 2000);
+      }, 500);
     };
     
     // Add event listener for DOMContentLoaded if document is not already loaded
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', handleDOMContentLoaded);
     } else {
-      // Document already loaded, schedule exit with a small delay
-      setTimeout(exitLoading, 500);
+      // Document already loaded, schedule exit with a longer delay
+      setTimeout(exitLoading, 2000);
     }
     
     return () => {
@@ -1680,14 +1684,34 @@ export default function Home() {
       
       <div className="relative w-screen h-screen">
       
+      {/* Absolute minimal fallback that will always show */}
+      <div className="fixed inset-0 z-[9999] bg-amber-50 flex items-center justify-center" 
+           style={{display: isLoading ? 'flex' : 'none'}}>
+        <div className="text-center">
+          <h2 className="text-2xl font-serif text-amber-800 mb-4">Loading La Serenissima</h2>
+          <div className="w-24 h-24 border-t-4 border-amber-600 rounded-full animate-spin mb-4 mx-auto"></div>
+          <p className="text-amber-600 mb-6">The Council of Ten is preparing the map...</p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors"
+          >
+            Reload Page
+          </button>
+        </div>
+      </div>
+      
       {/* Loading Screen */}
-      {isLoading && (
+      {(isLoading || usePolygonStore.getState().loading) && (
         <LoadingScreen 
           onLoadingComplete={() => {
             console.log('Loading screen complete callback triggered');
-            setIsLoading(false);
+            // Add a small delay before setting loading to false
+            setTimeout(() => {
+              setIsLoading(false);
+              usePolygonStore.setState({ loading: false });
+            }, 500);
           }}
-          duration={5000}
+          duration={7000} // Increased from 5000 to 7000 (7 seconds)
         />
       )}
     
