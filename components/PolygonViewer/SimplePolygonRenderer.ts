@@ -208,6 +208,7 @@ export default class SimplePolygonRenderer {
     }
     
     // Get all users from UserService to ensure we have the latest data
+    const userService = getUserService();
     const users = userService.getUsers();
     
     // Update our local ownerCoatOfArmsMap with the latest data
