@@ -16,7 +16,9 @@ export async function POST(request: NextRequest) {
       headers: {
         // You might need to add headers to mimic a browser request
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-      }
+      },
+      // Ensure we're not sending cookies or credentials to the external URL
+      credentials: 'omit'
     });
     
     if (!response.ok) {
