@@ -438,7 +438,7 @@ export default class SceneSetup {
     if (this.waterFacade) {
       console.log(`Connecting ${landObjects.length} land objects to water system`);
       this.waterFacade.registerLandObjects(landObjects);
-      this.waterFacade.setShorelineEffect(true, 0.8, 3.0);
+      this.waterFacade.setShorelineEffect(true, 1.5, 5.0); // Increased intensity and distance
     }
   }
   

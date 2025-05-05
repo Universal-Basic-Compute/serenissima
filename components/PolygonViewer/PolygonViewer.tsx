@@ -1244,7 +1244,29 @@ export default function PolygonViewer() {
         }
       }, 3000); // Wait 3 seconds for everything to be fully loaded
       
-      return () => clearTimeout(timer);
+      // Add a second connection attempt after a longer delay to catch any late-loaded polygons
+      const secondTimer = setTimeout(() => {
+        if (sceneRef.current) {
+          const landObjects: THREE.Object3D[] = [];
+          sceneRef.current.scene.traverse(object => {
+            if (object instanceof THREE.Mesh && 
+                object.userData && 
+                (object.userData.isPolygon || object.userData.isLand)) {
+              landObjects.push(object);
+            }
+          });
+          
+          if (landObjects.length > 0) {
+            console.log(`Second attempt: Connecting ${landObjects.length} land objects to water`);
+            sceneRef.current.connectLandToWater(landObjects);
+          }
+        }
+      }, 8000); // Wait 8 seconds for any late-loaded polygons
+      
+      return () => {
+        clearTimeout(timer);
+        clearTimeout(secondTimer);
+      };
     }
   }, [sceneRef.current, polygonRendererRef.current]);
   

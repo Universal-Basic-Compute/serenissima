@@ -701,7 +701,8 @@ export class WaterFacade {
               vertex.applyMatrix4(object.matrixWorld);
               
               // Only add points at water level (y ≈ 0)
-              if (Math.abs(vertex.y) < 0.1) {
+              // Increased tolerance to catch more boundary points
+              if (Math.abs(vertex.y) < 0.2) {
                 this.boundaryPoints.push(vertex);
               }
             }
@@ -712,6 +713,26 @@ export class WaterFacade {
       }
     });
     
+    // Add additional interpolated points between existing points to increase density
+    if (this.boundaryPoints.length > 1) {
+      const interpolatedPoints: THREE.Vector3[] = [];
+      
+      for (let i = 0; i < this.boundaryPoints.length - 1; i++) {
+        const p1 = this.boundaryPoints[i];
+        const p2 = this.boundaryPoints[i + 1];
+        
+        // Add midpoint between consecutive points
+        interpolatedPoints.push(new THREE.Vector3(
+          (p1.x + p2.x) / 2,
+          (p1.y + p2.y) / 2,
+          (p1.z + p2.z) / 2
+        ));
+      }
+      
+      // Add interpolated points to boundary points
+      this.boundaryPoints = this.boundaryPoints.concat(interpolatedPoints);
+    }
+    
     console.log(`Extracted ${this.boundaryPoints.length} boundary points for shoreline effect`);
   }
 
@@ -720,17 +741,64 @@ export class WaterFacade {
    * @private
    */
   private findBoundaryIndices(geometry: THREE.BufferGeometry): number[] {
-    // This is a simplified approach - in a full implementation,
-    // you would use a proper boundary extraction algorithm
-    
+    // Enhanced boundary detection to find actual edge vertices
     const indices: number[] = [];
     const positions = geometry.getAttribute('position');
     
-    // For simplicity, we'll sample every Nth vertex
-    const samplingRate = Math.max(1, Math.floor(positions.count / 100));
+    // If we have an index buffer, use it to find edges
+    if (geometry.index) {
+      const indexArray = geometry.index.array;
+      const edgeMap = new Map<string, number>();
+      
+      // First pass: count occurrences of each edge
+      for (let i = 0; i < indexArray.length; i += 3) {
+        const a = indexArray[i];
+        const b = indexArray[i + 1];
+        const c = indexArray[i + 2];
+        
+        // Add all three edges of the triangle
+        const addEdge = (v1: number, v2: number) => {
+          const edgeKey = v1 < v2 ? `${v1}-${v2}` : `${v2}-${v1}`;
+          edgeMap.set(edgeKey, (edgeMap.get(edgeKey) || 0) + 1);
+        };
+        
+        addEdge(a, b);
+        addEdge(b, c);
+        addEdge(c, a);
+      }
+      
+      // Second pass: find edges that appear only once (boundary edges)
+      const boundaryEdges = new Set<number>();
+      
+      for (const [edgeKey, count] of edgeMap.entries()) {
+        if (count === 1) {
+          // This is a boundary edge
+          const [v1, v2] = edgeKey.split('-').map(Number);
+          boundaryEdges.add(v1);
+          boundaryEdges.add(v2);
+        }
+      }
+      
+      // Convert set to array
+      indices.push(...Array.from(boundaryEdges));
+    } else {
+      // Fallback to sampling if no index buffer
+      // For simplicity, we'll sample every Nth vertex with a higher sampling rate
+      const samplingRate = Math.max(1, Math.floor(positions.count / 200));
+      
+      for (let i = 0; i < positions.count; i += samplingRate) {
+        indices.push(i);
+      }
+    }
     
-    for (let i = 0; i < positions.count; i += samplingRate) {
-      indices.push(i);
+    // If we found very few indices, fall back to denser sampling
+    if (indices.length < 20) {
+      indices.length = 0;
+      const samplingRate = Math.max(1, Math.floor(positions.count / 300));
+      
+      for (let i = 0; i < positions.count; i += samplingRate) {
+        indices.push(i);
+      }
     }
     
     return indices;
@@ -832,12 +900,14 @@ if (shoreFactor > 0.01) {
     this.shorelineEffect = enabled;
     
     if (intensity !== undefined) {
-      this.shorelineIntensity = Math.max(0, Math.min(1, intensity));
+      this.shorelineIntensity = Math.max(0, Math.min(2.0, intensity)); // Increased max intensity to 2.0
     }
     
     if (distance !== undefined) {
       this.shorelineDistance = Math.max(0.1, distance);
     }
+    
+    console.log(`Shoreline effect ${enabled ? 'enabled' : 'disabled'} with intensity: ${this.shorelineIntensity}, distance: ${this.shorelineDistance}`);
     
     // Update the effect if enabled
     if (enabled) {
