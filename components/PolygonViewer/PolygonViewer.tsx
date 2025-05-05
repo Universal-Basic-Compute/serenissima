@@ -1443,6 +1443,14 @@ export default function PolygonViewer() {
             console.log('Road saved to Airtable:', response);
             // Show success message
             alert('Road created successfully!');
+            
+            // If we're in transport view, we might want to refresh the view
+            if (activeView === 'transport') {
+              // Force a refresh of the transport infrastructure
+              if (roadManagerRef.current) {
+                roadManagerRef.current.updateRoadVisibility();
+              }
+            }
           })
           .catch(error => {
             console.error('Failed to save road to Airtable:', error);
@@ -1455,7 +1463,7 @@ export default function PolygonViewer() {
     }
     
     setRoadCreationActive(false);
-  }, [selectedPolygonId]);
+  }, [selectedPolygonId, activeView]); // Add activeView to dependencies
 
   // Add handler for road creation cancellation
   const handleRoadCancel = useCallback(() => {
@@ -1618,8 +1626,8 @@ export default function PolygonViewer() {
         {/* Add the Land Details Panel */}
         {LandDetailsPanelMemo}
       
-      {/* Add Create Road button when in building view */}
-      {activeView === 'buildings' && !roadCreationActive && (
+      {/* Add Create Road button when in transport view */}
+      {activeView === 'transport' && !roadCreationActive && (
         <div className="absolute bottom-4 right-4 z-10">
           <button
             onClick={(e) => {
@@ -1629,7 +1637,7 @@ export default function PolygonViewer() {
             className="bg-amber-600 text-white px-4 py-2 rounded-lg shadow-md hover:bg-amber-700 transition-colors flex items-center"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V3zm1 4h10a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V8a1 1 0 011-1z" clipRule="evenodd" />
+              <path d="M3 3a1 1 0 000 2h10a1 1 0 100-2H3zM3 7a1 1 0 000 2h10a1 1 0 100-2H3zM3 11a1 1 0 100 2h10a1 1 0 100-2H3zM3 15a1 1 0 100 2h10a1 1 0 100-2H3z" />
             </svg>
             Create Road
           </button>
