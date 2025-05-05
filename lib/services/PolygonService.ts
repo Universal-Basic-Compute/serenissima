@@ -126,22 +126,6 @@ export class PolygonService {
     });
   }
   
-  /**
-   * Update a polygon's coat of arms center position
-   */
-  public updateCoatOfArmsPosition(polygonId: string, position: { lat: number, lng: number }): void {
-    // Update polygon data
-    const polygon = this.getPolygonById(polygonId);
-    if (polygon) {
-      polygon.coatOfArmsCenter = position;
-      
-      // Notify listeners about the change
-      eventBus.emit(EventTypes.POLYGON_UPDATED, {
-        polygonId,
-        updates: { coatOfArmsCenter: position }
-      });
-    }
-  }
   
   /**
    * Check if polygons are loading

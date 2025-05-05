@@ -1284,13 +1284,6 @@ export default function PolygonViewer() {
     if (activeView === 'land' && polygonRendererRef.current) {
       console.log('Land view active, updating coat of arms sprites');
       
-      // Debug: Log polygons with coatOfArmsCenter
-      const polygonsWithCoatOfArmsCenter = polygons.filter(p => p.coatOfArmsCenter);
-      console.log(`Found ${polygonsWithCoatOfArmsCenter.length} polygons with coatOfArmsCenter in view mode change`);
-      if (polygonsWithCoatOfArmsCenter.length > 0) {
-        console.log('Sample polygons with coatOfArmsCenter:', 
-          polygonsWithCoatOfArmsCenter.slice(0, 3).map(p => ({ id: p.id, position: p.coatOfArmsCenter })));
-      }
       
       // Schedule multiple updates to ensure everything is visible
       // First immediate update
@@ -1320,11 +1313,6 @@ export default function PolygonViewer() {
         }
       }, 5000);
       
-      // Initialize coat of arms drag and drop if not already initialized
-      if (polygonRendererRef.current && canvasRef.current) {
-        console.log('Initializing coat of arms drag and drop');
-        polygonRendererRef.current.initCoatOfArmsDragDrop(canvasRef.current);
-      }
     }
   }, [activeView]);
   
@@ -1383,11 +1371,6 @@ export default function PolygonViewer() {
             const polygonsWithCoatOfArmsCenter = polygons.filter(p => p.coatOfArmsCenter);
             console.log(`Found ${polygonsWithCoatOfArmsCenter.length} polygons with coatOfArmsCenter in view mode change`);
             
-            // Initialize coat of arms drag and drop
-            if (canvasRef.current) {
-              console.log('Initializing coat of arms drag and drop');
-              polygonRendererRef.current.initCoatOfArmsDragDrop(canvasRef.current);
-            }
             
             // If we have users data, apply it again to ensure it's displayed
             if (users && Object.keys(users).length > 0) {

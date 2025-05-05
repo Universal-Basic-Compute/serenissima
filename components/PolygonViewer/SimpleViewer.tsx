@@ -137,8 +137,6 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
     }
   }, []);
   
-  // Add state variables for tracking coat of arms dragging
-  
   // Set up Three.js scene
   useEffect(() => {
     if (!canvasRef.current || loading || polygons.length === 0) return;

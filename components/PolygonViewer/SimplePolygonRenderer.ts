@@ -398,10 +398,9 @@ export default class SimplePolygonRenderer {
     // Add to scene
     this.scene.add(plane);
     
-    // Add metadata for dragging
+    // Add metadata
     plane.userData.isCoatOfArms = true;
     plane.userData.polygonId = polygon.id;
-    plane.userData.isDraggable = true;
     
     // Store reference
     this.coatOfArmsSprites[polygon.id] = plane;
@@ -457,8 +456,8 @@ export default class SimplePolygonRenderer {
       this.bounds.latCorrectionFactor
     );
     
-    // Use coatOfArmsCenter if available, otherwise use centroid
-    const positionCoord = polygon.coatOfArmsCenter || polygon.centroid;
+    // Always use centroid for positioning
+    const positionCoord = polygon.centroid;
     
     // Calculate the centroid position
     const centroidPos = normalizeCoordinates(
@@ -611,10 +610,9 @@ export default class SimplePolygonRenderer {
         // Add to scene
         this.scene.add(mesh);
         
-        // Add metadata for dragging
+        // Add metadata
         mesh.userData.isCoatOfArms = true;
         mesh.userData.polygonId = polygon.id;
-        mesh.userData.isDraggable = true;
         
         this.coatOfArmsSprites[polygon.id] = mesh;
       },
