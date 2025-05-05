@@ -16,7 +16,7 @@ export default class SimpleCamera {
     
     // Position camera closer for the smaller water area
     this.camera.position.set(0, 40, 80); // Reduced from (0, 60, 120)
-    this.camera.lookAt(0, 0, 0);
+    this.camera.lookAt(0, 0, 0); // Looking at the origin where everything is positioned
     
     // Create controls
     this.controls = new OrbitControls(this.camera, domElement);

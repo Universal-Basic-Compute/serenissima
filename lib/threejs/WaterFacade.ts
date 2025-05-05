@@ -160,7 +160,7 @@ export class WaterFacade {
 
       // Position water
       water.rotation.x = -Math.PI / 2;
-      water.position.set(this.position.x, this.position.y, this.position.z);
+      water.position.set(this.position.x, 0, this.position.z); // Change y position to 0
       
       // Set render order to ensure water renders before land
       water.renderOrder = 0;
@@ -205,7 +205,7 @@ export class WaterFacade {
       
       // Position the water plane
       waterMesh.rotation.x = -Math.PI / 2;
-      waterMesh.position.set(this.position.x, this.position.y, this.position.z);
+      waterMesh.position.set(this.position.x, 0, this.position.z); // Change y position to 0
       waterMesh.renderOrder = 0;
       
       // Create a minimal Water instance with the mesh
@@ -254,7 +254,7 @@ export class WaterFacade {
       );
       
       minimalWater.rotation.x = -Math.PI / 2;
-      minimalWater.position.set(this.position.x, this.position.y, this.position.z);
+      minimalWater.position.set(this.position.x, 0, this.position.z); // Change y position to 0
       
       return minimalWater;
     }

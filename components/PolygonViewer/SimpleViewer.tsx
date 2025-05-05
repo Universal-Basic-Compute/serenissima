@@ -66,7 +66,8 @@ export default function SimpleViewer({ qualityMode = 'high' }) {
     const water = new SimpleWater({
       scene,
       size: waterSize,
-      quality: qualityMode === 'high' ? 'high' : 'medium'
+      quality: qualityMode === 'high' ? 'high' : 'medium',
+      position: { y: 0 } // Explicitly set y position to 0
     });
     waterRef.current = water;
     

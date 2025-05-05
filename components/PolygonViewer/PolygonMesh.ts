@@ -110,7 +110,7 @@ class PolygonMesh {
       this.mesh = new THREE.Mesh(geometry, materials);
       
       // Position the mesh appropriately above water
-      this.mesh.position.y = 0.15; // Reduced from 0.3 to 0.15 to match the thinner depth
+      this.mesh.position.y = 0; // Change from 0.15 to 0
       
       // Rotate the mesh to make it face upward
       this.mesh.rotation.x = -Math.PI / 2;
