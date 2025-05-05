@@ -93,7 +93,7 @@ export class WaterFacade {
     };
     this.color = typeof options.color === 'string' 
       ? new THREE.Color(options.color).getHex() 
-      : (options.color || 0x001020); // Even deeper, darker blue color
+      : (options.color || 0xFF0000); // Bright red color for debugging
     this.distortionScale = options.distortionScale || this.getDefaultDistortionScale();
     this.flowDirection = {
       x: options.flowDirection?.x || 0,
@@ -152,6 +152,8 @@ export class WaterFacade {
         throw error; // Will be caught by the outer try/catch
       });
 
+      console.log('Creating water with color:', '#' + this.color.toString(16).padStart(6, '0'));
+      
       // Water material
       const water = new Water(
         waterGeometry,
@@ -420,6 +422,26 @@ export class WaterFacade {
     
     try {
       if (this.water.material instanceof THREE.ShaderMaterial) {
+        // Periodically check and force update the water color (every ~5 seconds)
+        if (Math.random() < 0.01) { // ~1% chance per frame
+          if (this.water.material.uniforms.waterColor) {
+            const currentColor = this.water.material.uniforms.waterColor.value;
+            const targetColor = new THREE.Color(this.color);
+            
+            // Only log if color is different
+            if (currentColor.r !== targetColor.r || 
+                currentColor.g !== targetColor.g || 
+                currentColor.b !== targetColor.b) {
+              console.log('Correcting water color from:', 
+                         '#' + Math.floor(currentColor.r * 255).toString(16).padStart(2, '0') +
+                         Math.floor(currentColor.g * 255).toString(16).padStart(2, '0') +
+                         Math.floor(currentColor.b * 255).toString(16).padStart(2, '0'),
+                         'to:', '#' + this.color.toString(16).padStart(6, '0'));
+              
+              this.water.material.uniforms.waterColor.value = targetColor;
+            }
+          }
+        }
         // Use provided deltaTime or get it from the clock
         const delta = deltaTime !== undefined ? deltaTime : this.clock.getDelta();
         
@@ -853,6 +875,13 @@ export class WaterFacade {
     try {
       if (this.water.material instanceof THREE.ShaderMaterial) {
         const material = this.water.material;
+        
+        // Force update the water color in the shader uniforms
+        if (material.uniforms.waterColor) {
+          material.uniforms.waterColor.value = new THREE.Color(this.color);
+          console.log('Explicitly setting water color in shader to:', 
+                     '#' + this.color.toString(16).padStart(6, '0'));
+        }
         
         // Check if we need to modify the shader
         if (!material.userData.hasShorelineEffect) {

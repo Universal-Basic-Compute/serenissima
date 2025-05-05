@@ -28,13 +28,13 @@ export class Water {
    */
   private initialize(): void {
     try {
-      // Create water with the updated deeper blue color (0x001020)
+      // Create water with a distinctive bright red color for debugging
       this.waterFacade = new WaterFacade({
         scene: this.scene,
         size: this.size,
         quality: this.quality,
         position: { y: -0.5 }, // Position slightly below land
-        color: 0x001020, // Even deeper, darker blue color
+        color: 0xFF0000, // Bright red color for debugging
         distortionScale: 4.5, // Further increased for more dramatic waves
         flowDirection: { x: 0.05, y: 0.05 },
         flowSpeed: 0.35, // Slightly increased flow speed
