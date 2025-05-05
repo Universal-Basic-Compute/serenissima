@@ -63,7 +63,7 @@ interface PolygonState {
 const usePolygonStore = create<PolygonState>((set, get) => ({
   // Data state
   polygons: [],
-  loading: true,
+  loading: false, // Changed from true to false
   error: null,
   activeView: 'land', // Default to land view
   highQuality: true, // Changed to true to enable high quality mode by default
@@ -128,30 +128,8 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
     try {
       console.log('Starting to load polygons...');
       
-      // Set loading state immediately
-      set({ loading: true, error: null });
-      
-      // Create a timeout to ensure we don't get stuck in loading state
-      const loadingTimeout = setTimeout(() => {
-        console.log('Loading timeout reached, forcing completion with sample data');
-        set({
-          loading: false,
-          polygons: [{
-            id: 'sample',
-            coordinates: [
-              { lat: 0, lng: 0 },
-              { lat: 0, lng: 1 },
-              { lat: 1, lng: 1 },
-              { lat: 1, lng: 0 }
-            ]
-          }]
-        });
-        
-        // Dispatch event to notify that polygons are loaded
-        if (typeof window !== 'undefined') {
-          window.dispatchEvent(new Event('polygonsLoaded'));
-        }
-      }, 30000); // 30 second timeout
+      // Don't set loading state
+      // set({ loading: true, error: null });
       
       // First try to load from cache to avoid network requests entirely
       const cacheKey = 'polygons_cache';
@@ -174,11 +152,8 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
             if (data.polygons && data.polygons.length > 0) {
               console.log(`Loaded ${data.polygons.length} polygons from cache`);
               
-              // Clear the timeout since we have data
-              clearTimeout(loadingTimeout);
-              
-              // Set the data and exit loading state
-              set({ polygons: data.polygons, loading: false });
+              // Set the data but don't change loading state
+              set({ polygons: data.polygons });
               
               // Dispatch event to notify that polygons are loaded
               if (typeof window !== 'undefined') {
@@ -211,15 +186,12 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
         if (data.polygons && data.polygons.length > 0) {
           console.log(`Loaded ${data.polygons.length} initial polygons`);
           
-          // Clear the timeout since we have data
-          clearTimeout(loadingTimeout);
-          
           // Cache the response
           localStorage.setItem(cacheKey, JSON.stringify(data));
           localStorage.setItem(cacheTimestampKey, currentTime.toString());
           
-          // Set the data and exit loading state
-          set({ polygons: data.polygons, loading: false });
+          // Set the data but don't change loading state
+          set({ polygons: data.polygons });
           
           // Dispatch event to notify that polygons are loaded
           if (typeof window !== 'undefined') {
@@ -287,9 +259,8 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
     } catch (error) {
       console.error('Error in loadPolygons:', error);
       
-      // Ensure we always set loading to false to prevent getting stuck
+      // Set error but don't change loading state
       set({ 
-        loading: false,
         error: 'Failed to load polygons',
         polygons: [{
           id: 'sample',
