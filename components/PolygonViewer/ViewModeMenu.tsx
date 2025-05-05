@@ -81,21 +81,6 @@ export default function ViewModeMenu({ activeView, setActiveView }: ViewModeMenu
         <span className="text-[10px] mt-1">Resources</span>
       </IconButton>
       
-      {/* Transport View - Disabled */}
-      <IconButton 
-        onClick={() => {}}
-        active={false}
-        title={viewDescriptions.transport + " (Coming Soon)"}
-        activeColor="amber"
-        compact={true}
-        disabled={true}
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M4 10h16M8 14h8M4 18h16M9 6l-5 4 5 4M15 6l5 4-5 4"></path>
-        </svg>
-        <span className="text-[10px] mt-1">Transport</span>
-      </IconButton>
-      
       <IconButton 
         onClick={() => activeView !== 'buildings' ? handleViewModeChange('buildings') : null}
         active={activeView === 'buildings'}
@@ -109,6 +94,21 @@ export default function ViewModeMenu({ activeView, setActiveView }: ViewModeMenu
           <polyline points="9 22 9 12 15 12 15 22"></polyline>
         </svg>
         <span className="text-[10px] mt-1">Buildings</span>
+      </IconButton>
+      
+      {/* Transport View - Now placed right after Buildings */}
+      <IconButton 
+        onClick={() => {}}
+        active={false}
+        title={viewDescriptions.transport + " (Coming Soon)"}
+        activeColor="amber"
+        compact={true}
+        disabled={true}
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M4 10h16M8 14h8M4 18h16M9 6l-5 4 5 4M15 6l5 4-5 4"></path>
+        </svg>
+        <span className="text-[10px] mt-1">Transport</span>
       </IconButton>
       
       <IconButton 
