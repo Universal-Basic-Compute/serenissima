@@ -138,8 +138,6 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
   }, []);
   
   // Add state variables for tracking coat of arms dragging
-  const [isDraggingCoatOfArms, setIsDraggingCoatOfArms] = useState(false);
-  const [draggedCoatOfArmsId, setDraggedCoatOfArmsId] = useState<string | null>(null);
   
   // Set up Three.js scene
   useEffect(() => {
