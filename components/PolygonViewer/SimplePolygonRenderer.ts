@@ -121,8 +121,8 @@ export default class SimplePolygonRenderer {
   private renderPolygons() {
     // Create a single shared material for all polygons
     this.sharedMaterial = new THREE.MeshStandardMaterial({
-      // Remove texture to allow the color to show through fully
-      // map: this.sandTexture,
+      // Restore the texture
+      map: this.sandTexture,
       color: this.sandColor, // Use our lighter yellow sand color directly
       side: THREE.DoubleSide,
       roughness: 0.8,

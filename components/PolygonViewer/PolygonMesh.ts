@@ -93,8 +93,8 @@ class PolygonMesh {
 
       // Create materials with brighter colors for better visibility
       const topMaterial = new THREE.MeshBasicMaterial({
-        // Remove texture to allow the color to show through fully
-        // map: sandTexture,
+        // Restore the texture
+        map: sandTexture,
         color: this.determineLandColor(),
         transparent: false, // Disable transparency for better visibility
         depthWrite: true, // Enable depth writing
