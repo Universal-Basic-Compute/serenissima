@@ -648,9 +648,14 @@ export default function Home() {
   // Add a dedicated effect to ensure market panel visibility is properly updated
   useEffect(() => {
     // Make sure this is properly set when activeView changes
-    const isMarketView = activeView === 'markets' as any; // Type assertion to avoid type error
+    const isMarketView = activeView === 'markets';
     setMarketPanelVisible(isMarketView);
     console.log('Active view changed to:', activeView, 'Market panel visible:', isMarketView);
+    
+    // Dispatch a custom event to notify other components about the view change
+    window.dispatchEvent(new CustomEvent('viewModeChanged', { 
+      detail: activeView 
+    }));
   }, [activeView]);
   
   // Add effect to trigger color and coat of arms updates when users data changes

@@ -10,6 +10,7 @@ import SuccessAlert from '../../components/UI/SuccessAlert';
 import { PhantomWalletAdapter } from '@solana/wallet-adapter-phantom';
 import { WalletReadyState } from '@solana/wallet-adapter-base';
 import { getApiBaseUrl } from '@/lib/apiUtils';
+import { FaHome, FaBuilding, FaRoad, FaTree, FaStore, FaLandmark } from 'react-icons/fa';
 
 // Import SimpleViewer with no SSR to avoid hydration issues
 const SimpleViewer = dynamic(() => import('../../components/PolygonViewer/SimpleViewer'), {
@@ -20,11 +21,12 @@ export default function SimplePage() {
   // UI state
   const [showControls, setShowControls] = useState(true);
   const [showInfo, setShowInfo] = useState(false);
-  const [activeView, setActiveView] = useState<'aerial' | 'street'>('aerial');
+  const [activeView, setActiveView] = useState<'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance'>('land');
   const [qualityMode, setQualityMode] = useState<'high' | 'performance'>('high');
   const [marketPanelVisible, setMarketPanelVisible] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   
   // Wallet and user state
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
@@ -166,6 +168,117 @@ export default function SimplePage() {
   return (
     <>
     <div className="relative w-full h-screen">
+      {/* Left Side Menu */}
+      <div className={`absolute left-0 top-0 bottom-0 bg-black/70 text-white transition-all duration-300 z-20 flex flex-col ${sidebarCollapsed ? 'w-16' : 'w-64'}`}>
+        {/* Toggle button */}
+        <button 
+          onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+          className="absolute -right-4 top-8 bg-amber-600 text-white w-8 h-8 rounded-full flex items-center justify-center shadow-lg z-10"
+        >
+          {sidebarCollapsed ? (
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+            </svg>
+          ) : (
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
+            </svg>
+          )}
+        </button>
+        
+        {/* Logo */}
+        <div className={`p-4 border-b border-gray-700 flex items-center ${sidebarCollapsed ? 'justify-center' : 'justify-start'}`}>
+          {sidebarCollapsed ? (
+            <span className="text-2xl font-serif text-amber-500">V</span>
+          ) : (
+            <span className="text-2xl font-serif text-amber-500">Venezia</span>
+          )}
+        </div>
+        
+        {/* Menu Items */}
+        <div className="flex-1 overflow-y-auto py-4">
+          <ul className="space-y-2 px-2">
+            <li>
+              <button
+                onClick={() => setActiveView('land')}
+                className={`w-full flex items-center p-2 rounded-lg transition-colors ${
+                  activeView === 'land' ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700'
+                }`}
+              >
+                <FaHome className={`${sidebarCollapsed ? 'mx-auto' : 'mr-3'} h-5 w-5`} />
+                {!sidebarCollapsed && <span>Land</span>}
+              </button>
+            </li>
+            <li>
+              <button
+                onClick={() => setActiveView('buildings')}
+                className={`w-full flex items-center p-2 rounded-lg transition-colors ${
+                  activeView === 'buildings' ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700'
+                }`}
+              >
+                <FaBuilding className={`${sidebarCollapsed ? 'mx-auto' : 'mr-3'} h-5 w-5`} />
+                {!sidebarCollapsed && <span>Buildings</span>}
+              </button>
+            </li>
+            <li>
+              <button
+                onClick={() => setActiveView('transport')}
+                className={`w-full flex items-center p-2 rounded-lg transition-colors ${
+                  activeView === 'transport' ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700'
+                }`}
+              >
+                <FaRoad className={`${sidebarCollapsed ? 'mx-auto' : 'mr-3'} h-5 w-5`} />
+                {!sidebarCollapsed && <span>Transport</span>}
+              </button>
+            </li>
+            <li>
+              <button
+                onClick={() => setActiveView('resources')}
+                className={`w-full flex items-center p-2 rounded-lg transition-colors ${
+                  activeView === 'resources' ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700'
+                }`}
+              >
+                <FaTree className={`${sidebarCollapsed ? 'mx-auto' : 'mr-3'} h-5 w-5`} />
+                {!sidebarCollapsed && <span>Resources</span>}
+              </button>
+            </li>
+            <li>
+              <button
+                onClick={() => {
+                  setActiveView('markets');
+                  setMarketPanelVisible(true);
+                }}
+                className={`w-full flex items-center p-2 rounded-lg transition-colors ${
+                  activeView === 'markets' ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700'
+                }`}
+              >
+                <FaStore className={`${sidebarCollapsed ? 'mx-auto' : 'mr-3'} h-5 w-5`} />
+                {!sidebarCollapsed && <span>Markets</span>}
+              </button>
+            </li>
+            <li>
+              <button
+                onClick={() => setActiveView('governance')}
+                className={`w-full flex items-center p-2 rounded-lg transition-colors ${
+                  activeView === 'governance' ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700'
+                }`}
+              >
+                <FaLandmark className={`${sidebarCollapsed ? 'mx-auto' : 'mr-3'} h-5 w-5`} />
+                {!sidebarCollapsed && <span>Governance</span>}
+              </button>
+            </li>
+          </ul>
+        </div>
+        
+        {/* Bottom section */}
+        <div className={`p-4 border-t border-gray-700 ${sidebarCollapsed ? 'text-center' : ''}`}>
+          {sidebarCollapsed ? (
+            <div className="text-xs text-gray-400">v1.0</div>
+          ) : (
+            <div className="text-xs text-gray-400">La Serenissima v1.0</div>
+          )}
+        </div>
+      </div>
       {/* Debug overlay - will show even if other components fails */}
       <div className="fixed top-0 left-0 z-50 bg-white p-2 text-xs">
         <button 
@@ -429,28 +542,6 @@ export default function SimplePage() {
         </div>
       </div>
       
-      {/* View Mode Selector */}
-      <div className="absolute top-20 left-4 bg-black/70 text-white p-3 rounded-lg">
-        <h3 className="text-sm font-bold mb-2">View Mode</h3>
-        <div className="flex flex-col space-y-2">
-          <button 
-            className={`px-3 py-1 rounded text-sm transition-colors ${
-              !marketPanelVisible ? 'bg-amber-500 text-black' : 'bg-gray-600 hover:bg-gray-500 text-white'
-            }`}
-            onClick={() => setMarketPanelVisible(false)}
-          >
-            Land View
-          </button>
-          <button 
-            className={`px-3 py-1 rounded text-sm transition-colors ${
-              marketPanelVisible ? 'bg-amber-500 text-black' : 'bg-gray-600 hover:bg-gray-500 text-white'
-            }`}
-            onClick={() => setMarketPanelVisible(true)}
-          >
-            Market View
-          </button>
-        </div>
-      </div>
     </div>
     
     {/* Transfer Compute Menu */}
