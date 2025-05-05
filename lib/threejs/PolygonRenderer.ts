@@ -164,6 +164,8 @@ private convertPositionToLatLng(position: THREE.Vector3): { lat: number, lng: nu
   const lat = bounds.minLat + (position.z - bounds.minZ) * latScale;
   const lng = bounds.minLng + (position.x - bounds.minX) * lngScale;
   
+  console.log(`Converting position (${position.x}, ${position.y}, ${position.z}) to lat/lng (${lat}, ${lng})`);
+  
   return { lat, lng };
 }
 
@@ -236,7 +238,9 @@ private convertLatLngToPosition(lat: number, lng: number): THREE.Vector3 {
   const x = bounds.minX + (lng - bounds.minLng) * xScale;
   
   // Use a fixed height or calculate based on your terrain
-  const y = 0; // You might want to adjust this
+  const y = 5; // Adjusted to ensure visibility above terrain
+  
+  console.log(`Converting lat/lng (${lat}, ${lng}) to position (${x}, ${y}, ${z})`);
   
   return new THREE.Vector3(x, y, z);
 }
@@ -248,6 +252,8 @@ import { eventBus, EventTypes } from '../eventBus';
  * Update coat of arms sprites based on current data
  */
 public updateCoatOfArmsSprites(): void {
+  console.log('Updating coat of arms sprites');
+  
   // Clear the sprite map
   this.coatOfArmsSprites.clear();
   

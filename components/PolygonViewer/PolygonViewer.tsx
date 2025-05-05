@@ -1296,6 +1296,14 @@ export default function PolygonViewer() {
         }
       }, 2000);
       
+      // Add an even longer delay for a final check to ensure all data is loaded
+      setTimeout(() => {
+        if (polygonRendererRef.current) {
+          console.log('Performing final coat of arms update after all data should be loaded');
+          polygonRendererRef.current.updateCoatOfArmsSprites();
+        }
+      }, 5000);
+      
       // Initialize coat of arms drag and drop if not already initialized
       if (polygonRendererRef.current && canvasRef.current) {
         console.log('Initializing coat of arms drag and drop');
@@ -1354,6 +1362,10 @@ export default function PolygonViewer() {
             
             // Force an update of coat of arms sprites
             polygonRendererRef.current.updateCoatOfArmsSprites();
+            
+            // Log all polygons with coatOfArmsCenter for debugging
+            const polygonsWithCoatOfArmsCenter = polygons.filter(p => p.coatOfArmsCenter);
+            console.log(`Found ${polygonsWithCoatOfArmsCenter.length} polygons with coatOfArmsCenter in view mode change`);
             
             // Initialize coat of arms drag and drop
             if (canvasRef.current) {

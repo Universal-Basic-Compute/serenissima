@@ -33,6 +33,13 @@ export class PolygonService {
       
       this.polygons = data.polygons;
       
+      // Debug: Check if any polygons have coatOfArmsCenter
+      const polygonsWithCoatOfArmsCenter = this.polygons.filter(p => p.coatOfArmsCenter);
+      console.log(`Found ${polygonsWithCoatOfArmsCenter.length} polygons with coatOfArmsCenter`);
+      if (polygonsWithCoatOfArmsCenter.length > 0) {
+        console.log('Example polygon with coatOfArmsCenter:', polygonsWithCoatOfArmsCenter[0]);
+      }
+      
       // Notify listeners that polygons have been loaded
       eventBus.emit(EventTypes.POLYGONS_LOADED);
       
