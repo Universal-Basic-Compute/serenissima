@@ -13,6 +13,18 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
   const [loadingImage, setLoadingImage] = useState<string>('');
   const [progress, setProgress] = useState(0);
   const [imageError, setImageError] = useState(false);
+  const [hasError, setHasError] = useState(false);
+  
+  // Force completion after the specified duration
+  useEffect(() => {
+    console.log('LoadingScreen: Setting up forced completion timer');
+    const timer = setTimeout(() => {
+      console.log('LoadingScreen: Forcing completion after timeout');
+      onLoadingComplete();
+    }, duration);
+    
+    return () => clearTimeout(timer);
+  }, [duration, onLoadingComplete]);
 
   useEffect(() => {
     // Function to get random loading image
@@ -67,8 +79,16 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
           setLoadingImage('/loading/fallback.jpg');
         }
       } catch (error) {
-        console.error('Error fetching loading images:', error);
+        console.error('Critical error in loading screen:', error);
+        setHasError(true);
+        setImageError(true);
         setLoadingImage('/loading/fallback.jpg');
+        
+        // Force completion after a short delay if there's a critical error
+        setTimeout(() => {
+          console.log('LoadingScreen: Forcing completion after critical error');
+          onLoadingComplete();
+        }, 2000);
       }
     };
 

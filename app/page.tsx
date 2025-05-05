@@ -60,11 +60,26 @@ export default function Home() {
   // Force exit loading state after a timeout
   useEffect(() => {
     const loadingTimer = setTimeout(() => {
+      console.log('Forcing exit from loading state after timeout');
       setIsLoading(false);
     }, 8000); // 8 seconds timeout
     
-    return () => clearTimeout(loadingTimer);
-  }, []);
+    // Add a shorter backup timer in case wallet initialization is causing issues
+    const backupTimer = setTimeout(() => {
+      if (isLoading) {
+        console.log('Backup timer: Still loading after 5s, checking wallet status...');
+        // If wallet adapter is initializing, we can proceed with loading
+        if (walletAdapter) {
+          console.log('Wallet adapter exists, proceeding with app initialization');
+        }
+      }
+    }, 5000); // 5 seconds backup check
+    
+    return () => {
+      clearTimeout(loadingTimer);
+      clearTimeout(backupTimer);
+    };
+  }, [isLoading, walletAdapter]);
   
   // State for wallet connection
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
@@ -1617,7 +1632,10 @@ export default function Home() {
       {/* Loading Screen */}
       {isLoading && (
         <LoadingScreen 
-          onLoadingComplete={() => setIsLoading(false)}
+          onLoadingComplete={() => {
+            console.log('Loading screen complete callback triggered');
+            setIsLoading(false);
+          }}
           duration={5000}
         />
       )}
