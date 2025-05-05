@@ -147,6 +147,7 @@ export class InteractionManager {
     scene,
     polygonMeshesRef,
     activeView,
+    throttleInterval,
     hoveredPolygonId,
     setHoveredPolygonId,
     selectedPolygonId,
@@ -156,6 +157,7 @@ export class InteractionManager {
   // Interaction management
   public updateViewMode(activeView: ViewMode): void;
   public setEnabled(enabled: boolean): void;
+  public updateThrottleIntervals(moveInterval: number, hoverInterval?: number): void;
   
   // Cleanup
   public cleanup(): void;

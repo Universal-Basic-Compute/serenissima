@@ -9,6 +9,7 @@ interface InteractionManagerProps {
   scene: THREE.Scene;
   polygonMeshesRef: MutableRefObject<Record<string, THREE.Mesh>>;
   activeView: ViewMode;
+  throttleInterval?: number; // Optional throttle interval in ms
 }
 
 /**
@@ -33,19 +34,24 @@ export class InteractionManager {
   // Facade for Three.js interaction
   private interactionFacade: InteractionFacade;
   
-  // Throttle mouse move events
+  // Throttle settings for mouse move events
   private lastMoveTime = 0;
-  private moveThrottleInterval = 16; // ms (roughly 60fps)
+  private moveThrottleInterval: number; // ms between move processing
+  private lastHoverCheckTime = 0;
+  private hoverThrottleInterval: number; // ms between hover checks
 
   constructor({
     camera,
     scene,
     polygonMeshesRef,
-    activeView
+    activeView,
+    throttleInterval = 16 // Default to 16ms (roughly 60fps)
   }: InteractionManagerProps) {
     this.scene = scene;
     this.polygonMeshesRef = polygonMeshesRef;
     this.activeView = activeView;
+    this.moveThrottleInterval = throttleInterval;
+    this.hoverThrottleInterval = throttleInterval * 2; // Hover checks at half the frequency of move events
     
     // Create the interaction facade
     this.interactionFacade = new InteractionFacade(camera);
@@ -85,8 +91,13 @@ export class InteractionManager {
     // Skip if disabled
     if (!this.enabled) return;
     
-    // Throttle mouse move events for better performance
     const now = performance.now();
+    
+    // Always update the mouse position in the facade for accurate raycasting
+    // even if we throttle other operations
+    this.interactionFacade.updateMousePosition(event.clientX, event.clientY);
+    
+    // Throttle mouse move event processing for better performance
     if (now - this.lastMoveTime < this.moveThrottleInterval) {
       return;
     }
@@ -121,8 +132,12 @@ export class InteractionManager {
       return; // Skip hover detection during dragging
     }
     
-    // Update mouse position in the facade
-    this.interactionFacade.updateMousePosition(event.clientX, event.clientY);
+    // Throttle hover detection separately (less frequent than move events)
+    // This is more expensive due to raycasting
+    if (now - this.lastHoverCheckTime < this.hoverThrottleInterval) {
+      return;
+    }
+    this.lastHoverCheckTime = now;
     
     // Find intersected polygon using the facade
     const hoveredId = this.interactionFacade.findIntersectedObjectId(this.polygonMeshesRef.current);
@@ -240,6 +255,16 @@ export class InteractionManager {
    */
   public updateViewMode(activeView: ViewMode) {
     this.activeView = activeView;
+  }
+  
+  /**
+   * Update throttling intervals for performance tuning
+   * @param moveInterval Milliseconds between processing move events
+   * @param hoverInterval Milliseconds between processing hover detection (defaults to 2x moveInterval)
+   */
+  public updateThrottleIntervals(moveInterval: number, hoverInterval?: number) {
+    this.moveThrottleInterval = moveInterval;
+    this.hoverThrottleInterval = hoverInterval || moveInterval * 2;
   }
   
   /**
