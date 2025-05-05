@@ -7,6 +7,7 @@ import BuildingModelViewer from '../UI/BuildingModelViewer';
 import PlaceableBuilding from '../PolygonViewer/PlaceableBuilding';
 import { Building } from '@/lib/services/BuildingService';
 import ErrorBoundary from '../UI/ErrorBoundary';
+import ErrorBoundary from '../UI/ErrorBoundary';
 import { useBuildingMenu } from '@/hooks/useBuildingMenu';
 
 interface BuildingMenuProps {
