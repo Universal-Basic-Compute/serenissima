@@ -28,7 +28,14 @@ export default class SimpleCamera {
     this.controls.maxPolarAngle = Math.PI / 2.5; // Limit to 72 degrees from vertical
     this.controls.minDistance = 5; // Reduced from 10 to allow closer zoom
     this.controls.maxDistance = 150; // Reduced from 200 for the smaller area
-    this.controls.screenSpacePanning = false;
+    this.controls.screenSpacePanning = true; // Enable screen space panning
+    
+    // Disable left mouse button for rotation (button 0)
+    this.controls.mouseButtons = {
+      LEFT: undefined, // Left click does nothing
+      MIDDLE: THREE.MOUSE.ROTATE, // Middle click rotates
+      RIGHT: THREE.MOUSE.PAN // Right click pans
+    };
     
     // Set initial target
     this.controls.target.set(0, 0, 0);
