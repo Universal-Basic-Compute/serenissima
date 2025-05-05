@@ -168,6 +168,9 @@ export default function SimplePage() {
   return (
     <>
     <div className="relative w-full h-screen">
+      {/* Main 3D Viewer (should be first in the DOM for proper layering) */}
+      <SimpleViewer qualityMode={qualityMode} />
+      
       {/* Left Side Menu */}
       <div className={`absolute left-0 top-0 bottom-0 bg-black/70 text-white transition-all duration-300 z-20 flex flex-col ${sidebarCollapsed ? 'w-16' : 'w-64'}`}>
         {/* Toggle button */}
@@ -279,7 +282,8 @@ export default function SimplePage() {
           )}
         </div>
       </div>
-      {/* Debug overlay - will show even if other components fails */}
+      
+      {/* Debug overlay - will show even if other components fail */}
       <div className="fixed top-0 left-0 z-50 bg-white p-2 text-xs">
         <button 
           onClick={() => window.location.reload()}
@@ -290,25 +294,22 @@ export default function SimplePage() {
         <span>Simple Viewer</span>
       </div>
       
-      {/* Main 3D Viewer */}
-      <SimpleViewer qualityMode={qualityMode} />
-      
       {/* Top Navigation Bar */}
       <div className="absolute top-0 left-0 right-0 bg-black/50 text-white p-4 flex justify-between items-center">
-        <Link href="/" className="text-xl font-bold hover:text-amber-400 transition-colors">
+        <Link href="/" className="text-xl font-serif font-bold hover:text-amber-400 transition-colors">
           La Serenissima
         </Link>
         
         <div className="flex space-x-4">
           <button 
             onClick={() => setShowControls(!showControls)}
-            className="px-3 py-1 bg-amber-500 hover:bg-amber-600 rounded text-black transition-colors"
+            className="px-3 py-1 bg-amber-600 hover:bg-amber-500 rounded text-white transition-colors font-serif"
           >
             {showControls ? 'Hide Controls' : 'Show Controls'}
           </button>
           <button 
             onClick={() => setShowInfo(!showInfo)}
-            className="px-3 py-1 bg-blue-500 hover:bg-blue-600 rounded text-white transition-colors"
+            className="px-3 py-1 bg-blue-600 hover:bg-blue-500 rounded text-white transition-colors font-serif"
           >
             {showInfo ? 'Hide Info' : 'Show Info'}
           </button>
@@ -444,42 +445,22 @@ export default function SimplePage() {
       
       {/* Controls Panel */}
       {showControls && (
-        <div className="absolute bottom-4 left-4 bg-black/70 text-white p-4 rounded-lg max-w-xs">
-          <h2 className="text-lg font-bold mb-2">Camera Controls</h2>
+        <div className="absolute bottom-4 left-4 bg-black/70 text-white p-4 rounded-lg max-w-xs border-2 border-amber-600 shadow-lg">
+          <h2 className="text-lg font-serif font-bold mb-2 text-amber-400">Camera Controls</h2>
           <ul className="space-y-1 text-sm">
-            <li>• Left-click + drag: Rotate camera</li>
-            <li>• Right-click + drag: Pan camera</li>
-            <li>• Scroll wheel: Zoom in/out</li>
-            <li>• Double-click: Reset view</li>
+            <li className="flex items-center"><span className="text-amber-400 mr-2">•</span> Left-click + drag: Rotate camera</li>
+            <li className="flex items-center"><span className="text-amber-400 mr-2">•</span> Right-click + drag: Pan camera</li>
+            <li className="flex items-center"><span className="text-amber-400 mr-2">•</span> Scroll wheel: Zoom in/out</li>
+            <li className="flex items-center"><span className="text-amber-400 mr-2">•</span> Double-click: Reset view</li>
           </ul>
           
-          <h2 className="text-lg font-bold mt-4 mb-2">View Options</h2>
+          <h2 className="text-lg font-serif font-bold mt-4 mb-2 text-amber-400">View Options</h2>
           <div className="grid grid-cols-2 gap-2">
             <button 
               className={`px-2 py-1 rounded text-sm transition-colors ${
-                activeView === 'aerial' 
-                  ? 'bg-amber-500 text-black' 
-                  : 'bg-gray-500 text-white hover:bg-gray-600'
-              }`}
-              onClick={() => setActiveView('aerial')}
-            >
-              Aerial View
-            </button>
-            <button 
-              className={`px-2 py-1 rounded text-sm transition-colors ${
-                activeView === 'street' 
-                  ? 'bg-amber-500 text-black' 
-                  : 'bg-gray-500 text-white hover:bg-gray-600'
-              }`}
-              onClick={() => setActiveView('street')}
-            >
-              Street View
-            </button>
-            <button 
-              className={`px-2 py-1 rounded text-sm transition-colors ${
                 qualityMode === 'high' 
-                  ? 'bg-amber-500 text-black' 
-                  : 'bg-gray-500 text-white hover:bg-gray-600'
+                  ? 'bg-amber-500 text-black font-bold' 
+                  : 'bg-gray-700 text-white hover:bg-gray-600'
               }`}
               onClick={() => setQualityMode('high')}
             >
@@ -488,8 +469,8 @@ export default function SimplePage() {
             <button 
               className={`px-2 py-1 rounded text-sm transition-colors ${
                 qualityMode === 'performance' 
-                  ? 'bg-amber-500 text-black' 
-                  : 'bg-gray-500 text-white hover:bg-gray-600'
+                  ? 'bg-amber-500 text-black font-bold' 
+                  : 'bg-gray-700 text-white hover:bg-gray-600'
               }`}
               onClick={() => setQualityMode('performance')}
             >
@@ -501,42 +482,42 @@ export default function SimplePage() {
       
       {/* Information Panel */}
       {showInfo && (
-        <div className="absolute top-20 right-4 bg-black/70 text-white p-4 rounded-lg max-w-sm">
-          <h2 className="text-lg font-bold mb-2">About La Serenissima</h2>
+        <div className="absolute top-20 right-4 bg-black/70 text-white p-4 rounded-lg max-w-sm border-2 border-amber-600 shadow-lg">
+          <h2 className="text-lg font-serif font-bold mb-2 text-amber-400">About La Serenissima</h2>
           <p className="text-sm mb-3">
             Welcome to a simplified view of La Serenissima, a digital recreation of Renaissance Venice.
             This view shows the basic layout of the city with land and water.
           </p>
           
-          <h3 className="text-md font-bold mb-1">Legend</h3>
+          <h3 className="text-md font-serif font-bold mb-1 text-amber-400">Legend</h3>
           <div className="flex items-center space-x-2 mb-1">
-            <div className="w-4 h-4 bg-amber-500"></div>
+            <div className="w-4 h-4 bg-amber-500 border border-amber-700"></div>
             <span className="text-sm">Land Parcels</span>
           </div>
           <div className="flex items-center space-x-2">
-            <div className="w-4 h-4 bg-blue-500"></div>
+            <div className="w-4 h-4 bg-blue-500 border border-blue-700"></div>
             <span className="text-sm">Water</span>
           </div>
           
-          <div className="mt-4 text-xs text-gray-300">
+          <div className="mt-4 text-xs text-amber-400">
             Simple Viewer v1.0
           </div>
         </div>
       )}
       
       {/* Bottom Right Menu */}
-      <div className="absolute bottom-4 right-4 bg-black/70 text-white p-4 rounded-lg">
+      <div className="absolute bottom-4 right-4 bg-black/70 text-white p-4 rounded-lg border-2 border-amber-600 shadow-lg">
         <div className="grid grid-cols-2 gap-2">
-          <button className="px-3 py-2 bg-green-600 hover:bg-green-700 rounded text-white text-sm transition-colors">
+          <button className="px-3 py-2 bg-green-700 hover:bg-green-600 rounded text-white text-sm transition-colors border border-green-500 font-serif">
             Create Land
           </button>
-          <button className="px-3 py-2 bg-red-600 hover:bg-red-700 rounded text-white text-sm transition-colors">
+          <button className="px-3 py-2 bg-red-700 hover:bg-red-600 rounded text-white text-sm transition-colors border border-red-500 font-serif">
             Delete Land
           </button>
-          <button className="px-3 py-2 bg-blue-600 hover:bg-blue-700 rounded text-white text-sm transition-colors">
+          <button className="px-3 py-2 bg-blue-700 hover:bg-blue-600 rounded text-white text-sm transition-colors border border-blue-500 font-serif">
             Add Bridge
           </button>
-          <button className="px-3 py-2 bg-purple-600 hover:bg-purple-700 rounded text-white text-sm transition-colors">
+          <button className="px-3 py-2 bg-purple-700 hover:bg-purple-600 rounded text-white text-sm transition-colors border border-purple-500 font-serif">
             Add Road
           </button>
         </div>
