@@ -19,6 +19,7 @@ export default class SimplePolygonRenderer {
   private meshes: THREE.Mesh[] = [];
   private textureLoader: THREE.TextureLoader;
   private sandTexture: THREE.Texture | null = null;
+  private sharedMaterial: THREE.MeshStandardMaterial | null = null;
   
   constructor({ scene, polygons, bounds }: SimplePolygonRendererProps) {
     this.scene = scene;
@@ -48,8 +49,8 @@ export default class SimplePolygonRenderer {
   }
   
   private renderPolygons() {
-    // Create a material with sand texture and improved appearance
-    const material = new THREE.MeshStandardMaterial({
+    // Create a single shared material for all polygons
+    this.sharedMaterial = new THREE.MeshStandardMaterial({
       map: this.sandTexture,
       color: this.sandTexture ? 0xffffff : 0xf5e9c8, // Use texture color or sand color
       side: THREE.DoubleSide,
@@ -57,9 +58,13 @@ export default class SimplePolygonRenderer {
       metalness: 0.1,
       // Reduce bumpiness for thinner land
       bumpScale: 0.02,
-      // Remove visible edges by setting these properties
+      // Remove all properties that might emphasize edges
       wireframe: false,
-      flatShading: false
+      flatShading: false,
+      // Add these properties to further reduce edge visibility
+      polygonOffset: true,
+      polygonOffsetFactor: 1,
+      polygonOffsetUnits: 1
     });
     
     // Process each polygon
@@ -82,23 +87,36 @@ export default class SimplePolygonRenderer {
         // Create shape
         const shape = createPolygonShape(normalizedCoords);
         
+        // Scale the shape slightly to create overlap between adjacent polygons
+        const scaleFactor = 1.001; // 0.1% larger
+        for (let i = 0; i < shape.curves.length; i++) {
+          const curve = shape.curves[i];
+          if (curve instanceof THREE.LineCurve) {
+            curve.v1.multiplyScalar(scaleFactor);
+            curve.v2.multiplyScalar(scaleFactor);
+          }
+        }
+
         // Create geometry with minimal extrusion for elevation
         const extrudeSettings = {
-          depth: 0.05,  // Reduce from 0.15 to 0.05 for much thinner land
+          depth: 0.05,  // Keep thin
           bevelEnabled: true,
-          bevelSegments: 2, // Increase from 1 to 2 for smoother edges
-          bevelSize: 0.02, // Reduce from 0.05 to 0.02 for smaller bevels
-          bevelThickness: 0.02 // Reduce from 0.05 to 0.02 for thinner bevels
+          bevelSegments: 4, // Increase from 2 to 4 for even smoother edges
+          bevelSize: 0.01, // Reduce from 0.02 to 0.01 for nearly invisible bevels
+          bevelThickness: 0.01, // Reduce from 0.02 to 0.01 for thinner bevels
+          curveSegments: 6 // Add more curve segments for smoother shape edges
         };
       
         // Use ExtrudeGeometry instead of ShapeGeometry for elevation
         const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
         
-        // Smooth the geometry to reduce visible edges
+        // Apply more aggressive smoothing to the geometry
         geometry.computeVertexNormals();
+        // Merge vertices to eliminate tiny gaps
+        geometry.mergeVertices();
       
-        // Create mesh
-        const mesh = new THREE.Mesh(geometry, material.clone());
+        // Create mesh with shared material
+        const mesh = new THREE.Mesh(geometry, this.sharedMaterial);
         
         // Set render order to ensure land renders above water
         mesh.renderOrder = 1;
@@ -131,13 +149,7 @@ export default class SimplePolygonRenderer {
     this.meshes.forEach(mesh => {
       this.scene.remove(mesh);
       if (mesh.geometry) mesh.geometry.dispose();
-      if (mesh.material) {
-        if (Array.isArray(mesh.material)) {
-          mesh.material.forEach(material => material.dispose());
-        } else {
-          mesh.material.dispose();
-        }
-      }
+      // Don't dispose individual materials since we're using a shared material
     });
     
     // Clear array
@@ -147,6 +159,12 @@ export default class SimplePolygonRenderer {
     if (this.sandTexture) {
       this.sandTexture.dispose();
       this.sandTexture = null;
+    }
+    
+    // Dispose of shared material
+    if (this.sharedMaterial) {
+      this.sharedMaterial.dispose();
+      this.sharedMaterial = null;
     }
   }
 }
