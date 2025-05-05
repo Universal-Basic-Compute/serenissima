@@ -93,7 +93,7 @@ export class WaterFacade {
     };
     this.color = typeof options.color === 'string' 
       ? new THREE.Color(options.color).getHex() 
-      : (options.color || 0x00142a); // Even deeper, richer blue color
+      : (options.color || 0x001020); // Even deeper, darker blue color
     this.distortionScale = options.distortionScale || this.getDefaultDistortionScale();
     this.flowDirection = {
       x: options.flowDirection?.x || 0,
