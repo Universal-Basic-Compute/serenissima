@@ -39,7 +39,8 @@ export class Water {
         flowDirection: { x: 0.05, y: 0.05 },
         flowSpeed: 0.35, // Slightly increased flow speed
         skipAnimationWhenOffscreen: true,
-        opacity: 0.98 // Almost fully opaque for maximum visibility
+        opacity: 0.98, // Almost fully opaque for maximum visibility
+        brightness: 0.3 // Lower brightness to make the water appear darker
       });
 
       console.log('Water initialized successfully');

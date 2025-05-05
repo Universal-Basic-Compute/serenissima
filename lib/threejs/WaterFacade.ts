@@ -29,6 +29,7 @@ export interface WaterFacadeProps {
   flowSpeed?: number;
   skipAnimationWhenOffscreen?: boolean;
   opacity?: number; // Add opacity parameter
+  brightness?: number; // Add brightness parameter to control water reflections
 }
 
 /**
@@ -59,6 +60,7 @@ export class WaterFacade {
   private shorelineIntensity: number = 5.0; // Increased to maximum for more dramatic shoreline effects
   private shorelineDistance: number = 18.0; // Increased distance for wider shoreline effect
   private opacity: number; // Add opacity property
+  private brightness: number; // Add brightness property to control reflections
 
   /**
    * Create a new WaterFacade
@@ -101,6 +103,7 @@ export class WaterFacade {
     };
     this.flowSpeed = options.flowSpeed || 0.3;
     this.opacity = options.opacity !== undefined ? options.opacity : 0.8; // Higher default opacity
+    this.brightness = options.brightness !== undefined ? options.brightness : 0.3; // Lower default brightness for darker water
     
     try {
       // Create water
@@ -169,6 +172,31 @@ export class WaterFacade {
           alpha: this.opacity // Add opacity parameter
         }
       );
+      
+      // Modify the water material to reduce brightness and reflections
+      if (water.material instanceof THREE.ShaderMaterial) {
+        // Add custom uniform for brightness control
+        water.material.uniforms.brightness = { value: this.brightness };
+        
+        // Modify the fragment shader to apply brightness
+        let fragmentShader = water.material.fragmentShader;
+        
+        // Add uniform declaration
+        fragmentShader = fragmentShader.replace(
+          'uniform float time;',
+          'uniform float time;\nuniform float brightness;'
+        );
+        
+        // Modify the final color calculation to reduce brightness
+        fragmentShader = fragmentShader.replace(
+          'gl_FragColor = vec4( color, alpha );',
+          'gl_FragColor = vec4( color * brightness, alpha );'
+        );
+        
+        // Apply the modified shader
+        water.material.fragmentShader = fragmentShader;
+        water.material.needsUpdate = true;
+      }
 
       // Position water
       water.rotation.x = -Math.PI / 2;
@@ -211,6 +239,11 @@ export class WaterFacade {
         opacity: this.opacity, // Use the opacity property
         side: THREE.DoubleSide
       });
+      
+      // Apply brightness to the material
+      const colorObj = new THREE.Color(this.color);
+      colorObj.multiplyScalar(this.brightness);
+      waterMaterial.color = colorObj;
       
       // Create a mesh with the geometry and material
       const waterMesh = new THREE.Mesh(waterGeometry, waterMaterial);
@@ -705,6 +738,32 @@ export class WaterFacade {
   }
   
   /**
+   * Set water brightness
+   * @param brightness New brightness value (0-1)
+   */
+  public setBrightness(brightness: number): void {
+    if (this.isDisposed) return;
+    
+    try {
+      this.brightness = Math.max(0, Math.min(1, brightness));
+      
+      if (this.water && this.water.material instanceof THREE.ShaderMaterial) {
+        // Update brightness value in the shader
+        if (this.water.material.uniforms.brightness) {
+          this.water.material.uniforms.brightness.value = this.brightness;
+        }
+      } else if (this.water && this.water.material instanceof THREE.MeshBasicMaterial) {
+        // Update fallback material brightness
+        const colorObj = new THREE.Color(this.color);
+        colorObj.multiplyScalar(this.brightness);
+        this.water.material.color = colorObj;
+      }
+    } catch (error) {
+      console.warn('Error updating water brightness:', error);
+    }
+  }
+  
+  /**
    * Register land objects for shoreline effects
    * @param objects Array of land objects to consider for shoreline effects
    */
@@ -1022,6 +1081,7 @@ if (shoreFactor > 0.01) {
     skipAnimationWhenOffscreen: boolean;
     isOnScreen: boolean;
     opacity: number; // Add opacity to state
+    brightness: number; // Add brightness to state
   } {
     return {
       size: this.size,
@@ -1035,7 +1095,8 @@ if (shoreFactor > 0.01) {
       updateInterval: this.updateInterval,
       skipAnimationWhenOffscreen: this.skipAnimationWhenOffscreen,
       isOnScreen: this.isOnScreen,
-      opacity: this.opacity // Include opacity in returned state
+      opacity: this.opacity, // Include opacity in returned state
+      brightness: this.brightness // Include brightness in returned state
     };
   }
 
