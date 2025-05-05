@@ -55,8 +55,8 @@ export class WaterFacade {
   private landObjects: THREE.Object3D[] = [];
   private boundaryPoints: THREE.Vector3[] = [];
   private shorelineEffect: boolean = true;
-  private shorelineIntensity: number = 1.0;
-  private shorelineDistance: number = 5.0; // Distance in units that shoreline effect extends
+  private shorelineIntensity: number = 2.0; // Increased from 1.0
+  private shorelineDistance: number = 8.0; // Distance in units that shoreline effect extends
 
   /**
    * Create a new WaterFacade
@@ -903,7 +903,7 @@ if (shoreFactor > 0.01) {
     this.shorelineEffect = enabled;
     
     if (intensity !== undefined) {
-      this.shorelineIntensity = Math.max(0, Math.min(2.0, intensity)); // Increased max intensity to 2.0
+      this.shorelineIntensity = Math.max(0, Math.min(3.0, intensity)); // Increased max intensity to 3.0 from 2.0
     }
     
     if (distance !== undefined) {
