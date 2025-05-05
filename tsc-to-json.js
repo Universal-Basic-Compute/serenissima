@@ -31,7 +31,60 @@ tsc.stderr.on('data', (data) => {
 tsc.on('close', (code) => {
   console.error(`TypeScript compiler exited with code ${code}`);
   
-  if (code !== 0 && !stdout.trim()) {
+  // Parse the output to extract errors
+  const errors = [];
+  const lines = stdout.split('\n');
+  
+  // Regular expression to match TypeScript error format
+  const errorRegex = /^(.+)\((\d+),(\d+)\): error TS(\d+): (.+)$/;
+  
+  // Log the first few lines of output for debugging
+  if (lines.length > 0) {
+    console.error('\nFirst few lines of TypeScript output:');
+    for (let i = 0; i < Math.min(5, lines.length); i++) {
+      if (lines[i].trim()) {
+        console.error(`> ${lines[i]}`);
+      }
+    }
+  }
+  
+  // Count warnings as well as errors
+  let warningCount = 0;
+  const warningRegex = /^(.+)\((\d+),(\d+)\): warning TS(\d+): (.+)$/;
+  
+  for (const line of lines) {
+    const errorMatch = line.match(errorRegex);
+    if (errorMatch) {
+      const [_, filePath, lineNum, column, errorCode, message] = errorMatch;
+      
+      errors.push({
+        filePath,
+        line: parseInt(lineNum, 10),
+        column: parseInt(column, 10),
+        code: `TS${errorCode}`,
+        message,
+        type: 'error'
+      });
+    }
+    
+    const warningMatch = line.match(warningRegex);
+    if (warningMatch) {
+      const [_, filePath, lineNum, column, warningCode, message] = warningMatch;
+      
+      warningCount++;
+      // Optionally add warnings to the errors array if you want to include them
+      // errors.push({
+      //   filePath,
+      //   line: parseInt(lineNum, 10),
+      //   column: parseInt(column, 10),
+      //   code: `TS${warningCode}`,
+      //   message,
+      //   type: 'warning'
+      // });
+    }
+  }
+  
+  if (code !== 0 && !stdout.trim() && errors.length === 0) {
     console.error('Error running TypeScript compiler:');
     
     if (stderr.trim()) {
@@ -61,33 +114,14 @@ tsc.on('close', (code) => {
     return;
   }
   
+  console.error(`Found ${errors.length} errors and ${warningCount} warnings`);
   console.error('TypeScript compilation completed.');
-  
-  // Parse the output to extract errors
-  const errors = [];
-  const lines = stdout.split('\n');
-  
-  // Regular expression to match TypeScript error format
-  const errorRegex = /^(.+)\((\d+),(\d+)\): error TS(\d+): (.+)$/;
-  
-  for (const line of lines) {
-    const match = line.match(errorRegex);
-    if (match) {
-      const [_, filePath, lineNum, column, errorCode, message] = match;
-      
-      errors.push({
-        filePath,
-        line: parseInt(lineNum, 10),
-        column: parseInt(column, 10),
-        code: `TS${errorCode}`,
-        message
-      });
-    }
-  }
   
   // Create the final JSON object
   const result = {
     totalErrors: errors.length,
+    totalWarnings: warningCount,
+    exitCode: code,
     timestamp: new Date().toISOString(),
     errors
   };
