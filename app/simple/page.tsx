@@ -47,7 +47,7 @@ export default function SimplePage() {
       </div>
       
       {/* Main 3D Viewer */}
-      <SimpleViewer />
+      <SimpleViewer qualityMode={qualityMode} />
       
       {/* Top Navigation Bar */}
       <div className="absolute top-0 left-0 right-0 bg-black/50 text-white p-4 flex justify-between items-center">

@@ -7,7 +7,7 @@ import { WaterFacade as SimpleWater, WaterQualityLevel } from './SimpleWater';
 import SimplePolygonRenderer from './SimplePolygonRenderer';
 import { calculateBounds } from './utils';
 
-export default function SimpleViewer() {
+export default function SimpleViewer({ qualityMode = 'high' }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [polygons, setPolygons] = useState([]);
   const [loading, setLoading] = useState(true);
