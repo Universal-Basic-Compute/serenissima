@@ -1365,7 +1365,7 @@ export default function PolygonViewer() {
     if (prevViewRef.current !== activeView) {
       prevViewRef.current = activeView;
       
-      if (sceneRef.current !== null) {
+      if (sceneRef.current) {
         console.log(`Updating view mode to ${activeView}`);
         
         // Load land owners when switching to land view
@@ -1455,7 +1455,7 @@ export default function PolygonViewer() {
       
       // Save the road to Airtable
       if (roadId) {
-        roadManagerRef.current.saveRoadToAirtable(roadId, selectedPolygonId, walletAddress || undefined)
+        roadManagerRef.current.saveRoadToAirtable(roadId, selectedPolygonId ?? undefined, walletAddress || undefined)
           .then(response => {
             console.log('Road saved to Airtable:', response);
             // Show success message
