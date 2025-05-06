@@ -11,6 +11,7 @@ import { PhantomWalletAdapter } from '@solana/wallet-adapter-phantom';
 import { WalletReadyState } from '@solana/wallet-adapter-base';
 import { getApiBaseUrl } from '@/lib/apiUtils';
 import { FaHome, FaBuilding, FaRoad, FaTree, FaStore, FaLandmark } from 'react-icons/fa';
+import * as THREE from 'three';
 
 // Import SimpleViewer with no SSR to avoid hydration issues
 const SimpleViewer = dynamic(() => import('../../components/PolygonViewer/SimpleViewer'), {
@@ -205,7 +206,7 @@ export default function SimplePage() {
       }
       
       // Clear any cached textures
-      if (typeof THREE !== 'undefined' && THREE.Cache) {
+      if (THREE && THREE.Cache) {
         THREE.Cache.clear();
         console.log('THREE.js texture cache cleared');
       }
