@@ -1355,7 +1355,7 @@ export default function PolygonViewer() {
     // Only update selection state when selectedPolygonId changes
     if (polygonRendererRef.current) {
       console.log('Updating selection state:', selectedPolygonId);
-      polygonRendererRef.current.updateSelectionState(selectedPolygonId || null);
+      polygonRendererRef.current.updateSelectionState(selectedPolygonId ?? null);
     }
   }, [selectedPolygonId]);
   
