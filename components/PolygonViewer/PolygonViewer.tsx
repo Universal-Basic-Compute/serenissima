@@ -1455,7 +1455,7 @@ export default function PolygonViewer() {
       const walletAddress = sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress');
       
       // Save the road to Airtable
-      if (roadId) {
+      if (roadId && roadManagerRef.current) {
         roadManagerRef.current.saveRoadToAirtable(roadId, selectedPolygonId ?? undefined, walletAddress || undefined)
           .then(response => {
             console.log('Road saved to Airtable:', response);
@@ -1715,7 +1715,7 @@ export default function PolygonViewer() {
       />
       
       {/* Road Creator */}
-      {roadCreationActive && sceneRef.current !== null && sceneRef.current.scene && sceneRef.current.camera && (
+      {roadCreationActive && sceneRef.current && sceneRef.current.scene && sceneRef.current.camera && (
         <RoadCreator
           scene={sceneRef.current.scene}
           camera={sceneRef.current.camera}
