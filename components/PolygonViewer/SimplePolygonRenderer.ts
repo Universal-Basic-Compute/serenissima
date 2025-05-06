@@ -297,7 +297,7 @@ export default class SimplePolygonRenderer {
     
     // Update our local ownerCoatOfArmsMap with the latest data
     if (serviceUsers && Object.keys(serviceUsers).length > 0) {
-      Object.values(serviceUsers).forEach(user => {
+      Object.values(serviceUsers).forEach((user: any) => {
         if (user.user_name && user.coat_of_arms_image) {
           this.ownerCoatOfArmsMap[user.user_name] = user.coat_of_arms_image;
           console.log(`Found coat of arms from service for ${user.user_name}: ${user.coat_of_arms_image}`);
