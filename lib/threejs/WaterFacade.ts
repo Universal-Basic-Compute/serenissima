@@ -1123,7 +1123,7 @@ if (shoreFactor > 0.01) {
             // Dispose of all textures in uniforms
             Object.keys(uniforms).forEach(key => {
               const uniform = uniforms[key];
-              if (uniform && uniform.value && typeof uniform.value === 'object') {
+              if (uniform && uniform.value && typeof uniform.value === 'object' && typeof uniform.value.dispose === 'function') {
                 uniform.value.dispose();
               }
             });
