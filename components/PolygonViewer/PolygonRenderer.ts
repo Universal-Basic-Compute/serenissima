@@ -733,11 +733,12 @@ export default class PolygonRenderer {
         
         if (polygonMesh) {
           // Get the owner's color
-          const ownerColor = this.getOwnerColor(polygon.owner);
+          const owner = polygon.owner || '';
+          const ownerColor = this.getOwnerColor(owner);
           
           if (ownerColor) {
-            console.log(`Applying color ${ownerColor} to polygon ${polygon.id} owned by ${polygon.owner}`);
-            polygonMesh.updateOwner(polygon.owner || '', ownerColor);
+            console.log(`Applying color ${ownerColor} to polygon ${polygon.id} owned by ${owner}`);
+            polygonMesh.updateOwner(owner, ownerColor);
           }
         } else {
           console.warn(`Could not find PolygonMesh for polygon ${polygon.id}`);
@@ -845,7 +846,7 @@ export default class PolygonRenderer {
                   obj.material.forEach((mat: THREE.Material) => {
                     try {
                       const materialWithMap = mat as THREE.MeshBasicMaterial | THREE.MeshStandardMaterial;
-                      if (materialWithMap.map) 
+                      if ('map' in materialWithMap && materialWithMap.map) 
                         materialWithMap.map.dispose();
                       mat.dispose();
                     } catch (matError) {
@@ -1381,8 +1382,9 @@ export default class PolygonRenderer {
                 if (Array.isArray(obj.material)) {
                   obj.material.forEach((mat: THREE.Material) => {
                     try {
-                      if ((mat as THREE.MeshBasicMaterial | THREE.MeshStandardMaterial).map) 
-                        (mat as THREE.MeshBasicMaterial | THREE.MeshStandardMaterial).map?.dispose();
+                      const materialWithMap = mat as THREE.MeshBasicMaterial | THREE.MeshStandardMaterial;
+                      if ('map' in materialWithMap && materialWithMap.map) 
+                        materialWithMap.map.dispose();
                       mat.dispose();
                     } catch (matError) {
                       log.error('Error disposing material:', matError);
