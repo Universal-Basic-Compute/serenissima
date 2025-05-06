@@ -378,7 +378,7 @@ export class RoadManager {
     try {
       // Create a simplified representation of points for the key
       // We don't use the exact points to allow for reuse of similar geometries
-      const simplifiedPoints = points.map((p, i) => {
+      const simplifiedPoints = points.map((p: THREE.Vector3, i) => {
         // Only use every 3rd point for the key to allow more reuse
         if (i % 3 === 0) {
           // Round coordinates to reduce unique variations
@@ -1441,8 +1441,8 @@ export class RoadManager {
         material.map = null;
         
         // Clear references for properties that might not exist on all material types
-        if ('normalMap' in material) (material as THREE.MeshStandardMaterial).normalMap = null;
-        if ('roughnessMap' in material) (material as THREE.MeshStandardMaterial).roughnessMap = null;
+        if ('normalMap' in material) (material as THREE.MeshStandardMaterial).normalMap = null as unknown as THREE.Texture;
+        if ('roughnessMap' in material) (material as THREE.MeshStandardMaterial).roughnessMap = null as unknown as THREE.Texture;
         if ('metalnessMap' in material) (material as THREE.MeshStandardMaterial).metalnessMap = null;
         if ('aoMap' in material) material.aoMap = null;
         
