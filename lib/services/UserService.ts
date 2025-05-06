@@ -346,7 +346,7 @@ export class UserService {
     const cachedEntry = this.userByUsernameCache.get(username);
     if (this.isCacheValid(cachedEntry)) {
       log.debug(`Returning user from cache: ${username}`);
-      return cachedEntry!.data;
+      return cachedEntry.data;
     }
     
     const user = this.users[username];
