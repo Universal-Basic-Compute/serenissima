@@ -71,18 +71,18 @@
         "alternative_output": true,
         "facility": "soap_workshop"
       }
-    ],
-    "production_chains": [
-      {
-        "process": "glassmaking",
-        "chain": "Soda Ash + Murano Sand → Glass Foundry → Molten Glass → Fine Glassware"
-      },
-      {
-        "process": "soap_making",
-        "chain": "Soda Ash → Soap Workshop → Soap"
-      }
     ]
   },
+  "production_chains": [
+    {
+      "process": "glassmaking",
+      "chain": "Soda Ash + Murano Sand → Glass Foundry → Molten Glass → Fine Glassware"
+    },
+    {
+      "process": "soap_making",
+      "chain": "Soda Ash → Soap Workshop → Soap"
+    }
+  ],
   "substitutes": [
     {
       "resource_id": "potash",
@@ -202,5 +202,6 @@
       "Venetian soap makers"
     ],
     "cultural_context": "The secret knowledge of proper soda ash preparation and purification was closely guarded by Venetian glassmakers. The material was so valuable that the Republic established special warehouses for its storage and distribution, with strict controls to prevent theft or unauthorized use."
-  }
+  },
+  "varieties": []
 }

@@ -14,7 +14,7 @@
   "description": {
     "short": "Essential mineral for food preservation and trade.",
     "full": "White crystalline mineral harvested from the Venetian lagoon's salt pans. A strategic resource that formed the foundation of Venice's early wealth and remains a state monopoly.",
-    "flavor": "The humble salt crystal\u00e2\u20ac\u201dVenice's first treasure. Before spices and silk, before gold and glass, there was salt. The invisible empire upon which all else was built."
+    "flavor": "The humble salt crystal—Venice's first treasure. Before spices and silk, before gold and glass, there was salt. The invisible empire upon which all else was built."
   },
   "source_properties": {
     "source": "local",
@@ -25,7 +25,8 @@
       "dalmatian_coast"
     ],
     "availability": "common",
-    "seasonality": {
+    "seasonality": "summer",
+    "seasonality_details": {
       "harvest": "summer",
       "peak": "late_summer",
       "note": "Dependent on dry weather for optimal production"
@@ -93,21 +94,21 @@
         "amount": 1,
         "requires": ["meat"]
       }
-    ],
-    "production_chains": [
-      {
-        "process": "food_preservation",
-        "chain": "Salt → Salting House → Preserved Food"
-      },
-      {
-        "process": "fish_preservation",
-        "chain": "Salt + Fish → Salting House → Preserved Fish"
-      },
-      {
-        "process": "meat_preservation",
-        "chain": "Salt + Meat → Salting House → Salted Meat"
-      }
     ]
+  },
+  "production_chains": [
+    {
+      "process": "food_preservation",
+      "chain": "Salt → Salting House → Preserved Food"
+    },
+    {
+      "process": "fish_preservation",
+      "chain": "Salt + Fish → Salting House → Preserved Fish"
+    },
+    {
+      "process": "meat_preservation",
+      "chain": "Salt + Meat → Salting House → Salted Meat"
+    }
   },
   "substitutes": [],
   "complements": [
@@ -199,6 +200,23 @@
     "strategic_importance": {
       "level": "critical",
       "note": "Foundation of Venetian trade networks and state revenue"
+    },
+    "trade_disruptions": {
+      "factors": [],
+      "impact": ""
     }
+  },
+  "historical_notes": {
+    "introduction_year": "ancient",
+    "notable_producers": [
+      "Chioggia Salt Pans",
+      "Venetian Lagoon"
+    ],
+    "historical_significance": "Salt was one of Venice's earliest and most important commodities, forming the foundation of its trading empire. The Republic maintained strict control over salt production and trade.",
+    "historical_markets": [
+      "Venetian State Salt Monopoly",
+      "European food preservation markets"
+    ],
+    "cultural_context": "Salt production was so vital to Venice that special laws protected salt workers and facilities, with severe penalties for interference with the salt trade."
   }
 }

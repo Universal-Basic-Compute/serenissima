@@ -81,6 +81,7 @@
       "primarily_used_for": "water_resistant_elements"
     }
   ],
+  "production_chains": [],
   "production_properties": {
     "processor_building": "stonecutter_workshop",
     "processing_complexity": 4,
@@ -185,6 +186,28 @@
       "construction_activity",
       "artistic_commissions",
       "diplomatic_gifts"
-    ]
+    ],
+    "trade_disruptions": {
+      "factors": [
+        "quarry_disputes",
+        "transport_difficulties"
+      ],
+      "impact": "moderate"
+    }
+  },
+  "historical_notes": {
+    "introduction_year": "ancient",
+    "notable_producers": [
+      "Carrara quarries",
+      "Greek islands",
+      "Istrian peninsula"
+    ],
+    "historical_significance": "Marble was essential to Venice's architectural grandeur, despite the city having no natural stone resources of its own. The Republic's ability to import and use this heavy material on unstable lagoon foundations demonstrated both its wealth and engineering prowess.",
+    "historical_markets": [
+      "Venetian construction industry",
+      "Sculptors' workshops",
+      "Church commissions"
+    ],
+    "cultural_context": "The use of colored marbles from different regions became a status symbol in Venetian architecture, with specific varieties reserved for the most prestigious buildings."
   }
 }

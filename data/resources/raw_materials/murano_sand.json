@@ -14,7 +14,7 @@
   "description": {
     "short": "Fine sand from Murano island.",
     "full": "Exceptionally pure silica sand harvested from specific locations on Murano island. Its unique composition makes it essential for Venice's legendary glass production.",
-    "flavor": "Beneath your feet lies the foundation of Venice's crystalline reputation\u00e2\u20ac\u201dmere grains to some, but to the glass masters, these sands are more precious than gold."
+    "flavor": "Beneath your feet lies the foundation of Venice's crystalline reputation—mere grains to some, but to the glass masters, these sands are more precious than gold."
   },
   "source_properties": {
     "source": "natural",
@@ -63,14 +63,14 @@
         "amount": 1,
         "requires": ["soda_ash"]
       }
-    ],
-    "production_chains": [
-      {
-        "process": "glassmaking",
-        "chain": "Murano Sand + Soda Ash → Glass Foundry → Molten Glass → Fine Glassware"
-      }
     ]
   },
+  "production_chains": [
+    {
+      "process": "glassmaking",
+      "chain": "Murano Sand + Soda Ash → Glass Foundry → Molten Glass → Fine Glassware"
+    }
+  ],
   "substitutes": [
     {
       "resource_id": "standard_sand",
@@ -170,6 +170,8 @@
     "historical_markets": [
       "Murano glass foundries",
       "Venetian glass industry"
-    ]
-  }
+    ],
+    "cultural_context": ""
+  },
+  "varieties": []
 }
