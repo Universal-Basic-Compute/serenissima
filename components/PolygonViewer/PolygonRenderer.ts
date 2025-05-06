@@ -847,9 +847,11 @@ export default class PolygonRenderer {
                 if (Array.isArray(obj.material)) {
                   obj.material.forEach((mat: THREE.Material) => {
                     try {
-                      const materialWithMap = mat as THREE.MeshBasicMaterial | THREE.MeshStandardMaterial;
-                      if ('map' in materialWithMap && materialWithMap.map) {
-                        materialWithMap.map.dispose();
+                      if (mat.hasOwnProperty('map')) {
+                        const materialWithMap = mat as THREE.MeshBasicMaterial | THREE.MeshStandardMaterial;
+                        if (materialWithMap.map) {
+                          materialWithMap.map.dispose();
+                        }
                       }
                       mat.dispose();
                     } catch (matError) {
@@ -858,8 +860,10 @@ export default class PolygonRenderer {
                   });
                 } else {
                   try {
-                    const materialWithMap = obj.material as THREE.MeshBasicMaterial | THREE.MeshStandardMaterial;
-                    if (materialWithMap.map) materialWithMap.map.dispose();
+                    if (obj.material.hasOwnProperty('map')) {
+                      const materialWithMap = obj.material as THREE.MeshBasicMaterial | THREE.MeshStandardMaterial;
+                      if (materialWithMap.map) materialWithMap.map.dispose();
+                    }
                     obj.material.dispose();
                   } catch (matError) {
                     log.error('Error disposing material:', matError);
@@ -1254,8 +1258,8 @@ export default class PolygonRenderer {
     
     // Get the owner's coat of arms URL if available
     let ownerCoatOfArmsUrl: string | null = null;
-    if (newOwner && this.ownerCoatOfArmsMap && typeof newOwner === 'string' && newOwner in this.ownerCoatOfArmsMap) {
-      ownerCoatOfArmsUrl = this.ownerCoatOfArmsMap[newOwner];
+    if (newOwner && this.ownerCoatOfArmsMap && typeof newOwner === 'string') {
+      ownerCoatOfArmsUrl = this.ownerCoatOfArmsMap[newOwner] || null;
       console.log(`Found coat of arms for ${newOwner}: ${ownerCoatOfArmsUrl}`);
     }
     
@@ -1391,8 +1395,10 @@ export default class PolygonRenderer {
                   });
                 } else {
                   try {
-                    const materialWithMap = obj.material as THREE.MeshBasicMaterial | THREE.MeshStandardMaterial;
-                    if (materialWithMap.map) materialWithMap.map.dispose();
+                    if (obj.material.hasOwnProperty('map')) {
+                      const materialWithMap = obj.material as THREE.MeshBasicMaterial | THREE.MeshStandardMaterial;
+                      if (materialWithMap.map) materialWithMap.map.dispose();
+                    }
                     obj.material.dispose();
                   } catch (matError) {
                     log.error('Error disposing material:', matError);
