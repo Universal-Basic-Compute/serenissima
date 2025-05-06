@@ -94,11 +94,14 @@ async function processBatch(batch, batchNumber) {
   // Collect unique files for this batch
   const files = [...new Set(batch.map(error => error.filePath))];
   
-  // Build the Aider command
-  const errorDetailsOneLine = errorDetails.replace(/\n/g, '\\n');
+  // Create a temporary file with error details
+  const tempErrorFile = `error-details-batch-${batchNumber}.txt`;
+  fs.writeFileSync(tempErrorFile, errorDetails, 'utf8');
+  
+  // Build the Aider command with a simpler message
   const aiderArgs = [
     '--yes-always',
-    '--message', `Fix the following TypeScript errors:\\n\\n${errorDetailsOneLine}`,
+    '--message', `Fix TypeScript errors in batch ${batchNumber} (see ${tempErrorFile} for details)`,
   ];
   
   // Add each file to the command
@@ -116,6 +119,9 @@ async function processBatch(batch, batchNumber) {
   }).join(' ')}`;
   console.log(`\nExecuting command:\n${fullCommand}\n`);
   
+  // Print the error details to the console for reference
+  console.log(`Error details saved to ${tempErrorFile}`);
+  
   // Run Aider
   return new Promise((resolve, reject) => {
     try {
@@ -127,6 +133,12 @@ async function processBatch(batch, batchNumber) {
       aider.on('close', code => {
         if (code === 0) {
           console.log(`Aider successfully processed batch ${batchNumber}`);
+          // Clean up the temporary file
+          try {
+            fs.unlinkSync(tempErrorFile);
+          } catch (err) {
+            console.warn(`Could not delete temporary file ${tempErrorFile}: ${err.message}`);
+          }
           resolve();
         } else {
           console.warn(`Aider exited with code ${code} for batch ${batchNumber}`);
@@ -148,10 +160,10 @@ async function processBatch(batch, batchNumber) {
   });
 }
 
-// Process batches in parallel, 3 at a time
+// Process batches sequentially to avoid overwhelming Aider
 async function processBatches() {
-  // Process batches in groups of 3
-  const PARALLEL_BATCHES = 3;
+  // Process batches one at a time to avoid issues
+  const PARALLEL_BATCHES = 1;
   
   // If no batches, return early
   if (batches.length === 0) {
