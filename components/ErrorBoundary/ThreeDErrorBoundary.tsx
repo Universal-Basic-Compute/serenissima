@@ -2,10 +2,11 @@ import React, { ErrorInfo } from 'react';
 import ErrorBoundary from './ErrorBoundary';
 import { log } from '@/lib/logUtils';
 
-interface ThreeDErrorBoundaryProps {
+export interface ThreeDErrorBoundaryProps {
   children: React.ReactNode;
   onError?: (error: Error, errorInfo: ErrorInfo) => void;
   resetKey?: any;
+  fallback: React.ReactElement;
 }
 
 /**

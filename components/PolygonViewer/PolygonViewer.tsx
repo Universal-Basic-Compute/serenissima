@@ -9,7 +9,7 @@
 'use client';
 
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
-import ThreeDErrorBoundary from '../ErrorBoundary/ThreeDErrorBoundary';
+import ThreeDErrorBoundary, { ThreeDErrorBoundaryProps } from '../ErrorBoundary/ThreeDErrorBoundary';
 import { log } from '@/lib/logUtils';
 import { getApiBaseUrl } from '@/lib/apiUtils';
 import * as THREE from 'three';
@@ -1588,7 +1588,7 @@ export default function PolygonViewer() {
       <ThreeDErrorBoundary 
         onError={handleRenderingError}
         resetKey={errorBoundaryResetKey}
-        fallback={errorBoundaryFallback}
+        fallback={errorBoundaryFallback as React.ReactElement}
       >
         <div className="w-full h-full flex flex-col items-center justify-center bg-amber-50">
           <div className="text-amber-800 text-2xl font-serif mb-4">Mapping the Venetian Republic...</div>
@@ -1646,7 +1646,7 @@ export default function PolygonViewer() {
     <ThreeDErrorBoundary 
       onError={handleRenderingError}
       resetKey={errorBoundaryResetKey}
-      fallback={errorBoundaryFallback}
+      fallback={errorBoundaryFallback as React.ReactElement}
     >
       <div className="w-screen h-screen">
         {/* View mode menu */}
