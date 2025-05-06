@@ -1129,14 +1129,15 @@ export class RoadManager {
             if (road.mesh && road.mesh.geometry) {
               // Properly dispose of geometry buffers
               if (road.mesh.geometry.index) {
-                road.mesh.geometry.index.array = null;
+                // Don't try to modify read-only array property
+                road.mesh.geometry.index = null;
               }
               
               // Dispose of all geometry attributes
               Object.keys(road.mesh.geometry.attributes).forEach(attributeName => {
                 const attribute = road.mesh.geometry.attributes[attributeName];
                 if (attribute) {
-                  attribute.array = null;
+                  // Don't try to modify read-only array property
                   road.mesh.geometry.deleteAttribute(attributeName);
                 }
               });
@@ -1273,14 +1274,15 @@ export class RoadManager {
                   // Properly dispose of geometry buffers
                   const geometry = (object as THREE.Mesh).geometry;
                   if (geometry.index) {
-                    geometry.index.array = null;
+                    // Don't try to modify read-only array property
+                    geometry.index = null;
                   }
                   
                   // Dispose of all geometry attributes
                   Object.keys(geometry.attributes).forEach(attributeName => {
                     const attribute = geometry.attributes[attributeName];
                     if (attribute) {
-                      attribute.array = null;
+                      // Don't try to modify read-only array property
                       geometry.deleteAttribute(attributeName);
                     }
                   });
@@ -1339,13 +1341,14 @@ export class RoadManager {
               if (geometry) {
                 // Dispose of any attributes and index buffers
                 if (geometry.index) {
-                  geometry.index.array = null;
+                  // Don't try to modify read-only array property
+                  geometry.index = null;
                 }
                 
                 Object.keys(geometry.attributes).forEach(attributeName => {
                   const attribute = geometry.attributes[attributeName];
                   if (attribute) {
-                    attribute.array = null;
+                    // Don't try to modify read-only array property
                     geometry.deleteAttribute(attributeName);
                   }
                 });
