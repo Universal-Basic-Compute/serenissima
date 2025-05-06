@@ -247,8 +247,8 @@ export default function SimplePage() {
       setIsGeneratingImage(true);
         
       // Import the utility function directly
-      const { generateCoatOfArmsImage } = await import('@/app/utils/coatOfArmsUtils');
-      const imageUrl = await generateCoatOfArmsImage(familyCoatOfArms);
+      const { generateCoatOfArmsImage: generateImage } = await import('@/app/utils/coatOfArmsUtils');
+      const imageUrl = await generateImage(familyCoatOfArms);
         
       // Update state with the local image URL
       setCoatOfArmsImage(imageUrl);
@@ -1128,23 +1128,24 @@ function generateCoatOfArmsImage() {
       return;
     }
     
-  try {
-    this.setIsGeneratingImage(true);
-      
-    // Import the utility function directly
-    const { generateCoatOfArmsImage } = await import('@/app/utils/coatOfArmsUtils');
-    const imageUrl = await generateCoatOfArmsImage(this.familyCoatOfArms);
-      
-    // Update state with the local image URL
-    this.setCoatOfArmsImage(imageUrl);
-      
-  } catch (error) {
-    console.error('Error generating coat of arms image:', error);
-    alert(`Failed to generate image: ${error instanceof Error ? error.message : String(error)}`);
-  } finally {
-    this.setIsGeneratingImage(false);
-  }
-};
+    try {
+      this.setIsGeneratingImage(true);
+        
+      // Import the utility function directly
+      const { generateCoatOfArmsImage } = await import('@/app/utils/coatOfArmsUtils');
+      const imageUrl = await generateCoatOfArmsImage(this.familyCoatOfArms);
+        
+      // Update state with the local image URL
+      this.setCoatOfArmsImage(imageUrl);
+        
+    } catch (error) {
+      console.error('Error generating coat of arms image:', error);
+      alert(`Failed to generate image: ${error instanceof Error ? error.message : String(error)}`);
+    } finally {
+      this.setIsGeneratingImage(false);
+    }
+  };
+}
 
 
 // Add the handleTransferCompute function
