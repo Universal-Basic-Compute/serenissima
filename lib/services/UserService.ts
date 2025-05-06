@@ -553,9 +553,11 @@ export class UserService {
     log.info('Disconnecting wallet');
     
     if (this.walletAddress) {
-      const maskedAddress = this.walletAddress ? 
-        `${this.walletAddress.substring(0, 6)}...${this.walletAddress.substring(this.walletAddress.length - 4)}` : 
-        'none';
+      if (!this.walletAddress) {
+        throw new ValidationError('Wallet address is not available', 'walletAddress');
+      }
+    
+      const maskedAddress = `${this.walletAddress.substring(0, 6)}...${this.walletAddress.substring(this.walletAddress.length - 4)}`;
       log.debug(`Disconnecting wallet: ${maskedAddress}`);
       
       // Remove from wallet cache
@@ -607,7 +609,7 @@ export class UserService {
       throw new ValidationError('Username cannot be empty', 'username');
     }
     
-    const maskedAddress = `${this.walletAddress.substring(0, 6)}...${this.walletAddress.substring(this.walletAddress.length - 4)}`;
+    const maskedAddress = this.walletAddress ? `${this.walletAddress.substring(0, 6)}...${this.walletAddress.substring(this.walletAddress.length - 4)}` : 'unknown';
     log.info(`Updating profile for wallet: ${maskedAddress}`);
     
     // Log what's being updated
