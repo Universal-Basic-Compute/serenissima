@@ -178,11 +178,11 @@ export class RoadManager {
           // Simplify the path to remove redundant points
           const simplifiedPoints = simplifyPath(points, 0.05);
           log.info(`RoadManager: Simplified path from ${points.length} to ${simplifiedPoints.length} points`);
-          
+              
           try {
             // Save to service and get ID
             const roadData = this.roadService.saveRoad(
-              simplifiedPoints.map(p => p.clone()), // Clone points to avoid reference issues
+              simplifiedPoints.map((p: THREE.Vector3) => p.clone()), // Clone points to avoid reference issues
               curvature,
               userId,
               landId
@@ -1356,7 +1356,7 @@ export class RoadManager {
                 // Dispose of any attributes and index buffers
                 if (geometry.index) {
                   // Don't try to modify read-only array property
-                  geometry.index = null as unknown as THREE.BufferAttribute;
+                  geometry.index = null!;
                 }
                 
                 Object.keys(geometry.attributes).forEach(attributeName => {
