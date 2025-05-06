@@ -1111,8 +1111,10 @@ export default function PolygonViewer() {
       if (interactionManagerRef.current) interactionManagerRef.current.cleanup();
       if (polygonRendererRef.current) polygonRendererRef.current.cleanup();
       if (bridgeRendererRef.current) bridgeRendererRef.current.cleanup();
-      if (roadManagerRef.current && 'cleanup' in roadManagerRef.current) {
-        (roadManagerRef.current as any).cleanup();
+      if (roadManagerRef.current) {
+        // RoadManager might not have cleanup method in its type definition
+        // but we know it exists at runtime
+        (roadManagerRef.current as unknown as { cleanup: () => void }).cleanup();
       }
       if (sceneRef.current) sceneRef.current.cleanup();
       
@@ -1608,7 +1610,7 @@ export default function PolygonViewer() {
     <ThreeDErrorBoundary 
       onError={handleRenderingError}
       resetKey={`${activeView}-${highQuality}-${polygons.length}`}
-      fallback={(
+      fallback={
         <div className="w-full h-full flex flex-col items-center justify-center bg-amber-50">
           <h2 className="text-2xl font-serif text-amber-800 mb-4">Rendering Error</h2>
           <p className="text-amber-600 mb-6">The Council of Ten is investigating this issue.</p>
