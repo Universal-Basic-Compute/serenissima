@@ -213,7 +213,8 @@ export default function SimplePage() {
       
       // Reset any global state
       if (window.getCachedSnapshot) {
-        delete window.getCachedSnapshot;
+        // Use type assertion to handle the delete operation properly
+        delete (window as any).getCachedSnapshot;
         console.log('getCachedSnapshot function removed');
       }
       
