@@ -758,9 +758,7 @@ export default function PolygonViewer() {
     
     // Clean up the interval in the return function
     return () => {
-      if (typeof renderingInterval !== 'undefined') {
-        clearInterval(renderingInterval);
-      }
+      // No rendering interval to clean up
       // ... other cleanup code ...
     };
     
