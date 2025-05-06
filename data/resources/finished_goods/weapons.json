@@ -54,13 +54,13 @@
       },
       {
         "resource": "tools",
-        "amount": 1,
-        "quality_impact": 0.1
+        "amount": 2,
+        "quality_impact": 0.2
       },
       {
         "resource": "fuel",
         "amount": 20,
-        "quality_impact": 0.2
+        "quality_impact": 0.1
       }
     ]
   },
