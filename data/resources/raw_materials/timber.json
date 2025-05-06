@@ -4,11 +4,11 @@
   "category": "raw_materials",
   "subcategory": "forestry",
   "icon": "/assets/icons/resources/timber.png",
-  "baseProperties": {
-    "baseValue": 12,
+  "base_properties": {
+    "base_value": 12,
     "weight": 4.0,
     "volume": 3.0,
-    "stackSize": 30,
+    "stack_size": 30,
     "perishable": false
   },
   "description": {

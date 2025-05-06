@@ -4,11 +4,11 @@
   "category": "raw_materials",
   "subcategory": "metal_ore",
   "icon": "/assets/icons/resources/iron_ore.png",
-  "baseProperties": {
-    "baseValue": 10,
+  "base_properties": {
+    "base_value": 10,
     "weight": 5.0,
     "volume": 1.0,
-    "stackSize": 40,
+    "stack_size": 40,
     "perishable": false
   },
   "description": {

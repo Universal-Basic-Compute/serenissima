@@ -4,11 +4,11 @@
   "category": "raw_materials",
   "subcategory": "mineral",
   "icon": "/assets/icons/resources/salt.png",
-  "baseProperties": {
-    "baseValue": 18,
+  "base_properties": {
+    "base_value": 18,
     "weight": 1.0,
     "volume": 0.8,
-    "stackSize": 50,
+    "stack_size": 50,
     "perishable": false
   },
   "description": {
@@ -31,25 +31,25 @@
       "note": "Dependent on dry weather for optimal production"
     }
   },
-  "qualityLevels": {
-    "available": [
+  "quality_variations": {
+    "available_qualities": [
       "common",
       "fine",
       "superior"
     ],
-    "default": "common",
-    "effects": {
+    "default_quality": "common",
+    "quality_multipliers": {
       "common": {
-        "valueModifier": 1.0,
-        "productionEfficiency": 1.0
+        "value": 1.0,
+        "production_efficiency": 1.0
       },
       "fine": {
-        "valueModifier": 1.3,
-        "productionEfficiency": 1.2
+        "value": 1.3,
+        "production_efficiency": 1.2
       },
       "superior": {
-        "valueModifier": 1.8,
-        "productionEfficiency": 1.4
+        "value": 1.8,
+        "production_efficiency": 1.4
       }
     }
   },
@@ -78,19 +78,22 @@
       "process": "food_preservation",
       "building": "salting_house",
       "role": "primary_ingredient",
-      "outputResource": "preserved_food"
+      "outputResource": "preserved_food",
+      "productionChain": "Salt → Salting House → Preserved Food"
     },
     {
       "process": "fish_preservation",
       "building": "salting_house",
       "role": "primary_ingredient",
-      "outputResource": "salted_fish"
+      "outputResource": "preserved_fish",
+      "productionChain": "Salt + Fish → Salting House → Preserved Fish"
     },
     {
       "process": "meat_preservation",
       "building": "salting_house",
       "role": "primary_ingredient",
-      "outputResource": "salted_meat"
+      "outputResource": "salted_meat",
+      "productionChain": "Salt + Meat → Salting House → Salted Meat"
     }
   ],
   "substitutes": [],
@@ -106,8 +109,8 @@
       "relationship": "required"
     }
   ],
-  "transportation": {
-    "methods": {
+  "transport_properties": {
+    "transport_methods": {
       "large_ship": {
         "capacity": 500,
         "efficiency": 1.0,
@@ -124,63 +127,63 @@
         "risk": 0.2
       }
     },
-    "requirements": [
+    "special_requirements": [
       "moisture_protection"
     ],
-    "loadingTime": 8,
-    "restrictions": [
+    "loading_time": 8,
+    "route_restrictions": [
       "state_monopoly_transport_only"
     ]
   },
-  "storage": {
-    "compatible": {
+  "storage_properties": {
+    "storage_facilities": {
       "salt_warehouse": {
-        "capacityMultiplier": 1.0,
+        "capacity_multiplier": 1.0,
         "preservation": 1.0
       },
       "salting_house": {
-        "capacityMultiplier": 0.8,
+        "capacity_multiplier": 0.8,
         "preservation": 1.0
       }
     },
-    "requirements": [
+    "storage_requirements": [
       "dry",
       "moisture_proof_containers"
     ],
-    "risks": [
+    "special_risks": [
       "moisture",
       "theft"
     ],
-    "maxStorageTime": "unlimited"
+    "max_storage_time": "unlimited"
   },
-  "marketDynamics": {
-    "baseAvailability": 0.9,
-    "demandLevel": "very_high",
-    "priceVolatility": 0.2,
-    "stateMonopoly": true,
-    "exportRestrictions": true,
-    "regionalFactors": [
+  "market_dynamics": {
+    "base_availability": 0.9,
+    "demand_level": "very_high",
+    "price_volatility": 0.2,
+    "state_monopoly": true,
+    "export_restrictions": true,
+    "regional_factors": [
       {
         "region": "chioggia",
-        "availabilityModifier": 1.5,
-        "priceModifier": 0.9
+        "availability_modifier": 1.5,
+        "price_modifier": 0.9
       }
     ],
-    "seasonalFactors": [
+    "seasonal_factors": [
       {
         "season": "autumn",
-        "availabilityModifier": 1.3,
-        "priceModifier": 0.9,
+        "availability_modifier": 1.3,
+        "price_modifier": 0.9,
         "note": "Post-harvest abundance"
       },
       {
         "season": "spring",
-        "availabilityModifier": 0.8,
-        "priceModifier": 1.1,
+        "availability_modifier": 0.8,
+        "price_modifier": 1.1,
         "note": "Pre-production scarcity"
       }
     ],
-    "strategicImportance": {
+    "strategic_importance": {
       "level": "critical",
       "note": "Foundation of Venetian trade networks and state revenue"
     }

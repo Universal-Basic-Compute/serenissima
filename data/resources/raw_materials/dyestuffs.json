@@ -4,13 +4,13 @@
   "category": "raw_materials",
   "subcategory": "colorants",
   "icon": "/assets/icons/resources/dyestuffs.png",
-  "baseProperties": {
-    "baseValue": 35,
+  "base_properties": {
+    "base_value": 35,
     "weight": 0.5,
     "volume": 0.5,
-    "stackSize": 20,
+    "stack_size": 20,
     "perishable": true,
-    "perishTime": 10080
+    "perish_time": 10080
   },
   "description": {
     "short": "Rare colorants for textile dyeing.",
@@ -116,13 +116,15 @@
       "process": "textile_dyeing",
       "building": "dye_works",
       "role": "primary_ingredient",
-      "outputResource": "dyed_textiles"
+      "outputResource": "dyed_textiles",
+      "productionChain": "Dyestuffs + Textiles → Dye Works → Dyed Textiles → Tailor Workshop → Luxury Silk Garments"
     },
     {
       "process": "pigment_making",
       "building": "pigment_workshop",
       "role": "primary_ingredient",
-      "outputResource": "pigments"
+      "outputResource": "pigments",
+      "productionChain": "Dyestuffs → Pigment Workshop → Pigments"
     }
   ],
   "substitutes": [
@@ -196,26 +198,26 @@
     ],
     "maxStorageTime": 10080
   },
-  "marketDynamics": {
-    "baseAvailability": 0.4,
-    "demandLevel": "high",
-    "priceVolatility": 0.6,
-    "regionalFactors": [
+  "market_dynamics": {
+    "base_availability": 0.4,
+    "demand_level": "high",
+    "price_volatility": 0.6,
+    "regional_factors": [
       {
         "region": "rialto",
-        "availabilityModifier": 1.3,
-        "priceModifier": 0.9
+        "availability_modifier": 1.3,
+        "price_modifier": 0.9
       }
     ],
-    "seasonalFactors": [
+    "seasonal_factors": [
       {
         "season": "winter",
-        "availabilityModifier": 0.7,
-        "priceModifier": 1.3,
+        "availability_modifier": 0.7,
+        "price_modifier": 1.3,
         "note": "Reduced shipping"
       }
     ],
-    "tradeDisruptions": {
+    "trade_disruptions": {
       "factors": [
         "eastern_conflict",
         "trade_route_closure",
@@ -223,5 +225,18 @@
       ],
       "impact": "severe"
     }
+  },
+  "production_chain_position": {
+    "predecessors": [],
+    "successors": [
+      {
+        "resource": "dyed_textiles",
+        "facility": "dye_works"
+      },
+      {
+        "resource": "pigments",
+        "facility": "pigment_workshop"
+      }
+    ]
   }
 }

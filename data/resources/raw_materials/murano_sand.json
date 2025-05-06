@@ -4,11 +4,11 @@
   "category": "raw_materials",
   "subcategory": "mineral",
   "icon": "/assets/icons/resources/murano_sand.png",
-  "baseProperties": {
-    "baseValue": 5,
+  "base_properties": {
+    "base_value": 5,
     "weight": 2.5,
     "volume": 1.0,
-    "stackSize": 50,
+    "stack_size": 50,
     "perishable": false
   },
   "description": {
@@ -131,5 +131,25 @@
       }
     ],
     "seasonalFactors": []
+  },
+  "production_chain_position": {
+    "predecessors": [],
+    "successors": [
+      {
+        "resource": "molten_glass",
+        "facility": "glass_foundry"
+      }
+    ]
+  },
+  "historical_notes": {
+    "introduction_year": "ancient",
+    "notable_producers": [
+      "Murano Island Quarries"
+    ],
+    "historical_significance": "The unique composition of Murano sand, with its exceptional purity and specific mineral content, was a closely guarded secret of Venetian glassmaking. This special sand, when combined with soda ash, produced glass of unparalleled clarity and workability, enabling Venetian glassmakers to create their world-renowned cristallo glass. The Republic strictly controlled access to these sand deposits, considering them a strategic resource.",
+    "historical_markets": [
+      "Murano glass foundries",
+      "Venetian glass industry"
+    ]
   }
 }

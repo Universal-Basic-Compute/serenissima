@@ -4,11 +4,11 @@
   "category": "raw_materials",
   "subcategory": "precious_metal",
   "icon": "/assets/icons/resources/gold.png",
-  "baseProperties": {
-    "baseValue": 100,
+  "base_properties": {
+    "base_value": 100,
     "weight": 0.5,
     "volume": 0.1,
-    "stackSize": 10,
+    "stack_size": 10,
     "perishable": false
   },
   "description": {

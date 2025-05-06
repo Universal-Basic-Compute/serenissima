@@ -4,13 +4,13 @@
   "category": "raw_materials",
   "subcategory": "food",
   "icon": "/assets/icons/resources/fish.png",
-  "baseProperties": {
-    "baseValue": 6,
+  "base_properties": {
+    "base_value": 6,
     "weight": 1.0,
     "volume": 1.0,
-    "stackSize": 20,
+    "stack_size": 20,
     "perishable": true,
-    "perishTime": 720
+    "perish_time": 720
   },
   "description": {
     "short": "Fresh fish caught from the lagoon and Adriatic.",

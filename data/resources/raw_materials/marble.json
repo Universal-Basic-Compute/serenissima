@@ -4,11 +4,11 @@
   "category": "raw_materials",
   "subcategory": "stone",
   "icon": "/assets/icons/resources/marble.png",
-  "baseProperties": {
-    "baseValue": 40,
+  "base_properties": {
+    "base_value": 40,
     "weight": 6.0,
     "volume": 2.0,
-    "stackSize": 10,
+    "stack_size": 10,
     "perishable": false
   },
   "description": {
@@ -28,30 +28,30 @@
     "availability": "uncommon",
     "seasonality": "year_round"
   },
-  "qualityLevels": {
-    "available": [
+  "quality_variations": {
+    "available_qualities": [
       "common",
       "fine",
       "superior",
       "exceptional"
     ],
-    "default": "common",
-    "effects": {
+    "default_quality": "common",
+    "quality_multipliers": {
       "common": {
-        "valueModifier": 1.0,
-        "productionEfficiency": 1.0
+        "value": 1.0,
+        "production_efficiency": 1.0
       },
       "fine": {
-        "valueModifier": 1.5,
-        "productionEfficiency": 1.2
+        "value": 1.5,
+        "production_efficiency": 1.2
       },
       "superior": {
-        "valueModifier": 2.5,
-        "productionEfficiency": 1.4
+        "value": 2.5,
+        "production_efficiency": 1.4
       },
       "exceptional": {
-        "valueModifier": 4.0,
-        "productionEfficiency": 1.7
+        "value": 4.0,
+        "production_efficiency": 1.7
       }
     }
   },
@@ -113,8 +113,8 @@
     }
   ],
   "complements": [],
-  "transportation": {
-    "methods": {
+  "transport_properties": {
+    "transport_methods": {
       "large_ship": {
         "capacity": 50,
         "efficiency": 1.0,
@@ -126,50 +126,50 @@
         "risk": 0.25
       }
     },
-    "requirements": [
+    "special_requirements": [
       "reinforced_vessel",
       "careful_handling"
     ],
-    "loadingTime": 30,
-    "restrictions": [
+    "loading_time": 30,
+    "route_restrictions": [
       "weight_limits",
       "careful_navigation"
     ]
   },
-  "storage": {
-    "compatible": {
+  "storage_properties": {
+    "storage_facilities": {
       "stone_yard": {
-        "capacityMultiplier": 1.0,
+        "capacity_multiplier": 1.0,
         "preservation": 1.0
       },
       "sculptor_workshop": {
-        "capacityMultiplier": 0.3,
+        "capacity_multiplier": 0.3,
         "preservation": 1.0
       }
     },
-    "requirements": [
+    "storage_requirements": [
       "reinforced_floor",
       "weather_protection"
     ],
-    "risks": [
+    "special_risks": [
       "breakage",
       "theft"
     ],
-    "maxStorageTime": "unlimited"
+    "max_storage_time": "unlimited"
   },
-  "marketDynamics": {
-    "baseAvailability": 0.4,
-    "demandLevel": "high",
-    "priceVolatility": 0.3,
-    "regionalFactors": [
+  "market_dynamics": {
+    "base_availability": 0.4,
+    "demand_level": "high",
+    "price_volatility": 0.3,
+    "regional_factors": [
       {
         "region": "san_marco",
-        "availabilityModifier": 1.2,
-        "priceModifier": 1.1
+        "availability_modifier": 1.2,
+        "price_modifier": 1.1
       }
     ],
-    "seasonalFactors": [],
-    "influencedBy": [
+    "seasonal_factors": [],
+    "influenced_by": [
       "construction_activity",
       "artistic_commissions",
       "diplomatic_gifts"

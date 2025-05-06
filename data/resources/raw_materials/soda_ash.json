@@ -4,11 +4,11 @@
   "category": "raw_materials",
   "subcategory": "mineral",
   "icon": "/assets/icons/resources/soda_ash.png",
-  "baseProperties": {
-    "baseValue": 8,
+  "base_properties": {
+    "base_value": 8,
     "weight": 2.0,
     "volume": 1.0,
-    "stackSize": 50,
+    "stack_size": 50,
     "perishable": false
   },
   "description": {
@@ -158,5 +158,30 @@
       ],
       "impact": "severe"
     }
+  },
+  "production_chain_position": {
+    "predecessors": [],
+    "successors": [
+      {
+        "resource": "molten_glass",
+        "facility": "glass_foundry"
+      },
+      {
+        "resource": "soap",
+        "facility": "soap_workshop"
+      }
+    ]
+  },
+  "historical_notes": {
+    "introduction_year": 1200,
+    "notable_producers": [
+      "Egyptian coastal regions",
+      "Syrian plant harvesters"
+    ],
+    "historical_significance": "Soda ash, derived from the ashes of specific marine plants, was a critical import for Venice's glassmaking industry. The Republic maintained exclusive trade agreements with suppliers in Egypt and Syria to ensure a steady supply of this essential material. The quality of Venetian glass depended heavily on the purity of this imported alkali, and the city's glassmakers developed specific techniques to purify and prepare it for use.",
+    "historical_markets": [
+      "Murano glass foundries",
+      "Venetian soap makers"
+    ]
   }
 }
