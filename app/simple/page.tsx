@@ -257,7 +257,7 @@ export default function SimplePage() {
       console.error('Error generating coat of arms image:', error);
       alert(`Failed to generate image: ${error instanceof Error ? error.message : String(error)}`);
     } finally {
-      setIsGeneratingImage(false);
+      this.setIsGeneratingImage(false);
     }
   };
   
@@ -1153,6 +1153,7 @@ function generateCoatOfArmsImage() {
 // Add the handleTransferCompute function
 function handleTransferCompute(amount: number) {
   return async function(this: {
+    walletAddress: string | null;
     userProfile: any;
     setUserProfile: (profile: any) => void;
     setSuccessMessage: (message: {message: string, signature: string} | null) => void;
@@ -1223,6 +1224,7 @@ function handleWithdrawCompute(amount: number) {
   return async function(this: {
     userProfile: any;
     setUserProfile: (profile: any) => void;
+    setSuccessMessage: (message: {message: string, signature: string} | null) => void;
   }) {
   try {
     // Get the wallet address from session or local storage
