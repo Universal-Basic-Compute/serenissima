@@ -1333,14 +1333,6 @@ export default function PolygonViewer() {
     }
   }, [roadCreationActive]);
   
-  // Add a separate effect to handle selection state changes
-  useEffect(() => {
-    // Only update selection state when selectedPolygonId changes
-    if (polygonRendererRef.current) {
-      console.log('Updating selection state:', selectedPolygonId);
-      polygonRendererRef.current.updateSelectionState(selectedPolygonId ?? null);
-    }
-  }, [selectedPolygonId]);
   
   // Add a separate effect to handle view mode changes
   useEffect(() => {
