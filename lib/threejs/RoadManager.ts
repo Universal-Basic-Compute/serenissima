@@ -1413,7 +1413,8 @@ export class RoadManager {
           if (matWithEmissive.emissiveMap) matWithEmissive.emissiveMap.dispose();
         }
         if ('bumpMap' in material && (material as any).bumpMap) (material as any).bumpMap.dispose();
-        if ('displacementMap' in material && (material as any).displacementMap) (material as any).displacementMap.dispose();
+        if ('displacementMap' in material && (material as THREE.MeshStandardMaterial).displacementMap) 
+          (material as THREE.MeshStandardMaterial).displacementMap.dispose();
         if ('envMap' in material && material.envMap) material.envMap.dispose();
         if ('lightMap' in material && material.lightMap) material.lightMap.dispose();
         if ('alphaMap' in material && material.alphaMap) material.alphaMap.dispose();
@@ -1422,7 +1423,7 @@ export class RoadManager {
         material.map = null;
         
         // Clear references for properties that might not exist on all material types
-        if ('normalMap' in material) material.normalMap = null;
+        if ('normalMap' in material) (material as THREE.MeshStandardMaterial).normalMap = null;
         if ('roughnessMap' in material) (material as THREE.MeshStandardMaterial).roughnessMap = null;
         if ('metalnessMap' in material) (material as THREE.MeshStandardMaterial).metalnessMap = null;
         if ('aoMap' in material) material.aoMap = null;
