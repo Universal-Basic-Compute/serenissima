@@ -1,0 +1,224 @@
+{
+  "id": "small_boats",
+  "name": "Small Boats",
+  "category": "finished_goods",
+  "subcategory": "transportation",
+  "description": "Various small watercraft designed for Venice's canals and lagoon. These versatile vessels serve multiple purposes from fishing and transportation to recreation and utility work.",
+  "icon": "/assets/icons/resources/small_boats.png",
+  "model": "models/resources/small_boats.glb",
+  "base_properties": {
+    "base_value": 150,
+    "weight": 200,
+    "volume": 100,
+    "stack_size": 1,
+    "perishable": false,
+    "maintenance_required": true,
+    "maintenance_interval": 720
+  },
+  "market_properties": {
+    "luxury_level": 1,
+    "target_customers": [
+      "fishermen",
+      "merchants",
+      "transportation_services",
+      "households"
+    ],
+    "fashion_sensitivity": 0.1,
+    "export_value_multiplier": 0.9,
+    "market_demand": "steady",
+    "price_volatility": 0.2
+  },
+  "production_properties": {
+    "producer_building": "boat_workshop",
+    "production_complexity": 4,
+    "required_skill": "boatbuilding:2",
+    "production_time": 720,
+    "inputs": [
+      {
+        "resource": "timber",
+        "amount": 10,
+        "quality_impact": 0.5
+      },
+      {
+        "resource": "pitch",
+        "amount": 3,
+        "quality_impact": 0.2
+      },
+      {
+        "resource": "iron_fittings",
+        "amount": 2,
+        "quality_impact": 0.2
+      },
+      {
+        "resource": "tools",
+        "amount": 1,
+        "quality_impact": 0.1
+      }
+    ]
+  },
+  "quality_variations": {
+    "available_qualities": [
+      "poor",
+      "common",
+      "fine"
+    ],
+    "default_quality": "common",
+    "quality_multipliers": {
+      "poor": {
+        "value": 0.7,
+        "durability": 0.7,
+        "capacity": 0.8
+      },
+      "common": {
+        "value": 1.0,
+        "durability": 1.0,
+        "capacity": 1.0
+      },
+      "fine": {
+        "value": 1.4,
+        "durability": 1.3,
+        "capacity": 1.2
+      }
+    },
+    "quality_factors": [
+      {
+        "factor": "material_quality",
+        "weight": 0.5
+      },
+      {
+        "factor": "craftsman_skill",
+        "weight": 0.4
+      },
+      {
+        "factor": "tools_quality",
+        "weight": 0.1
+      }
+    ]
+  },
+  "varieties": [
+    {
+      "type": "sandolo",
+      "production_difficulty": "medium",
+      "popularity": "high",
+      "value_multiplier": 0.9,
+      "primary_use": "general_purpose",
+      "capacity": 4,
+      "model_variant": "models/resources/small_boats_sandolo.glb"
+    },
+    {
+      "type": "fishing_boat",
+      "production_difficulty": "medium",
+      "popularity": "high",
+      "value_multiplier": 1.0,
+      "primary_use": "fishing",
+      "capacity": 3,
+      "model_variant": "models/resources/small_boats_fishing.glb"
+    },
+    {
+      "type": "cargo_boat",
+      "production_difficulty": "medium",
+      "popularity": "medium",
+      "value_multiplier": 1.2,
+      "primary_use": "cargo_transport",
+      "capacity": 2,
+      "model_variant": "models/resources/small_boats_cargo.glb"
+    },
+    {
+      "type": "pupparino",
+      "production_difficulty": "high",
+      "popularity": "low",
+      "value_multiplier": 1.5,
+      "primary_use": "speed_and_recreation",
+      "capacity": 4,
+      "model_variant": "models/resources/small_boats_pupparino.glb"
+    }
+  ],
+  "vessel_properties": {
+    "propulsion": "oar_or_pole",
+    "speed": "moderate",
+    "maneuverability": "good",
+    "canal_access": "most",
+    "maintenance_requirements": {
+      "caulking": {
+        "interval": 720,
+        "cost": 8
+      },
+      "repair": {
+        "interval": 1440,
+        "cost": 15
+      }
+    }
+  },
+  "usage_properties": {
+    "uses": [
+      "transportation",
+      "fishing",
+      "cargo_delivery",
+      "recreation"
+    ],
+    "special_features": [
+      "versatility",
+      "lagoon_capability",
+      "canal_navigation"
+    ],
+    "complementary_resources": [
+      "public_dock",
+      "private_dock",
+      "fishing_equipment"
+    ]
+  },
+  "transport_properties": {
+    "transport_methods": {
+      "barge": {
+        "capacity": 1,
+        "efficiency": 1.0,
+        "risk": 0.2
+      }
+    },
+    "special_requirements": [
+      "careful_handling",
+      "water_transport"
+    ],
+    "loading_time": 20
+  },
+  "storage_properties": {
+    "storage_facilities": {
+      "boat_workshop": {
+        "capacity_multiplier": 1.0,
+        "preservation": 1.0
+      },
+      "public_dock": {
+        "capacity_multiplier": 0.7,
+        "preservation": 0.8
+      },
+      "private_dock": {
+        "capacity_multiplier": 0.8,
+        "preservation": 0.9
+      }
+    },
+    "storage_requirements": [
+      "water_access",
+      "mooring_points"
+    ],
+    "special_risks": [
+      "weather_damage",
+      "theft",
+      "water_damage"
+    ],
+    "max_storage_time": "unlimited"
+  },
+  "historical_notes": {
+    "introduction_year": "ancient",
+    "notable_producers": [
+      "Venetian Boat Builders",
+      "Local Squeri (Boatyards)"
+    ],
+    "historical_significance": "Small boats were the workhorses of Venice, serving countless functions from fishing and transportation to cargo delivery and recreation. Their designs evolved to perfectly suit Venice's unique environment, with shallow drafts for canal navigation and versatile configurations for different purposes. These vessels connected the islands of the lagoon and enabled the daily activities that sustained Venetian life.",
+    "historical_markets": [
+      "Fishermen",
+      "Local merchants",
+      "Households",
+      "Transportation services"
+    ]
+  }
+}
