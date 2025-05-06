@@ -11,13 +11,13 @@
 // Add TypeScript declarations for window object extensions
 declare global {
   interface Window {
-    _polygonSnapshotCache?: {
+    _polygonSnapshotCache: {
       result: any | null;
       deps: string | null;
     };
-    getCachedSnapshot?: <T>(getSnapshotFn: () => T, deps: any[]) => T;
-    getSnapshotWithCache?: <T>(getSnapshotFn: () => T, deps: any[]) => T;
-    getSnapshotWithCacheCache?: {
+    getCachedSnapshot: <T>(getSnapshotFn: () => T, deps: any[]) => T;
+    getSnapshotWithCache: <T>(getSnapshotFn: () => T, deps: any[]) => T;
+    getSnapshotWithCacheCache: {
       result: any | null;
       deps: string | null;
     };
@@ -1575,7 +1575,7 @@ export default function Home() {
     // Load polygons immediately when map is ready
     if (isGoogleLoaded) {
       console.log('Loading polygons on map load...');
-      loadPolygonsOnMap();
+      loadPolygonsOnMapImpl();
       
       // Set up a MutationObserver to detect when the PolygonViewer might be affecting polygon visibility
       if (typeof window !== 'undefined' && window.MutationObserver) {
@@ -1608,135 +1608,15 @@ export default function Home() {
     setIsGoogleLoaded(true);
   };
   
-  // Define loadPolygonsOnMap function
-  const loadPolygonsOnMap = useCallback(() => {
-    console.log('loadPolygonsOnMap called');
-    
-    if (!mapRef.current) {
-      console.warn('Map reference not available');
-      return;
-    }
-    
-    if (!isGoogleLoaded) {
-      console.warn('Google Maps API not loaded');
-      return;
-    }
-    
-    console.log('Loading polygons onto map...');
-    
-    // Clear existing polygons
-    Object.values(activeLandPolygons).forEach(polygon => {
-      polygon.setMap(null);
-    });
-    
-    // Clear existing centroid markers
-    Object.values(centroidMarkers).forEach(marker => {
-      marker.setMap(null);
-    });
-    
-    // Reset selected polygon
-    if (selectedPolygon) {
-      setSelectedPolygon(null);
-    }
-    
-    // Reset active polygons and centroid markers
-    const newActiveLandPolygons: Record<string, google.maps.Polygon> = {};
-    const newCentroidMarkers: Record<string, google.maps.Marker> = {};
-    
-    // Fetch polygons from API
-    fetch('/api/get-polygons')
-      .then(response => response.json())
-      .then(data => {
-        console.log(`Fetched ${data.polygons?.length || 0} polygons from API`);
-        
-        if (!data.polygons || data.polygons.length === 0) {
-          console.warn('No polygons returned from API');
-          return;
-        }
-        
-        data.polygons.forEach((polygon: any, index: number) => {
-          if (polygon.coordinates && polygon.coordinates.length > 2) {
-            console.log(`Creating polygon ${index} (${polygon.id}) on map`);
-            
-            const path = polygon.coordinates.map((coord: any) => ({
-              lat: coord.lat,
-              lng: coord.lng
-            }));
-            
-            const mapPolygon = new google.maps.Polygon({
-              paths: path,
-              strokeColor: '#3388ff',
-              strokeOpacity: 0.8,
-              strokeWeight: 2,
-              fillColor: '#3388ff',
-              fillOpacity: 0.35,
-              visible: true,
-              map: mapRef.current
-            });
-            
-            // Store reference to polygon
-            newActiveLandPolygons[polygon.id] = mapPolygon;
-            
-            // Create a centroid marker if centroid exists
-            if (polygon.centroid) {
-              const centroidMarker = new google.maps.Marker({
-                position: {
-                  lat: polygon.centroid.lat,
-                  lng: polygon.centroid.lng
-                },
-                map: centroidDragMode ? mapRef.current : null, // Only show if in centroid drag mode
-                draggable: centroidDragMode,
-                icon: {
-                  path: google.maps.SymbolPath.CIRCLE,
-                  scale: 7,
-                  fillColor: '#FF0000',
-                  fillOpacity: 0.7,
-                  strokeWeight: 2,
-                  strokeColor: '#FFFFFF'
-                },
-                title: `Centroid: ${polygon.id}`
-              });
-              
-              // Add drag event listeners
-              centroidMarker.addListener('dragstart', () => {
-                setIsDraggingCentroid(true);
-              });
-              
-              centroidMarker.addListener('dragend', async () => {
-                setIsDraggingCentroid(false);
-                const newPosition = centroidMarker.getPosition();
-                if (newPosition) {
-                  // Update the centroid in the backend
-                  await updateCentroid(polygon.id, {
-                    lat: newPosition.lat(),
-                    lng: newPosition.lng()
-                  });
-                }
-              });
-              
-              newCentroidMarkers[polygon.id] = centroidMarker;
-            }
-          } else {
-            console.warn(`Polygon ${index} (${polygon.id}) has invalid coordinates:`, polygon.coordinates);
-          }
-        });
-        
-        console.log(`Added ${Object.keys(newActiveLandPolygons).length} polygons to map`);
-        setActiveLandPolygons(newActiveLandPolygons);
-        setCentroidMarkers(newCentroidMarkers);
-      })
-      .catch(error => {
-        console.error('Error loading polygons:', error);
-      });
-  }, [isGoogleLoaded, centroidDragMode, selectedPolygon, activeLandPolygons, centroidMarkers]);
+  // Define loadPolygonsOnMap function - declaration moved to top level
 
   // Add useEffect to load polygons when map is ready
   useEffect(() => {
     if (mapRef.current && isGoogleLoaded) {
       console.log('Map and Google Maps API ready, loading polygons...');
-      loadPolygonsOnMap();
+      loadPolygonsOnMapImpl();
     }
-  }, [mapRef.current, isGoogleLoaded, loadPolygonsOnMap]);
+  }, [mapRef.current, isGoogleLoaded, loadPolygonsOnMapImpl]);
   
   // Add this useEffect to listen for usersDataLoaded events
   useEffect(() => {
@@ -1783,7 +1663,7 @@ export default function Home() {
     const loadPolygonsWhenReady = () => {
       if (mapRef.current && isGoogleLoaded) {
         console.log('Loading polygons on mount...');
-        loadPolygonsOnMap();
+        loadPolygonsOnMapImpl();
       } else {
         // If map or Google Maps API isn't ready yet, check again in a moment
         // Map or Google Maps API not ready yet, waiting...
@@ -1793,7 +1673,7 @@ export default function Home() {
     };
     
     loadPolygonsWhenReady();
-  }, [loadPolygonsOnMap]);
+  }, [loadPolygonsOnMapImpl]);
 
   // Handle script load
   const handleScriptLoad = () => {
