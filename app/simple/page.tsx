@@ -1153,7 +1153,7 @@ function generateCoatOfArmsImage() {
       setIsGeneratingImage(false);
     }
   };
-}
+};
 
 
 // Add the handleTransferCompute function
@@ -1333,4 +1333,4 @@ function handleWithdrawCompute(amount: number) {
       throw error;
     }
   };
-}
+};
