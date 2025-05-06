@@ -1564,6 +1564,14 @@ export default function Home() {
   }, [isGoogleLoaded, centroidDragMode, selectedPolygon, activeLandPolygons, centroidMarkers]);
 
 
+  // Declare loadPolygonsOnMap at the top level to fix the "used before declaration" error
+  const loadPolygonsOnMap = useCallback(() => {
+    console.log('loadPolygonsOnMap called - top level declaration');
+    
+    // Implementation is in loadPolygonsOnMapImpl
+    loadPolygonsOnMapImpl();
+  }, [loadPolygonsOnMapImpl]);
+  
   // Handle map load
   const onMapLoad = (map: google.maps.Map) => {
     console.log('Google Map loaded');
