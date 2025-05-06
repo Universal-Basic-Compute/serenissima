@@ -1612,17 +1612,6 @@ export default function PolygonViewer() {
       </div>
     );
   }
-  
-
-
-  if (error) {
-    return (
-      <div className="w-full h-full flex flex-col items-center justify-center">
-        <p className="text-red-500 mb-4">{error}</p>
-        <p>Displaying sample polygon instead</p>
-      </div>
-    );
-  }
 
   return (
     <ThreeDErrorBoundary 
