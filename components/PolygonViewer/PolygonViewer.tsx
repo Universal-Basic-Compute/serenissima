@@ -1367,7 +1367,7 @@ export default function PolygonViewer() {
             polygonRendererRef.current.updateCoatOfArmsSprites();
             
             // Log all polygons with coatOfArmsCenter for debugging
-            const polygonsWithCoatOfArmsCenter = polygons.filter(p => p.coatOfArmsCenter);
+            const polygonsWithCoatOfArmsCenter = polygons.filter(p => 'coatOfArmsCenter' in p);
             console.log(`Found ${polygonsWithCoatOfArmsCenter.length} polygons with coatOfArmsCenter in view mode change`);
             
             
@@ -1437,7 +1437,7 @@ export default function PolygonViewer() {
       
       // Save the road to Airtable
       if (roadId) {
-        roadManagerRef.current.saveRoadToAirtable(roadId, selectedPolygonId, walletAddress)
+        roadManagerRef.current.saveRoadToAirtable(roadId, selectedPolygonId, walletAddress || undefined)
           .then(response => {
             console.log('Road saved to Airtable:', response);
             // Show success message
@@ -1687,7 +1687,7 @@ export default function PolygonViewer() {
       />
       
       {/* Road Creator */}
-      {roadCreationActive && sceneRef.current?.scene && sceneRef.current?.camera && (
+      {roadCreationActive && sceneRef.current && sceneRef.current.scene && sceneRef.current.camera && (
         <RoadCreator
           scene={sceneRef.current.scene}
           camera={sceneRef.current.camera}
