@@ -2,7 +2,7 @@
   "totalErrors": 28,
   "totalWarnings": 0,
   "exitCode": 2,
-  "timestamp": "2025-05-06T22:34:21.858Z",
+  "timestamp": "2025-05-06T22:35:04.352Z",
   "errors": [
     {
       "filePath": "app/page.tsx",
@@ -166,10 +166,10 @@
     },
     {
       "filePath": "lib/threejs/PolygonRendererFacade.ts",
-      "line": 218,
-      "column": 29,
-      "code": "TS2694",
-      "message": "Namespace '\"C:/Users/reyno/serenissima/node_modules/@types/three/build/three.module\"' has no exported member 'ErrorEvent'.",
+      "line": 241,
+      "column": 30,
+      "code": "TS2345",
+      "message": "Argument of type 'unknown' is not assignable to parameter of type 'Error'.",
       "type": "error"
     },
     {
