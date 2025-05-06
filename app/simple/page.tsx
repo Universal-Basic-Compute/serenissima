@@ -58,6 +58,7 @@ export default function SimplePage() {
   const [cacheCleared, setCacheCleared] = useState<boolean | undefined>(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [landRendered, setLandRendered] = useState(false);
+  const [landRendered, setLandRendered] = useState(false);
   const [userProfile, setUserProfile] = useState<{
     username: string;
     firstName: string;
