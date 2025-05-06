@@ -417,7 +417,7 @@ export default class PolygonRenderer {
       
       // Convert centroid to 3D position
       const normalizedCoord = normalizeCoordinates(
-        [centroid],
+        [polygon.centroid],
         this.bounds.centerLat,
         this.bounds.centerLng,
         this.bounds.scale,
@@ -1183,7 +1183,7 @@ export default class PolygonRenderer {
         // Fallback: create an even simpler representation
         try {
           // Convert centroid to 3D position
-          const centerPoint = polygon.coatOfArmsCenter || centroid;
+          const centerPoint = polygon.coatOfArmsCenter || polygon.centroid;
           const normalizedCoord = normalizeCoordinates(
             [centerPoint as Coordinate],
             this.bounds.centerLat,
@@ -1247,7 +1247,7 @@ export default class PolygonRenderer {
     const ownerColor = this.getOwnerColor(newOwner);
     
     // Get the owner's coat of arms URL if available
-    let ownerCoatOfArmsUrl = null;
+    let ownerCoatOfArmsUrl: string | null = null;
     if (newOwner && this.ownerCoatOfArmsMap && this.ownerCoatOfArmsMap[newOwner]) {
       ownerCoatOfArmsUrl = this.ownerCoatOfArmsMap[newOwner];
       console.log(`Found coat of arms for ${newOwner}: ${ownerCoatOfArmsUrl}`);
