@@ -13,5 +13,90 @@
       "docs/architecture/README.md"
     ],
     "details": "Refactor CloudSystem to follow the architecture by moving it to the rendering layer and implementing the facade pattern to hide Three.js complexity."
+  },
+  {
+    "id": "TODO-002",
+    "description": "Fix income and maintenance discrepancies in building descriptions",
+    "files": [
+      "data/buildings/military_defense/defensive_structures/defensive_bastion.json",
+      "data/buildings/military_defense/security_facilities/prison.json",
+      "data/buildings/military_defense/naval_facilities/naval_administration_office.json",
+      "data/buildings/military_defense/defensive_structures/harbor_chain_tower.json",
+      "data/buildings/infrastructure/water_management/public_well.json"
+    ],
+    "details": "Update the calculationsAnalysis sections to match the actual income and maintenance values in the JSON. For buildings like the Defensive Bastion, either set the incomeGeneration to 0 or update the analysis to explain its income source."
+  },
+  {
+    "id": "TODO-003",
+    "description": "Standardize income approach for public infrastructure buildings",
+    "files": [
+      "data/buildings/infrastructure/transportation_facilities/bridge.json",
+      "data/buildings/infrastructure/water_management/public_well.json",
+      "data/buildings/infrastructure/water_management/cistern.json",
+      "data/buildings/infrastructure/water_management/flood_control_station.json",
+      "data/buildings/military_defense/defensive_structures/defensive_bastion.json",
+      "data/buildings/military_defense/defensive_structures/city_gate.json"
+    ],
+    "details": "Decide on a consistent approach for public infrastructure buildings - either they all generate some income (through fees, etc.) or none do. Currently, some bridges, wells, and defensive structures have income while others don't, without clear justification."
+  },
+  {
+    "id": "TODO-004",
+    "description": "Verify construction time descriptions match actual values",
+    "files": [
+      "data/buildings/special_buildings/unique_structures/doge_s_palace.json",
+      "data/buildings/residential/basic_residences/artisan_s_house.json",
+      "data/buildings/residential/basic_residences/merchant_s_house.json",
+      "data/buildings/residential/basic_residences/fisherman_s_cottage.json",
+      "data/buildings/public_government/civic_buildings/public_archives.json"
+    ],
+    "details": "Ensure all construction time descriptions in the analysis sections match the actual millisecond values. For example, if a building says '5 days' in the analysis, verify that the constructionTime value is exactly 432000000ms."
+  },
+  {
+    "id": "TODO-005",
+    "description": "Review and balance building tier progression",
+    "files": [
+      "data/buildings/index.json",
+      "data/buildings/commercial/trade_facilities/weighing_station.json",
+      "data/buildings/commercial/trade_facilities/broker_s_office.json",
+      "data/buildings/production/glass_industry/glass_foundry.json",
+      "data/buildings/production/publishing_industry/paper_mill.json",
+      "data/buildings/production/publishing_industry/printing_house.json"
+    ],
+    "details": "Review buildings where the tier progression seems inconsistent (e.g., where Tier 3 buildings cost less than Tier 2). Ensure that higher tier buildings consistently have higher costs, requirements, and capabilities."
+  },
+  {
+    "id": "TODO-006",
+    "description": "Standardize environmental effects descriptions",
+    "files": [
+      "data/buildings/residential/basic_residences/canal_house.json",
+      "data/buildings/commercial/retail_shops/merceria.json",
+      "data/buildings/commercial/retail_shops/luxury_showroom.json",
+      "data/buildings/infrastructure/transportation_facilities/cargo_landing.json",
+      "data/buildings/infrastructure/transportation_facilities/gondola_station.json",
+      "data/buildings/production/glass_industry/glassblower_workshop.json"
+    ],
+    "details": "Some buildings have very specific environmental effects (e.g., 'Increases property value of adjacent buildings by 8%') while others are vague (e.g., 'Creates commercial hub'). Consider standardizing the level of detail in environmental effects."
+  },
+  {
+    "id": "TODO-007",
+    "description": "Fix employment capacity inconsistencies",
+    "files": [
+      "data/buildings/infrastructure/transportation_facilities/bridge.json",
+      "data/buildings/infrastructure/water_management/public_well.json",
+      "data/buildings/military_defense/defensive_structures/harbor_chain_tower.json"
+    ],
+    "details": "Ensure employment capacity values are consistent with the descriptions in the calculationsAnalysis sections. For example, the Public Well has an employment capacity of 0 in its analysis but shows a value of 8,000 for incomeGeneration."
+  },
+  {
+    "id": "TODO-008",
+    "description": "Standardize building unlock conditions format",
+    "files": [
+      "data/buildings/commercial/trade_facilities/weighing_station.json",
+      "data/buildings/public_government/civic_buildings/courthouse.json",
+      "data/buildings/military_defense/security_facilities/guard_post.json",
+      "data/buildings/public_government/health_safety/quarantine_station.json",
+      "data/buildings/special_buildings/guild_headquarters/goldsmith_guild_hall.json"
+    ],
+    "details": "Some unlock conditions are very specific (e.g., '15,000,000 ducats, government authorization, Health Office approval') while others are vague (e.g., 'Government license only'). Standardize the format and level of detail for unlock conditions."
   }
 ]
