@@ -1425,8 +1425,14 @@ export class RoadManager {
             material.bumpMap.dispose();
           }
         }
-        if ('displacementMap' in material && (material as THREE.MeshStandardMaterial).displacementMap) 
-          (material as THREE.MeshStandardMaterial).displacementMap.dispose();
+        if ('displacementMap' in material) {
+          // Check each material type that can have displacementMap
+          if (material instanceof THREE.MeshStandardMaterial && material.displacementMap) {
+            material.displacementMap.dispose();
+          } else if (material instanceof THREE.MeshPhongMaterial && material.displacementMap) {
+            material.displacementMap.dispose();
+          }
+        }
         if ('envMap' in material && material.envMap) material.envMap.dispose();
         if ('lightMap' in material && material.lightMap) material.lightMap.dispose();
         if ('alphaMap' in material && material.alphaMap) material.alphaMap.dispose();
@@ -1459,7 +1465,13 @@ export class RoadManager {
             material.bumpMap = null;
           }
         }
-        if ('displacementMap' in material) (material as any).displacementMap = null;
+        if ('displacementMap' in material) {
+          if (material instanceof THREE.MeshStandardMaterial) {
+            material.displacementMap = null;
+          } else if (material instanceof THREE.MeshPhongMaterial) {
+            material.displacementMap = null;
+          }
+        }
         if ('envMap' in material) material.envMap = null;
         if ('lightMap' in material) material.lightMap = null;
         if ('alphaMap' in material) material.alphaMap = null;
