@@ -914,7 +914,8 @@ export default function PolygonViewer() {
       
       // Set the hover handler separately since it's not part of the props interface
       if (interactionManager) {
-        interactionManager.setHoverHandler(setHoveredPolygonId);
+        // Use type assertion to access the setHoverHandler method
+        (interactionManager as any).setHoverHandler(setHoveredPolygonId);
       }
       
       interactionManagerRef.current = interactionManager;
@@ -1443,7 +1444,7 @@ export default function PolygonViewer() {
   const handleRoadComplete = useCallback((roadPoints: THREE.Vector3[]) => {
     console.log(`PolygonViewer: Road complete with ${roadPoints.length} points`);
     
-    if (roadManagerRef.current && sceneRef.current?.scene) {
+    if (roadManagerRef.current && sceneRef.current && sceneRef.current.scene) {
       // Get the curvature value from a state variable or use a default
       const curvature = 0.5; // Default curvature
       console.log(`PolygonViewer: Creating road with curvature ${curvature}`);
@@ -1714,7 +1715,7 @@ export default function PolygonViewer() {
       />
       
       {/* Road Creator */}
-      {roadCreationActive && sceneRef.current && (
+      {roadCreationActive && sceneRef.current !== null && (
         <RoadCreator
           scene={sceneRef.current?.scene}
           camera={sceneRef.current?.camera}
