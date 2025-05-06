@@ -1130,7 +1130,7 @@ if (shoreFactor > 0.01) {
           }
         } else if (this.water.material instanceof THREE.MeshBasicMaterial) {
           // For fallback mode with basic material
-          if (this.water.material.map) {
+          if ('map' in this.water.material && this.water.material.map) {
             this.water.material.map.dispose();
           }
         }
