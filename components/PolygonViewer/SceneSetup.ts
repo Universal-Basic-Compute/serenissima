@@ -16,7 +16,7 @@ export default class SceneSetup {
   public renderer!: THREE.WebGLRenderer;
   public controls: any;
   public composer: any;
-  private threejs: ThreeJSFacade;
+  private threejs!: ThreeJSFacade;
   private performanceMode: boolean;
   private sunLight: THREE.DirectionalLight = new THREE.DirectionalLight();
   private sunSphere: THREE.Mesh = new THREE.Mesh();
@@ -32,8 +32,8 @@ export default class SceneSetup {
     
     try {
       console.log('Initializing ThreeJS facade');
-      // Initialize ThreeJS facade with logarithmic depth buffer
-      this.threejs = new ThreeJSFacade(canvas, { logarithmicDepthBuffer: true });
+      // Initialize ThreeJS facade
+      this.threejs = new ThreeJSFacade(canvas);
       
       // Get references to THREE.js objects
       this.scene = this.threejs.getScene();
