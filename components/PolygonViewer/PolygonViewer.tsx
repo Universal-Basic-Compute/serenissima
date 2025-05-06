@@ -516,6 +516,7 @@ export default function PolygonViewer() {
       
       return undefined;
     };
+    };
     
     // Use event bus for land ownership changes
     const subscription = eventBus.subscribe(EventTypes.LAND_OWNERSHIP_CHANGED, handleLandOwnershipChanged);
