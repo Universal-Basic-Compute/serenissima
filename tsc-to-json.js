@@ -35,8 +35,8 @@ tsc.on('close', (code) => {
   const errors = [];
   const lines = stdout.split('\n');
   
-  // Regular expression to match TypeScript error format
-  const errorRegex = /^(.+)\((\d+),(\d+)\): error TS(\d+): (.+)$/;
+  // Regular expression to match TypeScript error format - updated to handle different formats
+  const errorRegex = /^(.+)\((\d+),(\d+)\)(?:: error|\s-\s)(?:TS)?(\d+)(?::\s|\s-\s)(.+)$/;
   
   // Log the first few lines of output for debugging
   if (lines.length > 0) {
@@ -48,9 +48,12 @@ tsc.on('close', (code) => {
     }
   }
   
+  console.error(`Raw output length: ${stdout.length} characters`);
+  console.error(`Number of lines: ${lines.length}`);
+  
   // Count warnings as well as errors
   let warningCount = 0;
-  const warningRegex = /^(.+)\((\d+),(\d+)\): warning TS(\d+): (.+)$/;
+  const warningRegex = /^(.+)\((\d+),(\d+)\)(?:: warning|\s-\s)(?:TS)?(\d+)(?::\s|\s-\s)(.+)$/;
   
   for (const line of lines) {
     const errorMatch = line.match(errorRegex);
@@ -114,6 +117,19 @@ tsc.on('close', (code) => {
     return;
   }
   
+  // Add debug information if we have a non-zero exit code but no parsed errors
+  if (errors.length === 0 && code !== 0) {
+    console.error('\nWarning: TypeScript reported errors but none were parsed.');
+    console.error('This might indicate a pattern matching issue.');
+    console.error('Sample lines from output:');
+    for (let i = 0; i < Math.min(10, lines.length); i++) {
+      if (lines[i].trim()) {
+        console.error(`Line ${i}: ${lines[i]}`);
+        console.error(`  Matches error regex: ${errorRegex.test(lines[i])}`);
+      }
+    }
+  }
+
   console.error(`Found ${errors.length} errors and ${warningCount} warnings`);
   console.error('TypeScript compilation completed.');
   
@@ -123,7 +139,11 @@ tsc.on('close', (code) => {
     totalWarnings: warningCount,
     exitCode: code,
     timestamp: new Date().toISOString(),
-    errors
+    errors,
+    // Add these fields for debugging
+    rawOutputLines: lines.length,
+    firstFewLines: lines.slice(0, 5).filter(l => l.trim()),
+    compilerExitCode: code
   };
   
   // Output the result
