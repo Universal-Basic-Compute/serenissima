@@ -493,7 +493,7 @@ export default function PolygonViewer() {
         }
 
         // Then a delayed update to ensure everything is properly loaded
-        setTimeout(() => {
+        const firstTimer = setTimeout(() => {
           console.log('Performing delayed update of polygon colors and coat of arms');
           if (activeView === 'land' && polygonRendererRef.current) {
             polygonRendererRef.current.updatePolygonOwnerColors();
@@ -502,13 +502,19 @@ export default function PolygonViewer() {
         }, 1000);
 
         // And another update after a longer delay as a final check
-        setTimeout(() => {
+        const secondTimer = setTimeout(() => {
           console.log('Performing final update of polygon colors and coat of arms');
           if (activeView === 'land' && polygonRendererRef.current) {
             polygonRendererRef.current.updatePolygonOwnerColors();
             polygonRendererRef.current.updateCoatOfArmsSprites();
           }
         }, 3000);
+        
+        // Store the timers for cleanup
+        return () => {
+          clearTimeout(firstTimer);
+          clearTimeout(secondTimer);
+        };
       }
     };
     
@@ -1208,7 +1214,7 @@ export default function PolygonViewer() {
       forceVisualUpdate();
       
       // Force an additional update after a short delay to ensure everything is visible
-      setTimeout(() => {
+      const visibilityTimer = setTimeout(() => {
         if (polygonRendererRef.current) {
           console.log('Forcing polygon visibility check');
           polygonRendererRef.current.ensurePolygonsVisible();
@@ -1216,7 +1222,7 @@ export default function PolygonViewer() {
       }, 1000);
       
       // Set up a timer to periodically force updates
-      const timer = setInterval(() => {
+      const updateTimer = setInterval(() => {
         forceVisualUpdate();
         
         // Also explicitly ensure polygons are visible
@@ -1226,7 +1232,8 @@ export default function PolygonViewer() {
       }, 5000);
       
       return () => {
-        clearInterval(timer);
+        clearTimeout(visibilityTimer);
+        clearInterval(updateTimer);
       };
     }
   }, [activeView, forceVisualUpdate]);
@@ -1278,7 +1285,7 @@ export default function PolygonViewer() {
         clearTimeout(secondTimer);
       };
     }
-  }, [sceneRef.current, polygonRendererRef.current]);
+  }, []); // Remove refs from dependencies as they cause infinite re-renders
   
   // Add this effect to ensure coat of arms are updated when view mode changes
   useEffect(() => {
@@ -1291,7 +1298,7 @@ export default function PolygonViewer() {
       polygonRendererRef.current.updateCoatOfArmsSprites();
       
       // Then a delayed update to ensure everything is loaded
-      setTimeout(() => {
+      const firstTimer = setTimeout(() => {
         if (polygonRendererRef.current) {
           console.log('Performing delayed update of coat of arms sprites');
           polygonRendererRef.current.updateCoatOfArmsSprites();
@@ -1299,7 +1306,7 @@ export default function PolygonViewer() {
       }, 500);
       
       // And another update after a longer delay as a final check
-      setTimeout(() => {
+      const secondTimer = setTimeout(() => {
         if (polygonRendererRef.current) {
           console.log('Performing final update of coat of arms sprites');
           polygonRendererRef.current.updateCoatOfArmsSprites();
@@ -1307,13 +1314,19 @@ export default function PolygonViewer() {
       }, 2000);
       
       // Add an even longer delay for a final check to ensure all data is loaded
-      setTimeout(() => {
+      const thirdTimer = setTimeout(() => {
         if (polygonRendererRef.current) {
           console.log('Performing final coat of arms update after all data should be loaded');
           polygonRendererRef.current.updateCoatOfArmsSprites();
         }
       }, 5000);
       
+      // Clean up timers on unmount or when activeView changes
+      return () => {
+        clearTimeout(firstTimer);
+        clearTimeout(secondTimer);
+        clearTimeout(thirdTimer);
+      };
     }
   }, [activeView]);
   
@@ -1421,7 +1434,7 @@ export default function PolygonViewer() {
         }
       }
     }
-  }, [activeView, loadLandOwners, users, setMarketPanelVisible]);
+  }, [activeView, loadLandOwners, users, setMarketPanelVisible, polygons]);
 
   // Add handler for road creation completion
   const handleRoadComplete = useCallback((roadPoints: THREE.Vector3[]) => {
@@ -1464,12 +1477,12 @@ export default function PolygonViewer() {
     }
     
     setRoadCreationActive(false);
-  }, [selectedPolygonId, activeView]); // Add activeView to dependencies
+  }, [selectedPolygonId, activeView, setRoadCreationActive]); // Add setRoadCreationActive to dependencies
 
   // Add handler for road creation cancellation
   const handleRoadCancel = useCallback(() => {
     setRoadCreationActive(false);
-  }, []);
+  }, [setRoadCreationActive]);
 
   // Add a separate effect to handle quality changes
   useEffect(() => {
@@ -1491,7 +1504,7 @@ export default function PolygonViewer() {
       }
       
       // Force visual updates after quality change
-      setTimeout(() => {
+      const timer = setTimeout(() => {
         if (activeView === 'land' && polygonRendererRef.current) {
           console.log('Forcing visual updates after quality change');
           if (polygonRendererRef.current) {
@@ -1500,6 +1513,10 @@ export default function PolygonViewer() {
           }
         }
       }, 500);
+      
+      return () => {
+        clearTimeout(timer);
+      };
     }
   }, [highQuality, activeView]);
   
