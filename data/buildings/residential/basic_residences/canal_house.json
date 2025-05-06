@@ -1,0 +1,71 @@
+{
+  "name": "Canal House",
+  "category": "Residential",
+  "subcategory": "Basic Residences",
+  "tier": 2,
+  "size": "Medium",
+  "unlockCondition": "12,000,000 ducats total wealth, waterfront property",
+  "calculationsAnalysis": "The Canal House represents specialized waterfront residential property with direct transportation access. The construction cost of 2,000,000 ducats reflects the premium waterfront location and specialized water-level construction, while the income of 35,000 ducats (1.75% return) represents the premium rent such properties commanded. The maintenance cost of 11,000 ducats (31% of income) shows an increased maintenance ratio, reflecting the challenges of maintaining structures in direct contact with water. The residentsCapacity of 8 represents a prosperous family with servants. The construction time of 5 days (432000000ms) reflects the specialized waterfront construction requirements. This building creates a strategic residential option with transportation advantages, reflecting Venice's unique water-based urban structure.",
+  "shortDescription": "Multi-story residence with direct canal access for convenient transportation.",
+  "fullDescription": "A practical yet prestigious home with a private water entrance (porta d'acqua) directly on a canal. These versatile buildings allow residents to receive goods and visitors directly by boat. The water-level entrance typically includes a small private dock and storage area, with living quarters above.",
+  "flavorText": "In Venice, a door to the water is worth more than a door to the street—for water is the true street of the Serenissima.",
+  "constructionCosts": {
+    "ducats": 2000000,
+    "timber": 90,
+    "bricks": 180,
+    "stone": 150,
+    "glass": 20,
+    "marble": 10
+  },
+  "maintenanceCost": 11000,
+  "constructionTime": 432000000,
+  "incomeGeneration": 35000,
+  "residentsCapacity": 8,
+  "locationRequirements": {
+    "districtRestrictions": "Must be built directly on a canal",
+    "adjacentRequirements": "Requires direct canal frontage, private mooring",
+    "environmentalEffects": "Water quality affects property value, increases value of nearby buildings by 8%"
+  },
+  "constructionPhase3DPrompt": "Renaissance Venetian canal house under construction, three-story structure being built directly on canal edge, foundation reinforcement visible at water level, water entrance taking shape with dock area, stone arched water gate under construction, brick walls rising on upper floors, wooden scaffolding with workers, ornate window frames being installed, boat delivering construction materials, temporary wooden walkways over water for construction access, isometric game perspective, stylized but detailed, combination of stone and brick textures, typical Venetian construction techniques",
+  "completedBuilding3DPrompt": "Completed Renaissance Venetian canal house, elegant three-story structure rising directly from canal water, ornate water entrance with arched stone porta d'acqua (water door), small private dock with mooring poles (pali da ormeggio) painted with spiral stripes, gondola moored at entrance, second and third floors feature Gothic Venetian windows, warm terracotta plastered exterior with exposed stone trim, decorative water-level stonework showing water marks, flower boxes on upper windows, small rooftop altana (wooden roof terrace), street-side entrance with stone steps, historically accurate but slightly stylized for game aesthetic, isometric game perspective, weathered waterline details, ornamental iron tie-rods visible on facade",
+  "gameplayInformation": {
+    "unlocks": [
+      "Private Water Transport",
+      "Water Delivery Access"
+    ],
+    "specialAbilities": [
+      "Direct goods delivery",
+      "Efficient transportation",
+      "Flooding resilience features"
+    ],
+    "upgradePath": [
+      "Patrician Palazzo"
+    ],
+    "reputationEffects": {
+      "Merchant Guild": 8,
+      "Water Transport Guild": 15,
+      "Nobility": 5
+    },
+    "riskFactors": {
+      "fireRisk": "Medium",
+      "floodRisk": "High (direct water exposure)",
+      "crimeRisk": "Medium (water access creates security challenges)"
+    }
+  },
+  "soundDesign": {
+    "ambientSound": "Water lapping against foundation, boat traffic",
+    "activitySounds": "Boat docking, goods being unloaded, water gate opening",
+    "musicTheme": "Acque Alte"
+  },
+  "seasonalEffects": {
+    "winter": "Fog rising from canal, ice protection at waterline",
+    "acqua alta": "Water barriers at doorways, elevated walkways visible",
+    "carnival": "Colorful lanterns hanging over water entrance, decorated gondola"
+  },
+  "aiInteractionPoints": [
+    "Water entrance",
+    "Private dock",
+    "Street entrance",
+    "Rooftop terrace"
+  ]
+}

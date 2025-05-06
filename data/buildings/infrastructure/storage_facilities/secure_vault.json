@@ -1,0 +1,74 @@
+{
+  "name": "Secure Vault",
+  "category": "Infrastructure",
+  "subcategory": "Storage Facilities",
+  "tier": 3,
+  "size": "Medium",
+  "unlockCondition": "20,000,000 ducats capital, Banking Guild connection",
+  "calculationsAnalysis": "The Secure Vault represents specialized high-security storage with premium service fees. The construction cost of 5,000,000 ducats reflects the extraordinary security features and reinforced construction required, while the income of 50,000 ducats (1% return) represents premium fees for securing valuable items. The maintenance cost of 40,000 ducats (80% of income) creates a modest profit margin appropriate for security-focused infrastructure. The employment capacity of 8 represents the guards, administrators, and security specialists needed. The construction time of 10 days (864000000ms) reflects the specialized construction requirements. This building creates a strategic investment in financial security infrastructure with appropriate guild requirements reflecting the historical importance of secure storage in Venice's sophisticated banking and commercial system.",
+  "shortDescription": "High-security facility for storing valuable items, documents, and currency with enhanced protection.",
+  "fullDescription": "The foundation of Venice's financial security, secure vaults provide maximum protection for the most valuable possessions. Featuring multiple security layers, controlled access, specialized storage environments, and often guard quarters, these facilities represent significant investment in physical security. Used by wealthy families, businesses, and banks, secure vaults protect everything from gold to crucial documents.",
+  "flavorText": "Venice's greatest treasures lie not in her churches or palaces, but behind the iron doors and complex locks of her vaults—for true wealth requires both acquisition and protection.",
+  "constructionCosts": {
+    "ducats": 5000000,
+    "timber": 50,
+    "bricks": 400,
+    "stone": 500,
+    "iron": 200
+  },
+  "maintenanceCost": 40000,
+  "constructionTime": 864000000,
+  "incomeGeneration": 50000,
+  "employmentCapacity": 8,
+  "locationRequirements": {
+    "districtRestrictions": "Financial districts, secure areas near government centers",
+    "adjacentRequirements": "Limited access points, defensible position",
+    "environmentalEffects": "Increases security in surrounding area, creates high-value target"
+  },
+  "constructionPhase3DPrompt": "Renaissance Venetian secure vault under construction, high-security storage facility, exceptionally thick walls being built with reinforced construction techniques, complex lock mechanisms being installed with multiple redundant systems, guard post construction, discrete access control area taking shape, storage chamber with specialized compartments of varying sizes, document preservation areas with climate considerations, secure counting room, special floor reinforcement for extremely heavy items, disguised or subtle exterior to avoid attention, security features integrated throughout construction, isometric game perspective, stylized but detailed, focus on multiple layers of physical security",
+  "completedBuilding3DPrompt": "Completed Renaissance Venetian secure vault, high-security storage facility featuring understated exterior concealing formidable security, massive metal-reinforced doors with multiple complex locks, guard station with constantly manned post, secure entry chamber where identity is verified before accessing main vault, interior vault chamber with various sized storage compartments, special document storage area with climate control features, private consultation rooms for examining contents without removal, dedicated counting room for valuables, nobles and wealthy merchants accessing their secured items, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of absolute security and discretion, clever Renaissance security mechanisms, balance of accessibility for legitimate users and protection against unauthorized access, meticulous record-keeping visible, atmosphere of wealth protection",
+  "gameplayInformation": {
+    "unlocks": [
+      "Secure Wealth Storage",
+      "Banking Services",
+      "Document Protection"
+    ],
+    "specialAbilities": [
+      "Maximum security storage",
+      "Wealth protection during crises",
+      "Confidential storage services"
+    ],
+    "upgradePath": [
+      "Banking House Vault (expanded financial services)"
+    ],
+    "reputationEffects": {
+      "Banking Guild": 25,
+      "Wealthy Citizens": 20,
+      "Government Officials": 15,
+      "Merchants": 20
+    },
+    "riskFactors": {
+      "targetRisk": "High (attracts sophisticated theft attempts)",
+      "insider risk": "Medium (requires trustworthy staff)",
+      "reputationRisk": "Very High (failures severely damage trust)"
+    }
+  },
+  "soundDesign": {
+    "ambientSound": "Heavy locks operating, hushed conversations, metal doors",
+    "activitySounds": "Keys turning in locks, guard verification, coins counting",
+    "musicTheme": "Consiglio dei Dieci"
+  },
+  "seasonalEffects": {
+    "political instability": "Increased usage and security measures",
+    "financial crises": "Heavy activity as wealth is secured",
+    "war threats": "Special protective measures implemented"
+  },
+  "aiInteractionPoints": [
+    "Security checkpoint",
+    "Client consultation room",
+    "Main vault chamber",
+    "Guard station",
+    "Record keeping office",
+    "Private viewing booths"
+  ]
+}

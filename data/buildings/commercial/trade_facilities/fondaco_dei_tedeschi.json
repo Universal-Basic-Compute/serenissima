@@ -1,0 +1,86 @@
+{
+  "name": "Fondaco dei Tedeschi",
+  "category": "Commercial",
+  "subcategory": "Trade Facilities",
+  "tier": 3,
+  "size": "Extra Large",
+  "unlockCondition": "25,000,000 ducats total wealth, German merchant connections, Senate approval",
+  "calculationsAnalysis": "The Fondaco dei Tedeschi represents a major commercial investment with significant returns. The construction cost of 7,500,000 ducats reflects the massive scale and institutional nature of this trading complex, while the income of 75,000 ducats (1% return) represents the substantial commercial activity it facilitates. The maintenance cost of 35,000 ducats (47% of income) balances profitability with the reality of maintaining a large commercial complex. The employment capacity of 40 reflects the administrative staff, guards, and workers needed to operate this international trading center. The construction time of 15 days (1296000000ms) represents a major project appropriate for advanced players. This building creates a strategic investment in international trade with appropriate requirements reflecting the political and diplomatic nature of establishing foreign trading posts in Renaissance Venice.",
+  "shortDescription": "German merchant trading hall combining warehouse, accommodation, and commercial offices.",
+  "fullDescription": "A cornerstone of Venice's international trade, this massive complex serves as headquarters for German merchants. Combining warehouse facilities, living quarters, offices, and trading halls, the fondaco creates a self-contained community for foreign traders under Venetian oversight. State regulations require all German goods to pass through this building, making it a vital link to Northern European markets while allowing careful tax collection.",
+  "flavorText": "Between these walls the languages of north and south mingle, as do the coins of a dozen cities—all under the watchful eye of the Serenissima.",
+  "constructionCosts": {
+    "ducats": 7500000,
+    "timber": 300,
+    "bricks": 800,
+    "stone": 500,
+    "glass": 100,
+    "marble": 50
+  },
+  "maintenanceCost": 35000,
+  "constructionTime": 1296000000,
+  "incomeGeneration": 75000,
+  "employmentCapacity": 40,
+  "locationRequirements": {
+    "districtRestrictions": "Grand Canal frontage near Rialto",
+    "adjacentRequirements": "Requires major canal access, proximity to commercial district",
+    "environmentalEffects": "Creates international commercial zone, increases nearby property values by 20%"
+  },
+  "productionInformation": {
+    "inputResources": {
+      "Northern European Goods": "100-200 units per day",
+      "Venetian Export Goods": "80-150 units per day"
+    },
+    "outputResources": {
+      "Trade Revenue": "150-300 ducats per day",
+      "Tax Revenue": "30-60 ducats per day to state"
+    },
+    "storageCapacity": 500
+  },
+  "constructionPhase3DPrompt": "Renaissance Venetian Fondaco dei Tedeschi under construction, massive trading complex on Grand Canal, multi-story structure with central courtyard layout, large-scale foundation work visible, canal-side loading docks being built, huge warehouse spaces taking shape, multiple cranes and construction equipment, offices and accommodation areas on upper floors under construction, hundreds of workers on scaffolding, distinct German architectural influences being incorporated alongside Venetian elements, government officials overseeing certain aspects, massive stone blocks being positioned, scale dwarfing nearby buildings, isometric game perspective, stylized but detailed, sense of architectural and commercial importance",
+  "completedBuilding3DPrompt": "Completed Renaissance Venetian Fondaco dei Tedeschi, imposing trading complex directly on Grand Canal, massive multi-story structure surrounding central courtyard, distinctive architecture blending Venetian and Northern European styles, impressive canal frontage with multiple loading docks active with boats, ground floor featuring vast warehouse spaces and customs inspection areas, upper floors with trading offices and accommodation for German merchants, rows of elegant arched windows, central stone courtyard with well and commercial activity, German cultural symbols and Venetian regulations displayed side-by-side, watchtower with customs officials, red exterior typical of Venetian commercial buildings, historically accurate but slightly stylized for game aesthetic, isometric game perspective, bustling activity with merchants from different regions recognizable by dress, scaled to dwarf surrounding buildings, multiple entrances with different levels of access restriction",
+  "gameplayInformation": {
+    "unlocks": [
+      "Northern European Trade Routes",
+      "German Merchant Connections",
+      "Access to Northern Technologies"
+    ],
+    "specialAbilities": [
+      "International trading hub",
+      "Cross-cultural exchange",
+      "Tax and customs collection point"
+    ],
+    "upgradePath": [
+      "International Trade Network expansion"
+    ],
+    "reputationEffects": {
+      "German Merchants": 25,
+      "Venetian Senate": 15,
+      "Merchant Guild": 20
+    },
+    "riskFactors": {
+      "fireRisk": "Medium (despite size, good regulations)",
+      "political risk": "Medium (subject to diplomatic relations)",
+      "espionage risk": "High (valuable trade information)"
+    }
+  },
+  "soundDesign": {
+    "ambientSound": "Multiple languages being spoken, trading negotiations, cargo movement",
+    "activitySounds": "Goods being inspected, coins counting, ships docking, cargo loading",
+    "musicTheme": "Diplomazia Veneziana"
+  },
+  "seasonalEffects": {
+    "winter": "Increased northern goods, fur trading",
+    "trading seasons": "Dramatic fluctuations in activity based on shipping seasons",
+    "festive seasons": "Cultural exchanges, German and Venetian celebrations"
+  },
+  "aiInteractionPoints": [
+    "Trading floor",
+    "Customs office",
+    "Warehouse receiving",
+    "Merchant accommodations",
+    "Canal docks",
+    "Courtyard market",
+    "Administrative offices"
+  ]
+}

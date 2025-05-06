@@ -54,12 +54,20 @@
     }
   ],
   "centroid": {
-    "lat": 45.42480227866245,
-    "lng": 12.337704352295756
+    "lat": 45.425345367140196,
+    "lng": 12.337465393747964
   },
   "historicalName": "Calle del Gran presso Santa Maria Formosa",
   "englishName": "Calle del Gran near Saint Mary Formosa",
   "historicalDescription": "This area in the Castello sestiere was known for its proximity to the Church of Santa Maria Formosa, one of the oldest churches in Venice, originally built in the 7th century and rebuilt in 1492.",
   "nameConfidence": "medium",
-  "areaInSquareMeters": 206910.56
+  "areaInSquareMeters": 206910.56,
+  "center": {
+    "lat": 45.42480227866245,
+    "lng": 12.337704352295756
+  },
+  "coatOfArmsCenter": {
+    "lat": 45.43503715343688,
+    "lng": 12.327813705709316
+  }
 }

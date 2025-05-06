@@ -10,12 +10,14 @@
   "description": "Financial services provided by Venetian banks, including loans, deposits, currency exchange, and trade financing. Essential infrastructure for Venice's commercial empire.",
   "lore": "While Florence may claim the birth of modern banking, Venice perfected its practical application. The city's banks financed trade voyages, managed public debt, and created financial instruments that oiled the wheels of commerce across the Mediterranean and beyond.",
   "sprite": "assets/sprites/resources/banking_services.png",
-  "icon": "assets/icons/resources/banking_services.png",
+  "icon": "/assets/icons/resources/banking_services.png",
   "soundEffect": "assets/audio/resources/banking_ambient.mp3",
-  
-  "availableQualities": ["standard", "premium", "exclusive"],
+  "availableQualities": [
+    "standard",
+    "premium",
+    "exclusive"
+  ],
   "defaultQuality": "standard",
-  
   "qualityEffects": {
     "standard": {
       "valueModifier": 1.0,
@@ -36,13 +38,15 @@
       "description": "Comprehensive financial services for the elite, including major trade financing and political loans."
     }
   },
-  
   "variants": [
     {
       "id": "trade_financing",
       "name": "Trade Financing",
       "valueModifier": 1.3,
-      "properties": ["risk_sharing", "voyage_specific"],
+      "properties": [
+        "risk_sharing",
+        "voyage_specific"
+      ],
       "primaryUse": "merchant_ventures",
       "risk_level": "high"
     },
@@ -50,7 +54,10 @@
       "id": "deposit_services",
       "name": "Deposit Services",
       "valueModifier": 0.8,
-      "properties": ["secure", "interest_bearing"],
+      "properties": [
+        "secure",
+        "interest_bearing"
+      ],
       "primaryUse": "wealth_storage",
       "risk_level": "low"
     },
@@ -58,7 +65,10 @@
       "id": "currency_exchange",
       "name": "Currency Exchange",
       "valueModifier": 1.0,
-      "properties": ["fluctuating_rates", "international"],
+      "properties": [
+        "fluctuating_rates",
+        "international"
+      ],
       "primaryUse": "foreign_trade",
       "risk_level": "medium"
     },
@@ -66,60 +76,77 @@
       "id": "public_debt",
       "name": "Public Debt Management",
       "valueModifier": 1.2,
-      "properties": ["state_guaranteed", "long_term"],
+      "properties": [
+        "state_guaranteed",
+        "long_term"
+      ],
       "primaryUse": "government_financing",
       "risk_level": "low"
     }
   ],
-  
   "seasonalAvailability": {
     "spring": 1.0,
     "summer": 1.0,
     "autumn": 1.0,
     "winter": 1.0
   },
-  
   "seasonalDemand": {
     "spring": 1.2,
     "summer": 1.0,
     "autumn": 1.1,
     "winter": 0.8
   },
-  
   "marketDynamics": {
     "basePrice": 30,
     "volatility": 0.2,
     "elasticity": 0.4,
     "strategicImportance": "very_high"
   },
-  
   "sources": [
     {
       "type": "private_banks",
-      "locations": ["rialto", "san_marco"],
+      "locations": [
+        "rialto",
+        "san_marco"
+      ],
       "reliability": 0.9,
       "quality": "varies",
       "costFactor": 1.0,
-      "affectedBy": ["political_stability", "trade_volume", "interest_rates"]
+      "affectedBy": [
+        "political_stability",
+        "trade_volume",
+        "interest_rates"
+      ]
     },
     {
       "type": "state_bank",
-      "locations": ["central_districts"],
+      "locations": [
+        "central_districts"
+      ],
       "reliability": 0.95,
       "quality": "premium",
       "costFactor": 1.1,
-      "affectedBy": ["state_finances", "political_decisions", "international_relations"]
+      "affectedBy": [
+        "state_finances",
+        "political_decisions",
+        "international_relations"
+      ]
     },
     {
       "type": "merchant_banking",
-      "locations": ["trading_districts"],
+      "locations": [
+        "trading_districts"
+      ],
       "reliability": 0.85,
       "quality": "standard",
       "costFactor": 0.9,
-      "affectedBy": ["trade_conditions", "merchant_wealth", "shipping_security"]
+      "affectedBy": [
+        "trade_conditions",
+        "merchant_wealth",
+        "shipping_security"
+      ]
     }
   ],
-  
   "financialInstruments": {
     "loans": {
       "interest_rates": {
@@ -127,7 +154,12 @@
         "premium": 0.06,
         "exclusive": 0.04
       },
-      "term_options": [180, 360, 720, 1440],
+      "term_options": [
+        180,
+        360,
+        720,
+        1440
+      ],
       "collateral_requirements": true
     },
     "deposits": {
@@ -136,7 +168,12 @@
         "premium": 0.04,
         "exclusive": 0.05
       },
-      "term_options": [360, 720, 1440, 2880],
+      "term_options": [
+        360,
+        720,
+        1440,
+        2880
+      ],
       "withdrawal_restrictions": true
     },
     "trade_investments": {
@@ -145,16 +182,23 @@
         "medium_risk": 0.12,
         "high_risk": 0.25
       },
-      "voyage_duration": [90, 180, 360],
+      "voyage_duration": [
+        90,
+        180,
+        360
+      ],
       "risk_sharing_options": true
     },
     "government_bonds": {
       "interest_rates": 0.05,
-      "term_options": [1440, 2880, 4320],
+      "term_options": [
+        1440,
+        2880,
+        4320
+      ],
       "transferability": true
     }
   },
-  
   "usedBy": [
     {
       "entity": "trading_house",
@@ -181,30 +225,57 @@
       "notes": "Secure storage of wealth with interest"
     }
   ],
-  
   "producedBy": [
     {
       "building": "bank",
       "service_capacity": 100,
-      "inputs": [{"resource": "capital", "quantity": 1000}, {"resource": "administrative_labor", "quantity": 5}],
+      "inputs": [
+        {
+          "resource": "capital",
+          "quantity": 1000
+        },
+        {
+          "resource": "administrative_labor",
+          "quantity": 5
+        }
+      ],
       "production_cycle": 24,
       "productionNotes": "Daily banking operations"
     },
     {
       "building": "mint",
       "service_capacity": 50,
-      "inputs": [{"resource": "precious_metals", "quantity": 10}, {"resource": "skilled_labor", "quantity": 10}],
+      "inputs": [
+        {
+          "resource": "precious_metals",
+          "quantity": 10
+        },
+        {
+          "resource": "skilled_labor",
+          "quantity": 10
+        }
+      ],
       "production_cycle": 24,
       "productionNotes": "Currency production and management"
     }
   ],
-  
   "relatedResources": {
-    "complementary": ["trade_goods", "shipping_services", "legal_services"],
-    "substitutes": ["barter", "direct_financing", "foreign_banks"],
-    "byproducts": ["financial_stability", "economic_growth", "wealth_concentration"]
+    "complementary": [
+      "trade_goods",
+      "shipping_services",
+      "legal_services"
+    ],
+    "substitutes": [
+      "barter",
+      "direct_financing",
+      "foreign_banks"
+    ],
+    "byproducts": [
+      "financial_stability",
+      "economic_growth",
+      "wealth_concentration"
+    ]
   },
-  
   "economicEffects": {
     "availability_increase": {
       "trade_volume": 1.3,
@@ -217,7 +288,6 @@
       "economic_contraction": true
     }
   },
-  
   "regulations": {
     "interest_rate_controls": "partial",
     "reserve_requirements": "enforced",
@@ -225,6 +295,5 @@
     "lending_restrictions": "by_client_category",
     "state_oversight": "comprehensive"
   },
-  
   "historicalNotes": "Venetian banking evolved from the needs of its maritime trade, developing sophisticated financial instruments to manage risk and capital. The city pioneered concepts like double-entry bookkeeping and bills of exchange that facilitated long-distance trade. The Banco della Piazza di Rialto, founded in 1587, became one of Europe's first public banks, providing secure deposits and regulated exchange services. Unlike some banking centers, Venice maintained tight state oversight of financial activities, viewing them as extensions of the Republic's commercial policy rather than independent enterprises. This integration of banking with state interests helped finance Venice's commercial and military power while providing stability during periods of European financial turbulence."
 }

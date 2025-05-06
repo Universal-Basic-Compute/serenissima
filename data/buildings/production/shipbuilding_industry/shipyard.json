@@ -1,0 +1,93 @@
+{
+  "name": "Shipyard",
+  "category": "Production",
+  "subcategory": "Shipbuilding Industry",
+  "tier": 3,
+  "size": "Extra Large",
+  "unlockCondition": "20,000,000 ducats capital, Shipwright Guild membership, deep water access",
+  "calculationsAnalysis": "The Shipyard represents major maritime industrial infrastructure with substantial returns. The construction cost of 6,000,000 ducats reflects the extensive facilities and specialized equipment required, while the income of 70,000 ducats (1.17% return) represents the high-value vessels produced. The maintenance cost of 75,000 ducats exceeds income, creating a realistic scenario where shipbuilding required substantial ongoing investment but provided strategic maritime capabilities. The employment capacity of 40 represents the shipwrights, carpenters, and laborers needed. The construction time of 14 days (1209600000ms) reflects the major industrial project. This building creates a strategic investment in maritime production with appropriate guild and location requirements reflecting the historical importance of shipbuilding to Venice's commercial and naval power, where private shipyards complemented the state-run Arsenal.",
+  "shortDescription": "Facility for construction and repair of maritime vessels, from small boats to trading ships.",
+  "fullDescription": "The backbone of Venice's maritime power, private shipyards construct and maintain the merchant fleet that drives the city's commerce. Featuring slipways for vessel construction, specialized workshops for component fabrication, and direct water access, these industrial facilities require substantial space and resources. While not as large as the state-run Arsenal, private shipyards are vital to maintaining Venice's commercial fleet.",
+  "flavorText": "From oak and pitch and canvas, we conjure vessels that will challenge the Mediterranean and return laden with the world's riches—or consign their investors to bankruptcy.",
+  "constructionCosts": {
+    "ducats": 6000000,
+    "timber": 300,
+    "bricks": 200,
+    "stone": 400,
+    "iron": 100
+  },
+  "maintenanceCost": 75000,
+  "constructionTime": 1209600000,
+  "incomeGeneration": 70000,
+  "employmentCapacity": 40,
+  "productionInformation": {
+    "inputResources": {
+      "Timber": 80,
+      "Pitch": 30,
+      "Iron": 20,
+      "Canvas": 40,
+      "Rope": 30
+    },
+    "outputResources": {
+      "Small Boats": 0.2,
+      "Medium Vessels": 0.05,
+      "Commercial Ships": 0.02
+    },
+    "productionRate": "Varies by vessel size",
+    "storageCapacity": {
+      "rawMaterials": 500,
+      "componentsInProgress": 200
+    }
+  },
+  "locationRequirements": {
+    "districtRestrictions": "Must be built on deep waterfront",
+    "adjacentRequirements": "Requires direct deep water access with approach channel",
+    "environmentalEffects": "Significant noise pollution, water traffic increase, wood dust in vicinity"
+  },
+  "constructionPhase3DPrompt": "Renaissance Venetian shipyard under construction, massive waterfront industrial complex, extensive foundation work at water's edge, multiple slipways being created for vessel construction, large covered workshop areas taking shape, timber storage structures, ship mold templates being installed, massive cranes and pulley systems, framework for launching mechanisms, smithy for metal components partially built, pitch processing area with safety features, workers creating specialized construction jigs, large-scale industrial construction with specialized maritime features, isometric game perspective, stylized but detailed, organized industrial zone with water access",
+  "completedBuilding3DPrompt": "Completed Renaissance Venetian shipyard, impressive maritime industrial complex directly on water, multiple slipways with ships in various stages of construction, ships' wooden skeleton frames visible, large covered workshops for specialized components, massive timber storage yard with sorted woods, sail loft with canvas work happening, blacksmith shop for metal fittings, pitch and oakum processing area, intricate pulley and crane systems for moving heavy components, workers swarming over partially completed vessel hulls, launching mechanism for completed ships, small boats moored nearby, historically accurate but slightly stylized for game aesthetic, isometric game perspective, detailed shipbuilding activities visible, organized chaos of maritime construction, different specialized zones for various aspects of shipbuilding, small office for designers and contracts",
+  "gameplayInformation": {
+    "unlocks": [
+      "Shipbuilding Industry",
+      "Maritime Trade Expansion",
+      "Naval Architecture"
+    ],
+    "specialAbilities": [
+      "Custom vessel construction",
+      "Ship repair services",
+      "Fleet capacity expansion"
+    ],
+    "upgradePath": [
+      "Advanced Shipyard (faster construction, larger vessels)"
+    ],
+    "reputationEffects": {
+      "Shipwright Guild": 25,
+      "Maritime Traders": 20,
+      "Admiralty": 15,
+      "Residential Neighbors": -10
+    },
+    "riskFactors": {
+      "fireRisk": "High (wood, pitch, open flames)",
+      "accidentRisk": "High (heavy materials, complex processes)",
+      "investmentRisk": "High (large capital requirements per ship)"
+    }
+  },
+  "soundDesign": {
+    "ambientSound": "Hammering, sawing, creaking timber, water lapping",
+    "activitySounds": "Workers shouting measurements, pulleys creaking, ship hulls being caulked",
+    "musicTheme": "Arsenale in Movimento"
+  },
+  "seasonalEffects": {
+    "winter": "Reduced exterior work, focus on interior fittings",
+    "summer": "Peak production season, multiple launches",
+    "stormySeasons": "Additional repair work for damaged vessels"
+  },
+  "aiInteractionPoints": [
+    "Main construction slipway",
+    "Design office",
+    "Component workshops",
+    "Timber selection yard",
+    "Launching platform",
+    "Ship inspection area"
+  ]
+}

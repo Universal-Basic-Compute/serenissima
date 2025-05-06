@@ -1,0 +1,76 @@
+{
+  "name": "Prison",
+  "category": "Military & Defense",
+  "subcategory": "Security Facilities",
+  "tier": 3,
+  "size": "Large",
+  "unlockCondition": "Government authorization, Security Guild appointment",
+  "calculationsAnalysis": "The Prison represents specialized security infrastructure with judicial rather than commercial value. The construction cost of 10,000,000 ducats reflects the secure facilities and specialized detention systems required, while generating no direct income reflects its judicial rather than commercial purpose. The maintenance cost of 50,000 ducats creates a substantial ongoing expense justified by the essential detention capabilities provided. The employment capacity of 35 represents the guards, administrators, and support staff needed. The construction time of 20 days (1728000000ms) reflects the specialized construction requirements. This building creates a strategic judicial asset with appropriate government restrictions reflecting the historical importance of incarceration facilities in Venice's sophisticated legal system, where the famous prison adjacent to the Doge's Palace symbolized the close relationship between governance and punishment.",
+  "shortDescription": "Detention facility for holding criminals and enemies of the state in secure conditions.",
+  "fullDescription": "Enforcing Venice's strict laws, prisons incarcerate criminals and political prisoners in secure facilities. Featuring multiple security levels, guard stations, prisoner housing, and administrative offices, these imposing institutions formed a key component of Venice's justice system. The Republic's famous prison adjacent to the Doge's Palace, connected by the Bridge of Sighs, symbolized the close relationship between government authority and punishment.",
+  "flavorText": "The shadow of the prison reminds all Venetians that while our laws may be complex and our courts sophisticated, the consequence of transgression remains simple and absolute—the loss of the very freedom that Venice herself treasures above all.",
+  "constructionCosts": {
+    "ducats": 10000000,
+    "timber": 150,
+    "bricks": 500,
+    "stone": 800,
+    "iron": 250
+  },
+  "maintenanceCost": 50000,
+  "constructionTime": 1728000000,
+  "incomeGeneration": 0,
+  "employmentCapacity": 35,
+  "locationRequirements": {
+    "districtRestrictions": "Government district, often near judicial facilities",
+    "adjacentRequirements": "Secure location, limited access, isolation",
+    "environmentalEffects": "Creates security presence, deters crime, somber atmosphere"
+  },
+  "constructionPhase3DPrompt": "Renaissance Venetian prison under construction, imposing detention facility, substantial security features being incorporated from foundation up, thick walls with minimal windows, complex locking systems being installed, cell blocks of varying security levels, guard stations at strategic points, administrative areas for prison management, separate processing zone for new prisoners, security measures preventing escape including water-facing considerations unique to Venice, isometric game perspective, stylized but detailed, focus on creating secure detention facility balancing punishment with Renaissance concepts of justice",
+  "completedBuilding3DPrompt": "Completed Renaissance Venetian prison, formidable detention facility featuring intimidating stone exterior with minimal windows, heavily secured entrance with multiple checkpoints, various security level zones from minimum to maximum, individual cells with appropriate furnishing based on prisoner status, common areas for permitted activities, guard stations positioned for maximum visibility, administration offices where records are maintained, visitor area with security features, exercise yard with surveillance, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of grim justice and containment, guards in Venetian security uniforms maintaining order, prisoner processing area, atmosphere of punishment and state authority, connection to wider justice system through secure transport to courts, balance of humane conditions with necessary security appropriate to Renaissance era",
+  "gameplayInformation": {
+    "unlocks": [
+      "Criminal Detention",
+      "Justice System Completion",
+      "State Security"
+    ],
+    "specialAbilities": [
+      "Criminal containment",
+      "Punishment enforcement",
+      "Security threat neutralization"
+    ],
+    "upgradePath": [
+      "Reform Prison (improved conditions, rehabilitation)"
+    ],
+    "reputationEffects": {
+      "Security Forces": 25,
+      "Judiciary": 20,
+      "Government": 20,
+      "Criminals": -30
+    },
+    "riskFactors": {
+      "escapeRisk": "Low (high security)",
+      "publicReputationRisk": "Medium (treatment concerns)",
+      "corruptionRisk": "Medium (guard integrity)"
+    }
+  },
+  "soundDesign": {
+    "ambientSound": "Cell doors, guard movements, distant prisoner sounds",
+    "activitySounds": "Lock mechanisms, prisoner processing, security checks",
+    "musicTheme": "Consiglio dei Dieci"
+  },
+  "seasonalEffects": {
+    "amnesty periods": "Selected releases, processing activity",
+    "high crime periods": "Increased population, enhanced security",
+    "festival security": "Special monitoring, temporary detention"
+  },
+  "aiInteractionPoints": [
+    "Main entrance security",
+    "Guard stations",
+    "Administrative offices",
+    "Prisoner processing",
+    "Visitation area",
+    "Cell blocks",
+    "Exercise yard",
+    "Isolation cells"
+  ]
+}

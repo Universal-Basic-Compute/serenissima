@@ -70,12 +70,16 @@
     }
   ],
   "centroid": {
-    "lat": 45.43481313220121,
-    "lng": 12.332612228671616
+    "lat": 45.43468183293921,
+    "lng": 12.332321914793447
   },
   "historicalName": "Calle dei Avvocati, San Marco",
   "englishName": "Lawyers' Street, St. Mark's District",
   "historicalDescription": "This street was known for housing offices of lawyers and notaries in the 15th century, located in the central San Marco sestiere near Piazza San Marco and the Doge's Palace.",
   "nameConfidence": "medium",
-  "areaInSquareMeters": 41904.44
+  "areaInSquareMeters": 41904.44,
+  "center": {
+    "lat": 45.43481313220121,
+    "lng": 12.332612228671616
+  }
 }

@@ -102,12 +102,16 @@
     }
   ],
   "centroid": {
-    "lat": 45.43499765554072,
-    "lng": 12.346991756445796
+    "lat": 45.43578310889964,
+    "lng": 12.346993390006594
   },
   "historicalName": "Calle de la Fontana in Contrà San Provolo",
   "englishName": "Fountain Street in the San Provolo District",
   "historicalDescription": "A narrow street located near the Church of San Provolo in the Castello sestiere, known for its fresh water fountain.",
   "nameConfidence": "medium",
-  "areaInSquareMeters": 91030.38
+  "areaInSquareMeters": 91030.38,
+  "center": {
+    "lat": 45.43499765554072,
+    "lng": 12.346991756445796
+  }
 }

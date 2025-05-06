@@ -66,12 +66,16 @@
     }
   ],
   "centroid": {
-    "lat": 45.4413603085514,
-    "lng": 12.339872017490793
+    "lat": 45.44090914234582,
+    "lng": 12.340043846066118
   },
   "historicalName": "Calle Stella in Sestiere San Marco, presso la Chiesa di San Salvador",
   "englishName": "Star Street in the District of St. Mark, near the Church of San Salvador",
   "historicalDescription": "This area was part of the vibrant merchant district of San Marco in the 15th century, known for its bustling trade and proximity to important landmarks like the Rialto Bridge and the Church of San Salvador.",
   "nameConfidence": "medium",
-  "areaInSquareMeters": 49778.78
+  "areaInSquareMeters": 49778.78,
+  "center": {
+    "lat": 45.4413603085514,
+    "lng": 12.339872017490793
+  }
 }

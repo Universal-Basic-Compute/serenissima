@@ -1,0 +1,70 @@
+{
+  "name": "Public Well",
+  "category": "Infrastructure",
+  "subcategory": "Water Management",
+  "tier": 1,
+  "size": "Small",
+  "unlockCondition": "1,000,000 ducats capital, community approval",
+  "calculationsAnalysis": "The Public Well represents basic water access infrastructure with no direct revenue. The construction cost of 500,000 ducats reflects the connection to cistern systems and decorative wellhead, while generating no direct income reflects its public service rather than commercial purpose. The maintenance cost of 7,500 ducats creates an ongoing expense justified by the essential water access provided. The employment capacity of 0 reflects the self-service nature of this infrastructure. The construction time of 2 days (172800000ms) reflects the relatively simple construction requirements. This building creates an accessible investment in water access that improves public health and community development, reflecting the historical importance of public wells as both practical infrastructure and social gathering points in Venetian neighborhoods.",
+  "shortDescription": "Community water access point providing fresh water to residents without private sources.",
+  "fullDescription": "Essential neighborhood infrastructure, public wells provide access to the fresh water stored in the cistern system beneath. Featuring decorative wellheads, drawing mechanisms, and often small surrounding plazas, these facilities serve as both practical utilities and social gathering points. Located in public campos throughout Venice, wells were regulated to ensure fair access to this vital resource.",
+  "flavorText": "The well is the true heart of the neighborhood—for what draws people together more surely than the water that sustains life itself?",
+  "constructionCosts": {
+    "ducats": 500000,
+    "stone": 100,
+    "iron": 20,
+    "bronze": 10
+  },
+  "maintenanceCost": 7500,
+  "constructionTime": 172800000,
+  "incomeGeneration": 0,
+  "employmentCapacity": 0,
+  "locationRequirements": {
+    "districtRestrictions": "Public campos or squares in all districts",
+    "adjacentRequirements": "Must connect to existing cistern system",
+    "environmentalEffects": "Creates community gathering point, improves local health"
+  },
+  "constructionPhase3DPrompt": "Renaissance Venetian public well under construction, community water access point, connection to cistern system being established, decorative stone wellhead being assembled, metal support structure for bucket and pulley, paving stones being placed around well to create small plaza, simple bronze ornamentation waiting for installation, specialized water access construction, community oversight of project, isometric game perspective, stylized but detailed, focus on the integration of practical utility and public space creation",
+  "completedBuilding3DPrompt": "Completed Renaissance Venetian public well, community water source featuring ornate stone wellhead with decorative carvings, bronze or iron pulley system for raising water, durable metal bucket on chain, small paved area surrounding well, simple stone benches nearby, women gathering water in traditional vessels, children playing nearby, small lion of St. Mark carving indicating public ownership, worn stone step where water vessels rest during filling, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of community focal point, wellhead showing wear from centuries of use, warm stone textures, neighbors engaged in conversation while collecting water, subtle integration with campo or small plaza as important neighborhood infrastructure",
+  "gameplayInformation": {
+    "unlocks": [
+      "Basic Water Access",
+      "Community Development"
+    ],
+    "specialAbilities": [
+      "Public water provision",
+      "Community gathering point",
+      "Health benefits for area"
+    ],
+    "upgradePath": [
+      "Improved Public Well (decorated, larger capacity)"
+    ],
+    "reputationEffects": {
+      "Local Community": 15,
+      "Common Citizens": 20,
+      "Health Officials": 10
+    },
+    "riskFactors": {
+      "contaminationRisk": "Low (regulated access)",
+      "crowdingRisk": "Medium (popular resource)",
+      "maintenanceRisk": "Low (simple, durable construction)"
+    }
+  },
+  "soundDesign": {
+    "ambientSound": "Water splashing, chain creaking, community chatter",
+    "activitySounds": "Bucket being lowered and raised, water pouring into vessels",
+    "musicTheme": "Rialto Mercante"
+  },
+  "seasonalEffects": {
+    "drought": "Regulated access hours, rationing",
+    "winter": "Ice prevention measures",
+    "summer": "Increased usage, social gathering"
+  },
+  "aiInteractionPoints": [
+    "Wellhead",
+    "Water collection area",
+    "Waiting area",
+    "Small plaza",
+    "Bench seating"
+  ]
+}

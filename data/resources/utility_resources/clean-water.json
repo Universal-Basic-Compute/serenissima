@@ -10,12 +10,14 @@
   "description": "Purified water suitable for drinking, cooking, and production processes. A vital resource in Venice's saltwater environment.",
   "lore": "In a city surrounded by water yet lacking natural springs, clean water became both precious and problematic. Venice's ingenious cistern system transformed rainwater into a usable resource, while strict regulations protected this limited supply from waste or contamination.",
   "sprite": "assets/sprites/resources/clean_water.png",
-  "icon": "assets/icons/resources/clean_water.png",
+  "icon": "/assets/icons/resources/clean_water.png",
   "soundEffect": "assets/audio/resources/water_pouring.mp3",
-  
-  "availableQualities": ["standard", "purified", "distilled"],
+  "availableQualities": [
+    "standard",
+    "purified",
+    "distilled"
+  ],
   "defaultQuality": "standard",
-  
   "qualityEffects": {
     "standard": {
       "valueModifier": 1.0,
@@ -36,87 +38,122 @@
       "description": "Water processed to remove all impurities, essential for medical and specialty production."
     }
   },
-  
   "variants": [
     {
       "id": "drinking_water",
       "name": "Drinking Water",
       "valueModifier": 1.2,
-      "properties": ["potable", "essential"],
+      "properties": [
+        "potable",
+        "essential"
+      ],
       "primaryUse": "consumption",
-      "sources": ["cisterns", "imported"]
+      "sources": [
+        "cisterns",
+        "imported"
+      ]
     },
     {
       "id": "process_water",
       "name": "Process Water",
       "valueModifier": 0.8,
-      "properties": ["clean", "filtered"],
+      "properties": [
+        "clean",
+        "filtered"
+      ],
       "primaryUse": "production",
-      "sources": ["cisterns", "wells"]
+      "sources": [
+        "cisterns",
+        "wells"
+      ]
     },
     {
       "id": "spring_water",
       "name": "Spring Water",
       "valueModifier": 1.5,
-      "properties": ["pure", "mineral_rich", "rare"],
+      "properties": [
+        "pure",
+        "mineral_rich",
+        "rare"
+      ],
       "primaryUse": "luxury_consumption",
-      "sources": ["imported"]
+      "sources": [
+        "imported"
+      ]
     }
   ],
-  
   "seasonalAvailability": {
     "spring": 1.2,
     "summer": 0.8,
     "autumn": 1.3,
     "winter": 1.0
   },
-  
   "seasonalDemand": {
     "spring": 1.0,
     "summer": 1.4,
     "autumn": 0.9,
     "winter": 0.8
   },
-  
   "marketDynamics": {
     "basePrice": 2,
     "volatility": 0.4,
     "elasticity": 0.3,
     "strategicImportance": "very high"
   },
-  
   "sources": [
     {
       "type": "cistern",
-      "locations": ["all_districts"],
+      "locations": [
+        "all_districts"
+      ],
       "reliability": 0.9,
       "quality": "standard",
       "costFactor": 1.0,
-      "affectedBy": ["rainfall", "maintenance", "pollution"]
+      "affectedBy": [
+        "rainfall",
+        "maintenance",
+        "pollution"
+      ]
     },
     {
       "type": "well",
-      "locations": ["limited_districts"],
+      "locations": [
+        "limited_districts"
+      ],
       "reliability": 0.7,
       "quality": "standard",
       "costFactor": 1.2,
-      "affectedBy": ["groundwater_level", "saltwater_intrusion"]
+      "affectedBy": [
+        "groundwater_level",
+        "saltwater_intrusion"
+      ]
     },
     {
       "type": "import",
-      "locations": ["mainland"],
+      "locations": [
+        "mainland"
+      ],
       "reliability": 0.6,
       "quality": "varies",
       "costFactor": 2.5,
-      "affectedBy": ["politics", "transportation_availability"]
+      "affectedBy": [
+        "politics",
+        "transportation_availability"
+      ]
     }
   ],
-  
   "storage": {
-    "requirements": ["clean_containers", "covered"],
+    "requirements": [
+      "clean_containers",
+      "covered"
+    ],
     "decayRate": 0.02,
     "contaminationRisk": 0.1,
-    "compatibleBuildings": ["cistern", "water_storage", "household"],
+    "compatibleBuildings": [
+      "cistern",
+      "water_storage",
+      "household"
+    ],
     "containerTypes": [
       {
         "name": "Barrel",
@@ -138,17 +175,34 @@
       }
     ]
   },
-  
   "transport": {
     "methods": {
-      "water_barge": {"efficiency": 1.0, "risk": 0.05, "capacity": 200},
-      "cart": {"efficiency": 0.7, "risk": 0.15, "capacity": 12},
-      "porter": {"efficiency": 0.5, "risk": 0.1, "capacity": 2}
+      "water_barge": {
+        "efficiency": 1.0,
+        "risk": 0.05,
+        "capacity": 200
+      },
+      "cart": {
+        "efficiency": 0.7,
+        "risk": 0.15,
+        "capacity": 12
+      },
+      "porter": {
+        "efficiency": 0.5,
+        "risk": 0.1,
+        "capacity": 2
+      }
     },
-    "risks": ["contamination", "spillage", "container_breakage"],
-    "regulations": ["licensed_water_carriers_only", "quality_inspection"]
+    "risks": [
+      "contamination",
+      "spillage",
+      "container_breakage"
+    ],
+    "regulations": [
+      "licensed_water_carriers_only",
+      "quality_inspection"
+    ]
   },
-  
   "usedBy": [
     {
       "building": "silk_conditioning_house",
@@ -176,7 +230,6 @@
       "notes": "Drinking, cooking, washing"
     }
   ],
-  
   "producedBy": [
     {
       "building": "cistern",
@@ -188,17 +241,32 @@
     {
       "building": "water_purification_house",
       "quantity": 40,
-      "inputs": [{"resource": "rainwater", "quantity": 50}, {"resource": "filtering_minerals", "quantity": 2}],
+      "inputs": [
+        {
+          "resource": "rainwater",
+          "quantity": 50
+        },
+        {
+          "resource": "filtering_minerals",
+          "quantity": 2
+        }
+      ],
       "productionTime": 360
     }
   ],
-  
   "relatedResources": {
-    "complementary": ["cistern_sand", "filtering_minerals"],
-    "substitutes": ["imported_beverages", "wine"],
-    "byproducts": ["waste_water"]
+    "complementary": [
+      "cistern_sand",
+      "filtering_minerals"
+    ],
+    "substitutes": [
+      "imported_beverages",
+      "wine"
+    ],
+    "byproducts": [
+      "waste_water"
+    ]
   },
-  
   "economicEffects": {
     "price_increase": {
       "textile_production_cost": 1.3,
@@ -211,7 +279,6 @@
       "civil_unrest": true
     }
   },
-  
   "regulations": {
     "quality_control": "strict",
     "price_controls": "permanent",
@@ -219,6 +286,5 @@
     "usage_restrictions": "priority_for_essential_uses",
     "cistern_maintenance": "mandatory"
   },
-  
   "historicalNotes": "Venice's unique approach to clean water management arose from necessity. Built on a lagoon with no natural freshwater springs, the city developed an elaborate system of cisterns that filtered and stored rainwater. These cisterns were often placed in the center of public squares (campi), with special paving stones that directed rainwater into a filtering system of sand and gravel before storage in underground chambers. Water carriers (acquaroli) would then distribute this water to homes and businesses, operating under strict guild regulations. During periods of drought, water would be brought in by boat from mainland rivers, though this was expensive and often of questionable quality."
 }

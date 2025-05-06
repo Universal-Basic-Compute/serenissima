@@ -1,0 +1,77 @@
+{
+  "name": "Theater",
+  "category": "Public & Government",
+  "subcategory": "Educational & Cultural",
+  "tier": 2,
+  "size": "Large",
+  "unlockCondition": "12,000,000 ducats, Cultural Guild connection, noble patronage",
+  "calculationsAnalysis": "The Theater balances cultural investment with entertainment revenue. The construction cost of 7,500,000 ducats reflects the specialized architecture and facilities required, while the income of 60,000 ducats (0.8% return) represents ticket sales and patron contributions. The maintenance cost of 45,000 ducats (75% of income) creates a modest profit margin appropriate for a cultural institution with commercial aspects. The employment capacity of 25 represents the performers, stagehands, and administrative staff needed. The construction time of 14 days (1209600000ms) reflects the specialized construction requirements. This building creates a strategic investment in cultural entertainment that enhances city prestige while providing modest returns, reflecting Venice's historically vibrant theatrical tradition that served both artistic and social functions.",
+  "shortDescription": "Entertainment venue for performances, including plays, music, and commedia dell'arte.",
+  "fullDescription": "Enriching Venetian cultural life, theaters provide venues for various performances from sophisticated dramas to popular entertainment. Featuring a stage, audience seating often in multiple tiers, backstage facilities, and sometimes refreshment areas, these buildings serve as important social gathering spaces. Venice's theater tradition blended intellectual content with spectacular staging and music.",
+  "flavorText": "On this stage we hold a mirror to Venice herself—sometimes flattering, sometimes critical, but always revealing truths that might otherwise remain unspoken.",
+  "constructionCosts": {
+    "ducats": 7500000,
+    "timber": 250,
+    "bricks": 400,
+    "stone": 300,
+    "glass": 60,
+    "fabric": 100
+  },
+  "maintenanceCost": 45000,
+  "constructionTime": 1209600000,
+  "incomeGeneration": 60000,
+  "employmentCapacity": 25,
+  "locationRequirements": {
+    "districtRestrictions": "Entertainment districts, cultural centers",
+    "adjacentRequirements": "Public accessibility, suitable acoustics",
+    "environmentalEffects": "Increases cultural activity, creates evening entertainment hub"
+  },
+  "constructionPhase3DPrompt": "Renaissance Venetian theater under construction, cultural entertainment venue, stage area taking shape with performance considerations, tiered seating being constructed in horseshoe arrangement, boxes for nobility being ornately decorated, backstage areas with technical requirements, acoustic design elements being implemented, decorative ceiling with mythological theme in progress, ornate facade showing cultural significance, grand entrance foyer, special effects machinery installation, dressing rooms and preparation areas, isometric game perspective, stylized but detailed, focus on creating space that combines artistic performance with social stratification",
+  "completedBuilding3DPrompt": "Completed Renaissance Venetian theater, elegant cultural venue featuring horseshoe-shaped audience arrangement with multiple tiers, ornate boxes for nobility with privacy curtains, main stage with elaborate backdrop system for scene changes, orchestra area, backstage with scene changing machinery and special effects equipment, richly decorated ceiling with mythological scenes, crystal chandeliers, performance in progress with actors in period costumes, audience of mixed social classes in appropriate sections, refreshment area for intermission, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of cultural importance with social stratification visible in seating arrangements, elaborate architectural details showing artistic investment, atmosphere of Renaissance entertainment combining intellectual and spectacular elements",
+  "gameplayInformation": {
+    "unlocks": [
+      "Cultural Entertainment",
+      "Social Events",
+      "Artistic Performances"
+    ],
+    "specialAbilities": [
+      "Population happiness increase",
+      "Social networking venue",
+      "Cultural advancement"
+    ],
+    "upgradePath": [
+      "Opera House (musical theater integration)"
+    ],
+    "reputationEffects": {
+      "Cultural Elite": 25,
+      "Nobility": 20,
+      "Common Citizens": 15,
+      "Foreign Visitors": 20
+    },
+    "riskFactors": {
+      "fireRisk": "High (candles, fabric scenery)",
+      "reputationRisk": "Medium (controversial performances)",
+      "financialRisk": "Medium (production costs)"
+    }
+  },
+  "soundDesign": {
+    "ambientSound": "Audience murmurs, distant music, seat creaking",
+    "activitySounds": "Dramatic dialogue, applause, scene changes, musical accompaniment",
+    "musicTheme": "Carnevale di Venezia"
+  },
+  "seasonalEffects": {
+    "carnival": "Special performances, masked audiences",
+    "summer": "Open air adaptations, lighter fare",
+    "religious seasons": "Appropriate themed performances"
+  },
+  "aiInteractionPoints": [
+    "Main entrance foyer",
+    "Audience seating",
+    "Noble boxes",
+    "Performance stage",
+    "Backstage area",
+    "Refreshment salon",
+    "Ticket booth",
+    "Performer dressing rooms"
+  ]
+}

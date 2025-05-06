@@ -1,106 +1,166 @@
 {
-    "id": "bricks",
-    "name": "Bricks",
-    "category": "processed_materials",
-    "subcategory": "construction",
-    "baseValue": 8,
-    "weight": 2.5,
-    "volume": 1.0,
-    "stackSize": 50,
-    "description": "Fired clay blocks used for construction throughout Venice.",
-    "longDescription": "Though Venice is famous for its stone palaces, brick is the true workhorse of Venetian construction. Produced in kilns on the mainland and transported to the city, these durable building blocks form the structure of countless buildings, from humble homes to the imposing walls of the Arsenal.",
-    "sprite": "assets/sprites/resources/bricks.png",
-    "icon": "assets/icons/resources/bricks.png",
-    "availableQualities": ["poor", "common", "fine"],
-    "defaultQuality": "common",
-    
-    "processingFacility": "brickworks",
-    "processingTime": 360,
-    "perishable": false,
-    "weatherSensitivity": 0.2,
-    "specialHandling": ["careful_stacking", "moisture_protection_before_use"],
-    "qualityFactors": [
-      {"factor": "input_quality", "weight": 0.5},
-      {"factor": "kiln_quality", "weight": 0.3},
-      {"factor": "worker_skill", "weight": 0.2}
-    ],
-    "varieties": [
-      {
-        "type": "common_brick",
-        "durability": "standard",
-        "value_multiplier": 1.0,
-        "primary_use": "general_construction"
-      },
-      {
-        "type": "facing_brick",
-        "durability": "high",
-        "appearance": "superior",
-        "value_multiplier": 1.4,
-        "primary_use": "visible_exteriors"
-      },
-      {
-        "type": "fire_brick",
-        "durability": "very_high",
-        "heat_resistance": "excellent",
-        "value_multiplier": 1.6,
-        "primary_use": "furnaces_fireplaces"
-      }
-    ],
-    
-    "producedFrom": [
-      {
-        "inputs": [
-          {"resource": "clay", "amount": 20},
-          {"resource": "fuel", "amount": 15}
-        ],
-        "building": "brickworks",
-        "processingTime": 360
-      }
-    ],
-    "usedIn": [
-      {
-        "outputs": [
-          {"resource": "building_materials", "amount": 30}
-        ],
-        "building": "construction_yard",
-        "processingTime": 120
-      },
-      {
-        "outputs": [
-          {"resource": "palazzo", "amount": 1}
-        ],
-        "building": "construction_site",
-        "processingTime": 10080
-      },
-      {
-        "outputs": [
-          {"resource": "glass_foundry", "amount": 1}
-        ],
-        "building": "construction_site",
-        "processingTime": 4320
-      }
-    ],
-    
-    "transportOptions": {
-      "barge": {"capacity": 500, "efficiency": 1.0, "risk": 0.1},
-      "cart": {"capacity": 50, "efficiency": 0.8, "risk": 0.2}
+  "id": "bricks",
+  "name": "Bricks",
+  "category": "processed_materials",
+  "subcategory": "construction",
+  "baseValue": 8,
+  "weight": 2.5,
+  "volume": 1.0,
+  "stackSize": 50,
+  "description": "Fired clay blocks used for construction throughout Venice.",
+  "longDescription": "Though Venice is famous for its stone palaces, brick is the true workhorse of Venetian construction. Produced in kilns on the mainland and transported to the city, these durable building blocks form the structure of countless buildings, from humble homes to the imposing walls of the Arsenal.",
+  "sprite": "assets/sprites/resources/bricks.png",
+  "icon": "/assets/icons/resources/bricks.png",
+  "availableQualities": [
+    "poor",
+    "common",
+    "fine"
+  ],
+  "defaultQuality": "common",
+  "processingFacility": "brickworks",
+  "processingTime": 360,
+  "perishable": false,
+  "weatherSensitivity": 0.2,
+  "specialHandling": [
+    "careful_stacking",
+    "moisture_protection_before_use"
+  ],
+  "qualityFactors": [
+    {
+      "factor": "input_quality",
+      "weight": 0.5
     },
-    "transportRequirements": ["reinforced_vessel", "careful_loading"],
-    "loadingTime": 15,
-    "routeRestrictions": ["weight_limits"],
-    
-    "storageOptions": {
-      "construction_yard": {"capacityMultiplier": 1.0, "preservation": 1.0},
-      "construction_site": {"capacityMultiplier": 0.8, "preservation": 1.0}
+    {
+      "factor": "kiln_quality",
+      "weight": 0.3
     },
-    "storageRequirements": ["covered", "dry_ground"],
-    "specialStorageRisks": ["breakage", "water_damage_before_use"],
-    "maxStorageTime": "unlimited",
-    
-    "marketDemand": "high",
-    "priceFluctuationFactors": [
-      {"factor": "clay_availability", "weight": 0.3},
-      {"factor": "fuel_prices", "weight": 0.2},
-      {"factor": "construction_activity", "weight": 0.5}
-    ]
-  }
+    {
+      "factor": "worker_skill",
+      "weight": 0.2
+    }
+  ],
+  "varieties": [
+    {
+      "type": "common_brick",
+      "durability": "standard",
+      "value_multiplier": 1.0,
+      "primary_use": "general_construction"
+    },
+    {
+      "type": "facing_brick",
+      "durability": "high",
+      "appearance": "superior",
+      "value_multiplier": 1.4,
+      "primary_use": "visible_exteriors"
+    },
+    {
+      "type": "fire_brick",
+      "durability": "very_high",
+      "heat_resistance": "excellent",
+      "value_multiplier": 1.6,
+      "primary_use": "furnaces_fireplaces"
+    }
+  ],
+  "producedFrom": [
+    {
+      "inputs": [
+        {
+          "resource": "clay",
+          "amount": 20
+        },
+        {
+          "resource": "fuel",
+          "amount": 15
+        }
+      ],
+      "building": "brickworks",
+      "processingTime": 360
+    }
+  ],
+  "usedIn": [
+    {
+      "outputs": [
+        {
+          "resource": "building_materials",
+          "amount": 30
+        }
+      ],
+      "building": "construction_yard",
+      "processingTime": 120
+    },
+    {
+      "outputs": [
+        {
+          "resource": "palazzo",
+          "amount": 1
+        }
+      ],
+      "building": "construction_site",
+      "processingTime": 10080
+    },
+    {
+      "outputs": [
+        {
+          "resource": "glass_foundry",
+          "amount": 1
+        }
+      ],
+      "building": "construction_site",
+      "processingTime": 4320
+    }
+  ],
+  "transportOptions": {
+    "barge": {
+      "capacity": 500,
+      "efficiency": 1.0,
+      "risk": 0.1
+    },
+    "cart": {
+      "capacity": 50,
+      "efficiency": 0.8,
+      "risk": 0.2
+    }
+  },
+  "transportRequirements": [
+    "reinforced_vessel",
+    "careful_loading"
+  ],
+  "loadingTime": 15,
+  "routeRestrictions": [
+    "weight_limits"
+  ],
+  "storageOptions": {
+    "construction_yard": {
+      "capacityMultiplier": 1.0,
+      "preservation": 1.0
+    },
+    "construction_site": {
+      "capacityMultiplier": 0.8,
+      "preservation": 1.0
+    }
+  },
+  "storageRequirements": [
+    "covered",
+    "dry_ground"
+  ],
+  "specialStorageRisks": [
+    "breakage",
+    "water_damage_before_use"
+  ],
+  "maxStorageTime": "unlimited",
+  "marketDemand": "high",
+  "priceFluctuationFactors": [
+    {
+      "factor": "clay_availability",
+      "weight": 0.3
+    },
+    {
+      "factor": "fuel_prices",
+      "weight": 0.2
+    },
+    {
+      "factor": "construction_activity",
+      "weight": 0.5
+    }
+  ]
+}

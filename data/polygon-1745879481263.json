@@ -57,5 +57,9 @@
   "englishName": "Street of Life in the District of the Holy Cross",
   "historicalDescription": "A narrow street located in the Santa Croce sestiere, known for its vibrant community and proximity to the Church of San Simeon Piccolo.",
   "nameConfidence": "medium",
-  "areaInSquareMeters": 34143.15
+  "areaInSquareMeters": 34143.15,
+  "center": {
+    "lat": 45.440640557718275,
+    "lng": 12.327903586207727
+  }
 }

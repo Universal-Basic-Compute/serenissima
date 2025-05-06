@@ -1,0 +1,83 @@
+{
+  "name": "Broker's Office",
+  "category": "Commercial",
+  "subcategory": "Trade Facilities",
+  "tier": 2,
+  "size": "Small",
+  "unlockCondition": "10,000,000 ducats capital, Merchant Guild membership",
+  "calculationsAnalysis": "The Broker's Office represents specialized commercial services with modest infrastructure but significant returns. The construction cost of 1,000,000 ducats reflects the secure, professional space required, while the income of 20,000 ducats (2% return) represents the lucrative fees earned from facilitating transactions without inventory costs. The maintenance cost of 7,500 ducats (37.5% of income) creates a healthy profit margin reflecting the low-overhead nature of brokerage. The employment capacity of 4 represents the broker and administrative staff. The construction time of 2 days (172800000ms) reflects the relatively simple construction requirements. This building creates a strategic option for players to participate in trade without direct goods handling, reflecting Venice's sophisticated commercial ecosystem where intermediaries played crucial roles.",
+  "shortDescription": "Specialized office for trade intermediaries who connect buyers with sellers for a commission.",
+  "fullDescription": "The oil that keeps Venice's commercial machinery running smoothly, brokers facilitate transactions without ever taking ownership of goods. These offices feature secure document storage, private meeting rooms for confidential negotiations, and often a public-facing area where potential clients can make inquiries. Brokers specialize by industry or trade route, building networks of connections that make them invaluable intermediaries.",
+  "flavorText": "The shrewd broker sells not silk nor spice nor silver, but something far more valuable: the perfect connection, made at precisely the right moment.",
+  "constructionCosts": {
+    "ducats": 1000000,
+    "timber": 40,
+    "bricks": 100,
+    "stone": 60,
+    "glass": 15
+  },
+  "maintenanceCost": 7500,
+  "constructionTime": 172800000,
+  "incomeGeneration": 20000,
+  "employmentCapacity": 4,
+  "locationRequirements": {
+    "districtRestrictions": "Commercial districts, particularly near Rialto",
+    "adjacentRequirements": "Benefits from proximity to related industry offices",
+    "environmentalEffects": "Increases efficiency of nearby commercial buildings by 5%"
+  },
+  "productionInformation": {
+    "inputResources": {
+      "Market Information": "Constantly updated",
+      "Client Connections": "Network-based resource"
+    },
+    "outputResources": {
+      "Brokerage Commissions": "30-60 ducats per day",
+      "Completed Transactions": "5-15 per day of varying sizes"
+    },
+    "storageCapacity": "Minimal physical storage, extensive document storage"
+  },
+  "constructionPhase3DPrompt": "Renaissance Venetian broker's office under construction, dignified commercial space taking shape, secure document storage areas being built with special attention to security, private meeting room with sound isolation features, public reception area, specialized desk and counter installations for document review and signing, quality materials but understated aesthetic, strategic window placement for light but maintaining privacy, lockable cabinets and document storage being installed, discreet side entrance for private clients, isometric game perspective, stylized but detailed, focus on practical business functionality with subtle status markers",
+  "completedBuilding3DPrompt": "Completed Renaissance Venetian broker's office, refined commercial space with understated elegant facade, discrete business signage, main room with large transaction desk featuring document reviewing space, walls lined with securely locked document cabinets, private meeting room with door closed for confidential negotiations, small waiting area for clients, quality furnishings that convey stability without ostentation, mercantile maps on walls showing trade routes, secure strongbox visible, writing equipment and legal seals arranged precisely, multiple ledgers and contract books, clerk's desk separate from broker's main position, historically accurate but slightly stylized for game aesthetic, isometric game perspective, atmospheric lighting emphasizing the serious business environment, subtle wealth indicators through quality materials rather than decoration, sense of discreet commercial activity",
+  "gameplayInformation": {
+    "unlocks": [
+      "Trade Commissions",
+      "Market Information Network",
+      "Commercial Partnerships"
+    ],
+    "specialAbilities": [
+      "Connection bonus to related industries",
+      "Market price information",
+      "Transaction facilitation without inventory"
+    ],
+    "upgradePath": [
+      "Trading House"
+    ],
+    "reputationEffects": {
+      "Merchant Guild": 15,
+      "Specific Industry Guilds": 10,
+      "Banking Houses": 8
+    },
+    "riskFactors": {
+      "market risk": "Medium (commission-based income fluctuates)",
+      "reputation risk": "High (business relies on trust)",
+      "information security": "Medium (valuable market data)"
+    }
+  },
+  "soundDesign": {
+    "ambientSound": "Quill scratching, muted business discussions, paper handling",
+    "activitySounds": "Contract sealing, coin counting, deal negotiations",
+    "musicTheme": "Diplomazia Veneziana"
+  },
+  "seasonalEffects": {
+    "trading seasons": "Activity levels fluctuate with shipping seasons",
+    "market disruptions": "Particularly busy during price fluctuations or political changes",
+    "end of fiscal periods": "Increased activity during closing periods"
+  },
+  "aiInteractionPoints": [
+    "Main broker's desk",
+    "Private meeting room",
+    "Document review area",
+    "Client waiting space",
+    "Clerk's position"
+  ]
+}

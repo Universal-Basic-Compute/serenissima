@@ -1,0 +1,86 @@
+{
+  "name": "Weighing Station",
+  "category": "Commercial",
+  "subcategory": "Trade Facilities",
+  "tier": 2,
+  "size": "Medium",
+  "unlockCondition": "Government license or 12,000,000 ducats with official connections",
+  "calculationsAnalysis": "The Weighing Station balances government service with modest revenue generation. The construction cost of 1,750,000 ducats reflects the specialized equipment and official infrastructure required, while the income of 22,500 ducats (1.3% return) represents the fees collected for standardized measurements. The maintenance cost of 12,500 ducats (55.6% of income) creates a modest profit margin appropriate for a semi-governmental service. The employment capacity of 8 represents the officials and workers needed to operate measurement equipment and maintain records. The construction time of 3 days (259200000ms) reflects the specialized construction requirements. This building creates a strategic investment in commercial infrastructure that benefits the entire trading system while generating modest direct returns, reflecting Venice's sophisticated approach to standardization and commercial regulation.",
+  "shortDescription": "Official product measurement facility ensuring accurate weights and measures for commerce.",
+  "fullDescription": "Accuracy in commerce was essential to Venice's reputation, and these official stations provided standardized weights and measures for all significant transactions. Featuring precisely calibrated scales, volume measures, and length standards, these government-regulated facilities prevented fraud while collecting small fees for their services. The official certification they provided gave merchants confidence in their transactions.",
+  "flavorText": "A gram too light or an inch too short may seem trivial, until one calculates the difference across a thousand transactions—then one understands why the Republic is so precise in its measures.",
+  "constructionCosts": {
+    "ducats": 1750000,
+    "timber": 60,
+    "bricks": 150,
+    "stone": 100,
+    "glass": 10,
+    "iron": 50
+  },
+  "maintenanceCost": 12500,
+  "constructionTime": 259200000,
+  "incomeGeneration": 22500,
+  "employmentCapacity": 8,
+  "locationRequirements": {
+    "districtRestrictions": "Commercial zones, particularly near markets",
+    "adjacentRequirements": "Requires good access for carts and porters",
+    "environmentalEffects": "Increases efficiency and trust in local commercial transactions"
+  },
+  "productionInformation": {
+    "inputResources": {
+      "Goods for Weighing": "100-200 transactions per day",
+      "Calibration Standards": "Maintained by government"
+    },
+    "outputResources": {
+      "Official Certificates": "100-200 per day",
+      "Measurement Fees": "40-80 ducats per day",
+      "Commercial Dispute Resolution": "5-10 cases per day"
+    },
+    "storageCapacity": "Minimal, primarily equipment storage"
+  },
+  "constructionPhase3DPrompt": "Renaissance Venetian weighing station under construction, official measurement facility, foundation being reinforced for stability and accuracy of scales, specialized equipment installation areas, precision stone platform for large scale being laid perfectly level, separate areas for different measurement types (weight, volume, length), official's office and document area, security features to prevent tampering, equipment calibration area, official symbols of weights and measures being installed, isometric game perspective, stylized but detailed, focus on precision and permanence of construction",
+  "completedBuilding3DPrompt": "Completed Renaissance Venetian weighing station, official measurement facility featuring large central hall with massive precision scale on perfectly level stone platform, smaller scales of various sizes for different goods, standardized volume measures in copper and brass, official length measures inlaid in stone floor, separate booths for specific commodities, official's desk with stamps and certification documents, Republic's seal prominently displayed, weights and measures symbols on exterior, carts and goods waiting to be weighed, clerks recording measurements, bronze standard weights in secure display, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of precision and official authority, activity showing commercial goods being carefully measured, certificate being issued to merchant",
+  "gameplayInformation": {
+    "unlocks": [
+      "Certified Trade Operations",
+      "Dispute Resolution",
+      "Standard Measurement Reference"
+    ],
+    "specialAbilities": [
+      "Fraud prevention",
+      "Commercial dispute resolution",
+      "Quality certification"
+    ],
+    "upgradePath": [
+      "Commercial Regulatory Office"
+    ],
+    "reputationEffects": {
+      "Merchant Guild": 15,
+      "Treasury": 10,
+      "Consumer Trust": 20
+    },
+    "riskFactors": {
+      "corruption risk": "Medium (opportunities for falsification)",
+      "maintenance risk": "High (requires precise calibration)",
+      "throughput risk": "Medium (bottlenecks during busy periods)"
+    }
+  },
+  "soundDesign": {
+    "ambientSound": "Scale mechanisms, official stamps, merchant discussions",
+    "activitySounds": "Weights being placed, goods being positioned, official declarations",
+    "musicTheme": "Rialto Mercante"
+  },
+  "seasonalEffects": {
+    "harvest seasons": "Increased grain and produce weighing",
+    "shipping arrivals": "Peaks of activity following major ship arrivals",
+    "market days": "Extended hours and additional staff"
+  },
+  "aiInteractionPoints": [
+    "Main weighing platform",
+    "Certification desk",
+    "Dispute resolution area",
+    "Smaller scales area",
+    "Queue management position",
+    "Record-keeping office"
+  ]
+}

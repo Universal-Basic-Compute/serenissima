@@ -58,12 +58,16 @@
     }
   ],
   "centroid": {
-    "lat": 45.431044466844625,
-    "lng": 12.32133077717181
+    "lat": 45.431637416560115,
+    "lng": 12.32212230472651
   },
   "historicalName": "Fondamenta degli Ognisanti",
   "englishName": "Foundations of All Saints",
   "historicalDescription": "This area in the Dorsoduro sestiere was known for its proximity to the Church of Ognissanti, a prominent religious landmark dedicated to All Saints. The fondamenta, or walkway along the canal, would have been a busy thoroughfare for locals and visitors alike.",
   "nameConfidence": "high",
-  "areaInSquareMeters": 57477.19
+  "areaInSquareMeters": 57477.19,
+  "center": {
+    "lat": 45.431044466844625,
+    "lng": 12.32133077717181
+  }
 }

@@ -34,12 +34,16 @@
     }
   ],
   "centroid": {
-    "lat": 45.425376706011356,
-    "lng": 12.324271501226841
+    "lat": 45.42463373312022,
+    "lng": 12.324437457873287
   },
   "historicalName": "Fondamenta de le Capuzine",
   "englishName": "Quay of the Capuchin Nuns",
   "historicalDescription": "This area in the Cannaregio sestiere was known for the nearby Convent of the Capuchin Nuns, established in the early 15th century. The fondamenta (quay) likely took its name from this convent.",
   "nameConfidence": "medium",
-  "areaInSquareMeters": 89562.38
+  "areaInSquareMeters": 89562.38,
+  "center": {
+    "lat": 45.425376706011356,
+    "lng": 12.324271501226841
+  }
 }

@@ -33,5 +33,9 @@
   "englishName": "Alley of the Two Courts in the District of St. Mark",
   "historicalDescription": "This narrow alley was located in the heart of the San Marco sestiere, known for its bustling commerce, artisan workshops, and proximity to Piazza San Marco and the Doge's Palace in the 15th century.",
   "nameConfidence": "medium",
-  "areaInSquareMeters": 12536.17
+  "areaInSquareMeters": 12536.17,
+  "center": {
+    "lat": 45.445336995552935,
+    "lng": 12.332917607524406
+  }
 }

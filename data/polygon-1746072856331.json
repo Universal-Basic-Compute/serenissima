@@ -101,5 +101,9 @@
   "historicalName": "Contrada San Polo",
   "englishName": "District of Saint Paul",
   "historicalDescription": "This area was part of the San Polo sestiere, one of the six districts of Venice. It was known for its artisan workshops, particularly those of shoemakers and tanners, as well as the Church of San Polo.",
-  "nameConfidence": "high"
+  "nameConfidence": "high",
+  "center": {
+    "lat": 45.43731375303353,
+    "lng": 12.329916278879844
+  }
 }

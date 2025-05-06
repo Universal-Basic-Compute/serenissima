@@ -26,12 +26,16 @@
     }
   ],
   "centroid": {
-    "lat": 45.43911022760539,
-    "lng": 12.339411855893966
+    "lat": 45.439387257998725,
+    "lng": 12.339467788037126
   },
   "historicalName": "Calle de la Gexia de San Salvador",
   "englishName": "Alley of the Church of San Salvador",
   "historicalDescription": "This narrow street was located in the San Marco sestiere, adjacent to the Church of San Salvador, an important religious site in 15th century Venice. The area was known for its proximity to Piazza San Marco and the bustling mercantile activity in the Rialto district.",
   "nameConfidence": "medium",
-  "areaInSquareMeters": 5565.7
+  "areaInSquareMeters": 5565.7,
+  "center": {
+    "lat": 45.43911022760539,
+    "lng": 12.339411855893966
+  }
 }

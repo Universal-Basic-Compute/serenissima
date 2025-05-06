@@ -4,9 +4,8 @@
   "category": "finished_goods",
   "subcategory": "food",
   "description": "The staple food of Venice, baked fresh daily in neighborhood bakeries. Available in various forms from simple loaves for commoners to fine white bread for wealthy households.",
-  "icon": "icons/resources/bread.png",
+  "icon": "/assets/icons/resources/bread.png",
   "model": "models/resources/bread.glb",
-  
   "base_properties": {
     "base_value": 3,
     "weight": 0.5,
@@ -16,10 +15,14 @@
     "perish_time": 72,
     "nutrition_value": 5
   },
-  
   "market_properties": {
     "luxury_level": 0,
-    "target_customers": ["all_citizens", "households", "taverns", "institutions"],
+    "target_customers": [
+      "all_citizens",
+      "households",
+      "taverns",
+      "institutions"
+    ],
     "fashion_sensitivity": 0.0,
     "export_value_multiplier": 0.8,
     "market_demand": "essential",
@@ -32,7 +35,6 @@
       "winter": 1.1
     }
   },
-  
   "production_properties": {
     "producer_building": "bakery",
     "production_complexity": 3,
@@ -40,28 +42,67 @@
     "production_time": 180,
     "batch_size": 300,
     "inputs": [
-      {"resource": "flour", "amount": 15, "quality_impact": 0.7},
-      {"resource": "water", "amount": 5, "quality_impact": 0.1},
-      {"resource": "salt", "amount": 1, "quality_impact": 0.1},
-      {"resource": "fuel", "amount": 10, "quality_impact": 0.1}
+      {
+        "resource": "flour",
+        "amount": 15,
+        "quality_impact": 0.7
+      },
+      {
+        "resource": "water",
+        "amount": 5,
+        "quality_impact": 0.1
+      },
+      {
+        "resource": "salt",
+        "amount": 1,
+        "quality_impact": 0.1
+      },
+      {
+        "resource": "fuel",
+        "amount": 10,
+        "quality_impact": 0.1
+      }
     ]
   },
-  
   "quality_variations": {
-    "available_qualities": ["poor", "common", "fine"],
+    "available_qualities": [
+      "poor",
+      "common",
+      "fine"
+    ],
     "default_quality": "common",
     "quality_multipliers": {
-      "poor": {"value": 0.7, "nutrition": 0.8, "taste": 0.6},
-      "common": {"value": 1.0, "nutrition": 1.0, "taste": 1.0},
-      "fine": {"value": 1.5, "nutrition": 1.1, "taste": 1.5}
+      "poor": {
+        "value": 0.7,
+        "nutrition": 0.8,
+        "taste": 0.6
+      },
+      "common": {
+        "value": 1.0,
+        "nutrition": 1.0,
+        "taste": 1.0
+      },
+      "fine": {
+        "value": 1.5,
+        "nutrition": 1.1,
+        "taste": 1.5
+      }
     },
     "quality_factors": [
-      {"factor": "input_quality", "weight": 0.5},
-      {"factor": "worker_skill", "weight": 0.3},
-      {"factor": "oven_quality", "weight": 0.2}
+      {
+        "factor": "input_quality",
+        "weight": 0.5
+      },
+      {
+        "factor": "worker_skill",
+        "weight": 0.3
+      },
+      {
+        "factor": "oven_quality",
+        "weight": 0.2
+      }
     ]
   },
-  
   "varieties": [
     {
       "type": "common_loaf",
@@ -96,57 +137,115 @@
       "model_variant": "models/resources/bread_ceremonial.glb"
     }
   ],
-  
   "consumption_properties": {
     "consumption_method": "eating",
     "satiety_value": 4,
-    "health_effects": ["basic_nutrition", "energy"],
-    "consumption_contexts": ["meals", "snacks", "accompaniment"],
+    "health_effects": [
+      "basic_nutrition",
+      "energy"
+    ],
+    "consumption_contexts": [
+      "meals",
+      "snacks",
+      "accompaniment"
+    ],
     "cultural_significance": "essential_staple",
     "daily_consumption_per_person": 0.5
   },
-  
   "usage_properties": {
-    "uses": ["direct_consumption", "meal_component", "charitable_distribution"],
-    "complementary_resources": ["cheese", "wine", "olive_oil", "fish"]
+    "uses": [
+      "direct_consumption",
+      "meal_component",
+      "charitable_distribution"
+    ],
+    "complementary_resources": [
+      "cheese",
+      "wine",
+      "olive_oil",
+      "fish"
+    ]
   },
-  
   "transport_properties": {
     "transport_methods": {
-      "cart": {"capacity": 200, "efficiency": 0.9, "risk": 0.1},
-      "porter": {"capacity": 40, "efficiency": 0.9, "risk": 0.1}
+      "cart": {
+        "capacity": 200,
+        "efficiency": 0.9,
+        "risk": 0.1
+      },
+      "porter": {
+        "capacity": 40,
+        "efficiency": 0.9,
+        "risk": 0.1
+      }
     },
-    "special_requirements": ["clean_handling", "protection_from_crushing"],
+    "special_requirements": [
+      "clean_handling",
+      "protection_from_crushing"
+    ],
     "loading_time": 5,
-    "route_restrictions": ["local_distribution_only"]
+    "route_restrictions": [
+      "local_distribution_only"
+    ]
   },
-  
   "storage_properties": {
     "storage_facilities": {
-      "bakery": {"capacity_multiplier": 1.0, "preservation": 1.0},
-      "market_stall": {"capacity_multiplier": 0.8, "preservation": 0.9},
-      "household": {"capacity_multiplier": 0.5, "preservation": 0.8}
+      "bakery": {
+        "capacity_multiplier": 1.0,
+        "preservation": 1.0
+      },
+      "market_stall": {
+        "capacity_multiplier": 0.8,
+        "preservation": 0.9
+      },
+      "household": {
+        "capacity_multiplier": 0.5,
+        "preservation": 0.8
+      }
     },
-    "storage_requirements": ["dry", "ventilated", "pest_free"],
-    "special_risks": ["mold", "staleness", "pest_infestation"],
+    "storage_requirements": [
+      "dry",
+      "ventilated",
+      "pest_free"
+    ],
+    "special_risks": [
+      "mold",
+      "staleness",
+      "pest_infestation"
+    ],
     "max_storage_time": 72,
     "preservation_methods": [
-      {"method": "toasting", "extension_hours": 24},
-      {"method": "drying", "extension_hours": 168}
+      {
+        "method": "toasting",
+        "extension_hours": 24
+      },
+      {
+        "method": "drying",
+        "extension_hours": 168
+      }
     ]
   },
-  
   "production_chain_position": {
     "predecessors": [
-      {"resource": "flour", "facility": "mill"},
-      {"resource": "water", "facility": "cistern"}
+      {
+        "resource": "flour",
+        "facility": "mill"
+      },
+      {
+        "resource": "water",
+        "facility": "cistern"
+      }
     ],
     "successors": [
-      {"resource": "meals", "facility": "tavern"},
-      {"resource": "consumption", "facility": "household"}
+      {
+        "resource": "meals",
+        "facility": "tavern"
+      },
+      {
+        "resource": "consumption",
+        "facility": "household"
+      }
     ]
   },
-  
   "regulation_properties": {
     "price_ceiling": 4,
     "quality_standards": "enforced",
@@ -154,7 +253,6 @@
     "distribution_controls": "during_shortages",
     "regulatory_body": "Magistrate of Grain"
   },
-  
   "historical_notes": {
     "introduction_year": "ancient",
     "historical_significance": "Bread was so essential to Venetian life that the Republic maintained strict control over grain supplies and bread production. The Magistrate of Grain ensured stable prices and adequate supplies, while neighborhood bakeries were required to produce sufficient quantities at regulated prices. During times of shortage, the government would subsidize bread prices to prevent unrest.",

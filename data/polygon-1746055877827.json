@@ -58,12 +58,16 @@
     }
   ],
   "centroid": {
-    "lat": 45.44243674009472,
-    "lng": 12.332462296493448
+    "lat": 45.44252956074252,
+    "lng": 12.332007069078879
   },
   "historicalName": "Fondamenta del Remèr in Sestiere Dorsoduro",
   "englishName": "Quay of the Oar Maker in Dorsoduro District",
   "historicalDescription": "This area, situated along the Rio de San Barnaba canal in the Dorsoduro sestiere, was known for its concentration of skilled artisans, particularly oar makers who crafted oars for Venice's many gondolas and boats.",
   "nameConfidence": "medium",
-  "areaInSquareMeters": 14900.06
+  "areaInSquareMeters": 14900.06,
+  "center": {
+    "lat": 45.44243674009472,
+    "lng": 12.332462296493448
+  }
 }

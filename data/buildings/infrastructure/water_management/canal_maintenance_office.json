@@ -1,0 +1,74 @@
+{
+  "name": "Canal Maintenance Office",
+  "category": "Infrastructure",
+  "subcategory": "Water Management",
+  "tier": 2,
+  "size": "Medium",
+  "unlockCondition": "Government license only",
+  "calculationsAnalysis": "The Canal Maintenance Office represents essential water management infrastructure with no direct revenue. The construction cost of 2,500,000 ducats reflects the specialized equipment and facilities required, while generating no direct income reflects its public service rather than commercial purpose. The maintenance cost of 40,000 ducats creates a substantial ongoing expense justified by the essential canal maintenance provided. The employment capacity of 20 represents the engineers, dredgers, and maintenance crews needed. The construction time of 7 days (604800000ms) reflects the specialized construction requirements. This building creates a strategic investment in waterway management that prevents sedimentation and maintains Venice's vital canal network, reflecting the historical reality that without constant maintenance, Venice's canals would quickly become unusable, threatening the city's very existence.",
+  "shortDescription": "Administrative and operational center for maintaining Venice's vital canal network.",
+  "fullDescription": "Critical to Venice's survival, canal maintenance offices coordinate the complex work of keeping the city's waterways navigable. Featuring administrative offices, equipment storage, specialized tools, and dredging boats, these facilities support the essential work of removing sediment, repairing canal walls, and maintaining water quality. Without this constant maintenance, Venice's canal network would quickly silt up and become unusable.",
+  "flavorText": "The canals are not merely our streets, but our very foundation—and like any foundation, they require constant attention lest our entire civilization sink into the mud from which it rose.",
+  "constructionCosts": {
+    "ducats": 2500000,
+    "timber": 100,
+    "bricks": 200,
+    "stone": 150,
+    "iron": 50
+  },
+  "maintenanceCost": 40000,
+  "constructionTime": 604800000,
+  "incomeGeneration": 0,
+  "employmentCapacity": 20,
+  "locationRequirements": {
+    "districtRestrictions": "Must have direct canal access, often in industrial areas",
+    "adjacentRequirements": "Deep water access for maintenance boats",
+    "environmentalEffects": "Improves canal water quality and navigability in area"
+  },
+  "constructionPhase3DPrompt": "Renaissance Venetian canal maintenance office under construction, specialized infrastructure facility, administrative building taking shape with offices and planning rooms, equipment storage areas, specialized tool racks, dredging equipment assembly area, maintenance boat dock being constructed, silt processing zone, engineers consulting plans, water testing station installation, records archive for canal conditions, canal cross-section models for planning, isometric game perspective, stylized but detailed, focus on the technical nature of this essential but unglamorous infrastructure service",
+  "completedBuilding3DPrompt": "Completed Renaissance Venetian canal maintenance office, critical infrastructure management facility featuring administrative building with maps and planning tables, equipment storage yard with specialized dredging tools, maintenance boats moored at private dock, workers preparing for canal maintenance operations, silt collection barges, water quality testing station, engineering office with detailed canal system maps on walls, maintenance schedule boards, specialized equipment for measuring water depths, pile driving equipment for canal wall repairs, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of essential but unglamorous urban management, mixture of administrative and practical operation areas, officials in discussion near map table, maintenance crew preparing equipment, carefully organized operation sustaining Venice's fundamental infrastructure",
+  "gameplayInformation": {
+    "unlocks": [
+      "Canal System Maintenance",
+      "Navigation Improvements",
+      "Flood Prevention"
+    ],
+    "specialAbilities": [
+      "Prevents canal degradation",
+      "Improves water quality",
+      "Maintains transportation network"
+    ],
+    "upgradePath": [
+      "Advanced Water Management Office (expanded capabilities)"
+    ],
+    "reputationEffects": {
+      "Senate": 15,
+      "Transportation Guild": 20,
+      "Engineers": 20,
+      "Citizens": 10
+    },
+    "riskFactors": {
+      "fundingRisk": "Medium (dependent on public budget)",
+      "sedimentationRisk": "High (constant natural process)",
+      "coordinationRisk": "Medium (complex scheduling requirements)"
+    }
+  },
+  "soundDesign": {
+    "ambientSound": "Administrative discussions, boat engines, equipment preparation",
+    "activitySounds": "Dredging operations, maintenance planning, water testing",
+    "musicTheme": "Acque Alte"
+  },
+  "seasonalEffects": {
+    "low tide": "Intensive maintenance operations, exposed canal walls",
+    "high water": "Emergency response operations, preventative measures",
+    "summer": "Algae control, tourist season preparations"
+  },
+  "aiInteractionPoints": [
+    "Administration office",
+    "Map planning room",
+    "Equipment yard",
+    "Maintenance boat dock",
+    "Dredging operation staging area",
+    "Water quality testing station"
+  ]
+}

@@ -22,12 +22,16 @@
     }
   ],
   "centroid": {
-    "lat": 45.43810621533953,
-    "lng": 12.340252195199714
+    "lat": 45.43800987246367,
+    "lng": 12.34020716208281
   },
   "historicalName": "Calle del Dose, Sestiere di San Marco",
   "englishName": "Alley of the Doge, District of St. Mark",
   "historicalDescription": "This alley was located in the sestiere of San Marco, near the political and religious heart of 15th century Venice. The Doge's Palace and St. Mark's Basilica were prominent landmarks in this district.",
   "nameConfidence": "medium",
-  "areaInSquareMeters": 5759.32
+  "areaInSquareMeters": 5759.32,
+  "center": {
+    "lat": 45.43810621533953,
+    "lng": 12.340252195199714
+  }
 }

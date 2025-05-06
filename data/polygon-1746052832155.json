@@ -33,5 +33,9 @@
   "englishName": "Walkway of Saint Gerard Sagredo",
   "historicalDescription": "This area in the Cannaregio sestiere was known for its proximity to the Church of San Gerardo Sagredo, dedicated to the 11th-century Venetian saint. The fondamenta, or walkway, along the nearby canal was named after this church.",
   "nameConfidence": "medium",
-  "areaInSquareMeters": 20373.99
+  "areaInSquareMeters": 20373.99,
+  "center": {
+    "lat": 45.42570675741067,
+    "lng": 12.312138635470333
+  }
 }

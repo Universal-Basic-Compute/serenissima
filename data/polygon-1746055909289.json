@@ -53,5 +53,9 @@
   "englishName": "Salamon Street in the Cannaregio District, near the Church of Saint Mary of Miracles",
   "historicalDescription": "This area in the Cannaregio sestiere was known for its Jewish population in the 15th century, as it bordered the Jewish Ghetto. The nearby Church of Santa Maria dei Miracoli, built in the late 15th century, was a popular pilgrimage site.",
   "nameConfidence": "medium",
-  "areaInSquareMeters": 14369.22
+  "areaInSquareMeters": 14369.22,
+  "center": {
+    "lat": 45.44242813002662,
+    "lng": 12.333846692599792
+  }
 }

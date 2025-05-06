@@ -25,5 +25,9 @@
   "englishName": "Oven Street in the Cannaregio District",
   "historicalDescription": "A small street known for its bakeries and located in the Cannaregio sestiere, not far from the Chiesa della Madonna dell'Orto.",
   "nameConfidence": "medium",
-  "areaInSquareMeters": 22235.09
+  "areaInSquareMeters": 22235.09,
+  "center": {
+    "lat": 45.425502446911246,
+    "lng": 12.32760782892889
+  }
 }

@@ -38,12 +38,16 @@
     }
   ],
   "centroid": {
-    "lat": 45.43457604384116,
-    "lng": 12.343283792634884
+    "lat": 45.434831146996245,
+    "lng": 12.34323721501989
   },
   "historicalName": "Campo San Zaccaria",
   "englishName": "Saint Zechariah Square",
   "historicalDescription": "This campo was located in the sestiere of Castello, near the Chiesa di San Zaccaria, a 15th-century church dedicated to St. Zechariah. The church and square were important landmarks in Venice during this period.",
   "nameConfidence": "high",
-  "areaInSquareMeters": 32252.72
+  "areaInSquareMeters": 32252.72,
+  "center": {
+    "lat": 45.43457604384116,
+    "lng": 12.343283792634884
+  }
 }

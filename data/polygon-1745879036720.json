@@ -62,12 +62,16 @@
     }
   ],
   "centroid": {
-    "lat": 45.43118239703004,
-    "lng": 12.325575847550898
+    "lat": 45.43156880851179,
+    "lng": 12.32549291067542
   },
   "historicalName": "Ponte de le Maravegie, San Polo",
   "englishName": "Bridge of Wonders, San Polo",
   "historicalDescription": "A bridge in the San Polo sestiere, known for its artisan workshops and proximity to the Rialto market during the 15th century.",
   "nameConfidence": "medium",
-  "areaInSquareMeters": 33241.63
+  "areaInSquareMeters": 33241.63,
+  "center": {
+    "lat": 45.43118239703004,
+    "lng": 12.325575847550898
+  }
 }

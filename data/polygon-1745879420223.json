@@ -38,12 +38,16 @@
     }
   ],
   "centroid": {
-    "lat": 45.43540950167617,
-    "lng": 12.325718729489502
+    "lat": 45.43532272170534,
+    "lng": 12.325636804062974
   },
   "historicalName": "Sestiere di Dorsoduro, presso la Chiesa di San Sebastiano",
   "englishName": "Dorsoduro District, near the Church of San Sebastiano",
   "historicalDescription": "This area in the Dorsoduro sestiere was known for its proximity to the Church of San Sebastiano, which was consecrated in 1468 and housed paintings by renowned Renaissance artist Paolo Veronese.",
   "nameConfidence": "medium",
-  "areaInSquareMeters": 26324.79
+  "areaInSquareMeters": 26324.79,
+  "center": {
+    "lat": 45.43540950167617,
+    "lng": 12.325718729489502
+  }
 }

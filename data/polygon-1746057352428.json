@@ -58,12 +58,16 @@
     }
   ],
   "centroid": {
-    "lat": 45.43157252454341,
-    "lng": 12.354456343167072
+    "lat": 45.431957444754104,
+    "lng": 12.35443795258632
   },
   "historicalName": "Calle San Domenego en Sestier de Castello",
   "englishName": "Saint Dominic Street in the Castello District",
   "historicalDescription": "This area in the Castello sestiere was known for the Church of San Domenico, a Dominican church and monastery established in the 13th century. The nearby Rio di San Domenico canal was also named after this church.",
   "nameConfidence": "high",
-  "areaInSquareMeters": 143199.9
+  "areaInSquareMeters": 143199.9,
+  "center": {
+    "lat": 45.43157252454341,
+    "lng": 12.354456343167072
+  }
 }

@@ -49,5 +49,9 @@
   "historicalName": "Calle de la Regina presso Santa Maria Formosa",
   "englishName": "Street of the Queen near Saint Mary Formosa",
   "historicalDescription": "This area in the sestiere of Castello was known for its proximity to the Church of Santa Maria Formosa, one of the oldest churches in Venice dating back to the 7th century. The street name likely referred to a prominent woman or queen associated with the area.",
-  "nameConfidence": "medium"
+  "nameConfidence": "medium",
+  "center": {
+    "lat": 45.43962407590167,
+    "lng": 12.331146687294936
+  }
 }

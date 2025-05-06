@@ -1,0 +1,70 @@
+{
+  "name": "Public Dock",
+  "category": "Infrastructure",
+  "subcategory": "Transportation Facilities",
+  "tier": 1,
+  "size": "Medium",
+  "unlockCondition": "Waterfront property, 2,000,000 ducats capital",
+  "calculationsAnalysis": "The Public Dock's economic values balance infrastructure investment with modest returns. The construction cost of 1,000,000 ducats represents the substantial stonework required for water-resistant structures, while the income of 12,000 ducats (1.2% return) reflects the small fees collected from users. The maintenance cost of 15,000 ducats exceeds income, creating a realistic scenario where essential infrastructure requires subsidy but provides indirect benefits through increased connectivity and property values. This encourages players to build docks strategically rather than as direct revenue sources, mirroring Venice's historical approach to public infrastructure.",
+  "shortDescription": "Common-use water access point for boats, goods transfer, and public transportation.",
+  "fullDescription": "Essential to city mobility, public docks provide communal water access points throughout Venice's extensive canal system. Featuring mooring posts, loading areas, and often covered waiting spaces, these facilities form the backbone of the city's transportation network. Regular maintenance is required due to water damage and heavy usage from boats, goods, and pedestrian traffic.",
+  "flavorText": "The dock is Venice's true piazza—where goods and gossip flow equally, where the boatman knows more of city affairs than any senator.",
+  "constructionCosts": {
+    "ducats": 1000000,
+    "timber": 100,
+    "stone": 150,
+    "iron": 20
+  },
+  "maintenanceCost": 15000,
+  "constructionTime": 259200000,
+  "incomeGeneration": 12000,
+  "employmentCapacity": 2,
+  "locationRequirements": {
+    "districtRestrictions": "Must be built on canal or lagoon frontage",
+    "adjacentRequirements": "Water depth sufficient for boat access",
+    "environmentalEffects": "Increases foot traffic, moderate noise, water traffic congregation"
+  },
+  "constructionPhase3DPrompt": "Renaissance Venetian public dock under construction, wooden and stone structure extending into canal, foundation pilings being driven into lagoon floor, stone steps leading to water partially completed, mooring posts (paline) being installed with distinctive spiral paint pattern, loading platform taking shape, simple roof structure for waiting area, workers carefully fitting stone blocks at water level, specialized marine construction techniques, building materials arriving by boat, isometric game perspective, stylized but detailed, focus on the intersection of land and water infrastructure",
+  "completedBuilding3DPrompt": "Completed Renaissance Venetian public dock, functional waterfront infrastructure featuring wide stone steps descending to water level, wooden landing platform extending into canal, multiple mooring posts (paline) with traditional striped spiral patterns, small covered waiting area with bench, pulley system for unloading heavier goods, stone bollards for securing boats, mild wear from regular use, historically accurate but slightly stylized for game aesthetic, isometric game perspective, gondolas and small boats moored at different heights depending on tide, people waiting for water transport, porters moving goods, sense of bustling water-based transportation hub, modest but essential infrastructure with well-worn stone showing regular use, water lapping against structure",
+  "gameplayInformation": {
+    "unlocks": [
+      "Water Transportation Network",
+      "Goods Transfer Point"
+    ],
+    "specialAbilities": [
+      "Public transportation access",
+      "Loading/unloading point for goods",
+      "Neighborhood connectivity"
+    ],
+    "upgradePath": [
+      "Expanded Public Dock with additional services"
+    ],
+    "reputationEffects": {
+      "Local Neighborhood": 10,
+      "Transportation Guild": 8,
+      "Merchants": 10
+    },
+    "riskFactors": {
+      "floodRisk": "High (direct water exposure)",
+      "maintenanceRisk": "High (water damage)",
+      "congestionRisk": "Medium (potential bottlenecks)"
+    }
+  },
+  "soundDesign": {
+    "ambientSound": "Water lapping against stone, boats knocking against moorings",
+    "activitySounds": "Boat arrivals and departures, loading/unloading, passenger conversations",
+    "musicTheme": "Acque Alte"
+  },
+  "seasonalEffects": {
+    "acqua alta": "Partially submerged during high water events",
+    "fog": "Lanterns lit, slower boat traffic",
+    "summer": "Increased passenger volume, sunshades deployed"
+  },
+  "aiInteractionPoints": [
+    "Boat mooring area",
+    "Waiting shelter",
+    "Goods transfer platform",
+    "Steps to water",
+    "Dockmaster's position"
+  ]
+}

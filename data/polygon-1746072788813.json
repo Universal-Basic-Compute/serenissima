@@ -69,5 +69,9 @@
   "historicalName": "Salizada San Stae, Sestiere di Santa Croce",
   "englishName": "Salizada San Stae, District of Santa Croce",
   "historicalDescription": "This area was part of the Santa Croce sestiere, known for its artisan workshops and proximity to the Grand Canal. The nearby Chiesa di San Stae, a church dedicated to Saint Eustachius, dates back to the 11th century.",
-  "nameConfidence": "medium"
+  "nameConfidence": "medium",
+  "center": {
+    "lat": 45.440684952448485,
+    "lng": 12.329845639787857
+  }
 }

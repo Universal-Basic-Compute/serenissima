@@ -1,0 +1,92 @@
+{
+  "name": "Glassblower Workshop",
+  "category": "Production",
+  "subcategory": "Glass Industry",
+  "tier": 2,
+  "size": "Medium",
+  "unlockCondition": "5,000,000 ducats capital, Glass Guild membership, Murano location",
+  "calculationsAnalysis": "The Glassblower Workshop represents specialized artistic production with substantial returns. The construction cost of 1,500,000 ducats reflects the specialized equipment and facilities required, while the income of 30,000 ducats (2% return) represents the high-value artistic glass pieces produced. The maintenance cost of 20,000 ducats (66.7% of income) creates a reasonable profit margin appropriate for luxury crafts. The employment capacity of 6 represents the master glassblower, apprentices, and assistants needed. The construction time of 4 days (345600000ms) reflects the specialized construction requirements. This building creates a strategic investment in luxury production with appropriate guild and location requirements reflecting the historical importance of Murano glass to Venice's luxury exports, where artistic glassblowing represented the perfect combination of technical skill and artistic creativity that made Venetian products famous throughout Europe.",
+  "shortDescription": "Specialized facility where skilled artisans shape molten glass into fine objects and art pieces.",
+  "fullDescription": "The creative heart of Venice's famed glass industry, these workshops transform molten glass from foundries into exquisite finished pieces. Featuring glassblowing stations with specialized tools, annealing ovens for controlled cooling, and display areas for completed works, these facilities combine industrial process with artistic creativity. Master glassblowers command tremendous respect for their skill in manipulating this challenging material.",
+  "flavorText": "Between the breath of the master and the heat of the furnace, ordinary sand is transformed into objects of such delicacy that they appear to defy the very nature of matter itself.",
+  "constructionCosts": {
+    "ducats": 1500000,
+    "timber": 60,
+    "bricks": 150,
+    "stone": 80,
+    "iron": 40
+  },
+  "maintenanceCost": 20000,
+  "constructionTime": 345600000,
+  "incomeGeneration": 30000,
+  "employmentCapacity": 6,
+  "productionInformation": {
+    "inputResources": {
+      "Molten Glass": 15,
+      "Colorants": 3,
+      "Fuel": 10,
+      "Gold Leaf": 0.5
+    },
+    "outputResources": {
+      "Fine Glassware": 20,
+      "Decorative Glass": 10,
+      "Specialty Glass": 5
+    },
+    "productionRate": "Daily production with cooling time",
+    "storageCapacity": {
+      "moltenGlass": 30,
+      "finishedGoods": 100
+    }
+  },
+  "locationRequirements": {
+    "districtRestrictions": "Must be built on Murano Island only",
+    "adjacentRequirements": "Benefits from proximity to Glass Foundry",
+    "environmentalEffects": "Increases area prestige, slight heat pollution"
+  },
+  "constructionPhase3DPrompt": "Renaissance Venetian glassblower workshop under construction on Murano, specialized artisan facility, workstations being installed with glassblowing benches, glory holes (reheating openings) being constructed, annealing ovens for controlled cooling taking shape, tool storage and specialized equipment areas, master's demonstration platform, apprentice stations, marver tables for shaping glass, design area with pattern books, ventilation systems for worker comfort, preparing display area for finished works, isometric game perspective, stylized but detailed, focus on specialized equipment for this prestigious craft",
+  "completedBuilding3DPrompt": "Completed Renaissance Venetian glassblower workshop on Murano, specialized artistic production facility, central area features master glassblower working with molten gather on blowpipe, skilled manipulation of glowing orange glass visible, multiple workstations with glory holes for reheating, marver tables for rolling glass, wooden shaping tools, apprentices assisting or working on simpler pieces, finished works cooling slowly in annealing ovens, display area showing exquisite completed pieces, pattern books and design sketches, specialized tools hung precisely, historically accurate but slightly stylized for game aesthetic, isometric game perspective, dramatic lighting from molten glass and glory holes, sense of artistic precision and ancient craft, quality finished pieces catching light, atmosphere combining intense heat and artistic refinement",
+  "gameplayInformation": {
+    "unlocks": [
+      "Luxury Glass Production",
+      "Artistic Commissions",
+      "Export-Quality Goods"
+    ],
+    "specialAbilities": [
+      "Create custom designs",
+      "Fulfill noble commissions",
+      "Train master glassblowers"
+    ],
+    "upgradePath": [
+      "Master Glassblower Studio (highest quality, signature pieces)"
+    ],
+    "reputationEffects": {
+      "Glass Guild": 20,
+      "Nobility": 15,
+      "Luxury Merchants": 20,
+      "Foreign Traders": 15
+    },
+    "riskFactors": {
+      "fireRisk": "High (constant high heat)",
+      "injuryRisk": "High (dangerous materials)",
+      "secretRisk": "High (industrial espionage for techniques)"
+    }
+  },
+  "soundDesign": {
+    "ambientSound": "Glass being heated, gentle blowing, tools on hot glass",
+    "activitySounds": "Master giving instructions, glass cracking when flawed, cooling sounds",
+    "musicTheme": "Arsenale in Movimento"
+  },
+  "seasonalEffects": {
+    "summer": "More difficult working conditions due to heat",
+    "carnival": "Special mask-themed glass pieces",
+    "diplomatic season": "Focus on prestigious gift pieces for foreign dignitaries"
+  },
+  "aiInteractionPoints": [
+    "Master's workstation",
+    "Apprentice stations",
+    "Design area",
+    "Cooling ovens",
+    "Display area for finished works",
+    "Customer commission desk"
+  ]
+}

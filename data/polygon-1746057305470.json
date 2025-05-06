@@ -42,12 +42,16 @@
     }
   ],
   "centroid": {
-    "lat": 45.43353227509495,
-    "lng": 12.357257016987134
+    "lat": 45.43385552090135,
+    "lng": 12.357367115868515
   },
   "historicalName": "Calle San Zulian, Sestiere di San Marco",
   "englishName": "Saint Julian Street, District of Saint Mark",
   "historicalDescription": "This street was located in the central San Marco sestiere, known for its proximity to Piazza San Marco, the political and religious heart of 15th century Venice. The street likely took its name from the nearby Church of San Zulian.",
   "nameConfidence": "high",
-  "areaInSquareMeters": 20007.6
+  "areaInSquareMeters": 20007.6,
+  "center": {
+    "lat": 45.43353227509495,
+    "lng": 12.357257016987134
+  }
 }

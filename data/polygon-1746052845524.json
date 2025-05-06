@@ -34,12 +34,16 @@
     }
   ],
   "centroid": {
-    "lat": 45.42678716916514,
-    "lng": 12.309551913421277
+    "lat": 45.42692281393109,
+    "lng": 12.309313822342816
   },
   "historicalName": "Campo de la Celestia",
   "englishName": "Field of the Celestia",
   "historicalDescription": "This area was known for the Church of Santa Maria della Celestia, a Catholic church built in the 14th century. The church was an important landmark in the sestiere of Castello.",
   "nameConfidence": "medium",
-  "areaInSquareMeters": 40010.16
+  "areaInSquareMeters": 40010.16,
+  "center": {
+    "lat": 45.42678716916514,
+    "lng": 12.309551913421277
+  }
 }

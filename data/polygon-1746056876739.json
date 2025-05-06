@@ -174,12 +174,20 @@
     }
   ],
   "centroid": {
-    "lat": 45.4336739114723,
-    "lng": 12.338038314124612
+    "lat": 45.43443479993373,
+    "lng": 12.337633214107097
   },
   "historicalName": "Ponte dei Dai in Sestiere Cannaregio",
   "englishName": "Bridge of the Dai in Cannaregio District",
   "historicalDescription": "A bridge in the Cannaregio sestiere, near the Church of Santa Maria dei Miracoli. The area was known for its artisan workshops and proximity to the Jewish Ghetto.",
   "nameConfidence": "medium",
-  "areaInSquareMeters": 125831.07
+  "areaInSquareMeters": 125831.07,
+  "center": {
+    "lat": 45.4336739114723,
+    "lng": 12.338038314124612
+  },
+  "coatOfArmsCenter": {
+    "lat": 45.437002597109824,
+    "lng": 12.331469226085867
+  }
 }

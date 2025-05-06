@@ -1,0 +1,88 @@
+{
+  "name": "Customs House",
+  "category": "Commercial",
+  "subcategory": "Trade Facilities",
+  "tier": 3,
+  "size": "Large",
+  "unlockCondition": "Senate appointment only",
+  "calculationsAnalysis": "The Customs House represents the intersection of government authority and commercial regulation. The construction cost of 4,000,000 ducats reflects the substantial secure infrastructure required, while the high income of 100,000 ducats (2.5% return) represents the significant tax revenue generated through import/export duties. The maintenance cost of 25,000 ducats (25% of income) creates a substantial profit margin appropriate for a revenue-generating government institution. The employment capacity of 30 represents the officials, guards, and clerks needed to process goods and collect duties. The construction time of 7 days (604800000ms) reflects the substantial construction requirements. This building creates a strategic investment in government infrastructure with appropriate high-level requirements reflecting the political nature of customs control in Renaissance Venice.",
+  "shortDescription": "Official goods inspection and taxation facility operated under government authority.",
+  "fullDescription": "The gateway through which all legal goods must pass, the customs house combines administrative offices, inspection facilities, and secure storage. Government officials carefully record imported and exported goods, calculate appropriate taxes, and inspect for contraband. These imposing buildings represent Venice's strict commercial regulations, which helped maintain quality standards while generating substantial revenue for the Republic.",
+  "flavorText": "Through these doors pass the riches of the world—and a healthy portion remains behind for the glory of the Serenissima.",
+  "constructionCosts": {
+    "ducats": 4000000,
+    "timber": 150,
+    "bricks": 400,
+    "stone": 300,
+    "glass": 40,
+    "marble": 30
+  },
+  "maintenanceCost": 25000,
+  "constructionTime": 604800000,
+  "incomeGeneration": 100000,
+  "employmentCapacity": 30,
+  "locationRequirements": {
+    "districtRestrictions": "Must be positioned at key harbor entrance points",
+    "adjacentRequirements": "Requires direct deep water access for ships",
+    "environmentalEffects": "Decreases illegal trade in area, increases formal commercial activity"
+  },
+  "productionInformation": {
+    "inputResources": {
+      "Imported Goods": "200-500 units per day for inspection",
+      "Exported Goods": "150-400 units per day for inspection"
+    },
+    "outputResources": {
+      "Tax Revenue": "150-300 ducats per day to state treasury",
+      "Inspection Certificates": "100-200 per day",
+      "Trade Data": "Valuable market intelligence"
+    },
+    "storageCapacity": 400
+  },
+  "constructionPhase3DPrompt": "Renaissance Venetian customs house under construction, official government building with imposing facade, substantial harbor-side foundation work, large-scale secure warehousing areas being built, official inspection halls with specialized lighting, offices for customs officials, secure document repositories, strong room for tax collection, multiple inspection stations taking shape, official architectural elements including state symbols, government oversight of construction visible, higher construction standards than commercial buildings, fortified elements for security, deep water docking facilities under construction, isometric game perspective, stylized but detailed, sense of government authority and permanence",
+  "completedBuilding3DPrompt": "Completed Renaissance Venetian customs house, imposing official building at harbor entrance, grand stone facade featuring Lion of St. Mark and government symbols, multiple inspection halls with specialized tables for opening and examining crates, separate areas for different types of goods, official's offices with view of operations, secure counting rooms for tax collection, armed guards at strategic positions, large harbor-facing doors allowing direct unloading from ships, official scales and measuring equipment, document office with clerks recording all transactions, separate entrances for merchants and officials, inspection stamps and seals visible, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of official authority and oversight, uniformed customs officials examining goods, merchants waiting for clearance, activity showing the blend of bureaucracy and commerce",
+  "gameplayInformation": {
+    "unlocks": [
+      "Legal Import/Export Operations",
+      "Government Revenue Stream",
+      "Official Trade Data"
+    ],
+    "specialAbilities": [
+      "Tax collection",
+      "Contraband seizure",
+      "Market regulation enforcement"
+    ],
+    "upgradePath": [
+      "Commercial Magistracy"
+    ],
+    "reputationEffects": {
+      "Senate": 20,
+      "Treasury": 25,
+      "Merchant Guild": 10,
+      "Smugglers": -30
+    },
+    "riskFactors": {
+      "corruption risk": "Medium (valuable position for bribes)",
+      "security risk": "Low (well-guarded)",
+      "efficiency risk": "Medium (bureaucratic delays)"
+    }
+  },
+  "soundDesign": {
+    "ambientSound": "Official stamps and seals, clerks calling next in line, harbor sounds",
+    "activitySounds": "Crates being opened for inspection, official declarations, tax calculations",
+    "musicTheme": "Processione Ducale"
+  },
+  "seasonalEffects": {
+    "shipping seasons": "Dramatically increased activity during peak seasons",
+    "trade fairs": "Special procedures and extended hours",
+    "diplomatic tensions": "Increased scrutiny of certain nation's goods"
+  },
+  "aiInteractionPoints": [
+    "Main inspection hall",
+    "Document processing office",
+    "Tax payment window",
+    "Merchant waiting area",
+    "Official's offices",
+    "Harbor inspection point",
+    "Security checkpoint"
+  ]
+}

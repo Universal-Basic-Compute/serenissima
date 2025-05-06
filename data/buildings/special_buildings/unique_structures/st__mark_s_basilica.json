@@ -1,0 +1,78 @@
+{
+  "name": "St. Mark's Basilica",
+  "category": "Special Buildings",
+  "subcategory": "Unique Structures",
+  "tier": 5,
+  "size": "Extra Large",
+  "unlockCondition": "Religious structure only, not privately constructable",
+  "calculationsAnalysis": "St. Mark's Basilica represents the ultimate religious structure with extraordinary artistic and spiritual significance. The construction cost of 60,000,000 ducats reflects the unparalleled architectural complexity and precious materials, while the income of 75,000 ducats (0.125% return) represents donations, religious tourism, and ceremonial fees. The maintenance cost of 200,000 ducats still far exceeds income, creating a realistic scenario where the state's primary religious building required substantial ongoing support. The employment capacity of 60 represents the clergy, guards, and maintenance staff. The construction time of 120 days (10368000000ms) reflects the monumental construction and artistic project. This unique building serves as the spiritual center of Venice with appropriate restrictions preventing private construction, reflecting the historical reality of this singular structure that embodied the Republic's religious identity.",
+  "shortDescription": "Primary cathedral of Venice combining religious significance with state symbolism.",
+  "fullDescription": "The spiritual center of Venice, St. Mark's Basilica (Basilica di San Marco) serves as both religious cathedral and state church. Featuring Byzantine-influenced architecture, spectacular golden mosaics, the famous quadriga horses, and St. Mark's relics, this magnificent structure blends Eastern and Western traditions. As the Doge's personal chapel and venue for state ceremonies, it represents the fusion of religious and political authority in Venetian governance.",
+  "flavorText": "Gold above, marble below, and centuries of prayer in between—this basilica stands not merely as a church, but as Venice's spiritual foundation and the treasure house of her most sacred relics and memories.",
+  "constructionCosts": {
+    "ducats": 60000000,
+    "timber": 400,
+    "bricks": 1000,
+    "stone": 2000,
+    "glass": 400,
+    "marble": 800,
+    "gold": 200
+  },
+  "maintenanceCost": 200000,
+  "constructionTime": 10368000000,
+  "incomeGeneration": 75000,
+  "employmentCapacity": 60,
+  "locationRequirements": {
+    "districtRestrictions": "San Marco district only, adjacent to Doge's Palace",
+    "adjacentRequirements": "Piazza frontage, campanile proximity",
+    "environmentalEffects": "Religious center, creates spiritual focal point, pilgrimage destination"
+  },
+  "constructionPhase3DPrompt": "Renaissance Venetian St. Mark's Basilica under construction, magnificent religious structure, Byzantine-influenced architecture taking shape, multiple domes with supporting structures, ornate facade design with marble inlay work, interior scaffolding where master craftsmen apply gold mosaics, marble column installation from Eastern sources, reliquary areas being prepared with security features, baptistery construction, connection to Doge's Palace, specially reinforced areas for golden altarpiece (Pala d'Oro), skilled artisans creating intricate decorative elements, isometric game perspective, stylized but detailed, sense of creating otherworldly spiritual space that also projects Venetian state power",
+  "completedBuilding3DPrompt": "Completed Renaissance Venetian St. Mark's Basilica, breathtaking cathedral featuring distinctive Byzantine-influenced architecture with five domes, ornate facade with marble, columns, and sculptures, famous quadriga horses above entrance, interior glowing with golden mosaics depicting biblical and Venetian scenes, central area where St. Mark's relics are housed, Pala d'Oro golden altarpiece studded with gems, baptistery with ancient decoration, treasury filled with Venetian plunder from Constantinople, connection to Doge's Palace symbolizing church-state relationship, priests conducting services, pilgrims visiting sacred relics, state ceremonies with Doge participating, historically accurate but slightly stylized for game aesthetic, isometric game perspective, atmosphere of divine splendor combined with state power, perfect fusion of Eastern and Western traditions, golden light filtering through windows, sense of spiritual authority and material magnificence supporting each other",
+  "gameplayInformation": {
+    "unlocks": [
+      "State Religion",
+      "Pilgrimage Destination",
+      "Ceremonial Center"
+    ],
+    "specialAbilities": [
+      "Religious authority",
+      "State ceremonies",
+      "Divine protection"
+    ],
+    "upgradePath": [
+      "None - unique historical structure"
+    ],
+    "reputationEffects": {
+      "Church": 50,
+      "Government": 40,
+      "Citizens": 40,
+      "Foreign Visitors": 40
+    },
+    "riskFactors": {
+      "fireRisk": "Medium (despite sacred protection)",
+      "theftRisk": "High (valuable treasures)",
+      "floodRisk": "High (ground level, despite precautions)"
+    }
+  },
+  "soundDesign": {
+    "ambientSound": "Gregorian chants, echoing prayers, reverent whispers",
+    "activitySounds": "Religious ceremonies, choir performances, state processions",
+    "musicTheme": "Gloria di San Marco"
+  },
+  "seasonalEffects": {
+    "major religious festivals": "Spectacular ceremonies, special displays",
+    "state ceremonies": "Doge's participation, political-religious events",
+    "holy days": "Enhanced decorations, increased pilgrim visits"
+  },
+  "aiInteractionPoints": [
+    "Main Sanctuary",
+    "Reliquary of St. Mark",
+    "Golden Altarpiece",
+    "Baptistery",
+    "Treasury",
+    "Doge's Ceremonial Area",
+    "Prayer Spaces",
+    "Tourist Viewing Areas"
+  ]
+}

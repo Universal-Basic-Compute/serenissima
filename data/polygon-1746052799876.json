@@ -25,5 +25,9 @@
   "englishName": "District of Giudecca",
   "historicalDescription": "In the 15th century, Giudecca was a separate island from the main part of Venice, known for its gardens, vineyards, and convents. It was a quieter, more rural area compared to the dense central sestieri of Venice.",
   "nameConfidence": "medium",
-  "areaInSquareMeters": 43063.26
+  "areaInSquareMeters": 43063.26,
+  "center": {
+    "lat": 45.42700186403998,
+    "lng": 12.318823594405117
+  }
 }

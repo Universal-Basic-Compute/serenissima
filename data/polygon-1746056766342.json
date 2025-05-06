@@ -26,12 +26,16 @@
     }
   ],
   "centroid": {
-    "lat": 45.43200179413452,
-    "lng": 12.332972451887564
+    "lat": 45.43252318689833,
+    "lng": 12.332966237642806
   },
   "historicalName": "Campiello de la Feltrina in Contrà San Moisè",
   "englishName": "Little Square of the Feltrina in the San Moisè District",
   "historicalDescription": "This small square was likely named after a felt workshop or merchant in the San Marco sestiere, near the Church of San Moisè. The area was known for its artisan workshops and proximity to Piazza San Marco.",
   "nameConfidence": "medium",
-  "areaInSquareMeters": 12205.86
+  "areaInSquareMeters": 12205.86,
+  "center": {
+    "lat": 45.43200179413452,
+    "lng": 12.332972451887564
+  }
 }

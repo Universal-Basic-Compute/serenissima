@@ -53,5 +53,9 @@
   "historicalName": "Calle de la Botta in Sestiere di Cannaregio",
   "englishName": "Barrel Street in the Cannaregio District",
   "historicalDescription": "A narrow street located in the Cannaregio sestiere, known for its proximity to the Jewish Ghetto, which was established in 1516. The area was populated by artisans and working-class families during the 15th century.",
-  "nameConfidence": "medium"
+  "nameConfidence": "medium",
+  "center": {
+    "lat": 45.43904378198908,
+    "lng": 12.332053872090938
+  }
 }

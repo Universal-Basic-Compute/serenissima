@@ -1,0 +1,78 @@
+{
+  "name": "Doge's Palace",
+  "category": "Special Buildings",
+  "subcategory": "Unique Structures",
+  "tier": 5,
+  "size": "Extra Large",
+  "unlockCondition": "Government structure only, not privately constructable",
+  "calculationsAnalysis": "The Doge's Palace represents the ultimate governmental structure with extraordinary investment requirements. The construction cost of 50,000,000 ducats reflects the unparalleled architectural significance and materials, while the income of 75,000 ducats (0.15% return) represents administrative fees, tourism, and ceremonial functions. The maintenance cost of 250,000 ducats still exceeds this income, creating a realistic scenario where this centerpiece of government requires substantial ongoing investment. The employment capacity of 200 represents the extensive administrative staff, guards, and service personnel. The construction time of 90 days (7776000000ms) reflects the monumental construction project. This unique building serves as the centerpiece of Venetian governance with appropriate restrictions preventing private construction, reflecting the historical reality of this singular structure that embodied the Republic's political system.",
+  "shortDescription": "Seat of government for the Venetian Republic, housing the Doge and major councils.",
+  "fullDescription": "The political heart of Venice, the Doge's Palace (Palazzo Ducale) houses the Republic's key governmental institutions. Featuring the Great Council chamber, Senate hall, Doge's apartments, judicial facilities, and administrative offices, this architectural masterpiece combines practical governance with symbolic authority. Its distinctive design represents Venice's unique political identity, balancing power between the Doge, aristocracy, and complex council system.",
+  "flavorText": "These walls have witnessed a thousand years of decisions that shaped Venice and beyond—for while emperors may command with swords, the true art of governance is found in these chambers where words, votes, and laws determine the fate of nations.",
+  "constructionCosts": {
+    "ducats": 50000000,
+    "timber": 500,
+    "bricks": 1000,
+    "stone": 2000,
+    "glass": 300,
+    "marble": 500,
+    "gold": 100
+  },
+  "maintenanceCost": 250000,
+  "constructionTime": 7776000000,
+  "incomeGeneration": 75000,
+  "employmentCapacity": 200,
+  "locationRequirements": {
+    "districtRestrictions": "San Marco district only, waterfront facing Basin",
+    "adjacentRequirements": "St. Mark's Basilica adjacency, grand piazza frontage",
+    "environmentalEffects": "Center of political power, creates governmental district"
+  },
+  "constructionPhase3DPrompt": "Renaissance Venetian Doge's Palace under construction, monumental seat of government, exceptional foundation work supporting massive structure, distinctive Gothic-Byzantine-Renaissance fusion architecture taking shape, grand council chamber with enormous ceiling spans, ornate facades with complex stone patterns, master craftsmen creating artistic elements, gold leaf application, marble column installation, colored stone patterns being laid, connection to St. Mark's Basilica, water entrance with ceremonial docking, security features being integrated despite ornate appearance, governmental chambers designed for various councils, state-commissioned artists painting ceremonial spaces, isometric game perspective, stylized but detailed, sense of creating architectural masterpiece that embodies Venetian governmental principles",
+  "completedBuilding3DPrompt": "Completed Renaissance Venetian Doge's Palace, magnificent seat of government featuring distinctive Gothic-Byzantine fusion architecture, iconic diamond pattern stonework on facades, grand portico with ornate columns, enormous Great Council chamber where hundreds of nobles govern, Doge's private apartments, Senate meeting hall, various council rooms for specific governmental functions, Bridge of Sighs connecting to prisons, ceremonial water entrance where ambassadors arrive by gondola, grand staircase (Scala dei Giganti) with Neptune and Mars statues, ornate interior with masterpiece paintings by Venetian artists, gold detailing throughout, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of governmental power balanced through architectural sophistication, perfect expression of Venice's unique republican system, dignitaries in official robes moving between chambers, guards in state uniforms, governmental activities visible in various chambers, combination of practical administration and symbolic authority",
+  "gameplayInformation": {
+    "unlocks": [
+      "Venetian Government System",
+      "Diplomatic Relations",
+      "State Authority"
+    ],
+    "specialAbilities": [
+      "Central governance",
+      "Diplomatic center",
+      "Symbolic power projection"
+    ],
+    "upgradePath": [
+      "None - unique historical structure"
+    ],
+    "reputationEffects": {
+      "Government": 50,
+      "Nobility": 40,
+      "Foreign Powers": 40,
+      "Citizens": 30
+    },
+    "riskFactors": {
+      "fireRisk": "Medium (despite protections)",
+      "politicalRisk": "High (center of power struggles)",
+      "symbolRisk": "Very High (primary target in conflicts)"
+    }
+  },
+  "soundDesign": {
+    "ambientSound": "Echoing chambers, distant debates, ceremonial announcements",
+    "activitySounds": "Council voting, diplomatic receptions, governmental proclamations",
+    "musicTheme": "Processione Ducale"
+  },
+  "seasonalEffects": {
+    "state ceremonies": "Elaborate decorations, increased ceremonial activity",
+    "election periods": "Conclave procedures, heightened security",
+    "diplomatic seasons": "Foreign ambassadors, treaty negotiations"
+  },
+  "aiInteractionPoints": [
+    "Great Council Chamber",
+    "Senate Hall",
+    "Doge's Apartments",
+    "Ceremonial Staircase",
+    "Diplomatic Reception Rooms",
+    "Governmental Offices",
+    "Bridge of Sighs",
+    "Water Entrance"
+  ]
+}

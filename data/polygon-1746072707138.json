@@ -102,12 +102,20 @@
     }
   ],
   "centroid": {
-    "lat": 45.43735726914725,
-    "lng": 12.325522174456236
+    "lat": 45.43723473254804,
+    "lng": 12.32620265401979
   },
   "areaInSquareMeters": 96650.42,
   "historicalName": "Calle de San Thomà in Sestier de San Polo",
   "englishName": "Street of Saint Thomas in the District of Saint Paul",
   "historicalDescription": "This area was part of the San Polo sestiere, known for its artisan workshops and merchants in the 15th century. The nearby Church of San Tomà and Rio de San Tomà canal were prominent landmarks.",
-  "nameConfidence": "medium"
+  "nameConfidence": "medium",
+  "center": {
+    "lat": 45.43735726914725,
+    "lng": 12.325522174456236
+  },
+  "coatOfArmsCenter": {
+    "lat": 45.432298512928,
+    "lng": 12.337212067514681
+  }
 }

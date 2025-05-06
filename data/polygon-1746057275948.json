@@ -138,12 +138,16 @@
     }
   ],
   "centroid": {
-    "lat": 45.43371378819052,
-    "lng": 12.351937223477572
+    "lat": 45.43477472138267,
+    "lng": 12.354184059542039
   },
   "historicalName": "Calle San Zuane in Rialto",
   "englishName": "Saint John's Street in Rialto",
   "historicalDescription": "This narrow street was located in the bustling Rialto district, known for its merchants, artisans, and the famous Rialto Bridge. The area was a center of trade and commerce in 15th century Venice.",
   "nameConfidence": "medium",
-  "areaInSquareMeters": 122349.19
+  "areaInSquareMeters": 122349.19,
+  "center": {
+    "lat": 45.43371378819052,
+    "lng": 12.351937223477572
+  }
 }

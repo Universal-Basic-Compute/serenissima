@@ -1,0 +1,76 @@
+{
+  "name": "Art Academy",
+  "category": "Public & Government",
+  "subcategory": "Educational & Cultural",
+  "tier": 3,
+  "size": "Large",
+  "unlockCondition": "15,000,000 ducats, Artistic Guild connection, cultural reputation",
+  "calculationsAnalysis": "The Art Academy balances cultural investment with artistic industry support. The construction cost of 6,000,000 ducats reflects the specialized studios and facilities required, while the income of 35,000 ducats (0.58% return) represents tuition, commissions, and patron contributions. The maintenance cost of 40,000 ducats exceeds income, creating a realistic scenario where artistic institutions required patronage but enhanced Venice's cultural prestige. The employment capacity of 25 represents the master artists, instructors, and staff needed. The construction time of 14 days (1209600000ms) reflects the specialized construction requirements. This building creates a strategic investment in artistic excellence that enhances the city's cultural reputation and supports luxury industries, reflecting Venice's historical emphasis on arts as both cultural and commercial assets.",
+  "shortDescription": "Educational institution teaching painting, sculpture, and other fine arts to students.",
+  "fullDescription": "Nurturing the artistic talent that adorns Venice's buildings and collections, art academies provide formal training in various creative disciplines. Featuring studios with specialized lighting, sculpture workshops, model rooms, exhibition spaces, and often material preparation areas, these institutions combine technical instruction with artistic philosophy. Venice's distinctive artistic style developed within these academies.",
+  "flavorText": "Talent without training is like a ship without a rudder—here we provide not just techniques, but the wisdom to know when to follow tradition and when to challenge it.",
+  "constructionCosts": {
+    "ducats": 6000000,
+    "timber": 150,
+    "bricks": 300,
+    "stone": 400,
+    "glass": 80,
+    "marble": 100
+  },
+  "maintenanceCost": 40000,
+  "constructionTime": 1209600000,
+  "incomeGeneration": 35000,
+  "employmentCapacity": 25,
+  "locationRequirements": {
+    "districtRestrictions": "Cultural districts, often near churches or palaces",
+    "adjacentRequirements": "Northern light exposure preferred for studios",
+    "environmentalEffects": "Increases cultural prestige, artistic activity in area"
+  },
+  "constructionPhase3DPrompt": "Renaissance Venetian art academy under construction, cultural education facility, main structure showing specialized studio spaces with northern light considerations, sculpture workshop taking shape with reinforced floors, painting studios with specific lighting design, exhibition hall under construction with display considerations, material preparation areas, model rooms with privacy features, plaster cast collection space, technical areas for pigment preparation and stone cutting, anatomical study room, perspective demonstration area, quality construction reflecting artistic importance, isometric game perspective, stylized but detailed, focus on creating ideal environment for artistic education",
+  "completedBuilding3DPrompt": "Completed Renaissance Venetian art academy, prestigious artistic education facility featuring painting studios with perfect northern light, sculpture workshop with works in progress, live model areas with draped figures, master artists instructing students at easels, material preparation rooms with pigments and tools, anatomical reference models, exhibition space displaying student and master works, plaster cast collection of classical sculptures, art library with reference works, specialized equipment for various media, historically accurate but slightly stylized for game aesthetic, isometric game perspective, creative atmosphere of artistic development, sense of technical mastery combined with creative expression, various artistic disciplines represented, different stages of artistic education visible from beginners to advanced students, subtle influence of Venetian artistic tradition in decor and approach",
+  "gameplayInformation": {
+    "unlocks": [
+      "Artistic Education",
+      "Commission Fulfillment",
+      "Cultural Development"
+    ],
+    "specialAbilities": [
+      "Artistic skill improvement",
+      "New art style development",
+      "Cultural prestige enhancement"
+    ],
+    "upgradePath": [
+      "Grand Academy of Arts (highest artistic education)"
+    ],
+    "reputationEffects": {
+      "Artists Guild": 25,
+      "Nobility": 20,
+      "Church": 15,
+      "Foreign Visitors": 20
+    },
+    "riskFactors": {
+      "styleTrendRisk": "Medium (artistic fashion changes)",
+      "patronageRisk": "Medium (dependent on wealthy supporters)",
+      "materialRisk": "Low (specialized supply needs)"
+    }
+  },
+  "soundDesign": {
+    "ambientSound": "Brushes on canvas, chisels on stone, quiet instruction",
+    "activitySounds": "Artistic discussions, model position changes, material preparation",
+    "musicTheme": "Sospiri Veneziani"
+  },
+  "seasonalEffects": {
+    "exhibition seasons": "Public displays, increased visitors",
+    "summer": "Outdoor painting sessions, natural light advantage",
+    "competition periods": "Intense activity, masterwork creation"
+  },
+  "aiInteractionPoints": [
+    "Painting studio",
+    "Sculpture workshop",
+    "Exhibition hall",
+    "Master's demonstration area",
+    "Model rooms",
+    "Material preparation area",
+    "Student critique space"
+  ]
+}

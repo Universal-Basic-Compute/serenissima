@@ -1,0 +1,241 @@
+{
+  "totalErrors": 28,
+  "totalWarnings": 0,
+  "exitCode": 2,
+  "timestamp": "2025-05-06T22:34:21.858Z",
+  "errors": [
+    {
+      "filePath": "app/page.tsx",
+      "line": 1419,
+      "column": 7,
+      "code": "TS2448",
+      "message": "Block-scoped variable 'loadPolygonsOnMap' used before its declaration.",
+      "type": "error"
+    },
+    {
+      "filePath": "app/page.tsx",
+      "line": 1419,
+      "column": 7,
+      "code": "TS2454",
+      "message": "Variable 'loadPolygonsOnMap' is used before being assigned.",
+      "type": "error"
+    },
+    {
+      "filePath": "app/page.tsx",
+      "line": 2413,
+      "column": 11,
+      "code": "TS2322",
+      "message": "Type '{ getSnapshotWithCache: <T>(getSnapshotFn: () => T, dependencies: any[]) => T; ref: MutableRefObject<any>; activeView: \"buildings\" | \"land\" | \"transport\" | \"resources\" | \"markets\" | \"governance\"; }' is not assignable to type 'IntrinsicAttributes'.",
+      "type": "error"
+    },
+    {
+      "filePath": "app/simple/page.tsx",
+      "line": 218,
+      "column": 11,
+      "code": "TS2774",
+      "message": "This condition will always return true since this function is always defined. Did you mean to call it instead?",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/BuildingMenu.tsx",
+      "line": 84,
+      "column": 37,
+      "code": "TS2345",
+      "message": "Argument of type '(category: BuildingCategory) => React.JSX.Element' is not assignable to parameter of type '(value: BuildingCategory, index: number, array: BuildingCategory[]) => Element'.",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/BuildingMenu.tsx",
+      "line": 99,
+      "column": 37,
+      "code": "TS2345",
+      "message": "Argument of type '(category: BuildingCategory) => React.JSX.Element' is not assignable to parameter of type '(value: BuildingCategory, index: number, array: BuildingCategory[]) => Element'.",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/PolygonRenderer.ts",
+      "line": 281,
+      "column": 30,
+      "code": "TS2339",
+      "message": "Property 'map' does not exist on type 'Material'.",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/PolygonRenderer.ts",
+      "line": 896,
+      "column": 57,
+      "code": "TS2538",
+      "message": "Type 'undefined' cannot be used as an index type.",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/PolygonRenderer.ts",
+      "line": 899,
+      "column": 49,
+      "code": "TS2345",
+      "message": "Argument of type 'string | undefined' is not assignable to parameter of type 'string'.",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/PolygonRenderer.ts",
+      "line": 968,
+      "column": 51,
+      "code": "TS2345",
+      "message": "Argument of type 'string | undefined' is not assignable to parameter of type 'string'.",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/PolygonViewer.tsx",
+      "line": 773,
+      "column": 39,
+      "code": "TS18047",
+      "message": "'sceneRef.current' is possibly 'null'.",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/PolygonViewer.tsx",
+      "line": 807,
+      "column": 29,
+      "code": "TS18047",
+      "message": "'sceneRef.current' is possibly 'null'.",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/PolygonViewer.tsx",
+      "line": 808,
+      "column": 48,
+      "code": "TS18047",
+      "message": "'sceneRef.current' is possibly 'null'.",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/PolygonViewer.tsx",
+      "line": 812,
+      "column": 9,
+      "code": "TS18047",
+      "message": "'roadManagerRef.current' is possibly 'null'.",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/PolygonViewer.tsx",
+      "line": 912,
+      "column": 9,
+      "code": "TS2353",
+      "message": "Object literal may only specify known properties, and 'selectedPolygonId' does not exist in type 'InteractionManagerProps'.",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/PolygonViewer.tsx",
+      "line": 1249,
+      "column": 9,
+      "code": "TS18047",
+      "message": "'sceneRef.current' is possibly 'null'.",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/PolygonViewer.tsx",
+      "line": 1455,
+      "column": 59,
+      "code": "TS2345",
+      "message": "Argument of type 'string | null' is not assignable to parameter of type 'string | undefined'.",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/PolygonViewer.tsx",
+      "line": 1579,
+      "column": 9,
+      "code": "TS2322",
+      "message": "Type '{ children: Element; onError: (error: Error, errorInfo: ErrorInfo) => void; resetKey: string; fallback: Element; }' is not assignable to type 'IntrinsicAttributes & ThreeDErrorBoundaryProps'.",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/PolygonViewer.tsx",
+      "line": 1637,
+      "column": 7,
+      "code": "TS2322",
+      "message": "Type '{ children: Element; onError: (error: Error, errorInfo: ErrorInfo) => void; resetKey: string; fallback: Element; }' is not assignable to type 'IntrinsicAttributes & ThreeDErrorBoundaryProps'.",
+      "type": "error"
+    },
+    {
+      "filePath": "lib/services/UserService.ts",
+      "line": 414,
+      "column": 26,
+      "code": "TS18048",
+      "message": "'cachedEntry' is possibly 'undefined'.",
+      "type": "error"
+    },
+    {
+      "filePath": "lib/threejs/PolygonRendererFacade.ts",
+      "line": 218,
+      "column": 29,
+      "code": "TS2694",
+      "message": "Namespace '\"C:/Users/reyno/serenissima/node_modules/@types/three/build/three.module\"' has no exported member 'ErrorEvent'.",
+      "type": "error"
+    },
+    {
+      "filePath": "lib/threejs/RoadManager.ts",
+      "line": 185,
+      "column": 36,
+      "code": "TS7006",
+      "message": "Parameter 'p' implicitly has an 'any' type.",
+      "type": "error"
+    },
+    {
+      "filePath": "lib/threejs/RoadManager.ts",
+      "line": 1403,
+      "column": 11,
+      "code": "TS2531",
+      "message": "Object is possibly 'null'.",
+      "type": "error"
+    },
+    {
+      "filePath": "lib/threejs/RoadManager.ts",
+      "line": 1405,
+      "column": 11,
+      "code": "TS2531",
+      "message": "Object is possibly 'null'.",
+      "type": "error"
+    },
+    {
+      "filePath": "lib/threejs/RoadManager.ts",
+      "line": 1407,
+      "column": 11,
+      "code": "TS2531",
+      "message": "Object is possibly 'null'.",
+      "type": "error"
+    },
+    {
+      "filePath": "lib/threejs/types.ts",
+      "line": 4,
+      "column": 10,
+      "code": "TS1205",
+      "message": "Re-exporting a type when 'isolatedModules' is enabled requires using 'export type'.",
+      "type": "error"
+    },
+    {
+      "filePath": "lib/threejs/types.ts",
+      "line": 4,
+      "column": 20,
+      "code": "TS1205",
+      "message": "Re-exporting a type when 'isolatedModules' is enabled requires using 'export type'.",
+      "type": "error"
+    },
+    {
+      "filePath": "lib/threejs/WaterFacade.ts",
+      "line": 1131,
+      "column": 20,
+      "code": "TS2358",
+      "message": "The left-hand side of an 'instanceof' expression must be of type 'any', an object type or a type parameter.",
+      "type": "error"
+    }
+  ],
+  "rawOutputLines": 39,
+  "firstFewLines": [
+    "app/page.tsx(1419,7): error TS2448: Block-scoped variable 'loadPolygonsOnMap' used before its declaration.\r",
+    "app/page.tsx(1419,7): error TS2454: Variable 'loadPolygonsOnMap' is used before being assigned.\r",
+    "app/page.tsx(2413,11): error TS2322: Type '{ getSnapshotWithCache: <T>(getSnapshotFn: () => T, dependencies: any[]) => T; ref: MutableRefObject<any>; activeView: \"buildings\" | \"land\" | \"transport\" | \"resources\" | \"markets\" | \"governance\"; }' is not assignable to type 'IntrinsicAttributes'.\r",
+    "  Property 'getSnapshotWithCache' does not exist on type 'IntrinsicAttributes'.\r",
+    "app/simple/page.tsx(218,11): error TS2774: This condition will always return true since this function is always defined. Did you mean to call it instead?\r"
+  ],
+  "compilerExitCode": 2
+}

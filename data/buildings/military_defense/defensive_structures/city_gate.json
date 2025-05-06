@@ -1,0 +1,77 @@
+{
+  "name": "City Gate",
+  "category": "Military & Defense",
+  "subcategory": "Defensive Structures",
+  "tier": 3,
+  "size": "Large",
+  "unlockCondition": "25,000,000 ducats, government authorization, Engineering Guild approval",
+  "calculationsAnalysis": "The City Gate balances defensive infrastructure with modest revenue generation. The construction cost of 7,500,000 ducats reflects the massive fortified structure and defensive systems required, while the income of 30,000 ducats (0.4% return) represents tolls and entry fees collected. The maintenance cost of 35,000 ducats exceeds income, creating a realistic scenario where defensive infrastructure required public funding but provided essential security. The employment capacity of 20 represents the guards, administrators, and maintenance staff needed. The construction time of 20 days (1728000000ms) reflects the substantial defensive project. This building creates a strategic control point with appropriate government restrictions reflecting the historical importance of controlled access points in Venice's unique urban structure, where gates regulated movement between districts and to the mainland connections.",
+  "shortDescription": "Fortified entrance point controlling access between districts or to the city itself.",
+  "fullDescription": "Regulating movement while providing defensive capabilities, city gates control access to key areas through fortified entry points. Featuring defensive architecture, checkpoint functions, guard facilities, and often customs inspection areas, these impressive structures combine practical control with symbolic authority. Though Venice's island nature limited traditional walls, gates controlled key access points and bridge approaches.",
+  "flavorText": "The gate speaks two messages simultaneously: to citizens it says 'you are protected,' while to potential enemies it declares 'you shall not pass'—both essential to the security of any great city.",
+  "constructionCosts": {
+    "ducats": 7500000,
+    "timber": 100,
+    "bricks": 400,
+    "stone": 800,
+    "iron": 150,
+    "marble": 100
+  },
+  "maintenanceCost": 35000,
+  "constructionTime": 1728000000,
+  "incomeGeneration": 30000,
+  "employmentCapacity": 20,
+  "locationRequirements": {
+    "districtRestrictions": "Natural choke points, major access routes, district boundaries",
+    "adjacentRequirements": "Control of entry route, defensive position",
+    "environmentalEffects": "Controls movement, creates security checkpoint, symbolic boundary"
+  },
+  "constructionPhase3DPrompt": "Renaissance Venetian city gate under construction, imposing fortified entrance, massive stone foundation ensuring stability, defensive architecture with guard posts and observation positions, main archway taking shape with space for portcullis, official checkpoint areas, customs inspection facilities, Venetian state symbols being carved, guard quarters and administrative offices, defensive features integrated with architectural beauty, engineers ensuring proper alignment with existing routes, isometric game perspective, stylized but detailed, focus on creating controlled access point balancing security with impressive civic architecture",
+  "completedBuilding3DPrompt": "Completed Renaissance Venetian city gate, magnificent fortified entrance featuring imposing stone archway large enough for commercial traffic, ornate but functional design combining defensive features with civic pride, Lion of St. Mark prominently displayed, guard posts with armed sentries, checkpoint where documents and goods are inspected, customs area for taxable items, administrative offices for entry records, mechanisms for closing massive wooden doors in emergencies, defensive positions above archway, decorative elements showing Venetian artistic sensibility, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of controlled access point, balance of defensive capability and impressive architecture, flow of people and goods through regulated entrance, officials checking papers, guards maintaining vigilant watch, perfect expression of Venetian approach to security through controlled movement",
+  "gameplayInformation": {
+    "unlocks": [
+      "Access Control",
+      "Defensive Position",
+      "Customs Inspection"
+    ],
+    "specialAbilities": [
+      "Movement regulation",
+      "Security checkpoint",
+      "Tax collection point",
+      "Emergency closure"
+    ],
+    "upgradePath": [
+      "Fortified Gateway (enhanced defensive capabilities)"
+    ],
+    "reputationEffects": {
+      "Security Forces": 20,
+      "Government": 25,
+      "Merchants": 10,
+      "Citizens": 15
+    },
+    "riskFactors": {
+      "congestionRisk": "High (bottleneck potential)",
+      "targetRisk": "High (strategic control point)",
+      "maintenanceRisk": "Medium (heavy usage)"
+    }
+  },
+  "soundDesign": {
+    "ambientSound": "Passage of people and carts, guard challenges, gate mechanisms",
+    "activitySounds": "Document checking, customs inspections, traffic regulation",
+    "musicTheme": "Consiglio dei Dieci"
+  },
+  "seasonalEffects": {
+    "heightened alert": "Increased inspections, restricted access",
+    "festivals": "Decorated with banners, ceremonial guards",
+    "trade fairs": "Maximum traffic, expedited processing"
+  },
+  "aiInteractionPoints": [
+    "Main archway",
+    "Guard checkpoint",
+    "Customs inspection area",
+    "Administration office",
+    "Defensive positions",
+    "Waiting area",
+    "Document verification station"
+  ]
+}

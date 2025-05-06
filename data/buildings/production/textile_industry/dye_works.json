@@ -1,0 +1,92 @@
+{
+  "name": "Dye Works",
+  "category": "Production",
+  "subcategory": "Textile Industry",
+  "tier": 2,
+  "size": "Medium",
+  "unlockCondition": "6,000,000 ducats capital, Textile Guild membership",
+  "calculationsAnalysis": "The Dye Works represents specialized textile processing with no direct income but industry-enabling capabilities. The construction cost of 1,400,000 ducats reflects the specialized vats and water systems required, while generating no direct income reflects its position as an intermediate production step rather than end product. The maintenance cost of 17,500 ducats creates an ongoing expense justified by enabling valuable colored textile production downstream. The employment capacity of 15 represents the dyers and assistants needed for this labor-intensive process. The construction time of 3 days (259200000ms) reflects the specialized construction requirements. This building creates a strategic investment in textile processing that enables the lucrative colored fabric industry, reflecting Venice's historical expertise in creating vibrant textiles using exotic dyestuffs from its extensive trade networks.",
+  "shortDescription": "Specialized facility for coloring fabrics and textiles using various natural dyes and fixing agents.",
+  "fullDescription": "Essential to Venice's textile industry, dye works transform plain fabrics into the vibrant colors that made Venetian textiles famous throughout Europe. Featuring large vats for immersion, drying yards, and specialized processes for different colorants, these facilities require significant technical knowledge. Venice's trade connections gave it access to exotic dyestuffs from around the Mediterranean and beyond.",
+  "flavorText": "The secret of our crimson is not merely in the kermes insects, but in water, time, and tradition passed from master to apprentice through generations of colored hands and careful eyes.",
+  "constructionCosts": {
+    "ducats": 1400000,
+    "timber": 70,
+    "bricks": 180,
+    "stone": 120,
+    "iron": 50
+  },
+  "maintenanceCost": 17500,
+  "constructionTime": 259200000,
+  "incomeGeneration": 0,
+  "employmentCapacity": 15,
+  "productionInformation": {
+    "inputResources": {
+      "Undyed Textiles": 30,
+      "Dyestuffs": 15,
+      "Mordants": 10,
+      "Water": 100,
+      "Fuel": 20
+    },
+    "outputResources": {
+      "Dyed Textiles": 28,
+      "Dye Waste": 2
+    },
+    "productionRate": "28 units of dyed fabric per day",
+    "storageCapacity": {
+      "rawMaterials": 150,
+      "finishedGoods": 100
+    }
+  },
+  "locationRequirements": {
+    "districtRestrictions": "Industrial areas with water access, often Cannaregio",
+    "adjacentRequirements": "Requires significant water access, drainage",
+    "environmentalEffects": "Colorful water runoff, distinctive smells, potential water pollution"
+  },
+  "constructionPhase3DPrompt": "Renaissance Venetian dye works under construction, specialized industrial facility, large rounded dyeing vats being installed, water supply channels, drainage systems for colored effluent, specialized ventilation for dye fumes, drying yard with hanging racks taking shape, mordant mixing area with safety features, storage for valuable dyestuffs with security, temperature control systems for vats, multiple workstations for different colors to prevent contamination, isometric game perspective, stylized but detailed, industrial character with specialized technical features",
+  "completedBuilding3DPrompt": "Completed Renaissance Venetian dye works, distinctive industrial facility with steaming colored vats, workers using long poles to manipulate fabric in bubbling dye baths of different vivid colors, large drying yard with rainbow of drying textiles hanging on frames, specialized areas for different dye types, mordant preparation area with alum and other fixatives, color testing station with sample swatches, drainage channels with colored water, specialized storage for expensive dye materials (indigo, kermes, brazilwood), protective equipment for workers handling caustic materials, historically accurate but slightly stylized for game aesthetic, isometric game perspective, vibrant colors creating visual spectacle, steam rising from hot dye vats, sense of industrial process combined with artisanal knowledge, distinct workstations for different color families",
+  "gameplayInformation": {
+    "unlocks": [
+      "Colored Textile Production",
+      "Fashion Industry",
+      "Exotic Dye Trading"
+    ],
+    "specialAbilities": [
+      "Create signature colors",
+      "Process imported dyestuffs",
+      "Color-matching services"
+    ],
+    "upgradePath": [
+      "Master Dye Works (rare colors, higher efficiency)"
+    ],
+    "reputationEffects": {
+      "Textile Guild": 15,
+      "Fashion Industry": 20,
+      "Environmental Factions": -15,
+      "Exotic Traders": 10
+    },
+    "riskFactors": {
+      "pollutionRisk": "High (chemical runoff)",
+      "healthRisk": "Medium (toxic materials)",
+      "fireRisk": "Medium (constant heating)"
+    }
+  },
+  "soundDesign": {
+    "ambientSound": "Bubbling vats, fabric splashing, steam venting",
+    "activitySounds": "Workers calling color names, poles stirring vats, wringing wet fabric",
+    "musicTheme": "Merletti di Burano"
+  },
+  "seasonalEffects": {
+    "summer": "Faster drying times, higher efficiency",
+    "winter": "Higher fuel costs, slower production",
+    "fashionSeasons": "Seasonal color shifts based on trends"
+  },
+  "aiInteractionPoints": [
+    "Main dyeing vats",
+    "Color testing area",
+    "Drying yard",
+    "Dyestuff storage",
+    "Quality control station",
+    "Master dyer's workplace"
+  ]
+}

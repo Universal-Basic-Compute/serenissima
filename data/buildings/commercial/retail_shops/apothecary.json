@@ -1,0 +1,84 @@
+{
+  "name": "Apothecary",
+  "category": "Commercial",
+  "subcategory": "Retail Shops",
+  "tier": 2,
+  "size": "Medium",
+  "unlockCondition": "7,500,000 ducats total wealth, Medical or Spice Guild connection",
+  "calculationsAnalysis": "The Apothecary balances specialized commercial investment with essential community services. The construction cost of 1,250,000 ducats reflects the specialized equipment and fixtures required, while the income of 14,000 ducats (1.1% return) represents the steady demand for medicines and treatments. The maintenance cost of 7,500 ducats (54% of income) creates a tighter profit margin than other shops, reflecting the costs of importing and maintaining exotic ingredients. The employment capacity of 3 represents the apothecary and assistants typical of Renaissance medical shops. The construction time of 3 days (259200000ms) reflects the specialized nature of the building. This building provides both direct income and community health benefits, encouraging strategic placement near residential areas.",
+  "shortDescription": "Medicine and herb shop offering remedies, cosmetics, and imported spices.",
+  "fullDescription": "Combining pharmacy, perfumery, and exotic goods shop, the Venetian apothecary is a vital community resource. The distinctive interior features walls lined with labeled ceramic jars, a preparation counter, and often a small garden for fresh herbs. Offering everything from fever remedies to beauty treatments, these shops benefit from Venice's position as a gateway for Eastern medical knowledge and ingredients.",
+  "flavorText": "Between these jars lies the boundary between East and West, between ancient wisdom and modern commerce, between life and death itself.",
+  "constructionCosts": {
+    "ducats": 1250000,
+    "timber": 50,
+    "bricks": 130,
+    "stone": 60,
+    "glass": 20
+  },
+  "maintenanceCost": 7500,
+  "constructionTime": 259200000,
+  "incomeGeneration": 14000,
+  "employmentCapacity": 3,
+  "locationRequirements": {
+    "districtRestrictions": "All districts, particularly near residential areas",
+    "adjacentRequirements": "Benefits from proximity to physicians",
+    "environmentalEffects": "Increases health of nearby citizens, slight exotic aroma in vicinity"
+  },
+  "productionInformation": {
+    "inputResources": {
+      "Herbs": "10-15 units per day",
+      "Exotic Ingredients": "5-10 units per day",
+      "Alcohol Base": "3-5 units per day"
+    },
+    "outputResources": {
+      "Medicines": "8-12 units per day",
+      "Cosmetics": "5-8 units per day",
+      "Spice Packets": "10-15 units per day"
+    },
+    "storageCapacity": 60
+  },
+  "constructionPhase3DPrompt": "Renaissance Venetian apothecary under construction, specialized shop with medicine focus, walls being lined with custom shelving for ingredient jars, preparation counter being installed with marble top, small distillation area taking shape with ventilation, secure storage areas for valuable ingredients, specialized grinding station, herb-drying rack installation, small side garden being planted, higher quality finishes than standard shop, isometric game perspective, stylized but detailed, combination of scientific and commercial design elements",
+  "completedBuilding3DPrompt": "Completed Renaissance Venetian apothecary, distinctive medical shop, elegant facade with medical symbol sign, interior lined with blue and white ceramic jars labeled in Latin script, central marble-topped preparation counter with mortar and pestle, brass scales for precise measurements, glass-fronted cabinets with exotic ingredients, dried herbs hanging from ceiling, small distillation apparatus, rack of prepared medicines in bottles, separate cosmetic preparation area, small garden visible through back window with medicinal plants, warm wooden interior with medical illustrations on walls, historically accurate but slightly stylized for game aesthetic, isometric game perspective, atmospheric lighting highlighting colorful jars and bottles, apothecary in distinctive robe weighing ingredients, subtle smoke from distillation process",
+  "gameplayInformation": {
+    "unlocks": [
+      "Medicine Production",
+      "Plague Treatment",
+      "Cosmetics Trade"
+    ],
+    "specialAbilities": [
+      "Disease prevention for nearby buildings",
+      "Beauty treatments",
+      "Exotic ingredient knowledge"
+    ],
+    "upgradePath": [
+      "Medical Academy partnership"
+    ],
+    "reputationEffects": {
+      "Medical Guild": 12,
+      "Spice Merchants": 10,
+      "Nobility": 5
+    },
+    "riskFactors": {
+      "fireRisk": "Medium-High (distillation processes)",
+      "health hazard": "Low-Medium (toxic ingredients)",
+      "theftRisk": "High (valuable exotic ingredients)"
+    }
+  },
+  "soundDesign": {
+    "ambientSound": "Glass bottles clinking, quiet consultation",
+    "activitySounds": "Mortar and pestle grinding, liquid pouring, weighing sounds",
+    "musicTheme": "Spezie d'Oriente"
+  },
+  "seasonalEffects": {
+    "winter": "Cold remedies prominently displayed, winter illnesses treated",
+    "plague season": "Preventative medicines, increased activity",
+    "summer": "Cooling remedies, sunburn treatments available"
+  },
+  "aiInteractionPoints": [
+    "Consultation counter",
+    "Preparation area",
+    "Herb garden",
+    "Private treatment area"
+  ]
+}

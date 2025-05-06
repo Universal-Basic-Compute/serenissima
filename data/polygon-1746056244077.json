@@ -69,5 +69,9 @@
   "englishName": "Long Street of Saint Mary Formosa in Castello District",
   "historicalDescription": "This area was part of the Castello sestiere, known for its proximity to the Church of Santa Maria Formosa, a prominent church in 15th century Venice. The street likely served as a main thoroughfare leading to the church.",
   "nameConfidence": "high",
-  "areaInSquareMeters": 24058.35
+  "areaInSquareMeters": 24058.35,
+  "center": {
+    "lat": 45.437536273854796,
+    "lng": 12.341368201227372
+  }
 }

@@ -1,0 +1,76 @@
+{
+  "name": "Rialto Bridge",
+  "category": "Special Buildings",
+  "subcategory": "Unique Structures",
+  "tier": 4,
+  "size": "Large",
+  "unlockCondition": "Government project only, not privately constructable",
+  "calculationsAnalysis": "The Rialto Bridge represents a unique infrastructure project with both practical and symbolic value. The construction cost of 35,000,000 ducats reflects the engineering challenges and architectural significance, while the income of 150,000 ducats (0.43% return) represents the rental fees from shops built on the bridge. The maintenance cost of 150,000 ducats creates a break-even financial profile appropriate for essential infrastructure with commercial elements. The employment capacity of 30 represents the shop operators and maintenance staff. The construction time of 60 days (5184000000ms) reflects the complex engineering project. This unique building serves as a critical connection between Venice's commercial and governmental districts with appropriate restrictions preventing private construction, reflecting the historical reality of this singular structure that combined infrastructure with commercial space.",
+  "shortDescription": "Main bridge spanning the Grand Canal with shops, connecting San Marco and Rialto districts.",
+  "fullDescription": "The commercial artery connecting Venice's governmental and financial centers, the Rialto Bridge spans the Grand Canal at its narrowest point. Featuring a single bold stone arch, rows of shops on either side of the central pathway, and distinctive architectural details, this engineering marvel combines practical transportation with commercial opportunity. As a symbol of Venice's commercial prowess and engineering skill, it remains one of the city's most recognizable landmarks.",
+  "flavorText": "Some bridges merely connect two shores, but the Rialto connects commerce with governance, tradition with innovation, and engineering with art—all in a single, perfect arch that seems to defy gravity while defining Venice.",
+  "constructionCosts": {
+    "ducats": 35000000,
+    "timber": 300,
+    "bricks": 500,
+    "stone": 1500,
+    "marble": 200
+  },
+  "maintenanceCost": 150000,
+  "constructionTime": 5184000000,
+  "incomeGeneration": 150000,
+  "employmentCapacity": 30,
+  "locationRequirements": {
+    "districtRestrictions": "Grand Canal at narrowest point between San Marco and Rialto",
+    "adjacentRequirements": "Commercial districts on both sides, water traffic clearance",
+    "environmentalEffects": "Creates major commercial thoroughfare, increases property values"
+  },
+  "constructionPhase3DPrompt": "Renaissance Venetian Rialto Bridge under construction, monumental engineering project spanning Grand Canal, temporary foundations in canal supporting massive construction, innovative single stone arch taking shape with precise geometry, rows of shop structures being built on either side, complex structural support system, master engineers supervising every detail, wooden scaffolding throughout, stone blocks being precisely fitted, shop interiors taking shape with commercial considerations, decorative elements including balustrades and archways, specialized water engineering to work around Grand Canal traffic, isometric game perspective, stylized but detailed, focus on revolutionary engineering allowing single span across canal while supporting commercial structures",
+  "completedBuilding3DPrompt": "Completed Renaissance Venetian Rialto Bridge, impressive structure featuring bold single stone arch spanning Grand Canal, two rows of shops lining both sides of central pedestrian pathway, elegant stone balustrades with decorative elements, archways at entrance points, steps ascending and descending the arch, shop fronts with various luxury merchants, continuous portico sheltering shoppers, boats passing underneath with generous clearance, crowds of people crossing between San Marco and Rialto districts, merchants conducting business, goods being transported across, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of commercial vitality combined with engineering achievement, perfect balance of practical transportation and business opportunity, distinctive silhouette that defines the Grand Canal, atmosphere of commerce and connection",
+  "gameplayInformation": {
+    "unlocks": [
+      "Grand Canal Crossing",
+      "Premium Commercial Space",
+      "City Integration"
+    ],
+    "specialAbilities": [
+      "Major pedestrian connection",
+      "High-value retail location",
+      "Commercial hub"
+    ],
+    "upgradePath": [
+      "None - unique historical structure"
+    ],
+    "reputationEffects": {
+      "Merchants": 40,
+      "Engineers": 30,
+      "Government": 25,
+      "Citizens": 35
+    },
+    "riskFactors": {
+      "structuralRisk": "Low (exceptional construction)",
+      "fireRisk": "Medium (shop contents)",
+      "congestionRisk": "Very High (major thoroughfare)"
+    }
+  },
+  "soundDesign": {
+    "ambientSound": "Bustling commerce, footsteps on stone, boats below",
+    "activitySounds": "Merchant transactions, tourist amazement, continuous movement",
+    "musicTheme": "Rialto Mercante"
+  },
+  "seasonalEffects": {
+    "carnival": "Decorated shops, masked revelers crossing",
+    "market days": "Peak commercial activity, special goods",
+    "regatta viewing": "Crowds watching boat races from vantage point"
+  },
+  "aiInteractionPoints": [
+    "Central Walkway",
+    "Shop Fronts",
+    "Viewing Points",
+    "Entrance Steps",
+    "Underbridge Passage",
+    "Merchant Stalls",
+    "Bridge Crossroads",
+    "Architectural Details"
+  ]
+}

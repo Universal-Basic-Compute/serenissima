@@ -1,110 +1,186 @@
 {
-    "id": "paper",
-    "name": "Paper",
-    "category": "processed_materials",
-    "subcategory": "publishing",
-    "baseValue": 25,
-    "weight": 0.2,
-    "volume": 0.5,
-    "stackSize": 100,
-    "description": "Processed sheets ready for printing, writing, and document creation.",
-    "longDescription": "Essential to Venice's thriving publishing industry and extensive bureaucracy, this high-quality paper is produced through careful processing of rags and fibers. Available in various grades from everyday writing paper to premium sheets for luxury books and official documents, paper represents both practical utility and intellectual advancement.",
-    "sprite": "assets/sprites/resources/paper.png",
-    "icon": "assets/icons/resources/paper.png",
-    "availableQualities": ["common", "fine", "superior"],
-    "defaultQuality": "common",
-    
-    "processingFacility": "paper_mill",
-    "processingTime": 480,
-    "perishable": false,
-    "moistureSensitivity": 0.9,
-    "specialHandling": ["keep_dry", "flat_storage"],
-    "qualityFactors": [
-      {"factor": "input_quality", "weight": 0.4},
-      {"factor": "water_quality", "weight": 0.3},
-      {"factor": "worker_skill", "weight": 0.3}
-    ],
-    "paperTypes": [
-      {
-        "type": "writing_paper",
-        "smoothness": "high",
-        "value_multiplier": 1.0
-      },
-      {
-        "type": "printing_paper",
-        "ink_absorption": "optimized",
-        "value_multiplier": 1.1
-      },
-      {
-        "type": "document_paper",
-        "durability": "high",
-        "value_multiplier": 1.3
-      },
-      {
-        "type": "luxury_paper",
-        "quality": "exceptional",
-        "value_multiplier": 2.0
-      }
-    ],
-    
-    "producedFrom": [
-      {
-        "inputs": [
-          {"resource": "rags", "amount": 80},
-          {"resource": "water", "amount": 200}
-        ],
-        "building": "paper_mill",
-        "processingTime": 480
-      }
-    ],
-    "usedIn": [
-      {
-        "outputs": [
-          {"resource": "books", "amount": 20}
-        ],
-        "building": "printing_house",
-        "processingTime": 720
-      },
-      {
-        "outputs": [
-          {"resource": "documents", "amount": 50}
-        ],
-        "building": "printing_house",
-        "processingTime": 360
-      },
-      {
-        "outputs": [
-          {"resource": "maps", "amount": 10}
-        ],
-        "building": "cartographer",
-        "processingTime": 960
-      }
-    ],
-    
-    "transportOptions": {
-      "barge": {"capacity": 1000, "efficiency": 0.85, "risk": 0.2},
-      "gondola": {"capacity": 200, "efficiency": 0.9, "risk": 0.15},
-      "handcart": {"capacity": 50, "efficiency": 0.95, "risk": 0.1},
-      "porter": {"capacity": 20, "efficiency": 0.9, "risk": 0.15}
+  "id": "paper",
+  "name": "Paper",
+  "category": "processed_materials",
+  "subcategory": "publishing",
+  "baseValue": 25,
+  "weight": 0.2,
+  "volume": 0.5,
+  "stackSize": 100,
+  "description": "Processed sheets ready for printing, writing, and document creation.",
+  "longDescription": "Essential to Venice's thriving publishing industry and extensive bureaucracy, this high-quality paper is produced through careful processing of rags and fibers. Available in various grades from everyday writing paper to premium sheets for luxury books and official documents, paper represents both practical utility and intellectual advancement.",
+  "sprite": "assets/sprites/resources/paper.png",
+  "icon": "/assets/icons/resources/paper.png",
+  "availableQualities": [
+    "common",
+    "fine",
+    "superior"
+  ],
+  "defaultQuality": "common",
+  "processingFacility": "paper_mill",
+  "processingTime": 480,
+  "perishable": false,
+  "moistureSensitivity": 0.9,
+  "specialHandling": [
+    "keep_dry",
+    "flat_storage"
+  ],
+  "qualityFactors": [
+    {
+      "factor": "input_quality",
+      "weight": 0.4
     },
-    "transportRequirements": ["waterproof_covering", "flat_packing"],
-    "loadingTime": 8,
-    "routeRestrictions": ["avoid_canals_in_rain"],
-    
-    "storageOptions": {
-      "small_warehouse": {"capacityMultiplier": 1.0, "preservation": 0.9},
-      "paper_mill": {"capacityMultiplier": 1.2, "preservation": 1.0},
-      "printing_house": {"capacityMultiplier": 0.8, "preservation": 0.95}
+    {
+      "factor": "water_quality",
+      "weight": 0.3
     },
-    "storageRequirements": ["dry", "flat", "protected_from_pests"],
-    "specialStorageRisks": ["moisture", "mold", "insect_damage"],
-    "maxStorageTime": 43200,
-    
-    "marketDemand": "high",
-    "priceFluctuationFactors": [
-      {"factor": "rag_availability", "weight": 0.3},
-      {"factor": "publishing_activity", "weight": 0.3},
-      {"factor": "government_activity", "weight": 0.2},
-      {"factor": "education_level", "weight": 0.2}
-    ]
-  }
+    {
+      "factor": "worker_skill",
+      "weight": 0.3
+    }
+  ],
+  "paperTypes": [
+    {
+      "type": "writing_paper",
+      "smoothness": "high",
+      "value_multiplier": 1.0
+    },
+    {
+      "type": "printing_paper",
+      "ink_absorption": "optimized",
+      "value_multiplier": 1.1
+    },
+    {
+      "type": "document_paper",
+      "durability": "high",
+      "value_multiplier": 1.3
+    },
+    {
+      "type": "luxury_paper",
+      "quality": "exceptional",
+      "value_multiplier": 2.0
+    }
+  ],
+  "producedFrom": [
+    {
+      "inputs": [
+        {
+          "resource": "rags",
+          "amount": 80
+        },
+        {
+          "resource": "water",
+          "amount": 200
+        }
+      ],
+      "building": "paper_mill",
+      "processingTime": 480
+    }
+  ],
+  "usedIn": [
+    {
+      "outputs": [
+        {
+          "resource": "books",
+          "amount": 20
+        }
+      ],
+      "building": "printing_house",
+      "processingTime": 720
+    },
+    {
+      "outputs": [
+        {
+          "resource": "documents",
+          "amount": 50
+        }
+      ],
+      "building": "printing_house",
+      "processingTime": 360
+    },
+    {
+      "outputs": [
+        {
+          "resource": "maps",
+          "amount": 10
+        }
+      ],
+      "building": "cartographer",
+      "processingTime": 960
+    }
+  ],
+  "transportOptions": {
+    "barge": {
+      "capacity": 1000,
+      "efficiency": 0.85,
+      "risk": 0.2
+    },
+    "gondola": {
+      "capacity": 200,
+      "efficiency": 0.9,
+      "risk": 0.15
+    },
+    "handcart": {
+      "capacity": 50,
+      "efficiency": 0.95,
+      "risk": 0.1
+    },
+    "porter": {
+      "capacity": 20,
+      "efficiency": 0.9,
+      "risk": 0.15
+    }
+  },
+  "transportRequirements": [
+    "waterproof_covering",
+    "flat_packing"
+  ],
+  "loadingTime": 8,
+  "routeRestrictions": [
+    "avoid_canals_in_rain"
+  ],
+  "storageOptions": {
+    "small_warehouse": {
+      "capacityMultiplier": 1.0,
+      "preservation": 0.9
+    },
+    "paper_mill": {
+      "capacityMultiplier": 1.2,
+      "preservation": 1.0
+    },
+    "printing_house": {
+      "capacityMultiplier": 0.8,
+      "preservation": 0.95
+    }
+  },
+  "storageRequirements": [
+    "dry",
+    "flat",
+    "protected_from_pests"
+  ],
+  "specialStorageRisks": [
+    "moisture",
+    "mold",
+    "insect_damage"
+  ],
+  "maxStorageTime": 43200,
+  "marketDemand": "high",
+  "priceFluctuationFactors": [
+    {
+      "factor": "rag_availability",
+      "weight": 0.3
+    },
+    {
+      "factor": "publishing_activity",
+      "weight": 0.3
+    },
+    {
+      "factor": "government_activity",
+      "weight": 0.2
+    },
+    {
+      "factor": "education_level",
+      "weight": 0.2
+    }
+  ]
+}

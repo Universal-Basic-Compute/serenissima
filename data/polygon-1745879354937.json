@@ -58,12 +58,16 @@
     }
   ],
   "centroid": {
-    "lat": 45.436929656979245,
-    "lng": 12.323016191731254
+    "lat": 45.43680991741156,
+    "lng": 12.322890807986502
   },
   "historicalName": "Salizada San Pantalon in Sestiere di Santa Croce",
   "englishName": "San Pantalon Street in the District of Santa Croce",
   "historicalDescription": "This area was part of the Santa Croce sestiere, known for its artisan workshops and proximity to the Church of San Pantalon, which dates back to the 12th century.",
   "nameConfidence": "medium",
-  "areaInSquareMeters": 35263.58
+  "areaInSquareMeters": 35263.58,
+  "center": {
+    "lat": 45.436929656979245,
+    "lng": 12.323016191731254
+  }
 }

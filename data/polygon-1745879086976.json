@@ -69,5 +69,9 @@
   "englishName": "Long Street of Saint Barnabas in the Dorsoduro District",
   "historicalDescription": "This area in the sestiere of Dorsoduro was known for the Church of San Barnaba, which dates back to the 9th century. The nearby Rio de San Barnaba canal was an important waterway for local transportation and commerce in the 15th century.",
   "nameConfidence": "medium",
-  "areaInSquareMeters": 31574.5
+  "areaInSquareMeters": 31574.5,
+  "center": {
+    "lat": 45.43263155336768,
+    "lng": 12.324171833328618
+  }
 }

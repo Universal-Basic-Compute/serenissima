@@ -1,0 +1,80 @@
+{
+  "name": "Grand Canal Palace",
+  "category": "Residential",
+  "subcategory": "Noble Residences",
+  "tier": 4,
+  "size": "Extra Large",
+  "unlockCondition": "200,000,000 ducats total wealth, Great Council membership",
+  "calculationsAnalysis": "The Grand Canal Palace represents the pinnacle of Venetian residential architecture and status. The construction cost of 15,000,000 ducats reflects the extraordinary materials, craftsmanship, and prime Grand Canal location, while the income of 180,000 ducats (1.2% return) represents the economic power wielded from this prestigious address. The maintenance cost of 75,000 ducats (41.7% of income) reflects the extensive staff and upkeep required for such a grand residence. The residentsCapacity of 25 represents the noble family with extensive household staff. The construction time of 20 days (1728000000ms) reflects the elaborate construction and artistic elements. This building creates an endgame residential option with appropriate wealth and political requirements reflecting the highest echelon of Venetian society.",
+  "shortDescription": "Spectacular palace facing the Grand Canal, the ultimate statement of wealth and power in Venice.",
+  "fullDescription": "The pinnacle of Venetian residential architecture, these magnificent palaces line the Grand Canal, their facades functioning as public displays of family power. Featuring enormous reception halls, multiple courtyards, private docks, and lavish decoration, these buildings combine Gothic, Byzantine, and Renaissance elements in a uniquely Venetian style. Only the wealthiest and most powerful families maintain such residences.",
+  "flavorText": "The facade speaks to the canal, the canal speaks to the world—and both pronounce the glory of your house for generations to come.",
+  "constructionCosts": {
+    "ducats": 15000000,
+    "timber": 400,
+    "bricks": 1000,
+    "stone": 800,
+    "glass": 150,
+    "marble": 200,
+    "gold": 20
+  },
+  "maintenanceCost": 75000,
+  "constructionTime": 1728000000,
+  "incomeGeneration": 180000,
+  "residentsCapacity": 25,
+  "locationRequirements": {
+    "districtRestrictions": "Must be built directly on the Grand Canal",
+    "adjacentRequirements": "Requires Grand Canal frontage, large plot",
+    "environmentalEffects": "Dramatically increases property value of all buildings within vicinity by 25%"
+  },
+  "constructionPhase3DPrompt": "Renaissance Venetian Grand Canal palace under construction, massive multi-story structure directly on Grand Canal, elaborate wooden foundations and water barriers allowing construction at water level, teams of specialized craftsmen working on different sections, ornate marble facades being installed, sculptors creating decorative elements, large scaffolding systems covering the impressive facade, golden elements being applied to certain architectural features, temporary canal barriers to allow water-level work, construction barges delivering highest quality materials, master artists working on interior frescoes in completed sections, isometric game perspective, stylized but detailed, sense of extraordinary scale and ambition, workers appearing tiny against the grand structure",
+  "completedBuilding3DPrompt": "Completed Renaissance Venetian Grand Canal palace, spectacular multi-story structure with monumental facade directly on Grand Canal, masterpiece of Venetian Gothic architecture with Byzantine influences, ground floor featuring rusticated marble with multiple water entrances for boats, piano nobile with enormous ornate window groupings and elegant balconies, upper floors with progressively refined windows maintaining perfect proportions, facade featuring polychrome marble inlays, quatrefoil decorative elements, pointed Gothic arches, subtle gold accents on architectural details, multiple chimneys, private docks with family gondolas, ornate mooring poles with family colors, grand water gate (porta d'acqua) with family coat of arms prominently displayed, multi-colored marble facade in white, pink and subtle patterns, historically accurate but slightly stylized for game aesthetic, isometric game perspective, perfect Venetian combination of grandeur and elegance without ostentation, reflection in Grand Canal water, small side canal access to inner courtyard",
+  "gameplayInformation": {
+    "unlocks": [
+      "Highest Political Connections",
+      "Major Art Patronage",
+      "State Receptions"
+    ],
+    "specialAbilities": [
+      "Can host state events",
+      "Family museum",
+      "Major reputation enhancement",
+      "Diplomatic venue"
+    ],
+    "upgradePath": [
+      "None - highest tier"
+    ],
+    "reputationEffects": {
+      "Nobility": 30,
+      "Great Council": 25,
+      "Doge's Circle": 15,
+      "Foreign Diplomats": 20,
+      "Commoners": -10
+    },
+    "riskFactors": {
+      "fireRisk": "Low (premium construction)",
+      "floodRisk": "Medium-High (Grand Canal exposure)",
+      "crimeRisk": "Very Low (private guards, high security)"
+    }
+  },
+  "soundDesign": {
+    "ambientSound": "Grand Canal boat traffic, distant music from within",
+    "activitySounds": "Gondolas arriving, important visitors, chamber music, servant activity",
+    "musicTheme": "Diplomazia Veneziana"
+  },
+  "seasonalEffects": {
+    "winter": "Elegant winter decorations, heated interior visible through windows",
+    "carnival": "Most elaborate decorations in city, musicians and entertainers present, illuminated by torches and lanterns",
+    "state ceremonies": "State flags and banners, increased security, distinguished visitors"
+  },
+  "aiInteractionPoints": [
+    "Grand water entrance",
+    "Formal reception halls",
+    "Private docks",
+    "Multiple courtyards",
+    "Art galleries",
+    "Garden terraces",
+    "Ballrooms",
+    "Private chapel"
+  ]
+}

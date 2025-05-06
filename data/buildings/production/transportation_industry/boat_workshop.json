@@ -1,0 +1,93 @@
+{
+  "name": "Boat Workshop",
+  "category": "Production",
+  "subcategory": "Transportation Industry",
+  "tier": 2,
+  "size": "Medium",
+  "unlockCondition": "6,000,000 ducats capital, Boat Builders Guild connection, water access",
+  "calculationsAnalysis": "The Boat Workshop represents specialized maritime production with modest returns. The construction cost of 2,000,000 ducats reflects the specialized equipment and waterfront facilities required, while the income of 25,000 ducats (1.25% return) represents sales of various watercraft. The maintenance cost of 20,000 ducats (80% of income) creates a modest profit margin appropriate for specialized production. The employment capacity of 8 represents the boat builders, apprentices, and assistants needed. The construction time of 5 days (432000000ms) reflects the specialized construction requirements. This building creates a strategic investment in transportation infrastructure that supports Venice's unique water-based mobility needs.",
+  "shortDescription": "Specialized workshop for building and repairing small watercraft for Venice's canals and lagoon.",
+  "fullDescription": "Essential to Venice's water-based transportation system, boat workshops construct and maintain the diverse fleet of small vessels that navigate the city's canals. Featuring covered construction areas, specialized tools, wood steaming equipment, and direct water access, these facilities combine traditional craftsmanship with practical functionality. From simple sandoli to elegant gondolas, these workshops produce the watercraft that define Venetian mobility.",
+  "flavorText": "In a city where streets are made of water, the boat builder is as essential as the baker—for while one feeds the body, the other enables every aspect of Venetian life to flow.",
+  "constructionCosts": {
+    "ducats": 2000000,
+    "timber": 150,
+    "bricks": 100,
+    "stone": 80,
+    "iron": 40
+  },
+  "maintenanceCost": 20000,
+  "constructionTime": 432000000,
+  "incomeGeneration": 25000,
+  "employmentCapacity": 8,
+  "productionInformation": {
+    "inputResources": {
+      "Timber": 10,
+      "Pitch": 3,
+      "Iron Fittings": 2,
+      "Tools": 1
+    },
+    "outputResources": {
+      "Small Boats": 1,
+      "Gondola": 0.5,
+      "Boat Repairs": 5
+    },
+    "productionRate": "Varies by vessel type",
+    "storageCapacity": {
+      "rawMaterials": 100,
+      "finishedGoods": 10
+    }
+  },
+  "locationRequirements": {
+    "districtRestrictions": "Must have direct water access",
+    "adjacentRequirements": "Canal or lagoon frontage, boat launching capability",
+    "environmentalEffects": "Moderate noise, wood dust, increased water traffic"
+  },
+  "constructionPhase3DPrompt": "Renaissance Venetian boat workshop under construction, specialized maritime production facility, covered building area taking shape with open sides for ventilation, timber storage racks, specialized tool installation, wood steaming equipment, boat molds and templates, small slipway for launching vessels, direct canal access, craftsman workbenches, pitch heating area with safety features, isometric game perspective, stylized but detailed, focus on traditional boatbuilding craftsmanship combined with practical water access",
+  "completedBuilding3DPrompt": "Completed Renaissance Venetian boat workshop, active maritime production facility featuring covered main work area with boats in various stages of construction, master boat builder directing apprentices, specialized tools for shaping wooden hulls, steam box for bending wood, pitch pot for waterproofing, timber storage organized by type and age, small slipway for launching completed vessels, boats being caulked and sealed, gondola taking shape on specialized frame, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of traditional craftsmanship, wood shavings on floor, partially completed vessels showing construction techniques, small dock where customers examine finished boats, atmosphere combining craftsmanship with maritime practicality",
+  "gameplayInformation": {
+    "unlocks": [
+      "Small Boat Production",
+      "Gondola Construction",
+      "Vessel Repair Services"
+    ],
+    "specialAbilities": [
+      "Create custom watercraft",
+      "Repair damaged vessels",
+      "Adapt designs for specific needs"
+    ],
+    "upgradePath": [
+      "Advanced Boat Workshop (larger vessels, higher efficiency)"
+    ],
+    "reputationEffects": {
+      "Boat Builders Guild": 20,
+      "Transportation Services": 15,
+      "Merchants": 10,
+      "Fishermen": 15
+    },
+    "riskFactors": {
+      "fireRisk": "High (wood, pitch, open flames)",
+      "floodRisk": "Medium (waterfront location)",
+      "qualityRisk": "Medium (craftsmanship variations)"
+    }
+  },
+  "soundDesign": {
+    "ambientSound": "Wood being worked, hammering, water lapping against hulls",
+    "activitySounds": "Sawing, planing, steam box hissing, boat launching",
+    "musicTheme": "Arsenale in Movimento"
+  },
+  "seasonalEffects": {
+    "winter": "Focus on repairs, indoor construction",
+    "summer": "Peak production season, outdoor finishing work",
+    "carnival": "Decorative boat commissions, gondola refurbishment"
+  },
+  "aiInteractionPoints": [
+    "Main construction area",
+    "Wood selection racks",
+    "Steam bending station",
+    "Caulking and sealing area",
+    "Launching slipway",
+    "Design consultation desk",
+    "Repair dock"
+  ]
+}

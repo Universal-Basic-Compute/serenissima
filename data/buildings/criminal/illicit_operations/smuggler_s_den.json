@@ -1,0 +1,90 @@
+{
+  "name": "Smuggler's Den",
+  "category": "Criminal",
+  "subcategory": "Illicit Operations",
+  "tier": 2,
+  "size": "Medium",
+  "unlockCondition": "8,000,000 ducats capital, Criminal Contacts (street level quality), water access",
+  "calculationsAnalysis": "The Smuggler's Den represents specialized contraband handling with high risk and high reward. The construction cost of 2,500,000 ducats reflects the specialized storage and security measures required, while the income of 35,000 ducats (1.4% return) represents the markup on smuggled goods. The maintenance cost of 25,000 ducats (71.4% of income) creates a reasonable profit margin appropriate for this high-risk venture. The employment capacity of 8 represents the minimal crew needed for operations. The construction time of 5 days (432000000ms) reflects the need for discreet construction. This building creates a strategic investment in contraband movement with appropriate location requirements reflecting Venice's historical position as a smuggling hub due to its complex waterways and position between East and West.",
+  "shortDescription": "Concealed facility for storing and moving contraband through Venice's complex waterways.",
+  "fullDescription": "Taking advantage of Venice's labyrinthine canals and lagoon, smuggler's dens serve as hubs for moving illegal goods into and through the city. Featuring hidden docks, concealed storage, lookout positions, and often disguised entrances, these facilities enable the shadow economy that operates beneath Venice's legitimate trade. Their strategic locations provide quick access to both city canals and lagoon escape routes.",
+  "flavorText": "The customs officer sees only what passes through the gate, but the smuggler knows that in Venice, every canal is a highway and every water door a potential customs house—if you know whom to pay.",
+  "constructionCosts": {
+    "ducats": 2500000,
+    "timber": 80,
+    "bricks": 120,
+    "stone": 100,
+    "iron": 40
+  },
+  "maintenanceCost": 25000,
+  "constructionTime": 432000000,
+  "incomeGeneration": 35000,
+  "employmentCapacity": 8,
+  "productionInformation": {
+    "inputResources": {
+      "Contraband": "varies",
+      "Bribes": 10,
+      "Criminal Contacts": 2
+    },
+    "outputResources": {
+      "Smuggled Goods": "varies",
+      "Smuggling Services": 5
+    },
+    "productionRate": "Based on contraband volume",
+    "storageCapacity": {
+      "contraband": 100,
+      "smuggling equipment": 50
+    }
+  },
+  "locationRequirements": {
+    "districtRestrictions": "Must have water access, low guard presence",
+    "adjacentRequirements": "Discreet boat access, escape routes",
+    "environmentalEffects": "Suspicious boat traffic, occasional night activity"
+  },
+  "constructionPhase3DPrompt": "Renaissance Venetian smuggler's den under construction, criminal waterfront facility, hidden dock being built below street level, concealed water entrance taking shape, false front establishment being created, secret storage areas with water access, lookout points with good visibility, escape route planning, reinforced security features, hidden compartments in walls and floors, specialized loading equipment for quick transfers, isometric game perspective, stylized but detailed, focus on creating concealed water access combined with security features",
+  "completedBuilding3DPrompt": "Completed Renaissance Venetian smuggler's den, clandestine waterfront facility featuring hidden dock beneath street-level building, concealed water entrance disguised as ordinary canal frontage, innocent-looking facade hiding illegal operation, main storage area with contraband goods organized by type, lookout post with view of approaching guard boats, quick-loading equipment for rapid transfers, hidden compartments throughout, small boats modified for smuggling with concealed storage, night lanterns with shutters for signaling, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of secretive operation, contrast between innocent exterior and criminal interior, smugglers moving contraband under cover of darkness, atmosphere of vigilance and quick escapes",
+  "gameplayInformation": {
+    "unlocks": [
+      "Contraband Movement",
+      "Customs Evasion",
+      "Black Market Access"
+    ],
+    "specialAbilities": [
+      "Move illegal goods",
+      "Avoid tariffs",
+      "Secret transportation"
+    ],
+    "upgradePath": [
+      "Smuggling Network Hub (larger operation, international connections)"
+    ],
+    "reputationEffects": {
+      "Criminal Underworld": 20,
+      "Customs Officials": -25,
+      "City Guards": -20,
+      "Merchants": 10
+    },
+    "riskFactors": {
+      "discoveryRisk": "High (imprisonment, heavy fines)",
+      "betrayalRisk": "Medium (informants)",
+      "seizureRisk": "High (contraband confiscation)"
+    }
+  },
+  "soundDesign": {
+    "ambientSound": "Water lapping, quiet boat movements, hushed conversations",
+    "activitySounds": "Cargo being moved, warning signals, boat moorings",
+    "musicTheme": "Consiglio dei Dieci"
+  },
+  "seasonalEffects": {
+    "fog": "Increased operations, natural concealment",
+    "guard patrols": "Altered routes, reduced volume",
+    "customs inspections": "Temporary shutdowns, alternative methods"
+  },
+  "aiInteractionPoints": [
+    "Hidden dock",
+    "Contraband storage",
+    "Lookout post",
+    "Front business",
+    "Escape route planning",
+    "Smuggler boat moorings"
+  ]
+}

@@ -41,5 +41,9 @@
   "historicalName": "Calle del Megio in Sestiere Dorsoduro",
   "englishName": "Alley of the Megio in the Dorsoduro District",
   "historicalDescription": "A narrow alley located in the Dorsoduro sestiere, known for its artisan workshops and proximity to the Chiesa di San Sebastiano church.",
-  "nameConfidence": "medium"
+  "nameConfidence": "medium",
+  "center": {
+    "lat": 45.4413580704064,
+    "lng": 12.328975595557488
+  }
 }

@@ -1,0 +1,77 @@
+{
+  "name": "Quarantine Station",
+  "category": "Public & Government",
+  "subcategory": "Health & Safety",
+  "tier": 3,
+  "size": "Large",
+  "unlockCondition": "15,000,000 ducats, government authorization, Health Office approval",
+  "calculationsAnalysis": "The Quarantine Station represents specialized public health infrastructure with modest revenue. The construction cost of 9,000,000 ducats reflects the isolated facilities and security features required, while the income of 40,000 ducats (0.44% return) represents fees charged to merchants and travelers. The maintenance cost of 60,000 ducats exceeds income, creating a realistic scenario where public health security required government subsidy but protected the city from devastating epidemics. The employment capacity of 30 represents the health officials, guards, and support staff needed. The construction time of 20 days (1728000000ms) reflects the specialized construction requirements. This building creates a strategic investment in disease prevention that was historically crucial to Venice's survival as a trading hub exposed to foreign pathogens.",
+  "shortDescription": "Specialized facility for isolating potentially contagious travelers and goods before entry into Venice.",
+  "fullDescription": "Protecting Venice from imported diseases, quarantine stations isolate ships, travelers, and goods for observation before permitting city entry. Featuring separated accommodation blocks, inspection areas, fumigation facilities, and secure boundaries, these complex facilities implement Venice's pioneering public health measures. The term 'quarantine' itself originates from Venice's forty-day isolation period (quaranta giorni).",
+  "flavorText": "Forty days may seem a harsh price for entry to our city, but consider the alternative: the finest goods and richest merchants mean nothing if they bring the Black Death as an uninvited companion.",
+  "constructionCosts": {
+    "ducats": 9000000,
+    "timber": 200,
+    "bricks": 500,
+    "stone": 600,
+    "glass": 50,
+    "iron": 100
+  },
+  "maintenanceCost": 60000,
+  "constructionTime": 1728000000,
+  "incomeGeneration": 40000,
+  "employmentCapacity": 30,
+  "locationRequirements": {
+    "districtRestrictions": "Isolated location, often on outer island or lagoon edge",
+    "adjacentRequirements": "Water access for ships, security perimeter",
+    "environmentalEffects": "Prevents disease spread, creates controlled isolation area"
+  },
+  "constructionPhase3DPrompt": "Renaissance Venetian quarantine station under construction, specialized health security facility, isolated island or peninsula location, multiple accommodation blocks being built with complete separation between them, fumigation chambers for goods, inspection areas with safety features, secure perimeter taking shape, dedicated dock facilities for controlled access, administrative building for health officials, separated ventilation systems for each block, water purification system, specific medical design principles following Venetian Health Office requirements, isometric game perspective, stylized but detailed, focus on isolation and disease prevention through Renaissance understanding of contagion",
+  "completedBuilding3DPrompt": "Completed Renaissance Venetian quarantine station, sophisticated disease prevention facility featuring multiple isolated accommodation blocks with no connecting pathways, dedicated dock where ships are thoroughly inspected, fumigation chambers for treating suspicious goods, inspection halls where health officials examine travelers, separate facilities for different arrival dates preventing cross-contamination, administrative building where records are kept, boundary walls preventing unauthorized movement, guards ensuring isolation compliance, health officials in distinctive protective clothing, specialized goods handling equipment, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of methodical disease prevention through physical separation, innovative public health infrastructure that protected Venice from numerous plague outbreaks, systematic processing of arrivals visible, different zones showing varying stages of quarantine period",
+  "gameplayInformation": {
+    "unlocks": [
+      "Disease Prevention",
+      "Safe Trade Protocols",
+      "Public Health Measures"
+    ],
+    "specialAbilities": [
+      "Plague prevention",
+      "Safe processing of foreign goods",
+      "Health security enhancement"
+    ],
+    "upgradePath": [
+      "Advanced Quarantine Complex (improved methods, research)"
+    ],
+    "reputationEffects": {
+      "Health Office": 30,
+      "Government": 25,
+      "Foreign Traders": -10,
+      "General Population": 20
+    },
+    "riskFactors": {
+      "diseaseBreachRisk": "Medium (despite precautions)",
+      "diplomatic risk": "Medium (foreign resistance to procedures)",
+      "economic risk": "Medium (trade delays)"
+    }
+  },
+  "soundDesign": {
+    "ambientSound": "Distant ship horns, water sounds, seagulls, isolation",
+    "activitySounds": "Health inspections, fumigation processes, ships docking",
+    "musicTheme": "Maschera di Medico"
+  },
+  "seasonalEffects": {
+    "plague reports abroad": "Heightened security, extended quarantine",
+    "trading seasons": "Increased processing volume, additional staff",
+    "winter": "Focus on respiratory disease monitoring"
+  },
+  "aiInteractionPoints": [
+    "Ship inspection dock",
+    "Traveler processing area",
+    "Accommodation blocks",
+    "Goods fumigation chamber",
+    "Health officer station",
+    "Administration building",
+    "Security checkpoint",
+    "Observation tower"
+  ]
+}

@@ -26,12 +26,16 @@
     }
   ],
   "centroid": {
-    "lat": 45.44369892962761,
-    "lng": 12.33290494076297
+    "lat": 45.44355197989074,
+    "lng": 12.33318292562801
   },
   "historicalName": "Fondamenta de la Misericordia",
   "englishName": "Waterfront of Mercy",
   "historicalDescription": "This area in the Cannaregio sestiere was known for the Scuola Vecchia della Misericordia, a charitable confraternity founded in the 13th century. The nearby Rio della Sensa canal and Church of Santa Maria Valverde were also local landmarks.",
   "nameConfidence": "medium",
-  "areaInSquareMeters": 6540.62
+  "areaInSquareMeters": 6540.62,
+  "center": {
+    "lat": 45.44369892962761,
+    "lng": 12.33290494076297
+  }
 }

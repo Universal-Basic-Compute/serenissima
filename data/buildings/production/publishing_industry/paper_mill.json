@@ -1,0 +1,93 @@
+{
+  "name": "Paper Mill",
+  "category": "Production",
+  "subcategory": "Publishing Industry",
+  "tier": 2,
+  "size": "Large",
+  "unlockCondition": "8,000,000 ducats capital, water rights, outside city location",
+  "calculationsAnalysis": "The Paper Mill represents specialized industrial production with no direct income but industry-enabling capabilities. The construction cost of 2,250,000 ducats reflects the water-powered machinery and specialized facilities required, while generating no direct income reflects its position as a raw material producer rather than end product. The maintenance cost of 20,000 ducats creates an ongoing expense justified by enabling valuable publishing and documentation activities downstream. The employment capacity of 20 represents the workers needed for this labor-intensive process. The construction time of 6 days (518400000ms) reflects the specialized construction requirements. This building creates a strategic investment in paper production that enables the lucrative publishing industry, reflecting Venice's historical position as an early center of printing that depended on reliable paper supplies.",
+  "shortDescription": "Facility converting rags and fibers into paper sheets through mechanical processing.",
+  "fullDescription": "Essential to Venice's intellectual and commercial life, paper mills transform rags and plant fibers into the paper used for books, documents, and correspondence. Featuring water-powered stamping hammers, drying facilities, and sizing baths, these industrial operations require significant water resources. Venice's early adoption of paper manufacturing supported its prominence in publishing and record-keeping.",
+  "flavorText": "From discarded rags we create the very foundation of knowledge, commerce, and governance—for without paper, thoughts remain ephemeral and agreements merely spoken.",
+  "constructionCosts": {
+    "ducats": 2250000,
+    "timber": 150,
+    "bricks": 200,
+    "stone": 300,
+    "iron": 80
+  },
+  "maintenanceCost": 20000,
+  "constructionTime": 518400000,
+  "incomeGeneration": 0,
+  "employmentCapacity": 20,
+  "productionInformation": {
+    "inputResources": {
+      "Rags": 80,
+      "Plant Fibers": 40,
+      "Water": 200,
+      "Sizing Materials": 10
+    },
+    "outputResources": {
+      "Writing Paper": 100,
+      "Printing Paper": 150,
+      "Packaging Paper": 50
+    },
+    "productionRate": "300 sheets per day at various qualities",
+    "storageCapacity": {
+      "rawMaterials": 300,
+      "finishedGoods": 1000
+    }
+  },
+  "locationRequirements": {
+    "districtRestrictions": "Requires flowing water, often outside city proper",
+    "adjacentRequirements": "Must have water wheel access, substantial water supply",
+    "environmentalEffects": "Water pollution downstream, fiber dust in vicinity"
+  },
+  "constructionPhase3DPrompt": "Renaissance Venetian paper mill under construction, industrial facility with water power focus, water wheel mechanism being installed, stamping hammer system taking shape, large vats for pulp preparation, drainage systems and water channels, rag storage and processing area, drying loft with ventilation, sizing bath installation, cutting and finishing room, mechanical systems for pulp processing, substantial foundation work for water-powered machinery, isometric game perspective, stylized but detailed, focus on water management systems and industrial machinery",
+  "completedBuilding3DPrompt": "Completed Renaissance Venetian paper mill, substantial industrial facility with large water wheel powering mechanical hammers, workers processing rags into fiber, massive vats where pulp is mixed and prepared, couching area where sheets are formed using wooden frames and wire screens, pressing mechanism removing excess water from newly formed sheets, drying loft with hundreds of sheets hanging to dry, sizing bath for treating finished paper, cutting and sorting room for final processing, stacks of finished paper in different grades and sizes, historically accurate but slightly stylized for game aesthetic, isometric game perspective, water flowing through various stages of the process, sense of continuous production flow, workers specialized in different stages from rag selection to final quality control, water-powered mechanical elements creating an early industrial atmosphere",
+  "gameplayInformation": {
+    "unlocks": [
+      "Publishing Industry",
+      "Document Services",
+      "Book Production"
+    ],
+    "specialAbilities": [
+      "Watermark creation",
+      "Custom paper formulation",
+      "Specialty papers for art"
+    ],
+    "upgradePath": [
+      "Advanced Paper Mill (finer papers, special formulations)"
+    ],
+    "reputationEffects": {
+      "Printing Guild": 20,
+      "Merchant Guild": 15,
+      "Government Offices": 15,
+      "Environmental Factions": -10
+    },
+    "riskFactors": {
+      "waterSupplyRisk": "High (dependent on water flow)",
+      "fireRisk": "Medium (dry paper storage)",
+      "pollutionRisk": "Medium (process chemicals)"
+    }
+  },
+  "soundDesign": {
+    "ambientSound": "Water wheel turning, stamping hammers pounding, water flowing",
+    "activitySounds": "Paper sheets being lifted, pressing mechanism operating, sorting",
+    "musicTheme": "Arsenale in Movimento"
+  },
+  "seasonalEffects": {
+    "summer": "Faster drying times, higher output",
+    "winter": "Potential freezing issues, slower production",
+    "rainy seasons": "Water quality issues affect paper quality"
+  },
+  "aiInteractionPoints": [
+    "Rag sorting area",
+    "Pulp vat",
+    "Sheet formation station",
+    "Pressing mechanism",
+    "Drying loft",
+    "Cutting and sorting room",
+    "Finished paper storage"
+  ]
+}

@@ -1,0 +1,76 @@
+{
+  "name": "Town Hall",
+  "category": "Public & Government",
+  "subcategory": "Civic Buildings",
+  "tier": 2,
+  "size": "Large",
+  "unlockCondition": "15,000,000 ducats, local government appointment or connection",
+  "calculationsAnalysis": "The Town Hall balances civic investment with modest administrative revenue. The construction cost of 5,000,000 ducats reflects the substantial public building required, while the income of 30,000 ducats (0.6% return) represents administrative fees and taxes collected. The maintenance cost of 35,000 ducats exceeds income, creating a realistic scenario where civic buildings required public subsidy but provided essential governance services. The employment capacity of 20 represents the officials and clerks needed for local administration. The construction time of 14 days (1209600000ms) reflects the substantial public project. This building creates a strategic investment in local governance with appropriate requirements reflecting the political nature of establishing administrative centers in Renaissance Venice.",
+  "shortDescription": "Local government offices providing administrative services for a district.",
+  "fullDescription": "Handling local governance needs, town halls serve as administrative centers for Venice's districts. Featuring offices for district officials, public meeting spaces, record archives, and often small courtrooms, these buildings manage the day-to-day governance tasks below the level of the central government. Their accessible location and public service focus made them important neighborhood institutions.",
+  "flavorText": "Between the lofty politics of the Senate and the daily concerns of the citizen lies the town hall—where grand policies become practical solutions to everyday problems.",
+  "constructionCosts": {
+    "ducats": 5000000,
+    "timber": 150,
+    "bricks": 300,
+    "stone": 400,
+    "glass": 60,
+    "marble": 80
+  },
+  "maintenanceCost": 35000,
+  "constructionTime": 1209600000,
+  "incomeGeneration": 30000,
+  "employmentCapacity": 20,
+  "locationRequirements": {
+    "districtRestrictions": "Central district location, often on secondary campo",
+    "adjacentRequirements": "Public accessibility, visibility",
+    "environmentalEffects": "Increases civic activity, creates administrative center"
+  },
+  "constructionPhase3DPrompt": "Renaissance Venetian town hall under construction, district government building, substantial civic structure taking shape, administrative offices being partitioned, public meeting hall with raised dais for officials, document storage vaults with security features, district symbols being carved into facade, official architectural style following government regulations, quality construction showing civic importance, public counter areas for citizen services, separate entrance for officials, dedicated clerk spaces, isometric game perspective, stylized but detailed, balance of authority and accessibility in design",
+  "completedBuilding3DPrompt": "Completed Renaissance Venetian town hall, dignified district government building featuring official architecture with Venetian Gothic elements, central public hall for community meetings, administrative offices visible with clerks at work, document archives with organized scrolls and ledgers, small courtroom for local cases, public service counters where citizens queue for assistance, district symbols prominently displayed including Lion of St. Mark, district flags and banners, separate official entrance, security features for valuable records, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of orderly local government, citizens conducting official business, district officials in formal robes, balance of authority symbolism and practical service functions, atmosphere of civic organization",
+  "gameplayInformation": {
+    "unlocks": [
+      "Local Government Functions",
+      "Document Services",
+      "Community Management"
+    ],
+    "specialAbilities": [
+      "Administrative center",
+      "Local dispute resolution",
+      "Public records access"
+    ],
+    "upgradePath": [
+      "District Government Center (expanded services)"
+    ],
+    "reputationEffects": {
+      "Local Citizens": 20,
+      "Central Government": 15,
+      "Merchants": 15,
+      "Nobility": 10
+    },
+    "riskFactors": {
+      "corruptionRisk": "Medium (administrative power)",
+      "bureaucracyRisk": "Medium (administrative inefficiencies)",
+      "fireRisk": "Medium (document storage)"
+    }
+  },
+  "soundDesign": {
+    "ambientSound": "Quill scratching, official stamps, muted conversations",
+    "activitySounds": "Public announcements, dispute resolutions, citizen petitions",
+    "musicTheme": "Processione Ducale"
+  },
+  "seasonalEffects": {
+    "tax seasons": "Increased activity, financial focus",
+    "elections": "Community gatherings, political speeches",
+    "civic holidays": "Decorated with district flags, ceremonies"
+  },
+  "aiInteractionPoints": [
+    "Public counter",
+    "Meeting hall",
+    "Document archive",
+    "Officials' offices",
+    "Courtroom",
+    "Waiting area",
+    "Announcement board"
+  ]
+}

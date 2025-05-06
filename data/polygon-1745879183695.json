@@ -62,12 +62,16 @@
     }
   ],
   "centroid": {
-    "lat": 45.43338574259584,
-    "lng": 12.318321133516296
+    "lat": 45.43344382008353,
+    "lng": 12.31775122224292
   },
   "historicalName": "Calle Larga San Marco",
   "englishName": "Long Street of St Mark's",
   "historicalDescription": "A wide street in the San Marco sestiere, near Piazza San Marco and the Doge's Palace. The area was a center of government and commerce in 15th century Venice.",
   "nameConfidence": "medium",
-  "areaInSquareMeters": 59489.6
+  "areaInSquareMeters": 59489.6,
+  "center": {
+    "lat": 45.43338574259584,
+    "lng": 12.318321133516296
+  }
 }

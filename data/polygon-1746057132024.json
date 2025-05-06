@@ -94,12 +94,16 @@
     }
   ],
   "centroid": {
-    "lat": 45.44094218311763,
-    "lng": 12.356304597890317
+    "lat": 45.441507721974396,
+    "lng": 12.356349693615437
   },
   "historicalName": "Campo San Polo",
   "englishName": "St. Paul's Square",
   "historicalDescription": "A major square in the San Polo sestiere, known for its large size and the Church of San Polo which has stood there since the 9th century. In the 15th century, it was a bustling area with markets, festivities, and one of the main wells providing water to the district.",
   "nameConfidence": "high",
-  "areaInSquareMeters": 54238.26
+  "areaInSquareMeters": 54238.26,
+  "center": {
+    "lat": 45.44094218311763,
+    "lng": 12.356304597890317
+  }
 }

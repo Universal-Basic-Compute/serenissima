@@ -33,5 +33,9 @@
   "englishName": "Saint John Lateran Street, Castello District",
   "historicalDescription": "This street was located in the Castello sestiere, one of the central districts of Venice. It was named after the nearby Church of San Giovanni in Laterano, a historic church dating back to the 11th century. The area was primarily residential, with houses and palaces of noble Venetian families.",
   "nameConfidence": "medium",
-  "areaInSquareMeters": 5674.72
+  "areaInSquareMeters": 5674.72,
+  "center": {
+    "lat": 45.43791589189734,
+    "lng": 12.343493555828202
+  }
 }

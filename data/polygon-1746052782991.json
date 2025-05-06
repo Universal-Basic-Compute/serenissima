@@ -25,5 +25,9 @@
   "englishName": "Alley of the Converted Women, Dorsoduro District",
   "historicalDescription": "This area in the Dorsoduro sestiere was known for housing a convent that took in former prostitutes who had 'converted' and left their profession. It was near the church of San Trovaso and the Squero di San Trovaso, a historic gondola boatyard.",
   "nameConfidence": "high",
-  "areaInSquareMeters": 36529.11
+  "areaInSquareMeters": 36529.11,
+  "center": {
+    "lat": 45.42709035113009,
+    "lng": 12.321661371542874
+  }
 }

@@ -61,5 +61,9 @@
   "englishName": "Lezze Alley in the San Moisè Quarter, District of San Marco",
   "historicalDescription": "A narrow alleyway in the San Moisè quarter of the San Marco district, near the bustling Piazza San Marco and the Grand Canal. The area was known for its proximity to the heart of Venice's political and religious power.",
   "nameConfidence": "medium",
-  "areaInSquareMeters": 43597.3
+  "areaInSquareMeters": 43597.3,
+  "center": {
+    "lat": 45.43404585738009,
+    "lng": 12.328699018382821
+  }
 }

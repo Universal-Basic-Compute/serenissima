@@ -30,12 +30,16 @@
     }
   ],
   "centroid": {
-    "lat": 45.4357825948601,
-    "lng": 12.317191542293017
+    "lat": 45.435783764769326,
+    "lng": 12.317847093367613
   },
   "historicalName": "Contrada San Simeon Grande",
   "englishName": "District of San Simeon the Great",
   "historicalDescription": "Area named after the nearby Church of San Simeon Grande, located in the Santa Croce sestiere. Known for its artisan workshops and proximity to the Grand Canal.",
   "nameConfidence": "medium",
-  "areaInSquareMeters": 41284.3
+  "areaInSquareMeters": 41284.3,
+  "center": {
+    "lat": 45.4357825948601,
+    "lng": 12.317191542293017
+  }
 }

@@ -73,5 +73,9 @@
   "englishName": "Street of the Blacksmiths, St. Mark's",
   "historicalDescription": "This street was known for its concentration of blacksmith workshops in the San Marco sestiere during the 15th century, located near the Rialto Bridge and market area.",
   "nameConfidence": "medium",
-  "areaInSquareMeters": 18788.35
+  "areaInSquareMeters": 18788.35,
+  "center": {
+    "lat": 45.43510312952261,
+    "lng": 12.337252050978096
+  }
 }

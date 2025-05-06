@@ -66,12 +66,16 @@
     }
   ],
   "centroid": {
-    "lat": 45.439666480386975,
-    "lng": 12.338253051888808
+    "lat": 45.439829448574855,
+    "lng": 12.337772107574917
   },
   "historicalName": "Ruga dei Oresi in Sestiere di Cannaregio",
   "englishName": "Goldsmith's Street in Cannaregio District",
   "historicalDescription": "This area in the Cannaregio sestiere was known for its concentration of goldsmiths and jewelers in the 15th century. It was situated near the Chiesa di Santa Sofia and the Rio di Santa Sofia canal.",
   "nameConfidence": "medium",
-  "areaInSquareMeters": 28079.13
+  "areaInSquareMeters": 28079.13,
+  "center": {
+    "lat": 45.439666480386975,
+    "lng": 12.338253051888808
+  }
 }

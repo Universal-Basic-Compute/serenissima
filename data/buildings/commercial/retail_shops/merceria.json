@@ -1,0 +1,83 @@
+{
+  "name": "Merceria",
+  "category": "Commercial",
+  "subcategory": "Retail Shops",
+  "tier": 2,
+  "size": "Medium",
+  "unlockCondition": "5,000,000 ducats total wealth, Textile Guild connection",
+  "calculationsAnalysis": "The Merceria's economic profile reflects the importance of textile retail in Venice's economy. With a construction cost of 1,000,000 ducats and income of 15,000 ducats (1.5% return), it represents a specialized investment with modest but reliable returns. The maintenance cost of 6,000 ducats (40% of income) balances profitability with realistic overhead for a specialized shop. The employment capacity of 4 reflects the staff needed to handle, display, and sell valuable textiles. The construction time of 3 days (259200000ms) represents the more refined construction and specialized fixtures required. This building creates a strategic choice for players to specialize in the lucrative textile trade, with appropriate guild requirements reflecting historical trade organization.",
+  "shortDescription": "Specialized textile and fabric shop offering a variety of imported and local cloths.",
+  "fullDescription": "Named after Venice's famous shopping street, these specialized shops are the center of the textile trade. Offering everything from simple local woolens to exotic silks from the East, a merceria features dramatic fabric displays, specialized measuring counters, and often a separate area for noble clients. These shops connect Venice's vital textile industry directly to consumers.",
+  "flavorText": "Under these silks lie the true fabric of Venice—commerce that spans from humble wool to threads of gold.",
+  "constructionCosts": {
+    "ducats": 1000000,
+    "timber": 60,
+    "bricks": 120,
+    "stone": 40,
+    "glass": 10
+  },
+  "maintenanceCost": 6000,
+  "constructionTime": 259200000,
+  "incomeGeneration": 15000,
+  "employmentCapacity": 4,
+  "locationRequirements": {
+    "districtRestrictions": "Premium locations in San Marco, Rialto, or Castello",
+    "adjacentRequirements": "Preferably near other luxury retailers",
+    "environmentalEffects": "Increases property value of adjacent buildings by 8%, attracts wealthy clientele"
+  },
+  "productionInformation": {
+    "inputResources": {
+      "Various Textiles": "30-50 units per day",
+      "Imported Fabrics": "10-20 units per day"
+    },
+    "outputResources": {
+      "Retail Fabric Sales": "25-40 units per day",
+      "Sales Revenue": "30-60 ducats per day"
+    },
+    "storageCapacity": 80
+  },
+  "constructionPhase3DPrompt": "Renaissance Venetian merceria under construction, textile shop with specialized features, large retail space taking shape, fabric display areas being built, custom shelving for fabric bolts, special north-facing windows for true color assessment, separate fitting area, elaborate counter being crafted, refined architectural elements, quality construction materials, workers installing specialized cabinet work, isometric game perspective, stylized but detailed, warm wood and plaster textures, attention to lighting considerations for fabric display",
+  "completedBuilding3DPrompt": "Completed Renaissance Venetian merceria, elegant textile shop with refined facade, large display windows with fabric samples visible, interior showing wooden shelves with colorful fabric bolts arranged by type and quality, long measuring counter of polished wood, separate area with privacy screens for noble customers, fabric samples draped artfully, specialized lighting to show true colors, small scissor and thread display, glass-front cabinets with exotic textiles, hanging sign showing measuring tools and fabric, historically accurate but slightly stylized for game aesthetic, isometric game perspective, color-coordinated textile displays creating vibrant interior, elegant customers examining fabrics, merchant showing silks to client, Persian carpet on floor",
+  "gameplayInformation": {
+    "unlocks": [
+      "Textile Trade",
+      "Fashion Industry Connections",
+      "Noble Client List"
+    ],
+    "specialAbilities": [
+      "Access to imported fabrics",
+      "Can fulfill noble commissions",
+      "Fashion trend information"
+    ],
+    "upgradePath": [
+      "Luxury Showroom"
+    ],
+    "reputationEffects": {
+      "Textile Guild": 15,
+      "Merchant Guild": 10,
+      "Nobility": 8
+    },
+    "riskFactors": {
+      "fireRisk": "High (flammable textiles)",
+      "theftRisk": "High (valuable merchandise)",
+      "fashionRisk": "Medium (affected by changing tastes)"
+    }
+  },
+  "soundDesign": {
+    "ambientSound": "Soft conversation, fabric being unfolded",
+    "activitySounds": "Scissors cutting samples, measuring discussions, price negotiations",
+    "musicTheme": "Sospiri Veneziani"
+  },
+  "seasonalEffects": {
+    "winter": "Heavier fabrics prominently displayed, seasonal colors",
+    "carnival": "Mask-making fabrics, costume materials featured",
+    "seasonal collections": "Complete rotation of stock 4 times per year"
+  },
+  "aiInteractionPoints": [
+    "Main counter",
+    "Noble client area",
+    "Fabric displays",
+    "Window shopping",
+    "Color matching area"
+  ]
+}

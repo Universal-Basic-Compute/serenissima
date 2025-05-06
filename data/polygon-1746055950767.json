@@ -26,12 +26,16 @@
     }
   ],
   "centroid": {
-    "lat": 45.44295709411116,
-    "lng": 12.335650384640275
+    "lat": 45.44265641382079,
+    "lng": 12.33566596182344
   },
   "historicalName": "Calle Corrente in Sestiere Cannaregio",
   "englishName": "Running Street in Cannaregio District",
   "historicalDescription": "A narrow street in the Cannaregio sestiere of Venice, known for its residential buildings and proximity to the Jewish Ghetto, which was established in 1516.",
   "nameConfidence": "medium",
-  "areaInSquareMeters": 14641.5
+  "areaInSquareMeters": 14641.5,
+  "center": {
+    "lat": 45.44295709411116,
+    "lng": 12.335650384640275
+  }
 }

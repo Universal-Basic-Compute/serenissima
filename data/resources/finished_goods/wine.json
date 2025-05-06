@@ -4,9 +4,8 @@
   "category": "finished_goods",
   "subcategory": "consumables",
   "description": "Fermented grape beverage imported from mainland vineyards and distributed throughout Venice. A daily staple for citizens of all classes and an important trade commodity.",
-  "icon": "icons/resources/wine.png",
+  "icon": "/assets/icons/resources/wine.png",
   "model": "models/resources/wine.glb",
-  
   "base_properties": {
     "base_value": 15,
     "weight": 3.0,
@@ -16,17 +15,36 @@
     "perish_time": 4320,
     "aging_potential": true,
     "aging_curve": [
-      {"time": 0, "value_multiplier": 0.9},
-      {"time": 720, "value_multiplier": 1.0},
-      {"time": 2160, "value_multiplier": 1.1},
-      {"time": 4320, "value_multiplier": 1.0},
-      {"time": 8640, "value_multiplier": 0.8}
+      {
+        "time": 0,
+        "value_multiplier": 0.9
+      },
+      {
+        "time": 720,
+        "value_multiplier": 1.0
+      },
+      {
+        "time": 2160,
+        "value_multiplier": 1.1
+      },
+      {
+        "time": 4320,
+        "value_multiplier": 1.0
+      },
+      {
+        "time": 8640,
+        "value_multiplier": 0.8
+      }
     ]
   },
-  
   "market_properties": {
     "luxury_level": 2,
-    "target_customers": ["all_citizens", "taverns", "merchants", "export_markets"],
+    "target_customers": [
+      "all_citizens",
+      "taverns",
+      "merchants",
+      "export_markets"
+    ],
     "fashion_sensitivity": 0.2,
     "export_value_multiplier": 1.2,
     "market_demand": "high",
@@ -38,7 +56,6 @@
       "winter": 1.2
     }
   },
-  
   "production_properties": {
     "producer_building": "winery",
     "production_complexity": 5,
@@ -46,35 +63,79 @@
     "production_time": 1440,
     "batch_size": 20,
     "inputs": [
-      {"resource": "grapes", "amount": 30, "quality_impact": 0.7},
-      {"resource": "barrels", "amount": 1, "quality_impact": 0.2},
-      {"resource": "clean_water", "amount": 5, "quality_impact": 0.1}
+      {
+        "resource": "grapes",
+        "amount": 30,
+        "quality_impact": 0.7
+      },
+      {
+        "resource": "barrels",
+        "amount": 1,
+        "quality_impact": 0.2
+      },
+      {
+        "resource": "clean_water",
+        "amount": 5,
+        "quality_impact": 0.1
+      }
     ]
   },
-  
   "quality_variations": {
-    "available_qualities": ["poor", "common", "fine", "superior"],
+    "available_qualities": [
+      "poor",
+      "common",
+      "fine",
+      "superior"
+    ],
     "default_quality": "common",
     "quality_multipliers": {
-      "poor": {"value": 0.6, "taste": 0.5, "prestige": 0.4},
-      "common": {"value": 1.0, "taste": 1.0, "prestige": 1.0},
-      "fine": {"value": 1.8, "taste": 1.5, "prestige": 1.8},
-      "superior": {"value": 3.0, "taste": 2.0, "prestige": 3.0}
+      "poor": {
+        "value": 0.6,
+        "taste": 0.5,
+        "prestige": 0.4
+      },
+      "common": {
+        "value": 1.0,
+        "taste": 1.0,
+        "prestige": 1.0
+      },
+      "fine": {
+        "value": 1.8,
+        "taste": 1.5,
+        "prestige": 1.8
+      },
+      "superior": {
+        "value": 3.0,
+        "taste": 2.0,
+        "prestige": 3.0
+      }
     },
     "quality_factors": [
-      {"factor": "grape_quality", "weight": 0.6},
-      {"factor": "winemaker_skill", "weight": 0.3},
-      {"factor": "aging_conditions", "weight": 0.1}
+      {
+        "factor": "grape_quality",
+        "weight": 0.6
+      },
+      {
+        "factor": "winemaker_skill",
+        "weight": 0.3
+      },
+      {
+        "factor": "aging_conditions",
+        "weight": 0.1
+      }
     ]
   },
-  
   "varieties": [
     {
       "type": "red_wine",
       "production_difficulty": "medium",
       "popularity": "high",
       "value_multiplier": 1.0,
-      "regions": ["veneto", "friuli", "tuscany"],
+      "regions": [
+        "veneto",
+        "friuli",
+        "tuscany"
+      ],
       "model_variant": "models/resources/wine_red.glb"
     },
     {
@@ -82,7 +143,11 @@
       "production_difficulty": "medium",
       "popularity": "high",
       "value_multiplier": 1.0,
-      "regions": ["veneto", "friuli", "lombardy"],
+      "regions": [
+        "veneto",
+        "friuli",
+        "lombardy"
+      ],
       "model_variant": "models/resources/wine_white.glb"
     },
     {
@@ -90,7 +155,10 @@
       "production_difficulty": "high",
       "popularity": "medium",
       "value_multiplier": 1.5,
-      "regions": ["crete", "greece"],
+      "regions": [
+        "crete",
+        "greece"
+      ],
       "model_variant": "models/resources/wine_malvasia.glb"
     },
     {
@@ -98,62 +166,143 @@
       "production_difficulty": "medium",
       "popularity": "medium",
       "value_multiplier": 1.2,
-      "regions": ["friuli", "istria"],
+      "regions": [
+        "friuli",
+        "istria"
+      ],
       "model_variant": "models/resources/wine_ribolla.glb"
     }
   ],
-  
   "flavor_properties": {
-    "base_flavor_profile": ["fruity", "acidic", "complex"],
+    "base_flavor_profile": [
+      "fruity",
+      "acidic",
+      "complex"
+    ],
     "serving_temperature": "cool",
-    "pairing_foods": ["fish", "meat", "cheese", "bread"],
-    "serving_occasions": ["daily_meals", "celebrations", "tavern_service", "religious_ceremonies"],
+    "pairing_foods": [
+      "fish",
+      "meat",
+      "cheese",
+      "bread"
+    ],
+    "serving_occasions": [
+      "daily_meals",
+      "celebrations",
+      "tavern_service",
+      "religious_ceremonies"
+    ],
     "intoxication_level": 2
   },
-  
   "usage_properties": {
-    "uses": ["consumption", "cooking", "religious_ceremonies", "medicinal"],
-    "special_features": ["social_lubricant", "caloric_value", "preservation_properties"],
-    "complementary_resources": ["cheese", "bread", "preserved_fish", "glassware"]
+    "uses": [
+      "consumption",
+      "cooking",
+      "religious_ceremonies",
+      "medicinal"
+    ],
+    "special_features": [
+      "social_lubricant",
+      "caloric_value",
+      "preservation_properties"
+    ],
+    "complementary_resources": [
+      "cheese",
+      "bread",
+      "preserved_fish",
+      "glassware"
+    ]
   },
-  
   "transport_properties": {
     "transport_methods": {
-      "barge": {"capacity": 100, "efficiency": 1.0, "risk": 0.1},
-      "cart": {"capacity": 15, "efficiency": 0.9, "risk": 0.15},
-      "porter": {"capacity": 2, "efficiency": 0.8, "risk": 0.2}
+      "barge": {
+        "capacity": 100,
+        "efficiency": 1.0,
+        "risk": 0.1
+      },
+      "cart": {
+        "capacity": 15,
+        "efficiency": 0.9,
+        "risk": 0.15
+      },
+      "porter": {
+        "capacity": 2,
+        "efficiency": 0.8,
+        "risk": 0.2
+      }
     },
-    "special_requirements": ["careful_handling", "sealed_containers"],
+    "special_requirements": [
+      "careful_handling",
+      "sealed_containers"
+    ],
     "loading_time": 10,
     "route_restrictions": []
   },
-  
   "storage_properties": {
     "storage_facilities": {
-      "wine_cellar": {"capacity_multiplier": 1.0, "preservation": 1.0, "aging_quality": 1.1},
-      "warehouse": {"capacity_multiplier": 0.8, "preservation": 0.9, "aging_quality": 0.9},
-      "tavern": {"capacity_multiplier": 0.6, "preservation": 0.8, "aging_quality": 0.8}
+      "wine_cellar": {
+        "capacity_multiplier": 1.0,
+        "preservation": 1.0,
+        "aging_quality": 1.1
+      },
+      "warehouse": {
+        "capacity_multiplier": 0.8,
+        "preservation": 0.9,
+        "aging_quality": 0.9
+      },
+      "tavern": {
+        "capacity_multiplier": 0.6,
+        "preservation": 0.8,
+        "aging_quality": 0.8
+      }
     },
-    "storage_requirements": ["cool", "dark", "stable_temperature"],
-    "special_risks": ["spoilage", "leakage", "theft"],
+    "storage_requirements": [
+      "cool",
+      "dark",
+      "stable_temperature"
+    ],
+    "special_risks": [
+      "spoilage",
+      "leakage",
+      "theft"
+    ],
     "max_storage_time": 4320,
     "container_types": [
-      {"type": "barrel", "capacity": 20, "preservation_bonus": 0.1},
-      {"type": "amphora", "capacity": 10, "preservation_bonus": 0.05},
-      {"type": "bottle", "capacity": 1, "preservation_bonus": 0.2}
+      {
+        "type": "barrel",
+        "capacity": 20,
+        "preservation_bonus": 0.1
+      },
+      {
+        "type": "amphora",
+        "capacity": 10,
+        "preservation_bonus": 0.05
+      },
+      {
+        "type": "bottle",
+        "capacity": 1,
+        "preservation_bonus": 0.2
+      }
     ]
   },
-  
   "production_chain_position": {
     "predecessors": [
-      {"resource": "grapes", "facility": "vineyard"}
+      {
+        "resource": "grapes",
+        "facility": "vineyard"
+      }
     ],
     "successors": [
-      {"resource": "spiced_wine", "facility": "winery"},
-      {"resource": "vinegar", "facility": "vinegar_works"}
+      {
+        "resource": "spiced_wine",
+        "facility": "winery"
+      },
+      {
+        "resource": "vinegar",
+        "facility": "vinegar_works"
+      }
     ]
   },
-  
   "historical_notes": {
     "introduction_year": "ancient",
     "historical_significance": "Wine was a fundamental part of Venetian daily life, consumed by all social classes. The city's position as a trading hub meant it had access to wines from across the Mediterranean, though much of its supply came from vineyards in its mainland territories. Wine consumption was considered healthier than water, which was often of questionable quality.",

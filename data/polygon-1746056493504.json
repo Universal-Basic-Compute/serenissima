@@ -66,12 +66,16 @@
     }
   ],
   "centroid": {
-    "lat": 45.438215584687356,
-    "lng": 12.348456628083005
+    "lat": 45.438275731200314,
+    "lng": 12.349185454392858
   },
   "historicalName": "Calle Seconda de la Fava en Sestier de San Marco",
   "englishName": "Second Street of the Fava in the District of St. Mark",
   "historicalDescription": "This area was part of the San Marco sestiere, known for its central location and proximity to important landmarks such as St. Mark's Basilica and the Doge's Palace. The street likely took its name from a prominent family or business dealing with fava beans.",
   "nameConfidence": "medium",
-  "areaInSquareMeters": 75110.14
+  "areaInSquareMeters": 75110.14,
+  "center": {
+    "lat": 45.438215584687356,
+    "lng": 12.348456628083005
+  }
 }

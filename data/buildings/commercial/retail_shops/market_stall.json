@@ -1,0 +1,83 @@
+{
+  "name": "Market Stall",
+  "category": "Commercial",
+  "subcategory": "Retail Shops",
+  "tier": 1,
+  "size": "Small",
+  "unlockCondition": "None - available from start",
+  "calculationsAnalysis": "The Market Stall represents the entry point to commercial ventures in Renaissance Venice. Historically, these simple structures required minimal investment (150,000 ducats) but provided steady daily income (8,000 ducats) with low maintenance (1,000 ducats). This creates a reasonable ROI of about 1.3% per cycle, balancing accessibility for new players while requiring multiple cycles to recoup the initial investment. The employment capacity of 1 reflects the family-operated nature of these businesses, while construction time of 1 day (86400000ms) allows new players to quickly establish basic income streams.",
+  "shortDescription": "Simple open-air selling space for basic goods and produce.",
+  "fullDescription": "The humble beginning of many Venetian merchants, these wooden stalls provide a simple but effective way to sell goods directly to the public. Typically clustered in market areas or along busy streets, market stalls can be assembled daily and feature awnings for protection from sun and rain.",
+  "flavorText": "A good location, a keen eye, and a loud voice—the three essentials of the successful market vendor.",
+  "constructionCosts": {
+    "ducats": 150000,
+    "timber": 20
+  },
+  "maintenanceCost": 1000,
+  "constructionTime": 86400000,
+  "incomeGeneration": 8000,
+  "employmentCapacity": 1,
+  "locationRequirements": {
+    "districtRestrictions": "Must be placed in designated market areas or along commercial streets",
+    "adjacentRequirements": "Requires open plaza or street access",
+    "environmentalEffects": "Increases foot traffic in immediate area"
+  },
+  "productionInformation": {
+    "inputResources": {
+      "Various Trade Goods": "5-10 units per day depending on type"
+    },
+    "outputResources": {
+      "Sales Revenue": "8-15 ducats per day depending on location and goods"
+    },
+    "storageCapacity": 20
+  },
+  "constructionPhase3DPrompt": "Renaissance Venetian market stall under construction, simple wooden framework being assembled in town square, partial awning of striped fabric, small counter being built, basic wooden structure, crates ready to display goods, simple tools for assembly, very quick construction process, workers securing support posts, historically accurate but simple design, isometric game perspective, stylized but detailed, warm wood textures",
+  "completedBuilding3DPrompt": "Completed Renaissance Venetian market stall, simple wooden structure with striped fabric awning in red and white, sturdy wooden counter for displaying goods, small storage space beneath counter, hanging scale for weighing goods, various produce or goods displayed according to stall type, small signage indicating merchant's specialty, oil lamp for evening operation, basket for transactions, historically accurate but slightly stylized for game aesthetic, isometric game perspective, colorful goods creating visual interest, weathered wood textures, bustling activity around stall",
+  "gameplayInformation": {
+    "unlocks": [
+      "Basic Retail Operations"
+    ],
+    "specialAbilities": [
+      "Flexible location - can be moved for a fee",
+      "Low startup costs",
+      "Quick to establish"
+    ],
+    "upgradePath": [
+      "Bottega"
+    ],
+    "reputationEffects": {
+      "Merchant Guild": 2,
+      "Local Neighborhood": 3
+    },
+    "riskFactors": {
+      "fireRisk": "Medium",
+      "weatherRisk": "High (exposed to elements)",
+      "theftRisk": "High (limited security)"
+    }
+  },
+  "soundDesign": {
+    "ambientSound": "Market chatter, occasional vendor calls",
+    "activitySounds": "Haggling, coins clinking, goods being arranged",
+    "musicTheme": "Rialto Mercante"
+  },
+  "seasonalEffects": {
+    "winter": "Additional wind protection, brazier for warmth",
+    "carnival": "Festive decorations, specialized carnival goods",
+    "rain": "Additional awning coverage, goods better protected"
+  },
+  "aiInteractionPoints": [
+    "Front counter",
+    "Sides for browsing",
+    "Merchant position behind counter"
+  ],
+  "assets": {
+    "models": "/assets/buildings/models/market-stall",
+    "variants": [
+      "model",
+      "winter",
+      "festival"
+    ],
+    "textures": "/assets/buildings/textures/market-stall/",
+    "thumbnail": "/assets/buildings/thumbnails/market-stall.png"
+  }
+}

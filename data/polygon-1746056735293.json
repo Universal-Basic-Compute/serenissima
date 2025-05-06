@@ -34,12 +34,16 @@
     }
   ],
   "centroid": {
-    "lat": 45.43217451346115,
-    "lng": 12.331458522532506
+    "lat": 45.432819792231776,
+    "lng": 12.331826075294058
   },
   "historicalName": "Calle Zaguri in Sestiere San Marco",
   "englishName": "Zaguri Alley in the District of St. Mark",
   "historicalDescription": "A narrow alleyway located in the San Marco sestiere, known for its proximity to Piazza San Marco and the Doge's Palace in the 15th century.",
   "nameConfidence": "medium",
-  "areaInSquareMeters": 21532.49
+  "areaInSquareMeters": 21532.49,
+  "center": {
+    "lat": 45.43217451346115,
+    "lng": 12.331458522532506
+  }
 }

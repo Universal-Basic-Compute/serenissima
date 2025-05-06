@@ -4,9 +4,8 @@
   "category": "finished_goods",
   "subcategory": "food",
   "description": "Fish preserved through salting, smoking, or drying for extended storage and transport. A staple protein source for Venetians and an important trade good.",
-  "icon": "icons/resources/preserved_fish.png",
+  "icon": "/assets/icons/resources/preserved_fish.png",
   "model": "models/resources/preserved_fish.glb",
-  
   "base_properties": {
     "base_value": 12,
     "weight": 0.8,
@@ -16,10 +15,14 @@
     "perish_time": 4320,
     "nutrition_value": 4
   },
-  
   "market_properties": {
     "luxury_level": 1,
-    "target_customers": ["common_households", "ships", "taverns", "military"],
+    "target_customers": [
+      "common_households",
+      "ships",
+      "taverns",
+      "military"
+    ],
     "fashion_sensitivity": 0.1,
     "export_value_multiplier": 1.2,
     "market_demand": "steady",
@@ -31,7 +34,6 @@
       "winter": 1.3
     }
   },
-  
   "production_properties": {
     "producer_building": "salting_house",
     "production_complexity": 4,
@@ -39,34 +41,76 @@
     "production_time": 360,
     "batch_size": 30,
     "inputs": [
-      {"resource": "fish", "amount": 20, "quality_impact": 0.7},
-      {"resource": "salt", "amount": 8, "quality_impact": 0.3}
+      {
+        "resource": "fish",
+        "amount": 20,
+        "quality_impact": 0.7
+      },
+      {
+        "resource": "salt",
+        "amount": 8,
+        "quality_impact": 0.3
+      }
     ],
     "alternative_production": {
       "producer_building": "smokehouse",
       "inputs": [
-        {"resource": "fish", "amount": 20, "quality_impact": 0.6},
-        {"resource": "fuel", "amount": 10, "quality_impact": 0.4}
+        {
+          "resource": "fish",
+          "amount": 20,
+          "quality_impact": 0.6
+        },
+        {
+          "resource": "fuel",
+          "amount": 10,
+          "quality_impact": 0.4
+        }
       ],
       "production_time": 480
     }
   },
-  
   "quality_variations": {
-    "available_qualities": ["poor", "common", "fine"],
+    "available_qualities": [
+      "poor",
+      "common",
+      "fine"
+    ],
     "default_quality": "common",
     "quality_multipliers": {
-      "poor": {"value": 0.7, "nutrition": 0.8, "taste": 0.6, "shelf_life": 0.7},
-      "common": {"value": 1.0, "nutrition": 1.0, "taste": 1.0, "shelf_life": 1.0},
-      "fine": {"value": 1.4, "nutrition": 1.1, "taste": 1.3, "shelf_life": 1.2}
+      "poor": {
+        "value": 0.7,
+        "nutrition": 0.8,
+        "taste": 0.6,
+        "shelf_life": 0.7
+      },
+      "common": {
+        "value": 1.0,
+        "nutrition": 1.0,
+        "taste": 1.0,
+        "shelf_life": 1.0
+      },
+      "fine": {
+        "value": 1.4,
+        "nutrition": 1.1,
+        "taste": 1.3,
+        "shelf_life": 1.2
+      }
     },
     "quality_factors": [
-      {"factor": "input_quality", "weight": 0.6},
-      {"factor": "worker_skill", "weight": 0.3},
-      {"factor": "facility_quality", "weight": 0.1}
+      {
+        "factor": "input_quality",
+        "weight": 0.6
+      },
+      {
+        "factor": "worker_skill",
+        "weight": 0.3
+      },
+      {
+        "factor": "facility_quality",
+        "weight": 0.1
+      }
     ]
   },
-  
   "varieties": [
     {
       "type": "salted_cod",
@@ -105,59 +149,132 @@
       "model_variant": "models/resources/preserved_fish_pickled.glb"
     }
   ],
-  
   "consumption_properties": {
     "consumption_method": "cooking_required",
     "satiety_value": 3,
-    "health_effects": ["protein_source", "salt_intake_high"],
-    "consumption_contexts": ["everyday_meals", "travel_provisions", "lenten_food"],
+    "health_effects": [
+      "protein_source",
+      "salt_intake_high"
+    ],
+    "consumption_contexts": [
+      "everyday_meals",
+      "travel_provisions",
+      "lenten_food"
+    ],
     "cultural_significance": "staple_protein",
-    "preparation_methods": ["soaking", "boiling", "frying", "stewing"]
+    "preparation_methods": [
+      "soaking",
+      "boiling",
+      "frying",
+      "stewing"
+    ]
   },
-  
   "usage_properties": {
-    "uses": ["food_consumption", "ship_provisions", "military_rations", "trade_good"],
-    "complementary_resources": ["bread", "vegetables", "olive_oil", "wine"]
+    "uses": [
+      "food_consumption",
+      "ship_provisions",
+      "military_rations",
+      "trade_good"
+    ],
+    "complementary_resources": [
+      "bread",
+      "vegetables",
+      "olive_oil",
+      "wine"
+    ]
   },
-  
   "transport_properties": {
     "transport_methods": {
-      "barge": {"capacity": 300, "efficiency": 1.0, "risk": 0.1},
-      "cart": {"capacity": 50, "efficiency": 0.9, "risk": 0.15},
-      "porter": {"capacity": 10, "efficiency": 0.8, "risk": 0.2}
+      "barge": {
+        "capacity": 300,
+        "efficiency": 1.0,
+        "risk": 0.1
+      },
+      "cart": {
+        "capacity": 50,
+        "efficiency": 0.9,
+        "risk": 0.15
+      },
+      "porter": {
+        "capacity": 10,
+        "efficiency": 0.8,
+        "risk": 0.2
+      }
     },
-    "special_requirements": ["odor_containment", "moisture_control"],
+    "special_requirements": [
+      "odor_containment",
+      "moisture_control"
+    ],
     "loading_time": 8,
     "route_restrictions": []
   },
-  
   "storage_properties": {
     "storage_facilities": {
-      "warehouse": {"capacity_multiplier": 1.0, "preservation": 0.9},
-      "salting_house": {"capacity_multiplier": 1.2, "preservation": 1.0},
-      "household": {"capacity_multiplier": 0.5, "preservation": 0.8}
+      "warehouse": {
+        "capacity_multiplier": 1.0,
+        "preservation": 0.9
+      },
+      "salting_house": {
+        "capacity_multiplier": 1.2,
+        "preservation": 1.0
+      },
+      "household": {
+        "capacity_multiplier": 0.5,
+        "preservation": 0.8
+      }
     },
-    "storage_requirements": ["cool", "dry", "ventilated", "odor_isolated"],
-    "special_risks": ["over_drying", "insect_infestation", "odor_contamination"],
+    "storage_requirements": [
+      "cool",
+      "dry",
+      "ventilated",
+      "odor_isolated"
+    ],
+    "special_risks": [
+      "over_drying",
+      "insect_infestation",
+      "odor_contamination"
+    ],
     "max_storage_time": 4320,
     "container_types": [
-      {"type": "wooden_barrel", "capacity": 50, "preservation_bonus": 0.1},
-      {"type": "clay_pot", "capacity": 20, "preservation_bonus": 0.05},
-      {"type": "cloth_sack", "capacity": 10, "preservation_bonus": -0.05}
+      {
+        "type": "wooden_barrel",
+        "capacity": 50,
+        "preservation_bonus": 0.1
+      },
+      {
+        "type": "clay_pot",
+        "capacity": 20,
+        "preservation_bonus": 0.05
+      },
+      {
+        "type": "cloth_sack",
+        "capacity": 10,
+        "preservation_bonus": -0.05
+      }
     ]
   },
-  
   "production_chain_position": {
     "predecessors": [
-      {"resource": "fish", "facility": "fishing_boat"},
-      {"resource": "salt", "facility": "salt_pans"}
+      {
+        "resource": "fish",
+        "facility": "fishing_boat"
+      },
+      {
+        "resource": "salt",
+        "facility": "salt_pans"
+      }
     ],
     "successors": [
-      {"resource": "meals", "facility": "tavern"},
-      {"resource": "ship_provisions", "facility": "provisioning_house"}
+      {
+        "resource": "meals",
+        "facility": "tavern"
+      },
+      {
+        "resource": "ship_provisions",
+        "facility": "provisioning_house"
+      }
     ]
   },
-  
   "historical_notes": {
     "introduction_year": "ancient",
     "historical_significance": "Preserved fish was essential to Venice's food security and maritime activities. The city's position as a trading hub meant it could import salt cheaply, allowing for large-scale fish preservation. This preserved protein source enabled long sea voyages and provided year-round nutrition for the population, especially during religious fasting periods when meat was forbidden but fish was permitted.",

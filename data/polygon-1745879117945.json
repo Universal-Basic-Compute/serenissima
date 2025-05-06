@@ -66,12 +66,16 @@
     }
   ],
   "centroid": {
-    "lat": 45.43395184564659,
-    "lng": 12.324276573267923
+    "lat": 45.434376590444224,
+    "lng": 12.323935956986473
   },
   "historicalName": "Contrada San Sebastiano in Dorsoduro",
   "englishName": "District of Saint Sebastian in Dorsoduro",
   "historicalDescription": "This area was part of the Dorsoduro sestiere, known for its churches, including the nearby Church of San Sebastiano. It was a residential district popular among artisans and the working class.",
   "nameConfidence": "medium",
-  "areaInSquareMeters": 75355.13
+  "areaInSquareMeters": 75355.13,
+  "center": {
+    "lat": 45.43395184564659,
+    "lng": 12.324276573267923
+  }
 }

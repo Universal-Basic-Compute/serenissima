@@ -29,5 +29,9 @@
   "englishName": "Alley of the Converted Women, Dorsoduro District",
   "historicalDescription": "This area in the Dorsoduro sestiere was known for housing a convent that took in reformed prostitutes in the 15th century, hence the name 'Calle de le Convertite' or 'Alley of the Converted Women'.",
   "nameConfidence": "high",
-  "areaInSquareMeters": 57385.7
+  "areaInSquareMeters": 57385.7,
+  "center": {
+    "lat": 45.425216557122816,
+    "lng": 12.320862609698239
+  }
 }

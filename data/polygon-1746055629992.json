@@ -26,12 +26,16 @@
     }
   ],
   "centroid": {
-    "lat": 45.445921885136784,
-    "lng": 12.328189531696982
+    "lat": 45.4461467900282,
+    "lng": 12.327995815660726
   },
   "historicalName": "Contrada San Giobbe, Sestiere Cannaregio",
   "englishName": "Saint Job District, Cannaregio Sestiere",
   "historicalDescription": "This area in the Cannaregio sestiere was known for the nearby Chiesa di San Giobbe (Church of Saint Job), which was built in the mid-15th century. The church and surrounding area were named after the biblical figure Job.",
   "nameConfidence": "medium",
-  "areaInSquareMeters": 23966.74
+  "areaInSquareMeters": 23966.74,
+  "center": {
+    "lat": 45.445921885136784,
+    "lng": 12.328189531696982
+  }
 }

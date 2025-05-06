@@ -85,5 +85,9 @@
   "englishName": "Alley of the Greeks, Castello District",
   "historicalDescription": "This area in the Castello district was known for its Greek population and Orthodox churches in the 15th century, as Venice had strong ties with the Byzantine Empire.",
   "nameConfidence": "high",
-  "areaInSquareMeters": 44239.65
+  "areaInSquareMeters": 44239.65,
+  "center": {
+    "lat": 45.43544312205228,
+    "lng": 12.345168456956333
+  }
 }

@@ -1,0 +1,74 @@
+{
+  "name": "Wine Cellar",
+  "category": "Infrastructure",
+  "subcategory": "Storage Facilities",
+  "tier": 2,
+  "size": "Medium",
+  "unlockCondition": "5,000,000 ducats capital, Wine Guild connection",
+  "calculationsAnalysis": "The Wine Cellar balances specialized storage infrastructure with premium service income. The construction cost of 2,000,000 ducats reflects the temperature-controlled environment and security features required, while the income of 25,000 ducats (1.25% return) represents storage fees and wine handling charges. The maintenance cost of 17,500 ducats (70% of income) creates a modest profit margin appropriate for specialized storage infrastructure. The employment capacity of 5 represents the cellar master, assistants, and security staff needed. The construction time of 5 days (432000000ms) reflects the specialized construction requirements. This building creates a strategic investment in wine storage that enhances value through proper aging, reflecting the historical importance of wine in Venetian culture and commerce, where proper storage was essential for this valuable commodity.",
+  "shortDescription": "Specialized storage facility for aging and preserving wine under optimal conditions.",
+  "fullDescription": "Supporting Venice's sophisticated wine trade, cellars provide the carefully controlled environment needed for proper aging and storage. Featuring temperature regulation, humidity control, specialized racks, inventory systems, and tasting areas, these facilities represent significant investment in quality preservation. Their specialized design preserves and enhances the value of wine holdings over time.",
+  "flavorText": "Unlike gold, which merely sits in vaults accumulating dust, wine transforms in the darkness of the cellar—gaining value not just through scarcity, but through the alchemy of patience.",
+  "constructionCosts": {
+    "ducats": 2000000,
+    "timber": 80,
+    "bricks": 200,
+    "stone": 300,
+    "iron": 40
+  },
+  "maintenanceCost": 17500,
+  "constructionTime": 432000000,
+  "incomeGeneration": 25000,
+  "employmentCapacity": 5,
+  "locationRequirements": {
+    "districtRestrictions": "All districts, often beneath existing buildings",
+    "adjacentRequirements": "Temperature stability, minimal vibration",
+    "environmentalEffects": "Slight wine aroma, attracts connoisseurs and merchants"
+  },
+  "constructionPhase3DPrompt": "Renaissance Venetian wine cellar under construction, specialized storage facility, below-ground excavation, stone arch construction techniques for stability, temperature control features being installed, ventilation systems for optimal humidity, specialized wine rack construction with perfect bottle positioning, secure access stairway, tasting area with proper lighting, inventory system implementation, water drainage to prevent flooding damage, natural temperature regulation design using earth's insulation, isometric game perspective, stylized but detailed, focus on creating optimal environment for wine storage through Renaissance engineering solutions",
+  "completedBuilding3DPrompt": "Completed Renaissance Venetian wine cellar, sophisticated wine storage facility featuring underground stone-lined chambers with arched ceilings, carefully organized wooden wine racks filled with bottles and casks of different vintages, perfect temperature and humidity control through passive systems, cellar master carefully examining bottles by candlelight, tasting area with small table and quality glassware, inventory ledger system tracking each bottle's origin and age, secure iron gate entry, small drainage system to prevent flooding, merchants examining potential purchases, historically accurate but slightly stylized for game aesthetic, isometric game perspective, atmospheric lighting from wall-mounted lanterns and candles, sense of valuable merchandise carefully preserved, bottles showing different ages and origins, subtle differences in storage conditions for different wine types",
+  "gameplayInformation": {
+    "unlocks": [
+      "Wine Trading",
+      "Luxury Hospitality",
+      "Investment Appreciation"
+    ],
+    "specialAbilities": [
+      "Wine quality enhancement over time",
+      "Vintage development",
+      "Specialized storage service"
+    ],
+    "upgradePath": [
+      "Master Wine Cellar (advanced aging techniques, rare vintages)"
+    ],
+    "reputationEffects": {
+      "Wine Guild": 20,
+      "Nobility": 15,
+      "Luxury Merchants": 15,
+      "Foreign Visitors": 10
+    },
+    "riskFactors": {
+      "floodRisk": "High (below ground, despite precautions)",
+      "theftRisk": "Medium (valuable merchandise)",
+      "qualityRisk": "Medium (requires careful management)"
+    }
+  },
+  "soundDesign": {
+    "ambientSound": "Subtle dripping water, glass bottles occasionally shifting, quiet",
+    "activitySounds": "Wine being decanted, bottles being carefully moved, tasting discussions",
+    "musicTheme": "Sospiri Veneziani"
+  },
+  "seasonalEffects": {
+    "new vintage arrivals": "Classification and storage organization",
+    "celebration seasons": "Increased withdrawals, special selection focus",
+    "wine trading seasons": "Merchant visits, inventory assessment"
+  },
+  "aiInteractionPoints": [
+    "Main storage chamber",
+    "Tasting area",
+    "Inventory management desk",
+    "Cellar master's inspection area",
+    "Receiving area for new wines",
+    "Security entrance"
+  ]
+}

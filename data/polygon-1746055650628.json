@@ -41,5 +41,9 @@
   "englishName": "Street of the Converted Women",
   "historicalDescription": "This narrow street in the Castello sestiere was known for housing a convent that took in reformed prostitutes in the 15th century. The nearby Rio de le Convertite canal is also named after this historical landmark.",
   "nameConfidence": "medium",
-  "areaInSquareMeters": 33682.61
+  "areaInSquareMeters": 33682.61,
+  "center": {
+    "lat": 45.4471895084532,
+    "lng": 12.32668423682969
+  }
 }

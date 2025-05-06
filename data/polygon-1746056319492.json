@@ -66,12 +66,16 @@
     }
   ],
   "centroid": {
-    "lat": 45.43698319281915,
-    "lng": 12.339161692491246
+    "lat": 45.43707969740338,
+    "lng": 12.338956078991393
   },
   "historicalName": "Corte de Ca' Giustinian, Sestiere di San Marco",
   "englishName": "Courtyard of the Giustinian House, District of Saint Mark",
   "historicalDescription": "An area near the Palazzo Giustinian, home to a prominent Venetian noble family. The district of San Marco was the political and religious center of Venice in the 15th century.",
   "nameConfidence": "medium",
-  "areaInSquareMeters": 34159.01
+  "areaInSquareMeters": 34159.01,
+  "center": {
+    "lat": 45.43698319281915,
+    "lng": 12.339161692491246
+  }
 }

@@ -73,5 +73,9 @@
   "historicalName": "Calle del Traghetto di San Marcuola",
   "englishName": "Street of the San Marcuola Ferry",
   "historicalDescription": "This area in the Cannaregio sestiere was known for its traghetto (ferry) crossing, connecting the north and south banks of the Grand Canal near the Chiesa di San Marcuola.",
-  "nameConfidence": "medium"
+  "nameConfidence": "medium",
+  "center": {
+    "lat": 45.4388597667254,
+    "lng": 12.328539633505706
+  }
 }

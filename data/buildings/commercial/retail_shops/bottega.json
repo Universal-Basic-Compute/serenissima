@@ -1,0 +1,82 @@
+{
+  "name": "Bottega",
+  "category": "Commercial",
+  "subcategory": "Retail Shops",
+  "tier": 2,
+  "size": "Medium",
+  "unlockCondition": "2,500,000 ducats total wealth, 5 citizens",
+  "calculationsAnalysis": "The Bottega represents a step up in commercial investment with a construction cost of 600,000 ducats and income of 11,000 ducats, providing a 1.8% return per cycle. The maintenance cost of 6,000 ducats (55% of income) reflects the more complex structure and workshop equipment. With an employment capacity of 3, it creates a significant jump in workforce requirements, representing the master craftsman and apprentices typical of Renaissance workshops. The construction time of 2 days (172800000ms) creates a meaningful progression from the Market Stall while remaining accessible to early-game players. This building serves as a bridge between simple retail and specialized production.",
+  "shortDescription": "Specialized shop with workshop in back, common for artisans and merchants.",
+  "fullDescription": "The backbone of Venetian retail, these versatile shops combine a front retail area with a rear workshop where goods are produced or customized. With large shutters that open to the street during business hours, botteghe create an inviting shopping environment while allowing craftspeople to work efficiently in the same location.",
+  "flavorText": "The hands create in the back, the voice sells in the front—the perfect marriage of craft and commerce.",
+  "constructionCosts": {
+    "ducats": 600000,
+    "timber": 50,
+    "bricks": 100,
+    "stone": 30,
+    "glass": 5
+  },
+  "maintenanceCost": 6000,
+  "constructionTime": 172800000,
+  "incomeGeneration": 11000,
+  "employmentCapacity": 3,
+  "locationRequirements": {
+    "districtRestrictions": "Best suited to commercial streets in any district",
+    "adjacentRequirements": "Must have street access",
+    "environmentalEffects": "Increases property value of adjacent buildings by 5%, creates steady foot traffic"
+  },
+  "productionInformation": {
+    "inputResources": {
+      "Raw Materials": "15-25 units per day depending on specialization",
+      "Labor": "2-3 workers"
+    },
+    "outputResources": {
+      "Finished Goods": "12-20 units per day",
+      "Sales Revenue": "20-35 ducats per day"
+    },
+    "storageCapacity": 50
+  },
+  "constructionPhase3DPrompt": "Renaissance Venetian bottega under construction, shop-workshop combination, brick and timber structure, front retail area taking shape with large openable shutters to street, workshop area in rear with specialized construction for craft type (woodworking, glass, textiles, etc.), workers installing distinctive wooden counter, specialized storage areas being built, front entrance with stepped access, space for business signage, isometric game perspective, stylized but detailed, historically accurate construction methods, warm brick and timber textures",
+  "completedBuilding3DPrompt": "Completed Renaissance Venetian bottega, charming shop-workshop combination, front area with large wooden shutters opened to street creating inviting retail space, decorated wooden counter with goods displayed, hanging shop sign with merchant's craft symbol, rear workshop visible with craft-specific tools and equipment, warm plastered exterior in Venetian yellow or terracotta, small glass windows with iron guards, quality wooden door, specialized display elements based on shop type (fabric bolts, glass shelves, etc.), historically accurate but slightly stylized for game aesthetic, isometric game perspective, active workshop scene with apprentices or workers, detailed craft-specific elements, well-worn threshold indicating established business",
+  "gameplayInformation": {
+    "unlocks": [
+      "Craft Production",
+      "Retail Operations",
+      "Apprentice Training"
+    ],
+    "specialAbilities": [
+      "Produces and sells specialized goods",
+      "Can fulfill custom orders",
+      "Trains new craftspeople"
+    ],
+    "upgradePath": [
+      "Luxury Showroom"
+    ],
+    "reputationEffects": {
+      "Craft-Specific Guild": 10,
+      "Merchant Guild": 8,
+      "Local Neighborhood": 5
+    },
+    "riskFactors": {
+      "fireRisk": "Medium-High (workshop materials)",
+      "theftRisk": "Medium",
+      "competitionRisk": "Medium (affected by nearby similar shops)"
+    }
+  },
+  "soundDesign": {
+    "ambientSound": "Workshop sounds specific to craft, customer conversations",
+    "activitySounds": "Tools working, sales transactions, apprentice instructions",
+    "musicTheme": "Rialto Mercante"
+  },
+  "seasonalEffects": {
+    "winter": "Partially closed shutters, interior more visible at night with lanterns",
+    "carnival": "Specialized carnival merchandise, festive decorations",
+    "high season": "Extended hours, more workers visible"
+  },
+  "aiInteractionPoints": [
+    "Shop counter",
+    "Workshop area",
+    "Street display",
+    "Entrance"
+  ]
+}

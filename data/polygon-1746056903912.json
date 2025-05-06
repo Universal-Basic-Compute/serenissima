@@ -46,12 +46,16 @@
     }
   ],
   "centroid": {
-    "lat": 45.434715935517254,
-    "lng": 12.34141275399888
+    "lat": 45.43530731103514,
+    "lng": 12.34133718150257
   },
   "historicalName": "Calle de le Rasse, sestiere San Polo",
   "englishName": "Alley of the Ducks, San Polo district",
   "historicalDescription": "A narrow alley in the San Polo sestiere, near the Grand Canal and Rialto market. Known for its proximity to the busy commercial district of Rialto in the 15th century.",
   "nameConfidence": "medium",
-  "areaInSquareMeters": 34147.04
+  "areaInSquareMeters": 34147.04,
+  "center": {
+    "lat": 45.434715935517254,
+    "lng": 12.34141275399888
+  }
 }

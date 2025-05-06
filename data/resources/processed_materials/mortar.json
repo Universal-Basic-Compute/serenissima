@@ -1,105 +1,169 @@
 {
-    "id": "mortar",
-    "name": "Mortar",
-    "category": "processed_materials",
-    "subcategory": "construction",
-    "baseValue": 6,
-    "weight": 3.0,
-    "volume": 1.0,
-    "stackSize": 40,
-    "description": "Binding material used to hold bricks and stones together in construction.",
-    "longDescription": "This crucial building material consists of lime, sand, and water mixed to precise proportions. When applied between bricks or stones, it hardens over time to create solid, durable structures. Venetian builders have developed special formulations that can withstand the unique challenges of building in a lagoon environment.",
-    "sprite": "assets/sprites/resources/mortar.png",
-    "icon": "assets/icons/resources/mortar.png",
-    "availableQualities": ["poor", "common", "fine"],
-    "defaultQuality": "common",
-    
-    "processingFacility": "mortar_works",
-    "processingTime": 120,
-    "perishable": true,
-    "perishTime": 720,
-    "specialHandling": ["use_while_fresh", "protect_from_rain_during_curing"],
-    "qualityFactors": [
-      {"factor": "input_quality", "weight": 0.6},
-      {"factor": "mixing_quality", "weight": 0.2},
-      {"factor": "worker_skill", "weight": 0.2}
-    ],
-    "varieties": [
-      {
-        "type": "standard_mortar",
-        "water_resistance": "moderate",
-        "value_multiplier": 1.0,
-        "primary_use": "general_construction"
-      },
-      {
-        "type": "hydraulic_mortar",
-        "water_resistance": "excellent",
-        "value_multiplier": 1.5,
-        "primary_use": "foundations_water_exposed_areas"
-      },
-      {
-        "type": "fine_mortar",
-        "appearance": "smooth",
-        "value_multiplier": 1.3,
-        "primary_use": "visible_joints_decorative_work"
-      }
-    ],
-    
-    "producedFrom": [
-      {
-        "inputs": [
-          {"resource": "lime", "amount": 10},
-          {"resource": "sand", "amount": 20},
-          {"resource": "water", "amount": 5}
-        ],
-        "building": "mortar_works",
-        "processingTime": 120
-      }
-    ],
-    "usedIn": [
-      {
-        "outputs": [
-          {"resource": "building_materials", "amount": 30}
-        ],
-        "building": "construction_yard",
-        "processingTime": 120
-      },
-      {
-        "outputs": [
-          {"resource": "palazzo", "amount": 1}
-        ],
-        "building": "construction_site",
-        "processingTime": 10080
-      },
-      {
-        "outputs": [
-          {"resource": "church", "amount": 1}
-        ],
-        "building": "construction_site",
-        "processingTime": 14400
-      }
-    ],
-    
-    "transportOptions": {
-      "barge": {"capacity": 200, "efficiency": 0.9, "risk": 0.2},
-      "cart": {"capacity": 20, "efficiency": 0.8, "risk": 0.25},
-      "porter": {"capacity": 2, "efficiency": 0.7, "risk": 0.3}
+  "id": "mortar",
+  "name": "Mortar",
+  "category": "processed_materials",
+  "subcategory": "construction",
+  "baseValue": 6,
+  "weight": 3.0,
+  "volume": 1.0,
+  "stackSize": 40,
+  "description": "Binding material used to hold bricks and stones together in construction.",
+  "longDescription": "This crucial building material consists of lime, sand, and water mixed to precise proportions. When applied between bricks or stones, it hardens over time to create solid, durable structures. Venetian builders have developed special formulations that can withstand the unique challenges of building in a lagoon environment.",
+  "sprite": "assets/sprites/resources/mortar.png",
+  "icon": "/assets/icons/resources/mortar.png",
+  "availableQualities": [
+    "poor",
+    "common",
+    "fine"
+  ],
+  "defaultQuality": "common",
+  "processingFacility": "mortar_works",
+  "processingTime": 120,
+  "perishable": true,
+  "perishTime": 720,
+  "specialHandling": [
+    "use_while_fresh",
+    "protect_from_rain_during_curing"
+  ],
+  "qualityFactors": [
+    {
+      "factor": "input_quality",
+      "weight": 0.6
     },
-    "transportRequirements": ["covered_containers", "timely_delivery"],
-    "loadingTime": 10,
-    "routeRestrictions": ["time_sensitive"],
-    
-    "storageOptions": {
-      "construction_site": {"capacityMultiplier": 1.0, "preservation": 0.9}
+    {
+      "factor": "mixing_quality",
+      "weight": 0.2
     },
-    "storageRequirements": ["covered", "used_quickly"],
-    "specialStorageRisks": ["premature_setting", "rain_damage"],
-    "maxStorageTime": 720,
-    
-    "marketDemand": "high",
-    "priceFluctuationFactors": [
-      {"factor": "lime_availability", "weight": 0.4},
-      {"factor": "sand_availability", "weight": 0.1},
-      {"factor": "construction_activity", "weight": 0.5}
-    ]
-  }
+    {
+      "factor": "worker_skill",
+      "weight": 0.2
+    }
+  ],
+  "varieties": [
+    {
+      "type": "standard_mortar",
+      "water_resistance": "moderate",
+      "value_multiplier": 1.0,
+      "primary_use": "general_construction"
+    },
+    {
+      "type": "hydraulic_mortar",
+      "water_resistance": "excellent",
+      "value_multiplier": 1.5,
+      "primary_use": "foundations_water_exposed_areas"
+    },
+    {
+      "type": "fine_mortar",
+      "appearance": "smooth",
+      "value_multiplier": 1.3,
+      "primary_use": "visible_joints_decorative_work"
+    }
+  ],
+  "producedFrom": [
+    {
+      "inputs": [
+        {
+          "resource": "lime",
+          "amount": 10
+        },
+        {
+          "resource": "sand",
+          "amount": 20
+        },
+        {
+          "resource": "water",
+          "amount": 5
+        }
+      ],
+      "building": "mortar_works",
+      "processingTime": 120
+    }
+  ],
+  "usedIn": [
+    {
+      "outputs": [
+        {
+          "resource": "building_materials",
+          "amount": 30
+        }
+      ],
+      "building": "construction_yard",
+      "processingTime": 120
+    },
+    {
+      "outputs": [
+        {
+          "resource": "palazzo",
+          "amount": 1
+        }
+      ],
+      "building": "construction_site",
+      "processingTime": 10080
+    },
+    {
+      "outputs": [
+        {
+          "resource": "church",
+          "amount": 1
+        }
+      ],
+      "building": "construction_site",
+      "processingTime": 14400
+    }
+  ],
+  "transportOptions": {
+    "barge": {
+      "capacity": 200,
+      "efficiency": 0.9,
+      "risk": 0.2
+    },
+    "cart": {
+      "capacity": 20,
+      "efficiency": 0.8,
+      "risk": 0.25
+    },
+    "porter": {
+      "capacity": 2,
+      "efficiency": 0.7,
+      "risk": 0.3
+    }
+  },
+  "transportRequirements": [
+    "covered_containers",
+    "timely_delivery"
+  ],
+  "loadingTime": 10,
+  "routeRestrictions": [
+    "time_sensitive"
+  ],
+  "storageOptions": {
+    "construction_site": {
+      "capacityMultiplier": 1.0,
+      "preservation": 0.9
+    }
+  },
+  "storageRequirements": [
+    "covered",
+    "used_quickly"
+  ],
+  "specialStorageRisks": [
+    "premature_setting",
+    "rain_damage"
+  ],
+  "maxStorageTime": 720,
+  "marketDemand": "high",
+  "priceFluctuationFactors": [
+    {
+      "factor": "lime_availability",
+      "weight": 0.4
+    },
+    {
+      "factor": "sand_availability",
+      "weight": 0.1
+    },
+    {
+      "factor": "construction_activity",
+      "weight": 0.5
+    }
+  ]
+}

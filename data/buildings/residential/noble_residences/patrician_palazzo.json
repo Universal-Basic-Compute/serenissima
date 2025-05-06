@@ -1,0 +1,75 @@
+{
+  "name": "Patrician Palazzo",
+  "category": "Residential",
+  "subcategory": "Noble Residences",
+  "tier": 3,
+  "size": "Large",
+  "unlockCondition": "50,000,000 ducats total wealth, Nobility status or connection",
+  "calculationsAnalysis": "The Patrician Palazzo represents elite housing with significant prestige value. The construction cost of 6,000,000 ducats reflects the high-quality materials and craftsmanship required, while the income of 80,000 ducats (1.33% return) represents both residential value and business activities conducted from this prestigious address. The maintenance cost of 30,000 ducats (37.5% of income) reflects the higher standards required for noble residences. The residentsCapacity of 15 represents the noble family with numerous servants and possibly extended family. The construction time of 10 days (864000000ms) reflects the sophisticated construction and decorative elements. This building creates a progression into noble housing with appropriate wealth and status requirements reflecting the social hierarchy of Renaissance Venice.",
+  "shortDescription": "Grand family residence for Venice's patrician class, featuring impressive architecture and private courtyard.",
+  "fullDescription": "A statement of wealth and status for Venice's noble families, the palazzo combines imposing architecture with practical business needs. Organized around a central courtyard, these buildings typically feature grand reception rooms, a family chapel, extensive servant quarters, and business offices. The facade displays the family's status through architectural refinement rather than ostentatious display.",
+  "flavorText": "Stone and legacy intertwined—a patrician palazzo houses not merely a family, but a dynasty's ambitions across generations.",
+  "constructionCosts": {
+    "ducats": 6000000,
+    "timber": 200,
+    "bricks": 500,
+    "stone": 350,
+    "glass": 80,
+    "marble": 60
+  },
+  "maintenanceCost": 30000,
+  "constructionTime": 864000000,
+  "incomeGeneration": 80000,
+  "residentsCapacity": 15,
+  "locationRequirements": {
+    "districtRestrictions": "Preferred in San Marco, Cannaregio, or Castello",
+    "adjacentRequirements": "Requires large plot, preferably with canal access",
+    "environmentalEffects": "Significantly increases property value of surrounding buildings by 15%"
+  },
+  "constructionPhase3DPrompt": "Renaissance Venetian patrician palazzo under construction, grand multi-story structure, imposing stone foundation, central courtyard layout visible, substantial scaffolding surrounding entire building, stonemasons working on ornate window frames and doorways, partial marble facade elements being installed, craftsmen creating decorative ceiling inside protected areas, teams of workers organized by specialty, construction cranes lifting stone blocks, architectural plans being consulted by master builder, temporary workshops set up around site, higher quality materials than typical residences, isometric game perspective, stylized but detailed, sense of grand scale and ambition",
+  "completedBuilding3DPrompt": "Completed Renaissance Venetian patrician palazzo, imposing U-shaped structure around central courtyard, grand three-story facade with Byzantine-Gothic elements, first floor in rusticated stone, piano nobile with ornate Gothic windows and small balconies, upper floor with smaller elegant windows, central water entrance with family coat of arms in carved stone, private courtyard with decorative well, small private garden visible, warm Venetian pink plastered exterior with white stone trim, marble accents on main doorways, multiple chimneys with decorative caps, roof loggia for entertaining, mooring poles for family gondolas, historically accurate but slightly stylized for game aesthetic, isometric game perspective, dignified grandeur without excessive ornamentation in Venetian style, wrought iron balconies with subtle gold accents",
+  "gameplayInformation": {
+    "unlocks": [
+      "Noble Entertainments",
+      "Political Connections",
+      "Family Art Collection"
+    ],
+    "specialAbilities": [
+      "Political meeting venue",
+      "Enhances family reputation",
+      "Can host diplomatic events"
+    ],
+    "upgradePath": [
+      "Grand Canal Palace"
+    ],
+    "reputationEffects": {
+      "Nobility": 20,
+      "Great Council": 10,
+      "Commoners": -5,
+      "Foreign Diplomats": 8
+    },
+    "riskFactors": {
+      "fireRisk": "Low (stone construction)",
+      "floodRisk": "Medium",
+      "crimeRisk": "Low (private guards)"
+    }
+  },
+  "soundDesign": {
+    "ambientSound": "Fountain in courtyard, distant string instruments",
+    "activitySounds": "Servants moving about, carriage arrivals, dignified conversations",
+    "musicTheme": "Sospiri Veneziani"
+  },
+  "seasonalEffects": {
+    "winter": "Braziers visible in courtyard, elegant winter decorations",
+    "carnival": "Elaborate decorations, masked guests arriving, music from within",
+    "state ceremonies": "Family banners displayed, increased activity"
+  },
+  "aiInteractionPoints": [
+    "Main entrance",
+    "Courtyard",
+    "Water entrance",
+    "Receiving rooms",
+    "Garden",
+    "Roof loggia"
+  ]
+}

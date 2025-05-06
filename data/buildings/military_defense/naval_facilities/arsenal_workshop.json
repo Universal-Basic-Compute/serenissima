@@ -1,0 +1,77 @@
+{
+  "name": "Arsenal Workshop",
+  "category": "Military & Defense",
+  "subcategory": "Naval Facilities",
+  "tier": 4,
+  "size": "Extra Large",
+  "unlockCondition": "Government license only, Senate appointment",
+  "calculationsAnalysis": "The Arsenal Workshop represents Venice's revolutionary naval production system with strategic rather than commercial value. The construction cost of 12,500,000 ducats reflects the massive industrial facilities and specialized equipment required, while the income of 40,000 ducats (0.32% return) represents naval contracts and specialized production. The maintenance cost of 100,000 ducats still exceeds this income, creating a realistic scenario where this military-industrial complex required substantial state support. The employment capacity of 100 represents the shipwrights, craftsmen, and laborers needed for industrial-scale production. The construction time of 40 days (3456000000ms) reflects the massive industrial project. This building creates a strategic military asset with appropriate government restrictions reflecting the historical Arsenal's status as a state-controlled facility that was the largest industrial complex in pre-industrial Europe and key to Venice's naval dominance.",
+  "shortDescription": "Specialized production facility within the Arsenal complex for building naval vessels and equipment.",
+  "fullDescription": "The industrial heart of Venice's naval power, Arsenal workshops represent the world's first standardized ship production facilities. Featuring specialized construction areas, material processing stations, equipment fabrication, and assembly zones, these massive structures enabled Venice to build ships at unprecedented speed and quality. Their advanced organization and scale astounded foreign visitors and projected Venetian power throughout the Mediterranean.",
+  "flavorText": "What other nations do in months, the Arsenal does in days; what they build individually, we create in series—for Venice's navy is not merely ships, but the perfected system that produces them.",
+  "constructionCosts": {
+    "ducats": 12500000,
+    "timber": 500,
+    "bricks": 800,
+    "stone": 1000,
+    "iron": 300,
+    "marble": 50
+  },
+  "maintenanceCost": 100000,
+  "constructionTime": 3456000000,
+  "incomeGeneration": 40000,
+  "employmentCapacity": 100,
+  "locationRequirements": {
+    "districtRestrictions": "Arsenal district only, government authorization required",
+    "adjacentRequirements": "Deep water access, Arsenal complex integration",
+    "environmentalEffects": "Industrial activity, strategic importance, restricted access"
+  },
+  "constructionPhase3DPrompt": "Renaissance Venetian Arsenal workshop under construction, massive naval industrial facility, part of the larger Arsenal complex, huge construction hall taking shape with overhead gantry system, specialized work zones for different ship components, material processing areas, strict security measures during construction, direct canal access being created for launched vessels, enormous roof trusses spanning wide production space, state engineers supervising all details, advanced construction techniques, scale dwarfing normal buildings, government oversight evident, isometric game perspective, stylized but detailed, sense of industrial-scale naval construction capabilities being created",
+  "completedBuilding3DPrompt": "Completed Renaissance Venetian Arsenal workshop, impressive naval industrial facility featuring enormous construction hall where multiple warships are simultaneously being built in various stages, standardized workstations for different ship components, overhead gantry system for moving heavy parts, specialized craftsmen working on specific tasks, timber processing zone, sail fabrication area, cannon mounting station, rope-making section, strict organization with military efficiency, ships moving through progressive assembly stages, launching channel to waters, armed guards restricting access, state officials supervising operations, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of revolutionary industrial capacity, workers moving with practiced efficiency showing the world's first assembly-line production, scale and organization that made Venice's naval dominance possible, atmosphere of disciplined manufacturing combined with craftsmanship, state symbols prominently displayed showing government ownership",
+  "gameplayInformation": {
+    "unlocks": [
+      "Naval Ship Production",
+      "State Military Contracts",
+      "Arsenal System"
+    ],
+    "specialAbilities": [
+      "Rapid warship construction",
+      "Standardized naval production",
+      "Military technology development"
+    ],
+    "upgradePath": [
+      "Advanced Arsenal Facility (cutting-edge naval technology)"
+    ],
+    "reputationEffects": {
+      "Military": 30,
+      "Senate": 25,
+      "Arsenal Workers Guild": 25,
+      "Foreign Powers": 20
+    },
+    "riskFactors": {
+      "securityRisk": "Medium (strategic target)",
+      "industrial risk": "High (dangerous processes)",
+      "fireRisk": "Very High (wood, pitch, open flames)"
+    }
+  },
+  "soundDesign": {
+    "ambientSound": "Intense industrial activity, hammering, sawing, orders being shouted",
+    "activitySounds": "Ship hull construction, material processing, coordinated team work",
+    "musicTheme": "Arsenale in Movimento"
+  },
+  "seasonalEffects": {
+    "wartime": "Maximum production, extended hours",
+    "peacetime": "Maintenance focus, training, improvements",
+    "fleet commissioning": "Ceremonial launches, quality inspections"
+  },
+  "aiInteractionPoints": [
+    "Main construction hall",
+    "Material processing zone",
+    "Component assembly areas",
+    "Ship launch channel",
+    "Administration office",
+    "Security checkpoint",
+    "Naval design area",
+    "Quality inspection station"
+  ]
+}

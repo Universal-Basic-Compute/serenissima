@@ -49,5 +49,9 @@
   "historicalName": "Corte del Diavolo in San Polo",
   "englishName": "Devil's Court in San Polo",
   "historicalDescription": "A small courtyard located in the San Polo sestiere, known for its unusual name referencing the devil. The area was primarily residential with nearby shops and artisan workshops.",
-  "nameConfidence": "medium"
+  "nameConfidence": "medium",
+  "center": {
+    "lat": 45.44014550201008,
+    "lng": 12.330710004257714
+  }
 }

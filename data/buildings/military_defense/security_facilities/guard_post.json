@@ -1,0 +1,74 @@
+{
+  "name": "Guard Post",
+  "category": "Military & Defense",
+  "subcategory": "Security Facilities",
+  "tier": 1,
+  "size": "Small",
+  "unlockCondition": "3,000,000 ducats, Security Guild connection or government approval",
+  "calculationsAnalysis": "The Guard Post's economic profile balances security investment with revenue generation. The construction cost of 1,000,000 ducats represents the robust construction and official nature of security infrastructure, while the income of 12,000 ducats (1.2% return) represents fees and fines collected. The maintenance cost of 12,500 ducats exceeds income, reflecting how security was primarily a public good rather than profit center. This building provides essential security benefits that exceed its direct financial return, encouraging players to consider strategic placement for maximum effect rather than pure profit.",
+  "shortDescription": "Security checkpoint monitoring access to specific areas and maintaining public order.",
+  "fullDescription": "Maintaining Venice's legendary internal security, guard posts provide visible security presence at key locations. Featuring observation positions, small detention areas, patrol coordination, and often checkpoint facilities, these practical security installations support Venice's extensive police functions. Their strategic placement throughout the city created an effective security network despite the complex urban layout.",
+  "flavorText": "Venice's greatest defense is not her walls or ships, but her watchful eyes—for a crime prevented through vigilance requires neither judges nor prisons.",
+  "constructionCosts": {
+    "ducats": 1000000,
+    "timber": 40,
+    "bricks": 100,
+    "stone": 150,
+    "iron": 30
+  },
+  "maintenanceCost": 12500,
+  "constructionTime": 172800000,
+  "incomeGeneration": 12000,
+  "employmentCapacity": 6,
+  "locationRequirements": {
+    "districtRestrictions": "Strategic points, entry points, valuable areas",
+    "adjacentRequirements": "Good visibility, control point potential",
+    "environmentalEffects": "Increases security, reduces crime, creates official presence"
+  },
+  "constructionPhase3DPrompt": "Renaissance Venetian guard post under construction, small security facility, strategic position with good visibility in all directions, elevated observation platform being built, secure office area for records and detention, checkpoint features if at entry point, official Venetian security symbols, construction showing security considerations in design, weapon storage area, patrol coordination space, isometric game perspective, stylized but detailed, focus on practical security functionality rather than imposing appearance",
+  "completedBuilding3DPrompt": "Completed Renaissance Venetian guard post, practical security facility featuring elevated observation platform with clear visibility of surroundings, small but secure structure with official Venetian security symbols including Lion of St. Mark, checkpoint area where documents can be checked, small detention room for temporary holding, patrol coordination desk with area maps, weapons rack with halberds and other official equipment, guards in Venetian security uniforms monitoring the area, record keeping system for incidents, lanterns for night operation, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of vigilant security presence, strategic positioning showing control of movement, balance of accessibility for legitimate citizens and security against threats",
+  "gameplayInformation": {
+    "unlocks": [
+      "Security Patrols",
+      "Access Control",
+      "Crime Reduction"
+    ],
+    "specialAbilities": [
+      "Area security enhancement",
+      "Criminal detention",
+      "Official presence"
+    ],
+    "upgradePath": [
+      "Security Station (larger jurisdiction, enhanced capability)"
+    ],
+    "reputationEffects": {
+      "Security Forces": 15,
+      "Law-Abiding Citizens": 20,
+      "Criminals": -25,
+      "Government": 15
+    },
+    "riskFactors": {
+      "targetRisk": "Medium (symbol of authority)",
+      "corruptionRisk": "Medium (enforcement discretion)",
+      "staffingRisk": "Low (desirable positions)"
+    }
+  },
+  "soundDesign": {
+    "ambientSound": "Boot steps on stone, keys jingling, official conversations",
+    "activitySounds": "Document checking, patrol departures, security alerts",
+    "musicTheme": "Consiglio dei Dieci"
+  },
+  "seasonalEffects": {
+    "carnival": "Increased staffing, mask verification",
+    "night hours": "Lanterns lit, increased vigilance",
+    "diplomatic events": "Enhanced security, special procedures"
+  },
+  "aiInteractionPoints": [
+    "Checkpoint desk",
+    "Observation platform",
+    "Patrol dispatch point",
+    "Detention area",
+    "Document inspection station",
+    "Weapons rack"
+  ]
+}

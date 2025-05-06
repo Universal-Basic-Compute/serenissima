@@ -1,0 +1,75 @@
+{
+  "name": "Watchtower",
+  "category": "Military & Defense",
+  "subcategory": "Security Facilities",
+  "tier": 2,
+  "size": "Medium",
+  "unlockCondition": "7,000,000 ducats, Security Guild connection or government approval",
+  "calculationsAnalysis": "The Watchtower represents specialized security infrastructure with surveillance rather than direct revenue functions. The construction cost of 2,500,000 ducats reflects the tall structure and observation facilities required, while generating no direct income reflects its security rather than commercial purpose. The maintenance cost of 17,500 ducats creates an ongoing expense justified by the critical surveillance capabilities provided. The employment capacity of 8 represents the guards and observers needed for continuous operation. The construction time of 5 days (432000000ms) reflects the specialized construction requirements. This building creates a strategic security asset that extends visual control over approaches to Venice, reflecting the historical importance of early warning systems in the city's defensive strategy, where advance notice of approaching threats was essential given Venice's unique lagoon position.",
+  "shortDescription": "Elevated observation position for surveillance of surrounding areas and early warning.",
+  "fullDescription": "Providing critical observation capabilities, watchtowers enable surveillance of wide areas for security and navigation purposes. Featuring elevated viewing platforms, signal equipment, observer quarters, and often communication systems, these specialized structures extend visual control over key approaches to Venice. Their strategic placement helped secure the lagoon approaches against threats while assisting maritime navigation.",
+  "flavorText": "From these heights, we can see threats before they see us, ships before they signal, and weather before it arrives—proving that in both security and commerce, foreknowledge is the greatest advantage.",
+  "constructionCosts": {
+    "ducats": 2500000,
+    "timber": 80,
+    "bricks": 200,
+    "stone": 350,
+    "iron": 50
+  },
+  "maintenanceCost": 17500,
+  "constructionTime": 432000000,
+  "incomeGeneration": 0,
+  "employmentCapacity": 8,
+  "locationRequirements": {
+    "districtRestrictions": "High points, strategic observation locations, approaches",
+    "adjacentRequirements": "Unobstructed views, supportive foundation",
+    "environmentalEffects": "Increased security visibility, surveillance presence"
+  },
+  "constructionPhase3DPrompt": "Renaissance Venetian watchtower under construction, strategic observation structure, tall design prioritizing height for maximum visibility, substantial foundation ensuring stability, spiral staircase installation, elevated observation platform with views in all directions, signal fire brazier being positioned, weather protection features, secure entry point, quarters for watch personnel, security features to prevent unauthorized access, communication systems like bell or signal flags, isometric game perspective, stylized but detailed, focus on creating optimal visibility combined with practical functionality",
+  "completedBuilding3DPrompt": "Completed Renaissance Venetian watchtower, impressive observation facility featuring tall stone structure with commanding views, elevated observation platform with protective railings, weather protection features including roof and windscreens, signal equipment including fire brazier for night signaling, flag system for coded communication, telescope or spyglass for distance viewing, watch captain's quarters, duty roster for continuous manning, logbook of observations, bell for alerting, narrow defensive windows on ascent, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of vigilant observation, strategic positioning showing clear views of important approaches, guards scanning horizon, signal flags ready, atmosphere of constant watchfulness",
+  "gameplayInformation": {
+    "unlocks": [
+      "Extended Surveillance",
+      "Early Warning System",
+      "Navigation Assistance"
+    ],
+    "specialAbilities": [
+      "Threat detection",
+      "Ship identification",
+      "Weather monitoring",
+      "Territory control"
+    ],
+    "upgradePath": [
+      "Signal Tower (enhanced communication capabilities)"
+    ],
+    "reputationEffects": {
+      "Security Forces": 20,
+      "Maritime Guild": 15,
+      "Government": 20,
+      "Foreign Visitors": 10
+    },
+    "riskFactors": {
+      "targetRisk": "High (strategic infrastructure)",
+      "weatherRisk": "Medium (exposure, lightning)",
+      "visibilityRisk": "Medium (fog, conditions)"
+    }
+  },
+  "soundDesign": {
+    "ambientSound": "Wind at height, flag flapping, distant city sounds",
+    "activitySounds": "Alerting bell, observation reports, signal operations",
+    "musicTheme": "Consiglio dei Dieci"
+  },
+  "seasonalEffects": {
+    "fog": "Limited effectiveness, increased staffing",
+    "stormy weather": "Weather warning priority, signal system active",
+    "war threats": "Military observers added, continuous operation"
+  },
+  "aiInteractionPoints": [
+    "Main observation platform",
+    "Signal equipment station",
+    "Watch captain's post",
+    "Communication desk",
+    "Entry checkpoint",
+    "Equipment storage"
+  ]
+}

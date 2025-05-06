@@ -1,0 +1,72 @@
+{
+  "name": "Small Warehouse",
+  "category": "Infrastructure",
+  "subcategory": "Storage Facilities",
+  "tier": 1,
+  "size": "Medium",
+  "unlockCondition": "5,000,000 ducats capital",
+  "calculationsAnalysis": "The Small Warehouse balances basic storage infrastructure with modest rental income. The construction cost of 1,250,000 ducats reflects the secure structure and organizational systems required, while the income of 15,000 ducats (1.2% return) represents storage rental fees. The maintenance cost of 12,500 ducats (83.3% of income) creates a thin profit margin appropriate for basic commercial infrastructure. The employment capacity of 5 represents the clerks, guards, and laborers needed. The construction time of 3 days (259200000ms) reflects the straightforward construction requirements. This building creates an accessible investment in commercial storage that supports trading activities, reflecting the historical importance of secure storage in Venice's commercial system where goods often needed to be warehoused between maritime shipments.",
+  "shortDescription": "Basic goods storage facility for commercial merchandise and materials.",
+  "fullDescription": "The workhorse of Venice's commercial infrastructure, small warehouses provide secure storage for merchandise and materials throughout the city. Featuring loading areas, organized storage systems, inventory management, and basic security, these practical facilities enable the smooth functioning of Venice's complex trade networks. Their flexible design accommodates a wide variety of goods from textiles to spices.",
+  "flavorText": "The difference between a successful merchant and a ruined one often lies not in what they buy or sell, but in how they store their goods between these transactions.",
+  "constructionCosts": {
+    "ducats": 1250000,
+    "timber": 100,
+    "bricks": 150,
+    "stone": 100,
+    "iron": 30
+  },
+  "maintenanceCost": 12500,
+  "constructionTime": 259200000,
+  "incomeGeneration": 15000,
+  "employmentCapacity": 5,
+  "locationRequirements": {
+    "districtRestrictions": "Commercial districts, near transportation",
+    "adjacentRequirements": "Access for goods movement, loading area",
+    "environmentalEffects": "Increases commercial activity, moderate noise from operations"
+  },
+  "constructionPhase3DPrompt": "Renaissance Venetian small warehouse under construction, commercial storage facility, sturdy foundation accounting for heavy goods weight, wooden shelving systems being installed, loading area with double-width doors, basic security features including locks and shuttered windows, inventory management area taking shape, multiple levels for different types of storage, goods organization system, reinforced flooring, clerk's office with record keeping space, simple hoisting mechanism, isometric game perspective, stylized but detailed, focus on practical commercial infrastructure with emphasis on organization and security",
+  "completedBuilding3DPrompt": "Completed Renaissance Venetian small warehouse, practical commercial storage facility featuring main storage hall with organized shelving and storage areas, goods of various types visible in organized sections, loading area with wide doors for moving merchandise, clerk's desk with inventory ledgers and quills, simple pulley system for moving heavier items between floors, basic security measures including sturdy locks and shuttered windows, weather protection features, warehouse workers moving crates and barrels, quality wooden shelving, division between different merchant goods, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of organized commercial activity, different types of merchandise organized by section, warehouse manager overseeing operations, efficient commercial infrastructure designed for practical functionality rather than appearance",
+  "gameplayInformation": {
+    "unlocks": [
+      "Basic Goods Storage",
+      "Commercial Operations"
+    ],
+    "specialAbilities": [
+      "Secure merchandise storage",
+      "Inventory management",
+      "Trade buffer capacity"
+    ],
+    "upgradePath": [
+      "Specialized Warehouse (climate control, enhanced security)"
+    ],
+    "reputationEffects": {
+      "Merchant Guild": 15,
+      "Local Businesses": 20,
+      "Customs Office": 10
+    },
+    "riskFactors": {
+      "fireRisk": "Medium (stored goods)",
+      "theftRisk": "Medium (valuable merchandise)",
+      "floodRisk": "Medium (ground level storage issue)"
+    }
+  },
+  "soundDesign": {
+    "ambientSound": "Crates being moved, inventory counting, shelving creaking",
+    "activitySounds": "Goods being loaded/unloaded, inventory discussions, security locks",
+    "musicTheme": "Rialto Mercante"
+  },
+  "seasonalEffects": {
+    "trading seasons": "Capacity maximum during peak seasons",
+    "inventory periods": "Organized auditing and reorganization",
+    "acqua alta": "Goods elevated from ground level"
+  },
+  "aiInteractionPoints": [
+    "Main storage area",
+    "Loading dock",
+    "Clerk's desk",
+    "Inventory management area",
+    "Security checkpoint",
+    "Goods organization system"
+  ]
+}

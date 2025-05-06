@@ -54,12 +54,16 @@
     }
   ],
   "centroid": {
-    "lat": 45.43313127078681,
-    "lng": 12.332461463393921
+    "lat": 45.43287622586406,
+    "lng": 12.332461088278334
   },
   "historicalName": "Fondamenta dei Narisi, Sestiere Dorsoduro",
   "englishName": "Walkway of the Narisi Family, Dorsoduro District",
   "historicalDescription": "A walkway along a canal in the Dorsoduro district, likely named after a prominent local family. The area was known for its artisan workshops and proximity to the Zattere promenade.",
   "nameConfidence": "medium",
-  "areaInSquareMeters": 6695.31
+  "areaInSquareMeters": 6695.31,
+  "center": {
+    "lat": 45.43313127078681,
+    "lng": 12.332461463393921
+  }
 }
