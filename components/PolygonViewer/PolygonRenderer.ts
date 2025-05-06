@@ -50,6 +50,9 @@ export default class PolygonRenderer {
   private polygonMeshes: PolygonMeshFacade[] = []; // Store PolygonMesh instances
   private createdPolygonIds = new Set<string>();
   
+  // Static properties for texture loading
+  private static sharedTextureLoader: THREE.TextureLoader | null = null;
+  
   // Facade for Three.js operations
   private facade: PolygonRendererFacade;
   
@@ -72,7 +75,7 @@ export default class PolygonRenderer {
     if (PolygonRenderer.sharedTextureLoader) {
       PolygonRenderer.sharedTextureLoader.load(
         optimizedUrl,
-        (fullTexture) => {
+        (fullTexture: THREE.Texture) => {
           // Copy properties from placeholder to full texture
           fullTexture.wrapS = placeholderTexture.wrapS;
           fullTexture.wrapT = placeholderTexture.wrapT;
