@@ -1563,6 +1563,7 @@ export default function Home() {
       });
   }, [isGoogleLoaded, centroidDragMode, selectedPolygon, activeLandPolygons, centroidMarkers]);
 
+
   // Handle map load
   const onMapLoad = (map: google.maps.Map) => {
     console.log('Google Map loaded');
@@ -2540,7 +2541,6 @@ export default function Home() {
           getSnapshotWithCache={getSnapshotWithCache}
           ref={polygonRendererRef}
           activeView={activeView}
-          {...{}} // Spread empty object to satisfy TypeScript
         />
       </>
       
