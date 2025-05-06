@@ -985,11 +985,10 @@ export default function SimplePage() {
     `}</style>
     </>
   );
-}
-// Add the connectWallet function
-function connectWallet() {
-  // This function needs to be defined inside the component
-  return async function(this: {
+  // Add the connectWallet function
+  function connectWallet() {
+    // This function needs to be defined inside the component
+    return async function(this: {
     walletAdapter: PhantomWalletAdapter | null;
     setWalletAddress: (address: string | null) => void;
     setUserProfile: (profile: any | null) => void;
@@ -1075,9 +1074,9 @@ function connectWallet() {
   }
 };
 
-// Add the storeWalletInAirtable function
-function storeWalletInAirtable(walletAddress: string) {
-  return async function(this: {
+  // Add the storeWalletInAirtable function
+  function storeWalletInAirtable(walletAddress: string) {
+    return async function(this: {
     setShowUsernamePrompt: (show: boolean) => void;
     setUserProfile: (profile: any) => void;
   }) {
@@ -1124,9 +1123,9 @@ function storeWalletInAirtable(walletAddress: string) {
   }
 };
 
-// Function to generate coat of arms image
-function generateCoatOfArmsImage() {
-  return async function(this: {
+  // Function to generate coat of arms image
+  function generateCoatOfArmsImage() {
+    return async function(this: {
     familyCoatOfArms: string;
     setIsGeneratingImage: (generating: boolean) => void;
     setCoatOfArmsImage: (url: string) => void;
@@ -1151,15 +1150,15 @@ function generateCoatOfArmsImage() {
       console.error('Error generating coat of arms image:', error);
       alert(`Failed to generate image: ${error instanceof Error ? error.message : String(error)}`);
     } finally {
-      setIsGeneratingImage(false);
+      this.setIsGeneratingImage(false);
     }
   };
-};
+}
 
 
-// Add the handleTransferCompute function
-function handleTransferCompute(amount: number) {
-  return async function(this: {
+  // Add the handleTransferCompute function
+  function handleTransferCompute(amount: number) {
+    return async function(this: {
     walletAddress: string | null;
     userProfile: any;
     setUserProfile: (profile: any) => void;
@@ -1226,9 +1225,9 @@ function handleTransferCompute(amount: number) {
   }
 };
 
-// Add the handleWithdrawCompute function
-function handleWithdrawCompute(amount: number) {
-  return async function(this: {
+  // Add the handleWithdrawCompute function
+  function handleWithdrawCompute(amount: number) {
+    return async function(this: {
     walletAddress: string | null;
     userProfile: any;
     setUserProfile: (profile: any) => void;
