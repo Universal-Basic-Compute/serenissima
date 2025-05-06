@@ -1444,7 +1444,7 @@ export default function PolygonViewer() {
       // Get the curvature value from a state variable or use a default
       const curvature = 0.5; // Default curvature
       console.log(`PolygonViewer: Creating road with curvature ${curvature}`);
-      const roadId = roadManagerRef.current.createRoad(roadPoints, curvature);
+      const roadId = roadManagerRef.current?.createRoad(roadPoints, curvature);
       console.log(`PolygonViewer: Road created with ID ${roadId}`);
       
       // Get the current wallet address
@@ -1712,8 +1712,8 @@ export default function PolygonViewer() {
       {/* Road Creator */}
       {roadCreationActive && sceneRef.current && sceneRef.current.scene && sceneRef.current.camera && (
         <RoadCreator
-          scene={sceneRef.current.scene}
-          camera={sceneRef.current.camera}
+          scene={sceneRef.current?.scene}
+          camera={sceneRef.current?.camera}
           active={roadCreationActive}
           onComplete={handleRoadComplete}
           onCancel={handleRoadCancel}
