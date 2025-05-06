@@ -215,7 +215,7 @@ export class PolygonRendererFacade {
   public loadTexture(
     url: string,
     onLoad?: (texture: THREE.Texture) => void,
-    onError?: (error: THREE.ErrorEvent) => void
+    onError?: (error: Error) => void
   ): THREE.Texture {
     if (this.isDisposed) {
       throw new Error('PolygonRendererFacade has been disposed');
