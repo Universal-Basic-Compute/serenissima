@@ -11,11 +11,11 @@
 // Add TypeScript declarations for window object extensions
 declare global {
   interface Window {
-    _polygonSnapshotCache: {
+    _polygonSnapshotCache?: {
       result: any | null;
       deps: string | null;
     };
-    getCachedSnapshot: <T>(getSnapshotFn: () => T, deps: any[]) => T;
+    getCachedSnapshot?: <T>(getSnapshotFn: () => T, deps: any[]) => T;
     getSnapshotWithCache?: <T>(getSnapshotFn: () => T, deps: any[]) => T;
     getSnapshotWithCacheCache?: {
       result: any | null;
@@ -1411,6 +1411,36 @@ export default function Home() {
   };
 
 
+  // Define updateCentroid function
+  const updateCentroid = async (polygonId: string, newCentroid: {lat: number, lng: number}): Promise<void> => {
+    try {
+      const response = await fetch('/api/update-centroid', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: polygonId,
+          centroid: newCentroid
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to update centroid');
+      }
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        console.log(`Successfully updated centroid for ${polygonId}`);
+      } else {
+        console.error(`Failed to update centroid: ${data.error}`);
+      }
+    } catch (error) {
+      console.error('Error updating centroid:', error);
+    }
+  };
+
   // Define loadPolygonsOnMap function early in the component
   const loadPolygonsOnMap = useCallback(() => {
     console.log('loadPolygonsOnMap called');
@@ -1577,38 +1607,7 @@ export default function Home() {
     setIsGoogleLoaded(true);
   };
   
-  // Define the updateCentroid function
-  const updateCentroid = async (polygonId: string, newCentroid: {lat: number, lng: number}): Promise<void> => {
-    try {
-      const response = await fetch('/api/update-centroid', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          id: polygonId,
-          centroid: newCentroid
-        }),
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to update centroid');
-      }
-      
-      const data = await response.json();
-      
-      if (data.success) {
-        console.log(`Successfully updated centroid for ${polygonId}`);
-      } else {
-        console.error(`Failed to update centroid: ${data.error}`);
-      }
-    } catch (error) {
-      console.error('Error updating centroid:', error);
-    }
-  };
-
-
-  // Define loadPolygonsOnMap function early in the component
+  // Define loadPolygonsOnMap function
   const loadPolygonsOnMap = useCallback(() => {
     console.log('loadPolygonsOnMap called');
     
