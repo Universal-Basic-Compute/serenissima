@@ -2536,7 +2536,8 @@ export default function Home() {
           ref={polygonRendererRef}
           activeView={activeView}
           // Add any other required props here with proper types
-          {...{} /* This empty object spread allows passing props to a component with unknown props */}
+          {...{}} /* This empty object spread allows passing props to a component with unknown props */
+        />
       </>
       
       </div>
