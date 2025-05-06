@@ -1768,7 +1768,7 @@ export default function Home() {
       .catch(error => {
         console.error('Error loading polygons:', error);
       });
-  }, [isGoogleLoaded, centroidDragMode, selectedPolygon, activeLandPolygons, centroidMarkers]);
+  }, [isGoogleLoaded, centroidDragMode]);
 
   // Also add this to ensure polygons are loaded when the component mounts
   useEffect(() => {
@@ -1792,8 +1792,6 @@ export default function Home() {
   const handleScriptLoad = () => {
     setIsGoogleLoaded(true);
   };
-  
-  // Function was moved to the top of the component
 
   // Create drawing manager options with client-side safety
   const [drawingManagerOptions, setDrawingManagerOptions] = useState({
