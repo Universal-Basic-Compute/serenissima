@@ -203,7 +203,7 @@ export class RoadManager {
               // Store the road
               const road: Road = {
                 id: roadData.id,
-                points: simplifiedPoints.map(p => p.clone()), // Clone points to avoid reference issues
+                points: simplifiedPoints.map((p: THREE.Vector3) => p.clone()), // Clone points to avoid reference issues
                 mesh,
                 curvature
               };
@@ -233,7 +233,7 @@ export class RoadManager {
         try {
           // Save to service and get ID
           const roadData = this.roadService.saveRoad(
-            points.map(p => p.clone()), // Clone points to avoid reference issues
+            points.map((p: THREE.Vector3) => p.clone()), // Clone points to avoid reference issues
             curvature,
             userId,
             landId
@@ -254,7 +254,7 @@ export class RoadManager {
             // Store the road
             const road: Road = {
               id: roadData.id,
-              points: points.map(p => p.clone()), // Clone points to avoid reference issues
+              points: points.map((p: THREE.Vector3) => p.clone()), // Clone points to avoid reference issues
               mesh,
               curvature
             };
@@ -1187,7 +1187,7 @@ export class RoadManager {
       try {
         if (this.roadTexture) {
           this.roadTexture.dispose();
-          this.roadTexture = null;
+          this.roadTexture = null as unknown as THREE.Texture;
         }
       } catch (textureError) {
         log.warn('Error disposing road texture:', textureError);
@@ -1196,7 +1196,7 @@ export class RoadManager {
       try {
         if (this.roadNormalMap) {
           this.roadNormalMap.dispose();
-          this.roadNormalMap = null;
+          this.roadNormalMap = null as unknown as THREE.Texture;
         }
       } catch (normalMapError) {
         log.warn('Error disposing road normal map:', normalMapError);
@@ -1205,7 +1205,7 @@ export class RoadManager {
       try {
         if (this.roadRoughnessMap) {
           this.roadRoughnessMap.dispose();
-          this.roadRoughnessMap = null;
+          this.roadRoughnessMap = null as unknown as THREE.Texture;
         }
       } catch (roughnessMapError) {
         log.warn('Error disposing road roughness map:', roughnessMapError);
