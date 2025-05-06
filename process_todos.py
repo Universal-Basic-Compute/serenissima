@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Make sure this file has executable permissions (chmod +x process_todos.py)
 import json
 import subprocess
 import os
