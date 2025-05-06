@@ -1598,8 +1598,10 @@ export default function PolygonViewer() {
       if (polygonRendererRef.current) polygonRendererRef.current.cleanup();
       if (interactionManagerRef.current) interactionManagerRef.current.cleanup();
       if (bridgeRendererRef.current) bridgeRendererRef.current.cleanup();
-      if (roadManagerRef.current && 'cleanup' in roadManagerRef.current) {
-        (roadManagerRef.current as any).cleanup();
+      if (roadManagerRef.current) {
+        // RoadManager might not have cleanup method in its type definition
+        // but we know it exists at runtime
+        (roadManagerRef.current as unknown as { cleanup: () => void }).cleanup();
       }
     } catch (cleanupError) {
       log.error('Error during cleanup after rendering failure:', cleanupError);
