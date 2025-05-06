@@ -257,7 +257,7 @@ export default function SimplePage() {
       console.error('Error generating coat of arms image:', error);
       alert(`Failed to generate image: ${error instanceof Error ? error.message : String(error)}`);
     } finally {
-      this.setIsGeneratingImage(false);
+      setIsGeneratingImage(false);
     }
   };
   
@@ -995,6 +995,7 @@ function connectWallet() {
     setShowUsernamePrompt: (show: boolean) => void;
     storeWalletInAirtable: (address: string) => Promise<any>;
     userProfile: any;
+    walletAddress: string | null;
   }) {
     // Use the walletAdapter from component state
     if (!this.walletAdapter) {
@@ -1049,7 +1050,7 @@ function connectWallet() {
     console.log("Wallet connected, address:", address);
     
     if (address) {
-      setWalletAddress(address);
+      this.setWalletAddress(address);
       // Store wallet in both session and local storage
       sessionStorage.setItem('walletAddress', address);
       localStorage.setItem('walletAddress', address);
@@ -1162,7 +1163,7 @@ function handleTransferCompute(amount: number) {
     console.log('Starting compute transfer process...');
     
     // Get the wallet address from session or local storage
-    const walletAddress = sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress');
+    const walletAddress = this.walletAddress || sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress');
     
     if (!walletAddress) {
       alert('Please connect your wallet first');
@@ -1222,13 +1223,14 @@ function handleTransferCompute(amount: number) {
 // Add the handleWithdrawCompute function
 function handleWithdrawCompute(amount: number) {
   return async function(this: {
+    walletAddress: string | null;
     userProfile: any;
     setUserProfile: (profile: any) => void;
     setSuccessMessage: (message: {message: string, signature: string} | null) => void;
   }) {
   try {
     // Get the wallet address from session or local storage
-    const walletAddress = sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress');
+    const walletAddress = this.walletAddress || sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress');
     
     if (!walletAddress) {
       alert('Please connect your wallet first');
