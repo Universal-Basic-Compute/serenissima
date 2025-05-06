@@ -1442,7 +1442,7 @@ export default function Home() {
   };
 
   // Define loadPolygonsOnMap function early in the component
-  const loadPolygonsOnMap = useCallback(() => {
+  const loadPolygonsOnMapImpl = useCallback(() => {
     console.log('loadPolygonsOnMap called');
     
     if (!mapRef.current) {
