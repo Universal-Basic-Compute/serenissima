@@ -1129,9 +1129,10 @@ if (shoreFactor > 0.01) {
               }
             });
           }
-        } else if (this.water.material instanceof THREE.MeshBasicMaterial) {
+        } else if (this.water.material && 'map' in this.water.material && 
+                  this.water.material.type === 'MeshBasicMaterial') {
           // For fallback mode with basic material
-          const material = this.water.material as THREE.MeshBasicMaterial;
+          const material = this.water.material as THREE.Material & { map?: THREE.Texture };
           if (material.map) {
             material.map.dispose();
           }
