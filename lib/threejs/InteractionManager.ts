@@ -19,9 +19,9 @@ interface InteractionManagerProps {
  * Uses EventBus for communication with other components
  */
 export class InteractionManager {
-  private scene: THREE.Scene;
-  private polygonMeshesRef: MutableRefObject<Record<string, THREE.Mesh>>;
-  private activeView: ViewMode;
+  private scene!: THREE.Scene;
+  private polygonMeshesRef!: MutableRefObject<Record<string, THREE.Mesh>>;
+  private activeView!: ViewMode;
   private selectedPolygonId: string | null = null;
   private handleMouseClick: (event: MouseEvent) => void;
   private handleMouseDown: (event: MouseEvent) => void;
