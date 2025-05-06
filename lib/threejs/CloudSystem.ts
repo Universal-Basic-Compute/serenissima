@@ -12,9 +12,9 @@ export class CloudSystem {
   private cloudParticles: THREE.Mesh[] = [];
   private cloudTexture: THREE.Texture | null = null;
   private isVisible: boolean = false;
-  private width: number;
-  private height: number;
-  private performanceMode: boolean;
+  private width: number = 300;
+  private height: number = 300;
+  private performanceMode: boolean = false;
   private cloudMaterial: THREE.MeshBasicMaterial | null = null;
   private lastUpdateTime: number = 0;
   private updateInterval: number = 16; // Update every ~16ms (60fps)
@@ -40,9 +40,9 @@ export class CloudSystem {
   }) {
     try {
       this.scene = options.scene;
-      this.width = options.width || 300;
-      this.height = options.height || 300;
-      this.performanceMode = options.performanceMode || false;
+      this.width = options.width ?? this.width;
+      this.height = options.height ?? this.height;
+      this.performanceMode = options.performanceMode ?? this.performanceMode;
       this.clouds = new THREE.Group();
       
       // Add error handling for scene addition
