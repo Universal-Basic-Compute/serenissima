@@ -410,11 +410,13 @@ export class PolygonMeshFacade implements Poolable {
       
       if (Array.isArray(this.mesh.material)) {
         this.mesh.material.forEach(material => {
-          if (material.map) material.map.dispose();
+          // Check if material has a map property (like MeshBasicMaterial or MeshStandardMaterial)
+          if ('map' in material && material.map) material.map.dispose();
           material.dispose();
         });
       } else if (this.mesh.material) {
-        if (this.mesh.material.map) this.mesh.material.map.dispose();
+        // Check if material has a map property
+        if ('map' in this.mesh.material && this.mesh.material.map) this.mesh.material.map.dispose();
         this.mesh.material.dispose();
       }
       
