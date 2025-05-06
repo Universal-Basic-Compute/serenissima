@@ -19,8 +19,8 @@ import * as THREE from 'three';
 // Add type declaration for window properties
 declare global {
   interface Window {
-    _polygonSnapshotCache?: { result: any; deps: string | null };
-    getCachedSnapshot?: <T>(getSnapshotFn: () => T, deps: any[]) => T;
+    _polygonSnapshotCache: { result: any; deps: string | null };
+    getCachedSnapshot: <T>(getSnapshotFn: () => T, deps: any[]) => T;
     dispatchEvent(event: Event): boolean;
   }
 }
