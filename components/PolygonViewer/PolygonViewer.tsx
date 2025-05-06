@@ -1235,9 +1235,10 @@ export default function PolygonViewer() {
           
           // Connect land to water
           if (landObjects.length > 0 && sceneRef.current) {
-          console.log(`Connecting ${landObjects.length} land objects to water`);
-          if (typeof sceneRef.current.connectLandToWater === 'function') {
-            sceneRef.current.connectLandToWater(landObjects);
+            console.log(`Connecting ${landObjects.length} land objects to water`);
+            if (typeof sceneRef.current.connectLandToWater === 'function') {
+              sceneRef.current.connectLandToWater(landObjects);
+            }
           }
         }
       }, 3000); // Wait 3 seconds for everything to be fully loaded
