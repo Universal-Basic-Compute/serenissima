@@ -1579,15 +1579,6 @@ export default function PolygonViewer() {
     );
   }
   
-  if (error) {
-    return (
-      <div className="w-full h-full flex flex-col items-center justify-center">
-        <p className="text-red-500 mb-4">{error}</p>
-        <p>Displaying sample polygon instead</p>
-      </div>
-    );
-  }
-  
   // Function to handle errors in the 3D components
   const handleRenderingError = useCallback((error: Error, errorInfo: React.ErrorInfo) => {
     log.error('PolygonViewer rendering error:', error, errorInfo);
@@ -1607,6 +1598,15 @@ export default function PolygonViewer() {
       log.error('Error during cleanup after rendering failure:', cleanupError);
     }
   }, []);
+
+  if (error) {
+    return (
+      <div className="w-full h-full flex flex-col items-center justify-center">
+        <p className="text-red-500 mb-4">{error}</p>
+        <p>Displaying sample polygon instead</p>
+      </div>
+    );
+  }
 
   return (
     <ThreeDErrorBoundary 
