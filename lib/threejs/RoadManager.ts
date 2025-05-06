@@ -1403,16 +1403,28 @@ export class RoadManager {
           (material as THREE.MeshStandardMaterial).normalMap.dispose();
         if ('roughnessMap' in material && (material as THREE.MeshStandardMaterial).roughnessMap) 
           (material as THREE.MeshStandardMaterial).roughnessMap.dispose();
-        if ('metalnessMap' in material) {
-          const standardMat = material as THREE.MeshStandardMaterial;
-          if (standardMat.metalnessMap) standardMat.metalnessMap.dispose();
+        if ('metalnessMap' in material && (material as THREE.MeshStandardMaterial).metalnessMap) {
+          (material as THREE.MeshStandardMaterial).metalnessMap.dispose();
         }
         if ('aoMap' in material && material.aoMap) material.aoMap.dispose();
         if ('emissiveMap' in material) {
-          const matWithEmissive = material as THREE.MeshStandardMaterial | THREE.MeshPhongMaterial | THREE.MeshLambertMaterial;
-          if (matWithEmissive.emissiveMap) matWithEmissive.emissiveMap.dispose();
+          // Check each material type that can have emissiveMap
+          if (material instanceof THREE.MeshStandardMaterial && material.emissiveMap) {
+            material.emissiveMap.dispose();
+          } else if (material instanceof THREE.MeshPhongMaterial && material.emissiveMap) {
+            material.emissiveMap.dispose();
+          } else if (material instanceof THREE.MeshLambertMaterial && material.emissiveMap) {
+            material.emissiveMap.dispose();
+          }
         }
-        if ('bumpMap' in material && (material as any).bumpMap) (material as any).bumpMap.dispose();
+        if ('bumpMap' in material) {
+          // Check each material type that can have bumpMap
+          if (material instanceof THREE.MeshStandardMaterial && material.bumpMap) {
+            material.bumpMap.dispose();
+          } else if (material instanceof THREE.MeshPhongMaterial && material.bumpMap) {
+            material.bumpMap.dispose();
+          }
+        }
         if ('displacementMap' in material && (material as THREE.MeshStandardMaterial).displacementMap) 
           (material as THREE.MeshStandardMaterial).displacementMap.dispose();
         if ('envMap' in material && material.envMap) material.envMap.dispose();
@@ -1427,8 +1439,26 @@ export class RoadManager {
         if ('roughnessMap' in material) (material as THREE.MeshStandardMaterial).roughnessMap = null;
         if ('metalnessMap' in material) (material as THREE.MeshStandardMaterial).metalnessMap = null;
         if ('aoMap' in material) material.aoMap = null;
-        if ('emissiveMap' in material) material.emissiveMap = null;
-        if ('bumpMap' in material) (material as any).bumpMap = null;
+        
+        // Clear emissiveMap based on material type
+        if ('emissiveMap' in material) {
+          if (material instanceof THREE.MeshStandardMaterial) {
+            material.emissiveMap = null;
+          } else if (material instanceof THREE.MeshPhongMaterial) {
+            material.emissiveMap = null;
+          } else if (material instanceof THREE.MeshLambertMaterial) {
+            material.emissiveMap = null;
+          }
+        }
+        
+        // Clear bumpMap based on material type
+        if ('bumpMap' in material) {
+          if (material instanceof THREE.MeshStandardMaterial) {
+            material.bumpMap = null;
+          } else if (material instanceof THREE.MeshPhongMaterial) {
+            material.bumpMap = null;
+          }
+        }
         if ('displacementMap' in material) (material as any).displacementMap = null;
         if ('envMap' in material) material.envMap = null;
         if ('lightMap' in material) material.lightMap = null;
