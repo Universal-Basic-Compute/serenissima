@@ -52,6 +52,8 @@ export default class PolygonRenderer {
   
   // Static properties for texture loading
   private static sharedTextureLoader: THREE.TextureLoader | null = null;
+  private sandNormalMap: THREE.Texture | null = null;
+  private sandRoughnessMap: THREE.Texture | null = null;
   
   // Facade for Three.js operations
   private facade: PolygonRendererFacade;
