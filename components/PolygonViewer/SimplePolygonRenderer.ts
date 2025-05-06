@@ -70,7 +70,7 @@ export default class SimplePolygonRenderer {
     
     // Process users data to extract coat of arms
     if (users) {
-      Object.values(users).forEach(user => {
+      Object.values(users).forEach((user: any) => {
         if (user.user_name && user.coat_of_arms_image) {
           this.ownerCoatOfArmsMap[user.user_name] = user.coat_of_arms_image;
           console.log(`Initialized coat of arms for ${user.user_name}: ${user.coat_of_arms_image}`);
@@ -83,7 +83,7 @@ export default class SimplePolygonRenderer {
       const userService = getUserService();
       const serviceUsers = userService.getUsers();
       if (serviceUsers && Object.keys(serviceUsers).length > 0) {
-        Object.values(serviceUsers).forEach(user => {
+        Object.values(serviceUsers).forEach((user: any) => {
           if (user.user_name && user.coat_of_arms_image) {
             this.ownerCoatOfArmsMap[user.user_name] = user.coat_of_arms_image;
             console.log(`Initialized coat of arms from service for ${user.user_name}: ${user.coat_of_arms_image}`);
@@ -307,7 +307,7 @@ export default class SimplePolygonRenderer {
     
     // Also check our users prop for any coat of arms data
     if (this.users) {
-      Object.values(this.users).forEach(user => {
+      Object.values(this.users).forEach((user: any) => {
         if (user.user_name && user.coat_of_arms_image) {
           this.ownerCoatOfArmsMap[user.user_name] = user.coat_of_arms_image;
           console.log(`Found coat of arms in users prop for ${user.user_name}: ${user.coat_of_arms_image}`);
