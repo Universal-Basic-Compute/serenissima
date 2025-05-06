@@ -1403,8 +1403,8 @@ export class RoadManager {
           (material as THREE.MeshStandardMaterial).normalMap.dispose();
         if ('roughnessMap' in material && (material as THREE.MeshStandardMaterial).roughnessMap) 
           (material as THREE.MeshStandardMaterial).roughnessMap.dispose();
-        if ('metalnessMap' in material && (material as THREE.MeshStandardMaterial).metalnessMap) 
-          (material as THREE.MeshStandardMaterial).metalnessMap.dispose();
+        if ('metalnessMap' in material && material.metalnessMap) 
+          material.metalnessMap.dispose();
         if ('aoMap' in material && material.aoMap) material.aoMap.dispose();
         if ('emissiveMap' in material && material.emissiveMap) material.emissiveMap.dispose();
         if ('bumpMap' in material && material.bumpMap) material.bumpMap.dispose();
