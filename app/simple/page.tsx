@@ -987,10 +987,15 @@ export default function SimplePage() {
 }
 // Add the connectWallet function
 function connectWallet() {
-  // This function needs to be defined inside the component to access state
-  return async () => {
+  // This function needs to be defined inside the component
+  return async function() {
     // Use the walletAdapter from component state
-    const adapter = walletAdapter;
+    if (!this.walletAdapter) {
+      console.log("Wallet adapter not initialized");
+      return;
+    }
+    
+    const adapter = this.walletAdapter;
     if (!adapter) {
       console.log("Wallet adapter not initialized");
       return;
@@ -1005,8 +1010,8 @@ function connectWallet() {
         await adapter.disconnect();
         
         // Only update state after successful disconnect
-        setWalletAddress(null);
-        setUserProfile(null); // Also clear the user profile
+        this.setWalletAddress(null);
+        this.setUserProfile(null); // Also clear the user profile
       
       // Clear wallet from both storages
       sessionStorage.removeItem('walletAddress');
@@ -1044,9 +1049,9 @@ function connectWallet() {
       console.log("Wallet address stored in session and local storage");
       
       // Store wallet in Airtable and check for username
-      const userData = await storeWalletInAirtable(address);
+      const userData = await this.storeWalletInAirtable(address);
       console.log("User data from Airtable:", userData);
-      console.log("User profile after wallet connection:", userProfile);
+      console.log("User profile after wallet connection:", this.userProfile);
     } else {
       console.log("No wallet address returned after connection");
     }
@@ -1058,7 +1063,7 @@ function connectWallet() {
 
 // Add the storeWalletInAirtable function
 function storeWalletInAirtable(walletAddress: string) {
-  return async () => {
+  return async function() {
   try {
     const response = await fetch(`${getApiBaseUrl()}/api/wallet`, {
       method: 'POST',
@@ -1080,11 +1085,11 @@ function storeWalletInAirtable(walletAddress: string) {
     // Check if the user has a username
     if (!data.user_name) {
       // If no username, show the prompt
-      setShowUsernamePrompt(true);
+      this.setShowUsernamePrompt(true);
     } else {
       // Store the user profile information
       console.log('Setting user profile with data:', data);
-      setUserProfile({
+      this.setUserProfile({
         username: data.user_name,
         firstName: data.first_name || data.user_name.split(' ')[0] || '',
         lastName: data.last_name || data.user_name.split(' ').slice(1).join(' ') || '',
@@ -1103,34 +1108,34 @@ function storeWalletInAirtable(walletAddress: string) {
 
 // Function to generate coat of arms image
 function generateCoatOfArmsImage() {
-  return async () => {
-    if (!familyCoatOfArms.trim()) {
+  return async function() {
+    if (!this.familyCoatOfArms.trim()) {
       alert('Please enter a description of your family coat of arms first');
       return;
     }
     
   try {
-    setIsGeneratingImage(true);
+    this.setIsGeneratingImage(true);
       
     // Import the utility function directly
     const { generateCoatOfArmsImage } = await import('@/app/utils/coatOfArmsUtils');
-    const imageUrl = await generateCoatOfArmsImage(familyCoatOfArms);
+    const imageUrl = await generateCoatOfArmsImage(this.familyCoatOfArms);
       
     // Update state with the local image URL
-    setCoatOfArmsImage(imageUrl);
+    this.setCoatOfArmsImage(imageUrl);
       
   } catch (error) {
     console.error('Error generating coat of arms image:', error);
     alert(`Failed to generate image: ${error instanceof Error ? error.message : String(error)}`);
   } finally {
-    setIsGeneratingImage(false);
+    this.setIsGeneratingImage(false);
   }
 };
 
 
 // Add the handleTransferCompute function
 function handleTransferCompute(amount: number) {
-  return async () => {
+  return async function() {
   try {
     console.log('Starting compute transfer process...');
     
@@ -1163,12 +1168,12 @@ function handleTransferCompute(amount: number) {
     console.log('Compute transfer successful:', data);
     
     // Update the user profile with the new compute amount
-    if (userProfile) {
+    if (this.userProfile) {
       const updatedProfile = {
-        ...userProfile,
+        ...this.userProfile,
         computeAmount: data.compute_amount
       };
-      setUserProfile(updatedProfile);
+      this.setUserProfile(updatedProfile);
       
       // Update localStorage
       localStorage.setItem('userProfile', JSON.stringify(updatedProfile));
@@ -1194,7 +1199,7 @@ function handleTransferCompute(amount: number) {
 
 // Add the handleWithdrawCompute function
 function handleWithdrawCompute(amount: number) {
-  return async () => {
+  return async function() {
   try {
     // Get the wallet address from session or local storage
     const walletAddress = sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress');
@@ -1271,12 +1276,12 @@ function handleWithdrawCompute(amount: number) {
     console.log('Compute withdrawal successful:', data);
     
     // Update the user profile with the new compute amount
-    if (userProfile) {
+    if (this.userProfile) {
       const updatedProfile = {
-        ...userProfile,
+        ...this.userProfile,
         computeAmount: data.compute_amount
       };
-      setUserProfile(updatedProfile);
+      this.setUserProfile(updatedProfile);
       
       // Update localStorage
       localStorage.setItem('userProfile', JSON.stringify(updatedProfile));
