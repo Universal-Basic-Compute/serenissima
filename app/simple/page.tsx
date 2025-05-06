@@ -1043,7 +1043,7 @@ export default function SimplePage() {
         
         if (userData) {
           // Check if the user has a username
-          if (!userData.user_name) {
+          if (userData.user_name === undefined || userData.user_name === null || userData.user_name === '') {
             // If no username, show the prompt
             setShowUsernamePrompt(true);
           } else {
