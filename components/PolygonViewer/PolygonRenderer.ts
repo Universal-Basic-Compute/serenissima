@@ -1303,7 +1303,11 @@ export default class PolygonRenderer {
     // No shore effects are created to avoid geometry generation
   }
   
-  // Helper methods for loading coat of arms textures
+  /**
+   * Load a coat of arms texture from a URL
+   * @param url The URL of the texture to load
+   * @returns A THREE.Texture object
+   */
   private loadCoatOfArmsTexture(url: string): THREE.Texture {
     const texture = new THREE.Texture();
     const loader = new THREE.TextureLoader();
@@ -1320,7 +1324,12 @@ export default class PolygonRenderer {
     return texture;
   }
   
-  // Helper method to convert lat/lng to 3D position
+  /**
+   * Convert latitude and longitude to a 3D position
+   * @param lat Latitude
+   * @param lng Longitude
+   * @returns A THREE.Vector3 position
+   */
   private convertLatLngToPosition(lat: number, lng: number): THREE.Vector3 {
     const normalizedCoord = normalizeCoordinates(
       [{ lat, lng }],
