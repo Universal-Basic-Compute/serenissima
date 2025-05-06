@@ -1003,5 +1003,98 @@
       "Completed works storage",
       "Author consultation area"
     ]
+  },
+  {
+    "name": "Weapons Smith",
+    "category": "Production",
+    "subcategory": "Metal Industry",
+    "tier": 2,
+    "size": "Medium",
+    "unlockCondition": "5,000,000 ducats capital, Metal Workers Guild connection, Security clearance",
+    "calculationsAnalysis": "The Weapons Smith represents specialized military production with substantial returns. The construction cost of 1,800,000 ducats reflects the specialized forge and equipment required, while the income of 25,000 ducats (1.39% return) represents sales of weapons and military equipment. The maintenance cost of 30,000 ducats (120% of income) creates a negative profit margin reflecting the resource-intensive nature of weapons production but strategic importance to the Republic. The employment capacity of 8 represents the master smith, apprentices, and specialized assistants needed. The construction time of 4 days (345600000ms) reflects the specialized construction requirements. This building creates a strategic investment in military production with appropriate guild and security requirements reflecting the historical importance of weapons production to Venice's military capabilities, where quality armaments were essential for naval and defensive forces.",
+    "shortDescription": "Specialized workshop producing weapons and military equipment for Venice's forces and export markets.",
+    "fullDescription": "Crafting the implements of war and defense, weapons smiths create everything from naval cutlasses to ceremonial arms. Featuring specialized forges, hardening facilities, and finishing areas, these workshops require both metallurgical expertise and artistic skill. Venice's weapons production supported both its naval power and provided valuable export goods, though under strict regulation by the Republic.",
+    "flavorText": "In peace, prepare for war—and in Venice, that preparation takes the form of steel shaped by fire, skill, and centuries of martial knowledge.",
+    "constructionCosts": {
+      "ducats": 1800000,
+      "timber": 80,
+      "bricks": 250,
+      "stone": 150,
+      "iron": 100
+    },
+    "maintenanceCost": 30000,
+    "constructionTime": 345600000,
+    "incomeGeneration": 25000,
+    "employmentCapacity": 8,
+    "productionInformation": {
+      "inputResources": {
+        "Processed Iron": 15,
+        "Tools": 2,
+        "Fuel": 30,
+        "Timber": 10
+      },
+      "outputResources": {
+        "Weapons": 5,
+        "Military Equipment": 3,
+        "Ceremonial Arms": 1
+      },
+      "productionRate": "5 units of weapons per day",
+      "storageCapacity": {
+        "rawMaterials": 100,
+        "finishedGoods": 50
+      }
+    },
+    "locationRequirements": {
+      "districtRestrictions": "Industrial zones, Arsenal district preferred",
+      "adjacentRequirements": "Water access for cooling, separation from residential due to noise",
+      "environmentalEffects": "Noise pollution, smoke, occasional sparks"
+    },
+    "constructionPhase3DPrompt": "Renaissance Venetian weapons smith under construction, specialized military production facility, reinforced forge area being built with multiple hearths, hardening tanks installation, grinding and polishing stations taking shape, blade testing area, secure storage for finished weapons, quality control station, decorative elements workshop for ceremonial pieces, heavy anvils being positioned, specialized tool racks, security features including strong locks and limited access points, isometric game perspective, stylized but detailed, focus on the specialized military production aspects",
+    "completedBuilding3DPrompt": "Completed Renaissance Venetian weapons smith, working military production facility with multiple specialized forges glowing at different temperatures, master smith working red-hot steel on large anvil, apprentices grinding and polishing blades, finished weapons displayed on racks (swords, pikes, naval cutlasses, crossbows), hardening tanks steaming as hot metal is quenched, testing area where blades are checked for strength and balance, decorative workshop where ceremonial weapons receive artistic embellishments, security features including guards and secure storage, historically accurate but slightly stylized for game aesthetic, isometric game perspective, dramatic lighting from forge fires, sense of precision craftsmanship combined with military purpose, Republic authorization documents prominently displayed, weapons organized by type and purpose",
+    "gameplayInformation": {
+      "unlocks": [
+        "Military Equipment Production",
+        "Naval Armaments",
+        "Export Weapons"
+      ],
+      "specialAbilities": [
+        "Create specialized weapons",
+        "Fulfill military contracts",
+        "Produce ceremonial arms"
+      ],
+      "upgradePath": [
+        "Advanced Armory (higher quality, specialized weapons)"
+      ],
+      "reputationEffects": {
+        "Metal Workers Guild": 15,
+        "Military Forces": 20,
+        "Security Guild": 15,
+        "Residential Neighbors": -10
+      },
+      "riskFactors": {
+        "fireRisk": "Very High (multiple forges)",
+        "securityRisk": "High (valuable and restricted goods)",
+        "injuryRisk": "High (dangerous work)"
+      }
+    },
+    "soundDesign": {
+      "ambientSound": "Multiple hammers on anvils, grinding wheels, metal being quenched",
+      "activitySounds": "Weapon testing, quality inspections, military orders being discussed",
+      "musicTheme": "Arsenale in Movimento"
+    },
+    "seasonalEffects": {
+      "wartime": "Increased production, military priority orders",
+      "peacetime": "Focus on export and ceremonial weapons",
+      "naval expansion": "Emphasis on maritime weapons"
+    },
+    "aiInteractionPoints": [
+      "Main forge",
+      "Blade testing area",
+      "Decorative workshop",
+      "Military contract desk",
+      "Quality inspection station",
+      "Secure weapons storage",
+      "Design consultation area"
+    ]
   }
 ]
