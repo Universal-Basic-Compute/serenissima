@@ -169,7 +169,7 @@ async function updateAirtableWithRents(landRents) {
               });
             } else {
               // Record not found
-              resolve({ id: land.id, success: false, error: 'Record not found' });
+              resolve({ id: land.id, success: false, error: `Record not found for PolygonID: ${land.id}` });
             }
           });
         });
