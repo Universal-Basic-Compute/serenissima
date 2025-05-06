@@ -98,40 +98,15 @@ export default function PolygonViewer() {
     loadOwnerCoatOfArms
   } = usePolygonStore();
   
-  // Function to update polygon colors
+  // Function to update polygon colors - now only triggers income-based coloring
   const updatePolygonColors = useCallback(() => {
-    if (polygonRendererRef.current && users && Object.keys(users).length > 0) {
-      console.log('Updating polygon colors with user data:', users);
+    if (polygonRendererRef.current) {
+      console.log('Updating polygon colors based on simulated income');
       
-      // Create a map of user colors
-      const colorMap: Record<string, string> = {};
-      Object.values(users).forEach(user => {
-        if (user.user_name) {
-          if (user.color) {
-            colorMap[user.user_name] = user.color;
-            console.log(`Added color for ${user.user_name}: ${user.color}`);
-          } else if (user.user_name === 'ConsiglioDeiDieci') {
-            // Special case for ConsiglioDeiDieci
-            colorMap[user.user_name] = '#8B0000'; // Dark red
-            console.log(`Added default color for ConsiglioDeiDieci: #8B0000`);
-          }
-        }
-      });
-      
-      // Always add ConsiglioDeiDieci if not present
-      if (!colorMap['ConsiglioDeiDieci']) {
-        colorMap['ConsiglioDeiDieci'] = '#8B0000'; // Dark red
-        console.log('Added missing ConsiglioDeiDieci with default color #8B0000');
-      }
-      
-      // Update colors in the renderer
-      if (Object.keys(colorMap).length > 0) {
-        polygonRendererRef.current.updateOwnerColors(colorMap);
-        // Force an update of owner colors
-        polygonRendererRef.current.updatePolygonOwnerColors();
-      }
+      // Force an update of the view mode to trigger income-based coloring
+      polygonRendererRef.current.updateViewMode(activeView);
     }
-  }, [users]);
+  }, [activeView]);
 
   // Function to update coat of arms
   const updateCoatOfArms = useCallback(() => {

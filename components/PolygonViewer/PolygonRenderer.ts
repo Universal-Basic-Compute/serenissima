@@ -710,22 +710,14 @@ export default class PolygonRenderer {
   }
   
   /**
-   * Update colors for all polygon owners
+   * Update colors for all polygons based on simulated income
    */
   public updatePolygonOwnerColors() {
-    console.log('Updating all polygon owner colors with', Object.keys(this.ownerColorMap).length, 'colors');
-    
-    // Check if we have owner colors
-    if (Object.keys(this.ownerColorMap).length === 0) {
-      console.warn('No owner colors available');
-      return;
-    }
+    console.log('Updating polygon colors based on simulated income');
     
     // Process all polygons
     this.polygons.forEach(polygon => {
-      if (polygon.owner) {
-        console.log(`Processing polygon ${polygon.id} owned by ${polygon.owner}`);
-        
+      if (polygon.id) {
         // Find the corresponding PolygonMesh
         const polygonMesh = this.polygonMeshes.find(pm => {
           const mesh = pm.getMesh();
@@ -733,16 +725,8 @@ export default class PolygonRenderer {
         });
         
         if (polygonMesh) {
-          // Get the owner's color
-          const owner = polygon.owner || '';
-          const ownerColor = this.getOwnerColor(owner);
-          
-          if (ownerColor) {
-            console.log(`Applying color ${ownerColor} to polygon ${polygon.id} owned by ${owner}`);
-            polygonMesh.updateOwner(owner, ownerColor);
-          }
-        } else {
-          console.warn(`Could not find PolygonMesh for polygon ${polygon.id}`);
+          // Update the polygon with its own data (which includes simulatedIncome)
+          polygonMesh.updateOwner(polygon.owner || '', null);
         }
       }
     });
@@ -797,33 +781,11 @@ export default class PolygonRenderer {
   }
   
   /**
-   * Update colors for owners
+   * Update colors for owners - now does nothing as we only use income-based coloring
    */
   public updateOwnerColors(colorMap: Record<string, string>) {
-    console.log('updateOwnerColors called with data:', colorMap);
-    
-    // Update the owner color map
-    this.ownerColorMap = { ...this.ownerColorMap, ...colorMap };
-    
-    // Update the users data with color information
-    Object.entries(colorMap).forEach(([owner, color]) => {
-      if (this.users[owner]) {
-        this.users[owner].color = color;
-      } else {
-        // Create user entry if it doesn't exist
-        this.users[owner] = { 
-          user_name: owner,
-          color: color
-        };
-      }
-    });
-    
-    console.log('Owner color map now has', Object.keys(this.ownerColorMap).length, 'entries');
-    
-    // If we're in land view, update the colors
-    if (this.activeView === 'land') {
-      this.updatePolygonOwnerColors();
-    }
+    // This method no longer needs to do anything
+    console.log('Owner colors are no longer used, income-based coloring only');
   }
   
   // This method is replaced by createColoredCircleOnLand

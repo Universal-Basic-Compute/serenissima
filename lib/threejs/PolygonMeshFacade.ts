@@ -208,29 +208,15 @@ export class PolygonMeshFacade implements Poolable {
   }
   
   /**
-   * Determine the color for land based on owner or income
+   * Determine the color for land based on income
    */
   private determineLandColor(): THREE.Color {
     // If we're in land view and have income data, use income-based coloring
-    if (this.activeView === 'land' && this.hasIncomeData && this.polygon.simulatedIncome !== undefined) {
+    if (this.activeView === 'land' && this.polygon.simulatedIncome !== undefined) {
       return this.getIncomeBasedColor(this.polygon.simulatedIncome);
     }
     
-    // Otherwise use the existing owner-based coloring logic
-    if (this.ownerColor) {
-      // Blend the owner color with sand color for a more natural look
-      const sandColor = new THREE.Color(0xf5e9c8); // Brighter sand color
-      const ownerColor = new THREE.Color(this.ownerColor);
-      return new THREE.Color().lerpColors(sandColor, ownerColor, 0.8);
-    } else if (this.polygon.owner) {
-      // If we have an owner but no color, use a default color
-      if (this.polygon.owner === 'ConsiglioDeiDieci') {
-        return new THREE.Color(0x8B0000); // Dark red for ConsiglioDeiDieci
-      }
-      return new THREE.Color(0x7cac6a); // Default green color
-    }
-    
-    // Default sand color if no owner
+    // Default sand color for all other cases
     return new THREE.Color(0xf5e9c8);
   }
   
