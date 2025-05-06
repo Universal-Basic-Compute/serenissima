@@ -146,9 +146,9 @@ async function updateAirtableWithRents(landRents) {
       // Create update operations for this batch
       const updatePromises = batch.map(land => {
         return new Promise((resolve, reject) => {
-          // Find the record by PolygonID and update it
+          // Find the record by LandID and update it
           table.select({
-            filterByFormula: `{PolygonID} = "${land.id}"`,
+            filterByFormula: `{LandID} = "${land.id}"`,
             maxRecords: 1
           }).firstPage((err, records) => {
             if (err) {
@@ -169,7 +169,7 @@ async function updateAirtableWithRents(landRents) {
               });
             } else {
               // Record not found
-              resolve({ id: land.id, success: false, error: `Record not found for PolygonID: ${land.id}` });
+              resolve({ id: land.id, success: false, error: `Record not found for LandID: ${land.id}` });
             }
           });
         });
