@@ -16,6 +16,7 @@ class PolygonMesh {
   private originalColor: THREE.Color | null = null;
   private originalMaterial: any = null;
   private ownerColor: string | null = null;
+  private ownerCoatOfArmsUrl: string | null = null;
   private coatOfArmsSprite: THREE.Sprite | null = null;
   private polygonMeshesRef: MutableRefObject<Record<string, THREE.Mesh>>;
 
@@ -38,6 +39,7 @@ class PolygonMesh {
     this.performanceMode = performanceMode;
     this.textureLoader = textureLoader;
     this.ownerColor = ownerColor;
+    this.ownerCoatOfArmsUrl = ownerCoatOfArmsUrl;
     this.polygonMeshesRef = polygonMeshesRef;
     
     // Create the polygon mesh
@@ -119,7 +121,7 @@ class PolygonMesh {
         metalness: 0.1
       });
       
-      // Enable shadows after material creation
+      // Set shadow properties on the material instance (not in constructor parameters)
       topMaterial.castShadow = true;
       topMaterial.receiveShadow = true;
       
@@ -131,7 +133,7 @@ class PolygonMesh {
         metalness: 0.0
       });
       
-      // Enable shadows after material creation
+      // Set shadow properties on the material instance (not in constructor parameters)
       sideMaterial.castShadow = true;
       sideMaterial.receiveShadow = true;
 
