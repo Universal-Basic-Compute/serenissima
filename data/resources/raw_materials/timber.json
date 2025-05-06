@@ -122,7 +122,7 @@
     "production_chains": [
       {
         "process": "shipbuilding",
-        "chain": "Timber → Shipyard → Ship Components"
+        "chain": "Timber → Shipyard → Ship Components → Merchant Galley"
       },
       {
         "process": "construction",

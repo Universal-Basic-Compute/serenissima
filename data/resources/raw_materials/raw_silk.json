@@ -90,7 +90,7 @@
   "production_chains": [
     {
       "process": "silk_processing",
-      "chain": "Raw Silk → Silk Conditioning House → Prepared Silk → Silk Fabric → Dyed Silk Fabric → Luxury Silk Garments"
+      "chain": "Raw Silk → Silk Conditioning House → Prepared Silk → Weaving Workshop → Silk Fabric → Dye Works → Dyed Silk Fabric → Tailor Workshop → Luxury Silk Garments"
     }
   ],
   "substitutes": [],
