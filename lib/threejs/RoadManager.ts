@@ -1462,7 +1462,7 @@ export class RoadManager {
         if ('alphaMap' in material && material.alphaMap) material.alphaMap.dispose();
         
         // Clear references
-        if (material.map) material.map = null as unknown as THREE.Texture;
+        if (material.map) material.map = null! as unknown as THREE.Texture;
         
         // Clear references for properties that might not exist on all material types
         if ('normalMap' in material && (material as THREE.MeshStandardMaterial).normalMap) 
