@@ -1043,7 +1043,7 @@ export default function PolygonViewer() {
         }
         
         // Update clouds based on camera position
-        if (sceneRef.current) {
+        if (sceneRef.current && typeof sceneRef.current.updateClouds === 'function') {
           try {
             sceneRef.current.updateClouds(frameCount);
           } catch (error) {
@@ -1704,7 +1704,7 @@ export default function PolygonViewer() {
       />
       
       {/* Road Creator */}
-      {roadCreationActive && sceneRef.current && (
+      {roadCreationActive && sceneRef.current && sceneRef.current.scene && sceneRef.current.camera && (
         <RoadCreator
           scene={sceneRef.current.scene}
           camera={sceneRef.current.camera}
