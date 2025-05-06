@@ -1153,7 +1153,7 @@ export default function PolygonViewer() {
     // This ensures the selection is durable
     if (polygonRendererRef.current) {
       console.log('Updating selection state:', selectedPolygonId);
-      polygonRendererRef.current.updateSelectionState(selectedPolygonId);
+      polygonRendererRef.current.updateSelectionState(selectedPolygonId || undefined);
     }
   }, [selectedPolygonId]);
   
@@ -1577,7 +1577,7 @@ export default function PolygonViewer() {
       <ThreeDErrorBoundary 
         onError={handleRenderingError}
         resetKey={`${activeView}-${highQuality}-${polygons.length}`}
-        fallback={errorBoundaryFallback}
+        fallbackComponent={errorBoundaryFallback}
       >
         <div className="w-full h-full flex flex-col items-center justify-center bg-amber-50">
           <div className="text-amber-800 text-2xl font-serif mb-4">Mapping the Venetian Republic...</div>
@@ -1635,7 +1635,7 @@ export default function PolygonViewer() {
     <ThreeDErrorBoundary 
       onError={handleRenderingError}
       resetKey={`${activeView}-${highQuality}-${polygons.length}`}
-      fallback={errorBoundaryFallback}
+      fallbackComponent={errorBoundaryFallback}
     >
       <div className="w-screen h-screen">
         {/* View mode menu */}
