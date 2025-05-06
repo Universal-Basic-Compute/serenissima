@@ -142,7 +142,8 @@
     "complementary_resources": [
       "criminal_contacts",
       "blackmail_evidence",
-      "smuggler_maps"
+      "smuggler_maps",
+      "disguise_materials"
     ]
   },
   "legal_properties": {

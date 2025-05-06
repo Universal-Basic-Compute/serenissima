@@ -148,7 +148,8 @@
     "complementary_resources": [
       "criminal_contacts",
       "smuggler_maps",
-      "forged_documents"
+      "forged_documents",
+      "forgery_tools"
     ]
   },
   "legal_properties": {
