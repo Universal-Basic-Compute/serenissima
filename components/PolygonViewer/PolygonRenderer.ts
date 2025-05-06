@@ -427,7 +427,7 @@ export default class PolygonRenderer {
       // Create a simple marker at the centroid
       const geometry = new THREE.CircleGeometry(0.3, 8); // Simplified geometry
       const material = new THREE.MeshBasicMaterial({
-        color: polygon.owner && typeof polygon.owner === 'string' ? this.getOwnerColor(polygon.owner) || '#FFF5D0' : '#FFF5D0', // Lighter, more yellow
+        color: polygon.owner && typeof polygon.owner === 'string' ? this.getOwnerColor(polygon.owner as string) || '#FFF5D0' : '#FFF5D0', // Lighter, more yellow
         side: THREE.DoubleSide,
         transparent: true,
         opacity: 0.7,
@@ -899,7 +899,7 @@ export default class PolygonRenderer {
           
           // Convert centroid to 3D position
           const normalizedCoord = normalizeCoordinates(
-            [centroid],
+            [centroid as Coordinate],
             this.bounds.centerLat,
             this.bounds.centerLng,
             this.bounds.scale,
@@ -1147,7 +1147,7 @@ export default class PolygonRenderer {
     }
     
     // Ensure centroid is not undefined before using it
-    const centroid: Coordinate = polygon.centroid;
+    const centroid: Coordinate = polygon.centroid as Coordinate;
     
     withErrorHandling(
       () => {
@@ -1181,7 +1181,7 @@ export default class PolygonRenderer {
         try {
           // Convert centroid to 3D position
           const normalizedCoord = normalizeCoordinates(
-            [centroid],
+            [centroid as Coordinate],
             this.bounds.centerLat,
             this.bounds.centerLng,
             this.bounds.scale,
