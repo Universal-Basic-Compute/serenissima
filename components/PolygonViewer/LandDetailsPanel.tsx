@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
+import * as THREE from 'three';
 import { getApiBaseUrl } from '@/lib/apiUtils';
 import { useRouter } from 'next/navigation';
 import ActionButton from '../UI/ActionButton';
@@ -50,6 +51,118 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
     }
   }, [selectedPolygonId, selectedPolygon, landOwners, owner]);
   
+  // Add this useEffect to render the top view of the land
+  useEffect(() => {
+    if (selectedPolygon && canvasRef.current && !landRendered) {
+      renderLandTopView(selectedPolygon, canvasRef.current);
+      setLandRendered(true);
+    }
+  }, [selectedPolygon, landRendered]);
+
+  // Function to render a top-down view of the land
+  const renderLandTopView = (polygon: Polygon, canvas: HTMLCanvasElement) => {
+    if (!polygon.coordinates || polygon.coordinates.length < 3) return;
+    
+    // Set canvas size
+    canvas.width = 300;
+    canvas.height = 200;
+    
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    
+    // Clear canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Extract coordinates
+    const coords = polygon.coordinates;
+    
+    // Find min/max to scale the polygon to fit the canvas
+    let minLat = coords[0].lat, maxLat = coords[0].lat;
+    let minLng = coords[0].lng, maxLng = coords[0].lng;
+    
+    coords.forEach(coord => {
+      minLat = Math.min(minLat, coord.lat);
+      maxLat = Math.max(maxLat, coord.lat);
+      minLng = Math.min(minLng, coord.lng);
+      maxLng = Math.max(maxLng, coord.lng);
+    });
+    
+    // Add padding
+    const padding = 20;
+    const scaleX = (canvas.width - padding * 2) / (maxLng - minLng);
+    const scaleY = (canvas.height - padding * 2) / (maxLat - minLat);
+    
+    // Use the smaller scale to maintain aspect ratio
+    const scale = Math.min(scaleX, scaleY);
+    
+    // Center the polygon
+    const centerX = (canvas.width / 2) - ((minLng + maxLng) / 2) * scale;
+    const centerY = (canvas.height / 2) + ((minLat + maxLat) / 2) * scale;
+    
+    // Draw the polygon
+    ctx.beginPath();
+    coords.forEach((coord, index) => {
+      const x = (coord.lng * scale) + centerX;
+      const y = centerY - (coord.lat * scale);
+      
+      if (index === 0) {
+        ctx.moveTo(x, y);
+      } else {
+        ctx.lineTo(x, y);
+      }
+    });
+    ctx.closePath();
+    
+    // Fill with a sand color
+    ctx.fillStyle = '#f5e9c8';
+    ctx.fill();
+    
+    // Draw border
+    ctx.strokeStyle = '#8B4513';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    
+    // If there's a simulated income, color the polygon accordingly
+    if (polygon.simulatedIncome !== undefined) {
+      // Normalize income to a 0-1 scale for coloring
+      const maxIncome = 1000; // Adjust based on your actual data range
+      const normalizedIncome = Math.min(Math.max(polygon.simulatedIncome / maxIncome, 0), 1);
+      
+      // Create a semi-transparent overlay with color based on income
+      ctx.globalAlpha = 0.4;
+      
+      if (normalizedIncome >= 0.5) {
+        // Higher income: yellow to red
+        const t = (normalizedIncome - 0.5) * 2; // Scale 0.5-1.0 to 0-1
+        const r = Math.floor(255);
+        const g = Math.floor(255 * (1 - t));
+        const b = 0;
+        ctx.fillStyle = `rgb(${r},${g},${b})`;
+      } else {
+        // Lower income: green to yellow
+        const t = normalizedIncome * 2; // Scale 0-0.5 to 0-1
+        const r = Math.floor(255 * t);
+        const g = Math.floor(255);
+        const b = 0;
+        ctx.fillStyle = `rgb(${r},${g},${b})`;
+      }
+      
+      ctx.fill();
+      ctx.globalAlpha = 1.0;
+    }
+    
+    // If there's a centroid, mark it
+    if (polygon.centroid) {
+      const x = (polygon.centroid.lng * scale) + centerX;
+      const y = centerY - (polygon.centroid.lat * scale);
+      
+      ctx.beginPath();
+      ctx.arc(x, y, 4, 0, Math.PI * 2);
+      ctx.fillStyle = '#ff0000';
+      ctx.fill();
+    }
+  };
+
   // Add this effect to listen for land purchase events
   useEffect(() => {
     const handleLandPurchase = (data: any) => {
@@ -267,6 +380,12 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
         isVisible ? 'translate-x-0' : 'translate-x-full'
       }`}
       key={refreshKey}
+      onTransitionEnd={() => {
+        // Reset landRendered when panel becomes visible
+        if (isVisible && !landRendered && selectedPolygonId) {
+          setLandRendered(false);
+        }
+      }}
     >
       <div className="p-6 h-full flex flex-col">
         {/* Header with improved styling */}
@@ -285,6 +404,28 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
         </div>
         
         <div className="space-y-6 overflow-y-auto flex-grow">
+          {/* Top view representation of the land */}
+          <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200 mb-6">
+            <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Land Overview</h3>
+            <div className="flex flex-col items-center">
+              <canvas 
+                ref={canvasRef} 
+                className="w-full h-[200px] border border-amber-100 rounded-lg mb-2"
+                style={{ maxWidth: '300px' }}
+              />
+              
+              {/* Buildable area information - now in small text below the canvas */}
+              {selectedPolygon?.areaInSquareMeters && (
+                <div className="text-center mt-1">
+                  <span className="text-sm text-amber-700">Buildable Area: </span>
+                  <span className="text-sm font-semibold text-amber-800">
+                    {Math.floor(selectedPolygon.areaInSquareMeters).toLocaleString()} m²
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+
           {/* Owner information with enhanced styling */}
           <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
             <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Owner</h3>
@@ -304,16 +445,6 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
               </div>
             )}
           </div>
-          
-          {/* Area information with enhanced styling */}
-          {selectedPolygon?.areaInSquareMeters && (
-            <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
-              <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Buildable Area</h3>
-              <p className="text-2xl font-semibold text-amber-800 text-center">
-                {Math.floor(selectedPolygon.areaInSquareMeters).toLocaleString()} m²
-              </p>
-            </div>
-          )}
           
           {/* Historical Name with enhanced styling */}
           {selectedPolygon?.historicalName && (
