@@ -39,13 +39,13 @@ export default function RootLayout({
     };
     
     // Add error handler for unhandled errors
-    const handleError = (event) => {
+    const handleError = (event: ErrorEvent) => {
       console.error('Unhandled error:', event.error || event.message);
       // Log to analytics or monitoring service if available
     };
     
     // Add error handler for unhandled promise rejections
-    const handleUnhandledRejection = (event) => {
+    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
       console.error('Unhandled promise rejection:', event.reason);
       // Log to analytics or monitoring service if available
     };
