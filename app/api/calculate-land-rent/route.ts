@@ -12,9 +12,18 @@ const VENICE_CENTER = {
 const MAX_DISTANCE = 2.5; // ~2.5km covers most of Venice
 
 // Market stall reference values from the game economy
-const MARKET_STALL_CONSTRUCTION_COST = 150000; // ducats
 const MARKET_STALL_DAILY_INCOME = 8000; // ducats
 const MARKET_STALL_SIZE = 20; // approximate size in square meters
+
+// Target economic values
+const AVERAGE_LAND_PRICE = 1000000; // 1M ducats average land price
+const TARGET_ANNUAL_YIELD = 0.05; // 5% annual yield (reasonable real estate return)
+const DAYS_PER_YEAR = 365;
+
+// Calculate target daily rent based on land value
+// If land is worth 1M ducats and we want 5% annual yield, daily rent should be:
+// 1,000,000 * 0.05 / 365 = ~137 ducats per day
+const TARGET_DAILY_RENT_PER_MILLION = (AVERAGE_LAND_PRICE * TARGET_ANNUAL_YIELD) / DAYS_PER_YEAR;
 
 // Calculate distance between two coordinates in kilometers using Haversine formula
 function calculateDistance(coord1: { lat: number; lng: number }, coord2: { lat: number; lng: number }) {
@@ -36,16 +45,17 @@ function calculateLocationMultiplier(distance: number) {
   return Math.max(1, multiplier);
 }
 
-// Calculate base rent based on area
+// Calculate base rent based on area - recalibrated to match target economy
 function calculateBaseRent(areaInSquareMeters: number): number {
-  // Use market stall as reference: 8000 ducats daily income for ~20 sq meters
-  // This gives us ~400 ducats per sq meter as a baseline
-  const baseRatePerSquareMeter = MARKET_STALL_DAILY_INCOME / MARKET_STALL_SIZE;
+  // Base value calculation - using a reference size of 100 sq meters
+  const REFERENCE_SIZE = 100; // sq meters
+  const REFERENCE_RENT = TARGET_DAILY_RENT_PER_MILLION; // ~137 ducats per day for 1M value
   
-  // Apply a slight diminishing return for larger areas
-  const scaleFactor = Math.pow(areaInSquareMeters / MARKET_STALL_SIZE, 0.85);
+  // Calculate size factor with diminishing returns for larger areas
+  const sizeFactor = Math.pow(areaInSquareMeters / REFERENCE_SIZE, 0.7);
   
-  return baseRatePerSquareMeter * areaInSquareMeters * scaleFactor;
+  // Calculate base rent
+  return REFERENCE_RENT * sizeFactor;
 }
 
 export async function GET() {
@@ -92,6 +102,9 @@ export async function GET() {
       const randomFactor = 0.9 + (Math.random() * 0.2);
       const finalRent = Math.round(dailyRent * randomFactor);
       
+      // Calculate estimated land value based on rent (for verification)
+      const estimatedLandValue = Math.round((finalRent * DAYS_PER_YEAR) / TARGET_ANNUAL_YIELD);
+      
       landRents.push({
         id,
         centroid,
@@ -99,6 +112,7 @@ export async function GET() {
         distanceFromCenter,
         locationMultiplier: parseFloat(locationMultiplier.toFixed(2)),
         dailyRent: finalRent,
+        estimatedLandValue,
         historicalName: data.historicalName || null
       });
     }
@@ -112,14 +126,21 @@ export async function GET() {
       // Continue with the response even if Airtable save fails
     }
     
+    const averageRent = Math.round(landRents.reduce((sum, land) => sum + land.dailyRent, 0) / landRents.length);
+    const minRent = Math.min(...landRents.map(land => land.dailyRent));
+    const maxRent = Math.max(...landRents.map(land => land.dailyRent));
+    const averageLandValue = Math.round(landRents.reduce((sum, land) => sum + land.estimatedLandValue, 0) / landRents.length);
+    
     return NextResponse.json({ 
       success: true, 
       landRents,
       metadata: {
         totalLands: landRents.length,
-        averageRent: Math.round(landRents.reduce((sum, land) => sum + land.dailyRent, 0) / landRents.length),
-        minRent: Math.min(...landRents.map(land => land.dailyRent)),
-        maxRent: Math.max(...landRents.map(land => land.dailyRent)),
+        averageRent,
+        minRent,
+        maxRent,
+        averageLandValue,
+        targetYield: TARGET_ANNUAL_YIELD,
         savedToAirtable: true
       }
     });

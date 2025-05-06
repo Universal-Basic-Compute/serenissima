@@ -19,6 +19,16 @@ const MAX_DISTANCE = 2.5; // ~2.5km covers most of Venice
 const MARKET_STALL_DAILY_INCOME = 8000; // ducats
 const MARKET_STALL_SIZE = 20; // approximate size in square meters
 
+// Target economic values
+const AVERAGE_LAND_PRICE = 1000000; // 1M ducats average land price
+const TARGET_ANNUAL_YIELD = 0.05; // 5% annual yield (reasonable real estate return)
+const DAYS_PER_YEAR = 365;
+
+// Calculate target daily rent based on land value
+// If land is worth 1M ducats and we want 5% annual yield, daily rent should be:
+// 1,000,000 * 0.05 / 365 = ~137 ducats per day
+const TARGET_DAILY_RENT_PER_MILLION = (AVERAGE_LAND_PRICE * TARGET_ANNUAL_YIELD) / DAYS_PER_YEAR;
+
 // Ensure data directory exists
 function ensureDataDirExists() {
   if (!fs.existsSync(DATA_DIR)) {
@@ -96,16 +106,17 @@ function calculateLocationMultiplier(distance) {
   return Math.max(1, multiplier);
 }
 
-// Calculate base rent based on area
+// Calculate base rent based on area - recalibrated to match target economy
 function calculateBaseRent(areaInSquareMeters) {
-  // Use market stall as reference: 8000 ducats daily income for ~20 sq meters
-  // This gives us ~400 ducats per sq meter as a baseline
-  const baseRatePerSquareMeter = MARKET_STALL_DAILY_INCOME / MARKET_STALL_SIZE;
+  // Base value calculation - using a reference size of 100 sq meters
+  const REFERENCE_SIZE = 100; // sq meters
+  const REFERENCE_RENT = TARGET_DAILY_RENT_PER_MILLION; // ~137 ducats per day for 1M value
   
-  // Apply a slight diminishing return for larger areas
-  const scaleFactor = Math.pow(areaInSquareMeters / MARKET_STALL_SIZE, 0.85);
+  // Calculate size factor with diminishing returns for larger areas
+  const sizeFactor = Math.pow(areaInSquareMeters / REFERENCE_SIZE, 0.7);
   
-  return baseRatePerSquareMeter * areaInSquareMeters * scaleFactor;
+  // Calculate base rent
+  return REFERENCE_RENT * sizeFactor;
 }
 
 // Update Airtable with the calculated rent values
@@ -198,6 +209,7 @@ async function updateAirtableWithRents(landRents) {
 async function calculateLandRents() {
   try {
     console.log('Starting land rent calculation...');
+    console.log(`Target daily rent for 1M ducat land: ${TARGET_DAILY_RENT_PER_MILLION.toFixed(2)} ducats`);
     
     // Read all polygon files
     const files = getAllJsonFiles();
@@ -249,6 +261,9 @@ async function calculateLandRents() {
       const randomFactor = 0.9 + (Math.random() * 0.2);
       const finalRent = Math.round(dailyRent * randomFactor);
       
+      // Calculate estimated land value based on rent (for verification)
+      const estimatedLandValue = Math.round((finalRent * DAYS_PER_YEAR) / TARGET_ANNUAL_YIELD);
+      
       landRents.push({
         id,
         centroid,
@@ -256,14 +271,22 @@ async function calculateLandRents() {
         distanceFromCenter,
         locationMultiplier: parseFloat(locationMultiplier.toFixed(2)),
         dailyRent: finalRent,
+        estimatedLandValue,
         historicalName: data.historicalName || null
       });
     }
     
     console.log(`Calculated rent for ${landRents.length} land parcels`);
-    console.log(`Average rent: ${Math.round(landRents.reduce((sum, land) => sum + land.dailyRent, 0) / landRents.length)} ducats`);
-    console.log(`Min rent: ${Math.min(...landRents.map(land => land.dailyRent))} ducats`);
-    console.log(`Max rent: ${Math.max(...landRents.map(land => land.dailyRent))} ducats`);
+    
+    const averageRent = Math.round(landRents.reduce((sum, land) => sum + land.dailyRent, 0) / landRents.length);
+    const minRent = Math.min(...landRents.map(land => land.dailyRent));
+    const maxRent = Math.max(...landRents.map(land => land.dailyRent));
+    const averageLandValue = Math.round(landRents.reduce((sum, land) => sum + land.estimatedLandValue, 0) / landRents.length);
+    
+    console.log(`Average rent: ${averageRent} ducats per day`);
+    console.log(`Min rent: ${minRent} ducats per day`);
+    console.log(`Max rent: ${maxRent} ducats per day`);
+    console.log(`Average estimated land value: ${averageLandValue} ducats`);
     
     // Update Airtable with the calculated rents
     const updateResults = await updateAirtableWithRents(landRents);
