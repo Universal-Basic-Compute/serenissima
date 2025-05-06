@@ -8,6 +8,18 @@
  */
 'use client';
 
+// Add TypeScript declarations for window object extensions
+declare global {
+  interface Window {
+    _polygonSnapshotCache: {
+      result: any | null;
+      deps: string | null;
+    };
+    getCachedSnapshot: <T>(getSnapshotFn: () => T, deps: any[]) => T;
+    getSnapshotWithCache?: <T>(getSnapshotFn: () => T, deps: any[]) => T;
+  }
+}
+
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { getApiBaseUrl } from '@/lib/apiUtils';
 import { PhantomWalletAdapter } from '@solana/wallet-adapter-phantom';
@@ -135,8 +147,8 @@ export default function Home() {
   const [marketPanelVisible, setMarketPanelVisible] = useState(false);
   const polygonRendererRef = useRef<any>(null);
   
-  // Define getSnapshotWithCache function early in the component
-  const getSnapshotWithCache = useCallback((getSnapshotFn, dependencies) => {
+  // Define getSnapshotWithCache function early in the component with proper type annotations
+  const getSnapshotWithCache = useCallback(<T,>(getSnapshotFn: () => T, dependencies: any[]): T => {
     // Check if window and getCachedSnapshot exist
     if (typeof window !== 'undefined' && window.getCachedSnapshot) {
       return window.getCachedSnapshot(getSnapshotFn, dependencies);
@@ -148,8 +160,8 @@ export default function Home() {
     // Use a static property to store the cached values between renders
     if (!getSnapshotWithCache.cache) {
       getSnapshotWithCache.cache = {
-        result: null,
-        deps: null
+        result: null as T | null,
+        deps: null as string | null
       };
     }
     
@@ -158,7 +170,7 @@ export default function Home() {
       getSnapshotWithCache.cache.result && 
       getSnapshotWithCache.cache.deps === depsString
     ) {
-      return getSnapshotWithCache.cache.result;
+      return getSnapshotWithCache.cache.result as T;
     }
     
     // Calculate new result
@@ -171,8 +183,11 @@ export default function Home() {
     return result;
   }, []);
   
-  // Initialize the cache property
-  getSnapshotWithCache.cache = null;
+  // Initialize the cache property with proper typing
+  getSnapshotWithCache.cache: {
+    result: any | null;
+    deps: string | null;
+  } | null = null;
   
   // Initialize wallet adapter
   useEffect(() => {
@@ -677,7 +692,7 @@ export default function Home() {
       };
       
       // Add a helper function to get cached snapshot
-      window.getCachedSnapshot = (getSnapshotFn, deps) => {
+      window.getCachedSnapshot = <T,>(getSnapshotFn: () => T, deps: any[]): T => {
         const currentDepsString = JSON.stringify(deps);
         
         // Use cached result if dependencies haven't changed
@@ -2348,7 +2363,7 @@ export default function Home() {
         </div>
         
         {/* Ensure the function is available globally as a fallback */}
-        {typeof window !== 'undefined' && (window.getSnapshotWithCache = getSnapshotWithCache)}
+        {typeof window !== 'undefined' && ((window as any).getSnapshotWithCache = getSnapshotWithCache)}
         
         {/* Dynamic import of PolygonViewer with snapshot caching prop */}
         <PolygonViewer 
