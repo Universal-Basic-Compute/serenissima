@@ -16,7 +16,7 @@ declare global {
       deps: string | null;
     };
     getCachedSnapshot: <T>(getSnapshotFn: () => T, deps: any[]) => T;
-    getSnapshotWithCache: <T>(getSnapshotFn: () => T, deps: any[]) => T;
+    getSnapshotWithCache: <T>(getSnapshotFn: () => T, dependencies: any[]) => T;
     getSnapshotWithCacheCache: {
       result: any | null;
       deps: string | null;
@@ -191,7 +191,7 @@ export default function Home() {
   };
   
   // Define getSnapshotWithCache function early in the component with proper type annotations
-  const getSnapshotWithCache = useCallback(<T,>(getSnapshotFn: () => T, dependencies: any[]): T => {
+  const getSnapshotWithCache = useCallback(function getSnapshotWithCache<T>(getSnapshotFn: () => T, dependencies: any[]): T {
     // Check if window and getCachedSnapshot exist
     if (typeof window !== 'undefined' && window._polygonSnapshotCache) {
       // Use the window's cache implementation directly
@@ -2543,8 +2543,6 @@ export default function Home() {
           getSnapshotWithCache={getSnapshotWithCache}
           ref={polygonRendererRef}
           activeView={activeView}
-          // Add any additional required props with empty/default values to satisfy TypeScript
-          {...{}} // This spread allows the component to accept additional props defined in its interface
         />
       </>
       
