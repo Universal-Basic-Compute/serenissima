@@ -1254,7 +1254,7 @@ export default class PolygonRenderer {
     
     // Get the owner's coat of arms URL if available
     let ownerCoatOfArmsUrl: string | null = null;
-    if (newOwner && this.ownerCoatOfArmsMap && newOwner in this.ownerCoatOfArmsMap) {
+    if (newOwner && this.ownerCoatOfArmsMap && typeof newOwner === 'string' && newOwner in this.ownerCoatOfArmsMap) {
       ownerCoatOfArmsUrl = this.ownerCoatOfArmsMap[newOwner];
       console.log(`Found coat of arms for ${newOwner}: ${ownerCoatOfArmsUrl}`);
     }
