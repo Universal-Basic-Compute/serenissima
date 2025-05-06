@@ -1130,8 +1130,9 @@ if (shoreFactor > 0.01) {
           }
         } else if (this.water.material instanceof THREE.MeshBasicMaterial) {
           // For fallback mode with basic material
-          if ('map' in this.water.material && this.water.material.map) {
-            this.water.material.map.dispose();
+          const material = this.water.material as THREE.MeshBasicMaterial;
+          if (material.map) {
+            material.map.dispose();
           }
         }
         
@@ -1157,6 +1158,6 @@ if (shoreFactor > 0.01) {
     
     // Clear references to help garbage collection
     this.water = null;
-    this.clock = null;
+    this.clock = new THREE.Clock(); // Replace with empty clock instead of null
   }
 }
