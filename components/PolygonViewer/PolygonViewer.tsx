@@ -1056,7 +1056,7 @@ export default function PolygonViewer() {
             }
           }
         }
-        
+      
         frameCount++;
       } catch (error) {
         console.error('Animation loop error:', error);
@@ -1227,12 +1227,12 @@ export default function PolygonViewer() {
         const landObjects: THREE.Object3D[] = [];
         if (sceneRef.current) {
           sceneRef.current.scene.traverse(object => {
-          if (object instanceof THREE.Mesh && 
-              object.userData && 
-              (object.userData.isPolygon || object.userData.isLand)) {
-            landObjects.push(object);
-          }
-        });
+            if (object instanceof THREE.Mesh && 
+                object.userData && 
+                (object.userData.isPolygon || object.userData.isLand)) {
+              landObjects.push(object);
+            }
+          });
         
         // Connect land to water
         if (landObjects.length > 0 && sceneRef.current) {
