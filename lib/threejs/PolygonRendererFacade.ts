@@ -116,7 +116,7 @@ export class PolygonRendererFacade {
       throw new Error('PolygonRendererFacade has been disposed');
     }
     
-    return new THREE.MeshStandardMaterial({
+    const material = new THREE.MeshStandardMaterial({
       map: PolygonRendererFacade.sharedTextures.sandBaseColor,
       normalMap: PolygonRendererFacade.sharedTextures.sandNormalMap,
       roughnessMap: PolygonRendererFacade.sharedTextures.sandRoughnessMap,
@@ -125,15 +125,17 @@ export class PolygonRendererFacade {
       transparent: false,
       roughness: 0.8,
       metalness: 0.1,
-      // Remove shadow properties
-      castShadow: false,
-      receiveShadow: false,
       // Remove any depth offset that might create shadow-like effects
       depthWrite: true,
       polygonOffset: false,
       polygonOffsetFactor: 0,
       polygonOffsetUnits: 0
     });
+    
+    // Set shadow properties on the material instance instead
+    material.userData.receiveShadow = false;
+    
+    return material;
   }
   
   /**
@@ -213,7 +215,7 @@ export class PolygonRendererFacade {
   public loadTexture(
     url: string,
     onLoad?: (texture: THREE.Texture) => void,
-    onError?: (error: ErrorEvent) => void
+    onError?: (error: THREE.ErrorEvent) => void
   ): THREE.Texture {
     if (this.isDisposed) {
       throw new Error('PolygonRendererFacade has been disposed');
