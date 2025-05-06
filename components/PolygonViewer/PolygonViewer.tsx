@@ -758,7 +758,7 @@ export default function PolygonViewer() {
     
     // Clean up the interval in the return function
     return () => {
-      // No rendering interval to clean up
+      // No interval to clean up
       // ... other cleanup code ...
     };
     
@@ -1684,7 +1684,7 @@ export default function PolygonViewer() {
       />
       
       {/* Road Creator */}
-      {roadCreationActive && sceneRef.current && sceneRef.current.scene && sceneRef.current.camera && (
+      {roadCreationActive && sceneRef.current?.scene && sceneRef.current?.camera && (
         <RoadCreator
           scene={sceneRef.current.scene}
           camera={sceneRef.current.camera}
