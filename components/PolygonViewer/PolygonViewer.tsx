@@ -1517,6 +1517,7 @@ export default function PolygonViewer() {
     />
   ), [activeView, selectedPolygonId, handleCloseLandDetails, polygons, landOwners]);
 
+
   if (loading) {
     return (
       <ThreeDErrorBoundary 
@@ -1607,7 +1608,7 @@ export default function PolygonViewer() {
     <ThreeDErrorBoundary 
       onError={handleRenderingError}
       resetKey={`${activeView}-${highQuality}-${polygons.length}`}
-      fallback={
+      fallback={(
         <div className="w-full h-full flex flex-col items-center justify-center bg-amber-50">
           <h2 className="text-2xl font-serif text-amber-800 mb-4">Rendering Error</h2>
           <p className="text-amber-600 mb-6">The Council of Ten is investigating this issue.</p>
@@ -1618,7 +1619,7 @@ export default function PolygonViewer() {
             Reload Page
           </button>
         </div>
-      }
+      )}
     >
       <div className="w-screen h-screen">
         {/* View mode menu */}
