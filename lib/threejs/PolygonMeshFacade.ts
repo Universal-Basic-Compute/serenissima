@@ -96,7 +96,7 @@ export class PolygonMeshFacade implements Poolable {
   /**
    * Check if the object is active in the pool
    */
-  public isActive(): boolean {
+  public isActive: () => boolean = () => {
     return this._isActive;
   }
   
@@ -181,10 +181,8 @@ export class PolygonMeshFacade implements Poolable {
       
       return new THREE.MeshBasicMaterial({
         color: landColor,
-        side: THREE.DoubleSide,
-        // Remove shadow properties
-        castShadow: false,
-        receiveShadow: false
+        side: THREE.DoubleSide
+        // Shadow properties removed as they don't exist on MeshBasicMaterialParameters
       });
     } else {
       // Other views - use standard material with textures
@@ -193,10 +191,8 @@ export class PolygonMeshFacade implements Poolable {
         side: THREE.DoubleSide,
         transparent: false,
         roughness: 0.8,
-        metalness: 0.1,
-        // Remove shadow properties
-        castShadow: false,
-        receiveShadow: false
+        metalness: 0.1
+        // Shadow properties removed as they don't exist on MeshStandardMaterialParameters
       });
     }
   }
