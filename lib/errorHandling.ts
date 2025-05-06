@@ -1,4 +1,5 @@
 import { log } from './logUtils';
+import * as THREE from 'three';
 
 /**
  * Error types for categorizing rendering errors
