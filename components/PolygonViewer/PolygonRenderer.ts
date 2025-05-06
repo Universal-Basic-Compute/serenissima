@@ -52,6 +52,7 @@ export default class PolygonRenderer {
   
   // Static properties for texture loading
   private static sharedTextureLoader: THREE.TextureLoader | null = null;
+  private textureLoader: THREE.TextureLoader;
   private sandNormalMap: THREE.Texture | null = null;
   private sandRoughnessMap: THREE.Texture | null = null;
   
@@ -127,6 +128,9 @@ export default class PolygonRenderer {
     this.activeView = activeView;
     this.performanceMode = performanceMode;
     this.polygonMeshesRef = polygonMeshesRef;
+    
+    // Initialize texture loader
+    this.textureLoader = new THREE.TextureLoader();
     
     // Initialize error handler
     this.errorHandler = RenderingErrorHandler.getInstance();
@@ -355,14 +359,13 @@ export default class PolygonRenderer {
         }
         
         // Create a PolygonMeshFacade instance
-        const textureLoader = new THREE.TextureLoader();
         const polygonMesh = new PolygonMeshFacade(
           this.scene,
           polygon,
           this.bounds,
           this.activeView,
           this.performanceMode,
-          textureLoader,
+          this.textureLoader,
           ownerColor,
           ownerCoatOfArmsUrl
         );
@@ -1294,63 +1297,34 @@ export default class PolygonRenderer {
     // No shore effects are created to avoid geometry generation
   }
   
-  /**
-   * Update coat of arms sprites based on current data
-   */
-  public updateCoatOfArmsSprites(): void {
-    console.log('Updating coat of arms sprites');
-    
-    // Debug: Log polygons with coatOfArmsCenter
-    const polygonsWithCoatOfArms = this.polygons.filter(p => p.coatOfArmsCenter);
-    console.log(`Found ${polygonsWithCoatOfArms.length} polygons with coatOfArmsCenter:`, 
-      polygonsWithCoatOfArms.map(p => ({ id: p.id, position: p.coatOfArmsCenter })));
-    
-    // Clear the sprite map
-    this.coatOfArmSprites = {};
-    
-    // Remove existing coat of arms sprites
-    this.scene.traverse((object) => {
-      if (object instanceof THREE.Sprite && object.userData && object.userData.isCoatOfArms) {
-        this.scene.remove(object);
+  // Helper methods for loading coat of arms textures
+  private loadCoatOfArmsTexture(url: string): THREE.Texture {
+    const texture = new THREE.Texture();
+    const loader = new THREE.TextureLoader();
+    loader.load(url, 
+      (loadedTexture) => {
+        texture.image = loadedTexture.image;
+        texture.needsUpdate = true;
+      },
+      undefined,
+      (error) => {
+        console.error('Error loading coat of arms texture:', error);
       }
-    });
+    );
+    return texture;
+  }
+  
+  // Helper method to convert lat/lng to 3D position
+  private convertLatLngToPosition(lat: number, lng: number): THREE.Vector3 {
+    const normalizedCoord = normalizeCoordinates(
+      [{ lat, lng }],
+      this.bounds.centerLat,
+      this.bounds.centerLng,
+      this.bounds.scale,
+      this.bounds.latCorrectionFactor
+    )[0];
     
-    // Create new coat of arms sprites
-    this.polygons.forEach(polygon => {
-      if (polygon.owner && this.ownerCoatOfArmsMap[polygon.owner]) {
-        // Use centroid for positioning
-        const position = polygon.centroid;
-        if (!position) return;
-        
-        console.log(`Creating coat of arms for polygon ${polygon.id} at position:`, position);
-        
-        // Create the sprite
-        const texture = this.loadCoatOfArmsTexture(this.ownerCoatOfArmsMap[polygon.owner]);
-        const material = new THREE.SpriteMaterial({ map: texture, transparent: true });
-        const sprite = new THREE.Sprite(material);
-        
-        // Set position
-        const worldPosition = this.convertLatLngToPosition(position.lat, position.lng);
-        sprite.position.copy(worldPosition);
-        sprite.position.y += 5; // Adjust height above the polygon
-        
-        // Set scale
-        sprite.scale.set(10, 10, 1);
-        
-        // Add metadata
-        sprite.userData = {
-          isCoatOfArms: true,
-          polygonId: polygon.id,
-          owner: polygon.owner
-        };
-        
-        // Add to scene
-        this.scene.add(sprite);
-        
-        // Store in map
-        this.coatOfArmSprites[polygon.id] = sprite;
-      }
-    });
+    return new THREE.Vector3(normalizedCoord.x, 0, normalizedCoord.y);
   }
   
   /**
