@@ -425,7 +425,14 @@ export class RoadManager {
             let roadGeometry: THREE.BufferGeometry;
             if (this.roadGeometryCache.has(cacheKey)) {
               // Reuse existing geometry
-              roadGeometry = this.roadGeometryCache.get(cacheKey)!.clone();
+              const cachedGeometry = this.roadGeometryCache.get(cacheKey);
+              if (cachedGeometry) {
+                roadGeometry = cachedGeometry.clone();
+              } else {
+                // This shouldn't happen, but handle it gracefully
+                log.warn(`Cache key ${cacheKey} exists but geometry is null, creating new geometry`);
+                roadGeometry = new THREE.BufferGeometry();
+              }
               
               // Update usage count
               const currentCount = this.geometryUsageCount.get(cacheKey) || 0;
@@ -568,13 +575,20 @@ export class RoadManager {
             let roadGeometry: THREE.BufferGeometry;
             if (this.roadGeometryCache.has(cacheKey)) {
               // Reuse existing geometry
-              roadGeometry = this.roadGeometryCache.get(cacheKey)!.clone();
-              
-              // Update usage count
-              const currentCount = this.geometryUsageCount.get(cacheKey) || 0;
-              this.geometryUsageCount.set(cacheKey, currentCount + 1);
-              
-              log.info(`Reusing cached road geometry in fallback mode (key: ${cacheKey}, usage: ${currentCount + 1})`);
+              const cachedGeometry = this.roadGeometryCache.get(cacheKey);
+              if (cachedGeometry) {
+                roadGeometry = cachedGeometry.clone();
+                
+                // Update usage count
+                const currentCount = this.geometryUsageCount.get(cacheKey) || 0;
+                this.geometryUsageCount.set(cacheKey, currentCount + 1);
+                
+                log.info(`Reusing cached road geometry in fallback mode (key: ${cacheKey}, usage: ${currentCount + 1})`);
+              } else {
+                // This shouldn't happen, but handle it gracefully
+                log.warn(`Cache key ${cacheKey} exists but geometry is null, creating new geometry`);
+                roadGeometry = new THREE.BufferGeometry();
+              }
             } else {
               // Create new road geometry
               const roadWidth = 0.15;
