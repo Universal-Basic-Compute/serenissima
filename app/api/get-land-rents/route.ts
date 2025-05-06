@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { airtableUtils } from '@/lib/airtableUtils';
+import { LandRent } from '@/lib/airtableUtils';
 
 export async function GET(request: Request) {
   try {
@@ -16,7 +17,7 @@ export async function GET(request: Request) {
       metadata: {
         totalLands: landRents.length,
         averageRent: landRents.length > 0 
-          ? Math.round(landRents.reduce((sum, land) => sum + land.dailyRent, 0) / landRents.length)
+          ? Math.round(landRents.reduce((sum: number, land: LandRent) => sum + land.dailyRent, 0) / landRents.length)
           : 0,
         minRent: landRents.length > 0 ? Math.min(...landRents.map(land => land.dailyRent)) : 0,
         maxRent: landRents.length > 0 ? Math.max(...landRents.map(land => land.dailyRent)) : 0
