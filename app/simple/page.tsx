@@ -20,7 +20,7 @@ import * as THREE from 'three';
 declare global {
   interface Window {
     _polygonSnapshotCache: { result: any; deps: string | null };
-    getCachedSnapshot: Function;
+    getCachedSnapshot: <T>(getSnapshotFn: () => T, deps: any[]) => T;
     dispatchEvent(event: Event): boolean;
   }
 }
