@@ -11,11 +11,11 @@
 // Add TypeScript declarations for window object extensions
 declare global {
   interface Window {
-    _polygonSnapshotCache?: {
+    _polygonSnapshotCache: {
       result: any | null;
       deps: string | null;
     };
-    getCachedSnapshot?: <T>(getSnapshotFn: () => T, deps: any[]) => T;
+    getCachedSnapshot: <T>(getSnapshotFn: () => T, deps: any[]) => T;
     getSnapshotWithCache?: <T>(getSnapshotFn: () => T, deps: any[]) => T;
     getSnapshotWithCacheCache?: {
       result: any | null;
@@ -251,7 +251,7 @@ export default function Home() {
   
   // Create a module-level variable for the cache
   const getSnapshotWithCacheCache = typeof window !== 'undefined' ? 
-    (window as any).getSnapshotWithCacheCache : null;
+    window.getSnapshotWithCacheCache : null;
   
   // Initialize wallet adapter
   useEffect(() => {
@@ -1409,6 +1409,7 @@ export default function Home() {
       alert('Error creating bridge');
     });
   };
+
 
   // Handle map load
   const onMapLoad = (map: google.maps.Map) => {
