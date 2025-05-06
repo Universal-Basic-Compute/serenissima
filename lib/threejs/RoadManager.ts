@@ -1130,7 +1130,7 @@ export class RoadManager {
               // Properly dispose of geometry buffers
               if (road.mesh.geometry.index) {
                 // Don't try to modify read-only array property
-                road.mesh.geometry.index = null;
+                road.mesh.geometry.index = null as unknown as THREE.BufferAttribute;
               }
               
               // Dispose of all geometry attributes
@@ -1275,7 +1275,7 @@ export class RoadManager {
                   const geometry = (object as THREE.Mesh).geometry;
                   if (geometry.index) {
                     // Don't try to modify read-only array property
-                    geometry.index = null;
+                    geometry.index = null as unknown as THREE.BufferAttribute;
                   }
                   
                   // Dispose of all geometry attributes
@@ -1342,7 +1342,7 @@ export class RoadManager {
                 // Dispose of any attributes and index buffers
                 if (geometry.index) {
                   // Don't try to modify read-only array property
-                  geometry.index = null;
+                  geometry.index = null as unknown as THREE.BufferAttribute;
                 }
                 
                 Object.keys(geometry.attributes).forEach(attributeName => {
@@ -1370,7 +1370,7 @@ export class RoadManager {
       }
       
       // Clear references to help garbage collection
-      this.scene = null;
+      this.scene = null as unknown as THREE.Scene;
       
       log.info('RoadManager disposed successfully');
     } catch (unexpectedError) {
@@ -1378,7 +1378,7 @@ export class RoadManager {
       // Mark as disposed even if there was an error
       this.isDisposed = true;
       this.roads = [];
-      this.scene = null;
+      this.scene = null as unknown as THREE.Scene;
     }
   }
 
