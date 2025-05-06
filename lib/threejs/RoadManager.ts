@@ -1470,9 +1470,9 @@ export class RoadManager {
         if ('roughnessMap' in material && (material as THREE.MeshStandardMaterial).roughnessMap) 
           (material as THREE.MeshStandardMaterial).roughnessMap = null as unknown as THREE.Texture;
         if ('metalnessMap' in material && (material as THREE.MeshStandardMaterial).metalnessMap) 
-          (material as THREE.MeshStandardMaterial).metalnessMap = null as unknown as THREE.Texture;
+          (material as THREE.MeshStandardMaterial).metalnessMap = null! as unknown as THREE.Texture;
         if ('aoMap' in material && material.aoMap) 
-          material.aoMap = null as unknown as THREE.Texture;
+          material.aoMap = null! as unknown as THREE.Texture;
         
         // Clear emissiveMap based on material type
         if ('emissiveMap' in material) {
