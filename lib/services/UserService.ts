@@ -214,7 +214,7 @@ export class UserService {
     // Check cache first
     if (this.isCacheValid(this.usersCache)) {
       log.info('Returning users from cache');
-      return this.usersCache.data;
+      return this.usersCache!.data;
     }
     
     const endpoint = `${getApiBaseUrl()}/api/users`;
@@ -344,9 +344,9 @@ export class UserService {
     
     // Check cache first
     const cachedEntry = this.userByUsernameCache.get(username);
-    if (this.isCacheValid(cachedEntry) && cachedEntry) {
+    if (this.isCacheValid(cachedEntry)) {
       log.debug(`Returning user from cache: ${username}`);
-      return cachedEntry.data;
+      return cachedEntry!.data;
     }
     
     const user = this.users[username];
