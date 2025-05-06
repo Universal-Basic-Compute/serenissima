@@ -1370,7 +1370,7 @@ export class RoadManager {
       }
       
       // Clear references to help garbage collection
-      this.scene = null as unknown as THREE.Scene;
+      this.scene = null as any; // Using any to avoid type error while still clearing the reference
       
       log.info('RoadManager disposed successfully');
     } catch (unexpectedError) {
@@ -1397,29 +1397,33 @@ export class RoadManager {
         
         // Dispose of all possible texture maps
         if (material.map) material.map.dispose();
-        if (material.normalMap) material.normalMap.dispose();
-        if (material.roughnessMap) material.roughnessMap.dispose();
-        if (material.metalnessMap) material.metalnessMap.dispose();
-        if (material.aoMap) material.aoMap.dispose();
-        if (material.emissiveMap) material.emissiveMap.dispose();
-        if (material.bumpMap) material.bumpMap.dispose();
-        if (material.displacementMap) material.displacementMap.dispose();
-        if (material.envMap) material.envMap.dispose();
-        if (material.lightMap) material.lightMap.dispose();
-        if (material.alphaMap) material.alphaMap.dispose();
+        
+        // Check for properties that might not exist on all material types
+        if ('normalMap' in material && material.normalMap) material.normalMap.dispose();
+        if ('roughnessMap' in material && material.roughnessMap) material.roughnessMap.dispose();
+        if ('metalnessMap' in material && material.metalnessMap) material.metalnessMap.dispose();
+        if ('aoMap' in material && material.aoMap) material.aoMap.dispose();
+        if ('emissiveMap' in material && material.emissiveMap) material.emissiveMap.dispose();
+        if ('bumpMap' in material && material.bumpMap) material.bumpMap.dispose();
+        if ('displacementMap' in material && material.displacementMap) material.displacementMap.dispose();
+        if ('envMap' in material && material.envMap) material.envMap.dispose();
+        if ('lightMap' in material && material.lightMap) material.lightMap.dispose();
+        if ('alphaMap' in material && material.alphaMap) material.alphaMap.dispose();
         
         // Clear references
         material.map = null;
-        material.normalMap = null;
-        material.roughnessMap = null;
-        material.metalnessMap = null;
-        material.aoMap = null;
-        material.emissiveMap = null;
-        material.bumpMap = null;
-        material.displacementMap = null;
-        material.envMap = null;
-        material.lightMap = null;
-        material.alphaMap = null;
+        
+        // Clear references for properties that might not exist on all material types
+        if ('normalMap' in material) material.normalMap = null;
+        if ('roughnessMap' in material) material.roughnessMap = null;
+        if ('metalnessMap' in material) material.metalnessMap = null;
+        if ('aoMap' in material) material.aoMap = null;
+        if ('emissiveMap' in material) material.emissiveMap = null;
+        if ('bumpMap' in material) material.bumpMap = null;
+        if ('displacementMap' in material) material.displacementMap = null;
+        if ('envMap' in material) material.envMap = null;
+        if ('lightMap' in material) material.lightMap = null;
+        if ('alphaMap' in material) material.alphaMap = null;
       }
     } catch (error) {
       log.warn('Error disposing textures from material:', error);
