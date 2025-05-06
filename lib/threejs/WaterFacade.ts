@@ -144,8 +144,9 @@ export class WaterFacade {
         
         // Apply anisotropic filtering for higher quality levels
         if (this.quality === WaterQualityLevel.ULTRA || this.quality === WaterQualityLevel.HIGH) {
-          const renderer = this.scene.renderer as THREE.WebGLRenderer;
-          if (renderer && renderer.capabilities.getMaxAnisotropy) {
+          // Get renderer from scene's userData or other appropriate source
+          const renderer = this.scene.userData.renderer as THREE.WebGLRenderer;
+          if (renderer && renderer.capabilities && renderer.capabilities.getMaxAnisotropy) {
             const maxAnisotropy = renderer.capabilities.getMaxAnisotropy();
             texture.anisotropy = maxAnisotropy;
           }
@@ -1122,7 +1123,7 @@ if (shoreFactor > 0.01) {
             // Dispose of all textures in uniforms
             Object.keys(uniforms).forEach(key => {
               const uniform = uniforms[key];
-              if (uniform && uniform.value instanceof THREE.Texture) {
+              if (uniform && uniform.value && typeof uniform.value === 'object') {
                 uniform.value.dispose();
               }
             });
@@ -1147,7 +1148,7 @@ if (shoreFactor > 0.01) {
         const waterUniforms = this.water.userData.waterUniforms;
         Object.keys(waterUniforms).forEach(key => {
           const uniform = waterUniforms[key];
-          if (uniform && uniform.value instanceof THREE.Texture) {
+          if (uniform && uniform.value && typeof uniform.value === 'object') {
             uniform.value.dispose();
           }
         });
