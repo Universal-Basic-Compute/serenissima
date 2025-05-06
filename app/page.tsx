@@ -11,12 +11,16 @@
 // Add TypeScript declarations for window object extensions
 declare global {
   interface Window {
-    _polygonSnapshotCache: {
+    _polygonSnapshotCache?: {
       result: any | null;
       deps: string | null;
     };
-    getCachedSnapshot: <T>(getSnapshotFn: () => T, deps: any[]) => T;
+    getCachedSnapshot?: <T>(getSnapshotFn: () => T, deps: any[]) => T;
     getSnapshotWithCache?: <T>(getSnapshotFn: () => T, deps: any[]) => T;
+    getSnapshotWithCacheCache?: {
+      result: any | null;
+      deps: string | null;
+    };
   }
 }
 
@@ -1571,8 +1575,8 @@ export default function Home() {
     setIsGoogleLoaded(true);
   };
   
-  // Add a function to update a centroid
-  const updateCentroid = async (polygonId: string, newCentroid: {lat: number, lng: number}) => {
+  // Define the updateCentroid function
+  const updateCentroid = async (polygonId: string, newCentroid: {lat: number, lng: number}): Promise<void> => {
     try {
       const response = await fetch('/api/update-centroid', {
         method: 'POST',
