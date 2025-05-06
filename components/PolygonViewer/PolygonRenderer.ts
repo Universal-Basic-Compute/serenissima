@@ -91,7 +91,7 @@ export default class PolygonRenderer {
           if (callback) callback(placeholderTexture);
         },
         undefined,
-        (error: ErrorEvent) => {
+        (error: unknown) => {
           console.error(`Error loading optimized texture ${optimizedUrl}:`, error);
         }
       );
@@ -844,7 +844,8 @@ export default class PolygonRenderer {
                 if (Array.isArray(obj.material)) {
                   obj.material.forEach((mat: THREE.Material) => {
                     try {
-                      if ((mat as any).map) (mat as any).map.dispose();
+                      if ((mat as THREE.MeshBasicMaterial | THREE.MeshStandardMaterial).map) 
+                        (mat as THREE.MeshBasicMaterial | THREE.MeshStandardMaterial).map?.dispose();
                       mat.dispose();
                     } catch (matError) {
                       log.error('Error disposing material:', matError);
@@ -899,7 +900,7 @@ export default class PolygonRenderer {
           
           // Convert centroid to 3D position
           // Use coatOfArmsCenter if available, otherwise use centroid
-          const centerPoint = polygon.coatOfArmsCenter || centroid;
+          const centerPoint = polygon.coatOfArmsCenter || polygon.centroid;
           const normalizedCoord = normalizeCoordinates(
             [centerPoint as Coordinate],
             this.bounds.centerLat,
