@@ -1441,7 +1441,7 @@ export default function PolygonViewer() {
   const handleRoadComplete = useCallback((roadPoints: THREE.Vector3[]) => {
     console.log(`PolygonViewer: Road complete with ${roadPoints.length} points`);
     
-    if (roadManagerRef.current) {
+    if (roadManagerRef.current && sceneRef.current) {
       // Get the curvature value from a state variable or use a default
       const curvature = 0.5; // Default curvature
       console.log(`PolygonViewer: Creating road with curvature ${curvature}`);
@@ -1462,7 +1462,7 @@ export default function PolygonViewer() {
             // If we're in transport view, we might want to refresh the view
             if (activeView === 'transport') {
               // Force a refresh of the transport infrastructure
-              if (roadManagerRef.current) {
+              if (roadManagerRef.current && sceneRef.current) {
                 roadManagerRef.current.updateRoadVisibility();
               }
             }
@@ -1706,8 +1706,8 @@ export default function PolygonViewer() {
       {/* Road Creator */}
       {roadCreationActive && sceneRef.current && (
         <RoadCreator
-          scene={sceneRef.current.scene}
-          camera={sceneRef.current.camera}
+          scene={sceneRef.current?.scene}
+          camera={sceneRef.current?.camera}
           active={roadCreationActive}
           onComplete={handleRoadComplete}
           onCancel={handleRoadCancel}
