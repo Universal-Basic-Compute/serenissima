@@ -28,6 +28,7 @@ export class PolygonMeshFacade implements Poolable {
   private minIncome: number = 0;
   private maxIncome: number = 1000;
   private hasIncomeData: boolean = false;
+  private hasIncomeData: boolean = false;
 
   constructor(
     scene: THREE.Scene,
@@ -47,6 +48,9 @@ export class PolygonMeshFacade implements Poolable {
     this.textureLoader = textureLoader;
     this.ownerColor = ownerColor;
     this.ownerCoatOfArmsUrl = ownerCoatOfArmsUrl;
+    
+    // Check if we have income data
+    this.hasIncomeData = polygon.simulatedIncome !== undefined;
     
     // Check if we have income data
     this.hasIncomeData = polygon.simulatedIncome !== undefined;

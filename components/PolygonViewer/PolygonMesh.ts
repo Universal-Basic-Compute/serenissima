@@ -117,8 +117,8 @@ class PolygonMesh {
         color: this.determineLandColor(),
         transparent: false,
         depthWrite: true,
-        roughness: 0.8,
-        metalness: 0.1
+        roughness: 0.6, // Lower roughness for more vibrant colors
+        metalness: 0.2  // Slight metalness for better color visibility
       });
       
       // Note: Material instances don't have castShadow/receiveShadow properties
@@ -173,6 +173,11 @@ class PolygonMesh {
   // Helper method to determine land color
   private determineLandColor(): THREE.Color {
     if (this.activeView === 'land') {
+      // If we have SimulatedIncome, use it to determine color
+      if (this.polygon.simulatedIncome !== undefined) {
+        return this.getIncomeBasedColor(this.polygon.simulatedIncome);
+      }
+      
       if (this.ownerColor) {
         // Blend the owner color with sand color for a more natural look
         const sandColor = new THREE.Color(0xfff8e0); // Much lighter, more yellow sand color
@@ -190,6 +195,35 @@ class PolygonMesh {
       }
     } else {
       return new THREE.Color(0xfff8e0); // Much lighter, more yellow sand color
+    }
+  }
+  
+  // Add a new method to map income to color (red-yellow-green scale)
+  private getIncomeBasedColor(income: number): THREE.Color {
+    // Define our color scale
+    // Red (high income) -> Yellow -> Green (low income)
+    const highIncomeColor = new THREE.Color(0xff0000); // Red
+    const midIncomeColor = new THREE.Color(0xffff00);  // Yellow
+    const lowIncomeColor = new THREE.Color(0x00ff00);  // Green
+    
+    // Normalize income to a 0-1 scale
+    // We need to determine reasonable min/max values for income
+    // For now, let's assume income ranges from 0 to 1000
+    // This can be adjusted based on actual data ranges
+    const maxIncome = 1000;
+    const normalizedIncome = Math.min(Math.max(income / maxIncome, 0), 1);
+    
+    // Map the normalized income to our color scale
+    // 0.5-1.0 maps from yellow to red (higher income)
+    // 0.0-0.5 maps from green to yellow (lower income)
+    if (normalizedIncome >= 0.5) {
+      // Map from yellow to red
+      const t = (normalizedIncome - 0.5) * 2; // Scale 0.5-1.0 to 0-1
+      return new THREE.Color().lerpColors(midIncomeColor, highIncomeColor, t);
+    } else {
+      // Map from green to yellow
+      const t = normalizedIncome * 2; // Scale 0-0.5 to 0-1
+      return new THREE.Color().lerpColors(lowIncomeColor, midIncomeColor, t);
     }
   }
   
