@@ -11,6 +11,7 @@ export interface Polygon {
   coordinates: Coordinate[];
   centroid?: Coordinate;
   center?: Coordinate; // Original centroid
+  coatOfArmsCenter?: Coordinate; // Center point for coat of arms display
   historicalName?: string;
   englishName?: string;
   historicalDescription?: string;

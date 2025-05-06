@@ -898,8 +898,10 @@ export default class PolygonRenderer {
           const ownerColor = this.getOwnerColor(polygon.owner);
           
           // Convert centroid to 3D position
+          // Use coatOfArmsCenter if available, otherwise use centroid
+          const centerPoint = polygon.coatOfArmsCenter || centroid;
           const normalizedCoord = normalizeCoordinates(
-            [centroid as Coordinate],
+            [centerPoint as Coordinate],
             this.bounds.centerLat,
             this.bounds.centerLng,
             this.bounds.scale,
@@ -987,7 +989,7 @@ export default class PolygonRenderer {
     );
   }
 
-  // Add this helper method to create a flat texture on the land for a polygon
+  // Helper method to create a flat texture on the land for a polygon
   private createFlatTextureForPolygon(polygon: Polygon, texture: THREE.Texture) {
     if (!polygon.centroid) {
       console.warn(`Cannot create flat texture for polygon ${polygon.id} - no centroid`);
@@ -1031,7 +1033,7 @@ export default class PolygonRenderer {
     }
   }
   
-  // Add helper function to create a circular texture
+  // Helper function to create a circular texture
   private createCircularTexture(texture: THREE.Texture): THREE.Texture {
     // Check if texture.image exists
     if (!texture.image) {
@@ -1180,8 +1182,9 @@ export default class PolygonRenderer {
         // Fallback: create an even simpler representation
         try {
           // Convert centroid to 3D position
+          const centerPoint = polygon.coatOfArmsCenter || centroid;
           const normalizedCoord = normalizeCoordinates(
-            [centroid as Coordinate],
+            [centerPoint as Coordinate],
             this.bounds.centerLat,
             this.bounds.centerLng,
             this.bounds.scale,
