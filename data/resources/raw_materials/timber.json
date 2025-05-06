@@ -16,9 +16,9 @@
     "full": "Logs cut from the forests of the Venetian mainland and Dalmatian coast, processed into usable timber. Essential for building construction and shipbuilding.",
     "flavor": "The lifeblood of a maritime empire isn't gold or spice, but timber\u00e2\u20ac\u201dwithout the strength of these mainland forests, Venice would be nothing more than scattered huts upon the lagoon."
   },
-  "sourceInfo": {
+  "source_properties": {
     "source": "territorial",
-    "harvestMethod": "forestry",
+    "harvest_method": "forestry",
     "locations": [
       "mainland",
       "dalmatian_coast",
@@ -82,43 +82,66 @@
       }
     ]
   },
-  "productionUses": [
-    {
-      "process": "shipbuilding",
-      "building": "shipyard",
-      "role": "primary_material",
-      "outputResource": "ship_components",
-      "productionChain": "Timber → Shipyard → Ship Components"
-    },
-    {
-      "process": "construction",
-      "building": "construction_site",
-      "role": "primary_material",
-      "outputResource": "building_materials",
-      "productionChain": "Timber → Construction Site → Building Materials"
-    },
-    {
-      "process": "woodworking",
-      "building": "carpentry_workshop",
-      "role": "primary_material",
-      "outputResource": "furniture",
-      "productionChain": "Timber → Carpentry Workshop → Furniture"
-    },
-    {
-      "process": "boat_building",
-      "building": "boat_workshop",
-      "role": "primary_material",
-      "outputResource": "small_boats",
-      "productionChain": "Timber → Boat Workshop → Small Boats"
-    },
-    {
-      "process": "gondola_crafting",
-      "building": "boat_workshop",
-      "role": "primary_material",
-      "outputResource": "gondola",
-      "productionChain": "Timber → Boat Workshop → Gondola"
-    }
-  ],
+  "production_properties": {
+    "processor_building": "sawmill",
+    "processing_complexity": 3,
+    "required_skill": "woodworking:2",
+    "processing_time": 240,
+    "outputs": [
+      {
+        "resource": "ship_components",
+        "amount": 1,
+        "alternative_output": true,
+        "facility": "shipyard"
+      },
+      {
+        "resource": "building_materials",
+        "amount": 1,
+        "alternative_output": true,
+        "facility": "construction_site"
+      },
+      {
+        "resource": "furniture",
+        "amount": 1,
+        "alternative_output": true,
+        "facility": "carpentry_workshop"
+      },
+      {
+        "resource": "small_boats",
+        "amount": 1,
+        "alternative_output": true,
+        "facility": "boat_workshop"
+      },
+      {
+        "resource": "gondola",
+        "amount": 1,
+        "alternative_output": true,
+        "facility": "boat_workshop"
+      }
+    ],
+    "production_chains": [
+      {
+        "process": "shipbuilding",
+        "chain": "Timber → Shipyard → Ship Components"
+      },
+      {
+        "process": "construction",
+        "chain": "Timber → Construction Site → Building Materials"
+      },
+      {
+        "process": "woodworking",
+        "chain": "Timber → Carpentry Workshop → Furniture"
+      },
+      {
+        "process": "boat_building",
+        "chain": "Timber → Boat Workshop → Small Boats"
+      },
+      {
+        "process": "gondola_crafting",
+        "chain": "Timber → Boat Workshop → Gondola"
+      }
+    ]
+  },
   "substitutes": [],
   "complements": [
     {

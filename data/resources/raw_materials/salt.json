@@ -16,9 +16,9 @@
     "full": "White crystalline mineral harvested from the Venetian lagoon's salt pans. A strategic resource that formed the foundation of Venice's early wealth and remains a state monopoly.",
     "flavor": "The humble salt crystal\u00e2\u20ac\u201dVenice's first treasure. Before spices and silk, before gold and glass, there was salt. The invisible empire upon which all else was built."
   },
-  "sourceInfo": {
+  "source_properties": {
     "source": "local",
-    "harvestMethod": "evaporation",
+    "harvest_method": "evaporation",
     "locations": [
       "chioggia",
       "lagoon_salt_pans",
@@ -73,29 +73,34 @@
       "primarily_used_for": "luxury_cuisine"
     }
   ],
-  "productionUses": [
-    {
-      "process": "food_preservation",
-      "building": "salting_house",
-      "role": "primary_ingredient",
-      "outputResource": "preserved_food",
-      "productionChain": "Salt → Salting House → Preserved Food"
-    },
-    {
-      "process": "fish_preservation",
-      "building": "salting_house",
-      "role": "primary_ingredient",
-      "outputResource": "preserved_fish",
-      "productionChain": "Salt + Fish → Salting House → Preserved Fish"
-    },
-    {
-      "process": "meat_preservation",
-      "building": "salting_house",
-      "role": "primary_ingredient",
-      "outputResource": "salted_meat",
-      "productionChain": "Salt + Meat → Salting House → Salted Meat"
-    }
-  ],
+  "production_properties": {
+    "processor_building": "stonecutter_workshop",
+    "processing_complexity": 4,
+    "required_skill": "stonecutting:3",
+    "processing_time": 360,
+    "outputs": [
+      {
+        "resource": "cut_stone",
+        "amount": 1
+      },
+      {
+        "resource": "sculpture",
+        "amount": 1,
+        "alternative_output": true,
+        "facility": "sculptor_workshop"
+      }
+    ],
+    "production_chains": [
+      {
+        "process": "stonecutting",
+        "chain": "Marble → Stonecutter Workshop → Cut Stone"
+      },
+      {
+        "process": "sculpting",
+        "chain": "Marble → Sculptor Workshop → Sculpture"
+      }
+    ]
+  },
   "substitutes": [],
   "complements": [
     {

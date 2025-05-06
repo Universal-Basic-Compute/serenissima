@@ -16,9 +16,9 @@
     "full": "Refined gold in ingot or powder form, used for creating jewelry, ornamentation, and gold leaf. Primarily imported from African and Eastern sources.",
     "flavor": "In this metal we trust, trade, and transform\u00e2\u20ac\u201dthe universal language of wealth that makes Venice's voice heard from Constantinople to London."
   },
-  "sourceInfo": {
+  "source_properties": {
     "source": "imported",
-    "harvestMethod": "mining_and_trade",
+    "harvest_method": "mining_and_trade",
     "locations": [
       "africa",
       "hungary",
@@ -72,26 +72,44 @@
       "primary_use": "jewelry"
     }
   ],
-  "productionUses": [
-    {
-      "process": "goldsmithing",
-      "building": "goldsmith_workshop",
-      "role": "primary_material",
-      "outputResource": "jewelry"
-    },
-    {
-      "process": "leaf_making",
-      "building": "gold_beater_workshop",
-      "role": "primary_material",
-      "outputResource": "gold_leaf"
-    },
-    {
-      "process": "minting",
-      "building": "mint",
-      "role": "primary_material",
-      "outputResource": "gold_ducats"
-    }
-  ],
+  "production_properties": {
+    "processor_building": "goldsmith_workshop",
+    "processing_complexity": 5,
+    "required_skill": "goldsmithing:4",
+    "processing_time": 480,
+    "outputs": [
+      {
+        "resource": "jewelry",
+        "amount": 1
+      },
+      {
+        "resource": "gold_leaf",
+        "amount": 1,
+        "alternative_output": true,
+        "facility": "gold_beater_workshop"
+      },
+      {
+        "resource": "gold_ducats",
+        "amount": 1,
+        "alternative_output": true,
+        "facility": "mint"
+      }
+    ],
+    "production_chains": [
+      {
+        "process": "goldsmithing",
+        "chain": "Gold → Goldsmith Workshop → Jewelry"
+      },
+      {
+        "process": "leaf_making",
+        "chain": "Gold → Gold Beater Workshop → Gold Leaf"
+      },
+      {
+        "process": "minting",
+        "chain": "Gold → Mint → Gold Ducats"
+      }
+    ]
+  },
   "substitutes": [],
   "complements": [
     {

@@ -16,9 +16,9 @@
     "full": "Heavy mineral ore containing iron, mined from the mainland territories under Venetian control and imported from Alpine regions.",
     "flavor": "From these humble stones of earth comes the skeleton of our ships, the strength of our tools, and the protection of our warriors\u00e2\u20ac\u201dtruly the bones of civilization."
   },
-  "sourceInfo": {
+  "source_properties": {
     "source": "territorial_and_imported",
-    "harvestMethod": "mining",
+    "harvest_method": "mining",
     "locations": [
       "mainland_territories",
       "alpine_regions",
@@ -31,7 +31,8 @@
     "available_qualities": [
       "poor",
       "common",
-      "fine"
+      "fine",
+      "superior"
     ],
     "default_quality": "common",
     "quality_multipliers": {
@@ -49,18 +50,32 @@
         "value": 1.4,
         "production_efficiency": 1.2,
         "yield_modifier": 1.3
+      },
+      "superior": {
+        "value": 2.0,
+        "production_efficiency": 1.5,
+        "yield_modifier": 1.6
       }
     }
   },
-  "productionUses": [
-    {
-      "process": "smelting",
-      "building": "foundry",
-      "role": "primary_material",
-      "outputResource": "processed_iron",
-      "productionChain": "Iron Ore → Foundry → Processed Iron"
-    }
-  ],
+  "production_properties": {
+    "processor_building": "foundry",
+    "processing_complexity": 4,
+    "required_skill": "smelting:3",
+    "processing_time": 360,
+    "outputs": [
+      {
+        "resource": "processed_iron",
+        "amount": 1
+      }
+    ],
+    "production_chains": [
+      {
+        "process": "smelting",
+        "chain": "Iron Ore → Foundry → Processed Iron"
+      }
+    ]
+  },
   "substitutes": [],
   "complements": [
     {
@@ -120,6 +135,12 @@
         "price_modifier": 0.9
       }
     ],
-    "seasonal_factors": []
+    "seasonal_factors": [],
+    "environmental_factors": {
+      "mining_conditions": {
+        "impact": "medium",
+        "note": "Flooding or collapses can disrupt supply"
+      }
+    }
   }
 }

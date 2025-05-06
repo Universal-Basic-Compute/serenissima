@@ -56,40 +56,59 @@
   "varieties": [
     {
       "type": "lagoon_fish",
-      "valueModifier": 0.8,
+      "value_multiplier": 0.8,
       "availability": "very_common"
     },
     {
       "type": "adriatic_fish",
-      "valueModifier": 1.2,
+      "value_multiplier": 1.2,
       "availability": "common"
     },
     {
       "type": "deep_sea_fish",
-      "valueModifier": 1.6,
+      "value_multiplier": 1.6,
       "availability": "uncommon"
     }
   ],
-  "productionUses": [
-    {
-      "process": "cooking",
-      "building": "tavern",
-      "role": "primary_ingredient",
-      "outputResource": "prepared_meal"
-    },
-    {
-      "process": "preserving",
-      "building": "smoker",
-      "role": "primary_ingredient",
-      "outputResource": "smoked_fish"
-    },
-    {
-      "process": "salting",
-      "building": "salting_house",
-      "role": "primary_ingredient",
-      "outputResource": "preserved_fish"
-    }
-  ],
+  "production_properties": {
+    "processor_building": "salting_house",
+    "processing_complexity": 3,
+    "required_skill": "food_preservation:2",
+    "processing_time": 240,
+    "outputs": [
+      {
+        "resource": "preserved_fish",
+        "amount": 1,
+        "requires": ["salt"]
+      },
+      {
+        "resource": "smoked_fish",
+        "amount": 1,
+        "alternative_output": true,
+        "facility": "smoker"
+      },
+      {
+        "resource": "prepared_meal",
+        "amount": 1,
+        "alternative_output": true,
+        "facility": "tavern"
+      }
+    ],
+    "production_chains": [
+      {
+        "process": "cooking",
+        "chain": "Fish → Tavern → Prepared Meal"
+      },
+      {
+        "process": "preserving",
+        "chain": "Fish → Smoker → Smoked Fish"
+      },
+      {
+        "process": "salting",
+        "chain": "Fish → Salting House → Preserved Fish"
+      }
+    ]
+  },
   "substitutes": [],
   "complements": [
     {

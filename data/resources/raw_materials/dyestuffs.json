@@ -250,18 +250,5 @@
       ],
       "impact": "severe"
     }
-  },
-  "production_chain_position": {
-    "predecessors": [],
-    "successors": [
-      {
-        "resource": "dyed_textiles",
-        "facility": "dye_works"
-      },
-      {
-        "resource": "pigments",
-        "facility": "pigment_workshop"
-      }
-    ]
   }
 }

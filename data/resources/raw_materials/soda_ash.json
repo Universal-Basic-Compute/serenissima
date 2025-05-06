@@ -16,9 +16,9 @@
     "full": "Imported alkali material derived from burned marine plants, primarily from Egypt and Syria. Essential for lowering the melting point of sand in glass production.",
     "flavor": "The secret of true cristallo lies not in Venetian hands, but in distant shores where plants are transformed into the white powder that makes our glass shine like diamonds."
   },
-  "sourceInfo": {
+  "source_properties": {
     "source": "imported",
-    "harvestMethod": "plant_processing",
+    "harvest_method": "plant_processing",
     "locations": [
       "egypt",
       "syria",
@@ -29,12 +29,17 @@
   },
   "quality_variations": {
     "available_qualities": [
+      "poor",
       "common",
       "fine",
       "superior"
     ],
     "default_quality": "common",
     "quality_multipliers": {
+      "poor": {
+        "value": 0.7,
+        "production_efficiency": 0.8
+      },
       "common": {
         "value": 1.0,
         "production_efficiency": 1.0
@@ -49,22 +54,35 @@
       }
     }
   },
-  "productionUses": [
-    {
-      "process": "glassmaking",
-      "building": "glass_foundry",
-      "role": "flux_agent",
-      "outputResource": "molten_glass",
-      "productionChain": "Soda Ash → Glass Foundry → Molten Glass"
-    },
-    {
-      "process": "soap_making",
-      "building": "soap_workshop",
-      "role": "primary_ingredient",
-      "outputResource": "soap",
-      "productionChain": "Soda Ash → Soap Workshop → Soap"
-    }
-  ],
+  "production_properties": {
+    "processor_building": "glass_foundry",
+    "processing_complexity": 3,
+    "required_skill": "glassmaking:2",
+    "processing_time": 240,
+    "outputs": [
+      {
+        "resource": "molten_glass",
+        "amount": 1,
+        "requires": ["murano_sand"]
+      },
+      {
+        "resource": "soap",
+        "amount": 1,
+        "alternative_output": true,
+        "facility": "soap_workshop"
+      }
+    ],
+    "production_chains": [
+      {
+        "process": "glassmaking",
+        "chain": "Soda Ash → Glass Foundry → Molten Glass"
+      },
+      {
+        "process": "soap_making",
+        "chain": "Soda Ash → Soap Workshop → Soap"
+      }
+    ]
+  },
   "substitutes": [
     {
       "resourceId": "potash",

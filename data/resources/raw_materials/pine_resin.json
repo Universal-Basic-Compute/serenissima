@@ -16,9 +16,9 @@
     "full": "Viscous, aromatic resin collected from pine trees in mainland forests. Essential raw material for producing pitch used in shipbuilding and waterproofing.",
     "flavor": "The lifeblood of the forest becomes the lifeblood of our ships\u00e2\u20ac\u201dwithout this golden sap, Venice's wooden vessels would succumb to the hungry sea."
   },
-  "sourceInfo": {
+  "source_properties": {
     "source": "territorial",
-    "harvestMethod": "tapping",
+    "harvest_method": "tapping",
     "locations": [
       "mainland_forests",
       "alpine_foothills",
@@ -33,11 +33,17 @@
   },
   "quality_variations": {
     "available_qualities": [
+      "poor",
       "common",
-      "fine"
+      "fine",
+      "superior"
     ],
     "default_quality": "common",
     "quality_multipliers": {
+      "poor": {
+        "value": 0.7,
+        "production_efficiency": 0.8
+      },
       "common": {
         "value": 1.0,
         "production_efficiency": 1.0
@@ -45,25 +51,41 @@
       "fine": {
         "value": 1.4,
         "production_efficiency": 1.2
+      },
+      "superior": {
+        "value": 2.0,
+        "production_efficiency": 1.5
       }
     }
   },
-  "productionUses": [
-    {
-      "process": "pitch_making",
-      "building": "pitch_works",
-      "role": "primary_material",
-      "outputResource": "pitch",
-      "productionChain": "Pine Resin → Pitch Works → Pitch"
-    },
-    {
-      "process": "varnish_making",
-      "building": "varnish_workshop",
-      "role": "primary_ingredient",
-      "outputResource": "varnish",
-      "productionChain": "Pine Resin → Varnish Workshop → Varnish"
-    }
-  ],
+  "production_properties": {
+    "processor_building": "pitch_works",
+    "processing_complexity": 3,
+    "required_skill": "pitch_making:2",
+    "processing_time": 360,
+    "outputs": [
+      {
+        "resource": "pitch",
+        "amount": 1
+      },
+      {
+        "resource": "varnish",
+        "amount": 1,
+        "alternative_output": true,
+        "facility": "varnish_workshop"
+      }
+    ],
+    "production_chains": [
+      {
+        "process": "pitch_making",
+        "chain": "Pine Resin → Pitch Works → Pitch"
+      },
+      {
+        "process": "varnish_making",
+        "chain": "Pine Resin → Varnish Workshop → Varnish"
+      }
+    ]
+  },
   "substitutes": [],
   "complements": [
     {

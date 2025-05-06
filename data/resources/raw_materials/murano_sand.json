@@ -16,9 +16,9 @@
     "full": "Exceptionally pure silica sand harvested from specific locations on Murano island. Its unique composition makes it essential for Venice's legendary glass production.",
     "flavor": "Beneath your feet lies the foundation of Venice's crystalline reputation\u00e2\u20ac\u201dmere grains to some, but to the glass masters, these sands are more precious than gold."
   },
-  "sourceInfo": {
+  "source_properties": {
     "source": "natural",
-    "harvestMethod": "mining",
+    "harvest_method": "mining",
     "locations": [
       "murano_island"
     ],
@@ -27,11 +27,17 @@
   },
   "quality_variations": {
     "available_qualities": [
+      "poor",
       "common",
-      "fine"
+      "fine",
+      "superior"
     ],
     "default_quality": "common",
     "quality_multipliers": {
+      "poor": {
+        "value": 0.7,
+        "production_efficiency": 0.8
+      },
       "common": {
         "value": 1.0,
         "production_efficiency": 1.0
@@ -39,18 +45,32 @@
       "fine": {
         "value": 1.5,
         "production_efficiency": 1.3
+      },
+      "superior": {
+        "value": 2.0,
+        "production_efficiency": 1.6
       }
     }
   },
-  "productionUses": [
-    {
-      "process": "glassmaking",
-      "building": "glass_foundry",
-      "role": "primary_ingredient",
-      "outputResource": "molten_glass",
-      "productionChain": "Murano Sand → Glass Foundry → Molten Glass"
-    }
-  ],
+  "production_properties": {
+    "processor_building": "glass_foundry",
+    "processing_complexity": 4,
+    "required_skill": "glassmaking:3",
+    "processing_time": 240,
+    "outputs": [
+      {
+        "resource": "molten_glass",
+        "amount": 1,
+        "requires": ["soda_ash"]
+      }
+    ],
+    "production_chains": [
+      {
+        "process": "glassmaking",
+        "chain": "Murano Sand → Glass Foundry → Molten Glass"
+      }
+    ]
+  },
   "substitutes": [
     {
       "resourceId": "standard_sand",
