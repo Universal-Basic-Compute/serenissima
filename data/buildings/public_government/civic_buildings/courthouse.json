@@ -4,7 +4,7 @@
   "subcategory": "Civic Buildings",
   "tier": 3,
   "size": "Large",
-  "unlockCondition": "25,000,000 ducats, judicial appointment or connection, government approval",
+  "unlockCondition": "25,000,000 ducats and government approval, or judicial appointment with government approval",
   "calculationsAnalysis": "The Courthouse represents significant judicial infrastructure with modest revenue generation. The construction cost of 9,000,000 ducats reflects the imposing architecture and specialized facilities required, while the income of 40,000 ducats (0.44% return) represents court fees and fines collected. The maintenance cost of 50,000 ducats exceeds income, creating a realistic scenario where judicial buildings required public funding but provided essential legal services. The employment capacity of 30 represents the judges, clerks, and guards needed. The construction time of 20 days (1728000000ms) reflects the substantial public project. This building creates a strategic investment in legal infrastructure with appropriate high-level requirements reflecting the political nature of establishing judicial authority in Renaissance Venice.",
   "shortDescription": "Judicial facility for legal proceedings, records, and administration of justice.",
   "fullDescription": "The physical embodiment of Venetian justice, courthouses provide spaces for legal proceedings from simple disputes to complex trials. Featuring multiple courtrooms, judicial offices, legal archives, and holding cells, these imposing buildings represent the rule of law in the Republic. Venice's sophisticated legal system required substantial facilities to manage its complex commercial and criminal jurisprudence.",
