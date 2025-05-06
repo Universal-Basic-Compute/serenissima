@@ -6,7 +6,8 @@ import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 /**
  * A facade for THREE.js scene management to reduce coupling
  */
-export class SceneFacade {
+// Rename to avoid duplicate identifier error
+export class ThreeJSSceneFacade {
   private scene: THREE.Scene;
   private camera: THREE.PerspectiveCamera;
   private renderer: THREE.WebGLRenderer;
