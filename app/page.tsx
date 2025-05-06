@@ -150,44 +150,65 @@ export default function Home() {
   // Define getSnapshotWithCache function early in the component with proper type annotations
   const getSnapshotWithCache = useCallback(<T,>(getSnapshotFn: () => T, dependencies: any[]): T => {
     // Check if window and getCachedSnapshot exist
-    if (typeof window !== 'undefined' && window.getCachedSnapshot) {
-      return window.getCachedSnapshot(getSnapshotFn, dependencies);
+    if (typeof window !== 'undefined' && window._polygonSnapshotCache) {
+      // Use the window's cache implementation directly
+      const currentDepsString = JSON.stringify(dependencies);
+      
+      // Use cached result if dependencies haven't changed
+      if (
+        window._polygonSnapshotCache.result && 
+        window._polygonSnapshotCache.deps && 
+        currentDepsString === window._polygonSnapshotCache.deps
+      ) {
+        return window._polygonSnapshotCache.result;
+      }
+      
+      // Calculate new result
+      const result = getSnapshotFn();
+      
+      // Cache the result and dependencies
+      window._polygonSnapshotCache.result = result;
+      window._polygonSnapshotCache.deps = currentDepsString;
+      
+      return result;
     }
     
     // If the global helper isn't available, implement the caching logic directly
     const depsString = JSON.stringify(dependencies);
     
-    // Use a static property to store the cached values between renders
-    if (!getSnapshotWithCache.cache) {
-      getSnapshotWithCache.cache = {
-        result: null as T | null,
-        deps: null as string | null
+    // Use a static cache object instead of a property
+    if (!getSnapshotWithCacheCache) {
+      // Create a module-level variable to store cache
+      (window as any).getSnapshotWithCacheCache = {
+        result: null,
+        deps: null
       };
     }
     
+    // Get reference to the cache
+    const cache = (window as any).getSnapshotWithCacheCache;
+    
     // Check if we can use the cached result
     if (
-      getSnapshotWithCache.cache.result && 
-      getSnapshotWithCache.cache.deps === depsString
+      cache.result && 
+      cache.deps === depsString
     ) {
-      return getSnapshotWithCache.cache.result as T;
+      return cache.result as T;
     }
     
     // Calculate new result
     const result = getSnapshotFn();
     
     // Cache the result and dependencies
-    getSnapshotWithCache.cache.result = result;
-    getSnapshotWithCache.cache.deps = depsString;
+    cache.result = result;
+    cache.deps = depsString;
     
     return result;
   }, []);
   
-  // Initialize the cache property with proper typing
-  getSnapshotWithCache.cache: {
-    result: any | null;
-    deps: string | null;
-  } | null = null;
+  // Create a module-level variable for the cache
+  const getSnapshotWithCacheCache = typeof window !== 'undefined' ? 
+    (window as any).getSnapshotWithCacheCache : null;
   
   // Initialize wallet adapter
   useEffect(() => {
@@ -685,41 +706,26 @@ export default function Home() {
   useEffect(() => {
     // Add this to the global window object so PolygonViewer can access it
     if (typeof window !== 'undefined') {
-      // Create cache storage
-      window._polygonSnapshotCache = {
+      // Create cache storage if it doesn't exist
+      if (!(window as any)._polygonSnapshotCache) {
+        (window as any)._polygonSnapshotCache = {
+          result: null,
+          deps: null
+        };
+      }
+      
+      // Create a module-level variable for the cache
+      (window as any).getSnapshotWithCacheCache = (window as any).getSnapshotWithCacheCache || {
         result: null,
         deps: null
-      };
-      
-      // Add a helper function to get cached snapshot
-      window.getCachedSnapshot = <T,>(getSnapshotFn: () => T, deps: any[]): T => {
-        const currentDepsString = JSON.stringify(deps);
-        
-        // Use cached result if dependencies haven't changed
-        if (
-          window._polygonSnapshotCache.result && 
-          window._polygonSnapshotCache.deps && 
-          currentDepsString === window._polygonSnapshotCache.deps
-        ) {
-          return window._polygonSnapshotCache.result;
-        }
-        
-        // Calculate new result
-        const result = getSnapshotFn();
-        
-        // Cache the result and dependencies
-        window._polygonSnapshotCache.result = result;
-        window._polygonSnapshotCache.deps = currentDepsString;
-        
-        return result;
       };
     }
     
     return () => {
       // Clean up on unmount
       if (typeof window !== 'undefined') {
-        delete window._polygonSnapshotCache;
-        delete window.getCachedSnapshot;
+        delete (window as any)._polygonSnapshotCache;
+        delete (window as any).getSnapshotWithCacheCache;
       }
     };
   }, []);
@@ -2362,8 +2368,7 @@ export default function Home() {
           </div>
         </div>
         
-        {/* Ensure the function is available globally as a fallback */}
-        {typeof window !== 'undefined' && ((window as any).getSnapshotWithCache = getSnapshotWithCache)}
+        {/* Make the function available to child components */}
         
         {/* Dynamic import of PolygonViewer with snapshot caching prop */}
         <PolygonViewer 
