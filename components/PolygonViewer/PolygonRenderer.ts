@@ -88,7 +88,7 @@ export default class PolygonRenderer {
           if (callback) callback(placeholderTexture);
         },
         undefined,
-        (error) => {
+        (error: ErrorEvent) => {
           console.error(`Error loading optimized texture ${optimizedUrl}:`, error);
         }
       );
@@ -578,9 +578,9 @@ export default class PolygonRenderer {
     
     // Create a material with sand texture
     const sandMaterial = new THREE.MeshStandardMaterial({
-      map: this.sandBaseColor,
-      normalMap: this.sandNormalMap,
-      roughnessMap: this.sandRoughnessMap,
+      map: this.facade.getSandTexture(),
+      normalMap: this.facade.getSandNormalMap(),
+      roughnessMap: this.facade.getSandRoughnessMap(),
       color: 0xf5e9c8, // Sand color
       side: THREE.DoubleSide,
       transparent: false,
@@ -1382,9 +1382,10 @@ export default class PolygonRenderer {
               if (obj.geometry) obj.geometry.dispose();
               if (obj.material) {
                 if (Array.isArray(obj.material)) {
-                  obj.material.forEach(mat => {
+                  obj.material.forEach((mat: THREE.Material) => {
                     try {
-                      if (mat.map) mat.map.dispose();
+                      if ((mat as THREE.MeshBasicMaterial | THREE.MeshStandardMaterial).map) 
+                        (mat as THREE.MeshBasicMaterial | THREE.MeshStandardMaterial).map?.dispose();
                       mat.dispose();
                     } catch (matError) {
                       log.error('Error disposing material:', matError);
