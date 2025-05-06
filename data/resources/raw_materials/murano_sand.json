@@ -47,7 +47,8 @@
       "process": "glassmaking",
       "building": "glass_foundry",
       "role": "primary_ingredient",
-      "outputResource": "molten_glass"
+      "outputResource": "molten_glass",
+      "productionChain": "Murano Sand → Glass Foundry → Molten Glass"
     }
   ],
   "substitutes": [

@@ -87,19 +87,22 @@
       "process": "shipbuilding",
       "building": "shipyard",
       "role": "primary_material",
-      "outputResource": "ship_components"
+      "outputResource": "ship_components",
+      "productionChain": "Timber → Shipyard → Ship Components"
     },
     {
       "process": "construction",
       "building": "construction_site",
       "role": "primary_material",
-      "outputResource": "building_materials"
+      "outputResource": "building_materials",
+      "productionChain": "Timber → Construction Site → Building Materials"
     },
     {
       "process": "woodworking",
       "building": "carpentry_workshop",
       "role": "primary_material",
-      "outputResource": "furniture"
+      "outputResource": "furniture",
+      "productionChain": "Timber → Carpentry Workshop → Furniture"
     }
   ],
   "substitutes": [],

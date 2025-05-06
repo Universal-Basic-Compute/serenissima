@@ -83,7 +83,8 @@
         }
       ],
       "building": "blacksmith",
-      "processingTime": 300
+      "processingTime": 300,
+      "productionChain": "Processed Iron → Blacksmith → Tools"
     }
   ],
   "usedIn": [

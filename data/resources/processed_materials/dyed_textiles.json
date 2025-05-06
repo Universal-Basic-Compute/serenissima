@@ -104,7 +104,8 @@
         }
       ],
       "building": "dye_works",
-      "processingTime": 360
+      "processingTime": 360,
+      "productionChain": "Silk Fabric → Dye Works → Dyed Textiles"
     }
   ],
   "usedIn": [
@@ -120,7 +121,8 @@
         }
       ],
       "building": "tailor_workshop",
-      "processingTime": 480
+      "processingTime": 480,
+      "productionChain": "Dyed Textiles → Tailor Workshop → Luxury Clothing"
     }
   ],
   "transportOptions": {

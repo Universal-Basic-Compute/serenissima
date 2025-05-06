@@ -70,7 +70,8 @@
         }
       ],
       "building": "silk_conditioning_house",
-      "processingTime": 360
+      "processingTime": 360,
+      "productionChain": "Raw Silk → Silk Conditioning House → Prepared Silk"
     }
   ],
   "usedIn": [
@@ -86,7 +87,8 @@
         }
       ],
       "building": "weaving_workshop",
-      "processingTime": 480
+      "processingTime": 480,
+      "productionChain": "Prepared Silk → Weaving Workshop → Silk Fabric"
     }
   ],
   "transportOptions": {

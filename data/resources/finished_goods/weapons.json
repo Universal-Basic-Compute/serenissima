@@ -62,7 +62,8 @@
         "amount": 20,
         "quality_impact": 0.1
       }
-    ]
+    ],
+    "productionChain": "Processed Iron → Weapons Smith → Weapons"
   },
   "quality_variations": {
     "available_qualities": [

@@ -77,7 +77,8 @@
         }
       ],
       "building": "weaving_workshop",
-      "processingTime": 360
+      "processingTime": 360,
+      "productionChain": "Hemp → Weaving Workshop → Sailcloth"
     },
     {
       "inputs": [
@@ -91,7 +92,8 @@
         }
       ],
       "building": "weaving_workshop",
-      "processingTime": 360
+      "processingTime": 360,
+      "productionChain": "Flax → Weaving Workshop → Sailcloth"
     }
   ],
   "usedIn": [

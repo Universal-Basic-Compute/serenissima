@@ -61,19 +61,22 @@
       "process": "fiber_processing",
       "building": "fiber_workshop",
       "role": "primary_material",
-      "outputResource": "processed_hemp"
+      "outputResource": "processed_hemp",
+      "productionChain": "Hemp → Fiber Workshop → Processed Hemp"
     },
     {
       "process": "rope_making",
       "building": "rope_works",
       "role": "primary_material",
-      "outputResource": "rope"
+      "outputResource": "rope",
+      "productionChain": "Hemp → Rope Works → Rope"
     },
     {
       "process": "weaving",
       "building": "weaving_workshop",
       "role": "primary_material",
-      "outputResource": "sailcloth"
+      "outputResource": "sailcloth",
+      "productionChain": "Hemp → Weaving Workshop → Sailcloth"
     }
   ],
   "substitutes": [

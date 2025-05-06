@@ -78,7 +78,8 @@
         }
       ],
       "building": "stonecutter_workshop",
-      "processingTime": 240
+      "processingTime": 240,
+      "productionChain": "Marble → Stonecutter Workshop → Cut Stone"
     },
     {
       "inputs": [
@@ -92,7 +93,8 @@
         }
       ],
       "building": "stonecutter_workshop",
-      "processingTime": 240
+      "processingTime": 240,
+      "productionChain": "Limestone → Stonecutter Workshop → Cut Stone"
     }
   ],
   "usedIn": [

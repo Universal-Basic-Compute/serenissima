@@ -76,7 +76,8 @@
         }
       ],
       "building": "foundry",
-      "processingTime": 360
+      "processingTime": 360,
+      "productionChain": "Iron Ore → Foundry → Processed Iron"
     }
   ],
   "usedIn": [
@@ -88,7 +89,8 @@
         }
       ],
       "building": "blacksmith",
-      "processingTime": 240
+      "processingTime": 240,
+      "productionChain": "Processed Iron → Blacksmith → Iron Fittings"
     },
     {
       "outputs": [
@@ -98,7 +100,8 @@
         }
       ],
       "building": "blacksmith",
-      "processingTime": 300
+      "processingTime": 300,
+      "productionChain": "Processed Iron → Blacksmith → Tools"
     },
     {
       "outputs": [
@@ -108,7 +111,8 @@
         }
       ],
       "building": "weapons_smith",
-      "processingTime": 480
+      "processingTime": 480,
+      "productionChain": "Processed Iron → Weapons Smith → Weapons"
     }
   ],
   "transportOptions": {

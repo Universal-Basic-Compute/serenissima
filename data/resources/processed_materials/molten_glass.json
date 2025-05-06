@@ -86,7 +86,8 @@
         }
       ],
       "building": "glass_foundry",
-      "processingTime": 240
+      "processingTime": 240,
+      "productionChain": "Murano Sand + Soda Ash → Glass Foundry → Molten Glass"
     }
   ],
   "usedIn": [
@@ -106,7 +107,8 @@
         }
       ],
       "building": "glassblower_workshop",
-      "processingTime": 360
+      "processingTime": 360,
+      "productionChain": "Molten Glass → Glassblower Workshop → Fine Glassware"
     }
   ],
   "transportOptions": {

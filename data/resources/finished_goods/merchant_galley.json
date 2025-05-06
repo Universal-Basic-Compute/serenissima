@@ -71,7 +71,8 @@
         "amount": 5,
         "quality_impact": 0.1
       }
-    ]
+    ],
+    "productionChain": "Ship Components + Sailcloth + Rope + Iron Fittings + Pitch → Shipyard → Merchant Galley"
   },
   "quality_variations": {
     "available_qualities": [

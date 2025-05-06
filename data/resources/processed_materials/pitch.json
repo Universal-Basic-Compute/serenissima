@@ -68,7 +68,8 @@
         }
       ],
       "building": "pitch_works",
-      "processingTime": 480
+      "processingTime": 480,
+      "productionChain": "Pine Resin → Pitch Works → Pitch"
     }
   ],
   "usedIn": [

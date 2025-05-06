@@ -53,13 +53,15 @@
       "process": "pitch_making",
       "building": "pitch_works",
       "role": "primary_material",
-      "outputResource": "pitch"
+      "outputResource": "pitch",
+      "productionChain": "Pine Resin → Pitch Works → Pitch"
     },
     {
       "process": "varnish_making",
       "building": "varnish_workshop",
       "role": "primary_ingredient",
-      "outputResource": "varnish"
+      "outputResource": "varnish",
+      "productionChain": "Pine Resin → Varnish Workshop → Varnish"
     }
   ],
   "substitutes": [],

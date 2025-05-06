@@ -78,7 +78,8 @@
         }
       ],
       "building": "weaving_workshop",
-      "processingTime": 480
+      "processingTime": 480,
+      "productionChain": "Prepared Silk → Weaving Workshop → Silk Fabric"
     }
   ],
   "usedIn": [
@@ -94,7 +95,8 @@
         }
       ],
       "building": "dye_works",
-      "processingTime": 360
+      "processingTime": 360,
+      "productionChain": "Silk Fabric → Dye Works → Dyed Textiles"
     }
   ],
   "transportOptions": {

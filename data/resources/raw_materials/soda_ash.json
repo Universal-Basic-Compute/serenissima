@@ -54,13 +54,15 @@
       "process": "glassmaking",
       "building": "glass_foundry",
       "role": "flux_agent",
-      "outputResource": "molten_glass"
+      "outputResource": "molten_glass",
+      "productionChain": "Soda Ash → Glass Foundry → Molten Glass"
     },
     {
       "process": "soap_making",
       "building": "soap_workshop",
       "role": "primary_ingredient",
-      "outputResource": "soap"
+      "outputResource": "soap",
+      "productionChain": "Soda Ash → Soap Workshop → Soap"
     }
   ],
   "substitutes": [

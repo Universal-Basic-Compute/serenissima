@@ -76,7 +76,8 @@
         }
       ],
       "building": "rope_works",
-      "processingTime": 240
+      "processingTime": 240,
+      "productionChain": "Hemp → Rope Works → Rope"
     }
   ],
   "usedIn": [

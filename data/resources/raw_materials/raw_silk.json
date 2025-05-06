@@ -59,7 +59,8 @@
       "process": "silk_conditioning",
       "building": "silk_conditioning_house",
       "role": "primary_ingredient",
-      "outputResource": "prepared_silk"
+      "outputResource": "prepared_silk",
+      "productionChain": "Raw Silk → Silk Conditioning House → Prepared Silk"
     }
   ],
   "substitutes": [],

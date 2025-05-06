@@ -82,7 +82,8 @@
         }
       ],
       "building": "shipyard_workshop",
-      "processingTime": 720
+      "processingTime": 720,
+      "productionChain": "Timber + Iron Fittings + Pitch → Shipyard Workshop → Ship Components"
     }
   ],
   "usedIn": [

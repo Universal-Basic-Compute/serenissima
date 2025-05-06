@@ -86,19 +86,22 @@
       "process": "stonecutting",
       "building": "stonecutter_workshop",
       "role": "primary_material",
-      "outputResource": "cut_stone"
+      "outputResource": "cut_stone",
+      "productionChain": "Marble → Stonecutter Workshop → Cut Stone"
     },
     {
       "process": "sculpture",
       "building": "sculptor_workshop",
       "role": "primary_material",
-      "outputResource": "sculpture"
+      "outputResource": "sculpture",
+      "productionChain": "Marble → Sculptor Workshop → Sculpture"
     },
     {
       "process": "construction",
       "building": "construction_site",
       "role": "decorative_material",
-      "outputResource": "prestigious_building"
+      "outputResource": "prestigious_building",
+      "productionChain": "Marble → Construction Site → Prestigious Building"
     }
   ],
   "substitutes": [

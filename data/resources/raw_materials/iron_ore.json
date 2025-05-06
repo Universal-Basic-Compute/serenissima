@@ -57,7 +57,8 @@
       "process": "smelting",
       "building": "foundry",
       "role": "primary_material",
-      "outputResource": "processed_iron"
+      "outputResource": "processed_iron",
+      "productionChain": "Iron Ore → Foundry → Processed Iron"
     }
   ],
   "substitutes": [],
