@@ -1362,7 +1362,7 @@ export default function PolygonViewer() {
     if (prevViewRef.current !== activeView) {
       prevViewRef.current = activeView;
       
-      if (sceneRef.current) {
+      if (sceneRef.current !== null) {
         console.log(`Updating view mode to ${activeView}`);
         
         // Load land owners when switching to land view
@@ -1487,7 +1487,7 @@ export default function PolygonViewer() {
   // Add a separate effect to handle quality changes
   useEffect(() => {
     // Update quality when highQuality changes
-    if (sceneRef.current) {
+    if (sceneRef.current !== null) {
       console.log(`Updating quality to ${highQuality ? 'high' : 'low'}`);
       
       // Update scene quality
@@ -1703,10 +1703,10 @@ export default function PolygonViewer() {
       />
       
       {/* Road Creator */}
-      {roadCreationActive && sceneRef.current && sceneRef.current.scene && sceneRef.current.camera && (
+      {roadCreationActive && sceneRef.current && (
         <RoadCreator
-          scene={sceneRef.current?.scene}
-          camera={sceneRef.current?.camera}
+          scene={sceneRef.current.scene}
+          camera={sceneRef.current.camera}
           active={roadCreationActive}
           onComplete={handleRoadComplete}
           onCancel={handleRoadCancel}
