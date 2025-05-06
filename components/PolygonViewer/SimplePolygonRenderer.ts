@@ -1006,7 +1006,8 @@ export default class SimplePolygonRenderer {
     // Remove coat of arms sprites
     Object.values(this.coatOfArmsSprites).forEach(sprite => {
       this.scene.remove(sprite);
-      if (sprite.material) {
+      // Check if sprite is a Mesh before accessing material property
+      if (sprite instanceof THREE.Mesh && sprite.material) {
         if (sprite.material instanceof THREE.SpriteMaterial && sprite.material.map) {
           sprite.material.map.dispose();
         }
