@@ -562,8 +562,8 @@ export class WaterFacade {
         // Full recreation for major quality changes
         this.scene.remove(this.water);
         
-        if ((this.water as THREE.Mesh).geometry) {
-          this.water.geometry.dispose();
+        if ((this.water as any).geometry) {
+          (this.water as any).geometry.dispose();
         }
         
         if (this.water.material) {
