@@ -992,6 +992,7 @@ function connectWallet() {
     walletAdapter: PhantomWalletAdapter | null;
     setWalletAddress: (address: string | null) => void;
     setUserProfile: (profile: any | null) => void;
+    setShowUsernamePrompt: (show: boolean) => void;
     storeWalletInAirtable: (address: string) => Promise<any>;
     userProfile: any;
   }) {
@@ -1019,20 +1020,20 @@ function connectWallet() {
         this.setWalletAddress(null);
         this.setUserProfile(null); // Also clear the user profile
       
-      // Clear wallet from both storages
-      sessionStorage.removeItem('walletAddress');
-      localStorage.removeItem('walletAddress');
-      
-      // Dispatch a custom event to notify other components
-      window.dispatchEvent(new CustomEvent('walletChanged'));
-      
-      console.log("Wallet disconnected successfully");
-    } catch (error) {
-      console.error("Error disconnecting wallet:", error);
-      alert(`Failed to disconnect wallet: ${error instanceof Error ? error.message : String(error)}`);
+        // Clear wallet from both storages
+        sessionStorage.removeItem('walletAddress');
+        localStorage.removeItem('walletAddress');
+        
+        // Dispatch a custom event to notify other components
+        window.dispatchEvent(new CustomEvent('walletChanged'));
+        
+        console.log("Wallet disconnected successfully");
+      } catch (error) {
+        console.error("Error disconnecting wallet:", error);
+        alert(`Failed to disconnect wallet: ${error instanceof Error ? error.message : String(error)}`);
+      }
+      return;
     }
-    return;
-  }
   
   // Check if Phantom is installed
   if (adapter.readyState !== WalletReadyState.Installed) {
@@ -1202,7 +1203,7 @@ function handleTransferCompute(amount: number) {
     }
     
     // Show success message with custom component instead of alert
-    setSuccessMessage({
+    this.setSuccessMessage({
       message: `Successfully transferred ${amount.toLocaleString()} $COMPUTE`,
       signature: data.transaction_signature || 'Transaction completed'
     });
