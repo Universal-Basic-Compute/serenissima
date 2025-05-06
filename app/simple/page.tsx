@@ -1233,20 +1233,59 @@ function handleWithdrawCompute(amount: number) {
     setUserProfile: (profile: any) => void;
     setSuccessMessage: (message: {message: string, signature: string} | null) => void;
   }) {
-  try {
-    // Get the wallet address from session or local storage
-    const walletAddress = this.walletAddress || sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress');
-    
-    if (!walletAddress) {
-      alert('Please connect your wallet first');
-      return;
-    }
-    
-    console.log(`Initiating withdrawal of ${amount.toLocaleString()} ducats...`);
-    
-    // Try the direct API route first
     try {
-      const response = await fetch('/api/withdraw-compute', {
+      // Get the wallet address from session or local storage
+      const walletAddress = this.walletAddress || sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress');
+      
+      if (!walletAddress) {
+        alert('Please connect your wallet first');
+        return;
+      }
+      
+      console.log(`Initiating withdrawal of ${amount.toLocaleString()} ducats...`);
+      
+      // Try the direct API route first
+      try {
+        const response = await fetch('/api/withdraw-compute', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            wallet_address: walletAddress,
+            compute_amount: amount,
+          }),
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Compute withdrawal successful:', data);
+          
+          // Update the user profile with the new compute amount
+          if (this.userProfile) {
+            const updatedProfile = {
+              ...this.userProfile,
+              computeAmount: data.compute_amount
+            };
+            this.setUserProfile(updatedProfile);
+            
+            // Update localStorage
+            localStorage.setItem('userProfile', JSON.stringify(updatedProfile));
+            
+            // Dispatch event to update other components
+            window.dispatchEvent(new CustomEvent('userProfileUpdated', {
+              detail: updatedProfile
+            }));
+          }
+          
+          return data;
+        }
+      } catch (directApiError) {
+        console.warn('Direct API withdrawal failed, falling back to backend API:', directApiError);
+      }
+      
+      // Fall back to the backend API
+      const response = await fetch(`${getApiBaseUrl()}/api/withdraw-compute-solana`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -1255,81 +1294,43 @@ function handleWithdrawCompute(amount: number) {
           wallet_address: walletAddress,
           compute_amount: amount,
         }),
+        // Add a timeout to prevent hanging requests
+        signal: AbortSignal.timeout(15000) // 15 second timeout
       });
       
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Compute withdrawal successful:', data);
-        
-        // Update the user profile with the new compute amount
-        if (this.userProfile) {
-          const updatedProfile = {
-            ...this.userProfile,
-            computeAmount: data.compute_amount
-          };
-          this.setUserProfile(updatedProfile);
-          
-          // Update localStorage
-          localStorage.setItem('userProfile', JSON.stringify(updatedProfile));
-          
-          // Dispatch event to update other components
-          window.dispatchEvent(new CustomEvent('userProfileUpdated', {
-            detail: updatedProfile
-          }));
-        }
-        
-        return data;
+      // Handle non-OK responses with more detailed error messages
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = errorData.detail || `Server returned ${response.status}: ${response.statusText}`;
+        throw new Error(errorMessage);
       }
-    } catch (directApiError) {
-      console.warn('Direct API withdrawal failed, falling back to backend API:', directApiError);
-    }
-    
-    // Fall back to the backend API
-    const response = await fetch(`${getApiBaseUrl()}/api/withdraw-compute-solana`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        wallet_address: walletAddress,
-        compute_amount: amount,
-      }),
-      // Add a timeout to prevent hanging requests
-      signal: AbortSignal.timeout(15000) // 15 second timeout
-    });
-    
-    // Handle non-OK responses with more detailed error messages
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      const errorMessage = errorData.detail || `Server returned ${response.status}: ${response.statusText}`;
-      throw new Error(errorMessage);
-    }
-    
-    const data = await response.json();
-    console.log('Compute withdrawal successful:', data);
-    
-    // Update the user profile with the new compute amount
-    if (this.userProfile) {
-      const updatedProfile = {
-        ...this.userProfile,
-        computeAmount: data.compute_amount
-      };
-      this.setUserProfile(updatedProfile);
       
-      // Update localStorage
-      localStorage.setItem('userProfile', JSON.stringify(updatedProfile));
+      const data = await response.json();
+      console.log('Compute withdrawal successful:', data);
       
-      // Dispatch event to update other components
-      window.dispatchEvent(new CustomEvent('userProfileUpdated', {
-        detail: updatedProfile
-      }));
+      // Update the user profile with the new compute amount
+      if (this.userProfile) {
+        const updatedProfile = {
+          ...this.userProfile,
+          computeAmount: data.compute_amount
+        };
+        this.setUserProfile(updatedProfile);
+        
+        // Update localStorage
+        localStorage.setItem('userProfile', JSON.stringify(updatedProfile));
+        
+        // Dispatch event to update other components
+        window.dispatchEvent(new CustomEvent('userProfileUpdated', {
+          detail: updatedProfile
+        }));
+      }
+      
+      // Return the data instead of showing an alert (the component will handle the success message)
+      return data;
+    } catch (error) {
+      console.error('Error withdrawing compute:', error);
+      // Don't show alert here, let the component handle the error
+      throw error;
     }
-    
-    // Return the data instead of showing an alert (the component will handle the success message)
-    return data;
-  } catch (error) {
-    console.error('Error withdrawing compute:', error);
-    // Don't show alert here, let the component handle the error
-    throw error;
-  }
-};
+  };
+}
