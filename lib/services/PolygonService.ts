@@ -1,4 +1,4 @@
-import { Polygon } from '../../components/PolygonViewer/types';
+import { Polygon, Coordinate } from '../../components/PolygonViewer/types';
 import { getApiBaseUrl } from '../apiUtils';
 import { eventBus, EventTypes } from '../eventBus';
 
