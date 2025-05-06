@@ -257,9 +257,10 @@ export default function SimplePage() {
       console.error('Error generating coat of arms image:', error);
       alert(`Failed to generate image: ${error instanceof Error ? error.message : String(error)}`);
     } finally {
-      setIsGeneratingImage(false);
+      this.setIsGeneratingImage(false);
     }
   };
+};
   
   // Initialize wallet adapter
   useEffect(() => {
