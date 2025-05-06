@@ -259,7 +259,8 @@ async function calculateLandRents() {
       
       // Add some randomness (±10%) to make it more natural
       const randomFactor = 0.9 + (Math.random() * 0.2);
-      const finalRent = Math.round(dailyRent * randomFactor);
+      // Divide the final rent by 4 to bring values into a more reasonable range
+      const finalRent = Math.round((dailyRent * randomFactor) / 4);
       
       // Calculate estimated land value based on rent (for verification)
       const estimatedLandValue = Math.round((finalRent * DAYS_PER_YEAR) / TARGET_ANNUAL_YIELD);
