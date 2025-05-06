@@ -869,6 +869,11 @@ export class WaterFacade {
     const indices: number[] = [];
     const positions = geometry.getAttribute('position');
     
+    if (!positions) {
+      console.warn('No position attribute found in geometry');
+      return indices;
+    }
+    
     // If we have an index buffer, use it to find edges
     if (geometry.index) {
       const indexArray = geometry.index.array;
