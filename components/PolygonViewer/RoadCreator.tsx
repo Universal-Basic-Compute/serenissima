@@ -72,7 +72,7 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
     
     try {
       // Count mouse moves for performance monitoring
-      mouseMoveCountRef.useRef++;
+      mouseMoveCountRef.current++;
       
       // Update mouse position in the manager
       managerRef.current.updateMousePosition(event.clientX, event.clientY);
