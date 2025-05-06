@@ -1016,18 +1016,19 @@ function connectWallet() {
       console.log("Disconnecting wallet...");
       try {
         await adapter.disconnect();
-        
+      
         // Only update state after successful disconnect
         this.setWalletAddress(null);
         this.setUserProfile(null); // Also clear the user profile
-      
+    
         // Clear wallet from both storages
         sessionStorage.removeItem('walletAddress');
         localStorage.removeItem('walletAddress');
-        
+        localStorage.removeItem('userProfile'); // Also clear user profile from storage
+      
         // Dispatch a custom event to notify other components
         window.dispatchEvent(new CustomEvent('walletChanged'));
-        
+      
         console.log("Wallet disconnected successfully");
       } catch (error) {
         console.error("Error disconnecting wallet:", error);
@@ -1059,7 +1060,11 @@ function connectWallet() {
       // Store wallet in Airtable and check for username
       const userData = await this.storeWalletInAirtable(address);
       console.log("User data from Airtable:", userData);
-      console.log("User profile after wallet connection:", this.userProfile);
+      
+      // Check if user profile exists in component state
+      if (this.userProfile) {
+        console.log("User profile after wallet connection:", this.userProfile);
+      }
     } else {
       console.log("No wallet address returned after connection");
     }
