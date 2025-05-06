@@ -38,13 +38,13 @@ export class InteractionManager {
   private readonly ERROR_RESET_TIME: number = 30000; // 30 seconds
   
   // Facade for Three.js interaction
-  private interactionFacade: InteractionFacade;
+  private interactionFacade!: InteractionFacade;
   
   // Throttle settings for mouse move events
   private lastMoveTime = 0;
-  private moveThrottleInterval: number; // ms between move processing
+  private moveThrottleInterval!: number; // ms between move processing
   private lastHoverCheckTime = 0;
-  private hoverThrottleInterval: number; // ms between hover checks
+  private hoverThrottleInterval!: number; // ms between hover checks
 
   constructor({
     camera,
