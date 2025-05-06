@@ -1351,7 +1351,7 @@ export default function PolygonViewer() {
     // Only update selection state when selectedPolygonId changes
     if (polygonRendererRef.current) {
       console.log('Updating selection state:', selectedPolygonId);
-      polygonRendererRef.current.updateSelectionState(selectedPolygonId || null);
+      polygonRendererRef.current.updateSelectionState(selectedPolygonId || undefined);
     }
   }, [selectedPolygonId]);
   
@@ -1575,7 +1575,7 @@ export default function PolygonViewer() {
       <ThreeDErrorBoundary 
         onError={handleRenderingError}
         resetKey={`${activeView}-${highQuality}-${polygons.length}`}
-        fallbackComponent={errorBoundaryFallback}
+        fallbackComponent={errorBoundaryFallback as React.ReactElement}
       >
         <div className="w-full h-full flex flex-col items-center justify-center bg-amber-50">
           <div className="text-amber-800 text-2xl font-serif mb-4">Mapping the Venetian Republic...</div>
@@ -1633,7 +1633,7 @@ export default function PolygonViewer() {
     <ThreeDErrorBoundary 
       onError={handleRenderingError}
       resetKey={`${activeView}-${highQuality}-${polygons.length}`}
-      fallbackComponent={errorBoundaryFallback}
+      fallbackComponent={errorBoundaryFallback as React.ReactElement}
     >
       <div className="w-screen h-screen">
         {/* View mode menu */}
@@ -1704,8 +1704,8 @@ export default function PolygonViewer() {
       {/* Road Creator */}
       {roadCreationActive && sceneRef.current && (
         <RoadCreator
-          scene={sceneRef.current?.scene}
-          camera={sceneRef.current?.camera}
+          scene={sceneRef.current.scene}
+          camera={sceneRef.current.camera}
           active={roadCreationActive}
           onComplete={handleRoadComplete}
           onCancel={handleRoadCancel}
