@@ -1403,10 +1403,15 @@ export class RoadManager {
           (material as THREE.MeshStandardMaterial).normalMap.dispose();
         if ('roughnessMap' in material && (material as THREE.MeshStandardMaterial).roughnessMap) 
           (material as THREE.MeshStandardMaterial).roughnessMap.dispose();
-        if ('metalnessMap' in material && material.metalnessMap) 
-          material.metalnessMap.dispose();
+        if ('metalnessMap' in material) {
+          const standardMat = material as THREE.MeshStandardMaterial;
+          if (standardMat.metalnessMap) standardMat.metalnessMap.dispose();
+        }
         if ('aoMap' in material && material.aoMap) material.aoMap.dispose();
-        if ('emissiveMap' in material && material.emissiveMap) material.emissiveMap.dispose();
+        if ('emissiveMap' in material) {
+          const matWithEmissive = material as THREE.MeshStandardMaterial | THREE.MeshPhongMaterial | THREE.MeshLambertMaterial;
+          if (matWithEmissive.emissiveMap) matWithEmissive.emissiveMap.dispose();
+        }
         if ('bumpMap' in material && material.bumpMap) material.bumpMap.dispose();
         if ('displacementMap' in material && material.displacementMap) material.displacementMap.dispose();
         if ('envMap' in material && material.envMap) material.envMap.dispose();
