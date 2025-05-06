@@ -520,7 +520,7 @@ export default class PolygonRenderer {
   /**
    * Get the color for an owner with error handling
    */
-  private getOwnerColor(owner: string): string | null {
+  private getOwnerColor(owner: string | undefined): string | null {
     return withErrorHandling(
       () => {
         if (!owner) return null;
@@ -733,7 +733,7 @@ export default class PolygonRenderer {
         
         if (polygonMesh) {
           // Get the owner's color
-          const ownerColor = this.getOwnerColor(polygon.owner || '');
+          const ownerColor = this.getOwnerColor(polygon.owner);
           
           if (ownerColor) {
             console.log(`Applying color ${ownerColor} to polygon ${polygon.id} owned by ${polygon.owner}`);
