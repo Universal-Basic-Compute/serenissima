@@ -4,11 +4,11 @@
   "category": "raw_materials",
   "subcategory": "mineral",
   "icon": "/assets/icons/resources/murano_sand.png",
-  "base_properties": {
-    "base_value": 5,
+  "baseProperties": {
+    "baseValue": 5,
     "weight": 2.5,
-    "volume": 1.0,
-    "stack_size": 50,
+    "volume": 1,
+    "stackSize": 50,
     "perishable": false
   },
   "description": {
@@ -16,56 +16,58 @@
     "full": "Exceptionally pure silica sand harvested from specific locations on Murano island. Its unique composition makes it essential for Venice's legendary glass production.",
     "flavor": "Beneath your feet lies the foundation of Venice's crystalline reputation—mere grains to some, but to the glass masters, these sands are more precious than gold."
   },
-  "source_properties": {
+  "sourceProperties": {
     "source": "natural",
-    "harvest_method": "mining",
+    "harvestMethod": "mining",
     "locations": [
       "murano_island"
     ],
     "availability": "common",
     "seasonality": "year_round"
   },
-  "quality_variations": {
-    "available_qualities": [
+  "qualityVariations": {
+    "availableQualities": [
       "common",
       "fine",
       "superior",
       "masterwork"
     ],
-    "default_quality": "common",
-    "quality_multipliers": {
+    "defaultQuality": "common",
+    "qualityMultipliers": {
       "common": {
         "value": 0.7,
-        "production_efficiency": 0.8
+        "productionEfficiency": 0.8
       },
       "fine": {
-        "value": 1.0,
-        "production_efficiency": 1.0
+        "value": 1,
+        "productionEfficiency": 1
       },
       "superior": {
         "value": 1.5,
-        "production_efficiency": 1.3
+        "productionEfficiency": 1.3
       },
       "masterwork": {
-        "value": 2.0,
-        "production_efficiency": 1.6
+        "value": 2,
+        "productionEfficiency": 1.6
       }
     }
   },
-  "production_properties": {
-    "processor_building": "glass_foundry",
-    "processing_complexity": 4,
-    "required_skill": "glassmaking:3",
-    "processing_time": 240,
+  "productionProperties": {
+    "processorBuilding": "glass_foundry",
+    "processingComplexity": 4,
+    "requiredSkill": "glassmaking:3",
+    "processingTime": 240,
     "outputs": [
       {
         "resource": "molten_glass",
         "amount": 1,
-        "requires": ["soda_ash"]
+        "requires": [
+          "soda_ash"
+        ]
       }
     ]
   },
-  "production_chains": [
+  "productionChains": [
     {
       "process": "glassmaking",
       "chain": "Murano Sand + Soda Ash → Glass Foundry → Molten Glass → Fine Glassware"
@@ -73,29 +75,29 @@
   ],
   "substitutes": [
     {
-      "resource_id": "standard_sand",
+      "resourceId": "standard_sand",
       "efficiency": 0.6,
-      "quality_penalty": 1,
+      "qualityPenalty": 1,
       "context": "glassmaking"
     }
   ],
   "complements": [
     {
-      "resource_id": "soda_ash",
+      "resourceId": "soda_ash",
       "context": "glassmaking",
       "relationship": "required"
     },
     {
-      "resource_id": "minerals_colorants",
+      "resourceId": "minerals_colorants",
       "context": "glassmaking",
       "relationship": "optional"
     }
   ],
-  "transport_properties": {
-    "transport_methods": {
-      "large_ship": {
+  "transportProperties": {
+    "transportMethods": {
+      "largeShip": {
         "capacity": 1000,
-        "efficiency": 1.0,
+        "efficiency": 1,
         "risk": 0.1
       },
       "barge": {
@@ -114,45 +116,45 @@
         "risk": 0.3
       }
     },
-    "special_requirements": [
+    "specialRequirements": [
       "dry_storage"
     ],
-    "loading_time": 5,
-    "route_restrictions": []
+    "loadingTime": 5,
+    "routeRestrictions": []
   },
-  "storage_properties": {
-    "storage_facilities": {
-      "small_warehouse": {
-        "capacity_multiplier": 1.0,
-        "preservation": 1.0
+  "storageProperties": {
+    "storageFacilities": {
+      "smallWarehouse": {
+        "capacityMultiplier": 1,
+        "preservation": 1
       },
-      "bulk_materials_yard": {
-        "capacity_multiplier": 1.5,
+      "bulkMaterialsYard": {
+        "capacityMultiplier": 1.5,
         "preservation": 0.9
       }
     },
-    "storage_requirements": [
+    "storageRequirements": [
       "dry"
     ],
-    "special_risks": [
+    "specialRisks": [
       "moisture"
     ],
-    "max_storage_time": "unlimited"
+    "maxStorageTime": "unlimited"
   },
-  "market_dynamics": {
-    "base_availability": 0.8,
-    "demand_level": "steady",
-    "price_volatility": 0.2,
-    "regional_factors": [
+  "marketDynamics": {
+    "baseAvailability": 0.8,
+    "demandLevel": "steady",
+    "priceVolatility": 0.2,
+    "regionalFactors": [
       {
         "region": "murano",
-        "availability_modifier": 1.5,
-        "price_modifier": 0.8
+        "availabilityModifier": 1.5,
+        "priceModifier": 0.8
       }
     ],
-    "seasonal_factors": []
+    "seasonalFactors": []
   },
-  "production_chain_position": {
+  "productionChainPosition": {
     "predecessors": [],
     "successors": [
       {
@@ -161,17 +163,17 @@
       }
     ]
   },
-  "historical_notes": {
-    "introduction_year": "ancient",
-    "notable_producers": [
+  "historicalNotes": {
+    "introductionYear": "ancient",
+    "notableProducers": [
       "Murano Island Quarries"
     ],
-    "historical_significance": "The unique composition of Murano sand, with its exceptional purity and specific mineral content, was a closely guarded secret of Venetian glassmaking. This special sand, when combined with soda ash, produced glass of unparalleled clarity and workability, enabling Venetian glassmakers to create their world-renowned cristallo glass. The Republic strictly controlled access to these sand deposits, considering them a strategic resource.",
-    "historical_markets": [
+    "historicalSignificance": "The unique composition of Murano sand, with its exceptional purity and specific mineral content, was a closely guarded secret of Venetian glassmaking. This special sand, when combined with soda ash, produced glass of unparalleled clarity and workability, enabling Venetian glassmakers to create their world-renowned cristallo glass. The Republic strictly controlled access to these sand deposits, considering them a strategic resource.",
+    "historicalMarkets": [
       "Murano glass foundries",
       "Venetian glass industry"
     ],
-    "cultural_context": ""
+    "culturalContext": ""
   },
   "varieties": []
 }
