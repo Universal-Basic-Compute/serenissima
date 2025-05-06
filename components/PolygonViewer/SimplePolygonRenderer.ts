@@ -798,7 +798,7 @@ export default class SimplePolygonRenderer {
     if (intersects.length > 0) {
       // Find the land ID from the intersected object or its ancestors
       let landId = null;
-      let currentObj = intersects[0].object;
+      let currentObj: THREE.Object3D | null = intersects[0].object;
       
       // Traverse up the parent chain to find the object with polygonId
       while (currentObj && !landId) {
@@ -844,7 +844,7 @@ export default class SimplePolygonRenderer {
     if (intersects.length > 0) {
       // Find the land ID from the intersected object or its ancestors
       let landId = null;
-      let currentObj = intersects[0].object;
+      let currentObj: THREE.Object3D | null = intersects[0].object;
       
       // Traverse up the parent chain to find the object with polygonId
       while (currentObj && !landId) {
@@ -917,8 +917,8 @@ export default class SimplePolygonRenderer {
   }
 
   // Helper method to highlight/unhighlight a coat of arms
-  private setCoatOfArmsHighlight(object: THREE.Object3D, highlight: boolean) {
-    if (object instanceof THREE.Mesh) {
+  private setCoatOfArmsHighlight(object: THREE.Object3D | null, highlight: boolean) {
+    if (object && object instanceof THREE.Mesh) {
       // Store original scale if not already stored
       if (!object.userData.originalScale && highlight) {
         object.userData.originalScale = object.scale.clone();
