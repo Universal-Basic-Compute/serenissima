@@ -910,9 +910,7 @@ export default function PolygonViewer() {
         polygonMeshesRef,
         activeView,
         throttleInterval: 100,
-        // Remove selectedPolygonId as it's not in the interface
-        // Pass these through scene.userData if needed
-        polygonRendererRef,
+        // Pass setHoveredPolygonId through scene.userData if needed
         setHoveredPolygonId
       });
       interactionManagerRef.current = interactionManager;
@@ -1353,7 +1351,7 @@ export default function PolygonViewer() {
     // Only update selection state when selectedPolygonId changes
     if (polygonRendererRef.current) {
       console.log('Updating selection state:', selectedPolygonId);
-      polygonRendererRef.current.updateSelectionState(selectedPolygonId);
+      polygonRendererRef.current.updateSelectionState(selectedPolygonId || null);
     }
   }, [selectedPolygonId]);
   
