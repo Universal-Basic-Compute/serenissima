@@ -23,9 +23,9 @@ export class InteractionManager {
   private polygonMeshesRef!: MutableRefObject<Record<string, THREE.Mesh>>;
   private activeView!: ViewMode;
   private selectedPolygonId: string | null = null;
-  private handleMouseClick: (event: MouseEvent) => void;
-  private handleMouseDown: (event: MouseEvent) => void;
-  private handleMouseMove: (event: MouseEvent) => void;
+  private handleMouseClick!: (event: MouseEvent) => void;
+  private handleMouseDown!: (event: MouseEvent) => void;
+  private handleMouseMove!: (event: MouseEvent) => void;
   private isProcessingClick: boolean = false;
   private isDragging: boolean = false;
   private mouseDownPosition = { x: 0, y: 0 };
