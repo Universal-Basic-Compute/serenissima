@@ -847,7 +847,8 @@ export default class PolygonRenderer {
                 if (Array.isArray(obj.material)) {
                   obj.material.forEach((mat: THREE.Material) => {
                     try {
-                      if (mat.hasOwnProperty('map')) {
+                      // Check if material has a map property (like MeshBasicMaterial or MeshStandardMaterial)
+                      if ('map' in mat) {
                         const materialWithMap = mat as THREE.MeshBasicMaterial | THREE.MeshStandardMaterial;
                         if (materialWithMap.map) {
                           materialWithMap.map.dispose();
@@ -860,7 +861,8 @@ export default class PolygonRenderer {
                   });
                 } else {
                   try {
-                    if (obj.material.hasOwnProperty('map')) {
+                    // Check if material has a map property
+                    if ('map' in obj.material) {
                       const materialWithMap = obj.material as THREE.MeshBasicMaterial | THREE.MeshStandardMaterial;
                       if (materialWithMap.map) materialWithMap.map.dispose();
                     }
@@ -1258,7 +1260,7 @@ export default class PolygonRenderer {
     
     // Get the owner's coat of arms URL if available
     let ownerCoatOfArmsUrl: string | null = null;
-    if (newOwner && this.ownerCoatOfArmsMap && typeof newOwner === 'string') {
+    if (newOwner && this.ownerCoatOfArmsMap) {
       ownerCoatOfArmsUrl = this.ownerCoatOfArmsMap[newOwner] || null;
       console.log(`Found coat of arms for ${newOwner}: ${ownerCoatOfArmsUrl}`);
     }
@@ -1395,7 +1397,7 @@ export default class PolygonRenderer {
                   });
                 } else {
                   try {
-                    if (obj.material.hasOwnProperty('map')) {
+                    if ('map' in obj.material) {
                       const materialWithMap = obj.material as THREE.MeshBasicMaterial | THREE.MeshStandardMaterial;
                       if (materialWithMap.map) materialWithMap.map.dispose();
                     }
