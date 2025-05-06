@@ -986,25 +986,27 @@ export default function SimplePage() {
   );
 }
 // Add the connectWallet function
-const connectWallet = async () => {
-  // Use the walletAdapter from component state
-  const adapter = walletAdapter;
-  if (!adapter) {
-    console.log("Wallet adapter not initialized");
-    return;
-  }
-  
-  console.log("Connecting wallet, current state:", adapter.connected ? "connected" : "disconnected");
-  
-  if (adapter.connected) {
-    // If already connected, disconnect
-    console.log("Disconnecting wallet...");
-    try {
-      await adapter.disconnect();
-      
-      // Only update state after successful disconnect
-      setWalletAddress(null);
-      setUserProfile(null); // Also clear the user profile
+function connectWallet() {
+  // This function needs to be defined inside the component to access state
+  return async () => {
+    // Use the walletAdapter from component state
+    const adapter = walletAdapter;
+    if (!adapter) {
+      console.log("Wallet adapter not initialized");
+      return;
+    }
+    
+    console.log("Connecting wallet, current state:", adapter.connected ? "connected" : "disconnected");
+    
+    if (adapter.connected) {
+      // If already connected, disconnect
+      console.log("Disconnecting wallet...");
+      try {
+        await adapter.disconnect();
+        
+        // Only update state after successful disconnect
+        setWalletAddress(null);
+        setUserProfile(null); // Also clear the user profile
       
       // Clear wallet from both storages
       sessionStorage.removeItem('walletAddress');
@@ -1055,7 +1057,8 @@ const connectWallet = async () => {
 };
 
 // Add the storeWalletInAirtable function
-const storeWalletInAirtable = async (walletAddress: string) => {
+function storeWalletInAirtable(walletAddress: string) {
+  return async () => {
   try {
     const response = await fetch(`${getApiBaseUrl()}/api/wallet`, {
       method: 'POST',
@@ -1099,11 +1102,12 @@ const storeWalletInAirtable = async (walletAddress: string) => {
 };
 
 // Function to generate coat of arms image
-const generateCoatOfArmsImage = async () => {
-  if (!familyCoatOfArms.trim()) {
-    alert('Please enter a description of your family coat of arms first');
-    return;
-  }
+function generateCoatOfArmsImage() {
+  return async () => {
+    if (!familyCoatOfArms.trim()) {
+      alert('Please enter a description of your family coat of arms first');
+      return;
+    }
     
   try {
     setIsGeneratingImage(true);
@@ -1125,7 +1129,8 @@ const generateCoatOfArmsImage = async () => {
 
 
 // Add the handleTransferCompute function
-const handleTransferCompute = async (amount: number) => {
+function handleTransferCompute(amount: number) {
+  return async () => {
   try {
     console.log('Starting compute transfer process...');
     
@@ -1188,7 +1193,8 @@ const handleTransferCompute = async (amount: number) => {
 };
 
 // Add the handleWithdrawCompute function
-const handleWithdrawCompute = async (amount: number) => {
+function handleWithdrawCompute(amount: number) {
+  return async () => {
   try {
     // Get the wallet address from session or local storage
     const walletAddress = sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress');
