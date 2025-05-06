@@ -182,10 +182,7 @@ export default class SimplePolygonRenderer {
       roughness: 0.8,
       metalness: 0.1,
       wireframe: false,
-      flatShading: false,
-      // Enable shadows
-      castShadow: true,
-      receiveShadow: true
+      flatShading: false
     });
     
     // Process each polygon
@@ -233,13 +230,13 @@ export default class SimplePolygonRenderer {
         
         // Merge vertices to eliminate tiny gaps using BufferGeometryUtils
         if (BufferGeometryUtils && BufferGeometryUtils.mergeVertices) {
-          geometry = BufferGeometryUtils.mergeVertices(geometry);
+          geometry = BufferGeometryUtils.mergeVertices(geometry) as THREE.ExtrudeGeometry;
         } else {
           console.warn('BufferGeometryUtils.mergeVertices not available, skipping vertex merging');
         }
       
         // Create mesh with shared material
-        const mesh = new THREE.Mesh(geometry, this.sharedMaterial);
+        const mesh = new THREE.Mesh(geometry, this.sharedMaterial as THREE.Material);
         
         // Set render order to ensure land renders above water
         mesh.renderOrder = 1;
