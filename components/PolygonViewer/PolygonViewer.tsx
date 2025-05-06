@@ -909,8 +909,9 @@ export default function PolygonViewer() {
         scene: sceneRef.current?.scene || fallbackScene,
         polygonMeshesRef,
         activeView,
-        selectedPolygonId,
-        setSelectedPolygonId,
+        throttleInterval: 100,
+        // Remove selectedPolygonId as it's not in the interface
+        // Pass these through scene.userData if needed
         polygonRendererRef,
         setHoveredPolygonId
       });
@@ -1263,7 +1264,7 @@ export default function PolygonViewer() {
       
       // Add a second connection attempt after a longer delay to catch any late-loaded polygons
       const secondTimer = setTimeout(() => {
-        if (sceneRef.current) {
+        if (sceneRef.current && sceneRef.current.scene) {
           const landObjects: THREE.Object3D[] = [];
           sceneRef.current.scene.traverse(object => {
             if (object instanceof THREE.Mesh && 
@@ -1444,7 +1445,7 @@ export default function PolygonViewer() {
       // Get the curvature value from a state variable or use a default
       const curvature = 0.5; // Default curvature
       console.log(`PolygonViewer: Creating road with curvature ${curvature}`);
-      const roadId = roadManagerRef.current?.createRoad(roadPoints, curvature);
+      const roadId = roadManagerRef.current.createRoad(roadPoints, curvature);
       console.log(`PolygonViewer: Road created with ID ${roadId}`);
       
       // Get the current wallet address
