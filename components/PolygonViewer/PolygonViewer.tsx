@@ -1641,7 +1641,7 @@ export default function PolygonViewer() {
             Reload Page
           </button>
         </div>
-      )}
+      }
     >
       <div className="w-screen h-screen">
         {/* View mode menu */}
