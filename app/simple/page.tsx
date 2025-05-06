@@ -76,11 +76,11 @@ export default function SimplePage() {
     
     try {
       // When editing, use the existing username
-      const username = userProfile ? userProfile.username : usernameInput.trim();
+      const username = userProfile !== null ? userProfile.username : usernameInput.trim();
       
       // If this is a new user (no userProfile), assign a random color from the palette
       // Otherwise, use the selected color
-      const userColor = !userProfile 
+      const userColor = userProfile === null
         ? veniceColorPalette[Math.floor(Math.random() * veniceColorPalette.length)]
         : selectedColor;
       
