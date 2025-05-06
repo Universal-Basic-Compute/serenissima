@@ -589,7 +589,7 @@ export default class PolygonRenderer {
     });
     
     // Create a polygon mesh for the sample
-    const polygonMesh = new PolygonMesh(
+    const polygonMesh = new PolygonMeshFacade(
       this.scene,
       samplePolygon,
       this.bounds,
@@ -597,12 +597,11 @@ export default class PolygonRenderer {
       this.performanceMode,
       this.textureLoader,
       '#FF0000', // Bright red for visibility
-      null,
-      this.polygonMeshesRef
+      null
     );
     
     // Store reference to the mesh
-    this.PolygonMeshs.push(polygonMesh);
+    this.polygonMeshes.push(polygonMesh);
     
     console.log('Sample test polygon created for visibility testing');
   }
