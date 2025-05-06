@@ -35,8 +35,9 @@ tsc.on('close', (code) => {
   const errors = [];
   const lines = stdout.split('\n');
   
-  // Regular expression to match TypeScript error format - updated to handle different formats and carriage returns
-  const errorRegex = /^(.+)\((\d+),(\d+)\)(?:: error|\s-\s)(?:TS)?(\d+)(?::\s|\s-\s)(.+?)[\r\n]*$/;
+  // Simpler regex patterns for TypeScript errors and warnings
+  const errorRegex = /^(.+)\((\d+),(\d+)\): error TS(\d+): (.+)$/;
+  const warningRegex = /^(.+)\((\d+),(\d+)\): warning TS(\d+): (.+)$/;
   
   // Log the first few lines of output for debugging
   if (lines.length > 0) {
@@ -53,12 +54,50 @@ tsc.on('close', (code) => {
   
   // Count warnings as well as errors
   let warningCount = 0;
-  const warningRegex = /^(.+)\((\d+),(\d+)\)(?:: warning|\s-\s)(?:TS)?(\d+)(?::\s|\s-\s)(.+?)[\r\n]*$/;
   
   for (const line of lines) {
-    // Clean the line by removing carriage returns
-    const cleanLine = line.replace(/\r$/, '');
+    // Remove any carriage returns or line feeds
+    const cleanLine = line.replace(/[\r\n]+$/, '');
     
+    // Debug logging for lines that look like errors
+    if (cleanLine.includes('error TS')) {
+      console.error(`Trying to match: "${cleanLine}"`);
+      console.error(`Regex test result: ${errorRegex.test(cleanLine)}`);
+      
+      // Try a direct string extraction approach as fallback
+      if (!errorRegex.test(cleanLine)) {
+        const parts = cleanLine.split(': error TS');
+        if (parts.length === 2) {
+          const locationPart = parts[0];
+          const errorPart = parts[1];
+          
+          // Extract file, line, column
+          const locationMatch = locationPart.match(/^(.+)\((\d+),(\d+)\)$/);
+          if (locationMatch) {
+            const [_, filePath, lineNum, column] = locationMatch;
+            
+            // Extract error code and message
+            const errorMatch = errorPart.match(/^(\d+): (.+)$/);
+            if (errorMatch) {
+              const [_, errorCode, message] = errorMatch;
+              
+              errors.push({
+                filePath,
+                line: parseInt(lineNum, 10),
+                column: parseInt(column, 10),
+                code: `TS${errorCode}`,
+                message,
+                type: 'error'
+              });
+              
+              console.error(`Successfully parsed error using fallback method: ${filePath}:${lineNum}:${column} - TS${errorCode}: ${message}`);
+            }
+          }
+        }
+      }
+    }
+    
+    // Try the regex match first
     const errorMatch = cleanLine.match(errorRegex);
     if (errorMatch) {
       const [_, filePath, lineNum, column, errorCode, message] = errorMatch;
