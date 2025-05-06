@@ -105,35 +105,54 @@ def process_todo(todo):
     for file in valid_files:
         aider_cmd.extend(["--file", file])
 
-    # Execute Aider command
+    # Execute Aider command with streaming output
     print(f"Executing: {' '.join(aider_cmd)}")
     try:
-        result = subprocess.run(aider_cmd, capture_output=True, text=True, timeout=300)  # 5 minute timeout
-
-        # Print the output
-        print("\nAider Output:")
-        print(result.stdout)
-
-        if result.stderr:
+        # Replace the subprocess.run with Popen to stream output
+        process = subprocess.Popen(
+            aider_cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            bufsize=1  # Line buffered
+        )
+        
+        print("\nAider Output (streaming):")
+        
+        # Stream stdout in real-time
+        stdout_lines = []
+        for line in iter(process.stdout.readline, ''):
+            print(line, end='')  # Print to console in real-time
+            stdout_lines.append(line)
+            
+            # Optionally log to file in real-time
+            with open('aider_output.log', 'a') as log_file:
+                log_file.write(line)
+        
+        # Get stderr after process completes
+        stderr = process.stderr.read()
+        
+        # Wait for process to complete and get return code
+        return_code = process.wait()
+        
+        # Store the complete output
+        stdout = ''.join(stdout_lines)
+        
+        if stderr:
             print("\nAider Errors:")
-            print(result.stderr)
+            print(stderr)
 
         # Check return code
-        if result.returncode != 0:
-            print(f"Warning: Aider exited with code {result.returncode}")
+        if return_code != 0:
+            print(f"Warning: Aider exited with code {return_code}")
         else:
             print(f"Successfully processed TODO {todo_id}")
             
         # Log completion to a file
         with open('todo_progress.log', 'a') as log_file:
             timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
-            log_file.write(f"{timestamp} - {todo_id}: {'Success' if result.returncode == 0 else 'Failed'}\n")
+            log_file.write(f"{timestamp} - {todo_id}: {'Success' if return_code == 0 else 'Failed'}\n")
 
-    except subprocess.TimeoutExpired:
-        print(f"Error: Aider command timed out after 5 minutes for TODO {todo_id}")
-        with open('todo_progress.log', 'a') as log_file:
-            timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
-            log_file.write(f"{timestamp} - {todo_id}: Timeout\n")
     except Exception as e:
         print(f"Error executing Aider: {e}")
         with open('todo_progress.log', 'a') as log_file:
