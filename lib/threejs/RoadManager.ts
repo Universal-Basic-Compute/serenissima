@@ -198,6 +198,9 @@ export class RoadManager {
               
               // Add to scene
               log.info(`RoadManager: Adding road mesh to scene with ID ${roadData.id}`);
+              if (!this.scene) {
+                throw new Error('Scene is null, cannot add road mesh');
+              }
               this.scene.add(mesh);
               
               // Store the road
@@ -249,6 +252,9 @@ export class RoadManager {
             
             // Add to scene
             log.info(`RoadManager: Adding road mesh to scene with ID ${roadData.id} (fallback mode)`);
+            if (!this.scene) {
+              throw new Error('Scene is null, cannot add road mesh in fallback mode');
+            }
             this.scene.add(mesh);
             
             // Store the road
@@ -299,7 +305,11 @@ export class RoadManager {
       try {
         // Remove from scene
         const road = this.roads[index];
-        this.scene.remove(road.mesh);
+        if (this.scene) {
+          this.scene.remove(road.mesh);
+        } else {
+          log.warn(`Cannot remove road mesh from scene: scene is null`);
+        }
         
         try {
           // Dispose of geometry and material
@@ -1549,7 +1559,13 @@ export class RoadManager {
                 }
                 
                 // Add to scene
-                this.scene.add(mesh);
+                if (this.scene) {
+                  this.scene.add(mesh);
+                } else {
+                  log.error(`Cannot add road mesh: scene is null`);
+                  failCount++;
+                  return; // Skip this road
+                }
                 
                 // Store the road
                 const road: Road = {
