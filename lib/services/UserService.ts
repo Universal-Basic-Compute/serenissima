@@ -84,11 +84,11 @@ export class UserService {
     if (storedProfile) {
       try {
         this.currentUser = JSON.parse(storedProfile);
-        log.info(`Restored user profile from storage: ${this.currentUser.username}`);
+        log.info(`Restored user profile from storage: ${this.currentUser?.username}`);
         log.debug('User profile details:', { 
-          username: this.currentUser.username,
-          hasCoatOfArms: !!this.currentUser.coatOfArmsImage,
-          hasMotto: !!this.currentUser.familyMotto
+          username: this.currentUser?.username,
+          hasCoatOfArms: !!this.currentUser?.coatOfArmsImage,
+          hasMotto: !!this.currentUser?.familyMotto
         });
         
         // Initialize cache with stored profile if wallet address exists
@@ -298,7 +298,7 @@ export class UserService {
       
       // Notify listeners that users data has been loaded
       log.debug('Emitting USERS_DATA_LOADED event');
-      eventBus.emit(EventTypes.USERS_DATA_LOADED);
+      eventBus.emit(EventTypes.USERS_DATA_LOADED, null);
       
       const totalTime = Math.round(performance.now() - startTime);
       log.info(`Successfully loaded ${Object.keys(this.users).length} users in ${totalTime}ms`);
@@ -346,7 +346,7 @@ export class UserService {
     const cachedEntry = this.userByUsernameCache.get(username);
     if (this.isCacheValid(cachedEntry)) {
       log.debug(`Returning user from cache: ${username}`);
-      return cachedEntry.data;
+      return cachedEntry?.data;
     }
     
     const user = this.users[username];
