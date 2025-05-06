@@ -1125,7 +1125,7 @@ if (shoreFactor > 0.01) {
               const uniform = uniforms[key];
               if (uniform && uniform.value && typeof uniform.value === 'object' && 
                   'dispose' in uniform.value && typeof uniform.value.dispose === 'function') {
-                uniform.value.dispose();
+                (uniform.value as { dispose: () => void }).dispose();
               }
             });
           }
@@ -1152,7 +1152,7 @@ if (shoreFactor > 0.01) {
           const uniform = waterUniforms[key];
           if (uniform && uniform.value && typeof uniform.value === 'object' && 
               'dispose' in uniform.value && typeof uniform.value.dispose === 'function') {
-            uniform.value.dispose();
+            (uniform.value as { dispose: () => void }).dispose();
           }
         });
       }
