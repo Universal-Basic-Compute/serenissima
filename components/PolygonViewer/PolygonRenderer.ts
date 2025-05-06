@@ -417,7 +417,7 @@ export default class PolygonRenderer {
       
       // Convert centroid to 3D position
       const normalizedCoord = normalizeCoordinates(
-        [polygon.centroid],
+        [centroid],
         this.bounds.centerLat,
         this.bounds.centerLng,
         this.bounds.scale,
@@ -1149,6 +1149,9 @@ export default class PolygonRenderer {
     // Ensure centroid is not undefined before using it
     const centroid: Coordinate = polygon.centroid;
     
+    // Ensure centroid is not undefined before using it
+    const centroid: Coordinate = polygon.centroid;
+    
     withErrorHandling(
       () => {
         // Convert centroid to 3D position
@@ -1181,7 +1184,7 @@ export default class PolygonRenderer {
         try {
           // Convert centroid to 3D position
           const normalizedCoord = normalizeCoordinates(
-            [polygon.centroid],
+            [centroid],
             this.bounds.centerLat,
             this.bounds.centerLng,
             this.bounds.scale,
