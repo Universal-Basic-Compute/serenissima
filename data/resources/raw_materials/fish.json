@@ -1,140 +1,193 @@
 {
-    "id": "fish",
-    "name": "Fish",
-    "category": "raw_materials",
-    "subcategory": "food",
-    "icon": "icons/raw_materials/fish.png",
-    "baseProperties": {
-      "baseValue": 6,
-      "weight": 1.0,
-      "volume": 1.0,
-      "stackSize": 20,
-      "perishable": true,
-      "perishTime": 720
+  "id": "fish",
+  "name": "Fish",
+  "category": "raw_materials",
+  "subcategory": "food",
+  "icon": "/assets/icons/resources/fish.png",
+  "baseProperties": {
+    "baseValue": 6,
+    "weight": 1.0,
+    "volume": 1.0,
+    "stackSize": 20,
+    "perishable": true,
+    "perishTime": 720
+  },
+  "description": {
+    "short": "Fresh fish caught from the lagoon and Adriatic.",
+    "full": "Various species of fish harvested from Venice's lagoon waters and nearby Adriatic Sea. A staple food for Venetians of all classes.",
+    "flavor": "The fishermen's nets haul in more than sustenance\u00e2\u20ac\u201dthey draw forth the very identity of Venice, a city as much of the water as beside it."
+  },
+  "sourceInfo": {
+    "source": "local",
+    "harvestMethod": "fishing",
+    "locations": [
+      "lagoon",
+      "adriatic"
+    ],
+    "availability": "common",
+    "seasonality": {
+      "harvest": "year_round",
+      "peak": "spring",
+      "note": "Different species available in different seasons"
+    }
+  },
+  "qualityLevels": {
+    "available": [
+      "poor",
+      "common",
+      "fine"
+    ],
+    "default": "common",
+    "effects": {
+      "poor": {
+        "valueModifier": 0.7,
+        "perishTimeModifier": 0.7
+      },
+      "common": {
+        "valueModifier": 1.0,
+        "perishTimeModifier": 1.0
+      },
+      "fine": {
+        "valueModifier": 1.5,
+        "perishTimeModifier": 1.2
+      }
+    }
+  },
+  "varieties": [
+    {
+      "type": "lagoon_fish",
+      "valueModifier": 0.8,
+      "availability": "very_common"
     },
-    "description": {
-      "short": "Fresh fish caught from the lagoon and Adriatic.",
-      "full": "Various species of fish harvested from Venice's lagoon waters and nearby Adriatic Sea. A staple food for Venetians of all classes.",
-      "flavor": "The fishermen's nets haul in more than sustenance—they draw forth the very identity of Venice, a city as much of the water as beside it."
+    {
+      "type": "adriatic_fish",
+      "valueModifier": 1.2,
+      "availability": "common"
     },
-    "sourceInfo": {
-      "source": "local",
-      "harvestMethod": "fishing",
-      "locations": ["lagoon", "adriatic"],
-      "availability": "common",
-      "seasonality": {
-        "harvest": "year_round",
-        "peak": "spring",
-        "note": "Different species available in different seasons"
+    {
+      "type": "deep_sea_fish",
+      "valueModifier": 1.6,
+      "availability": "uncommon"
+    }
+  ],
+  "productionUses": [
+    {
+      "process": "cooking",
+      "building": "tavern",
+      "role": "primary_ingredient",
+      "outputResource": "prepared_meal"
+    },
+    {
+      "process": "preserving",
+      "building": "smoker",
+      "role": "primary_ingredient",
+      "outputResource": "smoked_fish"
+    },
+    {
+      "process": "salting",
+      "building": "salting_house",
+      "role": "primary_ingredient",
+      "outputResource": "preserved_fish"
+    }
+  ],
+  "substitutes": [],
+  "complements": [
+    {
+      "resourceId": "salt",
+      "context": "preserving",
+      "relationship": "required"
+    },
+    {
+      "resourceId": "spices",
+      "context": "cooking",
+      "relationship": "optional"
+    }
+  ],
+  "transportation": {
+    "methods": {
+      "fishing_boat": {
+        "capacity": 20,
+        "efficiency": 1.0,
+        "risk": 0.1
+      },
+      "cart": {
+        "capacity": 10,
+        "efficiency": 0.8,
+        "risk": 0.15
+      },
+      "porter": {
+        "capacity": 3,
+        "efficiency": 0.7,
+        "risk": 0.2
       }
     },
-    "qualityLevels": {
-      "available": ["poor", "common", "fine"],
-      "default": "common",
-      "effects": {
-        "poor": {"valueModifier": 0.7, "perishTimeModifier": 0.7},
-        "common": {"valueModifier": 1.0, "perishTimeModifier": 1.0},
-        "fine": {"valueModifier": 1.5, "perishTimeModifier": 1.2}
+    "requirements": [
+      "cool_conditions",
+      "quick_delivery"
+    ],
+    "loadingTime": 5,
+    "restrictions": [
+      "time_sensitive"
+    ]
+  },
+  "storage": {
+    "compatible": {
+      "ice_storage": {
+        "capacityMultiplier": 1.0,
+        "preservation": 1.0,
+        "perishTimeExtension": 2880
+      },
+      "market_stall": {
+        "capacityMultiplier": 0.5,
+        "preservation": 0.8,
+        "perishTimeExtension": 0
       }
     },
-    "varieties": [
+    "requirements": [
+      "cold",
+      "ventilation"
+    ],
+    "risks": [
+      "spoilage",
+      "odor"
+    ],
+    "maxStorageTime": "depends_on_preservation"
+  },
+  "marketDynamics": {
+    "baseAvailability": 0.9,
+    "demandLevel": "high",
+    "priceVolatility": 0.4,
+    "regionalFactors": [
       {
-        "type": "lagoon_fish",
-        "valueModifier": 0.8,
-        "availability": "very_common"
-      },
-      {
-        "type": "adriatic_fish",
-        "valueModifier": 1.2,
-        "availability": "common"
-      },
-      {
-        "type": "deep_sea_fish",
-        "valueModifier": 1.6,
-        "availability": "uncommon"
+        "region": "fish_market",
+        "availabilityModifier": 2.0,
+        "priceModifier": 0.8
       }
     ],
-    "productionUses": [
+    "seasonalFactors": [
       {
-        "process": "cooking",
-        "building": "tavern",
-        "role": "primary_ingredient",
-        "outputResource": "prepared_meal"
+        "season": "spring",
+        "availabilityModifier": 1.3,
+        "priceModifier": 0.8,
+        "note": "Spawning season for many species"
       },
       {
-        "process": "preserving",
-        "building": "smoker",
-        "role": "primary_ingredient",
-        "outputResource": "smoked_fish"
-      },
-      {
-        "process": "salting",
-        "building": "salting_house",
-        "role": "primary_ingredient",
-        "outputResource": "preserved_fish"
+        "season": "winter",
+        "availabilityModifier": 0.7,
+        "priceModifier": 1.3,
+        "note": "Rough seas reduce fishing"
       }
     ],
-    "substitutes": [],
-    "complements": [
-      {
-        "resourceId": "salt",
-        "context": "preserving",
-        "relationship": "required"
+    "environmentalFactors": {
+      "weather": {
+        "storm_effect": "reduced_availability"
       },
-      {
-        "resourceId": "spices",
-        "context": "cooking",
-        "relationship": "optional"
-      }
-    ],
-    "transportation": {
-      "methods": {
-        "fishing_boat": {"capacity": 20, "efficiency": 1.0, "risk": 0.1},
-        "cart": {"capacity": 10, "efficiency": 0.8, "risk": 0.15},
-        "porter": {"capacity": 3, "efficiency": 0.7, "risk": 0.2}
+      "pollution": {
+        "effect": "quality_reduction"
       },
-      "requirements": ["cool_conditions", "quick_delivery"],
-      "loadingTime": 5,
-      "restrictions": ["time_sensitive"]
-    },
-    "storage": {
-      "compatible": {
-        "ice_storage": {"capacityMultiplier": 1.0, "preservation": 1.0, "perishTimeExtension": 2880},
-        "market_stall": {"capacityMultiplier": 0.5, "preservation": 0.8, "perishTimeExtension": 0}
-      },
-      "requirements": ["cold", "ventilation"],
-      "risks": ["spoilage", "odor"],
-      "maxStorageTime": "depends_on_preservation"
-    },
-    "marketDynamics": {
-      "baseAvailability": 0.9,
-      "demandLevel": "high",
-      "priceVolatility": 0.4,
-      "regionalFactors": [
-        {
-          "region": "fish_market",
-          "availabilityModifier": 2.0,
-          "priceModifier": 0.8
-        }
-      ],
-      "seasonalFactors": [
-        {
-          "season": "spring",
-          "availabilityModifier": 1.3,
-          "priceModifier": 0.8,
-          "note": "Spawning season for many species"
-        },
-        {
-          "season": "winter",
-          "availabilityModifier": 0.7,
-          "priceModifier": 1.3,
-          "note": "Rough seas reduce fishing"
-        }
-      ],
-      "environmentalFactors": {
-        "weather": {"storm_effect": "reduced_availability"},
-        "pollution": {"effect": "quality_reduction"},
-        "overfishing": {"long_term_effect": "reduced_availability"}
+      "overfishing": {
+        "long_term_effect": "reduced_availability"
       }
     }
   }
+}

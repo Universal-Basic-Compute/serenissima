@@ -1,143 +1,188 @@
 {
-    "id": "salt",
-    "name": "Salt",
-    "category": "raw_materials",
-    "subcategory": "mineral",
-    "icon": "icons/raw_materials/salt.png",
-    "baseProperties": {
-      "baseValue": 18,
-      "weight": 1.0,
-      "volume": 0.8,
-      "stackSize": 50,
-      "perishable": false
-    },
-    "description": {
-      "short": "Essential mineral for food preservation and trade.",
-      "full": "White crystalline mineral harvested from the Venetian lagoon's salt pans. A strategic resource that formed the foundation of Venice's early wealth and remains a state monopoly.",
-      "flavor": "The humble salt crystal—Venice's first treasure. Before spices and silk, before gold and glass, there was salt. The invisible empire upon which all else was built."
-    },
-    "sourceInfo": {
-      "source": "local",
-      "harvestMethod": "evaporation",
-      "locations": ["chioggia", "lagoon_salt_pans", "dalmatian_coast"],
-      "availability": "common",
-      "seasonality": {
-        "harvest": "summer",
-        "peak": "late_summer",
-        "note": "Dependent on dry weather for optimal production"
-      }
-    },
-    "qualityLevels": {
-      "available": ["common", "fine", "superior"],
-      "default": "common",
-      "effects": {
-        "common": {"valueModifier": 1.0, "productionEfficiency": 1.0},
-        "fine": {"valueModifier": 1.3, "productionEfficiency": 1.2},
-        "superior": {"valueModifier": 1.8, "productionEfficiency": 1.4}
-      }
-    },
-    "varieties": [
-      {
-        "type": "coarse_salt",
-        "purity": "medium",
-        "valueModifier": 0.8,
-        "primarily_used_for": "basic_preservation"
-      },
-      {
-        "type": "fine_salt",
-        "purity": "high",
-        "valueModifier": 1.2,
-        "primarily_used_for": "cooking_and_quality_preservation"
-      },
-      {
-        "type": "fleur_de_sel",
-        "purity": "very_high",
-        "valueModifier": 2.0,
-        "primarily_used_for": "luxury_cuisine"
-      }
+  "id": "salt",
+  "name": "Salt",
+  "category": "raw_materials",
+  "subcategory": "mineral",
+  "icon": "/assets/icons/resources/salt.png",
+  "baseProperties": {
+    "baseValue": 18,
+    "weight": 1.0,
+    "volume": 0.8,
+    "stackSize": 50,
+    "perishable": false
+  },
+  "description": {
+    "short": "Essential mineral for food preservation and trade.",
+    "full": "White crystalline mineral harvested from the Venetian lagoon's salt pans. A strategic resource that formed the foundation of Venice's early wealth and remains a state monopoly.",
+    "flavor": "The humble salt crystal\u00e2\u20ac\u201dVenice's first treasure. Before spices and silk, before gold and glass, there was salt. The invisible empire upon which all else was built."
+  },
+  "sourceInfo": {
+    "source": "local",
+    "harvestMethod": "evaporation",
+    "locations": [
+      "chioggia",
+      "lagoon_salt_pans",
+      "dalmatian_coast"
     ],
-    "productionUses": [
-      {
-        "process": "food_preservation",
-        "building": "salting_house",
-        "role": "primary_ingredient",
-        "outputResource": "preserved_food"
-      },
-      {
-        "process": "fish_preservation",
-        "building": "salting_house",
-        "role": "primary_ingredient",
-        "outputResource": "salted_fish"
-      },
-      {
-        "process": "meat_preservation",
-        "building": "salting_house",
-        "role": "primary_ingredient",
-        "outputResource": "salted_meat"
-      }
+    "availability": "common",
+    "seasonality": {
+      "harvest": "summer",
+      "peak": "late_summer",
+      "note": "Dependent on dry weather for optimal production"
+    }
+  },
+  "qualityLevels": {
+    "available": [
+      "common",
+      "fine",
+      "superior"
     ],
-    "substitutes": [],
-    "complements": [
-      {
-        "resourceId": "fish",
-        "context": "fish_preservation",
-        "relationship": "required"
+    "default": "common",
+    "effects": {
+      "common": {
+        "valueModifier": 1.0,
+        "productionEfficiency": 1.0
       },
-      {
-        "resourceId": "meat",
-        "context": "meat_preservation",
-        "relationship": "required"
-      }
-    ],
-    "transportation": {
-      "methods": {
-        "large_ship": {"capacity": 500, "efficiency": 1.0, "risk": 0.1},
-        "barge": {"capacity": 200, "efficiency": 0.9, "risk": 0.15},
-        "cart": {"capacity": 30, "efficiency": 0.8, "risk": 0.2}
+      "fine": {
+        "valueModifier": 1.3,
+        "productionEfficiency": 1.2
       },
-      "requirements": ["moisture_protection"],
-      "loadingTime": 8,
-      "restrictions": ["state_monopoly_transport_only"]
-    },
-    "storage": {
-      "compatible": {
-        "salt_warehouse": {"capacityMultiplier": 1.0, "preservation": 1.0},
-        "salting_house": {"capacityMultiplier": 0.8, "preservation": 1.0}
-      },
-      "requirements": ["dry", "moisture_proof_containers"],
-      "risks": ["moisture", "theft"],
-      "maxStorageTime": "unlimited"
-    },
-    "marketDynamics": {
-      "baseAvailability": 0.9,
-      "demandLevel": "very_high",
-      "priceVolatility": 0.2,
-      "stateMonopoly": true,
-      "exportRestrictions": true,
-      "regionalFactors": [
-        {
-          "region": "chioggia",
-          "availabilityModifier": 1.5,
-          "priceModifier": 0.9
-        }
-      ],
-      "seasonalFactors": [
-        {
-          "season": "autumn",
-          "availabilityModifier": 1.3,
-          "priceModifier": 0.9,
-          "note": "Post-harvest abundance"
-        },
-        {
-          "season": "spring",
-          "availabilityModifier": 0.8,
-          "priceModifier": 1.1,
-          "note": "Pre-production scarcity"
-        }
-      ],
-      "strategicImportance": {
-        "level": "critical",
-        "note": "Foundation of Venetian trade networks and state revenue"
+      "superior": {
+        "valueModifier": 1.8,
+        "productionEfficiency": 1.4
       }
     }
+  },
+  "varieties": [
+    {
+      "type": "coarse_salt",
+      "purity": "medium",
+      "valueModifier": 0.8,
+      "primarily_used_for": "basic_preservation"
+    },
+    {
+      "type": "fine_salt",
+      "purity": "high",
+      "valueModifier": 1.2,
+      "primarily_used_for": "cooking_and_quality_preservation"
+    },
+    {
+      "type": "fleur_de_sel",
+      "purity": "very_high",
+      "valueModifier": 2.0,
+      "primarily_used_for": "luxury_cuisine"
+    }
+  ],
+  "productionUses": [
+    {
+      "process": "food_preservation",
+      "building": "salting_house",
+      "role": "primary_ingredient",
+      "outputResource": "preserved_food"
+    },
+    {
+      "process": "fish_preservation",
+      "building": "salting_house",
+      "role": "primary_ingredient",
+      "outputResource": "salted_fish"
+    },
+    {
+      "process": "meat_preservation",
+      "building": "salting_house",
+      "role": "primary_ingredient",
+      "outputResource": "salted_meat"
+    }
+  ],
+  "substitutes": [],
+  "complements": [
+    {
+      "resourceId": "fish",
+      "context": "fish_preservation",
+      "relationship": "required"
+    },
+    {
+      "resourceId": "meat",
+      "context": "meat_preservation",
+      "relationship": "required"
+    }
+  ],
+  "transportation": {
+    "methods": {
+      "large_ship": {
+        "capacity": 500,
+        "efficiency": 1.0,
+        "risk": 0.1
+      },
+      "barge": {
+        "capacity": 200,
+        "efficiency": 0.9,
+        "risk": 0.15
+      },
+      "cart": {
+        "capacity": 30,
+        "efficiency": 0.8,
+        "risk": 0.2
+      }
+    },
+    "requirements": [
+      "moisture_protection"
+    ],
+    "loadingTime": 8,
+    "restrictions": [
+      "state_monopoly_transport_only"
+    ]
+  },
+  "storage": {
+    "compatible": {
+      "salt_warehouse": {
+        "capacityMultiplier": 1.0,
+        "preservation": 1.0
+      },
+      "salting_house": {
+        "capacityMultiplier": 0.8,
+        "preservation": 1.0
+      }
+    },
+    "requirements": [
+      "dry",
+      "moisture_proof_containers"
+    ],
+    "risks": [
+      "moisture",
+      "theft"
+    ],
+    "maxStorageTime": "unlimited"
+  },
+  "marketDynamics": {
+    "baseAvailability": 0.9,
+    "demandLevel": "very_high",
+    "priceVolatility": 0.2,
+    "stateMonopoly": true,
+    "exportRestrictions": true,
+    "regionalFactors": [
+      {
+        "region": "chioggia",
+        "availabilityModifier": 1.5,
+        "priceModifier": 0.9
+      }
+    ],
+    "seasonalFactors": [
+      {
+        "season": "autumn",
+        "availabilityModifier": 1.3,
+        "priceModifier": 0.9,
+        "note": "Post-harvest abundance"
+      },
+      {
+        "season": "spring",
+        "availabilityModifier": 0.8,
+        "priceModifier": 1.1,
+        "note": "Pre-production scarcity"
+      }
+    ],
+    "strategicImportance": {
+      "level": "critical",
+      "note": "Foundation of Venetian trade networks and state revenue"
+    }
   }
+}

@@ -1,125 +1,173 @@
 {
-    "id": "gold",
-    "name": "Gold",
-    "category": "raw_materials",
-    "subcategory": "precious_metal",
-    "icon": "icons/raw_materials/gold.png",
-    "baseProperties": {
-      "baseValue": 100,
-      "weight": 0.5,
-      "volume": 0.1,
-      "stackSize": 10,
-      "perishable": false
-    },
-    "description": {
-      "short": "Precious metal valued for its beauty and rarity.",
-      "full": "Refined gold in ingot or powder form, used for creating jewelry, ornamentation, and gold leaf. Primarily imported from African and Eastern sources.",
-      "flavor": "In this metal we trust, trade, and transform—the universal language of wealth that makes Venice's voice heard from Constantinople to London."
-    },
-    "sourceInfo": {
-      "source": "imported",
-      "harvestMethod": "mining_and_trade",
-      "locations": ["africa", "hungary", "arabic_regions", "far_east"],
-      "availability": "rare",
-      "seasonality": "year_round"
-    },
-    "qualityLevels": {
-      "available": ["common", "fine", "superior"],
-      "default": "common",
-      "effects": {
-        "common": {"valueModifier": 1.0, "purity": 0.85},
-        "fine": {"valueModifier": 1.2, "purity": 0.92},
-        "superior": {"valueModifier": 1.5, "purity": 0.99}
-      }
-    },
-    "forms": [
-      {
-        "form": "ingot",
+  "id": "gold",
+  "name": "Gold",
+  "category": "raw_materials",
+  "subcategory": "precious_metal",
+  "icon": "/assets/icons/resources/gold.png",
+  "baseProperties": {
+    "baseValue": 100,
+    "weight": 0.5,
+    "volume": 0.1,
+    "stackSize": 10,
+    "perishable": false
+  },
+  "description": {
+    "short": "Precious metal valued for its beauty and rarity.",
+    "full": "Refined gold in ingot or powder form, used for creating jewelry, ornamentation, and gold leaf. Primarily imported from African and Eastern sources.",
+    "flavor": "In this metal we trust, trade, and transform\u00e2\u20ac\u201dthe universal language of wealth that makes Venice's voice heard from Constantinople to London."
+  },
+  "sourceInfo": {
+    "source": "imported",
+    "harvestMethod": "mining_and_trade",
+    "locations": [
+      "africa",
+      "hungary",
+      "arabic_regions",
+      "far_east"
+    ],
+    "availability": "rare",
+    "seasonality": "year_round"
+  },
+  "qualityLevels": {
+    "available": [
+      "common",
+      "fine",
+      "superior"
+    ],
+    "default": "common",
+    "effects": {
+      "common": {
         "valueModifier": 1.0,
-        "primaryUse": "storage_and_trade"
+        "purity": 0.85
       },
-      {
-        "form": "powder",
-        "valueModifier": 0.95,
-        "primaryUse": "goldsmithing"
-      },
-      {
-        "form": "leaf",
-        "valueModifier": 1.3,
-        "primaryUse": "decoration"
-      },
-      {
-        "form": "wire",
+      "fine": {
         "valueModifier": 1.2,
-        "primaryUse": "jewelry"
+        "purity": 0.92
+      },
+      "superior": {
+        "valueModifier": 1.5,
+        "purity": 0.99
       }
-    ],
-    "productionUses": [
-      {
-        "process": "goldsmithing",
-        "building": "goldsmith_workshop",
-        "role": "primary_material",
-        "outputResource": "jewelry"
-      },
-      {
-        "process": "leaf_making",
-        "building": "gold_beater_workshop",
-        "role": "primary_material",
-        "outputResource": "gold_leaf"
-      },
-      {
-        "process": "minting",
-        "building": "mint",
-        "role": "primary_material",
-        "outputResource": "gold_ducats"
-      }
-    ],
-    "substitutes": [],
-    "complements": [
-      {
-        "resourceId": "silver",
-        "context": "jewelry_making",
-        "relationship": "optional"
-      },
-      {
-        "resourceId": "gems",
-        "context": "jewelry_making",
-        "relationship": "optional"
-      }
-    ],
-    "transportation": {
-      "methods": {
-        "armed_escort": {"capacity": 5, "efficiency": 1.0, "risk": 0.05},
-        "secure_shipment": {"capacity": 10, "efficiency": 1.0, "risk": 0.1}
-      },
-      "requirements": ["armed_guard", "secure_container", "documentation"],
-      "loadingTime": 10,
-      "restrictions": ["restricted_routes", "daylight_only"]
+    }
+  },
+  "forms": [
+    {
+      "form": "ingot",
+      "valueModifier": 1.0,
+      "primaryUse": "storage_and_trade"
     },
-    "storage": {
-      "compatible": {
-        "secure_vault": {"capacityMultiplier": 1.0, "preservation": 1.0},
-        "treasury": {"capacityMultiplier": 1.0, "preservation": 1.0}
-      },
-      "requirements": ["high_security", "inventory_tracking"],
-      "risks": ["theft"],
-      "maxStorageTime": "unlimited"
+    {
+      "form": "powder",
+      "valueModifier": 0.95,
+      "primaryUse": "goldsmithing"
     },
-    "marketDynamics": {
-      "baseAvailability": 0.3,
-      "demandLevel": "very_high",
-      "priceVolatility": 0.2,
-      "regionalFactors": [
-        {
-          "region": "rialto",
-          "availabilityModifier": 1.3,
-          "priceModifier": 1.0
-        }
-      ],
-      "seasonalFactors": [],
-      "economicFactors": {
-        "political_stability": {"impact": "high"},
-        "international_trade": {"impact": "high"}
+    {
+      "form": "leaf",
+      "valueModifier": 1.3,
+      "primaryUse": "decoration"
+    },
+    {
+      "form": "wire",
+      "valueModifier": 1.2,
+      "primaryUse": "jewelry"
+    }
+  ],
+  "productionUses": [
+    {
+      "process": "goldsmithing",
+      "building": "goldsmith_workshop",
+      "role": "primary_material",
+      "outputResource": "jewelry"
+    },
+    {
+      "process": "leaf_making",
+      "building": "gold_beater_workshop",
+      "role": "primary_material",
+      "outputResource": "gold_leaf"
+    },
+    {
+      "process": "minting",
+      "building": "mint",
+      "role": "primary_material",
+      "outputResource": "gold_ducats"
+    }
+  ],
+  "substitutes": [],
+  "complements": [
+    {
+      "resourceId": "silver",
+      "context": "jewelry_making",
+      "relationship": "optional"
+    },
+    {
+      "resourceId": "gems",
+      "context": "jewelry_making",
+      "relationship": "optional"
+    }
+  ],
+  "transportation": {
+    "methods": {
+      "armed_escort": {
+        "capacity": 5,
+        "efficiency": 1.0,
+        "risk": 0.05
+      },
+      "secure_shipment": {
+        "capacity": 10,
+        "efficiency": 1.0,
+        "risk": 0.1
+      }
+    },
+    "requirements": [
+      "armed_guard",
+      "secure_container",
+      "documentation"
+    ],
+    "loadingTime": 10,
+    "restrictions": [
+      "restricted_routes",
+      "daylight_only"
+    ]
+  },
+  "storage": {
+    "compatible": {
+      "secure_vault": {
+        "capacityMultiplier": 1.0,
+        "preservation": 1.0
+      },
+      "treasury": {
+        "capacityMultiplier": 1.0,
+        "preservation": 1.0
+      }
+    },
+    "requirements": [
+      "high_security",
+      "inventory_tracking"
+    ],
+    "risks": [
+      "theft"
+    ],
+    "maxStorageTime": "unlimited"
+  },
+  "marketDynamics": {
+    "baseAvailability": 0.3,
+    "demandLevel": "very_high",
+    "priceVolatility": 0.2,
+    "regionalFactors": [
+      {
+        "region": "rialto",
+        "availabilityModifier": 1.3,
+        "priceModifier": 1.0
+      }
+    ],
+    "seasonalFactors": [],
+    "economicFactors": {
+      "political_stability": {
+        "impact": "high"
+      },
+      "international_trade": {
+        "impact": "high"
       }
     }
   }
+}
