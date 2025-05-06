@@ -16,6 +16,15 @@ import { generateCoatOfArmsImage } from '@/app/utils/coatOfArmsUtils';
 import { FaHome, FaBuilding, FaRoad, FaTree, FaStore, FaLandmark } from 'react-icons/fa';
 import * as THREE from 'three';
 
+// Add type declaration for window properties
+declare global {
+  interface Window {
+    _polygonSnapshotCache?: { result: any; deps: any };
+    getCachedSnapshot?: Function;
+    dispatchEvent(event: Event): boolean;
+  }
+}
+
 // Import SimpleViewer with no SSR to avoid hydration issues
 const SimpleViewer = dynamic(() => import('../../components/PolygonViewer/SimpleViewer'), {
   ssr: false
@@ -177,11 +186,11 @@ export default function SimplePage() {
   
   // Add effect to handle clicking outside the dropdown to close it
   useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
+    const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setDropdownOpen(false);
       }
-    }
+    };
     
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
@@ -215,7 +224,7 @@ export default function SimplePage() {
       }
       
       // Reset any global state
-      if (window.getCachedSnapshot) {
+      if (typeof window.getCachedSnapshot === 'function') {
         // Use type assertion to handle the delete operation properly
         delete (window as any).getCachedSnapshot;
         console.log('getCachedSnapshot function removed');
@@ -933,8 +942,8 @@ export default function SimplePage() {
                     ? 'opacity-50 cursor-not-allowed bg-amber-400'
                     : 'hover:bg-amber-700'
                 }`}
-                disabled={Boolean((!userProfile && (!usernameInput.trim() || !firstName.trim() || !lastName.trim() || !familyCoatOfArms.trim() || !familyMotto.trim())) ||
-                  (userProfile && (!firstName.trim() || !lastName.trim() || !familyCoatOfArms.trim() || !familyMotto.trim())))}
+                disabled={(!userProfile && (!usernameInput.trim() || !firstName.trim() || !lastName.trim() || !familyCoatOfArms.trim() || !familyMotto.trim())) ||
+                  (userProfile && (!firstName.trim() || !lastName.trim() || !familyCoatOfArms.trim() || !familyMotto.trim()))}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M20 2v20h-2v-8h-2v8h-2v-8h-2v8h-2v-8h-2v8H8v-8H6v8H4v-8H2V2h18z" />
