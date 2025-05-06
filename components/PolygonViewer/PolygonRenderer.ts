@@ -7,7 +7,7 @@
  */
 import * as THREE from 'three';
 import { MutableRefObject } from 'react';
-import { Polygon, ViewMode } from './types';
+import { Polygon, ViewMode, Coordinate } from './types';
 import { normalizeCoordinates } from './utils';
 import { PolygonRendererFacade } from '../../lib/threejs/PolygonRendererFacade';
 import { PolygonMeshFacade } from '../../lib/threejs/PolygonMeshFacade';
