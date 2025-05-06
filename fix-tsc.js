@@ -81,82 +81,101 @@ if (currentBatch.length > 0) {
 
 console.log(`Created ${batches.length} batches of errors to fix.`);
 
-// Process batches one by one
-async function processBatches() {
-  for (let i = 0; i < Math.min(batches.length, MAX_BATCHES); i++) {
-    const batch = batches[i];
-    console.log(`\n--- Processing batch ${i + 1}/${batches.length} (${batch.length} errors) ---`);
-    
-    // Create a detailed error message for Aider
-    const errorDetails = batch.map(error => 
-      `${error.filePath}:${error.line}:${error.column} - ${error.code}: ${error.message}`
-    ).join('\n');
-    
-    // Collect unique files for this batch
-    const files = [...new Set(batch.map(error => error.filePath))];
-    
-    // Build the Aider command
-    const aiderArgs = [
-      '--yes-always',
-      '--message', `Fix the following TypeScript errors:\n\n${errorDetails}`,
-    ];
-    
-    // Add each file to the command
-    files.forEach(file => {
-      aiderArgs.push('--file', file);
-    });
-    
-    console.log(`Working on files: ${files.join(', ')}`);
-    console.log(`Fixing errors:\n${errorDetails}`);
-    
-    // Run Aider
+// Process a single batch
+async function processBatch(batch, batchNumber) {
+  console.log(`\n--- Processing batch ${batchNumber}/${batches.length} (${batch.length} errors) ---`);
+  
+  // Create a detailed error message for Aider
+  const errorDetails = batch.map(error => 
+    `${error.filePath}:${error.line}:${error.column} - ${error.code}: ${error.message}`
+  ).join('\n');
+  
+  // Collect unique files for this batch
+  const files = [...new Set(batch.map(error => error.filePath))];
+  
+  // Build the Aider command
+  const aiderArgs = [
+    '--yes-always',
+    '--message', `Fix the following TypeScript errors:\n\n${errorDetails}`,
+  ];
+  
+  // Add each file to the command
+  files.forEach(file => {
+    aiderArgs.push('--file', file);
+  });
+  
+  console.log(`Working on files: ${files.join(', ')}`);
+  console.log(`Fixing errors:\n${errorDetails}`);
+  
+  // Run Aider
+  return new Promise((resolve, reject) => {
     try {
       const aider = spawn('aider', aiderArgs, {
         stdio: 'inherit',
         shell: true
       });
       
-      // Wait for Aider to complete
-      await new Promise((resolve, reject) => {
-        aider.on('close', code => {
-          if (code === 0) {
-            console.log(`Aider successfully processed batch ${i + 1}`);
-            resolve();
-          } else {
-            console.warn(`Aider exited with code ${code} for batch ${i + 1}`);
-            // Continue anyway
-            resolve();
-          }
-        });
-        
-        aider.on('error', err => {
-          console.error(`Aider process error: ${err}`);
-          reject(err);
-        });
+      aider.on('close', code => {
+        if (code === 0) {
+          console.log(`Aider successfully processed batch ${batchNumber}`);
+          resolve();
+        } else {
+          console.warn(`Aider exited with code ${code} for batch ${batchNumber}`);
+          // Continue anyway
+          resolve();
+        }
       });
       
-      // Run TypeScript compiler again to check progress
-      console.log('Checking remaining errors...');
-      try {
-        execSync(`node tsc-to-json.js ${TS_ERRORS_FILE}`, { stdio: 'inherit' });
-        
-        // Read updated error count
-        const updatedErrorJson = fs.readFileSync(TS_ERRORS_FILE, 'utf8');
-        const updatedErrorData = JSON.parse(updatedErrorJson);
-        
-        console.log(`Remaining errors: ${updatedErrorData.totalErrors}`);
-        
-        // If all errors are fixed, we can exit early
-        if (updatedErrorData.totalErrors === 0) {
-          console.log('All TypeScript errors have been fixed! 🎉');
-          return;
-        }
-      } catch (error) {
-        // Continue even if there are still errors
-      }
-      
+      aider.on('error', err => {
+        console.error(`Aider process error: ${err}`);
+        // Continue anyway
+        resolve();
+      });
     } catch (error) {
-      console.error(`Failed to run Aider for batch ${i + 1}:`, error);
+      console.error(`Failed to run Aider for batch ${batchNumber}:`, error);
+      // Continue anyway
+      resolve();
+    }
+  });
+}
+
+// Process batches in parallel, 3 at a time
+async function processBatches() {
+  // Process batches in groups of 3
+  const PARALLEL_BATCHES = 3;
+  
+  for (let batchIndex = 0; batchIndex < Math.min(batches.length, MAX_BATCHES); batchIndex += PARALLEL_BATCHES) {
+    console.log(`\n--- Processing batches ${batchIndex + 1} to ${Math.min(batchIndex + PARALLEL_BATCHES, batches.length)} of ${batches.length} ---`);
+    
+    // Get the current group of batches to process in parallel
+    const batchGroup = batches.slice(batchIndex, batchIndex + PARALLEL_BATCHES);
+    
+    // Create an array of promises for each batch in the group
+    const batchPromises = batchGroup.map((batch, groupIndex) => {
+      return processBatch(batch, batchIndex + groupIndex + 1);
+    });
+    
+    // Wait for all batches in this group to complete
+    await Promise.all(batchPromises);
+    
+    // Run TypeScript compiler again to check overall progress
+    console.log('\nChecking overall progress after batch group...');
+    try {
+      execSync(`node tsc-to-json.js ${TS_ERRORS_FILE}`, { stdio: 'inherit' });
+      
+      // Read updated error count
+      const updatedErrorJson = fs.readFileSync(TS_ERRORS_FILE, 'utf8');
+      const updatedErrorData = JSON.parse(updatedErrorJson);
+      
+      console.log(`Remaining errors: ${updatedErrorData.totalErrors}`);
+      
+      // If all errors are fixed, we can exit early
+      if (updatedErrorData.totalErrors === 0) {
+        console.log('All TypeScript errors have been fixed! 🎉');
+        return;
+      }
+    } catch (error) {
+      // Continue even if there are still errors
     }
   }
   
