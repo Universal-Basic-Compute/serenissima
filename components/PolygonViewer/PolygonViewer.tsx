@@ -1537,6 +1537,26 @@ export default function PolygonViewer() {
   ), [activeView, selectedPolygonId, handleCloseLandDetails, polygons, landOwners]);
 
 
+  // Function to handle errors in the 3D components
+  const handleRenderingError = useCallback((error: Error, errorInfo: React.ErrorInfo) => {
+    log.error('PolygonViewer rendering error:', error, errorInfo);
+    
+    // Try to clean up resources to prevent memory leaks
+    try {
+      if (sceneRef.current) sceneRef.current.cleanup();
+      if (polygonRendererRef.current) polygonRendererRef.current.cleanup();
+      if (interactionManagerRef.current) interactionManagerRef.current.cleanup();
+      if (bridgeRendererRef.current) bridgeRendererRef.current.cleanup();
+      if (roadManagerRef.current) {
+        // RoadManager might not have cleanup method in its type definition
+        // but we know it exists at runtime
+        (roadManagerRef.current as unknown as { cleanup: () => void }).cleanup();
+      }
+    } catch (cleanupError) {
+      log.error('Error during cleanup after rendering failure:', cleanupError);
+    }
+  }, []);
+
   if (loading) {
     return (
       <ThreeDErrorBoundary 
@@ -1597,25 +1617,6 @@ export default function PolygonViewer() {
   }
   
 
-  // Function to handle errors in the 3D components
-  const handleRenderingError = useCallback((error: Error, errorInfo: React.ErrorInfo) => {
-    log.error('PolygonViewer rendering error:', error, errorInfo);
-    
-    // Try to clean up resources to prevent memory leaks
-    try {
-      if (sceneRef.current) sceneRef.current.cleanup();
-      if (polygonRendererRef.current) polygonRendererRef.current.cleanup();
-      if (interactionManagerRef.current) interactionManagerRef.current.cleanup();
-      if (bridgeRendererRef.current) bridgeRendererRef.current.cleanup();
-      if (roadManagerRef.current) {
-        // RoadManager might not have cleanup method in its type definition
-        // but we know it exists at runtime
-        (roadManagerRef.current as unknown as { cleanup: () => void }).cleanup();
-      }
-    } catch (cleanupError) {
-      log.error('Error during cleanup after rendering failure:', cleanupError);
-    }
-  }, []);
 
   if (error) {
     return (
