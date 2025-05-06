@@ -95,9 +95,10 @@ async function processBatch(batch, batchNumber) {
   const files = [...new Set(batch.map(error => error.filePath))];
   
   // Build the Aider command
+  const errorDetailsOneLine = errorDetails.replace(/\n/g, '\\n');
   const aiderArgs = [
     '--yes-always',
-    '--message', `Fix the following TypeScript errors:\n\n${errorDetails}`,
+    '--message', `Fix the following TypeScript errors:\\n\\n${errorDetailsOneLine}`,
   ];
   
   // Add each file to the command
@@ -107,6 +108,13 @@ async function processBatch(batch, batchNumber) {
   
   console.log(`Working on files: ${files.join(', ')}`);
   console.log(`Fixing errors:\n${errorDetails}`);
+  
+  // Log the full command that will be executed
+  const fullCommand = `aider ${aiderArgs.map(arg => {
+    // Properly quote arguments with spaces
+    return arg.includes(' ') ? `"${arg}"` : arg;
+  }).join(' ')}`;
+  console.log(`\nExecuting command:\n${fullCommand}\n`);
   
   // Run Aider
   return new Promise((resolve, reject) => {
