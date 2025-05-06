@@ -260,7 +260,7 @@ export default function SimplePage() {
       this.setIsGeneratingImage(false);
     }
   };
-};
+}
   
   // Initialize wallet adapter
   useEffect(() => {
