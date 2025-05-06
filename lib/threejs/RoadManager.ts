@@ -1412,8 +1412,8 @@ export class RoadManager {
           const matWithEmissive = material as THREE.MeshStandardMaterial | THREE.MeshPhongMaterial | THREE.MeshLambertMaterial;
           if (matWithEmissive.emissiveMap) matWithEmissive.emissiveMap.dispose();
         }
-        if ('bumpMap' in material && material.bumpMap) material.bumpMap.dispose();
-        if ('displacementMap' in material && material.displacementMap) material.displacementMap.dispose();
+        if ('bumpMap' in material && (material as any).bumpMap) (material as any).bumpMap.dispose();
+        if ('displacementMap' in material && (material as any).displacementMap) (material as any).displacementMap.dispose();
         if ('envMap' in material && material.envMap) material.envMap.dispose();
         if ('lightMap' in material && material.lightMap) material.lightMap.dispose();
         if ('alphaMap' in material && material.alphaMap) material.alphaMap.dispose();
@@ -1427,8 +1427,8 @@ export class RoadManager {
         if ('metalnessMap' in material) (material as THREE.MeshStandardMaterial).metalnessMap = null;
         if ('aoMap' in material) material.aoMap = null;
         if ('emissiveMap' in material) material.emissiveMap = null;
-        if ('bumpMap' in material) material.bumpMap = null;
-        if ('displacementMap' in material) material.displacementMap = null;
+        if ('bumpMap' in material) (material as any).bumpMap = null;
+        if ('displacementMap' in material) (material as any).displacementMap = null;
         if ('envMap' in material) material.envMap = null;
         if ('lightMap' in material) material.lightMap = null;
         if ('alphaMap' in material) material.alphaMap = null;
