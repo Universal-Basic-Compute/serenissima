@@ -969,9 +969,9 @@ export default function PolygonViewer() {
         // Skip some frames at the beginning for better initial performance
         if (isFirstRender) {
           isFirstRender = false;
-          
+            
           // Force a simple render on first frame
-          if (sceneRef.current && sceneRef.current.renderer) {
+          if (sceneRef.current && sceneRef.current.renderer && sceneRef.current.scene && sceneRef.current.camera) {
             sceneRef.current.renderer.render(sceneRef.current.scene, sceneRef.current.camera);
           }
           return;
@@ -1715,10 +1715,10 @@ export default function PolygonViewer() {
       />
       
       {/* Road Creator */}
-      {roadCreationActive && sceneRef.current !== null && (
+      {roadCreationActive && sceneRef.current !== null && sceneRef.current.scene && sceneRef.current.camera && (
         <RoadCreator
-          scene={sceneRef.current?.scene}
-          camera={sceneRef.current?.camera}
+          scene={sceneRef.current.scene}
+          camera={sceneRef.current.camera}
           active={roadCreationActive}
           onComplete={handleRoadComplete}
           onCancel={handleRoadCancel}
