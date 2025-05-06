@@ -16,7 +16,7 @@ const MARKET_STALL_DAILY_INCOME = 8000; // ducats
 const MARKET_STALL_SIZE = 20; // approximate size in square meters
 
 // Calculate distance between two coordinates in kilometers using Haversine formula
-function calculateDistance(coord1, coord2) {
+function calculateDistance(coord1: { lat: number; lng: number }, coord2: { lat: number; lng: number }) {
   const R = 6371; // Earth's radius in km
   const dLat = (coord2.lat - coord1.lat) * Math.PI / 180;
   const dLon = (coord2.lng - coord1.lng) * Math.PI / 180;
@@ -29,7 +29,7 @@ function calculateDistance(coord1, coord2) {
 }
 
 // Calculate location multiplier based on distance from center
-function calculateLocationMultiplier(distance) {
+function calculateLocationMultiplier(distance: number) {
   // Linear scaling from 5x at center to 1x at MAX_DISTANCE or beyond
   const multiplier = 5 - (4 * Math.min(distance, MAX_DISTANCE) / MAX_DISTANCE);
   return Math.max(1, multiplier);
