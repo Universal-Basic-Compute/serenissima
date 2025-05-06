@@ -1,118 +1,185 @@
 {
-    "id": "cut_stone",
-    "name": "Cut Stone",
-    "category": "processed_materials",
-    "subcategory": "construction",
-    "baseValue": 20,
-    "weight": 5.0,
-    "volume": 2.0,
-    "stackSize": 15,
-    "description": "Precisely shaped stone blocks ready for construction.",
-    "longDescription": "Quarried stone that has been carefully cut and shaped by skilled stonecutters, ready for use in Venice's grand buildings. From humble foundations to ornate facades, these blocks form the literal building blocks of the city's architectural splendor, allowing structures to rise from the lagoon's unstable bed.",
-    "sprite": "assets/sprites/resources/cut_stone.png",
-    "icon": "assets/icons/resources/cut_stone.png",
-    "availableQualities": ["common", "fine", "superior"],
-    "defaultQuality": "common",
-    
-    "processingFacility": "stonecutter_workshop",
-    "processingTime": 240,
-    "perishable": false,
-    "weatherSensitivity": 0.1,
-    "specialHandling": ["heavy_lifting_equipment", "careful_stacking"],
-    "qualityFactors": [
-      {"factor": "input_quality", "weight": 0.7},
-      {"factor": "tools_quality", "weight": 0.1},
-      {"factor": "worker_skill", "weight": 0.2}
-    ],
-    "varieties": [
-      {
-        "type": "foundation_blocks",
-        "precision": "low",
-        "value_multiplier": 0.8,
-        "primary_use": "foundations"
-      },
-      {
-        "type": "wall_blocks",
-        "precision": "medium",
-        "value_multiplier": 1.0,
-        "primary_use": "walls"
-      },
-      {
-        "type": "facade_blocks",
-        "precision": "high",
-        "value_multiplier": 1.5,
-        "primary_use": "visible_exteriors"
-      },
-      {
-        "type": "ornamental_pieces",
-        "precision": "very_high",
-        "value_multiplier": 2.0,
-        "primary_use": "decorative_elements"
-      }
-    ],
-    
-    "producedFrom": [
-      {
-        "inputs": [
-          {"resource": "marble", "amount": 5},
-          {"resource": "tools", "amount": 1}
-        ],
-        "building": "stonecutter_workshop",
-        "processingTime": 240
-      },
-      {
-        "inputs": [
-          {"resource": "limestone", "amount": 5},
-          {"resource": "tools", "amount": 1}
-        ],
-        "building": "stonecutter_workshop",
-        "processingTime": 240
-      }
-    ],
-    "usedIn": [
-      {
-        "outputs": [
-          {"resource": "building_materials", "amount": 20}
-        ],
-        "building": "construction_yard",
-        "processingTime": 120
-      },
-      {
-        "outputs": [
-          {"resource": "palazzo", "amount": 1}
-        ],
-        "building": "construction_site",
-        "processingTime": 10080
-      },
-      {
-        "outputs": [
-          {"resource": "church", "amount": 1}
-        ],
-        "building": "construction_site",
-        "processingTime": 14400
-      }
-    ],
-    
-    "transportOptions": {
-      "barge": {"capacity": 50, "efficiency": 1.0, "risk": 0.15},
-      "specialized_cart": {"capacity": 5, "efficiency": 0.8, "risk": 0.2}
+  "id": "cut_stone",
+  "name": "Cut Stone",
+  "category": "processed_materials",
+  "subcategory": "construction",
+  "baseValue": 20,
+  "weight": 5.0,
+  "volume": 2.0,
+  "stackSize": 15,
+  "description": "Precisely shaped stone blocks ready for construction.",
+  "longDescription": "Quarried stone that has been carefully cut and shaped by skilled stonecutters, ready for use in Venice's grand buildings. From humble foundations to ornate facades, these blocks form the literal building blocks of the city's architectural splendor, allowing structures to rise from the lagoon's unstable bed.",
+  "sprite": "assets/sprites/resources/cut_stone.png",
+  "icon": "/assets/icons/resources/cut_stone.png",
+  "availableQualities": [
+    "common",
+    "fine",
+    "superior"
+  ],
+  "defaultQuality": "common",
+  "processingFacility": "stonecutter_workshop",
+  "processingTime": 240,
+  "perishable": false,
+  "weatherSensitivity": 0.1,
+  "specialHandling": [
+    "heavy_lifting_equipment",
+    "careful_stacking"
+  ],
+  "qualityFactors": [
+    {
+      "factor": "input_quality",
+      "weight": 0.7
     },
-    "transportRequirements": ["reinforced_vessel", "heavy_lifting_equipment"],
-    "loadingTime": 20,
-    "routeRestrictions": ["weight_limits", "bridge_restrictions"],
-    
-    "storageOptions": {
-      "stone_yard": {"capacityMultiplier": 1.0, "preservation": 1.0},
-      "construction_site": {"capacityMultiplier": 0.8, "preservation": 1.0}
+    {
+      "factor": "tools_quality",
+      "weight": 0.1
     },
-    "storageRequirements": ["reinforced_ground", "organized_stacking"],
-    "specialStorageRisks": ["structural_collapse", "theft_of_valuable_pieces"],
-    "maxStorageTime": "unlimited",
-    
-    "marketDemand": "high",
-    "priceFluctuationFactors": [
-      {"factor": "raw_stone_availability", "weight": 0.4},
-      {"factor": "construction_activity", "weight": 0.4},
-      {"factor": "architectural_trends", "weight": 0.2}
-    ]
-  }
+    {
+      "factor": "worker_skill",
+      "weight": 0.2
+    }
+  ],
+  "varieties": [
+    {
+      "type": "foundation_blocks",
+      "precision": "low",
+      "value_multiplier": 0.8,
+      "primary_use": "foundations"
+    },
+    {
+      "type": "wall_blocks",
+      "precision": "medium",
+      "value_multiplier": 1.0,
+      "primary_use": "walls"
+    },
+    {
+      "type": "facade_blocks",
+      "precision": "high",
+      "value_multiplier": 1.5,
+      "primary_use": "visible_exteriors"
+    },
+    {
+      "type": "ornamental_pieces",
+      "precision": "very_high",
+      "value_multiplier": 2.0,
+      "primary_use": "decorative_elements"
+    }
+  ],
+  "producedFrom": [
+    {
+      "inputs": [
+        {
+          "resource": "marble",
+          "amount": 5
+        },
+        {
+          "resource": "tools",
+          "amount": 1
+        }
+      ],
+      "building": "stonecutter_workshop",
+      "processingTime": 240
+    },
+    {
+      "inputs": [
+        {
+          "resource": "limestone",
+          "amount": 5
+        },
+        {
+          "resource": "tools",
+          "amount": 1
+        }
+      ],
+      "building": "stonecutter_workshop",
+      "processingTime": 240
+    }
+  ],
+  "usedIn": [
+    {
+      "outputs": [
+        {
+          "resource": "building_materials",
+          "amount": 20
+        }
+      ],
+      "building": "construction_yard",
+      "processingTime": 120
+    },
+    {
+      "outputs": [
+        {
+          "resource": "palazzo",
+          "amount": 1
+        }
+      ],
+      "building": "construction_site",
+      "processingTime": 10080
+    },
+    {
+      "outputs": [
+        {
+          "resource": "church",
+          "amount": 1
+        }
+      ],
+      "building": "construction_site",
+      "processingTime": 14400
+    }
+  ],
+  "transportOptions": {
+    "barge": {
+      "capacity": 50,
+      "efficiency": 1.0,
+      "risk": 0.15
+    },
+    "specialized_cart": {
+      "capacity": 5,
+      "efficiency": 0.8,
+      "risk": 0.2
+    }
+  },
+  "transportRequirements": [
+    "reinforced_vessel",
+    "heavy_lifting_equipment"
+  ],
+  "loadingTime": 20,
+  "routeRestrictions": [
+    "weight_limits",
+    "bridge_restrictions"
+  ],
+  "storageOptions": {
+    "stone_yard": {
+      "capacityMultiplier": 1.0,
+      "preservation": 1.0
+    },
+    "construction_site": {
+      "capacityMultiplier": 0.8,
+      "preservation": 1.0
+    }
+  },
+  "storageRequirements": [
+    "reinforced_ground",
+    "organized_stacking"
+  ],
+  "specialStorageRisks": [
+    "structural_collapse",
+    "theft_of_valuable_pieces"
+  ],
+  "maxStorageTime": "unlimited",
+  "marketDemand": "high",
+  "priceFluctuationFactors": [
+    {
+      "factor": "raw_stone_availability",
+      "weight": 0.4
+    },
+    {
+      "factor": "construction_activity",
+      "weight": 0.4
+    },
+    {
+      "factor": "architectural_trends",
+      "weight": 0.2
+    }
+  ]
+}

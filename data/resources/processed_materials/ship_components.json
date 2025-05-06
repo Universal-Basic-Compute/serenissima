@@ -1,106 +1,173 @@
 {
-    "id": "ship_components",
-    "name": "Ship Components",
-    "category": "processed_materials",
-    "subcategory": "shipbuilding",
-    "baseValue": 120,
-    "weight": 50.0,
-    "volume": 30.0,
-    "stackSize": 5,
-    "description": "Prefabricated wooden parts ready for ship assembly.",
-    "longDescription": "Created by skilled shipwrights, these precisely cut and shaped wooden components represent the building blocks of Venice's maritime power. Crafted to standardized specifications that revolutionized shipbuilding efficiency, these components await assembly into the vessels that will carry Venetian trade and naval power across the Mediterranean.",
-    "sprite": "assets/sprites/resources/ship_components.png",
-    "icon": "assets/icons/resources/ship_components.png",
-    "availableQualities": ["common", "fine", "superior"],
-    "defaultQuality": "common",
-    
-    "processingFacility": "shipyard_workshop",
-    "processingTime": 720,
-    "perishable": false,
-    "weatherSensitivity": 0.3,
-    "specialHandling": ["heavy_lifting_equipment", "proper_support"],
-    "qualityFactors": [
-      {"factor": "input_quality", "weight": 0.6},
-      {"factor": "equipment_quality", "weight": 0.2},
-      {"factor": "worker_skill", "weight": 0.2}
-    ],
-    "componentTypes": [
-      {
-        "type": "hull_ribs",
-        "complexity": "high",
-        "structural_importance": "critical",
-        "value_multiplier": 1.2
-      },
-      {
-        "type": "keels",
-        "complexity": "very_high",
-        "structural_importance": "critical",
-        "value_multiplier": 1.5
-      },
-      {
-        "type": "deck_beams",
-        "complexity": "medium",
-        "structural_importance": "high",
-        "value_multiplier": 1.0
-      },
-      {
-        "type": "mast_sections",
-        "complexity": "high",
-        "structural_importance": "high",
-        "value_multiplier": 1.3
-      }
-    ],
-    
-    "producedFrom": [
-      {
-        "inputs": [
-          {"resource": "timber", "amount": 80},
-          {"resource": "iron_fittings", "amount": 10},
-          {"resource": "pitch", "amount": 15}
-        ],
-        "building": "shipyard_workshop",
-        "processingTime": 720
-      }
-    ],
-    "usedIn": [
-      {
-        "outputs": [
-          {"resource": "small_boats", "amount": 5},
-          {"resource": "ship_waste", "amount": 10}
-        ],
-        "building": "shipyard",
-        "processingTime": 2880
-      },
-      {
-        "outputs": [
-          {"resource": "merchant_vessel", "amount": 1},
-          {"resource": "ship_waste", "amount": 15}
-        ],
-        "building": "shipyard",
-        "processingTime": 4320
-      }
-    ],
-    
-    "transportOptions": {
-      "barge": {"capacity": 10, "efficiency": 0.9, "risk": 0.2},
-      "specialized_cargo_boat": {"capacity": 5, "efficiency": 0.95, "risk": 0.15}
+  "id": "ship_components",
+  "name": "Ship Components",
+  "category": "processed_materials",
+  "subcategory": "shipbuilding",
+  "baseValue": 120,
+  "weight": 50.0,
+  "volume": 30.0,
+  "stackSize": 5,
+  "description": "Prefabricated wooden parts ready for ship assembly.",
+  "longDescription": "Created by skilled shipwrights, these precisely cut and shaped wooden components represent the building blocks of Venice's maritime power. Crafted to standardized specifications that revolutionized shipbuilding efficiency, these components await assembly into the vessels that will carry Venetian trade and naval power across the Mediterranean.",
+  "sprite": "assets/sprites/resources/ship_components.png",
+  "icon": "/assets/icons/resources/ship_components.png",
+  "availableQualities": [
+    "common",
+    "fine",
+    "superior"
+  ],
+  "defaultQuality": "common",
+  "processingFacility": "shipyard_workshop",
+  "processingTime": 720,
+  "perishable": false,
+  "weatherSensitivity": 0.3,
+  "specialHandling": [
+    "heavy_lifting_equipment",
+    "proper_support"
+  ],
+  "qualityFactors": [
+    {
+      "factor": "input_quality",
+      "weight": 0.6
     },
-    "transportRequirements": ["water_transport", "heavy_lifting_equipment"],
-    "loadingTime": 30,
-    "routeRestrictions": ["water_routes_only"],
-    
-    "storageOptions": {
-      "shipyard": {"capacityMultiplier": 1.0, "preservation": 0.95},
-      "arsenal_warehouse": {"capacityMultiplier": 1.2, "preservation": 1.0}
+    {
+      "factor": "equipment_quality",
+      "weight": 0.2
     },
-    "storageRequirements": ["covered", "supported", "ventilated"],
-    "specialStorageRisks": ["moisture_warping", "pest_infestation"],
-    "maxStorageTime": 20160, 
-    
-    "marketDemand": "industry_only",
-    "priceFluctuationFactors": [
-      {"factor": "timber_availability", "weight": 0.5},
-      {"factor": "shipbuilding_activity", "weight": 0.3},
-      {"factor": "naval_expansion", "weight": 0.2}
-    ]
-  }
+    {
+      "factor": "worker_skill",
+      "weight": 0.2
+    }
+  ],
+  "componentTypes": [
+    {
+      "type": "hull_ribs",
+      "complexity": "high",
+      "structural_importance": "critical",
+      "value_multiplier": 1.2
+    },
+    {
+      "type": "keels",
+      "complexity": "very_high",
+      "structural_importance": "critical",
+      "value_multiplier": 1.5
+    },
+    {
+      "type": "deck_beams",
+      "complexity": "medium",
+      "structural_importance": "high",
+      "value_multiplier": 1.0
+    },
+    {
+      "type": "mast_sections",
+      "complexity": "high",
+      "structural_importance": "high",
+      "value_multiplier": 1.3
+    }
+  ],
+  "producedFrom": [
+    {
+      "inputs": [
+        {
+          "resource": "timber",
+          "amount": 80
+        },
+        {
+          "resource": "iron_fittings",
+          "amount": 10
+        },
+        {
+          "resource": "pitch",
+          "amount": 15
+        }
+      ],
+      "building": "shipyard_workshop",
+      "processingTime": 720
+    }
+  ],
+  "usedIn": [
+    {
+      "outputs": [
+        {
+          "resource": "small_boats",
+          "amount": 5
+        },
+        {
+          "resource": "ship_waste",
+          "amount": 10
+        }
+      ],
+      "building": "shipyard",
+      "processingTime": 2880
+    },
+    {
+      "outputs": [
+        {
+          "resource": "merchant_vessel",
+          "amount": 1
+        },
+        {
+          "resource": "ship_waste",
+          "amount": 15
+        }
+      ],
+      "building": "shipyard",
+      "processingTime": 4320
+    }
+  ],
+  "transportOptions": {
+    "barge": {
+      "capacity": 10,
+      "efficiency": 0.9,
+      "risk": 0.2
+    },
+    "specialized_cargo_boat": {
+      "capacity": 5,
+      "efficiency": 0.95,
+      "risk": 0.15
+    }
+  },
+  "transportRequirements": [
+    "water_transport",
+    "heavy_lifting_equipment"
+  ],
+  "loadingTime": 30,
+  "routeRestrictions": [
+    "water_routes_only"
+  ],
+  "storageOptions": {
+    "shipyard": {
+      "capacityMultiplier": 1.0,
+      "preservation": 0.95
+    },
+    "arsenal_warehouse": {
+      "capacityMultiplier": 1.2,
+      "preservation": 1.0
+    }
+  },
+  "storageRequirements": [
+    "covered",
+    "supported",
+    "ventilated"
+  ],
+  "specialStorageRisks": [
+    "moisture_warping",
+    "pest_infestation"
+  ],
+  "maxStorageTime": 20160,
+  "marketDemand": "industry_only",
+  "priceFluctuationFactors": [
+    {
+      "factor": "timber_availability",
+      "weight": 0.5
+    },
+    {
+      "factor": "shipbuilding_activity",
+      "weight": 0.3
+    },
+    {
+      "factor": "naval_expansion",
+      "weight": 0.2
+    }
+  ]
+}

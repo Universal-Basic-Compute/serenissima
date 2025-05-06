@@ -1,110 +1,181 @@
 {
-    "id": "processed_iron",
-    "name": "Processed Iron",
-    "category": "processed_materials",
-    "subcategory": "metallurgy",
-    "baseValue": 25,
-    "weight": 4.0,
-    "volume": 1.0,
-    "stackSize": 20,
-    "description": "Refined iron ingots and bars ready for blacksmithing.",
-    "longDescription": "Processed in foundries from raw ore, these iron ingots and bars represent the crucial intermediate stage in metalworking. With most impurities removed and carbon content carefully controlled, this versatile metal awaits transformation into tools, weapons, and architectural elements essential to Venetian industry and construction.",
-    "sprite": "assets/sprites/resources/processed_iron.png",
-    "icon": "assets/icons/resources/processed_iron.png",
-    "availableQualities": ["poor", "common", "fine", "superior"],
-    "defaultQuality": "common",
-    
-    "processingFacility": "foundry",
-    "processingTime": 360,
-    "perishable": false,
-    "corrosionRate": 0.1,
-    "specialHandling": ["avoid_moisture", "heavy_lifting_equipment"],
-    "qualityFactors": [
-      {"factor": "input_quality", "weight": 0.5},
-      {"factor": "furnace_quality", "weight": 0.3},
-      {"factor": "worker_skill", "weight": 0.2}
-    ],
-    "varieties": [
-      {
-        "type": "soft_iron",
-        "carbon_content": "low",
-        "malleability": "high",
-        "value_multiplier": 0.9,
-        "primary_use": "decorative_elements"
-      },
-      {
-        "type": "medium_iron",
-        "carbon_content": "medium",
-        "malleability": "medium",
-        "value_multiplier": 1.0,
-        "primary_use": "general_purpose"
-      },
-      {
-        "type": "hard_iron",
-        "carbon_content": "high",
-        "malleability": "low",
-        "value_multiplier": 1.2,
-        "primary_use": "tools_weapons"
-      }
-    ],
-    
-    "producedFrom": [
-      {
-        "inputs": [
-          {"resource": "iron_ore", "amount": 20},
-          {"resource": "fuel", "amount": 30}
-        ],
-        "building": "foundry",
-        "processingTime": 360
-      }
-    ],
-    "usedIn": [
-      {
-        "outputs": [
-          {"resource": "iron_fittings", "amount": 15}
-        ],
-        "building": "blacksmith",
-        "processingTime": 240
-      },
-      {
-        "outputs": [
-          {"resource": "tools", "amount": 10}
-        ],
-        "building": "blacksmith",
-        "processingTime": 300
-      },
-      {
-        "outputs": [
-          {"resource": "weapons", "amount": 5}
-        ],
-        "building": "weapons_smith",
-        "processingTime": 480
-      }
-    ],
-    
-    "transportOptions": {
-      "barge": {"capacity": 200, "efficiency": 0.9, "risk": 0.15},
-      "cart": {"capacity": 15, "efficiency": 0.8, "risk": 0.2},
-      "porter": {"capacity": 2, "efficiency": 0.7, "risk": 0.25}
+  "id": "processed_iron",
+  "name": "Processed Iron",
+  "category": "processed_materials",
+  "subcategory": "metallurgy",
+  "baseValue": 25,
+  "weight": 4.0,
+  "volume": 1.0,
+  "stackSize": 20,
+  "description": "Refined iron ingots and bars ready for blacksmithing.",
+  "longDescription": "Processed in foundries from raw ore, these iron ingots and bars represent the crucial intermediate stage in metalworking. With most impurities removed and carbon content carefully controlled, this versatile metal awaits transformation into tools, weapons, and architectural elements essential to Venetian industry and construction.",
+  "sprite": "assets/sprites/resources/processed_iron.png",
+  "icon": "/assets/icons/resources/processed_iron.png",
+  "availableQualities": [
+    "poor",
+    "common",
+    "fine",
+    "superior"
+  ],
+  "defaultQuality": "common",
+  "processingFacility": "foundry",
+  "processingTime": 360,
+  "perishable": false,
+  "corrosionRate": 0.1,
+  "specialHandling": [
+    "avoid_moisture",
+    "heavy_lifting_equipment"
+  ],
+  "qualityFactors": [
+    {
+      "factor": "input_quality",
+      "weight": 0.5
     },
-    "transportRequirements": ["reinforced_vessel", "moisture_protection"],
-    "loadingTime": 15,
-    "routeRestrictions": ["weight_limits"],
-    
-    "storageOptions": {
-      "warehouse": {"capacityMultiplier": 0.8, "preservation": 0.95},
-      "foundry": {"capacityMultiplier": 1.0, "preservation": 1.0},
-      "blacksmith": {"capacityMultiplier": 0.6, "preservation": 0.9}
+    {
+      "factor": "furnace_quality",
+      "weight": 0.3
     },
-    "storageRequirements": ["dry", "reinforced_flooring"],
-    "specialStorageRisks": ["rust", "theft"],
-    "maxStorageTime": 43200,
-    
-    "marketDemand": "high",
-    "priceFluctuationFactors": [
-      {"factor": "iron_ore_availability", "weight": 0.4},
-      {"factor": "fuel_prices", "weight": 0.3},
-      {"factor": "construction_activity", "weight": 0.2},
-      {"factor": "shipbuilding_activity", "weight": 0.1}
-    ]
-  }
+    {
+      "factor": "worker_skill",
+      "weight": 0.2
+    }
+  ],
+  "varieties": [
+    {
+      "type": "soft_iron",
+      "carbon_content": "low",
+      "malleability": "high",
+      "value_multiplier": 0.9,
+      "primary_use": "decorative_elements"
+    },
+    {
+      "type": "medium_iron",
+      "carbon_content": "medium",
+      "malleability": "medium",
+      "value_multiplier": 1.0,
+      "primary_use": "general_purpose"
+    },
+    {
+      "type": "hard_iron",
+      "carbon_content": "high",
+      "malleability": "low",
+      "value_multiplier": 1.2,
+      "primary_use": "tools_weapons"
+    }
+  ],
+  "producedFrom": [
+    {
+      "inputs": [
+        {
+          "resource": "iron_ore",
+          "amount": 20
+        },
+        {
+          "resource": "fuel",
+          "amount": 30
+        }
+      ],
+      "building": "foundry",
+      "processingTime": 360
+    }
+  ],
+  "usedIn": [
+    {
+      "outputs": [
+        {
+          "resource": "iron_fittings",
+          "amount": 15
+        }
+      ],
+      "building": "blacksmith",
+      "processingTime": 240
+    },
+    {
+      "outputs": [
+        {
+          "resource": "tools",
+          "amount": 10
+        }
+      ],
+      "building": "blacksmith",
+      "processingTime": 300
+    },
+    {
+      "outputs": [
+        {
+          "resource": "weapons",
+          "amount": 5
+        }
+      ],
+      "building": "weapons_smith",
+      "processingTime": 480
+    }
+  ],
+  "transportOptions": {
+    "barge": {
+      "capacity": 200,
+      "efficiency": 0.9,
+      "risk": 0.15
+    },
+    "cart": {
+      "capacity": 15,
+      "efficiency": 0.8,
+      "risk": 0.2
+    },
+    "porter": {
+      "capacity": 2,
+      "efficiency": 0.7,
+      "risk": 0.25
+    }
+  },
+  "transportRequirements": [
+    "reinforced_vessel",
+    "moisture_protection"
+  ],
+  "loadingTime": 15,
+  "routeRestrictions": [
+    "weight_limits"
+  ],
+  "storageOptions": {
+    "warehouse": {
+      "capacityMultiplier": 0.8,
+      "preservation": 0.95
+    },
+    "foundry": {
+      "capacityMultiplier": 1.0,
+      "preservation": 1.0
+    },
+    "blacksmith": {
+      "capacityMultiplier": 0.6,
+      "preservation": 0.9
+    }
+  },
+  "storageRequirements": [
+    "dry",
+    "reinforced_flooring"
+  ],
+  "specialStorageRisks": [
+    "rust",
+    "theft"
+  ],
+  "maxStorageTime": 43200,
+  "marketDemand": "high",
+  "priceFluctuationFactors": [
+    {
+      "factor": "iron_ore_availability",
+      "weight": 0.4
+    },
+    {
+      "factor": "fuel_prices",
+      "weight": 0.3
+    },
+    {
+      "factor": "construction_activity",
+      "weight": 0.2
+    },
+    {
+      "factor": "shipbuilding_activity",
+      "weight": 0.1
+    }
+  ]
+}

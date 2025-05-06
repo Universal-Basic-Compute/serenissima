@@ -1,102 +1,171 @@
 {
-    "id": "pitch",
-    "name": "Pitch",
-    "category": "processed_materials",
-    "subcategory": "naval_supplies",
-    "baseValue": 15,
-    "weight": 2.0,
-    "volume": 1.0,
-    "stackSize": 25,
-    "description": "Sticky, waterproof tar essential for shipbuilding and maintenance.",
-    "longDescription": "This dark, viscous substance is produced by heating pine resin and is crucial for waterproofing ships' hulls and sealing wooden joints. Without this humble material, Venice's maritime power would be impossible, as no vessel could withstand the sea for long. Primarily sourced from mainland pine forests and processed in specialized facilities.",
-    "sprite": "assets/sprites/resources/pitch.png",
-    "icon": "assets/icons/resources/pitch.png",
-    "availableQualities": ["poor", "common", "fine"],
-    "defaultQuality": "common",
-    
-    "processingFacility": "pitch_works",
-    "processingTime": 480,
-    "perishable": false,
-    "flammability": 0.8,
-    "specialHandling": ["heat_resistant_containers", "careful_handling"],
-    "qualityFactors": [
-      {"factor": "input_quality", "weight": 0.6},
-      {"factor": "processing_temperature", "weight": 0.3},
-      {"factor": "worker_skill", "weight": 0.1}
-    ],
-    "varieties": [
-      {
-        "type": "liquid_pitch",
-        "viscosity": "medium",
-        "waterproofing": "good",
-        "value_multiplier": 1.0,
-        "primary_use": "hull_sealing"
-      },
-      {
-        "type": "thick_pitch",
-        "viscosity": "high",
-        "waterproofing": "excellent",
-        "value_multiplier": 1.2,
-        "primary_use": "critical_seams"
-      }
-    ],
-    
-    "producedFrom": [
-      {
-        "inputs": [
-          {"resource": "pine_resin", "amount": 20},
-          {"resource": "fuel", "amount": 15}
-        ],
-        "building": "pitch_works",
-        "processingTime": 480
-      }
-    ],
-    "usedIn": [
-      {
-        "outputs": [
-          {"resource": "ship_components", "amount": 10}
-        ],
-        "building": "shipyard_workshop",
-        "processingTime": 720
-      },
-      {
-        "outputs": [
-          {"resource": "merchant_galley", "amount": 1}
-        ],
-        "building": "shipyard",
-        "processingTime": 4320
-      },
-      {
-        "outputs": [
-          {"resource": "waterproof_containers", "amount": 20}
-        ],
-        "building": "cooper_workshop",
-        "processingTime": 240
-      }
-    ],
-    
-    "transportOptions": {
-      "barge": {"capacity": 150, "efficiency": 0.9, "risk": 0.2},
-      "cart": {"capacity": 10, "efficiency": 0.8, "risk": 0.25},
-      "porter": {"capacity": 2, "efficiency": 0.7, "risk": 0.3}
+  "id": "pitch",
+  "name": "Pitch",
+  "category": "processed_materials",
+  "subcategory": "naval_supplies",
+  "baseValue": 15,
+  "weight": 2.0,
+  "volume": 1.0,
+  "stackSize": 25,
+  "description": "Sticky, waterproof tar essential for shipbuilding and maintenance.",
+  "longDescription": "This dark, viscous substance is produced by heating pine resin and is crucial for waterproofing ships' hulls and sealing wooden joints. Without this humble material, Venice's maritime power would be impossible, as no vessel could withstand the sea for long. Primarily sourced from mainland pine forests and processed in specialized facilities.",
+  "sprite": "assets/sprites/resources/pitch.png",
+  "icon": "/assets/icons/resources/pitch.png",
+  "availableQualities": [
+    "poor",
+    "common",
+    "fine"
+  ],
+  "defaultQuality": "common",
+  "processingFacility": "pitch_works",
+  "processingTime": 480,
+  "perishable": false,
+  "flammability": 0.8,
+  "specialHandling": [
+    "heat_resistant_containers",
+    "careful_handling"
+  ],
+  "qualityFactors": [
+    {
+      "factor": "input_quality",
+      "weight": 0.6
     },
-    "transportRequirements": ["heat_resistant_containers", "spill_prevention"],
-    "loadingTime": 12,
-    "routeRestrictions": ["fire_safety_routes"],
-    
-    "storageOptions": {
-      "warehouse": {"capacityMultiplier": 0.7, "preservation": 0.95},
-      "shipyard": {"capacityMultiplier": 1.0, "preservation": 1.0},
-      "arsenal_warehouse": {"capacityMultiplier": 1.2, "preservation": 1.0}
+    {
+      "factor": "processing_temperature",
+      "weight": 0.3
     },
-    "storageRequirements": ["fire_resistant", "ventilated", "cool"],
-    "specialStorageRisks": ["fire", "hardening", "contamination"],
-    "maxStorageTime": 10080,
-    
-    "marketDemand": "high",
-    "priceFluctuationFactors": [
-      {"factor": "pine_resin_availability", "weight": 0.5},
-      {"factor": "shipbuilding_activity", "weight": 0.3},
-      {"factor": "naval_maintenance_schedules", "weight": 0.2}
-    ]
-  }
+    {
+      "factor": "worker_skill",
+      "weight": 0.1
+    }
+  ],
+  "varieties": [
+    {
+      "type": "liquid_pitch",
+      "viscosity": "medium",
+      "waterproofing": "good",
+      "value_multiplier": 1.0,
+      "primary_use": "hull_sealing"
+    },
+    {
+      "type": "thick_pitch",
+      "viscosity": "high",
+      "waterproofing": "excellent",
+      "value_multiplier": 1.2,
+      "primary_use": "critical_seams"
+    }
+  ],
+  "producedFrom": [
+    {
+      "inputs": [
+        {
+          "resource": "pine_resin",
+          "amount": 20
+        },
+        {
+          "resource": "fuel",
+          "amount": 15
+        }
+      ],
+      "building": "pitch_works",
+      "processingTime": 480
+    }
+  ],
+  "usedIn": [
+    {
+      "outputs": [
+        {
+          "resource": "ship_components",
+          "amount": 10
+        }
+      ],
+      "building": "shipyard_workshop",
+      "processingTime": 720
+    },
+    {
+      "outputs": [
+        {
+          "resource": "merchant_galley",
+          "amount": 1
+        }
+      ],
+      "building": "shipyard",
+      "processingTime": 4320
+    },
+    {
+      "outputs": [
+        {
+          "resource": "waterproof_containers",
+          "amount": 20
+        }
+      ],
+      "building": "cooper_workshop",
+      "processingTime": 240
+    }
+  ],
+  "transportOptions": {
+    "barge": {
+      "capacity": 150,
+      "efficiency": 0.9,
+      "risk": 0.2
+    },
+    "cart": {
+      "capacity": 10,
+      "efficiency": 0.8,
+      "risk": 0.25
+    },
+    "porter": {
+      "capacity": 2,
+      "efficiency": 0.7,
+      "risk": 0.3
+    }
+  },
+  "transportRequirements": [
+    "heat_resistant_containers",
+    "spill_prevention"
+  ],
+  "loadingTime": 12,
+  "routeRestrictions": [
+    "fire_safety_routes"
+  ],
+  "storageOptions": {
+    "warehouse": {
+      "capacityMultiplier": 0.7,
+      "preservation": 0.95
+    },
+    "shipyard": {
+      "capacityMultiplier": 1.0,
+      "preservation": 1.0
+    },
+    "arsenal_warehouse": {
+      "capacityMultiplier": 1.2,
+      "preservation": 1.0
+    }
+  },
+  "storageRequirements": [
+    "fire_resistant",
+    "ventilated",
+    "cool"
+  ],
+  "specialStorageRisks": [
+    "fire",
+    "hardening",
+    "contamination"
+  ],
+  "maxStorageTime": 10080,
+  "marketDemand": "high",
+  "priceFluctuationFactors": [
+    {
+      "factor": "pine_resin_availability",
+      "weight": 0.5
+    },
+    {
+      "factor": "shipbuilding_activity",
+      "weight": 0.3
+    },
+    {
+      "factor": "naval_maintenance_schedules",
+      "weight": 0.2
+    }
+  ]
+}

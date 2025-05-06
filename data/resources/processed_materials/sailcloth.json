@@ -1,120 +1,196 @@
 {
-    "id": "sailcloth",
-    "name": "Sailcloth",
-    "category": "processed_materials",
-    "subcategory": "naval_supplies",
-    "baseValue": 30,
-    "weight": 1.0,
-    "volume": 1.5,
-    "stackSize": 20,
-    "description": "Durable woven fabric for ship sails and awnings.",
-    "longDescription": "Tightly woven from hemp or flax fibers, Venetian sailcloth is renowned for its durability and wind-catching properties. Produced in specialized weaving workshops, this essential material enables Venice's merchant and naval fleets to harness the wind's power, extending the Republic's reach across the Mediterranean and beyond.",
-    "sprite": "assets/sprites/resources/sailcloth.png",
-    "icon": "assets/icons/resources/sailcloth.png",
-    "availableQualities": ["common", "fine", "superior"],
-    "defaultQuality": "common",
-    
-    "processingFacility": "weaving_workshop",
-    "processingTime": 360,
-    "perishable": false,
-    "moistureSensitivity": 0.4,
-    "specialHandling": ["keep_dry", "proper_folding"],
-    "qualityFactors": [
-      {"factor": "input_quality", "weight": 0.6},
-      {"factor": "loom_quality", "weight": 0.2},
-      {"factor": "worker_skill", "weight": 0.2}
-    ],
-    "varieties": [
-      {
-        "type": "standard_sailcloth",
-        "weave_density": "medium",
-        "wind_efficiency": "good",
-        "value_multiplier": 1.0,
-        "primary_use": "merchant_vessels"
-      },
-      {
-        "type": "light_sailcloth",
-        "weave_density": "low",
-        "wind_efficiency": "excellent",
-        "durability": "reduced",
-        "value_multiplier": 1.2,
-        "primary_use": "racing_vessels"
-      },
-      {
-        "type": "heavy_sailcloth",
-        "weave_density": "high",
-        "wind_efficiency": "moderate",
-        "durability": "excellent",
-        "value_multiplier": 1.3,
-        "primary_use": "naval_vessels"
-      }
-    ],
-    
-    "producedFrom": [
-      {
-        "inputs": [
-          {"resource": "hemp", "amount": 25},
-          {"resource": "thread", "amount": 10}
-        ],
-        "building": "weaving_workshop",
-        "processingTime": 360
-      },
-      {
-        "inputs": [
-          {"resource": "flax", "amount": 30},
-          {"resource": "thread", "amount": 10}
-        ],
-        "building": "weaving_workshop",
-        "processingTime": 360
-      }
-    ],
-    "usedIn": [
-      {
-        "outputs": [
-          {"resource": "merchant_galley", "amount": 1}
-        ],
-        "building": "shipyard",
-        "processingTime": 4320
-      },
-      {
-        "outputs": [
-          {"resource": "small_boats", "amount": 5}
-        ],
-        "building": "shipyard",
-        "processingTime": 2880
-      },
-      {
-        "outputs": [
-          {"resource": "market_awnings", "amount": 10}
-        ],
-        "building": "tailor_workshop",
-        "processingTime": 240
-      }
-    ],
-    
-    "transportOptions": {
-      "barge": {"capacity": 100, "efficiency": 0.9, "risk": 0.1},
-      "cart": {"capacity": 15, "efficiency": 0.9, "risk": 0.15},
-      "porter": {"capacity": 3, "efficiency": 0.8, "risk": 0.2}
+  "id": "sailcloth",
+  "name": "Sailcloth",
+  "category": "processed_materials",
+  "subcategory": "naval_supplies",
+  "baseValue": 30,
+  "weight": 1.0,
+  "volume": 1.5,
+  "stackSize": 20,
+  "description": "Durable woven fabric for ship sails and awnings.",
+  "longDescription": "Tightly woven from hemp or flax fibers, Venetian sailcloth is renowned for its durability and wind-catching properties. Produced in specialized weaving workshops, this essential material enables Venice's merchant and naval fleets to harness the wind's power, extending the Republic's reach across the Mediterranean and beyond.",
+  "sprite": "assets/sprites/resources/sailcloth.png",
+  "icon": "/assets/icons/resources/sailcloth.png",
+  "availableQualities": [
+    "common",
+    "fine",
+    "superior"
+  ],
+  "defaultQuality": "common",
+  "processingFacility": "weaving_workshop",
+  "processingTime": 360,
+  "perishable": false,
+  "moistureSensitivity": 0.4,
+  "specialHandling": [
+    "keep_dry",
+    "proper_folding"
+  ],
+  "qualityFactors": [
+    {
+      "factor": "input_quality",
+      "weight": 0.6
     },
-    "transportRequirements": ["weather_protection", "proper_folding"],
-    "loadingTime": 10,
-    "routeRestrictions": [],
-    
-    "storageOptions": {
-      "warehouse": {"capacityMultiplier": 0.9, "preservation": 0.95},
-      "shipyard": {"capacityMultiplier": 1.0, "preservation": 1.0},
-      "arsenal_warehouse": {"capacityMultiplier": 1.2, "preservation": 1.0}
+    {
+      "factor": "loom_quality",
+      "weight": 0.2
     },
-    "storageRequirements": ["dry", "ventilated", "pest_free"],
-    "specialStorageRisks": ["moisture", "mildew", "pests"],
-    "maxStorageTime": 20160,
-    
-    "marketDemand": "high",
-    "priceFluctuationFactors": [
-      {"factor": "hemp_availability", "weight": 0.4},
-      {"factor": "shipbuilding_activity", "weight": 0.3},
-      {"factor": "naval_expansion", "weight": 0.2},
-      {"factor": "trading_fleet_size", "weight": 0.1}
-    ]
-  }
+    {
+      "factor": "worker_skill",
+      "weight": 0.2
+    }
+  ],
+  "varieties": [
+    {
+      "type": "standard_sailcloth",
+      "weave_density": "medium",
+      "wind_efficiency": "good",
+      "value_multiplier": 1.0,
+      "primary_use": "merchant_vessels"
+    },
+    {
+      "type": "light_sailcloth",
+      "weave_density": "low",
+      "wind_efficiency": "excellent",
+      "durability": "reduced",
+      "value_multiplier": 1.2,
+      "primary_use": "racing_vessels"
+    },
+    {
+      "type": "heavy_sailcloth",
+      "weave_density": "high",
+      "wind_efficiency": "moderate",
+      "durability": "excellent",
+      "value_multiplier": 1.3,
+      "primary_use": "naval_vessels"
+    }
+  ],
+  "producedFrom": [
+    {
+      "inputs": [
+        {
+          "resource": "hemp",
+          "amount": 25
+        },
+        {
+          "resource": "thread",
+          "amount": 10
+        }
+      ],
+      "building": "weaving_workshop",
+      "processingTime": 360
+    },
+    {
+      "inputs": [
+        {
+          "resource": "flax",
+          "amount": 30
+        },
+        {
+          "resource": "thread",
+          "amount": 10
+        }
+      ],
+      "building": "weaving_workshop",
+      "processingTime": 360
+    }
+  ],
+  "usedIn": [
+    {
+      "outputs": [
+        {
+          "resource": "merchant_galley",
+          "amount": 1
+        }
+      ],
+      "building": "shipyard",
+      "processingTime": 4320
+    },
+    {
+      "outputs": [
+        {
+          "resource": "small_boats",
+          "amount": 5
+        }
+      ],
+      "building": "shipyard",
+      "processingTime": 2880
+    },
+    {
+      "outputs": [
+        {
+          "resource": "market_awnings",
+          "amount": 10
+        }
+      ],
+      "building": "tailor_workshop",
+      "processingTime": 240
+    }
+  ],
+  "transportOptions": {
+    "barge": {
+      "capacity": 100,
+      "efficiency": 0.9,
+      "risk": 0.1
+    },
+    "cart": {
+      "capacity": 15,
+      "efficiency": 0.9,
+      "risk": 0.15
+    },
+    "porter": {
+      "capacity": 3,
+      "efficiency": 0.8,
+      "risk": 0.2
+    }
+  },
+  "transportRequirements": [
+    "weather_protection",
+    "proper_folding"
+  ],
+  "loadingTime": 10,
+  "routeRestrictions": [],
+  "storageOptions": {
+    "warehouse": {
+      "capacityMultiplier": 0.9,
+      "preservation": 0.95
+    },
+    "shipyard": {
+      "capacityMultiplier": 1.0,
+      "preservation": 1.0
+    },
+    "arsenal_warehouse": {
+      "capacityMultiplier": 1.2,
+      "preservation": 1.0
+    }
+  },
+  "storageRequirements": [
+    "dry",
+    "ventilated",
+    "pest_free"
+  ],
+  "specialStorageRisks": [
+    "moisture",
+    "mildew",
+    "pests"
+  ],
+  "maxStorageTime": 20160,
+  "marketDemand": "high",
+  "priceFluctuationFactors": [
+    {
+      "factor": "hemp_availability",
+      "weight": 0.4
+    },
+    {
+      "factor": "shipbuilding_activity",
+      "weight": 0.3
+    },
+    {
+      "factor": "naval_expansion",
+      "weight": 0.2
+    },
+    {
+      "factor": "trading_fleet_size",
+      "weight": 0.1
+    }
+  ]
+}

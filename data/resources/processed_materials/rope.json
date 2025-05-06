@@ -1,109 +1,177 @@
 {
-    "id": "rope",
-    "name": "Rope",
-    "category": "processed_materials",
-    "subcategory": "naval_supplies",
-    "baseValue": 18,
-    "weight": 2.0,
-    "volume": 1.5,
-    "stackSize": 25,
-    "description": "Strong, durable cordage essential for maritime activities and construction.",
-    "longDescription": "Twisted from hemp fibers in specialized rope works, Venetian rope is renowned for its strength and reliability. From the rigging of ships to the hoisting of construction materials, this versatile material literally binds together the Republic's maritime and building industries.",
-    "sprite": "assets/sprites/resources/rope.png",
-    "icon": "assets/icons/resources/rope.png",
-    "availableQualities": ["poor", "common", "fine", "superior"],
-    "defaultQuality": "common",
-    
-    "processingFacility": "rope_works",
-    "processingTime": 240,
-    "perishable": false,
-    "moistureSensitivity": 0.5,
-    "specialHandling": ["keep_dry", "proper_coiling"],
-    "qualityFactors": [
-      {"factor": "input_quality", "weight": 0.6},
-      {"factor": "equipment_quality", "weight": 0.2},
-      {"factor": "worker_skill", "weight": 0.2}
-    ],
-    "varieties": [
-      {
-        "type": "thin_cordage",
-        "diameter": "small",
-        "strength": "moderate",
-        "value_multiplier": 0.8,
-        "primary_use": "light_rigging"
-      },
-      {
-        "type": "standard_rope",
-        "diameter": "medium",
-        "strength": "good",
-        "value_multiplier": 1.0,
-        "primary_use": "general_purpose"
-      },
-      {
-        "type": "heavy_cable",
-        "diameter": "large",
-        "strength": "excellent",
-        "value_multiplier": 1.3,
-        "primary_use": "ship_anchors_heavy_lifting"
-      }
-    ],
-    
-    "producedFrom": [
-      {
-        "inputs": [
-          {"resource": "hemp", "amount": 25},
-          {"resource": "tools", "amount": 1}
-        ],
-        "building": "rope_works",
-        "processingTime": 240
-      }
-    ],
-    "usedIn": [
-      {
-        "outputs": [
-          {"resource": "merchant_galley", "amount": 1}
-        ],
-        "building": "shipyard",
-        "processingTime": 4320
-      },
-      {
-        "outputs": [
-          {"resource": "ship_components", "amount": 8}
-        ],
-        "building": "shipyard_workshop",
-        "processingTime": 720
-      },
-      {
-        "outputs": [
-          {"resource": "building_materials", "amount": 20}
-        ],
-        "building": "construction_yard",
-        "processingTime": 120
-      }
-    ],
-    
-    "transportOptions": {
-      "barge": {"capacity": 200, "efficiency": 0.9, "risk": 0.1},
-      "cart": {"capacity": 20, "efficiency": 0.9, "risk": 0.15},
-      "porter": {"capacity": 5, "efficiency": 0.8, "risk": 0.2}
+  "id": "rope",
+  "name": "Rope",
+  "category": "processed_materials",
+  "subcategory": "naval_supplies",
+  "baseValue": 18,
+  "weight": 2.0,
+  "volume": 1.5,
+  "stackSize": 25,
+  "description": "Strong, durable cordage essential for maritime activities and construction.",
+  "longDescription": "Twisted from hemp fibers in specialized rope works, Venetian rope is renowned for its strength and reliability. From the rigging of ships to the hoisting of construction materials, this versatile material literally binds together the Republic's maritime and building industries.",
+  "sprite": "assets/sprites/resources/rope.png",
+  "icon": "/assets/icons/resources/rope.png",
+  "availableQualities": [
+    "poor",
+    "common",
+    "fine",
+    "superior"
+  ],
+  "defaultQuality": "common",
+  "processingFacility": "rope_works",
+  "processingTime": 240,
+  "perishable": false,
+  "moistureSensitivity": 0.5,
+  "specialHandling": [
+    "keep_dry",
+    "proper_coiling"
+  ],
+  "qualityFactors": [
+    {
+      "factor": "input_quality",
+      "weight": 0.6
     },
-    "transportRequirements": ["moisture_protection", "proper_coiling"],
-    "loadingTime": 10,
-    "routeRestrictions": [],
-    
-    "storageOptions": {
-      "warehouse": {"capacityMultiplier": 0.9, "preservation": 0.95},
-      "rope_works": {"capacityMultiplier": 1.0, "preservation": 1.0},
-      "shipyard": {"capacityMultiplier": 0.8, "preservation": 0.9}
+    {
+      "factor": "equipment_quality",
+      "weight": 0.2
     },
-    "storageRequirements": ["dry", "ventilated", "pest_free"],
-    "specialStorageRisks": ["moisture_damage", "rodent_damage", "mildew"],
-    "maxStorageTime": 20160,
-    
-    "marketDemand": "high",
-    "priceFluctuationFactors": [
-      {"factor": "hemp_availability", "weight": 0.5},
-      {"factor": "shipbuilding_activity", "weight": 0.3},
-      {"factor": "construction_activity", "weight": 0.2}
-    ]
-  }
+    {
+      "factor": "worker_skill",
+      "weight": 0.2
+    }
+  ],
+  "varieties": [
+    {
+      "type": "thin_cordage",
+      "diameter": "small",
+      "strength": "moderate",
+      "value_multiplier": 0.8,
+      "primary_use": "light_rigging"
+    },
+    {
+      "type": "standard_rope",
+      "diameter": "medium",
+      "strength": "good",
+      "value_multiplier": 1.0,
+      "primary_use": "general_purpose"
+    },
+    {
+      "type": "heavy_cable",
+      "diameter": "large",
+      "strength": "excellent",
+      "value_multiplier": 1.3,
+      "primary_use": "ship_anchors_heavy_lifting"
+    }
+  ],
+  "producedFrom": [
+    {
+      "inputs": [
+        {
+          "resource": "hemp",
+          "amount": 25
+        },
+        {
+          "resource": "tools",
+          "amount": 1
+        }
+      ],
+      "building": "rope_works",
+      "processingTime": 240
+    }
+  ],
+  "usedIn": [
+    {
+      "outputs": [
+        {
+          "resource": "merchant_galley",
+          "amount": 1
+        }
+      ],
+      "building": "shipyard",
+      "processingTime": 4320
+    },
+    {
+      "outputs": [
+        {
+          "resource": "ship_components",
+          "amount": 8
+        }
+      ],
+      "building": "shipyard_workshop",
+      "processingTime": 720
+    },
+    {
+      "outputs": [
+        {
+          "resource": "building_materials",
+          "amount": 20
+        }
+      ],
+      "building": "construction_yard",
+      "processingTime": 120
+    }
+  ],
+  "transportOptions": {
+    "barge": {
+      "capacity": 200,
+      "efficiency": 0.9,
+      "risk": 0.1
+    },
+    "cart": {
+      "capacity": 20,
+      "efficiency": 0.9,
+      "risk": 0.15
+    },
+    "porter": {
+      "capacity": 5,
+      "efficiency": 0.8,
+      "risk": 0.2
+    }
+  },
+  "transportRequirements": [
+    "moisture_protection",
+    "proper_coiling"
+  ],
+  "loadingTime": 10,
+  "routeRestrictions": [],
+  "storageOptions": {
+    "warehouse": {
+      "capacityMultiplier": 0.9,
+      "preservation": 0.95
+    },
+    "rope_works": {
+      "capacityMultiplier": 1.0,
+      "preservation": 1.0
+    },
+    "shipyard": {
+      "capacityMultiplier": 0.8,
+      "preservation": 0.9
+    }
+  },
+  "storageRequirements": [
+    "dry",
+    "ventilated",
+    "pest_free"
+  ],
+  "specialStorageRisks": [
+    "moisture_damage",
+    "rodent_damage",
+    "mildew"
+  ],
+  "maxStorageTime": 20160,
+  "marketDemand": "high",
+  "priceFluctuationFactors": [
+    {
+      "factor": "hemp_availability",
+      "weight": 0.5
+    },
+    {
+      "factor": "shipbuilding_activity",
+      "weight": 0.3
+    },
+    {
+      "factor": "construction_activity",
+      "weight": 0.2
+    }
+  ]
+}

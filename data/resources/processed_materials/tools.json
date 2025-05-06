@@ -1,121 +1,196 @@
 {
-    "id": "tools",
-    "name": "Tools",
-    "category": "processed_materials",
-    "subcategory": "equipment",
-    "baseValue": 30,
-    "weight": 3.0,
-    "volume": 2.0,
-    "stackSize": 15,
-    "description": "Crafted implements for construction, shipbuilding, and artisanal work.",
-    "longDescription": "Forged by skilled blacksmiths, these durable tools enable Venice's craftsmen to practice their trades with precision and efficiency. From the shipyards of the Arsenal to the workshops of Murano, these essential implements form the foundation of Venetian industry and craftsmanship.",
-    "sprite": "assets/sprites/resources/tools.png",
-    "icon": "assets/icons/resources/tools.png",
-    "availableQualities": ["poor", "common", "fine", "superior"],
-    "defaultQuality": "common",
-    
-    "processingFacility": "blacksmith",
-    "processingTime": 300,
-    "perishable": false,
-    "corrosionRate": 0.2,
-    "specialHandling": ["prevent_rust", "careful_storage"],
-    "qualityFactors": [
-      {"factor": "input_quality", "weight": 0.5},
-      {"factor": "forge_quality", "weight": 0.2},
-      {"factor": "worker_skill", "weight": 0.3}
-    ],
-    "varieties": [
-      {
-        "type": "carpentry_tools",
-        "precision": "high",
-        "value_multiplier": 1.0,
-        "primary_use": "woodworking"
-      },
-      {
-        "type": "masonry_tools",
-        "precision": "medium",
-        "value_multiplier": 0.9,
-        "primary_use": "stonework"
-      },
-      {
-        "type": "shipwright_tools",
-        "precision": "very_high",
-        "value_multiplier": 1.3,
-        "primary_use": "shipbuilding"
-      },
-      {
-        "type": "glassmaking_tools",
-        "precision": "extreme",
-        "value_multiplier": 1.5,
-        "primary_use": "glassblowing"
-      }
-    ],
-    
-    "producedFrom": [
-      {
-        "inputs": [
-          {"resource": "processed_iron", "amount": 15},
-          {"resource": "timber", "amount": 5},
-          {"resource": "fuel", "amount": 20}
-        ],
-        "building": "blacksmith",
-        "processingTime": 300
-      }
-    ],
-    "usedIn": [
-      {
-        "outputs": [
-          {"resource": "ship_components", "amount": 8}
-        ],
-        "building": "shipyard_workshop",
-        "processingTime": 720
-      },
-      {
-        "outputs": [
-          {"resource": "cut_stone", "amount": 20}
-        ],
-        "building": "stonecutter_workshop",
-        "processingTime": 240
-      },
-      {
-        "outputs": [
-          {"resource": "fine_glassware", "amount": 15}
-        ],
-        "building": "glassblower_workshop",
-        "processingTime": 360
-      },
-      {
-        "outputs": [
-          {"resource": "rope", "amount": 25}
-        ],
-        "building": "rope_works",
-        "processingTime": 240
-      }
-    ],
-    
-    "transportOptions": {
-      "barge": {"capacity": 150, "efficiency": 0.9, "risk": 0.1},
-      "cart": {"capacity": 20, "efficiency": 0.9, "risk": 0.15},
-      "porter": {"capacity": 3, "efficiency": 0.8, "risk": 0.2}
+  "id": "tools",
+  "name": "Tools",
+  "category": "processed_materials",
+  "subcategory": "equipment",
+  "baseValue": 30,
+  "weight": 3.0,
+  "volume": 2.0,
+  "stackSize": 15,
+  "description": "Crafted implements for construction, shipbuilding, and artisanal work.",
+  "longDescription": "Forged by skilled blacksmiths, these durable tools enable Venice's craftsmen to practice their trades with precision and efficiency. From the shipyards of the Arsenal to the workshops of Murano, these essential implements form the foundation of Venetian industry and craftsmanship.",
+  "sprite": "assets/sprites/resources/tools.png",
+  "icon": "/assets/icons/resources/tools.png",
+  "availableQualities": [
+    "poor",
+    "common",
+    "fine",
+    "superior"
+  ],
+  "defaultQuality": "common",
+  "processingFacility": "blacksmith",
+  "processingTime": 300,
+  "perishable": false,
+  "corrosionRate": 0.2,
+  "specialHandling": [
+    "prevent_rust",
+    "careful_storage"
+  ],
+  "qualityFactors": [
+    {
+      "factor": "input_quality",
+      "weight": 0.5
     },
-    "transportRequirements": ["moisture_protection", "careful_handling"],
-    "loadingTime": 12,
-    "routeRestrictions": [],
-    
-    "storageOptions": {
-      "warehouse": {"capacityMultiplier": 0.9, "preservation": 0.9},
-      "blacksmith": {"capacityMultiplier": 1.0, "preservation": 0.95},
-      "workshop": {"capacityMultiplier": 0.7, "preservation": 0.9}
+    {
+      "factor": "forge_quality",
+      "weight": 0.2
     },
-    "storageRequirements": ["dry", "organized"],
-    "specialStorageRisks": ["rust", "theft"],
-    "maxStorageTime": 43200,
-    
-    "marketDemand": "high",
-    "priceFluctuationFactors": [
-      {"factor": "iron_availability", "weight": 0.4},
-      {"factor": "construction_activity", "weight": 0.3},
-      {"factor": "shipbuilding_activity", "weight": 0.2},
-      {"factor": "artisanal_activity", "weight": 0.1}
-    ]
-  }
+    {
+      "factor": "worker_skill",
+      "weight": 0.3
+    }
+  ],
+  "varieties": [
+    {
+      "type": "carpentry_tools",
+      "precision": "high",
+      "value_multiplier": 1.0,
+      "primary_use": "woodworking"
+    },
+    {
+      "type": "masonry_tools",
+      "precision": "medium",
+      "value_multiplier": 0.9,
+      "primary_use": "stonework"
+    },
+    {
+      "type": "shipwright_tools",
+      "precision": "very_high",
+      "value_multiplier": 1.3,
+      "primary_use": "shipbuilding"
+    },
+    {
+      "type": "glassmaking_tools",
+      "precision": "extreme",
+      "value_multiplier": 1.5,
+      "primary_use": "glassblowing"
+    }
+  ],
+  "producedFrom": [
+    {
+      "inputs": [
+        {
+          "resource": "processed_iron",
+          "amount": 15
+        },
+        {
+          "resource": "timber",
+          "amount": 5
+        },
+        {
+          "resource": "fuel",
+          "amount": 20
+        }
+      ],
+      "building": "blacksmith",
+      "processingTime": 300
+    }
+  ],
+  "usedIn": [
+    {
+      "outputs": [
+        {
+          "resource": "ship_components",
+          "amount": 8
+        }
+      ],
+      "building": "shipyard_workshop",
+      "processingTime": 720
+    },
+    {
+      "outputs": [
+        {
+          "resource": "cut_stone",
+          "amount": 20
+        }
+      ],
+      "building": "stonecutter_workshop",
+      "processingTime": 240
+    },
+    {
+      "outputs": [
+        {
+          "resource": "fine_glassware",
+          "amount": 15
+        }
+      ],
+      "building": "glassblower_workshop",
+      "processingTime": 360
+    },
+    {
+      "outputs": [
+        {
+          "resource": "rope",
+          "amount": 25
+        }
+      ],
+      "building": "rope_works",
+      "processingTime": 240
+    }
+  ],
+  "transportOptions": {
+    "barge": {
+      "capacity": 150,
+      "efficiency": 0.9,
+      "risk": 0.1
+    },
+    "cart": {
+      "capacity": 20,
+      "efficiency": 0.9,
+      "risk": 0.15
+    },
+    "porter": {
+      "capacity": 3,
+      "efficiency": 0.8,
+      "risk": 0.2
+    }
+  },
+  "transportRequirements": [
+    "moisture_protection",
+    "careful_handling"
+  ],
+  "loadingTime": 12,
+  "routeRestrictions": [],
+  "storageOptions": {
+    "warehouse": {
+      "capacityMultiplier": 0.9,
+      "preservation": 0.9
+    },
+    "blacksmith": {
+      "capacityMultiplier": 1.0,
+      "preservation": 0.95
+    },
+    "workshop": {
+      "capacityMultiplier": 0.7,
+      "preservation": 0.9
+    }
+  },
+  "storageRequirements": [
+    "dry",
+    "organized"
+  ],
+  "specialStorageRisks": [
+    "rust",
+    "theft"
+  ],
+  "maxStorageTime": 43200,
+  "marketDemand": "high",
+  "priceFluctuationFactors": [
+    {
+      "factor": "iron_availability",
+      "weight": 0.4
+    },
+    {
+      "factor": "construction_activity",
+      "weight": 0.3
+    },
+    {
+      "factor": "shipbuilding_activity",
+      "weight": 0.2
+    },
+    {
+      "factor": "artisanal_activity",
+      "weight": 0.1
+    }
+  ]
+}

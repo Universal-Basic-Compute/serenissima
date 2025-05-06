@@ -1,123 +1,175 @@
 {
-    "id": "marble",
-    "name": "Marble",
-    "category": "raw_materials",
-    "subcategory": "stone",
-    "icon": "icons/raw_materials/marble.png",
-    "baseProperties": {
-      "baseValue": 40,
-      "weight": 6.0,
-      "volume": 2.0,
-      "stackSize": 10,
-      "perishable": false
-    },
-    "description": {
-      "short": "Fine decorative stone for prestigious buildings.",
-      "full": "High-quality decorative stone quarried from mainland territories and imported from across the Mediterranean. Used in Venice's finest buildings and monuments.",
-      "flavor": "In these veined stones we capture eternity, turning the weight of mountains into the lightness of art that will outlast us all."
-    },
-    "sourceInfo": {
-      "source": "imported",
-      "harvestMethod": "quarrying",
-      "locations": ["verona", "carrara", "istria", "greece"],
-      "availability": "uncommon",
-      "seasonality": "year_round"
-    },
-    "qualityLevels": {
-      "available": ["common", "fine", "superior", "exceptional"],
-      "default": "common",
-      "effects": {
-        "common": {"valueModifier": 1.0, "productionEfficiency": 1.0},
-        "fine": {"valueModifier": 1.5, "productionEfficiency": 1.2},
-        "superior": {"valueModifier": 2.5, "productionEfficiency": 1.4},
-        "exceptional": {"valueModifier": 4.0, "productionEfficiency": 1.7}
-      }
-    },
-    "varieties": [
-      {
-        "type": "white_carrara",
-        "appearance": "pure_white",
-        "valueModifier": 1.3,
-        "primarily_used_for": "sculptures"
-      },
-      {
-        "type": "veined",
-        "appearance": "white_with_gray_veins",
-        "valueModifier": 1.2,
-        "primarily_used_for": "columns_facades"
-      },
-      {
-        "type": "red_verona",
-        "appearance": "reddish",
-        "valueModifier": 1.4,
-        "primarily_used_for": "decorative_elements"
-      },
-      {
-        "type": "istrian_stone",
-        "appearance": "white_limestone",
-        "valueModifier": 0.9,
-        "primarily_used_for": "water_resistant_elements"
-      }
+  "id": "marble",
+  "name": "Marble",
+  "category": "raw_materials",
+  "subcategory": "stone",
+  "icon": "/assets/icons/resources/marble.png",
+  "baseProperties": {
+    "baseValue": 40,
+    "weight": 6.0,
+    "volume": 2.0,
+    "stackSize": 10,
+    "perishable": false
+  },
+  "description": {
+    "short": "Fine decorative stone for prestigious buildings.",
+    "full": "High-quality decorative stone quarried from mainland territories and imported from across the Mediterranean. Used in Venice's finest buildings and monuments.",
+    "flavor": "In these veined stones we capture eternity, turning the weight of mountains into the lightness of art that will outlast us all."
+  },
+  "sourceInfo": {
+    "source": "imported",
+    "harvestMethod": "quarrying",
+    "locations": [
+      "verona",
+      "carrara",
+      "istria",
+      "greece"
     ],
-    "productionUses": [
-      {
-        "process": "stonecutting",
-        "building": "stonecutter_workshop",
-        "role": "primary_material",
-        "outputResource": "cut_stone"
-      },
-      {
-        "process": "sculpture",
-        "building": "sculptor_workshop",
-        "role": "primary_material",
-        "outputResource": "sculpture"
-      },
-      {
-        "process": "construction",
-        "building": "construction_site",
-        "role": "decorative_material",
-        "outputResource": "prestigious_building"
-      }
+    "availability": "uncommon",
+    "seasonality": "year_round"
+  },
+  "qualityLevels": {
+    "available": [
+      "common",
+      "fine",
+      "superior",
+      "exceptional"
     ],
-    "substitutes": [
-      {
-        "resourceId": "limestone",
-        "efficiency": 0.7,
-        "qualityPenalty": 1,
-        "context": "construction"
+    "default": "common",
+    "effects": {
+      "common": {
+        "valueModifier": 1.0,
+        "productionEfficiency": 1.0
+      },
+      "fine": {
+        "valueModifier": 1.5,
+        "productionEfficiency": 1.2
+      },
+      "superior": {
+        "valueModifier": 2.5,
+        "productionEfficiency": 1.4
+      },
+      "exceptional": {
+        "valueModifier": 4.0,
+        "productionEfficiency": 1.7
       }
-    ],
-    "complements": [],
-    "transportation": {
-      "methods": {
-        "large_ship": {"capacity": 50, "efficiency": 1.0, "risk": 0.2},
-        "barge": {"capacity": 20, "efficiency": 0.9, "risk": 0.25}
-      },
-      "requirements": ["reinforced_vessel", "careful_handling"],
-      "loadingTime": 30,
-      "restrictions": ["weight_limits", "careful_navigation"]
-    },
-    "storage": {
-      "compatible": {
-        "stone_yard": {"capacityMultiplier": 1.0, "preservation": 1.0},
-        "sculptor_workshop": {"capacityMultiplier": 0.3, "preservation": 1.0}
-      },
-      "requirements": ["reinforced_floor", "weather_protection"],
-      "risks": ["breakage", "theft"],
-      "maxStorageTime": "unlimited"
-    },
-    "marketDynamics": {
-      "baseAvailability": 0.4,
-      "demandLevel": "high",
-      "priceVolatility": 0.3,
-      "regionalFactors": [
-        {
-          "region": "san_marco",
-          "availabilityModifier": 1.2,
-          "priceModifier": 1.1
-        }
-      ],
-      "seasonalFactors": [],
-      "influencedBy": ["construction_activity", "artistic_commissions", "diplomatic_gifts"]
     }
+  },
+  "varieties": [
+    {
+      "type": "white_carrara",
+      "appearance": "pure_white",
+      "valueModifier": 1.3,
+      "primarily_used_for": "sculptures"
+    },
+    {
+      "type": "veined",
+      "appearance": "white_with_gray_veins",
+      "valueModifier": 1.2,
+      "primarily_used_for": "columns_facades"
+    },
+    {
+      "type": "red_verona",
+      "appearance": "reddish",
+      "valueModifier": 1.4,
+      "primarily_used_for": "decorative_elements"
+    },
+    {
+      "type": "istrian_stone",
+      "appearance": "white_limestone",
+      "valueModifier": 0.9,
+      "primarily_used_for": "water_resistant_elements"
+    }
+  ],
+  "productionUses": [
+    {
+      "process": "stonecutting",
+      "building": "stonecutter_workshop",
+      "role": "primary_material",
+      "outputResource": "cut_stone"
+    },
+    {
+      "process": "sculpture",
+      "building": "sculptor_workshop",
+      "role": "primary_material",
+      "outputResource": "sculpture"
+    },
+    {
+      "process": "construction",
+      "building": "construction_site",
+      "role": "decorative_material",
+      "outputResource": "prestigious_building"
+    }
+  ],
+  "substitutes": [
+    {
+      "resourceId": "limestone",
+      "efficiency": 0.7,
+      "qualityPenalty": 1,
+      "context": "construction"
+    }
+  ],
+  "complements": [],
+  "transportation": {
+    "methods": {
+      "large_ship": {
+        "capacity": 50,
+        "efficiency": 1.0,
+        "risk": 0.2
+      },
+      "barge": {
+        "capacity": 20,
+        "efficiency": 0.9,
+        "risk": 0.25
+      }
+    },
+    "requirements": [
+      "reinforced_vessel",
+      "careful_handling"
+    ],
+    "loadingTime": 30,
+    "restrictions": [
+      "weight_limits",
+      "careful_navigation"
+    ]
+  },
+  "storage": {
+    "compatible": {
+      "stone_yard": {
+        "capacityMultiplier": 1.0,
+        "preservation": 1.0
+      },
+      "sculptor_workshop": {
+        "capacityMultiplier": 0.3,
+        "preservation": 1.0
+      }
+    },
+    "requirements": [
+      "reinforced_floor",
+      "weather_protection"
+    ],
+    "risks": [
+      "breakage",
+      "theft"
+    ],
+    "maxStorageTime": "unlimited"
+  },
+  "marketDynamics": {
+    "baseAvailability": 0.4,
+    "demandLevel": "high",
+    "priceVolatility": 0.3,
+    "regionalFactors": [
+      {
+        "region": "san_marco",
+        "availabilityModifier": 1.2,
+        "priceModifier": 1.1
+      }
+    ],
+    "seasonalFactors": [],
+    "influencedBy": [
+      "construction_activity",
+      "artistic_commissions",
+      "diplomatic_gifts"
+    ]
   }
+}

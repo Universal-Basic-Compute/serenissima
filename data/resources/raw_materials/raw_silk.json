@@ -1,103 +1,165 @@
 {
-    "id": "raw_silk",
-    "name": "Raw Silk",
-    "category": "raw_materials",
-    "subcategory": "textile_fiber",
-    "icon": "icons/raw_materials/raw_silk.png",
-    "baseProperties": {
-      "baseValue": 25,
-      "weight": 0.8,
-      "volume": 1.0,
-      "stackSize": 40,
-      "perishable": false
-    },
-    "description": {
-      "short": "Unprocessed silk fibers from silkworm cocoons.",
-      "full": "Luxurious fibers harvested from silkworm cocoons, primarily imported from China and Persia. The foundation of Venice's prestigious textile industry.",
-      "flavor": "The journey of this delicate thread spans continents, passing through the hands of countless merchants before reaching Venice, where it transforms from simple cocoon to royal garment."
-    },
-    "sourceInfo": {
-      "source": "imported",
-      "harvestMethod": "sericulture",
-      "locations": ["china", "persia", "byzantium"],
-      "availability": "uncommon",
-      "seasonality": "year_round"
-    },
-    "qualityLevels": {
-      "available": ["common", "fine", "superior", "exceptional"],
-      "default": "common",
-      "effects": {
-        "common": {"valueModifier": 1.0, "productionEfficiency": 1.0},
-        "fine": {"valueModifier": 1.5, "productionEfficiency": 1.2},
-        "superior": {"valueModifier": 2.5, "productionEfficiency": 1.4},
-        "exceptional": {"valueModifier": 4.0, "productionEfficiency": 1.7}
-      }
-    },
-    "productionUses": [
-      {
-        "process": "silk_conditioning",
-        "building": "silk_conditioning_house",
-        "role": "primary_ingredient",
-        "outputResource": "prepared_silk"
-      }
+  "id": "raw_silk",
+  "name": "Raw Silk",
+  "category": "raw_materials",
+  "subcategory": "textile_fiber",
+  "icon": "/assets/icons/resources/raw_silk.png",
+  "baseProperties": {
+    "baseValue": 25,
+    "weight": 0.8,
+    "volume": 1.0,
+    "stackSize": 40,
+    "perishable": false
+  },
+  "description": {
+    "short": "Unprocessed silk fibers from silkworm cocoons.",
+    "full": "Luxurious fibers harvested from silkworm cocoons, primarily imported from China and Persia. The foundation of Venice's prestigious textile industry.",
+    "flavor": "The journey of this delicate thread spans continents, passing through the hands of countless merchants before reaching Venice, where it transforms from simple cocoon to royal garment."
+  },
+  "sourceInfo": {
+    "source": "imported",
+    "harvestMethod": "sericulture",
+    "locations": [
+      "china",
+      "persia",
+      "byzantium"
     ],
-    "substitutes": [],
-    "complements": [
-      {
-        "resourceId": "clean_water",
-        "context": "silk_conditioning",
-        "relationship": "required"
-      }
+    "availability": "uncommon",
+    "seasonality": "year_round"
+  },
+  "qualityLevels": {
+    "available": [
+      "common",
+      "fine",
+      "superior",
+      "exceptional"
     ],
-    "transportation": {
-      "methods": {
-        "large_ship": {"capacity": 500, "efficiency": 1.0, "risk": 0.15},
-        "barge": {"capacity": 150, "efficiency": 0.9, "risk": 0.2},
-        "handcart": {"capacity": 8, "efficiency": 0.8, "risk": 0.15},
-        "porter": {"capacity": 2, "efficiency": 0.9, "risk": 0.1}
+    "default": "common",
+    "effects": {
+      "common": {
+        "valueModifier": 1.0,
+        "productionEfficiency": 1.0
       },
-      "requirements": ["dry_storage", "moisture_protection", "security"],
-      "loadingTime": 8,
-      "restrictions": []
-    },
-    "storage": {
-      "compatible": {
-        "small_warehouse": {"capacityMultiplier": 1.0, "preservation": 0.9},
-        "secure_warehouse": {"capacityMultiplier": 1.0, "preservation": 0.95},
-        "silk_conditioning_house": {"capacityMultiplier": 0.8, "preservation": 1.0}
+      "fine": {
+        "valueModifier": 1.5,
+        "productionEfficiency": 1.2
       },
-      "requirements": ["dry", "pest_control", "security"],
-      "risks": ["moisture", "pests", "theft"],
-      "maxStorageTime": 43200
-    },
-    "marketDynamics": {
-      "baseAvailability": 0.5,
-      "demandLevel": "very_high",
-      "priceVolatility": 0.6,
-      "regionalFactors": [
-        {
-          "region": "rialto",
-          "availabilityModifier": 1.3,
-          "priceModifier": 0.9
-        }
-      ],
-      "seasonalFactors": [
-        {
-          "season": "winter",
-          "availabilityModifier": 0.6,
-          "priceModifier": 1.4,
-          "note": "Reduced caravan activity"
-        },
-        {
-          "season": "summer",
-          "availabilityModifier": 1.2,
-          "priceModifier": 0.9,
-          "note": "Peak trading season"
-        }
-      ],
-      "tradeDisruptions": {
-        "factors": ["silk_road_closure", "eastern_conflict", "embargo"],
-        "impact": "severe"
+      "superior": {
+        "valueModifier": 2.5,
+        "productionEfficiency": 1.4
+      },
+      "exceptional": {
+        "valueModifier": 4.0,
+        "productionEfficiency": 1.7
       }
     }
+  },
+  "productionUses": [
+    {
+      "process": "silk_conditioning",
+      "building": "silk_conditioning_house",
+      "role": "primary_ingredient",
+      "outputResource": "prepared_silk"
+    }
+  ],
+  "substitutes": [],
+  "complements": [
+    {
+      "resourceId": "clean_water",
+      "context": "silk_conditioning",
+      "relationship": "required"
+    }
+  ],
+  "transportation": {
+    "methods": {
+      "large_ship": {
+        "capacity": 500,
+        "efficiency": 1.0,
+        "risk": 0.15
+      },
+      "barge": {
+        "capacity": 150,
+        "efficiency": 0.9,
+        "risk": 0.2
+      },
+      "handcart": {
+        "capacity": 8,
+        "efficiency": 0.8,
+        "risk": 0.15
+      },
+      "porter": {
+        "capacity": 2,
+        "efficiency": 0.9,
+        "risk": 0.1
+      }
+    },
+    "requirements": [
+      "dry_storage",
+      "moisture_protection",
+      "security"
+    ],
+    "loadingTime": 8,
+    "restrictions": []
+  },
+  "storage": {
+    "compatible": {
+      "small_warehouse": {
+        "capacityMultiplier": 1.0,
+        "preservation": 0.9
+      },
+      "secure_warehouse": {
+        "capacityMultiplier": 1.0,
+        "preservation": 0.95
+      },
+      "silk_conditioning_house": {
+        "capacityMultiplier": 0.8,
+        "preservation": 1.0
+      }
+    },
+    "requirements": [
+      "dry",
+      "pest_control",
+      "security"
+    ],
+    "risks": [
+      "moisture",
+      "pests",
+      "theft"
+    ],
+    "maxStorageTime": 43200
+  },
+  "marketDynamics": {
+    "baseAvailability": 0.5,
+    "demandLevel": "very_high",
+    "priceVolatility": 0.6,
+    "regionalFactors": [
+      {
+        "region": "rialto",
+        "availabilityModifier": 1.3,
+        "priceModifier": 0.9
+      }
+    ],
+    "seasonalFactors": [
+      {
+        "season": "winter",
+        "availabilityModifier": 0.6,
+        "priceModifier": 1.4,
+        "note": "Reduced caravan activity"
+      },
+      {
+        "season": "summer",
+        "availabilityModifier": 1.2,
+        "priceModifier": 0.9,
+        "note": "Peak trading season"
+      }
+    ],
+    "tradeDisruptions": {
+      "factors": [
+        "silk_road_closure",
+        "eastern_conflict",
+        "embargo"
+      ],
+      "impact": "severe"
+    }
   }
+}

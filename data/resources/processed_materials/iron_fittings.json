@@ -1,113 +1,183 @@
 {
-    "id": "iron_fittings",
-    "name": "Iron Fittings",
-    "category": "processed_materials",
-    "subcategory": "metallurgy",
-    "baseValue": 35,
-    "weight": 8.0,
-    "volume": 3.0,
-    "stackSize": 25,
-    "description": "Forged iron hardware for construction and shipbuilding.",
-    "longDescription": "Essential to Venice's construction and shipbuilding industries, these iron fittings include nails, hinges, brackets, and specialized fasteners. Created by skilled blacksmiths, they provide the critical connections that hold together everything from humble fishing boats to grand palazzos.",
-    "sprite": "assets/sprites/resources/iron_fittings.png",
-    "icon": "assets/icons/resources/iron_fittings.png",
-    "availableQualities": ["poor", "common", "fine", "superior"],
-    "defaultQuality": "common",
-    
-    "processingFacility": "blacksmith",
-    "processingTime": 240,
-    "perishable": false,
-    "corrosionRate": 0.2,
-    "specialHandling": ["avoid_moisture", "prevent_rust"],
-    "qualityFactors": [
-      {"factor": "input_quality", "weight": 0.5},
-      {"factor": "forge_quality", "weight": 0.2},
-      {"factor": "worker_skill", "weight": 0.3}
-    ],
-    "fittingTypes": [
-      {
-        "type": "nails",
-        "usage": "general_construction",
-        "complexity": "low",
-        "value_multiplier": 0.8
-      },
-      {
-        "type": "hinges",
-        "usage": "doors_windows",
-        "complexity": "medium",
-        "value_multiplier": 1.0
-      },
-      {
-        "type": "ship_fittings",
-        "usage": "shipbuilding",
-        "complexity": "high",
-        "value_multiplier": 1.3
-      },
-      {
-        "type": "structural_brackets",
-        "usage": "heavy_construction",
-        "complexity": "medium",
-        "value_multiplier": 1.1
-      }
-    ],
-    
-    "producedFrom": [
-      {
-        "inputs": [
-          {"resource": "processed_iron", "amount": 20},
-          {"resource": "fuel", "amount": 25}
-        ],
-        "building": "blacksmith",
-        "processingTime": 240
-      }
-    ],
-    "usedIn": [
-      {
-        "outputs": [
-          {"resource": "ship_components", "amount": 8}
-        ],
-        "building": "shipyard_workshop",
-        "processingTime": 720
-      },
-      {
-        "outputs": [
-          {"resource": "tools", "amount": 15}
-        ],
-        "building": "blacksmith",
-        "processingTime": 360
-      },
-      {
-        "outputs": [
-          {"resource": "building_materials", "amount": 30}
-        ],
-        "building": "construction_yard",
-        "processingTime": 120
-      }
-    ],
-    
-    "transportOptions": {
-      "barge": {"capacity": 300, "efficiency": 0.9, "risk": 0.1},
-      "gondola": {"capacity": 50, "efficiency": 0.9, "risk": 0.1},
-      "handcart": {"capacity": 15, "efficiency": 0.8, "risk": 0.15},
-      "porter": {"capacity": 5, "efficiency": 0.7, "risk": 0.15}
+  "id": "iron_fittings",
+  "name": "Iron Fittings",
+  "category": "processed_materials",
+  "subcategory": "metallurgy",
+  "baseValue": 35,
+  "weight": 8.0,
+  "volume": 3.0,
+  "stackSize": 25,
+  "description": "Forged iron hardware for construction and shipbuilding.",
+  "longDescription": "Essential to Venice's construction and shipbuilding industries, these iron fittings include nails, hinges, brackets, and specialized fasteners. Created by skilled blacksmiths, they provide the critical connections that hold together everything from humble fishing boats to grand palazzos.",
+  "sprite": "assets/sprites/resources/iron_fittings.png",
+  "icon": "/assets/icons/resources/iron_fittings.png",
+  "availableQualities": [
+    "poor",
+    "common",
+    "fine",
+    "superior"
+  ],
+  "defaultQuality": "common",
+  "processingFacility": "blacksmith",
+  "processingTime": 240,
+  "perishable": false,
+  "corrosionRate": 0.2,
+  "specialHandling": [
+    "avoid_moisture",
+    "prevent_rust"
+  ],
+  "qualityFactors": [
+    {
+      "factor": "input_quality",
+      "weight": 0.5
     },
-    "transportRequirements": ["moisture_protection", "weight_distribution"],
-    "loadingTime": 15,
-    "routeRestrictions": [],
-    
-    "storageOptions": {
-      "small_warehouse": {"capacityMultiplier": 0.8, "preservation": 0.9},
-      "blacksmith": {"capacityMultiplier": 1.0, "preservation": 0.95},
-      "shipyard": {"capacityMultiplier": 0.7, "preservation": 0.9}
+    {
+      "factor": "forge_quality",
+      "weight": 0.2
     },
-    "storageRequirements": ["dry", "oiled"],
-    "specialStorageRisks": ["rust", "structural_damage_from_weight"],
-    "maxStorageTime": 20160,
-    
-    "marketDemand": "high",
-    "priceFluctuationFactors": [
-      {"factor": "iron_availability", "weight": 0.4},
-      {"factor": "construction_activity", "weight": 0.3},
-      {"factor": "shipbuilding_activity", "weight": 0.3}
-    ]
-  }
+    {
+      "factor": "worker_skill",
+      "weight": 0.3
+    }
+  ],
+  "fittingTypes": [
+    {
+      "type": "nails",
+      "usage": "general_construction",
+      "complexity": "low",
+      "value_multiplier": 0.8
+    },
+    {
+      "type": "hinges",
+      "usage": "doors_windows",
+      "complexity": "medium",
+      "value_multiplier": 1.0
+    },
+    {
+      "type": "ship_fittings",
+      "usage": "shipbuilding",
+      "complexity": "high",
+      "value_multiplier": 1.3
+    },
+    {
+      "type": "structural_brackets",
+      "usage": "heavy_construction",
+      "complexity": "medium",
+      "value_multiplier": 1.1
+    }
+  ],
+  "producedFrom": [
+    {
+      "inputs": [
+        {
+          "resource": "processed_iron",
+          "amount": 20
+        },
+        {
+          "resource": "fuel",
+          "amount": 25
+        }
+      ],
+      "building": "blacksmith",
+      "processingTime": 240
+    }
+  ],
+  "usedIn": [
+    {
+      "outputs": [
+        {
+          "resource": "ship_components",
+          "amount": 8
+        }
+      ],
+      "building": "shipyard_workshop",
+      "processingTime": 720
+    },
+    {
+      "outputs": [
+        {
+          "resource": "tools",
+          "amount": 15
+        }
+      ],
+      "building": "blacksmith",
+      "processingTime": 360
+    },
+    {
+      "outputs": [
+        {
+          "resource": "building_materials",
+          "amount": 30
+        }
+      ],
+      "building": "construction_yard",
+      "processingTime": 120
+    }
+  ],
+  "transportOptions": {
+    "barge": {
+      "capacity": 300,
+      "efficiency": 0.9,
+      "risk": 0.1
+    },
+    "gondola": {
+      "capacity": 50,
+      "efficiency": 0.9,
+      "risk": 0.1
+    },
+    "handcart": {
+      "capacity": 15,
+      "efficiency": 0.8,
+      "risk": 0.15
+    },
+    "porter": {
+      "capacity": 5,
+      "efficiency": 0.7,
+      "risk": 0.15
+    }
+  },
+  "transportRequirements": [
+    "moisture_protection",
+    "weight_distribution"
+  ],
+  "loadingTime": 15,
+  "routeRestrictions": [],
+  "storageOptions": {
+    "small_warehouse": {
+      "capacityMultiplier": 0.8,
+      "preservation": 0.9
+    },
+    "blacksmith": {
+      "capacityMultiplier": 1.0,
+      "preservation": 0.95
+    },
+    "shipyard": {
+      "capacityMultiplier": 0.7,
+      "preservation": 0.9
+    }
+  },
+  "storageRequirements": [
+    "dry",
+    "oiled"
+  ],
+  "specialStorageRisks": [
+    "rust",
+    "structural_damage_from_weight"
+  ],
+  "maxStorageTime": 20160,
+  "marketDemand": "high",
+  "priceFluctuationFactors": [
+    {
+      "factor": "iron_availability",
+      "weight": 0.4
+    },
+    {
+      "factor": "construction_activity",
+      "weight": 0.3
+    },
+    {
+      "factor": "shipbuilding_activity",
+      "weight": 0.3
+    }
+  ]
+}

@@ -1,117 +1,203 @@
 {
-    "id": "dyed_textiles",
-    "name": "Dyed Textiles",
-    "category": "processed_materials",
-    "subcategory": "textile",
-    "baseValue": 85,
-    "weight": 0.6,
-    "volume": 0.8,
-    "stackSize": 15,
-    "description": "Vibrant colored fabrics ready for tailoring into garments.",
-    "longDescription": "Venetian dyed textiles are renowned throughout Europe for their brilliant, long-lasting colors. Created through closely guarded dyeing techniques and using rare colorants from around the world, these fabrics represent the perfect marriage of art and chemistry, ready to be transformed into the finest garments and furnishings.",
-    "sprite": "assets/sprites/resources/dyed_textiles.png",
-    "icon": "assets/icons/resources/dyed_textiles.png",
-    "availableQualities": ["common", "fine", "superior", "exceptional", "masterwork"],
-    "defaultQuality": "fine",
-    
-    "processingFacility": "dye_works",
-    "processingTime": 360,
-    "perishable": false,
-    "lightSensitivity": 0.6,
-    "specialHandling": ["clean_environment", "color_separation"],
-    "qualityFactors": [
-      {"factor": "input_quality", "weight": 0.4},
-      {"factor": "dye_quality", "weight": 0.4},
-      {"factor": "worker_skill", "weight": 0.2}
-    ],
-    "colors": [
-      {
-        "color": "crimson",
-        "source": "kermes",
-        "rarity": "high",
-        "value_multiplier": 1.8
-      },
-      {
-        "color": "royal_purple",
-        "source": "murex",
-        "rarity": "very_high",
-        "value_multiplier": 2.5
-      },
-      {
-        "color": "azure_blue",
-        "source": "indigo",
-        "rarity": "high",
-        "value_multiplier": 1.7
-      },
-      {
-        "color": "emerald_green",
-        "source": "verdigris",
-        "rarity": "medium",
-        "value_multiplier": 1.5
-      },
-      {
-        "color": "golden_yellow",
-        "source": "saffron",
-        "rarity": "high",
-        "value_multiplier": 1.6
-      },
-      {
-        "color": "rich_black",
-        "source": "oak_gall",
-        "rarity": "medium",
-        "value_multiplier": 1.4
-      }
-    ],
-    
-    "producedFrom": [
-      {
-        "inputs": [
-          {"resource": "silk_fabric", "amount": 15},
-          {"resource": "dyestuffs", "amount": 15},
-          {"resource": "mordants", "amount": 10},
-          {"resource": "water", "amount": 100},
-          {"resource": "fuel", "amount": 20}
-        ],
-        "building": "dye_works",
-        "processingTime": 360
-      }
-    ],
-    "usedIn": [
-      {
-        "outputs": [
-          {"resource": "luxury_clothing", "amount": 7},
-          {"resource": "fine_furnishings", "amount": 3}
-        ],
-        "building": "tailor_workshop",
-        "processingTime": 480
-      }
-    ],
-    
-    "transportOptions": {
-      "barge": {"capacity": 200, "efficiency": 0.95, "risk": 0.15},
-      "gondola": {"capacity": 15, "efficiency": 0.95, "risk": 0.15},
-      "handcart": {"capacity": 6, "efficiency": 0.9, "risk": 0.2},
-      "porter": {"capacity": 2, "efficiency": 0.85, "risk": 0.2}
+  "id": "dyed_textiles",
+  "name": "Dyed Textiles",
+  "category": "processed_materials",
+  "subcategory": "textile",
+  "baseValue": 85,
+  "weight": 0.6,
+  "volume": 0.8,
+  "stackSize": 15,
+  "description": "Vibrant colored fabrics ready for tailoring into garments.",
+  "longDescription": "Venetian dyed textiles are renowned throughout Europe for their brilliant, long-lasting colors. Created through closely guarded dyeing techniques and using rare colorants from around the world, these fabrics represent the perfect marriage of art and chemistry, ready to be transformed into the finest garments and furnishings.",
+  "sprite": "assets/sprites/resources/dyed_textiles.png",
+  "icon": "/assets/icons/resources/dyed_textiles.png",
+  "availableQualities": [
+    "common",
+    "fine",
+    "superior",
+    "exceptional",
+    "masterwork"
+  ],
+  "defaultQuality": "fine",
+  "processingFacility": "dye_works",
+  "processingTime": 360,
+  "perishable": false,
+  "lightSensitivity": 0.6,
+  "specialHandling": [
+    "clean_environment",
+    "color_separation"
+  ],
+  "qualityFactors": [
+    {
+      "factor": "input_quality",
+      "weight": 0.4
     },
-    "transportRequirements": ["weather_protection", "clean_handling", "color_separation"],
-    "loadingTime": 12,
-    "routeRestrictions": [],
-    
-    "storageOptions": {
-      "small_warehouse": {"capacityMultiplier": 0.8, "preservation": 0.9},
-      "dye_works": {"capacityMultiplier": 0.5, "preservation": 1.0},
-      "tailor_workshop": {"capacityMultiplier": 0.7, "preservation": 0.95}
+    {
+      "factor": "dye_quality",
+      "weight": 0.4
     },
-    "storageRequirements": ["dry", "clean", "pest_free", "dark", "separated_by_color"],
-    "specialStorageRisks": ["moisture", "pests", "light_exposure", "color_bleeding"],
-    "maxStorageTime": 20160,
-    
-    "marketDemand": "high",
-    "priceFluctuationFactors": [
-      {"factor": "fashion_trends", "weight": 0.4},
-      {"factor": "silk_fabric_availability", "weight": 0.3},
-      {"factor": "dye_availability", "weight": 0.2},
-      {"factor": "season", "weight": 0.1}
-    ],
-    "fashionSensitivity": 0.8
-  }
+    {
+      "factor": "worker_skill",
+      "weight": 0.2
+    }
+  ],
+  "colors": [
+    {
+      "color": "crimson",
+      "source": "kermes",
+      "rarity": "high",
+      "value_multiplier": 1.8
+    },
+    {
+      "color": "royal_purple",
+      "source": "murex",
+      "rarity": "very_high",
+      "value_multiplier": 2.5
+    },
+    {
+      "color": "azure_blue",
+      "source": "indigo",
+      "rarity": "high",
+      "value_multiplier": 1.7
+    },
+    {
+      "color": "emerald_green",
+      "source": "verdigris",
+      "rarity": "medium",
+      "value_multiplier": 1.5
+    },
+    {
+      "color": "golden_yellow",
+      "source": "saffron",
+      "rarity": "high",
+      "value_multiplier": 1.6
+    },
+    {
+      "color": "rich_black",
+      "source": "oak_gall",
+      "rarity": "medium",
+      "value_multiplier": 1.4
+    }
+  ],
+  "producedFrom": [
+    {
+      "inputs": [
+        {
+          "resource": "silk_fabric",
+          "amount": 15
+        },
+        {
+          "resource": "dyestuffs",
+          "amount": 15
+        },
+        {
+          "resource": "mordants",
+          "amount": 10
+        },
+        {
+          "resource": "water",
+          "amount": 100
+        },
+        {
+          "resource": "fuel",
+          "amount": 20
+        }
+      ],
+      "building": "dye_works",
+      "processingTime": 360
+    }
+  ],
+  "usedIn": [
+    {
+      "outputs": [
+        {
+          "resource": "luxury_clothing",
+          "amount": 7
+        },
+        {
+          "resource": "fine_furnishings",
+          "amount": 3
+        }
+      ],
+      "building": "tailor_workshop",
+      "processingTime": 480
+    }
+  ],
+  "transportOptions": {
+    "barge": {
+      "capacity": 200,
+      "efficiency": 0.95,
+      "risk": 0.15
+    },
+    "gondola": {
+      "capacity": 15,
+      "efficiency": 0.95,
+      "risk": 0.15
+    },
+    "handcart": {
+      "capacity": 6,
+      "efficiency": 0.9,
+      "risk": 0.2
+    },
+    "porter": {
+      "capacity": 2,
+      "efficiency": 0.85,
+      "risk": 0.2
+    }
+  },
+  "transportRequirements": [
+    "weather_protection",
+    "clean_handling",
+    "color_separation"
+  ],
+  "loadingTime": 12,
+  "routeRestrictions": [],
+  "storageOptions": {
+    "small_warehouse": {
+      "capacityMultiplier": 0.8,
+      "preservation": 0.9
+    },
+    "dye_works": {
+      "capacityMultiplier": 0.5,
+      "preservation": 1.0
+    },
+    "tailor_workshop": {
+      "capacityMultiplier": 0.7,
+      "preservation": 0.95
+    }
+  },
+  "storageRequirements": [
+    "dry",
+    "clean",
+    "pest_free",
+    "dark",
+    "separated_by_color"
+  ],
+  "specialStorageRisks": [
+    "moisture",
+    "pests",
+    "light_exposure",
+    "color_bleeding"
+  ],
+  "maxStorageTime": 20160,
+  "marketDemand": "high",
+  "priceFluctuationFactors": [
+    {
+      "factor": "fashion_trends",
+      "weight": 0.4
+    },
+    {
+      "factor": "silk_fabric_availability",
+      "weight": 0.3
+    },
+    {
+      "factor": "dye_availability",
+      "weight": 0.2
+    },
+    {
+      "factor": "season",
+      "weight": 0.1
+    }
+  ],
+  "fashionSensitivity": 0.8
+}
