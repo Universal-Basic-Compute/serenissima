@@ -933,8 +933,9 @@ export default class SimplePolygonRenderer {
         }
         
         // Add glow effect by changing material - make the color change more subtle
-        if (object.material) {
-          const material = object.material as THREE.Material;
+        const meshObject = object as THREE.Mesh;
+        if (meshObject.material) {
+          const material = meshObject.material as THREE.Material;
           
           if (material instanceof THREE.MeshBasicMaterial) {
             // Store original color if not already stored
@@ -967,8 +968,9 @@ export default class SimplePolygonRenderer {
         }
         
         // Restore original material properties
-        if (object.material) {
-          const material = object.material as THREE.Material;
+        const meshObject = object as THREE.Mesh;
+        if (meshObject.material) {
+          const material = meshObject.material as THREE.Material;
           
           if (material instanceof THREE.MeshBasicMaterial && material.userData.originalColor) {
             material.color.copy(material.userData.originalColor);
