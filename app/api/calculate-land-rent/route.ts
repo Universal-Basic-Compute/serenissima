@@ -36,7 +36,7 @@ function calculateLocationMultiplier(distance: number) {
 }
 
 // Calculate base rent based on area
-function calculateBaseRent(areaInSquareMeters) {
+function calculateBaseRent(areaInSquareMeters: number): number {
   // Use market stall as reference: 8000 ducats daily income for ~20 sq meters
   // This gives us ~400 ducats per sq meter as a baseline
   const baseRatePerSquareMeter = MARKET_STALL_DAILY_INCOME / MARKET_STALL_SIZE;
