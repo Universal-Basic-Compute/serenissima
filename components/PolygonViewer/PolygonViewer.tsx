@@ -1579,6 +1579,7 @@ export default function PolygonViewer() {
     );
   }
   
+
   // Function to handle errors in the 3D components
   const handleRenderingError = useCallback((error: Error, errorInfo: React.ErrorInfo) => {
     log.error('PolygonViewer rendering error:', error, errorInfo);
