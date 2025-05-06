@@ -903,7 +903,6 @@ export default function PolygonViewer() {
         scene: sceneRef.current?.scene || fallbackScene,
         polygonMeshesRef,
         activeView,
-        hoveredPolygonId: null,
         setHoveredPolygonId,
         selectedPolygonId,
         setSelectedPolygonId,
@@ -1112,7 +1111,9 @@ export default function PolygonViewer() {
       if (interactionManagerRef.current) interactionManagerRef.current.cleanup();
       if (polygonRendererRef.current) polygonRendererRef.current.cleanup();
       if (bridgeRendererRef.current) bridgeRendererRef.current.cleanup();
-      if (roadManagerRef.current) roadManagerRef.current.cleanup();
+      if (roadManagerRef.current && 'cleanup' in roadManagerRef.current) {
+        (roadManagerRef.current as any).cleanup();
+      }
       if (sceneRef.current) sceneRef.current.cleanup();
       
       // Remove event listeners
@@ -1594,7 +1595,9 @@ export default function PolygonViewer() {
       if (polygonRendererRef.current) polygonRendererRef.current.cleanup();
       if (interactionManagerRef.current) interactionManagerRef.current.cleanup();
       if (bridgeRendererRef.current) bridgeRendererRef.current.cleanup();
-      if (roadManagerRef.current) roadManagerRef.current.cleanup();
+      if (roadManagerRef.current && 'cleanup' in roadManagerRef.current) {
+        (roadManagerRef.current as any).cleanup();
+      }
     } catch (cleanupError) {
       log.error('Error during cleanup after rendering failure:', cleanupError);
     }
