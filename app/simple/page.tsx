@@ -240,7 +240,7 @@ export default function SimplePage() {
   };
 
   // Function to generate coat of arms image
-  const generateCoatOfArmsImage = async () => {
+  const handleGenerateCoatOfArmsImage = async () => {
     if (!familyCoatOfArms.trim()) {
       alert('Please enter a description of your family coat of arms first');
       return;
@@ -249,9 +249,7 @@ export default function SimplePage() {
     try {
       setIsGeneratingImage(true);
         
-      // Import the utility function directly
-      const { generateCoatOfArmsImage: generateImage } = await import('@/app/utils/coatOfArmsUtils');
-      const imageUrl = await generateImage(familyCoatOfArms);
+      const imageUrl = await generateCoatOfArmsImage(familyCoatOfArms);
         
       // Update state with the local image URL
       setCoatOfArmsImage(imageUrl);
