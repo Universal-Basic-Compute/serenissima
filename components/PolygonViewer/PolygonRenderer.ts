@@ -521,13 +521,12 @@ export default class PolygonRenderer {
    * Get the color for an owner with error handling
    */
   private getOwnerColor(owner: string | undefined): string | null {
+    if (!owner) return null;
     return withErrorHandling(
       () => {
-        if (!owner) return null;
-        
         if (this.ownerColorMap[owner]) {
           return this.ownerColorMap[owner];
-        } else if (this.users[owner] && this.users[owner].color) {
+        } else if (owner in this.users && this.users[owner] && this.users[owner].color) {
           const color = this.users[owner].color;
           // Cache for future use
           this.ownerColorMap[owner] = color;
@@ -848,11 +847,8 @@ export default class PolygonRenderer {
                   obj.material.forEach((mat: THREE.Material) => {
                     try {
                       // Check if material has a map property (like MeshBasicMaterial or MeshStandardMaterial)
-                      if ('map' in mat) {
-                        const materialWithMap = mat as THREE.MeshBasicMaterial | THREE.MeshStandardMaterial;
-                        if (materialWithMap.map) {
-                          materialWithMap.map.dispose();
-                        }
+                      if ('map' in mat && (mat as any).map) {
+                        (mat as any).map.dispose();
                       }
                       mat.dispose();
                     } catch (matError) {
@@ -862,9 +858,8 @@ export default class PolygonRenderer {
                 } else {
                   try {
                     // Check if material has a map property
-                    if ('map' in obj.material) {
-                      const materialWithMap = obj.material as THREE.MeshBasicMaterial | THREE.MeshStandardMaterial;
-                      if (materialWithMap.map) materialWithMap.map.dispose();
+                    if ('map' in obj.material && (obj.material as any).map) {
+                      (obj.material as any).map.dispose();
                     }
                     obj.material.dispose();
                   } catch (matError) {
@@ -1387,9 +1382,9 @@ export default class PolygonRenderer {
                 if (Array.isArray(obj.material)) {
                   obj.material.forEach((mat: THREE.Material) => {
                     try {
-                      const materialWithMap = mat as THREE.MeshBasicMaterial | THREE.MeshStandardMaterial;
-                      if ('map' in materialWithMap && materialWithMap.map) 
-                        materialWithMap.map.dispose();
+                      if ('map' in mat && (mat as any).map) {
+                        (mat as any).map.dispose();
+                      }
                       mat.dispose();
                     } catch (matError) {
                       log.error('Error disposing material:', matError);
@@ -1397,9 +1392,8 @@ export default class PolygonRenderer {
                   });
                 } else {
                   try {
-                    if ('map' in obj.material) {
-                      const materialWithMap = obj.material as THREE.MeshBasicMaterial | THREE.MeshStandardMaterial;
-                      if (materialWithMap.map) materialWithMap.map.dispose();
+                    if ('map' in obj.material && (obj.material as any).map) {
+                      (obj.material as any).map.dispose();
                     }
                     obj.material.dispose();
                   } catch (matError) {
