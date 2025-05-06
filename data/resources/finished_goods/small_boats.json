@@ -211,7 +211,7 @@
     "predecessors": [
       {
         "resource": "timber",
-        "facility": "sawmill"
+        "facility": "boat_workshop"
       },
       {
         "resource": "pitch",

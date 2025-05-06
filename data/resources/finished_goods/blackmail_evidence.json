@@ -2,7 +2,7 @@
   "id": "blackmail_evidence",
   "name": "Blackmail Evidence",
   "category": "finished_goods",
-  "subcategory": "illicit_goods",
+  "subcategory": "criminal_supplies",
   "description": "Compromising documents, letters, or other evidence that can be used to coerce or manipulate individuals. A dangerous but powerful tool in Venice's political landscape.",
   "icon": "/assets/icons/resources/blackmail_evidence.png",
   "model": "models/resources/blackmail_evidence.glb",

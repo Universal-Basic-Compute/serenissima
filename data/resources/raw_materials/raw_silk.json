@@ -32,7 +32,7 @@
       "common",
       "fine",
       "superior",
-      "exceptional"
+      "masterwork"
     ],
     "default_quality": "common",
     "quality_multipliers": {
@@ -48,7 +48,7 @@
         "value": 2.5,
         "production_efficiency": 1.4
       },
-      "exceptional": {
+      "masterwork": {
         "value": 4.0,
         "production_efficiency": 1.7
       }
@@ -72,6 +72,18 @@
       {
         "resource": "prepared_silk",
         "facility": "silk_conditioning_house"
+      },
+      {
+        "resource": "silk_fabric",
+        "facility": "weaving_workshop"
+      },
+      {
+        "resource": "dyed_silk_fabric",
+        "facility": "dye_works"
+      },
+      {
+        "resource": "luxury_silk_garments",
+        "facility": "tailor_workshop"
       }
     ]
   },

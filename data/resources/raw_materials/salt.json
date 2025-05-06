@@ -57,19 +57,19 @@
     {
       "type": "coarse_salt",
       "purity": "medium",
-      "valueModifier": 0.8,
+      "value_multiplier": 0.8,
       "primarily_used_for": "basic_preservation"
     },
     {
       "type": "fine_salt",
       "purity": "high",
-      "valueModifier": 1.2,
+      "value_multiplier": 1.2,
       "primarily_used_for": "cooking_and_quality_preservation"
     },
     {
       "type": "fleur_de_sel",
       "purity": "very_high",
-      "valueModifier": 2.0,
+      "value_multiplier": 2.0,
       "primarily_used_for": "luxury_cuisine"
     }
   ],

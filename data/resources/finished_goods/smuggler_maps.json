@@ -2,7 +2,7 @@
   "id": "smuggler_maps",
   "name": "Smuggler's Maps",
   "category": "finished_goods",
-  "subcategory": "illicit_goods",
+  "subcategory": "criminal_supplies",
   "description": "Specialized charts showing secret routes, hidden passages, guard patrol schedules, and concealed entrances throughout Venice and its lagoon. Essential tools for moving contraband or people undetected.",
   "icon": "/assets/icons/resources/smuggler_maps.png",
   "model": "models/resources/smuggler_maps.glb",

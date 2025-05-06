@@ -27,26 +27,26 @@
   },
   "quality_variations": {
     "available_qualities": [
-      "poor",
       "common",
       "fine",
-      "superior"
+      "superior",
+      "masterwork"
     ],
     "default_quality": "common",
     "quality_multipliers": {
-      "poor": {
+      "common": {
         "value": 0.7,
         "production_efficiency": 0.8
       },
-      "common": {
+      "fine": {
         "value": 1.0,
         "production_efficiency": 1.0
       },
-      "fine": {
+      "superior": {
         "value": 1.5,
         "production_efficiency": 1.3
       },
-      "superior": {
+      "masterwork": {
         "value": 2.0,
         "production_efficiency": 1.6
       }

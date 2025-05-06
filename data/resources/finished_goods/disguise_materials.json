@@ -2,7 +2,7 @@
   "id": "disguise_materials",
   "name": "Disguise Materials",
   "category": "finished_goods",
-  "subcategory": "illicit_goods",
+  "subcategory": "criminal_supplies",
   "description": "Specialized materials for altering appearance, including facial prosthetics, hair dyes, voice-changing devices, and costume elements. Essential tools for spies, infiltrators, and anyone wishing to avoid recognition.",
   "icon": "/assets/icons/resources/disguise_materials.png",
   "model": "models/resources/disguise_materials.glb",
