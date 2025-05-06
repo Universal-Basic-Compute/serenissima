@@ -5,7 +5,7 @@
   "tier": 2,
   "size": "Medium",
   "unlockCondition": "15,000,000 ducats capital, Engineering Guild approval, Senate permission",
-  "calculationsAnalysis": "The Bridge represents essential pedestrian infrastructure with modest revenue. The construction cost of 4,000,000 ducats reflects the engineering challenges and durable materials required, while generating 10,000 ducats income reflects small crossing fees and increased property values in connected areas. The maintenance cost of 25,000 ducats creates an ongoing expense partially offset by this income. The employment capacity of 0 reflects the passive nature of this infrastructure. The construction time of 14 days (1209600000ms) reflects the complex engineering project. This building creates a strategic investment in urban connectivity that dramatically increases property values and accessibility of connected areas, reflecting the historical importance of bridges in Venice's unique urban fabric where canals would otherwise fragment the city.",
+  "calculationsAnalysis": "The Bridge represents essential pedestrian infrastructure with modest revenue. The construction cost of 4,000,000 ducats reflects the engineering challenges and durable materials required, while generating 10,000 ducats income reflects small crossing fees and increased property values in connected areas. The maintenance cost of 25,000 ducats creates an ongoing expense partially offset by this income. The employment capacity of 2 reflects the maintenance workers needed for this infrastructure. The construction time of 14 days (1209600000ms) reflects the complex engineering project. This building creates a strategic investment in urban connectivity that dramatically increases property values and accessibility of connected areas, reflecting the historical importance of bridges in Venice's unique urban fabric where canals would otherwise fragment the city.",
   "shortDescription": "Canal crossing structure connecting separate land areas and enabling pedestrian movement.",
   "fullDescription": "Essential to Venice's pedestrian mobility, bridges overcome the canal barriers that would otherwise fragment the city. Featuring arched construction for boat clearance, steps for elevation, and often small shops or seating areas, bridges serve as both transportation links and social spaces. Their construction requires significant engineering expertise and government approval, making them prestigious civic improvements.",
   "flavorText": "A paradox of Venice: we are a city defined by water, yet our greatest infrastructure achievements are the means by which we pretend, momentarily, that the water is not there.",
@@ -19,7 +19,7 @@
   "maintenanceCost": 25000,
   "constructionTime": 1209600000,
   "incomeGeneration": 10000,
-  "employmentCapacity": 0,
+  "employmentCapacity": 2,
   "locationRequirements": {
     "districtRestrictions": "Requires Senate approval for location",
     "adjacentRequirements": "Must connect land areas across canal",

@@ -5,7 +5,7 @@
   "tier": 1,
   "size": "Small",
   "unlockCondition": "1,000,000 ducats capital, community approval",
-  "calculationsAnalysis": "The Public Well represents basic water access infrastructure with modest revenue. The construction cost of 500,000 ducats reflects the connection to cistern systems and decorative wellhead, while generating 8,000 ducats income reflects small usage fees and increased property values in the vicinity. The maintenance cost of 7,500 ducats creates an ongoing expense justified by the essential water access provided. The employment capacity of 0 reflects the self-service nature of this infrastructure. The construction time of 2 days (172800000ms) reflects the relatively simple construction requirements. This building creates an accessible investment in water access that improves public health and community development, reflecting the historical importance of public wells as both practical infrastructure and social gathering points in Venetian neighborhoods.",
+  "calculationsAnalysis": "The Public Well represents basic water access infrastructure with modest revenue. The construction cost of 500,000 ducats reflects the connection to cistern systems and decorative wellhead, while generating 8,000 ducats income reflects small usage fees and increased property values in the vicinity. The maintenance cost of 7,500 ducats creates an ongoing expense justified by the essential water access provided. The employment capacity of 1 reflects the occasional maintenance worker needed for this infrastructure. The construction time of 2 days (172800000ms) reflects the relatively simple construction requirements. This building creates an accessible investment in water access that improves public health and community development, reflecting the historical importance of public wells as both practical infrastructure and social gathering points in Venetian neighborhoods.",
   "shortDescription": "Community water access point providing fresh water to residents without private sources.",
   "fullDescription": "Essential neighborhood infrastructure, public wells provide access to the fresh water stored in the cistern system beneath. Featuring decorative wellheads, drawing mechanisms, and often small surrounding plazas, these facilities serve as both practical utilities and social gathering points. Located in public campos throughout Venice, wells were regulated to ensure fair access to this vital resource.",
   "flavorText": "The well is the true heart of the neighborhood—for what draws people together more surely than the water that sustains life itself?",
@@ -18,7 +18,7 @@
   "maintenanceCost": 7500,
   "constructionTime": 172800000,
   "incomeGeneration": 8000,
-  "employmentCapacity": 0,
+  "employmentCapacity": 1,
   "locationRequirements": {
     "districtRestrictions": "Public campos or squares in all districts",
     "adjacentRequirements": "Must connect to existing cistern system",
