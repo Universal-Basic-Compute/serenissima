@@ -18,9 +18,9 @@
     "marble": 800,
     "gold": 200
   },
-  "maintenanceCost": 200000,
+  "maintenanceCost": 125000,
   "constructionTime": 10368000000,
-  "incomeGeneration": 75000,
+  "incomeGeneration": 150000,
   "employmentCapacity": 60,
   "locationRequirements": {
     "districtRestrictions": "San Marco district only, adjacent to Doge's Palace",

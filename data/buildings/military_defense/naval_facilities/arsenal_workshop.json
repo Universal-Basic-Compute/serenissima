@@ -20,7 +20,7 @@
   "maintenanceCost": 100000,
   "constructionTime": 3456000000,
   "incomeGeneration": 40000,
-  "employmentCapacity": 100,
+  "employmentCapacity": 80,
   "locationRequirements": {
     "districtRestrictions": "Arsenal district only, government authorization required",
     "adjacentRequirements": "Deep water access, Arsenal complex integration",

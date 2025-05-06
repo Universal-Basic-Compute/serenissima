@@ -19,7 +19,7 @@
   },
   "maintenanceCost": 75000,
   "constructionTime": 3456000000,
-  "incomeGeneration": 0,
+  "incomeGeneration": 80000,
   "employmentCapacity": 5,
   "locationRequirements": {
     "districtRestrictions": "San Marco district, entrance to Mercerie from piazza",

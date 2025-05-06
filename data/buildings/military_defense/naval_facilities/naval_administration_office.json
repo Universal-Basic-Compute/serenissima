@@ -19,7 +19,7 @@
   },
   "maintenanceCost": 60000,
   "constructionTime": 1209600000,
-  "incomeGeneration": 0,
+  "incomeGeneration": 65000,
   "employmentCapacity": 40,
   "locationRequirements": {
     "districtRestrictions": "Near Arsenal or government center, naval visibility",

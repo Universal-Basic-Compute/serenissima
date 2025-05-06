@@ -18,7 +18,7 @@
   },
   "maintenanceCost": 40000,
   "constructionTime": 604800000,
-  "incomeGeneration": 0,
+  "incomeGeneration": 45000,
   "employmentCapacity": 20,
   "locationRequirements": {
     "districtRestrictions": "Must have direct canal access, often in industrial areas",

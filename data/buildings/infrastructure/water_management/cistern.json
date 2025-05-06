@@ -19,7 +19,7 @@
   },
   "maintenanceCost": 12500,
   "constructionTime": 518400000,
-  "incomeGeneration": 0,
+  "incomeGeneration": 15000,
   "employmentCapacity": 1,
   "locationRequirements": {
     "districtRestrictions": "All districts, often in campos or courtyards",

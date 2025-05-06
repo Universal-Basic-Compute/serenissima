@@ -18,10 +18,10 @@
     "marble": 500,
     "gold": 100
   },
-  "maintenanceCost": 250000,
+  "maintenanceCost": 150000,
   "constructionTime": 7776000000,
-  "incomeGeneration": 75000,
-  "employmentCapacity": 200,
+  "incomeGeneration": 175000,
+  "employmentCapacity": 150,
   "locationRequirements": {
     "districtRestrictions": "San Marco district only, waterfront facing Basin",
     "adjacentRequirements": "St. Mark's Basilica adjacency, grand piazza frontage",

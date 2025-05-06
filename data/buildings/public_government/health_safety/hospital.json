@@ -17,7 +17,7 @@
     "glass": 100,
     "iron": 150
   },
-  "maintenanceCost": 100000,
+  "maintenanceCost": 60000,
   "constructionTime": 2592000000,
   "incomeGeneration": 75000,
   "employmentCapacity": 50,
