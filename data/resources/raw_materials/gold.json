@@ -28,24 +28,24 @@
     "availability": "rare",
     "seasonality": "year_round"
   },
-  "qualityLevels": {
-    "available": [
+  "quality_variations": {
+    "available_qualities": [
       "common",
       "fine",
       "superior"
     ],
-    "default": "common",
-    "effects": {
+    "default_quality": "common",
+    "quality_multipliers": {
       "common": {
-        "valueModifier": 1.0,
+        "value": 1.0,
         "purity": 0.85
       },
       "fine": {
-        "valueModifier": 1.2,
+        "value": 1.2,
         "purity": 0.92
       },
       "superior": {
-        "valueModifier": 1.5,
+        "value": 1.5,
         "purity": 0.99
       }
     }
@@ -105,8 +105,8 @@
       "relationship": "optional"
     }
   ],
-  "transportation": {
-    "methods": {
+  "transport_properties": {
+    "transport_methods": {
       "armed_escort": {
         "capacity": 5,
         "efficiency": 1.0,
@@ -118,50 +118,50 @@
         "risk": 0.1
       }
     },
-    "requirements": [
+    "special_requirements": [
       "armed_guard",
       "secure_container",
       "documentation"
     ],
-    "loadingTime": 10,
-    "restrictions": [
+    "loading_time": 10,
+    "route_restrictions": [
       "restricted_routes",
       "daylight_only"
     ]
   },
-  "storage": {
-    "compatible": {
+  "storage_properties": {
+    "storage_facilities": {
       "secure_vault": {
-        "capacityMultiplier": 1.0,
+        "capacity_multiplier": 1.0,
         "preservation": 1.0
       },
       "treasury": {
-        "capacityMultiplier": 1.0,
+        "capacity_multiplier": 1.0,
         "preservation": 1.0
       }
     },
-    "requirements": [
+    "storage_requirements": [
       "high_security",
       "inventory_tracking"
     ],
-    "risks": [
+    "special_risks": [
       "theft"
     ],
-    "maxStorageTime": "unlimited"
+    "max_storage_time": "unlimited"
   },
-  "marketDynamics": {
-    "baseAvailability": 0.3,
-    "demandLevel": "very_high",
-    "priceVolatility": 0.2,
-    "regionalFactors": [
+  "market_dynamics": {
+    "base_availability": 0.3,
+    "demand_level": "very_high",
+    "price_volatility": 0.2,
+    "regional_factors": [
       {
         "region": "rialto",
-        "availabilityModifier": 1.3,
-        "priceModifier": 1.0
+        "availability_modifier": 1.3,
+        "price_modifier": 1.0
       }
     ],
-    "seasonalFactors": [],
-    "economicFactors": {
+    "seasonal_factors": [],
+    "economic_factors": {
       "political_stability": {
         "impact": "high"
       },

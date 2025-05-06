@@ -30,33 +30,33 @@
     "availability": "rare",
     "seasonality": "varies_by_type"
   },
-  "qualityLevels": {
-    "available": [
+  "quality_variations": {
+    "available_qualities": [
       "common",
       "fine",
       "superior",
       "exceptional"
     ],
-    "default": "common",
-    "effects": {
+    "default_quality": "common",
+    "quality_multipliers": {
       "common": {
-        "valueModifier": 1.0,
-        "colorFastness": 0.8,
+        "value": 1.0,
+        "color_fastness": 0.8,
         "vibrancy": 0.8
       },
       "fine": {
-        "valueModifier": 1.5,
-        "colorFastness": 1.0,
+        "value": 1.5,
+        "color_fastness": 1.0,
         "vibrancy": 1.0
       },
       "superior": {
-        "valueModifier": 2.5,
-        "colorFastness": 1.3,
+        "value": 2.5,
+        "color_fastness": 1.3,
         "vibrancy": 1.3
       },
       "exceptional": {
-        "valueModifier": 4.0,
-        "colorFastness": 1.6,
+        "value": 4.0,
+        "color_fastness": 1.6,
         "vibrancy": 1.6
       }
     }
@@ -120,6 +120,13 @@
       "productionChain": "Dyestuffs + Textiles → Dye Works → Dyed Textiles → Tailor Workshop → Luxury Silk Garments"
     },
     {
+      "process": "silk_dyeing",
+      "building": "dye_works",
+      "role": "primary_ingredient",
+      "outputResource": "dyed_silk_fabric",
+      "productionChain": "Dyestuffs + Silk Fabric → Dye Works → Dyed Silk Fabric → Tailor Workshop → Luxury Silk Garments"
+    },
+    {
       "process": "pigment_making",
       "building": "pigment_workshop",
       "role": "primary_ingredient",
@@ -147,8 +154,8 @@
       "relationship": "required"
     }
   ],
-  "transportation": {
-    "methods": {
+  "transport_properties": {
+    "transport_methods": {
       "large_ship": {
         "capacity": 100,
         "efficiency": 1.0,
@@ -165,38 +172,38 @@
         "risk": 0.1
       }
     },
-    "requirements": [
+    "special_requirements": [
       "moisture_protection",
       "contamination_prevention",
       "security"
     ],
-    "loadingTime": 8,
-    "restrictions": []
+    "loading_time": 8,
+    "route_restrictions": []
   },
-  "storage": {
-    "compatible": {
+  "storage_properties": {
+    "storage_facilities": {
       "secure_warehouse": {
-        "capacityMultiplier": 1.0,
+        "capacity_multiplier": 1.0,
         "preservation": 0.95
       },
       "dye_works": {
-        "capacityMultiplier": 0.7,
+        "capacity_multiplier": 0.7,
         "preservation": 1.0
       }
     },
-    "requirements": [
+    "storage_requirements": [
       "dry",
       "cool",
       "dark",
       "secure"
     ],
-    "risks": [
+    "special_risks": [
       "moisture",
       "light_exposure",
       "theft",
       "contamination"
     ],
-    "maxStorageTime": 10080
+    "max_storage_time": 10080
   },
   "market_dynamics": {
     "base_availability": 0.4,

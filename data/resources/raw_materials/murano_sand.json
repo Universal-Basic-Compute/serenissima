@@ -25,20 +25,20 @@
     "availability": "common",
     "seasonality": "year_round"
   },
-  "qualityLevels": {
-    "available": [
+  "quality_variations": {
+    "available_qualities": [
       "common",
       "fine"
     ],
-    "default": "common",
-    "effects": {
+    "default_quality": "common",
+    "quality_multipliers": {
       "common": {
-        "valueModifier": 1.0,
-        "productionEfficiency": 1.0
+        "value": 1.0,
+        "production_efficiency": 1.0
       },
       "fine": {
-        "valueModifier": 1.5,
-        "productionEfficiency": 1.3
+        "value": 1.5,
+        "production_efficiency": 1.3
       }
     }
   },
@@ -71,8 +71,8 @@
       "relationship": "optional"
     }
   ],
-  "transportation": {
-    "methods": {
+  "transport_properties": {
+    "transport_methods": {
       "large_ship": {
         "capacity": 1000,
         "efficiency": 1.0,
@@ -94,30 +94,30 @@
         "risk": 0.3
       }
     },
-    "requirements": [
+    "special_requirements": [
       "dry_storage"
     ],
-    "loadingTime": 5,
-    "restrictions": []
+    "loading_time": 5,
+    "route_restrictions": []
   },
-  "storage": {
-    "compatible": {
+  "storage_properties": {
+    "storage_facilities": {
       "small_warehouse": {
-        "capacityMultiplier": 1.0,
+        "capacity_multiplier": 1.0,
         "preservation": 1.0
       },
       "bulk_materials_yard": {
-        "capacityMultiplier": 1.5,
+        "capacity_multiplier": 1.5,
         "preservation": 0.9
       }
     },
-    "requirements": [
+    "storage_requirements": [
       "dry"
     ],
-    "risks": [
+    "special_risks": [
       "moisture"
     ],
-    "maxStorageTime": "unlimited"
+    "max_storage_time": "unlimited"
   },
   "marketDynamics": {
     "baseAvailability": 0.8,

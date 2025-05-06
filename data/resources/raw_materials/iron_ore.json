@@ -27,28 +27,28 @@
     "availability": "common",
     "seasonality": "year_round"
   },
-  "qualityLevels": {
-    "available": [
+  "quality_variations": {
+    "available_qualities": [
       "poor",
       "common",
       "fine"
     ],
-    "default": "common",
-    "effects": {
+    "default_quality": "common",
+    "quality_multipliers": {
       "poor": {
-        "valueModifier": 0.7,
-        "productionEfficiency": 0.8,
-        "yieldModifier": 0.7
+        "value": 0.7,
+        "production_efficiency": 0.8,
+        "yield_modifier": 0.7
       },
       "common": {
-        "valueModifier": 1.0,
-        "productionEfficiency": 1.0,
-        "yieldModifier": 1.0
+        "value": 1.0,
+        "production_efficiency": 1.0,
+        "yield_modifier": 1.0
       },
       "fine": {
-        "valueModifier": 1.4,
-        "productionEfficiency": 1.2,
-        "yieldModifier": 1.3
+        "value": 1.4,
+        "production_efficiency": 1.2,
+        "yield_modifier": 1.3
       }
     }
   },
@@ -69,8 +69,8 @@
       "relationship": "required"
     }
   ],
-  "transportation": {
-    "methods": {
+  "transport_properties": {
+    "transport_methods": {
       "large_ship": {
         "capacity": 300,
         "efficiency": 1.0,
@@ -82,44 +82,44 @@
         "risk": 0.15
       }
     },
-    "requirements": [
+    "special_requirements": [
       "sturdy_vessel"
     ],
-    "loadingTime": 20,
-    "restrictions": [
+    "loading_time": 20,
+    "route_restrictions": [
       "weight_limits"
     ]
   },
-  "storage": {
-    "compatible": {
+  "storage_properties": {
+    "storage_facilities": {
       "bulk_materials_yard": {
-        "capacityMultiplier": 1.0,
+        "capacity_multiplier": 1.0,
         "preservation": 1.0
       },
       "foundry": {
-        "capacityMultiplier": 0.6,
+        "capacity_multiplier": 0.6,
         "preservation": 1.0
       }
     },
-    "requirements": [
+    "storage_requirements": [
       "reinforced_flooring"
     ],
-    "risks": [
+    "special_risks": [
       "moisture"
     ],
-    "maxStorageTime": "unlimited"
+    "max_storage_time": "unlimited"
   },
-  "marketDynamics": {
-    "baseAvailability": 0.7,
-    "demandLevel": "steady",
-    "priceVolatility": 0.3,
-    "regionalFactors": [
+  "market_dynamics": {
+    "base_availability": 0.7,
+    "demand_level": "steady",
+    "price_volatility": 0.3,
+    "regional_factors": [
       {
         "region": "arsenal",
-        "availabilityModifier": 1.2,
-        "priceModifier": 0.9
+        "availability_modifier": 1.2,
+        "price_modifier": 0.9
       }
     ],
-    "seasonalFactors": []
+    "seasonal_factors": []
   }
 }

@@ -31,25 +31,25 @@
       "note": "Different species available in different seasons"
     }
   },
-  "qualityLevels": {
-    "available": [
+  "quality_variations": {
+    "available_qualities": [
       "poor",
       "common",
       "fine"
     ],
-    "default": "common",
-    "effects": {
+    "default_quality": "common",
+    "quality_multipliers": {
       "poor": {
-        "valueModifier": 0.7,
-        "perishTimeModifier": 0.7
+        "value": 0.7,
+        "perish_time_modifier": 0.7
       },
       "common": {
-        "valueModifier": 1.0,
-        "perishTimeModifier": 1.0
+        "value": 1.0,
+        "perish_time_modifier": 1.0
       },
       "fine": {
-        "valueModifier": 1.5,
-        "perishTimeModifier": 1.2
+        "value": 1.5,
+        "perish_time_modifier": 1.2
       }
     }
   },
@@ -103,8 +103,8 @@
       "relationship": "optional"
     }
   ],
-  "transportation": {
-    "methods": {
+  "transport_properties": {
+    "transport_methods": {
       "fishing_boat": {
         "capacity": 20,
         "efficiency": 1.0,
@@ -121,64 +121,64 @@
         "risk": 0.2
       }
     },
-    "requirements": [
+    "special_requirements": [
       "cool_conditions",
       "quick_delivery"
     ],
-    "loadingTime": 5,
-    "restrictions": [
+    "loading_time": 5,
+    "route_restrictions": [
       "time_sensitive"
     ]
   },
-  "storage": {
-    "compatible": {
+  "storage_properties": {
+    "storage_facilities": {
       "ice_storage": {
-        "capacityMultiplier": 1.0,
+        "capacity_multiplier": 1.0,
         "preservation": 1.0,
-        "perishTimeExtension": 2880
+        "perish_time_extension": 2880
       },
       "market_stall": {
-        "capacityMultiplier": 0.5,
+        "capacity_multiplier": 0.5,
         "preservation": 0.8,
-        "perishTimeExtension": 0
+        "perish_time_extension": 0
       }
     },
-    "requirements": [
+    "storage_requirements": [
       "cold",
       "ventilation"
     ],
-    "risks": [
+    "special_risks": [
       "spoilage",
       "odor"
     ],
-    "maxStorageTime": "depends_on_preservation"
+    "max_storage_time": "depends_on_preservation"
   },
-  "marketDynamics": {
-    "baseAvailability": 0.9,
-    "demandLevel": "high",
-    "priceVolatility": 0.4,
-    "regionalFactors": [
+  "market_dynamics": {
+    "base_availability": 0.9,
+    "demand_level": "high",
+    "price_volatility": 0.4,
+    "regional_factors": [
       {
         "region": "fish_market",
-        "availabilityModifier": 2.0,
-        "priceModifier": 0.8
+        "availability_modifier": 2.0,
+        "price_modifier": 0.8
       }
     ],
-    "seasonalFactors": [
+    "seasonal_factors": [
       {
         "season": "spring",
-        "availabilityModifier": 1.3,
-        "priceModifier": 0.8,
+        "availability_modifier": 1.3,
+        "price_modifier": 0.8,
         "note": "Spawning season for many species"
       },
       {
         "season": "winter",
-        "availabilityModifier": 0.7,
-        "priceModifier": 1.3,
+        "availability_modifier": 0.7,
+        "price_modifier": 1.3,
         "note": "Rough seas reduce fishing"
       }
     ],
-    "environmentalFactors": {
+    "environmental_factors": {
       "weather": {
         "storm_effect": "reduced_availability"
       },

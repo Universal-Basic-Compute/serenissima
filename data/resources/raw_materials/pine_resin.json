@@ -31,20 +31,20 @@
       "note": "Resin flows most freely during warm months"
     }
   },
-  "qualityLevels": {
-    "available": [
+  "quality_variations": {
+    "available_qualities": [
       "common",
       "fine"
     ],
-    "default": "common",
-    "effects": {
+    "default_quality": "common",
+    "quality_multipliers": {
       "common": {
-        "valueModifier": 1.0,
-        "productionEfficiency": 1.0
+        "value": 1.0,
+        "production_efficiency": 1.0
       },
       "fine": {
-        "valueModifier": 1.4,
-        "productionEfficiency": 1.2
+        "value": 1.4,
+        "production_efficiency": 1.2
       }
     }
   },
@@ -72,8 +72,8 @@
       "relationship": "required"
     }
   ],
-  "transportation": {
-    "methods": {
+  "transport_properties": {
+    "transport_methods": {
       "large_ship": {
         "capacity": 300,
         "efficiency": 0.9,
@@ -90,64 +90,64 @@
         "risk": 0.25
       }
     },
-    "requirements": [
+    "special_requirements": [
       "sealed_containers",
       "careful_handling"
     ],
-    "loadingTime": 12,
-    "restrictions": [
+    "loading_time": 12,
+    "route_restrictions": [
       "fire_safety"
     ]
   },
-  "storage": {
-    "compatible": {
+  "storage_properties": {
+    "storage_facilities": {
       "warehouse": {
-        "capacityMultiplier": 0.8,
+        "capacity_multiplier": 0.8,
         "preservation": 0.95
       },
       "pitch_works": {
-        "capacityMultiplier": 1.0,
+        "capacity_multiplier": 1.0,
         "preservation": 1.0
       }
     },
-    "requirements": [
+    "storage_requirements": [
       "cool",
       "sealed_containers",
       "fire_safety"
     ],
-    "risks": [
+    "special_risks": [
       "fire",
       "hardening",
       "contamination"
     ],
-    "maxStorageTime": 10080
+    "max_storage_time": 10080
   },
-  "marketDynamics": {
-    "baseAvailability": 0.7,
-    "demandLevel": "high",
-    "priceVolatility": 0.3,
-    "regionalFactors": [
+  "market_dynamics": {
+    "base_availability": 0.7,
+    "demand_level": "high",
+    "price_volatility": 0.3,
+    "regional_factors": [
       {
         "region": "arsenal",
-        "availabilityModifier": 1.2,
-        "priceModifier": 0.9
+        "availability_modifier": 1.2,
+        "price_modifier": 0.9
       }
     ],
-    "seasonalFactors": [
+    "seasonal_factors": [
       {
         "season": "summer",
-        "availabilityModifier": 1.3,
-        "priceModifier": 0.8,
+        "availability_modifier": 1.3,
+        "price_modifier": 0.8,
         "note": "Peak harvesting season"
       },
       {
         "season": "winter",
-        "availabilityModifier": 0.6,
-        "priceModifier": 1.3,
+        "availability_modifier": 0.6,
+        "price_modifier": 1.3,
         "note": "Minimal harvesting possible"
       }
     ],
-    "environmentalFactors": {
+    "environmental_factors": {
       "forest_management": {
         "impact": "high",
         "note": "Sustainable tapping practices required for long-term supply"

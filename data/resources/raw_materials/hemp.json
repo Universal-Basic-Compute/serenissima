@@ -94,8 +94,8 @@
       "relationship": "required"
     }
   ],
-  "transportation": {
-    "methods": {
+  "transport_properties": {
+    "transport_methods": {
       "large_ship": {
         "capacity": 400,
         "efficiency": 1.0,
@@ -112,60 +112,60 @@
         "risk": 0.2
       }
     },
-    "requirements": [
+    "special_requirements": [
       "dry_storage"
     ],
-    "loadingTime": 10,
-    "restrictions": []
+    "loading_time": 10,
+    "route_restrictions": []
   },
-  "storage": {
-    "compatible": {
+  "storage_properties": {
+    "storage_facilities": {
       "warehouse": {
-        "capacityMultiplier": 1.0,
+        "capacity_multiplier": 1.0,
         "preservation": 1.0
       },
       "rope_works": {
-        "capacityMultiplier": 0.7,
+        "capacity_multiplier": 0.7,
         "preservation": 1.0
       },
       "weaving_workshop": {
-        "capacityMultiplier": 0.7,
+        "capacity_multiplier": 0.7,
         "preservation": 1.0
       }
     },
-    "requirements": [
+    "storage_requirements": [
       "dry",
       "ventilated"
     ],
-    "risks": [
+    "special_risks": [
       "moisture",
       "pests",
       "fire"
     ],
-    "maxStorageTime": 43200
+    "max_storage_time": 43200
   },
-  "marketDynamics": {
-    "baseAvailability": 0.8,
-    "demandLevel": "high",
-    "priceVolatility": 0.3,
-    "regionalFactors": [
+  "market_dynamics": {
+    "base_availability": 0.8,
+    "demand_level": "high",
+    "price_volatility": 0.3,
+    "regional_factors": [
       {
         "region": "arsenal",
-        "availabilityModifier": 1.3,
-        "priceModifier": 0.9
+        "availability_modifier": 1.3,
+        "price_modifier": 0.9
       }
     ],
-    "seasonalFactors": [
+    "seasonal_factors": [
       {
         "season": "autumn",
-        "availabilityModifier": 1.4,
-        "priceModifier": 0.8,
+        "availability_modifier": 1.4,
+        "price_modifier": 0.8,
         "note": "Post-harvest abundance"
       },
       {
         "season": "spring",
-        "availabilityModifier": 0.7,
-        "priceModifier": 1.2,
+        "availability_modifier": 0.7,
+        "price_modifier": 1.2,
         "note": "Pre-harvest scarcity"
       }
     ]
