@@ -103,6 +103,20 @@
       "role": "primary_material",
       "outputResource": "furniture",
       "productionChain": "Timber → Carpentry Workshop → Furniture"
+    },
+    {
+      "process": "boat_building",
+      "building": "boat_workshop",
+      "role": "primary_material",
+      "outputResource": "small_boats",
+      "productionChain": "Timber → Boat Workshop → Small Boats"
+    },
+    {
+      "process": "gondola_crafting",
+      "building": "boat_workshop",
+      "role": "primary_material",
+      "outputResource": "gondola",
+      "productionChain": "Timber → Boat Workshop → Gondola"
     }
   ],
   "substitutes": [],
