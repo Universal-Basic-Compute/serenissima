@@ -346,7 +346,7 @@ export class UserService {
     const cachedEntry = this.userByUsernameCache.get(username);
     if (this.isCacheValid(cachedEntry)) {
       log.debug(`Returning user from cache: ${username}`);
-      return cachedEntry.data;
+      return cachedEntry!.data;
     }
     
     const user = this.users[username];
@@ -411,7 +411,7 @@ export class UserService {
     const cachedEntry = this.userByWalletCache.get(address);
     if (this.isCacheValid(cachedEntry)) {
       log.info(`Returning user profile from cache for wallet: ${maskedAddress}`);
-      this.currentUser = cachedEntry.data;
+      this.currentUser = cachedEntry!.data;
       
       if (this.currentUser) {
         log.debug(`Cached profile found for wallet: ${maskedAddress}, username: ${this.currentUser.username}`);
