@@ -168,9 +168,9 @@
   ],
   "substitutes": [
     {
-      "resourceId": "local_plant_dyes",
+      "resource_id": "local_plant_dyes",
       "efficiency": 0.6,
-      "qualityPenalty": 2,
+      "quality_penalty": 2,
       "context": "textile_dyeing"
     }
   ],
