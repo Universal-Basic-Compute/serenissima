@@ -511,16 +511,16 @@ export default function PolygonViewer() {
         }, 3000);
         
         // Store the timers for cleanup
-        return () => {
-          clearTimeout(firstTimer);
-          clearTimeout(secondTimer);
-        };
+        return [firstTimer, secondTimer];
       }
+      
+      return undefined;
     };
     
     // Use event bus for land ownership changes
     const subscription = eventBus.subscribe(EventTypes.LAND_OWNERSHIP_CHANGED, handleLandOwnershipChanged);
     
+    // Clean up subscription and any timers
     return () => {
       subscription.unsubscribe();
     };
