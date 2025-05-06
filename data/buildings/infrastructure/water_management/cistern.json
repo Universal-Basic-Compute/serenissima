@@ -5,7 +5,7 @@
   "tier": 2,
   "size": "Medium",
   "unlockCondition": "4,000,000 ducats capital, property ownership",
-  "calculationsAnalysis": "The Cistern represents essential water infrastructure with no direct revenue. The construction cost of 1,500,000 ducats reflects the specialized underground construction and filtration systems required, while generating no direct income reflects its utility service rather than commercial purpose. The maintenance cost of 12,500 ducats creates an ongoing expense justified by the essential fresh water provided. The employment capacity of 1 represents the minimal maintenance staff needed. The construction time of 6 days (518400000ms) reflects the specialized construction requirements. This building creates a strategic investment in water security that enables residential and commercial development in a saltwater environment, reflecting the historical ingenuity of Venice's water management systems that allowed a city to thrive in a lagoon without natural fresh water sources.",
+  "calculationsAnalysis": "The Cistern represents essential water infrastructure with modest revenue. The construction cost of 1,500,000 ducats reflects the specialized underground construction and filtration systems required, while generating 5,000 ducats income reflects water usage fees and increased property values in serviced areas. The maintenance cost of 12,500 ducats creates an ongoing expense partially offset by this income. The employment capacity of 1 represents the minimal maintenance staff needed. The construction time of 6 days (518400000ms) reflects the specialized construction requirements. This building creates a strategic investment in water security that enables residential and commercial development in a saltwater environment, reflecting the historical ingenuity of Venice's water management systems that allowed a city to thrive in a lagoon without natural fresh water sources.",
   "shortDescription": "Rainwater collection and storage system providing fresh water in the saltwater lagoon environment.",
   "fullDescription": "Critical to survival in a saltwater environment, cisterns collect and store rainwater for drinking and domestic use. Featuring filtration systems, underground storage chambers, and often decorative wellheads, these sophisticated water management systems were essential infrastructure in Venice. Public cisterns served neighborhoods, while private ones provided water security for wealthy households and businesses.",
   "flavorText": "In a city surrounded by water, none is fit to drink—the clever cistern transforms the heavens themselves into our water supply, proving that Venetian ingenuity can resolve even the most fundamental paradoxes.",
@@ -19,7 +19,7 @@
   },
   "maintenanceCost": 12500,
   "constructionTime": 518400000,
-  "incomeGeneration": 0,
+  "incomeGeneration": 5000,
   "employmentCapacity": 1,
   "locationRequirements": {
     "districtRestrictions": "All districts, often in campos or courtyards",

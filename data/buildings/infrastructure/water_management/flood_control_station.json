@@ -5,7 +5,7 @@
   "tier": 3,
   "size": "Large",
   "unlockCondition": "15,000,000 ducats capital, Engineering Guild approval, Senate permission",
-  "calculationsAnalysis": "The Flood Control Station represents advanced water management infrastructure with no direct revenue. The construction cost of 6,000,000 ducats reflects the specialized equipment and engineering systems required, while generating no direct income reflects its public safety function rather than commercial purpose. The maintenance cost of 60,000 ducats creates a substantial ongoing expense justified by the critical flood protection provided. The employment capacity of 15 represents the engineers, operators, and maintenance staff needed. The construction time of 14 days (1209600000ms) reflects the complex engineering project. This building creates a strategic investment in flood protection that enables development in vulnerable low-lying areas, reflecting Venice's historical struggle against the sea and the sophisticated systems developed to protect the city from acqua alta (high water) events.",
+  "calculationsAnalysis": "The Flood Control Station represents advanced water management infrastructure with modest revenue. The construction cost of 6,000,000 ducats reflects the specialized equipment and engineering systems required, while generating 15,000 ducats income reflects fees from protected properties and increased property values in secured areas. The maintenance cost of 60,000 ducats creates a substantial ongoing expense partially offset by this income. The employment capacity of 15 represents the engineers, operators, and maintenance staff needed. The construction time of 14 days (1209600000ms) reflects the complex engineering project. This building creates a strategic investment in flood protection that enables development in vulnerable low-lying areas, reflecting Venice's historical struggle against the sea and the sophisticated systems developed to protect the city from acqua alta (high water) events.",
   "shortDescription": "Specialized facility managing barriers and pumps to control acqua alta flooding events.",
   "fullDescription": "Venice's first line of defense against the sea, flood control stations manage the complex systems that protect the city during acqua alta (high water) events. Featuring monitoring equipment, barrier storage, pump systems, and emergency response capabilities, these facilities represent sophisticated engineering solutions to Venice's existential challenge. Their operators maintain constant vigilance against the lagoon's rising waters.",
   "flavorText": "The sea gives Venice life, commerce, and beauty—but would also reclaim it in an instant if we relaxed our vigilance even for a season.",
@@ -18,7 +18,7 @@
   },
   "maintenanceCost": 60000,
   "constructionTime": 1209600000,
-  "incomeGeneration": 0,
+  "incomeGeneration": 15000,
   "employmentCapacity": 15,
   "locationRequirements": {
     "districtRestrictions": "Low-lying districts prone to flooding, canal entrances",
