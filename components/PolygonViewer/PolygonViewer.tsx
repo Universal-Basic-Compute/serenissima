@@ -1576,12 +1576,18 @@ export default function PolygonViewer() {
     );
   }, []);
 
+  // Create a memoized reset key for the error boundary
+  const errorBoundaryResetKey = useMemo(() => 
+    `${activeView}-${highQuality}-${polygons.length}`, 
+    [activeView, highQuality, polygons.length]
+  );
+
   if (loading) {
     return (
       <ThreeDErrorBoundary 
         onError={handleRenderingError}
-        resetKey={`${activeView}-${highQuality}-${polygons.length}`}
-        fallbackComponent={errorBoundaryFallback}
+        resetKey={errorBoundaryResetKey}
+        fallback={errorBoundaryFallback}
       >
         <div className="w-full h-full flex flex-col items-center justify-center bg-amber-50">
           <div className="text-amber-800 text-2xl font-serif mb-4">Mapping the Venetian Republic...</div>
@@ -1638,8 +1644,8 @@ export default function PolygonViewer() {
   return (
     <ThreeDErrorBoundary 
       onError={handleRenderingError}
-      resetKey={`${activeView}-${highQuality}-${polygons.length}`}
-      fallbackComponent={errorBoundaryFallback}
+      resetKey={errorBoundaryResetKey}
+      fallback={errorBoundaryFallback}
     >
       <div className="w-screen h-screen">
         {/* View mode menu */}
