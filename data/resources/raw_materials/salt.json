@@ -74,30 +74,38 @@
     }
   ],
   "production_properties": {
-    "processor_building": "stonecutter_workshop",
-    "processing_complexity": 4,
-    "required_skill": "stonecutting:3",
-    "processing_time": 360,
+    "processor_building": "salting_house",
+    "processing_complexity": 3,
+    "required_skill": "food_preservation:2",
+    "processing_time": 240,
     "outputs": [
       {
-        "resource": "cut_stone",
+        "resource": "preserved_food",
         "amount": 1
       },
       {
-        "resource": "sculpture",
+        "resource": "preserved_fish",
         "amount": 1,
-        "alternative_output": true,
-        "facility": "sculptor_workshop"
+        "requires": ["fish"]
+      },
+      {
+        "resource": "salted_meat",
+        "amount": 1,
+        "requires": ["meat"]
       }
     ],
     "production_chains": [
       {
-        "process": "stonecutting",
-        "chain": "Marble → Stonecutter Workshop → Cut Stone"
+        "process": "food_preservation",
+        "chain": "Salt → Salting House → Preserved Food"
       },
       {
-        "process": "sculpting",
-        "chain": "Marble → Sculptor Workshop → Sculpture"
+        "process": "fish_preservation",
+        "chain": "Salt + Fish → Salting House → Preserved Fish"
+      },
+      {
+        "process": "meat_preservation",
+        "chain": "Salt + Meat → Salting House → Salted Meat"
       }
     ]
   },
