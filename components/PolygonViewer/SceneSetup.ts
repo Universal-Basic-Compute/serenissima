@@ -268,11 +268,13 @@ export default class SceneSetup {
             });
           } else {
             object.material.needsUpdate = true;
-            if (object.material instanceof THREE.MeshBasicMaterial || object.material instanceof THREE.MeshStandardMaterial) {
-              object.material.depthWrite = false;
-              object.material.polygonOffset = true;
-              object.material.polygonOffsetFactor = -10;
-              object.material.polygonOffsetUnits = -10;
+            if (object.material instanceof THREE.Material) {
+              if (object.material instanceof THREE.MeshBasicMaterial || object.material instanceof THREE.MeshStandardMaterial) {
+                object.material.depthWrite = false;
+                object.material.polygonOffset = true;
+                object.material.polygonOffsetFactor = -10;
+                object.material.polygonOffsetUnits = -10;
+              }
             }
           }
         }
