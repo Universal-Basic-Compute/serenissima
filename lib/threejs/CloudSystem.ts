@@ -38,12 +38,16 @@ export class CloudSystem {
     height?: number;
     performanceMode?: boolean;
   }) {
+    // Initialize required properties first to avoid "used before assigned" errors
+    this.scene = new THREE.Scene(); // Default initialization
+    this.clouds = new THREE.Group();
+    
     try {
+      // Now properly assign from options
       this.scene = options.scene;
       this.width = options.width ?? this.width;
       this.height = options.height ?? this.height;
       this.performanceMode = options.performanceMode ?? this.performanceMode;
-      this.clouds = new THREE.Group();
       
       // Add error handling for scene addition
       try {
