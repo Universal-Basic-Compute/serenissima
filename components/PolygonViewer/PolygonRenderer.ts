@@ -1261,7 +1261,9 @@ export default class PolygonRenderer {
       if (ownerCoatOfArmsUrl) {
         console.log(`Updating coat of arms texture for ${polygonId} with URL ${ownerCoatOfArmsUrl}`);
         if (ownerCoatOfArmsUrl) {
-          polygonMesh.updateCoatOfArmsTexture(ownerCoatOfArmsUrl);
+          if (ownerCoatOfArmsUrl) {
+            polygonMesh.updateCoatOfArmsTexture(ownerCoatOfArmsUrl);
+          }
         }
       }
     } catch (error) {
