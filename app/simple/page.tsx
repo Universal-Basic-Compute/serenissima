@@ -1140,10 +1140,11 @@ function generateCoatOfArmsImage() {
       this.setCoatOfArmsImage(imageUrl);
         
     } catch (error) {
+      this.setIsGeneratingImage(false);
       console.error('Error generating coat of arms image:', error);
       alert(`Failed to generate image: ${error instanceof Error ? error.message : String(error)}`);
     } finally {
-      this.setIsGeneratingImage(false);
+      setIsGeneratingImage(false);
     }
   };
 }
