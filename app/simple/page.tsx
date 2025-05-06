@@ -235,7 +235,7 @@ export default function SimplePage() {
       
       // Hide success message after 3 seconds
       setTimeout(() => {
-        setCacheCleared(false);
+        setCacheCleared(undefined);
       }, 3000);
       
       // Reload the page after a short delay
