@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { MutableRefObject } from 'react';
 import { Polygon, ViewMode } from './types';
 import { normalizeCoordinates, createPolygonShape } from './utils';
 
@@ -115,22 +116,24 @@ class PolygonMesh {
         transparent: false,
         depthWrite: true,
         roughness: 0.8,
-        metalness: 0.1,
-        // Enable shadows
-        castShadow: true,
-        receiveShadow: true
+        metalness: 0.1
       });
+      
+      // Enable shadows after material creation
+      topMaterial.castShadow = true;
+      topMaterial.receiveShadow = true;
       
       const sideMaterial = new THREE.MeshStandardMaterial({
         color: this.determineLandColor(),
         transparent: false,
         opacity: 1.0,
         roughness: 0.9,
-        metalness: 0.0,
-        // Enable shadows
-        castShadow: true,
-        receiveShadow: true
+        metalness: 0.0
       });
+      
+      // Enable shadows after material creation
+      sideMaterial.castShadow = true;
+      sideMaterial.receiveShadow = true;
 
       // Create mesh with different materials for top and sides
       const materials = [topMaterial, sideMaterial];
