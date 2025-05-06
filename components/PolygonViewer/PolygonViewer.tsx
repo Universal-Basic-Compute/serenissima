@@ -470,7 +470,7 @@ export default function PolygonViewer() {
       // Update the polygon renderer if it exists
       if (polygonRendererRef.current) {
         console.log(`Updating polygon owner in renderer: ${landId} -> ${newOwner}`);
-        polygonRendererRef.current.updatePolygonOwner(landId, newOwner as string);
+        polygonRendererRef.current.updatePolygonOwner(landId, newOwner || undefined);
       }
       
       // If this is the currently selected polygon, make sure the panel stays open
@@ -804,7 +804,7 @@ export default function PolygonViewer() {
     checkTextureFiles();
     
     // Initialize road manager
-    if (sceneRef.current) {
+    if (sceneRef.current && sceneRef.current.scene) {
       roadManagerRef.current = new RoadManager(sceneRef.current.scene);
       
       // Load roads from Airtable
@@ -909,10 +909,10 @@ export default function PolygonViewer() {
         scene: sceneRef.current?.scene || fallbackScene,
         polygonMeshesRef,
         activeView,
-        setHoveredPolygonId,
         selectedPolygonId,
         setSelectedPolygonId,
-        polygonRendererRef
+        polygonRendererRef,
+        setHoveredPolygonId
       });
       interactionManagerRef.current = interactionManager;
     };
