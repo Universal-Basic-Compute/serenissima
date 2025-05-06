@@ -99,49 +99,60 @@ async function processBatch(batch, batchNumber) {
   fs.writeFileSync(tempErrorFile, errorDetails, 'utf8');
   
   // Build the Aider command with a simpler message
-  const message = `Fix TypeScript errors in batch ${batchNumber} (see ${tempErrorFile} for details)`;
-  // Escape any single quotes in the message
-  const escapedMessage = message.replace(/'/g, "\\'");
+  const message = `Fix TypeScript errors in batch ${batchNumber}`;
 
   const aiderArgs = [
     '--yes-always',
-    '--message', `'${escapedMessage}'`,
+    '--message', message,
   ];
+  
+  console.log(`Working on files: ${files.join(', ')}`);
+  console.log(`Fixing errors:\n${errorDetails}`);
+  
+  // Create a more detailed instruction file that Aider can read
+  const instructionFile = `aider-instructions-batch-${batchNumber}.md`;
+  fs.writeFileSync(instructionFile, `# TypeScript Errors to Fix
+
+Please fix the following TypeScript errors in batch ${batchNumber}:
+
+\`\`\`
+${errorDetails}
+\`\`\`
+
+Focus on adding proper type annotations and fixing type-related issues.
+`, 'utf8');
+
+  // Add the instruction file to the files to be processed
+  aiderArgs.push('--file', instructionFile);
   
   // Add each file to the command
   files.forEach(file => {
     aiderArgs.push('--file', file);
   });
   
-  console.log(`Working on files: ${files.join(', ')}`);
-  console.log(`Fixing errors:\n${errorDetails}`);
-  
-  // Log the full command that will be executed
-  const fullCommand = `aider ${aiderArgs.map(arg => {
-    // Properly quote arguments with spaces
-    return arg.includes(' ') ? `"${arg}"` : arg;
-  }).join(' ')}`;
-  console.log(`\nExecuting command:\n${fullCommand}\n`);
+  // Log the command that will be executed
+  console.log(`\nExecuting aider with batch ${batchNumber} errors\n`);
   
   // Print the error details to the console for reference
-  console.log(`Error details saved to ${tempErrorFile}`);
+  console.log(`Error details saved to ${tempErrorFile} and instructions in ${instructionFile}`);
   
   // Run Aider
   return new Promise((resolve, reject) => {
     try {
       const aider = spawn('aider', aiderArgs, {
         stdio: 'inherit',
-        shell: true
+        shell: false
       });
       
       aider.on('close', code => {
         if (code === 0) {
           console.log(`Aider successfully processed batch ${batchNumber}`);
-          // Clean up the temporary file
+          // Clean up the temporary files
           try {
             fs.unlinkSync(tempErrorFile);
+            fs.unlinkSync(instructionFile);
           } catch (err) {
-            console.warn(`Could not delete temporary file ${tempErrorFile}: ${err.message}`);
+            console.warn(`Could not delete temporary files: ${err.message}`);
           }
           resolve();
         } else {
