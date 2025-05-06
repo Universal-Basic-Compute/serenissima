@@ -1606,7 +1606,7 @@ export default function Home() {
   };
 
 
-  // Add a function to load polygons onto the map
+  // Define loadPolygonsOnMap function early in the component
   const loadPolygonsOnMap = useCallback(() => {
     console.log('loadPolygonsOnMap called');
     
@@ -1726,7 +1726,7 @@ export default function Home() {
       .catch(error => {
         console.error('Error loading polygons:', error);
       });
-  }, [isGoogleLoaded, centroidDragMode]);
+  }, [isGoogleLoaded, centroidDragMode, selectedPolygon, activeLandPolygons, centroidMarkers]);
 
   // Add useEffect to load polygons when map is ready
   useEffect(() => {
@@ -2539,8 +2539,6 @@ export default function Home() {
           getSnapshotWithCache={getSnapshotWithCache}
           ref={polygonRendererRef}
           activeView={activeView}
-          // Add any other required props here with proper types
-          {...{}} /* This empty object spread allows passing props to a component with unknown props */
         />
       </>
       
