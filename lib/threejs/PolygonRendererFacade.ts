@@ -236,9 +236,10 @@ export class PolygonRendererFacade {
         if (onLoad) onLoad(texture);
       },
       undefined,
-      (error: ErrorEvent) => {
+      (error: unknown) => {
         console.error(`Error loading texture ${textureUrl}:`, error);
-        if (onError) onError(new Error(`Failed to load texture: ${error.message || 'Unknown error'}`));
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        if (onError) onError(new Error(`Failed to load texture: ${errorMessage}`));
       }
     );
     
