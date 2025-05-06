@@ -11,9 +11,9 @@ interface SceneSetupProps {
 }
 
 export default class SceneSetup {
-  public scene: THREE.Scene;
-  public camera: THREE.PerspectiveCamera;
-  public renderer: THREE.WebGLRenderer;
+  public scene!: THREE.Scene;
+  public camera!: THREE.PerspectiveCamera;
+  public renderer!: THREE.WebGLRenderer;
   public controls: any;
   public composer: any;
   private threejs: ThreeJSFacade;
