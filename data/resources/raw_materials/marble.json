@@ -81,7 +81,16 @@
       "primarilyUsedFor": "water_resistant_elements"
     }
   ],
-  "productionChains": [],
+  "productionChains": [
+    {
+      "process": "stonecutting",
+      "chain": "Marble → Stonecutter Workshop → Cut Stone"
+    },
+    {
+      "process": "sculpture",
+      "chain": "Marble → Sculptor Workshop → Sculpture"
+    }
+  ],
   "productionProperties": {
     "processorBuilding": "stonecutter_workshop",
     "processingComplexity": 4,

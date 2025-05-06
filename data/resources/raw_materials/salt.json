@@ -4,11 +4,11 @@
   "category": "raw_materials",
   "subcategory": "mineral",
   "icon": "/assets/icons/resources/salt.png",
-  "base_properties": {
-    "base_value": 18,
+  "baseProperties": {
+    "baseValue": 18,
     "weight": 1.0,
     "volume": 0.8,
-    "stack_size": 50,
+    "stackSize": 50,
     "perishable": false
   },
   "description": {
@@ -16,9 +16,9 @@
     "full": "White crystalline mineral harvested from the Venetian lagoon's salt pans. A strategic resource that formed the foundation of Venice's early wealth and remains a state monopoly.",
     "flavor": "The humble salt crystal—Venice's first treasure. Before spices and silk, before gold and glass, there was salt. The invisible empire upon which all else was built."
   },
-  "source_properties": {
+  "sourceProperties": {
     "source": "local",
-    "harvest_method": "evaporation",
+    "harvestMethod": "evaporation",
     "locations": [
       "chioggia",
       "lagoon_salt_pans",
@@ -26,31 +26,31 @@
     ],
     "availability": "common",
     "seasonality": "summer",
-    "seasonality_details": {
+    "seasonalityDetails": {
       "harvest": "summer",
       "peak": "late_summer",
       "note": "Dependent on dry weather for optimal production"
     }
   },
-  "quality_variations": {
-    "available_qualities": [
+  "qualityVariations": {
+    "availableQualities": [
       "common",
       "fine",
       "superior"
     ],
-    "default_quality": "common",
-    "quality_multipliers": {
+    "defaultQuality": "common",
+    "qualityMultipliers": {
       "common": {
         "value": 1.0,
-        "production_efficiency": 1.0
+        "productionEfficiency": 1.0
       },
       "fine": {
         "value": 1.3,
-        "production_efficiency": 1.2
+        "productionEfficiency": 1.2
       },
       "superior": {
         "value": 1.8,
-        "production_efficiency": 1.4
+        "productionEfficiency": 1.4
       }
     }
   },
@@ -123,9 +123,9 @@
       "relationship": "required"
     }
   ],
-  "transport_properties": {
-    "transport_methods": {
-      "large_ship": {
+  "transportProperties": {
+    "transportMethods": {
+      "largeShip": {
         "capacity": 500,
         "efficiency": 1.0,
         "risk": 0.1
@@ -141,82 +141,99 @@
         "risk": 0.2
       }
     },
-    "special_requirements": [
+    "specialRequirements": [
       "moisture_protection"
     ],
-    "loading_time": 8,
-    "route_restrictions": [
+    "loadingTime": 8,
+    "routeRestrictions": [
       "state_monopoly_transport_only"
     ]
   },
-  "storage_properties": {
-    "storage_facilities": {
-      "salt_warehouse": {
-        "capacity_multiplier": 1.0,
+  "storageProperties": {
+    "storageFacilities": {
+      "saltWarehouse": {
+        "capacityMultiplier": 1.0,
         "preservation": 1.0
       },
-      "salting_house": {
-        "capacity_multiplier": 0.8,
+      "saltingHouse": {
+        "capacityMultiplier": 0.8,
         "preservation": 1.0
       }
     },
-    "storage_requirements": [
+    "storageRequirements": [
       "dry",
       "moisture_proof_containers"
     ],
-    "special_risks": [
+    "specialRisks": [
       "moisture",
       "theft"
     ],
-    "max_storage_time": "unlimited"
+    "maxStorageTime": "unlimited"
   },
-  "market_dynamics": {
-    "base_availability": 0.9,
-    "demand_level": "very_high",
-    "price_volatility": 0.2,
-    "state_monopoly": true,
-    "export_restrictions": true,
-    "regional_factors": [
+  "marketDynamics": {
+    "baseAvailability": 0.9,
+    "demandLevel": "very_high",
+    "priceVolatility": 0.2,
+    "stateMonopoly": true,
+    "exportRestrictions": true,
+    "regionalFactors": [
       {
         "region": "chioggia",
-        "availability_modifier": 1.5,
-        "price_modifier": 0.9
+        "availabilityModifier": 1.5,
+        "priceModifier": 0.9
       }
     ],
-    "seasonal_factors": [
+    "seasonalFactors": [
       {
         "season": "autumn",
-        "availability_modifier": 1.3,
-        "price_modifier": 0.9,
+        "availabilityModifier": 1.3,
+        "priceModifier": 0.9,
         "note": "Post-harvest abundance"
       },
       {
         "season": "spring",
-        "availability_modifier": 0.8,
-        "price_modifier": 1.1,
+        "availabilityModifier": 0.8,
+        "priceModifier": 1.1,
         "note": "Pre-production scarcity"
       }
     ],
-    "strategic_importance": {
+    "strategicImportance": {
       "level": "critical",
       "note": "Foundation of Venetian trade networks and state revenue"
     },
-    "trade_disruptions": {
+    "tradeDisruptions": {
       "factors": [],
       "impact": ""
     }
   },
-  "historical_notes": {
-    "introduction_year": "ancient",
-    "notable_producers": [
+  "productionChainPosition": {
+    "predecessors": [],
+    "successors": [
+      {
+        "resource": "preserved_food",
+        "facility": "salting_house"
+      },
+      {
+        "resource": "preserved_fish",
+        "facility": "salting_house"
+      },
+      {
+        "resource": "salted_meat",
+        "facility": "salting_house"
+      }
+    ]
+  },
+  "historicalNotes": {
+    "introductionYear": "ancient",
+    "notableProducers": [
       "Chioggia Salt Pans",
       "Venetian Lagoon"
     ],
-    "historical_significance": "Salt was one of Venice's earliest and most important commodities, forming the foundation of its trading empire. The Republic maintained strict control over salt production and trade.",
-    "historical_markets": [
+    "historicalSignificance": "Salt was one of Venice's earliest and most important commodities, forming the foundation of its trading empire. The Republic maintained strict control over salt production and trade.",
+    "historicalMarkets": [
       "Venetian State Salt Monopoly",
       "European food preservation markets"
     ],
-    "cultural_context": "Salt production was so vital to Venice that special laws protected salt workers and facilities, with severe penalties for interference with the salt trade."
+    "culturalContext": "Salt production was so vital to Venice that special laws protected salt workers and facilities, with severe penalties for interference with the salt trade."
   }
 }

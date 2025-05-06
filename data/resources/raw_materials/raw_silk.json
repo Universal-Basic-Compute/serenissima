@@ -193,5 +193,18 @@
       ],
       "impact": "severe"
     }
+  },
+  "historicalNotes": {
+    "introductionYear": "ancient",
+    "notableProducers": [
+      "Chinese silk farms",
+      "Persian silk traders"
+    ],
+    "historicalSignificance": "Raw silk was one of Venice's most valuable imports, forming the basis of its luxury textile industry. The Republic maintained exclusive trade routes to ensure a steady supply.",
+    "historicalMarkets": [
+      "Venetian silk weavers",
+      "European royal courts"
+    ],
+    "culturalContext": "Silk processing knowledge was closely guarded, with strict guild regulations controlling production methods and quality standards."
   }
 }

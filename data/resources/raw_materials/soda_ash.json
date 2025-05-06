@@ -4,11 +4,11 @@
   "category": "raw_materials",
   "subcategory": "mineral",
   "icon": "/assets/icons/resources/soda_ash.png",
-  "base_properties": {
-    "base_value": 8,
-    "weight": 2.0,
-    "volume": 1.0,
-    "stack_size": 50,
+  "baseProperties": {
+    "baseValue": 8,
+    "weight": 2,
+    "volume": 1,
+    "stackSize": 50,
     "perishable": false
   },
   "description": {
@@ -16,9 +16,9 @@
     "full": "Imported alkali material derived from burned marine plants, primarily from Egypt and Syria. Essential for lowering the melting point of sand in glass production.",
     "flavor": "The secret of true cristallo lies not in Venetian hands, but in distant shores where plants are transformed into the white powder that makes our glass shine like diamonds."
   },
-  "source_properties": {
+  "sourceProperties": {
     "source": "imported",
-    "harvest_method": "plant_processing",
+    "harvestMethod": "plant_processing",
     "locations": [
       "egypt",
       "syria",
@@ -27,53 +27,55 @@
     "availability": "uncommon",
     "seasonality": "year_round"
   },
-  "quality_variations": {
-    "available_qualities": [
+  "qualityVariations": {
+    "availableQualities": [
       "poor",
       "common",
       "fine",
       "superior"
     ],
-    "default_quality": "common",
-    "quality_multipliers": {
+    "defaultQuality": "common",
+    "qualityMultipliers": {
       "poor": {
         "value": 0.7,
-        "production_efficiency": 0.8
+        "productionEfficiency": 0.8
       },
       "common": {
-        "value": 1.0,
-        "production_efficiency": 1.0
+        "value": 1,
+        "productionEfficiency": 1
       },
       "fine": {
         "value": 1.5,
-        "production_efficiency": 1.2
+        "productionEfficiency": 1.2
       },
       "superior": {
         "value": 2.5,
-        "production_efficiency": 1.5
+        "productionEfficiency": 1.5
       }
     }
   },
-  "production_properties": {
-    "processor_building": "glass_foundry",
-    "processing_complexity": 3,
-    "required_skill": "glassmaking:2",
-    "processing_time": 240,
+  "productionProperties": {
+    "processorBuilding": "glass_foundry",
+    "processingComplexity": 3,
+    "requiredSkill": "glassmaking:2",
+    "processingTime": 240,
     "outputs": [
       {
         "resource": "molten_glass",
         "amount": 1,
-        "requires": ["murano_sand"]
+        "requires": [
+          "murano_sand"
+        ]
       },
       {
         "resource": "soap",
         "amount": 1,
-        "alternative_output": true,
+        "alternativeOutput": true,
         "facility": "soap_workshop"
       }
     ]
   },
-  "production_chains": [
+  "productionChains": [
     {
       "process": "glassmaking",
       "chain": "Soda Ash + Murano Sand → Glass Foundry → Molten Glass → Fine Glassware"
@@ -85,24 +87,24 @@
   ],
   "substitutes": [
     {
-      "resource_id": "potash",
+      "resourceId": "potash",
       "efficiency": 0.8,
-      "quality_penalty": 1,
+      "qualityPenalty": 1,
       "context": "glassmaking"
     }
   ],
   "complements": [
     {
-      "resource_id": "murano_sand",
+      "resourceId": "murano_sand",
       "context": "glassmaking",
       "relationship": "required"
     }
   ],
-  "transport_properties": {
-    "transport_methods": {
-      "large_ship": {
+  "transportProperties": {
+    "transportMethods": {
+      "largeShip": {
         "capacity": 800,
-        "efficiency": 1.0,
+        "efficiency": 1,
         "risk": 0.1
       },
       "barge": {
@@ -121,54 +123,54 @@
         "risk": 0.25
       }
     },
-    "special_requirements": [
+    "specialRequirements": [
       "dry_storage",
       "moisture_protection"
     ],
-    "loading_time": 6,
-    "route_restrictions": []
+    "loadingTime": 6,
+    "routeRestrictions": []
   },
-  "storage_properties": {
-    "storage_facilities": {
-      "small_warehouse": {
-        "capacity_multiplier": 1.0,
+  "storageProperties": {
+    "storageFacilities": {
+      "smallWarehouse": {
+        "capacityMultiplier": 1,
         "preservation": 0.95
       },
-      "secure_warehouse": {
-        "capacity_multiplier": 1.0,
-        "preservation": 1.0
+      "secureWarehouse": {
+        "capacityMultiplier": 1,
+        "preservation": 1
       }
     },
-    "storage_requirements": [
+    "storageRequirements": [
       "dry",
       "sealed_containers"
     ],
-    "special_risks": [
+    "specialRisks": [
       "moisture",
       "contamination"
     ],
-    "max_storage_time": "unlimited"
+    "maxStorageTime": "unlimited"
   },
-  "market_dynamics": {
-    "base_availability": 0.6,
-    "demand_level": "high",
-    "price_volatility": 0.5,
-    "regional_factors": [
+  "marketDynamics": {
+    "baseAvailability": 0.6,
+    "demandLevel": "high",
+    "priceVolatility": 0.5,
+    "regionalFactors": [
       {
         "region": "harbor_district",
-        "availability_modifier": 1.2,
-        "price_modifier": 0.9
+        "availabilityModifier": 1.2,
+        "priceModifier": 0.9
       }
     ],
-    "seasonal_factors": [
+    "seasonalFactors": [
       {
         "season": "winter",
-        "availability_modifier": 0.7,
-        "price_modifier": 1.3,
+        "availabilityModifier": 0.7,
+        "priceModifier": 1.3,
         "note": "Reduced Mediterranean shipping"
       }
     ],
-    "trade_disruptions": {
+    "tradeDisruptions": {
       "factors": [
         "eastern_conflict",
         "naval_blockade",
@@ -177,7 +179,7 @@
       "impact": "severe"
     }
   },
-  "production_chain_position": {
+  "productionChainPosition": {
     "predecessors": [],
     "successors": [
       {
@@ -190,18 +192,18 @@
       }
     ]
   },
-  "historical_notes": {
-    "introduction_year": 1200,
-    "notable_producers": [
+  "historicalNotes": {
+    "introductionYear": 1200,
+    "notableProducers": [
       "Egyptian coastal regions",
       "Syrian plant harvesters"
     ],
-    "historical_significance": "Soda ash, derived from the ashes of specific marine plants, was a critical import for Venice's glassmaking industry. The Republic maintained exclusive trade agreements with suppliers in Egypt and Syria to ensure a steady supply of this essential material. The quality of Venetian glass depended heavily on the purity of this imported alkali, and the city's glassmakers developed specific techniques to purify and prepare it for use.",
-    "historical_markets": [
+    "historicalSignificance": "Soda ash, derived from the ashes of specific marine plants, was a critical import for Venice's glassmaking industry. The Republic maintained exclusive trade agreements with suppliers in Egypt and Syria to ensure a steady supply of this essential material. The quality of Venetian glass depended heavily on the purity of this imported alkali, and the city's glassmakers developed specific techniques to purify and prepare it for use.",
+    "historicalMarkets": [
       "Murano glass foundries",
       "Venetian soap makers"
     ],
-    "cultural_context": "The secret knowledge of proper soda ash preparation and purification was closely guarded by Venetian glassmakers. The material was so valuable that the Republic established special warehouses for its storage and distribution, with strict controls to prevent theft or unauthorized use."
+    "culturalContext": "The secret knowledge of proper soda ash preparation and purification was closely guarded by Venetian glassmakers. The material was so valuable that the Republic established special warehouses for its storage and distribution, with strict controls to prevent theft or unauthorized use."
   },
   "varieties": []
 }
