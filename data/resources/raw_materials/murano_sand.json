@@ -67,7 +67,7 @@
     "production_chains": [
       {
         "process": "glassmaking",
-        "chain": "Murano Sand → Glass Foundry → Molten Glass"
+        "chain": "Murano Sand + Soda Ash → Glass Foundry → Molten Glass → Fine Glassware"
       }
     ]
   },

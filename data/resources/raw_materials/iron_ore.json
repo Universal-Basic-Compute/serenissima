@@ -2,7 +2,7 @@
   "id": "iron_ore",
   "name": "Iron Ore",
   "category": "raw_materials",
-  "subcategory": "metal",
+  "subcategory": "metal_ore",
   "icon": "/assets/icons/resources/iron_ore.png",
   "base_properties": {
     "base_value": 10,

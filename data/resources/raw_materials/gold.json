@@ -2,7 +2,7 @@
   "id": "gold",
   "name": "Gold",
   "category": "raw_materials",
-  "subcategory": "metal",
+  "subcategory": "precious_metal",
   "icon": "/assets/icons/resources/gold.png",
   "base_properties": {
     "base_value": 100,

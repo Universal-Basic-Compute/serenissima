@@ -75,6 +75,12 @@
       }
     ]
   },
+  "production_chains": [
+    {
+      "process": "silk_processing",
+      "chain": "Raw Silk → Silk Conditioning House → Prepared Silk → Silk Fabric → Dyed Silk Fabric → Luxury Silk Garments"
+    }
+  ],
   "substitutes": [],
   "complements": [
     {

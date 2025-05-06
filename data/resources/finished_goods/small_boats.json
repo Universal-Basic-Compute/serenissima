@@ -207,6 +207,32 @@
     ],
     "max_storage_time": "unlimited"
   },
+  "production_chain_position": {
+    "predecessors": [
+      {
+        "resource": "timber",
+        "facility": "sawmill"
+      },
+      {
+        "resource": "pitch",
+        "facility": "pitch_works"
+      },
+      {
+        "resource": "iron_fittings",
+        "facility": "blacksmith"
+      }
+    ],
+    "successors": [
+      {
+        "resource": "fishing_service",
+        "facility": "fishing_dock"
+      },
+      {
+        "resource": "transportation_service",
+        "facility": "boat_dock"
+      }
+    ]
+  },
   "historical_notes": {
     "introduction_year": "ancient",
     "notable_producers": [

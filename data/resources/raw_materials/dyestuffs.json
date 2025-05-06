@@ -152,6 +152,20 @@
       }
     ]
   },
+  "production_chains": [
+    {
+      "process": "textile_dyeing",
+      "chain": "Dyestuffs + Textiles → Dye Works → Dyed Textiles"
+    },
+    {
+      "process": "silk_dyeing",
+      "chain": "Dyestuffs + Silk Fabric → Dye Works → Dyed Silk Fabric → Luxury Silk Garments"
+    },
+    {
+      "process": "pigment_making",
+      "chain": "Dyestuffs → Pigment Workshop → Pigments"
+    }
+  ],
   "substitutes": [
     {
       "resourceId": "local_plant_dyes",
@@ -162,12 +176,12 @@
   ],
   "complements": [
     {
-      "resourceId": "mordants",
+      "resource_id": "mordants",
       "context": "textile_dyeing",
       "relationship": "required"
     },
     {
-      "resourceId": "clean_water",
+      "resource_id": "clean_water",
       "context": "textile_dyeing",
       "relationship": "required"
     }

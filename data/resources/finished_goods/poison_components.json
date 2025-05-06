@@ -2,7 +2,7 @@
   "id": "poison_components",
   "name": "Poison Components",
   "category": "finished_goods",
-  "subcategory": "criminal_supplies",
+  "subcategory": "illicit_goods",
   "description": "Carefully prepared botanical and mineral substances for creating various poisons. Ostensibly for pest control or medicinal purposes, but primarily used for more nefarious ends.",
   "icon": "/assets/icons/resources/poison_components.png",
   "model": "models/resources/poison_components.glb",

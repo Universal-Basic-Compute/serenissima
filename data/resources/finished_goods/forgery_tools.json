@@ -2,7 +2,7 @@
   "id": "forgery_tools",
   "name": "Forgery Tools",
   "category": "finished_goods",
-  "subcategory": "criminal_supplies",
+  "subcategory": "illicit_goods",
   "description": "Specialized equipment for creating convincing document forgeries, including custom quills, special inks, paper treatments, and seal replication tools.",
   "icon": "/assets/icons/resources/forgery_tools.png",
   "model": "models/resources/forgery_tools.glb",
