@@ -147,6 +147,45 @@ export default function Home() {
   const [marketPanelVisible, setMarketPanelVisible] = useState(false);
   const polygonRendererRef = useRef<any>(null);
   
+  // Function to generate coat of arms image
+  const generateCoatOfArmsImage = async () => {
+    if (!familyCoatOfArms.trim()) {
+      alert('Please describe your coat of arms first');
+      return;
+    }
+    
+    setIsGeneratingImage(true);
+    
+    try {
+      const response = await fetch(`${getApiBaseUrl()}/api/generate-coat-of-arms`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          description: familyCoatOfArms,
+          family_name: lastName || 'Noble Family'
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to generate coat of arms image');
+      }
+      
+      const data = await response.json();
+      if (data.image_url) {
+        setCoatOfArmsImage(data.image_url);
+      } else {
+        throw new Error('No image URL returned');
+      }
+    } catch (error) {
+      console.error('Error generating coat of arms:', error);
+      alert(`Failed to generate coat of arms: ${error instanceof Error ? error.message : String(error)}`);
+    } finally {
+      setIsGeneratingImage(false);
+    }
+  };
+  
   // Define getSnapshotWithCache function early in the component with proper type annotations
   const getSnapshotWithCache = useCallback(<T,>(getSnapshotFn: () => T, dependencies: any[]): T => {
     // Check if window and getCachedSnapshot exist
@@ -2495,7 +2534,8 @@ export default function Home() {
         {/* Dynamic import of PolygonViewer with snapshot caching prop */}
         <PolygonViewer 
           getSnapshotWithCache={getSnapshotWithCache}
-          ref={polygonRendererRef}
+          ref={polygonRendererRef as any}
+          // Add any other required props here with proper types
         />
       </>
       
