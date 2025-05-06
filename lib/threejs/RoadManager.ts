@@ -1399,9 +1399,12 @@ export class RoadManager {
         if (material.map) material.map.dispose();
         
         // Check for properties that might not exist on all material types
-        if ('normalMap' in material && material.normalMap) material.normalMap.dispose();
-        if ('roughnessMap' in material && material.roughnessMap) material.roughnessMap.dispose();
-        if ('metalnessMap' in material && material.metalnessMap) material.metalnessMap.dispose();
+        if ('normalMap' in material && (material as THREE.MeshStandardMaterial).normalMap) 
+          (material as THREE.MeshStandardMaterial).normalMap.dispose();
+        if ('roughnessMap' in material && (material as THREE.MeshStandardMaterial).roughnessMap) 
+          (material as THREE.MeshStandardMaterial).roughnessMap.dispose();
+        if ('metalnessMap' in material && (material as THREE.MeshStandardMaterial).metalnessMap) 
+          (material as THREE.MeshStandardMaterial).metalnessMap.dispose();
         if ('aoMap' in material && material.aoMap) material.aoMap.dispose();
         if ('emissiveMap' in material && material.emissiveMap) material.emissiveMap.dispose();
         if ('bumpMap' in material && material.bumpMap) material.bumpMap.dispose();
@@ -1415,8 +1418,8 @@ export class RoadManager {
         
         // Clear references for properties that might not exist on all material types
         if ('normalMap' in material) material.normalMap = null;
-        if ('roughnessMap' in material) material.roughnessMap = null;
-        if ('metalnessMap' in material) material.metalnessMap = null;
+        if ('roughnessMap' in material) (material as THREE.MeshStandardMaterial).roughnessMap = null;
+        if ('metalnessMap' in material) (material as THREE.MeshStandardMaterial).metalnessMap = null;
         if ('aoMap' in material) material.aoMap = null;
         if ('emissiveMap' in material) material.emissiveMap = null;
         if ('bumpMap' in material) material.bumpMap = null;
