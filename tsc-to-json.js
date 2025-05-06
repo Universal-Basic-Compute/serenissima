@@ -197,7 +197,9 @@ tsc.on('close', (code) => {
     fs.writeFileSync(outputFile, jsonOutput);
     console.error(`Results written to ${outputFile}`);
   } else {
-    // Print to stdout
+    // Print to stdout - make sure all debug info goes to stderr
+    // so that stdout contains ONLY the JSON output for piping
+    console.error('Printing JSON to stdout (no output file specified)');
     console.log(jsonOutput);
   }
   
