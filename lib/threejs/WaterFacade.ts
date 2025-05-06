@@ -796,7 +796,7 @@ export class WaterFacade {
     
     // Process each land object
     this.landObjects.forEach(object => {
-      if ((object as any) instanceof THREE.Mesh && object.geometry) {
+      if (object instanceof THREE.Mesh && object.geometry) {
         try {
           // Get the vertices from the geometry
           const positions = object.geometry.getAttribute('position');
@@ -1111,8 +1111,8 @@ if (shoreFactor > 0.01) {
     if (this.water) {
       this.scene.remove(this.water);
       
-      if ((this.water as THREE.Mesh).geometry) {
-        this.water.geometry.dispose();
+      if ((this.water as any).geometry) {
+        (this.water as any).geometry.dispose();
       }
       
       if (this.water.material) {
