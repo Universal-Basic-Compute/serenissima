@@ -796,7 +796,7 @@ export class WaterFacade {
     
     // Process each land object
     this.landObjects.forEach(object => {
-      if ((object as any) instanceof THREE.Mesh && object.geometry) {
+      if (object instanceof THREE.Mesh && object.geometry) {
         try {
           // Get the vertices from the geometry
           const positions = object.geometry.getAttribute('position');
