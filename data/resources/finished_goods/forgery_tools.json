@@ -1,0 +1,209 @@
+{
+  "id": "forgery_tools",
+  "name": "Forgery Tools",
+  "category": "finished_goods",
+  "subcategory": "criminal_supplies",
+  "description": "Specialized equipment for creating convincing document forgeries, including custom quills, special inks, paper treatments, and seal replication tools.",
+  "icon": "/assets/icons/resources/forgery_tools.png",
+  "model": "models/resources/forgery_tools.glb",
+  "base_properties": {
+    "base_value": 65,
+    "weight": 2.0,
+    "volume": 1.5,
+    "stack_size": 5,
+    "perishable": false,
+    "contraband_level": "high"
+  },
+  "market_properties": {
+    "luxury_level": 0,
+    "target_customers": [
+      "forgers",
+      "spies",
+      "smugglers",
+      "corrupt_officials"
+    ],
+    "fashion_sensitivity": 0.0,
+    "export_value_multiplier": 0.8,
+    "market_demand": "steady",
+    "price_volatility": 0.5,
+    "black_market_only": true
+  },
+  "production_properties": {
+    "producer_building": "hidden_workshop",
+    "production_complexity": 6,
+    "required_skill": "forgery:4",
+    "production_time": 480,
+    "inputs": [
+      {
+        "resource": "tools",
+        "amount": 2,
+        "quality_impact": 0.3
+      },
+      {
+        "resource": "paper",
+        "amount": 5,
+        "quality_impact": 0.2
+      },
+      {
+        "resource": "ink",
+        "amount": 3,
+        "quality_impact": 0.3
+      },
+      {
+        "resource": "gold_leaf",
+        "amount": 0.5,
+        "quality_impact": 0.2
+      }
+    ]
+  },
+  "quality_variations": {
+    "available_qualities": [
+      "poor",
+      "common",
+      "fine",
+      "superior"
+    ],
+    "default_quality": "common",
+    "quality_multipliers": {
+      "poor": {
+        "value": 0.6,
+        "detection_risk": 1.5,
+        "forgery_quality": 0.5
+      },
+      "common": {
+        "value": 1.0,
+        "detection_risk": 1.0,
+        "forgery_quality": 1.0
+      },
+      "fine": {
+        "value": 1.8,
+        "detection_risk": 0.7,
+        "forgery_quality": 1.5
+      },
+      "superior": {
+        "value": 3.0,
+        "detection_risk": 0.4,
+        "forgery_quality": 2.0
+      }
+    },
+    "quality_factors": [
+      {
+        "factor": "input_quality",
+        "weight": 0.4
+      },
+      {
+        "factor": "worker_skill",
+        "weight": 0.5
+      },
+      {
+        "factor": "workshop_secrecy",
+        "weight": 0.1
+      }
+    ]
+  },
+  "varieties": [
+    {
+      "type": "document_forgery_kit",
+      "production_difficulty": "high",
+      "popularity": "high",
+      "value_multiplier": 1.0,
+      "primary_use": "official_documents",
+      "model_variant": "models/resources/forgery_tools_documents.glb"
+    },
+    {
+      "type": "seal_replication_kit",
+      "production_difficulty": "very_high",
+      "popularity": "medium",
+      "value_multiplier": 1.5,
+      "primary_use": "official_seals",
+      "model_variant": "models/resources/forgery_tools_seals.glb"
+    },
+    {
+      "type": "currency_forgery_kit",
+      "production_difficulty": "extreme",
+      "popularity": "low",
+      "value_multiplier": 2.5,
+      "primary_use": "counterfeit_money",
+      "model_variant": "models/resources/forgery_tools_currency.glb"
+    }
+  ],
+  "usage_properties": {
+    "uses": [
+      "document_forgery",
+      "seal_replication",
+      "signature_forgery",
+      "currency_counterfeiting"
+    ],
+    "special_features": [
+      "detection_avoidance",
+      "quick_production",
+      "authentic_appearance"
+    ],
+    "complementary_resources": [
+      "criminal_contacts",
+      "blackmail_evidence",
+      "smuggler_maps"
+    ]
+  },
+  "legal_properties": {
+    "legality": "illegal",
+    "penalty_if_caught": "severe",
+    "confiscation_risk": "certain",
+    "detection_difficulty": "medium"
+  },
+  "transport_properties": {
+    "transport_methods": {
+      "discreet_courier": {
+        "capacity": 2,
+        "efficiency": 1.0,
+        "risk": 0.3
+      },
+      "hidden_compartment": {
+        "capacity": 5,
+        "efficiency": 0.9,
+        "risk": 0.4
+      }
+    },
+    "special_requirements": [
+      "concealment",
+      "trusted_carriers_only",
+      "avoid_checkpoints"
+    ],
+    "loading_time": 15,
+    "route_restrictions": [
+      "avoid_guards",
+      "avoid_inspections"
+    ]
+  },
+  "storage_properties": {
+    "storage_facilities": {
+      "hidden_workshop": {
+        "capacity_multiplier": 1.0,
+        "preservation": 1.0
+      },
+      "secret_room": {
+        "capacity_multiplier": 0.5,
+        "preservation": 0.9
+      }
+    },
+    "storage_requirements": [
+      "hidden",
+      "dry",
+      "secure"
+    ],
+    "special_risks": [
+      "discovery_by_authorities",
+      "informants",
+      "theft_by_rivals"
+    ],
+    "max_storage_time": "unlimited"
+  },
+  "historical_notes": {
+    "introduction_year": 1300,
+    "historical_significance": "Document forgery was both a serious crime and a necessary tool in Renaissance Venice's complex political landscape. The Republic's extensive bureaucracy created high demand for forged papers, from trade permits to noble lineages. The Council of Ten regularly prosecuted forgers, with penalties ranging from hand amputation to execution for counterfeiting currency.",
+    "notable_cases": [
+      "The Spafarii Affair of 1498",
+      "The False Ducal Seal Scandal of 1521"
+    ]
+  }
+}

@@ -1,0 +1,227 @@
+{
+  "id": "smuggler_maps",
+  "name": "Smuggler's Maps",
+  "category": "finished_goods",
+  "subcategory": "criminal_supplies",
+  "description": "Specialized charts showing secret routes, hidden passages, guard patrol schedules, and concealed entrances throughout Venice and its lagoon. Essential tools for moving contraband or people undetected.",
+  "icon": "/assets/icons/resources/smuggler_maps.png",
+  "model": "models/resources/smuggler_maps.glb",
+  "base_properties": {
+    "base_value": 70,
+    "weight": 0.3,
+    "volume": 0.2,
+    "stack_size": 5,
+    "perishable": false,
+    "contraband_level": "high",
+    "area_specific": true
+  },
+  "market_properties": {
+    "luxury_level": 0,
+    "target_customers": [
+      "smugglers",
+      "spies",
+      "thieves",
+      "fugitives"
+    ],
+    "fashion_sensitivity": 0.0,
+    "export_value_multiplier": 0.5,
+    "market_demand": "steady",
+    "price_volatility": 0.6,
+    "black_market_only": true
+  },
+  "production_properties": {
+    "producer_building": "cartographer_backroom",
+    "production_complexity": 7,
+    "required_skill": "cartography:4",
+    "secondary_skill": "criminal_knowledge:5",
+    "production_time": 960,
+    "inputs": [
+      {
+        "resource": "paper",
+        "amount": 2,
+        "quality_impact": 0.1
+      },
+      {
+        "resource": "ink",
+        "amount": 1,
+        "quality_impact": 0.1
+      },
+      {
+        "resource": "criminal_contacts",
+        "amount": 3,
+        "quality_impact": 0.5
+      },
+      {
+        "resource": "bribes",
+        "amount": 5,
+        "quality_impact": 0.3
+      }
+    ]
+  },
+  "quality_variations": {
+    "available_qualities": [
+      "basic",
+      "detailed",
+      "comprehensive",
+      "masterwork"
+    ],
+    "default_quality": "detailed",
+    "quality_multipliers": {
+      "basic": {
+        "value": 0.6,
+        "route_efficiency": 0.7,
+        "detection_avoidance": 0.6,
+        "coverage": 0.5
+      },
+      "detailed": {
+        "value": 1.0,
+        "route_efficiency": 1.0,
+        "detection_avoidance": 1.0,
+        "coverage": 1.0
+      },
+      "comprehensive": {
+        "value": 1.8,
+        "route_efficiency": 1.3,
+        "detection_avoidance": 1.4,
+        "coverage": 1.5
+      },
+      "masterwork": {
+        "value": 3.0,
+        "route_efficiency": 1.6,
+        "detection_avoidance": 1.8,
+        "coverage": 2.0
+      }
+    },
+    "quality_factors": [
+      {
+        "factor": "information_accuracy",
+        "weight": 0.5
+      },
+      {
+        "factor": "cartographer_skill",
+        "weight": 0.3
+      },
+      {
+        "factor": "information_recency",
+        "weight": 0.2
+      }
+    ]
+  },
+  "varieties": [
+    {
+      "type": "canal_network_map",
+      "production_difficulty": "medium",
+      "popularity": "very_high",
+      "value_multiplier": 1.0,
+      "coverage_area": "city_canals",
+      "model_variant": "models/resources/smuggler_maps_canals.glb"
+    },
+    {
+      "type": "lagoon_passages_map",
+      "production_difficulty": "high",
+      "popularity": "high",
+      "value_multiplier": 1.3,
+      "coverage_area": "lagoon_approaches",
+      "model_variant": "models/resources/smuggler_maps_lagoon.glb"
+    },
+    {
+      "type": "building_access_map",
+      "production_difficulty": "very_high",
+      "popularity": "medium",
+      "value_multiplier": 1.5,
+      "coverage_area": "specific_buildings",
+      "model_variant": "models/resources/smuggler_maps_buildings.glb"
+    },
+    {
+      "type": "patrol_schedule_map",
+      "production_difficulty": "high",
+      "popularity": "high",
+      "value_multiplier": 1.4,
+      "coverage_area": "guard_routes",
+      "model_variant": "models/resources/smuggler_maps_patrols.glb"
+    }
+  ],
+  "usage_properties": {
+    "uses": [
+      "contraband_smuggling",
+      "covert_infiltration",
+      "escape_planning",
+      "guard_avoidance"
+    ],
+    "special_features": [
+      "time-specific_information",
+      "coded_annotations",
+      "water_resistant_ink"
+    ],
+    "complementary_resources": [
+      "criminal_contacts",
+      "disguise_materials",
+      "bribes"
+    ]
+  },
+  "legal_properties": {
+    "legality": "illegal",
+    "penalty_if_caught": "imprisonment",
+    "confiscation_risk": "certain",
+    "detection_difficulty": "medium"
+  },
+  "transport_properties": {
+    "transport_methods": {
+      "personal_carriage": {
+        "capacity": 5,
+        "efficiency": 1.0,
+        "risk": 0.3
+      },
+      "hidden_on_person": {
+        "capacity": 2,
+        "efficiency": 1.0,
+        "risk": 0.2
+      }
+    },
+    "special_requirements": [
+      "concealment",
+      "water_protection",
+      "quick_destruction_option"
+    ],
+    "loading_time": 5,
+    "route_restrictions": [
+      "avoid_checkpoints"
+    ]
+  },
+  "storage_properties": {
+    "storage_facilities": {
+      "smuggler_hideout": {
+        "capacity_multiplier": 1.0,
+        "preservation": 1.0
+      },
+      "secret_compartment": {
+        "capacity_multiplier": 0.5,
+        "preservation": 0.9
+      }
+    },
+    "storage_requirements": [
+      "dry",
+      "hidden",
+      "secure"
+    ],
+    "special_risks": [
+      "information_obsolescence",
+      "discovery_by_authorities",
+      "theft_by_rivals"
+    ],
+    "max_storage_time": "unlimited",
+    "information_decay": {
+      "patrol_routes": 720,
+      "secret_passages": 10080,
+      "building_access": 4320
+    }
+  },
+  "historical_notes": {
+    "introduction_year": 1250,
+    "historical_significance": "Venice's complex geography of canals, islands, and lagoon passages created a need for specialized navigation knowledge for those operating outside the law. The Republic's strict customs controls and efficient guard patrols made accurate smuggling maps extremely valuable. These maps were often encoded or disguised as innocent documents to avoid detection.",
+    "notable_users": [
+      "The Salt Smuggling Ring of 1487",
+      "The Arsenale Thieves Guild"
+    ]
+  }
+}
