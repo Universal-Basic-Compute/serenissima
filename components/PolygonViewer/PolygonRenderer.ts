@@ -548,8 +548,10 @@ export default class PolygonRenderer {
         
         // Generate a deterministic color from the owner string
         let hash = 0;
-        for (let i = 0; i < owner.length; i++) {
-          hash = owner.charCodeAt(i) + ((hash << 5) - hash);
+        if (owner) {
+          for (let i = 0; i < owner.length; i++) {
+            hash = owner.charCodeAt(i) + ((hash << 5) - hash);
+          }
         }
         
         // Convert to hex color
@@ -846,8 +848,9 @@ export default class PolygonRenderer {
                   obj.material.forEach((mat: THREE.Material) => {
                     try {
                       const materialWithMap = mat as THREE.MeshBasicMaterial | THREE.MeshStandardMaterial;
-                      if ('map' in materialWithMap && materialWithMap.map) 
+                      if ('map' in materialWithMap && materialWithMap.map) {
                         materialWithMap.map.dispose();
+                      }
                       mat.dispose();
                     } catch (matError) {
                       log.error('Error disposing material:', matError);
