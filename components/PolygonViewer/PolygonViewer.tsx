@@ -909,10 +909,14 @@ export default function PolygonViewer() {
         scene: sceneRef.current?.scene || fallbackScene,
         polygonMeshesRef,
         activeView,
-        throttleInterval: 100,
-        // Pass setHoveredPolygonId through scene.userData if needed
-        setHoveredPolygonId
+        throttleInterval: 100
       });
+      
+      // Set the hover handler separately since it's not part of the props interface
+      if (interactionManager) {
+        interactionManager.setHoverHandler(setHoveredPolygonId);
+      }
+      
       interactionManagerRef.current = interactionManager;
     };
     
@@ -1151,7 +1155,7 @@ export default function PolygonViewer() {
     // This ensures the selection is durable
     if (polygonRendererRef.current) {
       console.log('Updating selection state:', selectedPolygonId);
-      polygonRendererRef.current.updateSelectionState(selectedPolygonId || undefined);
+      polygonRendererRef.current.updateSelectionState(selectedPolygonId || null);
     }
   }, [selectedPolygonId]);
   
@@ -1351,7 +1355,7 @@ export default function PolygonViewer() {
     // Only update selection state when selectedPolygonId changes
     if (polygonRendererRef.current) {
       console.log('Updating selection state:', selectedPolygonId);
-      polygonRendererRef.current.updateSelectionState(selectedPolygonId || undefined);
+      polygonRendererRef.current.updateSelectionState(selectedPolygonId || null);
     }
   }, [selectedPolygonId]);
   
