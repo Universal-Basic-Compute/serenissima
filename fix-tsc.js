@@ -6,6 +6,7 @@ const path = require('path');
 const BATCH_SIZE = 3; // Number of errors to fix in each batch
 const MAX_BATCHES = 100; // Safety limit to prevent infinite loops
 const TS_ERRORS_FILE = 'ts-errors.json';
+const MAX_ITERATIONS = 5; // Maximum number of full iterations to run
 
 // Run TypeScript compiler and save errors to JSON file
 console.log('Running TypeScript compiler to collect errors...');
@@ -144,6 +145,12 @@ async function processBatches() {
   // Process batches in groups of 3
   const PARALLEL_BATCHES = 3;
   
+  // If no batches, return early
+  if (batches.length === 0) {
+    console.log('No batches to process.');
+    return;
+  }
+  
   for (let batchIndex = 0; batchIndex < Math.min(batches.length, MAX_BATCHES); batchIndex += PARALLEL_BATCHES) {
     console.log(`\n--- Processing batches ${batchIndex + 1} to ${Math.min(batchIndex + PARALLEL_BATCHES, batches.length)} of ${batches.length} ---`);
     
@@ -183,8 +190,99 @@ async function processBatches() {
   console.log('Run `node tsc-to-json.js` to check for any remaining errors.');
 }
 
-// Start processing batches
-processBatches().catch(err => {
-  console.error('Error in batch processing:', err);
+// Main execution function
+async function main() {
+  let iteration = 1;
+  let remainingErrors = errorData.totalErrors;
+  
+  while (iteration <= MAX_ITERATIONS && remainingErrors > 0) {
+    console.log(`\n========== ITERATION ${iteration} OF ${MAX_ITERATIONS} ==========`);
+    console.log(`Starting with ${remainingErrors} TypeScript errors to fix.`);
+    
+    // Process all batches
+    await processBatches();
+    
+    // Check if we still have errors
+    console.log(`\nCompleted iteration ${iteration}. Checking for remaining errors...`);
+    try {
+      execSync(`node tsc-to-json.js ${TS_ERRORS_FILE}`, { stdio: 'inherit' });
+      
+      // Read updated error count
+      const updatedErrorJson = fs.readFileSync(TS_ERRORS_FILE, 'utf8');
+      const updatedErrorData = JSON.parse(updatedErrorJson);
+      
+      remainingErrors = updatedErrorData.totalErrors;
+      console.log(`Remaining errors after iteration ${iteration}: ${remainingErrors}`);
+      
+      // If all errors are fixed, we can exit early
+      if (remainingErrors === 0) {
+        console.log('All TypeScript errors have been fixed! 🎉');
+        break;
+      }
+      
+      // If we still have errors but this isn't the last iteration, prepare for next iteration
+      if (iteration < MAX_ITERATIONS) {
+        console.log(`Preparing for iteration ${iteration + 1}...`);
+        
+        // Reset batches with new errors
+        batches = [];
+        currentBatch = [];
+        filesInCurrentBatch = new Set();
+        
+        // Group errors by file again
+        const errorsByFile = {};
+        updatedErrorData.errors.forEach(error => {
+          if (!errorsByFile[error.filePath]) {
+            errorsByFile[error.filePath] = [];
+          }
+          errorsByFile[error.filePath].push(error);
+        });
+        
+        // Create new batches
+        Object.entries(errorsByFile).forEach(([filePath, errors]) => {
+          for (let i = 0; i < errors.length; i++) {
+            if (currentBatch.length >= BATCH_SIZE) {
+              batches.push([...currentBatch]);
+              currentBatch = [];
+              filesInCurrentBatch = new Set();
+            }
+            
+            currentBatch.push(errors[i]);
+            filesInCurrentBatch.add(filePath);
+          }
+          
+          if (currentBatch.length > 0) {
+            batches.push([...currentBatch]);
+            currentBatch = [];
+            filesInCurrentBatch = new Set();
+          }
+        });
+        
+        if (currentBatch.length > 0) {
+          batches.push(currentBatch);
+        }
+        
+        console.log(`Created ${batches.length} new batches for iteration ${iteration + 1}.`);
+      }
+      
+    } catch (error) {
+      console.error('Error checking TypeScript errors:', error);
+      break;
+    }
+    
+    iteration++;
+  }
+  
+  if (remainingErrors > 0) {
+    console.log(`\nCompleted ${MAX_ITERATIONS} iterations but still have ${remainingErrors} errors remaining.`);
+    console.log('You may need to fix the remaining errors manually or run this script again.');
+  } else {
+    console.log('\nAll TypeScript errors have been successfully fixed!');
+  }
+}
+
+// Start the main execution
+main().catch(err => {
+  console.error('Error in main process:', err);
   process.exit(1);
 });
