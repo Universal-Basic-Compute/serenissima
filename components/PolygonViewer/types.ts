@@ -19,6 +19,7 @@ export interface Polygon {
   owner?: string;
   areaInSquareMeters?: number; // Add area field
   coatOfArmsImage?: string; // Add coat of arms image URL
+  simulatedIncome?: number; // Add this property for income-based coloring
 }
 
 // Add this to the existing types

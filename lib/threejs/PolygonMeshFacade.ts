@@ -25,6 +25,9 @@ export class PolygonMeshFacade implements Poolable {
   private _isActive: boolean = false; // Renamed to avoid conflict with isActive() method
   private originalGeometry: THREE.BufferGeometry | null = null;
   private simplifiedGeometries: Map<number, THREE.BufferGeometry> = new Map();
+  private minIncome: number = 0;
+  private maxIncome: number = 1000;
+  private hasIncomeData: boolean = false;
 
   constructor(
     scene: THREE.Scene,
@@ -44,6 +47,9 @@ export class PolygonMeshFacade implements Poolable {
     this.textureLoader = textureLoader;
     this.ownerColor = ownerColor;
     this.ownerCoatOfArmsUrl = ownerCoatOfArmsUrl;
+    
+    // Check if we have income data
+    this.hasIncomeData = polygon.simulatedIncome !== undefined;
     
     // Create the mesh
     this.createMesh();
@@ -198,9 +204,15 @@ export class PolygonMeshFacade implements Poolable {
   }
   
   /**
-   * Determine the color for land based on owner
+   * Determine the color for land based on owner or income
    */
   private determineLandColor(): THREE.Color {
+    // If we're in land view and have income data, use income-based coloring
+    if (this.activeView === 'land' && this.hasIncomeData && this.polygon.simulatedIncome !== undefined) {
+      return this.getIncomeBasedColor(this.polygon.simulatedIncome);
+    }
+    
+    // Otherwise use the existing owner-based coloring logic
     if (this.ownerColor) {
       // Blend the owner color with sand color for a more natural look
       const sandColor = new THREE.Color(0xf5e9c8); // Brighter sand color
@@ -216,6 +228,35 @@ export class PolygonMeshFacade implements Poolable {
     
     // Default sand color if no owner
     return new THREE.Color(0xf5e9c8);
+  }
+  
+  /**
+   * Calculate color based on income value
+   * Red (high income) -> Yellow -> Green (low income)
+   */
+  private getIncomeBasedColor(income: number): THREE.Color {
+    // Define our color scale
+    const highIncomeColor = new THREE.Color(0xff0000); // Red
+    const midIncomeColor = new THREE.Color(0xffff00);  // Yellow
+    const lowIncomeColor = new THREE.Color(0x00ff00);  // Green
+    
+    // Normalize income to a 0-1 scale
+    // We'll use a simple approach with a fixed maximum value
+    const maxIncome = 1000; // Adjust this based on your actual data range
+    const normalizedIncome = Math.min(Math.max(income / maxIncome, 0), 1);
+    
+    // Map the normalized income to our color scale
+    // 0.5-1.0 maps from yellow to red (higher income)
+    // 0.0-0.5 maps from green to yellow (lower income)
+    if (normalizedIncome >= 0.5) {
+      // Map from yellow to red
+      const t = (normalizedIncome - 0.5) * 2; // Scale 0.5-1.0 to 0-1
+      return new THREE.Color().lerpColors(midIncomeColor, highIncomeColor, t);
+    } else {
+      // Map from green to yellow
+      const t = normalizedIncome * 2; // Scale 0-0.5 to 0-1
+      return new THREE.Color().lerpColors(lowIncomeColor, midIncomeColor, t);
+    }
   }
   
   /**
