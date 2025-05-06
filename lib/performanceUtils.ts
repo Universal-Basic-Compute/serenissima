@@ -1,6 +1,7 @@
 /**
  * Performance utilities for throttling and debouncing functions
  */
+import * as THREE from 'three';
 
 /**
  * Throttle a function to limit how often it can be called
