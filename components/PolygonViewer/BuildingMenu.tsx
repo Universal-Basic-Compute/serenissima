@@ -1,7 +1,7 @@
 /**
  * Building menu component for browsing and placing buildings
  */
-import React from 'react';
+import React, { ErrorInfo } from 'react';
 import { Tab } from '@headlessui/react';
 import BuildingModelViewer from '../UI/BuildingModelViewer';
 import PlaceableBuilding from './PlaceableBuilding';
@@ -13,6 +13,12 @@ import { log } from '@/lib/logUtils';
 interface BuildingMenuProps {
   visible: boolean;
   onClose: () => void;
+}
+
+interface BuildingCategory {
+  id: string;
+  name: string;
+  buildings: Building[];
 }
 
 export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
@@ -40,8 +46,8 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
 
   return (
     <ErrorBoundary
-      componentName="BuildingMenu"
-      onError={(error, errorInfo) => {
+      fallback={<div className="p-4 text-red-600">Something went wrong with the Building Menu</div>}
+      onError={(error: Error, errorInfo: ErrorInfo) => {
         log.error('BuildingMenu error:', error, errorInfo);
       }}
     >
