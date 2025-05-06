@@ -1303,8 +1303,8 @@ export class RoadManager {
                   }
                   
                   // Dispose of all geometry attributes
-                  Object.keys(geometry.attributes).forEach(attributeName => {
-                    const attribute = geometry.attributes[attributeName];
+                  Object.keys(geometry.attributes || {}).forEach(attributeName => {
+                    const attribute = geometry.attributes?.[attributeName];
                     if (attribute) {
                       // Don't try to modify read-only array property
                       geometry.deleteAttribute(attributeName);
