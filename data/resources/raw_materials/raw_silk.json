@@ -78,7 +78,7 @@
   "substitutes": [],
   "complements": [
     {
-      "resourceId": "clean_water",
+      "resource_id": "clean_water",
       "context": "silk_conditioning",
       "relationship": "required"
     }

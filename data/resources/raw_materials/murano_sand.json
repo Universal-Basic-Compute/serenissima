@@ -73,20 +73,20 @@
   },
   "substitutes": [
     {
-      "resourceId": "standard_sand",
+      "resource_id": "standard_sand",
       "efficiency": 0.6,
-      "qualityPenalty": 1,
+      "quality_penalty": 1,
       "context": "glassmaking"
     }
   ],
   "complements": [
     {
-      "resourceId": "soda_ash",
+      "resource_id": "soda_ash",
       "context": "glassmaking",
       "relationship": "required"
     },
     {
-      "resourceId": "minerals_colorants",
+      "resource_id": "minerals_colorants",
       "context": "glassmaking",
       "relationship": "optional"
     }

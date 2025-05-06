@@ -112,12 +112,12 @@
   "substitutes": [],
   "complements": [
     {
-      "resourceId": "fish",
+      "resource_id": "fish",
       "context": "fish_preservation",
       "relationship": "required"
     },
     {
-      "resourceId": "meat",
+      "resource_id": "meat",
       "context": "meat_preservation",
       "relationship": "required"
     }

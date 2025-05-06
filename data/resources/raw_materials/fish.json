@@ -112,12 +112,12 @@
   "substitutes": [],
   "complements": [
     {
-      "resourceId": "salt",
+      "resource_id": "salt",
       "context": "preserving",
       "relationship": "required"
     },
     {
-      "resourceId": "spices",
+      "resource_id": "spices",
       "context": "cooking",
       "relationship": "optional"
     }

@@ -62,7 +62,7 @@
         "quality_impact": 0.2
       }
     ],
-    "productionChain": "Dyed Textiles → Tailor Workshop → Luxury Silk Garments"
+    "production_chain": "Dyed Textiles → Tailor Workshop → Luxury Silk Garments"
   },
   "quality_variations": {
     "available_qualities": [

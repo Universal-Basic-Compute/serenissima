@@ -79,7 +79,7 @@
   "substitutes": [],
   "complements": [
     {
-      "resourceId": "fuel",
+      "resource_id": "fuel",
       "context": "smelting",
       "relationship": "required"
     }

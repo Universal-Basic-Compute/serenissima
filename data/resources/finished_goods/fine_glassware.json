@@ -57,7 +57,7 @@
         "quality_impact": 0.2
       }
     ],
-    "productionChain": "Molten Glass → Glassblower Workshop → Fine Glassware"
+    "production_chain": "Molten Glass → Glassblower Workshop → Fine Glassware"
   },
   "quality_variations": {
     "available_qualities": [

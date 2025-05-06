@@ -145,12 +145,12 @@
   "substitutes": [],
   "complements": [
     {
-      "resourceId": "pitch",
+      "resource_id": "pitch",
       "context": "shipbuilding",
       "relationship": "required"
     },
     {
-      "resourceId": "iron_nails",
+      "resource_id": "iron_nails",
       "context": "construction",
       "relationship": "required"
     }

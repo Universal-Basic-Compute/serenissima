@@ -113,12 +113,12 @@
   "substitutes": [],
   "complements": [
     {
-      "resourceId": "silver",
+      "resource_id": "silver",
       "context": "jewelry_making",
       "relationship": "optional"
     },
     {
-      "resourceId": "gems",
+      "resource_id": "gems",
       "context": "jewelry_making",
       "relationship": "optional"
     }

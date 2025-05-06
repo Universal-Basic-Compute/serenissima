@@ -118,9 +118,9 @@
   },
   "substitutes": [
     {
-      "resourceId": "limestone",
+      "resource_id": "limestone",
       "efficiency": 0.7,
-      "qualityPenalty": 1,
+      "quality_penalty": 1,
       "context": "construction"
     }
   ],

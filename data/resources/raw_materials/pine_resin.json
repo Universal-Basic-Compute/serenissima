@@ -89,7 +89,7 @@
   "substitutes": [],
   "complements": [
     {
-      "resourceId": "fuel",
+      "resource_id": "fuel",
       "context": "pitch_making",
       "relationship": "required"
     }

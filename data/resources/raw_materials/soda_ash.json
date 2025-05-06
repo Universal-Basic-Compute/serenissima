@@ -85,15 +85,15 @@
   },
   "substitutes": [
     {
-      "resourceId": "potash",
+      "resource_id": "potash",
       "efficiency": 0.8,
-      "qualityPenalty": 1,
+      "quality_penalty": 1,
       "context": "glassmaking"
     }
   ],
   "complements": [
     {
-      "resourceId": "murano_sand",
+      "resource_id": "murano_sand",
       "context": "glassmaking",
       "relationship": "required"
     }

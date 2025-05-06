@@ -99,15 +99,15 @@
   },
   "substitutes": [
     {
-      "resourceId": "flax",
+      "resource_id": "flax",
       "efficiency": 0.8,
-      "qualityPenalty": 1,
+      "quality_penalty": 1,
       "context": "sailcloth_production"
     }
   ],
   "complements": [
     {
-      "resourceId": "water",
+      "resource_id": "water",
       "context": "fiber_processing",
       "relationship": "required"
     }
