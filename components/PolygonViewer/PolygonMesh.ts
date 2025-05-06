@@ -87,53 +87,64 @@ class PolygonMesh {
       
       const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
 
-      // Create sand texture material with normal and roughness maps
-      const sandTexture = this.textureLoader.load('/textures/sand.jpg', (texture) => {
-        texture.wrapS = THREE.RepeatWrapping;
-        texture.wrapT = THREE.RepeatWrapping;
-        texture.repeat.set(5, 5);
-      });
-
-      // Add normal map
-      const sandNormalMap = this.textureLoader.load('/textures/sand_normal.jpg', (texture) => {
-        texture.wrapS = THREE.RepeatWrapping;
-        texture.wrapT = THREE.RepeatWrapping;
-        texture.repeat.set(5, 5);
-      });
-
-      // Add roughness map
-      const sandRoughnessMap = this.textureLoader.load('/textures/sand_roughness.jpg', (texture) => {
-        texture.wrapS = THREE.RepeatWrapping;
-        texture.wrapT = THREE.RepeatWrapping;
-        texture.repeat.set(5, 5);
-      });
-
-      // Create materials with brighter colors for better visibility
-      // Change from MeshBasicMaterial to MeshStandardMaterial to receive light
-      const topMaterial = new THREE.MeshStandardMaterial({
-        map: sandTexture,
-        normalMap: sandNormalMap,
-        roughnessMap: sandRoughnessMap,
-        color: this.determineLandColor(),
-        transparent: false,
-        depthWrite: true,
-        roughness: 0.6, // Lower roughness for more vibrant colors
-        metalness: 0.2  // Slight metalness for better color visibility
-      });
+      // Create materials based on view mode
+      let topMaterial, sideMaterial;
       
-      // Note: Material instances don't have castShadow/receiveShadow properties
-      // These properties only exist on Object3D instances like meshes
-      
-      const sideMaterial = new THREE.MeshStandardMaterial({
-        color: this.determineLandColor(),
-        transparent: false,
-        opacity: 1.0,
-        roughness: 0.9,
-        metalness: 0.0
-      });
-      
-      // Note: Material instances don't have castShadow/receiveShadow properties
-      // These properties only exist on Object3D instances like meshes
+      if (this.activeView === 'land') {
+        // For land view, use a simple material without texture for better color visibility
+        const landColor = this.determineLandColor();
+        topMaterial = new THREE.MeshBasicMaterial({
+          color: landColor,
+          transparent: false,
+          depthWrite: true
+        });
+        
+        sideMaterial = new THREE.MeshBasicMaterial({
+          color: landColor,
+          transparent: false,
+          opacity: 1.0
+        });
+      } else {
+        // For other views, use the original textured material
+        const sandTexture = this.textureLoader.load('/textures/sand.jpg', (texture) => {
+          texture.wrapS = THREE.RepeatWrapping;
+          texture.wrapT = THREE.RepeatWrapping;
+          texture.repeat.set(5, 5);
+        });
+
+        // Add normal map
+        const sandNormalMap = this.textureLoader.load('/textures/sand_normal.jpg', (texture) => {
+          texture.wrapS = THREE.RepeatWrapping;
+          texture.wrapT = THREE.RepeatWrapping;
+          texture.repeat.set(5, 5);
+        });
+
+        // Add roughness map
+        const sandRoughnessMap = this.textureLoader.load('/textures/sand_roughness.jpg', (texture) => {
+          texture.wrapS = THREE.RepeatWrapping;
+          texture.wrapT = THREE.RepeatWrapping;
+          texture.repeat.set(5, 5);
+        });
+
+        topMaterial = new THREE.MeshStandardMaterial({
+          map: sandTexture,
+          normalMap: sandNormalMap,
+          roughnessMap: sandRoughnessMap,
+          color: this.determineLandColor(),
+          transparent: false,
+          depthWrite: true,
+          roughness: 0.6,
+          metalness: 0.2
+        });
+        
+        sideMaterial = new THREE.MeshStandardMaterial({
+          color: this.determineLandColor(),
+          transparent: false,
+          opacity: 1.0,
+          roughness: 0.9,
+          metalness: 0.0
+        });
+      }
 
       // Create mesh with different materials for top and sides
       const materials = [topMaterial, sideMaterial];
@@ -187,22 +198,16 @@ class PolygonMesh {
   
   // Add a new method to map income to color (red-yellow-green scale)
   private getIncomeBasedColor(income: number): THREE.Color {
-    // Define our color scale
-    // Red (high income) -> Yellow -> Green (low income)
-    const highIncomeColor = new THREE.Color(0xff0000); // Red
-    const midIncomeColor = new THREE.Color(0xffff00);  // Yellow
-    const lowIncomeColor = new THREE.Color(0x00ff00);  // Green
+    // Define our color scale with more vibrant colors
+    const highIncomeColor = new THREE.Color(0xff0000); // Bright red
+    const midIncomeColor = new THREE.Color(0xffff00);  // Bright yellow
+    const lowIncomeColor = new THREE.Color(0x00ff00);  // Bright green
     
     // Normalize income to a 0-1 scale
-    // We need to determine reasonable min/max values for income
-    // For now, let's assume income ranges from 0 to 1000
-    // This can be adjusted based on actual data ranges
     const maxIncome = 1000;
     const normalizedIncome = Math.min(Math.max(income / maxIncome, 0), 1);
     
     // Map the normalized income to our color scale
-    // 0.5-1.0 maps from yellow to red (higher income)
-    // 0.0-0.5 maps from green to yellow (lower income)
     if (normalizedIncome >= 0.5) {
       // Map from yellow to red
       const t = (normalizedIncome - 0.5) * 2; // Scale 0.5-1.0 to 0-1

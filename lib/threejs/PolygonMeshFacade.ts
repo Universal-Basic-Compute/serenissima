@@ -186,13 +186,13 @@ export class PolygonMeshFacade implements Poolable {
    */
   private createMaterial(): THREE.Material {
     if (this.activeView === 'land') {
-      // Land view - use color based on owner
+      // Land view - use color based on income without texture
       const landColor = this.determineLandColor();
       
+      // Create a basic material without texture for better color visibility
       return new THREE.MeshBasicMaterial({
         color: landColor,
         side: THREE.DoubleSide
-        // Shadow properties removed as they don't exist on MeshBasicMaterialParameters
       });
     } else {
       // Other views - use standard material with textures
@@ -225,19 +225,16 @@ export class PolygonMeshFacade implements Poolable {
    * Red (high income) -> Yellow -> Green (low income)
    */
   private getIncomeBasedColor(income: number): THREE.Color {
-    // Define our color scale
-    const highIncomeColor = new THREE.Color(0xff0000); // Red
-    const midIncomeColor = new THREE.Color(0xffff00);  // Yellow
-    const lowIncomeColor = new THREE.Color(0x00ff00);  // Green
+    // Define our color scale with more vibrant colors
+    const highIncomeColor = new THREE.Color(0xff0000); // Bright red
+    const midIncomeColor = new THREE.Color(0xffff00);  // Bright yellow
+    const lowIncomeColor = new THREE.Color(0x00ff00);  // Bright green
     
     // Normalize income to a 0-1 scale
-    // We'll use a simple approach with a fixed maximum value
     const maxIncome = 1000; // Adjust this based on your actual data range
     const normalizedIncome = Math.min(Math.max(income / maxIncome, 0), 1);
     
     // Map the normalized income to our color scale
-    // 0.5-1.0 maps from yellow to red (higher income)
-    // 0.0-0.5 maps from green to yellow (lower income)
     if (normalizedIncome >= 0.5) {
       // Map from yellow to red
       const t = (normalizedIncome - 0.5) * 2; // Scale 0.5-1.0 to 0-1
