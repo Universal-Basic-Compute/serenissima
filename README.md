@@ -19,6 +19,7 @@ La Serenissima is a blockchain-powered interactive experience set in Renaissance
 - **Interactive 3D Environment**: Explore Venice with dynamic water effects and atmospheric elements
 - **Multiple View Modes**: Land, Buildings, Transport, Resources, Markets, and Governance
 - **Economic Simulation**: Realistic land value and rent calculations based on historical factors
+- **Airtable Integration**: Land data and economic calculations stored in Airtable for easy management
 
 ## Technology Stack
 
@@ -26,7 +27,7 @@ La Serenissima is a blockchain-powered interactive experience set in Renaissance
 - **Backend**: FastAPI (Python), Node.js
 - **Blockchain**: Solana (for $COMPUTE integration)
 - **AI Integration**: For coat of arms generation and historical content
-- **Database**: Airtable
+- **Database**: Airtable (land data, economic calculations, user profiles)
 - **3D Rendering**: Three.js with custom shaders and effects
 
 ## Getting Started
@@ -54,7 +55,9 @@ La Serenissima is a blockchain-powered interactive experience set in Renaissance
 3. Set up environment variables:
    ```bash
    cp .env.example .env.local
-   # Edit .env.local with your configuration
+   # Edit .env.local with your configuration including:
+   # - AIRTABLE_API_KEY
+   # - AIRTABLE_BASE_ID
    ```
 
 4. Run the development server:

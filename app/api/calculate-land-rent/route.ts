@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { serverUtils, calculateCentroid } from '@/lib/fileUtils';
+import { airtableUtils } from '@/lib/airtableUtils';
 
 // Venice center coordinates
 const VENICE_CENTER = {
@@ -102,6 +103,15 @@ export async function GET() {
       });
     }
     
+    // Save the calculated land rents to Airtable
+    try {
+      await airtableUtils.saveLandRents(landRents);
+      console.log(`Successfully saved ${landRents.length} land rent records to Airtable`);
+    } catch (error) {
+      console.error('Failed to save land rents to Airtable:', error);
+      // Continue with the response even if Airtable save fails
+    }
+    
     return NextResponse.json({ 
       success: true, 
       landRents,
@@ -109,7 +119,8 @@ export async function GET() {
         totalLands: landRents.length,
         averageRent: Math.round(landRents.reduce((sum, land) => sum + land.dailyRent, 0) / landRents.length),
         minRent: Math.min(...landRents.map(land => land.dailyRent)),
-        maxRent: Math.max(...landRents.map(land => land.dailyRent))
+        maxRent: Math.max(...landRents.map(land => land.dailyRent)),
+        savedToAirtable: true
       }
     });
   } catch (error) {
