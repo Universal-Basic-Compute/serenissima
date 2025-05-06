@@ -222,11 +222,15 @@ export default class SceneSetup {
       if (normalizedHeight < 0.3) {
         // Sunrise/sunset - more orange
         this.sunLight.color.setHex(0xffcc88);
-        this.sunSphere.material.color.setHex(0xffcc66);
+        if (this.sunSphere.material instanceof THREE.MeshBasicMaterial) {
+          this.sunSphere.material.color.setHex(0xffcc66);
+        }
       } else {
         // Daytime - more yellow-white
         this.sunLight.color.setHex(0xffffeb);
-        this.sunSphere.material.color.setHex(0xffff80);
+        if (this.sunSphere.material instanceof THREE.MeshBasicMaterial) {
+          this.sunSphere.material.color.setHex(0xffff80);
+        }
       }
     };
     
