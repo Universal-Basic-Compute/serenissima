@@ -796,10 +796,13 @@ export class WaterFacade {
     
     // Process each land object
     this.landObjects.forEach(object => {
-      if ((object as THREE.Mesh).geometry) {
+      // Cast object to Mesh to access geometry property
+      const mesh = object as THREE.Mesh;
+      if (mesh.geometry) {
         try {
           // Get the vertices from the geometry
-          const positions = object.geometry.getAttribute('position');
+          const geometry = (object as THREE.Mesh).geometry;
+          const positions = geometry.getAttribute('position');
           
           if (positions) {
             // Sample more points along the boundary
@@ -968,7 +971,8 @@ float calculateShorelineFactor(vec3 position) {
   
   // Find distance to closest shoreline point
   for(int i = 0; i < ${this.boundaryPoints.length}; i++) {
-    float dist = distance(position.xz, shorelinePoints[i].xz);
+    vec2 pointXZ = shorelinePoints[i].xz;
+    float dist = distance(position.xz, pointXZ);
     minDist = min(minDist, dist);
   }
   
