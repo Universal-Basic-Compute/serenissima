@@ -54,29 +54,29 @@
   },
   "quality_variations": {
     "available_qualities": [
-      "questionable",
-      "credible",
-      "damning",
-      "irrefutable"
+      "common",
+      "fine",
+      "superior",
+      "masterwork"
     ],
-    "default_quality": "credible",
+    "default_quality": "fine",
     "quality_multipliers": {
-      "questionable": {
+      "common": {
         "value": 0.5,
         "effectiveness": 0.4,
         "risk_to_user": 1.5
       },
-      "credible": {
+      "fine": {
         "value": 1.0,
         "effectiveness": 1.0,
         "risk_to_user": 1.0
       },
-      "damning": {
+      "superior": {
         "value": 2.0,
         "effectiveness": 1.5,
         "risk_to_user": 0.8
       },
-      "irrefutable": {
+      "masterwork": {
         "value": 4.0,
         "effectiveness": 2.5,
         "risk_to_user": 0.6

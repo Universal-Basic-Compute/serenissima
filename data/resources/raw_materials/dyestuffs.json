@@ -68,7 +68,7 @@
       "source": "insect",
       "origin": "mediterranean",
       "rarity": "high",
-      "valueModifier": 1.8
+      "value_multiplier": 1.8
     },
     {
       "type": "indigo",
@@ -76,7 +76,7 @@
       "source": "plant",
       "origin": "india",
       "rarity": "high",
-      "valueModifier": 1.7
+      "value_multiplier": 1.7
     },
     {
       "type": "murex",
@@ -84,7 +84,7 @@
       "source": "mollusk",
       "origin": "mediterranean",
       "rarity": "very_high",
-      "valueModifier": 3.0
+      "value_multiplier": 3.0
     },
     {
       "type": "saffron",
@@ -92,7 +92,7 @@
       "source": "flower",
       "origin": "persia",
       "rarity": "high",
-      "valueModifier": 2.0
+      "value_multiplier": 2.0
     },
     {
       "type": "madder",
@@ -100,7 +100,7 @@
       "source": "root",
       "origin": "europe",
       "rarity": "medium",
-      "valueModifier": 1.2
+      "value_multiplier": 1.2
     },
     {
       "type": "woad",
@@ -108,32 +108,50 @@
       "source": "plant",
       "origin": "europe",
       "rarity": "low",
-      "valueModifier": 0.9
+      "value_multiplier": 0.9
     }
   ],
-  "productionUses": [
-    {
-      "process": "textile_dyeing",
-      "building": "dye_works",
-      "role": "primary_ingredient",
-      "outputResource": "dyed_textiles",
-      "productionChain": "Dyestuffs + Textiles → Dye Works → Dyed Textiles → Tailor Workshop → Luxury Silk Garments"
-    },
-    {
-      "process": "silk_dyeing",
-      "building": "dye_works",
-      "role": "primary_ingredient",
-      "outputResource": "dyed_silk_fabric",
-      "productionChain": "Dyestuffs + Silk Fabric → Dye Works → Dyed Silk Fabric → Tailor Workshop → Luxury Silk Garments"
-    },
-    {
-      "process": "pigment_making",
-      "building": "pigment_workshop",
-      "role": "primary_ingredient",
-      "outputResource": "pigments",
-      "productionChain": "Dyestuffs → Pigment Workshop → Pigments"
-    }
-  ],
+  "production_properties": {
+    "processor_building": "dye_works",
+    "processing_complexity": 5,
+    "required_skill": "dyeing:4",
+    "processing_time": 360,
+    "outputs": [
+      {
+        "resource": "dyed_textiles",
+        "amount": 1,
+        "requires": ["textiles"]
+      },
+      {
+        "resource": "dyed_silk_fabric",
+        "amount": 1,
+        "requires": ["silk_fabric"]
+      },
+      {
+        "resource": "pigments",
+        "amount": 1,
+        "alternative_output": true,
+        "facility": "pigment_workshop"
+      }
+    ]
+  },
+  "production_chain_position": {
+    "predecessors": [],
+    "successors": [
+      {
+        "resource": "dyed_textiles",
+        "facility": "dye_works"
+      },
+      {
+        "resource": "dyed_silk_fabric",
+        "facility": "dye_works"
+      },
+      {
+        "resource": "pigments",
+        "facility": "pigment_workshop"
+      }
+    ]
+  },
   "substitutes": [
     {
       "resourceId": "local_plant_dyes",

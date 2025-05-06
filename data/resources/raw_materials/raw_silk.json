@@ -16,9 +16,9 @@
     "full": "Luxurious fibers harvested from silkworm cocoons, primarily imported from China and Persia. The foundation of Venice's prestigious textile industry.",
     "flavor": "The journey of this delicate thread spans continents, passing through the hands of countless merchants before reaching Venice, where it transforms from simple cocoon to royal garment."
   },
-  "sourceInfo": {
+  "source_properties": {
     "source": "imported",
-    "harvestMethod": "sericulture",
+    "harvest_method": "sericulture",
     "locations": [
       "china",
       "persia",
@@ -54,15 +54,27 @@
       }
     }
   },
-  "productionUses": [
-    {
-      "process": "silk_conditioning",
-      "building": "silk_conditioning_house",
-      "role": "primary_ingredient",
-      "outputResource": "prepared_silk",
-      "productionChain": "Raw Silk → Silk Conditioning House → Prepared Silk → Weaving Workshop → Silk Fabric → Dye Works → Dyed Silk Fabric → Tailor Workshop → Luxury Silk Garments"
-    }
-  ],
+  "production_properties": {
+    "processor_building": "silk_conditioning_house",
+    "processing_complexity": 5,
+    "required_skill": "silk_processing:3",
+    "processing_time": 240,
+    "outputs": [
+      {
+        "resource": "prepared_silk",
+        "amount": 1
+      }
+    ]
+  },
+  "production_chain_position": {
+    "predecessors": [],
+    "successors": [
+      {
+        "resource": "prepared_silk",
+        "facility": "silk_conditioning_house"
+      }
+    ]
+  },
   "substitutes": [],
   "complements": [
     {

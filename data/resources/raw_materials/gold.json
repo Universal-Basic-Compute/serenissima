@@ -2,7 +2,7 @@
   "id": "gold",
   "name": "Gold",
   "category": "raw_materials",
-  "subcategory": "precious_metal",
+  "subcategory": "metal",
   "icon": "/assets/icons/resources/gold.png",
   "base_properties": {
     "base_value": 100,
@@ -53,23 +53,23 @@
   "forms": [
     {
       "form": "ingot",
-      "valueModifier": 1.0,
-      "primaryUse": "storage_and_trade"
+      "value_multiplier": 1.0,
+      "primary_use": "storage_and_trade"
     },
     {
       "form": "powder",
-      "valueModifier": 0.95,
-      "primaryUse": "goldsmithing"
+      "value_multiplier": 0.95,
+      "primary_use": "goldsmithing"
     },
     {
       "form": "leaf",
-      "valueModifier": 1.3,
-      "primaryUse": "decoration"
+      "value_multiplier": 1.3,
+      "primary_use": "decoration"
     },
     {
       "form": "wire",
-      "valueModifier": 1.2,
-      "primaryUse": "jewelry"
+      "value_multiplier": 1.2,
+      "primary_use": "jewelry"
     }
   ],
   "productionUses": [

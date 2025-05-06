@@ -60,10 +60,10 @@
   },
   "quality_variations": {
     "available_qualities": [
-      "poor",
       "common",
       "fine",
-      "superior"
+      "superior",
+      "masterwork"
     ],
     "default_quality": "common",
     "quality_multipliers": {

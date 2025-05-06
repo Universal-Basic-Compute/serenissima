@@ -17,9 +17,9 @@
     "full": "Various species of fish harvested from Venice's lagoon waters and nearby Adriatic Sea. A staple food for Venetians of all classes.",
     "flavor": "The fishermen's nets haul in more than sustenance\u00e2\u20ac\u201dthey draw forth the very identity of Venice, a city as much of the water as beside it."
   },
-  "sourceInfo": {
+  "source_properties": {
     "source": "local",
-    "harvestMethod": "fishing",
+    "harvest_method": "fishing",
     "locations": [
       "lagoon",
       "adriatic"

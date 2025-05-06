@@ -56,29 +56,47 @@
       }
     }
   },
-  "productionUses": [
-    {
-      "process": "fiber_processing",
-      "building": "fiber_workshop",
-      "role": "primary_material",
-      "outputResource": "processed_hemp",
-      "productionChain": "Hemp → Fiber Workshop → Processed Hemp"
-    },
-    {
-      "process": "rope_making",
-      "building": "rope_works",
-      "role": "primary_material",
-      "outputResource": "rope",
-      "productionChain": "Hemp → Rope Works → Rope"
-    },
-    {
-      "process": "weaving",
-      "building": "weaving_workshop",
-      "role": "primary_material",
-      "outputResource": "sailcloth",
-      "productionChain": "Hemp → Weaving Workshop → Sailcloth"
-    }
-  ],
+  "production_properties": {
+    "processor_building": "fiber_workshop",
+    "processing_complexity": 3,
+    "required_skill": "fiber_processing:2",
+    "processing_time": 240,
+    "outputs": [
+      {
+        "resource": "processed_hemp",
+        "amount": 1
+      },
+      {
+        "resource": "rope",
+        "amount": 1,
+        "alternative_output": true,
+        "facility": "rope_works"
+      },
+      {
+        "resource": "sailcloth",
+        "amount": 1,
+        "alternative_output": true,
+        "facility": "weaving_workshop"
+      }
+    ]
+  },
+  "production_chain_position": {
+    "predecessors": [],
+    "successors": [
+      {
+        "resource": "processed_hemp",
+        "facility": "fiber_workshop"
+      },
+      {
+        "resource": "rope",
+        "facility": "rope_works"
+      },
+      {
+        "resource": "sailcloth",
+        "facility": "weaving_workshop"
+      }
+    ]
+  },
   "substitutes": [
     {
       "resourceId": "flax",

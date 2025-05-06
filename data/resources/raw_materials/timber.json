@@ -52,15 +52,15 @@
         "production_efficiency": 1.6
       }
     },
-    "woodTypes": [
+    "wood_types": [
       {
         "type": "oak",
         "properties": [
           "strong",
           "water_resistant"
         ],
-        "primaryUse": "shipbuilding",
-        "valueModifier": 1.5
+        "primary_use": "shipbuilding",
+        "value_multiplier": 1.5
       },
       {
         "type": "pine",
@@ -68,8 +68,8 @@
           "straight",
           "workable"
         ],
-        "primaryUse": "construction",
-        "valueModifier": 1.0
+        "primary_use": "construction",
+        "value_multiplier": 1.0
       },
       {
         "type": "walnut",
@@ -77,8 +77,8 @@
           "attractive_grain",
           "durable"
         ],
-        "primaryUse": "furniture",
-        "valueModifier": 1.8
+        "primary_use": "furniture",
+        "value_multiplier": 1.8
       }
     ]
   },
