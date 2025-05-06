@@ -19,7 +19,7 @@
   },
   "maintenanceCost": 50000,
   "constructionTime": 2592000000,
-  "incomeGeneration": 55000,
+  "incomeGeneration": 0,
   "employmentCapacity": 30,
   "locationRequirements": {
     "districtRestrictions": "Arsenal district entrance only, unique structure",

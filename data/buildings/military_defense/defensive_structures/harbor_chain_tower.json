@@ -18,7 +18,7 @@
   },
   "maintenanceCost": 30000,
   "constructionTime": 864000000,
-  "incomeGeneration": 35000,
+  "incomeGeneration": 0,
   "employmentCapacity": 10,
   "locationRequirements": {
     "districtRestrictions": "Harbor entrances, strategic canal access points",

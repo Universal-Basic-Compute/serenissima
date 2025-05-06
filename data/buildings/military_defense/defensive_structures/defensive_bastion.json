@@ -18,7 +18,7 @@
   },
   "maintenanceCost": 75000,
   "constructionTime": 2592000000,
-  "incomeGeneration": 80000,
+  "incomeGeneration": 0,
   "employmentCapacity": 40,
   "locationRequirements": {
     "districtRestrictions": "Strategic defensive positions, vulnerable approaches",

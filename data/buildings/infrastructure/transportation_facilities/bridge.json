@@ -19,7 +19,7 @@
   "maintenanceCost": 25000,
   "constructionTime": 1209600000,
   "incomeGeneration": 0,
-  "employmentCapacity": 3,
+  "employmentCapacity": 0,
   "locationRequirements": {
     "districtRestrictions": "Requires Senate approval for location",
     "adjacentRequirements": "Must connect land areas across canal",

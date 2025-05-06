@@ -5,7 +5,7 @@
   "tier": 3,
   "size": "Small",
   "unlockCondition": "12,000,000 ducats capital, Criminal Contacts (elite quality), political connections",
-  "calculationsAnalysis": "The Spy Safehouse represents specialized intelligence infrastructure with strategic rather than commercial value. The construction cost of 4,000,000 ducats reflects the specialized security and communication systems required, while generating no direct income reflects its intelligence gathering rather than commercial purpose. The maintenance cost of 35,000 ducats creates a substantial ongoing expense justified by the valuable intelligence produced. The employment capacity of 4 represents the minimal trusted operatives needed. The construction time of 10 days (864000000ms) reflects the need for extremely discreet construction. This building creates a strategic investment in intelligence gathering with appropriate security requirements reflecting Venice's historical position as a center of Renaissance espionage where multiple powers maintained intelligence operations.",
+  "calculationsAnalysis": "The Spy Safehouse represents specialized intelligence infrastructure with strategic and covert commercial value. The construction cost of 4,000,000 ducats reflects the specialized security and communication systems required, while the income of 25,000 ducats (0.63% return) represents the value of sold intelligence and blackmail opportunities. The maintenance cost of 35,000 ducats (140% of income) creates a substantial ongoing expense justified by the valuable intelligence produced and security requirements. The employment capacity of 4 represents the minimal trusted operatives needed. The construction time of 10 days (864000000ms) reflects the need for extremely discreet construction. This building creates a strategic investment in intelligence gathering with appropriate security requirements reflecting Venice's historical position as a center of Renaissance espionage where multiple powers maintained intelligence operations.",
   "shortDescription": "Secure facility for intelligence gathering, agent meetings, and covert operations planning.",
   "fullDescription": "Operating in the shadows of Venice's political landscape, spy safehouses provide secure locations for intelligence operations. Featuring secure meeting rooms, document processing facilities, coding/decoding equipment, and often disguised communications systems, these discreet facilities serve both Venetian intelligence and foreign operatives. Their locations are carefully chosen for both security and strategic observation opportunities.",
   "flavorText": "In the City of Masks, the most valuable mask is the ordinary facade of a building where extraordinary secrets change hands daily, and the fate of nations may be decided over a quiet glass of wine.",
@@ -18,7 +18,7 @@
   },
   "maintenanceCost": 35000,
   "constructionTime": 864000000,
-  "incomeGeneration": 0,
+  "incomeGeneration": 25000,
   "employmentCapacity": 4,
   "productionInformation": {
     "inputResources": {
