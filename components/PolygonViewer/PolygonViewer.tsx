@@ -1135,7 +1135,6 @@ export default function PolygonViewer() {
     }
   }, [selectedPolygonId]);
   
-
   // Add a new useEffect to handle hover state changes
   useEffect(() => {
     const handleHoverStateChange = (event: CustomEvent) => {
@@ -1233,9 +1232,9 @@ export default function PolygonViewer() {
               landObjects.push(object);
             }
           });
-        
-        // Connect land to water
-        if (landObjects.length > 0 && sceneRef.current) {
+          
+          // Connect land to water
+          if (landObjects.length > 0 && sceneRef.current) {
           console.log(`Connecting ${landObjects.length} land objects to water`);
           if (typeof sceneRef.current.connectLandToWater === 'function') {
             sceneRef.current.connectLandToWater(landObjects);
