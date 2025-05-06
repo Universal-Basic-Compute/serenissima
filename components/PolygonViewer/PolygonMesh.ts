@@ -121,9 +121,8 @@ class PolygonMesh {
         metalness: 0.1
       });
       
-      // Set shadow properties on the material instance (not in constructor parameters)
-      topMaterial.castShadow = true;
-      topMaterial.receiveShadow = true;
+      // Note: Material instances don't have castShadow/receiveShadow properties
+      // These properties only exist on Object3D instances like meshes
       
       const sideMaterial = new THREE.MeshStandardMaterial({
         color: this.determineLandColor(),
@@ -133,9 +132,8 @@ class PolygonMesh {
         metalness: 0.0
       });
       
-      // Set shadow properties on the material instance (not in constructor parameters)
-      sideMaterial.castShadow = true;
-      sideMaterial.receiveShadow = true;
+      // Note: Material instances don't have castShadow/receiveShadow properties
+      // These properties only exist on Object3D instances like meshes
 
       // Create mesh with different materials for top and sides
       const materials = [topMaterial, sideMaterial];
