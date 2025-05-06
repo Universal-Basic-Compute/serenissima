@@ -1250,7 +1250,8 @@ export default function PolygonViewer() {
       const timer = setTimeout(() => {
         // Find all land objects in the scene
         const landObjects: THREE.Object3D[] = [];
-        sceneRef.current.scene.traverse(object => {
+        if (sceneRef.current) {
+          sceneRef.current.scene.traverse(object => {
           if (object instanceof THREE.Mesh && 
               object.userData && 
               (object.userData.isPolygon || object.userData.isLand)) {
@@ -1261,7 +1262,9 @@ export default function PolygonViewer() {
         // Connect land to water
         if (landObjects.length > 0 && sceneRef.current) {
           console.log(`Connecting ${landObjects.length} land objects to water`);
-          sceneRef.current.connectLandToWater(landObjects);
+          if (typeof sceneRef.current.connectLandToWater === 'function') {
+            sceneRef.current.connectLandToWater(landObjects);
+          }
         }
       }, 3000); // Wait 3 seconds for everything to be fully loaded
       
@@ -1269,7 +1272,8 @@ export default function PolygonViewer() {
       const secondTimer = setTimeout(() => {
         if (sceneRef.current && sceneRef.current.scene) {
           const landObjects: THREE.Object3D[] = [];
-          sceneRef.current.scene.traverse(object => {
+          if (sceneRef.current) {
+            sceneRef.current.scene.traverse(object => {
             if (object instanceof THREE.Mesh && 
                 object.userData && 
                 (object.userData.isPolygon || object.userData.isLand)) {
@@ -1277,9 +1281,11 @@ export default function PolygonViewer() {
             }
           });
           
-          if (landObjects.length > 0) {
+          if (landObjects.length > 0 && sceneRef.current) {
             console.log(`Second attempt: Connecting ${landObjects.length} land objects to water`);
-            sceneRef.current.connectLandToWater(landObjects);
+            if (typeof sceneRef.current.connectLandToWater === 'function') {
+              sceneRef.current.connectLandToWater(landObjects);
+            }
           }
         }
       }, 8000); // Wait 8 seconds for any late-loaded polygons
