@@ -1462,43 +1462,43 @@ export class RoadManager {
         if ('alphaMap' in material && material.alphaMap) material.alphaMap.dispose();
         
         // Clear references
-        material.map = null;
+        material.map = null as unknown as THREE.Texture;
         
         // Clear references for properties that might not exist on all material types
         if ('normalMap' in material) (material as THREE.MeshStandardMaterial).normalMap = null as unknown as THREE.Texture;
         if ('roughnessMap' in material) (material as THREE.MeshStandardMaterial).roughnessMap = null as unknown as THREE.Texture;
-        if ('metalnessMap' in material) (material as THREE.MeshStandardMaterial).metalnessMap = null;
-        if ('aoMap' in material) material.aoMap = null;
+        if ('metalnessMap' in material) (material as THREE.MeshStandardMaterial).metalnessMap = null as unknown as THREE.Texture;
+        if ('aoMap' in material) material.aoMap = null as unknown as THREE.Texture;
         
         // Clear emissiveMap based on material type
         if ('emissiveMap' in material) {
           if (material instanceof THREE.MeshStandardMaterial) {
-            material.emissiveMap = null;
+            material.emissiveMap = null as unknown as THREE.Texture;
           } else if (material instanceof THREE.MeshPhongMaterial) {
-            material.emissiveMap = null;
+            material.emissiveMap = null as unknown as THREE.Texture;
           } else if (material instanceof THREE.MeshLambertMaterial) {
-            material.emissiveMap = null;
+            material.emissiveMap = null as unknown as THREE.Texture;
           }
         }
         
         // Clear bumpMap based on material type
         if ('bumpMap' in material) {
           if (material instanceof THREE.MeshStandardMaterial) {
-            material.bumpMap = null;
+            material.bumpMap = null as unknown as THREE.Texture;
           } else if (material instanceof THREE.MeshPhongMaterial) {
-            material.bumpMap = null;
+            material.bumpMap = null as unknown as THREE.Texture;
           }
         }
         if ('displacementMap' in material) {
           if (material instanceof THREE.MeshStandardMaterial) {
-            material.displacementMap = null;
+            material.displacementMap = null as unknown as THREE.Texture;
           } else if (material instanceof THREE.MeshPhongMaterial) {
-            material.displacementMap = null;
+            material.displacementMap = null as unknown as THREE.Texture;
           }
         }
-        if ('envMap' in material) material.envMap = null;
-        if ('lightMap' in material) material.lightMap = null;
-        if ('alphaMap' in material) material.alphaMap = null;
+        if ('envMap' in material) material.envMap = null as unknown as THREE.Texture;
+        if ('lightMap' in material) material.lightMap = null as unknown as THREE.Texture;
+        if ('alphaMap' in material) material.alphaMap = null as unknown as THREE.Texture;
       }
     } catch (error) {
       log.warn('Error disposing textures from material:', error);
