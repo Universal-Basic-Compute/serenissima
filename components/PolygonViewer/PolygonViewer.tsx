@@ -1557,25 +1557,27 @@ export default function PolygonViewer() {
   }, []);
 
   // Define the fallback UI for error boundary
-  const errorBoundaryFallback = useMemo(() => (
-    <div className="w-full h-full flex flex-col items-center justify-center bg-amber-50">
-      <h2 className="text-2xl font-serif text-amber-800 mb-4">Rendering Error</h2>
-      <p className="text-amber-600 mb-6">The Council of Ten is investigating this issue.</p>
-      <button 
-        onClick={() => window.location.reload()}
-        className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors"
-      >
-        Reload Page
-      </button>
-    </div>
-  ), []);
+  const errorBoundaryFallback = useMemo(() => {
+    return (
+      <div className="w-full h-full flex flex-col items-center justify-center bg-amber-50">
+        <h2 className="text-2xl font-serif text-amber-800 mb-4">Rendering Error</h2>
+        <p className="text-amber-600 mb-6">The Council of Ten is investigating this issue.</p>
+        <button 
+          onClick={() => window.location.reload()}
+          className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors"
+        >
+          Reload Page
+        </button>
+      </div>
+    );
+  }, []);
 
   if (loading) {
     return (
       <ThreeDErrorBoundary 
         onError={handleRenderingError}
         resetKey={`${activeView}-${highQuality}-${polygons.length}`}
-        fallbackComponent={errorBoundaryFallback as React.ReactElement}
+        fallbackComponent={errorBoundaryFallback}
       >
         <div className="w-full h-full flex flex-col items-center justify-center bg-amber-50">
           <div className="text-amber-800 text-2xl font-serif mb-4">Mapping the Venetian Republic...</div>
@@ -1633,7 +1635,7 @@ export default function PolygonViewer() {
     <ThreeDErrorBoundary 
       onError={handleRenderingError}
       resetKey={`${activeView}-${highQuality}-${polygons.length}`}
-      fallbackComponent={errorBoundaryFallback as React.ReactElement}
+      fallbackComponent={errorBoundaryFallback}
     >
       <div className="w-screen h-screen">
         {/* View mode menu */}
