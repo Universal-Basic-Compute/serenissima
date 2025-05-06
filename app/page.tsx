@@ -2543,6 +2543,8 @@ export default function Home() {
           getSnapshotWithCache={getSnapshotWithCache}
           ref={polygonRendererRef}
           activeView={activeView}
+          // Add any additional required props here
+          key={activeView} // Adding a key prop to ensure re-render on view change
         />
       </>
       
