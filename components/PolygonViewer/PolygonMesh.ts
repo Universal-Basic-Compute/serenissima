@@ -220,6 +220,10 @@ class PolygonMesh {
       }
     }
     
+    // receiveShadow is a property of Object3D (like Mesh), not of Material
+    // Ensure the mesh itself has receiveShadow set
+    this.mesh.receiveShadow = true;
+    
     material.needsUpdate = true;
   }
   
