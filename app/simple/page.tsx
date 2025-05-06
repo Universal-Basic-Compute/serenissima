@@ -10,6 +10,9 @@ import SuccessAlert from '../../components/UI/SuccessAlert';
 import { PhantomWalletAdapter } from '@solana/wallet-adapter-phantom';
 import { WalletReadyState } from '@solana/wallet-adapter-base';
 import { getApiBaseUrl } from '@/lib/apiUtils';
+import { getWalletAddress, setWalletAddress, clearWalletAddress, storeWalletInAirtable } from '@/lib/walletUtils';
+import { transferCompute, withdrawCompute } from '@/lib/computeUtils';
+import { generateCoatOfArmsImage } from '@/app/utils/coatOfArmsUtils';
 import { FaHome, FaBuilding, FaRoad, FaTree, FaStore, FaLandmark } from 'react-icons/fa';
 import * as THREE from 'three';
 
@@ -267,7 +270,7 @@ export default function SimplePage() {
     setWalletAdapter(adapter);
     
     // Check if wallet is already connected in session or local storage
-    const storedWallet = sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress');
+    const storedWallet = getWalletAddress();
     console.log("Stored wallet address:", storedWallet);
     
     if (storedWallet) {
@@ -821,7 +824,7 @@ export default function SimplePage() {
                     
                     <div className="mt-2 flex justify-between">
                       <button
-                        onClick={generateCoatOfArmsImage}
+                        onClick={handleGenerateCoatOfArmsImage}
                         disabled={!familyCoatOfArms.trim() || isGeneratingImage}
                         className={`px-3 py-1 rounded text-white text-sm ${
                           !familyCoatOfArms.trim() || isGeneratingImage 
@@ -984,7 +987,7 @@ export default function SimplePage() {
     </>
   );
   // Add the connectWallet function
-  function connectWallet() {
+  async function connectWallet() {
     console.log("Connecting wallet...");
     if (!walletAdapter) {
       console.log("Wallet adapter not initialized");
@@ -1004,8 +1007,7 @@ export default function SimplePage() {
         setUserProfile(null); // Also clear the user profile
     
         // Clear wallet from both storages
-        sessionStorage.removeItem('walletAddress');
-        localStorage.removeItem('walletAddress');
+        clearWalletAddress();
         localStorage.removeItem('userProfile'); // Also clear user profile from storage
       
         // Dispatch a custom event to notify other components
@@ -1016,45 +1018,6 @@ export default function SimplePage() {
         console.error("Error disconnecting wallet:", error);
         alert(`Failed to disconnect wallet: ${error instanceof Error ? error.message : String(error)}`);
       });
-      return;
-    }
-    // Use the walletAdapter from component state
-    if (!this.walletAdapter) {
-      console.log("Wallet adapter not initialized");
-      return;
-    }
-    
-    const adapter = this.walletAdapter;
-    if (!adapter) {
-      console.log("Wallet adapter not initialized");
-      return;
-    }
-    
-    console.log("Connecting wallet, current state:", adapter.connected ? "connected" : "disconnected");
-    
-    if (adapter.connected) {
-      // If already connected, disconnect
-      console.log("Disconnecting wallet...");
-      try {
-        await adapter.disconnect();
-      
-        // Only update state after successful disconnect
-        this.setWalletAddress(null);
-        this.setUserProfile(null); // Also clear the user profile
-    
-        // Clear wallet from both storages
-        sessionStorage.removeItem('walletAddress');
-        localStorage.removeItem('walletAddress');
-        localStorage.removeItem('userProfile'); // Also clear user profile from storage
-      
-        // Dispatch a custom event to notify other components
-        window.dispatchEvent(new CustomEvent('walletChanged'));
-      
-        console.log("Wallet disconnected successfully");
-      } catch (error) {
-        console.error("Error disconnecting wallet:", error);
-        alert(`Failed to disconnect wallet: ${error instanceof Error ? error.message : String(error)}`);
-      }
       return;
     }
   
@@ -1067,142 +1030,60 @@ export default function SimplePage() {
     
     try {
       console.log("Attempting to connect to wallet...");
-      adapter.connect().then(() => {
-        const address = adapter.publicKey?.toString() || null;
-        console.log("Wallet connected, address:", address);
+      await adapter.connect();
+      
+      const address = adapter.publicKey?.toString() || null;
+      console.log("Wallet connected, address:", address);
+      
+      if (address) {
+        setWalletAddress(address);
+        // Store wallet in both session and local storage
+        setWalletAddress(address);
         
-        if (address) {
-          setWalletAddress(address);
-          // Store wallet in both session and local storage
-          sessionStorage.setItem('walletAddress', address);
-          localStorage.setItem('walletAddress', address);
-          console.log("Wallet address stored in session and local storage");
-          
-          // Store wallet in Airtable and check for username
-          storeWalletInAirtable(address).then(userData => {
-            console.log("User data from Airtable:", userData);
-            
-            // Check if user profile exists in component state
-            if (userProfile) {
-              console.log("User profile after wallet connection:", userProfile);
-            }
-          });
-        } else {
-          console.log("No wallet address returned after connection");
+        // Store wallet in Airtable and check for username
+        const userData = await storeWalletInAirtable(address);
+        
+        if (userData) {
+          // Check if the user has a username
+          if (!userData.user_name) {
+            // If no username, show the prompt
+            setShowUsernamePrompt(true);
+          } else {
+            // Store the user profile information
+            console.log('Setting user profile with data:', userData);
+            const userProfile = {
+              username: userData.user_name,
+              firstName: userData.first_name || userData.user_name.split(' ')[0] || '',
+              lastName: userData.last_name || userData.user_name.split(' ').slice(1).join(' ') || '',
+              coatOfArmsImage: userData.coat_of_arms_image,
+              familyMotto: userData.family_motto,
+              computeAmount: userData.compute_amount
+            };
+            setUserProfile(userProfile);
+          }
         }
-      }).catch(error => {
-        console.error('Error connecting to wallet:', error);
-        alert(`Failed to connect wallet: ${error instanceof Error ? error.message : String(error)}`);
-      });
+      }
     } catch (error) {
       console.error('Error connecting to wallet:', error);
       alert(`Failed to connect wallet: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
-  // Add the storeWalletInAirtable function
-  async function storeWalletInAirtable(walletAddress: string) {
-    try {
-      const response = await fetch(`${getApiBaseUrl()}/api/wallet`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          wallet_address: walletAddress,
-        }),
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to store wallet');
-      }
-      
-      const data = await response.json();
-      console.log('Wallet stored in Airtable:', data);
-      
-      // Check if the user has a username
-      if (!data.user_name) {
-        // If no username, show the prompt
-        setShowUsernamePrompt(true);
-      } else {
-        // Store the user profile information
-        console.log('Setting user profile with data:', data);
-        const userProfile = {
-          username: data.user_name,
-          firstName: data.first_name || data.user_name.split(' ')[0] || '',
-          lastName: data.last_name || data.user_name.split(' ').slice(1).join(' ') || '',
-          coatOfArmsImage: data.coat_of_arms_image,
-          familyMotto: data.family_motto,
-          computeAmount: data.compute_amount
-        };
-        setUserProfile(userProfile);
-      }
-      
-      return data;
-    } catch (error) {
-      console.error('Error storing wallet:', error);
-      return null;
-    }
-  }
 
-  // Function to generate coat of arms image
-  async function generateCoatOfArmsImage() {
-    if (!familyCoatOfArms.trim()) {
-      alert('Please enter a description of your family coat of arms first');
-      return;
-    }
-    
-    try {
-      setIsGeneratingImage(true);
-        
-      // Import the utility function directly
-      const { generateCoatOfArmsImage: generateImage } = await import('@/app/utils/coatOfArmsUtils');
-      const imageUrl = await generateImage(familyCoatOfArms);
-        
-      // Update state with the local image URL
-      setCoatOfArmsImage(imageUrl);
-        
-    } catch (error) {
-      console.error('Error generating coat of arms image:', error);
-      alert(`Failed to generate image: ${error instanceof Error ? error.message : String(error)}`);
-    } finally {
-      setIsGeneratingImage(false);
-    }
-  }
 
 
   // Add the handleTransferCompute function
   async function handleTransferCompute(amount: number) {
     try {
-      console.log('Starting compute transfer process...');
-      
-      // Get the wallet address from session or local storage
-      const currentWalletAddress = walletAddress || sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress');
+      // Get the wallet address from state or storage
+      const currentWalletAddress = walletAddress || getWalletAddress();
       
       if (!currentWalletAddress) {
         alert('Please connect your wallet first');
         return;
       }
       
-      // Call the backend API to transfer compute using Solana
-      const response = await fetch(`${getApiBaseUrl()}/api/transfer-compute-solana`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          wallet_address: currentWalletAddress,
-          compute_amount: amount,
-        }),
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Failed to transfer compute');
-      }
-      
-      const data = await response.json();
-      console.log('Compute transfer successful:', data);
+      const data = await transferCompute(currentWalletAddress, amount);
       
       // Update the user profile with the new compute amount
       if (userProfile) {
@@ -1237,79 +1118,15 @@ export default function SimplePage() {
   // Add the handleWithdrawCompute function
   async function handleWithdrawCompute(amount: number) {
     try {
-      // Get the wallet address from session or local storage
-      const currentWalletAddress = walletAddress || sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress');
+      // Get the wallet address from state or storage
+      const currentWalletAddress = walletAddress || getWalletAddress();
       
       if (!currentWalletAddress) {
         alert('Please connect your wallet first');
         return;
       }
       
-      console.log(`Initiating withdrawal of ${amount.toLocaleString()} ducats...`);
-      
-      // Try the direct API route first
-      try {
-        const response = await fetch('/api/withdraw-compute', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            wallet_address: currentWalletAddress,
-            compute_amount: amount,
-          }),
-        });
-        
-        if (response.ok) {
-          const data = await response.json();
-          console.log('Compute withdrawal successful:', data);
-          
-          // Update the user profile with the new compute amount
-          if (userProfile) {
-            const updatedProfile = {
-              ...userProfile,
-              computeAmount: data.compute_amount
-            };
-            setUserProfile(updatedProfile);
-            
-            // Update localStorage
-            localStorage.setItem('userProfile', JSON.stringify(updatedProfile));
-            
-            // Dispatch event to update other components
-            window.dispatchEvent(new CustomEvent('userProfileUpdated', {
-              detail: updatedProfile
-            }));
-          }
-          
-          return data;
-        }
-      } catch (directApiError) {
-        console.warn('Direct API withdrawal failed, falling back to backend API:', directApiError);
-      }
-      
-      // Fall back to the backend API
-      const response = await fetch(`${getApiBaseUrl()}/api/withdraw-compute-solana`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          wallet_address: currentWalletAddress,
-          compute_amount: amount,
-        }),
-        // Add a timeout to prevent hanging requests
-        signal: AbortSignal.timeout(15000) // 15 second timeout
-      });
-      
-      // Handle non-OK responses with more detailed error messages
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        const errorMessage = errorData.detail || `Server returned ${response.status}: ${response.statusText}`;
-        throw new Error(errorMessage);
-      }
-      
-      const data = await response.json();
-      console.log('Compute withdrawal successful:', data);
+      const data = await withdrawCompute(currentWalletAddress, amount);
       
       // Update the user profile with the new compute amount
       if (userProfile) {
@@ -1328,11 +1145,9 @@ export default function SimplePage() {
         }));
       }
       
-      // Return the data instead of showing an alert (the component will handle the success message)
       return data;
     } catch (error) {
       console.error('Error withdrawing compute:', error);
-      // Don't show alert here, let the component handle the error
       throw error;
     }
   }
