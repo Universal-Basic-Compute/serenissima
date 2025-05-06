@@ -1099,14 +1099,15 @@ function storeWalletInAirtable(walletAddress: string) {
     } else {
       // Store the user profile information
       console.log('Setting user profile with data:', data);
-      this.setUserProfile({
+      const userProfile = {
         username: data.user_name,
         firstName: data.first_name || data.user_name.split(' ')[0] || '',
         lastName: data.last_name || data.user_name.split(' ').slice(1).join(' ') || '',
         coatOfArmsImage: data.coat_of_arms_image,
         familyMotto: data.family_motto,
         computeAmount: data.compute_amount
-      });
+      };
+      this.setUserProfile(userProfile);
     }
     
     return data;
