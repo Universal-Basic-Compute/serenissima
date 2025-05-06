@@ -22,6 +22,7 @@ The application is organized into the following layers:
 4. **Event System**: Communication between components
 5. **3D Rendering**: Three.js integration and rendering logic
 6. **Blockchain Integration**: Wallet connection and token management
+7. **Economic Simulation**: Land value and rent calculation systems
 
 ## Directory Structure
 
@@ -36,7 +37,8 @@ The application is organized into the following layers:
 ├── lib/                # Shared utilities and services
 │   ├── services/       # Service layer
 │   ├── threejs/        # Three.js abstractions
-│   └── blockchain/     # Blockchain utilities
+│   ├── blockchain/     # Blockchain utilities
+│   └── economy/        # Economic simulation utilities
 ├── store/              # State management
 ├── types/              # TypeScript type definitions
 └── public/             # Static assets
@@ -51,3 +53,4 @@ See the following documents for detailed information on each architectural compo
 - [State Management](./state-management.md)
 - [Event System](./events.md)
 - [3D Rendering](./rendering.md)
+- [Economic Simulation](./economic-simulation.md)

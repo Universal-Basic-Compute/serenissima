@@ -18,6 +18,7 @@ La Serenissima is a blockchain-powered interactive experience set in Renaissance
 - **$COMPUTE Integration**: Full blockchain economy with real value and ownership
 - **Interactive 3D Environment**: Explore Venice with dynamic water effects and atmospheric elements
 - **Multiple View Modes**: Land, Buildings, Transport, Resources, Markets, and Governance
+- **Economic Simulation**: Realistic land value and rent calculations based on historical factors
 
 ## Technology Stack
 
