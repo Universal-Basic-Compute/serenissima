@@ -23,7 +23,7 @@
   "locationRequirements": {
     "districtRestrictions": "Premium locations in San Marco, Rialto, or Castello",
     "adjacentRequirements": "Preferably near other luxury retailers",
-    "environmentalEffects": "Increases property value of adjacent buildings by 8%, attracts wealthy clientele"
+    "environmentalEffects": "Increases property value of adjacent buildings by 8%, attracts wealthy clientele (5% higher chance of noble visitors), improves area commerce rating by 10%"
   },
   "productionInformation": {
     "inputResources": {

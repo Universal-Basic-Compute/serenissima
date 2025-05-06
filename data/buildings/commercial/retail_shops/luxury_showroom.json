@@ -24,7 +24,7 @@
   "locationRequirements": {
     "districtRestrictions": "Premium locations only: San Marco, Grand Canal frontage, or Rialto",
     "adjacentRequirements": "Benefits from proximity to other luxury establishments",
-    "environmentalEffects": "Significantly increases property value of surrounding buildings, attracts wealthy visitors"
+    "environmentalEffects": "Increases property value of surrounding buildings by 15%, attracts wealthy visitors (10% higher chance of noble visitors), improves area prestige rating by 12%"
   },
   "productionInformation": {
     "inputResources": {
