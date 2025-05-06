@@ -6,6 +6,46 @@ import os
 import time
 from pathlib import Path
 
+# Function to mark a task as done
+def mark_todo_as_done(todo_id):
+    done_file = 'todos_done.json'
+    done_todos = []
+    
+    # Load existing done TODOs if file exists
+    if os.path.exists(done_file):
+        try:
+            with open(done_file, 'r') as f:
+                done_todos = json.load(f)
+        except json.JSONDecodeError:
+            print(f"Warning: Could not parse {done_file}, creating new file")
+            done_todos = []
+    
+    # Add the new TODO ID if not already in the list
+    if todo_id not in done_todos:
+        done_todos.append(todo_id)
+        
+        # Save the updated list
+        with open(done_file, 'w') as f:
+            json.dump(done_todos, f, indent=2)
+        
+        print(f"Marked TODO {todo_id} as done")
+    else:
+        print(f"TODO {todo_id} was already marked as done")
+
+# Function to check if a task is done
+def is_todo_done(todo_id):
+    done_file = 'todos_done.json'
+    
+    if not os.path.exists(done_file):
+        return False
+        
+    try:
+        with open(done_file, 'r') as f:
+            done_todos = json.load(f)
+            return todo_id in done_todos
+    except (json.JSONDecodeError, FileNotFoundError):
+        return False
+
 # Load the TODOs from the JSON file
 def load_todos():
     with open('todos.json', 'r') as f:
@@ -13,7 +53,13 @@ def load_todos():
 
 # Process TODOs in batches of 3
 def process_todos(todos, batch_size=3, start_from=0):
-    total_todos = len(todos)
+    # Filter out already completed TODOs
+    active_todos = [todo for todo in todos if not is_todo_done(todo.get('id', 'Unknown'))]
+    
+    total_todos = len(active_todos)
+    if total_todos < len(todos):
+        print(f"Skipping {len(todos) - total_todos} already completed TODOs")
+    
     print(f"Processing {total_todos} TODOs in batches of {batch_size}, starting from index {start_from}...")
 
     # Create log file if it doesn't exist
@@ -23,7 +69,7 @@ def process_todos(todos, batch_size=3, start_from=0):
             log_file.write(f"Total TODOs: {total_todos}, Batch Size: {batch_size}, Starting Index: {start_from}\n\n")
 
     for i in range(start_from, total_todos, batch_size):
-        batch = todos[i:i+batch_size]
+        batch = active_todos[i:i+batch_size]
         batch_num = i//batch_size + 1
         total_batches = (total_todos + batch_size - 1)//batch_size
         
@@ -59,6 +105,12 @@ def process_todos(todos, batch_size=3, start_from=0):
 # Process a single TODO
 def process_todo(todo):
     todo_id = todo.get('id', 'Unknown')
+    
+    # Skip if already done
+    if is_todo_done(todo_id):
+        print(f"Skipping TODO {todo_id} - already completed")
+        return
+        
     description = todo.get('description', '')
     details = todo.get('details', '')
     files = todo.get('files', [])
@@ -147,6 +199,7 @@ def process_todo(todo):
             print(f"Warning: Aider exited with code {return_code}")
         else:
             print(f"Successfully processed TODO {todo_id}")
+            mark_todo_as_done(todo_id)
             
         # Log completion to a file
         with open('todo_progress.log', 'a') as log_file:
