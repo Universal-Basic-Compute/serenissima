@@ -986,18 +986,20 @@ export default function SimplePage() {
 }
 // Add the connectWallet function
 const connectWallet = async () => {
-  if (!walletAdapter) {
+  // Use the walletAdapter from component state
+  const adapter = walletAdapter;
+  if (!adapter) {
     console.log("Wallet adapter not initialized");
     return;
   }
   
-  console.log("Connecting wallet, current state:", walletAdapter.connected ? "connected" : "disconnected");
+  console.log("Connecting wallet, current state:", adapter.connected ? "connected" : "disconnected");
   
-  if (walletAdapter.connected) {
+  if (adapter.connected) {
     // If already connected, disconnect
     console.log("Disconnecting wallet...");
     try {
-      await walletAdapter.disconnect();
+      await adapter.disconnect();
       
       // Only update state after successful disconnect
       setWalletAddress(null);
@@ -1019,7 +1021,7 @@ const connectWallet = async () => {
   }
   
   // Check if Phantom is installed
-  if (walletAdapter.readyState !== WalletReadyState.Installed) {
+  if (adapter.readyState !== WalletReadyState.Installed) {
     console.log("Phantom wallet not installed, opening website");
     window.open('https://phantom.app/', '_blank');
     return;
@@ -1027,8 +1029,8 @@ const connectWallet = async () => {
   
   try {
     console.log("Attempting to connect to wallet...");
-    await walletAdapter.connect();
-    const address = walletAdapter.publicKey?.toString() || null;
+    await adapter.connect();
+    const address = adapter.publicKey?.toString() || null;
     console.log("Wallet connected, address:", address);
     
     if (address) {
