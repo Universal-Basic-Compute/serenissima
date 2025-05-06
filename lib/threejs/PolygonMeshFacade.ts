@@ -22,7 +22,7 @@ export class PolygonMeshFacade implements Poolable {
   private ownerColor: string | null = null;
   private ownerCoatOfArmsUrl: string | null = null;
   private isDisposed: boolean = false;
-  private isActive: boolean = false;
+  private _isActive: boolean = false; // Renamed to avoid conflict with isActive() method
   private originalGeometry: THREE.BufferGeometry | null = null;
   private simplifiedGeometries: Map<number, THREE.BufferGeometry> = new Map();
 
@@ -97,14 +97,14 @@ export class PolygonMeshFacade implements Poolable {
    * Check if the object is active in the pool
    */
   public isActive(): boolean {
-    return this.isActive;
+    return this._isActive;
   }
   
   /**
    * Set the active state of the object
    */
   public setActive(active: boolean): void {
-    this.isActive = active;
+    this._isActive = active;
   }
   
   /**
