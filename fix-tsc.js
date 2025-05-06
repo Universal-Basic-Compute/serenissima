@@ -99,9 +99,13 @@ async function processBatch(batch, batchNumber) {
   fs.writeFileSync(tempErrorFile, errorDetails, 'utf8');
   
   // Build the Aider command with a simpler message
+  const message = `Fix TypeScript errors in batch ${batchNumber} (see ${tempErrorFile} for details)`;
+  // Escape any single quotes in the message
+  const escapedMessage = message.replace(/'/g, "\\'");
+
   const aiderArgs = [
     '--yes-always',
-    '--message', `Fix TypeScript errors in batch ${batchNumber} (see ${tempErrorFile} for details)`,
+    '--message', `'${escapedMessage}'`,
   ];
   
   // Add each file to the command
