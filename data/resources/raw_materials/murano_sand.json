@@ -119,18 +119,18 @@
     ],
     "max_storage_time": "unlimited"
   },
-  "marketDynamics": {
-    "baseAvailability": 0.8,
-    "demandLevel": "steady",
-    "priceVolatility": 0.2,
-    "regionalFactors": [
+  "market_dynamics": {
+    "base_availability": 0.8,
+    "demand_level": "steady",
+    "price_volatility": 0.2,
+    "regional_factors": [
       {
         "region": "murano",
-        "availabilityModifier": 1.5,
-        "priceModifier": 0.8
+        "availability_modifier": 1.5,
+        "price_modifier": 0.8
       }
     ],
-    "seasonalFactors": []
+    "seasonal_factors": []
   },
   "production_chain_position": {
     "predecessors": [],
