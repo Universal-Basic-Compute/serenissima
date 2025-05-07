@@ -14,12 +14,23 @@ const LoanMarketplace: React.FC = () => {
   const [notification, setNotification] = useState<{message: string, type: 'success' | 'info' | 'error'} | null>(null);
   
   useEffect(() => {
-    loadAvailableLoans();
+    const fetchLoans = async () => {
+      console.log("Fetching available loans...");
+      try {
+        await loadAvailableLoans();
+        console.log("Loans loaded successfully");
+      } catch (error) {
+        console.error("Error loading loans:", error);
+      }
+    };
+    
+    fetchLoans();
     
     // Subscribe to loan-related events to update the marketplace in real-time
     const loanOfferCreatedSubscription = eventBus.subscribe(
       EventTypes.LOAN_OFFER_CREATED, 
       (data) => {
+        console.log("Loan offer created event received:", data);
         // Add the new loan to the available loans list
         if (data.loan && data.loan.status === LoanStatus.AVAILABLE) {
           setAvailableLoans(prevLoans => [...prevLoans, data.loan]);
@@ -30,6 +41,7 @@ const LoanMarketplace: React.FC = () => {
     const loanAppliedSubscription = eventBus.subscribe(
       EventTypes.LOAN_APPLIED, 
       (data) => {
+        console.log("Loan applied event received:", data);
         // Remove the loan from available loans if it was just applied for
         if (data.loan && data.loan.id) {
           setAvailableLoans(prevLoans => 
@@ -57,8 +69,18 @@ const LoanMarketplace: React.FC = () => {
   
   // Update local state when store loans change
   useEffect(() => {
-    setAvailableLoans(storeLoans);
+    console.log("Store loans updated:", storeLoans);
+    if (storeLoans && storeLoans.length > 0) {
+      setAvailableLoans(storeLoans);
+    }
   }, [storeLoans]);
+  
+  // Add a check to ensure we have loans before rendering
+  useEffect(() => {
+    console.log("Available loans in state:", availableLoans);
+    console.log("Filtered loans:", filteredLoans);
+    console.log("Sorted loans:", sortedLoans);
+  }, [availableLoans, filteredLoans, sortedLoans]);
   
   // Show notification when events occur
   useEffect(() => {

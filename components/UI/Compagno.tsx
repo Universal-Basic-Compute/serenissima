@@ -213,7 +213,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className }) => {
 
       {/* Expanded chat window */}
       {isOpen && (
-        <div className="bg-white rounded-lg shadow-xl w-96 max-h-[600px] flex flex-col border-2 border-amber-600 overflow-hidden slide-in">
+        <div className="bg-white rounded-lg shadow-xl w-96 max-h-[700px] flex flex-col border-2 border-amber-600 overflow-hidden slide-in">
           {/* Header */}
           <div className="bg-amber-700 text-white p-3 flex justify-between items-center">
             <div className="flex items-center">
@@ -322,9 +322,6 @@ const Compagno: React.FC<CompagnoProps> = ({ className }) => {
                       {message.content}
                     </ReactMarkdown>
                   </div>
-                </div>
-                <div className="text-xs text-gray-500 mt-1 px-1">
-                  {new Date(message.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                 </div>
               </div>
             ))}
