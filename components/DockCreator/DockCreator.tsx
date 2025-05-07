@@ -72,9 +72,15 @@ const DockCreator: React.FC<DockCreatorProps> = ({
             managerRef.current = new DockCreationManager(sceneToUse, cameraToUse, polygonsToUse);
             
             // Force an initial update of the mouse position to show the preview
-            const centerX = window.innerWidth / 2;
-            const centerY = window.innerHeight / 2;
-            managerRef.current.updateMousePosition(centerX, centerY);
+            // Use a slight delay to ensure the manager is fully initialized
+            setTimeout(() => {
+              if (managerRef.current) {
+                const centerX = window.innerWidth / 2;
+                const centerY = window.innerHeight / 2;
+                managerRef.current.updateMousePosition(centerX, centerY);
+                console.log('DockCreator: Initial mouse position updated');
+              }
+            }, 500);
             
             console.log('DockCreator: Manager initialized successfully');
             break;

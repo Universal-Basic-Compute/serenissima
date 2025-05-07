@@ -117,9 +117,14 @@ export class DockCreationManager {
    * Load the dock 3D model
    */
   private loadDockModel(): void {
+    // Add a console log to track loading attempts
+    console.log('Loading dock model from: /assets/buildings/models/public-dock/model.glb');
+    
     this.modelLoader.load(
       '/assets/buildings/models/public-dock/model.glb',
       (gltf) => {
+        console.log('Dock model loaded successfully');
+        
         // Remove fallback mesh if it exists
         if (this.fallbackPreviewMesh) {
           this.scene.remove(this.fallbackPreviewMesh);
@@ -129,16 +134,26 @@ export class DockCreationManager {
         const model = gltf.scene;
         
         // Scale the model to half its size
-        model.scale.set(0.5, 0.5, 0.5); // Make the model twice as small
+        model.scale.set(0.5, 0.5, 0.5);
         
         // Apply materials and settings
         model.traverse((child) => {
           if (child instanceof THREE.Mesh) {
             // Make the material transparent for preview
             if (child.material) {
-              child.material = child.material.clone();
-              child.material.transparent = true;
-              child.material.opacity = 0.7;
+              // Clone the material to avoid modifying the original
+              if (Array.isArray(child.material)) {
+                child.material = child.material.map(mat => {
+                  const newMat = mat.clone();
+                  newMat.transparent = true;
+                  newMat.opacity = 0.7;
+                  return newMat;
+                });
+              } else {
+                child.material = child.material.clone();
+                child.material.transparent = true;
+                child.material.opacity = 0.7;
+              }
             }
           }
         });
@@ -146,7 +161,9 @@ export class DockCreationManager {
         // Add to scene
         this.scene.add(model);
         this.previewMesh = model;
-        this.previewMesh.visible = false;
+        
+        // Make sure the model is visible
+        this.previewMesh.visible = true;
         
         // Set flag
         this.isModelLoaded = true;
@@ -154,11 +171,18 @@ export class DockCreationManager {
         // Update position if we already have a valid position
         if (this.currentEdge) {
           this.updatePreviewPosition();
+        } else {
+          // Force an update to position the model at the current mouse position
+          const centerX = window.innerWidth / 2;
+          const centerY = window.innerHeight / 2;
+          this.updateMousePosition(centerX, centerY);
         }
+        
+        console.log('Dock model added to scene and made visible');
       },
       (progress) => {
         // Loading progress
-        console.log(`Loading dock model: ${(progress.loaded / progress.total) * 100}%`);
+        console.log(`Loading dock model: ${(progress.loaded / progress.total * 100).toFixed(2)}%`);
       },
       (error) => {
         // Error handling
@@ -212,7 +236,7 @@ export class DockCreationManager {
         // Snap the dock precisely to the edge
         activeMesh.position.copy(result.position);
         activeMesh.position.y = 0.1; // Slightly above water level
-        activeMesh.visible = true;
+        activeMesh.visible = true; // Ensure visibility
         this.adjacentLandId = result.landId;
         this.currentEdge = result.edge;
         
@@ -242,11 +266,13 @@ export class DockCreationManager {
             }
           });
         }
+        
+        console.log('Dock preview positioned at valid location:', result.position);
       } else {
         // Show preview at cursor but indicate invalid placement
         activeMesh.position.copy(intersection);
         activeMesh.position.y = 0.1;
-        activeMesh.visible = true;
+        activeMesh.visible = true; // Ensure visibility
         this.adjacentLandId = null;
         this.currentEdge = null;
         

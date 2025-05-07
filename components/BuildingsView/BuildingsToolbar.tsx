@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import * as THREE from 'three';
 import RoadCreator from '@/components/PolygonViewer/RoadCreator';
 import DockCreator from '@/components/DockCreator';
+import DockRenderer from '@/components/DockCreator/DockRenderer';
 
 interface BuildingsToolbarProps {
   scene?: THREE.Scene;
@@ -18,6 +19,10 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
 }) => {
   const [isRoadCreatorActive, setIsRoadCreatorActive] = useState(false);
   const [isDockCreatorActive, setIsDockCreatorActive] = useState(false);
+  const [showDockRenderer, setShowDockRenderer] = useState(true);
+
+  // Get scene with fallback
+  const actualScene = scene || (document.querySelector('canvas')?.__scene as THREE.Scene);
 
   return (
     <div className="absolute bottom-4 left-4 z-20 flex flex-col space-y-2">
@@ -81,6 +86,11 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
             setIsDockCreatorActive(false);
           }}
         />
+      )}
+      
+      {/* Always render the DockRenderer to show existing docks */}
+      {showDockRenderer && actualScene && (
+        <DockRenderer scene={actualScene} active={true} />
       )}
     </div>
   );
