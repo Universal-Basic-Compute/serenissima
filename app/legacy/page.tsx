@@ -39,18 +39,18 @@ import { WalletReadyState } from '@solana/wallet-adapter-base';
 import dynamic from 'next/dynamic';
 import { GoogleMap, LoadScript, DrawingManager } from '@react-google-maps/api';
 import usePolygonStore from '@/store/usePolygonStore';
-import PlayerProfile from '../components/UI/PlayerProfile';
-import TransferComputeMenu from '../components/UI/TransferComputeMenu';
-import WithdrawComputeMenu from '../components/UI/WithdrawComputeMenu';
-import BackgroundMusic from '../components/UI/BackgroundMusic';
-import SuccessAlert from '../components/UI/SuccessAlert';
-import { transferComputeTokens } from '../lib/tokenUtils';
-import { transferComputeInAirtable } from '../lib/airtableUtils';
-import { eventBus, EventTypes } from '../lib/eventBus';
-import { IncomePolygonRenderer } from '../lib/threejs/IncomePolygonRenderer';
+import PlayerProfile from '../../components/UI/PlayerProfile';
+import TransferComputeMenu from '../../components/UI/TransferComputeMenu';
+import WithdrawComputeMenu from '../../components/UI/WithdrawComputeMenu';
+import BackgroundMusic from '../../components/UI/BackgroundMusic';
+import SuccessAlert from '../../components/UI/SuccessAlert';
+import { transferComputeTokens } from '../../lib/tokenUtils';
+import { transferComputeInAirtable } from '../../lib/airtableUtils';
+import { eventBus, EventTypes } from '../../lib/eventBus';
+import { IncomePolygonRenderer } from '../../lib/threejs/IncomePolygonRenderer';
 
 // Import PolygonViewer with no SSR to avoid hydration issues
-const PolygonViewer = dynamic<PolygonViewerProps>(() => import('../components/PolygonViewer/PolygonViewer'), {
+const PolygonViewer = dynamic<PolygonViewerProps>(() => import('../../components/PolygonViewer/PolygonViewer'), {
   ssr: false
 });
 
