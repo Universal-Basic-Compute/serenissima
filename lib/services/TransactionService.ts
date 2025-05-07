@@ -12,8 +12,12 @@ import {
 import { getWalletAddress } from '../walletUtils';
 import { Listing, Offer, Transaction } from '../store/marketStore';
 
-// Define event types for land ownership changes
-export const EventTypes = {
+// Define event types for marketplace events
+export const TransactionEventTypes = {
+  TRANSACTION_CREATED: 'transactionCreated',
+  TRANSACTION_EXECUTED: 'transactionExecuted',
+  LISTING_CANCELLED: 'listingCancelled',
+  OFFER_ACCEPTED: 'offerAccepted',
   LAND_OWNERSHIP_CHANGED: 'landOwnershipChanged'
 };
 
@@ -33,13 +37,6 @@ interface CacheEntry<T> {
 // Instead, provide a getter function to prevent circular dependencies
 let transactionServiceInstance: TransactionService | null = null;
 
-// Define event types for marketplace events
-export const TransactionEventTypes = {
-  TRANSACTION_CREATED: 'transactionCreated',
-  TRANSACTION_EXECUTED: 'transactionExecuted',
-  LISTING_CANCELLED: 'listingCancelled',
-  OFFER_ACCEPTED: 'offerAccepted'
-};
 
 export function getTransactionService(): TransactionService {
   if (!transactionServiceInstance) {
@@ -944,7 +941,7 @@ export class TransactionService {
       
       // Also emit land ownership changed event if this is a land transaction
       if (transaction.type === 'land') {
-        eventBus.emit(EventTypes.LAND_OWNERSHIP_CHANGED, {
+        eventBus.emit(TransactionEventTypes.LAND_OWNERSHIP_CHANGED, {
           landId: transaction.assetId,
           newOwner: transaction.buyer,
           previousOwner: transaction.seller,
