@@ -36,25 +36,6 @@ const ResourceTree: React.FC<ResourceTreeProps> = ({ onClose }) => {
     loadResources();
   }, []);
 
-  // Load resources on component mount
-  useEffect(() => {
-    const loadResources = async () => {
-      try {
-        setLoading(true);
-        const data = await fetchResources();
-        setResources(data);
-        setError(null);
-      } catch (err) {
-        setError('Failed to load resources. Please try again later.');
-        console.error('Error loading resources:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    loadResources();
-  }, []);
-
   // Get unique categories for filtering
   const categories = ['all', ...new Set(resources.map(node => node.category))].sort();
   
