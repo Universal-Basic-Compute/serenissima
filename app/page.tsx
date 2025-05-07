@@ -1344,54 +1344,10 @@ export default function Home() {
     }
   };
   
-  // Add this function to handle polygon deletion
+  // Polygon deletion is now disabled
   const handleDeletePolygon = async () => {
-    if (!selectedMapPolygonId || !selectedMapPolygon) {
-      alert('Please select a polygon to delete first');
-      return;
-    }
-    
-    // Confirm deletion
-    if (!confirm(`Are you sure you want to delete this polygon: ${selectedMapPolygonId}?`)) {
-      return;
-    }
-    
-    try {
-      const response = await fetch('/api/delete-polygon', {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ id: selectedMapPolygonId }),
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to delete polygon');
-      }
-      
-      const data = await response.json();
-      
-      if (data.success) {
-        // Remove the polygon from the map
-        selectedMapPolygon.setMap(null);
-        
-        // Remove from active polygons
-        const newActiveLandPolygons = { ...activeLandPolygons };
-        delete newActiveLandPolygons[selectedMapPolygonId];
-        setActiveLandPolygons(newActiveLandPolygons);
-        
-        // Reset selection
-        setSelectedMapPolygon(null);
-        setSelectedMapPolygonId(null);
-        
-        alert('Polygon deleted successfully');
-      } else {
-        alert(`Failed to delete polygon: ${data.error}`);
-      }
-    } catch (error) {
-      console.error('Error deleting polygon:', error);
-      alert('An error occurred while deleting the polygon');
-    }
+    console.log('Polygon deletion is disabled');
+    alert('Polygon deletion is not allowed in this version');
   };
 
   // Add this function to save bridge to file
@@ -2462,60 +2418,12 @@ export default function Home() {
         </div>
       )}
       
-      {/* Delete button - only show when a polygon is selected in normal mode */}
+      {/* Delete button removed to prevent land deletion */}
       {selectedPolygon && !deleteMode && !bridgeMode && (
         <div className="absolute top-16 right-4 z-10 bg-white p-3 rounded shadow">
           <div className="flex flex-col items-start">
             <p className="mb-2 font-medium">Selected: {selectedPolygon.id}</p>
-            <button
-              onClick={async () => {
-                if (!selectedPolygon) return;
-                
-                // Confirm deletion
-                if (!confirm(`Are you sure you want to delete this polygon: ${selectedPolygon.id}?`)) {
-                  return;
-                }
-                
-                try {
-                  const response = await fetch('/api/delete-polygon', {
-                    method: 'DELETE',
-                    headers: {
-                      'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ id: selectedPolygon.id }),
-                  });
-                  
-                  if (!response.ok) {
-                    throw new Error('Failed to delete polygon');
-                  }
-                  
-                  const data = await response.json();
-                  
-                  if (data.success) {
-                    // Remove the polygon from the map
-                    selectedPolygon.polygon.setMap(null);
-                    
-                    // Remove from active polygons
-                    const newActiveLandPolygons = { ...activeLandPolygons };
-                    delete newActiveLandPolygons[selectedPolygon.id];
-                    setActiveLandPolygons(newActiveLandPolygons);
-                    
-                    // Reset selection
-                    setSelectedPolygon(null);
-                    
-                    alert('Polygon deleted successfully');
-                  } else {
-                    alert(`Failed to delete polygon: ${data.error}`);
-                  }
-                } catch (error) {
-                  console.error('Error deleting polygon:', error);
-                  alert('An error occurred while deleting the polygon');
-                }
-              }}
-              className="px-4 py-2 bg-red-500 text-white rounded shadow hover:bg-red-600 w-full"
-            >
-              Delete Polygon
-            </button>
+            {/* Delete button removed */}
           </div>
         </div>
       )}

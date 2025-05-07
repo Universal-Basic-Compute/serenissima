@@ -165,40 +165,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
     }
   };
 
-  // Add this effect to listen for land purchase events
-  useEffect(() => {
-    const handleLandPurchase = (data: any) => {
-      // Force a panel update if the selected land is the one that was just purchased
-      if (data.landId === selectedPolygonId) {
-        console.log('Land purchase detected, refreshing panel');
-        // Force a refresh of the data
-        setRefreshKey(prevKey => prevKey + 1);
-        
-        // Update transaction data locally
-        if (data.transaction) {
-          console.log('Updating transaction data locally:', data.transaction);
-          setTransaction(data.transaction);
-          
-          // Set flag to indicate a transaction was just completed
-          setJustCompletedTransaction(true);
-        }
-        
-        // Force the panel to stay visible
-        setIsVisible(true);
-        
-        // Use event bus to keep panel open
-        console.log('Emitting keepLandDetailsPanelOpen event');
-        eventBus.emit(EventTypes.KEEP_LAND_DETAILS_PANEL_OPEN, { polygonId: selectedPolygonId });
-      }
-    };
-
-    // Subscribe to land purchase events using the event bus
-    const subscription = eventBus.subscribe(EventTypes.LAND_PURCHASED, handleLandPurchase);
-    
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [selectedPolygonId]);
+  // Land purchase events are no longer handled to prevent land modification
   
   // Add effect to maintain panel visibility after a purchase
   useEffect(() => {
@@ -800,67 +767,11 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
     </div>
   );
   
-  // Add the missing handleConfirmPurchase function
+  // Land purchase confirmation is disabled to prevent land modification
   function handleConfirmPurchase() {
-    if (!selectedPolygonId || !transaction) return;
-    
-    setIsPurchasing(true);
-    
-    // Get the current wallet address
-    const walletAddress = sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress') || '';
-    
-    if (!walletAddress) {
-      alert('Please connect your wallet first');
-      setIsPurchasing(false);
-      setShowPurchaseConfirmation(false);
-      return;
-    }
-    
-    // Execute the transaction
-    fetch(`${getApiBaseUrl()}/api/transaction/${transaction.id}/execute`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        buyer: walletAddress
-      }),
-    })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Failed to purchase land');
-      }
-      return response.json();
-    })
-    .then(data => {
-      // Show success message
-      alert(`Land purchased successfully! You are now the owner of ${selectedPolygon?.historicalName || 'this land'}.`);
-      
-      // Use event bus to update the UI
-      eventBus.emit(EventTypes.LAND_PURCHASED, {
-        landId: selectedPolygonId,
-        transaction: data.transaction
-      });
-      
-      // Use event bus to update land ownership
-      eventBus.emit(EventTypes.LAND_OWNERSHIP_CHANGED, {
-        landId: selectedPolygonId,
-        newOwner: walletAddress,
-        transaction: data.transaction
-      });
-      
-      // Close the confirmation dialog
-      setShowPurchaseConfirmation(false);
-      setIsPurchasing(false);
-      
-      // Force a refresh of the panel
-      setRefreshKey(prevKey => prevKey + 1);
-    })
-    .catch(error => {
-      console.error('Error purchasing land:', error);
-      alert('Failed to purchase land. Please try again.');
-      setIsPurchasing(false);
-      setShowPurchaseConfirmation(false);
-    });
+    console.log('Land purchase is disabled to prevent land modification');
+    alert('Land purchase is not allowed in this version');
+    setIsPurchasing(false);
+    setShowPurchaseConfirmation(false);
   }
 }

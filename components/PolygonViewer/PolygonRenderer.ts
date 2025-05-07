@@ -890,25 +890,11 @@ export default class PolygonRenderer {
   
   /**
    * Update colors for all polygons based on simulated income
+   * This method is now disabled to prevent land modification
    */
   public updatePolygonOwnerColors() {
-    console.log('Updating polygon colors based on simulated income');
-    
-    // Simply recreate all overlays with updated data
-    this.clearOverlays();
-    
-    // Create new overlays based on the active view
-    this.polygons.forEach(polygon => {
-      this.createOverlayForPolygon(polygon, this.activeView);
-    });
-    
-    // Recreate owner indicators
-    if (this.activeView === 'land') {
-      this.createOwnerIndicators();
-    }
-    
-    // Force a render to apply changes
-    this.facade.forceRender();
+    console.log('Polygon color updates disabled to prevent land modification');
+    // No implementation to prevent land modification
   }
 
   /**
@@ -1126,81 +1112,11 @@ export default class PolygonRenderer {
 
   /**
    * Update the owner of a polygon
+   * This method is now disabled to prevent land modification
    */
   public updatePolygonOwner(polygonId: string, newOwner: string) {
-    console.log(`PolygonRenderer.updatePolygonOwner called for ${polygonId} with new owner ${newOwner}`);
-    
-    // Find the polygon in our list
-    const polygon = this.polygons.find(p => p.id === polygonId);
-    if (!polygon) {
-      console.warn(`Polygon ${polygonId} not found in polygons list`);
-      return;
-    }
-    
-    // Update the polygon's owner
-    polygon.owner = newOwner;
-    console.log(`Updated polygon ${polygonId} owner to ${newOwner} in data model`);
-    
-    // Update the overlay for this polygon
-    this.createOverlayForPolygon(polygon, this.activeView);
-    
-    // Update owner indicators
-    if (this.activeView === 'land') {
-      // Remove existing indicator for this polygon
-      if (this.ownerIndicators.has(polygonId)) {
-        const indicator = this.ownerIndicators.get(polygonId);
-        if (indicator) {
-          this.scene.remove(indicator);
-          if (indicator.geometry) indicator.geometry.dispose();
-          if (indicator.material) {
-            if (Array.isArray(indicator.material)) {
-              indicator.material.forEach(mat => mat.dispose());
-            } else {
-              indicator.material.dispose();
-            }
-          }
-        }
-        this.ownerIndicators.delete(polygonId);
-      }
-      
-      // Create new indicator if polygon has an owner
-      if (newOwner && polygon.centroid) {
-        try {
-          // Get position from centroid
-          const position = this.convertLatLngToPosition(
-            polygon.centroid.lat,
-            polygon.centroid.lng
-          );
-          
-          // Get owner color
-          const ownerColor = this.getOwnerColor(newOwner) || '#7cac6a';
-          
-          // Create simple circle indicator
-          const circleGeometry = new THREE.CircleGeometry(0.25, 8);
-          const circleMaterial = new THREE.MeshBasicMaterial({
-            color: ownerColor,
-            side: THREE.DoubleSide,
-            transparent: true,
-            opacity: 0.8,
-            depthWrite: false
-          });
-          
-          const circleMesh = new THREE.Mesh(circleGeometry, circleMaterial);
-          circleMesh.position.set(position.x, 0.05, position.y);
-          circleMesh.rotation.x = -Math.PI / 2;
-          circleMesh.renderOrder = 20; // Above all land layers
-          
-          // Add to scene and store reference
-          this.scene.add(circleMesh);
-          this.ownerIndicators.set(polygonId, circleMesh);
-        } catch (error) {
-          log.error(`Failed to create owner indicator for polygon ${polygonId}:`, error);
-        }
-      }
-    }
-    
-    // Force a render to apply changes
-    this.facade.forceRender();
+    console.log(`Polygon owner updates disabled to prevent land modification: ${polygonId}`);
+    // No implementation to prevent land modification
   }
   
   /**

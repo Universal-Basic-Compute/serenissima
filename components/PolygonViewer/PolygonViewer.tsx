@@ -98,15 +98,10 @@ export default function PolygonViewer() {
     loadOwnerCoatOfArms
   } = usePolygonStore();
   
-  // Function to update polygon colors - now only triggers income-based coloring
+  // Removed function to update polygon colors to prevent land modification
   const updatePolygonColors = useCallback(() => {
-    if (polygonRendererRef.current) {
-      console.log('Updating polygon colors based on simulated income');
-      
-      // Force an update of the view mode to trigger income-based coloring
-      polygonRendererRef.current.updateViewMode(activeView);
-    }
-  }, [activeView]);
+    console.log('Polygon color updates disabled to prevent land modification');
+  }, []);
 
   // Function to update coat of arms
   const updateCoatOfArms = useCallback(() => {
@@ -407,21 +402,7 @@ export default function PolygonViewer() {
     }
   }, [users, activeView]); // Depend on users and activeView
   
-  // Add an effect to listen for polygon deletion events
-  useEffect(() => {
-    const handlePolygonDeleted = () => {
-      // Reload polygons when a polygon is deleted
-      loadPolygons();
-      loadLandOwners();
-    };
-    
-    // Create a custom event for polygon deletion
-    window.addEventListener('polygonDeleted', handlePolygonDeleted);
-    
-    return () => {
-      window.removeEventListener('polygonDeleted', handlePolygonDeleted);
-    };
-  }, [loadPolygons, loadLandOwners]);
+  // Polygon deletion events are no longer handled
   
   // Add an effect to listen for land ownership changes
   useEffect(() => {
@@ -1187,36 +1168,8 @@ export default function PolygonViewer() {
     }
   }, [activeView, updatePolygonColors, updateCoatOfArms]);
   
-  // Add effect to periodically force visual updates when in land view
-  useEffect(() => {
-    if (activeView === 'land') {
-      // Force an initial update
-      forceVisualUpdate();
-      
-      // Force an additional update after a short delay to ensure everything is visible
-      const visibilityTimer = setTimeout(() => {
-        if (polygonRendererRef.current) {
-          console.log('Forcing polygon visibility check');
-          polygonRendererRef.current.ensurePolygonsVisible();
-        }
-      }, 1000);
-      
-      // Set up a timer to periodically force updates
-      const updateTimer = setInterval(() => {
-        forceVisualUpdate();
-        
-        // Also explicitly ensure polygons are visible
-        if (polygonRendererRef.current) {
-          polygonRendererRef.current.ensurePolygonsVisible();
-        }
-      }, 5000);
-      
-      return () => {
-        clearTimeout(visibilityTimer);
-        clearInterval(updateTimer);
-      };
-    }
-  }, [activeView, forceVisualUpdate]);
+  // Land view updates are now handled only on initial load and view changes
+  // No periodic updates to prevent rerendering
   
   // Add effect to connect land objects to water
   useEffect(() => {
