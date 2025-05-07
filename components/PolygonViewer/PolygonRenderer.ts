@@ -1157,9 +1157,12 @@ export default class PolygonRenderer {
         
         // Create mesh and position it
         const circleMesh = new THREE.Mesh(circleGeometry, circleMaterial);
-        circleMesh.position.set(normalizedCoord.x, 0.05, normalizedCoord.y);
+        circleMesh.position.set(normalizedCoord.x, 0.015, normalizedCoord.y); // Increased height to be above income polygon edges
         circleMesh.rotation.x = -Math.PI / 2; // Rotate to lie flat
-        circleMesh.renderOrder = 200; // Increased from 100 to 200 to ensure it renders on top of everything
+        circleMesh.renderOrder = 200; // Keep high render order
+        
+        // Disable depth testing to ensure it renders on top regardless of physical position
+        circleMaterial.depthTest = false;
         
         // Add to scene
         this.scene.add(circleMesh);
@@ -1199,11 +1202,12 @@ export default class PolygonRenderer {
             color: fallbackColor,
             transparent: true,
             opacity: 0.7,
-            side: THREE.DoubleSide
+            side: THREE.DoubleSide,
+            depthTest: false // Disable depth testing for fallback circles too
           });
           
           const circleMesh = new THREE.Mesh(geometry, material);
-          circleMesh.position.set(normalizedCoord.x, 0.05, normalizedCoord.y);
+          circleMesh.position.set(normalizedCoord.x, 0.015, normalizedCoord.y); // Increased height to be above income polygon edges
           circleMesh.rotation.x = -Math.PI / 2; // Flat on the ground
           circleMesh.renderOrder = 200; // Ensure fallback circles also render on top
           
