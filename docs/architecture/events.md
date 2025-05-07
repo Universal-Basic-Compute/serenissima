@@ -73,6 +73,7 @@ export const EventTypes = {
   USER_PROFILE_UPDATED: 'userProfileUpdated',
   WALLET_CHANGED: 'walletChanged',
   BUILDING_PLACED: 'buildingPlaced',
+  DOCK_PLACED: 'dockPlaced',
   VIEW_MODE_CHANGED: 'viewModeChanged',
   POLYGONS_LOADED: 'polygonsLoaded',
   POLYGON_DELETED: 'polygonDeleted',

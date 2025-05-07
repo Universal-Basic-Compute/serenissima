@@ -383,6 +383,7 @@ export class RoadCreationManager {
   
   // Private implementation
   private updateRoadPreview(): void;
+  private findDockSnapPoint(position: THREE.Vector3): THREE.Vector3 | null;
 }
 
 // RoadCreator component focuses solely on UI concerns
@@ -403,6 +404,65 @@ const RoadCreator: React.FC<RoadCreatorProps> = ({
   // UI rendering
   return (
     <div className="road-creator-ui">
+      {/* UI controls */}
+    </div>
+  );
+};
+```
+
+## Dock Creation System
+
+The dock creation system follows a similar layered architecture:
+
+```typescript
+// DockCreationManager coordinates between UI and Three.js
+export class DockCreationManager {
+  constructor(scene: THREE.Scene, camera: THREE.PerspectiveCamera);
+  
+  // Public API for UI component
+  public updateMousePosition(clientX: number, clientY: number): void;
+  public getPreviewPosition(): THREE.Vector3 | null;
+  public getAdjacentLandId(): string | null;
+  public updateRotation(rotation: number): void;
+  public dispose(): void;
+  
+  // Private implementation
+  private createPreviewMesh(): void;
+  private updatePreviewPosition(): void;
+}
+
+// WaterEdgeDetector helps find valid dock placement locations
+export class WaterEdgeDetector {
+  constructor(scene: THREE.Scene);
+  
+  public findNearestWaterEdge(position: THREE.Vector3): { 
+    position: THREE.Vector3 | null; 
+    landId: string | null 
+  };
+  
+  private getWaterEdges(polygon: any): { start: THREE.Vector3, end: THREE.Vector3 }[];
+  private isWaterEdge(polygon: any, start: any, end: any): boolean;
+  private getClosestPointOnEdge(start: THREE.Vector3, end: THREE.Vector3, point: THREE.Vector3): THREE.Vector3;
+}
+
+// DockCreator component focuses solely on UI concerns
+const DockCreator: React.FC<DockCreatorProps> = ({
+  scene,
+  camera,
+  active,
+  onComplete,
+  onCancel
+}) => {
+  // UI state management
+  const [previewPosition, setPreviewPosition] = useState<THREE.Vector3 | null>(null);
+  const [previewRotation, setPreviewRotation] = useState<number>(0);
+  
+  // Use the manager for coordinating with Three.js
+  const managerRef = useRef<DockCreationManager | null>(null);
+  
+  // UI rendering
+  return (
+    <div className="dock-creator-ui">
       {/* UI controls */}
     </div>
   );

@@ -123,6 +123,36 @@ export class RoadService {
 }
 ```
 
+### BuildingService
+
+Manages building data, including docks.
+
+```typescript
+export interface DockData {
+  id: string;
+  landId: string;
+  position: { x: number; y: number; z: number };
+  rotation: number; // Rotation in radians
+  connectionPoints: { x: number; y: number; z: number }[];
+  createdBy: string;
+  createdAt: string;
+}
+
+export class BuildingService {
+  public static getInstance(): BuildingService;
+  
+  // Building methods
+  public getBuildings(type?: string): Promise<any[]>;
+  public getBuildingById(id: string): Promise<any | null>;
+  public saveBuilding(buildingData: any): Promise<any>;
+  
+  // Dock-specific methods
+  public createDock(landId: string, position: THREE.Vector3, rotation: number): Promise<DockData>;
+  public getDocks(): Promise<DockData[]>;
+  public getDockById(id: string): Promise<DockData | null>;
+}
+```
+
 The RoadService follows the singleton pattern and provides methods for:
 
 1. **Data Persistence**: Saving and loading roads from local storage

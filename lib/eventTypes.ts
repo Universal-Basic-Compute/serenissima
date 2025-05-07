@@ -1,0 +1,30 @@
+export const EventTypes = {
+  // Domain events
+  POLYGON_SELECTED: 'polygonSelected',
+  POLYGON_HOVER: 'polygonHover',
+  LAND_OWNERSHIP_CHANGED: 'landOwnershipChanged',
+  COMPUTE_BALANCE_CHANGED: 'computeBalanceChanged',
+  LAND_PURCHASED: 'landPurchased',
+  SHOW_LAND_PURCHASE_MODAL: 'showLandPurchaseModal',
+  KEEP_LAND_DETAILS_PANEL_OPEN: 'keepLandDetailsPanelOpen',
+  USERS_DATA_LOADED: 'usersDataLoaded',
+  USER_PROFILE_UPDATED: 'userProfileUpdated',
+  WALLET_CHANGED: 'walletChanged',
+  BUILDING_PLACED: 'buildingPlaced',
+  DOCK_PLACED: 'dockPlaced',
+  VIEW_MODE_CHANGED: 'viewModeChanged',
+  POLYGONS_LOADED: 'polygonsLoaded',
+  POLYGON_DELETED: 'polygonDeleted',
+  
+  // UI interaction events
+  INTERACTION_CLICK: 'interactionClick',
+  INTERACTION_MOUSE_DOWN: 'interactionMouseDown',
+  INTERACTION_MOUSE_MOVE: 'interactionMouseMove',
+  INTERACTION_DRAG: 'interactionDrag',
+  INTERACTION_DRAG_END: 'interactionDragEnd',
+  
+  // Rendering events
+  OWNER_COLORS_UPDATED: 'ownerColorsUpdated',
+  OWNER_COAT_OF_ARMS_UPDATED: 'ownerCoatOfArmsUpdated',
+  POLYGON_OWNER_UPDATED: 'polygonOwnerUpdated'
+};
