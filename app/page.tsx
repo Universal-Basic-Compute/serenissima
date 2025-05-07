@@ -1,91 +1,48 @@
-/**
- * TODO: Refactor according to architecture
- * - Separate UI from business logic
- * - Move wallet and user management to service layer
- * - Use state management for application state
- * - Implement proper error boundaries
- * - Break down into smaller, focused components
- */
 'use client';
 
-// Add TypeScript declarations for window object extensions
+import dynamic from 'next/dynamic';
+import { useState, useRef, useEffect } from 'react';
+import Link from 'next/link';
+import PlayerProfile from '../../components/UI/PlayerProfile';
+import TransferComputeMenu from '../../components/UI/TransferComputeMenu';
+import WithdrawComputeMenu from '../../components/UI/WithdrawComputeMenu';
+import SuccessAlert from '../../components/UI/SuccessAlert';
+import { PhantomWalletAdapter } from '@solana/wallet-adapter-phantom';
+import { WalletReadyState } from '@solana/wallet-adapter-base';
+import { getApiBaseUrl } from '@/lib/apiUtils';
+import { getWalletAddress, setWalletAddress, clearWalletAddress, storeWalletInAirtable } from '@/lib/walletUtils';
+import { transferCompute, withdrawCompute } from '@/lib/computeUtils';
+import { generateCoatOfArmsImage } from '@/app/utils/coatOfArmsUtils';
+import { FaHome, FaBuilding, FaRoad, FaTree, FaStore, FaLandmark } from 'react-icons/fa';
+import * as THREE from 'three';
+
+// Add type declaration for window properties
 declare global {
   interface Window {
-    _polygonSnapshotCache: {
-      result: any | null;
-      deps: string | null;
-    };
+    _polygonSnapshotCache: { result: any; deps: string | null };
     getCachedSnapshot: <T>(getSnapshotFn: () => T, deps: any[]) => T;
-    getSnapshotWithCache: <T>(getSnapshotFn: () => T, dependencies: any[]) => T;
-    getSnapshotWithCacheCache: {
-      result: any | null;
-      deps: string | null;
-    };
+    dispatchEvent(event: Event): boolean;
   }
 }
 
-// Define interface for PolygonViewer props
-interface PolygonViewerProps {
-  getSnapshotWithCache: <T>(getSnapshotFn: () => T, dependencies: any[]) => T;
-  ref?: MutableRefObject<any>;
-  activeView: 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance';
-  key?: string | number; // Add key prop to the interface
-}
-
-import { useEffect, useRef, useState, useCallback, MutableRefObject } from 'react';
-import { getApiBaseUrl } from '@/lib/apiUtils';
-import { PhantomWalletAdapter } from '@solana/wallet-adapter-phantom';
-import { WalletReadyState } from '@solana/wallet-adapter-base';
-import dynamic from 'next/dynamic';
-import { GoogleMap, LoadScript, DrawingManager } from '@react-google-maps/api';
-import usePolygonStore from '@/store/usePolygonStore';
-import PlayerProfile from '../components/UI/PlayerProfile';
-import TransferComputeMenu from '../components/UI/TransferComputeMenu';
-import WithdrawComputeMenu from '../components/UI/WithdrawComputeMenu';
-import BackgroundMusic from '../components/UI/BackgroundMusic';
-import SuccessAlert from '../components/UI/SuccessAlert';
-import { transferComputeTokens } from '../lib/tokenUtils';
-import { transferComputeInAirtable } from '../lib/airtableUtils';
-import { eventBus, EventTypes } from '../lib/eventBus';
-import { IncomePolygonRenderer } from '../lib/threejs/IncomePolygonRenderer';
-
-// Import PolygonViewer with no SSR to avoid hydration issues
-const PolygonViewer = dynamic<PolygonViewerProps>(() => import('../components/PolygonViewer/PolygonViewer'), {
+// Import SimpleViewer with no SSR to avoid hydration issues
+const SimpleViewer = dynamic(() => import('../../components/PolygonViewer/SimpleViewer'), {
   ssr: false
 });
 
-// Venice coordinates
-const center = {
-  lat: 45.4371908,
-  lng: 12.3345898
-};
-
-const mapContainerStyle = {
-  width: '100vw',
-  height: '100vh'
-};
-
-// Polygon styling options
-const polygonOptions = {
-  fillColor: '#3388ff',
-  fillOpacity: 0.3,
-  strokeWeight: 2,
-  strokeColor: '#3388ff',
-  editable: true,
-  draggable: true
-};
-
-// Libraries we need to load
-const libraries = ['drawing', 'geometry'];
-
-export default function Home() {
-  // No loading state needed
-  
-  // State for wallet connection
-  const [walletAddress, setWalletAddress] = useState<string | null>(null);
-  const [walletAdapter, setWalletAdapter] = useState<PhantomWalletAdapter | null>(null);
+export default function SimplePage() {
+  // UI state
+  const [showInfo, setShowInfo] = useState(false);
+  const [activeView, setActiveView] = useState<'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance'>('land');
+  const [qualityMode, setQualityMode] = useState<'high' | 'performance'>('high');
+  const [marketPanelVisible, setMarketPanelVisible] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  // Sidebar is always compact
+  
+  // Wallet and user state
+  const [walletAddress, setWalletAddress] = useState<string | null>(null);
+  const [walletAdapter, setWalletAdapter] = useState<PhantomWalletAdapter | null>(null);
   const [transferMenuOpen, setTransferMenuOpen] = useState(false);
   const [withdrawMenuOpen, setWithdrawMenuOpen] = useState(false);
   const [showUsernamePrompt, setShowUsernamePrompt] = useState(false);
@@ -99,23 +56,8 @@ export default function Home() {
   const [selectedColor, setSelectedColor] = useState<string>('#8B4513'); // Default brown color
   const [successMessage, setSuccessMessage] = useState<{message: string, signature: string} | null>(null);
   const [cacheCleared, setCacheCleared] = useState<boolean>(false);
-  
-  // Venice-themed color palette
-  const veniceColorPalette = [
-    // Venetian reds
-    '#8B0000', '#A52A2A', '#B22222', '#CD5C5C',
-    // Venetian blues
-    '#1E5799', '#3A7CA5', '#00AAFF', '#0066CC',
-    // Venetian golds
-    '#DAA520', '#B8860B', '#CD853F', '#D2B48C',
-    // Venetian greens
-    '#2E8B57', '#3CB371', '#6B8E23', '#556B2F',
-    // Venetian purples and other colors
-    '#4B0082', '#800080', '#8B4513', '#A0522D',
-    // Add more distinct colors to ensure uniqueness
-    '#FF5733', '#33FF57', '#3357FF', '#F033FF', '#FF33A8'
-  ];
-  // Add user profile state
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [landRendered, setLandRendered] = useState(false);
   const [userProfile, setUserProfile] = useState<{
     username: string;
     firstName: string;
@@ -128,328 +70,7 @@ export default function Home() {
     walletAddress?: string;
   } | null>(null);
   
-  // Get API key from environment variable
-  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '';
-  const [savedPolygons, setSavedPolygons] = useState<any[]>([]);
-  const mapRef = useRef<google.maps.Map | null>(null);
-  const drawingManagerRef = useRef<google.maps.drawing.DrawingManager | null>(null);
-  const [isGoogleLoaded, setIsGoogleLoaded] = useState(false);
-  
-  // Add these states to the Home component
-  const [bridgeMode, setBridgeMode] = useState(false);
-  const [bridgeStart, setBridgeStart] = useState<google.maps.LatLng | null>(null);
-  const [bridgeStartLandId, setBridgeStartLandId] = useState<string | null>(null);
-  const [activeLandPolygons, setActiveLandPolygons] = useState<{[id: string]: google.maps.Polygon}>({});
-  const [centroidDragMode, setCentroidDragMode] = useState(false);
-  const [centroidMarkers, setCentroidMarkers] = useState<{[id: string]: google.maps.Marker}>({});
-  const [isDraggingCentroid, setIsDraggingCentroid] = useState(false);
-  
-  // Add these new state variables for delete mode
-  const [deleteMode, setDeleteMode] = useState(false);
-  const [selectedMapPolygon, setSelectedMapPolygon] = useState<google.maps.Polygon | null>(null);
-  const [selectedMapPolygonId, setSelectedMapPolygonId] = useState<string | null>(null);
-  // Add state to track selected polygon in normal mode
-  const [selectedPolygon, setSelectedPolygon] = useState<{
-    id: string;
-    polygon: google.maps.Polygon;
-  } | null>(null);
-  
-  // Add state for users data and active view
-  const [users, setUsers] = useState<Record<string, any>>({});
-  const [activeView, setActiveView] = useState<'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance'>('land');
-  const [marketPanelVisible, setMarketPanelVisible] = useState(false);
-  const polygonRendererRef = useRef<any>(null);
-  const incomeRendererRef = useRef<IncomePolygonRenderer | null>(null);
-  const [polygons, setPolygons] = useState<any[]>([]);
-  
-  // Function to generate coat of arms image
-  const generateCoatOfArmsImage = async () => {
-    if (!familyCoatOfArms.trim()) {
-      alert('Please describe your coat of arms first');
-      return;
-    }
-    
-    setIsGeneratingImage(true);
-    
-    try {
-      const response = await fetch(`${getApiBaseUrl()}/api/generate-coat-of-arms`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          description: familyCoatOfArms,
-          family_name: lastName || 'Noble Family'
-        }),
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to generate coat of arms image');
-      }
-      
-      const data = await response.json();
-      if (data.image_url) {
-        setCoatOfArmsImage(data.image_url);
-      } else {
-        throw new Error('No image URL returned');
-      }
-    } catch (error) {
-      console.error('Error generating coat of arms:', error);
-      alert(`Failed to generate coat of arms: ${error instanceof Error ? error.message : String(error)}`);
-    } finally {
-      setIsGeneratingImage(false);
-    }
-  };
-  
-  // Define getSnapshotWithCache function early in the component with proper type annotations
-  const getSnapshotWithCache = useCallback(function getSnapshotWithCache<T>(getSnapshotFn: () => T, dependencies: any[]): T {
-    // Check if window and getCachedSnapshot exist
-    if (typeof window !== 'undefined' && window._polygonSnapshotCache) {
-      // Use the window's cache implementation directly
-      const currentDepsString = JSON.stringify(dependencies);
-      
-      // Use cached result if dependencies haven't changed
-      if (
-        window._polygonSnapshotCache.result && 
-        window._polygonSnapshotCache.deps && 
-        currentDepsString === window._polygonSnapshotCache.deps
-      ) {
-        return window._polygonSnapshotCache.result;
-      }
-      
-      // Calculate new result
-      const result = getSnapshotFn();
-      
-      // Cache the result and dependencies
-      window._polygonSnapshotCache.result = result;
-      window._polygonSnapshotCache.deps = currentDepsString;
-      
-      return result;
-    }
-    
-    // If the global helper isn't available, implement the caching logic directly
-    const depsString = JSON.stringify(dependencies);
-    
-    // Use a static cache object instead of a property
-    if (!getSnapshotWithCacheCache) {
-      // Create a module-level variable to store cache
-      (window as any).getSnapshotWithCacheCache = {
-        result: null,
-        deps: null
-      };
-    }
-    
-    // Get reference to the cache
-    const cache = (window as any).getSnapshotWithCacheCache;
-    
-    // Check if we can use the cached result
-    if (
-      cache.result && 
-      cache.deps === depsString
-    ) {
-      return cache.result as T;
-    }
-    
-    // Calculate new result
-    const result = getSnapshotFn();
-    
-    // Cache the result and dependencies
-    cache.result = result;
-    cache.deps = depsString;
-    
-    return result;
-  }, []);
-  
-  // Create a module-level variable for the cache
-  const getSnapshotWithCacheCache = typeof window !== 'undefined' ? 
-    window.getSnapshotWithCacheCache : null;
-  
-  // Initialize wallet adapter
-  useEffect(() => {
-    console.log("Initializing wallet adapter...");
-    const adapter = new PhantomWalletAdapter();
-    setWalletAdapter(adapter);
-    
-    // Check if wallet is already connected in session or local storage
-    const storedWallet = sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress');
-    console.log("Stored wallet address:", storedWallet);
-    
-    if (storedWallet) {
-      console.log("Found stored wallet address, setting as connected");
-      setWalletAddress(storedWallet);
-      
-      // Try to load user profile from localStorage first
-      const storedProfile = localStorage.getItem('userProfile');
-      if (storedProfile) {
-        try {
-          const parsedProfile = JSON.parse(storedProfile);
-          console.log('Loaded user profile from localStorage:', parsedProfile);
-          setUserProfile(parsedProfile);
-        } catch (e) {
-          console.error('Error parsing stored profile:', e);
-        }
-      }
-      
-      // Also fetch user profile data from backend to ensure it's up to date
-      fetch(`${getApiBaseUrl()}/api/wallet/${storedWallet}`)
-        .then(response => {
-          if (response.ok) return response.json();
-          throw new Error('Failed to fetch user profile');
-        })
-        .then(data => {
-          console.log('Fetched user profile from backend:', data);
-          if (data.user_name) {
-            const backendProfile = {
-              username: data.user_name,
-              firstName: data.first_name || data.user_name.split(' ')[0] || '',
-              lastName: data.last_name || data.user_name.split(' ').slice(1).join(' ') || '',
-              coatOfArmsImage: data.coat_of_arms_image,
-              familyMotto: data.family_motto,
-              familyCoatOfArms: data.family_coat_of_arms,
-              computeAmount: data.compute_amount,
-              color: data.color || '#8B4513'
-            };
-          
-            // Update state with backend data
-            setUserProfile(backendProfile);
-            setSelectedColor(data.color || '#8B4513');
-            
-            // Also update localStorage
-            localStorage.setItem('userProfile', JSON.stringify(backendProfile));
-          }
-        })
-        .catch(error => {
-          console.error('Error fetching user profile:', error);
-        });
-    } else if (adapter.connected) {
-      // If adapter is connected but not in storage, update both
-      console.log("Adapter is connected but not in storage");
-      const address = adapter.publicKey?.toString() || null;
-      if (address) {
-        console.log("Setting wallet address from adapter:", address);
-        setWalletAddress(address);
-        sessionStorage.setItem('walletAddress', address);
-        localStorage.setItem('walletAddress', address);
-      }
-    } else {
-      console.log("No stored wallet address and adapter not connected");
-    }
-    
-    return () => {
-      // Clean up adapter when component unmounts
-      if (adapter) {
-        console.log("Cleaning up wallet adapter");
-        adapter.disconnect();
-      }
-    };
-  }, []);
-  
-  // Add effect to handle clicking outside the dropdown to close it
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setDropdownOpen(false);
-      }
-    }
-    
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
-  
-  // Ensure ConsiglioDeiDieci exists with proper color
-  useEffect(() => {
-    if (users && Object.keys(users).length > 0) {
-      const updatedUsers = { ...users };
-      
-      if (!updatedUsers['ConsiglioDeiDieci']) {
-        console.log('Adding ConsiglioDeiDieci to users data');
-        updatedUsers['ConsiglioDeiDieci'] = {
-          user_name: 'ConsiglioDeiDieci',
-          color: '#8B0000', // Dark red
-          coat_of_arms_image: null
-        };
-        setUsers(updatedUsers);
-      } else if (!updatedUsers['ConsiglioDeiDieci'].color) {
-        console.log('Adding color to ConsiglioDeiDieci');
-        updatedUsers['ConsiglioDeiDieci'].color = '#8B0000'; // Dark red
-        setUsers(updatedUsers);
-      }
-    }
-  }, [users]);
-  
-  // Add this useEffect to check wallet connection status
-  useEffect(() => {
-    const checkWalletConnection = async () => {
-      if (walletAdapter) {
-        console.log("Checking wallet connection status...");
-        console.log("Wallet adapter ready state:", walletAdapter.readyState);
-        console.log("Wallet connected:", walletAdapter.connected);
-        
-        if (walletAdapter.connected) {
-          const address = walletAdapter.publicKey?.toString() || null;
-          console.log("Wallet is connected with address:", address);
-          
-          if (address && !walletAddress) {
-            console.log("Setting wallet address from connected adapter");
-            setWalletAddress(address);
-            sessionStorage.setItem('walletAddress', address);
-            localStorage.setItem('walletAddress', address);
-          }
-        }
-      }
-    };
-    
-    checkWalletConnection();
-  }, [walletAdapter, walletAddress]);
-
-  // Functions to interact with the backend
-  const storeWalletInAirtable = async (walletAddress: string) => {
-    try {
-      const response = await fetch(`${getApiBaseUrl()}/api/wallet`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          wallet_address: walletAddress,
-        }),
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to store wallet');
-      }
-      
-      const data = await response.json();
-      console.log('Wallet stored in Airtable:', data);
-      
-      // Check if the user has a username
-      if (!data.user_name) {
-        // If no username, show the prompt
-        setShowUsernamePrompt(true);
-      } else {
-        // Store the user profile information
-        console.log('Setting user profile with data:', data);
-        setUserProfile({
-          username: data.user_name,
-          firstName: data.first_name || data.user_name.split(' ')[0] || '',
-          lastName: data.last_name || data.user_name.split(' ').slice(1).join(' ') || '',
-          coatOfArmsImage: data.coat_of_arms_image,
-          familyMotto: data.family_motto,
-          computeAmount: data.compute_amount // Add this line
-        });
-      }
-      
-      return data;
-    } catch (error) {
-      console.error('Error storing wallet:', error);
-      return null;
-    }
-  };
-  
-
-
+  // Add the handleUsernameSubmit function inside the component
   const handleUsernameSubmit = async () => {
     // When editing a profile, we need to ensure all required fields are present
     // When creating a new profile, we need username, first name, and last name
@@ -466,11 +87,11 @@ export default function Home() {
     
     try {
       // When editing, use the existing username
-      const username = userProfile ? userProfile.username : usernameInput.trim();
+      const username = userProfile !== null ? userProfile.username : usernameInput.trim();
       
       // If this is a new user (no userProfile), assign a random color from the palette
       // Otherwise, use the selected color
-      const userColor = !userProfile 
+      const userColor = userProfile === null
         ? veniceColorPalette[Math.floor(Math.random() * veniceColorPalette.length)]
         : selectedColor;
       
@@ -549,1405 +170,306 @@ export default function Home() {
     }
   };
 
-  // Add function to update polygon colors
-  const updatePolygonColors = useCallback(() => {
-    if (polygonRendererRef.current && users && Object.keys(users).length > 0) {
-      console.log('Updating polygon colors with user data:', users);
-      
-      // Create a map of user colors
-      const colorMap: Record<string, string> = {};
-      
-      // Always add ConsiglioDeiDieci first with the correct color
-      colorMap['ConsiglioDeiDieci'] = '#8B0000'; // Dark red
-      console.log('Added ConsiglioDeiDieci with color #8B0000');
-      
-      Object.values(users).forEach(user => {
-        if (user.user_name) {
-          if (user.color) {
-            colorMap[user.user_name] = user.color;
-            console.log(`Added color for ${user.user_name}: ${user.color}`);
-          } else if (user.user_name === 'ConsiglioDeiDieci') {
-            // Special case for ConsiglioDeiDieci
-            colorMap[user.user_name] = '#8B0000'; // Dark red
-            console.log(`Added default color for ConsiglioDeiDieci: #8B0000`);
-          }
-        }
-      });
-      
-      // Update colors in the renderer
-      if (Object.keys(colorMap).length > 0) {
-        polygonRendererRef.current.updateOwnerColors(colorMap);
-        // Force an update of owner colors
-        polygonRendererRef.current.updatePolygonOwnerColors();
-      }
-    }
-  }, [users]);
+  // Venice-themed color palette
+  const veniceColorPalette = [
+    // Venetian reds
+    '#8B0000', '#A52A2A', '#B22222', '#CD5C5C',
+    // Venetian blues
+    '#1E5799', '#3A7CA5', '#00AAFF', '#0066CC',
+    // Venetian golds
+    '#DAA520', '#B8860B', '#CD853F', '#D2B48C',
+    // Venetian greens
+    '#2E8B57', '#3CB371', '#6B8E23', '#556B2F',
+    // Venetian purples and other colors
+    '#4B0082', '#800080', '#8B4513', '#A0522D',
+    // Add more distinct colors to ensure uniqueness
+    '#FF5733', '#33FF57', '#3357FF', '#F033FF', '#FF33A8'
+  ];
   
-  // Add function to update coat of arms
-  const updateCoatOfArms = useCallback(() => {
-    if (polygonRendererRef.current && users && Object.keys(users).length > 0) {
-      console.log('Updating coat of arms with user data:', users);
-      
-      // Create a map of user coat of arms
-      const coatOfArmsMap: Record<string, string> = {};
-      Object.values(users).forEach(user => {
-        if (user.user_name && user.coat_of_arms_image) {
-          coatOfArmsMap[user.user_name] = user.coat_of_arms_image;
-          console.log(`Added coat of arms for ${user.user_name}:`, user.coat_of_arms_image);
-        }
-      });
-      
-      // Update coat of arms in the renderer
-      if (Object.keys(coatOfArmsMap).length > 0) {
-        polygonRendererRef.current.updateOwnerCoatOfArms(coatOfArmsMap);
-        // Force an update of coat of arms sprites
-        polygonRendererRef.current.updateCoatOfArmsSprites();
+  // Add effect to handle clicking outside the dropdown to close it
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setDropdownOpen(false);
       }
-    }
-  }, [users]);
-
-  // Add function to load users data
-  const loadUsers = useCallback(async () => {
-    try {
-      const response = await fetch(`${getApiBaseUrl()}/api/users`);
-      if (response.ok) {
-        const data = await response.json();
-        if (data && Array.isArray(data)) {
-          const usersMap: Record<string, any> = {};
-          data.forEach(user => {
-            if (user.user_name) {
-              usersMap[user.user_name] = user;
-            }
-          });
-          setUsers(usersMap);
-          console.log('Loaded users data:', Object.keys(usersMap).length, 'users');
-          
-          // Dispatch event to notify components that users data is loaded
-          window.dispatchEvent(new CustomEvent('usersDataLoaded'));
-        }
-      }
-    } catch (error) {
-      console.error('Error loading users data:', error);
-    }
+    };
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
   }, []);
-
-
-  // Add effect to load users data when component mounts
-  useEffect(() => {
-    loadUsers();
-    
-    // Load income data after users
-    try {
-      const { getIncomeDataService } = require('../lib/services/IncomeDataService');
-      const incomeService = getIncomeDataService();
-      
-      // Load income data or generate simulated data
-      incomeService.loadIncomeData().catch(error => {
-        console.error('Error loading income data:', error);
-        // Generate simulated data as fallback
-        incomeService.generateSimulatedIncomeData(polygons);
-      });
-    } catch (error) {
-      console.warn('Error initializing income data service:', error);
-    }
-    
-    // No additional timeout here - the main loading timer handles both states
-    
-    return () => {
-      // Just cleanup, no need for additional timers
-    };
-  }, [loadUsers, polygons]);
   
-  // Function to ensure all polygons remain visible
-  const ensurePolygonsVisible = useCallback(() => {
-    Object.values(activeLandPolygons).forEach(polygon => {
-      if (!polygon.getVisible()) {
-        polygon.setVisible(true);
-      }
-    });
-  }, [activeLandPolygons]);
-  
-  // Periodically check and ensure polygon visibility
-  useEffect(() => {
-    const visibilityInterval = setInterval(ensurePolygonsVisible, 1000);
-    return () => clearInterval(visibilityInterval);
-  }, [ensurePolygonsVisible, activeLandPolygons]);
-  
-  // Listen for view mode changes
-  useEffect(() => {
-    const handleViewModeChange = () => {
-      console.log('View mode changed, ensuring polygon visibility');
-      // Wait a moment for the view to update
-      setTimeout(ensurePolygonsVisible, 100);
-    };
-    
-    // Use event bus for view mode changes
-    const subscription = eventBus.subscribe(EventTypes.VIEW_MODE_CHANGED, handleViewModeChange);
-    
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [ensurePolygonsVisible]);
-
-  // Add effect to check users data and update polygon renderer
-  useEffect(() => {
-    if (users && Object.keys(users).length > 0) {
-      console.log('Users data loaded:', users);
-      
-      // Create a copy of users to modify
-      const updatedUsers = { ...users };
-      let needsUpdate = false;
-      
-      // Check if ConsiglioDeiDieci is in the users data
-      if (updatedUsers['ConsiglioDeiDieci']) {
-        console.log('ConsiglioDeiDieci user data:', updatedUsers['ConsiglioDeiDieci']);
-        console.log('ConsiglioDeiDieci color:', updatedUsers['ConsiglioDeiDieci'].color);
-        
-        // If ConsiglioDeiDieci has no color, add a default color
-        if (!updatedUsers['ConsiglioDeiDieci'].color) {
-          console.warn('ConsiglioDeiDieci has no color defined in user data! Adding default color.');
-          updatedUsers['ConsiglioDeiDieci'].color = '#8B0000'; // Dark red
-          needsUpdate = true;
-        }
-      } else {
-        // If ConsiglioDeiDieci is missing, add it with default values
-        console.warn('ConsiglioDeiDieci not found in users data! Adding default entry.');
-        updatedUsers['ConsiglioDeiDieci'] = {
-          user_name: 'ConsiglioDeiDieci',
-          color: '#8B0000', // Dark red
-          coat_of_arms_image: null
-        };
-        needsUpdate = true;
-      }
-      
-      // Update the store if needed
-      if (needsUpdate) {
-        usePolygonStore.setState({ users: updatedUsers });
-      }
-      
-      // Force an update of the polygon renderer with the users data
-      if (polygonRendererRef.current) {
-        console.log('Updating polygon renderer with users data');
-        polygonRendererRef.current.updateViewMode(activeView);
-        
-        // Only update coat of arms, not colors (we're using income-based coloring now)
-        updateCoatOfArms();
-        
-        // Force additional updates for land view
-        if (activeView === 'land' && polygonRendererRef.current) {
-          if (polygonRendererRef.current) {
-            // Use income-based coloring instead of owner-based
-            if (typeof polygonRendererRef.current.updatePolygonIncomeColors === 'function') {
-              polygonRendererRef.current.updatePolygonIncomeColors();
-            }
-            polygonRendererRef.current.updateCoatOfArmsSprites();
-          }
-        }
-      }
-      
-      // Ensure polygons remain visible after renderer updates
-      setTimeout(ensurePolygonsVisible, 200);
-    }
-  }, [users, activeView, updateCoatOfArms, ensurePolygonsVisible]);
-  
-  // Add effect to log when transferMenuOpen changes
-  useEffect(() => {
-    console.log('transferMenuOpen state changed:', transferMenuOpen);
-  }, [transferMenuOpen]);
-  
-  // Add a dedicated effect to ensure market panel visibility is properly updated
-  useEffect(() => {
-    // Make sure this is properly set when activeView changes
-    const isMarketView = activeView === 'markets';
-    setMarketPanelVisible(isMarketView);
-    console.log('Active view changed to:', activeView, 'Market panel visible:', isMarketView);
-    
-    // Dispatch a custom event to notify other components about the view change
-    window.dispatchEvent(new CustomEvent('viewModeChanged', { 
-      detail: activeView 
-    }));
-  }, [activeView]);
-  
-  // Add effect to trigger coat of arms updates when users data changes
-  useEffect(() => {
-    updateCoatOfArms();
-  }, [updateCoatOfArms]);
-  
-  // Add effect to handle income data updates
-  useEffect(() => {
-    // Handle income data updates
-    const handleIncomeDataUpdated = (data: any) => {
-      console.log('Income data updated:', data);
-      
-      // Update the income visualization if we're in land view
-      if (incomeRendererRef.current && activeView === 'land') {
-        incomeRendererRef.current.updateIncomeVisualization();
-      }
-    };
-    
-    // Handle individual polygon income updates
-    const handlePolygonIncomeUpdated = (data: any) => {
-      console.log('Polygon income updated:', data);
-      
-      // If we're in land view, update the income visualization
-      if (incomeRendererRef.current && activeView === 'land') {
-        // Find the polygon in our data
-        const polygon = polygons.find(p => p.id === data.polygonId);
-        if (polygon) {
-          // Update the polygon's simulated income
-          polygon.simulatedIncome = data.income;
-          
-          // Update the income visualization
-          incomeRendererRef.current.updateIncomeVisualization();
-        }
-      }
-    };
+  // Function to flush all caches
+  const flushAllCaches = () => {
+    console.log('Flushing all caches...');
     
     try {
-      // Subscribe to income data events
-      const incomeDataSubscription = eventBus.subscribe(
-        EventTypes.INCOME_DATA_UPDATED, 
-        handleIncomeDataUpdated
-      );
+      // Clear localStorage
+      localStorage.clear();
+      console.log('localStorage cleared');
       
-      const polygonIncomeSubscription = eventBus.subscribe(
-        EventTypes.POLYGON_INCOME_UPDATED, 
-        handlePolygonIncomeUpdated
-      );
+      // Clear sessionStorage
+      sessionStorage.clear();
+      console.log('sessionStorage cleared');
       
-      // Also listen for custom events
-      const handleCustomIncomeDataUpdated = (event: CustomEvent) => {
-        if (incomeRendererRef.current && activeView === 'land') {
-          incomeRendererRef.current.updateIncomeVisualization();
-        }
-      };
-      
-      window.addEventListener('incomeDataUpdated', handleCustomIncomeDataUpdated as EventListener);
-      
-      // Cleanup subscriptions
-      return () => {
-        incomeDataSubscription.unsubscribe();
-        polygonIncomeSubscription.unsubscribe();
-        window.removeEventListener('incomeDataUpdated', handleCustomIncomeDataUpdated as EventListener);
-      };
-    } catch (error) {
-      console.warn('Error setting up income data event handlers:', error);
-      return () => {}; // Empty cleanup function
-    }
-    
-    try {
-      // Subscribe to income data events
-      const incomeDataSubscription = eventBus.subscribe(
-        EventTypes.INCOME_DATA_UPDATED, 
-        handleIncomeDataUpdated
-      );
-      
-      const polygonIncomeSubscription = eventBus.subscribe(
-        EventTypes.POLYGON_INCOME_UPDATED, 
-        handlePolygonIncomeUpdated
-      );
-      
-      // Also listen for custom events
-      const handleCustomIncomeDataUpdated = (event: CustomEvent) => {
-        if (incomeRendererRef.current && activeView === 'land') {
-          incomeRendererRef.current.updateIncomeVisualization();
-        }
-      };
-      
-      window.addEventListener('incomeDataUpdated', handleCustomIncomeDataUpdated as EventListener);
-      
-      // Cleanup subscriptions
-      return () => {
-        incomeDataSubscription.unsubscribe();
-        polygonIncomeSubscription.unsubscribe();
-        window.removeEventListener('incomeDataUpdated', handleCustomIncomeDataUpdated as EventListener);
-      };
-    } catch (error) {
-      console.warn('Error setting up income data event handlers:', error);
-      return () => {}; // Empty cleanup function
-    }
-  }, [activeView, polygons, eventBus, EventTypes]);
-  
-  // Add caching for polygon renderer snapshot to prevent infinite loops
-  useEffect(() => {
-    // Add this to the global window object so PolygonViewer can access it
-    if (typeof window !== 'undefined') {
-      // Create cache storage if it doesn't exist
-      if (!(window as any)._polygonSnapshotCache) {
-        (window as any)._polygonSnapshotCache = {
-          result: null,
-          deps: null
-        };
+      // Clear any in-memory caches
+      if (window._polygonSnapshotCache) {
+        window._polygonSnapshotCache = { result: null, deps: null };
+        console.log('Polygon snapshot cache cleared');
       }
       
-      // Create a module-level variable for the cache
-      (window as any).getSnapshotWithCacheCache = (window as any).getSnapshotWithCacheCache || {
-        result: null,
-        deps: null
-      };
-    }
-    
-    return () => {
-      // Clean up on unmount
+      // Clear any cached textures
+      if (THREE && THREE.Cache) {
+        THREE.Cache.clear();
+        console.log('THREE.js texture cache cleared');
+      }
+      
+      // Clear coat of arms cache in PolygonRenderer
       if (typeof window !== 'undefined') {
-        delete (window as any)._polygonSnapshotCache;
-        delete (window as any).getSnapshotWithCacheCache;
-      }
-    };
-  }, []);
-
-  // Handle compute transfer
-  const handleTransferCompute = async (amount: number) => {
-    try {
-      console.log('Starting compute transfer process...');
-      
-      // Get the wallet address from session or local storage
-      const walletAddress = sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress');
-      
-      if (!walletAddress) {
-        alert('Please connect your wallet first');
-        return;
+        // Use a custom event to notify PolygonRenderer to clear its caches
+        window.dispatchEvent(new CustomEvent('clearPolygonRendererCaches'));
+        console.log('Dispatched event to clear PolygonRenderer caches');
       }
       
-      // Call the backend API to transfer compute using Solana
-      const response = await fetch(`${getApiBaseUrl()}/api/transfer-compute-solana`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          wallet_address: walletAddress,
-          compute_amount: amount,
-        }),
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Failed to transfer compute');
+      // Reset any global state
+      if (typeof window.getCachedSnapshot === 'function') {
+        // Use type assertion to handle the delete operation properly
+        delete (window as any).getCachedSnapshot;
+        console.log('getCachedSnapshot function removed');
       }
       
-      const data = await response.json();
-      console.log('Compute transfer successful:', data);
+      // Show success message
+      setCacheCleared(true);
       
-      // Update the user profile with the new compute amount
-      if (userProfile) {
-        const updatedProfile = {
-          ...userProfile,
-          computeAmount: data.compute_amount
-        };
-        setUserProfile(updatedProfile);
-        
-        // Update localStorage
-        localStorage.setItem('userProfile', JSON.stringify(updatedProfile));
-        
-        // Dispatch event to update other components
-        window.dispatchEvent(new CustomEvent('userProfileUpdated', {
-          detail: updatedProfile
-        }));
-      }
+      // Hide success message after 3 seconds
+      setTimeout(() => {
+        setCacheCleared(false);
+      }, 3000);
       
-      // Show success message with custom component instead of alert
-      setSuccessMessage({
-        message: `Successfully transferred ${amount.toLocaleString()}`,
-        signature: data.transaction_signature || 'Transaction completed'
-      });
-      return data;
+      // Reload the page after a short delay
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
     } catch (error) {
-      console.error('Error transferring compute:', error);
-      alert(`Failed to transfer compute: ${error instanceof Error ? error.message : String(error)}`);
-      throw error;
+      console.error('Error clearing caches:', error);
+      alert(`Error clearing caches: ${error instanceof Error ? error.message : String(error)}`);
     }
   };
-  
-  // Handle compute withdrawal
-  const handleWithdrawCompute = async (amount: number) => {
+
+  // Function to generate coat of arms image
+  const handleGenerateCoatOfArmsImage = async () => {
+    if (!familyCoatOfArms.trim()) {
+      alert('Please enter a description of your family coat of arms first');
+      return;
+    }
+      
     try {
-      // Get the wallet address from session or local storage
-      const walletAddress = sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress');
-      
-      if (!walletAddress) {
-        alert('Please connect your wallet first');
-        return;
-      }
-      
-      console.log(`Initiating withdrawal of ${amount.toLocaleString()} ducats...`);
-      
-      // Try the direct API route first
-      try {
-        const response = await fetch('/api/withdraw-compute', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            wallet_address: walletAddress,
-            compute_amount: amount,
-          }),
-        });
+      setIsGeneratingImage(true);
         
-        if (response.ok) {
-          const data = await response.json();
-          console.log('Compute withdrawal successful:', data);
-          
-          // Update the user profile with the new compute amount
-          if (userProfile) {
-            const updatedProfile = {
-              ...userProfile,
-              computeAmount: data.compute_amount
-            };
-            setUserProfile(updatedProfile);
-            
-            // Update localStorage
-            localStorage.setItem('userProfile', JSON.stringify(updatedProfile));
-            
-            // Dispatch event to update other components
-            window.dispatchEvent(new CustomEvent('userProfileUpdated', {
-              detail: updatedProfile
-            }));
-          }
-          
-          return data;
+      const imageUrl = await generateCoatOfArmsImage(familyCoatOfArms);
+        
+      // Update state with the local image URL
+      setCoatOfArmsImage(imageUrl);
+        
+    } catch (error) {
+      console.error('Error generating coat of arms image:', error);
+      alert(`Failed to generate image: ${error instanceof Error ? error.message : String(error)}`);
+    } finally {
+      setIsGeneratingImage(false);
+    }
+  };
+  // Initialize wallet adapter
+  useEffect(() => {
+    console.log("Initializing wallet adapter...");
+    const adapter = new PhantomWalletAdapter();
+    setWalletAdapter(adapter);
+    
+    // Check if wallet is already connected in session or local storage
+    const storedWallet = getWalletAddress();
+    console.log("Stored wallet address:", storedWallet);
+    
+    if (storedWallet) {
+      console.log("Found stored wallet address, setting as connected");
+      setWalletAddress(storedWallet);
+      
+      // Try to load user profile from localStorage first
+      const storedProfile = localStorage.getItem('userProfile');
+      if (storedProfile) {
+        try {
+          const parsedProfile = JSON.parse(storedProfile);
+          console.log('Loaded user profile from localStorage:', parsedProfile);
+          setUserProfile(parsedProfile);
+        } catch (e) {
+          console.error('Error parsing stored profile:', e);
         }
-      } catch (directApiError) {
-        console.warn('Direct API withdrawal failed, falling back to backend API:', directApiError);
       }
       
-      // Fall back to the backend API
-      const response = await fetch(`${getApiBaseUrl()}/api/withdraw-compute-solana`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          wallet_address: walletAddress,
-          compute_amount: amount,
-        }),
-        // Add a timeout to prevent hanging requests
-        signal: AbortSignal.timeout(15000) // 15 second timeout
-      });
-      
-      // Handle non-OK responses with more detailed error messages
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        const errorMessage = errorData.detail || `Server returned ${response.status}: ${response.statusText}`;
-        throw new Error(errorMessage);
-      }
-      
-      const data = await response.json();
-      console.log('Compute withdrawal successful:', data);
-      
-      // Update the user profile with the new compute amount
-      if (userProfile) {
-        const updatedProfile = {
-          ...userProfile,
-          computeAmount: data.compute_amount
-        };
-        setUserProfile(updatedProfile);
-        
-        // Update localStorage
-        localStorage.setItem('userProfile', JSON.stringify(updatedProfile));
-        
-        // Dispatch event to update other components
-        window.dispatchEvent(new CustomEvent('userProfileUpdated', {
-          detail: updatedProfile
-        }));
-      }
-      
-      // Return the data instead of showing an alert (the component will handle the success message)
-      return data;
-    } catch (error) {
-      console.error('Error withdrawing compute:', error);
-      // Don't show alert here, let the component handle the error
-      throw error;
-    }
-  };
-
-  // Handle wallet connection
-  const connectWallet = useCallback(async () => {
-    if (!walletAdapter) {
-      console.log("Wallet adapter not initialized");
-      return;
-    }
-    
-    console.log("Connecting wallet, current state:", walletAdapter.connected ? "connected" : "disconnected");
-    
-    if (walletAdapter.connected) {
-      // If already connected, disconnect
-      console.log("Disconnecting wallet...");
-      try {
-        await walletAdapter.disconnect();
-        
-        // Only update state after successful disconnect
-        setWalletAddress(null);
-        setUserProfile(null); // Also clear the user profile
-        
-        // Clear wallet from both storages, but prioritize session storage
-        sessionStorage.removeItem('walletAddress');
-        localStorage.removeItem('walletAddress');
-        
-        // Dispatch a custom event to notify other components
-        window.dispatchEvent(new CustomEvent('walletChanged'));
-        
-        console.log("Wallet disconnected successfully");
-      } catch (error) {
-        console.error("Error disconnecting wallet:", error);
-        alert(`Failed to disconnect wallet: ${error instanceof Error ? error.message : String(error)}`);
-      }
-      return;
-    }
-    
-    // Check if Phantom is installed
-    if (walletAdapter.readyState !== WalletReadyState.Installed) {
-      console.log("Phantom wallet not installed, opening website");
-      window.open('https://phantom.app/', '_blank');
-      return;
-    }
-    
-    try {
-      console.log("Attempting to connect to wallet...");
-      await walletAdapter.connect();
-      const address = walletAdapter.publicKey?.toString() || null;
-      console.log("Wallet connected, address:", address);
-      
+      // Also fetch user profile data from backend to ensure it's up to date
+      fetch(`${getApiBaseUrl()}/api/wallet/${storedWallet}`)
+        .then(response => {
+          if (response.ok) return response.json();
+          throw new Error('Failed to fetch user profile');
+        })
+        .then(data => {
+          console.log('Fetched user profile from backend:', data);
+          if (data.user_name) {
+            const backendProfile = {
+              username: data.user_name,
+              firstName: data.first_name || data.user_name.split(' ')[0] || '',
+              lastName: data.last_name || data.user_name.split(' ').slice(1).join(' ') || '',
+              coatOfArmsImage: data.coat_of_arms_image,
+              familyMotto: data.family_motto,
+              familyCoatOfArms: data.family_coat_of_arms,
+              computeAmount: data.compute_amount,
+              color: data.color || '#8B4513'
+            };
+          
+            // Update state with backend data
+            setUserProfile(backendProfile);
+            setSelectedColor(data.color || '#8B4513');
+            
+            // Also update localStorage
+            localStorage.setItem('userProfile', JSON.stringify(backendProfile));
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching user profile:', error);
+        });
+    } else if (adapter.connected) {
+      // If adapter is connected but not in storage, update both
+      console.log("Adapter is connected but not in storage");
+      const address = adapter.publicKey?.toString() || null;
       if (address) {
+        console.log("Setting wallet address from adapter:", address);
         setWalletAddress(address);
-        // Store wallet in session storage first, then local storage as backup
         sessionStorage.setItem('walletAddress', address);
         localStorage.setItem('walletAddress', address);
-        console.log("Wallet address stored in session and local storage");
-        
-        // Store wallet in Airtable and check for username
-        const userData = await storeWalletInAirtable(address);
-        console.log("User data from Airtable:", userData);
-        console.log("User profile after wallet connection:", userProfile);
-      } else {
-        console.log("No wallet address returned after connection");
-      }
-    } catch (error) {
-      console.error('Error connecting to wallet:', error);
-      alert(`Failed to connect wallet: ${error instanceof Error ? error.message : String(error)}`);
-    }
-  }, [walletAdapter]);
-
-  if (!apiKey && walletAddress) {
-    return <div className="w-screen h-screen flex items-center justify-center">
-      <p>Google Maps API key is missing. Please add it to your .env.local file.</p>
-    </div>;
-  }
-
-  // Function to save polygon data to a file
-  const savePolygonToFile = (polygon: google.maps.Polygon) => {
-    const path = polygon.getPath();
-    const coordinates = Array.from({ length: path.getLength() }, (_, i) => {
-      const point = path.getAt(i);
-      return { lat: point.lat(), lng: point.lng() };
-    });
-
-    // In a real app, you would send this to your backend
-    // For now, we'll log it to console
-    console.log('Saving polygon:', coordinates);
-    
-    // Add to our local state
-    setSavedPolygons(prev => [...prev, polygon]);
-
-    // Send polygon data to the API
-    fetch('/api/save-polygon', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ coordinates })
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        console.log(`Polygon ${data.isNew ? 'created' : 'updated'}: ${data.filename}`);
-      } else {
-        console.error('Failed to save polygon:', data.error);
-      }
-    })
-    .catch(error => {
-      console.error('Error saving polygon:', error);
-    });
-  };
-
-  // Handle polygon complete event
-  const onPolygonComplete = (polygon: google.maps.Polygon) => {
-    // Apply rounded corners (this is a visual effect only)
-    polygon.setOptions({
-      ...polygonOptions,
-      // The geodesic option helps create slightly rounded paths
-      geodesic: true
-    });
-
-    // Auto-close the polygon if needed
-    const path = polygon.getPath();
-    if (path.getLength() > 2) {
-      const firstPoint = path.getAt(0);
-      const lastPoint = path.getAt(path.getLength() - 1);
-      
-      // If the first and last points are close enough, snap to close
-      const threshold = 0.0001; // Adjust based on your needs
-      if (
-        Math.abs(firstPoint.lat() - lastPoint.lat()) < threshold &&
-        Math.abs(firstPoint.lng() - lastPoint.lng()) < threshold
-      ) {
-        // Remove the last point and use the first point to close the polygon
-        path.removeAt(path.getLength() - 1);
-        // No need to add the first point again as polygons auto-close visually
-      }
-    }
-
-    // Save the polygon
-    savePolygonToFile(polygon);
-
-    // Add listener for changes to save updated polygon
-    // Use a debounce to prevent saving on every small change
-    if (typeof google !== 'undefined') {
-      let saveTimeout: NodeJS.Timeout | null = null;
-      
-      const debouncedSave = () => {
-        if (saveTimeout) clearTimeout(saveTimeout);
-        saveTimeout = setTimeout(() => {
-          savePolygonToFile(polygon);
-          saveTimeout = null;
-        }, 1000); // Wait 1 second after changes stop before saving
-      };
-      
-      google.maps.event.addListener(polygon.getPath(), 'set_at', debouncedSave);
-      google.maps.event.addListener(polygon.getPath(), 'insert_at', debouncedSave);
-    }
-  };
-
-  // Add this function to handle bridge creation
-  const handleBridgeMode = () => {
-    // Turn off delete mode if it's on
-    if (deleteMode) {
-      setDeleteMode(false);
-      setSelectedMapPolygon(null);
-      setSelectedMapPolygonId(null);
-    }
-    
-    // Reset selected polygon when entering bridge mode
-    if (selectedPolygon) {
-      selectedPolygon.polygon.setOptions({
-        strokeColor: '#3388ff',
-        strokeOpacity: 0.8,
-        fillColor: '#3388ff',
-        fillOpacity: 0.35,
-        visible: true // Explicitly ensure visibility is maintained
-      });
-      setSelectedPolygon(null);
-    }
-    
-    setBridgeMode(!bridgeMode);
-    
-    // Reset bridge start if turning off bridge mode
-    if (bridgeMode) {
-      setBridgeStart(null);
-      setBridgeStartLandId(null);
-    }
-    
-    // Change cursor style based on bridge mode
-    if (mapRef.current) {
-      mapRef.current.setOptions({
-        draggableCursor: !bridgeMode ? 'crosshair' : ''
-      });
-    }
-  };
-
-  // Add this function to handle map clicks for bridge creation and polygon selection
-  const handleMapClick = (event: google.maps.MapMouseEvent) => {
-    if (!event.latLng) return;
-    
-    // Skip if we're dragging a centroid
-    if (isDraggingCentroid) return;
-    
-    // Ensure all polygons are visible before processing the click
-    Object.values(activeLandPolygons).forEach(polygon => {
-      if (!polygon.getVisible()) {
-        console.log('Making invisible polygon visible before processing click');
-        polygon.setVisible(true);
-      }
-    });
-    
-    if (deleteMode) {
-      // Find which polygon was clicked
-      let clickedPolygonId = null;
-      let clickedPolygon = null;
-      
-      for (const [id, polygon] of Object.entries(activeLandPolygons)) {
-        if (google.maps.geometry.poly.containsLocation(event.latLng, polygon)) {
-          clickedPolygonId = id;
-          clickedPolygon = polygon;
-          break;
-        }
-      }
-      
-      if (!clickedPolygonId || !clickedPolygon) {
-        // If we didn't click on a polygon, deselect the current one
-        if (selectedMapPolygon) {
-          selectedMapPolygon.setOptions({
-            strokeColor: '#3388ff',
-            strokeOpacity: 0.8,
-            fillColor: '#3388ff',
-            fillOpacity: 0.35,
-            visible: true
-          });
-        }
-        setSelectedMapPolygon(null);
-        setSelectedMapPolygonId(null);
-        return;
-      }
-      
-      // If we already had a selected polygon, reset its style
-      if (selectedMapPolygon && selectedMapPolygon !== clickedPolygon) {
-        selectedMapPolygon.setOptions({
-          strokeColor: '#3388ff',
-          strokeOpacity: 0.8,
-          fillColor: '#3388ff',
-          fillOpacity: 0.35,
-          visible: true // Ensure visibility is maintained
-        });
-      }
-      
-      // Select the clicked polygon
-      setSelectedMapPolygon(clickedPolygon);
-      setSelectedMapPolygonId(clickedPolygonId);
-      
-      // Highlight the selected polygon
-      clickedPolygon.setOptions({
-        strokeColor: '#ff0000',
-        strokeOpacity: 1.0,
-        fillColor: '#ff0000',
-        fillOpacity: 0.5,
-        visible: true // Explicitly ensure visibility is maintained
-      });
-      
-      console.log('Selected polygon styling applied, visibility set to true');
-      
-      // Check if something is changing the visibility later
-      setTimeout(() => {
-        if (clickedPolygon) {
-          console.log('Checking polygon visibility after 500ms:', clickedPolygon.getVisible());
-          if (!clickedPolygon.getVisible()) {
-            console.log('Polygon visibility was changed to false! Restoring...');
-            clickedPolygon.setVisible(true);
-          }
-        }
-      }, 500);
-      
-      return;
-    }
-    
-    if (bridgeMode) {
-      // Find which polygon was clicked
-      let clickedPolygonId = null;
-      
-      for (const [id, polygon] of Object.entries(activeLandPolygons)) {
-        if (google.maps.geometry.poly.containsLocation(event.latLng, polygon)) {
-          clickedPolygonId = id;
-          break;
-        }
-      }
-      
-      if (!clickedPolygonId) {
-        alert('Please click on a land polygon');
-        return;
-      }
-      
-      if (!bridgeStart) {
-        // Set bridge start point
-        setBridgeStart(event.latLng);
-        setBridgeStartLandId(clickedPolygonId);
-        alert(`Bridge start point set on land ${clickedPolygonId}`);
-      } else {
-        // Set bridge end point and create bridge
-        if (clickedPolygonId === bridgeStartLandId) {
-          alert('Bridge must connect two different lands');
-          return;
-        }
-        
-        // Create bridge
-        const bridge = {
-          id: `bridge-${Date.now()}`,
-          startPoint: {
-            lat: bridgeStart.lat(),
-            lng: bridgeStart.lng()
-          },
-          endPoint: {
-            lat: event.latLng.lat(),
-            lng: event.latLng.lng()
-          },
-          startLandId: bridgeStartLandId,
-          endLandId: clickedPolygonId
-        };
-        
-        // Save bridge to file
-        saveBridgeToFile(bridge);
-        
-        // Reset bridge mode
-        setBridgeStart(null);
-        setBridgeStartLandId(null);
-        
-        // Draw bridge line on map
-        const bridgeLine = new google.maps.Polyline({
-          path: [
-            { lat: bridge.startPoint.lat, lng: bridge.startPoint.lng },
-            { lat: bridge.endPoint.lat, lng: bridge.endPoint.lng }
-          ],
-          geodesic: true,
-          strokeColor: '#FF0000',
-          strokeOpacity: 1.0,
-          strokeWeight: 3
-        });
-        
-        bridgeLine.setMap(mapRef.current);
       }
     } else {
-      // Normal mode - select polygon on click
-      let clickedPolygonId = null;
-      let clickedPolygon = null;
-      
-      for (const [id, polygon] of Object.entries(activeLandPolygons)) {
-        if (google.maps.geometry.poly.containsLocation(event.latLng, polygon)) {
-          clickedPolygonId = id;
-          clickedPolygon = polygon;
-          break;
-        }
-      }
-      
-      // If we clicked on a polygon, select it
-      if (clickedPolygonId && clickedPolygon) {
-        // If we already had a selected polygon, reset its style
-        if (selectedPolygon && selectedPolygon.polygon !== clickedPolygon) {
-          selectedPolygon.polygon.setOptions({
-            strokeColor: '#3388ff',
-            strokeOpacity: 0.8,
-            fillColor: '#3388ff',
-            fillOpacity: 0.35,
-            visible: true
-          });
-        }
-        
-        // Select the clicked polygon
-        setSelectedPolygon({
-          id: clickedPolygonId,
-          polygon: clickedPolygon
-        });
-        
-        // Highlight the selected polygon
-        clickedPolygon.setOptions({
-          strokeColor: '#ff0000',
-          strokeOpacity: 1.0,
-          fillColor: '#ff0000',
-          fillOpacity: 0.5,
-          visible: true
-        });
-      } else {
-        // If we clicked on empty space, deselect the current polygon
-        if (selectedPolygon) {
-          selectedPolygon.polygon.setOptions({
-            strokeColor: '#3388ff',
-            strokeOpacity: 0.8,
-            fillColor: '#3388ff',
-            fillOpacity: 0.35,
-            visible: true
-          });
-          setSelectedPolygon(null);
-        }
-      }
+      console.log("No stored wallet address and adapter not connected");
     }
-  };
-  
-  // Polygon deletion is now disabled
-  const handleDeletePolygon = async () => {
-    console.log('Polygon deletion is disabled');
-    alert('Polygon deletion is not allowed in this version');
-  };
-
-  // Add this function to save bridge to file
-  const saveBridgeToFile = (bridge: any) => {
-    // Send bridge data to the API
-    fetch('/api/save-bridge', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(bridge)
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        console.log(`Bridge created: ${data.filename}`);
-        alert(`Bridge created between lands ${bridge.startLandId} and ${bridge.endLandId}`);
-      } else {
-        console.error('Failed to save bridge:', data.error);
-        alert('Failed to create bridge');
-      }
-    })
-    .catch(error => {
-      console.error('Error saving bridge:', error);
-      alert('Error creating bridge');
-    });
-  };
-
-
-  // Define updateCentroid function
-  const updateCentroid = async (polygonId: string, newCentroid: {lat: number, lng: number}): Promise<void> => {
-    try {
-      const response = await fetch('/api/update-centroid', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          id: polygonId,
-          centroid: newCentroid
-        }),
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to update centroid');
-      }
-      
-      const data = await response.json();
-      
-      if (data.success) {
-        console.log(`Successfully updated centroid for ${polygonId}`);
-      } else {
-        console.error(`Failed to update centroid: ${data.error}`);
-      }
-    } catch (error) {
-      console.error('Error updating centroid:', error);
-    }
-  };
-
-  // Define loadPolygonsOnMapImpl function early in the component
-  const loadPolygonsOnMapImpl = useCallback(() => {
-    console.log('loadPolygonsOnMapImpl called');
-    
-    if (!mapRef.current) {
-      console.warn('Map reference not available');
-      return;
-    }
-    
-    if (!isGoogleLoaded) {
-      console.warn('Google Maps API not loaded');
-      return;
-    }
-    
-    console.log('Loading polygons onto map...');
-    
-    // Clear existing polygons
-    Object.values(activeLandPolygons).forEach(polygon => {
-      polygon.setMap(null);
-    });
-    
-    // Clear existing centroid markers
-    Object.values(centroidMarkers).forEach(marker => {
-      marker.setMap(null);
-    });
-    
-    // Reset selected polygon
-    if (selectedPolygon) {
-      setSelectedPolygon(null);
-    }
-    
-    // Reset active polygons and centroid markers
-    const newActiveLandPolygons: Record<string, google.maps.Polygon> = {};
-    const newCentroidMarkers: Record<string, google.maps.Marker> = {};
-    
-    // Fetch polygons from API
-    fetch('/api/get-polygons')
-      .then(response => response.json())
-      .then(data => {
-        console.log(`Fetched ${data.polygons?.length || 0} polygons from API`);
-        
-        if (!data.polygons || data.polygons.length === 0) {
-          console.warn('No polygons returned from API');
-          return;
-        }
-        
-        // Update the polygons state
-        setPolygons(data.polygons);
-        
-        data.polygons.forEach((polygon: any, index: number) => {
-          if (polygon.coordinates && polygon.coordinates.length > 2) {
-            console.log(`Creating polygon ${index} (${polygon.id}) on map`);
-            
-            const path = polygon.coordinates.map((coord: any) => ({
-              lat: coord.lat,
-              lng: coord.lng
-            }));
-            
-            const mapPolygon = new google.maps.Polygon({
-              paths: path,
-              strokeColor: '#3388ff',
-              strokeOpacity: 0.8,
-              strokeWeight: 2,
-              fillColor: '#3388ff',
-              fillOpacity: 0.35,
-              visible: true,
-              map: mapRef.current
-            });
-            
-            // Store reference to polygon
-            newActiveLandPolygons[polygon.id] = mapPolygon;
-            
-            // Create a centroid marker if centroid exists
-            if (polygon.centroid) {
-              const centroidMarker = new google.maps.Marker({
-                position: {
-                  lat: polygon.centroid.lat,
-                  lng: polygon.centroid.lng
-                },
-                map: centroidDragMode ? mapRef.current : null, // Only show if in centroid drag mode
-                draggable: centroidDragMode,
-                icon: {
-                  path: google.maps.SymbolPath.CIRCLE,
-                  scale: 7,
-                  fillColor: '#FF0000',
-                  fillOpacity: 0.7,
-                  strokeWeight: 2,
-                  strokeColor: '#FFFFFF'
-                },
-                title: `Centroid: ${polygon.id}`
-              });
-              
-              // Add drag event listeners
-              centroidMarker.addListener('dragstart', () => {
-                setIsDraggingCentroid(true);
-              });
-              
-              centroidMarker.addListener('dragend', async () => {
-                setIsDraggingCentroid(false);
-                const newPosition = centroidMarker.getPosition();
-                if (newPosition) {
-                  // Update the centroid in the backend
-                  await updateCentroid(polygon.id, {
-                    lat: newPosition.lat(),
-                    lng: newPosition.lng()
-                  });
-                }
-              });
-              
-              newCentroidMarkers[polygon.id] = centroidMarker;
-            }
-          } else {
-            console.warn(`Polygon ${index} (${polygon.id}) has invalid coordinates:`, polygon.coordinates);
-          }
-        });
-        
-        console.log(`Added ${Object.keys(newActiveLandPolygons).length} polygons to map`);
-        setActiveLandPolygons(newActiveLandPolygons);
-        setCentroidMarkers(newCentroidMarkers);
-      })
-      .catch(error => {
-        console.error('Error loading polygons:', error);
-      });
-  }, [isGoogleLoaded, centroidDragMode, selectedPolygon, activeLandPolygons, centroidMarkers]);
-
-
-  // Declare loadPolygonsOnMap function early to avoid "used before declaration" error
-  const loadPolygonsOnMap = useCallback(() => {
-    console.log('loadPolygonsOnMap called - top level declaration');
-    
-    if (!mapRef.current) {
-      console.warn('Map reference not available');
-      return;
-    }
-    
-    if (!isGoogleLoaded) {
-      console.warn('Google Maps API not loaded');
-      return;
-    }
-    
-    console.log('Loading polygons onto map...');
-    
-    // Clear existing polygons
-    Object.values(activeLandPolygons).forEach(polygon => {
-      polygon.setMap(null);
-    });
-    
-    // Clear existing centroid markers
-    Object.values(centroidMarkers).forEach(marker => {
-      marker.setMap(null);
-    });
-    
-    // Reset selected polygon
-    if (selectedPolygon) {
-      setSelectedPolygon(null);
-    }
-    
-    // Reset active polygons and centroid markers
-    const newActiveLandPolygons: Record<string, google.maps.Polygon> = {};
-    const newCentroidMarkers: Record<string, google.maps.Marker> = {};
-    
-    // Fetch polygons from API
-    fetch('/api/get-polygons')
-      .then(response => response.json())
-      .then(data => {
-        console.log(`Fetched ${data.polygons?.length || 0} polygons from API`);
-        
-        if (!data.polygons || data.polygons.length === 0) {
-          console.warn('No polygons returned from API');
-          return;
-        }
-        
-        data.polygons.forEach((polygon: any, index: number) => {
-          if (polygon.coordinates && polygon.coordinates.length > 2) {
-            console.log(`Creating polygon ${index} (${polygon.id}) on map`);
-            
-            const path = polygon.coordinates.map((coord: any) => ({
-              lat: coord.lat,
-              lng: coord.lng
-            }));
-            
-            const mapPolygon = new google.maps.Polygon({
-              paths: path,
-              strokeColor: '#3388ff',
-              strokeOpacity: 0.8,
-              strokeWeight: 2,
-              fillColor: '#3388ff',
-              fillOpacity: 0.35,
-              visible: true,
-              map: mapRef.current
-            });
-            
-            // Store reference to polygon
-            newActiveLandPolygons[polygon.id] = mapPolygon;
-            
-            // Create a centroid marker if centroid exists
-            if (polygon.centroid) {
-              const centroidMarker = new google.maps.Marker({
-                position: {
-                  lat: polygon.centroid.lat,
-                  lng: polygon.centroid.lng
-                },
-                map: centroidDragMode ? mapRef.current : null, // Only show if in centroid drag mode
-                draggable: centroidDragMode,
-                icon: {
-                  path: google.maps.SymbolPath.CIRCLE,
-                  scale: 7,
-                  fillColor: '#FF0000',
-                  fillOpacity: 0.7,
-                  strokeWeight: 2,
-                  strokeColor: '#FFFFFF'
-                },
-                title: `Centroid: ${polygon.id}`
-              });
-              
-              // Add drag event listeners
-              centroidMarker.addListener('dragstart', () => {
-                setIsDraggingCentroid(true);
-              });
-              
-              centroidMarker.addListener('dragend', async () => {
-                setIsDraggingCentroid(false);
-                const newPosition = centroidMarker.getPosition();
-                if (newPosition) {
-                  // Update the centroid in the backend
-                  await updateCentroid(polygon.id, {
-                    lat: newPosition.lat(),
-                    lng: newPosition.lng()
-                  });
-                }
-              });
-              
-              newCentroidMarkers[polygon.id] = centroidMarker;
-            }
-          } else {
-            console.warn(`Polygon ${index} (${polygon.id}) has invalid coordinates:`, polygon.coordinates);
-          }
-        });
-        
-        console.log(`Added ${Object.keys(newActiveLandPolygons).length} polygons to map`);
-        setActiveLandPolygons(newActiveLandPolygons);
-        setCentroidMarkers(newCentroidMarkers);
-      })
-      .catch(error => {
-        console.error('Error loading polygons:', error);
-      });
-  }, [mapRef, isGoogleLoaded, centroidDragMode, selectedPolygon, activeLandPolygons, centroidMarkers, updateCentroid]);
-  
-  // Handle map load
-  const onMapLoad = (map: google.maps.Map) => {
-    console.log('Google Map loaded');
-    mapRef.current = map;
-    
-    // Add click listener for bridge creation
-    map.addListener('click', handleMapClick);
-    
-    // Load polygons immediately when map is ready
-    if (isGoogleLoaded) {
-      console.log('Loading polygons on map load...');
-      loadPolygonsOnMapImpl();
-      
-      // Set up a MutationObserver to detect when the PolygonViewer might be affecting polygon visibility
-      if (typeof window !== 'undefined' && window.MutationObserver) {
-        const observer = new MutationObserver((mutations) => {
-          // Check if any mutations might affect our polygons
-          const relevantMutation = mutations.some(mutation => 
-            mutation.target.nodeName === 'CANVAS' || 
-            (mutation.target as Element).classList?.contains('polygon-viewer')
-          );
-          
-          if (relevantMutation) {
-            console.log('Detected DOM changes that might affect polygons, ensuring visibility');
-            setTimeout(ensurePolygonsVisible, 100);
-          }
-        });
-        
-        // Start observing the document with the configured parameters
-        observer.observe(document.body, { 
-          childList: true, 
-          subtree: true,
-          attributes: true,
-          attributeFilter: ['style', 'class']
-        });
-      }
-  };
-
-  // Handle drawing manager load
-  const onDrawingManagerLoad = (drawingManager: google.maps.drawing.DrawingManager) => {
-    drawingManagerRef.current = drawingManager;
-    setIsGoogleLoaded(true);
-  };
-  
-  // Define loadPolygonsOnMap function - declaration moved to top level
-
-  // Add useEffect to load polygons when map is ready
-  useEffect(() => {
-    if (mapRef.current && isGoogleLoaded) {
-      console.log('Map and Google Maps API ready, loading polygons...');
-      loadPolygonsOnMapImpl();
-    }
-  }, [mapRef.current, isGoogleLoaded, loadPolygonsOnMapImpl]);
-  
-  // Add this useEffect to listen for usersDataLoaded events
-  useEffect(() => {
-    const handleUsersLoaded = () => {
-      console.log('Users data loaded event detected');
-      
-      // Add ConsiglioDeiDieci if not present
-      if (!users['ConsiglioDeiDieci']) {
-        console.log('Adding ConsiglioDeiDieci to users data');
-        const updatedUsers = {
-          ...users,
-          'ConsiglioDeiDieci': {
-            user_name: 'ConsiglioDeiDieci',
-            color: '#8B0000', // Dark red
-            coat_of_arms_image: null
-          }
-        };
-        // Update the users state directly instead of using usePolygonStore
-        setUsers(updatedUsers);
-      }
-      
-      updatePolygonColors();
-      updateCoatOfArms();
-      
-      // Force additional updates for land view
-      if (activeView === 'land' && polygonRendererRef.current) {
-        if (polygonRendererRef.current) {
-          polygonRendererRef.current.updatePolygonOwnerColors();
-          polygonRendererRef.current.updateCoatOfArmsSprites();
-        }
-      }
-    };
-    
-    window.addEventListener('usersDataLoaded', handleUsersLoaded);
     
     return () => {
-      window.removeEventListener('usersDataLoaded', handleUsersLoaded);
-    };
-  }, [updatePolygonColors, updateCoatOfArms, users, activeView]);
-
-  // Also add this to ensure polygons are loaded when the component mounts
-  useEffect(() => {
-    // This will run once when the component mounts
-    const loadPolygonsWhenReady = () => {
-      if (mapRef.current && isGoogleLoaded) {
-        console.log('Loading polygons on mount...');
-        loadPolygonsOnMapImpl();
-      } else {
-        // If map or Google Maps API isn't ready yet, check again in a moment
-        // Map or Google Maps API not ready yet, waiting...
-        const timer = setTimeout(loadPolygonsWhenReady, 500);
-        return () => clearTimeout(timer);
+      // Clean up adapter when component unmounts
+      if (adapter) {
+        console.log("Cleaning up wallet adapter");
+        adapter.disconnect();
       }
     };
-    
-    loadPolygonsWhenReady();
-  }, [loadPolygonsOnMapImpl]);
-
-  // Handle script load
-  const handleScriptLoad = () => {
-    setIsGoogleLoaded(true);
-  };
-
-  // Create drawing manager options with client-side safety
-  const [drawingManagerOptions, setDrawingManagerOptions] = useState({
-    drawingControl: true,
-    drawingControlOptions: {
-      position: 1, // TOP_CENTER
-      drawingModes: ['polygon']
-    },
-    polygonOptions
-  });
-
-  // Update drawing manager options when Google is loaded
-  useEffect(() => {
-    if (isGoogleLoaded && typeof google !== 'undefined') {
-      setDrawingManagerOptions({
-        drawingControl: true,
-        drawingControlOptions: {
-          position: google.maps.ControlPosition.TOP_CENTER,
-          drawingModes: [google.maps.drawing.OverlayType.POLYGON]
-        },
-        polygonOptions
-      });
-    }
-  }, [isGoogleLoaded]);
-
-  // Add a simple fallback component that will always render
-  const FallbackComponent = () => (
-    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-amber-50">
-      <h2 className="text-2xl font-serif text-amber-800 mb-4">Loading La Serenissima</h2>
-      <p className="text-amber-600 mb-6">The Council of Ten is preparing the map...</p>
-      <button 
-        onClick={() => window.location.reload()}
-        className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors"
-      >
-        Reload Page
-      </button>
-    </div>
-  );
-}
+  }, []);
 
   return (
     <>
+    <div className="relative w-full h-screen">
+      {/* Main 3D Viewer (should be first in the DOM for proper layering) */}
+      <SimpleViewer qualityMode={qualityMode} activeView={activeView} />
       
-      {/* Minimal fallback removed */}
+      {/* Left Side Menu */}
+      <div className="absolute left-0 top-0 bottom-0 bg-black/70 text-white z-20 flex flex-col w-16">
+        {/* Logo */}
+        <div className="p-4 border-b border-gray-700 flex items-center justify-center">
+          <span className="text-2xl font-serif text-amber-500">V</span>
+        </div>
+        
+        {/* Menu Items - in the correct order from main page */}
+        <div className="flex-1 overflow-y-auto py-4">
+          <ul className="space-y-2 px-2">
+            <li>
+              <button
+                onClick={() => setActiveView('governance')}
+                className={`w-full flex items-center p-2 rounded-lg transition-colors ${
+                  activeView === 'governance' ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700'
+                }`}
+                title="Governance"
+              >
+                <FaLandmark className="mx-auto h-5 w-5" />
+              </button>
+            </li>
+            <li>
+              <button
+                onClick={() => {
+                  setActiveView('markets');
+                  setMarketPanelVisible(true);
+                }}
+                className={`w-full flex items-center p-2 rounded-lg transition-colors ${
+                  activeView === 'markets' ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700'
+                }`}
+                title="Markets"
+              >
+                <FaStore className="mx-auto h-5 w-5" />
+              </button>
+            </li>
+            <li>
+              <button
+                onClick={() => setActiveView('resources')}
+                className={`w-full flex items-center p-2 rounded-lg transition-colors ${
+                  activeView === 'resources' ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700'
+                }`}
+                title="Resources"
+              >
+                <FaTree className="mx-auto h-5 w-5" />
+              </button>
+            </li>
+            <li>
+              <button
+                onClick={() => setActiveView('transport')}
+                className={`w-full flex items-center p-2 rounded-lg transition-colors ${
+                  activeView === 'transport' ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700'
+                }`}
+                title="Transport"
+              >
+                <FaRoad className="mx-auto h-5 w-5" />
+              </button>
+            </li>
+            <li>
+              <button
+                onClick={() => setActiveView('buildings')}
+                className={`w-full flex items-center p-2 rounded-lg transition-colors ${
+                  activeView === 'buildings' ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700'
+                }`}
+                title="Buildings"
+              >
+                <FaBuilding className="mx-auto h-5 w-5" />
+              </button>
+            </li>
+            <li>
+              <button
+                onClick={() => setActiveView('land')}
+                className={`w-full flex items-center p-2 rounded-lg transition-colors ${
+                  activeView === 'land' ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700'
+                }`}
+                title="Land"
+              >
+                <FaHome className="mx-auto h-5 w-5" />
+              </button>
+            </li>
+          </ul>
+        </div>
+        
+        {/* Bottom section */}
+        <div className="p-4 border-t border-gray-700 text-center">
+          <div className="text-xs text-gray-400">v0.1.0</div>
+        </div>
+      </div>
       
-      <div className="relative w-screen h-screen">
       
       
-      {/* Loading screen removed */}
-    
-      {/* Transfer Compute Menu - moved to top level */}
-      {transferMenuOpen && (
-        <TransferComputeMenu
-          onClose={() => setTransferMenuOpen(false)}
-          onTransfer={handleTransferCompute}
-        />
-      )}
-      
-      {/* Withdraw Compute Menu */}
-      {withdrawMenuOpen && (
-        <WithdrawComputeMenu
-          onClose={() => setWithdrawMenuOpen(false)}
-          onWithdraw={handleWithdrawCompute}
-          computeAmount={userProfile?.computeAmount || 0}
-        />
-      )}
+      {/* Top Navigation Bar */}
+      <div className="absolute top-0 left-0 right-0 bg-black/50 text-white p-4 flex justify-between items-center">
+        <Link href="/" className="text-xl font-serif font-bold hover:text-amber-400 transition-colors">
+          La Serenissima
+        </Link>
+        
+        <div className="flex space-x-4">
+          <button 
+            onClick={() => setShowInfo(!showInfo)}
+            className="px-3 py-1 bg-blue-600 hover:bg-blue-500 rounded text-white transition-colors font-serif"
+          >
+            {showInfo ? 'Hide Info' : 'Show Info'}
+          </button>
+        </div>
+      </div>
       
       {/* Wallet button/dropdown or User Profile */}
       {walletAddress ? (
@@ -1968,7 +490,7 @@ export default function Home() {
                 size="medium" // Change from small to medium
                 className="mr-3" // Increase margin
                 showMotto={false}
-                showDucats={true}
+                showDucats
               />
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-amber-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -2076,501 +598,544 @@ export default function Home() {
         </button>
       )}
       
-      {/* Username prompt modal - non-dismissable */}
-      {showUsernamePrompt && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
-          <div className="bg-white p-8 rounded-lg shadow-lg w-[900px] max-w-[90vw] border-4 border-amber-700 flex flex-col md:flex-row">
-            {/* Left side - Form */}
-            <div className="md:w-1/2 pr-0 md:pr-6">
-              <h2 className="text-2xl font-serif font-semibold mb-4 text-amber-800 text-center">
-                {userProfile ? 'Edit Your Noble Profile' : 'Welcome to La Serenissima'}
-              </h2>
+      
+      {/* Information Panel */}
+      {showInfo && (
+        <div className="absolute top-20 right-4 bg-black/70 text-white p-4 rounded-lg max-w-sm border-2 border-amber-600 shadow-lg">
+          <h2 className="text-lg font-serif font-bold mb-2 text-amber-400">About La Serenissima</h2>
+          <p className="text-sm mb-3">
+            Welcome to a simplified view of La Serenissima, a digital recreation of Renaissance Venice.
+            This view shows the basic layout of the city with land and water.
+          </p>
+          
+          <h3 className="text-md font-serif font-bold mb-1 text-amber-400">Legend</h3>
+          <div className="flex items-center space-x-2 mb-1">
+            <div className="w-4 h-4 bg-amber-500 border border-amber-700"></div>
+            <span className="text-sm">Land Parcels</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <div className="w-4 h-4 bg-blue-500 border border-blue-700"></div>
+            <span className="text-sm">Water</span>
+          </div>
+          
+          <div className="mt-4 text-xs text-amber-400">
+            Simple Viewer v0.1.0
+          </div>
+        </div>
+      )}
+      
+      
+    </div>
+    
+    {/* Transfer Compute Menu */}
+    {transferMenuOpen && (
+      <TransferComputeMenu
+        onClose={() => setTransferMenuOpen(false)}
+        onTransfer={handleTransferCompute}
+      />
+    )}
+    
+    {/* Withdraw Compute Menu */}
+    {withdrawMenuOpen && (
+      <WithdrawComputeMenu
+        onClose={() => setWithdrawMenuOpen(false)}
+        onWithdraw={handleWithdrawCompute}
+        computeAmount={userProfile?.computeAmount || 0}
+      />
+    )}
+    
+    {/* Username prompt modal - non-dismissable */}
+    {showUsernamePrompt && (
+      <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
+        <div className="bg-white p-8 rounded-lg shadow-lg w-[900px] max-w-[90vw] border-4 border-amber-700 flex flex-col md:flex-row">
+          {/* Left side - Form */}
+          <div className="md:w-1/2 pr-0 md:pr-6">
+            <h2 className="text-2xl font-serif font-semibold mb-4 text-amber-800 text-center">
+              {userProfile ? 'Edit Your Noble Profile' : 'Welcome to La Serenissima'}
+            </h2>
+            
+            <div className="mb-6 text-gray-700 italic text-center">
+              {userProfile ? (
+                <p>Update your noble identity and family heraldry as registered with the Council of Ten.</p>
+              ) : (
+                <>
+                  <p>The year is 1525. The Most Serene Republic of Venezia stands as a beacon of wealth and power in the Mediterranean.</p>
+                  <p className="mt-2">As a noble of Venice, you must now register your identity with the Council of Ten.</p>
+                </>
+              )}
+            </div>
+            
+            <div className="mb-6">
+              <h3 className="text-lg font-medium text-amber-700 mb-2">Your Noble Identity</h3>
               
-              <div className="mb-6 text-gray-700 italic text-center">
-                {userProfile ? (
-                  <p>Update your noble identity and family heraldry as registered with the Council of Ten.</p>
-                ) : (
-                  <>
-                    <p>The year is 1525. The Most Serene Republic of Venezia stands as a beacon of wealth and power in the Mediterranean.</p>
-                    <p className="mt-2">As a noble of Venice, you must now register your identity with the Council of Ten.</p>
-                  </>
-                )}
-              </div>
-              
-              <div className="mb-6">
-                <h3 className="text-lg font-medium text-amber-700 mb-2">Your Noble Identity</h3>
-                
-                <div className="flex flex-col space-y-4">
-                  {/* Only show username field when creating a new profile, not when editing */}
-                  {!userProfile && (
-                    <div className="flex items-center">
-                      <div className="w-1/3">
-                        <label className="block text-gray-700">Username</label>
-                      </div>
-                      <div className="w-2/3">
-                        <input
-                          type="text"
-                          value={usernameInput}
-                          onChange={(e) => setUsernameInput(e.target.value)}
-                          placeholder="Enter your username..."
-                          className="w-full px-3 py-2 border border-amber-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-500"
-                        />
-                      </div>
-                    </div>
-                  )}
-                  
+              <div className="flex flex-col space-y-4">
+                {/* Only show username field when creating a new profile, not when editing */}
+                {!userProfile && (
                   <div className="flex items-center">
                     <div className="w-1/3">
-                      <label className="block text-gray-700">First Name</label>
-                    </div>
-                    <div className="w-2/3 flex">
-                      <input
-                        type="text"
-                        value={firstName}
-                        onChange={(e) => setFirstName(e.target.value)}
-                        placeholder="Enter your first name..."
-                        className="w-full px-3 py-2 border border-amber-300 rounded-l focus:outline-none focus:ring-2 focus:ring-amber-500"
-                      />
-                      <button
-                        onClick={() => {
-                          const venetianFirstNames = [
-                            "Marco", "Antonio", "Giovanni", "Francesco", "Alvise",
-                            "Domenico", "Pietro", "Paolo", "Nicolo", "Giacomo",
-                            "Maria", "Caterina", "Isabella", "Lucia", "Elena",
-                            "Beatrice", "Chiara", "Francesca", "Vittoria", "Laura"
-                          ];
-                          const randomName = venetianFirstNames[Math.floor(Math.random() * venetianFirstNames.length)];
-                          setFirstName(randomName);
-                        }}
-                        className="bg-amber-600 text-white p-2 rounded-r hover:bg-amber-700 transition-colors text-xl"
-                        title="Roll the dice for a random name"
-                        type="button"
-                      >
-                        🎲
-                      </button>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center mt-4">
-                    <div className="w-1/3">
-                      <label className="block text-gray-700">Family Name</label>
-                    </div>
-                    <div className="w-2/3 flex">
-                      <input
-                        type="text"
-                        value={lastName}
-                        onChange={(e) => setLastName(e.target.value)}
-                        placeholder="Enter your family name..."
-                        className="w-full px-3 py-2 border border-amber-300 rounded-l focus:outline-none focus:ring-2 focus:ring-amber-500"
-                      />
-                      <button
-                        onClick={() => {
-                          const venetianLastNames = [
-                            "Contarini", "Morosini", "Dandolo", "Foscari", "Grimani",
-                            "Barbarigo", "Mocenigo", "Venier", "Loredan", "Gritti",
-                            "Pisani", "Tiepolo", "Bembo", "Priuli", "Trevisan",
-                            "Donato", "Giustinian", "Zeno", "Corner", "Gradenigo"
-                          ];
-                          const randomName = venetianLastNames[Math.floor(Math.random() * venetianLastNames.length)];
-                          setLastName(randomName);
-                        }}
-                        className="bg-amber-600 text-white p-2 rounded-r hover:bg-amber-700 transition-colors text-xl"
-                        title="Roll the dice for a random name"
-                        type="button"
-                      >
-                        🎲
-                      </button>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center">
-                    <div className="w-1/3">
-                      <label className="block text-gray-700">Family Coat of Arms</label>
-                    </div>
-                    <div className="w-2/3 flex flex-col">
-                      <div className="flex">
-                        <textarea
-                          value={familyCoatOfArms}
-                          onChange={(e) => setFamilyCoatOfArms(e.target.value)}
-                          placeholder="Describe your family's coat of arms..."
-                          className="w-full px-3 py-2 border border-amber-300 rounded-l focus:outline-none focus:ring-2 focus:ring-amber-500"
-                          rows={3}
-                        />
-                        <button
-                          onClick={() => {
-                            const coatOfArmsElements = [
-                              "A golden winged lion of St. Mark rampant on a field of azure, holding an open book with the words 'Pax Tibi Marce'",
-                              "A silver eagle displayed on a field of crimson, with a golden crown above its head",
-                              "Three golden fleurs-de-lis on a field of azure, bordered with a silver and red checkered pattern",
-                              "A red rose with golden center on a field of silver, surrounded by eight smaller golden stars",
-                              "A black wolf passant on a field of gold, with three silver crescents in chief",
-                              "A golden sun with sixteen rays on a field of azure, above a silver galley ship on waves",
-                              "A silver crescent moon on a field of sable, with three golden stars arranged in a triangle",
-                              "A golden Venetian galley with white sails on a sea of azure, beneath a red sky",
-                              "A red griffin segreant on a field of silver, holding a golden key in its claws",
-                              "Three silver stars on a field of gules, above a silver bridge spanning blue waves",
-                              "A golden lion and a silver winged horse supporting a shield divided per pale azure and gules",
-                              "A black double-headed eagle on a gold field, with a red shield on its breast",
-                              "A silver tower between two cypress trees on a field of blue, with a red chief bearing three gold coins",
-                              "A golden doge's cap (corno ducale) on a field of crimson, with silver tassels",
-                              "A silver dolphin naiant on a field of blue and green waves, beneath a golden sun",
-                              "A red and gold checkerboard pattern, with a black eagle in the center square",
-                              "Three golden crowns on a field of azure, separated by a silver chevron",
-                              "A silver gondola on blue waves, beneath a night sky of gold stars on black",
-                              "A golden lion's head erased on a field of red, surrounded by a border of alternating gold and blue squares",
-                              "A silver winged horse rampant on a field of blue, with golden stars in each corner",
-                              "A red cross on a silver field, with four golden keys in the quarters",
-                              "A golden tree with deep roots on a green mound, on a field of azure with silver stars",
-                              "Three black ravens on a field of gold, above a red rose on a silver chief",
-                              "A silver unicorn rampant on a field of blue, with a golden crown around its neck",
-                              "A golden portcullis on a field of red, with three silver shells in chief",
-                              "A silver mermaid holding a mirror on a field of blue waves, beneath a golden sun",
-                              "A red and gold striped field, with a silver lion passant in chief",
-                              "A golden phoenix rising from flames on a field of azure, with silver stars in chief",
-                              "Three silver crescents on a field of blue, with a golden sun in the center",
-                              "A silver tower between two red roses on a field of blue, with a golden chief"
-                            ];
-                            const randomCoatOfArms = coatOfArmsElements[Math.floor(Math.random() * coatOfArmsElements.length)];
-                            setFamilyCoatOfArms(randomCoatOfArms);
-                          }}
-                          className="bg-amber-600 text-white p-2 rounded-r hover:bg-amber-700 transition-colors text-xl self-stretch"
-                          title="Roll the dice for a random coat of arms"
-                          type="button"
-                        >
-                          🎲
-                        </button>
-                      </div>
-                      
-                      <div className="mt-2 flex justify-between">
-                        <button
-                          onClick={generateCoatOfArmsImage}
-                          disabled={!familyCoatOfArms.trim() || isGeneratingImage}
-                          className={`px-3 py-1 rounded text-white text-sm ${
-                            !familyCoatOfArms.trim() || isGeneratingImage 
-                              ? 'bg-gray-400 cursor-not-allowed' 
-                              : 'bg-amber-600 hover:bg-amber-700'
-                          }`}
-                        >
-                          {isGeneratingImage ? 'Generating...' : 'Generate Image'}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center mt-4">
-                    <div className="w-1/3">
-                      <label className="block text-gray-700">Family Motto</label>
+                      <label className="block text-gray-700">Username</label>
                     </div>
                     <div className="w-2/3">
-                      <textarea
-                        value={familyMotto}
-                        onChange={(e) => setFamilyMotto(e.target.value)}
-                        placeholder="Enter your family motto..."
+                      <input
+                        type="text"
+                        value={usernameInput}
+                        onChange={(e) => setUsernameInput(e.target.value)}
+                        placeholder="Enter your username..."
                         className="w-full px-3 py-2 border border-amber-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-500"
-                        rows={2}
                       />
                     </div>
                   </div>
-                  
-                  <div className="flex items-center mt-4">
-                    <div className="w-1/3">
-                      <label className="block text-gray-700">Family Color</label>
+                )}
+                
+                <div className="flex items-center">
+                  <div className="w-1/3">
+                    <label className="block text-gray-700">First Name</label>
+                  </div>
+                  <div className="w-2/3 flex">
+                    <input
+                      type="text"
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      placeholder="Enter your first name..."
+                      className="w-full px-3 py-2 border border-amber-300 rounded-l focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    />
+                    <button
+                      onClick={() => {
+                        const venetianFirstNames = [
+                          "Marco", "Antonio", "Giovanni", "Francesco", "Alvise",
+                          "Domenico", "Pietro", "Paolo", "Nicolo", "Giacomo",
+                          "Maria", "Caterina", "Isabella", "Lucia", "Elena",
+                          "Beatrice", "Chiara", "Francesca", "Vittoria", "Laura"
+                        ];
+                        const randomName = venetianFirstNames[Math.floor(Math.random() * venetianFirstNames.length)];
+                        setFirstName(randomName);
+                      }}
+                      className="bg-amber-600 text-white p-2 rounded-r hover:bg-amber-700 transition-colors text-xl"
+                      title="Roll the dice for a random name"
+                      type="button"
+                    >
+                      🎲
+                    </button>
+                  </div>
+                </div>
+                
+                <div className="flex items-center mt-4">
+                  <div className="w-1/3">
+                    <label className="block text-gray-700">Family Name</label>
+                  </div>
+                  <div className="w-2/3 flex">
+                    <input
+                      type="text"
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      placeholder="Enter your family name..."
+                      className="w-full px-3 py-2 border border-amber-300 rounded-l focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    />
+                    <button
+                      onClick={() => {
+                        const venetianLastNames = [
+                          "Contarini", "Morosini", "Dandolo", "Foscari", "Grimani",
+                          "Barbarigo", "Mocenigo", "Venier", "Loredan", "Gritti",
+                          "Pisani", "Tiepolo", "Bembo", "Priuli", "Trevisan",
+                          "Donato", "Giustinian", "Zeno", "Corner", "Gradenigo"
+                        ];
+                        const randomName = venetianLastNames[Math.floor(Math.random() * venetianLastNames.length)];
+                        setLastName(randomName);
+                      }}
+                      className="bg-amber-600 text-white p-2 rounded-r hover:bg-amber-700 transition-colors text-xl"
+                      title="Roll the dice for a random name"
+                      type="button"
+                    >
+                      🎲
+                    </button>
+                  </div>
+                </div>
+                
+                <div className="flex items-center">
+                  <div className="w-1/3">
+                    <label className="block text-gray-700">Family Coat of Arms</label>
+                  </div>
+                  <div className="w-2/3 flex flex-col">
+                    <div className="flex">
+                      <textarea
+                        value={familyCoatOfArms}
+                        onChange={(e) => setFamilyCoatOfArms(e.target.value)}
+                        placeholder="Describe your family's coat of arms..."
+                        className="w-full px-3 py-2 border border-amber-300 rounded-l focus:outline-none focus:ring-2 focus:ring-amber-500"
+                        rows={3}
+                      />
+                      <button
+                        onClick={() => {
+                          const coatOfArmsElements = [
+                            "A golden winged lion of St. Mark rampant on a field of azure, holding an open book with the words 'Pax Tibi Marce'",
+                            "A silver eagle displayed on a field of crimson, with a golden crown above its head",
+                            "Three golden fleurs-de-lis on a field of azure, bordered with a silver and red checkered pattern",
+                            "A red rose with golden center on a field of silver, surrounded by eight smaller golden stars",
+                            "A black wolf passant on a field of gold, with three silver crescents in chief",
+                            "A golden sun with sixteen rays on a field of azure, above a silver galley ship on waves",
+                            "A silver crescent moon on a field of sable, with three golden stars arranged in a triangle",
+                            "A golden Venetian galley with white sails on a sea of azure, beneath a red sky",
+                            "A red griffin segreant on a field of silver, holding a golden key in its claws",
+                            "Three silver stars on a field of gules, above a silver bridge spanning blue waves",
+                            "A golden lion and a silver winged horse supporting a shield divided per pale azure and gules",
+                            "A black double-headed eagle on a gold field, with a red shield on its breast",
+                            "A silver tower between two cypress trees on a field of blue, with a red chief bearing three gold coins",
+                            "A golden doge's cap (corno ducale) on a field of crimson, with silver tassels",
+                            "A silver dolphin naiant on a field of blue and green waves, beneath a golden sun",
+                            "A red and gold checkerboard pattern, with a black eagle in the center square",
+                            "Three golden crowns on a field of azure, separated by a silver chevron",
+                            "A silver gondola on blue waves, beneath a night sky of gold stars on black",
+                            "A golden lion's head erased on a field of red, surrounded by a border of alternating gold and blue squares",
+                            "A silver winged horse rampant on a field of blue, with golden stars in each corner",
+                            "A red cross on a silver field, with four golden keys in the quarters",
+                            "A golden tree with deep roots on a green mound, on a field of azure with silver stars",
+                            "Three black ravens on a field of gold, above a red rose on a silver chief",
+                            "A silver unicorn rampant on a field of blue, with a golden crown around its neck",
+                            "A golden portcullis on a field of red, with three silver shells in chief",
+                            "A silver mermaid holding a mirror on a field of blue waves, beneath a golden sun",
+                            "A red and gold striped field, with a silver lion passant in chief",
+                            "A golden phoenix rising from flames on a field of azure, with silver stars in chief",
+                            "Three silver crescents on a field of blue, with a golden sun in the center",
+                            "A silver tower between two red roses on a field of blue, with a golden chief"
+                          ];
+                          const randomCoatOfArms = coatOfArmsElements[Math.floor(Math.random() * coatOfArmsElements.length)];
+                          setFamilyCoatOfArms(randomCoatOfArms);
+                        }}
+                        className="bg-amber-600 text-white p-2 rounded-r hover:bg-amber-700 transition-colors text-xl self-stretch"
+                        title="Roll the dice for a random coat of arms"
+                        type="button"
+                      >
+                        🎲
+                      </button>
                     </div>
-                    <div className="w-2/3">
-                      <div className="flex flex-wrap gap-2">
-                        {veniceColorPalette.map((color) => (
-                          <button
-                            key={color}
-                            onClick={() => setSelectedColor(color)}
-                            className={`w-8 h-8 rounded-full border-2 ${
-                              selectedColor === color ? 'border-white ring-2 ring-amber-500' : 'border-gray-300'
-                            }`}
-                            style={{ backgroundColor: color }}
-                            title={`Select ${color} as your family color`}
-                            type="button"
-                            aria-label={`Select ${color} as your family color`}
-                          />
-                        ))}
-                      </div>
-                      <p className="mt-1 text-xs text-gray-500">
-                        This color will represent your family on the map of Venice.
-                      </p>
+                    
+                    <div className="mt-2 flex justify-between">
+                      <button
+                        onClick={handleGenerateCoatOfArmsImage}
+                        disabled={!familyCoatOfArms.trim() || isGeneratingImage}
+                        className={`px-3 py-1 rounded text-white text-sm ${
+                          !familyCoatOfArms.trim() || isGeneratingImage 
+                            ? 'bg-gray-400 cursor-not-allowed' 
+                            : 'bg-amber-600 hover:bg-amber-700'
+                        }`}
+                      >
+                        {isGeneratingImage ? 'Generating...' : 'Generate Image'}
+                      </button>
                     </div>
                   </div>
                 </div>
+                
+                <div className="flex items-center mt-4">
+                  <div className="w-1/3">
+                    <label className="block text-gray-700">Family Motto</label>
+                  </div>
+                  <div className="w-2/3">
+                    <textarea
+                      value={familyMotto}
+                      onChange={(e) => setFamilyMotto(e.target.value)}
+                      placeholder="Enter your family motto..."
+                      className="w-full px-3 py-2 border border-amber-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-500"
+                      rows={2}
+                    />
+                  </div>
+                </div>
+                
+                <div className="flex items-center mt-4">
+                  <div className="w-1/3">
+                    <label className="block text-gray-700">Family Color</label>
+                  </div>
+                  <div className="w-2/3">
+                    <div className="flex flex-wrap gap-2">
+                      {veniceColorPalette.map((color) => (
+                        <button
+                          key={color}
+                          onClick={() => setSelectedColor(color)}
+                          className={`w-8 h-8 rounded-full border-2 ${
+                            selectedColor === color ? 'border-white ring-2 ring-amber-500' : 'border-gray-300'
+                          }`}
+                          style={{ backgroundColor: color }}
+                          title={`Select ${color} as your family color`}
+                          type="button"
+                          aria-label={`Select ${color} as your family color`}
+                        />
+                      ))}
+                    </div>
+                    <p className="mt-1 text-xs text-gray-500">
+                      This color will represent your family on the map of Venice.
+                    </p>
+                  </div>
+                </div>
               </div>
-              
             </div>
             
-            {/* Right side - Coat of Arms Image and Oath */}
-            <div className="md:w-1/2 mt-6 md:mt-0 flex flex-col items-center justify-center">
-              {/* Coat of Arms Image */}
-              <div className="flex-1 flex flex-col items-center justify-center w-full">
-                {coatOfArmsImage ? (
-                  <div className="flex flex-col items-center">
-                    <div className="border-8 border-amber-700 rounded-lg shadow-xl p-2 bg-amber-50 flex items-center justify-center">
-                      <img 
-                        src={coatOfArmsImage} 
-                        alt="Family Coat of Arms" 
-                        className="w-full h-auto max-h-[400px] object-contain"
-                        style={{ maxWidth: "300px" }} // Add fixed width for better consistency
-                      />
-                    </div>
-                    <p className="mt-4 text-center italic text-amber-800 font-medium">
-                      The Coat of Arms of the House of {lastName || "Your Family"}
+          </div>
+          
+          {/* Right side - Coat of Arms Image and Oath */}
+          <div className="md:w-1/2 mt-6 md:mt-0 flex flex-col items-center justify-center">
+            {/* Coat of Arms Image */}
+            <div className="flex-1 flex flex-col items-center justify-center w-full">
+              {coatOfArmsImage ? (
+                <div className="flex flex-col items-center">
+                  <div className="border-8 border-amber-700 rounded-lg shadow-xl p-2 bg-amber-50 flex items-center justify-center">
+                    <img 
+                      src={coatOfArmsImage} 
+                      alt="Family Coat of Arms" 
+                      className="w-full h-auto max-h-[400px] object-contain"
+                      style={{ maxWidth: "300px" }} // Add fixed width for better consistency
+                    />
+                  </div>
+                  <p className="mt-4 text-center italic text-amber-800 font-medium">
+                    The Coat of Arms of the House of {lastName || "Your Family"}
+                  </p>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center">
+                  <div className="w-64 h-64 border-4 border-dashed border-amber-300 rounded-lg flex items-center justify-center bg-amber-50">
+                    <p className="text-amber-700 text-center p-4">
+                      {isGeneratingImage 
+                        ? "Creating your family's coat of arms..." 
+                        : "Describe your family's coat of arms and click 'Generate Image' to visualize it"}
                     </p>
                   </div>
-                ) : (
-                  <div className="flex flex-col items-center justify-center">
-                    <div className="w-64 h-64 border-4 border-dashed border-amber-300 rounded-lg flex items-center justify-center bg-amber-50">
-                      <p className="text-amber-700 text-center p-4">
-                        {isGeneratingImage 
-                          ? "Creating your family's coat of arms..." 
-                          : "Describe your family's coat of arms and click 'Generate Image' to visualize it"}
-                      </p>
-                    </div>
-                    <p className="mt-4 text-center italic text-amber-800">
-                      Every noble Venetian family is known by its distinctive emblem
-                    </p>
-                  </div>
-                )}
-              </div>
+                  <p className="mt-4 text-center italic text-amber-800">
+                    Every noble Venetian family is known by its distinctive emblem
+                  </p>
+                </div>
+              )}
+            </div>
+      
+            {/* Oath Section - Moved below the image */}
+            <div className="mt-6 border-2 border-amber-600 rounded-lg p-4 bg-amber-50 w-full">
+              <h4 className="text-lg font-medium text-amber-800 mb-2">
+                {userProfile ? 'Confirm Your Changes' : 'Swear Your Oath to Venice'}
+              </h4>
         
-              {/* Oath Section - Moved below the image */}
-              <div className="mt-6 border-2 border-amber-600 rounded-lg p-4 bg-amber-50 w-full">
-                <h4 className="text-lg font-medium text-amber-800 mb-2">
-                  {userProfile ? 'Confirm Your Changes' : 'Swear Your Oath to Venice'}
-                </h4>
-          
-                <p className="text-sm text-amber-700 mb-4 italic">
-                  "I solemnly pledge my loyalty to the Most Serene Republic of Venice, to uphold her laws, defend her interests, and increase her glory. May my family prosper under the wings of the Lion of Saint Mark."
-                </p>
-          
+              <p className="text-sm text-amber-700 mb-4 italic">
+                "I solemnly pledge my loyalty to the Most Serene Republic of Venice, to uphold her laws, defend her interests, and increase her glory. May my family prosper under the wings of the Lion of Saint Mark."
+              </p>
+        
+              <button
+                onClick={handleUsernameSubmit}
+                className={`w-full px-6 py-3 bg-amber-600 text-white rounded-lg transition-colors font-medium flex items-center justify-center ${
+                  (!userProfile && (!usernameInput.trim() || !firstName.trim() || !lastName.trim() || !familyCoatOfArms.trim() || !familyMotto.trim())) ||
+                  (userProfile && (!firstName.trim() || !lastName.trim() || !familyCoatOfArms.trim() || !familyMotto.trim()))
+                    ? 'opacity-50 cursor-not-allowed bg-amber-400'
+                    : 'hover:bg-amber-700'
+                }`}
+                disabled={Boolean((!userProfile && (!usernameInput.trim() || !firstName.trim() || !lastName.trim() || !familyCoatOfArms.trim() || !familyMotto.trim())) ||
+                  (userProfile && (!firstName.trim() || !lastName.trim() || !familyCoatOfArms.trim() || !familyMotto.trim())))}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20 2v20h-2v-8h-2v8h-2v-8h-2v8h-2v-8h-2v8H8v-8H6v8H4v-8H2V2h18z" />
+                  <path d="M2 2l8 8" />
+                  <path d="M20 2l-8 8" />
+                </svg>
+                {userProfile ? 'Update Your Noble Identity' : 'Sign and Seal Your Oath'}
+              </button>
+        
+              {userProfile && (
                 <button
-                  onClick={handleUsernameSubmit}
-                  className={`w-full px-6 py-3 bg-amber-600 text-white rounded-lg transition-colors font-medium flex items-center justify-center ${
-                    (!userProfile && (!usernameInput.trim() || !firstName.trim() || !lastName.trim() || !familyCoatOfArms.trim() || !familyMotto.trim())) ||
-                    (userProfile && (!firstName.trim() || !lastName.trim() || !familyCoatOfArms.trim() || !familyMotto.trim()))
-                      ? 'opacity-50 cursor-not-allowed bg-amber-400'
-                      : 'hover:bg-amber-700'
-                  }`}
-                  disabled={Boolean((!userProfile && (!usernameInput.trim() || !firstName.trim() || !lastName.trim() || !familyCoatOfArms.trim() || !familyMotto.trim())) ||
-                    (userProfile && (!firstName.trim() || !lastName.trim() || !familyCoatOfArms.trim() || !familyMotto.trim())))}
+                  onClick={() => setShowUsernamePrompt(false)}
+                  className="w-full mt-2 px-6 py-2 bg-gray-300 text-gray-700 rounded-lg transition-colors font-medium hover:bg-gray-400"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M20 2v20h-2v-8h-2v8h-2v-8h-2v8h-2v-8h-2v8H8v-8H6v8H4v-8H2V2h18z" />
-                    <path d="M2 2l8 8" />
-                    <path d="M20 2l-8 8" />
-                  </svg>
-                  {userProfile ? 'Update Your Noble Identity' : 'Sign and Seal Your Oath'}
+                  Cancel
                 </button>
-          
-                {userProfile && (
-                  <button
-                    onClick={() => setShowUsernamePrompt(false)}
-                    className="w-full mt-2 px-6 py-2 bg-gray-300 text-gray-700 rounded-lg transition-colors font-medium hover:bg-gray-400"
-                  >
-                    Cancel
-                  </button>
-                )}
-          
-                <p className="mt-3 text-xs text-center text-amber-600">
-                  {userProfile 
-                    ? 'Your updated information will be recorded in the official registers of Venice.'
-                    : 'By signing this oath, you will be granted the rights and privileges of a Venetian noble, including the ability to own property and conduct trade within the Republic.'}
-                </p>
-              </div>
+              )}
+        
+              <p className="mt-3 text-xs text-center text-amber-600">
+                {userProfile 
+                  ? 'Your updated information will be recorded in the official registers of Venice.'
+                  : 'By signing this oath, you will be granted the rights and privileges of a Venetian noble, including the ability to own property and conduct trade within the Republic.'}
+              </p>
             </div>
           </div>
         </div>
-      )}
-      
-      {/* Bridge mode button */}
-      {isGoogleLoaded && (
-        <div className="absolute bottom-4 left-4 z-10">
-          <button
-            onClick={handleBridgeMode}
-            className={`px-4 py-2 rounded shadow ${
-              bridgeMode ? 'bg-red-500 text-white' : 'bg-white'
-            }`}
-          >
-            {bridgeMode ? 'Cancel Bridge' : 'Add Bridge'}
-          </button>
-        </div>
-      )}
-      
-      {/* Delete mode button */}
-      {isGoogleLoaded && (
-        <div className="absolute bottom-4 left-36 z-10">
-          <button
-            onClick={() => {
-              // Turn off bridge mode if it's on
-              if (bridgeMode) {
-                setBridgeMode(false);
-                setBridgeStart(null);
-                setBridgeStartLandId(null);
-              }
-              
-              // Reset selected polygon when entering delete mode
-              if (selectedPolygon) {
-                selectedPolygon.polygon.setOptions({
-                  strokeColor: '#3388ff',
-                  strokeOpacity: 0.8,
-                  fillColor: '#3388ff',
-                  fillOpacity: 0.35
-                });
-                setSelectedPolygon(null);
-              }
-              
-              // Toggle delete mode
-              setDeleteMode(!deleteMode);
-              
-              // Reset selection when turning off delete mode
-              if (deleteMode) {
-                if (selectedMapPolygon) {
-                  // Reset the polygon style
-                  selectedMapPolygon.setOptions({
-                    strokeColor: '#3388ff',
-                    strokeOpacity: 0.8,
-                    fillColor: '#3388ff',
-                    fillOpacity: 0.35,
-                    visible: true
-                  });
-                }
-                setSelectedMapPolygon(null);
-                setSelectedMapPolygonId(null);
-              }
-              
-              // Change cursor style based on delete mode
-              if (mapRef.current) {
-                mapRef.current.setOptions({
-                  draggableCursor: !deleteMode ? 'crosshair' : ''
-                });
-              }
-            }}
-            className={`px-4 py-2 rounded shadow ${
-              deleteMode ? 'bg-red-500 text-white' : 'bg-white'
-            }`}
-          >
-            {deleteMode ? 'Cancel Delete' : 'Delete Polygon'}
-          </button>
-        </div>
-      )}
-      
-      {/* Centroid drag mode button */}
-      {isGoogleLoaded && (
-        <div className="absolute bottom-4 left-72 z-10">
-          <button
-            onClick={() => {
-              // Toggle centroid drag mode
-              const newMode = !centroidDragMode;
-              setCentroidDragMode(newMode);
-              
-              // Show/hide and enable/disable dragging for all centroid markers
-              Object.values(centroidMarkers).forEach(marker => {
-                marker.setMap(newMode ? mapRef.current : null);
-                marker.setDraggable(newMode);
-              });
-              
-              // Turn off other modes if enabling centroid drag mode
-              if (newMode) {
-                if (bridgeMode) {
-                  setBridgeMode(false);
-                  setBridgeStart(null);
-                  setBridgeStartLandId(null);
-                }
-                
-                if (deleteMode) {
-                  setDeleteMode(false);
-                  if (selectedMapPolygon) {
-                    selectedMapPolygon.setOptions({
-                      strokeColor: '#3388ff',
-                      strokeOpacity: 0.8,
-                      fillColor: '#3388ff',
-                      fillOpacity: 0.35,
-                      visible: true
-                    });
-                  }
-                  setSelectedMapPolygon(null);
-                  setSelectedMapPolygonId(null);
-                }
-              }
-              
-              // Change cursor style based on centroid drag mode
-              if (mapRef.current) {
-                mapRef.current.setOptions({
-                  draggableCursor: newMode ? 'move' : ''
-                });
-              }
-            }}
-            className={`px-4 py-2 rounded shadow ${
-              centroidDragMode ? 'bg-purple-500 text-white' : 'bg-white'
-            }`}
-          >
-            {centroidDragMode ? 'Exit Centroid Mode' : 'Edit Centroids'}
-          </button>
-        </div>
-      )}
-      
-      {/* Delete confirmation button - only show when a polygon is selected in delete mode */}
-      {deleteMode && selectedMapPolygonId && (
-        <div className="absolute bottom-16 left-36 z-10 bg-white p-2 rounded shadow">
-          <p className="mb-2">Selected: {selectedMapPolygonId}</p>
-          <button
-            onClick={handleDeletePolygon}
-            className="px-4 py-2 bg-red-500 text-white rounded shadow hover:bg-red-600"
-          >
-            Confirm Delete
-          </button>
-        </div>
-      )}
-      
-      {/* Delete button removed to prevent land deletion */}
-      {selectedPolygon && !deleteMode && !bridgeMode && (
-        <div className="absolute top-16 right-4 z-10 bg-white p-3 rounded shadow">
-          <div className="flex flex-col items-start">
-            <p className="mb-2 font-medium">Selected: {selectedPolygon.id}</p>
-            {/* Delete button removed */}
-          </div>
-        </div>
-      )}
-      
-      {/* Success message alert */}
-      {/* Success message alert */}
-      {successMessage && (
-        <SuccessAlert 
-          message={successMessage.message}
-          signature={successMessage.signature}
-          onClose={() => setSuccessMessage(null)}
-        />
-      )}
-      
-      {/* Always show the 3D Polygon Viewer regardless of wallet connection status */}
-      <>
-        {/* Fallback component that will show if PolygonViewer fails */}
-        <div className="absolute inset-0 z-10 pointer-events-none">
-          <div className="w-full h-full flex flex-col items-center justify-center bg-amber-50 bg-opacity-0">
-            <button 
-              onClick={() => window.location.reload()}
-              className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors pointer-events-auto opacity-0 hover:opacity-100 transition-opacity"
-            >
-              Reload Page
-            </button>
-          </div>
-        </div>
-        
-        {/* Make the function available to child components */}
-        
-        {/* Dynamic import of PolygonViewer with snapshot caching prop */}
-        <PolygonViewer 
-          getSnapshotWithCache={getSnapshotWithCache}
-          ref={polygonRendererRef}
-          activeView={activeView}
-          key={activeView} // Adding a key prop to ensure re-render on view change
-        />
-      </>
-      
       </div>
+    )}
+    
+    {/* Success message alert */}
+    {successMessage && (
+      <SuccessAlert 
+        message={successMessage.message}
+        signature={successMessage.signature}
+        onClose={() => setSuccessMessage(null)}
+      />
+    )}
+    <style jsx>{`
+      @keyframes fadeOut {
+        0% { opacity: 1; }
+        70% { opacity: 1; }
+        100% { opacity: 0; }
+      }
+      .animate-fade-out {
+        animation: fadeOut 3s forwards;
+      }
+    `}</style>
     </>
   );
+  // Add the connectWallet function
+  async function connectWallet() {
+    console.log("Connecting wallet...");
+    if (!walletAdapter) {
+      console.log("Wallet adapter not initialized");
+      return;
+    }
+    
+    const adapter = walletAdapter;
+    
+    console.log("Connecting wallet, current state:", adapter.connected ? "connected" : "disconnected");
+    
+    if (adapter.connected) {
+      // If already connected, disconnect
+      console.log("Disconnecting wallet...");
+      adapter.disconnect().then(() => {
+        // Only update state after successful disconnect
+        setWalletAddress(null);
+        setUserProfile(null); // Also clear the user profile
+    
+        // Clear wallet from both storages
+        clearWalletAddress();
+        localStorage.removeItem('userProfile'); // Also clear user profile from storage
+      
+        // Dispatch a custom event to notify other components
+        window.dispatchEvent(new CustomEvent('walletChanged'));
+      
+        console.log("Wallet disconnected successfully");
+      }).catch(error => {
+        console.error("Error disconnecting wallet:", error);
+        alert(`Failed to disconnect wallet: ${error instanceof Error ? error.message : String(error)}`);
+      });
+      return;
+    }
+  
+    // Check if Phantom is installed
+    if (adapter.readyState !== WalletReadyState.Installed) {
+      console.log("Phantom wallet not installed, opening website");
+      window.open('https://phantom.app/', '_blank');
+      return;
+    }
+    
+    try {
+      console.log("Attempting to connect to wallet...");
+      await adapter.connect();
+      
+      const address = adapter.publicKey?.toString() || null;
+      console.log("Wallet connected, address:", address);
+      
+      if (address) {
+        setWalletAddress(address);
+        // Store wallet in both session and local storage
+        setWalletAddress(address);
+        
+        // Store wallet in Airtable and check for username
+        const userData = await storeWalletInAirtable(address);
+        
+        if (userData) {
+          // Check if the user has a username
+          if (userData.user_name === undefined || userData.user_name === null || userData.user_name === '') {
+            // If no username, show the prompt
+            setShowUsernamePrompt(true);
+          } else {
+            // Store the user profile information
+            console.log('Setting user profile with data:', userData);
+            const userProfile = {
+              username: userData.user_name,
+              firstName: userData.first_name || userData.user_name.split(' ')[0] || '',
+              lastName: userData.last_name || userData.user_name.split(' ').slice(1).join(' ') || '',
+              coatOfArmsImage: userData.coat_of_arms_image,
+              familyMotto: userData.family_motto,
+              computeAmount: userData.compute_amount
+            };
+            setUserProfile(userProfile);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error connecting to wallet:', error);
+      alert(`Failed to connect wallet: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+
+
+
+  // Add the handleTransferCompute function
+  async function handleTransferCompute(amount: number) {
+    try {
+      // Get the wallet address from state or storage
+      const currentWalletAddress = walletAddress || getWalletAddress();
+      
+      if (!currentWalletAddress) {
+        alert('Please connect your wallet first');
+        return;
+      }
+      
+      const data = await transferCompute(currentWalletAddress, amount);
+      
+      // Update the user profile with the new compute amount
+      if (userProfile) {
+        const updatedProfile = {
+          ...userProfile,
+          computeAmount: data.compute_amount
+        };
+        setUserProfile(updatedProfile);
+        
+        // Update localStorage
+        localStorage.setItem('userProfile', JSON.stringify(updatedProfile));
+        
+        // Dispatch event to update other components
+        window.dispatchEvent(new CustomEvent('userProfileUpdated', {
+          detail: updatedProfile
+        }));
+      }
+      
+      // Show success message with custom component instead of alert
+      setSuccessMessage({
+        message: `Successfully transferred ${amount.toLocaleString()} $COMPUTE`,
+        signature: data.transaction_signature || 'Transaction completed'
+      });
+      return data;
+    } catch (error) {
+      console.error('Error transferring compute:', error);
+      alert(`Failed to transfer compute: ${error instanceof Error ? error.message : String(error)}`);
+      throw error;
+    }
+  }
+
+  // Add the handleWithdrawCompute function
+  async function handleWithdrawCompute(amount: number) {
+    try {
+      // Get the wallet address from state or storage
+      const currentWalletAddress = walletAddress || getWalletAddress();
+      
+      if (!currentWalletAddress) {
+        alert('Please connect your wallet first');
+        return;
+      }
+      
+      const data = await withdrawCompute(currentWalletAddress, amount);
+      
+      // Update the user profile with the new compute amount
+      if (userProfile) {
+        const updatedProfile = {
+          ...userProfile,
+          computeAmount: data.compute_amount
+        };
+        setUserProfile(updatedProfile);
+        
+        // Update localStorage
+        localStorage.setItem('userProfile', JSON.stringify(updatedProfile));
+        
+        // Dispatch event to update other components
+        window.dispatchEvent(new CustomEvent('userProfileUpdated', {
+          detail: updatedProfile
+        }));
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('Error withdrawing compute:', error);
+      throw error;
+    }
+  }
 }
