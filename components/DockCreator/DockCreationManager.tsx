@@ -32,17 +32,28 @@ export class DockCreationManager {
     } else {
       // Try to find the renderer from the canvas
       const canvas = document.querySelector('canvas');
-      if (canvas && (canvas as any).__renderer) {
-        this.renderer = (canvas as any).__renderer;
-        console.log('DockCreationManager: Found renderer in canvas.__renderer');
+      if (canvas) {
+        console.log('DockCreationManager: Found canvas element');
+        // Try different ways to access the renderer
+        if ((canvas as any).__renderer) {
+          this.renderer = (canvas as any).__renderer;
+          console.log('DockCreationManager: Found renderer in canvas.__renderer');
+        } else if ((scene as any).userData?.canvas?.__renderer) {
+          this.renderer = (scene as any).userData.canvas.__renderer;
+          console.log('DockCreationManager: Found renderer in scene.userData.canvas.__renderer');
+        } else {
+          console.warn('DockCreationManager: No renderer found in canvas, creating temporary one');
+          this.renderer = new THREE.WebGLRenderer({ antialias: true });
+          this.renderer.setSize(window.innerWidth, window.innerHeight);
+          this.renderer.domElement = canvas;
+        }
       } else {
-        console.warn('DockCreationManager: No renderer found, creating temporary one');
+        console.warn('DockCreationManager: No canvas found, creating temporary one');
         this.renderer = new THREE.WebGLRenderer({ antialias: true });
-        // Attach to a small canvas to make it functional
         const tempCanvas = document.createElement('canvas');
-        tempCanvas.width = 1;
-        tempCanvas.height = 1;
-        this.renderer.setSize(1, 1);
+        tempCanvas.width = window.innerWidth;
+        tempCanvas.height = window.innerHeight;
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.renderer.domElement = tempCanvas;
       }
     }
@@ -60,16 +71,31 @@ export class DockCreationManager {
   public updateMousePosition(clientX: number, clientY: number): void {
     console.log('DockCreationManager: Updating mouse position to', clientX, clientY);
     
-    // Convert mouse position to normalized device coordinates
-    const rect = this.renderer.domElement.getBoundingClientRect();
-    console.log('DockCreationManager: Renderer rect =', rect);
-    
-    this.mouse.x = ((clientX - rect.left) / rect.width) * 2 - 1;
-    this.mouse.y = -((clientY - rect.top) / rect.height) * 2 + 1;
-    console.log('DockCreationManager: Normalized mouse coordinates =', this.mouse.x, this.mouse.y);
-    
-    // Update preview position
-    this.updatePreviewPosition();
+    try {
+      // Convert mouse position to normalized device coordinates
+      const rect = this.renderer.domElement.getBoundingClientRect();
+      console.log('DockCreationManager: Renderer rect =', rect);
+      
+      // Check if we have valid dimensions
+      if (rect.width > 0 && rect.height > 0) {
+        this.mouse.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+        this.mouse.y = -((clientY - rect.top) / rect.height) * 2 + 1;
+        console.log('DockCreationManager: Normalized mouse coordinates =', this.mouse.x, this.mouse.y);
+        
+        // Update preview position
+        this.updatePreviewPosition();
+      } else {
+        // Fallback for when rect dimensions are invalid
+        console.warn('DockCreationManager: Invalid renderer rect dimensions, using fallback calculation');
+        this.mouse.x = (clientX / window.innerWidth) * 2 - 1;
+        this.mouse.y = -(clientY / window.innerHeight) * 2 + 1;
+        
+        // Update preview position
+        this.updatePreviewPosition();
+      }
+    } catch (error) {
+      console.error('DockCreationManager: Error updating mouse position:', error);
+    }
   }
   
   /**

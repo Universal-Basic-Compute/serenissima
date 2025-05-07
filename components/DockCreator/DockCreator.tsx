@@ -78,6 +78,39 @@ const DockCreator: React.FC<DockCreatorProps> = ({
     }
   }, [active]);
   
+  // Add document-level event listeners as a fallback
+  useEffect(() => {
+    if (!active) return;
+    
+    console.log('DockCreator: Adding document event listeners');
+    
+    const handleDocumentMouseMove = (e: MouseEvent) => {
+      if (!managerRef.current) return;
+      console.log('Document mouse move detected at', e.clientX, e.clientY);
+      managerRef.current.updateMousePosition(e.clientX, e.clientY);
+      
+      // Get the preview position (snapped to water edge)
+      const position = managerRef.current.getPreviewPosition();
+      if (position) {
+        setPreviewPosition(position);
+        setIsPlacementValid(managerRef.current.isPlacementValid());
+      }
+    };
+    
+    const handleDocumentClick = (e: MouseEvent) => {
+      console.log('Document click detected at', e.clientX, e.clientY);
+      handleClick();
+    };
+    
+    document.addEventListener('mousemove', handleDocumentMouseMove);
+    document.addEventListener('click', handleDocumentClick);
+    
+    return () => {
+      document.removeEventListener('mousemove', handleDocumentMouseMove);
+      document.removeEventListener('click', handleDocumentClick);
+    };
+  }, [active, handleClick]);
+  
   // Handle click to place dock
   const handleClick = useCallback(async () => {
     console.log('DockCreator: Click detected, active =', active, 'manager =', !!managerRef.current, 'position =', previewPosition);
@@ -188,9 +221,15 @@ const DockCreator: React.FC<DockCreatorProps> = ({
     <div className="dock-creator">
       {/* Overlay for mouse events */}
       <div 
-        className="fixed inset-0 z-50 cursor-crosshair"
+        className="fixed inset-0 z-[100]" // Increase z-index to be higher than anything else
         style={{ 
           pointerEvents: 'all',
+          cursor: 'crosshair',
+          position: 'absolute', // Ensure it's absolutely positioned
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
           backgroundColor: 'rgba(0,0,0,0.01)' // Very slight tint to ensure it captures events
         }}
         onMouseMove={(e) => {
@@ -200,6 +239,7 @@ const DockCreator: React.FC<DockCreatorProps> = ({
         onClick={(e) => {
           console.log('Overlay click detected at', e.clientX, e.clientY);
           handleClick();
+          e.stopPropagation(); // Stop event propagation
         }}
       />
       
