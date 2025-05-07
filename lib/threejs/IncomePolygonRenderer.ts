@@ -18,7 +18,7 @@ export class IncomePolygonRenderer {
   private scene: THREE.Scene;
   private polygons: any[];
   private bounds: any;
-  private incomeMeshes: THREE.Mesh[] = [];
+  private incomeMeshes: (THREE.Mesh | THREE.LineSegments)[] = [];
   private isVisible: boolean = true;
   private isDisposed: boolean = false;
   
