@@ -31,6 +31,8 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
   const [showPurchaseConfirmation, setShowPurchaseConfirmation] = useState(false);
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [justCompletedTransaction, setJustCompletedTransaction] = useState(false);
+  const [landRendered, setLandRendered] = useState(false);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   
   // Find the selected polygon
   const selectedPolygon = selectedPolygonId 
