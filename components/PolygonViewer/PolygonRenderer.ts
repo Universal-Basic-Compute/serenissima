@@ -1110,7 +1110,7 @@ export default class PolygonRenderer {
       
       if (ownerCoatOfArmsUrl) {
         console.log(`Updating coat of arms texture for ${polygonId} with URL ${ownerCoatOfArmsUrl}`);
-        polygonMesh.updateCoatOfArmsTexture(ownerCoatOfArmsUrl);
+        polygonMesh.updateCoatOfArmsTexture(ownerCoatOfArmsUrl || '');
       }
     } catch (error) {
       console.error(`Error updating PolygonMesh for ${polygonId}:`, error);
@@ -1159,7 +1159,7 @@ export default class PolygonRenderer {
    * @param url The URL of the texture to load
    * @returns A THREE.Texture object
    */
-  private loadCoatOfArmsTexture(url: string): THREE.Texture {
+  private loadCoatOfArmsTexture(url: string | null): THREE.Texture {
     console.log('loadCoatOfArmsTexture is disabled in land view');
     // Return an empty texture without loading anything
     return new THREE.Texture();
