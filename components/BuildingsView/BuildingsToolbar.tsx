@@ -19,6 +19,32 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
   const [isDockCreatorActive, setIsDockCreatorActive] = useState(false);
   const [isSceneReady, setIsSceneReady] = useState(false);
   
+  // Function to get scene and camera with retries
+  const getSceneAndCameraWithRetry = async () => {
+    // Try to get scene and camera with retries
+    let attempts = 0;
+    const maxAttempts = 5;
+    
+    while (attempts < maxAttempts) {
+      const canvas = document.querySelector('canvas');
+      const currentScene = canvas?.__scene;
+      const currentCamera = canvas?.__camera;
+      const currentPolygons = window.__polygonData || [];
+      
+      console.log(`Attempt ${attempts + 1}: Scene:`, !!currentScene, 'Camera:', !!currentCamera, 'Polygons:', currentPolygons?.length);
+      
+      if (currentScene && currentCamera && currentPolygons.length > 0) {
+        return { scene: currentScene, camera: currentCamera, polygons: currentPolygons };
+      }
+      
+      // Wait before trying again
+      await new Promise(resolve => setTimeout(resolve, 500));
+      attempts++;
+    }
+    
+    return { scene: null, camera: null, polygons: [] };
+  };
+  
   // Check if scene and camera are ready
   useEffect(() => {
     // Wait for scene and camera to be properly initialized
@@ -64,12 +90,32 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
       </button>
       
       <button
-        onClick={() => {
+        onClick={async () => {
           console.log('Create Dock button clicked');
-          const { scene: currentScene, camera: currentCamera, polygons: currentPolygons } = getSceneAndCamera();
-          console.log('Scene:', !!currentScene, 'Camera:', !!currentCamera, 'Polygons:', currentPolygons?.length);
+          
+          // Show loading indicator
+          const loadingMessage = document.createElement('div');
+          loadingMessage.textContent = 'Initializing dock creator...';
+          loadingMessage.style.position = 'fixed';
+          loadingMessage.style.bottom = '100px';
+          loadingMessage.style.left = '50%';
+          loadingMessage.style.transform = 'translateX(-50%)';
+          loadingMessage.style.backgroundColor = 'rgba(0,0,0,0.7)';
+          loadingMessage.style.color = 'white';
+          loadingMessage.style.padding = '10px 20px';
+          loadingMessage.style.borderRadius = '5px';
+          loadingMessage.style.zIndex = '1000';
+          document.body.appendChild(loadingMessage);
+          
+          // Try to get scene and camera with retries
+          const { scene: currentScene, camera: currentCamera, polygons: currentPolygons } = 
+            await getSceneAndCameraWithRetry();
+          
+          // Remove loading indicator
+          document.body.removeChild(loadingMessage);
           
           if (currentScene && currentCamera) {
+            console.log('Scene and camera ready, activating dock creator');
             setIsDockCreatorActive(true);
             setIsRoadCreatorActive(false);
           } else {

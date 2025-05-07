@@ -39,21 +39,50 @@ const DockCreator: React.FC<DockCreatorProps> = ({
   
   // Initialize the dock creation manager
   useEffect(() => {
-    console.log('DockCreator: Initializing with active =', active, 'polygons =', polygons.length);
+    console.log('DockCreator: Initializing with active =', active, 'polygons =', polygons?.length);
     console.log('DockCreator: Scene =', !!actualScene, 'Camera =', !!actualCamera);
     
-    if (active && !managerRef.current && actualScene && actualCamera && polygons.length > 0) {
-      console.log('DockCreator: Creating new DockCreationManager');
-      try {
-        managerRef.current = new DockCreationManager(actualScene, actualCamera, polygons);
-        // Force an initial update of the mouse position to show the preview
-        const centerX = window.innerWidth / 2;
-        const centerY = window.innerHeight / 2;
-        managerRef.current.updateMousePosition(centerX, centerY);
-      } catch (error) {
-        console.error('Error creating DockCreationManager:', error);
+    if (!active) return;
+    
+    // Function to initialize the manager with retries
+    const initializeManager = async () => {
+      let attempts = 0;
+      const maxAttempts = 5;
+      
+      while (attempts < maxAttempts && !managerRef.current) {
+        console.log(`DockCreator: Initialization attempt ${attempts + 1}`);
+        
+        if (actualScene && actualCamera && polygons && polygons.length > 0) {
+          try {
+            console.log('DockCreator: Creating new DockCreationManager');
+            managerRef.current = new DockCreationManager(actualScene, actualCamera, polygons);
+            
+            // Force an initial update of the mouse position to show the preview
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 2;
+            managerRef.current.updateMousePosition(centerX, centerY);
+            
+            console.log('DockCreator: Manager initialized successfully');
+            break;
+          } catch (error) {
+            console.error('Error creating DockCreationManager:', error);
+          }
+        } else {
+          console.log('DockCreator: Missing scene, camera, or polygons');
+        }
+        
+        // Wait before trying again
+        await new Promise(resolve => setTimeout(resolve, 500));
+        attempts++;
       }
-    }
+      
+      if (!managerRef.current) {
+        console.error('DockCreator: Failed to initialize manager after', maxAttempts, 'attempts');
+      }
+    };
+    
+    // Start initialization
+    initializeManager();
     
     return () => {
       if (managerRef.current) {
