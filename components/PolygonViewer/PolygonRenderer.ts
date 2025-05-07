@@ -727,6 +727,11 @@ export default class PolygonRenderer {
         if (polygonMesh) {
           // Update the polygon with its own data (which includes simulatedIncome)
           polygonMesh.updateOwner(polygon.owner || '', null);
+          
+          // If we're in land view, force a view mode update to ensure income-based coloring
+          if (this.activeView === 'land') {
+            polygonMesh.updateViewMode(this.activeView);
+          }
         }
       }
     });

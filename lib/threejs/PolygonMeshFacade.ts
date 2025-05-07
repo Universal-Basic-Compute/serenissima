@@ -188,7 +188,9 @@ export class PolygonMeshFacade implements Poolable {
       // Create a basic material without texture for better color visibility
       return new THREE.MeshBasicMaterial({
         color: landColor,
-        side: THREE.DoubleSide
+        side: THREE.DoubleSide,
+        transparent: false,
+        depthWrite: true
       });
     } else {
       // Other views - use standard material with textures
@@ -212,8 +214,8 @@ export class PolygonMeshFacade implements Poolable {
       return this.getIncomeBasedColor(this.polygon.simulatedIncome);
     }
     
-    // Default sand color for all other cases
-    return new THREE.Color(0xf5e9c8);
+    // Default sand color for all other cases - lighter, more yellow
+    return new THREE.Color(0xfff8e0);
   }
   
   /**
@@ -260,12 +262,32 @@ export class PolygonMeshFacade implements Poolable {
     
     if (!this.mesh) return;
     
-    const material = this.mesh.material as THREE.MeshBasicMaterial;
+    // Create a new material based on the new view mode
+    const newMaterial = this.createMaterial();
     
-    if (!material) return;
+    // Apply the new material to the mesh
+    if (Array.isArray(this.mesh.material)) {
+      // If we have an array of materials, update all of them
+      this.mesh.material.forEach((mat, index) => {
+        if (mat) {
+          // Dispose of the old material
+          mat.dispose();
+        }
+        // Set the new material
+        this.mesh.material[index] = newMaterial;
+      });
+    } else {
+      // If we have a single material, update it
+      if (this.mesh.material) {
+        this.mesh.material.dispose();
+      }
+      this.mesh.material = newMaterial;
+    }
     
-    // Update material color based on view mode
-    this.updateMaterialColor(material);
+    // Store the original color for hover/selection states
+    if (newMaterial instanceof THREE.MeshBasicMaterial) {
+      this.originalColor = newMaterial.color.clone();
+    }
   }
   
   /**
