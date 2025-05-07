@@ -389,11 +389,11 @@ def distribute_income():
         average_distribution = total_distributed / successful_distributions
         
         notification_message = (
-            "Daily Income Distribution Complete\n\n"
+            "🏛️ Daily Income Distribution Complete 🏛️\n\n"
             "The Council of Ten has distributed today's income to the noble houses of Venice.\n\n"
             f"• {successful_distributions} properties received income\n"
-            f"• {total_distributed:,} ducats distributed\n"
-            f"• {average_distribution:,.0f} ducats per property on average\n\n"
+            f"• {total_distributed:,} ⚜️ ducats distributed\n"
+            f"• {average_distribution:,.0f} ⚜️ ducats per property on average\n\n"
             "Visit https://serenissima.ai to check your properties."
         )
         
