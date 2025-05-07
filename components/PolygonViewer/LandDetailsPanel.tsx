@@ -30,7 +30,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
   const [offers, setOffers] = useState<any[]>([]);
   const [showPurchaseConfirmation, setShowPurchaseConfirmation] = useState(false);
   const [isPurchasing, setIsPurchasing] = useState(false);
-  const [justCompletedTransaction, setJustCompletedTransaction] = useState(false);
+  const [justCompletedTransaction, setJustCompletedTransaction] = useState<boolean>(false);
   const [landRendered, setLandRendered] = useState<boolean>(false);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   
