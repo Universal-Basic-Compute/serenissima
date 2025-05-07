@@ -1172,12 +1172,7 @@ export default class PolygonRenderer {
    * @param url The URL of the texture to load
    * @returns A THREE.Texture object
    */
-  private loadCoatOfArmsTexture(url: string | null): THREE.Texture {
-    if (url === null) {
-      console.log('loadCoatOfArmsTexture called with null URL');
-      return new THREE.Texture();
-    }
-    
+  private loadCoatOfArmsTexture(url: string): THREE.Texture {
     console.log('loadCoatOfArmsTexture is disabled in land view');
     // Return an empty texture without loading anything
     return new THREE.Texture();
