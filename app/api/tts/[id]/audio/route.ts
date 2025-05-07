@@ -1,10 +1,16 @@
 import { NextResponse } from 'next/server';
 
+type Params = {
+  params: {
+    id: string;
+  };
+};
+
 // This is a simplified implementation
 // In a real app, you would store the audio data and retrieve it by ID
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: Params
 ) {
   try {
     const id = params.id;
