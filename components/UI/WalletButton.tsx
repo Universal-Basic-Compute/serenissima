@@ -99,11 +99,25 @@ export default function WalletButton({ className = '' }: WalletButtonProps) {
                 // Dispatch event to notify components about wallet change
                 window.dispatchEvent(new Event('walletChanged'));
                 
-                // Wait a moment for the disconnect to complete
-                await new Promise(resolve => setTimeout(resolve, 500));
+                // Force Phantom to forget the connection by directly accessing the window.solana object
+                if (typeof window !== 'undefined' && window.solana && window.solana.isPhantom) {
+                  try {
+                    // First try to disconnect using Phantom's own method
+                    window.solana.disconnect();
+                    
+                    // Then reload the page to completely reset the connection state
+                    // This is the most reliable way to force Phantom to show the account selector
+                    window.location.reload();
+                  } catch (e) {
+                    console.warn("Could not access Phantom browser API:", e);
+                    // If we couldn't access the Phantom API, just try to connect
+                    connectWallet();
+                  }
+                } else {
+                  // If window.solana is not available, just try to connect
+                  connectWallet();
+                }
                 
-                // Then trigger wallet connection flow to select a new wallet
-                connectWallet();
                 setDropdownOpen(false);
               }}
               className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-amber-500 hover:text-white transition-colors"

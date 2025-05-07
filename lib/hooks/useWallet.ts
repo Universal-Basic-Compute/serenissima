@@ -151,97 +151,28 @@ export function useWallet() {
         
         console.log("Wallet disconnected successfully");
         
-        // Force Phantom to show the account selector by completely resetting the adapter
-        setWalletAdapter(null);
-        
-        // Wait a moment before creating a new adapter
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        // Try to disconnect Phantom at the browser level
-        if (window.solana && window.solana.isPhantom) {
+        // Force Phantom to forget the connection by directly accessing the window.solana object
+        if (typeof window !== 'undefined' && window.solana && window.solana.isPhantom) {
           try {
-            console.log("Attempting to disconnect Phantom at browser level");
+            // First try to disconnect using Phantom's own method
             window.solana.disconnect();
+            console.log("Called window.solana.disconnect()");
             
-            // Try to access internal methods to force forgetting identity
-            // @ts-ignore - accessing private property
-            if (window.solana._handleDisconnect) {
-              // @ts-ignore - accessing private property
-              window.solana._handleDisconnect();
-            }
-            
-            // @ts-ignore - accessing private property
-            if (window.solana.forgetIdentity) {
-              // @ts-ignore - accessing private property
-              window.solana.forgetIdentity();
-            }
-            
-            // Try another approach to reset connection state
-            // @ts-ignore - accessing private property
-            if (window.solana._popup) {
-              // @ts-ignore - accessing private property
-              window.solana._popup.forgetIdentity();
-            }
-            
-            console.log("Phantom disconnected at browser level");
+            // Then try to clear the connection state by reloading the page
+            // This is the most reliable way to force Phantom to show the account selector
+            console.log("Reloading page to completely reset Phantom connection state");
+            window.location.reload();
+            return; // Return early since we're reloading the page
           } catch (e) {
             console.warn("Could not access Phantom browser API:", e);
           }
         }
         
-        // Wait longer to ensure Phantom has time to reset its state
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        // Create a new adapter instance
-        console.log("Creating new wallet adapter instance");
-        const newAdapter = new PhantomWalletAdapter();
-        setWalletAdapter(newAdapter);
-        
-        // Wait for the new adapter to initialize
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        // Now attempt to connect with the new adapter
-        console.log("Attempting to connect with new adapter...");
-        await newAdapter.connect();
-        
-        const address = newAdapter.publicKey?.toString() || null;
-        console.log("Wallet connected, address:", address);
-        
-        if (address) {
-          setWalletAddressState(address);
-          // Store wallet in both session and local storage
-          setWalletAddress(address);
-          
-          // Store wallet in Airtable and check for username
-          const userData = await storeWalletInAirtable(address);
-          
-          if (userData) {
-            // Check if the user has a username
-            if (userData.user_name === undefined || userData.user_name === null || userData.user_name === '') {
-              // If no username, show the prompt
-              window.dispatchEvent(new CustomEvent('showUsernamePrompt'));
-            } else {
-              // Store the user profile information
-              console.log('Setting user profile with data:', userData);
-              const userProfile = {
-                username: userData.user_name,
-                firstName: userData.first_name || userData.user_name.split(' ')[0] || '',
-                lastName: userData.last_name || userData.user_name.split(' ').slice(1).join(' ') || '',
-                coatOfArmsImage: userData.coat_of_arms_image,
-                familyMotto: userData.family_motto,
-                computeAmount: userData.compute_amount,
-                walletAddress: address
-              };
-              setUserProfile(userProfile);
-              localStorage.setItem('userProfile', JSON.stringify(userProfile));
-            }
-          }
-        }
-        
-        return;
+        // If we couldn't reload the page, continue with the normal flow
+        // but the account selector might not show
       } catch (error) {
-        console.error("Error during disconnect/reconnect flow:", error);
-        alert(`Failed to switch accounts: ${error instanceof Error ? error.message : String(error)}`);
+        console.error("Error during disconnect flow:", error);
+        alert(`Failed to disconnect wallet: ${error instanceof Error ? error.message : String(error)}`);
         return;
       }
     }
