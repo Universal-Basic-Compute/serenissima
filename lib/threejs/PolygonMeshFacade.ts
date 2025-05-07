@@ -347,11 +347,11 @@ export class PolygonMeshFacade implements Poolable {
     try {
       // Handle both array and single material cases
       const materials = Array.isArray(this.mesh.material) 
-        ? this.mesh.material as THREE.MeshBasicMaterial[]
-        : [this.mesh.material as THREE.MeshBasicMaterial];
+        ? this.mesh.material as THREE.Material[]
+        : [this.mesh.material as THREE.Material];
       
       materials.forEach(material => {
-        if (material && material.color) {
+        if (material && 'color' in material && material.color) {
           if (isSelected) {
             // Store original color if not already stored
             if (!this.originalColor) {
@@ -386,11 +386,11 @@ export class PolygonMeshFacade implements Poolable {
     try {
       // Handle both array and single material cases
       const materials = Array.isArray(this.mesh.material) 
-        ? this.mesh.material as THREE.MeshBasicMaterial[]
-        : [this.mesh.material as THREE.MeshBasicMaterial];
+        ? this.mesh.material as THREE.Material[]
+        : [this.mesh.material as THREE.Material];
       
       materials.forEach(material => {
-        if (material && material.color) {
+        if (material && 'color' in material && material.color) {
           if (isHovered) {
             // Store original color if not already stored
             if (!this.originalColor) {
