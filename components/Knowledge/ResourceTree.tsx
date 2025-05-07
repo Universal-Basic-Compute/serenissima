@@ -365,45 +365,38 @@ const ResourceTree: React.FC<ResourceTreeProps> = ({ onClose }) => {
               </div>
             </div>
             
+            {/* Description */}
             <div className="mb-6">
               <h4 className="text-lg font-serif text-amber-300 mb-2 border-b border-amber-700/50 pb-1">Description</h4>
-              {/* Format the description to separate the resource characteristics and production */}
-              {(() => {
-                const parts = selectedResource.description.split('RESOURCE CHARACTERISTICS:');
-                const overview = parts[0].trim();
-                
-                let characteristics = '';
-                let production = '';
-                
-                if (parts.length > 1) {
-                  const charParts = parts[1].split('PRODUCTION:');
-                  characteristics = charParts[0].trim();
-                  if (charParts.length > 1) {
-                    production = charParts[1].trim();
-                  }
-                }
-                
-                return (
-                  <>
-                    <p className="text-amber-100 mb-3">{overview}</p>
-                    
-                    {characteristics && (
-                      <div className="mb-3">
-                        <h5 className="text-amber-300 font-medium mb-1">Resource Characteristics</h5>
-                        <p className="text-amber-100 text-sm">{characteristics}</p>
-                      </div>
-                    )}
-                    
-                    {production && (
-                      <div>
-                        <h5 className="text-amber-300 font-medium mb-1">Production</h5>
-                        <p className="text-amber-100 text-sm">{production}</p>
-                      </div>
-                    )}
-                  </>
-                );
-              })()}
+              <p className="text-amber-100 text-sm">
+                {selectedResource.description || "No description available."}
+              </p>
             </div>
+            
+            {/* Varieties */}
+            {selectedResource.varieties && selectedResource.varieties.length > 0 && (
+              <div className="mb-6">
+                <h4 className="text-lg font-serif text-amber-300 mb-2 border-b border-amber-700/50 pb-1">Varieties</h4>
+                <div className="grid grid-cols-1 gap-2">
+                  {selectedResource.varieties.map((variety, index) => (
+                    <div key={index} className="bg-amber-900/20 rounded p-2 border border-amber-700/30">
+                      <div className="font-medium text-amber-200">{getCategoryDisplayName(variety.type)}</div>
+                      <div className="text-xs text-amber-100 mt-1">
+                        {variety.appearance && (
+                          <div><span className="font-medium">Appearance:</span> {getCategoryDisplayName(variety.appearance)}</div>
+                        )}
+                        {variety.valueMultiplier && (
+                          <div><span className="font-medium">Value:</span> {variety.valueMultiplier}x</div>
+                        )}
+                        {variety.primaryUse && (
+                          <div><span className="font-medium">Primary Use:</span> {getCategoryDisplayName(variety.primaryUse)}</div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
             
             {/* Production Chain */}
             <div className="mb-6">
