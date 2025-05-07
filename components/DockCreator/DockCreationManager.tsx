@@ -117,7 +117,6 @@ export class DockCreationManager {
    * Load the dock 3D model
    */
   private loadDockModel(): void {
-    // Add a console log to track loading attempts
     console.log('Loading dock model from: /assets/buildings/models/public-dock/model.glb');
     
     this.modelLoader.load(
@@ -133,8 +132,11 @@ export class DockCreationManager {
         // Set up the model
         const model = gltf.scene;
         
-        // Scale the model to half its size
-        model.scale.set(0.5, 0.5, 0.5);
+        // Scale the model appropriately - try a larger scale to make it more visible
+        model.scale.set(1.0, 1.0, 1.0); // Increase from 0.5 to 1.0
+        
+        // Make sure the model is visible
+        model.visible = true;
         
         // Apply materials and settings
         model.traverse((child) => {
@@ -146,13 +148,13 @@ export class DockCreationManager {
                 child.material = child.material.map(mat => {
                   const newMat = mat.clone();
                   newMat.transparent = true;
-                  newMat.opacity = 0.7;
+                  newMat.opacity = 0.8; // Increase opacity from 0.7 to 0.8
                   return newMat;
                 });
               } else {
                 child.material = child.material.clone();
                 child.material.transparent = true;
-                child.material.opacity = 0.7;
+                child.material.opacity = 0.8; // Increase opacity from 0.7 to 0.8
               }
             }
           }
@@ -162,27 +164,23 @@ export class DockCreationManager {
         this.scene.add(model);
         this.previewMesh = model;
         
-        // Make sure the model is visible
-        this.previewMesh.visible = true;
-        
         // Set flag
         this.isModelLoaded = true;
         
-        // Update position if we already have a valid position
-        if (this.currentEdge) {
-          this.updatePreviewPosition();
-        } else {
-          // Force an update to position the model at the current mouse position
-          const centerX = window.innerWidth / 2;
-          const centerY = window.innerHeight / 2;
-          this.updateMousePosition(centerX, centerY);
-        }
+        // Force an update to position the model at the current mouse position
+        const centerX = window.innerWidth / 2;
+        const centerY = window.innerHeight / 2;
+        this.updateMousePosition(centerX, centerY);
+        
+        // Log the model's position for debugging
+        console.log('Dock model position:', model.position);
         
         console.log('Dock model added to scene and made visible');
       },
       (progress) => {
         // Loading progress
-        console.log(`Loading dock model: ${(progress.loaded / progress.total * 100).toFixed(2)}%`);
+        const percent = progress.total ? (progress.loaded / progress.total * 100).toFixed(2) : 'unknown';
+        console.log(`Loading dock model: ${percent}%`);
       },
       (error) => {
         // Error handling
@@ -235,66 +233,70 @@ export class DockCreationManager {
       if (result.position && result.landId && result.edge) {
         // Snap the dock precisely to the edge
         activeMesh.position.copy(result.position);
-        activeMesh.position.y = 0.1; // Slightly above water level
-        activeMesh.visible = true; // Ensure visibility
+        activeMesh.position.y = 0.2; // Increase from 0.1 to 0.2 to make it more visible
+        activeMesh.visible = true;
         this.adjacentLandId = result.landId;
         this.currentEdge = result.edge;
-        
+      
         // Calculate the direction vector of the edge
         const direction = new THREE.Vector3().subVectors(result.edge.end, result.edge.start).normalize();
-        
+      
         // Calculate the angle for proper alignment perpendicular to the edge
         const angle = Math.atan2(direction.z, direction.x);
         activeMesh.rotation.y = angle + Math.PI/2; // Perpendicular to edge
-        
+      
         // Update material color to indicate valid placement
         if (!this.isModelLoaded && this.fallbackPreviewMesh && 
             this.fallbackPreviewMesh.material instanceof THREE.MeshBasicMaterial) {
           this.fallbackPreviewMesh.material.color.set(0x8B4513); // Brown for valid
-          this.fallbackPreviewMesh.material.opacity = 0.7;
+          this.fallbackPreviewMesh.material.opacity = 0.8; // Increase opacity
         } else if (this.isModelLoaded && this.previewMesh) {
           // For the model, we'll make it fully visible for valid placement
           this.previewMesh.traverse((child) => {
             if (child instanceof THREE.Mesh && child.material) {
               if (Array.isArray(child.material)) {
                 child.material.forEach(mat => {
-                  mat.opacity = 0.7;
+                  mat.opacity = 0.8; // Increase opacity
                 });
               } else {
-                child.material.opacity = 0.7;
+                child.material.opacity = 0.8; // Increase opacity
               }
             }
           });
         }
-        
-        console.log('Dock preview positioned at valid location:', result.position);
+      
+        // Log position for debugging
+        console.log('Dock positioned at valid location:', result.position);
       } else {
         // Show preview at cursor but indicate invalid placement
         activeMesh.position.copy(intersection);
-        activeMesh.position.y = 0.1;
-        activeMesh.visible = true; // Ensure visibility
+        activeMesh.position.y = 0.2; // Increase from 0.1 to 0.2
+        activeMesh.visible = true;
         this.adjacentLandId = null;
         this.currentEdge = null;
-        
+      
         // Update material color to indicate invalid placement
         if (!this.isModelLoaded && this.fallbackPreviewMesh && 
             this.fallbackPreviewMesh.material instanceof THREE.MeshBasicMaterial) {
           this.fallbackPreviewMesh.material.color.set(0xFF0000); // Red for invalid
-          this.fallbackPreviewMesh.material.opacity = 0.5;
+          this.fallbackPreviewMesh.material.opacity = 0.6; // Slightly increase opacity
         } else if (this.isModelLoaded && this.previewMesh) {
           // For the model, we'll make it semi-transparent red for invalid placement
           this.previewMesh.traverse((child) => {
             if (child instanceof THREE.Mesh && child.material) {
               if (Array.isArray(child.material)) {
                 child.material.forEach(mat => {
-                  mat.opacity = 0.5;
+                  mat.opacity = 0.6; // Slightly increase opacity
                 });
               } else {
-                child.material.opacity = 0.5;
+                child.material.opacity = 0.6; // Slightly increase opacity
               }
             }
           });
         }
+      
+        // Log position for debugging
+        console.log('Dock positioned at invalid location:', intersection);
       }
     }
   }
