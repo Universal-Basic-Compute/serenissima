@@ -113,8 +113,8 @@ function calculateBaseRent(areaInSquareMeters) {
   const REFERENCE_RENT = TARGET_DAILY_RENT_PER_MILLION; // ~137 ducats per day for 1M value
   
   // Calculate size factor with diminishing returns for larger areas
-  // Reduce the exponent from 0.15 to 0.10 (making area even less important)
-  const sizeFactor = Math.pow(areaInSquareMeters / REFERENCE_SIZE, 0.10);
+  // Reduce the exponent from 0.10 to 0.05 (making area even less important)
+  const sizeFactor = Math.pow(areaInSquareMeters / REFERENCE_SIZE, 0.05);
   
   // Calculate base rent and multiply by 100
   return REFERENCE_RENT * sizeFactor * 100;
