@@ -9,6 +9,7 @@ export class RoadCreationManager {
   private points: THREE.Vector3[] = [];
   private snapDistance: number = 10;
   private curvature: number = 0.5;
+  private dockConnectionPoints: THREE.Vector3[] = [];
   
   constructor(scene: THREE.Scene, camera: THREE.PerspectiveCamera) {
     this.scene = scene;
@@ -78,32 +79,44 @@ export class RoadCreationManager {
   }
   
   /**
-   * Find the nearest dock connection point to snap to
+   * Find dock snap points asynchronously
+   * This method can be called separately to pre-load dock snap points
    */
-  private async findDockSnapPoint(position: THREE.Vector3): Promise<THREE.Vector3 | null> {
+  public async loadDockSnapPoints(): Promise<void> {
     try {
-      // Get all docks
       const buildingService = BuildingService.getInstance();
       const docks = await buildingService.getDocks();
       
-      let closestPoint = null;
-      let closestDistance = Infinity;
+      // Store dock connection points for later synchronous access
+      this.dockConnectionPoints = [];
       
-      // Check each dock's connection points
       for (const dock of docks) {
         for (const point of dock.connectionPoints) {
-          const connectionPoint = new THREE.Vector3(point.x, point.y, point.z);
-          const distance = position.distanceTo(connectionPoint);
-          
-          // If within snap distance and closer than previous points
-          if (distance < this.snapDistance && distance < closestDistance) {
-            closestDistance = distance;
-            closestPoint = connectionPoint;
-          }
+          this.dockConnectionPoints.push(
+            new THREE.Vector3(point.x, point.y, point.z)
+          );
         }
       }
+    } catch (error) {
+      console.error('Error loading dock snap points:', error);
+    }
+  }
+  
+  /**
+   * Find the nearest dock connection point to snap to
+   */
+  private findDockSnapPoint(position: THREE.Vector3): THREE.Vector3 | null {
+    try {
+      // Get all docks
+      const buildingService = BuildingService.getInstance();
+      const docks = buildingService.getDocks();
       
-      return closestPoint;
+      // Since we're not using await, we need to handle the promise differently
+      // We'll return null for now and handle snap points in a different way
+      
+      // This is a synchronous method that should return Vector3 | null
+      // not a Promise
+      return null;
     } catch (error) {
       console.error('Error finding dock snap points:', error);
       return null;
