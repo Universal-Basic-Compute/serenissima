@@ -4,7 +4,7 @@ const path = require('path');
 
 // Configuration
 const BATCH_SIZE = 3; // Number of errors to fix in each batch
-const MAX_BATCHES = 100; // Safety limit to prevent infinite loops
+const MAX_BATCHES = 100; // Increased from 5 to 100 to process more batches
 const TS_ERRORS_FILE = 'ts-errors.json';
 const MAX_ITERATIONS = 5; // Maximum number of full iterations to run
 
