@@ -761,7 +761,9 @@ export default function PolygonViewer() {
       
     // Initialize road manager
     if (sceneRef.current && sceneRef.current.scene) {
-      roadManagerRef.current = new RoadManager(sceneRef.current.scene);
+      if (roadManagerRef.current === null) {
+        roadManagerRef.current = new RoadManager(sceneRef.current.scene);
+      }
           
       // Load roads from Airtable
       if (roadManagerRef.current) {
