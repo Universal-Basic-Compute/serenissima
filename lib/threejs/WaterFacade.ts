@@ -806,7 +806,7 @@ export class WaterFacade {
           
           if (positions) {
             // Sample more points along the boundary
-            const boundaryIndices = this.findBoundaryIndices(object.geometry);
+            const boundaryIndices = this.findBoundaryIndices(geometry);
             
             // Convert local vertices to world space and add to boundary points
             for (let i = 0; i < boundaryIndices.length; i++) {
@@ -864,7 +864,7 @@ export class WaterFacade {
    * Find boundary indices of a geometry (simplified version)
    * @private
    */
-  private findBoundaryIndices(geometry: THREE.BufferGeometry<THREE.NormalBufferAttributes>): number[] {
+  private findBoundaryIndices(geometry: THREE.BufferGeometry): number[] {
     // Enhanced boundary detection to find actual edge vertices
     const indices: number[] = [];
     const positions = geometry.getAttribute('position');
