@@ -3,11 +3,14 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import * as THREE from 'three';
 import { DockCreationManager } from './DockCreationManager';
-import { BuildingService } from '@/lib/buildingService';
+import { getApiBaseUrl } from '@/lib/apiUtils';
+import { getWalletAddress } from '@/lib/walletUtils';
+import { eventBus, EventTypes } from '@/lib/eventBus';
 
 interface DockCreatorProps {
   scene: THREE.Scene;
   camera: THREE.PerspectiveCamera;
+  polygons: any[];
   active: boolean;
   onComplete: (dockData: any) => void;
   onCancel: () => void;
@@ -16,6 +19,7 @@ interface DockCreatorProps {
 const DockCreator: React.FC<DockCreatorProps> = ({
   scene,
   camera,
+  polygons,
   active,
   onComplete,
   onCancel
@@ -24,14 +28,15 @@ const DockCreator: React.FC<DockCreatorProps> = ({
   const [previewPosition, setPreviewPosition] = useState<THREE.Vector3 | null>(null);
   const [previewRotation, setPreviewRotation] = useState<number>(0);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isPlacementValid, setIsPlacementValid] = useState<boolean>(false);
   
   // Reference to the dock creation manager
   const managerRef = useRef<DockCreationManager | null>(null);
   
   // Initialize the dock creation manager
   useEffect(() => {
-    if (active && !managerRef.current) {
-      managerRef.current = new DockCreationManager(scene, camera);
+    if (active && !managerRef.current && polygons.length > 0) {
+      managerRef.current = new DockCreationManager(scene, camera, polygons);
     }
     
     return () => {
@@ -40,7 +45,7 @@ const DockCreator: React.FC<DockCreatorProps> = ({
         managerRef.current = null;
       }
     };
-  }, [active, scene, camera]);
+  }, [active, scene, camera, polygons]);
   
   // Update rotation in the manager when it changes
   useEffect(() => {
@@ -59,6 +64,7 @@ const DockCreator: React.FC<DockCreatorProps> = ({
     const position = managerRef.current.getPreviewPosition();
     if (position) {
       setPreviewPosition(position);
+      setIsPlacementValid(managerRef.current.isPlacementValid());
     }
   }, [active]);
   
@@ -67,6 +73,12 @@ const DockCreator: React.FC<DockCreatorProps> = ({
     if (!active || !managerRef.current || !previewPosition) return;
     
     try {
+      // Check if placement is valid
+      if (!managerRef.current.isPlacementValid()) {
+        setErrorMessage('Dock must be placed along a water edge adjacent to land');
+        return;
+      }
+      
       setIsPlacing(true);
       setErrorMessage(null);
       
@@ -79,16 +91,55 @@ const DockCreator: React.FC<DockCreatorProps> = ({
         return;
       }
       
-      // Create the dock using the service
-      const buildingService = BuildingService.getInstance();
-      const dockData = await buildingService.createDock(
-        landId,
-        previewPosition,
-        previewRotation
-      );
+      // Get wallet address
+      const walletAddress = getWalletAddress();
+      if (!walletAddress) {
+        setErrorMessage('Please connect your wallet to place a dock');
+        setIsPlacing(false);
+        return;
+      }
+      
+      // Generate connection points
+      const connectionPoints = managerRef.current.generateConnectionPoints();
+      
+      // Prepare dock data
+      const dockData = {
+        landId: landId,
+        position: {
+          x: previewPosition.x,
+          y: previewPosition.y,
+          z: previewPosition.z
+        },
+        rotation: previewRotation,
+        connectionPoints: connectionPoints,
+        createdBy: walletAddress
+      };
+      
+      // Send to server
+      const response = await fetch(`${getApiBaseUrl()}/api/docks`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(dockData),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to create dock: ${response.status} ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      
+      // Emit event
+      eventBus.emit(EventTypes.DOCK_PLACED, {
+        dockId: data.id,
+        landId: landId,
+        position: previewPosition,
+        rotation: previewRotation
+      });
       
       // Call the completion callback
-      onComplete(dockData);
+      onComplete(data);
     } catch (error) {
       console.error('Error creating dock:', error);
       setErrorMessage(error instanceof Error ? error.message : 'Failed to create dock');
@@ -125,40 +176,64 @@ const DockCreator: React.FC<DockCreatorProps> = ({
       />
       
       {/* UI Controls */}
-      <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-black/80 text-white p-4 rounded-lg z-20">
-        <h3 className="text-lg font-bold mb-2">Dock Placement</h3>
-        
-        <div className="flex space-x-4 mb-2">
-          <button
-            onClick={handleClick}
-            disabled={!previewPosition || isPlacing}
-            className={`px-4 py-2 rounded-md ${
-              previewPosition && !isPlacing
-                ? 'bg-amber-600 hover:bg-amber-700' 
-                : 'bg-gray-600 cursor-not-allowed'
-            }`}
-          >
-            {isPlacing ? 'Placing...' : 'Place Dock'}
-          </button>
-          
-          <button
-            onClick={onCancel}
-            className="px-4 py-2 bg-gray-700 hover:bg-gray-800 rounded-md"
-          >
-            Cancel
-          </button>
-        </div>
-        
-        <div className="text-sm">
-          <p>Press <kbd className="px-2 py-1 bg-gray-700 rounded">R</kbd> to rotate</p>
-          <p>Position dock along the shoreline</p>
-        </div>
+      <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-black/80 text-white p-4 rounded-lg z-20 w-96">
+        <h3 className="text-lg font-serif mb-4 text-center">Dock Placement</h3>
         
         {errorMessage && (
-          <div className="mt-2 text-red-400">
+          <div className="bg-red-500/70 p-2 rounded mb-4 text-white text-sm">
             {errorMessage}
           </div>
         )}
+        
+        <div className="mb-4">
+          <label className="block text-sm mb-1">Rotation</label>
+          <input
+            type="range"
+            min="0"
+            max={Math.PI * 2}
+            step="0.1"
+            value={previewRotation}
+            onChange={(e) => setPreviewRotation(parseFloat(e.target.value))}
+            className="w-full"
+          />
+        </div>
+        
+        <div className="text-sm mb-4">
+          <p>Position your cursor where you want to place the dock.</p>
+          <p>Docks must be placed at the edge of land parcels adjacent to water.</p>
+          {isPlacementValid && (
+            <p className="text-green-400 mt-2">Valid placement location found</p>
+          )}
+        </div>
+        
+        <div className="flex justify-between">
+          <button
+            onClick={onCancel}
+            className="px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded transition-colors"
+            disabled={isPlacing}
+          >
+            Cancel
+          </button>
+          
+          <button
+            onClick={handleClick}
+            disabled={!isPlacementValid || isPlacing}
+            className={`px-4 py-2 rounded ${
+              isPlacementValid && !isPlacing
+                ? 'bg-blue-600 hover:bg-blue-700'
+                : 'bg-gray-400 cursor-not-allowed'
+            }`}
+          >
+            {isPlacing ? (
+              <div className="flex items-center">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                Creating...
+              </div>
+            ) : (
+              'Place Dock'
+            )}
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -164,33 +164,63 @@ const DockRenderer: React.FC<DockRendererProps> = ({ scene, active }) => {
   
   // Render a single dock
   const renderDock = (dock: DockData) => {
-    // Create a simple dock mesh
-    const geometry = new THREE.BoxGeometry(2, 0.2, 5);
-    const material = new THREE.MeshStandardMaterial({ 
+    // Create a more detailed dock mesh
+    const dockGroup = new THREE.Group();
+    
+    // Main dock platform
+    const platformGeometry = new THREE.BoxGeometry(2, 0.2, 5);
+    const woodMaterial = new THREE.MeshStandardMaterial({ 
       color: 0x8B4513, // Brown color for wood
       roughness: 0.8,
       metalness: 0.2
     });
     
-    const mesh = new THREE.Mesh(geometry, material);
+    const platform = new THREE.Mesh(platformGeometry, woodMaterial);
+    dockGroup.add(platform);
+    
+    // Add posts at corners
+    const postGeometry = new THREE.CylinderGeometry(0.1, 0.1, 0.5, 8);
+    const postMaterial = new THREE.MeshStandardMaterial({
+      color: 0x6B4226, // Darker brown for posts
+      roughness: 0.9,
+      metalness: 0.1
+    });
+    
+    // Add four posts at the corners
+    const postPositions = [
+      [-0.9, 0.15, -2.4],
+      [0.9, 0.15, -2.4],
+      [-0.9, 0.15, 2.4],
+      [0.9, 0.15, 2.4]
+    ];
+    
+    postPositions.forEach(pos => {
+      const post = new THREE.Mesh(postGeometry, postMaterial);
+      post.position.set(pos[0], pos[1], pos[2]);
+      dockGroup.add(post);
+    });
     
     // Position and rotate the dock
-    mesh.position.set(
+    dockGroup.position.set(
       dock.position.x,
       dock.position.y || 0.1, // Default to slightly above water level
       dock.position.z
     );
-    mesh.rotation.y = dock.rotation;
+    dockGroup.rotation.y = dock.rotation;
     
     // Add to scene
-    scene.add(mesh);
-    meshesRef.current.push(mesh);
+    scene.add(dockGroup);
+    meshesRef.current.push(dockGroup as unknown as THREE.Mesh); // Type cast for simplicity
     
-    // Add connection points (simplified)
+    // Add connection points
     if (dock.connectionPoints && dock.connectionPoints.length > 0) {
       dock.connectionPoints.forEach(point => {
-        const sphereGeometry = new THREE.SphereGeometry(0.2, 16, 16);
-        const sphereMaterial = new THREE.MeshBasicMaterial({ color: 0xFF0000 });
+        const sphereGeometry = new THREE.SphereGeometry(0.15, 16, 16);
+        const sphereMaterial = new THREE.MeshBasicMaterial({ 
+          color: 0x4CAF50, // Green for connection points
+          transparent: true,
+          opacity: 0.7
+        });
         const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
         
         sphere.position.set(point.x, point.y || 0.2, point.z);
@@ -200,7 +230,7 @@ const DockRenderer: React.FC<DockRendererProps> = ({ scene, active }) => {
       });
     }
     
-    return mesh;
+    return dockGroup;
   };
   
   return null; // This is a non-visual component

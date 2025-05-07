@@ -1,71 +1,58 @@
 import * as THREE from 'three';
 
 export class WaterEdgeDetector {
-  private scene: THREE.Scene;
   private polygons: any[] = [];
   
-  constructor(scene: THREE.Scene) {
-    this.scene = scene;
-    this.loadPolygons();
-  }
-  
-  /**
-   * Load polygon data for edge detection
-   */
-  private async loadPolygons(): Promise<void> {
-    try {
-      // Get polygons from scene
-      this.scene.traverse((object) => {
-        if (object.userData && object.userData.isLandPolygon) {
-          this.polygons.push({
-            id: object.userData.id,
-            object: object,
-            coordinates: object.userData.coordinates
-          });
-        }
-      });
-      
-      console.log(`Loaded ${this.polygons.length} polygons for water edge detection`);
-    } catch (error) {
-      console.error('Failed to load polygons for water edge detection:', error);
-    }
+  constructor(polygons: any[]) {
+    this.polygons = polygons;
+    console.log(`Initialized WaterEdgeDetector with ${this.polygons.length} polygons`);
   }
   
   /**
    * Find the nearest water edge to a given position
    */
-  public findNearestWaterEdge(position: THREE.Vector3): { position: THREE.Vector3 | null, landId: string | null } {
+  public findNearestWaterEdge(position: THREE.Vector3): { 
+    position: THREE.Vector3 | null; 
+    landId: string | null;
+    edge: { start: THREE.Vector3, end: THREE.Vector3 } | null;
+  } {
     if (this.polygons.length === 0) {
-      return { position: null, landId: null };
+      return { position: null, landId: null, edge: null };
     }
     
-    let closestEdge: THREE.Vector3 | null = null;
+    let closestPoint: THREE.Vector3 | null = null;
     let closestDistance = Infinity;
     let closestLandId: string | null = null;
+    let closestEdge: { start: THREE.Vector3, end: THREE.Vector3 } | null = null;
     
     // Check each polygon for water edges
     for (const polygon of this.polygons) {
-      const edges = this.getWaterEdges(polygon);
+      const waterEdges = this.getWaterEdges(polygon);
       
-      for (const edge of edges) {
+      for (const edge of waterEdges) {
         // Find closest point on edge to position
-        const closestPoint = this.getClosestPointOnEdge(edge.start, edge.end, position);
-        const distance = position.distanceTo(closestPoint);
+        const pointOnEdge = this.getClosestPointOnEdge(edge.start, edge.end, position);
+        const distance = position.distanceTo(pointOnEdge);
         
         if (distance < closestDistance) {
           closestDistance = distance;
-          closestEdge = closestPoint;
+          closestPoint = pointOnEdge;
           closestLandId = polygon.id;
+          closestEdge = edge;
         }
       }
     }
     
-    // Only return if within a reasonable distance (20 units)
-    if (closestDistance < 20 && closestEdge) {
-      return { position: closestEdge, landId: closestLandId };
+    // Only return if within a reasonable distance (10 units)
+    if (closestDistance < 10 && closestPoint) {
+      return { 
+        position: closestPoint, 
+        landId: closestLandId,
+        edge: closestEdge
+      };
     }
     
-    return { position: null, landId: null };
+    return { position: null, landId: null, edge: null };
   }
   
   /**
@@ -74,23 +61,30 @@ export class WaterEdgeDetector {
   private getWaterEdges(polygon: any): { start: THREE.Vector3, end: THREE.Vector3 }[] {
     const waterEdges: { start: THREE.Vector3, end: THREE.Vector3 }[] = [];
     
-    // Get coordinates from polygon
-    const coordinates = polygon.coordinates;
-    if (!coordinates || coordinates.length < 3) {
+    if (!polygon.coordinates || !polygon.coordinates[0]) {
       return waterEdges;
     }
     
-    // Check each edge
-    for (let i = 0; i < coordinates.length; i++) {
-      const start = coordinates[i];
-      const end = coordinates[(i + 1) % coordinates.length];
+    const coordinates = polygon.coordinates[0];
+    
+    // Check each edge of the polygon
+    for (let i = 0; i < coordinates.length - 1; i++) {
+      const start = new THREE.Vector3(coordinates[i][0], 0.1, coordinates[i][1]);
+      const end = new THREE.Vector3(coordinates[i+1][0], 0.1, coordinates[i+1][1]);
       
-      // Check if this edge borders water (no adjacent polygon)
-      if (this.isWaterEdge(polygon, start, end)) {
-        waterEdges.push({
-          start: new THREE.Vector3(start.x || start.lng, 0, start.z || start.lat),
-          end: new THREE.Vector3(end.x || end.lng, 0, end.z || end.lat)
-        });
+      // Determine if this is a water edge
+      if (this.isWaterEdge(polygon, coordinates[i], coordinates[i+1])) {
+        waterEdges.push({ start, end });
+      }
+    }
+    
+    // Check the closing edge
+    if (coordinates.length > 1) {
+      const start = new THREE.Vector3(coordinates[coordinates.length-1][0], 0.1, coordinates[coordinates.length-1][1]);
+      const end = new THREE.Vector3(coordinates[0][0], 0.1, coordinates[0][1]);
+      
+      if (this.isWaterEdge(polygon, coordinates[coordinates.length-1], coordinates[0])) {
+        waterEdges.push({ start, end });
       }
     }
     
@@ -101,12 +95,61 @@ export class WaterEdgeDetector {
    * Check if an edge borders water (no adjacent polygon)
    */
   private isWaterEdge(polygon: any, start: any, end: any): boolean {
-    // This is a simplified implementation
-    // In a real system, you would check if there's another polygon adjacent to this edge
+    // Check if the edge is shared with another polygon
+    const isSharedEdge = this.isEdgeSharedWithAnotherPolygon(polygon, start, end);
     
-    // For now, we'll assume edges on the outer boundary of the polygon are water edges
-    // This is a simplification and would need to be improved for a real implementation
-    return true;
+    // If it's not shared with another polygon, it's likely a water edge
+    return !isSharedEdge;
+  }
+  
+  /**
+   * Check if an edge is shared with another polygon
+   */
+  private isEdgeSharedWithAnotherPolygon(polygon: any, start: any, end: any): boolean {
+    for (const otherPolygon of this.polygons) {
+      if (otherPolygon.id === polygon.id) continue;
+      
+      const otherCoordinates = otherPolygon.coordinates[0];
+      if (!otherCoordinates) continue;
+      
+      // Check each edge of the other polygon
+      for (let i = 0; i < otherCoordinates.length - 1; i++) {
+        if (this.areEdgesEqual(start, end, otherCoordinates[i], otherCoordinates[i+1])) {
+          return true;
+        }
+      }
+      
+      // Check the closing edge
+      if (otherCoordinates.length > 1) {
+        if (this.areEdgesEqual(start, end, otherCoordinates[otherCoordinates.length-1], otherCoordinates[0])) {
+          return true;
+        }
+      }
+    }
+    
+    return false;
+  }
+  
+  /**
+   * Check if two edges are the same (allowing for reversed direction)
+   */
+  private areEdgesEqual(start1: any, end1: any, start2: any, end2: any): boolean {
+    const tolerance = 0.1;
+    
+    // Check if edges match in either direction
+    const isForwardMatch = 
+      Math.abs(start1[0] - start2[0]) < tolerance &&
+      Math.abs(start1[1] - start2[1]) < tolerance &&
+      Math.abs(end1[0] - end2[0]) < tolerance &&
+      Math.abs(end1[1] - end2[1]) < tolerance;
+      
+    const isReverseMatch = 
+      Math.abs(start1[0] - end2[0]) < tolerance &&
+      Math.abs(start1[1] - end2[1]) < tolerance &&
+      Math.abs(end1[0] - start2[0]) < tolerance &&
+      Math.abs(end1[1] - start2[1]) < tolerance;
+      
+    return isForwardMatch || isReverseMatch;
   }
   
   /**
