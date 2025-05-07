@@ -48,6 +48,9 @@ export default class PolygonRenderer {
   private ownerColorMap: Record<string, string> = {}; // Map of owner to color
   private users: Record<string, any> = {}; // Store users data
   private coatOfArmSprites: Record<string, THREE.Mesh> = {}; // Map of polygon ID to coat of arms sprite mesh
+  private hoverTooltip: THREE.Sprite | null = null; // Tooltip for hover information
+  private raycaster: THREE.Raycaster = new THREE.Raycaster(); // For detecting hover intersections
+  private mouse: THREE.Vector2 = new THREE.Vector2(); // Store mouse position
   
   // Layered rendering approach
   private basePolygons: Map<string, THREE.Mesh> = new Map(); // Base land layer (never changes)
@@ -1273,6 +1276,153 @@ export default class PolygonRenderer {
       }
     });
   }
+  
+  /**
+   * Create a tooltip sprite with text
+   * @param text The text to display in the tooltip
+   * @returns A THREE.Sprite with the tooltip
+   */
+  private createTooltip(text: string): THREE.Sprite {
+    // Create canvas for the tooltip
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    canvas.width = 512;
+    canvas.height = 128;
+    
+    if (context) {
+      context.fillStyle = 'rgba(0, 0, 0, 0.7)';
+      context.fillRect(0, 0, canvas.width, canvas.height);
+      context.strokeStyle = '#ffcc00';
+      context.lineWidth = 2;
+      context.strokeRect(2, 2, canvas.width - 4, canvas.height - 4);
+      context.fillStyle = 'white';
+      context.font = '24px Arial';
+      context.textAlign = 'center';
+      context.textBaseline = 'middle';
+      
+      // Split text into lines
+      const lines = text.split('\n');
+      const lineHeight = 30;
+      const startY = canvas.height / 2 - ((lines.length - 1) * lineHeight) / 2;
+      
+      lines.forEach((line, i) => {
+        context.fillText(line, canvas.width / 2, startY + i * lineHeight);
+      });
+    }
+    
+    // Create texture from canvas
+    const texture = new THREE.CanvasTexture(canvas);
+    
+    // Create sprite material
+    const material = new THREE.SpriteMaterial({
+      map: texture,
+      transparent: true
+    });
+    
+    // Create sprite
+    const sprite = new THREE.Sprite(material);
+    sprite.scale.set(2, 0.5, 1);
+    
+    return sprite;
+  }
+  
+  /**
+   * Handle mouse move events to show tooltips on hover
+   * @param event The mouse move event
+   */
+  public handleMouseMove(event: MouseEvent): void {
+    // Only process in land view
+    if (this.activeView !== 'land') return;
+    
+    // Calculate mouse position in normalized device coordinates
+    this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    
+    // Update the raycaster
+    this.raycaster.setFromCamera(this.mouse, this.camera);
+    
+    // Find intersections with overlay polygons
+    const intersects = this.raycaster.intersectObjects(
+      Array.from(this.overlayPolygons.values()), 
+      false
+    );
+    
+    // Remove existing tooltip
+    if (this.hoverTooltip) {
+      this.scene.remove(this.hoverTooltip);
+      this.hoverTooltip = null;
+    }
+    
+    // Reset all polygon hover states
+    this.overlayPolygons.forEach((mesh) => {
+      if (mesh.material instanceof THREE.MeshBasicMaterial && mesh.userData.isHovered) {
+        mesh.material.opacity = 0.7; // Reset opacity
+        mesh.userData.isHovered = false;
+      }
+    });
+    
+    // If we found an intersection
+    if (intersects.length > 0) {
+      const intersect = intersects[0];
+      const mesh = intersect.object as THREE.Mesh;
+      
+      if (mesh.userData.polygonId) {
+        // Find the polygon data
+        const polygon = this.polygons.find(p => p.id === mesh.userData.polygonId);
+        
+        if (polygon) {
+          // Highlight the polygon
+          if (mesh.material instanceof THREE.MeshBasicMaterial) {
+            mesh.material.opacity = 0.9; // Increase opacity for highlight
+            mesh.userData.isHovered = true;
+          }
+          
+          // Get income data
+          let incomeValue = "Unknown";
+          try {
+            const { getIncomeDataService } = require('../../lib/services/IncomeDataService');
+            const incomeService = getIncomeDataService();
+            const income = polygon.simulatedIncome !== undefined 
+              ? polygon.simulatedIncome 
+              : incomeService.getIncome(polygon.id);
+            
+            if (income !== undefined) {
+              incomeValue = income.toLocaleString() + " ducats/day";
+            }
+          } catch (error) {
+            console.warn('Error getting income data:', error);
+          }
+          
+          // Get owner name
+          let ownerName = "Unowned";
+          if (polygon.owner) {
+            ownerName = polygon.owner;
+            
+            // Try to get more user details if available
+            if (this.users[polygon.owner]) {
+              const user = this.users[polygon.owner];
+              if (user.first_name && user.last_name) {
+                ownerName = `${user.first_name} ${user.last_name}`;
+              }
+            }
+          }
+          
+          // Create tooltip text
+          const tooltipText = `${polygon.historicalName || polygon.id}\nOwner: ${ownerName}\nIncome: ${incomeValue}`;
+          
+          // Create tooltip
+          this.hoverTooltip = this.createTooltip(tooltipText);
+          
+          // Position tooltip above the intersection point
+          this.hoverTooltip.position.copy(intersect.point);
+          this.hoverTooltip.position.y += 0.5; // Position above the land
+          
+          // Add to scene
+          this.scene.add(this.hoverTooltip);
+        }
+      }
+    }
+  }
 
   // Add method to create shore effects for islands
   private createShoreEffects() {
@@ -1347,6 +1497,18 @@ export default class PolygonRenderer {
     // Remove event listener for cache clearing
     if (typeof window !== 'undefined') {
       window.removeEventListener('clearPolygonRendererCaches', this.clearCaches.bind(this));
+    }
+    
+    // Remove tooltip if it exists
+    if (this.hoverTooltip) {
+      this.scene.remove(this.hoverTooltip);
+      if (this.hoverTooltip.material) {
+        if (this.hoverTooltip.material instanceof THREE.SpriteMaterial && this.hoverTooltip.material.map) {
+          this.hoverTooltip.material.map.dispose();
+        }
+        this.hoverTooltip.material.dispose();
+      }
+      this.hoverTooltip = null;
     }
     
     // Clean up base polygons
