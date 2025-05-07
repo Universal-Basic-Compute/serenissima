@@ -295,9 +295,9 @@ export class PolygonMeshFacade implements Poolable {
         // Dispose of the old material and its textures
         if (this.mesh.material instanceof THREE.MeshStandardMaterial) {
           if (this.mesh.material.map) this.mesh.material.map.dispose();
-          if (this.mesh.material.normalMap) this.mesh.material.normalMap.dispose();
-          if (this.mesh.material.roughnessMap) this.mesh.material.roughnessMap.dispose();
-          if (this.mesh.material.metalnessMap) {
+          if (this.mesh.material && this.mesh.material.normalMap) this.mesh.material.normalMap.dispose();
+          if (this.mesh.material && this.mesh.material.roughnessMap) this.mesh.material.roughnessMap.dispose();
+          if (this.mesh.material && this.mesh.material.metalnessMap) {
             if ('dispose' in this.mesh.material.metalnessMap) {
               this.mesh.material.metalnessMap.dispose();
             }
@@ -506,8 +506,9 @@ export class PolygonMeshFacade implements Poolable {
         // Check if material has a map property
         if ('map' in this.mesh.material && 
             (this.mesh.material as THREE.MeshStandardMaterial | THREE.MeshBasicMaterial).map &&
-            'dispose' in (this.mesh.material as THREE.MeshStandardMaterial | THREE.MeshBasicMaterial).map!) {
-          (this.mesh.material as THREE.MeshStandardMaterial | THREE.MeshBasicMaterial).map!.dispose();
+            (this.mesh.material as THREE.MeshStandardMaterial | THREE.MeshBasicMaterial).map &&
+            'dispose' in (this.mesh.material as THREE.MeshStandardMaterial | THREE.MeshBasicMaterial).map) {
+          (this.mesh.material as THREE.MeshStandardMaterial | THREE.MeshBasicMaterial).map.dispose();
         }
         this.mesh.material.dispose();
       }

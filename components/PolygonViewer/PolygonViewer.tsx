@@ -725,11 +725,8 @@ export default function PolygonViewer() {
     };
     
     // Add camera reference to window for debugging
-    if (typeof window !== 'undefined' && sceneRef.current) {
-      const currentScene = sceneRef.current;
-      if (currentScene.camera) {
-        (window as any).threeJsCamera = currentScene.camera;
-      }
+    if (typeof window !== 'undefined' && sceneRef.current && sceneRef.current.camera) {
+      (window as any).threeJsCamera = sceneRef.current.camera;
     }
     
     // Check if texture files exist and are accessible
@@ -763,23 +760,22 @@ export default function PolygonViewer() {
     checkTextureFiles();
       
     // Initialize road manager
-    if (sceneRef.current) {
+    if (sceneRef.current && sceneRef.current.scene) {
       const scene = sceneRef.current.scene;
-      if (scene) {
-        if (roadManagerRef.current === null) {
-          roadManagerRef.current = new RoadManager(scene);
-        }
-              
-        // Load roads from Airtable
-        if (roadManagerRef.current) {
-          roadManagerRef.current.loadRoadsFromAirtable()
-            .then(() => {
-              console.log('Roads loaded from Airtable');
-            })
-            .catch(error => {
-              console.error('Failed to load roads from Airtable:', error);
-            });
-        }
+      
+      if (roadManagerRef.current === null) {
+        roadManagerRef.current = new RoadManager(scene);
+      }
+      
+      // Load roads from Airtable
+      if (roadManagerRef.current) {
+        roadManagerRef.current.loadRoadsFromAirtable()
+          .then(() => {
+            console.log('Roads loaded from Airtable');
+          })
+          .catch(error => {
+            console.error('Failed to load roads from Airtable:', error);
+          });
       }
     }
     
