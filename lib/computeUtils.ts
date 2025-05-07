@@ -1,3 +1,5 @@
+import { Connection, PublicKey, Transaction } from '@solana/web3.js';
+import { getAssociatedTokenAddress, createTransferInstruction } from '@solana/spl-token';
 import { getApiBaseUrl } from '@/lib/apiUtils';
 
 /**
@@ -17,9 +19,6 @@ export async function transferCompute(walletAddress: string, amount: number) {
     // Check if we have a valid wallet address
     let publicKey;
     try {
-      // Import Solana web3 libraries
-      const { PublicKey } = await import('@solana/web3.js');
-      
       // Validate the wallet address format
       if (!walletAddress.match(/^[1-9A-HJ-NP-Za-km-z]{32,44}$/)) {
         throw new Error('Invalid wallet address format. Please connect a valid Solana wallet.');
@@ -48,10 +47,6 @@ export async function transferCompute(walletAddress: string, amount: number) {
       console.error('Failed to connect to wallet:', connectError);
       throw new Error('Failed to connect to your wallet. Please try again.');
     }
-    
-    // Now proceed with the transaction
-    const { Connection, Transaction } = await import('@solana/web3.js');
-    const { getAssociatedTokenAddress, createTransferInstruction } = await import('@solana/spl-token');
     
     // Get the connection to Solana
     const connection = new Connection(
