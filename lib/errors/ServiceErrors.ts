@@ -70,11 +70,48 @@ export class NotFoundError extends ServiceError {
 }
 
 /**
- * Error thrown when there's a problem with data format
+ * Error thrown when data format is invalid
  */
 export class DataFormatError extends ServiceError {
   constructor(message: string) {
     super(`Data format error: ${message}`);
+    this.name = 'DataFormatError';
+    Object.setPrototypeOf(this, DataFormatError.prototype);
+  }
+}
+
+/**
+ * Error thrown when user is not authorized to perform an action
+ */
+export class UnauthorizedActionError extends ServiceError {
+  constructor(message: string) {
+    super(`Unauthorized action: ${message}`);
+    this.name = 'UnauthorizedActionError';
+    Object.setPrototypeOf(this, UnauthorizedActionError.prototype);
+  }
+}
+
+/**
+ * Error thrown when a listing is not found
+ */
+export class ListingNotFoundError extends NotFoundError {
+  constructor(listingId: string) {
+    super('Listing', listingId);
+    this.name = 'ListingNotFoundError';
+    Object.setPrototypeOf(this, ListingNotFoundError.prototype);
+  }
+}
+
+/**
+ * Error thrown when an offer is not found
+ */
+export class OfferNotFoundError extends NotFoundError {
+  constructor(offerId: string) {
+    super('Offer', offerId);
+    this.name = 'OfferNotFoundError';
+    Object.setPrototypeOf(this, OfferNotFoundError.prototype);
+  }
+}
     this.name = 'DataFormatError';
     Object.setPrototypeOf(this, DataFormatError.prototype);
   }
