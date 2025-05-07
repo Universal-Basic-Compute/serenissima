@@ -3,16 +3,16 @@
 import dynamic from 'next/dynamic';
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import PlayerProfile from '../../components/UI/PlayerProfile';
-import TransferComputeMenu from '../../components/UI/TransferComputeMenu';
-import WithdrawComputeMenu from '../../components/UI/WithdrawComputeMenu';
-import SuccessAlert from '../../components/UI/SuccessAlert';
+import PlayerProfile from '../components/UI/PlayerProfile';
+import TransferComputeMenu from '../components/UI/TransferComputeMenu';
+import WithdrawComputeMenu from '../components/UI/WithdrawComputeMenu';
+import SuccessAlert from '../components/UI/SuccessAlert';
 import { PhantomWalletAdapter } from '@solana/wallet-adapter-phantom';
 import { WalletReadyState } from '@solana/wallet-adapter-base';
 import { getApiBaseUrl } from '@/lib/apiUtils';
 import { getWalletAddress, setWalletAddress, clearWalletAddress, storeWalletInAirtable } from '@/lib/walletUtils';
 import { transferCompute, withdrawCompute } from '@/lib/computeUtils';
-import { generateCoatOfArmsImage } from '@/app/utils/coatOfArmsUtils';
+import { generateCoatOfArmsImage } from '@/utils/coatOfArmsUtils';
 import { FaHome, FaBuilding, FaRoad, FaTree, FaStore, FaLandmark } from 'react-icons/fa';
 import * as THREE from 'three';
 
@@ -26,7 +26,7 @@ declare global {
 }
 
 // Import SimpleViewer with no SSR to avoid hydration issues
-const SimpleViewer = dynamic(() => import('../../components/PolygonViewer/SimpleViewer'), {
+const SimpleViewer = dynamic(() => import('../components/PolygonViewer/SimpleViewer'), {
   ssr: false
 });
 
