@@ -313,7 +313,7 @@ export default class SimplePolygonRenderer {
       Object.values(serviceUsers).forEach((user: any) => {
         if (user.user_name && user.coat_of_arms_image) {
           this.ownerCoatOfArmsMap[user.user_name] = user.coat_of_arms_image;
-          console.log(`Found coat of arms from service for ${user.user_name}: ${user.coat_of_arms_image}`);
+          // Coat of arms found in service
         }
       });
     }
@@ -323,13 +323,12 @@ export default class SimplePolygonRenderer {
       Object.values(this.users).forEach((user: any) => {
         if (user.user_name && user.coat_of_arms_image) {
           this.ownerCoatOfArmsMap[user.user_name] = user.coat_of_arms_image;
-          console.log(`Found coat of arms in users prop for ${user.user_name}: ${user.coat_of_arms_image}`);
+          // Coat of arms found in users prop
         }
       });
     }
     
-    // Log the available coat of arms data
-    console.log('Available coat of arms:', Object.keys(this.ownerCoatOfArmsMap));
+    // Track available coat of arms data
     
     // Count polygons with owners and centroids
     let polygonsWithOwners = 0;
@@ -355,7 +354,7 @@ export default class SimplePolygonRenderer {
       }
     });
     
-    console.log(`Polygons stats: ${this.polygons.length} total, ${polygonsWithOwners} with owners, ${polygonsWithCentroids} with centroids, ${polygonsWithBoth} with both, ${polygonsWithMatchingOwners} with matching owners`);
+    // Polygon statistics collected
     
     // Process each polygon with an owner and centroid
     let createdCount = 0;
@@ -372,12 +371,12 @@ export default class SimplePolygonRenderer {
         return;
       }
     
-      console.log(`Processing polygon ${polygon.id} with owner ${ownerValue}`);
+      // Process polygon with owner
     
       // Get the coat of arms URL for the owner
       const coatOfArmsUrl = this.ownerCoatOfArmsMap[ownerValue];
       if (!coatOfArmsUrl) {
-        console.log(`No coat of arms found for owner ${ownerValue}`);
+        // No coat of arms found for this owner
         return;
       }
       
@@ -388,7 +387,7 @@ export default class SimplePolygonRenderer {
     
     this.hasRenderedCoatOfArms = true;
     this.isRenderingCoatOfArms = false;
-    console.log(`Created ${createdCount} coat of arms sprites`);
+    // Coat of arms sprites created
   }
   
   /**
@@ -451,7 +450,7 @@ export default class SimplePolygonRenderer {
     // If we found an intersection, use that height (plus a small offset)
     if (intersects.length > 0) {
       yPosition = intersects[0].point.y + 0.01; // 0.01 units above the land
-      console.log(`Found land intersection for ${polygon.id} at height ${yPosition}`);
+      // Land intersection found
     }
     
     // Create a plane geometry for the texture
@@ -485,7 +484,6 @@ export default class SimplePolygonRenderer {
     this.textureLoader.load(
       textureUrl,
       (texture) => {
-        console.log(`Loaded texture for ${polygon.id} from ${textureUrl}`);
         // Create a circular texture with inverted orientation
         const circularTexture = this.createCircularTexture(texture, true); // Added invert parameter
         
