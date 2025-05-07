@@ -74,7 +74,7 @@ app = FastAPI(title="Wallet Storage API")
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "https://api.serenissima.ai", "https://serenissima.ai"],  # Update with your frontend URL
+    allow_origins=["http://localhost:3000", "https://api.serenissima.ai", "https://serenissima.ai", "https://ideogram.ai"],  # Update with your frontend URL
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
