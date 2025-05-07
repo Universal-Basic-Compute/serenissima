@@ -1307,7 +1307,9 @@ export class RoadManager {
                     const attribute = geometry.attributes?.[attributeName];
                     if (attribute && geometry) {
                       // Don't try to modify read-only array property
-                      geometry.deleteAttribute(attributeName);
+                      if (geometry !== null) {
+                        geometry.deleteAttribute(attributeName);
+                      }
                     }
                   });
                   
@@ -1371,9 +1373,11 @@ export class RoadManager {
                 
                 Object.keys(geometry.attributes).forEach(attributeName => {
                   const attribute = geometry.attributes[attributeName];
-                  if (attribute) {
+                  if (attribute && geometry) {
                     // Don't try to modify read-only array property
-                    geometry.deleteAttribute(attributeName);
+                    if (geometry !== null) {
+                      geometry.deleteAttribute(attributeName);
+                    }
                   }
                 });
                 
