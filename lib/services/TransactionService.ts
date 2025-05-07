@@ -15,6 +15,7 @@ import { Listing, Offer, Transaction } from '../store/marketStore';
 // Extend the Listing interface to include updatedAt
 interface ExtendedListing extends Listing {
   updatedAt?: string;
+  assetType?: 'land' | 'building' | 'bridge' | 'compute';
   metadata?: {
     historicalName?: string;
     englishName?: string;
@@ -601,6 +602,7 @@ export class TransactionService {
       const listing: ExtendedListing = {
         id: data.id,
         assetId: data.asset_id,
+        assetType: assetType,
         seller: data.seller,
         price: data.price,
         createdAt: data.created_at,
