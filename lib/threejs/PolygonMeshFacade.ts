@@ -367,7 +367,7 @@ export class PolygonMeshFacade implements Poolable {
             }
           } else {
             // Restore original color
-            if (this.originalColor && material.color instanceof THREE.Color) {
+            if (this.originalColor instanceof THREE.Color && material.color instanceof THREE.Color) {
               material.color.copy(this.originalColor);
             }
           }
@@ -403,7 +403,7 @@ export class PolygonMeshFacade implements Poolable {
             }
             
             // Set to hover color (lighter version of original)
-            if (this.originalColor) {
+            if (this.originalColor instanceof THREE.Color) {
               const hoverColor = this.originalColor.clone();
               hoverColor.r = Math.min(1, hoverColor.r * 1.2);
               hoverColor.g = Math.min(1, hoverColor.g * 1.2);
@@ -415,7 +415,7 @@ export class PolygonMeshFacade implements Poolable {
             }
           } else {
             // Restore original color
-            if (this.originalColor && material.color instanceof THREE.Color) {
+            if (this.originalColor instanceof THREE.Color && material.color instanceof THREE.Color) {
               material.color.copy(this.originalColor);
             }
           }
@@ -514,7 +514,7 @@ export class PolygonMeshFacade implements Poolable {
       }
       
       // Store original color for hover/selection effects
-      if (material instanceof THREE.MeshBasicMaterial && material.color) {
+      if (material instanceof THREE.MeshBasicMaterial && material.color instanceof THREE.Color) {
         this.originalColor = material.color.clone();
       }
     } catch (error) {
