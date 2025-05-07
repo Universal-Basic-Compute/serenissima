@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic';
 import { useState, useRef, useEffect } from 'react';
 import TechTree from '../components/Knowledge/TechTree';
 import ProjectPresentation from '../components/Knowledge/ProjectPresentation';
+import ResourceTree from '../components/Knowledge/ResourceTree';
 import Link from 'next/link';
 import { clearLandOwnershipCaches } from '@/lib/cacheUtils';
 import { eventBus, EventTypes } from '@/lib/eventBus';
@@ -93,6 +94,7 @@ export default function SimplePage() {
   const [showSettingsModal, setShowSettingsModal] = useState<boolean>(false);
   const [showTechTree, setShowTechTree] = useState<boolean>(false);
   const [showPresentation, setShowPresentation] = useState<boolean>(false);
+  const [showResourceTree, setShowResourceTree] = useState<boolean>(false);
   const [userProfile, setUserProfile] = useState<{
     username: string;
     firstName: string;
@@ -513,7 +515,7 @@ export default function SimplePage() {
               Knowledge Repository
             </h2>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {/* Roadmap Resource */}
               <div className="bg-white rounded-lg overflow-hidden shadow-md border border-amber-200">
                 <div className="h-48 overflow-hidden">
@@ -566,6 +568,34 @@ export default function SimplePage() {
                     className="inline-block px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors"
                   >
                     View Presentation
+                  </button>
+                </div>
+              </div>
+              
+              {/* Resource Tree Card */}
+              <div className="bg-white rounded-lg overflow-hidden shadow-md border border-amber-200">
+                <div className="h-48 overflow-hidden">
+                  <img 
+                    src="/images/resource-tree.png" 
+                    alt="Resource Tree" 
+                    className="w-full h-full object-cover transition-transform hover:scale-105"
+                    onError={(e) => {
+                      // Fallback if image doesn't exist
+                      (e.target as HTMLImageElement).src = 'https://via.placeholder.com/800x400?text=Resources';
+                    }}
+                  />
+                </div>
+                <div className="p-6">
+                  <h3 className="text-xl font-serif text-amber-800 mb-2">Resource Encyclopedia</h3>
+                  <p className="text-gray-600 mb-4">
+                    Explore the complex web of resources, production chains, and economic relationships 
+                    that power the Venetian economy.
+                  </p>
+                  <button 
+                    onClick={() => setShowResourceTree(true)}
+                    className="inline-block px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors"
+                  >
+                    View Resource Tree
                   </button>
                 </div>
               </div>
@@ -1146,6 +1176,11 @@ export default function SimplePage() {
       {/* Project Presentation Modal */}
       {showPresentation && (
         <ProjectPresentation onClose={() => setShowPresentation(false)} />
+      )}
+      
+      {/* Resource Tree Modal */}
+      {showResourceTree && (
+        <ResourceTree onClose={() => setShowResourceTree(false)} />
       )}
       
       {/* Land Purchase Confirmation Modal */}
