@@ -864,7 +864,7 @@ export class WaterFacade {
    * Find boundary indices of a geometry (simplified version)
    * @private
    */
-  private findBoundaryIndices(geometry: THREE.BufferGeometry<THREE.NormalBufferAttributes>): number[] {
+  private findBoundaryIndices(geometry: THREE.BufferGeometry): number[] {
     // Enhanced boundary detection to find actual edge vertices
     const indices: number[] = [];
     const positions = geometry.getAttribute('position');
