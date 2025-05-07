@@ -27,8 +27,9 @@ declare global {
 // Define interface for PolygonViewer props
 interface PolygonViewerProps {
   getSnapshotWithCache: <T>(getSnapshotFn: () => T, dependencies: any[]) => T;
-  ref?: React.MutableRefObject<any>;
+  ref: MutableRefObject<any>;
   activeView: 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance';
+  key: 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance';
   [key: string]: any; // Allow additional props
 }
 
