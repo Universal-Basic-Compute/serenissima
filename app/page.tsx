@@ -29,7 +29,7 @@ interface PolygonViewerProps {
   getSnapshotWithCache: <T>(getSnapshotFn: () => T, dependencies: any[]) => T;
   ref: MutableRefObject<any>;
   activeView: 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance';
-  key: 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance';
+  key?: 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance';
   [key: string]: any; // Allow additional props
 }
 
@@ -2554,8 +2554,6 @@ export default function Home() {
           activeView={activeView}
           // Add any additional required props here
           key={activeView} // Adding a key prop to ensure re-render on view change
-          // Spread any additional props that might be required by the component
-          {...{}} // Empty object to satisfy TypeScript
         />
       </>
       
