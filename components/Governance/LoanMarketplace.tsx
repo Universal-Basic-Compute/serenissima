@@ -99,8 +99,12 @@ const LoanMarketplace: React.FC = () => {
   
   const filteredLoans = availableLoans.filter(loan => {
     if (selectedLoanType === 'all') return true;
-    if (selectedLoanType === 'treasury') return loan.lender === 'Treasury';
-    if (selectedLoanType === 'private') return loan.lender !== 'Treasury';
+    if (selectedLoanType === 'treasury') {
+      return loan.lender === 'Treasury' || loan.lender === 'ConsiglioDeiDieci';
+    }
+    if (selectedLoanType === 'private') {
+      return loan.lender !== 'Treasury' && loan.lender !== 'ConsiglioDeiDieci';
+    }
     return true;
   });
   
@@ -174,7 +178,7 @@ const LoanMarketplace: React.FC = () => {
               }`}
               onClick={() => setSelectedLoanType('treasury')}
             >
-              Treasury Loans
+              Official Loans
             </button>
             <button
               type="button"
@@ -270,6 +274,10 @@ const LoanMarketplace: React.FC = () => {
                           {loan.lender === 'Treasury' ? (
                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                               Treasury of Venice
+                            </span>
+                          ) : loan.lender === 'ConsiglioDeiDieci' ? (
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                              Council of Ten
                             </span>
                           ) : (
                             loan.lender
