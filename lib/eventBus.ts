@@ -89,7 +89,6 @@ export const EventTypes = {
   OWNER_COAT_OF_ARMS_UPDATED: 'ownerCoatOfArmsUpdated',
   POLYGON_OWNER_UPDATED: 'polygonOwnerUpdated',
   // Building and infrastructure events
-  DOCK_PLACED: 'dockPlaced',
   DOCK_DELETED: 'dockDeleted',
   DOCK_UPDATED: 'dockUpdated',
   // Interaction events
