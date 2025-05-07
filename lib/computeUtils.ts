@@ -226,9 +226,10 @@ export async function transferCompute(walletAddress: string, amount: number) {
     }
     
     // Send the signed transaction to the network
+    let signature: string;
     try {
       console.log('Sending transaction to network...');
-      const signature = await connection.sendRawTransaction(serializedTransaction);
+      signature = await connection.sendRawTransaction(serializedTransaction);
       
       console.log('Transaction sent with signature:', signature);
       
