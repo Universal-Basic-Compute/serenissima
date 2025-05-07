@@ -511,10 +511,10 @@ export default function SimplePage() {
     
     {/* Username prompt modal - non-dismissable */}
     {showUsernamePrompt && (
-      <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
-        <div className="bg-white p-8 rounded-lg shadow-lg w-[900px] max-w-[90vw] border-4 border-amber-700 flex flex-col md:flex-row">
+      <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-lg shadow-lg w-[900px] max-w-[95vw] max-h-[90vh] border-4 border-amber-700 flex flex-col md:flex-row overflow-hidden">
           {/* Left side - Form */}
-          <div className="md:w-1/2 pr-0 md:pr-6">
+          <div className="md:w-1/2 pr-0 md:pr-6 overflow-y-auto max-h-[80vh] p-6">
             <h2 className="text-2xl font-serif font-semibold mb-4 text-amber-800 text-center">
               {userProfile ? 'Edit Your Noble Profile' : 'Welcome to La Serenissima'}
             </h2>
@@ -533,7 +533,7 @@ export default function SimplePage() {
             <div className="mb-6">
               <h3 className="text-lg font-medium text-amber-700 mb-2">Your Noble Identity</h3>
               
-              <div className="flex flex-col space-y-4">
+              <div className="flex flex-col space-y-3">
                 {/* Only show username field when creating a new profile, not when editing */}
                 {!userProfile && (
                   <div className="flex items-center">
@@ -710,12 +710,12 @@ export default function SimplePage() {
                     <label className="block text-gray-700">Family Color</label>
                   </div>
                   <div className="w-2/3">
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-1">
                       {veniceColorPalette.map((color) => (
                         <button
                           key={color}
                           onClick={() => setSelectedColor(color)}
-                          className={`w-8 h-8 rounded-full border-2 ${
+                          className={`w-6 h-6 rounded-full border-2 ${
                             selectedColor === color ? 'border-white ring-2 ring-amber-500' : 'border-gray-300'
                           }`}
                           style={{ backgroundColor: color }}
@@ -736,7 +736,7 @@ export default function SimplePage() {
           </div>
           
           {/* Right side - Coat of Arms Image and Oath */}
-          <div className="md:w-1/2 mt-6 md:mt-0 flex flex-col items-center justify-center">
+          <div className="md:w-1/2 mt-6 md:mt-0 flex flex-col items-center overflow-y-auto max-h-[80vh] p-6">
             {/* Coat of Arms Image */}
             <div className="flex-1 flex flex-col items-center justify-center w-full">
               {coatOfArmsImage ? (
@@ -837,6 +837,28 @@ export default function SimplePage() {
       }
     `}</style>
       <BackgroundMusic />
+      
+      <style jsx global>{`
+        .overflow-y-auto {
+          scrollbar-width: thin;
+          scrollbar-color: rgba(217, 119, 6, 0.5) rgba(255, 255, 255, 0.1);
+        }
+        .overflow-y-auto::-webkit-scrollbar {
+          width: 8px;
+        }
+        .overflow-y-auto::-webkit-scrollbar-track {
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: 4px;
+        }
+        .overflow-y-auto::-webkit-scrollbar-thumb {
+          background-color: rgba(217, 119, 6, 0.5);
+          border-radius: 4px;
+          border: 2px solid transparent;
+        }
+        .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+          background-color: rgba(217, 119, 6, 0.8);
+        }
+      `}</style>
       
       {/* Land Purchase Confirmation Modal */}
       {showLandPurchaseModal && landPurchaseData && (
