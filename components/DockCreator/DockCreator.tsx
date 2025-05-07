@@ -52,10 +52,25 @@ const DockCreator: React.FC<DockCreatorProps> = ({
       while (attempts < maxAttempts && !managerRef.current) {
         console.log(`DockCreator: Initialization attempt ${attempts + 1}`);
         
-        if (actualScene && actualCamera && polygons && polygons.length > 0) {
+        // Try to get scene, camera, and polygons from window.__threeContext
+        const globalScene = window.__threeContext?.scene;
+        const globalCamera = window.__threeContext?.camera;
+        const globalPolygons = window.__polygonData || [];
+        
+        console.log('Found from global:', 
+          !!globalScene, 
+          !!globalCamera, 
+          globalPolygons.length);
+        
+        // Use props if provided, otherwise use global objects
+        const sceneToUse = scene || actualScene || globalScene;
+        const cameraToUse = camera || actualCamera || globalCamera;
+        const polygonsToUse = polygons || globalPolygons;
+        
+        if (sceneToUse && cameraToUse && polygonsToUse && polygonsToUse.length > 0) {
           try {
             console.log('DockCreator: Creating new DockCreationManager');
-            managerRef.current = new DockCreationManager(actualScene, actualCamera, polygons);
+            managerRef.current = new DockCreationManager(sceneToUse, cameraToUse, polygonsToUse);
             
             // Force an initial update of the mouse position to show the preview
             const centerX = window.innerWidth / 2;

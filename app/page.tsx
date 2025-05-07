@@ -26,13 +26,19 @@ declare global {
     _polygonSnapshotCache: { result: any; deps: string | null };
     getCachedSnapshot: <T>(getSnapshotFn: () => T, deps: any[]) => T;
     dispatchEvent(event: Event): boolean;
-    __polygonData?: any[]; // Add missing property
+    __polygonData?: any[];
+    __threeContext?: {
+      scene: THREE.Scene;
+      camera: THREE.PerspectiveCamera;
+      renderer: THREE.WebGLRenderer;
+    };
   }
   
   // Add custom properties to HTMLCanvasElement
   interface HTMLCanvasElement {
     __scene?: THREE.Scene;
     __camera?: THREE.PerspectiveCamera;
+    __renderer?: THREE.WebGLRenderer;
   }
 }
 

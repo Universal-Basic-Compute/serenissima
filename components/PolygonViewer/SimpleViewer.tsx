@@ -180,6 +180,25 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
     const cameraController = new SimpleCamera(renderer.domElement);
     cameraControllerRef.current = cameraController;
     
+    // IMPORTANT: Expose scene, camera, and polygons to window object
+    if (typeof window !== 'undefined') {
+      window.__threeContext = {
+        scene,
+        camera: cameraController.camera,
+        renderer
+      };
+      
+      // Also expose on canvas element for backward compatibility
+      if (canvasRef.current) {
+        canvasRef.current.__scene = scene;
+        canvasRef.current.__camera = cameraController.camera;
+        canvasRef.current.__renderer = renderer;
+      }
+      
+      // Store polygon data on window
+      window.__polygonData = polygons;
+    }
+    
     // Create water first (so it's rendered first)
     const waterSize = Math.max(bounds.scale * 500, 1000);
     const water = new SimpleWater({
@@ -291,6 +310,18 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
           }
         }
       });
+      
+      // Clean up window references
+      if (typeof window !== 'undefined') {
+        delete window.__threeContext;
+        delete window.__polygonData;
+        
+        if (canvasRef.current) {
+          delete canvasRef.current.__scene;
+          delete canvasRef.current.__camera;
+          delete canvasRef.current.__renderer;
+        }
+      }
     };
   }, [polygons, loading, qualityMode, activeView, users]);
   
