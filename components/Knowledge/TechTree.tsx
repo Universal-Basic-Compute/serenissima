@@ -43,14 +43,14 @@ const TechTree: React.FC<TechTreeProps> = ({ onClose }) => {
     {
       id: 'terrain',
       title: 'Terrain',
-      description: 'The foundational geography of La Serenissima, including land and water features. The terrain system defines the physical world, with elevation changes, water bodies, and natural features that influence construction and navigation throughout the city-state.',
+      description: 'The foundational geography of La Serenissima, including land and water features. The terrain system defines the physical world, with elevation changes, water bodies, and natural features that influence construction and navigation throughout the city-state. GAMEPLAY IMPACT: Determines where you can build and how you can navigate. PLAYER BENEFIT: Explore a beautifully rendered Venice with realistic waterways and islands that create strategic opportunities for property development.',
       image: '/images/tech-tree/terrain.jpg',
       link: '/docs/terrain.pdf',
     },
     {
       id: 'lands',
       title: 'Lands',
-      description: 'Parcels of land that can be owned, developed, and traded. The land system enables property ownership with detailed boundaries, legal titles, and transfer mechanisms. Land parcels vary in size, location value, and development potential based on proximity to canals and city centers.',
+      description: 'Parcels of land that can be owned, developed, and traded. The land system enables property ownership with detailed boundaries, legal titles, and transfer mechanisms. Land parcels vary in size, location value, and development potential based on proximity to canals and city centers. GAMEPLAY IMPACT: Allows you to purchase, own, and develop specific areas of the map. PLAYER BENEFIT: Build your own Venetian empire by acquiring prime real estate in strategic locations that appreciate in value over time.',
       image: '/images/tech-tree/lands.jpg',
       link: '/docs/lands.pdf',
       dependencies: ['terrain'],
@@ -58,7 +58,7 @@ const TechTree: React.FC<TechTreeProps> = ({ onClose }) => {
     {
       id: 'loans',
       title: 'Loans',
-      description: 'Financial instruments for borrowing and lending ducats. The loan system implements Renaissance banking practices with interest calculations, collateral requirements, and repayment schedules. Loans can be used for land purchases, building construction, or trade ventures with varying terms and conditions.',
+      description: 'Financial instruments for borrowing and lending ducats. The loan system implements Renaissance banking practices with interest calculations, collateral requirements, and repayment schedules. Loans can be used for land purchases, building construction, or trade ventures with varying terms and conditions. GAMEPLAY IMPACT: Provides capital to fund land purchases and construction projects. PLAYER BENEFIT: Accelerate your growth by leveraging loans to acquire assets before you have the full capital, creating opportunities for both borrowers and lenders.',
       image: '/images/tech-tree/loans.jpg',
       link: '/docs/loans.pdf',
       dependencies: ['lands'],
@@ -66,7 +66,7 @@ const TechTree: React.FC<TechTreeProps> = ({ onClose }) => {
     {
       id: 'docks',
       title: 'Docks',
-      description: 'Water access points for transportation and trade. The dock system enables water-based commerce with loading/unloading facilities, ship moorings, and connection points to the road network. Docks must be strategically placed along water edges and provide economic benefits to adjacent land parcels.',
+      description: 'Water access points for transportation and trade. The dock system enables water-based commerce with loading/unloading facilities, ship moorings, and connection points to the road network. Docks must be strategically placed along water edges and provide economic benefits to adjacent land parcels. GAMEPLAY IMPACT: Creates connection points between water and land transportation networks. PLAYER BENEFIT: Establish lucrative trade routes and increase the value of waterfront properties by building docks that serve as commercial hubs.',
       image: '/images/tech-tree/docks.jpg',
       link: '/docs/docks.pdf',
       dependencies: ['lands'],
@@ -74,7 +74,7 @@ const TechTree: React.FC<TechTreeProps> = ({ onClose }) => {
     {
       id: 'bridges',
       title: 'Bridges',
-      description: 'Structures connecting land parcels across water. The bridge system facilitates pedestrian and goods movement between islands with varying designs and capacities. Bridges require engineering expertise, significant resources to construct, and ongoing maintenance to remain operational.',
+      description: 'Structures connecting land parcels across water. The bridge system facilitates pedestrian and goods movement between islands with varying designs and capacities. Bridges require engineering expertise, significant resources to construct, and ongoing maintenance to remain operational. GAMEPLAY IMPACT: Creates new pathways between previously disconnected areas. PLAYER BENEFIT: Transform the accessibility of your properties by building bridges that increase foot traffic and connect isolated areas to the main commercial districts.',
       image: '/images/tech-tree/bridges.jpg',
       link: '/docs/bridges.pdf',
       dependencies: ['lands'],
@@ -82,7 +82,7 @@ const TechTree: React.FC<TechTreeProps> = ({ onClose }) => {
     {
       id: 'roads',
       title: 'Roads',
-      description: 'Transportation infrastructure connecting properties. The road network enables land-based movement with variable widths, surfaces, and traffic capacities. Roads can be constructed with different materials affecting durability and maintenance costs, while providing essential connectivity between buildings.',
+      description: 'Transportation infrastructure connecting properties. The road network enables land-based movement with variable widths, surfaces, and traffic capacities. Roads can be constructed with different materials affecting durability and maintenance costs, while providing essential connectivity between buildings. GAMEPLAY IMPACT: Establishes land-based transportation routes that affect property values. PLAYER BENEFIT: Design your own transportation network to maximize efficiency and increase the value of your properties through improved accessibility.',
       image: '/images/tech-tree/roads.jpg',
       link: '/docs/roads.pdf',
       dependencies: ['lands'],
@@ -90,7 +90,7 @@ const TechTree: React.FC<TechTreeProps> = ({ onClose }) => {
     {
       id: 'market',
       title: 'Market',
-      description: 'System for buying and selling land and resources. The marketplace facilitates economic exchange with auctions, fixed-price listings, and negotiated trades. Market activities influence property values, resource prices, and overall economic conditions through supply and demand mechanics.',
+      description: 'System for buying and selling land and resources. The marketplace facilitates economic exchange with auctions, fixed-price listings, and negotiated trades. Market activities influence property values, resource prices, and overall economic conditions through supply and demand mechanics. GAMEPLAY IMPACT: Creates a player-driven economy where assets can be traded. PLAYER BENEFIT: Speculate on property values, corner markets on essential resources, or establish yourself as a trusted merchant with competitive pricing.',
       image: '/images/tech-tree/market.jpg',
       link: '/docs/market.pdf',
       dependencies: ['lands', 'loans'],
@@ -98,7 +98,7 @@ const TechTree: React.FC<TechTreeProps> = ({ onClose }) => {
     {
       id: 'buildings',
       title: 'Buildings',
-      description: 'Structures that can be built on land parcels. The building system enables construction of various architectural styles with different functions, capacities, and resource requirements. Buildings provide housing, production facilities, and civic services while contributing to land value.',
+      description: 'Structures that can be built on land parcels. The building system enables construction of various architectural styles with different functions, capacities, and resource requirements. Buildings provide housing, production facilities, and civic services while contributing to land value. GAMEPLAY IMPACT: Determines what activities can occur on your land and how much income it generates. PLAYER BENEFIT: Express your creativity by designing your own Venetian palazzo or commercial district while strategically choosing buildings that maximize your income.',
       image: '/images/tech-tree/buildings.jpg',
       link: '/docs/buildings.pdf',
       dependencies: ['lands', 'roads'],
@@ -106,7 +106,7 @@ const TechTree: React.FC<TechTreeProps> = ({ onClose }) => {
     {
       id: 'transport',
       title: 'Transport',
-      description: 'Systems for moving people and goods around the city. The transportation network combines water and land routes with various vessel types and cargo capacities. Transport efficiency affects trade profitability, resource distribution, and population mobility throughout La Serenissima.',
+      description: 'Systems for moving people and goods around the city. The transportation network combines water and land routes with various vessel types and cargo capacities. Transport efficiency affects trade profitability, resource distribution, and population mobility throughout La Serenissima. GAMEPLAY IMPACT: Affects the efficiency of resource movement and accessibility of properties. PLAYER BENEFIT: Establish faster trade routes and passenger services that generate income while making your properties more valuable through improved connectivity.',
       image: '/images/tech-tree/transport.jpg',
       link: '/docs/transport.pdf',
       dependencies: ['roads', 'docks', 'bridges'],
@@ -114,7 +114,7 @@ const TechTree: React.FC<TechTreeProps> = ({ onClose }) => {
     {
       id: 'rent',
       title: 'Rent',
-      description: 'Income generated from owned properties. The rent system calculates returns based on property size, location, building quality, and economic conditions. Rent collection occurs at regular intervals and provides passive income to property owners while creating ongoing expenses for tenants.',
+      description: 'Income generated from owned properties. The rent system calculates returns based on property size, location, building quality, and economic conditions. Rent collection occurs at regular intervals and provides passive income to property owners while creating ongoing expenses for tenants. GAMEPLAY IMPACT: Provides passive income from your property investments. PLAYER BENEFIT: Build a real estate empire that generates consistent passive income, allowing you to focus on expansion while your existing properties pay dividends.',
       image: '/images/tech-tree/rent.jpg',
       link: '/docs/rent.pdf',
       dependencies: ['buildings'],
@@ -122,7 +122,7 @@ const TechTree: React.FC<TechTreeProps> = ({ onClose }) => {
     {
       id: 'businesses',
       title: 'Businesses',
-      description: 'Commercial enterprises that generate income. The business system enables various economic activities with different resource inputs, production processes, and market outputs. Businesses require appropriate buildings, skilled workers, and resource supply chains to operate profitably.',
+      description: 'Commercial enterprises that generate income. The business system enables various economic activities with different resource inputs, production processes, and market outputs. Businesses require appropriate buildings, skilled workers, and resource supply chains to operate profitably. GAMEPLAY IMPACT: Creates active income sources that require management but yield higher returns. PLAYER BENEFIT: Diversify your income streams by establishing businesses that transform raw materials into valuable goods, creating economic chains that you control.',
       image: '/images/tech-tree/businesses.jpg',
       link: '/docs/businesses.pdf',
       dependencies: ['buildings', 'market'],
@@ -130,7 +130,7 @@ const TechTree: React.FC<TechTreeProps> = ({ onClose }) => {
     {
       id: 'pay',
       title: 'Pay',
-      description: 'System for compensating workers and service providers. The payment system handles wage calculations, service fees, and transaction records with historical accuracy. Payment amounts vary based on skill levels, market conditions, and negotiated contracts between employers and workers.',
+      description: 'System for compensating workers and service providers. The payment system handles wage calculations, service fees, and transaction records with historical accuracy. Payment amounts vary based on skill levels, market conditions, and negotiated contracts between employers and workers. GAMEPLAY IMPACT: Determines the cost of labor and services for your operations. PLAYER BENEFIT: Hire skilled workers to increase your production efficiency and quality, balancing wage costs against productivity gains.',
       image: '/images/tech-tree/pay.jpg',
       link: '/docs/pay.pdf',
       dependencies: ['businesses'],
@@ -138,7 +138,7 @@ const TechTree: React.FC<TechTreeProps> = ({ onClose }) => {
     {
       id: 'resources',
       title: 'Resources',
-      description: 'Raw materials used in construction and production. The resource system models extraction, refinement, and consumption of materials with realistic scarcity and quality variations. Resources include building materials, craft inputs, luxury goods, and consumables with complex supply chains.',
+      description: 'Raw materials used in construction and production. The resource system models extraction, refinement, and consumption of materials with realistic scarcity and quality variations. Resources include building materials, craft inputs, luxury goods, and consumables with complex supply chains. GAMEPLAY IMPACT: Creates supply chains that feed into construction and manufacturing. PLAYER BENEFIT: Secure key resource supplies to protect your operations from market fluctuations or corner markets to control pricing of essential materials.',
       image: '/images/tech-tree/resources.jpg',
       link: '/docs/resources.pdf',
       dependencies: ['transport'],
@@ -146,7 +146,7 @@ const TechTree: React.FC<TechTreeProps> = ({ onClose }) => {
     {
       id: 'economy',
       title: 'Economy',
-      description: 'The overall economic system of La Serenissima. The economy integrates all commercial activities with inflation mechanics, business cycles, and external trade factors. Economic conditions fluctuate based on player actions, historical events, and simulated market forces affecting all other systems.',
+      description: 'The overall economic system of La Serenissima. The economy integrates all commercial activities with inflation mechanics, business cycles, and external trade factors. Economic conditions fluctuate based on player actions, historical events, and simulated market forces affecting all other systems. GAMEPLAY IMPACT: Creates dynamic market conditions that affect all other systems. PLAYER BENEFIT: Master the economic cycles to buy low and sell high, or create monopolies that allow you to set prices in key sectors of the Venetian economy.',
       image: '/images/tech-tree/economy.jpg',
       link: '/docs/economy.pdf',
       dependencies: ['market', 'businesses', 'rent'],
@@ -154,7 +154,7 @@ const TechTree: React.FC<TechTreeProps> = ({ onClose }) => {
     {
       id: 'consumption',
       title: 'Consumption',
-      description: 'Use of goods and services by the population. The consumption system models demand patterns across different social classes with varying preferences and purchasing power. Consumption drives production requirements, influences prices, and creates economic opportunities for businesses catering to public needs.',
+      description: 'Use of goods and services by the population. The consumption system models demand patterns across different social classes with varying preferences and purchasing power. Consumption drives production requirements, influences prices, and creates economic opportunities for businesses catering to public needs. GAMEPLAY IMPACT: Drives demand for various goods and services in the economy. PLAYER BENEFIT: Analyze consumption patterns to identify untapped markets and consumer needs, allowing you to establish businesses that cater to specific demographic segments.',
       image: '/images/tech-tree/consumption.jpg',
       link: '/docs/consumption.pdf',
       dependencies: ['resources', 'businesses'],
@@ -162,7 +162,7 @@ const TechTree: React.FC<TechTreeProps> = ({ onClose }) => {
     {
       id: 'actions',
       title: 'Actions',
-      description: 'Player activities and interactions within the world. The action system defines available player behaviors with associated costs, requirements, and consequences. Actions include construction projects, business operations, political maneuvers, and social interactions with both immediate and long-term effects.',
+      description: 'Player activities and interactions within the world. The action system defines available player behaviors with associated costs, requirements, and consequences. Actions include construction projects, business operations, political maneuvers, and social interactions with both immediate and long-term effects. GAMEPLAY IMPACT: Determines what players can do and how they interact with the world. PLAYER BENEFIT: Unlock new capabilities and strategic options as you progress, from simple property management to complex political maneuvers that shape the future of Venice.',
       image: '/images/tech-tree/actions.jpg',
       link: '/docs/actions.pdf',
       dependencies: ['economy', 'consumption'],
@@ -170,7 +170,7 @@ const TechTree: React.FC<TechTreeProps> = ({ onClose }) => {
     {
       id: 'governance',
       title: 'Governance',
-      description: 'Political systems and decision-making processes. The governance system implements Venetian political structures with councils, voting mechanisms, and factional dynamics. Governance affects taxation, regulations, public works, and diplomatic relations with significant economic and social consequences.',
+      description: 'Political systems and decision-making processes. The governance system implements Venetian political structures with councils, voting mechanisms, and factional dynamics. Governance affects taxation, regulations, public works, and diplomatic relations with significant economic and social consequences. GAMEPLAY IMPACT: Allows players to influence city-wide policies and regulations. PLAYER BENEFIT: Rise through the political ranks of Venice to shape laws, taxation, and public works that benefit your interests while participating in the famous Venetian political intrigue.',
       image: '/images/tech-tree/governance.jpg',
       link: '/docs/governance.pdf',
       dependencies: ['economy', 'actions'],
@@ -445,9 +445,44 @@ const TechTree: React.FC<TechTreeProps> = ({ onClose }) => {
                       <article className="prose prose-amber prose-lg max-w-none">
                         <h2 className="text-2xl font-serif text-amber-800 mb-4 hidden md:block">{selectedNode.title}</h2>
                         
-                        <p className="text-lg font-medium text-amber-900 leading-relaxed">
-                          {selectedNode.description}
-                        </p>
+                        {/* Format the description to separate the gameplay impact and player benefit */}
+                        {(() => {
+                          const parts = selectedNode.description.split('GAMEPLAY IMPACT:');
+                          const overview = parts[0].trim();
+                          
+                          let gameplayImpact = '';
+                          let playerBenefit = '';
+                          
+                          if (parts.length > 1) {
+                            const impactParts = parts[1].split('PLAYER BENEFIT:');
+                            gameplayImpact = impactParts[0].trim();
+                            if (impactParts.length > 1) {
+                              playerBenefit = impactParts[1].trim();
+                            }
+                          }
+                          
+                          return (
+                            <>
+                              <p className="text-lg font-medium text-amber-900 leading-relaxed">
+                                {overview}
+                              </p>
+                              
+                              {gameplayImpact && (
+                                <div className="mt-4 bg-amber-100/50 p-4 rounded-lg border border-amber-200">
+                                  <h3 className="text-lg font-serif text-amber-800 mb-2">Gameplay Impact</h3>
+                                  <p className="text-base text-amber-900">{gameplayImpact}</p>
+                                </div>
+                              )}
+                              
+                              {playerBenefit && (
+                                <div className="mt-4 bg-amber-100/50 p-4 rounded-lg border border-amber-200">
+                                  <h3 className="text-lg font-serif text-amber-800 mb-2">Player Benefit</h3>
+                                  <p className="text-base text-amber-900">{playerBenefit}</p>
+                                </div>
+                              )}
+                            </>
+                          );
+                        })()}
                         
                         {selectedNode.link && (
                           <div className="mt-6">
