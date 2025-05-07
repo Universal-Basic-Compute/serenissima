@@ -88,11 +88,21 @@ export default function WalletButton({ className = '' }: WalletButtonProps) {
               Cash out <span className="compute-token">$COMPUTE</span>
             </button>
             <button
-              onClick={() => {
+              onClick={async () => {
                 // Clear current wallet connection but keep the session
                 localStorage.removeItem('userProfile');
                 
-                // Trigger wallet connection flow to select a new wallet
+                // Disconnect the current wallet first
+                sessionStorage.removeItem('walletAddress');
+                localStorage.removeItem('walletAddress');
+                
+                // Dispatch event to notify components about wallet change
+                window.dispatchEvent(new Event('walletChanged'));
+                
+                // Wait a moment for the disconnect to complete
+                await new Promise(resolve => setTimeout(resolve, 100));
+                
+                // Then trigger wallet connection flow to select a new wallet
                 connectWallet();
                 setDropdownOpen(false);
               }}
