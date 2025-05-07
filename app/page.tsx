@@ -66,6 +66,7 @@ export default function SimplePage() {
     transaction: any;
     onComplete?: () => void;
   } | null>(null);
+  const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [userProfile, setUserProfile] = useState<{
     username: string;
     firstName: string;
@@ -88,10 +89,16 @@ export default function SimplePage() {
       return;
     }
     
-    if (!walletAddress) {
+    // Get the current wallet address
+    const currentWalletAddress = getWalletAddress();
+    
+    if (!currentWalletAddress) {
       alert('Wallet connection is required');
       return;
     }
+    
+    // Update the state
+    setWalletAddress(currentWalletAddress);
     
     try {
       // When editing, use the existing username
@@ -104,7 +111,7 @@ export default function SimplePage() {
         : selectedColor;
       
       console.log('Submitting profile data to backend:', {
-        wallet_address: walletAddress,
+        wallet_address: currentWalletAddress,
         user_name: username,
         first_name: firstName.trim(),
         last_name: lastName.trim(),
@@ -121,7 +128,7 @@ export default function SimplePage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          wallet_address: walletAddress,
+          wallet_address: currentWalletAddress,
           user_name: username,
           first_name: firstName.trim(),
           last_name: lastName.trim(),
@@ -149,7 +156,8 @@ export default function SimplePage() {
         familyMotto: familyMotto.trim(),
         familyCoatOfArms: familyCoatOfArms.trim(),
         computeAmount: data.compute_amount,
-        color: selectedColor
+        color: selectedColor,
+        walletAddress: currentWalletAddress
       };
       
       // Update the user profile state
