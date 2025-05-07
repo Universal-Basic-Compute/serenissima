@@ -695,7 +695,19 @@ export default class PolygonRenderer {
       return;
     }
     
+    const wasLandView = this.activeView === 'land';
+    const isNowLandView = activeView === 'land';
+    
     this.activeView = activeView;
+    
+    // If switching to land view, we need to dispose of textures
+    if (!wasLandView && isNowLandView) {
+      console.log('Switching to land view, disposing of textures');
+      // Clear THREE.js texture cache to free memory
+      if (THREE.Cache) {
+        THREE.Cache.clear();
+      }
+    }
     
     // Update all polygons with the new view mode
     this.polygonMeshes.forEach(polygonMesh => {

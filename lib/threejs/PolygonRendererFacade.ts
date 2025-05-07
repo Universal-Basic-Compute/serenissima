@@ -16,9 +16,11 @@ export class PolygonRendererFacade {
     sandRoughnessMap?: THREE.Texture;
   } = {};
   private isDisposed: boolean = false;
+  private isLandView: boolean = false;
 
-  constructor(scene: THREE.Scene) {
+  constructor(scene: THREE.Scene, activeView?: ViewMode) {
     this.scene = scene;
+    this.isLandView = activeView === 'land';
     
     // Initialize texture loader
     if (!PolygonRendererFacade.sharedTextureLoader) {
@@ -27,8 +29,12 @@ export class PolygonRendererFacade {
     }
     this.textureLoader = PolygonRendererFacade.sharedTextureLoader;
     
-    // Load shared textures if they don't exist yet
-    this.loadSharedTextures();
+    // Load shared textures if don't exist yet and not in land view
+    if (!this.isLandView) {
+      this.loadSharedTextures();
+    } else {
+      console.log('Land view active: Skipping shared texture loading');
+    }
   }
   
   /**
@@ -36,6 +42,11 @@ export class PolygonRendererFacade {
    */
   private loadSharedTextures(): void {
     if (this.isDisposed) return;
+    
+    if (this.isLandView) {
+      console.log('Land view active: Skipping shared texture loading');
+      return;
+    }
     
     if (!PolygonRendererFacade.sharedTextures.sandBaseColor) {
       console.log('Loading shared textures...');
@@ -109,13 +120,25 @@ export class PolygonRendererFacade {
   }
   
   /**
-   * Create a standard material for land polygons
+   * Create a material for land polygons
+   * @param forceBasicMaterial If true, creates a MeshBasicMaterial without textures
    */
-  public createLandMaterial(): THREE.MeshStandardMaterial {
+  public createLandMaterial(forceBasicMaterial: boolean = false): THREE.Material {
     if (this.isDisposed) {
       throw new Error('PolygonRendererFacade has been disposed');
     }
     
+    // In land view or when forced, use a simple MeshBasicMaterial without textures
+    if (this.isLandView || forceBasicMaterial) {
+      return new THREE.MeshBasicMaterial({
+        color: 0xf5e9c8, // Sand color
+        side: THREE.DoubleSide,
+        transparent: false,
+        depthWrite: true
+      });
+    }
+    
+    // For other views, use MeshStandardMaterial with textures
     const material = new THREE.MeshStandardMaterial({
       map: PolygonRendererFacade.sharedTextures.sandBaseColor,
       normalMap: PolygonRendererFacade.sharedTextures.sandNormalMap,
@@ -217,14 +240,14 @@ export class PolygonRendererFacade {
     url: string,
     onLoad?: (texture: THREE.Texture) => void,
     onError?: (error: Error) => void,
-    isLandMode: boolean = false
+    isLandMode?: boolean
   ): THREE.Texture {
     if (this.isDisposed) {
       throw new Error('PolygonRendererFacade has been disposed');
     }
     
     // In land mode, return a placeholder texture without loading from network
-    if (isLandMode) {
+    if (this.isLandView || isLandMode) {
       console.log('Land mode active: Using placeholder texture instead of loading:', url);
       const placeholderTexture = new THREE.Texture();
       

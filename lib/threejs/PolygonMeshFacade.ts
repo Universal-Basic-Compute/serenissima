@@ -194,6 +194,8 @@ export class PolygonMeshFacade implements Poolable {
       });
     } else {
       // Other views - use standard material with textures
+      // Use the textureLoader but don't load textures directly here
+      // This will be handled by the facade
       return new THREE.MeshStandardMaterial({
         color: 0xf5e9c8, // Sand color
         side: THREE.DoubleSide,
@@ -259,6 +261,9 @@ export class PolygonMeshFacade implements Poolable {
     // Skip update if view hasn't changed
     if (this.activeView === activeView) return;
     
+    const wasLandView = this.activeView === 'land';
+    const isNowLandView = activeView === 'land';
+    
     this.activeView = activeView;
     
     if (!this.mesh) return;
@@ -269,19 +274,28 @@ export class PolygonMeshFacade implements Poolable {
     // Apply the new material to the mesh
     if (Array.isArray(this.mesh.material)) {
       // If we have an array of materials, update all of them
-      if (Array.isArray(this.mesh.material)) {
-        (this.mesh.material as THREE.Material[]).forEach((mat, index) => {
-          if (mat) {
-            // Dispose of the old material
-            mat.dispose();
+      (this.mesh.material as THREE.Material[]).forEach((mat, index) => {
+        if (mat) {
+          // Dispose of the old material and its textures
+          if (mat instanceof THREE.MeshStandardMaterial) {
+            if (mat.map) mat.map.dispose();
+            if (mat.normalMap) mat.normalMap.dispose();
+            if (mat.roughnessMap) mat.roughnessMap.dispose();
           }
-          // Set the new material
-          (this.mesh.material as THREE.Material[])[index] = newMaterial;
-        });
-      }
+          mat.dispose();
+        }
+        // Set the new material
+        (this.mesh.material as THREE.Material[])[index] = newMaterial;
+      });
     } else {
       // If we have a single material, update it
       if (this.mesh.material) {
+        // Dispose of the old material and its textures
+        if (this.mesh.material instanceof THREE.MeshStandardMaterial) {
+          if (this.mesh.material.map) this.mesh.material.map.dispose();
+          if (this.mesh.material.normalMap) this.mesh.material.normalMap.dispose();
+          if (this.mesh.material.roughnessMap) this.mesh.material.roughnessMap.dispose();
+        }
         this.mesh.material.dispose();
       }
       this.mesh.material = newMaterial;
