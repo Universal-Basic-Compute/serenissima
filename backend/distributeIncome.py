@@ -11,6 +11,8 @@ import sys
 import json
 import logging
 import datetime
+import requests
+from urllib.parse import quote
 from dotenv import load_dotenv
 from pyairtable import Api, Table
 
@@ -34,6 +36,10 @@ AIRTABLE_BASE_ID = os.getenv("AIRTABLE_BASE_ID")
 AIRTABLE_USERS_TABLE = os.getenv("AIRTABLE_USERS_TABLE", "Users")
 AIRTABLE_LANDS_TABLE = os.getenv("AIRTABLE_LANDS_TABLE", "LANDS")
 AIRTABLE_TRANSACTIONS_TABLE = os.getenv("AIRTABLE_TRANSACTIONS_TABLE", "TRANSACTIONS")
+
+# Get Telegram credentials
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+MAIN_TELEGRAM_CHAT_ID = os.getenv("MAIN_TELEGRAM_CHAT_ID")
 
 # Check if credentials are set
 if not AIRTABLE_API_KEY or not AIRTABLE_BASE_ID:
@@ -192,6 +198,30 @@ def create_transaction_record(transactions_table, from_user, to_user, amount, la
         log.error(f"Error creating transaction record: {str(e)}")
         return None
 
+def send_telegram_notification(message):
+    """Send a notification to the Telegram channel"""
+    if not TELEGRAM_BOT_TOKEN or not MAIN_TELEGRAM_CHAT_ID:
+        log.warning("Telegram credentials not set, skipping notification")
+        return False
+    
+    try:
+        # URL encode the message
+        encoded_message = quote(message)
+        url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage?chat_id={MAIN_TELEGRAM_CHAT_ID}&text={encoded_message}&parse_mode=HTML"
+        
+        # Send the message
+        response = requests.get(url)
+        
+        if response.status_code == 200:
+            log.info("Telegram notification sent successfully")
+            return True
+        else:
+            log.error(f"Failed to send Telegram notification: {response.status_code} {response.text}")
+            return False
+    except Exception as e:
+        log.error(f"Error sending Telegram notification: {str(e)}")
+        return False
+
 def distribute_income():
     """Main function to distribute income from lands to owners"""
     log.info("Starting income distribution process")
@@ -284,6 +314,18 @@ def distribute_income():
         else:
             log.warning(f"Transaction record creation failed for {land_id}")
             # We don't revert the balance here since the money was actually transferred
+    
+    # Send Telegram notification
+    if successful_distributions > 0:
+        notification_message = (
+            f"🏛️ <b>Daily Income Distribution Complete</b> 🏛️\n\n"
+            f"The Council of Ten has distributed today's income to the noble houses of Venice.\n\n"
+            f"• <b>{successful_distributions}</b> properties received income\n"
+            f"• <b>{total_distributed:,}</b> ⚜️ ducats distributed\n"
+            f"• <b>{failed_distributions}</b> distributions failed\n\n"
+            f"Visit <a href='https://serenissima.ai'>La Serenissima</a> to check your properties."
+        )
+        send_telegram_notification(notification_message)
     
     # Log summary
     log.info("Income distribution completed")
