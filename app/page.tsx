@@ -304,8 +304,16 @@ export default function SimplePage() {
       
     try {
       setIsGeneratingImage(true);
-        
-      const imageUrl = await generateCoatOfArmsImage(familyCoatOfArms);
+      
+      // Use the username from the form or the existing profile
+      const usernameToUse = userProfile ? userProfile.username : usernameInput;
+      
+      if (!usernameToUse) {
+        alert('Please enter a username first');
+        return;
+      }
+      
+      const imageUrl = await generateCoatOfArmsImage(familyCoatOfArms, usernameToUse);
         
       // Update state with the local image URL
       setCoatOfArmsImage(imageUrl);

@@ -1343,10 +1343,12 @@ async def execute_transaction(transaction_id: str, data: dict):
 
 @app.post("/api/generate-coat-of-arms")
 async def generate_coat_of_arms(data: dict):
-    """Generate a coat of arms image based on description"""
+    """Generate a coat of arms image based on description and save it to public folder"""
     
     if not data.get("description"):
         raise HTTPException(status_code=400, detail="Description is required")
+    
+    username = data.get("username", "anonymous")
     
     ideogram_api_key = os.getenv("IDEOGRAM_API_KEY", "")
     
@@ -1397,10 +1399,36 @@ async def generate_coat_of_arms(data: dict):
                 content={"success": False, "error": "No image URL in response"}
             )
         
-        # Return the image URL
+        # Download the image
+        image_response = requests.get(image_url)
+        if not image_response.ok:
+            return JSONResponse(
+                status_code=500,
+                content={"success": False, "error": "Failed to download image"}
+            )
+        
+        # Sanitize username for filename
+        import re
+        sanitized_username = re.sub(r'[^a-zA-Z0-9_-]', '_', username)
+        filename = f"{sanitized_username}_{int(time.time())}.png"
+        
+        # Create directory if it doesn't exist
+        public_dir = os.path.join(os.getcwd(), 'public')
+        coat_of_arms_dir = os.path.join(public_dir, 'coat-of-arms')
+        os.makedirs(coat_of_arms_dir, exist_ok=True)
+        
+        # Save the image to the public folder
+        file_path = os.path.join(coat_of_arms_dir, filename)
+        with open(file_path, 'wb') as f:
+            f.write(image_response.content)
+        
+        # Return the path to the saved image (relative to public folder)
+        relative_path = f"/coat-of-arms/{filename}"
+        
         return {
             "success": True,
-            "image_url": image_url,
+            "image_url": image_url,  # Original URL from Ideogram
+            "local_image_url": relative_path,  # Path to the saved image
             "prompt": prompt
         }
     except Exception as e:
