@@ -45,7 +45,7 @@ const LoanApplicationModal: React.FC<LoanApplicationModalProps> = ({ loan, onClo
       });
       
       // The event is already emitted in the store, but we can add more specific data here
-      eventBus.emit(EventTypes.LOAN_APPLIED, { 
+      eventBus.emit('LOAN_APPLIED', { 
         loan: result,
         borrower: walletAddress,
         loanAmount,
