@@ -239,6 +239,18 @@ def distribute_income():
     """Main function to distribute income from lands to owners"""
     log.info("Starting income distribution process")
     
+    # Add debug notification at the beginning
+    try:
+        log.info("Sending debug notification to Telegram")
+        notification_message = (
+            "🏛️ Income Distribution Debug 🏛️\n\n"
+            "The income distribution script has started running."
+        )
+        send_telegram_notification(notification_message)
+    except Exception as e:
+        log.error(f"Error sending debug notification: {str(e)}")
+        # Continue with the script even if notification fails
+    
     # Initialize Airtable
     users_table, lands_table, transactions_table = initialize_airtable()
     
