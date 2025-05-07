@@ -78,27 +78,50 @@ export class IncomePolygonRenderer {
           side: THREE.DoubleSide,
           depthWrite: false
         });
-        
+      
         // Create mesh
         const mesh = new THREE.Mesh(geometry, material);
-        
+      
         // Position mesh slightly above land
         mesh.rotation.x = -Math.PI / 2;
         mesh.position.y = 0.01; // Position just above land
         mesh.renderOrder = 2; // Higher than land (which is 1)
-        
+      
         // Add userData to identify this as an income polygon
         mesh.userData = {
           isIncomePolygon: true,
           polygonId: polygon.id,
           income: income
         };
-        
+      
         // Add to scene
         this.scene.add(mesh);
-        
+      
         // Store reference
         this.incomeMeshes.push(mesh);
+      
+        // Create a wireframe edge overlay with the same geometry but different material
+        const edgeMaterial = new THREE.LineBasicMaterial({
+          color: 0xffffff,  // White edges
+          transparent: true,
+          opacity: 0.3,     // Very subtle
+          linewidth: 1      // Thin lines
+        });
+      
+        // Create wireframe for edges
+        const edges = new THREE.EdgesGeometry(geometry);
+        const line = new THREE.LineSegments(edges, edgeMaterial);
+      
+        // Position the wireframe exactly like the main mesh
+        line.rotation.x = -Math.PI / 2;
+        line.position.y = 0.011; // Slightly above the colored mesh to prevent z-fighting
+        line.renderOrder = 3;    // Higher than the colored mesh
+      
+        // Add to scene
+        this.scene.add(line);
+      
+        // Store reference to the edge mesh as well
+        this.incomeMeshes.push(line);
       } catch (error) {
         console.error(`Error rendering income polygon ${polygon.id}:`, error);
       }
