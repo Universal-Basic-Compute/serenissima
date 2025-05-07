@@ -67,7 +67,22 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
   // Load users data on mount
   useEffect(() => {
     loadUsers();
-  }, [loadUsers]);
+    
+    // Load income data after users
+    try {
+      const { getIncomeDataService } = require('../../lib/services/IncomeDataService');
+      const incomeService = getIncomeDataService();
+      
+      // Load income data or generate simulated data
+      incomeService.loadIncomeData().catch(error => {
+        console.error('Error loading income data:', error);
+        // Generate simulated data as fallback
+        incomeService.generateSimulatedIncomeData(polygons);
+      });
+    } catch (error) {
+      console.warn('Error initializing income data service:', error);
+    }
+  }, [loadUsers, polygons]);
   
   // Load polygons (still needed to calculate bounds)
   useEffect(() => {

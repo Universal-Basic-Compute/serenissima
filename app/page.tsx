@@ -727,14 +727,16 @@ export default function Home() {
         console.log('Updating polygon renderer with users data');
         polygonRendererRef.current.updateViewMode(activeView);
         
-        // Explicitly update colors and coat of arms
-        updatePolygonColors();
+        // Only update coat of arms, not colors (we're using income-based coloring now)
         updateCoatOfArms();
         
         // Force additional updates for land view
         if (activeView === 'land' && polygonRendererRef.current) {
           if (polygonRendererRef.current) {
-            polygonRendererRef.current.updatePolygonOwnerColors();
+            // Use income-based coloring instead of owner-based
+            if (typeof polygonRendererRef.current.updatePolygonIncomeColors === 'function') {
+              polygonRendererRef.current.updatePolygonIncomeColors();
+            }
             polygonRendererRef.current.updateCoatOfArmsSprites();
           }
         }
@@ -743,7 +745,7 @@ export default function Home() {
       // Ensure polygons remain visible after renderer updates
       setTimeout(ensurePolygonsVisible, 200);
     }
-  }, [users, activeView, updatePolygonColors, updateCoatOfArms, ensurePolygonsVisible]);
+  }, [users, activeView, updateCoatOfArms, ensurePolygonsVisible]);
   
   // Add effect to log when transferMenuOpen changes
   useEffect(() => {
