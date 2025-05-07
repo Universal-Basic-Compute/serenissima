@@ -504,6 +504,8 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
                   walletAddress={owner}
                   size="medium"
                   className="mx-auto"
+                  showCoatOfArms={true} // Explicitly enable coat of arms display
+                  coatOfArmsSize="large" // Make coat of arms more prominent
                 />
               </div>
             ) : (
@@ -546,7 +548,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
             <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
               <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Income</h3>
               <div className="flex items-center justify-between">
-                <span className="text-gray-700">Annual Income:</span>
+                <span className="text-gray-700">Daily Income:</span>
                 <span className="font-semibold text-amber-800">
                   {(() => {
                     try {
