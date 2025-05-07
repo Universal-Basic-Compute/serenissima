@@ -9,7 +9,7 @@ interface PlayerProfileProps {
   familyMotto?: string;
   walletAddress?: string; // Add wallet address prop
   computeAmount?: number; // Add this property
-  size?: 'small' | 'medium' | 'large';
+  size?: 'tiny' | 'small' | 'medium' | 'large';
   onClick?: () => void;
   className?: string;
   showMotto?: boolean;
@@ -89,6 +89,13 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
 
   // Determine sizes based on the size prop
   const dimensions = {
+    tiny: {
+      container: 'w-16',
+      image: 'w-12 h-12',
+      initials: 'w-12 h-12 text-xs',
+      username: 'text-xs',
+      name: 'text-xs'
+    },
     small: {
       container: 'w-20', // Increased from w-16
       image: 'w-16 h-16', // Increased from w-12 h-12
