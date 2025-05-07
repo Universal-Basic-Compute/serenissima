@@ -13,6 +13,7 @@ import BackgroundMusic from '../components/UI/BackgroundMusic';
 import WalletButton from '../components/UI/WalletButton';
 import LandPurchaseConfirmation from '../components/UI/LandPurchaseConfirmation';
 import BuildingsToolbar from '../components/BuildingsView/BuildingsToolbar';
+import { LoanMarketplace, LoanManagementDashboard, LoanApplicationModal } from '../components/Governance';
 import { getApiBaseUrl } from '@/lib/apiUtils';
 import { getWalletAddress } from '@/lib/walletUtils';
 import { transferCompute, withdrawCompute } from '@/lib/computeUtils';
@@ -81,6 +82,9 @@ export default function SimplePage() {
     onComplete?: () => void;
   } | null>(null);
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
+  const [governanceTab, setGovernanceTab] = useState<'council' | 'laws' | 'loans'>('council');
+  const [showLoanApplicationModal, setShowLoanApplicationModal] = useState<boolean>(false);
+  const [selectedLoan, setSelectedLoan] = useState<any>(null);
   const [userProfile, setUserProfile] = useState<{
     username: string;
     firstName: string;
@@ -359,16 +363,25 @@ export default function SimplePage() {
       setShowLandPurchaseModal(true);
     };
     
+    // Add handler for loan application modal
+    const handleShowLoanApplicationModal = (event: CustomEvent) => {
+      console.log('Received showLoanApplicationModal event with data:', event.detail);
+      setSelectedLoan(event.detail.loan);
+      setShowLoanApplicationModal(true);
+    };
+    
     window.addEventListener('showTransferMenu', handleShowTransferMenu);
     window.addEventListener('showWithdrawMenu', handleShowWithdrawMenu);
     window.addEventListener('showUsernamePrompt', handleShowUsernamePrompt);
     window.addEventListener('showLandPurchaseModal', handleShowLandPurchaseModal as EventListener);
+    window.addEventListener('showLoanApplicationModal', handleShowLoanApplicationModal as EventListener);
     
     return () => {
       window.removeEventListener('showTransferMenu', handleShowTransferMenu);
       window.removeEventListener('showWithdrawMenu', handleShowWithdrawMenu);
       window.removeEventListener('showUsernamePrompt', handleShowUsernamePrompt);
       window.removeEventListener('showLandPurchaseModal', handleShowLandPurchaseModal as EventListener);
+      window.removeEventListener('showLoanApplicationModal', handleShowLoanApplicationModal as EventListener);
     };
   }, []);
 
@@ -389,6 +402,75 @@ export default function SimplePage() {
             eventBus.emit(EventTypes.BUILDING_PLACED, { refresh: true });
           }}
         />
+      )}
+      
+      {/* Governance View */}
+      {activeView === 'governance' && (
+        <div className="absolute top-20 left-20 right-4 bottom-4 bg-black/30 rounded-lg p-4 overflow-auto">
+          <div className="bg-amber-50 border-2 border-amber-700 rounded-lg p-6 max-w-6xl mx-auto">
+            <h2 className="text-3xl font-serif text-amber-800 mb-6 text-center">
+              Governance of La Serenissima
+            </h2>
+            
+            {/* Governance tabs */}
+            <div className="border-b border-amber-200 mb-6">
+              <nav className="-mb-px flex space-x-8">
+                <button
+                  className={`pb-4 px-1 border-b-2 font-medium text-sm ${
+                    governanceTab === 'council' 
+                      ? 'border-amber-600 text-amber-800' 
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
+                  onClick={() => setGovernanceTab('council')}
+                >
+                  Council of Ten
+                </button>
+                <button
+                  className={`pb-4 px-1 border-b-2 font-medium text-sm ${
+                    governanceTab === 'laws' 
+                      ? 'border-amber-600 text-amber-800' 
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
+                  onClick={() => setGovernanceTab('laws')}
+                >
+                  Laws & Decrees
+                </button>
+                <button
+                  className={`pb-4 px-1 border-b-2 font-medium text-sm ${
+                    governanceTab === 'loans' 
+                      ? 'border-amber-600 text-amber-800' 
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
+                  onClick={() => setGovernanceTab('loans')}
+                >
+                  Loans & Banking
+                </button>
+              </nav>
+            </div>
+            
+            {/* Tab content */}
+            {governanceTab === 'council' && (
+              <div className="text-center py-8 text-gray-500 italic">
+                The Council of Ten governs La Serenissima with wisdom and discretion.
+                <p className="mt-4">Council features coming soon.</p>
+              </div>
+            )}
+            
+            {governanceTab === 'laws' && (
+              <div className="text-center py-8 text-gray-500 italic">
+                The laws and decrees of Venice ensure order and prosperity.
+                <p className="mt-4">Legal system features coming soon.</p>
+              </div>
+            )}
+            
+            {governanceTab === 'loans' && (
+              <div className="space-y-8">
+                <LoanMarketplace />
+                <LoanManagementDashboard />
+              </div>
+            )}
+          </div>
+        </div>
       )}
       
       {/* Left Side Menu */}
@@ -496,6 +578,14 @@ export default function SimplePage() {
           </button>
         </div>
       </div>
+      
+      {/* Loan Application Modal - will be shown when triggered by event */}
+      {showLoanApplicationModal && selectedLoan && (
+        <LoanApplicationModal 
+          loan={selectedLoan}
+          onClose={() => setShowLoanApplicationModal(false)}
+        />
+      )}
       
       {/* Wallet Button */}
       <WalletButton className="absolute top-4 right-4 z-10" />

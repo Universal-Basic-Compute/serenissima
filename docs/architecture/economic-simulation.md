@@ -77,9 +77,37 @@ The economic simulation integrates with:
 The economic simulation architecture supports future expansion:
 
 1. **Trade Networks**: Simulating goods flow between regions
-2. **Banking System**: Loans, interest, and financial instruments
+2. **Banking System**: Loans, interest, and financial instruments (partially implemented)
 3. **Guild Mechanics**: Economic effects of guild membership and regulations
 4. **Tax System**: Implementation of historically accurate taxation
+
+## Loan System
+
+The loan system provides financial instruments for players to borrow and lend $COMPUTE:
+
+1. **Loan Types**:
+   - Treasury Loans: Official loans from the Venetian government
+   - Private Loans: Loans between players
+   - Specialized Loans: Purpose-specific loans with unique terms
+
+2. **Loan Parameters**:
+   - Principal Amount: The amount borrowed
+   - Interest Rate: Annual percentage rate
+   - Term: Duration in days
+   - Payment Schedule: Daily payment amounts
+
+3. **Loan Lifecycle**:
+   - Application: Players apply for available loans
+   - Approval: Lenders approve loan applications
+   - Disbursement: Funds are transferred to borrower
+   - Repayment: Borrower makes regular payments
+   - Completion: Loan is fully repaid or defaulted
+
+4. **Economic Impact**:
+   - Provides capital for development and expansion
+   - Creates financial relationships between players
+   - Influences land values and economic activity
+   - Simulates historical Venetian banking practices
 
 ## Technical Implementation
 

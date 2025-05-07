@@ -1942,6 +1942,349 @@ async def cancel_transaction(transaction_id: str, data: dict):
         print(f"ERROR: {error_msg}")
         traceback.print_exc(file=sys.stdout)
         raise HTTPException(status_code=500, detail=error_msg)
+
+# Initialize Airtable for LOANS table
+AIRTABLE_LOANS_TABLE = os.getenv("AIRTABLE_LOANS_TABLE", "LOANS")
+try:
+    loans_table = Table(AIRTABLE_API_KEY, AIRTABLE_BASE_ID, AIRTABLE_LOANS_TABLE)
+    print(f"Initialized Airtable LOANS table: {AIRTABLE_LOANS_TABLE}")
+except Exception as e:
+    print(f"ERROR initializing Airtable LOANS table: {str(e)}")
+    traceback.print_exc(file=sys.stdout)
+
+@app.get("/api/loans/available")
+async def get_available_loans():
+    """Get all available loans"""
+    try:
+        formula = "AND({Status}='available')"
+        print(f"Fetching available loans with formula: {formula}")
+        records = loans_table.all(formula=formula)
+        
+        loans = []
+        for record in records:
+            loans.append({
+                "id": record["id"],
+                "name": record["fields"].get("Name", ""),
+                "borrower": record["fields"].get("Borrower", ""),
+                "lender": record["fields"].get("Lender", ""),
+                "status": record["fields"].get("Status", ""),
+                "principalAmount": record["fields"].get("PrincipalAmount", 0),
+                "interestRate": record["fields"].get("InterestRate", 0),
+                "termDays": record["fields"].get("TermDays", 0),
+                "paymentAmount": record["fields"].get("PaymentAmount", 0),
+                "remainingBalance": record["fields"].get("RemainingBalance", 0),
+                "createdAt": record["fields"].get("CreatedAt", ""),
+                "updatedAt": record["fields"].get("UpdatedAt", ""),
+                "finalPaymentDate": record["fields"].get("FinalPaymentDate", ""),
+                "requirementsText": record["fields"].get("RequirementsText", ""),
+                "applicationText": record["fields"].get("ApplicationText", ""),
+                "loanPurpose": record["fields"].get("LoanPurpose", ""),
+                "notes": record["fields"].get("Notes", "")
+            })
+        
+        print(f"Found {len(loans)} available loans")
+        return loans
+    except Exception as e:
+        error_msg = f"Failed to get available loans: {str(e)}"
+        print(f"ERROR: {error_msg}")
+        traceback.print_exc(file=sys.stdout)
+        raise HTTPException(status_code=500, detail=error_msg)
+
+@app.get("/api/loans/user/{user_id}")
+async def get_user_loans(user_id: str):
+    """Get loans for a specific user"""
+    try:
+        formula = f"{{Borrower}}='{user_id}'"
+        print(f"Fetching loans for user with formula: {formula}")
+        records = loans_table.all(formula=formula)
+        
+        loans = []
+        for record in records:
+            loans.append({
+                "id": record["id"],
+                "name": record["fields"].get("Name", ""),
+                "borrower": record["fields"].get("Borrower", ""),
+                "lender": record["fields"].get("Lender", ""),
+                "status": record["fields"].get("Status", ""),
+                "principalAmount": record["fields"].get("PrincipalAmount", 0),
+                "interestRate": record["fields"].get("InterestRate", 0),
+                "termDays": record["fields"].get("TermDays", 0),
+                "paymentAmount": record["fields"].get("PaymentAmount", 0),
+                "remainingBalance": record["fields"].get("RemainingBalance", 0),
+                "createdAt": record["fields"].get("CreatedAt", ""),
+                "updatedAt": record["fields"].get("UpdatedAt", ""),
+                "finalPaymentDate": record["fields"].get("FinalPaymentDate", ""),
+                "requirementsText": record["fields"].get("RequirementsText", ""),
+                "applicationText": record["fields"].get("ApplicationText", ""),
+                "loanPurpose": record["fields"].get("LoanPurpose", ""),
+                "notes": record["fields"].get("Notes", "")
+            })
+        
+        print(f"Found {len(loans)} loans for user {user_id}")
+        return loans
+    except Exception as e:
+        error_msg = f"Failed to get user loans: {str(e)}"
+        print(f"ERROR: {error_msg}")
+        traceback.print_exc(file=sys.stdout)
+        raise HTTPException(status_code=500, detail=error_msg)
+
+@app.post("/api/loans/apply")
+async def apply_for_loan(loan_application: dict):
+    """Apply for a loan"""
+    if not loan_application.get("borrower"):
+        raise HTTPException(status_code=400, detail="Borrower is required")
+    
+    if not loan_application.get("principalAmount") or loan_application.get("principalAmount") <= 0:
+        raise HTTPException(status_code=400, detail="Principal amount must be greater than 0")
+    
+    try:
+        # If loanId is provided, get the loan details
+        loan_id = loan_application.get("loanId")
+        if loan_id:
+            loan_record = loans_table.get(loan_id)
+            if not loan_record:
+                raise HTTPException(status_code=404, detail="Loan not found")
+            
+            # Check if loan is available
+            if loan_record["fields"].get("Status") != "available":
+                raise HTTPException(status_code=400, detail="Loan is not available")
+            
+            # Update the loan with borrower information
+            now = datetime.datetime.now().isoformat()
+            
+            # Calculate payment details
+            principal = loan_application.get("principalAmount")
+            interest_rate = loan_record["fields"].get("InterestRate", 0)
+            term_days = loan_record["fields"].get("TermDays", 0)
+            
+            # Simple interest calculation
+            interest_decimal = interest_rate / 100
+            total_interest = principal * interest_decimal * (term_days / 365)
+            total_payment = principal + total_interest
+            
+            # Update the loan record
+            updated_record = loans_table.update(loan_id, {
+                "Borrower": loan_application.get("borrower"),
+                "Status": "pending",
+                "PrincipalAmount": principal,
+                "RemainingBalance": principal,
+                "PaymentAmount": total_payment / term_days,  # Daily payment
+                "ApplicationText": loan_application.get("applicationText", ""),
+                "LoanPurpose": loan_application.get("loanPurpose", ""),
+                "UpdatedAt": now
+            })
+            
+            return {
+                "id": updated_record["id"],
+                "name": updated_record["fields"].get("Name", ""),
+                "borrower": updated_record["fields"].get("Borrower", ""),
+                "lender": updated_record["fields"].get("Lender", ""),
+                "status": updated_record["fields"].get("Status", ""),
+                "principalAmount": updated_record["fields"].get("PrincipalAmount", 0),
+                "interestRate": updated_record["fields"].get("InterestRate", 0),
+                "termDays": updated_record["fields"].get("TermDays", 0),
+                "paymentAmount": updated_record["fields"].get("PaymentAmount", 0),
+                "remainingBalance": updated_record["fields"].get("RemainingBalance", 0),
+                "createdAt": updated_record["fields"].get("CreatedAt", ""),
+                "updatedAt": updated_record["fields"].get("UpdatedAt", ""),
+                "finalPaymentDate": updated_record["fields"].get("FinalPaymentDate", ""),
+                "requirementsText": updated_record["fields"].get("RequirementsText", ""),
+                "applicationText": updated_record["fields"].get("ApplicationText", ""),
+                "loanPurpose": updated_record["fields"].get("LoanPurpose", ""),
+                "notes": updated_record["fields"].get("Notes", "")
+            }
+        else:
+            # Create a new loan application
+            now = datetime.datetime.now().isoformat()
+            
+            # Create the loan record
+            record = loans_table.create({
+                "Name": f"Loan Application - {loan_application.get('borrower')}",
+                "Borrower": loan_application.get("borrower"),
+                "Status": "pending",
+                "PrincipalAmount": loan_application.get("principalAmount"),
+                "RemainingBalance": loan_application.get("principalAmount"),
+                "ApplicationText": loan_application.get("applicationText", ""),
+                "LoanPurpose": loan_application.get("loanPurpose", ""),
+                "CreatedAt": now,
+                "UpdatedAt": now
+            })
+            
+            return {
+                "id": record["id"],
+                "name": record["fields"].get("Name", ""),
+                "borrower": record["fields"].get("Borrower", ""),
+                "lender": record["fields"].get("Lender", ""),
+                "status": record["fields"].get("Status", ""),
+                "principalAmount": record["fields"].get("PrincipalAmount", 0),
+                "interestRate": record["fields"].get("InterestRate", 0),
+                "termDays": record["fields"].get("TermDays", 0),
+                "paymentAmount": record["fields"].get("PaymentAmount", 0),
+                "remainingBalance": record["fields"].get("RemainingBalance", 0),
+                "createdAt": record["fields"].get("CreatedAt", ""),
+                "updatedAt": record["fields"].get("UpdatedAt", ""),
+                "finalPaymentDate": record["fields"].get("FinalPaymentDate", ""),
+                "requirementsText": record["fields"].get("RequirementsText", ""),
+                "applicationText": record["fields"].get("ApplicationText", ""),
+                "loanPurpose": record["fields"].get("LoanPurpose", ""),
+                "notes": record["fields"].get("Notes", "")
+            }
+    except HTTPException:
+        raise
+    except Exception as e:
+        error_msg = f"Failed to apply for loan: {str(e)}"
+        print(f"ERROR: {error_msg}")
+        traceback.print_exc(file=sys.stdout)
+        raise HTTPException(status_code=500, detail=error_msg)
+
+@app.post("/api/loans/{loan_id}/payment")
+async def make_loan_payment(loan_id: str, payment_data: dict):
+    """Make a payment on a loan"""
+    if not payment_data.get("amount") or payment_data.get("amount") <= 0:
+        raise HTTPException(status_code=400, detail="Payment amount must be greater than 0")
+    
+    try:
+        # Get the loan record
+        loan_record = loans_table.get(loan_id)
+        if not loan_record:
+            raise HTTPException(status_code=404, detail="Loan not found")
+        
+        # Check if loan is active
+        if loan_record["fields"].get("Status") != "active":
+            raise HTTPException(status_code=400, detail="Loan is not active")
+        
+        # Get current remaining balance
+        remaining_balance = loan_record["fields"].get("RemainingBalance", 0)
+        
+        # Check if payment amount is valid
+        payment_amount = payment_data.get("amount")
+        if payment_amount > remaining_balance:
+            payment_amount = remaining_balance  # Cap at remaining balance
+        
+        # Calculate new remaining balance
+        new_balance = remaining_balance - payment_amount
+        
+        # Update loan status if paid off
+        status = "paid" if new_balance <= 0 else "active"
+        
+        # Update the loan record
+        now = datetime.datetime.now().isoformat()
+        updated_record = loans_table.update(loan_id, {
+            "RemainingBalance": new_balance,
+            "Status": status,
+            "UpdatedAt": now,
+            "Notes": f"{loan_record['fields'].get('Notes', '')}\nPayment of {payment_amount} made on {now}"
+        })
+        
+        # If the loan is from Treasury, update the borrower's compute balance
+        if loan_record["fields"].get("Lender") == "Treasury":
+            try:
+                borrower = loan_record["fields"].get("Borrower")
+                if borrower:
+                    # Find the borrower record
+                    borrower_records = users_table.all(formula=f"{{Wallet}}='{borrower}'")
+                    if borrower_records:
+                        borrower_record = borrower_records[0]
+                        current_compute = borrower_record["fields"].get("ComputeAmount", 0)
+                        
+                        # Deduct payment from compute balance
+                        users_table.update(borrower_record["id"], {
+                            "ComputeAmount": current_compute - payment_amount
+                        })
+                        
+                        print(f"Updated borrower {borrower} compute balance: {current_compute} -> {current_compute - payment_amount}")
+            except Exception as compute_error:
+                print(f"WARNING: Failed to update borrower compute balance: {str(compute_error)}")
+                # Continue execution even if compute update fails
+        
+        return {
+            "id": updated_record["id"],
+            "name": updated_record["fields"].get("Name", ""),
+            "borrower": updated_record["fields"].get("Borrower", ""),
+            "lender": updated_record["fields"].get("Lender", ""),
+            "status": updated_record["fields"].get("Status", ""),
+            "principalAmount": updated_record["fields"].get("PrincipalAmount", 0),
+            "interestRate": updated_record["fields"].get("InterestRate", 0),
+            "termDays": updated_record["fields"].get("TermDays", 0),
+            "paymentAmount": updated_record["fields"].get("PaymentAmount", 0),
+            "remainingBalance": updated_record["fields"].get("RemainingBalance", 0),
+            "createdAt": updated_record["fields"].get("CreatedAt", ""),
+            "updatedAt": updated_record["fields"].get("UpdatedAt", ""),
+            "finalPaymentDate": updated_record["fields"].get("FinalPaymentDate", ""),
+            "requirementsText": updated_record["fields"].get("RequirementsText", ""),
+            "applicationText": updated_record["fields"].get("ApplicationText", ""),
+            "loanPurpose": updated_record["fields"].get("LoanPurpose", ""),
+            "notes": updated_record["fields"].get("Notes", "")
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        error_msg = f"Failed to make loan payment: {str(e)}"
+        print(f"ERROR: {error_msg}")
+        traceback.print_exc(file=sys.stdout)
+        raise HTTPException(status_code=500, detail=error_msg)
+
+@app.post("/api/loans/create")
+async def create_loan_offer(loan_offer: dict):
+    """Create a loan offer"""
+    if not loan_offer.get("lender"):
+        raise HTTPException(status_code=400, detail="Lender is required")
+    
+    if not loan_offer.get("principalAmount") or loan_offer.get("principalAmount") <= 0:
+        raise HTTPException(status_code=400, detail="Principal amount must be greater than 0")
+    
+    if not loan_offer.get("interestRate") or loan_offer.get("interestRate") < 0:
+        raise HTTPException(status_code=400, detail="Interest rate must be non-negative")
+    
+    if not loan_offer.get("termDays") or loan_offer.get("termDays") <= 0:
+        raise HTTPException(status_code=400, detail="Term days must be greater than 0")
+    
+    try:
+        # Create the loan offer
+        now = datetime.datetime.now().isoformat()
+        
+        # Calculate final payment date
+        final_payment_date = (datetime.datetime.now() + datetime.timedelta(days=loan_offer.get("termDays"))).isoformat()
+        
+        # Create the loan record
+        record = loans_table.create({
+            "Name": loan_offer.get("name", f"Loan Offer - {loan_offer.get('lender')}"),
+            "Lender": loan_offer.get("lender"),
+            "Status": "available",
+            "PrincipalAmount": loan_offer.get("principalAmount"),
+            "InterestRate": loan_offer.get("interestRate"),
+            "TermDays": loan_offer.get("termDays"),
+            "RequirementsText": loan_offer.get("requirementsText", ""),
+            "LoanPurpose": loan_offer.get("loanPurpose", ""),
+            "CreatedAt": now,
+            "UpdatedAt": now,
+            "FinalPaymentDate": final_payment_date
+        })
+        
+        return {
+            "id": record["id"],
+            "name": record["fields"].get("Name", ""),
+            "borrower": record["fields"].get("Borrower", ""),
+            "lender": record["fields"].get("Lender", ""),
+            "status": record["fields"].get("Status", ""),
+            "principalAmount": record["fields"].get("PrincipalAmount", 0),
+            "interestRate": record["fields"].get("InterestRate", 0),
+            "termDays": record["fields"].get("TermDays", 0),
+            "paymentAmount": record["fields"].get("PaymentAmount", 0),
+            "remainingBalance": record["fields"].get("RemainingBalance", 0),
+            "createdAt": record["fields"].get("CreatedAt", ""),
+            "updatedAt": record["fields"].get("UpdatedAt", ""),
+            "finalPaymentDate": record["fields"].get("FinalPaymentDate", ""),
+            "requirementsText": record["fields"].get("RequirementsText", ""),
+            "applicationText": record["fields"].get("ApplicationText", ""),
+            "loanPurpose": record["fields"].get("LoanPurpose", ""),
+            "notes": record["fields"].get("Notes", "")
+        }
+    except Exception as e:
+        error_msg = f"Failed to create loan offer: {str(e)}"
+        print(f"ERROR: {error_msg}")
+        traceback.print_exc(file=sys.stdout)
+        raise HTTPException(status_code=500, detail=error_msg)
 @app.post("/api/inject-compute-complete")
 async def inject_compute_complete(data: dict):
     """Update the database after a successful compute injection"""

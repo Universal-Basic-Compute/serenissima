@@ -78,6 +78,15 @@ export const EventTypes = {
   POLYGONS_LOADED: 'polygonsLoaded',
   POLYGON_DELETED: 'polygonDeleted',
   
+  // Loan events
+  LOAN_APPLIED: 'loanApplied',
+  LOAN_APPROVED: 'loanApproved',
+  LOAN_REJECTED: 'loanRejected',
+  LOAN_PAYMENT_MADE: 'loanPaymentMade',
+  LOAN_PAID_OFF: 'loanPaidOff',
+  LOAN_DEFAULTED: 'loanDefaulted',
+  LOAN_OFFER_CREATED: 'loanOfferCreated',
+  
   // UI interaction events
   INTERACTION_CLICK: 'interactionClick',
   INTERACTION_MOUSE_DOWN: 'interactionMouseDown',
