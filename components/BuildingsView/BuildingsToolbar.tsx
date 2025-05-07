@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import RoadCreator from '@/components/PolygonViewer/RoadCreator';
 import DockCreator from '@/components/DockCreator';
 
@@ -17,13 +17,36 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
 }) => {
   const [isRoadCreatorActive, setIsRoadCreatorActive] = useState(false);
   const [isDockCreatorActive, setIsDockCreatorActive] = useState(false);
-
-  // Make sure we have valid scene and camera
+  const [isSceneReady, setIsSceneReady] = useState(false);
+  
+  // Check if scene and camera are ready
   useEffect(() => {
-    if (!scene || !camera) {
-      console.warn('BuildingsToolbar: Missing scene or camera props');
+    // Wait for scene and camera to be properly initialized
+    if (scene && camera && polygons && polygons.length > 0) {
+      console.log('BuildingsToolbar: Scene and camera are ready');
+      setIsSceneReady(true);
+    } else {
+      console.warn('BuildingsToolbar: Missing scene, camera, or polygons');
+      setIsSceneReady(false);
     }
-  }, [scene, camera]);
+  }, [scene, camera, polygons]);
+
+  // Function to find scene and camera if not provided as props
+  const getSceneAndCamera = () => {
+    // Try to get scene and camera from canvas element
+    const canvas = document.querySelector('canvas');
+    const sceneFromCanvas = canvas?.__scene;
+    const cameraFromCanvas = canvas?.__camera;
+    
+    console.log('Getting scene and camera from canvas:', 
+      !!sceneFromCanvas, !!cameraFromCanvas);
+    
+    return {
+      scene: scene || sceneFromCanvas,
+      camera: camera || cameraFromCanvas,
+      polygons: polygons || window.__polygonData || []
+    };
+  };
 
   return (
     <div className="absolute bottom-4 left-4 z-20 flex flex-col space-y-2">
@@ -43,9 +66,15 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
       <button
         onClick={() => {
           console.log('Create Dock button clicked');
-          console.log('Scene:', !!scene, 'Camera:', !!camera, 'Polygons:', polygons?.length);
-          setIsDockCreatorActive(true);
-          setIsRoadCreatorActive(false);
+          const { scene: currentScene, camera: currentCamera, polygons: currentPolygons } = getSceneAndCamera();
+          console.log('Scene:', !!currentScene, 'Camera:', !!currentCamera, 'Polygons:', currentPolygons?.length);
+          
+          if (currentScene && currentCamera) {
+            setIsDockCreatorActive(true);
+            setIsRoadCreatorActive(false);
+          } else {
+            alert('Scene or camera not ready. Please try again in a moment.');
+          }
         }}
         className="px-4 py-2 bg-blue-600 text-white rounded-md shadow-md hover:bg-blue-700 transition-colors flex items-center space-x-2"
       >
@@ -73,11 +102,11 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
         />
       )}
       
-      {isDockCreatorActive && polygons && polygons.length > 0 && (
+      {isDockCreatorActive && (
         <DockCreator
-          scene={scene}
-          camera={camera}
-          polygons={polygons}
+          scene={getSceneAndCamera().scene}
+          camera={getSceneAndCamera().camera}
+          polygons={getSceneAndCamera().polygons}
           active={isDockCreatorActive}
           onComplete={(dockData) => {
             console.log('Dock created:', dockData);
