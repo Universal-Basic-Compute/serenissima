@@ -309,6 +309,43 @@ export default function SimplePage() {
       setIsGeneratingImage(false);
     }
   };
+  // Load user profile from localStorage on component mount
+  useEffect(() => {
+    // Try to load the user profile from localStorage
+    const savedProfile = localStorage.getItem('userProfile');
+    if (savedProfile) {
+      try {
+        const parsedProfile = JSON.parse(savedProfile);
+        setUserProfile(parsedProfile);
+      } catch (error) {
+        console.error('Error parsing saved user profile:', error);
+      }
+    }
+  }, []);
+
+  // Prefill form fields when editing a profile
+  useEffect(() => {
+    // When the username prompt is shown and we have a userProfile, prefill the form
+    if (showUsernamePrompt && userProfile) {
+      // Prefill all form fields with existing user data
+      setFirstName(userProfile.firstName || '');
+      setLastName(userProfile.lastName || '');
+      setFamilyCoatOfArms(userProfile.familyCoatOfArms || '');
+      setFamilyMotto(userProfile.familyMotto || '');
+      setCoatOfArmsImage(userProfile.coatOfArmsImage || null);
+      setSelectedColor(userProfile.color || '#8B4513');
+    } else if (showUsernamePrompt && !userProfile) {
+      // Clear form fields when creating a new profile
+      setUsernameInput('');
+      setFirstName('');
+      setLastName('');
+      setFamilyCoatOfArms('');
+      setFamilyMotto('');
+      setCoatOfArmsImage(null);
+      setSelectedColor('#8B4513'); // Default color
+    }
+  }, [showUsernamePrompt, userProfile]);
+
   // Listen for custom events
   useEffect(() => {
     const handleShowTransferMenu = () => setTransferMenuOpen(true);
