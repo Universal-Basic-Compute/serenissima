@@ -223,11 +223,11 @@ const ResourceTree: React.FC<ResourceTreeProps> = ({ onClose }) => {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" key="resource-grid">
                 {filteredResources.map(resource => (
-                <div 
-                  key={resource.id}
-                  className={`border-2 rounded-lg overflow-hidden shadow-md cursor-pointer transition-transform hover:scale-105 hover:shadow-lg ${getCategoryColor(resource.category)}`}
-                  onClick={() => setSelectedResource(resource)}
-                >
+                  <div 
+                    key={resource.id}
+                    className={`border-2 rounded-lg overflow-hidden shadow-md cursor-pointer transition-transform hover:scale-105 hover:shadow-lg ${getCategoryColor(resource.category)}`}
+                    onClick={() => setSelectedResource(resource)}
+                  >
                   <div className="p-4 flex items-center">
                     <div className="w-16 h-16 bg-white rounded-lg overflow-hidden flex items-center justify-center mr-4 border border-amber-200">
                       <img 
@@ -275,9 +275,9 @@ const ResourceTree: React.FC<ResourceTreeProps> = ({ onClose }) => {
                       </div>
                     )}
                   </div>
-                </div>
-              ))}
-            </div>
+                  </div>
+                ))}
+              </div>
           ) : (
             <div className="bg-amber-50/10 rounded-lg p-6 border border-amber-700/30">
               <div className="text-center text-amber-300 mb-6">
