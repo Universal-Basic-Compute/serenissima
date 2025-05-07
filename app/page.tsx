@@ -1081,7 +1081,7 @@ export default function Home() {
         setWalletAddress(null);
         setUserProfile(null); // Also clear the user profile
         
-        // Clear wallet from both storages
+        // Clear wallet from both storages, but prioritize session storage
         sessionStorage.removeItem('walletAddress');
         localStorage.removeItem('walletAddress');
         
@@ -1111,7 +1111,7 @@ export default function Home() {
       
       if (address) {
         setWalletAddress(address);
-        // Store wallet in both session and local storage
+        // Store wallet in session storage first, then local storage as backup
         sessionStorage.setItem('walletAddress', address);
         localStorage.setItem('walletAddress', address);
         console.log("Wallet address stored in session and local storage");

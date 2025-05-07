@@ -18,7 +18,7 @@ export function setWalletAddress(address: string | null): void {
   if (typeof window === 'undefined') return;
   
   if (address) {
-    // Store in both storages
+    // Store in session storage first, then local storage as backup
     sessionStorage.setItem('walletAddress', address);
     localStorage.setItem('walletAddress', address);
     
