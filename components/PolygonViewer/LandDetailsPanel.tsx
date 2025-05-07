@@ -761,8 +761,8 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
                 /* Show Acquire Land button if user is not the owner */
                 <button
                   onClick={() => {
-                    // Get the current wallet address
-                    const walletAddress = sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress') || '';
+                    // Get the current wallet address using the more reliable getWalletAddress function
+                    const walletAddress = getWalletAddress();
                     
                     console.log('Attempting to acquire land, seller:', transaction.seller, 'wallet:', walletAddress);
                     
