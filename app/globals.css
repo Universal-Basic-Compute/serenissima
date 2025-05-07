@@ -83,9 +83,9 @@ button:hover, a:hover {
 
 /* Parchment-like bubble effects */
 .assistant-bubble {
-  background: linear-gradient(to bottom, #f5e7c1, #e8d4a9);
-  color: #4b3621;
-  border: 1px solid #c9b18d;
+  background: linear-gradient(to bottom, #fdba74, #fb923c); /* Changed to lighter orange */
+  color: #7c2d12; /* Darker text for contrast */
+  border: 1px solid #f97316;
   box-shadow: 
     0 2px 5px rgba(0, 0, 0, 0.1),
     inset 0 1px 1px rgba(255, 255, 255, 0.7);
@@ -112,9 +112,9 @@ button:hover, a:hover {
 }
 
 .user-bubble {
-  background: linear-gradient(to bottom, #8a5a44, #73483a);
+  background: linear-gradient(to bottom, #f97316, #ea580c); /* Changed to orange shades */
   color: white;
-  border: 1px solid #5e3a2e;
+  border: 1px solid #c2410c; /* Darker orange border */
   box-shadow: 
     0 2px 5px rgba(0, 0, 0, 0.1),
     inset 0 1px 1px rgba(255, 255, 255, 0.3);
@@ -200,8 +200,8 @@ button:hover, a:hover {
 
 /* Typing indicator with parchment-like effect */
 .typing-indicator {
-  background: linear-gradient(to bottom, #f5e7c1, #e8d4a9);
-  border: 1px solid #c9b18d;
+  background: linear-gradient(to bottom, #fdba74, #fb923c);
+  border: 1px solid #f97316;
   box-shadow: 
     0 2px 5px rgba(0, 0, 0, 0.1),
     inset 0 1px 1px rgba(255, 255, 255, 0.7);
@@ -229,7 +229,7 @@ button:hover, a:hover {
 .typing-dot {
   width: 8px;
   height: 8px;
-  background: #73483a;
+  background: #ea580c; /* Changed to match user bubble color */
   border-radius: 50%;
   display: inline-block;
   margin: 0 1px;
