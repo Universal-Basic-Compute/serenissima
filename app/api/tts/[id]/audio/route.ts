@@ -13,26 +13,16 @@ export async function GET(
     // and generate the audio or retrieve it from storage
     
     // For now, we'll return a placeholder response
-    return new NextResponse(
-      JSON.stringify({ error: 'Audio streaming not implemented in this example' }),
-      {
-        status: 501,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
+    return NextResponse.json(
+      { error: 'Audio streaming not implemented in this example' },
+      { status: 501 }
     );
     
   } catch (error) {
     console.error('Error serving audio:', error);
-    return new NextResponse(
-      JSON.stringify({ error: 'Failed to serve audio' }),
-      {
-        status: 500,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
+    return NextResponse.json(
+      { error: 'Failed to serve audio' },
+      { status: 500 }
     );
   }
 }
