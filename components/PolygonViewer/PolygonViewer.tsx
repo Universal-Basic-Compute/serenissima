@@ -975,7 +975,8 @@ export default function PolygonViewer() {
         
         // Force update of all road meshes in the scene
         if (sceneRef.current && sceneRef.current.scene) {
-          sceneRef.current.scene.traverse((object) => {
+          const scene = sceneRef.current.scene;
+          scene.traverse((object) => {
             if (object instanceof THREE.Mesh && 
                 object.userData && 
                 (object.userData.isRoad || object.userData.alwaysVisible)) {
@@ -1023,7 +1024,7 @@ export default function PolygonViewer() {
         }
         
         // Update clouds based on camera position
-        if (sceneRef.current && typeof sceneRef.current.updateClouds === 'function') {
+        if (sceneRef.current && sceneRef.current.updateClouds) {
           try {
             sceneRef.current.updateClouds(frameCount);
           } catch (error) {
