@@ -1226,7 +1226,7 @@ export default function PolygonViewer() {
       const timer = setTimeout(() => {
         // Find all land objects in the scene
         const landObjects: THREE.Object3D[] = [];
-        if (sceneRef.current) {
+        if (sceneRef.current && sceneRef.current.scene) {
           sceneRef.current.scene.traverse(object => {
             if (object instanceof THREE.Mesh && 
                 object.userData && 
@@ -1236,7 +1236,7 @@ export default function PolygonViewer() {
           });
           
           // Connect land to water
-          if (landObjects.length > 0 && sceneRef.current) {
+          if (landObjects.length > 0 && sceneRef.current && sceneRef.current.scene) {
             console.log(`Connecting ${landObjects.length} land objects to water`);
             if (typeof sceneRef.current.connectLandToWater === 'function') {
               sceneRef.current.connectLandToWater(landObjects);
@@ -1249,7 +1249,7 @@ export default function PolygonViewer() {
       const secondTimer = setTimeout(() => {
         if (sceneRef.current && sceneRef.current.scene) {
           const landObjects: THREE.Object3D[] = [];
-          if (sceneRef.current) {
+          if (sceneRef.current && sceneRef.current.scene) {
             sceneRef.current.scene.traverse(object => {
               if (object instanceof THREE.Mesh && 
                   object.userData && 
