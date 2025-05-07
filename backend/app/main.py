@@ -1868,6 +1868,48 @@ async def get_users():
         traceback.print_exc(file=sys.stdout)
         raise HTTPException(status_code=500, detail=error_msg)
 
+@app.get("/api/cron-status")
+async def cron_status():
+    """Check if the income distribution cron job is set up"""
+    try:
+        # Run crontab -l to check if our job is there
+        import subprocess
+        result = subprocess.run(['crontab', '-l'], capture_output=True, text=True)
+        
+        if result.returncode != 0:
+            return {"status": "error", "message": "Failed to check crontab", "error": result.stderr}
+        
+        # Check if our job is in the crontab
+        if "distributeIncome.py" in result.stdout:
+            return {"status": "ok", "message": "Income distribution cron job is set up", "crontab": result.stdout}
+        else:
+            return {"status": "warning", "message": "Income distribution cron job not found", "crontab": result.stdout}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+@app.post("/api/trigger-income-distribution")
+async def trigger_income_distribution():
+    """Manually trigger income distribution"""
+    try:
+        # Import the distribute_income function
+        import sys
+        import os
+        
+        # Add the backend directory to the Python path
+        backend_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        sys.path.append(backend_dir)
+        
+        # Import the distribute_income function
+        from distributeIncome import distribute_income
+        
+        # Run the distribution
+        distribute_income()
+        
+        return {"status": "success", "message": "Income distribution triggered successfully"}
+    except Exception as e:
+        import traceback
+        return {"status": "error", "message": str(e), "traceback": traceback.format_exc()}
+
 @app.post("/api/transaction/{transaction_id}/cancel")
 async def cancel_transaction(transaction_id: str, data: dict):
     """Cancel a transaction"""
