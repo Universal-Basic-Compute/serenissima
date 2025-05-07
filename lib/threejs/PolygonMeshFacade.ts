@@ -358,12 +358,14 @@ export class PolygonMeshFacade implements Poolable {
         if (material && 'color' in material && material.color) {
           if (isSelected) {
             // Store original color if not already stored
-            if (!this.originalColor) {
+            if (!this.originalColor && material.color instanceof THREE.Color) {
               this.originalColor = material.color.clone();
             }
             
             // Set to highlight color (bright yellow)
-            material.color.set(0xffff00);
+            if (material.color instanceof THREE.Color) {
+              material.color.set(0xffff00);
+            }
           } else {
             // Restore original color
             if (this.originalColor && material.color instanceof THREE.Color) {
@@ -397,7 +399,7 @@ export class PolygonMeshFacade implements Poolable {
         if (material && 'color' in material && material.color) {
           if (isHovered) {
             // Store original color if not already stored
-            if (!this.originalColor) {
+            if (!this.originalColor && material.color instanceof THREE.Color) {
               this.originalColor = material.color.clone();
             }
             
