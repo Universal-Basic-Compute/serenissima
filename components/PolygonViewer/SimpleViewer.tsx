@@ -12,7 +12,7 @@ import LandDetailsPanel from './LandDetailsPanel'; // Import the existing panel
 
 export default function SimpleViewer({ qualityMode = 'high', activeView = 'land' }: {
   qualityMode: 'high' | 'performance';
-  activeView: 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance';
+  activeView: 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance' | 'loans' | 'knowledge';
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [polygons, setPolygons] = useState([]);
