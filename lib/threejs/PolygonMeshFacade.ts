@@ -297,8 +297,10 @@ export class PolygonMeshFacade implements Poolable {
           if (this.mesh.material.map) this.mesh.material.map.dispose();
           if (this.mesh.material.normalMap) this.mesh.material.normalMap.dispose();
           if (this.mesh.material.roughnessMap) this.mesh.material.roughnessMap.dispose();
-          if (this.mesh.material.metalnessMap && 'dispose' in this.mesh.material.metalnessMap) {
-            this.mesh.material.metalnessMap.dispose();
+          if (this.mesh.material.metalnessMap) {
+            if ('dispose' in this.mesh.material.metalnessMap) {
+              this.mesh.material.metalnessMap.dispose();
+            }
           }
         }
         this.mesh.material.dispose();
