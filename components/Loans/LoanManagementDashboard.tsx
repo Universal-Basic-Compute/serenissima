@@ -15,8 +15,20 @@ const LoanManagementDashboard: React.FC = () => {
   
   useEffect(() => {
     const walletAddress = getWalletAddress();
+    console.log("LoanManagementDashboard: Wallet address:", walletAddress);
+    
     if (walletAddress) {
-      loadUserLoans(walletAddress);
+      console.log("LoanManagementDashboard: Loading user loans for wallet:", walletAddress);
+      loadUserLoans(walletAddress)
+        .then(loans => {
+          console.log("LoanManagementDashboard: User loans loaded:", loans);
+          console.log("LoanManagementDashboard: Number of user loans:", loans.length);
+        })
+        .catch(error => {
+          console.error("LoanManagementDashboard: Error loading user loans:", error);
+        });
+    } else {
+      console.warn("LoanManagementDashboard: No wallet address found, cannot load loans");
     }
     
     // Subscribe to loan-related events to update the dashboard in real-time

@@ -63,17 +63,24 @@ export class LoanService {
     this.loading = true;
     this.error = null;
     
+    console.log('LoanService: Loading available loans...');
     try {
       const response = await fetch(`${getApiBaseUrl()}/api/loans/available`);
       
+      console.log('LoanService: API response status:', response.status);
+      
       if (!response.ok) {
+        console.error('LoanService: Failed to load loans:', response.status, response.statusText);
         throw new Error(`Failed to load loans: ${response.status} ${response.statusText}`);
       }
       
       const data = await response.json();
+      console.log('LoanService: Received loan data:', data);
+      console.log('LoanService: Number of loans received:', Array.isArray(data) ? data.length : 'Not an array');
       this.loans = data;
       return data;
     } catch (error) {
+      console.error('LoanService: Error in loadAvailableLoans:', error);
       this.error = error instanceof Error ? error.message : String(error);
       throw error;
     } finally {

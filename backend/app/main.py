@@ -1981,6 +1981,16 @@ AIRTABLE_LOANS_TABLE = os.getenv("AIRTABLE_LOANS_TABLE", "LOANS")
 try:
     loans_table = Table(AIRTABLE_API_KEY, AIRTABLE_BASE_ID, AIRTABLE_LOANS_TABLE)
     print(f"Initialized Airtable LOANS table: {AIRTABLE_LOANS_TABLE}")
+    
+    # Check if LOANS_TABLE is properly initialized
+    print(f"LOANS_TABLE initialized: {loans_table is not None}")
+    try:
+        # Try to get one record to test the connection
+        test_loan = loans_table.all(limit=1)
+        print(f"LOANS_TABLE test query successful: {len(test_loan)} records found")
+    except Exception as e:
+        print(f"ERROR testing LOANS_TABLE: {str(e)}")
+        traceback.print_exc(file=sys.stdout)
 except Exception as e:
     print(f"ERROR initializing Airtable LOANS table: {str(e)}")
     traceback.print_exc(file=sys.stdout)
@@ -1990,12 +2000,14 @@ async def get_available_loans():
     """Get all available loans"""
     try:
         formula = "AND({Status}='available')"
-        print(f"Fetching available loans with formula: {formula}")
+        print(f"Backend: Fetching available loans with formula: {formula}")
         records = loans_table.all(formula=formula)
+        
+        print(f"Backend: Found {len(records)} available loan records")
         
         loans = []
         for record in records:
-            loans.append({
+            loan_data = {
                 "id": record["id"],
                 "name": record["fields"].get("Name", ""),
                 "borrower": record["fields"].get("Borrower", ""),
@@ -2013,27 +2025,36 @@ async def get_available_loans():
                 "applicationText": record["fields"].get("ApplicationText", ""),
                 "loanPurpose": record["fields"].get("LoanPurpose", ""),
                 "notes": record["fields"].get("Notes", "")
-            })
+            }
+            loans.append(loan_data)
+            print(f"Backend: Added loan: {loan_data['name']} with ID {loan_data['id']}")
         
-        print(f"Found {len(loans)} available loans")
+        print(f"Backend: Returning {len(loans)} available loans")
         return loans
     except Exception as e:
         error_msg = f"Failed to get available loans: {str(e)}"
-        print(f"ERROR: {error_msg}")
+        print(f"Backend ERROR: {error_msg}")
         traceback.print_exc(file=sys.stdout)
         raise HTTPException(status_code=500, detail=error_msg)
+
+@app.get("/api/loans/test")
+async def test_loans_endpoint():
+    """Test endpoint to verify loans API is working"""
+    return {"status": "ok", "message": "Loans API is working"}
 
 @app.get("/api/loans/user/{user_id}")
 async def get_user_loans(user_id: str):
     """Get loans for a specific user"""
     try:
         formula = f"{{Borrower}}='{user_id}'"
-        print(f"Fetching loans for user with formula: {formula}")
+        print(f"Backend: Fetching loans for user with formula: {formula}")
         records = loans_table.all(formula=formula)
+        
+        print(f"Backend: Found {len(records)} loan records for user {user_id}")
         
         loans = []
         for record in records:
-            loans.append({
+            loan_data = {
                 "id": record["id"],
                 "name": record["fields"].get("Name", ""),
                 "borrower": record["fields"].get("Borrower", ""),
@@ -2051,13 +2072,15 @@ async def get_user_loans(user_id: str):
                 "applicationText": record["fields"].get("ApplicationText", ""),
                 "loanPurpose": record["fields"].get("LoanPurpose", ""),
                 "notes": record["fields"].get("Notes", "")
-            })
+            }
+            loans.append(loan_data)
+            print(f"Backend: Added user loan: {loan_data['name']} with ID {loan_data['id']}")
         
-        print(f"Found {len(loans)} loans for user {user_id}")
+        print(f"Backend: Returning {len(loans)} loans for user {user_id}")
         return loans
     except Exception as e:
         error_msg = f"Failed to get user loans: {str(e)}"
-        print(f"ERROR: {error_msg}")
+        print(f"Backend ERROR: {error_msg}")
         traceback.print_exc(file=sys.stdout)
         raise HTTPException(status_code=500, detail=error_msg)
 

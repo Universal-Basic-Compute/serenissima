@@ -21,12 +21,12 @@ const LoanMarketplace: React.FC = () => {
   
   useEffect(() => {
     const fetchLoans = async () => {
-      console.log("Fetching available loans...");
+      console.log("LoanMarketplace: Fetching available loans...");
       try {
         await loadAvailableLoans();
-        console.log("Loans loaded successfully");
+        console.log("LoanMarketplace: Loans loaded successfully");
       } catch (error) {
-        console.error("Error loading loans:", error);
+        console.error("LoanMarketplace: Error loading loans:", error);
       }
     };
     
@@ -36,7 +36,7 @@ const LoanMarketplace: React.FC = () => {
     const loanOfferCreatedSubscription = eventBus.subscribe(
       EventTypes.OFFER_CREATED, 
       (data: LoanEventData) => {
-        console.log("Loan offer created event received:", data);
+        console.log("LoanMarketplace: Loan offer created event received:", data);
         // Add the new loan to the available loans list
         if (data.loan && data.loan.status === LoanStatus.AVAILABLE) {
           setAvailableLoans(prevLoans => [...prevLoans, data.loan]);
@@ -47,7 +47,7 @@ const LoanMarketplace: React.FC = () => {
     const loanAppliedSubscription = eventBus.subscribe(
       'LOAN_APPLIED', // Using string literal as fallback
       (data: LoanEventData) => {
-        console.log("Loan applied event received:", data);
+        console.log("LoanMarketplace: Loan applied event received:", data);
         // Remove the loan from available loans if it was just applied for
         if (data.loan && data.loan.id) {
           setAvailableLoans(prevLoans => 
@@ -75,8 +75,10 @@ const LoanMarketplace: React.FC = () => {
   
   // Update local state when store loans change
   useEffect(() => {
-    console.log("Store loans updated:", storeLoans);
+    console.log("LoanMarketplace: Store loans updated:", storeLoans);
+    console.log("LoanMarketplace: Store loans length:", storeLoans?.length || 0);
     if (storeLoans && storeLoans.length > 0) {
+      console.log("LoanMarketplace: Setting available loans from store");
       setAvailableLoans(storeLoans);
     }
   }, [storeLoans]);
@@ -113,9 +115,9 @@ const LoanMarketplace: React.FC = () => {
   
   // Add a check to ensure we have loans before rendering
   useEffect(() => {
-    console.log("Available loans in state:", availableLoans);
-    console.log("Filtered loans:", filteredLoans);
-    console.log("Sorted loans:", sortedLoans);
+    console.log("LoanMarketplace: Available loans in state:", availableLoans);
+    console.log("LoanMarketplace: Filtered loans:", filteredLoans);
+    console.log("LoanMarketplace: Sorted loans:", sortedLoans);
   }, [availableLoans, filteredLoans, sortedLoans]);
   
   // Show notification when events occur

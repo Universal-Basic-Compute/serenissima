@@ -43,13 +43,18 @@ export const useLoanStore = create<LoanState & LoanActions>((set, get) => ({
   error: null,
   
   loadAvailableLoans: async () => {
+    console.log('LoanStore: Starting to load available loans');
     set({ loading: true, error: null });
     try {
       const loanService = LoanService.getInstance();
+      console.log('LoanStore: Calling loanService.loadAvailableLoans()');
       const loans = await loanService.loadAvailableLoans();
+      console.log('LoanStore: Received loans from service:', loans);
+      console.log('LoanStore: Number of loans:', loans.length);
       set({ availableLoans: loans, loading: false });
       return loans;
     } catch (error) {
+      console.error('LoanStore: Error loading available loans:', error);
       set({ error: error instanceof Error ? error.message : String(error), loading: false });
       throw error;
     }
