@@ -55,7 +55,7 @@ export default function SimplePage() {
   const [isGeneratingImage, setIsGeneratingImage] = useState<boolean>(false);
   const [selectedColor, setSelectedColor] = useState<string>('#8B4513'); // Default brown color
   const [successMessage, setSuccessMessage] = useState<{message: string, signature: string} | null>(null);
-  const [cacheCleared, setCacheCleared] = useState<boolean>(false);
+  const [cacheCleared, setCacheCleared] = useState<boolean | null>(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [landRendered, setLandRendered] = useState(false);
   const [userProfile, setUserProfile] = useState<{
@@ -237,7 +237,7 @@ export default function SimplePage() {
       
       // Hide success message after 3 seconds
       setTimeout(() => {
-        setCacheCleared(undefined);
+        setCacheCleared(false);
       }, 3000);
       
       // Reload the page after a short delay
