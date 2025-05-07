@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { eventBus, EventTypes } from '@/lib/eventBus';
 import { getApiBaseUrl } from '@/lib/apiUtils';
 
@@ -20,8 +21,40 @@ interface DockRendererProps {
 
 const DockRenderer: React.FC<DockRendererProps> = ({ scene, active }) => {
   const docksRef = useRef<DockData[]>([]);
-  const meshesRef = useRef<THREE.Mesh[]>([]);
+  const meshesRef = useRef<THREE.Object3D[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const modelRef = useRef<THREE.Group | null>(null);
+  const loaderRef = useRef<GLTFLoader>(new GLTFLoader());
+  const modelLoadingRef = useRef<boolean>(false);
+  
+  // Load the dock model once
+  useEffect(() => {
+    if (!modelRef.current && !modelLoadingRef.current) {
+      modelLoadingRef.current = true;
+      
+      loaderRef.current.load(
+        '/assets/buildings/models/public-dock/model.glb',
+        (gltf) => {
+          console.log('Dock model loaded successfully');
+          modelRef.current = gltf.scene;
+          
+          // If we already have docks to render, render them now
+          if (active && docksRef.current.length > 0) {
+            renderDocks();
+          }
+          
+          modelLoadingRef.current = false;
+        },
+        (progress) => {
+          console.log(`Loading dock model: ${(progress.loaded / progress.total) * 100}%`);
+        },
+        (error) => {
+          console.error('Error loading dock model:', error);
+          modelLoadingRef.current = false;
+        }
+      );
+    }
+  }, [active]);
   
   // Load docks on mount and when active changes
   useEffect(() => {
@@ -47,8 +80,10 @@ const DockRenderer: React.FC<DockRendererProps> = ({ scene, active }) => {
         const docks = await response.json();
         docksRef.current = docks;
         
-        // Render docks
-        renderDocks();
+        // Render docks if model is loaded
+        if (modelRef.current) {
+          renderDocks();
+        }
         
         // Show docks
         meshesRef.current.forEach(mesh => {
@@ -79,8 +114,10 @@ const DockRenderer: React.FC<DockRendererProps> = ({ scene, active }) => {
           .then(dock => {
             // Add to our list
             docksRef.current.push(dock);
-            // Render the new dock
-            renderDock(dock);
+            // Render the new dock if model is loaded
+            if (modelRef.current) {
+              renderDock(dock);
+            }
           })
           .catch(error => {
             console.error('Error loading new dock:', error);
@@ -98,12 +135,7 @@ const DockRenderer: React.FC<DockRendererProps> = ({ scene, active }) => {
           // Remove the mesh
           if (meshesRef.current[index]) {
             scene.remove(meshesRef.current[index]);
-            meshesRef.current[index].geometry.dispose();
-            if (Array.isArray(meshesRef.current[index].material)) {
-              meshesRef.current[index].material.forEach(m => m.dispose());
-            } else if (meshesRef.current[index].material) {
-              meshesRef.current[index].material.dispose();
-            }
+            disposeMesh(meshesRef.current[index]);
             meshesRef.current.splice(index, 1);
           }
         }
@@ -121,6 +153,25 @@ const DockRenderer: React.FC<DockRendererProps> = ({ scene, active }) => {
     };
   }, [scene]);
   
+  // Helper function to dispose of a mesh and its children
+  const disposeMesh = (object: THREE.Object3D) => {
+    object.traverse((child) => {
+      if (child instanceof THREE.Mesh) {
+        if (child.geometry) {
+          child.geometry.dispose();
+        }
+        
+        if (child.material) {
+          if (Array.isArray(child.material)) {
+            child.material.forEach(material => material.dispose());
+          } else {
+            child.material.dispose();
+          }
+        }
+      }
+    });
+  };
+  
   // Cleanup on unmount
   useEffect(() => {
     return () => {
@@ -128,12 +179,7 @@ const DockRenderer: React.FC<DockRendererProps> = ({ scene, active }) => {
       meshesRef.current.forEach(mesh => {
         if (mesh) {
           scene.remove(mesh);
-          mesh.geometry.dispose();
-          if (Array.isArray(mesh.material)) {
-            mesh.material.forEach(m => m.dispose());
-          } else if (mesh.material) {
-            mesh.material.dispose();
-          }
+          disposeMesh(mesh);
         }
       });
       meshesRef.current = [];
@@ -146,12 +192,7 @@ const DockRenderer: React.FC<DockRendererProps> = ({ scene, active }) => {
     meshesRef.current.forEach(mesh => {
       if (mesh) {
         scene.remove(mesh);
-        mesh.geometry.dispose();
-        if (Array.isArray(mesh.material)) {
-          mesh.material.forEach(m => m.dispose());
-        } else if (mesh.material) {
-          mesh.material.dispose();
-        }
+        disposeMesh(mesh);
       }
     });
     meshesRef.current = [];
@@ -164,6 +205,52 @@ const DockRenderer: React.FC<DockRendererProps> = ({ scene, active }) => {
   
   // Render a single dock
   const renderDock = (dock: DockData) => {
+    if (!modelRef.current) {
+      console.warn('Dock model not loaded yet');
+      return null;
+    }
+    
+    // Clone the model for this dock instance
+    const dockModel = modelRef.current.clone();
+    
+    // Position and rotate the dock
+    dockModel.position.set(
+      dock.position.x,
+      dock.position.y || 0.1, // Default to slightly above water level
+      dock.position.z
+    );
+    dockModel.rotation.y = dock.rotation;
+    
+    // Scale the model appropriately (adjust as needed based on the model)
+    dockModel.scale.set(1, 1, 1);
+    
+    // Add to scene
+    scene.add(dockModel);
+    meshesRef.current.push(dockModel);
+    
+    // Add connection points
+    if (dock.connectionPoints && dock.connectionPoints.length > 0) {
+      dock.connectionPoints.forEach(point => {
+        const sphereGeometry = new THREE.SphereGeometry(0.15, 16, 16);
+        const sphereMaterial = new THREE.MeshBasicMaterial({ 
+          color: 0x4CAF50, // Green for connection points
+          transparent: true,
+          opacity: 0.7
+        });
+        const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+        
+        sphere.position.set(point.x, point.y || 0.2, point.z);
+        
+        scene.add(sphere);
+        meshesRef.current.push(sphere);
+      });
+    }
+    
+    return dockModel;
+  };
+  
+  // Fallback rendering if model fails to load
+  const renderFallbackDock = (dock: DockData) => {
     // Create a more detailed dock mesh
     const dockGroup = new THREE.Group();
     
@@ -210,25 +297,7 @@ const DockRenderer: React.FC<DockRendererProps> = ({ scene, active }) => {
     
     // Add to scene
     scene.add(dockGroup);
-    meshesRef.current.push(dockGroup as unknown as THREE.Mesh); // Type cast for simplicity
-    
-    // Add connection points
-    if (dock.connectionPoints && dock.connectionPoints.length > 0) {
-      dock.connectionPoints.forEach(point => {
-        const sphereGeometry = new THREE.SphereGeometry(0.15, 16, 16);
-        const sphereMaterial = new THREE.MeshBasicMaterial({ 
-          color: 0x4CAF50, // Green for connection points
-          transparent: true,
-          opacity: 0.7
-        });
-        const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
-        
-        sphere.position.set(point.x, point.y || 0.2, point.z);
-        
-        scene.add(sphere);
-        meshesRef.current.push(sphere);
-      });
-    }
+    meshesRef.current.push(dockGroup);
     
     return dockGroup;
   };

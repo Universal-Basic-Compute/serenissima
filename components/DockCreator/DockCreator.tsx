@@ -112,7 +112,13 @@ const DockCreator: React.FC<DockCreatorProps> = ({
         },
         rotation: previewRotation,
         connectionPoints: connectionPoints,
-        createdBy: walletAddress
+        createdBy: walletAddress,
+        // Add metadata for the dock model
+        metadata: {
+          modelPath: '/assets/buildings/models/public-dock/model.glb',
+          scale: 1.0,
+          offsetY: 0.1
+        }
       };
       
       // Send to server
@@ -135,7 +141,8 @@ const DockCreator: React.FC<DockCreatorProps> = ({
         dockId: data.id,
         landId: landId,
         position: previewPosition,
-        rotation: previewRotation
+        rotation: previewRotation,
+        modelPath: '/assets/buildings/models/public-dock/model.glb'
       });
       
       // Call the completion callback

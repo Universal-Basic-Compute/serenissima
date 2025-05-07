@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { WaterEdgeDetector } from './WaterEdgeDetector';
 
 export class DockCreationManager {
@@ -6,11 +7,14 @@ export class DockCreationManager {
   private camera: THREE.PerspectiveCamera;
   private raycaster: THREE.Raycaster;
   private mouse: THREE.Vector2;
-  private previewMesh: THREE.Mesh | null = null;
+  private previewMesh: THREE.Object3D | null = null;
+  private fallbackPreviewMesh: THREE.Mesh | null = null;
   private waterEdgeDetector: WaterEdgeDetector;
   private adjacentLandId: string | null = null;
   private renderer: THREE.WebGLRenderer;
   private currentEdge: { start: THREE.Vector3, end: THREE.Vector3 } | null = null;
+  private modelLoader: GLTFLoader;
+  private isModelLoaded: boolean = false;
   
   constructor(scene: THREE.Scene, camera: THREE.PerspectiveCamera, polygons: any[]) {
     this.scene = scene;
@@ -18,13 +22,17 @@ export class DockCreationManager {
     this.raycaster = new THREE.Raycaster();
     this.mouse = new THREE.Vector2();
     this.waterEdgeDetector = new WaterEdgeDetector(polygons);
+    this.modelLoader = new GLTFLoader();
     
     // Find the renderer from the scene's userData or create a temporary one
     this.renderer = scene.userData?.renderer || 
       new THREE.WebGLRenderer({ antialias: true });
     
-    // Create preview mesh
-    this.createPreviewMesh();
+    // Create fallback preview mesh immediately
+    this.createFallbackPreviewMesh();
+    
+    // Load the 3D model for preview
+    this.loadDockModel();
   }
   
   /**
@@ -44,8 +52,12 @@ export class DockCreationManager {
    * Get the current preview position (snapped to water edge)
    */
   public getPreviewPosition(): THREE.Vector3 | null {
-    if (!this.previewMesh) return null;
-    return this.previewMesh.position.clone();
+    if (this.previewMesh) {
+      return this.previewMesh.position.clone();
+    } else if (this.fallbackPreviewMesh) {
+      return this.fallbackPreviewMesh.position.clone();
+    }
+    return null;
   }
   
   /**
@@ -63,9 +75,64 @@ export class DockCreationManager {
   }
   
   /**
-   * Create the preview mesh for the dock
+   * Load the dock 3D model
    */
-  private createPreviewMesh(): void {
+  private loadDockModel(): void {
+    this.modelLoader.load(
+      '/assets/buildings/models/public-dock/model.glb',
+      (gltf) => {
+        // Remove fallback mesh if it exists
+        if (this.fallbackPreviewMesh) {
+          this.scene.remove(this.fallbackPreviewMesh);
+        }
+        
+        // Set up the model
+        const model = gltf.scene;
+        
+        // Apply materials and settings
+        model.traverse((child) => {
+          if (child instanceof THREE.Mesh) {
+            // Make the material transparent for preview
+            if (child.material) {
+              child.material = child.material.clone();
+              child.material.transparent = true;
+              child.material.opacity = 0.7;
+            }
+          }
+        });
+        
+        // Add to scene
+        this.scene.add(model);
+        this.previewMesh = model;
+        this.previewMesh.visible = false;
+        
+        // Set flag
+        this.isModelLoaded = true;
+        
+        // Update position if we already have a valid position
+        if (this.currentEdge) {
+          this.updatePreviewPosition();
+        }
+      },
+      (progress) => {
+        // Loading progress
+        console.log(`Loading dock model: ${(progress.loaded / progress.total) * 100}%`);
+      },
+      (error) => {
+        // Error handling
+        console.error('Error loading dock model:', error);
+        // Ensure fallback mesh is visible
+        if (this.fallbackPreviewMesh) {
+          this.fallbackPreviewMesh.visible = true;
+        }
+      }
+    );
+  }
+  
+  /**
+   * Create a fallback preview mesh for the dock (used until the model loads)
+   */
+  private createFallbackPreviewMesh(): void {
     // Create a simple dock mesh for preview
     const geometry = new THREE.BoxGeometry(2, 0.2, 5);
     const material = new THREE.MeshBasicMaterial({
@@ -74,16 +141,18 @@ export class DockCreationManager {
       opacity: 0.7
     });
     
-    this.previewMesh = new THREE.Mesh(geometry, material);
-    this.previewMesh.visible = false;
-    this.scene.add(this.previewMesh);
+    this.fallbackPreviewMesh = new THREE.Mesh(geometry, material);
+    this.fallbackPreviewMesh.visible = false;
+    this.scene.add(this.fallbackPreviewMesh);
   }
   
   /**
    * Update the preview position based on mouse position
    */
   private updatePreviewPosition(): void {
-    if (!this.previewMesh) return;
+    // Get the active preview mesh (either the model or fallback)
+    const activeMesh = this.isModelLoaded ? this.previewMesh : this.fallbackPreviewMesh;
+    if (!activeMesh) return;
     
     // Cast ray from mouse position
     this.raycaster.setFromCamera(this.mouse, this.camera);
@@ -99,9 +168,9 @@ export class DockCreationManager {
       
       if (position && landId) {
         // Update preview mesh position
-        this.previewMesh.position.copy(position);
-        this.previewMesh.position.y = 0.1; // Slightly above water level
-        this.previewMesh.visible = true;
+        activeMesh.position.copy(position);
+        activeMesh.position.y = 0.1; // Slightly above water level
+        activeMesh.visible = true;
         this.adjacentLandId = landId;
         this.currentEdge = edge;
         
@@ -109,25 +178,54 @@ export class DockCreationManager {
         if (edge) {
           const direction = new THREE.Vector3().subVectors(edge.end, edge.start).normalize();
           const angle = Math.atan2(direction.z, direction.x);
-          this.previewMesh.rotation.y = angle + Math.PI/2; // Perpendicular to edge
+          activeMesh.rotation.y = angle + Math.PI/2; // Perpendicular to edge
         }
         
         // Update material color to indicate valid placement
-        if (this.previewMesh.material instanceof THREE.MeshBasicMaterial) {
-          this.previewMesh.material.color.set(0x8B4513); // Brown for valid
+        if (!this.isModelLoaded && this.fallbackPreviewMesh && 
+            this.fallbackPreviewMesh.material instanceof THREE.MeshBasicMaterial) {
+          this.fallbackPreviewMesh.material.color.set(0x8B4513); // Brown for valid
+          this.fallbackPreviewMesh.material.opacity = 0.7;
+        } else if (this.isModelLoaded && this.previewMesh) {
+          // For the model, we'll make it fully visible for valid placement
+          this.previewMesh.traverse((child) => {
+            if (child instanceof THREE.Mesh && child.material) {
+              if (Array.isArray(child.material)) {
+                child.material.forEach(mat => {
+                  mat.opacity = 0.7;
+                });
+              } else {
+                child.material.opacity = 0.7;
+              }
+            }
+          });
         }
       } else {
         // Show preview at cursor but indicate invalid placement
-        this.previewMesh.position.copy(intersection);
-        this.previewMesh.position.y = 0.1;
-        this.previewMesh.visible = true;
+        activeMesh.position.copy(intersection);
+        activeMesh.position.y = 0.1;
+        activeMesh.visible = true;
         this.adjacentLandId = null;
         this.currentEdge = null;
         
         // Update material color to indicate invalid placement
-        if (this.previewMesh.material instanceof THREE.MeshBasicMaterial) {
-          this.previewMesh.material.color.set(0xFF0000); // Red for invalid
-          this.previewMesh.material.opacity = 0.5;
+        if (!this.isModelLoaded && this.fallbackPreviewMesh && 
+            this.fallbackPreviewMesh.material instanceof THREE.MeshBasicMaterial) {
+          this.fallbackPreviewMesh.material.color.set(0xFF0000); // Red for invalid
+          this.fallbackPreviewMesh.material.opacity = 0.5;
+        } else if (this.isModelLoaded && this.previewMesh) {
+          // For the model, we'll make it semi-transparent red for invalid placement
+          this.previewMesh.traverse((child) => {
+            if (child instanceof THREE.Mesh && child.material) {
+              if (Array.isArray(child.material)) {
+                child.material.forEach(mat => {
+                  mat.opacity = 0.5;
+                });
+              } else {
+                child.material.opacity = 0.5;
+              }
+            }
+          });
         }
       }
     }
@@ -137,8 +235,10 @@ export class DockCreationManager {
    * Update the preview rotation
    */
   public updateRotation(rotation: number): void {
-    if (this.previewMesh) {
+    if (this.isModelLoaded && this.previewMesh) {
       this.previewMesh.rotation.y = rotation;
+    } else if (this.fallbackPreviewMesh) {
+      this.fallbackPreviewMesh.rotation.y = rotation;
     }
   }
   
@@ -146,10 +246,12 @@ export class DockCreationManager {
    * Generate connection points for the dock
    */
   public generateConnectionPoints(): { x: number; y: number; z: number }[] {
-    if (!this.previewMesh) return [];
+    // Get position and rotation from the active preview mesh
+    const position = this.getPreviewPosition() || new THREE.Vector3();
+    const rotation = this.isModelLoaded && this.previewMesh 
+      ? this.previewMesh.rotation.y 
+      : this.fallbackPreviewMesh?.rotation.y || 0;
     
-    const position = this.previewMesh.position;
-    const rotation = this.previewMesh.rotation.y;
     const points = [];
     
     // Front connection point (for roads connecting to the dock)
@@ -186,11 +288,44 @@ export class DockCreationManager {
    * Clean up resources
    */
   public dispose(): void {
+    // Clean up the 3D model if loaded
     if (this.previewMesh) {
       this.scene.remove(this.previewMesh);
-      this.previewMesh.geometry.dispose();
-      (this.previewMesh.material as THREE.Material).dispose();
+      
+      // Dispose of geometries and materials
+      this.previewMesh.traverse((child) => {
+        if (child instanceof THREE.Mesh) {
+          if (child.geometry) {
+            child.geometry.dispose();
+          }
+          
+          if (child.material) {
+            if (Array.isArray(child.material)) {
+              child.material.forEach(material => material.dispose());
+            } else {
+              child.material.dispose();
+            }
+          }
+        }
+      });
+      
       this.previewMesh = null;
+    }
+    
+    // Clean up the fallback mesh
+    if (this.fallbackPreviewMesh) {
+      this.scene.remove(this.fallbackPreviewMesh);
+      this.fallbackPreviewMesh.geometry.dispose();
+      
+      if (this.fallbackPreviewMesh.material) {
+        if (Array.isArray(this.fallbackPreviewMesh.material)) {
+          this.fallbackPreviewMesh.material.forEach(material => material.dispose());
+        } else {
+          this.fallbackPreviewMesh.material.dispose();
+        }
+      }
+      
+      this.fallbackPreviewMesh = null;
     }
   }
 }
