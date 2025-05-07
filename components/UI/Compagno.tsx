@@ -1,94 +1,187 @@
 import { useState, useRef, useEffect } from 'react';
-import { FaTimes, FaChevronUp, FaChevronDown } from 'react-icons/fa';
+import { FaTimes, FaChevronDown, FaSpinner } from 'react-icons/fa';
 
 interface CompagnoProps {
   className?: string;
 }
 
+interface Message {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: string;
+}
+
+interface PaginationInfo {
+  total: number;
+  limit: number;
+  offset: number;
+  has_more: boolean;
+}
+
+const KINOS_API_BASE_URL = 'https://api.kinos-engine.ai/v2';
+const BLUEPRINT = 'compagno';
+const DEFAULT_USERNAME = 'visitor'; // We'll use a default username for anonymous users
+
 const Compagno: React.FC<CompagnoProps> = ({ className }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<{text: string; sender: 'user' | 'compagno'}[]>([
-    { text: "Buongiorno! I am Compagno, your guide to La Serenissima. How may I assist you today?", sender: 'compagno' }
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+  const [pagination, setPagination] = useState<PaginationInfo | null>(null);
+  const [username, setUsername] = useState<string>(DEFAULT_USERNAME);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Fetch user information if available
+  useEffect(() => {
+    // Try to get username from localStorage or other source
+    const savedProfile = localStorage.getItem('userProfile');
+    if (savedProfile) {
+      try {
+        const profile = JSON.parse(savedProfile);
+        if (profile.username) {
+          setUsername(profile.username);
+        }
+      } catch (error) {
+        console.error('Error parsing user profile:', error);
+      }
+    }
+  }, []);
+
+  // Load message history when chat is opened
+  useEffect(() => {
+    if (isOpen) {
+      fetchMessageHistory();
+    }
+  }, [isOpen, username]);
 
   // Scroll to bottom of messages when new ones are added
   useEffect(() => {
-    if (messagesEndRef.current) {
+    if (messagesEndRef.current && isOpen) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [messages]);
+  }, [messages, isOpen]);
 
-  const handleSendMessage = async (message: string) => {
+  const fetchMessageHistory = async (offset = 0) => {
+    setIsLoadingHistory(true);
+    try {
+      const response = await fetch(
+        `${KINOS_API_BASE_URL}/blueprints/${BLUEPRINT}/kins/${username}/messages?limit=25&offset=${offset}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch message history: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      if (offset === 0) {
+        // First page of results
+        setMessages(data.messages || []);
+      } else {
+        // Append to existing messages for pagination
+        setMessages(prev => [...prev, ...(data.messages || [])]);
+      }
+      
+      setPagination(data.pagination || null);
+    } catch (error) {
+      console.error('Error fetching message history:', error);
+      // If we can't fetch history, start with a welcome message
+      if (offset === 0) {
+        setMessages([
+          {
+            id: 'welcome',
+            role: 'assistant',
+            content: "Buongiorno! I am Compagno, your guide to La Serenissima. How may I assist you today?",
+            timestamp: new Date().toISOString()
+          }
+        ]);
+      }
+    } finally {
+      setIsLoadingHistory(false);
+    }
+  };
+
+  const loadMoreMessages = () => {
+    if (pagination && pagination.has_more) {
+      fetchMessageHistory(pagination.offset + pagination.limit);
+    }
+  };
+
+  const sendMessage = async (content: string) => {
+    if (!content.trim()) return;
+    
+    // Optimistically add user message to UI
+    const userMessage: Message = {
+      id: `temp-${Date.now()}`,
+      role: 'user',
+      content: content,
+      timestamp: new Date().toISOString()
+    };
+    
+    setMessages(prev => [...prev, userMessage]);
+    setInputValue('');
     setIsTyping(true);
     
     try {
-      // In a real implementation, this would call an API endpoint
-      // For now, we'll simulate a response after a delay
-      setTimeout(() => {
-        const responses = [
-          "Ah, an excellent question about Venice!",
-          "The Council of Ten would be most interested in your inquiry.",
-          "As your loyal guide, I shall help you navigate the canals of knowledge.",
-          "The Doge himself would approve of your curiosity!",
-          "Venice's history is rich with stories that answer your question."
-        ];
-        
-        const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-        setMessages(prev => [...prev, { text: randomResponse, sender: 'compagno' }]);
-        setIsTyping(false);
-      }, 1000);
+      const response = await fetch(
+        `${KINOS_API_BASE_URL}/blueprints/${BLUEPRINT}/kins/${username}/messages`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            content: content,
+            model: 'claude-3-7-sonnet-latest',
+            mode: 'creative',
+            addSystem: "You are Compagno, a Venetian guide in La Serenissima, a digital recreation of Renaissance Venice. Respond in a friendly, helpful manner with a slight Venetian flair. Your knowledge includes Venice's history, the game's mechanics, and how to navigate the digital city. Always be helpful and concise."
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to send message: ${response.status}`);
+      }
+
+      const data = await response.json();
       
-    } catch (error) {
-      console.error('Error getting response:', error);
-      setMessages(prev => [...prev, { 
-        text: "Forgive me, but I seem to be unable to respond at the moment.", 
-        sender: 'compagno' 
+      // Add the assistant's response to the messages
+      setMessages(prev => [...prev, {
+        id: data.id,
+        role: 'assistant',
+        content: data.content,
+        timestamp: data.timestamp
       }]);
+    } catch (error) {
+      console.error('Error sending message:', error);
+      
+      // Add a fallback response if the API call fails
+      setMessages(prev => [...prev, {
+        id: `error-${Date.now()}`,
+        role: 'assistant',
+        content: "Forgive me, but I seem to be unable to respond at the moment. The Council of Ten may be reviewing our conversation. Please try again later.",
+        timestamp: new Date().toISOString()
+      }]);
+    } finally {
       setIsTyping(false);
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!inputValue.trim()) return;
-    
-    // Add user message
-    const userMessage = { text: inputValue, sender: 'user' as const };
-    setMessages(prev => [...prev, userMessage]);
-    setInputValue('');
-    
-    // Show typing indicator
-    setIsTyping(true);
-    
-    try {
-      // In a real implementation, this would call an API endpoint
-      // For now, we'll simulate a response after a delay
-      setTimeout(() => {
-        const responses = [
-          "Ah, an excellent question about Venice!",
-          "The Council of Ten would be most interested in your inquiry.",
-          "As your loyal guide, I shall help you navigate the canals of knowledge.",
-          "The Doge himself would approve of your curiosity!",
-          "Venice's history is rich with stories that answer your question."
-        ];
-        
-        const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-        setMessages(prev => [...prev, { text: randomResponse, sender: 'compagno' }]);
-        setIsTyping(false);
-      }, 1000);
-      
-    } catch (error) {
-      console.error('Error getting response:', error);
-      setMessages(prev => [...prev, { 
-        text: "Forgive me, but I seem to be unable to respond at the moment.", 
-        sender: 'compagno' 
-      }]);
-      setIsTyping(false);
-    }
+    await sendMessage(inputValue);
+  };
+
+  const handleSuggestedQuestion = async (question: string) => {
+    await sendMessage(question);
   };
 
   return (
@@ -118,7 +211,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className }) => {
 
       {/* Expanded chat window */}
       {isOpen && (
-        <div className="bg-white rounded-lg shadow-xl w-80 max-h-96 flex flex-col border-2 border-amber-600 overflow-hidden slide-in">
+        <div className="bg-white rounded-lg shadow-xl w-96 max-h-[600px] flex flex-col border-2 border-amber-600 overflow-hidden slide-in">
           {/* Header */}
           <div className="bg-amber-700 text-white p-3 flex justify-between items-center">
             <div className="flex items-center">
@@ -157,23 +250,54 @@ const Compagno: React.FC<CompagnoProps> = ({ className }) => {
           
           {/* Messages area */}
           <div className="flex-1 overflow-y-auto p-3 bg-amber-50">
+            {/* Load more button */}
+            {pagination && pagination.has_more && (
+              <div className="text-center mb-4">
+                <button
+                  onClick={loadMoreMessages}
+                  disabled={isLoadingHistory}
+                  className="px-3 py-1 text-sm bg-amber-100 hover:bg-amber-200 text-amber-800 rounded-full border border-amber-200 transition-colors"
+                >
+                  {isLoadingHistory ? (
+                    <span className="flex items-center justify-center">
+                      <FaSpinner className="animate-spin mr-2" />
+                      Loading...
+                    </span>
+                  ) : (
+                    'Load earlier messages'
+                  )}
+                </button>
+              </div>
+            )}
+            
+            {/* Loading indicator for initial load */}
+            {isLoadingHistory && messages.length === 0 && (
+              <div className="flex justify-center items-center h-32">
+                <FaSpinner className="animate-spin text-amber-600 text-2xl" />
+              </div>
+            )}
+            
+            {/* Messages */}
             {messages.map((message, index) => (
               <div 
-                key={index} 
+                key={message.id} 
                 className={`mb-3 ${
-                  message.sender === 'user' 
+                  message.role === 'user' 
                     ? 'text-right' 
                     : 'text-left'
                 }`}
               >
                 <div 
                   className={`inline-block p-2 rounded-lg max-w-[80%] ${
-                    message.sender === 'user'
+                    message.role === 'user'
                       ? 'bg-blue-500 text-white rounded-br-none'
                       : 'bg-amber-100 text-gray-800 rounded-bl-none border border-amber-200'
                   }`}
                 >
-                  {message.text}
+                  {message.content}
+                </div>
+                <div className="text-xs text-gray-500 mt-1 px-1">
+                  {new Date(message.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                 </div>
               </div>
             ))}
@@ -195,36 +319,24 @@ const Compagno: React.FC<CompagnoProps> = ({ className }) => {
           </div>
           
           {/* Suggestions */}
-          {messages.length <= 2 && (
+          {messages.length <= 1 && (
             <div className="border-t border-gray-200 p-2 bg-amber-50">
               <p className="text-xs text-gray-500 mb-2">Suggested questions:</p>
               <div className="flex flex-wrap gap-1">
                 <button
-                  onClick={() => {
-                    const question = "How do I purchase land?";
-                    setMessages(prev => [...prev, { text: question, sender: 'user' }]);
-                    handleSendMessage(question);
-                  }}
+                  onClick={() => handleSuggestedQuestion("How do I purchase land?")}
                   className="text-xs bg-amber-100 hover:bg-amber-200 text-amber-800 px-2 py-1 rounded-full border border-amber-200 transition-colors"
                 >
                   How do I purchase land?
                 </button>
                 <button
-                  onClick={() => {
-                    const question = "What are $COMPUTE tokens?";
-                    setMessages(prev => [...prev, { text: question, sender: 'user' }]);
-                    handleSendMessage(question);
-                  }}
+                  onClick={() => handleSuggestedQuestion("What are $COMPUTE tokens?")}
                   className="text-xs bg-amber-100 hover:bg-amber-200 text-amber-800 px-2 py-1 rounded-full border border-amber-200 transition-colors"
                 >
                   What are $COMPUTE tokens?
                 </button>
                 <button
-                  onClick={() => {
-                    const question = "How do I build structures?";
-                    setMessages(prev => [...prev, { text: question, sender: 'user' }]);
-                    handleSendMessage(question);
-                  }}
+                  onClick={() => handleSuggestedQuestion("How do I build structures?")}
                   className="text-xs bg-amber-100 hover:bg-amber-200 text-amber-800 px-2 py-1 rounded-full border border-amber-200 transition-colors"
                 >
                   How do I build structures?
@@ -241,13 +353,18 @@ const Compagno: React.FC<CompagnoProps> = ({ className }) => {
               onChange={(e) => setInputValue(e.target.value)}
               placeholder="Ask Compagno a question..."
               className="flex-1 p-2 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+              disabled={isTyping}
             />
             <button 
               type="submit"
-              className="bg-amber-600 text-white px-4 rounded-r-lg hover:bg-amber-500 transition-colors"
-              disabled={!inputValue.trim()}
+              className={`px-4 rounded-r-lg transition-colors ${
+                isTyping || !inputValue.trim()
+                  ? 'bg-gray-400 text-white cursor-not-allowed'
+                  : 'bg-amber-600 text-white hover:bg-amber-500'
+              }`}
+              disabled={isTyping || !inputValue.trim()}
             >
-              Send
+              {isTyping ? <FaSpinner className="animate-spin" /> : 'Send'}
             </button>
           </form>
         </div>
