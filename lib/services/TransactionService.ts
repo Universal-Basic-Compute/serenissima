@@ -28,6 +28,14 @@ interface CacheEntry<T> {
 // Instead, provide a getter function to prevent circular dependencies
 let transactionServiceInstance: TransactionService | null = null;
 
+// Define event types for marketplace events
+export const EventTypes = {
+  TRANSACTION_CREATED: 'transactionCreated',
+  TRANSACTION_EXECUTED: 'transactionExecuted',
+  LISTING_CANCELLED: 'listingCancelled',
+  OFFER_ACCEPTED: 'offerAccepted'
+};
+
 export function getTransactionService(): TransactionService {
   if (!transactionServiceInstance) {
     transactionServiceInstance = new TransactionService();
@@ -491,6 +499,374 @@ export class TransactionService {
         error instanceof Error ? error.message : 'Unknown error',
         500,
         'getTransactionsByUser'
+      );
+    }
+  }
+  
+  /**
+   * Create a new listing
+   * @throws {ValidationError} If required fields are missing
+   * @throws {AuthenticationError} If wallet is not connected
+   * @throws {ApiError} If API request fails
+   */
+  public async createListing(
+    assetId: string, 
+    assetType: 'land' | 'building' | 'bridge' | 'compute', 
+    price: number,
+    metadata?: {
+      historicalName?: string;
+      englishName?: string;
+      description?: string;
+    }
+  ): Promise<Listing> {
+    log.info(`Creating listing for ${assetType} ${assetId} for ${price}`);
+    
+    // Validate inputs
+    if (!assetId) {
+      throw new ValidationError('Asset ID is required', 'assetId');
+    }
+    
+    if (!assetType) {
+      throw new ValidationError('Asset type is required', 'assetType');
+    }
+    
+    if (!price || price <= 0) {
+      throw new ValidationError('Price must be greater than 0', 'price');
+    }
+    
+    // Get current wallet address
+    const walletAddress = getWalletAddress();
+    if (!walletAddress) {
+      throw new AuthenticationError('Wallet must be connected to create a listing');
+    }
+    
+    try {
+      const endpoint = `${getApiBaseUrl()}/api/transaction`;
+      log.debug(`Creating listing at endpoint: ${endpoint}`);
+      
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          type: assetType,
+          asset_id: assetId,
+          seller: walletAddress,
+          price: price,
+          historical_name: metadata?.historicalName,
+          english_name: metadata?.englishName,
+          description: metadata?.description
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new ApiError(
+          'Failed to create listing', 
+          response.status, 
+          endpoint
+        );
+      }
+      
+      const data = await response.json();
+      log.debug('Listing created successfully', data);
+      
+      // Convert API response to our Listing interface
+      const listing: Listing = {
+        id: data.id,
+        type: data.type,
+        assetId: data.asset_id,
+        seller: data.seller,
+        price: data.price,
+        createdAt: data.created_at,
+        updatedAt: data.updated_at,
+        status: 'active',
+        metadata: {
+          historicalName: metadata?.historicalName,
+          englishName: metadata?.englishName,
+          description: metadata?.description
+        }
+      };
+      
+      // Invalidate cache
+      this.invalidateTransactionsCache({ 
+        assetId: listing.assetId,
+        seller: listing.seller
+      });
+      
+      // Emit event
+      eventBus.emit(EventTypes.TRANSACTION_CREATED, listing);
+      
+      return listing;
+    } catch (error) {
+      if (error instanceof ApiError || 
+          error instanceof ValidationError || 
+          error instanceof AuthenticationError) {
+        throw error;
+      }
+      
+      log.error('Unexpected error creating listing:', error);
+      throw new ApiError(
+        error instanceof Error ? error.message : 'Unknown error',
+        500,
+        'createListing'
+      );
+    }
+  }
+  
+  /**
+   * Cancel a listing
+   * @throws {NotFoundError} If listing is not found
+   * @throws {AuthenticationError} If wallet is not connected
+   * @throws {ApiError} If API request fails
+   */
+  public async cancelListing(listingId: string): Promise<boolean> {
+    log.info(`Canceling listing: ${listingId}`);
+    
+    if (!listingId) {
+      throw new ValidationError('Listing ID is required', 'listingId');
+    }
+    
+    // Get current wallet address
+    const walletAddress = getWalletAddress();
+    if (!walletAddress) {
+      throw new AuthenticationError('Wallet must be connected to cancel a listing');
+    }
+    
+    try {
+      const endpoint = `${getApiBaseUrl()}/api/transaction/${listingId}/cancel`;
+      log.debug(`Canceling listing at endpoint: ${endpoint}`);
+      
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          seller: walletAddress
+        }),
+      });
+      
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new NotFoundError('Listing', listingId);
+        }
+        
+        throw new ApiError(
+          'Failed to cancel listing', 
+          response.status, 
+          endpoint
+        );
+      }
+      
+      // Invalidate cache
+      this.invalidateTransactionsCache({ id: listingId });
+      
+      // Emit event
+      eventBus.emit(EventTypes.LISTING_CANCELLED, { id: listingId });
+      
+      return true;
+    } catch (error) {
+      if (error instanceof ApiError || 
+          error instanceof ValidationError || 
+          error instanceof AuthenticationError ||
+          error instanceof NotFoundError) {
+        throw error;
+      }
+      
+      log.error('Unexpected error canceling listing:', error);
+      throw new ApiError(
+        error instanceof Error ? error.message : 'Unknown error',
+        500,
+        'cancelListing'
+      );
+    }
+  }
+  
+  /**
+   * Create an offer for an asset
+   * @throws {ValidationError} If required fields are missing
+   * @throws {AuthenticationError} If wallet is not connected
+   * @throws {ApiError} If API request fails
+   */
+  public async createOffer(
+    assetId: string,
+    assetType: 'land' | 'building' | 'bridge' | 'compute',
+    seller: string,
+    price: number,
+    metadata?: {
+      historicalName?: string;
+      englishName?: string;
+      description?: string;
+    }
+  ): Promise<Offer> {
+    log.info(`Creating offer for ${assetType} ${assetId} to ${seller} for ${price}`);
+    
+    // Validate inputs
+    if (!assetId) {
+      throw new ValidationError('Asset ID is required', 'assetId');
+    }
+    
+    if (!assetType) {
+      throw new ValidationError('Asset type is required', 'assetType');
+    }
+    
+    if (!seller) {
+      throw new ValidationError('Seller is required', 'seller');
+    }
+    
+    if (!price || price <= 0) {
+      throw new ValidationError('Price must be greater than 0', 'price');
+    }
+    
+    // Get current wallet address
+    const walletAddress = getWalletAddress();
+    if (!walletAddress) {
+      throw new AuthenticationError('Wallet must be connected to create an offer');
+    }
+    
+    try {
+      const endpoint = `${getApiBaseUrl()}/api/transaction`;
+      log.debug(`Creating offer at endpoint: ${endpoint}`);
+      
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          type: assetType,
+          asset_id: assetId,
+          seller: seller,
+          buyer: walletAddress,
+          price: price,
+          historical_name: metadata?.historicalName,
+          english_name: metadata?.englishName,
+          description: metadata?.description
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new ApiError(
+          'Failed to create offer', 
+          response.status, 
+          endpoint
+        );
+      }
+      
+      const data = await response.json();
+      log.debug('Offer created successfully', data);
+      
+      // Convert API response to our Offer interface
+      const offer: Offer = {
+        id: data.id,
+        type: data.type,
+        assetId: data.asset_id,
+        seller: data.seller,
+        buyer: data.buyer,
+        price: data.price,
+        createdAt: data.created_at,
+        updatedAt: data.updated_at,
+        status: 'pending',
+        metadata: {
+          historicalName: metadata?.historicalName,
+          englishName: metadata?.englishName,
+          description: metadata?.description
+        }
+      };
+      
+      // Invalidate cache
+      this.invalidateTransactionsCache({ 
+        assetId: offer.assetId,
+        seller: offer.seller,
+        buyer: offer.buyer
+      });
+      
+      // Emit event
+      eventBus.emit(EventTypes.TRANSACTION_CREATED, offer);
+      
+      return offer;
+    } catch (error) {
+      if (error instanceof ApiError || 
+          error instanceof ValidationError || 
+          error instanceof AuthenticationError) {
+        throw error;
+      }
+      
+      log.error('Unexpected error creating offer:', error);
+      throw new ApiError(
+        error instanceof Error ? error.message : 'Unknown error',
+        500,
+        'createOffer'
+      );
+    }
+  }
+  
+  /**
+   * Cancel an offer
+   * @throws {NotFoundError} If offer is not found
+   * @throws {AuthenticationError} If wallet is not connected
+   * @throws {ApiError} If API request fails
+   */
+  public async cancelOffer(offerId: string): Promise<boolean> {
+    log.info(`Canceling offer: ${offerId}`);
+    
+    if (!offerId) {
+      throw new ValidationError('Offer ID is required', 'offerId');
+    }
+    
+    // Get current wallet address
+    const walletAddress = getWalletAddress();
+    if (!walletAddress) {
+      throw new AuthenticationError('Wallet must be connected to cancel an offer');
+    }
+    
+    try {
+      const endpoint = `${getApiBaseUrl()}/api/transaction/${offerId}/cancel`;
+      log.debug(`Canceling offer at endpoint: ${endpoint}`);
+      
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          buyer: walletAddress
+        }),
+      });
+      
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new NotFoundError('Offer', offerId);
+        }
+        
+        throw new ApiError(
+          'Failed to cancel offer', 
+          response.status, 
+          endpoint
+        );
+      }
+      
+      // Invalidate cache
+      this.invalidateTransactionsCache({ id: offerId });
+      
+      // Emit event
+      eventBus.emit(EventTypes.LISTING_CANCELLED, { id: offerId });
+      
+      return true;
+    } catch (error) {
+      if (error instanceof ApiError || 
+          error instanceof ValidationError || 
+          error instanceof AuthenticationError ||
+          error instanceof NotFoundError) {
+        throw error;
+      }
+      
+      log.error('Unexpected error canceling offer:', error);
+      throw new ApiError(
+        error instanceof Error ? error.message : 'Unknown error',
+        500,
+        'cancelOffer'
       );
     }
   }

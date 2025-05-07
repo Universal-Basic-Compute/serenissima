@@ -6,6 +6,7 @@ import ActionButton from '../UI/ActionButton';
 import WalletStatus from '../UI/WalletStatus';
 import PlayerProfile from '../UI/PlayerProfile';
 import LandPurchaseConfirmation from '../UI/LandPurchaseConfirmation';
+import ListLandForSaleModal from '../UI/ListLandForSaleModal';
 import AnimatedDucats from '../UI/AnimatedDucats';
 import { Polygon } from './types';
 import { eventBus, EventTypes } from '../../lib/eventBus';
@@ -311,6 +312,9 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
       subscription.unsubscribe();
     };
   }, [selectedPolygonId]);
+  
+  // State for list for sale modal
+  const [showListForSaleModal, setShowListForSaleModal] = useState<boolean>(false);
   
   // Add this useEffect to listen for the custom event to keep panel open
   useEffect(() => {
@@ -893,6 +897,17 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
               <p className="text-sm text-amber-600 mt-1 italic">
                 "May your family prosper under the wings of the Lion of Saint Mark"
               </p>
+              
+              {/* Add List for Sale button */}
+              <button
+                onClick={() => setShowListForSaleModal(true)}
+                className="mt-4 w-full bg-amber-600 hover:bg-amber-700 text-white py-2 rounded-lg shadow-md border border-amber-700 transition-all flex items-center justify-center"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="font-serif">List Land For Sale</span>
+              </button>
             </div>
           )}
         </div>
@@ -918,6 +933,21 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
           onConfirm={handleConfirmPurchase}
           onCancel={() => setShowPurchaseConfirmation(false)}
           isLoading={isPurchasing}
+        />
+      )}
+      
+      {/* List Land For Sale Modal */}
+      {showListForSaleModal && selectedPolygonId && (
+        <ListLandForSaleModal
+          landId={selectedPolygonId}
+          landName={selectedPolygon?.historicalName}
+          englishName={selectedPolygon?.englishName}
+          landDescription={selectedPolygon?.historicalDescription}
+          onClose={() => setShowListForSaleModal(false)}
+          onComplete={() => {
+            // Refresh the panel to show the new listing
+            setRefreshKey(prevKey => prevKey + 1);
+          }}
         />
       )}
     </div>
