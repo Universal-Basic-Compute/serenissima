@@ -844,6 +844,7 @@ export default class PolygonRenderer {
             log.error('Error removing coat of arms object:', objError);
           }
         });
+        // Ensure we completely clear the sprites object
         this.coatOfArmSprites = {};
       },
       RenderingErrorType.RESOURCE_DISPOSAL,
@@ -1008,23 +1009,26 @@ export default class PolygonRenderer {
             fallbackColor = this.ownerColorMap[polygon.owner];
           }
           
-          // Create a simple box as fallback
-          const geometry = new THREE.BoxGeometry(0.3, 0.1, 0.3);
+          // Create a simple dot as fallback (instead of a box)
+          const geometry = new THREE.CircleGeometry(0.2, 8);
           const material = new THREE.MeshBasicMaterial({ 
             color: fallbackColor,
-            wireframe: true
+            transparent: true,
+            opacity: 0.7,
+            side: THREE.DoubleSide
           });
           
-          const boxMesh = new THREE.Mesh(geometry, material);
-          boxMesh.position.set(normalizedCoord.x, 0.05, normalizedCoord.y);
+          const circleMesh = new THREE.Mesh(geometry, material);
+          circleMesh.position.set(normalizedCoord.x, 0.05, normalizedCoord.y);
+          circleMesh.rotation.x = -Math.PI / 2; // Flat on the ground
           
           // Add to scene
-          this.scene.add(boxMesh);
+          this.scene.add(circleMesh);
           
           // Store reference
-          this.coatOfArmSprites[polygon.id] = boxMesh;
+          this.coatOfArmSprites[polygon.id] = circleMesh;
           
-          log.info(`Created fallback box for polygon ${polygon.id}`);
+          log.info(`Created fallback circle for polygon ${polygon.id}`);
         } catch (fallbackError) {
           log.error(`Fallback also failed for polygon ${polygon.id}:`, fallbackError);
         }
