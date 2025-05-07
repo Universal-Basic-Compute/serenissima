@@ -7,6 +7,7 @@ import PlayerProfile from '../components/UI/PlayerProfile';
 import TransferComputeMenu from '../components/UI/TransferComputeMenu';
 import WithdrawComputeMenu from '../components/UI/WithdrawComputeMenu';
 import SuccessAlert from '../components/UI/SuccessAlert';
+import BackgroundMusic from '../components/UI/BackgroundMusic';
 import { PhantomWalletAdapter } from '@solana/wallet-adapter-phantom';
 import { WalletReadyState } from '@solana/wallet-adapter-base';
 import { getApiBaseUrl } from '@/lib/apiUtils';
@@ -971,6 +972,7 @@ export default function SimplePage() {
         animation: fadeOut 3s forwards;
       }
     `}</style>
+      <BackgroundMusic />
     </>
   );
   // Add the connectWallet function
