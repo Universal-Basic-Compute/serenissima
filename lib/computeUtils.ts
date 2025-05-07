@@ -2,6 +2,10 @@ import { Connection, PublicKey, Transaction } from '@solana/web3.js';
 import { getAssociatedTokenAddress, createTransferInstruction } from '@solana/spl-token';
 import { getApiBaseUrl } from '@/lib/apiUtils';
 
+// Constants for token decimal handling
+const COMPUTE_DECIMALS = 9;
+const COMPUTE_MULTIPLIER = Math.pow(10, COMPUTE_DECIMALS);
+
 /**
  * Injects compute from a user's wallet to the treasury
  * @param walletAddress The wallet address to inject compute from
@@ -106,11 +110,15 @@ export async function transferCompute(walletAddress: string, amount: number) {
     
     // Create transfer instruction - FROM sender TO treasury
     console.log('Creating transfer instruction...');
+    // Convert the amount to the correct decimal representation
+    const tokenAmount = Math.floor(amount * COMPUTE_MULTIPLIER);
+    console.log(`Converting ${amount} COMPUTE to ${tokenAmount} token units (with ${COMPUTE_DECIMALS} decimals)`);
+    
     const transferIx = createTransferInstruction(
       senderTokenAccount,
       treasuryTokenAccount,
       publicKey,  // The sender needs to sign this transaction
-      amount
+      tokenAmount
     );
     
     // Create transaction and add the transfer instruction

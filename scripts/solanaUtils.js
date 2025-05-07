@@ -2,6 +2,10 @@ const { Connection, PublicKey, Transaction } = require('@solana/web3.js');
 const { getAssociatedTokenAddress, createTransferInstruction } = require('@solana/spl-token');
 const bs58 = require('bs58');
 
+// Constants for token decimal handling
+const COMPUTE_DECIMALS = 9;
+const COMPUTE_MULTIPLIER = Math.pow(10, COMPUTE_DECIMALS);
+
 // Solana connection - use devnet for testing, mainnet for production
 const connection = new Connection(
   process.env.SOLANA_RPC_URL || 'https://api.devnet.solana.com',
@@ -49,11 +53,15 @@ async function prepareInjectComputeTransaction(senderAddress, amount) {
     }
     
     // Create transfer instruction - FROM sender TO treasury
+    // Convert the amount to the correct decimal representation
+    const tokenAmount = Math.floor(amount * COMPUTE_MULTIPLIER);
+    console.log(`Converting ${amount} COMPUTE to ${tokenAmount} token units (with ${COMPUTE_DECIMALS} decimals)`);
+    
     const transferIx = createTransferInstruction(
       senderTokenAccount,
       treasuryTokenAccount,
       sender,  // The sender needs to sign this transaction
-      amount
+      tokenAmount
     );
     
     // Create transaction and add the transfer instruction
