@@ -14,6 +14,7 @@ import WalletButton from '../components/UI/WalletButton';
 import LandPurchaseConfirmation from '../components/UI/LandPurchaseConfirmation';
 import BuildingsToolbar from '../components/BuildingsView/BuildingsToolbar';
 import { LoanMarketplace, LoanManagementDashboard, LoanApplicationModal } from '../components/Governance';
+import Settings from '../components/UI/Settings';
 import { getApiBaseUrl } from '@/lib/apiUtils';
 import { getWalletAddress } from '@/lib/walletUtils';
 import { transferCompute, withdrawCompute } from '@/lib/computeUtils';
@@ -85,6 +86,7 @@ export default function SimplePage() {
   const [governanceTab, setGovernanceTab] = useState<'council' | 'laws' | 'loans'>('council');
   const [showLoanApplicationModal, setShowLoanApplicationModal] = useState<boolean>(false);
   const [selectedLoan, setSelectedLoan] = useState<any>(null);
+  const [showSettingsModal, setShowSettingsModal] = useState<boolean>(false);
   const [userProfile, setUserProfile] = useState<{
     username: string;
     firstName: string;
@@ -603,6 +605,12 @@ export default function SimplePage() {
         
         <div className="flex space-x-4">
           <button 
+            onClick={() => setShowSettingsModal(true)}
+            className="px-3 py-1 bg-amber-600 hover:bg-amber-500 rounded text-white transition-colors font-serif"
+          >
+            Settings
+          </button>
+          <button 
             onClick={() => setShowInfo(!showInfo)}
             className="px-3 py-1 bg-blue-600 hover:bg-blue-500 rounded text-white transition-colors font-serif"
           >
@@ -1018,6 +1026,11 @@ export default function SimplePage() {
           background-color: rgba(217, 119, 6, 0.8);
         }
       `}</style>
+      
+      {/* Settings Modal */}
+      {showSettingsModal && (
+        <Settings onClose={() => setShowSettingsModal(false)} />
+      )}
       
       {/* Land Purchase Confirmation Modal */}
       {showLandPurchaseModal && landPurchaseData && (
