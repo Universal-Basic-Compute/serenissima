@@ -81,28 +81,43 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
               ) : (
                 <Tab.Group>
                   <Tab.List className="flex space-x-1 bg-amber-100 p-1">
-                    {categories.map((category: BuildingCategory, index: number, array: BuildingCategory[]): React.ReactElement => (
-                      <Tab
-                        key={category.id}
-                        className={({ selected }) =>
-                          `w-full py-2.5 text-sm font-medium leading-5 text-amber-700 rounded-lg
-                          ${selected 
-                            ? 'bg-amber-600 text-white shadow' 
-                            : 'hover:bg-amber-200 hover:text-amber-900'}`
-                        }
-                      >
-                        {category.name}
-                      </Tab>
-                    ))}
+                    {categories.map((category, index: number, array): React.ReactElement => {
+                      // Create a compatible category object with the required id property
+                      const compatibleCategory: BuildingCategory = {
+                        ...category,
+                        id: category.name // Use the name as id if it doesn't exist
+                      };
+                      
+                      return (
+                        <Tab
+                          key={compatibleCategory.id}
+                          className={({ selected }) =>
+                            `w-full py-2.5 text-sm font-medium leading-5 text-amber-700 rounded-lg
+                            ${selected 
+                              ? 'bg-amber-600 text-white shadow' 
+                              : 'hover:bg-amber-200 hover:text-amber-900'}`
+                          }
+                        >
+                          {compatibleCategory.name}
+                        </Tab>
+                      );
+                    })}
                   </Tab.List>
                   <Tab.Panels className="mt-2">
-                    {categories.map((category: BuildingCategory, index: number, array: BuildingCategory[]): React.ReactElement => (
-                      <Tab.Panel
-                        key={category.id}
-                        className="p-3 bg-white rounded-lg"
-                      >
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                          {category.buildings.map((building) => (
+                    {categories.map((category, index: number, array): React.ReactElement => {
+                      // Create a compatible category object with the required id property
+                      const compatibleCategory: BuildingCategory = {
+                        ...category,
+                        id: category.name // Use the name as id if it doesn't exist
+                      };
+                      
+                      return (
+                        <Tab.Panel
+                          key={compatibleCategory.id}
+                          className="p-3 bg-white rounded-lg"
+                        >
+                          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                            {compatibleCategory.buildings.map((building) => (
                             <div
                               key={building.id}
                               className="bg-amber-50 rounded-lg p-2 cursor-pointer hover:bg-amber-100 transition-colors"
@@ -127,7 +142,8 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
                           ))}
                         </div>
                       </Tab.Panel>
-                    ))}
+                      );
+                    })}
                   </Tab.Panels>
                 </Tab.Group>
               )}

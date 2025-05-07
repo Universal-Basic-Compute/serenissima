@@ -47,6 +47,7 @@ export default class PolygonRenderer {
   public hasUpdatedCoatOfArms: boolean = false; // Flag to track if coat of arms have been updated
   private ownerColorMap: Record<string, string> = {}; // Map of owner to color
   private users: Record<string, any> = {}; // Store users data
+  private coatOfArmSprites: Record<string, THREE.Mesh> = {}; // Map of polygon ID to coat of arms sprite mesh
   
   // Layered rendering approach
   private basePolygons: Map<string, THREE.Mesh> = new Map(); // Base land layer (never changes)

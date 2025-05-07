@@ -285,7 +285,9 @@ export class PolygonMeshFacade implements Poolable {
           mat.dispose();
         }
         // Set the new material
-        (this.mesh.material as THREE.Material[])[index] = newMaterial;
+        if (this.mesh && this.mesh.material) {
+          (this.mesh.material as THREE.Material[])[index] = newMaterial;
+        }
       });
     } else {
       // If we have a single material, update it
