@@ -486,7 +486,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
         </div>
         
         <div className="space-y-6 overflow-y-auto flex-grow">
-          {/* Top view representation of the land */}
+          {/* 1. Top view representation of the land */}
           <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200 mb-6">
             <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Land Overview</h3>
             <div className="flex flex-col items-center">
@@ -508,48 +508,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
             </div>
           </div>
 
-          {/* Owner information with enhanced styling */}
-          <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
-            <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Owner</h3>
-            {owner && owner !== "" ? (
-              <div className="flex items-center justify-center">
-                <PlayerProfile 
-                  username={owner}
-                  walletAddress={owner}
-                  size="medium"
-                  className="mx-auto"
-                  showCoatOfArms={true} // Explicitly enable coat of arms display
-                  coatOfArmsSize="large" // Make coat of arms more prominent
-                />
-              </div>
-            ) : (
-              <div className="bg-amber-100 p-3 rounded-lg text-center">
-                <p className="font-semibold text-amber-800">Available for Purchase</p>
-                <p className="text-xs text-amber-600 mt-1">This land has no current owner</p>
-              </div>
-            )}
-          </div>
-          
-          {/* Historical Name with enhanced styling */}
-          {selectedPolygon?.historicalName && (
-            <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
-              <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Historical Name</h3>
-              <p className="font-serif text-xl font-semibold text-amber-800">{selectedPolygon.historicalName}</p>
-              {selectedPolygon.englishName && (
-                <p className="mt-1 text-sm italic text-amber-600">{selectedPolygon.englishName}</p>
-              )}
-            </div>
-          )}
-          
-          {/* Historical Description with enhanced styling */}
-          {selectedPolygon?.historicalDescription && (
-            <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
-              <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Historical Description</h3>
-              <p className="text-sm text-gray-700 leading-relaxed">{selectedPolygon.historicalDescription}</p>
-            </div>
-          )}
-      
-          {/* Income information */}
+          {/* 2. Income information */}
           {(selectedPolygon?.simulatedIncome !== undefined || 
             (selectedPolygonId && (() => {
               try {
@@ -612,8 +571,30 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
               </div>
             </div>
           )}
+
+          {/* 3. Owner information with enhanced styling */}
+          <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
+            <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Owner</h3>
+            {owner && owner !== "" ? (
+              <div className="flex items-center justify-center">
+                <PlayerProfile 
+                  username={owner}
+                  walletAddress={owner}
+                  size="medium"
+                  className="mx-auto"
+                  showCoatOfArms={true} // Explicitly enable coat of arms display
+                  coatOfArmsSize="large" // Make coat of arms more prominent
+                />
+              </div>
+            ) : (
+              <div className="bg-amber-100 p-3 rounded-lg text-center">
+                <p className="font-semibold text-amber-800">Available for Purchase</p>
+                <p className="text-xs text-amber-600 mt-1">This land has no current owner</p>
+              </div>
+            )}
+          </div>
           
-          {/* Transaction information with enhanced styling */}
+          {/* 4. Transaction information with enhanced styling */}
           {transaction && (
             <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
               {transaction.buyer === (sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress')) ? (
@@ -688,6 +669,25 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
                   </button>
                 </>
               )}
+            </div>
+          )}
+          
+          {/* 5. Historical Name with enhanced styling */}
+          {selectedPolygon?.historicalName && (
+            <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
+              <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Historical Name</h3>
+              <p className="font-serif text-xl font-semibold text-amber-800">{selectedPolygon.historicalName}</p>
+              {selectedPolygon.englishName && (
+                <p className="mt-1 text-sm italic text-amber-600">{selectedPolygon.englishName}</p>
+              )}
+            </div>
+          )}
+          
+          {/* 6. Historical Description with enhanced styling */}
+          {selectedPolygon?.historicalDescription && (
+            <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
+              <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Historical Description</h3>
+              <p className="text-sm text-gray-700 leading-relaxed">{selectedPolygon.historicalDescription}</p>
             </div>
           )}
 
