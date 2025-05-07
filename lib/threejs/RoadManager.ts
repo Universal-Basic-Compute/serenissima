@@ -1500,12 +1500,15 @@ export class RoadManager {
             material.displacementMap = null as unknown as THREE.Texture;
           }
         }
-        if ('envMap' in material && material.envMap) 
-          material.envMap = null as unknown as THREE.Texture;
-        if ('lightMap' in material && material.lightMap) 
-          material.lightMap = null as unknown as THREE.Texture;
-        if ('alphaMap' in material && material.alphaMap) 
-          material.alphaMap = null as unknown as THREE.Texture;
+        if ('envMap' in material && material.envMap) {
+          (material as any).envMap = null;
+        }
+        if ('lightMap' in material && material.lightMap) {
+          (material as any).lightMap = null;
+        }
+        if ('alphaMap' in material && material.alphaMap) {
+          (material as any).alphaMap = null;
+        }
       }
     } catch (error) {
       log.warn('Error disposing textures from material:', error);
