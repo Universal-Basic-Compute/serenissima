@@ -52,7 +52,7 @@ const SimpleViewer = dynamic(() => import('../components/PolygonViewer/SimpleVie
 export default function SimplePage() {
   // UI state
   const [showInfo, setShowInfo] = useState(false);
-  const [activeView, setActiveView] = useState<'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance'>('land');
+  const [activeView, setActiveView] = useState<'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance' | 'loans'>('land');
   const [qualityMode, setQualityMode] = useState<'high' | 'performance'>('high');
   const [marketPanelVisible, setMarketPanelVisible] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
