@@ -46,56 +46,7 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  // Scrollbar styles
-  const scrollbarStyles = `
-    .scrollbar-thin::-webkit-scrollbar {
-      width: 6px;
-    }
-    
-    .scrollbar-thin::-webkit-scrollbar-track {
-      background: var(--scrollbar-track, #f5e9c8);
-      border-radius: 3px;
-    }
-    
-    .scrollbar-thin::-webkit-scrollbar-thumb {
-      background-color: var(--scrollbar-thumb, #d97706);
-      border-radius: 3px;
-    }
-    
-    .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-      background-color: var(--scrollbar-thumb-hover, #b45309);
-    }
-    
-    /* For Firefox */
-    .scrollbar-thin {
-      scrollbar-width: thin;
-      scrollbar-color: var(--scrollbar-thumb, #d97706) var(--scrollbar-track, #f5e9c8);
-    }
-    
-    /* Hide scrollbar when not needed */
-    .scrollbar-thin {
-      overflow-y: auto;
-      scrollbar-width: thin;
-    }
-    
-    @media (max-width: 640px) {
-      .scrollbar-thin {
-        max-height: 80vh;
-      }
-    }
-  `;
-
-  // Add the scrollbar styles to the document
-  useEffect(() => {
-    const styleElement = document.createElement('style');
-    styleElement.textContent = scrollbarStyles;
-    document.head.appendChild(styleElement);
-    
-    return () => {
-      // Clean up the styles when the component unmounts
-      document.head.removeChild(styleElement);
-    };
-  }, []);
+  // No scrollbar styles needed
 
   // Fetch user data if wallet address is provided but no direct data
   useEffect(() => {
@@ -141,31 +92,31 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
   // Determine sizes based on the size prop
   const dimensions = {
     tiny: {
-      container: 'w-16 max-w-full',
-      image: 'w-12 h-12',
-      initials: 'w-12 h-12 text-xs',
+      container: 'w-14 max-w-full',
+      image: 'w-10 h-10',
+      initials: 'w-10 h-10 text-xs',
       username: 'text-xs',
       name: 'text-xs'
     },
     small: {
-      container: 'w-20 max-w-full', // Added max-w-full
-      image: 'w-16 h-16', // Increased from w-12 h-12
-      initials: 'w-16 h-16 text-sm', // Increased from w-12 h-12 text-xs
-      username: 'text-sm', // Increased from text-xs
+      container: 'w-18 max-w-full',
+      image: 'w-14 h-14',
+      initials: 'w-14 h-14 text-sm',
+      username: 'text-sm',
       name: 'text-xs'
     },
     medium: {
-      container: 'w-32 max-w-full', // Added max-w-full
-      image: 'w-24 h-24', // Increased from w-20 h-20
-      initials: 'w-24 h-24 text-lg', // Increased from w-20 h-20 text-base
-      username: 'text-base font-semibold', // Added font-semibold
+      container: 'w-32 max-w-full',
+      image: 'w-24 h-24',
+      initials: 'w-24 h-24 text-lg',
+      username: 'text-base font-semibold',
       name: 'text-sm'
     },
     large: {
-      container: 'w-40 max-w-full', // Added max-w-full
-      image: 'w-32 h-32', // Increased from w-28 h-28
-      initials: 'w-32 h-32 text-2xl', // Increased from w-28 h-28 text-xl
-      username: 'text-lg font-semibold', // Added font-semibold
+      container: 'w-40 max-w-full',
+      image: 'w-32 h-32',
+      initials: 'w-32 h-32 text-2xl',
+      username: 'text-lg font-semibold',
       name: 'text-base'
     }
   };
@@ -204,8 +155,8 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
       className={`flex flex-col items-center ${dim.container} ${className} ${onClick ? 'cursor-pointer' : ''}`}
       onClick={onClick}
     >
-      {/* Create a scrollable container for the content */}
-      <div className="w-full overflow-y-auto max-h-full scrollbar-thin scrollbar-thumb-amber-400 scrollbar-track-amber-100">
+      {/* Create a flex container for the content */}
+      <div className="w-full flex flex-col items-center">
         {/* Coat of Arms or Initials */}
         {displayData.coatOfArmsImage ? (
           <div className="rounded-full border-3 border-amber-600 overflow-hidden bg-amber-50 flex items-center justify-center shadow-md mx-auto">
@@ -224,13 +175,13 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
         )}
         
         {/* Username */}
-        <div className={`${dim.username} font-medium text-center mt-1 w-full`}>
+        <div className={`${dim.username} font-medium text-center mt-1 w-full username-text truncate px-1`}>
           {displayData.username}
         </div>
         
         {/* Ducats (Compute Amount) */}
         {showDucats && displayData.computeAmount !== undefined && (
-          <div className={`${dim.name} text-amber-700 font-semibold text-center w-full flex items-center justify-center mt-1 bg-amber-50 py-1 px-2 rounded-full border border-amber-200`}>
+          <div className={`${dim.name} text-amber-700 font-semibold text-center w-full flex items-center justify-center mt-1 bg-amber-50 py-1 px-2 rounded-full border border-amber-200 ducats-text`}>
             <span className="mr-1">⚜️</span> 
             <AnimatedDucats 
               value={displayData.computeAmount} 
@@ -243,7 +194,7 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
         
         {/* Family Motto - Replace the Full Name section */}
         {(userData?.familyMotto || familyMotto) && (
-          <div className={`${dim.name} italic text-amber-600 text-center mt-1 w-full overflow-hidden text-ellipsis font-light`}>
+          <div className={`${dim.name} italic text-amber-600 text-center mt-1 w-full overflow-hidden text-ellipsis font-light motto-text line-clamp-2`}>
             "{userData?.familyMotto || familyMotto}"
           </div>
         )}
@@ -261,6 +212,19 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
             width: 80%;
             height: auto;
             aspect-ratio: 1;
+          }
+        }
+        
+        /* Add responsive text sizing */
+        @media (max-width: 480px) {
+          .username-text {
+            font-size: 0.875rem;
+          }
+          .motto-text {
+            font-size: 0.75rem;
+          }
+          .ducats-text {
+            font-size: 0.75rem;
           }
         }
       `}</style>
