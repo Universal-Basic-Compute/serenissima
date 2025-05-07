@@ -1099,7 +1099,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
   );
   
   // Land purchase confirmation is disabled to prevent land modification
-  function handleConfirmPurchase() {
+  function handleConfirmPurchase(): React.ReactNode {
     console.log('Land purchase is disabled to prevent land modification');
     alert('Land purchase is not allowed in this version');
     setIsPurchasing(false);
