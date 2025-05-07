@@ -151,7 +151,7 @@ def extract_tech_tree_nodes():
                     'id': node['id'].strip("'\""),
                     'title': node['title'].strip("'\""),
                     'description': node['description'].strip("'\""),
-                    'image': node['image'].strip("'\"") if 'image' in node else f"/images/tech-tree/{node['id'].strip("'\"")}.jpg"
+                    'image': node['image'].strip("'\"") if 'image' in node else "/images/tech-tree/" + node['id'].strip("'\"") + ".jpg"
                 })
         
         print(f"Extracted {len(clean_nodes)} tech tree nodes")
