@@ -94,12 +94,14 @@ def get_lands_with_income(lands_table):
             if "Notes" in land["fields"]:
                 try:
                     notes = json.loads(land["fields"]["Notes"])
-                    if "simulatedIncome" in notes and notes["simulatedIncome"] > 0:
+                    # Check for both "simulatedIncome" (lowercase) and "SimulatedIncome" (uppercase)
+                    income = notes.get("simulatedIncome") or notes.get("SimulatedIncome")
+                    if income and income > 0:
                         lands_with_income.append({
                             "id": land["id"],
                             "land_id": land["fields"].get("LandId", ""),
                             "owner": land["fields"].get("User", ""),
-                            "income": notes["simulatedIncome"],
+                            "income": income,
                             "historical_name": land["fields"].get("HistoricalName", "")
                         })
                 except (json.JSONDecodeError, KeyError):
