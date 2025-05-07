@@ -12,6 +12,7 @@ import SuccessAlert from '../components/UI/SuccessAlert';
 import BackgroundMusic from '../components/UI/BackgroundMusic';
 import WalletButton from '../components/UI/WalletButton';
 import LandPurchaseConfirmation from '../components/UI/LandPurchaseConfirmation';
+import BuildingsToolbar from '../components/BuildingsView/BuildingsToolbar';
 import { getApiBaseUrl } from '@/lib/apiUtils';
 import { getWalletAddress } from '@/lib/walletUtils';
 import { transferCompute, withdrawCompute } from '@/lib/computeUtils';
@@ -326,6 +327,19 @@ export default function SimplePage() {
     <div className="relative w-full h-screen">
       {/* Main 3D Viewer (should be first in the DOM for proper layering) */}
       <SimpleViewer qualityMode={qualityMode} activeView={activeView} />
+      
+      {/* Buildings Toolbar - only visible in buildings view */}
+      {activeView === 'buildings' && (
+        <BuildingsToolbar 
+          scene={document.querySelector('canvas')?.__scene}
+          camera={document.querySelector('canvas')?.__camera}
+          polygons={window.__polygonData || []}
+          onRefreshBuildings={() => {
+            // Refresh buildings by dispatching an event
+            eventBus.emit(EventTypes.BUILDING_PLACED, { refresh: true });
+          }}
+        />
+      )}
       
       {/* Left Side Menu */}
       <div className="absolute left-0 top-0 bottom-0 bg-black/70 text-white z-20 flex flex-col w-16">

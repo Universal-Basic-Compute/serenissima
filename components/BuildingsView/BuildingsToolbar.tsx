@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import RoadCreator from '@/components/PolygonViewer/RoadCreator';
-import DockCreator from '@/components/DockCreator/DockCreator';
+import DockCreator from '@/components/DockCreator';
 
 interface BuildingsToolbarProps {
   scene: THREE.Scene;
@@ -18,8 +18,15 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
   const [isRoadCreatorActive, setIsRoadCreatorActive] = useState(false);
   const [isDockCreatorActive, setIsDockCreatorActive] = useState(false);
 
+  // Make sure we have valid scene and camera
+  useEffect(() => {
+    if (!scene || !camera) {
+      console.warn('BuildingsToolbar: Missing scene or camera props');
+    }
+  }, [scene, camera]);
+
   return (
-    <div className="absolute top-4 right-4 z-20 flex flex-col space-y-2">
+    <div className="absolute top-20 right-4 z-20 flex flex-col space-y-2">
       <button
         onClick={() => {
           setIsRoadCreatorActive(true);
@@ -46,8 +53,9 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
         <span>Create Dock</span>
       </button>
       
-      {/* Information tooltip about docks */}
-      <div className="bg-gray-800 text-white p-3 rounded-md shadow-md text-sm max-w-xs">
+      {/* Information tooltip about docks - only show when not in creation mode */}
+      {!isRoadCreatorActive && !isDockCreatorActive && (
+        <div className="bg-gray-800 text-white p-3 rounded-md shadow-md text-sm max-w-xs">
         <h4 className="font-medium mb-1">About Docks</h4>
         <p className="text-gray-300 text-xs">
           Docks must be placed along water edges. They provide connection points for roads and allow goods to be transported by water.
@@ -55,7 +63,8 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
         <p className="text-gray-300 text-xs mt-1">
           Position your cursor near a water's edge and the dock will automatically align perpendicular to the shore.
         </p>
-      </div>
+        </div>
+      )}
       
       {isRoadCreatorActive && (
         <RoadCreator
@@ -75,7 +84,7 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
         />
       )}
       
-      {isDockCreatorActive && polygons && (
+      {isDockCreatorActive && polygons && polygons.length > 0 && (
         <DockCreator
           scene={scene}
           camera={camera}
