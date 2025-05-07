@@ -116,10 +116,11 @@ export class IncomePolygonRenderer {
         // to ensure it appears on top of the polygon rather than inside
         line.rotation.x = -Math.PI / 2;
         line.position.y = 0.011; // Position higher than the colored mesh (0.01) to be on top
-        line.renderOrder = 150;  // Set to 150 - higher than base polygons (1-10) but lower than coat of arms (200)
+        line.renderOrder = 100;  // Lower than coat of arms (200) to ensure proper layering
         
         // Ensure the edge material has proper depth settings
         edgeMaterial.depthWrite = false; // Don't write to depth buffer
+        edgeMaterial.depthTest = true;   // Enable depth testing to respect z-order
       
         // Add to scene
         this.scene.add(line);
