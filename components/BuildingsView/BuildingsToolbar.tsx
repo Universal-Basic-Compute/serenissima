@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import RoadCreator from '@/components/PolygonViewer/RoadCreator';
-import DockCreator from '@/components/DockCreator';
+import DockCreator from '@/components/PolygonViewer/DockCreator';
 
 interface BuildingsToolbarProps {
   scene: THREE.Scene;
