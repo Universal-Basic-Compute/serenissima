@@ -11,6 +11,13 @@ import AnimatedDucats from '../UI/AnimatedDucats';
 import { Polygon } from './types';
 import { eventBus, EventTypes } from '../../lib/eventBus';
 
+// Helper function to normalize identifiers for comparison
+const normalizeIdentifier = (id: string | null | undefined): string | null => {
+  if (!id) return null;
+  // Convert to lowercase and trim
+  return id.toLowerCase().trim();
+};
+
 interface LandDetailsPanelProps {
   selectedPolygonId: string | null;
   onClose: () => void;
@@ -19,6 +26,52 @@ interface LandDetailsPanelProps {
   visible?: boolean; // Add this prop
   preventAutoClose?: boolean; // Add this prop to prevent auto-closing after purchase
 }
+
+// Helper function to check if current user is the seller
+const isCurrentUserTheSeller = (transaction: any): boolean => {
+  if (!transaction || !transaction.seller) return false;
+  
+  // Get current user identifier (username or wallet)
+  const currentUser = sessionStorage.getItem('username') || 
+                     localStorage.getItem('username') ||
+                     sessionStorage.getItem('walletAddress') || 
+                     localStorage.getItem('walletAddress');
+  
+  if (!currentUser) return false;
+  
+  // Get user profile from localStorage
+  let userProfile = null;
+  try {
+    const profileStr = localStorage.getItem('userProfile');
+    if (profileStr) {
+      userProfile = JSON.parse(profileStr);
+    }
+  } catch (e) {
+    console.error('Error parsing user profile:', e);
+  }
+  
+  // Log the comparison details
+  console.log('Transaction seller:', transaction.seller);
+  console.log('Current user identifier:', currentUser);
+  console.log('User profile:', userProfile);
+  
+  // Compare normalized identifiers
+  const normalizedSeller = normalizeIdentifier(transaction.seller);
+  const normalizedCurrentUser = normalizeIdentifier(currentUser);
+  const normalizedUsername = userProfile?.username ? normalizeIdentifier(userProfile.username) : null;
+  
+  console.log('Normalized seller:', normalizedSeller);
+  console.log('Normalized current user:', normalizedCurrentUser);
+  console.log('Normalized username:', normalizedUsername);
+  
+  // Check if seller matches either the wallet address or username
+  const isSellerCurrentUser = normalizedSeller === normalizedCurrentUser || 
+                             normalizedSeller === normalizedUsername;
+  
+  console.log('Is seller the current user?', isSellerCurrentUser);
+  
+  return isSellerCurrentUser;
+};
 
 export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons, landOwners, visible = true, preventAutoClose = false }: LandDetailsPanelProps) {
   const router = useRouter();
@@ -617,8 +670,12 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
                 </span>
               </p>
               
-              {/* Check if current user is the owner */}
-              {transaction.seller === (sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress')) ? (
+              {/* Log transaction data for debugging */}
+              {console.log('Transaction data:', transaction)}
+              {console.log('Transaction seller type:', typeof transaction.seller)}
+              
+              {/* Check if current user is the seller using our helper function */}
+              {isCurrentUserTheSeller(transaction) ? (
                 /* Show Remove from Sale button if user is the owner */
                 <button
                   onClick={async () => {
@@ -629,6 +686,8 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
                       alert('Please connect your wallet first');
                       return;
                     }
+                    
+                    console.log('Removing listing, seller:', transaction.seller, 'wallet:', walletAddress);
                     
                     try {
                       // Cancel the transaction
@@ -668,13 +727,16 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
                     // Get the current wallet address
                     const walletAddress = sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress') || '';
                     
+                    console.log('Attempting to acquire land, seller:', transaction.seller, 'wallet:', walletAddress);
+                    
                     if (!walletAddress) {
                       alert('Please connect your wallet first');
                       return;
                     }
                     
                     // Check if this is the user's own listing
-                    if (transaction.seller === walletAddress) {
+                    if (isCurrentUserTheSeller(transaction)) {
+                      console.log('User tried to purchase their own listing');
                       alert('You cannot purchase your own listing');
                       return;
                     }
