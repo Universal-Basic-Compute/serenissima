@@ -112,9 +112,9 @@ button:hover, a:hover {
 }
 
 .user-bubble {
-  background: linear-gradient(to bottom, #f97316, #ea580c); /* Changed to orange shades */
-  color: white;
-  border: 1px solid #c2410c; /* Darker orange border */
+  background: linear-gradient(to bottom, #fdba74, #fb923c); /* Changed to lighter orange like assistant bubble */
+  color: #7c2d12; /* Changed from white to dark orange/brown for better readability */
+  border: 1px solid #f97316;
   box-shadow: 
     0 2px 5px rgba(0, 0, 0, 0.1),
     inset 0 1px 1px rgba(255, 255, 255, 0.3);
