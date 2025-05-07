@@ -177,7 +177,8 @@ const DockCreator: React.FC<DockCreatorProps> = ({
     <div className="dock-creator">
       {/* Overlay for mouse events */}
       <div 
-        className="fixed inset-0 z-10 cursor-crosshair"
+        className="fixed inset-0 z-50 cursor-crosshair"
+        style={{ pointerEvents: 'all' }}
         onMouseMove={handleMouseMove}
         onClick={handleClick}
       />
