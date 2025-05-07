@@ -9,7 +9,7 @@ interface WalletButtonProps {
   onSettingsClick?: () => void;
 }
 
-export default function WalletButton({ className = '' }: WalletButtonProps) {
+export default function WalletButton({ className = '', onSettingsClick }: WalletButtonProps) {
   const { walletAddress, userProfile, isConnected, connectWallet } = useWalletContext();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
