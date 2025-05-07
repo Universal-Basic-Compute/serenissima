@@ -464,7 +464,7 @@ export default class SimplePolygonRenderer {
       side: THREE.DoubleSide,
       depthTest: true,
       depthWrite: false,
-      opacity: 0 // Start with invisible material until texture loads
+      opacity: 0 // Start with opacity 0 for fade-in effect
     });
     
     // Create mesh and position it with the calculated y position
@@ -492,7 +492,6 @@ export default class SimplePolygonRenderer {
         // Apply the texture to the plane material
         if (planeMaterial) {
           planeMaterial.map = circularTexture;
-          planeMaterial.opacity = 1; // Make visible now that texture is loaded
           planeMaterial.needsUpdate = true;
           
           // Adjust plane scale based on texture aspect ratio and scene scale
@@ -508,6 +507,9 @@ export default class SimplePolygonRenderer {
           
           // Store reference
           this.coatOfArmsSprites[polygon.id] = plane;
+          
+          // Add fade-in animation
+          this.animateFadeIn(planeMaterial);
         }
       },
       undefined,
@@ -519,6 +521,38 @@ export default class SimplePolygonRenderer {
         planeMaterial.dispose();
       }
     );
+  }
+  
+  // Add a new method to handle the fade-in animation
+  private animateFadeIn(material: THREE.MeshBasicMaterial): void {
+    // Start with opacity 0
+    material.opacity = 0;
+    
+    // Create a fade-in animation
+    const startTime = performance.now();
+    const duration = 800; // 800ms fade-in duration
+    
+    // Animation function
+    const animate = () => {
+      const currentTime = performance.now();
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      
+      // Use an ease-in function for smoother appearance
+      material.opacity = progress * progress;
+      material.needsUpdate = true;
+      
+      // Continue animation until complete
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      } else {
+        material.opacity = 1; // Ensure we end at full opacity
+        material.needsUpdate = true;
+      }
+    };
+    
+    // Start the animation
+    requestAnimationFrame(animate);
   }
   
   /**
