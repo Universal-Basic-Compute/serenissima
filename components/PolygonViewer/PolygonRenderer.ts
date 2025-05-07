@@ -780,8 +780,9 @@ export default class PolygonRenderer {
     
     console.log('Combined coat of arms map now has', Object.keys(this.ownerCoatOfArmsMap).length, 'entries');
     
-    // If we're in land view, apply the new coat of arms textures directly to the land shapes
+    // If we're in land view, update the owner indicators
     if (this.activeView === 'land') {
+      // In land view, we'll just update the colored circles
       this.updateCoatOfArmsSprites();
     }
     
@@ -968,154 +969,42 @@ export default class PolygonRenderer {
     );
   }
 
-  // Helper method to create a flat texture on the land for a polygon
+  // Helper method to create a flat texture on the land for a polygon - disabled
   private createFlatTextureForPolygon(polygon: Polygon, texture: THREE.Texture) {
-    if (!polygon.centroid) {
-      console.warn(`Cannot create flat texture for polygon ${polygon.id} - no centroid`);
-      return;
-    }
-    
-    try {
-      // Convert centroid to 3D position
-      const normalizedCoord = normalizeCoordinates(
-        [polygon.centroid],
-        this.bounds.centerLat,
-        this.bounds.centerLng,
-        this.bounds.scale,
-        this.bounds.latCorrectionFactor
-      )[0];
-      
-      // Create a plane geometry for the texture
-      const planeGeometry = new THREE.PlaneGeometry(1, 1);
-      const planeMaterial = new THREE.MeshBasicMaterial({
-        map: texture,
-        transparent: true,
-        side: THREE.DoubleSide,
-        depthWrite: false
-      });
-      
-      // Create mesh and position it
-      const planeMesh = new THREE.Mesh(planeGeometry, planeMaterial);
-      planeMesh.position.set(normalizedCoord.x, 0.1, normalizedCoord.y); // Slightly above ground
-      planeMesh.rotation.x = -Math.PI / 2; // Rotate to lie flat
-      planeMesh.renderOrder = 10; // Ensure it renders on top
-      
-      // Add to scene
-      this.scene.add(planeMesh);
-      
-      // Store reference
-      this.coatOfArmSprites[polygon.id] = planeMesh;
-      
-      console.log(`Created flat texture for polygon ${polygon.id} at position:`, normalizedCoord);
-    } catch (error) {
-      console.error(`Error creating flat texture for polygon ${polygon.id}:`, error);
+    console.log('createFlatTextureForPolygon is disabled - using colored circles instead');
+    // Instead of creating a texture, create a colored circle
+    if (polygon.centroid && polygon.id) {
+      const ownerColor = polygon.owner ? this.getOwnerColor(polygon.owner) : '#8B4513';
+      this.createColoredCircleOnLand(polygon, ownerColor);
     }
   }
   
-  // Helper function to create a circular texture
+  // Helper function to create a circular texture - disabled
   private createCircularTexture(texture: THREE.Texture): THREE.Texture {
-    // Check if texture.image exists
-    if (!texture.image) {
-      console.warn('Texture image is null, creating fallback texture');
-      
-      // Create a canvas for a fallback texture
-      const canvas = document.createElement('canvas');
-      const size = 256;
-      canvas.width = size;
-      canvas.height = size;
-      
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return texture;
-      
-      // Draw a colored circle as fallback
-      ctx.beginPath();
-      ctx.arc(size/2, size/2, size/2 - 4, 0, Math.PI * 2);
-      ctx.fillStyle = '#FFF8E0'; // Much lighter, more yellow sand color
-      ctx.fill();
-      ctx.strokeStyle = '#FFFFFF';
-      ctx.lineWidth = 8;
-      ctx.stroke();
-      
-      // Create a new texture from the canvas
-      const fallbackTexture = new THREE.Texture(canvas);
-      fallbackTexture.needsUpdate = true;
-      return fallbackTexture;
-    }
+    console.log('createCircularTexture is disabled - using colored circles instead');
     
-    // Create a canvas to draw the circular mask
+    // Create a simple colored circle texture without loading any images
     const canvas = document.createElement('canvas');
-    const size = 512; // Increased size for better quality
+    const size = 256;
     canvas.width = size;
     canvas.height = size;
     
     const ctx = canvas.getContext('2d');
-    if (!ctx) return texture; // Fallback if context creation fails
+    if (!ctx) return texture;
     
-    try {
-      // Clear the canvas first
-      ctx.clearRect(0, 0, size, size);
-      
-      // Draw a circular clipping path
-      ctx.beginPath();
-      ctx.arc(size/2, size/2, size/2 - 4, 0, Math.PI * 2);
-      ctx.closePath();
-      
-      // Add a white stroke around the circle
-      ctx.strokeStyle = '#FFFFFF';
-      ctx.lineWidth = 8;
-      ctx.stroke();
-      
-      // Create a new clipping path for the image
-      ctx.save();
-      ctx.beginPath();
-      ctx.arc(size/2, size/2, size/2 - 12, 0, Math.PI * 2);
-      ctx.clip();
-      
-      // Calculate dimensions to maintain aspect ratio
-      let drawWidth = size - 24;
-      let drawHeight = size - 24;
-      let offsetX = 12;
-      let offsetY = 12;
-      
-      if (texture.image.width > texture.image.height) {
-        // Landscape image
-        drawHeight = (texture.image.height / texture.image.width) * (size - 24);
-        offsetY = (size - drawHeight) / 2;
-      } else if (texture.image.height > texture.image.width) {
-        // Portrait image
-        drawWidth = (texture.image.width / texture.image.height) * (size - 24);
-        offsetX = (size - drawWidth) / 2;
-      }
-      
-      // Draw the image with proper aspect ratio
-      if (texture.image) {
-        ctx.drawImage(texture.image, offsetX, offsetY, drawWidth, drawHeight);
-      }
-      
-      ctx.restore();
-      
-      // Create a new texture from the canvas
-      const circularTexture = new THREE.Texture(canvas);
-      circularTexture.needsUpdate = true;
-      
-      return circularTexture;
-    } catch (error) {
-      console.error('Error creating circular texture:', error);
-      
-      // If there's an error, create a simple colored circle
-      ctx.clearRect(0, 0, size, size);
-      ctx.beginPath();
-      ctx.arc(size/2, size/2, size/2 - 4, 0, Math.PI * 2);
-      ctx.fillStyle = '#FFF5D0'; // Lighter, more yellow sand color
-      ctx.fill();
-      ctx.strokeStyle = '#FFFFFF';
-      ctx.lineWidth = 8;
-      ctx.stroke();
-      
-      const fallbackTexture = new THREE.Texture(canvas);
-      fallbackTexture.needsUpdate = true;
-      return fallbackTexture;
-    }
+    // Draw a colored circle
+    ctx.beginPath();
+    ctx.arc(size/2, size/2, size/2 - 4, 0, Math.PI * 2);
+    ctx.fillStyle = '#FFF8E0'; // Much lighter, more yellow sand color
+    ctx.fill();
+    ctx.strokeStyle = '#FFFFFF';
+    ctx.lineWidth = 8;
+    ctx.stroke();
+    
+    // Create a new texture from the canvas
+    const fallbackTexture = new THREE.Texture(canvas);
+    fallbackTexture.needsUpdate = true;
+    return fallbackTexture;
   }
   
   /**
@@ -1141,14 +1030,24 @@ export default class PolygonRenderer {
           this.bounds.latCorrectionFactor
         )[0];
         
-        // Create position vector
-        const position = new THREE.Vector3(normalizedCoord.x, 0.05, normalizedCoord.y);
+        // Create a simple circle geometry
+        const circleGeometry = new THREE.CircleGeometry(0.25, 16);
+        const circleMaterial = new THREE.MeshBasicMaterial({
+          color: color,
+          side: THREE.DoubleSide,
+          transparent: true,
+          opacity: 0.8,
+          depthWrite: false
+        });
         
-        // Create circle using the facade (half the original size)
-        const circleMesh = this.facade.createColoredCircle(position, color, 0.25);
+        // Create mesh and position it
+        const circleMesh = new THREE.Mesh(circleGeometry, circleMaterial);
+        circleMesh.position.set(normalizedCoord.x, 0.05, normalizedCoord.y);
+        circleMesh.rotation.x = -Math.PI / 2; // Rotate to lie flat
+        circleMesh.renderOrder = 100; // Ensure it renders on top
         
         // Add to scene
-        this.facade.addToScene(circleMesh);
+        this.scene.add(circleMesh);
         
         // Store reference
         this.coatOfArmSprites[polygon.id] = circleMesh;
