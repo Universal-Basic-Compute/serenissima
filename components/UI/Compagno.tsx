@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { FaTimes, FaChevronDown, FaSpinner } from 'react-icons/fa';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface CompagnoProps {
   className?: string;
@@ -288,13 +290,32 @@ const Compagno: React.FC<CompagnoProps> = ({ className }) => {
                 }`}
               >
                 <div 
-                  className={`inline-block p-2 rounded-lg max-w-[80%] ${
+                  className={`inline-block p-3 rounded-lg max-w-[80%] ${
                     message.role === 'user'
-                      ? 'bg-blue-500 text-white rounded-br-none'
-                      : 'bg-amber-100 text-gray-800 rounded-bl-none border border-amber-200'
+                      ? 'user-bubble rounded-br-none'
+                      : 'assistant-bubble rounded-bl-none'
                   }`}
                 >
-                  {message.content}
+                  <ReactMarkdown 
+                    remarkPlugins={[remarkGfm]}
+                    className="markdown-content"
+                    components={{
+                      // Customize how certain markdown elements are rendered
+                      a: ({node, ...props}) => <a {...props} className="text-amber-700 underline hover:text-amber-500" target="_blank" rel="noopener noreferrer" />,
+                      code: ({node, ...props}) => <code {...props} className="bg-amber-50 px-1 py-0.5 rounded text-sm font-mono" />,
+                      pre: ({node, ...props}) => <pre {...props} className="bg-amber-50 p-2 rounded my-2 overflow-x-auto text-sm font-mono" />,
+                      ul: ({node, ...props}) => <ul {...props} className="list-disc pl-5 my-1" />,
+                      ol: ({node, ...props}) => <ol {...props} className="list-decimal pl-5 my-1" />,
+                      li: ({node, ...props}) => <li {...props} className="my-0.5" />,
+                      blockquote: ({node, ...props}) => <blockquote {...props} className="border-l-4 border-amber-300 pl-3 italic my-2" />,
+                      h1: ({node, ...props}) => <h1 {...props} className="text-lg font-bold my-2" />,
+                      h2: ({node, ...props}) => <h2 {...props} className="text-md font-bold my-2" />,
+                      h3: ({node, ...props}) => <h3 {...props} className="text-sm font-bold my-1" />,
+                      p: ({node, ...props}) => <p {...props} className="my-1" />
+                    }}
+                  >
+                    {message.content}
+                  </ReactMarkdown>
                 </div>
                 <div className="text-xs text-gray-500 mt-1 px-1">
                   {new Date(message.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
@@ -305,11 +326,11 @@ const Compagno: React.FC<CompagnoProps> = ({ className }) => {
             {/* Typing indicator */}
             {isTyping && (
               <div className="text-left mb-3">
-                <div className="inline-block p-2 rounded-lg max-w-[80%] bg-amber-100 text-gray-800 rounded-bl-none border border-amber-200">
-                  <div className="flex space-x-1">
-                    <div className="w-2 h-2 bg-amber-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                    <div className="w-2 h-2 bg-amber-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                    <div className="w-2 h-2 bg-amber-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                <div className="inline-block p-3 rounded-lg max-w-[80%] typing-indicator rounded-bl-none">
+                  <div className="flex space-x-2">
+                    <div className="typing-dot animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                    <div className="typing-dot animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                    <div className="typing-dot animate-bounce" style={{ animationDelay: '300ms' }}></div>
                   </div>
                 </div>
               </div>
@@ -325,19 +346,19 @@ const Compagno: React.FC<CompagnoProps> = ({ className }) => {
               <div className="flex flex-wrap gap-1">
                 <button
                   onClick={() => handleSuggestedQuestion("How do I purchase land?")}
-                  className="text-xs bg-amber-100 hover:bg-amber-200 text-amber-800 px-2 py-1 rounded-full border border-amber-200 transition-colors"
+                  className="text-xs bg-gradient-to-r from-amber-100 to-amber-200 hover:from-amber-200 hover:to-amber-300 text-amber-800 px-3 py-1.5 rounded-full border border-amber-200 transition-colors shadow-sm"
                 >
                   How do I purchase land?
                 </button>
                 <button
                   onClick={() => handleSuggestedQuestion("What are $COMPUTE tokens?")}
-                  className="text-xs bg-amber-100 hover:bg-amber-200 text-amber-800 px-2 py-1 rounded-full border border-amber-200 transition-colors"
+                  className="text-xs bg-gradient-to-r from-amber-100 to-amber-200 hover:from-amber-200 hover:to-amber-300 text-amber-800 px-3 py-1.5 rounded-full border border-amber-200 transition-colors shadow-sm"
                 >
                   What are $COMPUTE tokens?
                 </button>
                 <button
                   onClick={() => handleSuggestedQuestion("How do I build structures?")}
-                  className="text-xs bg-amber-100 hover:bg-amber-200 text-amber-800 px-2 py-1 rounded-full border border-amber-200 transition-colors"
+                  className="text-xs bg-gradient-to-r from-amber-100 to-amber-200 hover:from-amber-200 hover:to-amber-300 text-amber-800 px-3 py-1.5 rounded-full border border-amber-200 transition-colors shadow-sm"
                 >
                   How do I build structures?
                 </button>
@@ -360,7 +381,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className }) => {
               className={`px-4 rounded-r-lg transition-colors ${
                 isTyping || !inputValue.trim()
                   ? 'bg-gray-400 text-white cursor-not-allowed'
-                  : 'bg-amber-600 text-white hover:bg-amber-500'
+                  : 'bg-gradient-to-r from-amber-600 to-amber-500 text-white hover:from-amber-500 hover:to-amber-400'
               }`}
               disabled={isTyping || !inputValue.trim()}
             >

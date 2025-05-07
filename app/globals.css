@@ -81,6 +81,152 @@ button:hover, a:hover {
   animation: slideIn 0.3s ease-out forwards;
 }
 
+/* Metallic bubble effects */
+.assistant-bubble {
+  background: linear-gradient(145deg, #f8e3c5, #e6c89b);
+  color: #4b3621;
+  border: 1px solid rgba(218, 165, 32, 0.3);
+  box-shadow: 
+    0 2px 5px rgba(0, 0, 0, 0.1),
+    inset 0 1px 1px rgba(255, 255, 255, 0.7),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.05);
+  position: relative;
+  overflow: hidden;
+  animation: bubbleAppear 0.3s ease-out forwards;
+}
+
+.assistant-bubble::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 40%;
+  background: linear-gradient(to bottom, 
+    rgba(255, 255, 255, 0.4) 0%, 
+    rgba(255, 255, 255, 0.1) 100%);
+  border-radius: inherit;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  pointer-events: none;
+}
+
+.user-bubble {
+  background: linear-gradient(145deg, #6a82fb, #5465ca);
+  color: white;
+  border: 1px solid rgba(106, 130, 251, 0.3);
+  box-shadow: 
+    0 2px 5px rgba(0, 0, 0, 0.1),
+    inset 0 1px 1px rgba(255, 255, 255, 0.3),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.05);
+  position: relative;
+  overflow: hidden;
+  animation: bubbleAppear 0.3s ease-out forwards;
+}
+
+.user-bubble::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 40%;
+  background: linear-gradient(to bottom, 
+    rgba(255, 255, 255, 0.3) 0%, 
+    rgba(255, 255, 255, 0.05) 100%);
+  border-radius: inherit;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  pointer-events: none;
+}
+
+@keyframes bubbleAppear {
+  from { 
+    opacity: 0; 
+    transform: translateY(10px) scale(0.95);
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Subtle hover effect */
+.assistant-bubble:hover, .user-bubble:hover {
+  transform: translateY(-1px);
+  transition: transform 0.2s ease;
+}
+
+/* Markdown content styling */
+.markdown-content {
+  line-height: 1.5;
+}
+
+.markdown-content p {
+  margin-bottom: 0.5rem;
+}
+
+.markdown-content p:last-child {
+  margin-bottom: 0;
+}
+
+.markdown-content a {
+  text-decoration: underline;
+  color: inherit;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+
+.markdown-content a:hover {
+  opacity: 1;
+}
+
+.markdown-content code {
+  font-family: var(--font-geist-mono);
+  font-size: 0.9em;
+}
+
+.markdown-content pre {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Typing indicator with metallic effect */
+.typing-indicator {
+  background: linear-gradient(145deg, #f8e3c5, #e6c89b);
+  border: 1px solid rgba(218, 165, 32, 0.3);
+  box-shadow: 
+    0 2px 5px rgba(0, 0, 0, 0.1),
+    inset 0 1px 1px rgba(255, 255, 255, 0.7);
+  position: relative;
+  overflow: hidden;
+}
+
+.typing-indicator::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 40%;
+  background: linear-gradient(to bottom, 
+    rgba(255, 255, 255, 0.4) 0%, 
+    rgba(255, 255, 255, 0.1) 100%);
+  border-radius: inherit;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  pointer-events: none;
+}
+
+.typing-dot {
+  width: 8px;
+  height: 8px;
+  background: linear-gradient(145deg, #daa520, #b8860b);
+  border-radius: 50%;
+  display: inline-block;
+  margin: 0 1px;
+}
+
 /* Animated metallic Ducats text effect - updated for more pronounced metallic effect */
 .ducats-token, .compute-token {
   font-family: 'Geist', sans-serif;
