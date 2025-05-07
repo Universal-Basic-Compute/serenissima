@@ -198,6 +198,27 @@ button:hover, a:hover {
   border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
+/* Voice button styles */
+.voice-button {
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+}
+
+.voice-button:hover {
+  opacity: 1;
+}
+
+.voice-button.playing {
+  color: #f97316;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+
 /* Typing indicator with parchment-like effect */
 .typing-indicator {
   background: linear-gradient(145deg, #f97316, #fbbf24);

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { FaTimes, FaChevronDown, FaSpinner } from 'react-icons/fa';
+import { FaTimes, FaChevronDown, FaSpinner, FaVolumeUp, FaVolumeMute } from 'react-icons/fa';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -12,6 +12,7 @@ interface Message {
   role: 'user' | 'assistant';
   content: string;
   timestamp: string;
+  isPlaying?: boolean; // Add this property to track audio playback state
 }
 
 interface PaginationInfo {
@@ -33,6 +34,8 @@ const Compagno: React.FC<CompagnoProps> = ({ className }) => {
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [pagination, setPagination] = useState<PaginationInfo | null>(null);
   const [username, setUsername] = useState<string>(DEFAULT_USERNAME);
+  const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
+  const [playingMessageId, setPlayingMessageId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Fetch user information if available
@@ -186,6 +189,66 @@ const Compagno: React.FC<CompagnoProps> = ({ className }) => {
     await sendMessage(question);
   };
 
+  const handleTextToSpeech = async (message: Message) => {
+    try {
+      // If already playing this message, stop it
+      if (playingMessageId === message.id) {
+        if (audioElement) {
+          audioElement.pause();
+          audioElement.currentTime = 0;
+        }
+        setPlayingMessageId(null);
+        return;
+      }
+      
+      // Stop any currently playing audio
+      if (audioElement) {
+        audioElement.pause();
+        audioElement.currentTime = 0;
+      }
+      
+      // Set the current message as playing
+      setPlayingMessageId(message.id);
+      
+      // Call the ElevenLabs API
+      const response = await fetch('/api/tts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          text: message.content,
+          voice_id: 'IKne3meq5aSn9XLyUdCD', // Default ElevenLabs voice ID
+          model: 'eleven_flash_v2_5'
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to generate speech: ${response.status}`);
+      }
+      
+      // Get the audio URL from the response
+      const data = await response.json();
+      
+      // Create a new audio element
+      const audio = new Audio(data.audio_url);
+      setAudioElement(audio);
+      
+      // Play the audio
+      audio.play();
+      
+      // When audio ends, reset the playing state
+      audio.onended = () => {
+        setPlayingMessageId(null);
+      };
+      
+    } catch (error) {
+      console.error('Error generating speech:', error);
+      setPlayingMessageId(null);
+      alert('Failed to generate speech. Please try again.');
+    }
+  };
+
   return (
     <div className={`fixed bottom-4 right-4 z-50 ${className}`}>
       {/* Collapsed state - just show the mask icon */}
@@ -324,6 +387,21 @@ const Compagno: React.FC<CompagnoProps> = ({ className }) => {
                       {message.content}
                     </ReactMarkdown>
                   </div>
+                  
+                  {/* Only show voice button for assistant messages */}
+                  {message.role === 'assistant' && (
+                    <button
+                      onClick={() => handleTextToSpeech(message)}
+                      className="mt-1 text-amber-700 hover:text-amber-500 transition-colors float-right voice-button"
+                      aria-label={playingMessageId === message.id ? "Stop speaking" : "Speak message"}
+                    >
+                      {playingMessageId === message.id ? (
+                        <FaVolumeMute className="w-4 h-4" />
+                      ) : (
+                        <FaVolumeUp className="w-4 h-4" />
+                      )}
+                    </button>
+                  )}
                 </div>
               </div>
             ))}
