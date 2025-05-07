@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { Table } from 'pyairtable';
+import Airtable from 'airtable';
 import dotenv from 'dotenv';
 
 // Load environment variables
@@ -28,21 +28,26 @@ export async function GET() {
       );
     }
     
+    // Configure Airtable
+    Airtable.configure({
+      apiKey: AIRTABLE_API_KEY
+    });
+    
     // Connect to the LANDS table
-    const lands_table = new Table(AIRTABLE_API_KEY, AIRTABLE_BASE_ID, AIRTABLE_LANDS_TABLE);
+    const base = Airtable.base(AIRTABLE_BASE_ID);
     
     // Fetch all records from the LANDS table
-    const records = await lands_table.all();
+    const records = await base(AIRTABLE_LANDS_TABLE).select().all();
     console.log(`Retrieved ${records.length} land records from Airtable`);
     
     // Extract income data from the records
     const incomeData = records
-      .filter(record => record.fields.LandId && 
-              (record.fields.SimulatedIncome !== undefined || 
-               record.fields.SimulatedIncome !== null))
+      .filter(record => record.get('LandId') && 
+              (record.get('SimulatedIncome') !== undefined || 
+               record.get('SimulatedIncome') !== null))
       .map(record => ({
-        polygonId: record.fields.LandId,
-        income: record.fields.SimulatedIncome || 0
+        polygonId: record.get('LandId'),
+        income: record.get('SimulatedIncome') || 0
       }));
     
     console.log(`Extracted income data for ${incomeData.length} land parcels`);
