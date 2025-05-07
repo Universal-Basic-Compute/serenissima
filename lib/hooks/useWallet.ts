@@ -150,15 +150,25 @@ export function useWallet() {
         
         console.log("Wallet disconnected successfully");
         
-        // Important: Wait a moment before trying to reconnect
-        // This gives Phantom time to fully disconnect
+        // Important: We need to completely reset the adapter to force Phantom to show the account selector
+        // This is the key change - we need to create a new adapter instance
+        setWalletAdapter(null);
+        
+        // Wait a moment before creating a new adapter
         await new Promise(resolve => setTimeout(resolve, 500));
         
-        // Now attempt to connect again, which will prompt Phantom to show the account selector
-        console.log("Attempting to reconnect after disconnect...");
-        await adapter.connect();
+        // Create a new adapter instance
+        const newAdapter = new PhantomWalletAdapter();
+        setWalletAdapter(newAdapter);
         
-        const address = adapter.publicKey?.toString() || null;
+        // Wait for the new adapter to initialize
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // Now attempt to connect with the new adapter
+        console.log("Attempting to reconnect with new adapter...");
+        await newAdapter.connect();
+        
+        const address = newAdapter.publicKey?.toString() || null;
         console.log("Wallet reconnected, address:", address);
         
         if (address) {
