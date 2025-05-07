@@ -29,6 +29,7 @@ interface PolygonViewerProps {
   getSnapshotWithCache: <T>(getSnapshotFn: () => T, dependencies: any[]) => T;
   ref?: MutableRefObject<any>;
   activeView: 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance';
+  key?: string | number; // Add key prop to the interface
 }
 
 import { useEffect, useRef, useState, useCallback, MutableRefObject } from 'react';
@@ -48,7 +49,7 @@ import { transferComputeInAirtable } from '../lib/airtableUtils';
 import { eventBus, EventTypes } from '../lib/eventBus';
 
 // Import PolygonViewer with no SSR to avoid hydration issues
-const PolygonViewer = dynamic(() => import('../components/PolygonViewer/PolygonViewer'), {
+const PolygonViewer = dynamic<PolygonViewerProps>(() => import('../components/PolygonViewer/PolygonViewer'), {
   ssr: false
 });
 
