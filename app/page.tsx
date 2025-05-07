@@ -958,17 +958,6 @@ export default function SimplePage() {
               )}
             </div>
       
-            {/* Test image for static file serving */}
-            <div className="mt-4">
-              <p>Test image (should appear below):</p>
-              <img 
-                src="/favicon.ico" 
-                alt="Test image" 
-                style={{ width: '32px', height: '32px' }} 
-                onError={(e) => console.error('Error loading test image')}
-              />
-            </div>
-            
             {/* Oath Section - Moved below the image */}
             <div className="mt-6 border-2 border-amber-600 rounded-lg p-4 bg-amber-50 w-full">
               <h4 className="text-lg font-medium text-amber-800 mb-2">
