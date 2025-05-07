@@ -604,7 +604,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
           </div>
           
           {/* 4. Transaction information with enhanced styling */}
-          {transaction && (
+          {transaction && !transaction.buyer && (
             <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
               <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">For Sale</h3>
               <p className="text-2xl font-semibold text-center">
