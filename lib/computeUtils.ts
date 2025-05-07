@@ -3,7 +3,7 @@ import { getAssociatedTokenAddress, createTransferInstruction } from '@solana/sp
 import { getApiBaseUrl } from '@/lib/apiUtils';
 
 // Constants for token decimal handling
-const COMPUTE_DECIMALS = 9;
+const COMPUTE_DECIMALS = 6;
 const COMPUTE_MULTIPLIER = Math.pow(10, COMPUTE_DECIMALS);
 
 /**

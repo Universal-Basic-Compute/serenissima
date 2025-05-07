@@ -3,7 +3,7 @@ const { getAssociatedTokenAddress, createTransferInstruction } = require('@solan
 const bs58 = require('bs58');
 
 // Constants for token decimal handling
-const COMPUTE_DECIMALS = 9;
+const COMPUTE_DECIMALS = 6;
 const COMPUTE_MULTIPLIER = Math.pow(10, COMPUTE_DECIMALS);
 
 // Solana connection - use devnet for testing, mainnet for production
