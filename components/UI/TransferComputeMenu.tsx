@@ -147,7 +147,9 @@ const TransferComputeMenu: React.FC<TransferComputeMenuProps> = ({ onClose, onTr
                 Injecting...
               </>
             ) : (
-              'Inject <span className="compute-token">$COMPUTE</span>'
+              <>
+                Inject <span className="compute-token">$COMPUTE</span>
+              </>
             )}
           </button>
         </div>
