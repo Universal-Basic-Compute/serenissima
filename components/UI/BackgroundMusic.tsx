@@ -69,12 +69,17 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
     if (tracks.length === 1) {
       newTrack = tracks[0];
     } else {
+      // Keep track of the last played track
+      const lastPlayedTrack = audioRef.current?.src;
+      
       do {
         const randomIndex = Math.floor(Math.random() * tracks.length);
         newTrack = tracks[randomIndex];
-      } while (newTrack === currentTrack && tracks.length > 1 && !currentTrack.includes('Pausing between tracks'));
+        // Make sure we don't play the same track twice in a row
+      } while (newTrack === lastPlayedTrack && tracks.length > 1);
     }
     
+    console.log(`Playing new track: ${newTrack}`);
     setCurrentTrack(newTrack);
     
     if (audioRef.current) {
@@ -164,9 +169,11 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
       // Pause for 10 seconds before playing the next track
       setIsPlaying(false);
       
+      // Store the current track URL before changing to pause message
+      const lastTrackUrl = audio?.src;
+      
       // Show a message that we're pausing between tracks
       const pauseMessage = 'Pausing between tracks...';
-      const originalTrack = currentTrack;
       setCurrentTrack(pauseMessage);
       
       // Wait 10 seconds before playing the next track
