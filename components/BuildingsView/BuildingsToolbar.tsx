@@ -1,12 +1,19 @@
 import React, { useState } from 'react';
+import * as THREE from 'three';
 import RoadCreator from '@/components/PolygonViewer/RoadCreator';
 import DockCreator from '@/components/DockCreator';
 
 interface BuildingsToolbarProps {
+  scene?: THREE.Scene;
+  camera?: THREE.PerspectiveCamera;
+  polygons?: any[];
   onRefreshBuildings?: () => void;
 }
 
 const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
+  scene,
+  camera,
+  polygons,
   onRefreshBuildings
 }) => {
   const [isRoadCreatorActive, setIsRoadCreatorActive] = useState(false);
@@ -59,6 +66,9 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
       
       {isDockCreatorActive && (
         <DockCreator
+          scene={scene}
+          camera={camera}
+          polygons={polygons}
           active={isDockCreatorActive}
           onComplete={(dockData) => {
             console.log('Dock created:', dockData);
