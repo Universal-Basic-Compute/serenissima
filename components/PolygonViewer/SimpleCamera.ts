@@ -14,20 +14,20 @@ export default class SimpleCamera {
       500 // Far clipping plane (decreased from 1000 to reduce depth range)
     );
     
-    // Position camera closer for the smaller water area
-    this.camera.position.set(0, 40, 80); // Reduced from (0, 60, 120)
+    // Position camera for better view of the land and water
+    this.camera.position.set(0, 45, 70); // Adjusted for better viewing angle
     this.camera.lookAt(0, 0, 0); // Looking at the origin where everything is positioned
     
     // Create controls
     this.controls = new OrbitControls(this.camera, domElement);
     
-    // Configure controls
+    // Configure controls with improved settings
     this.controls.enableDamping = true;
     this.controls.dampingFactor = 0.05;
     this.controls.minPolarAngle = 0.1; // Allow more downward angle to see water
-    this.controls.maxPolarAngle = Math.PI / 2.5; // Limit to 72 degrees from vertical
+    this.controls.maxPolarAngle = Math.PI / 2.2; // Increased to allow more top-down view
     this.controls.minDistance = 4; // Restrict zoom-in to 4 units
-    this.controls.maxDistance = 52.5; // Allow zooming out 30% less than current value (75 * 0.7 = 52.5)
+    this.controls.maxDistance = 60; // Allow zooming out a bit more
     this.controls.screenSpacePanning = true; // Enable screen space panning
     
     // Disable left mouse button for rotation (button 0)

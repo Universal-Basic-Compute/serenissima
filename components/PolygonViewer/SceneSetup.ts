@@ -336,10 +336,14 @@ export default class SceneSetup {
     const z = -Math.cos(azimuth) * projectedDistance;
     
     // Ensure sun is always visible even at night (just very low in the sky)
-    const minHeight = -200; // Minimum height for night time
+    const minHeight = -100; // Increased minimum height for better lighting at night
     const adjustedHeight = Math.max(minHeight, height);
     
-    return new THREE.Vector3(x, adjustedHeight, z);
+    // Add a slight offset to prevent the sun from being directly behind the camera
+    const offsetX = x + 50;
+    const offsetZ = z + 50;
+    
+    return new THREE.Vector3(offsetX, adjustedHeight, offsetZ);
   }
   
   

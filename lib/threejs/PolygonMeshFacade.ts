@@ -28,7 +28,6 @@ export class PolygonMeshFacade implements Poolable {
   private minIncome: number = 0;
   private maxIncome: number = 1000;
   private hasIncomeData: boolean = false;
-  private hasIncomeData: boolean = false;
 
   constructor(
     scene: THREE.Scene,
@@ -226,9 +225,9 @@ export class PolygonMeshFacade implements Poolable {
    */
   private getIncomeBasedColor(income: number): THREE.Color {
     // Define our color scale with more vibrant colors
-    const highIncomeColor = new THREE.Color(0xff0000); // Bright red
-    const midIncomeColor = new THREE.Color(0xffff00);  // Bright yellow
-    const lowIncomeColor = new THREE.Color(0x00ff00);  // Bright green
+    const highIncomeColor = new THREE.Color(0xff3300); // Bright orange-red
+    const midIncomeColor = new THREE.Color(0xffcc00);  // Golden yellow
+    const lowIncomeColor = new THREE.Color(0x33cc33);  // Rich green
     
     // Normalize income to a 0-1 scale
     const maxIncome = 1000; // Adjust this based on your actual data range
