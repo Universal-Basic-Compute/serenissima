@@ -8,10 +8,9 @@ import TransferComputeMenu from '../components/UI/TransferComputeMenu';
 import WithdrawComputeMenu from '../components/UI/WithdrawComputeMenu';
 import SuccessAlert from '../components/UI/SuccessAlert';
 import BackgroundMusic from '../components/UI/BackgroundMusic';
-import { PhantomWalletAdapter } from '@solana/wallet-adapter-phantom';
-import { WalletReadyState } from '@solana/wallet-adapter-base';
+import WalletButton from '../components/UI/WalletButton';
 import { getApiBaseUrl } from '@/lib/apiUtils';
-import { getWalletAddress, setWalletAddress, clearWalletAddress, storeWalletInAirtable } from '@/lib/walletUtils';
+import { getWalletAddress } from '@/lib/walletUtils';
 import { transferCompute, withdrawCompute } from '@/lib/computeUtils';
 import { generateCoatOfArmsImage } from '@/app/utils/coatOfArmsUtils';
 import { FaHome, FaBuilding, FaRoad, FaTree, FaStore, FaLandmark } from 'react-icons/fa';
@@ -41,9 +40,7 @@ export default function SimplePage() {
   const dropdownRef = useRef<HTMLDivElement>(null);
   // Sidebar is always compact
   
-  // Wallet and user state
-  const [walletAddress, setWalletAddress] = useState<string | null>(null);
-  const [walletAdapter, setWalletAdapter] = useState<PhantomWalletAdapter | null>(null);
+  // UI state
   const [transferMenuOpen, setTransferMenuOpen] = useState(false);
   const [withdrawMenuOpen, setWithdrawMenuOpen] = useState(false);
   const [showUsernamePrompt, setShowUsernamePrompt] = useState(false);
@@ -280,83 +277,20 @@ export default function SimplePage() {
       setIsGeneratingImage(false);
     }
   };
-  // Initialize wallet adapter
+  // Listen for custom events
   useEffect(() => {
-    console.log("Initializing wallet adapter...");
-    const adapter = new PhantomWalletAdapter();
-    setWalletAdapter(adapter);
+    const handleShowTransferMenu = () => setTransferMenuOpen(true);
+    const handleShowWithdrawMenu = () => setWithdrawMenuOpen(true);
+    const handleShowUsernamePrompt = () => setShowUsernamePrompt(true);
     
-    // Check if wallet is already connected in session or local storage
-    const storedWallet = getWalletAddress();
-    console.log("Stored wallet address:", storedWallet);
-    
-    if (storedWallet) {
-      console.log("Found stored wallet address, setting as connected");
-      setWalletAddress(storedWallet);
-      
-      // Try to load user profile from localStorage first
-      const storedProfile = localStorage.getItem('userProfile');
-      if (storedProfile) {
-        try {
-          const parsedProfile = JSON.parse(storedProfile);
-          console.log('Loaded user profile from localStorage:', parsedProfile);
-          setUserProfile(parsedProfile);
-        } catch (e) {
-          console.error('Error parsing stored profile:', e);
-        }
-      }
-      
-      // Also fetch user profile data from backend to ensure it's up to date
-      fetch(`${getApiBaseUrl()}/api/wallet/${storedWallet}`)
-        .then(response => {
-          if (response.ok) return response.json();
-          throw new Error('Failed to fetch user profile');
-        })
-        .then(data => {
-          console.log('Fetched user profile from backend:', data);
-          if (data.user_name) {
-            const backendProfile = {
-              username: data.user_name,
-              firstName: data.first_name || data.user_name.split(' ')[0] || '',
-              lastName: data.last_name || data.user_name.split(' ').slice(1).join(' ') || '',
-              coatOfArmsImage: data.coat_of_arms_image,
-              familyMotto: data.family_motto,
-              familyCoatOfArms: data.family_coat_of_arms,
-              computeAmount: data.compute_amount,
-              color: data.color || '#8B4513'
-            };
-          
-            // Update state with backend data
-            setUserProfile(backendProfile);
-            setSelectedColor(data.color || '#8B4513');
-            
-            // Also update localStorage
-            localStorage.setItem('userProfile', JSON.stringify(backendProfile));
-          }
-        })
-        .catch(error => {
-          console.error('Error fetching user profile:', error);
-        });
-    } else if (adapter.connected) {
-      // If adapter is connected but not in storage, update both
-      console.log("Adapter is connected but not in storage");
-      const address = adapter.publicKey?.toString() || null;
-      if (address) {
-        console.log("Setting wallet address from adapter:", address);
-        setWalletAddress(address);
-        sessionStorage.setItem('walletAddress', address);
-        localStorage.setItem('walletAddress', address);
-      }
-    } else {
-      console.log("No stored wallet address and adapter not connected");
-    }
+    window.addEventListener('showTransferMenu', handleShowTransferMenu);
+    window.addEventListener('showWithdrawMenu', handleShowWithdrawMenu);
+    window.addEventListener('showUsernamePrompt', handleShowUsernamePrompt);
     
     return () => {
-      // Clean up adapter when component unmounts
-      if (adapter) {
-        console.log("Cleaning up wallet adapter");
-        adapter.disconnect();
-      }
+      window.removeEventListener('showTransferMenu', handleShowTransferMenu);
+      window.removeEventListener('showWithdrawMenu', handleShowWithdrawMenu);
+      window.removeEventListener('showUsernamePrompt', handleShowUsernamePrompt);
     };
   }, []);
 
@@ -472,132 +406,8 @@ export default function SimplePage() {
         </div>
       </div>
       
-      {/* Wallet button/dropdown or User Profile */}
-      {walletAddress ? (
-        userProfile ? (
-          // Show user profile with coat of arms and name
-          <div className="absolute top-4 right-4 z-10" ref={dropdownRef}>
-            <button 
-              onClick={() => setDropdownOpen(!dropdownOpen)}
-              className="bg-amber-50 px-6 py-3 rounded-lg shadow-md hover:bg-amber-100 transition-colors flex items-center border-2 border-amber-300"
-            >
-              <PlayerProfile
-                username={userProfile.username || usernameInput}
-                firstName={userProfile.firstName || firstName}
-                lastName={userProfile.lastName || lastName}
-                coatOfArmsImage={userProfile.coatOfArmsImage || coatOfArmsImage}
-                familyMotto={userProfile.familyMotto || familyMotto}
-                computeAmount={userProfile.computeAmount}
-                size="medium" // Change from small to medium
-                className="mr-3" // Increase margin
-                showMotto={false}
-                showDucats
-              />
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-amber-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-            
-            {dropdownOpen && (
-              <div className="absolute right-0 mt-2 w-72 bg-white rounded-lg shadow-xl py-1 z-20 border-2 border-amber-300 overflow-hidden">
-                <div className="px-4 py-3 border-b border-amber-100 bg-amber-50">
-                  <p className="text-xs text-amber-700">Wallet</p>
-                  <p className="text-sm truncate font-medium">{walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}</p>
-                  {userProfile.familyMotto && (
-                    <p className="text-xs italic text-amber-600 mt-1">"{userProfile.familyMotto}"</p>
-                  )}
-                </div>
-                <button
-                  onClick={() => {
-                    setShowUsernamePrompt(true); // Reuse the username prompt for profile editing
-                    // Don't set username input when editing
-                    setFirstName(userProfile.firstName || '');
-                    setLastName(userProfile.lastName || '');
-                    setFamilyCoatOfArms(userProfile.familyCoatOfArms || '');
-                    setFamilyMotto(userProfile.familyMotto || '');
-                    setCoatOfArmsImage(userProfile.coatOfArmsImage || null);
-                    setDropdownOpen(false);
-                  }}
-                  className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-amber-500 hover:text-white transition-colors"
-                >
-                  Edit Profile
-                </button>
-
-                <button
-                  onClick={() => {
-                    setTransferMenuOpen(true);
-                    setDropdownOpen(false);
-                  }}
-                  className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-amber-500 hover:text-white transition-colors"
-                >
-                  Inject <span className="compute-token">$COMPUTE</span>
-                </button>
-                <button
-                  onClick={() => {
-                    setWithdrawMenuOpen(true);
-                    setDropdownOpen(false);
-                  }}
-                  className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-amber-500 hover:text-white transition-colors"
-                >
-                  Cash out <span className="compute-token">$COMPUTE</span>
-                </button>
-                <button
-                  onClick={() => {
-                    connectWallet();
-                    setDropdownOpen(false);
-                  }}
-                  className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-red-500 hover:text-white transition-colors"
-                >
-                  Disconnect
-                </button>
-              </div>
-            )}
-          </div>
-        ) : (
-          // Show wallet address if profile not loaded yet
-          <div className="absolute top-4 right-4 z-10" ref={dropdownRef}>
-            <button 
-              onClick={() => setDropdownOpen(!dropdownOpen)}
-              className="bg-white px-4 py-2 rounded shadow hover:bg-gray-100 transition-colors flex items-center"
-            >
-              <span className="mr-2">{walletAddress.slice(0, 4)}...{walletAddress.slice(-4)}</span>
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-            
-            {dropdownOpen && (
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-20">
-                <button
-                  onClick={() => {
-                    setTransferMenuOpen(true);
-                    setDropdownOpen(false);
-                  }}
-                  className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-blue-500 hover:text-white transition-colors"
-                >
-                  Transfer Compute
-                </button>
-                <button
-                  onClick={() => {
-                    connectWallet();
-                    setDropdownOpen(false);
-                  }}
-                  className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-red-500 hover:text-white transition-colors"
-                >
-                  Disconnect
-                </button>
-              </div>
-            )}
-          </div>
-        )
-      ) : (
-        <button 
-          onClick={connectWallet}
-          className="absolute top-4 right-4 z-10 bg-white px-4 py-2 rounded shadow hover:bg-purple-100 transition-colors"
-        >
-          Connect Wallet
-        </button>
-      )}
+      {/* Wallet Button */}
+      <WalletButton className="absolute top-4 right-4 z-10" />
       
       
       {/* Information Panel */}
@@ -975,88 +785,6 @@ export default function SimplePage() {
       <BackgroundMusic />
     </>
   );
-  // Add the connectWallet function
-  async function connectWallet() {
-    console.log("Connecting wallet...");
-    if (!walletAdapter) {
-      console.log("Wallet adapter not initialized");
-      return;
-    }
-    
-    const adapter = walletAdapter;
-    
-    console.log("Connecting wallet, current state:", adapter.connected ? "connected" : "disconnected");
-    
-    if (adapter.connected) {
-      // If already connected, disconnect
-      console.log("Disconnecting wallet...");
-      adapter.disconnect().then(() => {
-        // Only update state after successful disconnect
-        setWalletAddress(null);
-        setUserProfile(null); // Also clear the user profile
-    
-        // Clear wallet from both storages
-        clearWalletAddress();
-        localStorage.removeItem('userProfile'); // Also clear user profile from storage
-      
-        // Dispatch a custom event to notify other components
-        window.dispatchEvent(new CustomEvent('walletChanged'));
-      
-        console.log("Wallet disconnected successfully");
-      }).catch(error => {
-        console.error("Error disconnecting wallet:", error);
-        alert(`Failed to disconnect wallet: ${error instanceof Error ? error.message : String(error)}`);
-      });
-      return;
-    }
-  
-    // Check if Phantom is installed
-    if (adapter.readyState !== WalletReadyState.Installed) {
-      console.log("Phantom wallet not installed, opening website");
-      window.open('https://phantom.app/', '_blank');
-      return;
-    }
-    
-    try {
-      console.log("Attempting to connect to wallet...");
-      await adapter.connect();
-      
-      const address = adapter.publicKey?.toString() || null;
-      console.log("Wallet connected, address:", address);
-      
-      if (address) {
-        setWalletAddress(address);
-        // Store wallet in both session and local storage
-        setWalletAddress(address);
-        
-        // Store wallet in Airtable and check for username
-        const userData = await storeWalletInAirtable(address);
-        
-        if (userData) {
-          // Check if the user has a username
-          if (userData.user_name === undefined || userData.user_name === null || userData.user_name === '') {
-            // If no username, show the prompt
-            setShowUsernamePrompt(true);
-          } else {
-            // Store the user profile information
-            console.log('Setting user profile with data:', userData);
-            const userProfile = {
-              username: userData.user_name,
-              firstName: userData.first_name || userData.user_name.split(' ')[0] || '',
-              lastName: userData.last_name || userData.user_name.split(' ').slice(1).join(' ') || '',
-              coatOfArmsImage: userData.coat_of_arms_image,
-              familyMotto: userData.family_motto,
-              computeAmount: userData.compute_amount
-            };
-            setUserProfile(userProfile);
-          }
-        }
-      }
-    } catch (error) {
-      console.error('Error connecting to wallet:', error);
-      alert(`Failed to connect wallet: ${error instanceof Error ? error.message : String(error)}`);
-    }
-  }
 
 
 
@@ -1064,8 +792,8 @@ export default function SimplePage() {
   // Add the handleTransferCompute function
   async function handleTransferCompute(amount: number) {
     try {
-      // Get the wallet address from state or storage
-      const currentWalletAddress = walletAddress || getWalletAddress();
+      // Get the wallet address from storage
+      const currentWalletAddress = getWalletAddress();
       
       if (!currentWalletAddress) {
         alert('Please connect your wallet first');
@@ -1073,23 +801,6 @@ export default function SimplePage() {
       }
       
       const data = await transferCompute(currentWalletAddress, amount);
-      
-      // Update the user profile with the new compute amount
-      if (userProfile) {
-        const updatedProfile = {
-          ...userProfile,
-          computeAmount: data.compute_amount
-        };
-        setUserProfile(updatedProfile);
-        
-        // Update localStorage
-        localStorage.setItem('userProfile', JSON.stringify(updatedProfile));
-        
-        // Dispatch event to update other components
-        window.dispatchEvent(new CustomEvent('userProfileUpdated', {
-          detail: updatedProfile
-        }));
-      }
       
       // Show success message with custom component instead of alert
       setSuccessMessage({
@@ -1107,8 +818,8 @@ export default function SimplePage() {
   // Add the handleWithdrawCompute function
   async function handleWithdrawCompute(amount: number) {
     try {
-      // Get the wallet address from state or storage
-      const currentWalletAddress = walletAddress || getWalletAddress();
+      // Get the wallet address from storage
+      const currentWalletAddress = getWalletAddress();
       
       if (!currentWalletAddress) {
         alert('Please connect your wallet first');
@@ -1116,24 +827,6 @@ export default function SimplePage() {
       }
       
       const data = await withdrawCompute(currentWalletAddress, amount);
-      
-      // Update the user profile with the new compute amount
-      if (userProfile) {
-        const updatedProfile = {
-          ...userProfile,
-          computeAmount: data.compute_amount
-        };
-        setUserProfile(updatedProfile);
-        
-        // Update localStorage
-        localStorage.setItem('userProfile', JSON.stringify(updatedProfile));
-        
-        // Dispatch event to update other components
-        window.dispatchEvent(new CustomEvent('userProfileUpdated', {
-          detail: updatedProfile
-        }));
-      }
-      
       return data;
     } catch (error) {
       console.error('Error withdrawing compute:', error);
