@@ -1,21 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FaTimes, FaSearch, FaFilter, FaThLarge, FaProjectDiagram, FaInfoCircle, FaBuilding } from 'react-icons/fa';
-import Image from 'next/image';
-
-interface ResourceNode {
-  id: string;
-  name: string;
-  category: string;
-  subcategory?: string;
-  description: string;
-  icon: string;
-  inputs?: string[]; // Resource IDs that are inputs to this resource
-  outputs?: string[]; // Resource IDs that this resource is an input for
-  buildings?: string[]; // Building IDs that can produce this resource
-  rarity?: 'common' | 'uncommon' | 'rare' | 'exotic';
-  baseValue?: number; // Base market value in ducats
-  position?: { x: number; y: number }; // For visualization layout
-}
+import { FaTimes, FaSearch, FaFilter, FaThLarge, FaProjectDiagram, FaInfoCircle, FaBuilding, FaWeight, FaCube, FaCoins, FaHistory } from 'react-icons/fa';
+import { fetchResources, ResourceNode } from '../../lib/resourceUtils';
 
 interface ResourceTreeProps {
   onClose: () => void;
@@ -28,107 +13,40 @@ const ResourceTree: React.FC<ResourceTreeProps> = ({ onClose }) => {
   const [selectedRarity, setSelectedRarity] = useState<string>('all');
   const [viewMode, setViewMode] = useState<'tree' | 'grid'>('grid');
   const [selectedResource, setSelectedResource] = useState<ResourceNode | null>(null);
+  const [resources, setResources] = useState<ResourceNode[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
   
-  // Sample resource data
-  const resourceNodes: ResourceNode[] = [
-    {
-      id: 'wood',
-      name: 'Wood',
-      category: 'raw_materials',
-      description: 'Basic timber harvested from forests on the mainland. Essential for construction and shipbuilding. RESOURCE CHARACTERISTICS: Renewable resource that requires significant transportation infrastructure to bring to Venice. PRODUCTION: Harvested from mainland forests and transported to Venice via rivers and canals.',
-      icon: '/assets/icons/resources/wood.png',
-      outputs: ['planks', 'charcoal'],
-      buildings: ['lumber_mill'],
-      rarity: 'common',
-      baseValue: 10
-    },
-    {
-      id: 'planks',
-      name: 'Planks',
-      category: 'processed_materials',
-      description: 'Processed wooden planks used in building construction and shipbuilding. RESOURCE CHARACTERISTICS: Processed material that requires skilled labor to produce. More compact and valuable than raw wood. PRODUCTION: Created at lumber mills from raw wood logs.',
-      icon: '/assets/icons/resources/planks.png',
-      inputs: ['wood'],
-      outputs: ['furniture', 'ships'],
-      buildings: ['lumber_mill'],
-      rarity: 'common',
-      baseValue: 25
-    },
-    {
-      id: 'glass',
-      name: 'Venetian Glass',
-      category: 'luxury_goods',
-      description: 'Exquisite glass products made using secret Venetian techniques. RESOURCE CHARACTERISTICS: High-value luxury export that requires specialized knowledge and facilities. PRODUCTION: Created in glass foundries on Murano island using sand, potash, and specialized techniques.',
-      icon: '/assets/icons/resources/glass.png',
-      inputs: ['sand', 'potash'],
-      buildings: ['glass_foundry'],
-      rarity: 'rare',
-      baseValue: 100
-    },
-    {
-      id: 'sand',
-      name: 'Sand',
-      category: 'raw_materials',
-      description: 'Fine sand collected from the Venetian lagoon. Essential for glassmaking. RESOURCE CHARACTERISTICS: Locally available but requires specific collection methods. PRODUCTION: Harvested from specific areas of the lagoon with the right mineral composition.',
-      icon: '/assets/icons/resources/sand.png',
-      outputs: ['glass'],
-      rarity: 'common',
-      baseValue: 5
-    },
-    {
-      id: 'potash',
-      name: 'Potash',
-      category: 'processed_materials',
-      description: 'Potassium-rich ash used in glassmaking to lower the melting temperature of sand. RESOURCE CHARACTERISTICS: Processed material created through burning specific plants. PRODUCTION: Created by burning hardwoods and leaching the ashes.',
-      icon: '/assets/icons/resources/potash.png',
-      outputs: ['glass'],
-      rarity: 'uncommon',
-      baseValue: 30
-    },
-    {
-      id: 'charcoal',
-      name: 'Charcoal',
-      category: 'processed_materials',
-      description: 'Processed fuel created by burning wood in low-oxygen environments. RESOURCE CHARACTERISTICS: High-energy fuel essential for metalworking and glass production. PRODUCTION: Created in charcoal kilns from wood.',
-      icon: '/assets/icons/resources/charcoal.png',
-      inputs: ['wood'],
-      buildings: ['charcoal_kiln'],
-      rarity: 'common',
-      baseValue: 15
-    },
-    {
-      id: 'silk',
-      name: 'Raw Silk',
-      category: 'imported_goods',
-      description: 'Luxurious fiber imported from the Far East via trade routes. RESOURCE CHARACTERISTICS: Expensive imported material that forms the basis of Venice\'s textile industry. PRODUCTION: Imported from China and Persia through trade networks.',
-      icon: '/assets/icons/resources/silk.png',
-      outputs: ['silk_fabric'],
-      rarity: 'rare',
-      baseValue: 80
-    },
-    {
-      id: 'silk_fabric',
-      name: 'Silk Fabric',
-      category: 'luxury_goods',
-      description: 'Finely woven silk fabric, one of Venice\'s most profitable exports. RESOURCE CHARACTERISTICS: High-value processed good that requires skilled labor and specialized equipment. PRODUCTION: Woven on specialized looms by skilled artisans.',
-      icon: '/assets/icons/resources/silk_fabric.png',
-      inputs: ['silk'],
-      buildings: ['textile_workshop'],
-      rarity: 'exotic',
-      baseValue: 200
-    }
-  ];
+  // Load resources on component mount
+  useEffect(() => {
+    const loadResources = async () => {
+      try {
+        setLoading(true);
+        const data = await fetchResources();
+        setResources(data);
+        setError(null);
+      } catch (err) {
+        setError('Failed to load resources. Please try again later.');
+        console.error('Error loading resources:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadResources();
+  }, []);
 
   // Get unique categories for filtering
-  const categories = ['all', ...new Set(resourceNodes.map(node => node.category))];
+  const categories = ['all', ...new Set(resources.map(node => node.category))].sort();
   
   // Get unique rarities for filtering
-  const rarities = ['all', ...new Set(resourceNodes.map(node => node.rarity || 'unknown'))];
+  const rarities = ['all', ...new Set(resources.map(node => node.rarity || 'unknown').filter(Boolean))].sort();
   
   // Filter resources based on search term and filters
-  const filteredResources = resourceNodes.filter(resource => {
-    const matchesSearch = resource.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          resource.description.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredResources = resources.filter(resource => {
+    const matchesSearch = 
+      resource.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      (resource.description && resource.description.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesCategory = selectedCategory === 'all' || resource.category === selectedCategory;
     const matchesRarity = selectedRarity === 'all' || resource.rarity === selectedRarity;
     
@@ -137,7 +55,7 @@ const ResourceTree: React.FC<ResourceTreeProps> = ({ onClose }) => {
   
   // Get resource by ID
   const getResourceById = (id: string): ResourceNode | undefined => {
-    return resourceNodes.find(node => node.id === id);
+    return resources.find(node => node.id === id);
   };
   
   // Get input resources for a given resource
@@ -284,9 +202,21 @@ const ResourceTree: React.FC<ResourceTreeProps> = ({ onClose }) => {
       <div className="flex-grow flex overflow-hidden">
         {/* Resource List */}
         <div className={`${selectedResource ? 'w-2/3' : 'w-full'} overflow-auto p-6 tech-tree-scroll`}>
-          {viewMode === 'grid' ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {filteredResources.map(resource => (
+          {loading ? (
+            <div className="flex items-center justify-center h-full">
+              <div className="text-amber-500 text-xl">Loading resources...</div>
+            </div>
+          ) : error ? (
+            <div className="flex items-center justify-center h-full">
+              <div className="text-red-500 text-xl">{error}</div>
+            </div>
+          ) : viewMode === 'grid' ? (
+            <>
+              <div className="mb-4 text-amber-300">
+                <span className="font-medium">{filteredResources.length}</span> resources found
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {filteredResources.map(resource => (
                 <div 
                   key={resource.id}
                   className={`border-2 rounded-lg overflow-hidden shadow-md cursor-pointer transition-transform hover:scale-105 hover:shadow-lg ${getCategoryColor(resource.category)}`}
@@ -320,6 +250,12 @@ const ResourceTree: React.FC<ResourceTreeProps> = ({ onClose }) => {
                       <span className="font-medium mr-1">Category:</span> 
                       {getCategoryDisplayName(resource.category)}
                     </div>
+                    {resource.subcategory && (
+                      <div className="flex items-center mt-1">
+                        <span className="font-medium mr-1">Subcategory:</span>
+                        {getCategoryDisplayName(resource.subcategory)}
+                      </div>
+                    )}
                     {resource.inputs && resource.inputs.length > 0 && (
                       <div className="flex items-center mt-1">
                         <span className="font-medium mr-1">Inputs:</span>
@@ -403,6 +339,28 @@ const ResourceTree: React.FC<ResourceTreeProps> = ({ onClose }) => {
                       <span className="font-medium">Subcategory:</span> {getCategoryDisplayName(selectedResource.subcategory)}
                     </div>
                   )}
+                  
+                  {/* Physical properties */}
+                  <div className="flex flex-wrap gap-3 mt-2">
+                    {selectedResource.weight && (
+                      <div className="flex items-center text-amber-200">
+                        <FaWeight className="mr-1" size={12} />
+                        <span>{selectedResource.weight} kg</span>
+                      </div>
+                    )}
+                    {selectedResource.volume && (
+                      <div className="flex items-center text-amber-200">
+                        <FaCube className="mr-1" size={12} />
+                        <span>{selectedResource.volume} m³</span>
+                      </div>
+                    )}
+                    {selectedResource.baseValue && (
+                      <div className="flex items-center text-amber-200">
+                        <FaCoins className="mr-1" size={12} />
+                        <span>{selectedResource.baseValue} ducats</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -513,7 +471,7 @@ const ResourceTree: React.FC<ResourceTreeProps> = ({ onClose }) => {
             </div>
             
             {/* Buildings */}
-            <div>
+            <div className="mb-6">
               <h4 className="text-lg font-serif text-amber-300 mb-2 border-b border-amber-700/50 pb-1">Production Buildings</h4>
               {selectedResource.buildings && selectedResource.buildings.length > 0 ? (
                 <div className="space-y-2">
@@ -542,6 +500,23 @@ const ResourceTree: React.FC<ResourceTreeProps> = ({ onClose }) => {
                 <p className="text-amber-400/70 text-sm italic">No specific buildings required</p>
               )}
             </div>
+            
+            {/* Historical Notes */}
+            {selectedResource.historicalNotes && (
+              <div className="mb-6">
+                <h4 className="text-lg font-serif text-amber-300 mb-2 border-b border-amber-700/50 pb-1">
+                  <div className="flex items-center">
+                    <FaHistory className="mr-2" />
+                    Historical Context
+                  </div>
+                </h4>
+                <div className="bg-amber-900/20 p-3 rounded border border-amber-700/30 text-amber-100 text-sm italic">
+                  {selectedResource.historicalNotes.historicalSignificance || 
+                   selectedResource.historicalNotes.culturalContext || 
+                   "No historical notes available."}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
