@@ -60,6 +60,27 @@ button:hover, a:hover {
   animation: fadeIn 0.3s ease-out;
 }
 
+@keyframes maskFloat {
+  0% { transform: translateY(0px) rotate(0deg); }
+  25% { transform: translateY(-3px) rotate(2deg); }
+  50% { transform: translateY(0px) rotate(0deg); }
+  75% { transform: translateY(-2px) rotate(-2deg); }
+  100% { transform: translateY(0px) rotate(0deg); }
+}
+
+.mask-float {
+  animation: maskFloat 6s ease-in-out infinite;
+}
+
+@keyframes slideIn {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.slide-in {
+  animation: slideIn 0.3s ease-out forwards;
+}
+
 /* Animated metallic $COMPUTE text effect - updated for more pronounced metallic effect */
 .compute-token {
   font-family: 'Geist', sans-serif;

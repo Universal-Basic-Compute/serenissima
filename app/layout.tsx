@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { useEffect } from "react";
 import { WalletProvider } from "@/components/UI/WalletProvider";
+import Compagno from "@/components/UI/Compagno"; // Add this import
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -92,6 +93,7 @@ export default function RootLayout({
       >
         <WalletProvider>
           {children}
+          <Compagno /> {/* Add Compagno component here */}
         </WalletProvider>
       </body>
     </html>
