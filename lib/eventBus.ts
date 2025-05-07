@@ -111,5 +111,9 @@ export const EventTypes = {
   LISTING_CANCELLED: 'listingCancelled',
   OFFER_CREATED: 'offerCreated',
   OFFER_ACCEPTED: 'offerAccepted',
-  OFFER_REJECTED: 'offerRejected'
+  OFFER_REJECTED: 'offerRejected',
+  // Loan events
+  LOAN_PAYMENT_MADE: 'loanPaymentMade',
+  LOAN_APPLIED: 'loanApplied',
+  LOAN_PAID_OFF: 'loanPaidOff'
 };
