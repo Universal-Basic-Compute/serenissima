@@ -228,7 +228,7 @@ export class PolygonMeshFacade implements Poolable {
     const lowIncomeColor = new THREE.Color(0x33cc33);  // Rich green
     
     // Normalize income to a 0-1 scale
-    const maxIncome = 1000; // Adjust this based on your actual data range
+    const maxIncome = this.maxIncome || 1000; // Use class property or default
     const normalizedIncome = Math.min(Math.max(income / maxIncome, 0), 1);
     
     // Map the normalized income to our color scale
@@ -603,7 +603,7 @@ export class PolygonMeshFacade implements Poolable {
     }
     
     // Create a clone of the original geometry
-    const simplifiedGeometry = this.originalGeometry!.clone();
+    const simplifiedGeometry = this.originalGeometry.clone();
     
     // If the geometry has an index buffer, we can simplify by removing vertices
     if (simplifiedGeometry.index) {
