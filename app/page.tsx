@@ -473,6 +473,22 @@ export default function SimplePage() {
         </div>
       )}
       
+      {/* Loans View */}
+      {activeView === 'loans' && (
+        <div className="absolute top-20 left-20 right-4 bottom-4 bg-black/30 rounded-lg p-4 overflow-auto">
+          <div className="bg-amber-50 border-2 border-amber-700 rounded-lg p-6 max-w-6xl mx-auto">
+            <h2 className="text-3xl font-serif text-amber-800 mb-6 text-center">
+              Loans & Banking
+            </h2>
+            
+            <div className="space-y-8">
+              <LoanMarketplace />
+              <LoanManagementDashboard />
+            </div>
+          </div>
+        </div>
+      )}
+      
       {/* Left Side Menu */}
       <div className="absolute left-0 top-0 bottom-0 bg-black/70 text-white z-20 flex flex-col w-16">
         {/* Logo */}
@@ -492,6 +508,22 @@ export default function SimplePage() {
                 title="Governance"
               >
                 <FaLandmark className="mx-auto h-5 w-5" />
+              </button>
+            </li>
+            <li>
+              <button
+                onClick={() => {
+                  setActiveView('loans');
+                  setGovernanceTab('loans');
+                }}
+                className={`w-full flex items-center p-2 rounded-lg transition-colors ${
+                  activeView === 'loans' ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700'
+                }`}
+                title="Loans"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
               </button>
             </li>
             <li>
