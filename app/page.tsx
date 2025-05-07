@@ -12,7 +12,7 @@ import { WalletReadyState } from '@solana/wallet-adapter-base';
 import { getApiBaseUrl } from '@/lib/apiUtils';
 import { getWalletAddress, setWalletAddress, clearWalletAddress, storeWalletInAirtable } from '@/lib/walletUtils';
 import { transferCompute, withdrawCompute } from '@/lib/computeUtils';
-import { generateCoatOfArmsImage } from '@/utils/coatOfArmsUtils';
+import { generateCoatOfArmsImage } from '@/app/utils/coatOfArmsUtils';
 import { FaHome, FaBuilding, FaRoad, FaTree, FaStore, FaLandmark } from 'react-icons/fa';
 import * as THREE from 'three';
 
