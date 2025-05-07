@@ -11,7 +11,6 @@ import AnimatedDucats from '../UI/AnimatedDucats';
 import { Polygon } from './types';
 import { eventBus, EventTypes } from '../../lib/eventBus';
 import { getWalletAddress } from '@/lib/walletUtils';
-import { getWalletAddress } from '@/lib/walletUtils';
 
 // Helper function to normalize identifiers for comparison
 const normalizeIdentifier = (id: string | null | undefined): string | null => {
@@ -853,13 +852,13 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
                       <button
                         onClick={async () => {
                           // Get the current wallet address
-                          const walletAddress = sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress') || '';
-                          
+                          const walletAddress = getWalletAddress();
+                        
                           if (!walletAddress) {
                             alert('Please connect your wallet first');
                             return;
                           }
-                          
+                        
                           // Only the owner can accept offers
                           if (owner !== walletAddress) {
                             alert('Only the current owner can accept offers');
@@ -904,7 +903,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
                       <button
                         onClick={async () => {
                           // Get the current wallet address
-                          const walletAddress = sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress') || '';
+                          const walletAddress = getWalletAddress();
                           
                           if (!walletAddress) {
                             alert('Please connect your wallet first');
@@ -975,7 +974,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
                   <ActionButton
                     onClick={async () => {
                       // Get the current wallet address
-                      const walletAddress = sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress') || '';
+                      const walletAddress = getWalletAddress();
                       
                       if (!walletAddress) {
                         alert('Please connect your wallet first');
