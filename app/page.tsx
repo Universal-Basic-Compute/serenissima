@@ -517,7 +517,7 @@ export default function SimplePage() {
             <li>
               <button
                 onClick={() => {
-                  setActiveView('loans' as ViewType);
+                  setActiveView('loans');
                   setGovernanceTab('loans');
                 }}
                 className={`w-full flex items-center p-2 rounded-lg transition-colors ${
