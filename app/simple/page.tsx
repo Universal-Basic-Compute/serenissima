@@ -449,7 +449,7 @@ export default function SimplePage() {
         
         {/* Bottom section */}
         <div className="p-4 border-t border-gray-700 text-center">
-          <div className="text-xs text-gray-400">v1.0</div>
+          <div className="text-xs text-gray-400">v0.1.0</div>
         </div>
       </div>
       
@@ -619,7 +619,7 @@ export default function SimplePage() {
           </div>
           
           <div className="mt-4 text-xs text-amber-400">
-            Simple Viewer v1.0
+            Simple Viewer v0.1.0
           </div>
         </div>
       )}
