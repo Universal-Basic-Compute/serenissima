@@ -85,7 +85,7 @@ export async function transferCompute(walletAddress: string, amount: number) {
     // Get the treasury public key
     console.log('Getting treasury public key...');
     const TREASURY_PUBLIC_KEY = new PublicKey(
-      process.env.NEXT_PUBLIC_TREASURY_PUBLIC_KEY || 'F4kXoqxPvYHwn12pCvgPYwogRZ8CuTpBgKA7vEBN9qMf'
+      process.env.NEXT_PUBLIC_TREASURY_PUBLIC_KEY || 'BECGjgNwEnaaxvK84or6vWvbR1xcX6wQc5Zmy9vvqZ2V'
     );
     
     // Get the token account for the treasury
