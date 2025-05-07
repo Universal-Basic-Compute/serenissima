@@ -45,9 +45,13 @@ const TransferComputeMenu: React.FC<TransferComputeMenuProps> = ({ onClose, onTr
       // Check for specific error messages
       if ((error as Error).message && (
         (error as Error).message.includes('Insufficient balance') || 
+        (error as Error).message.includes('Insufficient token balance') ||
         (error as Error).message.includes('no balance changes found') ||
         (error as Error).message.includes('Token account does not exist') ||
-        (error as Error).message.includes('You may not have any COMPUTE tokens')
+        (error as Error).message.includes('You may not have any COMPUTE tokens') ||
+        (error as Error).message.includes('You do not have a COMPUTE token account') ||
+        (error as Error).message.includes('Attempt to debit an account but found no record of a prior credit') ||
+        (error as Error).message.includes('Token account not found')
       )) {
         setError('You don\'t have enough COMPUTE tokens in your wallet. Please add tokens to your wallet first.');
       } else {

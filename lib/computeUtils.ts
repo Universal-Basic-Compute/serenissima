@@ -32,7 +32,15 @@ export async function transferCompute(walletAddress: string, amount: number) {
       console.log('Valid PublicKey created:', publicKey.toString());
     } catch (error) {
       console.error('Invalid wallet address:', error);
-      throw new Error(`Invalid wallet address. Please connect a valid Solana wallet. Details: ${error.message}`);
+      
+      // Provide more specific error messages for common wallet issues
+      if (error.message && error.message.includes('Invalid public key input')) {
+        throw new Error('Invalid wallet address format. Please connect a valid Solana wallet.');
+      } else if (error.message && error.message.includes('expected a public key')) {
+        throw new Error('Expected a valid Solana public key. Please reconnect your wallet.');
+      } else {
+        throw new Error(`Invalid wallet address. Please connect a valid Solana wallet. Details: ${error.message}`);
+      }
     }
     
     // Get the wallet adapter
@@ -123,17 +131,67 @@ export async function transferCompute(walletAddress: string, amount: number) {
     console.log('Serializing signed transaction...');
     const serializedTransaction = signedTransaction.serialize();
     
+    // Check sender token account balance before attempting transfer
+    console.log('Checking sender token account balance...');
+    try {
+      const tokenBalance = await connection.getTokenAccountBalance(senderTokenAccount);
+      console.log('Token balance:', tokenBalance.value.uiAmount);
+      
+      if (!tokenBalance.value.uiAmount || tokenBalance.value.uiAmount < amount) {
+        throw new Error(`Insufficient token balance. You have ${tokenBalance.value.uiAmount || 0} COMPUTE tokens, but ${amount} are required for this transaction.`);
+      }
+    } catch (balanceError) {
+      console.error('Error checking token balance:', balanceError);
+      
+      if (balanceError.message && balanceError.message.includes('Account does not exist')) {
+        throw new Error('You do not have a COMPUTE token account. Please add COMPUTE tokens to your wallet first.');
+      }
+      
+      throw new Error(`Failed to check token balance: ${balanceError.message}`);
+    }
+    
     // Send the signed transaction to the network
-    console.log('Sending transaction to network...');
-    const signature = await connection.sendRawTransaction(serializedTransaction);
-    
-    console.log('Transaction sent with signature:', signature);
-    
-    // Wait for confirmation
-    console.log('Waiting for transaction confirmation...');
-    await connection.confirmTransaction(signature);
-    
-    console.log('Transaction confirmed!');
+    try {
+      console.log('Sending transaction to network...');
+      const signature = await connection.sendRawTransaction(serializedTransaction);
+      
+      console.log('Transaction sent with signature:', signature);
+      
+      // Wait for confirmation
+      console.log('Waiting for transaction confirmation...');
+      try {
+        await connection.confirmTransaction(signature);
+        console.log('Transaction confirmed!');
+      } catch (confirmError) {
+        console.error('Error confirming transaction:', confirmError);
+        throw new Error(`Transaction sent but confirmation failed: ${confirmError.message}`);
+      }
+    } catch (sendError) {
+      console.error('Error sending transaction:', sendError);
+      
+      // Check for specific error types
+      if (sendError.message && sendError.message.includes('Attempt to debit an account but found no record of a prior credit')) {
+        throw new Error('You may not have any COMPUTE tokens in your wallet. Please add tokens to your wallet first.');
+      } else if (sendError.message && sendError.message.includes('Transaction simulation failed')) {
+        // Try to get more detailed logs if available
+        let errorDetails = sendError.message;
+        if (sendError.logs) {
+          errorDetails += ` Logs: ${JSON.stringify(sendError.logs)}`;
+        }
+        
+        // Check if it's a token account issue
+        if (errorDetails.includes('TokenAccountNotFound') || 
+            errorDetails.includes('Account does not exist') ||
+            errorDetails.includes('Invalid account owner')) {
+          throw new Error('Token account not found. You may need to create a COMPUTE token account in your wallet first.');
+        }
+        
+        throw new Error(`Transaction simulation failed: ${errorDetails}`);
+      }
+      
+      // If it's another type of error, just throw it
+      throw sendError;
+    }
     
     // Now update the backend database with the completed transaction
     console.log('Updating backend database...');
