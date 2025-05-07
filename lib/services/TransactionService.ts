@@ -12,12 +12,36 @@ import {
 import { getWalletAddress } from '../walletUtils';
 import { Listing, Offer, Transaction } from '../store/marketStore';
 
+// Extend the Listing interface to include updatedAt
+interface ExtendedListing extends Listing {
+  updatedAt?: string;
+  metadata?: {
+    historicalName?: string;
+    englishName?: string;
+    description?: string;
+  };
+}
+
+// Extend the Offer interface to include metadata
+interface ExtendedOffer extends Offer {
+  metadata?: {
+    historicalName?: string;
+    englishName?: string;
+    description?: string;
+  };
+}
+
 // Define event types for marketplace events
 export const TransactionEventTypes = {
   TRANSACTION_CREATED: 'transactionCreated',
   TRANSACTION_EXECUTED: 'transactionExecuted',
   LISTING_CANCELLED: 'listingCancelled',
   OFFER_ACCEPTED: 'offerAccepted',
+  LAND_OWNERSHIP_CHANGED: 'landOwnershipChanged'
+};
+
+// Define event types for land ownership changes
+export const EventTypes = {
   LAND_OWNERSHIP_CHANGED: 'landOwnershipChanged'
 };
 
@@ -573,8 +597,8 @@ export class TransactionService {
       const data = await response.json();
       log.debug('Listing created successfully', data);
       
-      // Convert API response to our Listing interface
-      const listing: Listing = {
+      // Convert API response to our ExtendedListing interface
+      const listing: ExtendedListing = {
         id: data.id,
         assetId: data.asset_id,
         seller: data.seller,
@@ -758,8 +782,8 @@ export class TransactionService {
       const data = await response.json();
       log.debug('Offer created successfully', data);
       
-      // Convert API response to our Offer interface
-      const offer: Offer = {
+      // Convert API response to our ExtendedOffer interface
+      const offer: ExtendedOffer = {
         id: data.id,
         listingId: data.asset_id, // Using asset_id as listingId
         buyer: data.buyer,
