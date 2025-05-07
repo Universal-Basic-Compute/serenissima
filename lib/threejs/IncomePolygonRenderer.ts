@@ -104,12 +104,12 @@ export class IncomePolygonRenderer {
         const edgeMaterial = new THREE.LineBasicMaterial({
           color: 0xffffff,  // White edges
           transparent: true,
-          opacity: 0.8,     // Increased opacity for better visibility (from 0.6 to 0.8)
-          linewidth: 5      // Thicker lines for better visibility (increased from 3 to 5)
+          opacity: 0.9,     // Increased opacity for better visibility (from 0.8 to 0.9)
+          linewidth: 8      // Thicker lines for better visibility (increased from 5 to 8)
         });
       
         // Create wireframe for edges
-        const edges = new THREE.EdgesGeometry(geometry, 10); // Reduced threshold to show more edges (from 15 to 10)
+        const edges = new THREE.EdgesGeometry(geometry, 8); // Reduced threshold to show even more edges (from 10 to 8)
         const line = new THREE.LineSegments(edges, edgeMaterial);
       
         // Position the wireframe exactly like the main mesh but slightly higher
