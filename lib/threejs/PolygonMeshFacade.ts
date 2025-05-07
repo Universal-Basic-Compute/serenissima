@@ -603,7 +603,7 @@ export class PolygonMeshFacade implements Poolable {
     }
     
     // Create a clone of the original geometry
-    const simplifiedGeometry = this.originalGeometry.clone();
+    const simplifiedGeometry = this.originalGeometry!.clone();
     
     // If the geometry has an index buffer, we can simplify by removing vertices
     if (simplifiedGeometry.index) {
