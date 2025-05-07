@@ -14,9 +14,43 @@ export async function transferCompute(walletAddress: string, amount: number) {
       throw new Error('Please connect your wallet first');
     }
     
-    // Instead of calling the backend to prepare the transaction,
-    // we'll prepare it directly in the frontend
-    const { Connection, PublicKey, Transaction } = await import('@solana/web3.js');
+    // Check if we have a valid wallet address
+    let publicKey;
+    try {
+      // Import Solana web3 libraries
+      const { PublicKey } = await import('@solana/web3.js');
+      
+      // Validate the wallet address format
+      if (!walletAddress.match(/^[1-9A-HJ-NP-Za-km-z]{32,44}$/)) {
+        throw new Error('Invalid wallet address format. Please connect a valid Solana wallet.');
+      }
+      
+      publicKey = new PublicKey(walletAddress);
+    } catch (error) {
+      console.error('Invalid wallet address:', error);
+      throw new Error('Invalid wallet address. Please connect a valid Solana wallet.');
+    }
+    
+    // Get the wallet adapter
+    const wallet = window.solana;
+    if (!wallet) {
+      throw new Error('Solana wallet not found. Please install a Solana wallet extension like Phantom.');
+    }
+    
+    // Request wallet connection if not already connected
+    if (!wallet.isPhantom) {
+      throw new Error('Please use a Phantom wallet for Solana transactions.');
+    }
+    
+    try {
+      await wallet.connect();
+    } catch (connectError) {
+      console.error('Failed to connect to wallet:', connectError);
+      throw new Error('Failed to connect to your wallet. Please try again.');
+    }
+    
+    // Now proceed with the transaction
+    const { Connection, Transaction } = await import('@solana/web3.js');
     const { getAssociatedTokenAddress, createTransferInstruction } = await import('@solana/spl-token');
     
     // Get the connection to Solana
@@ -35,9 +69,6 @@ export async function transferCompute(walletAddress: string, amount: number) {
       process.env.NEXT_PUBLIC_TREASURY_PUBLIC_KEY || 'YOUR_TREASURY_PUBLIC_KEY_HERE'
     );
     
-    // Convert sender address to PublicKey
-    const sender = new PublicKey(walletAddress);
-    
     // Get the token account for the treasury
     const treasuryTokenAccount = await getAssociatedTokenAddress(
       COMPUTE_TOKEN_MINT,
@@ -47,14 +78,14 @@ export async function transferCompute(walletAddress: string, amount: number) {
     // Get the token account for the sender
     const senderTokenAccount = await getAssociatedTokenAddress(
       COMPUTE_TOKEN_MINT,
-      sender
+      publicKey
     );
     
     // Create transfer instruction - FROM sender TO treasury
     const transferIx = createTransferInstruction(
       senderTokenAccount,
       treasuryTokenAccount,
-      sender,  // The sender needs to sign this transaction
+      publicKey,  // The sender needs to sign this transaction
       amount
     );
     
@@ -64,13 +95,7 @@ export async function transferCompute(walletAddress: string, amount: number) {
     // Get the recent blockhash
     const { blockhash } = await connection.getLatestBlockhash();
     transaction.recentBlockhash = blockhash;
-    transaction.feePayer = sender;  // The sender pays the fee
-    
-    // Get the wallet adapter
-    const wallet = window.solana;
-    if (!wallet) {
-      throw new Error('Solana wallet not found. Please install a Solana wallet extension.');
-    }
+    transaction.feePayer = publicKey;  // The sender pays the fee
     
     // Request the wallet to sign the transaction
     const signedTransaction = await wallet.signTransaction(transaction);
@@ -89,6 +114,7 @@ export async function transferCompute(walletAddress: string, amount: number) {
     console.log('Transaction confirmed!');
     
     // Now update the backend database with the completed transaction
+    const { getApiBaseUrl } = await import('@/lib/apiUtils');
     const response = await fetch(`${getApiBaseUrl()}/api/inject-compute-complete`, {
       method: 'POST',
       headers: {
