@@ -944,20 +944,20 @@ export default function PolygonViewer() {
         // Skip some frames at the beginning for better initial performance
         if (isFirstRender) {
           isFirstRender = false;
-            
+              
           // Force a simple render on first frame
           if (sceneRef.current && sceneRef.current.renderer && sceneRef.current.scene && sceneRef.current.camera) {
             sceneRef.current.renderer.render(sceneRef.current.scene, sceneRef.current.camera);
           }
           return;
         }
-        
+          
         // Skip frames based on performance mode
         if (!highQuality && frameCount % 2 !== 0) {
           frameCount++;
           return;
         }
-        
+          
         // Update controls to enable camera movement
         if (sceneRef.current && sceneRef.current.controls) {
           try {
@@ -966,13 +966,13 @@ export default function PolygonViewer() {
             // Silent fail
           }
         }
-          
+            
       
         // Update road visibility EVERY frame instead of periodically
         if (roadManagerRef.current) {
           roadManagerRef.current.updateRoadVisibility();
         }
-        
+          
         // Force update of all road meshes in the scene
         if (sceneRef.current && sceneRef.current.scene) {
           const scene = sceneRef.current?.scene;
@@ -1038,7 +1038,7 @@ export default function PolygonViewer() {
         // Use composer instead of renderer directly to include post-processing effects
         if (sceneRef.current && sceneRef.current.composer) {
           // CRITICAL: Add additional checks to ensure all required objects exist before rendering
-          if (sceneRef.current.scene && 
+          if (sceneRef.current && sceneRef.current.scene && 
               sceneRef.current.camera && 
               !sceneRef.current.scene.userData.isDisposed) {
             
