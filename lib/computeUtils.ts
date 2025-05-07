@@ -108,6 +108,75 @@ export async function transferCompute(walletAddress: string, amount: number) {
     );
     console.log('Sender token account:', senderTokenAccount.toString());
     
+    // Check if the sender token account exists and create it if needed
+    console.log('Checking if sender token account exists...');
+    try {
+      const senderAccountInfo = await connection.getAccountInfo(senderTokenAccount);
+      if (!senderAccountInfo) {
+        console.log('Sender token account does not exist, creating it...');
+        
+        // Import the necessary function
+        const { createAssociatedTokenAccountInstruction } = await import('@solana/spl-token');
+        
+        // Create the associated token account for the sender
+        const createSenderAccountIx = createAssociatedTokenAccountInstruction(
+          publicKey, // payer
+          senderTokenAccount,
+          publicKey,
+          COMPUTE_TOKEN_MINT
+        );
+        
+        // Create and send the transaction
+        const createAccountTx = new Transaction().add(createSenderAccountIx);
+        createAccountTx.feePayer = publicKey;
+        createAccountTx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+        
+        const signedCreateAccountTx = await wallet.signTransaction(createAccountTx);
+        const createAccountSignature = await connection.sendRawTransaction(signedCreateAccountTx.serialize());
+        await connection.confirmTransaction(createAccountSignature);
+        
+        console.log('Created sender token account:', senderTokenAccount.toString());
+      } else {
+        console.log('Sender token account exists:', senderTokenAccount.toString());
+      }
+    } catch (error) {
+      console.error('Error checking/creating sender token account:', error);
+      throw new Error(`Failed to check/create sender token account: ${error.message}`);
+    }
+
+    // Also check if the treasury token account exists and create it if needed
+    console.log('Checking if treasury token account exists...');
+    try {
+      const treasuryAccountInfo = await connection.getAccountInfo(treasuryTokenAccount);
+      if (!treasuryAccountInfo) {
+        console.log('Treasury token account does not exist, creating it...');
+        
+        // Create the associated token account for the treasury
+        const createTreasuryAccountIx = createAssociatedTokenAccountInstruction(
+          publicKey, // payer
+          treasuryTokenAccount,
+          TREASURY_PUBLIC_KEY,
+          COMPUTE_TOKEN_MINT
+        );
+        
+        // Create and send the transaction
+        const createAccountTx = new Transaction().add(createTreasuryAccountIx);
+        createAccountTx.feePayer = publicKey;
+        createAccountTx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+        
+        const signedCreateAccountTx = await wallet.signTransaction(createAccountTx);
+        const createAccountSignature = await connection.sendRawTransaction(signedCreateAccountTx.serialize());
+        await connection.confirmTransaction(createAccountSignature);
+        
+        console.log('Created treasury token account:', treasuryTokenAccount.toString());
+      } else {
+        console.log('Treasury token account exists:', treasuryTokenAccount.toString());
+      }
+    } catch (error) {
+      console.error('Error checking/creating treasury token account:', error);
+      throw new Error(`Failed to check/create treasury token account: ${error.message}`);
+    }
+    
     // Create transfer instruction - FROM sender TO treasury
     console.log('Creating transfer instruction...');
     // Convert the amount to the correct decimal representation
@@ -151,10 +220,7 @@ export async function transferCompute(walletAddress: string, amount: number) {
     } catch (balanceError) {
       console.error('Error checking token balance:', balanceError);
       
-      if (balanceError.message && balanceError.message.includes('Account does not exist')) {
-        throw new Error('You do not have a COMPUTE token account. Please add COMPUTE tokens to your wallet first.');
-      }
-      
+      // If the account doesn't exist, we should have created it above, so this is a different error
       throw new Error(`Failed to check token balance: ${balanceError.message}`);
     }
     

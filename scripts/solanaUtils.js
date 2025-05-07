@@ -49,7 +49,8 @@ async function prepareInjectComputeTransaction(senderAddress, amount) {
     // Check if the sender token account exists
     const accountInfo = await connection.getAccountInfo(senderTokenAccount);
     if (!accountInfo) {
-      throw new Error(`User ${senderAddress} does not have a COMPUTE token account`);
+      console.log(`User ${senderAddress} does not have a COMPUTE token account. This is okay - the frontend will create it.`);
+      // We don't throw an error here because the frontend will handle creating the token account
     }
     
     // Create transfer instruction - FROM sender TO treasury

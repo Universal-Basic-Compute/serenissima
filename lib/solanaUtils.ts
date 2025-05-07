@@ -4,7 +4,8 @@ import bs58 from 'bs58';
 import { 
   getAssociatedTokenAddress, 
   createAssociatedTokenAccountInstruction,
-  createTransferInstruction
+  createTransferInstruction,
+  getAccount
 } from '@solana/spl-token';
 
 // Constants for token decimal handling
