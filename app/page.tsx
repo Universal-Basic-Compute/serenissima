@@ -9,6 +9,7 @@ import WithdrawComputeMenu from '../components/UI/WithdrawComputeMenu';
 import SuccessAlert from '../components/UI/SuccessAlert';
 import BackgroundMusic from '../components/UI/BackgroundMusic';
 import WalletButton from '../components/UI/WalletButton';
+import LandPurchaseConfirmation from '../components/UI/LandPurchaseConfirmation';
 import { getApiBaseUrl } from '@/lib/apiUtils';
 import { getWalletAddress } from '@/lib/walletUtils';
 import { transferCompute, withdrawCompute } from '@/lib/computeUtils';
