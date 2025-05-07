@@ -726,7 +726,7 @@ export default function PolygonViewer() {
     
     // Add camera reference to window for debugging
     if (typeof window !== 'undefined' && sceneRef.current) {
-      if (sceneRef.current.camera) {
+      if (sceneRef.current && sceneRef.current.camera) {
         (window as any).threeJsCamera = sceneRef.current.camera;
       }
     }
