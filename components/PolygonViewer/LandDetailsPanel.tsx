@@ -315,6 +315,13 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
   
   // State for list for sale modal
   const [showListForSaleModal, setShowListForSaleModal] = useState<boolean>(false);
+  const [showLandPurchaseModal, setShowLandPurchaseModal] = useState<boolean>(false);
+  const [landPurchaseData, setLandPurchaseData] = useState<{
+    landId: string;
+    landName?: string;
+    transaction: any;
+    onComplete?: () => void;
+  } | null>(null);
   
   // Add this useEffect to listen for the custom event to keep panel open
   useEffect(() => {

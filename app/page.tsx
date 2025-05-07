@@ -283,14 +283,23 @@ export default function SimplePage() {
     const handleShowWithdrawMenu = () => setWithdrawMenuOpen(true);
     const handleShowUsernamePrompt = () => setShowUsernamePrompt(true);
     
+    // Add this handler for the land purchase modal
+    const handleShowLandPurchaseModal = (event: CustomEvent) => {
+      console.log('Received showLandPurchaseModal event with data:', event.detail);
+      setLandPurchaseData(event.detail);
+      setShowLandPurchaseModal(true);
+    };
+    
     window.addEventListener('showTransferMenu', handleShowTransferMenu);
     window.addEventListener('showWithdrawMenu', handleShowWithdrawMenu);
     window.addEventListener('showUsernamePrompt', handleShowUsernamePrompt);
+    window.addEventListener('showLandPurchaseModal', handleShowLandPurchaseModal as EventListener);
     
     return () => {
       window.removeEventListener('showTransferMenu', handleShowTransferMenu);
       window.removeEventListener('showWithdrawMenu', handleShowWithdrawMenu);
       window.removeEventListener('showUsernamePrompt', handleShowUsernamePrompt);
+      window.removeEventListener('showLandPurchaseModal', handleShowLandPurchaseModal as EventListener);
     };
   }, []);
 
@@ -783,6 +792,64 @@ export default function SimplePage() {
       }
     `}</style>
       <BackgroundMusic />
+      
+      {/* Land Purchase Confirmation Modal */}
+      {showLandPurchaseModal && landPurchaseData && (
+        <LandPurchaseConfirmation
+          landId={landPurchaseData.landId}
+          landName={landPurchaseData.landName}
+          price={landPurchaseData.transaction.price}
+          onConfirm={async () => {
+            try {
+              // Get the current wallet address
+              const walletAddress = getWalletAddress();
+              
+              if (!walletAddress) {
+                alert('Please connect your wallet first');
+                return;
+              }
+              
+              // Execute the transaction
+              const response = await fetch(`${getApiBaseUrl()}/api/transaction/${landPurchaseData.transaction.id}/execute`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  buyer: walletAddress
+                }),
+              });
+              
+              if (!response.ok) {
+                throw new Error(`Failed to execute transaction: ${response.status} ${response.statusText}`);
+              }
+              
+              const data = await response.json();
+              
+              // Show success message
+              setSuccessMessage({
+                message: `Successfully purchased ${landPurchaseData.landName || 'land'} for ${landPurchaseData.transaction.price.toLocaleString()} $COMPUTE`,
+                signature: 'Transaction completed'
+              });
+              
+              // Call the onComplete callback if provided
+              if (landPurchaseData.onComplete) {
+                landPurchaseData.onComplete();
+              }
+              
+              // Close the modal
+              setShowLandPurchaseModal(false);
+            } catch (error) {
+              console.error('Error executing transaction:', error);
+              alert(`Failed to complete purchase: ${error instanceof Error ? error.message : String(error)}`);
+            }
+          }}
+          onCancel={() => {
+            setShowLandPurchaseModal(false);
+          }}
+          isLoading={false}
+        />
+      )}
     </>
   );
 
