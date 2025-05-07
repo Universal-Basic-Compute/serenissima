@@ -317,12 +317,15 @@ def distribute_income():
     
     # Send Telegram notification
     if successful_distributions > 0:
+        # Calculate average distribution
+        average_distribution = total_distributed / successful_distributions
+        
         notification_message = (
             f"🏛️ <b>Daily Income Distribution Complete</b> 🏛️\n\n"
             f"The Council of Ten has distributed today's income to the noble houses of Venice.\n\n"
             f"• <b>{successful_distributions}</b> properties received income\n"
             f"• <b>{total_distributed:,}</b> ⚜️ ducats distributed\n"
-            f"• <b>{failed_distributions}</b> distributions failed\n\n"
+            f"• <b>{average_distribution:,.0f}</b> ⚜️ ducats per property on average\n\n"
             f"Visit <a href='https://serenissima.ai'>La Serenissima</a> to check your properties."
         )
         send_telegram_notification(notification_message)
