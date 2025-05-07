@@ -3,14 +3,19 @@ import { LoanData, LoanService, LoanStatus, LoanPurpose } from '@/lib/services/L
 import { eventBus, EventTypes } from '@/lib/eventBus';
 
 // Define custom event types if they don't exist in EventTypes
-interface ExtendedEventTypes extends typeof EventTypes {
+interface ExtendedEventTypes {
   LOAN_APPLIED: string;
   LOAN_PAYMENT_MADE: string;
   LOAN_OFFER_CREATED: string;
 }
 
-// Cast EventTypes to our extended interface
-const ExtendedEventTypes = EventTypes as ExtendedEventTypes;
+// Create extended event types by combining with existing EventTypes
+const ExtendedEventTypes = {
+  ...EventTypes,
+  LOAN_APPLIED: 'LOAN_APPLIED',
+  LOAN_PAYMENT_MADE: 'LOAN_PAYMENT_MADE',
+  LOAN_OFFER_CREATED: 'LOAN_OFFER_CREATED'
+};
 
 // Loan store
 export interface LoanState {
