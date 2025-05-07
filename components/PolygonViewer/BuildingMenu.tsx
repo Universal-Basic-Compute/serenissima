@@ -81,7 +81,7 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
               ) : (
                 <Tab.Group>
                   <Tab.List className="flex space-x-1 bg-amber-100 p-1">
-                    {categories.map((category: BuildingCategory, index: number, array: BuildingCategory[]) => (
+                    {categories.map((category) => (
                       <Tab
                         key={category.id}
                         className={({ selected }) =>
@@ -96,7 +96,7 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
                     ))}
                   </Tab.List>
                   <Tab.Panels className="mt-2">
-                    {categories.map((category: BuildingCategory, index: number, array: BuildingCategory[]) => (
+                    {categories.map((category) => (
                       <Tab.Panel
                         key={category.id}
                         className="p-3 bg-white rounded-lg"
