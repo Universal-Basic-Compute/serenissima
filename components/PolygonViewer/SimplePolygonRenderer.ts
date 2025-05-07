@@ -165,8 +165,11 @@ export default class SimplePolygonRenderer {
       this.renderPolygons();
       
       // Fetch and apply land owners, but don't automatically create coat of arms sprites
-      this.fetchAndApplyLandOwners();
-      // The fetchAndApplyLandOwners method will call createCoatOfArmsSprites only when it has owner data
+      // Add a small delay to ensure polygons are fully rendered first
+      setTimeout(() => {
+        this.fetchAndApplyLandOwners();
+        // The fetchAndApplyLandOwners method will call createCoatOfArmsSprites only when it has owner data
+      }, 1000);
     }
   }
   
@@ -460,7 +463,8 @@ export default class SimplePolygonRenderer {
       transparent: true,
       side: THREE.DoubleSide,
       depthTest: true,
-      depthWrite: false
+      depthWrite: false,
+      opacity: 0 // Start with invisible material until texture loads
     });
     
     // Create mesh and position it with the calculated y position
@@ -471,16 +475,7 @@ export default class SimplePolygonRenderer {
     
     // Mark this mesh as a coat of arms to avoid raycasting against it
     plane.userData.isCoatOfArms = true;
-    
-    // Add to scene
-    this.scene.add(plane);
-    
-    // Add metadata
-    plane.userData.isCoatOfArms = true;
     plane.userData.polygonId = polygon.id;
-    
-    // Store reference
-    this.coatOfArmsSprites[polygon.id] = plane;
     
     // Load the texture - handle both external and local URLs
     const textureUrl = coatOfArmsUrl.startsWith('http') 
@@ -497,6 +492,7 @@ export default class SimplePolygonRenderer {
         // Apply the texture to the plane material
         if (planeMaterial) {
           planeMaterial.map = circularTexture;
+          planeMaterial.opacity = 1; // Make visible now that texture is loaded
           planeMaterial.needsUpdate = true;
           
           // Adjust plane scale based on texture aspect ratio and scene scale
@@ -506,14 +502,21 @@ export default class SimplePolygonRenderer {
             const baseScale = Math.max(0.19, sceneScale / 2633); // Increased by 50% from 0.12675 and 3950
             plane.scale.set(baseScale * aspectRatio, baseScale, 1); // Removed the multiplier (2 -> 1)
           }
+          
+          // NOW add to scene after texture is loaded
+          this.scene.add(plane);
+          
+          // Store reference
+          this.coatOfArmsSprites[polygon.id] = plane;
         }
       },
       undefined,
       (error) => {
         console.error(`Failed to load coat of arms texture for ${polygon.id}:`, error);
-        // Remove the plane if texture loading fails
-        this.scene.remove(plane);
-        delete this.coatOfArmsSprites[polygon.id];
+        // Don't add the plane to the scene at all if texture loading fails
+        // Just clean up the geometry and material
+        planeGeometry.dispose();
+        planeMaterial.dispose();
       }
     );
   }
@@ -710,14 +713,22 @@ export default class SimplePolygonRenderer {
     this.ownerCoatOfArmsMap = { ...this.ownerCoatOfArmsMap, ...ownerCoatOfArmsMap };
     
     // Only create coat of arms sprites if we're in land view AND we have owner data
-    if (this.activeView === 'land' && Object.keys(this.ownerCoatOfArmsMap).length > 0) {
+    // AND we have textures loaded (sandTexture is a good indicator)
+    if (this.activeView === 'land' && 
+        Object.keys(this.ownerCoatOfArmsMap).length > 0 && 
+        this.sandTexture) {
+      
       // Check if we have any polygons with owners before creating sprites
       const polygonsWithOwners = this.polygons.filter(p => p.owner && this.ownerCoatOfArmsMap[p.owner]);
       
       if (polygonsWithOwners.length > 0) {
         // Reset the rendered flag to force a refresh with new data
         this.hasRenderedCoatOfArms = false;
-        this.createCoatOfArmsSprites();
+        
+        // Add a small delay to ensure textures are fully loaded
+        setTimeout(() => {
+          this.createCoatOfArmsSprites();
+        }, 500);
       }
     }
   }
@@ -756,7 +767,8 @@ export default class SimplePolygonRenderer {
           console.log(`Updated ${updatedCount} polygons with owner information`);
           
           // Only create coat of arms sprites if we have owners AND we're in land view
-          if (updatedCount > 0 && this.activeView === 'land') {
+          // AND we have textures loaded (sandTexture is a good indicator)
+          if (updatedCount > 0 && this.activeView === 'land' && this.sandTexture) {
             // Check if we have any polygons with matching owners before creating sprites
             const polygonsWithMatchingOwners = this.polygons.filter(p => 
               p.owner && this.ownerCoatOfArmsMap[p.owner]
@@ -764,7 +776,10 @@ export default class SimplePolygonRenderer {
             
             if (polygonsWithMatchingOwners.length > 0) {
               // Now that we have owners, create coat of arms sprites
-              this.createCoatOfArmsSprites();
+              // Add a small delay to ensure textures are fully loaded
+              setTimeout(() => {
+                this.createCoatOfArmsSprites();
+              }, 500);
             }
           } else if (updatedCount === 0) {
             // No owners were found, use default owners
@@ -814,8 +829,12 @@ export default class SimplePolygonRenderer {
     console.log(`Assigned default owners to ${polygonsToAssign} polygons`);
     
     // Create coat of arms sprites with the new owners only if in land view
-    if (this.activeView === 'land' && !this.hasRenderedCoatOfArms) {
-      this.createCoatOfArmsSprites();
+    // AND we have textures loaded (sandTexture is a good indicator)
+    if (this.activeView === 'land' && !this.hasRenderedCoatOfArms && this.sandTexture) {
+      // Add a small delay to ensure textures are fully loaded
+      setTimeout(() => {
+        this.createCoatOfArmsSprites();
+      }, 500);
     }
   }
   
