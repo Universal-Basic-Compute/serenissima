@@ -1462,12 +1462,12 @@ export class RoadManager {
         if ('alphaMap' in material && material.alphaMap) material.alphaMap.dispose();
         
         // Clear references
-        if (material.map) material.map = null as unknown as THREE.Texture;
-        
+        if (material.map !== null && material.map !== undefined) material.map = null as unknown as THREE.Texture;
+              
         // Clear references for properties that might not exist on all material types
-        if ('normalMap' in material && (material as THREE.MeshStandardMaterial).normalMap) 
+        if ('normalMap' in material && (material as THREE.MeshStandardMaterial).normalMap !== null && (material as THREE.MeshStandardMaterial).normalMap !== undefined) 
           (material as THREE.MeshStandardMaterial).normalMap = null as unknown as THREE.Texture;
-        if ('roughnessMap' in material && (material as THREE.MeshStandardMaterial).roughnessMap) 
+        if ('roughnessMap' in material && (material as THREE.MeshStandardMaterial).roughnessMap !== null && (material as THREE.MeshStandardMaterial).roughnessMap !== undefined) 
           (material as THREE.MeshStandardMaterial).roughnessMap = null as unknown as THREE.Texture;
         if ('metalnessMap' in material && (material as THREE.MeshStandardMaterial).metalnessMap) 
           (material as THREE.MeshStandardMaterial).metalnessMap = null as unknown as THREE.Texture;
