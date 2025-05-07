@@ -135,6 +135,7 @@ export function useWallet() {
       // If already connected, disconnect first
       console.log("Disconnecting wallet...");
       try {
+        // First disconnect the adapter
         await adapter.disconnect();
         
         // Clear wallet from both storages
@@ -151,40 +152,60 @@ export function useWallet() {
         console.log("Wallet disconnected successfully");
         
         // Force Phantom to show the account selector by completely resetting the adapter
-        // This is the key change - we need to create a new adapter instance
         setWalletAdapter(null);
         
         // Wait a moment before creating a new adapter
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Try to disconnect Phantom at the browser level
+        if (window.solana && window.solana.isPhantom) {
+          try {
+            console.log("Attempting to disconnect Phantom at browser level");
+            window.solana.disconnect();
+            
+            // Try to access internal methods to force forgetting identity
+            // @ts-ignore - accessing private property
+            if (window.solana._handleDisconnect) {
+              // @ts-ignore - accessing private property
+              window.solana._handleDisconnect();
+            }
+            
+            // @ts-ignore - accessing private property
+            if (window.solana.forgetIdentity) {
+              // @ts-ignore - accessing private property
+              window.solana.forgetIdentity();
+            }
+            
+            // Try another approach to reset connection state
+            // @ts-ignore - accessing private property
+            if (window.solana._popup) {
+              // @ts-ignore - accessing private property
+              window.solana._popup.forgetIdentity();
+            }
+            
+            console.log("Phantom disconnected at browser level");
+          } catch (e) {
+            console.warn("Could not access Phantom browser API:", e);
+          }
+        }
+        
+        // Wait longer to ensure Phantom has time to reset its state
+        await new Promise(resolve => setTimeout(resolve, 1000));
         
         // Create a new adapter instance
+        console.log("Creating new wallet adapter instance");
         const newAdapter = new PhantomWalletAdapter();
         setWalletAdapter(newAdapter);
         
         // Wait for the new adapter to initialize
         await new Promise(resolve => setTimeout(resolve, 500));
         
-        // Force Phantom to forget the previous connection
-        // This is a workaround to make Phantom show the account selector
-        if (window.solana && window.solana.isPhantom) {
-          // Access the internal _popup property if available (this is implementation-specific)
-          try {
-            // @ts-ignore - accessing private property
-            if (window.solana._popup) {
-              // @ts-ignore - accessing private property
-              window.solana._popup.forgetIdentity();
-            }
-          } catch (e) {
-            console.error("Could not access Phantom internal API:", e);
-          }
-        }
-        
         // Now attempt to connect with the new adapter
-        console.log("Attempting to reconnect with new adapter...");
+        console.log("Attempting to connect with new adapter...");
         await newAdapter.connect();
         
         const address = newAdapter.publicKey?.toString() || null;
-        console.log("Wallet reconnected, address:", address);
+        console.log("Wallet connected, address:", address);
         
         if (address) {
           setWalletAddressState(address);

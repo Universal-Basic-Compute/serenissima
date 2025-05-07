@@ -89,7 +89,7 @@ export default function WalletButton({ className = '' }: WalletButtonProps) {
             </button>
             <button
               onClick={async () => {
-                // Clear current wallet connection but keep the session
+                // Clear current wallet connection
                 localStorage.removeItem('userProfile');
                 
                 // Disconnect the current wallet first
@@ -100,7 +100,7 @@ export default function WalletButton({ className = '' }: WalletButtonProps) {
                 window.dispatchEvent(new Event('walletChanged'));
                 
                 // Wait a moment for the disconnect to complete
-                await new Promise(resolve => setTimeout(resolve, 100));
+                await new Promise(resolve => setTimeout(resolve, 500));
                 
                 // Then trigger wallet connection flow to select a new wallet
                 connectWallet();

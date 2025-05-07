@@ -39,11 +39,27 @@ export function setWalletAddress(address: string | null): void {
 export function clearWalletAddress(): void {
   if (typeof window === 'undefined') return;
   
+  // Clear wallet address from storage
   sessionStorage.removeItem('walletAddress');
   localStorage.removeItem('walletAddress');
   
+  // Also clear wallet connection timestamp if it exists
+  localStorage.removeItem('walletConnectedAt');
+  
+  // Try to disconnect Phantom at the browser level if available
+  if (window.solana && window.solana.isPhantom) {
+    try {
+      console.log("Attempting to disconnect Phantom at browser level");
+      window.solana.disconnect();
+    } catch (e) {
+      console.warn("Could not disconnect Phantom at browser level:", e);
+    }
+  }
+  
   // Dispatch a custom event to notify components
   window.dispatchEvent(new Event('walletChanged'));
+  
+  console.log("Wallet address cleared from storage");
 }
 
 /**
