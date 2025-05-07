@@ -38,19 +38,19 @@ const TechTree: React.FC<TechTreeProps> = ({ onClose }) => {
       window.removeEventListener('resize', updateDimensions);
     };
   }, []);
-  // Tech tree data
+  // Tech tree data with expanded descriptions
   const techNodes: TechNode[] = [
     {
       id: 'terrain',
       title: 'Terrain',
-      description: 'The foundational geography of La Serenissima, including land and water.',
+      description: 'The foundational geography of La Serenissima, including land and water features. The terrain system defines the physical world, with elevation changes, water bodies, and natural features that influence construction and navigation throughout the city-state.',
       image: '/images/tech-tree/terrain.jpg',
       link: '/docs/terrain.pdf',
     },
     {
       id: 'lands',
       title: 'Lands',
-      description: 'Parcels of land that can be owned, developed, and traded.',
+      description: 'Parcels of land that can be owned, developed, and traded. The land system enables property ownership with detailed boundaries, legal titles, and transfer mechanisms. Land parcels vary in size, location value, and development potential based on proximity to canals and city centers.',
       image: '/images/tech-tree/lands.jpg',
       link: '/docs/lands.pdf',
       dependencies: ['terrain'],
@@ -58,7 +58,7 @@ const TechTree: React.FC<TechTreeProps> = ({ onClose }) => {
     {
       id: 'loans',
       title: 'Loans',
-      description: 'Financial instruments for borrowing and lending ducats.',
+      description: 'Financial instruments for borrowing and lending ducats. The loan system implements Renaissance banking practices with interest calculations, collateral requirements, and repayment schedules. Loans can be used for land purchases, building construction, or trade ventures with varying terms and conditions.',
       image: '/images/tech-tree/loans.jpg',
       link: '/docs/loans.pdf',
       dependencies: ['lands'],
@@ -66,7 +66,7 @@ const TechTree: React.FC<TechTreeProps> = ({ onClose }) => {
     {
       id: 'docks',
       title: 'Docks',
-      description: 'Water access points for transportation and trade.',
+      description: 'Water access points for transportation and trade. The dock system enables water-based commerce with loading/unloading facilities, ship moorings, and connection points to the road network. Docks must be strategically placed along water edges and provide economic benefits to adjacent land parcels.',
       image: '/images/tech-tree/docks.jpg',
       link: '/docs/docks.pdf',
       dependencies: ['lands'],
@@ -74,7 +74,7 @@ const TechTree: React.FC<TechTreeProps> = ({ onClose }) => {
     {
       id: 'bridges',
       title: 'Bridges',
-      description: 'Structures connecting land parcels across water.',
+      description: 'Structures connecting land parcels across water. The bridge system facilitates pedestrian and goods movement between islands with varying designs and capacities. Bridges require engineering expertise, significant resources to construct, and ongoing maintenance to remain operational.',
       image: '/images/tech-tree/bridges.jpg',
       link: '/docs/bridges.pdf',
       dependencies: ['lands'],
@@ -82,7 +82,7 @@ const TechTree: React.FC<TechTreeProps> = ({ onClose }) => {
     {
       id: 'roads',
       title: 'Roads',
-      description: 'Transportation infrastructure connecting properties.',
+      description: 'Transportation infrastructure connecting properties. The road network enables land-based movement with variable widths, surfaces, and traffic capacities. Roads can be constructed with different materials affecting durability and maintenance costs, while providing essential connectivity between buildings.',
       image: '/images/tech-tree/roads.jpg',
       link: '/docs/roads.pdf',
       dependencies: ['lands'],
@@ -90,7 +90,7 @@ const TechTree: React.FC<TechTreeProps> = ({ onClose }) => {
     {
       id: 'market',
       title: 'Market',
-      description: 'System for buying and selling land and resources.',
+      description: 'System for buying and selling land and resources. The marketplace facilitates economic exchange with auctions, fixed-price listings, and negotiated trades. Market activities influence property values, resource prices, and overall economic conditions through supply and demand mechanics.',
       image: '/images/tech-tree/market.jpg',
       link: '/docs/market.pdf',
       dependencies: ['lands', 'loans'],
@@ -98,7 +98,7 @@ const TechTree: React.FC<TechTreeProps> = ({ onClose }) => {
     {
       id: 'buildings',
       title: 'Buildings',
-      description: 'Structures that can be built on land parcels.',
+      description: 'Structures that can be built on land parcels. The building system enables construction of various architectural styles with different functions, capacities, and resource requirements. Buildings provide housing, production facilities, and civic services while contributing to land value.',
       image: '/images/tech-tree/buildings.jpg',
       link: '/docs/buildings.pdf',
       dependencies: ['lands', 'roads'],
@@ -106,7 +106,7 @@ const TechTree: React.FC<TechTreeProps> = ({ onClose }) => {
     {
       id: 'transport',
       title: 'Transport',
-      description: 'Systems for moving people and goods around the city.',
+      description: 'Systems for moving people and goods around the city. The transportation network combines water and land routes with various vessel types and cargo capacities. Transport efficiency affects trade profitability, resource distribution, and population mobility throughout La Serenissima.',
       image: '/images/tech-tree/transport.jpg',
       link: '/docs/transport.pdf',
       dependencies: ['roads', 'docks', 'bridges'],
@@ -114,7 +114,7 @@ const TechTree: React.FC<TechTreeProps> = ({ onClose }) => {
     {
       id: 'rent',
       title: 'Rent',
-      description: 'Income generated from owned properties.',
+      description: 'Income generated from owned properties. The rent system calculates returns based on property size, location, building quality, and economic conditions. Rent collection occurs at regular intervals and provides passive income to property owners while creating ongoing expenses for tenants.',
       image: '/images/tech-tree/rent.jpg',
       link: '/docs/rent.pdf',
       dependencies: ['buildings'],
@@ -122,7 +122,7 @@ const TechTree: React.FC<TechTreeProps> = ({ onClose }) => {
     {
       id: 'businesses',
       title: 'Businesses',
-      description: 'Commercial enterprises that generate income.',
+      description: 'Commercial enterprises that generate income. The business system enables various economic activities with different resource inputs, production processes, and market outputs. Businesses require appropriate buildings, skilled workers, and resource supply chains to operate profitably.',
       image: '/images/tech-tree/businesses.jpg',
       link: '/docs/businesses.pdf',
       dependencies: ['buildings', 'market'],
@@ -130,7 +130,7 @@ const TechTree: React.FC<TechTreeProps> = ({ onClose }) => {
     {
       id: 'pay',
       title: 'Pay',
-      description: 'System for compensating workers and service providers.',
+      description: 'System for compensating workers and service providers. The payment system handles wage calculations, service fees, and transaction records with historical accuracy. Payment amounts vary based on skill levels, market conditions, and negotiated contracts between employers and workers.',
       image: '/images/tech-tree/pay.jpg',
       link: '/docs/pay.pdf',
       dependencies: ['businesses'],
@@ -138,7 +138,7 @@ const TechTree: React.FC<TechTreeProps> = ({ onClose }) => {
     {
       id: 'resources',
       title: 'Resources',
-      description: 'Raw materials used in construction and production.',
+      description: 'Raw materials used in construction and production. The resource system models extraction, refinement, and consumption of materials with realistic scarcity and quality variations. Resources include building materials, craft inputs, luxury goods, and consumables with complex supply chains.',
       image: '/images/tech-tree/resources.jpg',
       link: '/docs/resources.pdf',
       dependencies: ['transport'],
@@ -146,7 +146,7 @@ const TechTree: React.FC<TechTreeProps> = ({ onClose }) => {
     {
       id: 'economy',
       title: 'Economy',
-      description: 'The overall economic system of La Serenissima.',
+      description: 'The overall economic system of La Serenissima. The economy integrates all commercial activities with inflation mechanics, business cycles, and external trade factors. Economic conditions fluctuate based on player actions, historical events, and simulated market forces affecting all other systems.',
       image: '/images/tech-tree/economy.jpg',
       link: '/docs/economy.pdf',
       dependencies: ['market', 'businesses', 'rent'],
@@ -154,7 +154,7 @@ const TechTree: React.FC<TechTreeProps> = ({ onClose }) => {
     {
       id: 'consumption',
       title: 'Consumption',
-      description: 'Use of goods and services by the population.',
+      description: 'Use of goods and services by the population. The consumption system models demand patterns across different social classes with varying preferences and purchasing power. Consumption drives production requirements, influences prices, and creates economic opportunities for businesses catering to public needs.',
       image: '/images/tech-tree/consumption.jpg',
       link: '/docs/consumption.pdf',
       dependencies: ['resources', 'businesses'],
@@ -162,7 +162,7 @@ const TechTree: React.FC<TechTreeProps> = ({ onClose }) => {
     {
       id: 'actions',
       title: 'Actions',
-      description: 'Player activities and interactions within the world.',
+      description: 'Player activities and interactions within the world. The action system defines available player behaviors with associated costs, requirements, and consequences. Actions include construction projects, business operations, political maneuvers, and social interactions with both immediate and long-term effects.',
       image: '/images/tech-tree/actions.jpg',
       link: '/docs/actions.pdf',
       dependencies: ['economy', 'consumption'],
@@ -170,7 +170,7 @@ const TechTree: React.FC<TechTreeProps> = ({ onClose }) => {
     {
       id: 'governance',
       title: 'Governance',
-      description: 'Political systems and decision-making processes.',
+      description: 'Political systems and decision-making processes. The governance system implements Venetian political structures with councils, voting mechanisms, and factional dynamics. Governance affects taxation, regulations, public works, and diplomatic relations with significant economic and social consequences.',
       image: '/images/tech-tree/governance.jpg',
       link: '/docs/governance.pdf',
       dependencies: ['economy', 'actions'],
@@ -220,15 +220,15 @@ const TechTree: React.FC<TechTreeProps> = ({ onClose }) => {
     });
     
     // Calculate x position based on level
-    const levelWidth = 280; // Increased width between levels
-    const levelPadding = 100; // Initial padding
+    const levelWidth = 320; // Increased width between levels for more space
+    const levelPadding = 120; // Initial padding
     
     // Calculate y position based on nodes in the same level
     Object.entries(nodesByLevel).forEach(([level, nodeIds]) => {
       const numNodes = nodeIds.length;
-      const levelHeight = 200; // Increased height per node
+      const levelHeight = 280; // Increased height between nodes for more space
       const totalHeight = numNodes * levelHeight;
-      const startY = Math.max(100, (dimensions.height - totalHeight) / 2);
+      const startY = Math.max(120, (dimensions.height - totalHeight) / 2);
       
       nodeIds.forEach((nodeId, index) => {
         const node = nodesMap.get(nodeId);
@@ -250,12 +250,12 @@ const TechTree: React.FC<TechTreeProps> = ({ onClose }) => {
   const contentWidth = Math.max(
     ...positionedNodes.map(node => (node.position?.x || 0) + 280),
     dimensions.width
-  ) + 100;
+  ) + 120;
   
   const contentHeight = Math.max(
-    ...positionedNodes.map(node => (node.position?.y || 0) + 220),
+    ...positionedNodes.map(node => (node.position?.y || 0) + 280),
     dimensions.height
-  ) + 100;
+  ) + 120;
 
   return (
     <div 
@@ -299,7 +299,7 @@ const TechTree: React.FC<TechTreeProps> = ({ onClose }) => {
                   return (
                     <line 
                       key={`${node.id}-${depId}`}
-                      x1={depNode.position.x + 140} // Center of the source node
+                      x1={depNode.position.x + 100} // Center of the source node
                       y1={depNode.position.y + 100} // Center of the source node
                       x2={node.position.x} // Left edge of the target node
                       y2={node.position.y + 100} // Center of the target node
@@ -318,14 +318,14 @@ const TechTree: React.FC<TechTreeProps> = ({ onClose }) => {
           {positionedNodes.map(node => (
             <div 
               key={node.id}
-              className="absolute bg-amber-50 border-2 border-amber-700 rounded-lg shadow-lg w-72 tech-node hover:shadow-xl transition-all duration-300"
+              className="absolute bg-amber-50 border-2 border-amber-700 rounded-lg shadow-lg w-56 tech-node hover:shadow-xl transition-all duration-300"
               style={{ 
                 left: `${node.position?.x}px`, 
                 top: `${node.position?.y}px`,
                 transform: 'translate3d(0,0,0)', // Force GPU acceleration
               }}
             >
-              <div className="h-44 overflow-hidden rounded-t-md relative">
+              <div className="h-32 w-32 overflow-hidden rounded-md relative mx-auto mt-4">
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent to-amber-900/30" />
                 <img 
                   src={node.image} 
@@ -333,23 +333,13 @@ const TechTree: React.FC<TechTreeProps> = ({ onClose }) => {
                   className="w-full h-full object-cover transition-transform duration-700 hover:scale-110"
                   onError={(e) => {
                     // Fallback if image doesn't exist
-                    (e.target as HTMLImageElement).src = `https://via.placeholder.com/280x176/8B4513/FFF?text=${node.title}`;
+                    (e.target as HTMLImageElement).src = `https://via.placeholder.com/128x128/8B4513/FFF?text=${node.title}`;
                   }}
                 />
               </div>
               <div className="p-4">
-                <h3 className="text-xl font-serif text-amber-800 mb-2 border-b border-amber-200 pb-2">{node.title}</h3>
-                <p className="text-gray-600 text-sm mb-3 h-16 overflow-hidden">{node.description}</p>
-                {node.link && (
-                  <a 
-                    href={node.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-block px-3 py-1 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors text-sm"
-                  >
-                    Learn More
-                  </a>
-                )}
+                <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-2 text-center">{node.title}</h3>
+                <p className="text-gray-600 text-xs mb-3 h-28 overflow-auto pr-1 tech-tree-scroll">{node.description}</p>
               </div>
             </div>
           ))}
