@@ -818,8 +818,8 @@ export default class PolygonRenderer {
                   obj.material.forEach((mat: THREE.Material) => {
                     try {
                       // Check if material has a map property (like MeshBasicMaterial or MeshStandardMaterial)
-                      if ((mat as any).map) {
-                        (mat as any).map.dispose();
+                      if ('map' in mat && (mat as THREE.MeshBasicMaterial | THREE.MeshStandardMaterial).map) {
+                        (mat as THREE.MeshBasicMaterial | THREE.MeshStandardMaterial).map?.dispose();
                       }
                       mat.dispose();
                     } catch (matError) {
@@ -829,8 +829,8 @@ export default class PolygonRenderer {
                 } else {
                   try {
                     // Check if material has a map property
-                    if ((obj.material as any).map) {
-                      (obj.material as any).map.dispose();
+                    if ('map' in obj.material && (obj.material as THREE.MeshBasicMaterial | THREE.MeshStandardMaterial).map) {
+                      (obj.material as THREE.MeshBasicMaterial | THREE.MeshStandardMaterial).map?.dispose();
                     }
                     obj.material.dispose();
                   } catch (matError) {
@@ -1353,8 +1353,8 @@ export default class PolygonRenderer {
                 if (Array.isArray(obj.material)) {
                   obj.material.forEach((mat: THREE.Material) => {
                     try {
-                      if ((mat as any).map) {
-                        (mat as any).map.dispose();
+                      if ('map' in mat && (mat as THREE.MeshBasicMaterial | THREE.MeshStandardMaterial).map) {
+                        (mat as THREE.MeshBasicMaterial | THREE.MeshStandardMaterial).map?.dispose();
                       }
                       mat.dispose();
                     } catch (matError) {
@@ -1363,8 +1363,8 @@ export default class PolygonRenderer {
                   });
                 } else {
                   try {
-                    if ((obj.material as any).map) {
-                      (obj.material as any).map.dispose();
+                    if ('map' in obj.material && (obj.material as THREE.MeshBasicMaterial | THREE.MeshStandardMaterial).map) {
+                      (obj.material as THREE.MeshBasicMaterial | THREE.MeshStandardMaterial).map?.dispose();
                     }
                     obj.material.dispose();
                   } catch (matError) {
