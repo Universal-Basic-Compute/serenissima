@@ -1400,12 +1400,13 @@ async def generate_coat_of_arms(data: dict):
                 content={"success": False, "error": "No image URL in response"}
             )
         
-        # Download the image
-        image_response = requests.get(image_url)
+        # Download the image directly to avoid CORS issues
+        print(f"Downloading image from Ideogram URL: {image_url}")
+        image_response = requests.get(image_url, stream=True)
         if not image_response.ok:
             return JSONResponse(
                 status_code=500,
-                content={"success": False, "error": "Failed to download image"}
+                content={"success": False, "error": f"Failed to download image: {image_response.status_code} {image_response.reason}"}
             )
         
         # Sanitize username for filename
@@ -1422,7 +1423,8 @@ async def generate_coat_of_arms(data: dict):
         file_path = os.path.join(coat_of_arms_dir, filename)
         print(f"Saving coat of arms image to: {file_path}")
         with open(file_path, 'wb') as f:
-            f.write(image_response.content)
+            for chunk in image_response.iter_content(chunk_size=8192):
+                f.write(chunk)
         
         # Return the path to the saved image (relative to public folder)
         relative_path = f"/coat-of-arms/{filename}"
