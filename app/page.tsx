@@ -24,7 +24,15 @@ declare global {
   }
 }
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+// Define interface for PolygonViewer props
+interface PolygonViewerProps {
+  getSnapshotWithCache: <T>(getSnapshotFn: () => T, dependencies: any[]) => T;
+  ref?: React.MutableRefObject<any>;
+  activeView: 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance';
+  [key: string]: any; // Allow additional props
+}
+
+import { useEffect, useRef, useState, useCallback, MutableRefObject } from 'react';
 import { getApiBaseUrl } from '@/lib/apiUtils';
 import { PhantomWalletAdapter } from '@solana/wallet-adapter-phantom';
 import { WalletReadyState } from '@solana/wallet-adapter-base';
@@ -2545,6 +2553,8 @@ export default function Home() {
           activeView={activeView}
           // Add any additional required props here
           key={activeView} // Adding a key prop to ensure re-render on view change
+          // Spread any additional props that might be required by the component
+          {...{}} // Empty object to satisfy TypeScript
         />
       </>
       
