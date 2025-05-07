@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { FaTimes } from 'react-icons/fa';
+import Image from 'next/image';
 
 interface TechNode {
   id: string;
@@ -16,6 +17,27 @@ interface TechTreeProps {
 }
 
 const TechTree: React.FC<TechTreeProps> = ({ onClose }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+  
+  // Update dimensions on resize
+  useEffect(() => {
+    const updateDimensions = () => {
+      if (containerRef.current) {
+        setDimensions({
+          width: window.innerWidth,
+          height: window.innerHeight
+        });
+      }
+    };
+    
+    updateDimensions();
+    window.addEventListener('resize', updateDimensions);
+    
+    return () => {
+      window.removeEventListener('resize', updateDimensions);
+    };
+  }, []);
   // Tech tree data
   const techNodes: TechNode[] = [
     {
@@ -198,15 +220,15 @@ const TechTree: React.FC<TechTreeProps> = ({ onClose }) => {
     });
     
     // Calculate x position based on level
-    const levelWidth = 250; // Width between levels
+    const levelWidth = 280; // Increased width between levels
     const levelPadding = 100; // Initial padding
     
     // Calculate y position based on nodes in the same level
     Object.entries(nodesByLevel).forEach(([level, nodeIds]) => {
       const numNodes = nodeIds.length;
-      const levelHeight = 180; // Height per node
+      const levelHeight = 200; // Increased height per node
       const totalHeight = numNodes * levelHeight;
-      const startY = (window.innerHeight - totalHeight) / 2;
+      const startY = Math.max(100, (dimensions.height - totalHeight) / 2);
       
       nodeIds.forEach((nodeId, index) => {
         const node = nodesMap.get(nodeId);
@@ -223,25 +245,51 @@ const TechTree: React.FC<TechTreeProps> = ({ onClose }) => {
   };
 
   const positionedNodes = calculatePositions();
+  
+  // Calculate the content dimensions to ensure proper scrolling
+  const contentWidth = Math.max(
+    ...positionedNodes.map(node => (node.position?.x || 0) + 280),
+    dimensions.width
+  ) + 100;
+  
+  const contentHeight = Math.max(
+    ...positionedNodes.map(node => (node.position?.y || 0) + 220),
+    dimensions.height
+  ) + 100;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-90 z-50 overflow-auto tech-tree-container">
-      <div className="absolute top-4 right-4">
+    <div 
+      className="fixed inset-0 bg-black bg-opacity-90 z-50 flex flex-col tech-tree-container"
+      ref={containerRef}
+    >
+      <div className="flex justify-between items-center p-4 border-b border-amber-700">
+        <h2 className="text-3xl font-serif text-amber-500 px-4">
+          La Serenissima Development Roadmap
+        </h2>
         <button 
           onClick={onClose}
-          className="text-white hover:text-amber-200 transition-colors"
+          className="text-white hover:text-amber-200 transition-colors p-2 rounded-full hover:bg-amber-900/30"
           aria-label="Close"
         >
           <FaTimes size={24} />
         </button>
       </div>
       
-      <div className="p-8 min-h-screen">
-        <h2 className="text-3xl font-serif text-amber-500 mb-8 text-center">
-          La Serenissima Development Roadmap
-        </h2>
-        
-        <div className="relative w-full overflow-x-auto pb-10 tech-tree-scroll" style={{ minWidth: '1200px', minHeight: '800px' }}>
+      <div 
+        className="flex-grow overflow-auto tech-tree-scroll"
+        style={{ 
+          position: 'relative',
+          scrollbarWidth: 'thin',
+          scrollbarColor: 'rgba(139, 69, 19, 0.5) rgba(0, 0, 0, 0.1)'
+        }}
+      >
+        <div 
+          style={{ 
+            width: `${contentWidth}px`, 
+            height: `${contentHeight}px`, 
+            position: 'relative' 
+          }}
+        >
           {/* Draw connection lines between nodes */}
           <svg className="absolute inset-0 w-full h-full pointer-events-none">
             {positionedNodes.map(node => 
@@ -251,10 +299,10 @@ const TechTree: React.FC<TechTreeProps> = ({ onClose }) => {
                   return (
                     <line 
                       key={`${node.id}-${depId}`}
-                      x1={depNode.position.x + 100} // Center of the source node
-                      y1={depNode.position.y + 75} // Center of the source node
+                      x1={depNode.position.x + 140} // Center of the source node
+                      y1={depNode.position.y + 100} // Center of the source node
                       x2={node.position.x} // Left edge of the target node
-                      y2={node.position.y + 75} // Center of the target node
+                      y2={node.position.y + 100} // Center of the target node
                       stroke="#8B4513" // Brown color for the lines
                       strokeWidth={3}
                       strokeDasharray="5,5" // Dashed line
@@ -270,26 +318,28 @@ const TechTree: React.FC<TechTreeProps> = ({ onClose }) => {
           {positionedNodes.map(node => (
             <div 
               key={node.id}
-              className="absolute bg-amber-50 border-2 border-amber-700 rounded-lg shadow-lg w-64 transition-transform hover:scale-105 tech-node"
+              className="absolute bg-amber-50 border-2 border-amber-700 rounded-lg shadow-lg w-72 tech-node hover:shadow-xl transition-all duration-300"
               style={{ 
                 left: `${node.position?.x}px`, 
                 top: `${node.position?.y}px`,
+                transform: 'translate3d(0,0,0)', // Force GPU acceleration
               }}
             >
-              <div className="h-40 overflow-hidden">
+              <div className="h-44 overflow-hidden rounded-t-md relative">
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-amber-900/30" />
                 <img 
                   src={node.image} 
                   alt={node.title}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover transition-transform duration-700 hover:scale-110"
                   onError={(e) => {
                     // Fallback if image doesn't exist
-                    (e.target as HTMLImageElement).src = 'https://via.placeholder.com/200x150?text=' + node.title;
+                    (e.target as HTMLImageElement).src = `https://via.placeholder.com/280x176/8B4513/FFF?text=${node.title}`;
                   }}
                 />
               </div>
               <div className="p-4">
-                <h3 className="text-xl font-serif text-amber-800 mb-2">{node.title}</h3>
-                <p className="text-gray-600 text-sm mb-3">{node.description}</p>
+                <h3 className="text-xl font-serif text-amber-800 mb-2 border-b border-amber-200 pb-2">{node.title}</h3>
+                <p className="text-gray-600 text-sm mb-3 h-16 overflow-hidden">{node.description}</p>
                 {node.link && (
                   <a 
                     href={node.link}
