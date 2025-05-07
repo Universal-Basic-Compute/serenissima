@@ -14,6 +14,7 @@ interface PlayerProfileProps {
   className?: string;
   showMotto?: boolean;
   showDucats?: boolean; // Add this property to control display
+  onSettingsClick?: () => void; // Add this new prop
 }
 
 // Add a cache for user profiles to avoid redundant fetches
@@ -31,7 +32,8 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
   onClick,
   className = '',
   showMotto = false,
-  showDucats = true // Default to showing ducats
+  showDucats = true, // Default to showing ducats
+  onSettingsClick
 }) => {
   // Add state for user data
   const [userData, setUserData] = useState<{

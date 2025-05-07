@@ -630,7 +630,10 @@ export default function SimplePage() {
       )}
       
       {/* Wallet Button */}
-      <WalletButton className="absolute top-4 right-4 z-10" />
+      <WalletButton 
+        className="absolute top-4 right-4 z-10" 
+        onSettingsClick={() => setShowSettingsModal(true)}
+      />
       
       
       {/* Information Panel */}
