@@ -2,6 +2,16 @@ import { create } from 'zustand';
 import { LoanData, LoanService, LoanStatus, LoanPurpose } from '@/lib/services/LoanService';
 import { eventBus, EventTypes } from '@/lib/eventBus';
 
+// Define custom event types if they don't exist in EventTypes
+interface ExtendedEventTypes extends typeof EventTypes {
+  LOAN_APPLIED: string;
+  LOAN_PAYMENT_MADE: string;
+  LOAN_OFFER_CREATED: string;
+}
+
+// Cast EventTypes to our extended interface
+const ExtendedEventTypes = EventTypes as ExtendedEventTypes;
+
 // Loan store
 export interface LoanState {
   availableLoans: LoanData[];
@@ -66,7 +76,7 @@ export const useLoanStore = create<LoanState & LoanActions>((set, get) => ({
       set({ userLoans, loading: false });
       
       // Emit event for loan application
-      eventBus.emit(EventTypes.LOAN_APPLIED, { loan });
+      eventBus.emit(ExtendedEventTypes.LOAN_APPLIED, { loan });
       
       return loan;
     } catch (error) {
@@ -89,7 +99,7 @@ export const useLoanStore = create<LoanState & LoanActions>((set, get) => ({
       set({ userLoans, loading: false });
       
       // Emit event for loan payment
-      eventBus.emit(EventTypes.LOAN_PAYMENT_MADE, { 
+      eventBus.emit(ExtendedEventTypes.LOAN_PAYMENT_MADE, { 
         loanId, 
         amount, 
         remainingBalance: updatedLoan.remainingBalance 
@@ -113,7 +123,7 @@ export const useLoanStore = create<LoanState & LoanActions>((set, get) => ({
       set({ availableLoans, loading: false });
       
       // Emit event for loan offer creation
-      eventBus.emit(EventTypes.LOAN_OFFER_CREATED, { loan });
+      eventBus.emit(ExtendedEventTypes.LOAN_OFFER_CREATED, { loan });
       
       return loan;
     } catch (error) {
