@@ -864,7 +864,7 @@ export class WaterFacade {
    * Find boundary indices of a geometry (simplified version)
    * @private
    */
-  private findBoundaryIndices(geometry: THREE.BufferGeometry): number[] {
+  private findBoundaryIndices(geometry: THREE.BufferGeometry<THREE.NormalBufferAttributes>): number[] {
     // Enhanced boundary detection to find actual edge vertices
     const indices: number[] = [];
     const positions = geometry.getAttribute('position');
@@ -1139,7 +1139,7 @@ if (shoreFactor > 0.01) {
             });
           }
         } else if (this.water.material && 'map' in this.water.material && 
-                  this.water.material.type === 'MeshBasicMaterial') {
+                  (this.water.material as THREE.Material).type === 'MeshBasicMaterial') {
           // For fallback mode with basic material
           const material = this.water.material as THREE.MeshBasicMaterial;
           if (material.map) {
