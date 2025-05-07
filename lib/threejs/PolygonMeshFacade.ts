@@ -168,7 +168,7 @@ export class PolygonMeshFacade implements Poolable {
       this.originalGeometry = geometry.clone();
       
       // Store original color for hover/selection effects
-      if (material instanceof THREE.MeshBasicMaterial && material.color) {
+      if (material instanceof THREE.MeshBasicMaterial && material.color instanceof THREE.Color) {
         this.originalColor = material.color.clone();
       }
       
@@ -289,7 +289,7 @@ export class PolygonMeshFacade implements Poolable {
     }
     
     // Store the original color for hover/selection states
-    if (newMaterial instanceof THREE.MeshBasicMaterial && newMaterial.color) {
+    if (newMaterial instanceof THREE.MeshBasicMaterial && newMaterial.color instanceof THREE.Color) {
       this.originalColor = newMaterial.color.clone();
     }
   }
@@ -416,7 +416,7 @@ export class PolygonMeshFacade implements Poolable {
             }
           } else {
             // Restore original color
-            if (this.originalColor) {
+            if (this.originalColor && material.color instanceof THREE.Color) {
               material.color.copy(this.originalColor);
             }
           }
