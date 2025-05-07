@@ -233,14 +233,16 @@ export class PolygonMeshFacade implements Poolable {
     const normalizedIncome = Math.min(Math.max(income / maxIncome, 0), 1);
     
     // Map the normalized income to our color scale
+    const resultColor = new THREE.Color();
+    
     if (normalizedIncome >= 0.5) {
       // Map from yellow to red
       const t = (normalizedIncome - 0.5) * 2; // Scale 0.5-1.0 to 0-1
-      return new THREE.Color().lerpColors(midIncomeColor, highIncomeColor, t);
+      return resultColor.lerpColors(midIncomeColor, highIncomeColor, t);
     } else {
       // Map from green to yellow
       const t = normalizedIncome * 2; // Scale 0-0.5 to 0-1
-      return new THREE.Color().lerpColors(lowIncomeColor, midIncomeColor, t);
+      return resultColor.lerpColors(lowIncomeColor, midIncomeColor, t);
     }
   }
   
@@ -268,14 +270,16 @@ export class PolygonMeshFacade implements Poolable {
     // Apply the new material to the mesh
     if (Array.isArray(this.mesh.material)) {
       // If we have an array of materials, update all of them
-      this.mesh.material.forEach((mat, index) => {
-        if (mat) {
-          // Dispose of the old material
-          mat.dispose();
-        }
-        // Set the new material
-        this.mesh.material[index] = newMaterial;
-      });
+      if (Array.isArray(this.mesh.material)) {
+        (this.mesh.material as THREE.Material[]).forEach((mat, index) => {
+          if (mat) {
+            // Dispose of the old material
+            mat.dispose();
+          }
+          // Set the new material
+          (this.mesh.material as THREE.Material[])[index] = newMaterial;
+        });
+      }
     } else {
       // If we have a single material, update it
       if (this.mesh.material) {
