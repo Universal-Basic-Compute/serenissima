@@ -112,7 +112,3 @@ export class OfferNotFoundError extends NotFoundError {
     Object.setPrototypeOf(this, OfferNotFoundError.prototype);
   }
 }
-    this.name = 'DataFormatError';
-    Object.setPrototypeOf(this, DataFormatError.prototype);
-  }
-}
