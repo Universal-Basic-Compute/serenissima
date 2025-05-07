@@ -288,16 +288,6 @@ export class DockCreationManager {
     }
   }
   
-  /**
-   * Update the preview rotation
-   */
-  public updateRotation(rotation: number): void {
-    if (this.isModelLoaded && this.previewMesh) {
-      this.previewMesh.rotation.y = rotation;
-    } else if (this.fallbackPreviewMesh) {
-      this.fallbackPreviewMesh.rotation.y = rotation;
-    }
-  }
   
   /**
    * Generate connection points for the dock

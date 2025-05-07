@@ -26,7 +26,6 @@ const DockCreator: React.FC<DockCreatorProps> = ({
 }) => {
   const [isPlacing, setIsPlacing] = useState<boolean>(false);
   const [previewPosition, setPreviewPosition] = useState<THREE.Vector3 | null>(null);
-  const [previewRotation, setPreviewRotation] = useState<number>(0);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isPlacementValid, setIsPlacementValid] = useState<boolean>(false);
   
@@ -108,12 +107,6 @@ const DockCreator: React.FC<DockCreatorProps> = ({
     };
   }, [active, actualScene, actualCamera, polygons]);
   
-  // Update rotation in the manager when it changes
-  useEffect(() => {
-    if (managerRef.current) {
-      managerRef.current.updateRotation(previewRotation);
-    }
-  }, [previewRotation]);
   
   // Handle mouse movement for dock placement preview
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
@@ -211,13 +204,13 @@ const DockCreator: React.FC<DockCreatorProps> = ({
         
         // Get the land ID from the manager
         const landId = managerRef.current.getAdjacentLandId();
-        
+      
         if (!landId) {
           setErrorMessage('Dock must be adjacent to land');
           setIsPlacing(false);
           return;
         }
-        
+      
         // Get wallet address
         const walletAddress = getWalletAddress();
         if (!walletAddress) {
@@ -225,10 +218,24 @@ const DockCreator: React.FC<DockCreatorProps> = ({
           setIsPlacing(false);
           return;
         }
+      
+        // Get the current edge and calculate rotation
+        const currentEdge = managerRef.current.getCurrentEdge();
+        let rotation = 0;
+      
+        if (currentEdge) {
+          // Calculate the direction vector of the edge
+          const direction = new THREE.Vector3()
+            .subVectors(currentEdge.end, currentEdge.start)
+            .normalize();
         
+          // Calculate the angle for proper alignment perpendicular to the edge
+          rotation = Math.atan2(direction.z, direction.x) + Math.PI/2;
+        }
+      
         // Generate connection points
         const connectionPoints = managerRef.current.generateConnectionPoints();
-        
+      
         // Prepare dock data
         const dockData = {
           landId: landId,
@@ -237,7 +244,7 @@ const DockCreator: React.FC<DockCreatorProps> = ({
             y: currentPosition.y,
             z: currentPosition.z
           },
-          rotation: previewRotation,
+          rotation: rotation, // Use calculated rotation instead of previewRotation
           connectionPoints: connectionPoints,
           createdBy: walletAddress,
           // Add metadata for the dock model
@@ -268,7 +275,7 @@ const DockCreator: React.FC<DockCreatorProps> = ({
           dockId: data.id,
           landId: landId,
           position: currentPosition,
-          rotation: previewRotation,
+          rotation: rotation, // Use calculated rotation instead of previewRotation
           modelPath: '/assets/buildings/models/public-dock/model.glb'
         });
         
@@ -283,20 +290,6 @@ const DockCreator: React.FC<DockCreatorProps> = ({
     })();
   };
   
-  // Handle rotation with keyboard
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (!active) return;
-      
-      if (e.key === 'r' || e.key === 'R') {
-        // Rotate 45 degrees
-        setPreviewRotation((prev) => (prev + Math.PI / 4) % (Math.PI * 2));
-      }
-    };
-    
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [active]);
   
   // Render UI
   if (!active) return null;
@@ -363,22 +356,10 @@ const DockCreator: React.FC<DockCreatorProps> = ({
           </div>
         )}
         
-        <div className="mb-4">
-          <label className="block text-sm mb-1">Rotation</label>
-          <input
-            type="range"
-            min="0"
-            max={Math.PI * 2}
-            step="0.1"
-            value={previewRotation}
-            onChange={(e) => setPreviewRotation(parseFloat(e.target.value))}
-            className="w-full"
-          />
-        </div>
-        
         <div className="text-sm mb-4">
           <p>Position your cursor where you want to place the dock.</p>
           <p>Docks must be placed at the edge of land parcels adjacent to water.</p>
+          <p>The dock will automatically align perpendicular to the shoreline.</p>
           {isPlacementValid && (
             <p className="text-green-400 mt-2">Valid placement location found</p>
           )}
