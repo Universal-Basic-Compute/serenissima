@@ -29,7 +29,6 @@ interface PolygonViewerProps {
   getSnapshotWithCache: <T>(getSnapshotFn: () => T, dependencies: any[]) => T;
   ref?: MutableRefObject<any>;
   activeView: 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance';
-  key?: string;
 }
 
 import { useEffect, useRef, useState, useCallback, MutableRefObject } from 'react';
