@@ -6,6 +6,78 @@ This document outlines the architecture for the economic simulation systems in L
 
 The economic simulation layer provides realistic economic mechanics that drive gameplay while maintaining historical authenticity. It models Renaissance Venetian economic principles while ensuring game balance and player engagement.
 
+## Economic Loop Visualization
+
+La Serenissima operates as a closed economic system where value circulates between players and AI-controlled entities. Unlike traditional games with infinite resource generation, wealth must be captured rather than created from nothing.
+
+```ascii
+                                  ┌───────────────────┐
+                                  │                   │
+                                  │  Resource Inputs  │
+                                  │                   │
+                                  └─────────┬─────────┘
+                                            │
+                                            ▼
+┌───────────────────┐           ┌───────────────────┐           ┌───────────────────┐
+│                   │           │                   │           │                   │
+│  Player Actions   │◄────────►│   Production &    │◄────────►│   AI Citizens     │
+│  & Investments    │           │   Manufacturing   │           │   & Merchants     │
+│                   │           │                   │           │                   │
+└─────────┬─────────┘           └─────────┬─────────┘           └─────────┬─────────┘
+          │                               │                               │
+          │                               ▼                               │
+          │                     ┌───────────────────┐                     │
+          │                     │                   │                     │
+          └────────────────────►│   Marketplace    │◄────────────────────┘
+                                │   & Trading      │
+                                │                   │
+                                └─────────┬─────────┘
+                                          │
+                                          ▼
+                              ┌───────────────────────┐
+                              │                       │
+                              │  Taxes, Fees, Rents   │
+                              │  & Value Extraction   │
+                              │                       │
+                              └───────────┬───────────┘
+                                          │
+                                          │
+                                          ▼
+                              ┌───────────────────────┐
+                              │                       │
+                              │  Reinvestment &       │
+                              │  Wealth Accumulation  │
+                              │                       │
+                              └───────────────────────┘
+```
+
+### Closed Economy Principles
+
+1. **Zero-Sum Value Capture**: The total amount of $COMPUTE in the system remains relatively constant. Economic success comes from capturing a larger share of the existing value pool rather than generating new value from nothing.
+
+2. **Value Flow Cycles**: $COMPUTE tokens flow through the system in predictable cycles:
+   - Players invest in land, buildings, and production
+   - These investments generate goods and services
+   - AI citizens and other players purchase these goods and services
+   - Revenue is collected as profit, rent, or fees
+   - Profits are reinvested to expand economic activity
+
+3. **Competitive Advantage**: Players succeed by:
+   - Securing strategic locations with higher foot traffic
+   - Creating efficient production chains
+   - Developing specialized businesses that fill market gaps
+   - Building complementary businesses that create synergies
+   - Timing investments to match market conditions
+
+4. **Economic Interdependence**: No player can succeed entirely alone:
+   - Raw materials must be sourced from specific locations
+   - Manufacturing requires specialized buildings and skills
+   - Distribution depends on transportation networks
+   - Consumption requires a population of AI citizens and other players
+
+This closed economic system creates meaningful economic gameplay where strategic decisions have lasting consequences and where cooperation can be as valuable as competition.
+
+
 ## Land Value and Rent System
 
 ### Core Components
