@@ -45,6 +45,57 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
   
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // Scrollbar styles
+  const scrollbarStyles = `
+    .scrollbar-thin::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    .scrollbar-thin::-webkit-scrollbar-track {
+      background: var(--scrollbar-track, #f5e9c8);
+      border-radius: 3px;
+    }
+    
+    .scrollbar-thin::-webkit-scrollbar-thumb {
+      background-color: var(--scrollbar-thumb, #d97706);
+      border-radius: 3px;
+    }
+    
+    .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+      background-color: var(--scrollbar-thumb-hover, #b45309);
+    }
+    
+    /* For Firefox */
+    .scrollbar-thin {
+      scrollbar-width: thin;
+      scrollbar-color: var(--scrollbar-thumb, #d97706) var(--scrollbar-track, #f5e9c8);
+    }
+    
+    /* Hide scrollbar when not needed */
+    .scrollbar-thin {
+      overflow-y: auto;
+      scrollbar-width: thin;
+    }
+    
+    @media (max-width: 640px) {
+      .scrollbar-thin {
+        max-height: 80vh;
+      }
+    }
+  `;
+
+  // Add the scrollbar styles to the document
+  useEffect(() => {
+    const styleElement = document.createElement('style');
+    styleElement.textContent = scrollbarStyles;
+    document.head.appendChild(styleElement);
+    
+    return () => {
+      // Clean up the styles when the component unmounts
+      document.head.removeChild(styleElement);
+    };
+  }, []);
 
   // Fetch user data if wallet address is provided but no direct data
   useEffect(() => {
@@ -90,28 +141,28 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
   // Determine sizes based on the size prop
   const dimensions = {
     tiny: {
-      container: 'w-16',
+      container: 'w-16 max-w-full',
       image: 'w-12 h-12',
       initials: 'w-12 h-12 text-xs',
       username: 'text-xs',
       name: 'text-xs'
     },
     small: {
-      container: 'w-20', // Increased from w-16
+      container: 'w-20 max-w-full', // Added max-w-full
       image: 'w-16 h-16', // Increased from w-12 h-12
       initials: 'w-16 h-16 text-sm', // Increased from w-12 h-12 text-xs
       username: 'text-sm', // Increased from text-xs
       name: 'text-xs'
     },
     medium: {
-      container: 'w-32', // Increased from w-24
+      container: 'w-32 max-w-full', // Added max-w-full
       image: 'w-24 h-24', // Increased from w-20 h-20
       initials: 'w-24 h-24 text-lg', // Increased from w-20 h-20 text-base
       username: 'text-base font-semibold', // Added font-semibold
       name: 'text-sm'
     },
     large: {
-      container: 'w-40', // Increased from w-32
+      container: 'w-40 max-w-full', // Added max-w-full
       image: 'w-32 h-32', // Increased from w-28 h-28
       initials: 'w-32 h-32 text-2xl', // Increased from w-28 h-28 text-xl
       username: 'text-lg font-semibold', // Added font-semibold
@@ -153,47 +204,66 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
       className={`flex flex-col items-center ${dim.container} ${className} ${onClick ? 'cursor-pointer' : ''}`}
       onClick={onClick}
     >
-      {/* Coat of Arms or Initials */}
-      {displayData.coatOfArmsImage ? (
-        <div className="rounded-full border-3 border-amber-600 overflow-hidden bg-amber-50 flex items-center justify-center shadow-md">
-          <img 
-            src={displayData.coatOfArmsImage} 
-            alt={`${displayData.username}'s Coat of Arms`}
-            className={`${dim.image} object-cover`}
-          />
+      {/* Create a scrollable container for the content */}
+      <div className="w-full overflow-y-auto max-h-full scrollbar-thin scrollbar-thumb-amber-400 scrollbar-track-amber-100">
+        {/* Coat of Arms or Initials */}
+        {displayData.coatOfArmsImage ? (
+          <div className="rounded-full border-3 border-amber-600 overflow-hidden bg-amber-50 flex items-center justify-center shadow-md mx-auto">
+            <img 
+              src={displayData.coatOfArmsImage} 
+              alt={`${displayData.username}'s Coat of Arms`}
+              className={`${dim.image} object-cover`}
+            />
+          </div>
+        ) : (
+          <div className={`${dim.initials} rounded-full border-3 border-amber-600 bg-amber-100 flex items-center justify-center shadow-md mx-auto`}>
+            <span className="text-amber-800 font-bold">
+              {displayData.firstName.charAt(0)}{displayData.lastName.charAt(0)}
+            </span>
+          </div>
+        )}
+        
+        {/* Username */}
+        <div className={`${dim.username} font-medium text-center mt-1 w-full`}>
+          {displayData.username}
         </div>
-      ) : (
-        <div className={`${dim.initials} rounded-full border-3 border-amber-600 bg-amber-100 flex items-center justify-center shadow-md`}>
-          <span className="text-amber-800 font-bold">
-            {displayData.firstName.charAt(0)}{displayData.lastName.charAt(0)}
-          </span>
-        </div>
-      )}
-      
-      {/* Username */}
-      <div className={`${dim.username} font-medium text-center mt-1 w-full`}>
-        {displayData.username}
+        
+        {/* Ducats (Compute Amount) */}
+        {showDucats && displayData.computeAmount !== undefined && (
+          <div className={`${dim.name} text-amber-700 font-semibold text-center w-full flex items-center justify-center mt-1 bg-amber-50 py-1 px-2 rounded-full border border-amber-200`}>
+            <span className="mr-1">⚜️</span> 
+            <AnimatedDucats 
+              value={displayData.computeAmount} 
+              suffix="ducats" 
+              prefix=""
+              className="inline"
+            />
+          </div>
+        )}
+        
+        {/* Family Motto - Replace the Full Name section */}
+        {(userData?.familyMotto || familyMotto) && (
+          <div className={`${dim.name} italic text-amber-600 text-center mt-1 w-full overflow-hidden text-ellipsis font-light`}>
+            "{userData?.familyMotto || familyMotto}"
+          </div>
+        )}
       </div>
       
-      {/* Ducats (Compute Amount) */}
-      {showDucats && displayData.computeAmount !== undefined && (
-        <div className={`${dim.name} text-amber-700 font-semibold text-center w-full flex items-center justify-center mt-1 bg-amber-50 py-1 px-2 rounded-full border border-amber-200`}>
-          <span className="mr-1">⚜️</span> 
-          <AnimatedDucats 
-            value={displayData.computeAmount} 
-            suffix="ducats" 
-            prefix=""
-            className="inline"
-          />
-        </div>
-      )}
-      
-      {/* Family Motto - Replace the Full Name section */}
-      {(userData?.familyMotto || familyMotto) && (
-        <div className={`${dim.name} italic text-amber-600 text-center mt-1 w-full overflow-hidden text-ellipsis font-light`}>
-          "{userData?.familyMotto || familyMotto}"
-        </div>
-      )}
+      {/* Add responsive styles for very small screens */}
+      <style jsx>{`
+        @media (max-width: 320px) {
+          .${dim.container} {
+            width: 100%;
+            padding: 0 8px;
+          }
+          
+          .${dim.image}, .${dim.initials} {
+            width: 80%;
+            height: auto;
+            aspect-ratio: 1;
+          }
+        }
+      `}</style>
     </div>
   );
 };
