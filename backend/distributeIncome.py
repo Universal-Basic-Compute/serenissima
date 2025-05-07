@@ -215,7 +215,21 @@ def send_telegram_notification(message):
             log.info("Telegram notification sent successfully")
             return True
         else:
-            log.error(f"Failed to send Telegram notification: {response.status_code} {response.text}")
+            # More detailed error logging
+            error_details = response.text
+            log.error(f"Failed to send Telegram notification: {response.status_code} {error_details}")
+            
+            # Check for specific error types
+            try:
+                error_json = response.json()
+                if error_json.get("error_code") == 400 and "chat not found" in error_json.get("description", "").lower():
+                    log.error(f"The chat ID {MAIN_TELEGRAM_CHAT_ID} was not found. Please verify the chat ID is correct and the bot is a member of the chat.")
+                elif error_json.get("error_code") == 401:
+                    log.error("Bot token is invalid. Please check your TELEGRAM_BOT_TOKEN.")
+            except:
+                # If we can't parse the JSON, just continue
+                pass
+                
             return False
     except Exception as e:
         log.error(f"Error sending Telegram notification: {str(e)}")
@@ -327,7 +341,15 @@ def distribute_income():
             f"• {average_distribution:,.0f} ⚜️ ducats per property on average\n\n"
             "Visit https://serenissima.ai to check your properties."
         )
-        send_telegram_notification(notification_message)
+        
+        # Try to send notification but continue even if it fails
+        try:
+            notification_sent = send_telegram_notification(notification_message)
+            if not notification_sent:
+                log.warning("Telegram notification could not be sent, but income distribution completed successfully")
+        except Exception as e:
+            log.error(f"Error in Telegram notification process: {str(e)}")
+            log.warning("Continuing despite Telegram notification failure")
     
     # Log summary
     log.info("Income distribution completed")
