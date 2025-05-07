@@ -11,12 +11,11 @@ export async function POST(request: Request) {
       );
     }
     
-    // Call the ElevenLabs API
-    const response = await fetch('https://api.elevenlabs.io/v2/tts', {
+    // Call the Kinos Engine API instead of ElevenLabs directly
+    const response = await fetch('https://api.kinos-engine.ai/v2/tts', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'xi-api-key': process.env.ELEVENLABS_API_KEY || '', // Make sure to set this in your .env file
       },
       body: JSON.stringify({
         text,
@@ -27,26 +26,18 @@ export async function POST(request: Request) {
     
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      console.error('ElevenLabs API error:', errorData);
+      console.error('Kinos Engine API error:', errorData);
       return NextResponse.json(
-        { success: false, error: `ElevenLabs API error: ${response.status}` },
+        { success: false, error: `Kinos Engine API error: ${response.status}` },
         { status: response.status }
       );
     }
     
-    // For simplicity, we'll return a JSON response with the audio URL
-    // In a real implementation, you might want to stream the audio directly
-    const ttsId = `tts_${Date.now()}`;
+    // Get the JSON response from Kinos Engine
+    const data = await response.json();
     
-    return NextResponse.json({
-      id: ttsId,
-      status: 'success',
-      text,
-      audio_url: `/api/tts/${ttsId}/audio`, // This would be a real endpoint in a full implementation
-      created_at: new Date().toISOString(),
-      voice_id,
-      model,
-    });
+    // Return the response directly
+    return NextResponse.json(data);
     
   } catch (error) {
     console.error('Error in TTS API:', error);

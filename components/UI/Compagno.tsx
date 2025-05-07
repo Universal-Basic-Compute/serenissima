@@ -210,7 +210,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className }) => {
       // Set the current message as playing
       setPlayingMessageId(message.id);
       
-      // Call the ElevenLabs API
+      // Call our API endpoint which will call the Kinos Engine API
       const response = await fetch('/api/tts', {
         method: 'POST',
         headers: {
@@ -227,11 +227,14 @@ const Compagno: React.FC<CompagnoProps> = ({ className }) => {
         throw new Error(`Failed to generate speech: ${response.status}`);
       }
       
-      // Get the audio URL from the response
+      // Get the response from our API
       const data = await response.json();
       
+      // Construct the full audio URL from the Kinos Engine API
+      const audioUrl = `https://api.kinos-engine.ai${data.audio_url}`;
+      
       // Create a new audio element
-      const audio = new Audio(data.audio_url);
+      const audio = new Audio(audioUrl);
       setAudioElement(audio);
       
       // Play the audio
