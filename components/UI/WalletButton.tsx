@@ -125,9 +125,20 @@ export default function WalletButton({ className = '' }: WalletButtonProps) {
               Switch Account
             </button>
             <button
-              onClick={() => {
-                connectWallet();
-                setDropdownOpen(false);
+              onClick={async () => {
+                try {
+                  // First, update the UI state immediately
+                  setDropdownOpen(false);
+                  
+                  // Then disconnect the wallet
+                  await connectWallet();
+                  
+                  // No need to do anything else here as the connectWallet function
+                  // will handle the state updates and event dispatching
+                } catch (error) {
+                  console.error("Error disconnecting wallet:", error);
+                  alert(`Failed to disconnect wallet: ${error instanceof Error ? error.message : String(error)}`);
+                }
               }}
               className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-red-500 hover:text-white transition-colors"
             >
