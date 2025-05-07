@@ -1075,7 +1075,10 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
           landId={selectedPolygonId || ''}
           landName={selectedPolygon?.historicalName || selectedPolygon?.englishName}
           price={transaction.price}
-          onConfirm={() => handleConfirmPurchase()}
+          onConfirm={() => {
+            handleConfirmPurchase();
+            return null;
+          }}
           onCancel={() => setShowPurchaseConfirmation(false)}
           isLoading={isPurchasing}
         />
