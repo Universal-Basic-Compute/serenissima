@@ -957,7 +957,7 @@ export default class PolygonRenderer {
     // Instead of creating a texture, create a colored circle
     if (polygon.centroid && polygon.id) {
       const ownerColor = polygon.owner ? this.getOwnerColor(polygon.owner) : '#8B4513';
-      this.createColoredCircleOnLand(polygon, ownerColor);
+      this.createColoredCircleOnLand(polygon, ownerColor || '#8B4513');
     }
   }
   
@@ -1122,6 +1122,7 @@ export default class PolygonRenderer {
       
       if (ownerCoatOfArmsUrl) {
         console.log(`Updating coat of arms texture for ${polygonId} with URL ${ownerCoatOfArmsUrl}`);
+        // Ensure we're passing a string, not null
         polygonMesh.updateCoatOfArmsTexture(ownerCoatOfArmsUrl);
       }
     } catch (error) {
@@ -1172,6 +1173,11 @@ export default class PolygonRenderer {
    * @returns A THREE.Texture object
    */
   private loadCoatOfArmsTexture(url: string | null): THREE.Texture {
+    if (url === null) {
+      console.log('loadCoatOfArmsTexture called with null URL');
+      return new THREE.Texture();
+    }
+    
     console.log('loadCoatOfArmsTexture is disabled in land view');
     // Return an empty texture without loading anything
     return new THREE.Texture();
