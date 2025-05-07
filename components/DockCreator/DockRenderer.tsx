@@ -221,8 +221,8 @@ const DockRenderer: React.FC<DockRendererProps> = ({ scene, active }) => {
     );
     dockModel.rotation.y = dock.rotation;
     
-    // Scale the model appropriately (adjust as needed based on the model)
-    dockModel.scale.set(1, 1, 1);
+    // Scale the model to half its original size
+    dockModel.scale.set(0.5, 0.5, 0.5);
     
     // Add to scene
     scene.add(dockModel);
@@ -251,11 +251,11 @@ const DockRenderer: React.FC<DockRendererProps> = ({ scene, active }) => {
   
   // Fallback rendering if model fails to load
   const renderFallbackDock = (dock: DockData) => {
-    // Create a more detailed dock mesh
+    // Create a more detailed dock mesh at half the original size
     const dockGroup = new THREE.Group();
     
-    // Main dock platform
-    const platformGeometry = new THREE.BoxGeometry(2, 0.2, 5);
+    // Main dock platform - half the original size
+    const platformGeometry = new THREE.BoxGeometry(1, 0.2, 2.5); // Was 2x0.2x5
     const woodMaterial = new THREE.MeshStandardMaterial({ 
       color: 0x8B4513, // Brown color for wood
       roughness: 0.8,
@@ -273,12 +273,12 @@ const DockRenderer: React.FC<DockRendererProps> = ({ scene, active }) => {
       metalness: 0.1
     });
     
-    // Add four posts at the corners
+    // Add four posts at the corners - adjust positions for smaller size
     const postPositions = [
-      [-0.9, 0.15, -2.4],
-      [0.9, 0.15, -2.4],
-      [-0.9, 0.15, 2.4],
-      [0.9, 0.15, 2.4]
+      [-0.45, 0.15, -1.2], // Half of original [-0.9, 0.15, -2.4]
+      [0.45, 0.15, -1.2],  // Half of original [0.9, 0.15, -2.4]
+      [-0.45, 0.15, 1.2],  // Half of original [-0.9, 0.15, 2.4]
+      [0.45, 0.15, 1.2]    // Half of original [0.9, 0.15, 2.4]
     ];
     
     postPositions.forEach(pos => {

@@ -128,6 +128,9 @@ export class DockCreationManager {
         // Set up the model
         const model = gltf.scene;
         
+        // Scale the model to half its size
+        model.scale.set(0.5, 0.5, 0.5); // Make the model twice as small
+        
         // Apply materials and settings
         model.traverse((child) => {
           if (child instanceof THREE.Mesh) {
@@ -172,8 +175,8 @@ export class DockCreationManager {
    * Create a fallback preview mesh for the dock (used until the model loads)
    */
   private createFallbackPreviewMesh(): void {
-    // Create a simple dock mesh for preview
-    const geometry = new THREE.BoxGeometry(2, 0.2, 5);
+    // Create a simple dock mesh for preview - half the original size
+    const geometry = new THREE.BoxGeometry(1, 0.2, 2.5); // Half the original size (was 2x0.2x5)
     const material = new THREE.MeshBasicMaterial({
       color: 0x8B4513, // Brown color for wood
       transparent: true,
@@ -210,20 +213,20 @@ export class DockCreationManager {
       // Find nearest water edge and adjacent land
       const { position, landId, edge } = this.waterEdgeDetector.findNearestWaterEdge(intersection);
       
-      if (position && landId) {
-        // Update preview mesh position
+      if (position && landId && edge) {
+        // Snap the dock precisely to the edge
         activeMesh.position.copy(position);
         activeMesh.position.y = 0.1; // Slightly above water level
         activeMesh.visible = true;
         this.adjacentLandId = landId;
         this.currentEdge = edge;
         
-        // If we have an edge, automatically align the dock perpendicular to it
-        if (edge) {
-          const direction = new THREE.Vector3().subVectors(edge.end, edge.start).normalize();
-          const angle = Math.atan2(direction.z, direction.x);
-          activeMesh.rotation.y = angle + Math.PI/2; // Perpendicular to edge
-        }
+        // Calculate the direction vector of the edge
+        const direction = new THREE.Vector3().subVectors(edge.end, edge.start).normalize();
+        
+        // Calculate the angle for proper alignment perpendicular to the edge
+        const angle = Math.atan2(direction.z, direction.x);
+        activeMesh.rotation.y = angle + Math.PI/2; // Perpendicular to edge
         
         // Update material color to indicate valid placement
         if (!this.isModelLoaded && this.fallbackPreviewMesh && 
@@ -299,23 +302,25 @@ export class DockCreationManager {
     const points = [];
     
     // Front connection point (for roads connecting to the dock)
+    // Adjust distance to account for smaller size
     points.push({
-      x: position.x + Math.sin(rotation) * 2.5,
+      x: position.x + Math.sin(rotation) * 1.25, // Half of original 2.5
       y: position.y + 0.2,
-      z: position.z + Math.cos(rotation) * 2.5
+      z: position.z + Math.cos(rotation) * 1.25
     });
     
     // Side connection points (for roads running alongside the dock)
+    // Adjust distance to account for smaller size
     points.push({
-      x: position.x + Math.sin(rotation + Math.PI/2) * 1,
+      x: position.x + Math.sin(rotation + Math.PI/2) * 0.5, // Half of original 1
       y: position.y + 0.2,
-      z: position.z + Math.cos(rotation + Math.PI/2) * 1
+      z: position.z + Math.cos(rotation + Math.PI/2) * 0.5
     });
     
     points.push({
-      x: position.x + Math.sin(rotation - Math.PI/2) * 1,
+      x: position.x + Math.sin(rotation - Math.PI/2) * 0.5, // Half of original 1
       y: position.y + 0.2,
-      z: position.z + Math.cos(rotation - Math.PI/2) * 1
+      z: position.z + Math.cos(rotation - Math.PI/2) * 0.5
     });
     
     return points;

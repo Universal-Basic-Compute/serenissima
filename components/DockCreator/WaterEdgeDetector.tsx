@@ -43,8 +43,19 @@ export class WaterEdgeDetector {
       }
     }
     
-    // Only return if within a reasonable distance (10 units)
-    if (closestDistance < 10 && closestPoint) {
+    // Only return if within a reasonable distance (5 units instead of 10)
+    // This makes it snap more precisely to edges
+    if (closestDistance < 5 && closestPoint) {
+      // Ensure the point is exactly on the edge
+      if (closestEdge) {
+        // Calculate a position that's slightly offset from the land edge toward the water
+        const edgeDirection = new THREE.Vector3().subVectors(closestEdge.end, closestEdge.start).normalize();
+        const perpendicular = new THREE.Vector3(-edgeDirection.z, 0, edgeDirection.x).normalize();
+        
+        // Move the point slightly away from land (0.1 units) to ensure it's over water
+        closestPoint.add(perpendicular.multiplyScalar(0.1));
+      }
+      
       return { 
         position: closestPoint, 
         landId: closestLandId,

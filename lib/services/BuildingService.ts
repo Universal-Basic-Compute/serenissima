@@ -215,23 +215,25 @@ export class BuildingService {
     const points = [];
     
     // Front connection point (for roads connecting to the dock)
+    // Adjust distance to account for smaller size
     points.push({
-      x: position.x + Math.sin(rotation) * 2.5,
+      x: position.x + Math.sin(rotation) * 1.25, // Half of original 2.5
       y: position.y + 0.2,
-      z: position.z + Math.cos(rotation) * 2.5
+      z: position.z + Math.cos(rotation) * 1.25
     });
     
     // Side connection points (for roads running alongside the dock)
+    // Adjust distance to account for smaller size
     points.push({
-      x: position.x + Math.sin(rotation + Math.PI/2) * 1,
+      x: position.x + Math.sin(rotation + Math.PI/2) * 0.5, // Half of original 1
       y: position.y + 0.2,
-      z: position.z + Math.cos(rotation + Math.PI/2) * 1
+      z: position.z + Math.cos(rotation + Math.PI/2) * 0.5
     });
     
     points.push({
-      x: position.x + Math.sin(rotation - Math.PI/2) * 1,
+      x: position.x + Math.sin(rotation - Math.PI/2) * 0.5, // Half of original 1
       y: position.y + 0.2,
-      z: position.z + Math.cos(rotation - Math.PI/2) * 1
+      z: position.z + Math.cos(rotation - Math.PI/2) * 0.5
     });
     
     return points;
