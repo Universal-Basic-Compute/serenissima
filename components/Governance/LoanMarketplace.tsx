@@ -3,15 +3,47 @@ import { useLoanStore } from '@/store/loanStore';
 import { LoanData, LoanStatus, LoanPurpose } from '@/lib/services/LoanService';
 import { getWalletAddress } from '@/lib/walletUtils';
 import { ErrorBoundary } from '@/components/UI/ErrorBoundary';
+import { eventBus, EventTypes } from '@/lib/eventBus';
 
 const LoanMarketplace: React.FC = () => {
-  const { availableLoans, loading, error, loadAvailableLoans } = useLoanStore();
+  const { availableLoans: storeLoans, loading, error, loadAvailableLoans } = useLoanStore();
+  const [availableLoans, setAvailableLoans] = useState<LoanData[]>([]);
   const [sortField, setSortField] = useState<keyof LoanData>('interestRate');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [selectedLoanType, setSelectedLoanType] = useState<'all' | 'treasury' | 'private'>('all');
+  const [notification, setNotification] = useState<{message: string, type: 'success' | 'info' | 'error'} | null>(null);
   
   useEffect(() => {
     loadAvailableLoans();
+    
+    // Subscribe to loan-related events to update the marketplace in real-time
+    const loanOfferCreatedSubscription = eventBus.subscribe(
+      EventTypes.LOAN_OFFER_CREATED, 
+      (data) => {
+        // Add the new loan to the available loans list
+        if (data.loan && data.loan.status === LoanStatus.AVAILABLE) {
+          setAvailableLoans(prevLoans => [...prevLoans, data.loan]);
+        }
+      }
+    );
+    
+    const loanAppliedSubscription = eventBus.subscribe(
+      EventTypes.LOAN_APPLIED, 
+      (data) => {
+        // Remove the loan from available loans if it was just applied for
+        if (data.loan && data.loan.id) {
+          setAvailableLoans(prevLoans => 
+            prevLoans.filter(loan => loan.id !== data.loan.id)
+          );
+        }
+      }
+    );
+    
+    // Clean up subscriptions when component unmounts
+    return () => {
+      loanOfferCreatedSubscription.unsubscribe();
+      loanAppliedSubscription.unsubscribe();
+    };
   }, [loadAvailableLoans]);
   
   const handleSort = (field: keyof LoanData) => {
@@ -22,6 +54,48 @@ const LoanMarketplace: React.FC = () => {
       setSortDirection('asc');
     }
   };
+  
+  // Update local state when store loans change
+  useEffect(() => {
+    setAvailableLoans(storeLoans);
+  }, [storeLoans]);
+  
+  // Show notification when events occur
+  useEffect(() => {
+    const handleLoanApplied = (data: any) => {
+      setNotification({
+        message: `Loan application submitted successfully!`,
+        type: 'success'
+      });
+      
+      // Clear notification after 5 seconds
+      setTimeout(() => {
+        setNotification(null);
+      }, 5000);
+    };
+    
+    const handleLoanOfferCreated = (data: any) => {
+      setNotification({
+        message: `New loan offer created: ${data.loan?.name || 'Unnamed loan'}`,
+        type: 'info'
+      });
+      
+      // Clear notification after 5 seconds
+      setTimeout(() => {
+        setNotification(null);
+      }, 5000);
+    };
+    
+    // Subscribe to events
+    const loanAppliedSubscription = eventBus.subscribe(EventTypes.LOAN_APPLIED, handleLoanApplied);
+    const loanOfferCreatedSubscription = eventBus.subscribe(EventTypes.LOAN_OFFER_CREATED, handleLoanOfferCreated);
+    
+    // Clean up subscriptions
+    return () => {
+      loanAppliedSubscription.unsubscribe();
+      loanOfferCreatedSubscription.unsubscribe();
+    };
+  }, []);
   
   const filteredLoans = availableLoans.filter(loan => {
     if (selectedLoanType === 'all') return true;
@@ -59,6 +133,23 @@ const LoanMarketplace: React.FC = () => {
         <h2 className="text-2xl font-serif text-amber-800 mb-6 text-center">
           Loan Marketplace of La Serenissima
         </h2>
+        
+        {/* Notification banner */}
+        {notification && (
+          <div className={`mb-6 p-4 rounded-md ${
+            notification.type === 'success' ? 'bg-green-100 text-green-800 border border-green-300' :
+            notification.type === 'error' ? 'bg-red-100 text-red-800 border border-red-300' :
+            'bg-blue-100 text-blue-800 border border-blue-300'
+          }`}>
+            <div className="flex items-center">
+              <span className="mr-2">
+                {notification.type === 'success' ? '✓' : 
+                 notification.type === 'error' ? '✗' : 'ℹ'}
+              </span>
+              <p>{notification.message}</p>
+            </div>
+          </div>
+        )}
         
         {/* Loan type filter */}
         <div className="flex justify-center mb-6">

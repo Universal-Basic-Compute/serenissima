@@ -3,6 +3,7 @@ import { useLoanStore } from '@/store/loanStore';
 import { LoanData, LoanPurpose } from '@/lib/services/LoanService';
 import { getWalletAddress } from '@/lib/walletUtils';
 import { ErrorBoundary } from '@/components/UI/ErrorBoundary';
+import { eventBus, EventTypes } from '@/lib/eventBus';
 
 interface LoanApplicationModalProps {
   loan: LoanData;
@@ -35,7 +36,7 @@ const LoanApplicationModal: React.FC<LoanApplicationModalProps> = ({ loan, onClo
         throw new Error('Please connect your wallet first');
       }
       
-      await applyForLoan({
+      const result = await applyForLoan({
         loanId: loan.id,
         borrower: walletAddress,
         principalAmount: loanAmount,
@@ -43,8 +44,16 @@ const LoanApplicationModal: React.FC<LoanApplicationModalProps> = ({ loan, onClo
         applicationText
       });
       
-      // Show success message and close modal
-      alert('Loan application submitted successfully!');
+      // The event is already emitted in the store, but we can add more specific data here
+      eventBus.emit(EventTypes.LOAN_APPLIED, { 
+        loan: result,
+        borrower: walletAddress,
+        loanAmount,
+        loanPurpose,
+        lender: loan.lender
+      });
+      
+      // Close modal - no need for alert as we'll show a notification via the event system
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));

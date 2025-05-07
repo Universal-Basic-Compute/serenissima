@@ -3,6 +3,7 @@ import { useLoanStore } from '@/store/loanStore';
 import { LoanData, LoanStatus } from '@/lib/services/LoanService';
 import { getWalletAddress } from '@/lib/walletUtils';
 import { ErrorBoundary } from '@/components/UI/ErrorBoundary';
+import { eventBus, EventTypes } from '@/lib/eventBus';
 
 const LoanManagementDashboard: React.FC = () => {
   const { userLoans, loading, error, loadUserLoans, makePayment } = useLoanStore();
@@ -17,6 +18,33 @@ const LoanManagementDashboard: React.FC = () => {
     if (walletAddress) {
       loadUserLoans(walletAddress);
     }
+    
+    // Subscribe to loan-related events to update the dashboard in real-time
+    const loanPaymentMadeSubscription = eventBus.subscribe(
+      EventTypes.LOAN_PAYMENT_MADE, 
+      (data) => {
+        // Refresh loans after payment
+        if (walletAddress) {
+          loadUserLoans(walletAddress);
+        }
+      }
+    );
+    
+    const loanAppliedSubscription = eventBus.subscribe(
+      EventTypes.LOAN_APPLIED, 
+      (data) => {
+        // Refresh loans after application
+        if (walletAddress) {
+          loadUserLoans(walletAddress);
+        }
+      }
+    );
+    
+    // Clean up subscriptions when component unmounts
+    return () => {
+      loanPaymentMadeSubscription.unsubscribe();
+      loanAppliedSubscription.unsubscribe();
+    };
   }, [loadUserLoans]);
   
   const handleOpenPaymentModal = (loan: LoanData) => {
@@ -34,7 +62,20 @@ const LoanManagementDashboard: React.FC = () => {
     try {
       await makePayment(selectedLoan.id, paymentAmount);
       setIsPaymentModalOpen(false);
-      alert('Payment successful!');
+      
+      // Emit event for loan paid off if balance is now zero
+      if (selectedLoan.remainingBalance - paymentAmount <= 0) {
+        eventBus.emit(EventTypes.LOAN_PAID_OFF, { 
+          loanId: selectedLoan.id,
+          loanName: selectedLoan.name
+        });
+      }
+      
+      // Use notification instead of alert for better UX
+      eventBus.emit('showNotification', {
+        message: 'Payment successful!',
+        type: 'success'
+      });
     } catch (err) {
       setPaymentError(err instanceof Error ? err.message : String(err));
     } finally {
