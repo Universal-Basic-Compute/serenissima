@@ -56,6 +56,13 @@ export default function SimplePage() {
   const [cacheCleared, setCacheCleared] = useState<boolean>(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [landRendered, setLandRendered] = useState(false);
+  const [showLandPurchaseModal, setShowLandPurchaseModal] = useState<boolean>(false);
+  const [landPurchaseData, setLandPurchaseData] = useState<{
+    landId: string;
+    landName?: string;
+    transaction: any;
+    onComplete?: () => void;
+  } | null>(null);
   const [userProfile, setUserProfile] = useState<{
     username: string;
     firstName: string;
