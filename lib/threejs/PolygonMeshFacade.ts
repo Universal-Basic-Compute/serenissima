@@ -366,7 +366,7 @@ export class PolygonMeshFacade implements Poolable {
             material.color.set(0xffff00);
           } else {
             // Restore original color
-            if (this.originalColor) {
+            if (this.originalColor && material.color instanceof THREE.Color) {
               material.color.copy(this.originalColor);
             }
           }
@@ -407,7 +407,10 @@ export class PolygonMeshFacade implements Poolable {
               hoverColor.r = Math.min(1, hoverColor.r * 1.2);
               hoverColor.g = Math.min(1, hoverColor.g * 1.2);
               hoverColor.b = Math.min(1, hoverColor.b * 1.2);
-              material.color.copy(hoverColor);
+              // Ensure material.color is a THREE.Color before calling copy
+              if (material.color instanceof THREE.Color) {
+                material.color.copy(hoverColor);
+              }
             }
           } else {
             // Restore original color
