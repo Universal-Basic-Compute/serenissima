@@ -83,7 +83,7 @@ button:hover, a:hover {
 
 /* Parchment-like bubble effects */
 .assistant-bubble {
-  background: linear-gradient(to bottom, #fdba74, #fb923c); /* Changed to lighter orange */
+  background: linear-gradient(145deg, #f97316, #fbbf24); /* Orange to amber/yellow gradient */
   color: #7c2d12; /* Darker text for contrast */
   border: 1px solid #f97316;
   box-shadow: 
@@ -112,8 +112,8 @@ button:hover, a:hover {
 }
 
 .user-bubble {
-  background: linear-gradient(to bottom, #fdba74, #fb923c); /* Changed to lighter orange like assistant bubble */
-  color: #7c2d12; /* Changed from white to dark orange/brown for better readability */
+  background: linear-gradient(145deg, #f97316, #fbbf24); /* Orange to amber/yellow gradient */
+  color: #7c2d12; /* Dark orange/brown for better readability */
   border: 1px solid #f97316;
   box-shadow: 
     0 2px 5px rgba(0, 0, 0, 0.1),
@@ -200,7 +200,7 @@ button:hover, a:hover {
 
 /* Typing indicator with parchment-like effect */
 .typing-indicator {
-  background: linear-gradient(to bottom, #fdba74, #fb923c);
+  background: linear-gradient(145deg, #f97316, #fbbf24);
   border: 1px solid #f97316;
   box-shadow: 
     0 2px 5px rgba(0, 0, 0, 0.1),
