@@ -149,6 +149,11 @@ export default class PolygonRenderer {
     // Store users data
     this.users = users || {};
     
+    // Add event listener for cache clearing
+    if (typeof window !== 'undefined') {
+      window.addEventListener('clearPolygonRendererCaches', this.clearCaches.bind(this));
+    }
+    
     // Process users data to create coat of arms map and color map
     if (users) {
       try {
@@ -1179,10 +1184,83 @@ export default class PolygonRenderer {
   }
   
   /**
+   * Clear caches method to handle the clearPolygonRendererCaches event
+   */
+  private clearCaches(): void {
+    log.info('Clearing PolygonRenderer caches');
+    
+    // Clear coat of arms cache
+    this.ownerCoatOfArmsMap = {};
+    log.info('Coat of arms cache cleared');
+    
+    // Clear owner color map
+    this.ownerColorMap = {};
+    log.info('Owner color map cleared');
+    
+    // Remove all coat of arms sprites
+    withErrorHandling(
+      () => {
+        Object.values(this.coatOfArmSprites).forEach(obj => {
+          try {
+            this.facade.removeFromScene(obj);
+            if (obj instanceof THREE.Mesh) {
+              if (obj.geometry) obj.geometry.dispose();
+              if (obj.material) {
+                if (Array.isArray(obj.material)) {
+                  obj.material.forEach((mat: THREE.Material) => {
+                    try {
+                      if ('map' in mat && (mat as THREE.MeshBasicMaterial | THREE.MeshStandardMaterial).map) {
+                        (mat as THREE.MeshBasicMaterial | THREE.MeshStandardMaterial).map?.dispose();
+                      }
+                      mat.dispose();
+                    } catch (matError) {
+                      log.error('Error disposing material:', matError);
+                    }
+                  });
+                } else {
+                  try {
+                    if ('map' in obj.material && (obj.material as THREE.MeshBasicMaterial | THREE.MeshStandardMaterial).map) {
+                      (obj.material as THREE.MeshBasicMaterial | THREE.MeshStandardMaterial).map?.dispose();
+                    }
+                    obj.material.dispose();
+                  } catch (matError) {
+                    log.error('Error disposing material:', matError);
+                  }
+                }
+              }
+            }
+          } catch (objError) {
+            log.error('Error removing coat of arms object:', objError);
+          }
+        });
+        this.coatOfArmSprites = {};
+        log.info('Coat of arms sprites cleared');
+      },
+      RenderingErrorType.RESOURCE_DISPOSAL,
+      'clear-coat-of-arms-sprites'
+    );
+    
+    // Force THREE.js to clear its texture cache
+    if (THREE.Cache) {
+      THREE.Cache.clear();
+      log.info('THREE.js texture cache cleared');
+    }
+    
+    // Update the view mode to regenerate everything
+    this.updateViewMode(this.activeView);
+    log.info('View mode updated to regenerate visuals');
+  }
+
+  /**
    * Clean up resources with error handling
    */
   public cleanup() {
     log.info(`Cleaning up PolygonRenderer with ${this.polygonMeshes.length} meshes`);
+    
+    // Remove event listener for cache clearing
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('clearPolygonRendererCaches', this.clearCaches.bind(this));
+    }
     
     // Clean up all polygon meshes with error handling
     this.polygonMeshes.forEach(polygonMesh => {

@@ -225,6 +225,13 @@ export default function SimplePage() {
         console.log('THREE.js texture cache cleared');
       }
       
+      // Clear coat of arms cache in PolygonRenderer
+      if (typeof window !== 'undefined') {
+        // Use a custom event to notify PolygonRenderer to clear its caches
+        window.dispatchEvent(new CustomEvent('clearPolygonRendererCaches'));
+        console.log('Dispatched event to clear PolygonRenderer caches');
+      }
+      
       // Reset any global state
       if (typeof window.getCachedSnapshot === 'function') {
         // Use type assertion to handle the delete operation properly
