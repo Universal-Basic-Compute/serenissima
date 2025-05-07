@@ -116,8 +116,8 @@ function calculateBaseRent(areaInSquareMeters) {
   // Reduce the exponent from 0.15 to 0.10 (making area even less important)
   const sizeFactor = Math.pow(areaInSquareMeters / REFERENCE_SIZE, 0.10);
   
-  // Calculate base rent
-  return REFERENCE_RENT * sizeFactor;
+  // Calculate base rent and multiply by 100
+  return REFERENCE_RENT * sizeFactor * 100;
 }
 
 // Update Airtable with the calculated rent values
