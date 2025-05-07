@@ -143,6 +143,9 @@ const DockCreator: React.FC<DockCreatorProps> = ({
     console.log('DockCreator: Adding document event listeners');
     
     const handleDocumentMouseMove = (e: MouseEvent) => {
+      // Only handle left mouse button or no button events
+      if ((e.buttons !== 1 && e.buttons !== 0) || e.button !== 0) return;
+      
       if (!managerRef.current) return;
       console.log('Document mouse move detected at', e.clientX, e.clientY);
       managerRef.current.updateMousePosition(e.clientX, e.clientY);
@@ -156,6 +159,9 @@ const DockCreator: React.FC<DockCreatorProps> = ({
     };
     
     const handleDocumentClick = (e: MouseEvent) => {
+      // Only handle left mouse button clicks
+      if (e.button !== 0) return;
+      
       console.log('Document click detected at', e.clientX, e.clientY);
       // Call the handleClick function directly
       handleClick();
@@ -308,18 +314,42 @@ const DockCreator: React.FC<DockCreatorProps> = ({
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundColor: 'rgba(0,0,255,0.05)', // Blue tint for debugging
-          zIndex: 1000 // Much higher z-index
+          backgroundColor: 'rgba(0,0,255,0.01)', // Make it almost invisible
+          zIndex: 1000 // Keep high z-index
         }}
         onMouseMove={(e) => {
-          console.log('Overlay mouse move detected at', e.clientX, e.clientY);
-          handleMouseMove(e);
+          // Only handle left mouse button events for dock placement
+          if (e.buttons === 1 || e.buttons === 0) {
+            console.log('Overlay mouse move detected at', e.clientX, e.clientY);
+            handleMouseMove(e);
+          }
+          // Let other mouse events pass through
         }}
         onClick={(e) => {
-          console.log('Overlay click detected at', e.clientX, e.clientY);
-          e.preventDefault();
+          // Only handle left mouse button clicks for dock placement
+          if (e.button === 0) {
+            console.log('Overlay click detected at', e.clientX, e.clientY);
+            e.preventDefault();
+            e.stopPropagation();
+            handleClick();
+          }
+          // Let other mouse events pass through
+        }}
+        onContextMenu={(e) => {
+          // Let right-click events pass through to the camera controls
           e.stopPropagation();
-          handleClick();
+          return true;
+        }}
+        onMouseDown={(e) => {
+          // Only capture left mouse button events
+          if (e.button !== 0) {
+            // For middle and right mouse buttons, don't prevent default
+            return true;
+          }
+        }}
+        onWheel={(e) => {
+          // Let wheel events pass through to the camera controls
+          return true;
         }}
       />
       
