@@ -3,6 +3,14 @@
 # Log startup
 echo "Starting application setup..."
 
+# Install required Python packages from requirements.txt
+echo "Installing Python requirements..."
+pip install -r backend/requirements.txt
+
+# Install required Node.js packages
+echo "Installing required Node.js packages..."
+npm install dotenv @solana/web3.js @solana/spl-token
+
 # Make the distribution script executable
 chmod +x backend/distributeIncome.py
 echo "Made distributeIncome.py executable"
