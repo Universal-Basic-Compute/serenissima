@@ -121,7 +121,7 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
     }
   };
 
-  const dim = dimensions[responsiveSize];
+  const dim = dimensions[size];
   
   // Show loading state
   if (isLoading) {
