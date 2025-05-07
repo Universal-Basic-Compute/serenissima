@@ -56,6 +56,13 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
   // Add this useEffect to render the top view of the land
   useEffect(() => {
     if (selectedPolygon && canvasRef.current && !landRendered) {
+      // Clear the canvas first to remove any previous rendering
+      const ctx = canvasRef.current.getContext('2d');
+      if (ctx) {
+        ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+      }
+      
+      // Now render the new polygon
       renderLandTopView(selectedPolygon, canvasRef.current);
       setLandRendered(true);
     }
@@ -280,6 +287,13 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
       setIsVisible(true);
     }
   }, [preventAutoClose, selectedPolygonId]);
+  
+  // Reset landRendered when selectedPolygonId changes
+  useEffect(() => {
+    if (selectedPolygonId) {
+      setLandRendered(false);
+    }
+  }, [selectedPolygonId]);
   
   // Add this useEffect to listen for the custom event to keep panel open
   useEffect(() => {
