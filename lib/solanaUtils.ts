@@ -7,6 +7,7 @@ import {
   createTransferInstruction,
   getAccount
 } from '@solana/spl-token';
+import '../components/types/phantom'; // Import the Phantom type definitions
 
 // Constants for token decimal handling
 const COMPUTE_DECIMALS = 6;
@@ -274,18 +275,5 @@ export async function prepareInjectComputeTransaction(
   } catch (error) {
     console.error('Error preparing COMPUTE token injection transaction:', error);
     throw error;
-  }
-}
-// Add a type definition for the window.solana object
-declare global {
-  interface Window {
-    solana?: {
-      isPhantom?: boolean;
-      connect: () => Promise<{ publicKey: any }>;
-      disconnect: () => Promise<void>;
-      signTransaction: (transaction: any) => Promise<any>;
-      signAllTransactions: (transactions: any[]) => Promise<any[]>;
-      signMessage: (message: Uint8Array, encoding: string) => Promise<{ signature: Uint8Array }>;
-    };
   }
 }
