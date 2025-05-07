@@ -5,6 +5,7 @@ import * as THREE from 'three';
 import SimpleCamera from './SimpleCamera';
 import { WaterFacade as SimpleWater, WaterQualityLevel } from './SimpleWater';
 import SimplePolygonRenderer from './SimplePolygonRenderer';
+import { IncomePolygonRenderer } from '../../lib/threejs/IncomePolygonRenderer';
 import { calculateBounds } from './utils';
 import { getApiBaseUrl } from '@/lib/apiUtils';
 import LandDetailsPanel from './LandDetailsPanel'; // Import the existing panel
@@ -24,6 +25,7 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
   const cameraControllerRef = useRef<SimpleCamera | null>(null);
   const waterRef = useRef<SimpleWater | null>(null);
   const polygonRendererRef = useRef<SimplePolygonRenderer | null>(null);
+  const incomeRendererRef = useRef<IncomePolygonRenderer | null>(null);
   
   // State for land selection and details panel
   const [selectedPolygonId, setSelectedPolygonId] = useState<string | null>(null);
@@ -204,6 +206,17 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
     });
     polygonRendererRef.current = polygonRenderer;
     
+    // Create income renderer if in land view
+    if (activeView === 'land') {
+      console.log('Creating income renderer for land view');
+      const incomeRenderer = new IncomePolygonRenderer({
+        scene,
+        polygons,
+        bounds
+      });
+      incomeRendererRef.current = incomeRenderer;
+    }
+    
     // Add ambient light
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
     scene.add(ambientLight);
@@ -250,6 +263,7 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
       window.removeEventListener('resize', handleResize);
       
       if (polygonRendererRef.current) polygonRendererRef.current.cleanup();
+      if (incomeRendererRef.current) incomeRendererRef.current.cleanup();
       if (waterRef.current) waterRef.current.dispose();
       if (cameraController) cameraController.cleanup();
       if (renderer) renderer.dispose();
@@ -273,6 +287,11 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
   useEffect(() => {
     if (polygonRendererRef.current) {
       polygonRendererRef.current.updateViewMode(activeView);
+    }
+    
+    // Show/hide income visualization based on view mode
+    if (incomeRendererRef.current) {
+      incomeRendererRef.current.setVisible(activeView === 'land');
     }
   }, [activeView]);
   

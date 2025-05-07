@@ -777,14 +777,9 @@ export default function Home() {
     const handleIncomeDataUpdated = (data: any) => {
       console.log('Income data updated:', data);
       
-      // Force an update of the view mode to refresh colors
-      if (polygonRendererRef.current && activeView === 'land') {
-        if (typeof polygonRendererRef.current.updatePolygonIncomeColors === 'function') {
-          polygonRendererRef.current.updatePolygonIncomeColors();
-        } else {
-          // Fallback to updating the view mode
-          polygonRendererRef.current.updateViewMode(activeView);
-        }
+      // Update the income visualization if we're in land view
+      if (incomeRendererRef.current && activeView === 'land') {
+        incomeRendererRef.current.updateIncomeVisualization();
       }
     };
     
@@ -792,21 +787,16 @@ export default function Home() {
     const handlePolygonIncomeUpdated = (data: any) => {
       console.log('Polygon income updated:', data);
       
-      // If we're in land view, update the specific polygon
-      if (polygonRendererRef.current && activeView === 'land') {
+      // If we're in land view, update the income visualization
+      if (incomeRendererRef.current && activeView === 'land') {
         // Find the polygon in our data
         const polygon = polygons.find(p => p.id === data.polygonId);
         if (polygon) {
           // Update the polygon's simulated income
           polygon.simulatedIncome = data.income;
           
-          // Force an update of the overlay for this polygon
-          if (typeof polygonRendererRef.current.updatePolygonIncomeColors === 'function') {
-            polygonRendererRef.current.updatePolygonIncomeColors();
-          } else {
-            // Fallback to updating the view mode
-            polygonRendererRef.current.updateViewMode(activeView);
-          }
+          // Update the income visualization
+          incomeRendererRef.current.updateIncomeVisualization();
         }
       }
     };
@@ -823,10 +813,20 @@ export default function Home() {
         handlePolygonIncomeUpdated
       );
       
+      // Also listen for custom events
+      const handleCustomIncomeDataUpdated = (event: CustomEvent) => {
+        if (incomeRendererRef.current && activeView === 'land') {
+          incomeRendererRef.current.updateIncomeVisualization();
+        }
+      };
+      
+      window.addEventListener('incomeDataUpdated', handleCustomIncomeDataUpdated as EventListener);
+      
       // Cleanup subscriptions
       return () => {
         incomeDataSubscription.unsubscribe();
         polygonIncomeSubscription.unsubscribe();
+        window.removeEventListener('incomeDataUpdated', handleCustomIncomeDataUpdated as EventListener);
       };
     } catch (error) {
       console.warn('Error setting up income data event handlers:', error);
