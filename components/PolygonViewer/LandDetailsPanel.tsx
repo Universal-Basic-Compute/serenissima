@@ -582,8 +582,6 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
                   walletAddress={owner}
                   size="medium"
                   className="mx-auto"
-                  showCoatOfArms={true} // Explicitly enable coat of arms display
-                  coatOfArmsSize="large" // Make coat of arms more prominent
                 />
               </div>
             ) : (
