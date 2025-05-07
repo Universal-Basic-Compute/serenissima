@@ -95,33 +95,33 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
       container: 'w-14 max-w-full',
       image: 'w-10 h-10',
       initials: 'w-10 h-10 text-xs',
-      username: 'text-xs',
-      name: 'text-xs'
+      username: 'text-xs truncate',
+      name: 'text-xs truncate'
     },
     small: {
       container: 'w-18 max-w-full',
       image: 'w-14 h-14',
       initials: 'w-14 h-14 text-sm',
-      username: 'text-sm',
-      name: 'text-xs'
+      username: 'text-sm truncate',
+      name: 'text-xs truncate'
     },
     medium: {
       container: 'w-32 max-w-full',
       image: 'w-24 h-24',
       initials: 'w-24 h-24 text-lg',
-      username: 'text-base font-semibold',
-      name: 'text-sm'
+      username: 'text-base font-semibold truncate',
+      name: 'text-sm truncate'
     },
     large: {
       container: 'w-40 max-w-full',
       image: 'w-32 h-32',
       initials: 'w-32 h-32 text-2xl',
-      username: 'text-lg font-semibold',
-      name: 'text-base'
+      username: 'text-lg font-semibold truncate',
+      name: 'text-base truncate'
     }
   };
 
-  const dim = dimensions[size];
+  const dim = dimensions[responsiveSize];
   
   // Show loading state
   if (isLoading) {
@@ -181,20 +181,20 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
         
         {/* Ducats (Compute Amount) */}
         {showDucats && displayData.computeAmount !== undefined && (
-          <div className={`${dim.name} text-amber-700 font-semibold text-center w-full flex items-center justify-center mt-1 bg-amber-50 py-1 px-2 rounded-full border border-amber-200 ducats-text`}>
+          <div className={`${dim.name} text-amber-700 font-semibold text-center w-full flex items-center justify-center mt-1 bg-amber-50 py-1 px-2 rounded-full border border-amber-200 ducats-text truncate`}>
             <span className="mr-1">⚜️</span> 
             <AnimatedDucats 
               value={displayData.computeAmount} 
               suffix="ducats" 
               prefix=""
-              className="inline"
+              className="inline truncate"
             />
           </div>
         )}
         
         {/* Family Motto - Replace the Full Name section */}
         {(userData?.familyMotto || familyMotto) && (
-          <div className={`${dim.name} italic text-amber-600 text-center mt-1 w-full overflow-hidden text-ellipsis font-light motto-text line-clamp-2`}>
+          <div className={`${dim.name} italic text-amber-600 text-center mt-1 w-full font-light motto-text line-clamp-2`}>
             "{userData?.familyMotto || familyMotto}"
           </div>
         )}
@@ -205,7 +205,7 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
         @media (max-width: 320px) {
           .${dim.container} {
             width: 100%;
-            padding: 0 8px;
+            padding: 0 4px;
           }
           
           .${dim.image}, .${dim.initials} {
@@ -218,13 +218,20 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
         /* Add responsive text sizing */
         @media (max-width: 480px) {
           .username-text {
-            font-size: 0.875rem;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
           }
           .motto-text {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
           }
           .ducats-text {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
           }
         }
       `}</style>

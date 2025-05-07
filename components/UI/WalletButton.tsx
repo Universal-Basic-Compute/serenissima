@@ -29,10 +29,10 @@ export default function WalletButton({ className = '' }: WalletButtonProps) {
   
   if (isConnected && userProfile) {
     return (
-      <div className={`${className}`} ref={dropdownRef}>
+      <div className={`${className} flex-shrink-0`} ref={dropdownRef}>
         <button 
           onClick={() => setDropdownOpen(!dropdownOpen)}
-          className="bg-amber-50 px-6 py-3 rounded-lg shadow-md hover:bg-amber-100 transition-colors flex items-center border-2 border-amber-300"
+          className="bg-amber-50 px-4 py-2 rounded-lg shadow-md hover:bg-amber-100 transition-colors flex items-center border-2 border-amber-300"
         >
           <PlayerProfile
             username={userProfile.username}
@@ -42,7 +42,7 @@ export default function WalletButton({ className = '' }: WalletButtonProps) {
             familyMotto={userProfile.familyMotto}
             computeAmount={userProfile.computeAmount}
             size="medium"
-            className="mr-3"
+            className="mr-2"
             showMotto={false}
             showDucats
           />
