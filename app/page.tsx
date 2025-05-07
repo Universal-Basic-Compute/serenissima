@@ -13,7 +13,7 @@ import BackgroundMusic from '../components/UI/BackgroundMusic';
 import WalletButton from '../components/UI/WalletButton';
 import LandPurchaseConfirmation from '../components/UI/LandPurchaseConfirmation';
 import BuildingsToolbar from '../components/BuildingsView/BuildingsToolbar';
-import { LoanMarketplace, LoanManagementDashboard, LoanApplicationModal } from '../components/Governance';
+import { LoanMarketplace, LoanManagementDashboard, LoanApplicationModal } from '../components/Loans';
 import Settings from '../components/UI/Settings';
 import { getApiBaseUrl } from '@/lib/apiUtils';
 import { getWalletAddress } from '@/lib/walletUtils';
