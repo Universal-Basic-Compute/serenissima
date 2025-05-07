@@ -856,8 +856,8 @@ export default class PolygonRenderer {
       return;
     }
 
-    log.info('Creating coat of arms for land view, polygons count:', this.polygons.length);
-    log.debug('Available coat of arms:', Object.keys(this.ownerCoatOfArmsMap));
+    // In land view, we'll use colored circles instead of textures
+    log.info('Creating colored indicators for land view, polygons count:', this.polygons.length);
     
     // Track success and failure counts
     let successCount = 0;
@@ -871,78 +871,21 @@ export default class PolygonRenderer {
         () => {
           log.debug(`Processing polygon ${polygon.id} with owner ${polygon.owner}`);
           
-          // Get the coat of arms URL
-          const coatOfArmsUrl = this.ownerCoatOfArmsMap[polygon.owner];
-          
           // Get the owner's color
           const ownerColor = this.getOwnerColor(polygon.owner);
           
-          // Convert centroid to 3D position
-          // Use coatOfArmsCenter if available, otherwise use centroid
-          const centerPoint = polygon.coatOfArmsCenter || polygon.centroid;
-          const normalizedCoord = normalizeCoordinates(
-            [centerPoint as Coordinate],
-            this.bounds.centerLat,
-            this.bounds.centerLng,
-            this.bounds.scale,
-            this.bounds.latCorrectionFactor
-          )[0];
-          
-          if (coatOfArmsUrl) {
-            log.debug(`Creating coat of arms sprite for ${polygon.id} at position:`, normalizedCoord);
-            
-            // Load the texture with error handling - handle both external and local URLs
-            const textureUrl = coatOfArmsUrl.startsWith('http') 
-              ? coatOfArmsUrl 
-              : `${window.location.origin}${coatOfArmsUrl}`;
-              
-            const texture = this.facade.loadTexture(
-              textureUrl,
-              (loadedTexture) => {
-                // Create a circular texture
-                const circularTexture = this.facade.createCircularTexture(loadedTexture);
-                
-                // Create a plane geometry for the texture (half the original size)
-                const planeGeometry = new THREE.PlaneGeometry(0.75, 0.75);
-                const planeMaterial = new THREE.MeshBasicMaterial({
-                  map: circularTexture,
-                  transparent: true,
-                  side: THREE.DoubleSide,
-                  depthWrite: false
-                });
-                
-                // Create mesh and position it
-                const planeMesh = new THREE.Mesh(planeGeometry, planeMaterial);
-                planeMesh.position.set(normalizedCoord.x, 0.2, normalizedCoord.y); // Higher above ground
-                planeMesh.rotation.x = -Math.PI / 2; // Rotate to lie flat
-                planeMesh.renderOrder = 100; // Ensure it renders on top of everything
-                
-                // Add to scene
-                this.facade.addToScene(planeMesh);
-                
-                // Store reference
-                this.coatOfArmSprites[polygon.id] = planeMesh;
-                
-                log.debug(`Created coat of arms for polygon ${polygon.id} at position:`, normalizedCoord);
-              },
-              (error) => {
-                log.error(`Failed to load coat of arms texture for ${polygon.id}:`, error);
-                // Create a colored circle as fallback
-                this.createColoredCircleOnLand(polygon, ownerColor || '#8B4513');
-              }
-            );
-          } else if (polygon.centroid) {
-            log.debug(`Creating colored circle for ${polygon.id} with color: ${ownerColor}`);
-            // Create a colored circle texture on the land as fallback
+          // Create a colored circle on the land instead of loading a texture
+          if (polygon.centroid) {
             this.createColoredCircleOnLand(polygon, ownerColor || '#8B4513');
+            return true;
           }
           
-          return true;
+          return false;
         },
-        RenderingErrorType.TEXTURE_LOADING,
+        RenderingErrorType.MESH_CREATION,
         polygon.id,
         () => {
-          // Fallback: just create a colored circle if texture loading fails
+          // Fallback: just create a colored circle if creation fails
           if (polygon.centroid) {
             const ownerColor = this.getOwnerColor(polygon.owner);
             this.createColoredCircleOnLand(polygon, ownerColor || '#8B4513');
@@ -959,7 +902,7 @@ export default class PolygonRenderer {
       }
     });
     
-    log.info(`Updated coat of arms: ${successCount} successful, ${failureCount} failed`);
+    log.info(`Updated owner indicators: ${successCount} successful, ${failureCount} failed`);
     
     // Force a render to apply the changes with error handling
     withErrorHandling(
