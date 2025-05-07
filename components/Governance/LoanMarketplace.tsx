@@ -34,8 +34,8 @@ const LoanMarketplace: React.FC = () => {
     
     // Subscribe to loan-related events to update the marketplace in real-time
     const loanOfferCreatedSubscription = eventBus.subscribe(
-      EventTypes.LOAN_OFFER_CREATED, 
-      (data) => {
+      EventTypes.OFFER_CREATED, 
+      (data: LoanEventData) => {
         console.log("Loan offer created event received:", data);
         // Add the new loan to the available loans list
         if (data.loan && data.loan.status === LoanStatus.AVAILABLE) {
