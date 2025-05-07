@@ -164,8 +164,9 @@ export default class SimplePolygonRenderer {
     if (this.sandTexture || (this.textureLoadAttempts >= 3)) {
       this.renderPolygons();
       
-      // Fetch and apply land owners, then create coat of arms sprites
+      // Fetch and apply land owners, but don't automatically create coat of arms sprites
       this.fetchAndApplyLandOwners();
+      // The fetchAndApplyLandOwners method will call createCoatOfArmsSprites only when it has owner data
     }
   }
   
@@ -684,13 +685,20 @@ export default class SimplePolygonRenderer {
     
     // Update coat of arms sprites based on view mode
     if (activeView === 'land') {
-      // Only create if we haven't rendered them yet or if we're switching back to land view
-      if (!this.hasRenderedCoatOfArms) {
-        this.createCoatOfArmsSprites();
-      }
+      // Don't automatically create coat of arms when switching to land view
+      // Instead, we'll only create them when we have owner data
+      // The createCoatOfArmsSprites method will be called by fetchAndApplyLandOwners
+      // or when updateCoatOfArms is called with new data
+      
+      // Just make existing ones visible if they exist
+      Object.values(this.coatOfArmsSprites).forEach(sprite => {
+        sprite.visible = true;
+      });
     } else {
-      // Remove coat of arms sprites if not in land view
-      this.clearCoatOfArmsSprites();
+      // Hide coat of arms sprites if not in land view
+      Object.values(this.coatOfArmsSprites).forEach(sprite => {
+        sprite.visible = false;
+      });
       this.hasRenderedCoatOfArms = false;
     }
   }
@@ -701,11 +709,16 @@ export default class SimplePolygonRenderer {
   public updateCoatOfArms(ownerCoatOfArmsMap: Record<string, string>) {
     this.ownerCoatOfArmsMap = { ...this.ownerCoatOfArmsMap, ...ownerCoatOfArmsMap };
     
-    // Refresh coat of arms sprites if in land view
-    if (this.activeView === 'land') {
-      // Reset the rendered flag to force a refresh with new data
-      this.hasRenderedCoatOfArms = false;
-      this.createCoatOfArmsSprites();
+    // Only create coat of arms sprites if we're in land view AND we have owner data
+    if (this.activeView === 'land' && Object.keys(this.ownerCoatOfArmsMap).length > 0) {
+      // Check if we have any polygons with owners before creating sprites
+      const polygonsWithOwners = this.polygons.filter(p => p.owner && this.ownerCoatOfArmsMap[p.owner]);
+      
+      if (polygonsWithOwners.length > 0) {
+        // Reset the rendered flag to force a refresh with new data
+        this.hasRenderedCoatOfArms = false;
+        this.createCoatOfArmsSprites();
+      }
     }
   }
 
@@ -713,12 +726,6 @@ export default class SimplePolygonRenderer {
    * Fetch land owners data and apply to polygons
    */
   private async fetchAndApplyLandOwners() {
-    // Only fetch if we haven't rendered coat of arms yet
-    if (this.hasRenderedCoatOfArms) {
-      console.log('Coat of arms already rendered, skipping fetch');
-      return;
-    }
-    
     console.log('Fetching land owners data...');
     try {
       const response = await fetch('/api/get-land-owners');
@@ -748,12 +755,20 @@ export default class SimplePolygonRenderer {
           
           console.log(`Updated ${updatedCount} polygons with owner information`);
           
-          // If no owners were found or applied, use default owners
-          if (updatedCount === 0) {
+          // Only create coat of arms sprites if we have owners AND we're in land view
+          if (updatedCount > 0 && this.activeView === 'land') {
+            // Check if we have any polygons with matching owners before creating sprites
+            const polygonsWithMatchingOwners = this.polygons.filter(p => 
+              p.owner && this.ownerCoatOfArmsMap[p.owner]
+            );
+            
+            if (polygonsWithMatchingOwners.length > 0) {
+              // Now that we have owners, create coat of arms sprites
+              this.createCoatOfArmsSprites();
+            }
+          } else if (updatedCount === 0) {
+            // No owners were found, use default owners
             this.assignDefaultOwners();
-          } else if (this.activeView === 'land') {
-            // Now that we have owners, create coat of arms sprites only if in land view
-            this.createCoatOfArmsSprites();
           }
         } else {
           // No lands data, use default owners
