@@ -177,6 +177,22 @@ export async function transferCompute(walletAddress: string, amount: number) {
       throw new Error(`Failed to check/create treasury token account: ${error.message}`);
     }
     
+    // Check sender token account balance after ensuring the account exists
+    console.log('Checking sender token account balance...');
+    try {
+      const tokenBalance = await connection.getTokenAccountBalance(senderTokenAccount);
+      console.log('Token balance:', tokenBalance.value.uiAmount);
+      
+      if (!tokenBalance.value.uiAmount || tokenBalance.value.uiAmount < amount) {
+        throw new Error(`Insufficient token balance. You have ${tokenBalance.value.uiAmount || 0} COMPUTE tokens, but ${amount} are required for this transaction.`);
+      }
+    } catch (balanceError) {
+      console.error('Error checking token balance:', balanceError);
+      
+      // If we get here, the account exists but we couldn't get the balance
+      throw new Error(`Failed to check token balance: ${balanceError.message}`);
+    }
+    
     // Create transfer instruction - FROM sender TO treasury
     console.log('Creating transfer instruction...');
     // Convert the amount to the correct decimal representation
@@ -209,21 +225,6 @@ export async function transferCompute(walletAddress: string, amount: number) {
     const serializedTransaction = signedTransaction.serialize();
     
     
-    // Check sender token account balance after ensuring the account exists
-    console.log('Checking sender token account balance...');
-    try {
-      const tokenBalance = await connection.getTokenAccountBalance(senderTokenAccount);
-      console.log('Token balance:', tokenBalance.value.uiAmount);
-      
-      if (!tokenBalance.value.uiAmount || tokenBalance.value.uiAmount < amount) {
-        throw new Error(`Insufficient token balance. You have ${tokenBalance.value.uiAmount || 0} COMPUTE tokens, but ${amount} are required for this transaction.`);
-      }
-    } catch (balanceError) {
-      console.error('Error checking token balance:', balanceError);
-      
-      // If we get here, the account exists but we couldn't get the balance
-      throw new Error(`Failed to check token balance: ${balanceError.message}`);
-    }
     
     // Send the signed transaction to the network
     let signature: string;
@@ -266,6 +267,14 @@ export async function transferCompute(walletAddress: string, amount: number) {
             errorDetails.includes('Account does not exist') ||
             errorDetails.includes('Invalid account owner')) {
           throw new Error('Token account not found. You may need to create a COMPUTE token account in your wallet first.');
+        }
+        
+        // Check for insufficient token balance in the simulation error
+        if (errorDetails.includes('insufficient funds') || 
+            errorDetails.includes('Insufficient funds') ||
+            errorDetails.includes('would result in negative tokens') ||
+            errorDetails.includes('no balance changes found')) {
+          throw new Error('You don\'t have enough COMPUTE tokens in your wallet. Please add tokens to your wallet first.');
         }
         
         throw new Error(`Transaction simulation failed: ${errorDetails}`);
