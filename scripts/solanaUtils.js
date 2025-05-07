@@ -15,7 +15,7 @@ const COMPUTE_TOKEN_MINT = new PublicKey(
 
 // Treasury public key (this is just for preparing the transaction, we don't need the private key)
 const TREASURY_PUBLIC_KEY = new PublicKey(
-  process.env.TREASURY_PUBLIC_KEY || 'YOUR_TREASURY_PUBLIC_KEY_HERE'
+  process.env.TREASURY_PUBLIC_KEY || 'F4kXoqxPvYHwn12pCvgPYwogRZ8CuTpBgKA7vEBN9qMf'
 );
 
 /**

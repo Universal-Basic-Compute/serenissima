@@ -53,11 +53,9 @@ export async function transferCompute(walletAddress: string, amount: number) {
       const { publicKey: connectedPublicKey } = await wallet.connect();
       console.log('Connected to wallet with public key:', connectedPublicKey.toString());
       
-      // Verify that the connected wallet matches the expected wallet
-      if (connectedPublicKey.toString() !== publicKey.toString()) {
-        console.warn('Connected wallet does not match expected wallet:',
-          { connected: connectedPublicKey.toString(), expected: publicKey.toString() });
-      }
+      // Use the connected wallet's public key instead of the one passed to the function
+      publicKey = connectedPublicKey;
+      console.log('Using connected wallet public key for transaction:', publicKey.toString());
     } catch (connectError) {
       console.error('Failed to connect to wallet:', connectError);
       throw new Error(`Failed to connect to your wallet: ${connectError.message}`);
@@ -79,7 +77,7 @@ export async function transferCompute(walletAddress: string, amount: number) {
     // Get the treasury public key
     console.log('Getting treasury public key...');
     const TREASURY_PUBLIC_KEY = new PublicKey(
-      process.env.NEXT_PUBLIC_TREASURY_PUBLIC_KEY || 'YOUR_TREASURY_PUBLIC_KEY_HERE'
+      process.env.NEXT_PUBLIC_TREASURY_PUBLIC_KEY || 'F4kXoqxPvYHwn12pCvgPYwogRZ8CuTpBgKA7vEBN9qMf'
     );
     
     // Get the token account for the treasury
