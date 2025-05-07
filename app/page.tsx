@@ -19,7 +19,7 @@ import { getApiBaseUrl } from '@/lib/apiUtils';
 import { getWalletAddress } from '@/lib/walletUtils';
 import { transferCompute, withdrawCompute } from '@/lib/computeUtils';
 import { generateCoatOfArmsImage } from '@/app/utils/coatOfArmsUtils';
-import { FaHome, FaBuilding, FaRoad, FaTree, FaStore, FaLandmark } from 'react-icons/fa';
+import { FaHome, FaBuilding, FaRoad, FaTree, FaStore, FaLandmark, FaBook } from 'react-icons/fa';
 import * as THREE from 'three';
 
 // Add type declaration for window properties
@@ -53,7 +53,7 @@ export default function SimplePage() {
   // UI state
   const [showInfo, setShowInfo] = useState(false);
   // Define the view type to ensure consistency
-  type ViewType = 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance' | 'loans';
+  type ViewType = 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance' | 'loans' | 'knowledge';
   const [activeView, setActiveView] = useState<ViewType>('land');
   const [qualityMode, setQualityMode] = useState<'high' | 'performance'>('high');
   const [marketPanelVisible, setMarketPanelVisible] = useState(false);
@@ -501,6 +501,77 @@ export default function SimplePage() {
         </div>
       )}
       
+      {/* Knowledge View */}
+      {activeView === 'knowledge' && (
+        <div className="absolute top-20 left-20 right-4 bottom-4 bg-black/30 rounded-lg p-4 overflow-auto">
+          <div className="bg-amber-50 border-2 border-amber-700 rounded-lg p-6 max-w-6xl mx-auto">
+            <h2 className="text-3xl font-serif text-amber-800 mb-6 text-center">
+              Knowledge Repository
+            </h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {/* Roadmap Resource */}
+              <div className="bg-white rounded-lg overflow-hidden shadow-md border border-amber-200">
+                <div className="h-48 overflow-hidden">
+                  <img 
+                    src="/images/roadmap.jpg" 
+                    alt="Project Roadmap" 
+                    className="w-full h-full object-cover transition-transform hover:scale-105"
+                    onError={(e) => {
+                      // Fallback if image doesn't exist
+                      (e.target as HTMLImageElement).src = 'https://via.placeholder.com/800x400?text=Roadmap';
+                    }}
+                  />
+                </div>
+                <div className="p-6">
+                  <h3 className="text-xl font-serif text-amber-800 mb-2">Project Roadmap</h3>
+                  <p className="text-gray-600 mb-4">
+                    Explore the future development plans for La Serenissima, including upcoming features, 
+                    economic expansions, and governance implementations.
+                  </p>
+                  <a 
+                    href="/docs/roadmap.pdf" 
+                    target="_blank"
+                    className="inline-block px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors"
+                  >
+                    View Roadmap
+                  </a>
+                </div>
+              </div>
+              
+              {/* Presentation Resource */}
+              <div className="bg-white rounded-lg overflow-hidden shadow-md border border-amber-200">
+                <div className="h-48 overflow-hidden">
+                  <img 
+                    src="/images/presentation.jpg" 
+                    alt="Project Presentation" 
+                    className="w-full h-full object-cover transition-transform hover:scale-105"
+                    onError={(e) => {
+                      // Fallback if image doesn't exist
+                      (e.target as HTMLImageElement).src = 'https://via.placeholder.com/800x400?text=Presentation';
+                    }}
+                  />
+                </div>
+                <div className="p-6">
+                  <h3 className="text-xl font-serif text-amber-800 mb-2">Project Presentation</h3>
+                  <p className="text-gray-600 mb-4">
+                    Learn about the vision, architecture, and technical implementation of La Serenissima 
+                    through our comprehensive project presentation.
+                  </p>
+                  <a 
+                    href="/docs/presentation.pdf" 
+                    target="_blank"
+                    className="inline-block px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors"
+                  >
+                    View Presentation
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
       {/* Left Side Menu */}
       <div className="absolute left-0 top-0 bottom-0 bg-black/70 text-white z-20 flex flex-col w-16">
         {/* Logo */}
@@ -520,6 +591,17 @@ export default function SimplePage() {
                 title="Governance"
               >
                 <FaLandmark className="mx-auto h-5 w-5" />
+              </button>
+            </li>
+            <li>
+              <button
+                onClick={() => setActiveView('knowledge')}
+                className={`w-full flex items-center p-2 rounded-lg transition-colors ${
+                  activeView === 'knowledge' ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700'
+                }`}
+                title="Knowledge"
+              >
+                <FaBook className="mx-auto h-5 w-5" />
               </button>
             </li>
             <li>
