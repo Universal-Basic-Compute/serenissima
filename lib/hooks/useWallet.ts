@@ -132,26 +132,72 @@ export function useWallet() {
     console.log("Connecting wallet, current state:", adapter.connected ? "connected" : "disconnected");
     
     if (adapter.connected) {
-      // If already connected, disconnect
+      // If already connected, disconnect first
       console.log("Disconnecting wallet...");
-      adapter.disconnect().then(() => {
-        // Only update state after successful disconnect
-        setWalletAddressState(null);
-        setUserProfile(null); // Also clear the user profile
-    
+      try {
+        await adapter.disconnect();
+        
         // Clear wallet from both storages
         clearWalletAddress();
         localStorage.removeItem('userProfile'); // Also clear user profile from storage
-      
+        
+        // Update state after successful disconnect
+        setWalletAddressState(null);
+        setUserProfile(null); // Also clear the user profile
+        
         // Dispatch a custom event to notify other components
         window.dispatchEvent(new CustomEvent('walletChanged'));
-      
+        
         console.log("Wallet disconnected successfully");
-      }).catch(error => {
-        console.error("Error disconnecting wallet:", error);
-        alert(`Failed to disconnect wallet: ${error instanceof Error ? error.message : String(error)}`);
-      });
-      return;
+        
+        // Important: Wait a moment before trying to reconnect
+        // This gives Phantom time to fully disconnect
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // Now attempt to connect again, which will prompt Phantom to show the account selector
+        console.log("Attempting to reconnect after disconnect...");
+        await adapter.connect();
+        
+        const address = adapter.publicKey?.toString() || null;
+        console.log("Wallet reconnected, address:", address);
+        
+        if (address) {
+          setWalletAddressState(address);
+          // Store wallet in both session and local storage
+          setWalletAddress(address);
+          
+          // Store wallet in Airtable and check for username
+          const userData = await storeWalletInAirtable(address);
+          
+          if (userData) {
+            // Check if the user has a username
+            if (userData.user_name === undefined || userData.user_name === null || userData.user_name === '') {
+              // If no username, show the prompt
+              window.dispatchEvent(new CustomEvent('showUsernamePrompt'));
+            } else {
+              // Store the user profile information
+              console.log('Setting user profile with data:', userData);
+              const userProfile = {
+                username: userData.user_name,
+                firstName: userData.first_name || userData.user_name.split(' ')[0] || '',
+                lastName: userData.last_name || userData.user_name.split(' ').slice(1).join(' ') || '',
+                coatOfArmsImage: userData.coat_of_arms_image,
+                familyMotto: userData.family_motto,
+                computeAmount: userData.compute_amount,
+                walletAddress: address
+              };
+              setUserProfile(userProfile);
+              localStorage.setItem('userProfile', JSON.stringify(userProfile));
+            }
+          }
+        }
+        
+        return;
+      } catch (error) {
+        console.error("Error during disconnect/reconnect flow:", error);
+        alert(`Failed to switch accounts: ${error instanceof Error ? error.message : String(error)}`);
+        return;
+      }
     }
   
     // Check if Phantom is installed
