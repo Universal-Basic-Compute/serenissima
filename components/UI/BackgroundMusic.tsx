@@ -16,6 +16,7 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
   const [currentTrack, setCurrentTrack] = useState<string | null>(null);
   const [tracks, setTracks] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isPaused, setIsPaused] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [showControls, setShowControls] = useState(false);
 
@@ -69,18 +70,21 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
     if (tracks.length === 1) {
       newTrack = tracks[0];
     } else {
-      // Keep track of the last played track
-      const lastPlayedTrack = audioRef.current?.src;
+      // Get the current track path without domain/origin
+      const currentTrackPath = currentTrack && !currentTrack.includes('Pausing') 
+        ? currentTrack
+        : null;
       
       do {
         const randomIndex = Math.floor(Math.random() * tracks.length);
         newTrack = tracks[randomIndex];
         // Make sure we don't play the same track twice in a row
-      } while (newTrack === lastPlayedTrack && tracks.length > 1);
+      } while (newTrack === currentTrackPath && tracks.length > 1);
     }
     
     console.log(`Playing new track: ${newTrack}`);
     setCurrentTrack(newTrack);
+    setIsPaused(false);
     
     if (audioRef.current) {
       audioRef.current.src = newTrack;
@@ -168,19 +172,15 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
     const handleEnded = () => {
       // Pause for 10 seconds before playing the next track
       setIsPlaying(false);
-      
-      // Store the current track URL before changing to pause message
-      const lastTrackUrl = audio?.src;
+      setIsPaused(true);
       
       // Show a message that we're pausing between tracks
-      const pauseMessage = 'Pausing between tracks...';
-      setCurrentTrack(pauseMessage);
+      setCurrentTrack('Pausing between tracks...');
       
       // Wait 10 seconds before playing the next track
       const pauseTimeout = setTimeout(() => {
-        // Only play the next track if we're still on the pause message
-        // This prevents issues if the user manually changed tracks during the pause
-        if (currentTrack === pauseMessage) {
+        // Only play the next track if we're still paused
+        if (isPaused) {
           playRandomTrack();
         }
       }, 10000); // 10 seconds
@@ -195,7 +195,7 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
         audio.removeEventListener('ended', handleEnded);
       };
     }
-  }, [tracks, currentTrack]);
+  }, [tracks, isPaused]);
 
   // Update volume when it changes
   useEffect(() => {
