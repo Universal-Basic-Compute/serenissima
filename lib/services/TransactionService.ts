@@ -13,9 +13,15 @@ import { getWalletAddress } from '../walletUtils';
 import { Listing, Offer, Transaction } from '../store/marketStore';
 
 // Extend the Listing interface to include updatedAt
-interface ExtendedListing extends Listing {
-  updatedAt?: string;
+interface ExtendedListing {
+  id: string;
+  assetId: string;
   assetType?: 'land' | 'building' | 'bridge' | 'compute';
+  seller: string;
+  price: number;
+  createdAt: string;
+  updatedAt?: string;
+  status: 'active' | 'cancelled' | 'sold';
   metadata?: {
     historicalName?: string;
     englishName?: string;
@@ -598,21 +604,14 @@ export class TransactionService {
       const data = await response.json();
       log.debug('Listing created successfully', data);
       
-      // Convert API response to our ExtendedListing interface
-      const listing: ExtendedListing = {
+      // Convert API response to our Listing interface
+      const listing: Listing = {
         id: data.id,
         assetId: data.asset_id,
-        assetType: assetType,
         seller: data.seller,
         price: data.price,
         createdAt: data.created_at,
-        updatedAt: data.updated_at,
-        status: 'active',
-        metadata: {
-          historicalName: metadata?.historicalName,
-          englishName: metadata?.englishName,
-          description: metadata?.description
-        }
+        status: 'active'
       };
       
       // Invalidate cache
