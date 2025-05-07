@@ -1457,9 +1457,9 @@ export class RoadManager {
             material.displacementMap.dispose();
           }
         }
-        if ('envMap' in material && material.envMap && material.envMap !== null) material.envMap.dispose();
-        if ('lightMap' in material && material.lightMap && material.lightMap !== null) material.lightMap.dispose();
-        if ('alphaMap' in material && material.alphaMap && material.alphaMap !== null) material.alphaMap.dispose();
+        if ('envMap' in material && material.envMap) material.envMap.dispose();
+        if ('lightMap' in material && material.lightMap) material.lightMap.dispose();
+        if ('alphaMap' in material && material.alphaMap) material.alphaMap.dispose();
         
         // Clear references
         if (material.map) material.map = null as unknown as THREE.Texture;
@@ -1500,9 +1500,12 @@ export class RoadManager {
             material.displacementMap = null as unknown as THREE.Texture;
           }
         }
-        if ('envMap' in material && material.envMap) material.envMap = null as unknown as THREE.Texture;
-        if ('lightMap' in material && material.lightMap) material.lightMap = null as unknown as THREE.Texture;
-        if ('alphaMap' in material && material.alphaMap) material.alphaMap = null as unknown as THREE.Texture;
+        if ('envMap' in material && material.envMap) 
+          material.envMap = null as unknown as THREE.Texture;
+        if ('lightMap' in material && material.lightMap) 
+          material.lightMap = null as unknown as THREE.Texture;
+        if ('alphaMap' in material && material.alphaMap) 
+          material.alphaMap = null as unknown as THREE.Texture;
       }
     } catch (error) {
       log.warn('Error disposing textures from material:', error);
