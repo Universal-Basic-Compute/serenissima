@@ -32,7 +32,7 @@ declare global {
   // Add custom properties to HTMLCanvasElement
   interface HTMLCanvasElement {
     __scene?: THREE.Scene;
-    __camera?: THREE.Camera;
+    __camera?: THREE.PerspectiveCamera;
   }
 }
 
@@ -339,7 +339,7 @@ export default function SimplePage() {
       {activeView === 'buildings' && (
         <BuildingsToolbar 
           scene={document.querySelector('canvas')?.__scene}
-          camera={document.querySelector('canvas')?.__camera}
+          camera={document.querySelector('canvas')?.__camera as THREE.PerspectiveCamera}
           polygons={window.__polygonData || []}
           onRefreshBuildings={() => {
             // Refresh buildings by dispatching an event
