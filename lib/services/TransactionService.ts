@@ -608,6 +608,7 @@ export class TransactionService {
       const listing: Listing = {
         id: data.id,
         assetId: data.asset_id,
+        assetType: assetType,
         seller: data.seller,
         price: data.price,
         createdAt: data.created_at,
