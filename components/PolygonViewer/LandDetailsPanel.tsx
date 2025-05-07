@@ -79,14 +79,16 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
     const coords = polygon.coordinates;
     
     // Find min/max to scale the polygon to fit the canvas
-    let minLat = coords[0].lat, maxLat = coords[0].lat;
-    let minLng = coords[0].lng, maxLng = coords[0].lng;
+    let minLat = coords[0]?.lat || 0, maxLat = coords[0]?.lat || 0;
+    let minLng = coords[0]?.lng || 0, maxLng = coords[0]?.lng || 0;
     
     coords.forEach(coord => {
-      minLat = Math.min(minLat, coord.lat);
-      maxLat = Math.max(maxLat, coord.lat);
-      minLng = Math.min(minLng, coord.lng);
-      maxLng = Math.max(maxLng, coord.lng);
+      if (coord) {
+        minLat = Math.min(minLat, coord.lat);
+        maxLat = Math.max(maxLat, coord.lat);
+        minLng = Math.min(minLng, coord.lng);
+        maxLng = Math.max(maxLng, coord.lng);
+      }
     });
     
     // Add padding
