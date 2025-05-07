@@ -717,7 +717,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
                 <button
                   onClick={async () => {
                     // Get the current wallet address
-                    const walletAddress = sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress') || '';
+                    const walletAddress = getWalletAddress();
                     
                     if (!walletAddress) {
                       alert('Please connect your wallet first');
