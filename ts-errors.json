@@ -1,113 +1,30 @@
 {
-  "totalErrors": 12,
+  "totalErrors": 2,
   "totalWarnings": 0,
-  "exitCode": 2,
-  "timestamp": "2025-05-07T00:45:47.027Z",
+  "exitCode": 1,
+  "timestamp": "2025-05-07T05:00:25.479Z",
   "errors": [
     {
-      "filePath": "app/simple/page.tsx",
-      "line": 954,
-      "column": 17,
-      "code": "TS2322",
-      "message": "Type 'boolean | null' is not assignable to type 'boolean | undefined'.",
+      "filePath": "components/UI/TransactionHistoryView.tsx",
+      "line": 5,
+      "column": 45,
+      "code": "TS2307",
+      "message": "Cannot find module 'date-fns' or its corresponding type declarations.",
       "type": "error"
     },
     {
-      "filePath": "components/PolygonViewer/BuildingMenu.tsx",
-      "line": 84,
-      "column": 37,
-      "code": "TS2345",
-      "message": "Argument of type '(category: BuildingCategory, index: number, array: BuildingCategory[]) => React.ReactElement' is not assignable to parameter of type '(value: BuildingCategory, index: number, array: BuildingCategory[]) => ReactElement<any, string | JSXElementConstructor<any>>'.",
-      "type": "error"
-    },
-    {
-      "filePath": "components/PolygonViewer/BuildingMenu.tsx",
-      "line": 99,
-      "column": 37,
-      "code": "TS2345",
-      "message": "Argument of type '(category: BuildingCategory, index: number, array: BuildingCategory[]) => React.ReactElement' is not assignable to parameter of type '(value: BuildingCategory, index: number, array: BuildingCategory[]) => ReactElement<any, string | JSXElementConstructor<any>>'.",
-      "type": "error"
-    },
-    {
-      "filePath": "components/PolygonViewer/PolygonRenderer.ts",
-      "line": 286,
-      "column": 30,
-      "code": "TS2339",
-      "message": "Property 'map' does not exist on type 'Material'.",
-      "type": "error"
-    },
-    {
-      "filePath": "components/PolygonViewer/PolygonViewer.tsx",
-      "line": 748,
-      "column": 39,
-      "code": "TS18047",
-      "message": "'sceneRef.current' is possibly 'null'.",
-      "type": "error"
-    },
-    {
-      "filePath": "components/PolygonViewer/PolygonViewer.tsx",
-      "line": 782,
-      "column": 29,
-      "code": "TS18047",
-      "message": "'sceneRef.current' is possibly 'null'.",
-      "type": "error"
-    },
-    {
-      "filePath": "components/PolygonViewer/PolygonViewer.tsx",
-      "line": 783,
-      "column": 48,
-      "code": "TS18047",
-      "message": "'sceneRef.current' is possibly 'null'.",
-      "type": "error"
-    },
-    {
-      "filePath": "components/PolygonViewer/PolygonViewer.tsx",
-      "line": 787,
-      "column": 9,
-      "code": "TS18047",
-      "message": "'roadManagerRef.current' is possibly 'null'.",
-      "type": "error"
-    },
-    {
-      "filePath": "lib/threejs/PolygonMeshFacade.ts",
-      "line": 288,
-      "column": 10,
-      "code": "TS2531",
-      "message": "Object is possibly 'null'.",
-      "type": "error"
-    },
-    {
-      "filePath": "lib/threejs/RoadManager.ts",
-      "line": 1431,
-      "column": 11,
-      "code": "TS2531",
-      "message": "Object is possibly 'null'.",
-      "type": "error"
-    },
-    {
-      "filePath": "lib/threejs/RoadManager.ts",
-      "line": 1433,
-      "column": 11,
-      "code": "TS2531",
-      "message": "Object is possibly 'null'.",
-      "type": "error"
-    },
-    {
-      "filePath": "lib/threejs/RoadManager.ts",
-      "line": 1435,
-      "column": 11,
-      "code": "TS2531",
-      "message": "Object is possibly 'null'.",
+      "filePath": "lib/services/TransactionService.ts",
+      "line": 608,
+      "column": 13,
+      "code": "TS2741",
+      "message": "Property 'assetType' is missing in type '{ id: any; assetId: any; seller: any; price: any; createdAt: any; status: \"active\"; }' but required in type 'Listing'.",
       "type": "error"
     }
   ],
-  "rawOutputLines": 18,
+  "rawOutputLines": 3,
   "firstFewLines": [
-    "app/simple/page.tsx(954,17): error TS2322: Type 'boolean | null' is not assignable to type 'boolean | undefined'.\r",
-    "  Type 'null' is not assignable to type 'boolean | undefined'.\r",
-    "components/PolygonViewer/BuildingMenu.tsx(84,37): error TS2345: Argument of type '(category: BuildingCategory, index: number, array: BuildingCategory[]) => React.ReactElement' is not assignable to parameter of type '(value: BuildingCategory, index: number, array: BuildingCategory[]) => ReactElement<any, string | JSXElementConstructor<any>>'.\r",
-    "  Types of parameters 'category' and 'value' are incompatible.\r",
-    "    Property 'id' is missing in type 'import(\"C:/Users/reyno/serenissima/lib/services/BuildingService\").BuildingCategory' but required in type 'BuildingCategory'.\r"
+    "components/UI/TransactionHistoryView.tsx(5,45): error TS2307: Cannot find module 'date-fns' or its corresponding type declarations.\r",
+    "lib/services/TransactionService.ts(608,13): error TS2741: Property 'assetType' is missing in type '{ id: any; assetId: any; seller: any; price: any; createdAt: any; status: \"active\"; }' but required in type 'Listing'.\r"
   ],
-  "compilerExitCode": 2
+  "compilerExitCode": 1
 }
