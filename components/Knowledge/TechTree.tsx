@@ -333,11 +333,19 @@ const TechTree: React.FC<TechTreeProps> = ({ onClose }) => {
                 left: `${node.position?.x}px`, 
                 top: `${node.position?.y}px`,
                 transform: 'translate3d(0,0,0)', // Force GPU acceleration
+                // Add orange border for in-progress nodes
+                borderColor: node.id === 'lands' || node.id === 'loans' ? '#f97316' : '',
               }}
               onClick={() => handleNodeClick(node)}
             >
               <div className="h-32 w-32 overflow-hidden rounded-md relative mx-auto mt-4">
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent to-amber-900/30" />
+                {/* Add "In Progress" badge for lands and loans */}
+                {(node.id === 'lands' || node.id === 'loans') && (
+                  <div className="absolute top-0 right-0 bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-bl-md rounded-tr-md z-10">
+                    In Progress
+                  </div>
+                )}
                 <img 
                   src={node.image} 
                   alt={node.title}
@@ -349,7 +357,13 @@ const TechTree: React.FC<TechTreeProps> = ({ onClose }) => {
                 />
               </div>
               <div className="p-4">
-                <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-2 text-center">{node.title}</h3>
+                <h3 
+                  className={`text-lg font-serif mb-2 border-b pb-2 text-center ${
+                    node.id === 'lands' || node.id === 'loans' ? 'text-orange-700 border-orange-200' : 'text-amber-800 border-amber-200'
+                  }`}
+                >
+                  {node.title}
+                </h3>
                 <p className="text-gray-600 text-xs mb-3 text-center italic">Click to learn more</p>
               </div>
             </div>
