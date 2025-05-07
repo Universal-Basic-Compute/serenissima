@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLoanStore } from '@/store/loanStore';
 import { LoanData, LoanPurpose } from '@/lib/services/LoanService';
 import { getWalletAddress } from '@/lib/walletUtils';
-import { ErrorBoundary } from '@/components/UI/ErrorBoundary';
+import ErrorBoundary from '@/components/UI/ErrorBoundary';
 import { eventBus, EventTypes } from '@/lib/eventBus';
 
 interface LoanApplicationModalProps {

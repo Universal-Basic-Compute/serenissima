@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useLoanStore } from '@/store/loanStore';
 import { LoanData, LoanStatus, LoanPurpose } from '@/lib/services/LoanService';
 import { getWalletAddress } from '@/lib/walletUtils';
-import { ErrorBoundary } from '@/components/UI/ErrorBoundary';
+import ErrorBoundary from '@/components/UI/ErrorBoundary';
 import { eventBus, EventTypes } from '@/lib/eventBus';
 
 const LoanMarketplace: React.FC = () => {
