@@ -2,29 +2,29 @@
   "totalErrors": 2,
   "totalWarnings": 0,
   "exitCode": 1,
-  "timestamp": "2025-05-07T05:00:25.479Z",
+  "timestamp": "2025-05-07T05:41:31.548Z",
   "errors": [
     {
-      "filePath": "components/UI/TransactionHistoryView.tsx",
-      "line": 5,
-      "column": 45,
-      "code": "TS2307",
-      "message": "Cannot find module 'date-fns' or its corresponding type declarations.",
+      "filePath": "components/PolygonViewer/LandDetailsPanel.tsx",
+      "line": 705,
+      "column": 15,
+      "code": "TS2322",
+      "message": "Type 'void' is not assignable to type 'ReactNode'.",
       "type": "error"
     },
     {
-      "filePath": "lib/services/TransactionService.ts",
-      "line": 608,
-      "column": 13,
-      "code": "TS2741",
-      "message": "Property 'assetType' is missing in type '{ id: any; assetId: any; seller: any; price: any; createdAt: any; status: \"active\"; }' but required in type 'Listing'.",
+      "filePath": "components/PolygonViewer/LandDetailsPanel.tsx",
+      "line": 706,
+      "column": 15,
+      "code": "TS2322",
+      "message": "Type 'void' is not assignable to type 'ReactNode'.",
       "type": "error"
     }
   ],
   "rawOutputLines": 3,
   "firstFewLines": [
-    "components/UI/TransactionHistoryView.tsx(5,45): error TS2307: Cannot find module 'date-fns' or its corresponding type declarations.\r",
-    "lib/services/TransactionService.ts(608,13): error TS2741: Property 'assetType' is missing in type '{ id: any; assetId: any; seller: any; price: any; createdAt: any; status: \"active\"; }' but required in type 'Listing'.\r"
+    "components/PolygonViewer/LandDetailsPanel.tsx(705,15): error TS2322: Type 'void' is not assignable to type 'ReactNode'.\r",
+    "components/PolygonViewer/LandDetailsPanel.tsx(706,15): error TS2322: Type 'void' is not assignable to type 'ReactNode'.\r"
   ],
   "compilerExitCode": 1
 }
