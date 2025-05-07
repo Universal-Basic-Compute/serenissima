@@ -745,8 +745,8 @@ export default function SimplePage() {
                     <img 
                       src={coatOfArmsImage} 
                       alt="Family Coat of Arms" 
-                      className="w-full h-auto max-h-[400px] object-contain"
-                      style={{ maxWidth: "300px" }} // Add fixed width for better consistency
+                      className="w-full h-auto max-h-[300px] object-contain"
+                      style={{ maxWidth: "250px" }} // Slightly smaller for better fit
                     />
                   </div>
                   <p className="mt-4 text-center italic text-amber-800 font-medium">
