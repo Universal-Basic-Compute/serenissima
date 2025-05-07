@@ -207,7 +207,7 @@ const DockRenderer: React.FC<DockRendererProps> = ({ scene, active }) => {
   const renderDock = (dock: DockData) => {
     if (!modelRef.current) {
       console.warn('Dock model not loaded yet');
-      return null;
+      return renderFallbackDock(dock); // Use fallback if model isn't loaded
     }
     
     // Clone the model for this dock instance
@@ -241,10 +241,19 @@ const DockRenderer: React.FC<DockRendererProps> = ({ scene, active }) => {
         
         sphere.position.set(point.x, point.y || 0.2, point.z);
         
-        scene.add(sphere);
-        meshesRef.current.push(sphere);
+        // Only show connection points in development mode
+        if (process.env.NODE_ENV === 'development') {
+          scene.add(sphere);
+          meshesRef.current.push(sphere);
+        }
       });
     }
+    
+    // Add a small light to highlight the dock
+    const pointLight = new THREE.PointLight(0xffffff, 0.5, 5);
+    pointLight.position.set(dock.position.x, dock.position.y + 1, dock.position.z);
+    scene.add(pointLight);
+    meshesRef.current.push(pointLight);
     
     return dockModel;
   };

@@ -233,7 +233,7 @@ export class DockCreationManager {
       if (result.position && result.landId && result.edge) {
         // Snap the dock precisely to the edge
         activeMesh.position.copy(result.position);
-        activeMesh.position.y = 0.2; // Increase from 0.1 to 0.2 to make it more visible
+        activeMesh.position.y = 0.2; // Keep it slightly above water level
         activeMesh.visible = true;
         this.adjacentLandId = result.landId;
         this.currentEdge = result.edge;
@@ -248,29 +248,31 @@ export class DockCreationManager {
         // Update material color to indicate valid placement
         if (!this.isModelLoaded && this.fallbackPreviewMesh && 
             this.fallbackPreviewMesh.material instanceof THREE.MeshBasicMaterial) {
-          this.fallbackPreviewMesh.material.color.set(0x8B4513); // Brown for valid
-          this.fallbackPreviewMesh.material.opacity = 0.8; // Increase opacity
+          this.fallbackPreviewMesh.material.color.set(0x4CAF50); // Green for valid
+          this.fallbackPreviewMesh.material.opacity = 0.9; // Increase opacity for better visibility
         } else if (this.isModelLoaded && this.previewMesh) {
-          // For the model, we'll make it fully visible for valid placement
+          // For the model, make it more visible for valid placement
           this.previewMesh.traverse((child) => {
             if (child instanceof THREE.Mesh && child.material) {
               if (Array.isArray(child.material)) {
                 child.material.forEach(mat => {
-                  mat.opacity = 0.8; // Increase opacity
+                  mat.opacity = 0.9; // Increase opacity for better visibility
                 });
               } else {
-                child.material.opacity = 0.8; // Increase opacity
+                child.material.opacity = 0.9; // Increase opacity for better visibility
               }
             }
           });
         }
       
-        // Log position for debugging
-        console.log('Dock positioned at valid location:', result.position);
+        // Only log valid positions occasionally to reduce console spam
+        if (Math.random() < 0.05) {
+          console.log('Valid dock placement found at:', result.position);
+        }
       } else {
         // Show preview at cursor but indicate invalid placement
         activeMesh.position.copy(intersection);
-        activeMesh.position.y = 0.2; // Increase from 0.1 to 0.2
+        activeMesh.position.y = 0.2;
         activeMesh.visible = true;
         this.adjacentLandId = null;
         this.currentEdge = null;
@@ -278,25 +280,27 @@ export class DockCreationManager {
         // Update material color to indicate invalid placement
         if (!this.isModelLoaded && this.fallbackPreviewMesh && 
             this.fallbackPreviewMesh.material instanceof THREE.MeshBasicMaterial) {
-          this.fallbackPreviewMesh.material.color.set(0xFF0000); // Red for invalid
-          this.fallbackPreviewMesh.material.opacity = 0.6; // Slightly increase opacity
+          this.fallbackPreviewMesh.material.color.set(0xFF5252); // Brighter red for invalid
+          this.fallbackPreviewMesh.material.opacity = 0.7; // Slightly increase opacity
         } else if (this.isModelLoaded && this.previewMesh) {
-          // For the model, we'll make it semi-transparent red for invalid placement
+          // For the model, make it semi-transparent red for invalid placement
           this.previewMesh.traverse((child) => {
             if (child instanceof THREE.Mesh && child.material) {
               if (Array.isArray(child.material)) {
                 child.material.forEach(mat => {
-                  mat.opacity = 0.6; // Slightly increase opacity
+                  mat.opacity = 0.7;
                 });
               } else {
-                child.material.opacity = 0.6; // Slightly increase opacity
+                child.material.opacity = 0.7;
               }
             }
           });
         }
       
-        // Log position for debugging
-        console.log('Dock positioned at invalid location:', intersection);
+        // Only log invalid positions occasionally to reduce console spam
+        if (Math.random() < 0.01) {
+          console.log('Looking for valid dock placement near:', intersection);
+        }
       }
     }
   }

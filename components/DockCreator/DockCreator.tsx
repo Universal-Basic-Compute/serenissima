@@ -124,7 +124,7 @@ const DockCreator: React.FC<DockCreatorProps> = ({
   
   // Add throttling for mouse movement
   const lastUpdateTimeRef = useRef<number>(0);
-  const throttleIntervalRef = useRef<number>(50); // 50ms throttle
+  const throttleIntervalRef = useRef<number>(30); // Reduce throttle to 30ms for more responsive updates
   
   // Throttled mouse move handler
   const handleMouseMove = useCallback((e: React.MouseEvent | MouseEvent) => {
@@ -143,6 +143,15 @@ const DockCreator: React.FC<DockCreatorProps> = ({
       setPreviewPosition(position);
       const isValid = managerRef.current.isPlacementValid();
       setIsPlacementValid(isValid);
+      
+      // Add visual feedback when valid placement is found
+      if (isValid && !document.body.classList.contains('valid-dock-placement')) {
+        document.body.classList.add('valid-dock-placement');
+        // Remove the class after a short delay to avoid flashing
+        setTimeout(() => {
+          document.body.classList.remove('valid-dock-placement');
+        }, 300);
+      }
     }
   }, [active]);
   
@@ -290,21 +299,31 @@ const DockCreator: React.FC<DockCreatorProps> = ({
   
   return (
     <div className="dock-creator">
-      {/* Overlay for mouse events - SIMPLIFIED */}
+      {/* Overlay for mouse events with improved visual feedback */}
       <div 
         className="fixed inset-0"
         style={{ 
           pointerEvents: 'none',
-          cursor: 'crosshair',
+          cursor: isPlacementValid ? 'pointer' : 'crosshair',
           position: 'fixed',
           top: 0,
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundColor: 'rgba(0,0,255,0.01)',
+          backgroundColor: isPlacementValid ? 'rgba(76,175,80,0.05)' : 'rgba(0,0,255,0.01)',
           zIndex: 1000
         }}
       />
+      
+      {/* Add a style tag for the visual feedback */}
+      <style jsx global>{`
+        .valid-dock-placement {
+          cursor: pointer !important;
+        }
+        .valid-dock-placement canvas {
+          outline: 2px solid rgba(76,175,80,0.5);
+        }
+      `}</style>
       
       {/* UI Controls */}
       <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-black/80 text-white p-4 rounded-lg z-20 w-96">
@@ -320,8 +339,10 @@ const DockCreator: React.FC<DockCreatorProps> = ({
           <p>Position your cursor where you want to place the dock.</p>
           <p>Docks must be placed at the edge of land parcels adjacent to water.</p>
           <p>The dock will automatically align perpendicular to the shoreline.</p>
-          {isPlacementValid && (
-            <p className="text-green-400 mt-2">Valid placement location found</p>
+          {isPlacementValid ? (
+            <p className="text-green-400 mt-2 font-bold">✓ Valid placement location found</p>
+          ) : (
+            <p className="text-yellow-400 mt-2">Move cursor closer to a shoreline</p>
           )}
         </div>
         
