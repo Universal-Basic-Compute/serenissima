@@ -10,7 +10,7 @@ const connection = new Connection(
 
 // COMPUTE token mint address (replace with your actual token mint)
 const COMPUTE_TOKEN_MINT = new PublicKey(
-  process.env.COMPUTE_TOKEN_MINT || '4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU'
+  process.env.COMPUTE_TOKEN_MINT || 'B1N1HcMm4RysYz4smsXwmk2UnS8NziqKCM6Ho8i62vXo'
 );
 
 // Treasury public key (this is just for preparing the transaction, we don't need the private key)

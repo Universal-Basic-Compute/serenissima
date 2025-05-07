@@ -79,7 +79,7 @@ export async function transferCompute(walletAddress: string, amount: number) {
     // Get the COMPUTE token mint address
     console.log('Getting COMPUTE token mint address...');
     const COMPUTE_TOKEN_MINT = new PublicKey(
-      process.env.NEXT_PUBLIC_COMPUTE_TOKEN_MINT || '4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU'
+      process.env.NEXT_PUBLIC_COMPUTE_TOKEN_MINT || 'B1N1HcMm4RysYz4smsXwmk2UnS8NziqKCM6Ho8i62vXo'
     );
     
     // Get the treasury public key
