@@ -73,6 +73,38 @@ const isCurrentUserTheSeller = (transaction: any): boolean => {
   return isSellerCurrentUser;
 };
 
+// Helper function to check if current user is the owner
+const isCurrentUserTheOwner = (ownerIdentifier: string | null): boolean => {
+  if (!ownerIdentifier) return false;
+  
+  // Get current user identifier (username or wallet)
+  const currentUser = sessionStorage.getItem('username') || 
+                     localStorage.getItem('username') ||
+                     sessionStorage.getItem('walletAddress') || 
+                     localStorage.getItem('walletAddress');
+  
+  if (!currentUser) return false;
+  
+  // Get user profile from localStorage
+  let userProfile = null;
+  try {
+    const profileStr = localStorage.getItem('userProfile');
+    if (profileStr) {
+      userProfile = JSON.parse(profileStr);
+    }
+  } catch (e) {
+    console.error('Error parsing user profile:', e);
+  }
+  
+  // Compare normalized identifiers
+  const normalizedOwner = normalizeIdentifier(ownerIdentifier);
+  const normalizedCurrentUser = normalizeIdentifier(currentUser);
+  const normalizedUsername = userProfile?.username ? normalizeIdentifier(userProfile.username) : null;
+  
+  // Check if owner matches either the wallet address or username
+  return normalizedOwner === normalizedCurrentUser || normalizedOwner === normalizedUsername;
+};
+
 export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons, landOwners, visible = true, preventAutoClose = false }: LandDetailsPanelProps) {
   const router = useRouter();
   const [refreshKey, setRefreshKey] = useState(0);
@@ -713,7 +745,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
                       alert('Failed to remove listing. Please try again.');
                     }
                   }}
-                  className="mt-4 w-full px-4 py-3 bg-red-600 text-white text-base font-medium rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center"
+                  className="mt-4 w-full px-4 py-3 bg-white text-amber-600 text-base font-medium rounded-lg hover:bg-amber-50 transition-colors flex items-center justify-center border-2 border-amber-600"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -921,7 +953,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
 
         {/* Action buttons at the bottom with improved styling */}
         <div className="pt-4 mt-auto border-t-2 border-amber-300">
-          {owner && owner !== (sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress')) && (
+          {owner && !isCurrentUserTheOwner(owner) && (
             // Only show "Make an Offer" button if the land is owned by someone else (not the current user)
             showOfferInput ? (
               <div className="flex flex-col w-full space-y-3">
