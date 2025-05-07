@@ -8,13 +8,13 @@ export interface ColorScaleConfig {
   highIncomeColor: THREE.Color;
 }
 
-// Default configuration
+// Default configuration with Venetian-themed colors
 export const DEFAULT_COLOR_SCALE: ColorScaleConfig = {
   minIncome: 0,
   maxIncome: 1000,
-  lowIncomeColor: new THREE.Color(0x33cc33),  // Rich green
-  midIncomeColor: new THREE.Color(0xffcc00),  // Golden yellow
-  highIncomeColor: new THREE.Color(0xff3300)   // Bright orange-red
+  lowIncomeColor: new THREE.Color(0x1E5799),  // Venetian Blue
+  midIncomeColor: new THREE.Color(0xDAA520),  // Venetian Gold
+  highIncomeColor: new THREE.Color(0x8B0000)   // Venetian Red
 };
 
 /**
