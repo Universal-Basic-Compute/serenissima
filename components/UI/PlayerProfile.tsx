@@ -85,57 +85,6 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
       window.removeEventListener('userProfileUpdated', handleProfileUpdate as EventListener);
     };
     
-    // If we have a wallet address, fetch the user data
-    if (walletAddress) {
-      // Check cache first
-      if (walletAddress && typeof walletAddress === 'string' && 
-          userProfileCache && userProfileCache[walletAddress as keyof typeof userProfileCache]) {
-        setUserData(userProfileCache[walletAddress as keyof typeof userProfileCache]);
-        return;
-      }
-      
-      setIsLoading(true);
-      setError(null);
-      
-      fetch(`http://localhost:8000/api/wallet/${walletAddress}`)
-        .then(response => {
-          if (!response.ok) {
-            throw new Error(`Failed to fetch user data: ${response.status}`);
-          }
-          return response.json();
-        })
-        .then(data => {
-          const profileData = {
-            username: data.user_name || 'Unknown User',
-            firstName: data.first_name || data.user_name?.split(' ')[0] || 'Unknown',
-            lastName: data.last_name || data.user_name?.split(' ').slice(1).join(' ') || 'User',
-            coatOfArmsImage: data.coat_of_arms_image,
-            familyMotto: data.family_motto,
-            computeAmount: data.compute_amount // Include the compute amount from API response
-          };
-          
-          // Store in cache
-          if (walletAddress) {
-            userProfileCache[walletAddress] = profileData;
-          }
-          
-          setUserData(profileData);
-          setIsLoading(false);
-        })
-        .catch(err => {
-          console.error('Error fetching user data:', err);
-          setError(err.message);
-          setIsLoading(false);
-          
-          // Set fallback data
-          setUserData({
-            username: 'Unknown User',
-            firstName: 'Unknown',
-            lastName: 'User',
-            coatOfArmsImage: null
-          });
-        });
-    }
   }, [walletAddress, username, firstName, lastName, coatOfArmsImage]);
 
   // Determine sizes based on the size prop

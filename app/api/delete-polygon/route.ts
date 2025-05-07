@@ -27,7 +27,8 @@ export async function DELETE(request: Request) {
     
     // 2. Delete the Airtable record
     try {
-      const response = await fetch(`http://localhost:8000/api/land/${id}`, {
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+      const response = await fetch(`${apiBaseUrl}/api/land/${id}`, {
         method: 'DELETE',
       });
       

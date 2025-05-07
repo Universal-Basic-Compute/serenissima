@@ -47,7 +47,8 @@ export const airtableUtils = {
       // The blockchain transaction in tokenUtils.ts will handle the decimal conversion
       console.log(`Transferring ${amount.toLocaleString()} COMPUTE for wallet ${walletAddress}`);
       
-      const response = await fetch('http://localhost:8000/api/transfer-compute', {
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+      const response = await fetch(`${apiBaseUrl}/api/transfer-compute`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
