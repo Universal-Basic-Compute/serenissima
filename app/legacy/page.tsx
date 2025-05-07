@@ -638,7 +638,7 @@ export default function Home() {
     
     // Load income data after users
     try {
-      const { getIncomeDataService } = require('../lib/services/IncomeDataService');
+      const { getIncomeDataService } = require('../../lib/services/IncomeDataService');
       const incomeService = getIncomeDataService();
       
       // Load income data or generate simulated data
