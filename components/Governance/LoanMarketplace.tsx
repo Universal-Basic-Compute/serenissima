@@ -5,6 +5,12 @@ import { getWalletAddress } from '@/lib/walletUtils';
 import ErrorBoundary from '@/components/UI/ErrorBoundary';
 import { eventBus, EventTypes } from '@/lib/eventBus';
 
+// Define missing event types
+type LoanEventData = {
+  loan?: LoanData;
+  [key: string]: any;
+};
+
 const LoanMarketplace: React.FC = () => {
   const { availableLoans: storeLoans, loading, error, loadAvailableLoans } = useLoanStore();
   const [availableLoans, setAvailableLoans] = useState<LoanData[]>([]);
@@ -39,8 +45,8 @@ const LoanMarketplace: React.FC = () => {
     );
     
     const loanAppliedSubscription = eventBus.subscribe(
-      EventTypes.LOAN_APPLIED, 
-      (data) => {
+      'LOAN_APPLIED', // Using string literal as fallback
+      (data: LoanEventData) => {
         console.log("Loan applied event received:", data);
         // Remove the loan from available loans if it was just applied for
         if (data.loan && data.loan.id) {
@@ -75,50 +81,7 @@ const LoanMarketplace: React.FC = () => {
     }
   }, [storeLoans]);
   
-  // Add a check to ensure we have loans before rendering
-  useEffect(() => {
-    console.log("Available loans in state:", availableLoans);
-    console.log("Filtered loans:", filteredLoans);
-    console.log("Sorted loans:", sortedLoans);
-  }, [availableLoans, filteredLoans, sortedLoans]);
-  
-  // Show notification when events occur
-  useEffect(() => {
-    const handleLoanApplied = (data: any) => {
-      setNotification({
-        message: `Loan application submitted successfully!`,
-        type: 'success'
-      });
-      
-      // Clear notification after 5 seconds
-      setTimeout(() => {
-        setNotification(null);
-      }, 5000);
-    };
-    
-    const handleLoanOfferCreated = (data: any) => {
-      setNotification({
-        message: `New loan offer created: ${data.loan?.name || 'Unnamed loan'}`,
-        type: 'info'
-      });
-      
-      // Clear notification after 5 seconds
-      setTimeout(() => {
-        setNotification(null);
-      }, 5000);
-    };
-    
-    // Subscribe to events
-    const loanAppliedSubscription = eventBus.subscribe(EventTypes.LOAN_APPLIED, handleLoanApplied);
-    const loanOfferCreatedSubscription = eventBus.subscribe(EventTypes.LOAN_OFFER_CREATED, handleLoanOfferCreated);
-    
-    // Clean up subscriptions
-    return () => {
-      loanAppliedSubscription.unsubscribe();
-      loanOfferCreatedSubscription.unsubscribe();
-    };
-  }, []);
-  
+  // Filter loans based on selected type
   const filteredLoans = availableLoans.filter(loan => {
     if (selectedLoanType === 'all') return true;
     if (selectedLoanType === 'treasury') {
@@ -130,6 +93,7 @@ const LoanMarketplace: React.FC = () => {
     return true;
   });
   
+  // Sort loans based on selected field and direction
   const sortedLoans = [...filteredLoans].sort((a, b) => {
     const aValue = a[sortField];
     const bValue = b[sortField];
@@ -146,6 +110,52 @@ const LoanMarketplace: React.FC = () => {
     
     return 0;
   });
+  
+  // Add a check to ensure we have loans before rendering
+  useEffect(() => {
+    console.log("Available loans in state:", availableLoans);
+    console.log("Filtered loans:", filteredLoans);
+    console.log("Sorted loans:", sortedLoans);
+  }, [availableLoans, filteredLoans, sortedLoans]);
+  
+  // Show notification when events occur
+  useEffect(() => {
+    const handleLoanApplied = (data: LoanEventData) => {
+      setNotification({
+        message: `Loan application submitted successfully!`,
+        type: 'success'
+      });
+      
+      // Clear notification after 5 seconds
+      setTimeout(() => {
+        setNotification(null);
+      }, 5000);
+    };
+    
+    const handleLoanOfferCreated = (data: LoanEventData) => {
+      setNotification({
+        message: `New loan offer created: ${data.loan?.name || 'Unnamed loan'}`,
+        type: 'info'
+      });
+      
+      // Clear notification after 5 seconds
+      setTimeout(() => {
+        setNotification(null);
+      }, 5000);
+    };
+    
+    // Subscribe to events
+    const loanAppliedSubscription = eventBus.subscribe('LOAN_APPLIED', handleLoanApplied);
+    const loanOfferCreatedSubscription = eventBus.subscribe(EventTypes.OFFER_CREATED, handleLoanOfferCreated);
+    
+    // Clean up subscriptions
+    return () => {
+      loanAppliedSubscription.unsubscribe();
+      loanOfferCreatedSubscription.unsubscribe();
+    };
+  }, []);
+  
+  // These are now defined above the useEffect that references them
   
   const getInterestRateColor = (rate: number) => {
     if (rate < 5) return 'text-green-500';
