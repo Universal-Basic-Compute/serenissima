@@ -99,6 +99,7 @@ const DockCreator: React.FC<DockCreatorProps> = ({
     
     const handleDocumentClick = (e: MouseEvent) => {
       console.log('Document click detected at', e.clientX, e.clientY);
+      // Call the handleClick function directly
       handleClick();
     };
     
@@ -109,95 +110,114 @@ const DockCreator: React.FC<DockCreatorProps> = ({
       document.removeEventListener('mousemove', handleDocumentMouseMove);
       document.removeEventListener('click', handleDocumentClick);
     };
-  }, [active, handleClick]);
+  }, [active]); // Remove handleClick from dependencies
   
   // Handle click to place dock
-  const handleClick = useCallback(async () => {
-    console.log('DockCreator: Click detected, active =', active, 'manager =', !!managerRef.current, 'position =', previewPosition);
-    if (!active || !managerRef.current || !previewPosition) return;
+  const handleClick = () => {
+    console.log('DockCreator: Click detected, active =', active, 'manager =', !!managerRef.current);
     
-    try {
-      // Check if placement is valid
-      if (!managerRef.current.isPlacementValid()) {
-        setErrorMessage('Dock must be placed along a water edge adjacent to land');
-        return;
-      }
-      
-      setIsPlacing(true);
-      setErrorMessage(null);
-      
-      // Get the land ID from the manager
-      const landId = managerRef.current.getAdjacentLandId();
-      
-      if (!landId) {
-        setErrorMessage('Dock must be adjacent to land');
-        setIsPlacing(false);
-        return;
-      }
-      
-      // Get wallet address
-      const walletAddress = getWalletAddress();
-      if (!walletAddress) {
-        setErrorMessage('Please connect your wallet to place a dock');
-        setIsPlacing(false);
-        return;
-      }
-      
-      // Generate connection points
-      const connectionPoints = managerRef.current.generateConnectionPoints();
-      
-      // Prepare dock data
-      const dockData = {
-        landId: landId,
-        position: {
-          x: previewPosition.x,
-          y: previewPosition.y,
-          z: previewPosition.z
-        },
-        rotation: previewRotation,
-        connectionPoints: connectionPoints,
-        createdBy: walletAddress,
-        // Add metadata for the dock model
-        metadata: {
-          modelPath: '/assets/buildings/models/public-dock/model.glb',
-          scale: 1.0,
-          offsetY: 0.1
-        }
-      };
-      
-      // Send to server
-      const response = await fetch(`${getApiBaseUrl()}/api/docks`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(dockData),
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Failed to create dock: ${response.status} ${response.statusText}`);
-      }
-      
-      const data = await response.json();
-      
-      // Emit event
-      eventBus.emit(EventTypes.DOCK_PLACED, {
-        dockId: data.id,
-        landId: landId,
-        position: previewPosition,
-        rotation: previewRotation,
-        modelPath: '/assets/buildings/models/public-dock/model.glb'
-      });
-      
-      // Call the completion callback
-      onComplete(data);
-    } catch (error) {
-      console.error('Error creating dock:', error);
-      setErrorMessage(error instanceof Error ? error.message : 'Failed to create dock');
-    } finally {
-      setIsPlacing(false);
+    if (!active || !managerRef.current) {
+      console.log('DockCreator: Click ignored - component not active or manager not initialized');
+      return;
     }
-  }, [active, previewPosition, previewRotation, onComplete]);
+    
+    // Get the current preview position directly from the manager
+    const currentPosition = managerRef.current.getPreviewPosition();
+    console.log('DockCreator: Current preview position =', currentPosition);
+    
+    if (!currentPosition) {
+      console.log('DockCreator: No valid position found');
+      return;
+    }
+    
+    // Check if placement is valid
+    const isValid = managerRef.current.isPlacementValid();
+    console.log('DockCreator: Placement valid =', isValid);
+    
+    if (!isValid) {
+      setErrorMessage('Dock must be placed along a water edge adjacent to land');
+      return;
+    }
+    
+    // Continue with the async part in an IIFE
+    (async () => {
+      try {
+        setIsPlacing(true);
+        setErrorMessage(null);
+        
+        // Get the land ID from the manager
+        const landId = managerRef.current.getAdjacentLandId();
+        
+        if (!landId) {
+          setErrorMessage('Dock must be adjacent to land');
+          setIsPlacing(false);
+          return;
+        }
+        
+        // Get wallet address
+        const walletAddress = getWalletAddress();
+        if (!walletAddress) {
+          setErrorMessage('Please connect your wallet to place a dock');
+          setIsPlacing(false);
+          return;
+        }
+        
+        // Generate connection points
+        const connectionPoints = managerRef.current.generateConnectionPoints();
+        
+        // Prepare dock data
+        const dockData = {
+          landId: landId,
+          position: {
+            x: currentPosition.x,
+            y: currentPosition.y,
+            z: currentPosition.z
+          },
+          rotation: previewRotation,
+          connectionPoints: connectionPoints,
+          createdBy: walletAddress,
+          // Add metadata for the dock model
+          metadata: {
+            modelPath: '/assets/buildings/models/public-dock/model.glb',
+            scale: 1.0,
+            offsetY: 0.1
+          }
+        };
+        
+        // Send to server
+        const response = await fetch(`${getApiBaseUrl()}/api/docks`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(dockData),
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Failed to create dock: ${response.status} ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        
+        // Emit event
+        eventBus.emit(EventTypes.DOCK_PLACED, {
+          dockId: data.id,
+          landId: landId,
+          position: currentPosition,
+          rotation: previewRotation,
+          modelPath: '/assets/buildings/models/public-dock/model.glb'
+        });
+        
+        // Call the completion callback
+        onComplete(data);
+      } catch (error) {
+        console.error('Error creating dock:', error);
+        setErrorMessage(error instanceof Error ? error.message : 'Failed to create dock');
+      } finally {
+        setIsPlacing(false);
+      }
+    })();
+  };
   
   // Handle rotation with keyboard
   useEffect(() => {
@@ -225,12 +245,12 @@ const DockCreator: React.FC<DockCreatorProps> = ({
         style={{ 
           pointerEvents: 'all',
           cursor: 'crosshair',
-          position: 'absolute', // Ensure it's absolutely positioned
+          position: 'fixed', // Change from absolute to fixed
           top: 0,
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.01)' // Very slight tint to ensure it captures events
+          backgroundColor: 'rgba(255,0,0,0.05)' // Make it slightly visible for debugging
         }}
         onMouseMove={(e) => {
           console.log('Overlay mouse move detected at', e.clientX, e.clientY);
@@ -238,8 +258,9 @@ const DockCreator: React.FC<DockCreatorProps> = ({
         }}
         onClick={(e) => {
           console.log('Overlay click detected at', e.clientX, e.clientY);
+          e.preventDefault(); // Add this
+          e.stopPropagation(); // Keep this
           handleClick();
-          e.stopPropagation(); // Stop event propagation
         }}
       />
       

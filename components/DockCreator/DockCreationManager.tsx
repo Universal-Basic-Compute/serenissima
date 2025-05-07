@@ -18,6 +18,8 @@ export class DockCreationManager {
   
   constructor(scene: THREE.Scene, camera: THREE.PerspectiveCamera, polygons: any[]) {
     console.log('DockCreationManager: Initializing with', polygons.length, 'polygons');
+    console.log('DockCreationManager: Scene =', !!scene, 'Camera =', !!camera);
+    
     this.scene = scene;
     this.camera = camera;
     this.raycaster = new THREE.Raycaster();
