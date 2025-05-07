@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FaTimes, FaSearch, FaFilter, FaThLarge, FaProjectDiagram, FaInfoCircle } from 'react-icons/fa';
+import { FaTimes, FaSearch, FaFilter, FaThLarge, FaProjectDiagram, FaInfoCircle, FaBuilding } from 'react-icons/fa';
 import Image from 'next/image';
 
 interface ResourceNode {
