@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FaTimes } from 'react-icons/fa';
-import Image from 'next/image';
 
 interface TechNode {
   id: string;
@@ -19,6 +18,7 @@ interface TechTreeProps {
 const TechTree: React.FC<TechTreeProps> = ({ onClose }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+  const [selectedNode, setSelectedNode] = useState<TechNode | null>(null);
   
   // Update dimensions on resize
   useEffect(() => {
@@ -244,6 +244,16 @@ const TechTree: React.FC<TechTreeProps> = ({ onClose }) => {
     return Array.from(nodesMap.values());
   };
 
+  // Handle node click
+  const handleNodeClick = (node: TechNode) => {
+    setSelectedNode(node);
+  };
+
+  // Close the detail panel
+  const closeDetailPanel = () => {
+    setSelectedNode(null);
+  };
+
   const positionedNodes = calculatePositions();
   
   // Calculate the content dimensions to ensure proper scrolling
@@ -318,12 +328,13 @@ const TechTree: React.FC<TechTreeProps> = ({ onClose }) => {
           {positionedNodes.map(node => (
             <div 
               key={node.id}
-              className="absolute bg-amber-50 border-2 border-amber-700 rounded-lg shadow-lg w-56 tech-node hover:shadow-xl transition-all duration-300"
+              className="absolute bg-amber-50 border-2 border-amber-700 rounded-lg shadow-lg w-56 tech-node hover:shadow-xl transition-all duration-300 cursor-pointer"
               style={{ 
                 left: `${node.position?.x}px`, 
                 top: `${node.position?.y}px`,
                 transform: 'translate3d(0,0,0)', // Force GPU acceleration
               }}
+              onClick={() => handleNodeClick(node)}
             >
               <div className="h-32 w-32 overflow-hidden rounded-md relative mx-auto mt-4">
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent to-amber-900/30" />
@@ -339,10 +350,124 @@ const TechTree: React.FC<TechTreeProps> = ({ onClose }) => {
               </div>
               <div className="p-4">
                 <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-2 text-center">{node.title}</h3>
-                <p className="text-gray-600 text-xs mb-3 h-28 overflow-auto pr-1 tech-tree-scroll">{node.description}</p>
+                <p className="text-gray-600 text-xs mb-3 text-center italic">Click to learn more</p>
               </div>
             </div>
           ))}
+          
+          {/* Detail Panel */}
+          {selectedNode && (
+            <div className="fixed inset-0 bg-black bg-opacity-80 z-10 flex items-center justify-center p-8" onClick={closeDetailPanel}>
+              <div 
+                className="bg-amber-50 rounded-lg shadow-2xl max-w-4xl max-h-[90vh] w-full overflow-hidden flex flex-col"
+                onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside
+              >
+                <div className="flex justify-between items-center p-6 border-b border-amber-200 bg-gradient-to-r from-amber-700 to-amber-600">
+                  <h2 className="text-2xl font-serif text-white">{selectedNode.title}</h2>
+                  <button 
+                    onClick={closeDetailPanel}
+                    className="text-white hover:text-amber-200 transition-colors"
+                    aria-label="Close detail"
+                  >
+                    <FaTimes size={24} />
+                  </button>
+                </div>
+                
+                <div className="flex-grow overflow-auto p-6 tech-tree-scroll">
+                  <div className="flex flex-col md:flex-row gap-6">
+                    <div className="md:w-1/3">
+                      <div className="rounded-lg overflow-hidden border-2 border-amber-300 shadow-md">
+                        <img 
+                          src={selectedNode.image} 
+                          alt={selectedNode.title}
+                          className="w-full h-auto object-cover"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = `https://via.placeholder.com/400x400/8B4513/FFF?text=${selectedNode.title}`;
+                          }}
+                        />
+                      </div>
+                      
+                      {selectedNode.dependencies && selectedNode.dependencies.length > 0 && (
+                        <div className="mt-6 bg-amber-100 rounded-lg p-4 border border-amber-200">
+                          <h3 className="text-lg font-serif text-amber-800 mb-2">Dependencies</h3>
+                          <ul className="list-disc list-inside text-amber-900">
+                            {selectedNode.dependencies.map(depId => {
+                              const depNode = techNodes.find(n => n.id === depId);
+                              return depNode ? (
+                                <li key={depId} className="mb-1">
+                                  <button 
+                                    className="text-amber-700 hover:text-amber-900 hover:underline font-medium"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      const node = techNodes.find(n => n.id === depId);
+                                      if (node) handleNodeClick(node);
+                                    }}
+                                  >
+                                    {depNode.title}
+                                  </button>
+                                </li>
+                              ) : null;
+                            })}
+                          </ul>
+                        </div>
+                      )}
+                      
+                      {/* Find nodes that depend on this node */}
+                      {(() => {
+                        const dependents = techNodes.filter(n => 
+                          n.dependencies && n.dependencies.includes(selectedNode.id)
+                        );
+                        
+                        return dependents.length > 0 ? (
+                          <div className="mt-4 bg-amber-100 rounded-lg p-4 border border-amber-200">
+                            <h3 className="text-lg font-serif text-amber-800 mb-2">Enables</h3>
+                            <ul className="list-disc list-inside text-amber-900">
+                              {dependents.map(dep => (
+                                <li key={dep.id} className="mb-1">
+                                  <button 
+                                    className="text-amber-700 hover:text-amber-900 hover:underline font-medium"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleNodeClick(dep);
+                                    }}
+                                  >
+                                    {dep.title}
+                                  </button>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        ) : null;
+                      })()}
+                    </div>
+                    
+                    <div className="md:w-2/3">
+                      <article className="prose prose-amber prose-lg max-w-none">
+                        <h2 className="text-2xl font-serif text-amber-800 mb-4 hidden md:block">{selectedNode.title}</h2>
+                        
+                        <p className="text-lg font-medium text-amber-900 leading-relaxed">
+                          {selectedNode.description}
+                        </p>
+                        
+                        {selectedNode.link && (
+                          <div className="mt-6">
+                            <a 
+                              href={selectedNode.link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-block px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors"
+                            >
+                              View Technical Documentation
+                            </a>
+                          </div>
+                        )}
+                      </article>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
