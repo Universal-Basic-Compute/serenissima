@@ -35,12 +35,15 @@ const DockCreator: React.FC<DockCreatorProps> = ({
   
   // Initialize the dock creation manager
   useEffect(() => {
+    console.log('DockCreator: Initializing with active =', active, 'polygons =', polygons.length);
     if (active && !managerRef.current && polygons.length > 0) {
+      console.log('DockCreator: Creating new DockCreationManager');
       managerRef.current = new DockCreationManager(scene, camera, polygons);
     }
     
     return () => {
       if (managerRef.current) {
+        console.log('DockCreator: Disposing DockCreationManager');
         managerRef.current.dispose();
         managerRef.current = null;
       }
@@ -56,20 +59,28 @@ const DockCreator: React.FC<DockCreatorProps> = ({
   
   // Handle mouse movement for dock placement preview
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    if (!active || !managerRef.current) return;
+    if (!active || !managerRef.current) {
+      console.log('DockCreator: Mouse move ignored - active =', active, 'manager =', !!managerRef.current);
+      return;
+    }
     
+    console.log('DockCreator: Mouse move at', e.clientX, e.clientY);
     managerRef.current.updateMousePosition(e.clientX, e.clientY);
     
     // Get the preview position (snapped to water edge)
     const position = managerRef.current.getPreviewPosition();
     if (position) {
+      console.log('DockCreator: Preview position updated to', position);
       setPreviewPosition(position);
-      setIsPlacementValid(managerRef.current.isPlacementValid());
+      const isValid = managerRef.current.isPlacementValid();
+      console.log('DockCreator: Placement valid =', isValid);
+      setIsPlacementValid(isValid);
     }
   }, [active]);
   
   // Handle click to place dock
   const handleClick = useCallback(async () => {
+    console.log('DockCreator: Click detected, active =', active, 'manager =', !!managerRef.current, 'position =', previewPosition);
     if (!active || !managerRef.current || !previewPosition) return;
     
     try {
@@ -178,9 +189,18 @@ const DockCreator: React.FC<DockCreatorProps> = ({
       {/* Overlay for mouse events */}
       <div 
         className="fixed inset-0 z-50 cursor-crosshair"
-        style={{ pointerEvents: 'all' }}
-        onMouseMove={handleMouseMove}
-        onClick={handleClick}
+        style={{ 
+          pointerEvents: 'all',
+          backgroundColor: 'rgba(0,0,0,0.01)' // Very slight tint to ensure it captures events
+        }}
+        onMouseMove={(e) => {
+          console.log('Overlay mouse move detected at', e.clientX, e.clientY);
+          handleMouseMove(e);
+        }}
+        onClick={(e) => {
+          console.log('Overlay click detected at', e.clientX, e.clientY);
+          handleClick();
+        }}
       />
       
       {/* UI Controls */}

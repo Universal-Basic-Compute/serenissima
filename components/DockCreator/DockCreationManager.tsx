@@ -17,6 +17,7 @@ export class DockCreationManager {
   private isModelLoaded: boolean = false;
   
   constructor(scene: THREE.Scene, camera: THREE.PerspectiveCamera, polygons: any[]) {
+    console.log('DockCreationManager: Initializing with', polygons.length, 'polygons');
     this.scene = scene;
     this.camera = camera;
     this.raycaster = new THREE.Raycaster();
@@ -24,9 +25,27 @@ export class DockCreationManager {
     this.waterEdgeDetector = new WaterEdgeDetector(polygons);
     this.modelLoader = new GLTFLoader();
     
-    // Find the renderer from the scene's userData or create a temporary one
-    this.renderer = scene.userData?.renderer || 
-      new THREE.WebGLRenderer({ antialias: true });
+    // Find the renderer from the scene's userData or from the canvas
+    if (scene.userData?.renderer) {
+      this.renderer = scene.userData.renderer;
+      console.log('DockCreationManager: Found renderer in scene.userData');
+    } else {
+      // Try to find the renderer from the canvas
+      const canvas = document.querySelector('canvas');
+      if (canvas && (canvas as any).__renderer) {
+        this.renderer = (canvas as any).__renderer;
+        console.log('DockCreationManager: Found renderer in canvas.__renderer');
+      } else {
+        console.warn('DockCreationManager: No renderer found, creating temporary one');
+        this.renderer = new THREE.WebGLRenderer({ antialias: true });
+        // Attach to a small canvas to make it functional
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = 1;
+        tempCanvas.height = 1;
+        this.renderer.setSize(1, 1);
+        this.renderer.domElement = tempCanvas;
+      }
+    }
     
     // Create fallback preview mesh immediately
     this.createFallbackPreviewMesh();
@@ -39,10 +58,15 @@ export class DockCreationManager {
    * Update mouse position for raycasting
    */
   public updateMousePosition(clientX: number, clientY: number): void {
+    console.log('DockCreationManager: Updating mouse position to', clientX, clientY);
+    
     // Convert mouse position to normalized device coordinates
     const rect = this.renderer.domElement.getBoundingClientRect();
+    console.log('DockCreationManager: Renderer rect =', rect);
+    
     this.mouse.x = ((clientX - rect.left) / rect.width) * 2 - 1;
     this.mouse.y = -((clientY - rect.top) / rect.height) * 2 + 1;
+    console.log('DockCreationManager: Normalized mouse coordinates =', this.mouse.x, this.mouse.y);
     
     // Update preview position
     this.updatePreviewPosition();
@@ -150,9 +174,14 @@ export class DockCreationManager {
    * Update the preview position based on mouse position
    */
   private updatePreviewPosition(): void {
+    console.log('DockCreationManager: Updating preview position');
+    
     // Get the active preview mesh (either the model or fallback)
     const activeMesh = this.isModelLoaded ? this.previewMesh : this.fallbackPreviewMesh;
-    if (!activeMesh) return;
+    if (!activeMesh) {
+      console.log('DockCreationManager: No active mesh available');
+      return;
+    }
     
     // Cast ray from mouse position
     this.raycaster.setFromCamera(this.mouse, this.camera);
