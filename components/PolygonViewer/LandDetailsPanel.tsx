@@ -11,6 +11,7 @@ import AnimatedDucats from '../UI/AnimatedDucats';
 import { Polygon } from './types';
 import { eventBus, EventTypes } from '../../lib/eventBus';
 import { getWalletAddress } from '@/lib/walletUtils';
+import { getWalletAddress } from '@/lib/walletUtils';
 
 // Helper function to normalize identifiers for comparison
 const normalizeIdentifier = (id: string | null | undefined): string | null => {
