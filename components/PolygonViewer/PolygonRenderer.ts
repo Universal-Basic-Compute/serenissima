@@ -1111,7 +1111,7 @@ export default class PolygonRenderer {
     // Get the owner's coat of arms URL if available
     let ownerCoatOfArmsUrl: string | null = null;
     if (newOwner && this.ownerCoatOfArmsMap && newOwner in this.ownerCoatOfArmsMap) {
-      ownerCoatOfArmsUrl = this.ownerCoatOfArmsMap[newOwner] || null;
+      ownerCoatOfArmsUrl = this.ownerCoatOfArmsMap[newOwner];
       console.log(`Found coat of arms for ${newOwner}: ${ownerCoatOfArmsUrl}`);
     }
     
@@ -1122,7 +1122,7 @@ export default class PolygonRenderer {
       
       if (ownerCoatOfArmsUrl) {
         console.log(`Updating coat of arms texture for ${polygonId} with URL ${ownerCoatOfArmsUrl}`);
-        polygonMesh.updateCoatOfArmsTexture(ownerCoatOfArmsUrl || '');
+        polygonMesh.updateCoatOfArmsTexture(ownerCoatOfArmsUrl);
       }
     } catch (error) {
       console.error(`Error updating PolygonMesh for ${polygonId}:`, error);
