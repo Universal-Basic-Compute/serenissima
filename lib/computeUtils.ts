@@ -208,7 +208,8 @@ export async function transferCompute(walletAddress: string, amount: number) {
     console.log('Serializing signed transaction...');
     const serializedTransaction = signedTransaction.serialize();
     
-    // Check sender token account balance before attempting transfer
+    
+    // Check sender token account balance after ensuring the account exists
     console.log('Checking sender token account balance...');
     try {
       const tokenBalance = await connection.getTokenAccountBalance(senderTokenAccount);
@@ -220,7 +221,7 @@ export async function transferCompute(walletAddress: string, amount: number) {
     } catch (balanceError) {
       console.error('Error checking token balance:', balanceError);
       
-      // If the account doesn't exist, we should have created it above, so this is a different error
+      // If we get here, the account exists but we couldn't get the balance
       throw new Error(`Failed to check token balance: ${balanceError.message}`);
     }
     
@@ -234,8 +235,12 @@ export async function transferCompute(walletAddress: string, amount: number) {
       // Wait for confirmation
       console.log('Waiting for transaction confirmation...');
       try {
-        await connection.confirmTransaction(signature);
-        console.log('Transaction confirmed!');
+        const confirmation = await connection.confirmTransaction(signature);
+        console.log('Transaction confirmed!', confirmation);
+        
+        if (confirmation.value.err) {
+          throw new Error(`Transaction confirmed but failed: ${JSON.stringify(confirmation.value.err)}`);
+        }
       } catch (confirmError) {
         console.error('Error confirming transaction:', confirmError);
         throw new Error(`Transaction sent but confirmation failed: ${confirmError.message}`);
@@ -245,7 +250,9 @@ export async function transferCompute(walletAddress: string, amount: number) {
       
       // Check for specific error types
       if (sendError.message && sendError.message.includes('Attempt to debit an account but found no record of a prior credit')) {
-        throw new Error('You may not have any COMPUTE tokens in your wallet. Please add tokens to your wallet first.');
+        throw new Error('You don\'t have any COMPUTE tokens in your wallet. Please add tokens to your wallet first.');
+      } else if (sendError.message && sendError.message.includes('insufficient funds')) {
+        throw new Error('Insufficient funds to complete this transaction. This could be due to not having enough SOL to pay for transaction fees.');
       } else if (sendError.message && sendError.message.includes('Transaction simulation failed')) {
         // Try to get more detailed logs if available
         let errorDetails = sendError.message;
