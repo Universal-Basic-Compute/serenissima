@@ -160,7 +160,7 @@ const LoanApplicationModal: React.FC<LoanApplicationModalProps> = ({ loan, onClo
                   <h4 className="font-medium text-amber-800 mb-2">Loan Details</h4>
                   <div className="grid grid-cols-2 gap-2 text-sm">
                     <div className="text-gray-600">Principal:</div>
-                    <div className="text-gray-900 font-medium">{loanAmount.toLocaleString()} Ducats</div>
+                    <div className="text-gray-900 font-medium">{loanAmount.toLocaleString()} ⚜️ Ducats</div>
                     
                     <div className="text-gray-600">Interest Rate:</div>
                     <div className="text-gray-900 font-medium">{loan.interestRate}%</div>
@@ -169,13 +169,13 @@ const LoanApplicationModal: React.FC<LoanApplicationModalProps> = ({ loan, onClo
                     <div className="text-gray-900 font-medium">{loan.termDays} days</div>
                     
                     <div className="text-gray-600">Total Interest:</div>
-                    <div className="text-gray-900 font-medium">{totalInterest.toLocaleString()} Ducats</div>
+                    <div className="text-gray-900 font-medium">{totalInterest.toLocaleString()} ⚜️ Ducats</div>
                     
                     <div className="text-gray-600">Total Payment:</div>
-                    <div className="text-gray-900 font-medium">{totalPayment.toLocaleString()} Ducats</div>
+                    <div className="text-gray-900 font-medium">{totalPayment.toLocaleString()} ⚜️ Ducats</div>
                     
                     <div className="text-gray-600">Daily Payment:</div>
-                    <div className="text-gray-900 font-medium">{dailyPayment.toLocaleString()} Ducats</div>
+                    <div className="text-gray-900 font-medium">{dailyPayment.toLocaleString()} ⚜️ Ducats</div>
                   </div>
                 </div>
                 
@@ -234,7 +234,7 @@ const LoanApplicationModal: React.FC<LoanApplicationModalProps> = ({ loan, onClo
                   </div>
                   
                   <div className="text-gray-600">Principal Amount:</div>
-                  <div className="text-gray-900 font-medium">{loanAmount.toLocaleString()} Ducats</div>
+                  <div className="text-gray-900 font-medium">{loanAmount.toLocaleString()} ⚜️ Ducats</div>
                   
                   <div className="text-gray-600">Interest Rate:</div>
                   <div className="text-gray-900 font-medium">{loan.interestRate}%</div>
@@ -243,10 +243,10 @@ const LoanApplicationModal: React.FC<LoanApplicationModalProps> = ({ loan, onClo
                   <div className="text-gray-900 font-medium">{loan.termDays} days</div>
                   
                   <div className="text-gray-600">Total Repayment:</div>
-                  <div className="text-gray-900 font-medium">{totalPayment.toLocaleString()} Ducats</div>
+                  <div className="text-gray-900 font-medium">{totalPayment.toLocaleString()} ⚜️ Ducats</div>
                   
                   <div className="text-gray-600">Daily Payment:</div>
-                  <div className="text-gray-900 font-medium">{dailyPayment.toLocaleString()} Ducats</div>
+                  <div className="text-gray-900 font-medium">{dailyPayment.toLocaleString()} ⚜️ Ducats</div>
                 </div>
                 
                 {loan.requirementsText && (

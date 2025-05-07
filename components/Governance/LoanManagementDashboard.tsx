@@ -106,12 +106,12 @@ const LoanManagementDashboard: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <div className="bg-white p-6 rounded-lg border border-amber-200 shadow-sm">
             <h3 className="text-lg font-medium text-amber-800 mb-2">Total Debt</h3>
-            <p className="text-3xl font-bold text-gray-900">{totalDebt.toLocaleString()} Ducats</p>
+            <p className="text-3xl font-bold text-gray-900">{totalDebt.toLocaleString()} ⚜️ Ducats</p>
           </div>
           
           <div className="bg-white p-6 rounded-lg border border-amber-200 shadow-sm">
             <h3 className="text-lg font-medium text-amber-800 mb-2">Daily Payment Obligations</h3>
-            <p className="text-3xl font-bold text-gray-900">{dailyPayments.toLocaleString()} Ducats</p>
+            <p className="text-3xl font-bold text-gray-900">{dailyPayments.toLocaleString()} ⚜️ Ducats</p>
           </div>
         </div>
         
@@ -156,11 +156,11 @@ const LoanManagementDashboard: React.FC = () => {
                       <div className="mt-4 grid grid-cols-2 gap-4">
                         <div>
                           <p className="text-sm text-gray-500">Principal</p>
-                          <p className="text-lg font-medium text-gray-900">{loan.principalAmount.toLocaleString()} Ducats</p>
+                          <p className="text-lg font-medium text-gray-900">{loan.principalAmount.toLocaleString()} ⚜️ Ducats</p>
                         </div>
                         <div>
                           <p className="text-sm text-gray-500">Remaining Balance</p>
-                          <p className="text-lg font-medium text-gray-900">{loan.remainingBalance.toLocaleString()} Ducats</p>
+                          <p className="text-lg font-medium text-gray-900">{loan.remainingBalance.toLocaleString()} ⚜️ Ducats</p>
                         </div>
                         <div>
                           <p className="text-sm text-gray-500">Interest Rate</p>
@@ -192,7 +192,7 @@ const LoanManagementDashboard: React.FC = () => {
                       <div className="mt-6 flex justify-between items-center">
                         <div>
                           <p className="text-sm text-gray-500">Next Payment</p>
-                          <p className="text-lg font-medium text-gray-900">{loan.paymentAmount.toLocaleString()} Ducats</p>
+                          <p className="text-lg font-medium text-gray-900">{loan.paymentAmount.toLocaleString()} ⚜️ Ducats</p>
                         </div>
                         
                         <button
