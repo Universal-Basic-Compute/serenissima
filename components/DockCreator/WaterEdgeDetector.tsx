@@ -9,6 +9,20 @@ export class WaterEdgeDetector {
   }
   
   /**
+   * Get all polygons
+   */
+  public getPolygons(): any[] {
+    return this.polygons;
+  }
+  
+  /**
+   * Get water edges for a specific polygon (for debugging)
+   */
+  public getWaterEdgesForPolygon(polygon: any): { start: THREE.Vector3, end: THREE.Vector3 }[] {
+    return this.getWaterEdges(polygon);
+  }
+  
+  /**
    * Find the nearest water edge to a given position
    */
   public findNearestWaterEdge(position: THREE.Vector3): { 
@@ -72,16 +86,32 @@ export class WaterEdgeDetector {
   private getWaterEdges(polygon: any): { start: THREE.Vector3, end: THREE.Vector3 }[] {
     const waterEdges: { start: THREE.Vector3, end: THREE.Vector3 }[] = [];
     
-    if (!polygon.coordinates || !polygon.coordinates[0]) {
+    // Check if polygon has coordinates in the expected format
+    if (!polygon.coordinates && !polygon.geometry) {
+      console.warn('Polygon missing coordinates and geometry:', polygon);
       return waterEdges;
     }
     
-    const coordinates = polygon.coordinates[0];
+    // Try to get coordinates from different possible locations in the polygon object
+    let coordinates;
+    if (polygon.coordinates && Array.isArray(polygon.coordinates[0])) {
+      coordinates = polygon.coordinates[0];
+    } else if (polygon.geometry && polygon.geometry.coordinates && Array.isArray(polygon.geometry.coordinates[0])) {
+      coordinates = polygon.geometry.coordinates[0];
+    } else if (polygon.geometry && polygon.geometry.coordinates && Array.isArray(polygon.geometry.coordinates)) {
+      coordinates = polygon.geometry.coordinates;
+    } else {
+      console.warn('Could not find valid coordinates in polygon:', polygon);
+      return waterEdges;
+    }
     
     // Check each edge of the polygon
     for (let i = 0; i < coordinates.length - 1; i++) {
       const start = new THREE.Vector3(coordinates[i][0], 0.1, coordinates[i][1]);
       const end = new THREE.Vector3(coordinates[i+1][0], 0.1, coordinates[i+1][1]);
+      
+      // For debugging
+      console.log(`Edge ${i}: ${coordinates[i][0]},${coordinates[i][1]} to ${coordinates[i+1][0]},${coordinates[i+1][1]}`);
       
       // Determine if this is a water edge
       if (this.isWaterEdge(polygon, coordinates[i], coordinates[i+1])) {
@@ -94,11 +124,15 @@ export class WaterEdgeDetector {
       const start = new THREE.Vector3(coordinates[coordinates.length-1][0], 0.1, coordinates[coordinates.length-1][1]);
       const end = new THREE.Vector3(coordinates[0][0], 0.1, coordinates[0][1]);
       
+      // For debugging
+      console.log(`Closing edge: ${coordinates[coordinates.length-1][0]},${coordinates[coordinates.length-1][1]} to ${coordinates[0][0]},${coordinates[0][1]}`);
+      
       if (this.isWaterEdge(polygon, coordinates[coordinates.length-1], coordinates[0])) {
         waterEdges.push({ start, end });
       }
     }
     
+    console.log(`Found ${waterEdges.length} water edges for polygon ${polygon.id}`);
     return waterEdges;
   }
   
@@ -106,11 +140,10 @@ export class WaterEdgeDetector {
    * Check if an edge borders water (no adjacent polygon)
    */
   private isWaterEdge(polygon: any, start: any, end: any): boolean {
-    // Check if the edge is shared with another polygon
-    const isSharedEdge = this.isEdgeSharedWithAnotherPolygon(polygon, start, end);
-    
-    // If it's not shared with another polygon, it's likely a water edge
-    return !isSharedEdge;
+    // For now, treat all edges as water edges to test basic snapping
+    // Later we can re-enable the shared edge check
+    // return !this.isEdgeSharedWithAnotherPolygon(polygon, start, end);
+    return true;
   }
   
   /**

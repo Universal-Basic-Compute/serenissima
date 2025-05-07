@@ -65,6 +65,9 @@ export class DockCreationManager {
     
     // Load the 3D model for preview
     this.loadDockModel();
+    
+    // Visualize water edges for debugging
+    this.visualizeWaterEdges();
   }
   
   /**
@@ -210,19 +213,24 @@ export class DockCreationManager {
     const intersected = this.raycaster.ray.intersectPlane(waterPlane, intersection);
     
     if (intersected) {
-      // Find nearest water edge and adjacent land
-      const { position, landId, edge } = this.waterEdgeDetector.findNearestWaterEdge(intersection);
+      console.log('DockCreationManager: Ray intersected water plane at', intersection);
       
-      if (position && landId && edge) {
+      // Find nearest water edge and adjacent land
+      const result = this.waterEdgeDetector.findNearestWaterEdge(intersection);
+      console.log('DockCreationManager: Nearest water edge result:', result);
+      
+      if (result.position && result.landId && result.edge) {
+        console.log('DockCreationManager: Found valid water edge, snapping dock');
+        
         // Snap the dock precisely to the edge
-        activeMesh.position.copy(position);
+        activeMesh.position.copy(result.position);
         activeMesh.position.y = 0.1; // Slightly above water level
         activeMesh.visible = true;
-        this.adjacentLandId = landId;
-        this.currentEdge = edge;
+        this.adjacentLandId = result.landId;
+        this.currentEdge = result.edge;
         
         // Calculate the direction vector of the edge
-        const direction = new THREE.Vector3().subVectors(edge.end, edge.start).normalize();
+        const direction = new THREE.Vector3().subVectors(result.edge.end, result.edge.start).normalize();
         
         // Calculate the angle for proper alignment perpendicular to the edge
         const angle = Math.atan2(direction.z, direction.x);
@@ -248,6 +256,8 @@ export class DockCreationManager {
           });
         }
       } else {
+        console.log('DockCreationManager: No valid water edge found, showing at cursor position');
+        
         // Show preview at cursor but indicate invalid placement
         activeMesh.position.copy(intersection);
         activeMesh.position.y = 0.1;
@@ -334,6 +344,33 @@ export class DockCreationManager {
   }
   
   /**
+   * Visualize water edges for debugging
+   */
+  private visualizeWaterEdges(): void {
+    console.log('DockCreationManager: Visualizing water edges');
+    
+    // Remove any existing visualizations
+    const existingEdges = this.scene.children.filter(child => child.name === 'waterEdgeVisualization');
+    existingEdges.forEach(edge => this.scene.remove(edge));
+    
+    // Create a material for the edges
+    const edgeMaterial = new THREE.LineBasicMaterial({ color: 0x00ffff, linewidth: 2 });
+    
+    // Visualize water edges for each polygon
+    for (const polygon of this.waterEdgeDetector.getPolygons()) {
+      const waterEdges = this.waterEdgeDetector.getWaterEdgesForPolygon(polygon);
+      
+      for (const edge of waterEdges) {
+        const geometry = new THREE.BufferGeometry().setFromPoints([edge.start, edge.end]);
+        const line = new THREE.Line(geometry, edgeMaterial);
+        line.name = 'waterEdgeVisualization';
+        line.position.y = 0.2; // Slightly above water level
+        this.scene.add(line);
+      }
+    }
+  }
+
+  /**
    * Clean up resources
    */
   public dispose(): void {
@@ -376,5 +413,21 @@ export class DockCreationManager {
       
       this.fallbackPreviewMesh = null;
     }
+    
+    // Remove water edge visualizations
+    const existingEdges = this.scene.children.filter(child => child.name === 'waterEdgeVisualization');
+    existingEdges.forEach(edge => {
+      this.scene.remove(edge);
+      if (edge instanceof THREE.Line && edge.geometry) {
+        edge.geometry.dispose();
+      }
+      if (edge instanceof THREE.Line && edge.material) {
+        if (Array.isArray(edge.material)) {
+          edge.material.forEach(material => material.dispose());
+        } else {
+          edge.material.dispose();
+        }
+      }
+    });
   }
 }
