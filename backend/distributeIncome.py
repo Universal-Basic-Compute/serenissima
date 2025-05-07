@@ -90,22 +90,17 @@ def get_lands_with_income(lands_table):
         # Filter lands with simulated income
         lands_with_income = []
         for land in lands:
-            # Check if land has simulated income in the Notes field
-            if "Notes" in land["fields"]:
-                try:
-                    notes = json.loads(land["fields"]["Notes"])
-                    # Check for both "simulatedIncome" (lowercase) and "SimulatedIncome" (uppercase)
-                    income = notes.get("simulatedIncome") or notes.get("SimulatedIncome")
-                    if income and income > 0:
-                        lands_with_income.append({
-                            "id": land["id"],
-                            "land_id": land["fields"].get("LandId", ""),
-                            "owner": land["fields"].get("User", ""),
-                            "income": income,
-                            "historical_name": land["fields"].get("HistoricalName", "")
-                        })
-                except (json.JSONDecodeError, KeyError):
-                    pass
+            # Check if land has SimulatedIncome field directly
+            if "SimulatedIncome" in land["fields"]:
+                income = land["fields"]["SimulatedIncome"]
+                if income and income > 0:
+                    lands_with_income.append({
+                        "id": land["id"],
+                        "land_id": land["fields"].get("LandId", ""),
+                        "owner": land["fields"].get("User", ""),
+                        "income": income,
+                        "historical_name": land["fields"].get("HistoricalName", "")
+                    })
         
         log.info(f"Found {len(lands_with_income)} lands with simulated income")
         return lands_with_income
@@ -325,12 +320,12 @@ def distribute_income():
         average_distribution = total_distributed / successful_distributions
         
         notification_message = (
-            f"🏛️ <b>Daily Income Distribution Complete</b> 🏛️\n\n"
-            f"The Council of Ten has distributed today's income to the noble houses of Venice.\n\n"
-            f"• <b>{successful_distributions}</b> properties received income\n"
-            f"• <b>{total_distributed:,}</b> ⚜️ ducats distributed\n"
-            f"• <b>{average_distribution:,.0f}</b> ⚜️ ducats per property on average\n\n"
-            f"Visit <a href='https://serenissima.ai'>La Serenissima</a> to check your properties."
+            "🏛️ Daily Income Distribution Complete 🏛️\n\n"
+            "The Council of Ten has distributed today's income to the noble houses of Venice.\n\n"
+            f"• {successful_distributions} properties received income\n"
+            f"• {total_distributed:,} ⚜️ ducats distributed\n"
+            f"• {average_distribution:,.0f} ⚜️ ducats per property on average\n\n"
+            "Visit https://serenissima.ai to check your properties."
         )
         send_telegram_notification(notification_message)
     
