@@ -137,14 +137,14 @@ export default class PolygonRenderer {
     
     // Initialize the facade with error handling
     this.facade = withErrorHandling(
-      () => new PolygonRendererFacade(scene),
+      () => new PolygonRendererFacade(scene, activeView),
       RenderingErrorType.SCENE_MANIPULATION,
       'polygon-renderer-facade',
       () => {
         log.warn('Failed to create PolygonRendererFacade, using minimal fallback');
-        return new PolygonRendererFacade(scene);
+        return new PolygonRendererFacade(scene, activeView);
       }
-    ) || new PolygonRendererFacade(scene);
+    ) || new PolygonRendererFacade(scene, activeView);
     
     // Store users data
     this.users = users || {};
