@@ -350,12 +350,31 @@ export class DockCreationManager {
     for (const polygon of this.waterEdgeDetector.getPolygons()) {
       const waterEdges = this.waterEdgeDetector.getWaterEdgesForPolygon(polygon);
       
+      console.log(`Visualizing ${waterEdges.length} water edges for polygon ${polygon.id || 'unknown'}`);
+      
       for (const edge of waterEdges) {
         const geometry = new THREE.BufferGeometry().setFromPoints([edge.start, edge.end]);
         const line = new THREE.Line(geometry, edgeMaterial);
         line.name = 'waterEdgeVisualization';
         line.position.y = 0.2; // Slightly above water level
         this.scene.add(line);
+        
+        // Add small spheres at the start and end points for better visibility
+        const sphereGeometry = new THREE.SphereGeometry(0.1, 8, 8);
+        const startMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 }); // Green
+        const endMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 }); // Red
+        
+        const startSphere = new THREE.Mesh(sphereGeometry, startMaterial);
+        startSphere.position.copy(edge.start);
+        startSphere.position.y = 0.2;
+        startSphere.name = 'waterEdgeVisualization';
+        this.scene.add(startSphere);
+        
+        const endSphere = new THREE.Mesh(sphereGeometry, endMaterial);
+        endSphere.position.copy(edge.end);
+        endSphere.position.y = 0.2;
+        endSphere.name = 'waterEdgeVisualization';
+        this.scene.add(endSphere);
       }
     }
   }

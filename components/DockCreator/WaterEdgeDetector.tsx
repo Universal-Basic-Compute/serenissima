@@ -96,13 +96,19 @@ export class WaterEdgeDetector {
     let coordinates;
     
     if (polygon.coordinates) {
-      // Coordinates are directly on the polygon object
-      if (Array.isArray(polygon.coordinates[0]) && Array.isArray(polygon.coordinates[0][0])) {
-        // Format: polygon.coordinates = [[[x1,y1], [x2,y2], ...]]
-        coordinates = polygon.coordinates[0];
-      } else if (Array.isArray(polygon.coordinates)) {
-        // Format: polygon.coordinates = [[x1,y1], [x2,y2], ...]
-        coordinates = polygon.coordinates;
+      // Coordinates are directly on the polygon object as seen in the example data
+      if (Array.isArray(polygon.coordinates) && polygon.coordinates.length > 0) {
+        // Check if coordinates are objects with lat/lng properties
+        if (polygon.coordinates[0].lat !== undefined && polygon.coordinates[0].lng !== undefined) {
+          // Format: polygon.coordinates = [{lat, lng}, {lat, lng}, ...]
+          coordinates = polygon.coordinates;
+        } else if (Array.isArray(polygon.coordinates[0]) && Array.isArray(polygon.coordinates[0][0])) {
+          // Format: polygon.coordinates = [[[x1,y1], [x2,y2], ...]]
+          coordinates = polygon.coordinates[0];
+        } else if (Array.isArray(polygon.coordinates)) {
+          // Format: polygon.coordinates = [[x1,y1], [x2,y2], ...]
+          coordinates = polygon.coordinates;
+        }
       }
     } else if (polygon.geometry && polygon.geometry.coordinates) {
       // Coordinates are in the geometry property
@@ -185,6 +191,14 @@ export class WaterEdgeDetector {
     // For now, treat all edges as water edges to test basic snapping
     // Later we can re-enable the shared edge check
     // return !this.isEdgeSharedWithAnotherPolygon(polygon, start, end);
+    
+    // Log the edge we're checking for debugging
+    if (start && end) {
+      const startCoord = start.lat !== undefined ? `${start.lat},${start.lng}` : JSON.stringify(start);
+      const endCoord = end.lat !== undefined ? `${end.lat},${end.lng}` : JSON.stringify(end);
+      console.log(`Checking edge from ${startCoord} to ${endCoord} for polygon ${polygon.id || 'unknown'}`);
+    }
+    
     return true;
   }
   
@@ -222,18 +236,35 @@ export class WaterEdgeDetector {
   private areEdgesEqual(start1: any, end1: any, start2: any, end2: any): boolean {
     const tolerance = 0.1;
     
+    // Handle different coordinate formats (array vs object with lat/lng)
+    const getCoords = (point: any): [number, number] => {
+      if (Array.isArray(point)) {
+        return [point[0], point[1]];
+      } else if (point.lat !== undefined && point.lng !== undefined) {
+        return [point.lng, point.lat];
+      } else {
+        console.warn('Unknown coordinate format:', point);
+        return [0, 0];
+      }
+    };
+    
+    const [s1x, s1y] = getCoords(start1);
+    const [e1x, e1y] = getCoords(end1);
+    const [s2x, s2y] = getCoords(start2);
+    const [e2x, e2y] = getCoords(end2);
+    
     // Check if edges match in either direction
     const isForwardMatch = 
-      Math.abs(start1[0] - start2[0]) < tolerance &&
-      Math.abs(start1[1] - start2[1]) < tolerance &&
-      Math.abs(end1[0] - end2[0]) < tolerance &&
-      Math.abs(end1[1] - end2[1]) < tolerance;
+      Math.abs(s1x - s2x) < tolerance &&
+      Math.abs(s1y - s2y) < tolerance &&
+      Math.abs(e1x - e2x) < tolerance &&
+      Math.abs(e1y - e2y) < tolerance;
       
     const isReverseMatch = 
-      Math.abs(start1[0] - end2[0]) < tolerance &&
-      Math.abs(start1[1] - end2[1]) < tolerance &&
-      Math.abs(end1[0] - start2[0]) < tolerance &&
-      Math.abs(end1[1] - start2[1]) < tolerance;
+      Math.abs(s1x - e2x) < tolerance &&
+      Math.abs(s1y - e2y) < tolerance &&
+      Math.abs(e1x - s2x) < tolerance &&
+      Math.abs(e1y - s2y) < tolerance;
       
     return isForwardMatch || isReverseMatch;
   }
