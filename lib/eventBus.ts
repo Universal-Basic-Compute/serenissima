@@ -96,5 +96,14 @@ export const EventTypes = {
   POLYGON_UPDATED: 'polygonUpdated',
   // Income data events
   INCOME_DATA_UPDATED: 'incomeDataUpdated',
-  POLYGON_INCOME_UPDATED: 'polygonIncomeUpdated'
+  POLYGON_INCOME_UPDATED: 'polygonIncomeUpdated',
+  // Transaction events
+  TRANSACTION_CREATED: 'transactionCreated',
+  TRANSACTION_EXECUTED: 'transactionExecuted',
+  // Marketplace events
+  LISTING_CREATED: 'listingCreated',
+  LISTING_CANCELLED: 'listingCancelled',
+  OFFER_CREATED: 'offerCreated',
+  OFFER_ACCEPTED: 'offerAccepted',
+  OFFER_REJECTED: 'offerRejected'
 };
