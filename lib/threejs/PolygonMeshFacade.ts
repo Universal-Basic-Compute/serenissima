@@ -520,7 +520,9 @@ export class PolygonMeshFacade implements Poolable {
       if (Array.isArray(this.mesh.material)) {
         // Replace all materials
         this.mesh.material.forEach(mat => mat.dispose());
-        this.mesh.material = material;
+        if (this.mesh && this.mesh.material) {
+          this.mesh.material = material;
+        }
       } else {
         // Replace single material
         if (this.mesh.material) this.mesh.material.dispose();
