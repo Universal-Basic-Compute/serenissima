@@ -6,6 +6,7 @@ import PlayerProfile from './PlayerProfile';
 
 interface WalletButtonProps {
   className?: string;
+  onSettingsClick?: () => void;
 }
 
 export default function WalletButton({ className = '' }: WalletButtonProps) {
