@@ -197,6 +197,43 @@ def create_transaction_record(transactions_table, from_user, to_user, amount, la
         log.error(f"Error creating transaction record: {str(e)}")
         return None
 
+def test_telegram_connection():
+    """Test the Telegram connection"""
+    if not TELEGRAM_BOT_TOKEN or not MAIN_TELEGRAM_CHAT_ID:
+        log.warning("Telegram credentials not set, skipping connection test")
+        return False
+    
+    try:
+        # Try to get bot info first to verify the token
+        bot_info_url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/getMe"
+        bot_response = requests.get(bot_info_url)
+        
+        if not bot_response.ok:
+            log.error(f"Invalid bot token: {bot_response.status_code} {bot_response.text}")
+            return False
+        
+        bot_data = bot_response.json()
+        bot_username = bot_data.get("result", {}).get("username", "Unknown")
+        log.info(f"Connected to Telegram bot: @{bot_username}")
+        
+        # Now try to get chat info to verify the chat ID
+        chat_info_url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/getChat?chat_id={MAIN_TELEGRAM_CHAT_ID}"
+        chat_response = requests.get(chat_info_url)
+        
+        if not chat_response.ok:
+            log.error(f"Failed to get chat info: {chat_response.status_code} {chat_response.text}")
+            log.error("Make sure the bot is a member of the chat and has permission to send messages")
+            return False
+        
+        chat_data = chat_response.json()
+        chat_title = chat_data.get("result", {}).get("title", "Unknown")
+        log.info(f"Connected to Telegram chat: {chat_title} (ID: {MAIN_TELEGRAM_CHAT_ID})")
+        
+        return True
+    except Exception as e:
+        log.error(f"Error testing Telegram connection: {str(e)}")
+        return False
+
 def send_telegram_notification(message):
     """Send a notification to the Telegram channel"""
     if not TELEGRAM_BOT_TOKEN or not MAIN_TELEGRAM_CHAT_ID:
@@ -206,7 +243,8 @@ def send_telegram_notification(message):
     try:
         # URL encode the message
         encoded_message = quote(message)
-        url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage?chat_id={MAIN_TELEGRAM_CHAT_ID}&text={encoded_message}&parse_mode=HTML"
+        # Remove HTML parse mode which might be causing issues
+        url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage?chat_id={MAIN_TELEGRAM_CHAT_ID}&text={encoded_message}"
         
         # Send the message
         response = requests.get(url)
@@ -238,6 +276,11 @@ def send_telegram_notification(message):
 def distribute_income():
     """Main function to distribute income from lands to owners"""
     log.info("Starting income distribution process")
+    
+    # Test Telegram connection
+    telegram_connected = test_telegram_connection()
+    if not telegram_connected:
+        log.warning("Telegram connection test failed, notifications may not be delivered")
     
     # Add debug notification at the beginning
     try:
@@ -346,11 +389,11 @@ def distribute_income():
         average_distribution = total_distributed / successful_distributions
         
         notification_message = (
-            "🏛️ Daily Income Distribution Complete 🏛️\n\n"
+            "Daily Income Distribution Complete\n\n"
             "The Council of Ten has distributed today's income to the noble houses of Venice.\n\n"
             f"• {successful_distributions} properties received income\n"
-            f"• {total_distributed:,} ⚜️ ducats distributed\n"
-            f"• {average_distribution:,.0f} ⚜️ ducats per property on average\n\n"
+            f"• {total_distributed:,} ducats distributed\n"
+            f"• {average_distribution:,.0f} ducats per property on average\n\n"
             "Visit https://serenissima.ai to check your properties."
         )
         
