@@ -171,9 +171,38 @@ The rendering pipeline follows these steps:
 1. **Scene Setup**: Initialize Three.js scene, camera, renderer, and controls
 2. **Asset Loading**: Load textures, models, and other assets
 3. **Object Creation**: Create 3D objects and add them to the scene
+   - Base land layer (rendered once, never changes)
+   - Visualization overlays (created dynamically based on view mode)
+   - Owner indicators (positioned above all other elements)
 4. **Rendering Loop**: Update and render the scene on each frame
 5. **Interaction Handling**: Handle user interaction with 3D objects
 6. **Cleanup**: Dispose of resources when components unmount
+
+## Land Rendering Architecture
+
+The system uses a layered approach to render land and its visualizations:
+
+### Layer Separation
+
+1. **Base Land Layer**:
+   - Rendered once at initialization
+   - Uses simple materials without complex textures
+   - Never modified after initial creation
+   - Provides the foundational geography
+
+2. **Visualization Overlay Layer**:
+   - Created dynamically based on active view mode
+   - Positioned slightly above base land
+   - Can be freely modified without affecting base geometry
+   - Provides view-specific visual information
+
+3. **Owner Indicator Layer**:
+   - Positioned at the top layer
+   - Simple colored circles at polygon centroids
+   - Clearly visible above all other elements
+   - Updated when ownership changes
+
+This separation of concerns ensures optimal performance while maintaining visual clarity. The base land never needs to be re-rendered, significantly reducing GPU load during view transitions and updates.
 
 ## Facade Pattern Implementation
 

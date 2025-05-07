@@ -4,11 +4,12 @@
  * - Separates rendering logic from data management
  * - Provides robust error handling with graceful degradation
  * - Implements fallback rendering modes for critical failures
+ * - Uses layered approach with base land and visualization overlays
  */
 import * as THREE from 'three';
 import { MutableRefObject } from 'react';
 import { Polygon, ViewMode, Coordinate } from './types';
-import { normalizeCoordinates } from './utils';
+import { normalizeCoordinates, createPolygonShape } from './utils';
 import { PolygonRendererFacade } from '../../lib/threejs/PolygonRendererFacade';
 import { PolygonMeshFacade } from '../../lib/threejs/PolygonMeshFacade';
 import { log } from '../../lib/logUtils';
@@ -31,7 +32,7 @@ interface PolygonRendererProps {
   activeView: ViewMode;
   performanceMode: boolean;
   polygonMeshesRef: MutableRefObject<Record<string, THREE.Mesh>>;
-  users?: Record<string, any>; // Add this
+  users?: Record<string, any>;
 }
 
 export default class PolygonRenderer {
@@ -44,65 +45,22 @@ export default class PolygonRenderer {
   private polygonMeshesRef: MutableRefObject<Record<string, THREE.Mesh>>;
   private ownerCoatOfArmsMap: Record<string, string> = {}; // Map of owner to coat of arms URL
   public hasUpdatedCoatOfArms: boolean = false; // Flag to track if coat of arms have been updated
-  private coatOfArmSprites: Record<string, THREE.Object3D | THREE.Mesh> = {};
   private ownerColorMap: Record<string, string> = {}; // Map of owner to color
   private users: Record<string, any> = {}; // Store users data
-  private polygonMeshes: PolygonMeshFacade[] = []; // Store PolygonMesh instances
+  
+  // Layered rendering approach
+  private basePolygons: Map<string, THREE.Mesh> = new Map(); // Base land layer (never changes)
+  private overlayPolygons: Map<string, THREE.Mesh> = new Map(); // Visualization overlays
+  private ownerIndicators: Map<string, THREE.Mesh> = new Map(); // Owner indicators
   private createdPolygonIds = new Set<string>();
   
   // Static properties for texture loading
   private static sharedTextureLoader: THREE.TextureLoader | null = null;
   private textureLoader: THREE.TextureLoader;
-  private sandNormalMap: THREE.Texture | null = null;
-  private sandRoughnessMap: THREE.Texture | null = null;
   
   // Facade for Three.js operations
   private facade: PolygonRendererFacade;
   
-  // Add static method for optimized texture loading
-  private static loadOptimizedTexture(url: string, callback?: (texture: THREE.Texture) => void): THREE.Texture {
-    // Check if device supports WebP
-    const supportsWebP = document.createElement('canvas')
-      .toDataURL('image/webp')
-      .indexOf('data:image/webp') === 0;
-    
-    // Use WebP if supported
-    const optimizedUrl = supportsWebP ? 
-      url.replace(/\.(jpg|png)$/, '.webp') : 
-      url;
-    
-    // Create a low-res placeholder texture first
-    const placeholderTexture = new THREE.Texture();
-    
-    // Load the full texture in the background
-    if (PolygonRenderer.sharedTextureLoader) {
-      PolygonRenderer.sharedTextureLoader.load(
-        optimizedUrl,
-        (fullTexture: THREE.Texture) => {
-          // Copy properties from placeholder to full texture
-          fullTexture.wrapS = placeholderTexture.wrapS;
-          fullTexture.wrapT = placeholderTexture.wrapT;
-          fullTexture.repeat = placeholderTexture.repeat;
-          
-          // Replace the placeholder with the full texture
-          placeholderTexture.image = fullTexture.image;
-          placeholderTexture.needsUpdate = true;
-          
-          if (callback) callback(placeholderTexture);
-        },
-        undefined,
-        (error: unknown) => {
-          console.error(`Error loading optimized texture ${optimizedUrl}:`, error);
-        }
-      );
-    }
-    
-    return placeholderTexture;
-  }
-  
-  // Add sun reflection property
-  private sunReflection: THREE.Mesh | null = null;
-
   // Error handler instance
   private errorHandler: RenderingErrorHandler;
   
@@ -130,7 +88,10 @@ export default class PolygonRenderer {
     this.polygonMeshesRef = polygonMeshesRef;
     
     // Initialize texture loader
-    this.textureLoader = new THREE.TextureLoader();
+    if (!PolygonRenderer.sharedTextureLoader) {
+      PolygonRenderer.sharedTextureLoader = new THREE.TextureLoader();
+    }
+    this.textureLoader = PolygonRenderer.sharedTextureLoader;
     
     // Initialize error handler
     this.errorHandler = RenderingErrorHandler.getInstance();
@@ -186,8 +147,11 @@ export default class PolygonRenderer {
       }
     }
     
-    // Render polygons with a slight delay to allow the UI to render first
-    setTimeout(() => this.renderPolygons(), 0);
+    // Create base land layer first
+    setTimeout(() => this.createBaseLandLayer(), 0);
+    
+    // Then create visualization overlays based on active view
+    setTimeout(() => this.updateViewMode(activeView), 100);
     
     // Schedule periodic recovery attempts for failed polygons
     this.scheduleRecoveryAttempts();
@@ -215,7 +179,13 @@ export default class PolygonRenderer {
         failedPolygonIds.forEach(polygonId => {
           const polygon = this.polygons.find(p => p.id === polygonId);
           if (polygon) {
-            this.renderSinglePolygon(polygon, true);
+            // Add to base layer if missing
+            if (!this.basePolygons.has(polygonId)) {
+              this.createBasePolygon(polygon);
+            }
+            
+            // Add to overlay layer based on active view
+            this.createOverlayForPolygon(polygon, this.activeView);
           }
         });
       }
@@ -264,35 +234,11 @@ export default class PolygonRenderer {
     console.log(`Processed ${Object.keys(this.ownerCoatOfArmsMap).length} coat of arms and ${Object.keys(this.ownerColorMap).length} colors from users data`);
   }
 
-  private renderPolygons() {
-    log.info(`Rendering ${this.polygons.length} polygons`);
-    
-    // Get a standard material from the facade with error handling
-    const sandMaterial = withErrorHandling(
-      () => this.facade.createLandMaterial(),
-      RenderingErrorType.MATERIAL_CREATION,
-      'sand-material',
-      () => {
-        // Create a fallback material with texture
-        const fallbackMaterial = this.errorHandler.createFallbackMaterial('#fff5d0');
-        
-        // Try to load a texture for the fallback material
-        try {
-          const textureLoader = new THREE.TextureLoader();
-          textureLoader.load('/textures/sand.jpg', (texture) => {
-            texture.wrapS = THREE.RepeatWrapping;
-            texture.wrapT = THREE.RepeatWrapping;
-            texture.repeat.set(5, 5);
-            fallbackMaterial.map = texture;
-            fallbackMaterial.needsUpdate = true;
-          });
-        } catch (e) {
-          console.error('Failed to load texture for fallback material:', e);
-        }
-        
-        return fallbackMaterial;
-      }
-    );
+  /**
+   * Create the base land layer - rendered once and never changed
+   */
+  private createBaseLandLayer(): void {
+    log.info(`Creating base land layer for ${this.polygons.length} polygons`);
     
     // Track success and failure counts
     let successCount = 0;
@@ -301,11 +247,11 @@ export default class PolygonRenderer {
     // Process each polygon
     this.polygons.forEach(polygon => {
       // Skip if already created
-      if (this.createdPolygonIds.has(polygon.id)) {
+      if (this.basePolygons.has(polygon.id)) {
         return;
       }
       
-      const success = this.renderSinglePolygon(polygon);
+      const success = this.createBasePolygon(polygon);
       if (success) {
         successCount++;
       } else {
@@ -313,10 +259,10 @@ export default class PolygonRenderer {
       }
     });
     
-    log.info(`Created ${this.polygonMeshes.length} polygon meshes (${successCount} successful, ${failureCount} failed)`);
+    log.info(`Created ${successCount} base land polygons (${failureCount} failed)`);
     
     // If we're in fallback mode, create a simple representation of the map
-    if (this.errorHandler.isInFallbackMode() && this.polygonMeshes.length < this.polygons.length * 0.5) {
+    if (this.errorHandler.isInFallbackMode() && this.basePolygons.size < this.polygons.length * 0.5) {
       log.warn('In fallback mode with less than 50% of polygons rendered, creating simplified map representation');
       this.createSimplifiedMapRepresentation();
     }
@@ -333,14 +279,13 @@ export default class PolygonRenderer {
   }
   
   /**
-   * Render a single polygon with error handling
-   * @param polygon The polygon to render
-   * @param isRecoveryAttempt Whether this is a recovery attempt for a previously failed polygon
-   * @returns Whether rendering was successful
+   * Create a base polygon for the base land layer
+   * @param polygon The polygon to create
+   * @returns Whether creation was successful
    */
-  private renderSinglePolygon(polygon: Polygon, isRecoveryAttempt: boolean = false): boolean {
+  private createBasePolygon(polygon: Polygon): boolean {
     if (!polygon.id) {
-      log.warn('Polygon missing ID, cannot render');
+      log.warn('Polygon missing ID, cannot create base polygon');
       return false;
     }
     
@@ -351,51 +296,53 @@ export default class PolygonRenderer {
           return false;
         }
         
-        // Get owner color if available
-        let ownerColor = null;
-        if (polygon.owner) {
-          ownerColor = this.getOwnerColor(polygon.owner);
-        }
-        
-        // Get owner coat of arms if available
-        let ownerCoatOfArmsUrl = null;
-        if (polygon.owner && polygon.owner in this.ownerCoatOfArmsMap) {
-          ownerCoatOfArmsUrl = this.ownerCoatOfArmsMap[polygon.owner];
-        }
-        
-        // Create a PolygonMeshFacade instance
-        const polygonMesh = new PolygonMeshFacade(
-          this.scene,
-          polygon,
-          this.bounds,
-          this.activeView,
-          this.performanceMode,
-          this.textureLoader,
-          ownerColor,
-          ownerCoatOfArmsUrl
+        // Normalize coordinates
+        const normalizedCoords = normalizeCoordinates(
+          polygon.coordinates,
+          this.bounds.centerLat,
+          this.bounds.centerLng,
+          this.bounds.scale,
+          this.bounds.latCorrectionFactor
         );
         
-        const mesh = polygonMesh.getMesh();
+        // Create shape from normalized coordinates
+        const shape = createPolygonShape(normalizedCoords);
         
-        if (mesh) {
-          // Store reference in the ref object
-          this.polygonMeshesRef.current[polygon.id] = mesh;
-          
-          // Mark as created
-          this.createdPolygonIds.add(polygon.id);
-          
-          // Store reference to the facade
-          this.polygonMeshes.push(polygonMesh);
-          
-          // If this was a recovery attempt, log success
-          if (isRecoveryAttempt) {
-            log.info(`Successfully recovered polygon ${polygon.id}`);
-          }
-          
-          return true;
-        }
+        // Create geometry from shape
+        const geometry = new THREE.ShapeGeometry(shape);
         
-        return false;
+        // Create a simple material for the base land
+        const material = new THREE.MeshBasicMaterial({
+          color: 0xf5e9c8, // Base sand color
+          side: THREE.DoubleSide,
+          depthWrite: true
+        });
+        
+        // Create mesh
+        const mesh = new THREE.Mesh(geometry, material);
+        mesh.rotation.x = -Math.PI / 2;
+        mesh.position.y = 0; // At water level
+        mesh.renderOrder = 1; // Base layer
+        
+        // Add userData to identify this as a base polygon
+        mesh.userData = {
+          isPolygon: true,
+          isBaseLand: true,
+          polygonId: polygon.id,
+          alwaysVisible: true
+        };
+        
+        // Add to scene
+        this.scene.add(mesh);
+        
+        // Store reference in the ref object and our maps
+        this.polygonMeshesRef.current[polygon.id] = mesh;
+        this.basePolygons.set(polygon.id, mesh);
+        
+        // Mark as created
+        this.createdPolygonIds.add(polygon.id);
+        
+        return true;
       },
       RenderingErrorType.MESH_CREATION,
       polygon.id,
@@ -448,41 +395,9 @@ export default class PolygonRenderer {
       
       // Store reference
       this.polygonMeshesRef.current[polygon.id] = mesh;
+      this.basePolygons.set(polygon.id, mesh);
       
-      // Create a simplified PolygonMeshFacade wrapper for this mesh
-      const simplifiedFacade = {
-        getMesh: () => mesh,
-        updateViewMode: () => {},
-        updateOwner: () => {},
-        updateCoatOfArmsTexture: () => {},
-        updateSelectionState: (isSelected: boolean) => {
-          if (isSelected && material.color) {
-            material.color.set('#FFFF00'); // Yellow for selection
-          } else if (material.color) {
-            material.color.set(polygon.owner ? this.getOwnerColor(polygon.owner) || '#FF00FF' : '#FF00FF');
-          }
-        },
-        updateHoverState: (isHovered: boolean) => {
-          if (isHovered && material.color) {
-            material.color.set('#00FFFF'); // Cyan for hover
-          } else if (material.color) {
-            material.color.set(polygon.owner ? this.getOwnerColor(polygon.owner) || '#FF00FF' : '#FF00FF');
-          }
-        },
-        updateQuality: () => {},
-        cleanup: () => {
-          this.scene.remove(mesh);
-          geometry.dispose();
-          material.dispose();
-        },
-        configure: () => {},
-        reset: () => {},
-        isActive: () => true,
-        setActive: () => {}
-      };
-      
-      // Add to our collection
-      this.polygonMeshes.push(simplifiedFacade as unknown as PolygonMeshFacade);
+      // Mark as created
       this.createdPolygonIds.add(polygon.id);
       
       log.info(`Created simplified representation for polygon ${polygon.id}`);
@@ -591,32 +506,11 @@ export default class PolygonRenderer {
       centroid: { lat: 45.4381, lng: 12.3345 }
     };
     
-    // Create a material with sand texture
-    const sandMaterial = new THREE.MeshStandardMaterial({
-      map: this.facade.getSandTexture(),
-      normalMap: this.facade.getSandNormalMap(),
-      roughnessMap: this.facade.getSandRoughnessMap(),
-      color: 0xf5e9c8, // Sand color
-      side: THREE.DoubleSide,
-      transparent: false,
-      roughness: 0.8,
-      metalness: 0.1
-    });
+    // Create base polygon
+    this.createBasePolygon(samplePolygon);
     
-    // Create a polygon mesh for the sample
-    const polygonMesh = new PolygonMeshFacade(
-      this.scene,
-      samplePolygon,
-      this.bounds,
-      this.activeView,
-      this.performanceMode,
-      this.textureLoader,
-      '#FF0000', // Bright red for visibility
-      null
-    );
-    
-    // Store reference to the mesh
-    this.polygonMeshes.push(polygonMesh);
+    // Create overlay
+    this.createOverlayForPolygon(samplePolygon, this.activeView);
     
     console.log('Sample test polygon created for visibility testing');
   }
@@ -633,9 +527,8 @@ export default class PolygonRenderer {
    * Ensure all polygons are visible
    */
   public ensurePolygonsVisible() {
-    // Check all polygon meshes
-    this.polygonMeshes.forEach(polygonMesh => {
-      const mesh = polygonMesh.getMesh();
+    // Check base polygons
+    this.basePolygons.forEach(mesh => {
       if (mesh) {
         // Force visibility
         mesh.visible = true;
@@ -650,6 +543,30 @@ export default class PolygonRenderer {
             mesh.material.needsUpdate = true;
           }
         }
+      }
+    });
+    
+    // Check overlay polygons
+    this.overlayPolygons.forEach(mesh => {
+      if (mesh) {
+        mesh.visible = true;
+        
+        if (mesh.material) {
+          if (Array.isArray(mesh.material)) {
+            mesh.material.forEach(mat => {
+              if (mat) mat.needsUpdate = true;
+            });
+          } else {
+            mesh.material.needsUpdate = true;
+          }
+        }
+      }
+    });
+    
+    // Check owner indicators
+    this.ownerIndicators.forEach(mesh => {
+      if (mesh) {
+        mesh.visible = true;
       }
     });
     
@@ -668,16 +585,31 @@ export default class PolygonRenderer {
    * Update selection state for polygons
    */
   public updateSelectionState(selectedPolygonId: string | null) {
-    // Update selection state for all polygons
-    this.polygonMeshes.forEach(polygonMesh => {
+    // Update selection state for all overlay polygons
+    this.overlayPolygons.forEach((mesh, polygonId) => {
       try {
-        const polygonId = this.polygons.find(
-          p => p && polygonMesh.getMesh() === this.polygonMeshesRef.current[p.id]
-        )?.id;
-        
-        if (polygonId) {
-          // Apply selection state based on ID match
-          polygonMesh.updateSelectionState(polygonId === selectedPolygonId);
+        if (mesh.material instanceof THREE.Material) {
+          const isSelected = polygonId === selectedPolygonId;
+          
+          // Apply selection effect
+          if (isSelected) {
+            if (mesh.material instanceof THREE.MeshBasicMaterial) {
+              // Store original color if not already stored
+              if (!mesh.userData.originalColor) {
+                mesh.userData.originalColor = mesh.material.color.clone();
+              }
+              
+              // Set to highlight color (bright yellow)
+              mesh.material.color.set(0xffff00);
+              mesh.material.needsUpdate = true;
+            }
+          } else {
+            // Restore original color if it exists
+            if (mesh.userData.originalColor && mesh.material instanceof THREE.MeshBasicMaterial) {
+              mesh.material.color.copy(mesh.userData.originalColor);
+              mesh.material.needsUpdate = true;
+            }
+          }
         }
       } catch (error) {
         console.error('Error updating selection state for polygon:', error);
@@ -687,6 +619,7 @@ export default class PolygonRenderer {
   
   /**
    * Update view mode for all polygons
+   * This is the key method that implements the separation of concerns approach
    */
   public updateViewMode(activeView: ViewMode) {
     // Skip update if view hasn't changed
@@ -700,34 +633,259 @@ export default class PolygonRenderer {
     
     this.activeView = activeView;
     
-    // If switching to land view, we need to dispose of textures
-    if (!wasLandView && isNowLandView) {
-      console.log('Switching to land view, disposing of textures');
-      // Clear THREE.js texture cache to free memory
-      if (THREE.Cache) {
-        THREE.Cache.clear();
-      }
-    }
+    // Clear all existing overlays
+    this.clearOverlays();
     
-    // Update all polygons with the new view mode
-    this.polygonMeshes.forEach(polygonMesh => {
-      polygonMesh.updateViewMode(activeView);
+    // Create new overlays based on the active view
+    this.polygons.forEach(polygon => {
+      this.createOverlayForPolygon(polygon, activeView);
     });
     
-    // Always update coat of arms sprites when changing view mode
-    // This ensures they're created when switching to land view
-    // and removed when switching away
-    this.updateCoatOfArmsSprites();
-    
-    // Force update of owner colors when switching to land view
-    if (activeView === 'land') {
-      this.updatePolygonOwnerColors();
+    // Create owner indicators if in land view
+    if (isNowLandView) {
+      this.createOwnerIndicators();
     }
     
     // Ensure all polygons remain visible after view mode change
     setTimeout(() => this.ensurePolygonsVisible(), 100);
     
-    console.log(`View mode updated to ${activeView}, coat of arms sprites updated`);
+    console.log(`View mode updated to ${activeView}`);
+  }
+  
+  /**
+   * Create an overlay polygon for visualization based on view mode
+   */
+  private createOverlayForPolygon(polygon: Polygon, activeView: ViewMode): void {
+    if (!polygon.id || !polygon.coordinates || polygon.coordinates.length < 3) {
+      return;
+    }
+    
+    try {
+      // Remove any existing overlay for this polygon
+      if (this.overlayPolygons.has(polygon.id)) {
+        const existingOverlay = this.overlayPolygons.get(polygon.id);
+        if (existingOverlay) {
+          this.scene.remove(existingOverlay);
+          if (existingOverlay.geometry) existingOverlay.geometry.dispose();
+          if (existingOverlay.material) {
+            if (Array.isArray(existingOverlay.material)) {
+              existingOverlay.material.forEach(mat => mat.dispose());
+            } else {
+              existingOverlay.material.dispose();
+            }
+          }
+        }
+        this.overlayPolygons.delete(polygon.id);
+      }
+      
+      // Skip creating new overlay if not in land view
+      if (activeView !== 'land') {
+        return;
+      }
+      
+      // Normalize coordinates
+      const normalizedCoords = normalizeCoordinates(
+        polygon.coordinates,
+        this.bounds.centerLat,
+        this.bounds.centerLng,
+        this.bounds.scale,
+        this.bounds.latCorrectionFactor
+      );
+      
+      // Create shape from normalized coordinates
+      const shape = createPolygonShape(normalizedCoords);
+      
+      // Create geometry from shape
+      const geometry = new THREE.ShapeGeometry(shape);
+      
+      // Determine color based on income or ownership
+      let color: THREE.Color;
+      
+      if (polygon.simulatedIncome !== undefined) {
+        // Use income-based coloring
+        color = this.getIncomeBasedColor(polygon.simulatedIncome);
+      } else if (polygon.owner) {
+        // Use owner-based coloring
+        const ownerColor = this.getOwnerColor(polygon.owner);
+        color = new THREE.Color(ownerColor || '#7cac6a');
+      } else {
+        // Default color for unowned land
+        color = new THREE.Color(0xf5e9c8);
+      }
+      
+      // Create material for the overlay
+      const material = new THREE.MeshBasicMaterial({
+        color: color,
+        transparent: true,
+        opacity: 0.7,
+        side: THREE.DoubleSide,
+        depthWrite: false
+      });
+      
+      // Create mesh
+      const mesh = new THREE.Mesh(geometry, material);
+      mesh.rotation.x = -Math.PI / 2;
+      mesh.position.y = 0.01; // Slightly above base land
+      mesh.renderOrder = 10; // Higher than base layer
+      
+      // Add userData to identify this as an overlay
+      mesh.userData = {
+        isPolygonOverlay: true,
+        polygonId: polygon.id,
+        originalColor: color.clone()
+      };
+      
+      // Add to scene
+      this.scene.add(mesh);
+      
+      // Store reference
+      this.overlayPolygons.set(polygon.id, mesh);
+      
+    } catch (error) {
+      log.error(`Failed to create overlay for polygon ${polygon.id}:`, error);
+    }
+  }
+  
+  /**
+   * Calculate color based on income value
+   * Red (high income) -> Yellow -> Green (low income)
+   */
+  private getIncomeBasedColor(income: number): THREE.Color {
+    // Define our color scale with more vibrant colors
+    const highIncomeColor = new THREE.Color(0xff3300); // Bright orange-red
+    const midIncomeColor = new THREE.Color(0xffcc00);  // Golden yellow
+    const lowIncomeColor = new THREE.Color(0x33cc33);  // Rich green
+    
+    // Normalize income to a 0-1 scale
+    const maxIncome = 1000; // Default max income value
+    const normalizedIncome = Math.min(Math.max(income / maxIncome, 0), 1);
+    
+    // Map the normalized income to our color scale
+    const resultColor = new THREE.Color();
+    
+    if (normalizedIncome >= 0.5) {
+      // Map from yellow to red
+      const t = (normalizedIncome - 0.5) * 2; // Scale 0.5-1.0 to 0-1
+      return resultColor.lerpColors(midIncomeColor, highIncomeColor, t);
+    } else {
+      // Map from green to yellow
+      const t = normalizedIncome * 2; // Scale 0-0.5 to 0-1
+      return resultColor.lerpColors(lowIncomeColor, midIncomeColor, t);
+    }
+  }
+  
+  /**
+   * Create owner indicators (colored circles) for all owned polygons
+   */
+  private createOwnerIndicators(): void {
+    // Clear any existing owner indicators
+    this.clearOwnerIndicators();
+    
+    // Only create indicators in land view
+    if (this.activeView !== 'land') {
+      return;
+    }
+    
+    // Filter polygons with owners and centroids
+    const polygonsWithOwners = this.polygons.filter(p => p.owner && p.centroid);
+    
+    log.info(`Creating owner indicators for ${polygonsWithOwners.length} owned polygons`);
+    
+    // Process in batches for better performance
+    const BATCH_SIZE = 50;
+    
+    // Function to process a batch
+    const processBatch = (startIndex: number) => {
+      const endIndex = Math.min(startIndex + BATCH_SIZE, polygonsWithOwners.length);
+      
+      for (let i = startIndex; i < endIndex; i++) {
+        const polygon = polygonsWithOwners[i];
+        
+        try {
+          // Get position from centroid
+          const position = this.convertLatLngToPosition(
+            polygon.centroid!.lat,
+            polygon.centroid!.lng
+          );
+          
+          // Get owner color
+          const ownerColor = this.getOwnerColor(polygon.owner) || '#7cac6a';
+          
+          // Create simple circle indicator
+          const circleGeometry = new THREE.CircleGeometry(0.25, 8);
+          const circleMaterial = new THREE.MeshBasicMaterial({
+            color: ownerColor,
+            side: THREE.DoubleSide,
+            transparent: true,
+            opacity: 0.8,
+            depthWrite: false
+          });
+          
+          const circleMesh = new THREE.Mesh(circleGeometry, circleMaterial);
+          circleMesh.position.set(position.x, 0.05, position.y);
+          circleMesh.rotation.x = -Math.PI / 2;
+          circleMesh.renderOrder = 20; // Above all land layers
+          
+          // Add to scene and store reference
+          this.scene.add(circleMesh);
+          this.ownerIndicators.set(polygon.id, circleMesh);
+        } catch (error) {
+          log.error(`Failed to create owner indicator for polygon ${polygon.id}:`, error);
+        }
+      }
+      
+      // Process next batch if there are more
+      if (endIndex < polygonsWithOwners.length) {
+        setTimeout(() => processBatch(endIndex), 0);
+      }
+    };
+    
+    // Start processing the first batch
+    if (polygonsWithOwners.length > 0) {
+      processBatch(0);
+    }
+  }
+  
+  /**
+   * Clear all owner indicators
+   */
+  private clearOwnerIndicators(): void {
+    this.ownerIndicators.forEach(mesh => {
+      this.scene.remove(mesh);
+      if (mesh.geometry) mesh.geometry.dispose();
+      if (mesh.material) {
+        if (Array.isArray(mesh.material)) {
+          mesh.material.forEach(mat => mat.dispose());
+        } else {
+          mesh.material.dispose();
+        }
+      }
+    });
+    
+    this.ownerIndicators.clear();
+  }
+  
+  /**
+   * Clear all visualization overlays
+   */
+  private clearOverlays(): void {
+    // Clear polygon overlays
+    this.overlayPolygons.forEach(mesh => {
+      this.scene.remove(mesh);
+      if (mesh.geometry) mesh.geometry.dispose();
+      if (mesh.material) {
+        if (Array.isArray(mesh.material)) {
+          mesh.material.forEach(mat => mat.dispose());
+        } else {
+          mesh.material.dispose();
+        }
+      }
+    });
+    
+    this.overlayPolygons.clear();
+    
+    // Clear owner indicators
+    this.clearOwnerIndicators();
   }
   
   /**
@@ -736,41 +894,35 @@ export default class PolygonRenderer {
   public updatePolygonOwnerColors() {
     console.log('Updating polygon colors based on simulated income');
     
-    // Process all polygons
+    // Simply recreate all overlays with updated data
+    this.clearOverlays();
+    
+    // Create new overlays based on the active view
     this.polygons.forEach(polygon => {
-      if (polygon.id) {
-        // Find the corresponding PolygonMesh
-        const polygonMesh = this.polygonMeshes.find(pm => {
-          const mesh = pm.getMesh();
-          return mesh && this.polygonMeshesRef.current[polygon.id] === mesh;
-        });
-        
-        if (polygonMesh) {
-          // Update the polygon with its own data (which includes simulatedIncome)
-          polygonMesh.updateOwner(polygon.owner || '', null);
-          
-          // If we're in land view, force a view mode update to ensure income-based coloring
-          if (this.activeView === 'land') {
-            polygonMesh.updateViewMode(this.activeView);
-          }
-        }
-      }
+      this.createOverlayForPolygon(polygon, this.activeView);
     });
+    
+    // Recreate owner indicators
+    if (this.activeView === 'land') {
+      this.createOwnerIndicators();
+    }
     
     // Force a render to apply changes
     this.facade.forceRender();
   }
 
   /**
-   * Update quality settings for all polygons
+   * Update quality settings
    */
   public updateQuality(performanceMode: boolean) {
     this.performanceMode = performanceMode;
     
-    // Update all polygons with the new quality setting
-    this.polygonMeshes.forEach(polygonMesh => {
-      polygonMesh.updateQuality(performanceMode);
-    });
+    // No need to update individual polygons since we're using a layered approach
+    // Just force a re-creation of overlays if needed
+    if (this.activeView === 'land') {
+      // Recreate overlays with new quality settings
+      this.updateViewMode(this.activeView);
+    }
   }
   
   /**
@@ -799,8 +951,8 @@ export default class PolygonRenderer {
     
     // If we're in land view, update the owner indicators
     if (this.activeView === 'land') {
-      // In land view, we'll just update the colored circles
-      this.updateCoatOfArmsSprites();
+      // Recreate owner indicators with updated coat of arms
+      this.createOwnerIndicators();
     }
     
     // Set the flag to indicate we've updated coat of arms
@@ -808,146 +960,40 @@ export default class PolygonRenderer {
   }
   
   /**
-   * Update colors for owners - now does nothing as we only use income-based coloring
+   * Update colors for owners
    */
   public updateOwnerColors(colorMap: Record<string, string>) {
-    // This method no longer needs to do anything
-    console.log('Owner colors are no longer used, income-based coloring only');
+    console.log('Updating owner colors with data:', colorMap);
+    
+    // Update the color map
+    this.ownerColorMap = { ...this.ownerColorMap, ...colorMap };
+    
+    // Update the users data with color information
+    Object.entries(colorMap).forEach(([owner, color]) => {
+      if (this.users[owner]) {
+        this.users[owner].color = color;
+      } else {
+        // Create user entry if it doesn't exist
+        this.users[owner] = { 
+          user_name: owner,
+          color: color
+        };
+      }
+    });
+    
+    // If we're in land view, update the overlays and owner indicators
+    if (this.activeView === 'land') {
+      this.updatePolygonOwnerColors();
+    }
   }
   
-  // This method is replaced by createColoredCircleOnLand
-
   /**
-   * Update coat of arms sprites for all polygons with error handling
-   * Optimized for performance in land mode
+   * Update coat of arms sprites
+   * This is now just an alias for createOwnerIndicators
    */
   public updateCoatOfArmsSprites() {
-    log.info('Updating coat of arms sprites, active view:', this.activeView);
-    
-    // Remove existing coat of arms objects with error handling
-    withErrorHandling(
-      () => {
-        Object.values(this.coatOfArmSprites).forEach(obj => {
-          try {
-            this.facade.removeFromScene(obj);
-            if (obj instanceof THREE.Mesh) {
-              if (obj.geometry) obj.geometry.dispose();
-              if (obj.material) {
-                if (Array.isArray(obj.material)) {
-                  obj.material.forEach((mat: THREE.Material) => {
-                    try {
-                      // Check if material has a map property (like MeshBasicMaterial or MeshStandardMaterial)
-                      if ('map' in mat && (mat as THREE.MeshBasicMaterial | THREE.MeshStandardMaterial).map) {
-                        (mat as THREE.MeshBasicMaterial | THREE.MeshStandardMaterial).map?.dispose();
-                      }
-                      mat.dispose();
-                    } catch (matError) {
-                      log.error('Error disposing material:', matError);
-                    }
-                  });
-                } else {
-                  try {
-                    // Check if material has a map property
-                    if ('map' in obj.material && (obj.material as THREE.MeshBasicMaterial | THREE.MeshStandardMaterial).map) {
-                      (obj.material as THREE.MeshBasicMaterial | THREE.MeshStandardMaterial).map?.dispose();
-                    }
-                    obj.material.dispose();
-                  } catch (matError) {
-                    log.error('Error disposing material:', matError);
-                  }
-                }
-              }
-            }
-          } catch (objError) {
-            log.error('Error removing coat of arms object:', objError);
-          }
-        });
-        // Ensure we completely clear the sprites object
-        this.coatOfArmSprites = {};
-      },
-      RenderingErrorType.RESOURCE_DISPOSAL,
-      'coat-of-arms-sprites'
-    );
-
-    // Only create coat of arms if we're in land view
-    if (this.activeView !== 'land') {
-      log.info('Not in land view, skipping coat of arms textures');
-      return;
-    }
-
-    // In land view, we'll use colored circles instead of textures
-    log.info('Creating colored indicators for land view, polygons count:', this.polygons.length);
-    
-    // Performance optimization: Process polygons in batches
-    const BATCH_SIZE = 50; // Process 50 polygons at a time
-    const polygonsWithOwners = this.polygons.filter(p => p.owner && p.id && p.centroid);
-    
-    // Track success and failure counts
-    let successCount = 0;
-    let failureCount = 0;
-    
-    // Function to process a batch of polygons
-    const processBatch = (startIndex: number) => {
-      const endIndex = Math.min(startIndex + BATCH_SIZE, polygonsWithOwners.length);
-      
-      // Process this batch
-      for (let i = startIndex; i < endIndex; i++) {
-        const polygon = polygonsWithOwners[i];
-        
-        const success = withErrorHandling(
-          () => {
-            // Get the owner's color
-            const ownerColor = this.getOwnerColor(polygon.owner);
-            
-            // Create a colored circle on the land - no texture loading
-            if (polygon.centroid) {
-              this.createColoredCircleOnLand(polygon, ownerColor || '#8B4513');
-              return true;
-            }
-            
-            return false;
-          },
-          RenderingErrorType.MESH_CREATION,
-          polygon.id,
-          () => {
-            // Fallback: just create a colored circle if creation fails
-            if (polygon.centroid) {
-              const ownerColor = this.getOwnerColor(polygon.owner);
-              this.createColoredCircleOnLand(polygon, ownerColor || '#8B4513');
-              return true;
-            }
-            return false;
-          }
-        );
-        
-        if (success) {
-          successCount++;
-        } else {
-          failureCount++;
-        }
-      }
-      
-      // If there are more polygons to process, schedule the next batch
-      if (endIndex < polygonsWithOwners.length) {
-        setTimeout(() => processBatch(endIndex), 0);
-      } else {
-        // All batches processed, log results and force render
-        log.info(`Updated owner indicators: ${successCount} successful, ${failureCount} failed`);
-        
-        // Force a render to apply the changes with error handling
-        withErrorHandling(
-          () => this.facade.forceRender(),
-          RenderingErrorType.SCENE_MANIPULATION,
-          'force-render'
-        );
-      }
-    };
-    
-    // Start processing the first batch
-    if (polygonsWithOwners.length > 0) {
-      processBatch(0);
-    } else {
-      log.info('No polygons with owners to process');
+    if (this.activeView === 'land') {
+      this.createOwnerIndicators();
     }
   }
 
@@ -1095,41 +1141,63 @@ export default class PolygonRenderer {
     polygon.owner = newOwner;
     console.log(`Updated polygon ${polygonId} owner to ${newOwner} in data model`);
     
-    // Find the corresponding PolygonMesh
-    const polygonMesh = this.polygonMeshes.find(pm => 
-      pm.getMesh() === this.polygonMeshesRef.current[polygonId]
-    );
+    // Update the overlay for this polygon
+    this.createOverlayForPolygon(polygon, this.activeView);
     
-    if (!polygonMesh) {
-      console.warn(`PolygonMesh for ${polygonId} not found`);
-      return;
-    }
-    
-    // Get the owner's color
-    const ownerColor = this.getOwnerColor(newOwner);
-    
-    // Get the owner's coat of arms URL if available
-    let ownerCoatOfArmsUrl: string | null = null;
-    if (newOwner && this.ownerCoatOfArmsMap && newOwner in this.ownerCoatOfArmsMap) {
-      ownerCoatOfArmsUrl = this.ownerCoatOfArmsMap[newOwner];
-      console.log(`Found coat of arms for ${newOwner}: ${ownerCoatOfArmsUrl}`);
-    }
-    
-    // Update the PolygonMesh with the new owner's color and coat of arms
-    try {
-      console.log(`Updating PolygonMesh for ${polygonId} with owner ${newOwner} and color ${ownerColor}`);
-      polygonMesh.updateOwner(newOwner, ownerColor || '#7cac6a');
-      
-      if (ownerCoatOfArmsUrl) {
-        console.log(`Updating coat of arms texture for ${polygonId} with URL ${ownerCoatOfArmsUrl}`);
-        polygonMesh.updateCoatOfArmsTexture(ownerCoatOfArmsUrl);
+    // Update owner indicators
+    if (this.activeView === 'land') {
+      // Remove existing indicator for this polygon
+      if (this.ownerIndicators.has(polygonId)) {
+        const indicator = this.ownerIndicators.get(polygonId);
+        if (indicator) {
+          this.scene.remove(indicator);
+          if (indicator.geometry) indicator.geometry.dispose();
+          if (indicator.material) {
+            if (Array.isArray(indicator.material)) {
+              indicator.material.forEach(mat => mat.dispose());
+            } else {
+              indicator.material.dispose();
+            }
+          }
+        }
+        this.ownerIndicators.delete(polygonId);
       }
-    } catch (error) {
-      console.error(`Error updating PolygonMesh for ${polygonId}:`, error);
+      
+      // Create new indicator if polygon has an owner
+      if (newOwner && polygon.centroid) {
+        try {
+          // Get position from centroid
+          const position = this.convertLatLngToPosition(
+            polygon.centroid.lat,
+            polygon.centroid.lng
+          );
+          
+          // Get owner color
+          const ownerColor = this.getOwnerColor(newOwner) || '#7cac6a';
+          
+          // Create simple circle indicator
+          const circleGeometry = new THREE.CircleGeometry(0.25, 8);
+          const circleMaterial = new THREE.MeshBasicMaterial({
+            color: ownerColor,
+            side: THREE.DoubleSide,
+            transparent: true,
+            opacity: 0.8,
+            depthWrite: false
+          });
+          
+          const circleMesh = new THREE.Mesh(circleGeometry, circleMaterial);
+          circleMesh.position.set(position.x, 0.05, position.y);
+          circleMesh.rotation.x = -Math.PI / 2;
+          circleMesh.renderOrder = 20; // Above all land layers
+          
+          // Add to scene and store reference
+          this.scene.add(circleMesh);
+          this.ownerIndicators.set(polygonId, circleMesh);
+        } catch (error) {
+          log.error(`Failed to create owner indicator for polygon ${polygonId}:`, error);
+        }
+      }
     }
-    
-    // Update coat of arms sprites
-    this.updateCoatOfArmsSprites();
     
     // Force a render to apply changes
     this.facade.forceRender();
@@ -1141,18 +1209,41 @@ export default class PolygonRenderer {
   public updateHoverState(hoveredPolygonId: string | null) {
     console.log('Updating hover state for polygon:', hoveredPolygonId);
     
-    // Update hover state for all polygons
-    this.polygonMeshes.forEach(polygonMesh => {
-      if (!polygonMesh) return;
-      
+    // Update hover state for all overlay polygons
+    this.overlayPolygons.forEach((mesh, polygonId) => {
       try {
-        const polygonId = this.polygons.find(
-          p => p && polygonMesh.getMesh() === this.polygonMeshesRef.current[p.id]
-        )?.id;
-        
-        if (polygonId) {
-          // Apply hover state based on ID match
-          polygonMesh.updateHoverState(polygonId === hoveredPolygonId);
+        if (mesh.material instanceof THREE.Material) {
+          const isHovered = polygonId === hoveredPolygonId;
+          
+          // Skip if this is the selected polygon (selection takes precedence)
+          if (mesh.userData.isSelected) {
+            return;
+          }
+          
+          // Apply hover effect
+          if (isHovered) {
+            if (mesh.material instanceof THREE.MeshBasicMaterial) {
+              // Store original color if not already stored
+              if (!mesh.userData.originalColor) {
+                mesh.userData.originalColor = mesh.material.color.clone();
+              }
+              
+              // Set to hover color (lighter version of original)
+              const hoverColor = mesh.userData.originalColor.clone();
+              hoverColor.r = Math.min(1, hoverColor.r * 1.2);
+              hoverColor.g = Math.min(1, hoverColor.g * 1.2);
+              hoverColor.b = Math.min(1, hoverColor.b * 1.2);
+              
+              mesh.material.color.copy(hoverColor);
+              mesh.material.needsUpdate = true;
+            }
+          } else {
+            // Restore original color if it exists
+            if (mesh.userData.originalColor && mesh.material instanceof THREE.MeshBasicMaterial) {
+              mesh.material.color.copy(mesh.userData.originalColor);
+              mesh.material.needsUpdate = true;
+            }
+          }
         }
       } catch (error) {
         console.error('Error updating hover state for polygon:', error);
@@ -1209,48 +1300,9 @@ export default class PolygonRenderer {
     this.ownerColorMap = {};
     log.info('Owner color map cleared');
     
-    // Remove all coat of arms sprites
-    withErrorHandling(
-      () => {
-        Object.values(this.coatOfArmSprites).forEach(obj => {
-          try {
-            this.facade.removeFromScene(obj);
-            if (obj instanceof THREE.Mesh) {
-              if (obj.geometry) obj.geometry.dispose();
-              if (obj.material) {
-                if (Array.isArray(obj.material)) {
-                  obj.material.forEach((mat: THREE.Material) => {
-                    try {
-                      if ('map' in mat && (mat as THREE.MeshBasicMaterial | THREE.MeshStandardMaterial).map) {
-                        (mat as THREE.MeshBasicMaterial | THREE.MeshStandardMaterial).map?.dispose();
-                      }
-                      mat.dispose();
-                    } catch (matError) {
-                      log.error('Error disposing material:', matError);
-                    }
-                  });
-                } else {
-                  try {
-                    if ('map' in obj.material && (obj.material as THREE.MeshBasicMaterial | THREE.MeshStandardMaterial).map) {
-                      (obj.material as THREE.MeshBasicMaterial | THREE.MeshStandardMaterial).map?.dispose();
-                    }
-                    obj.material.dispose();
-                  } catch (matError) {
-                    log.error('Error disposing material:', matError);
-                  }
-                }
-              }
-            }
-          } catch (objError) {
-            log.error('Error removing coat of arms object:', objError);
-          }
-        });
-        this.coatOfArmSprites = {};
-        log.info('Coat of arms sprites cleared');
-      },
-      RenderingErrorType.RESOURCE_DISPOSAL,
-      'clear-coat-of-arms-sprites'
-    );
+    // Clear all overlays and indicators
+    this.clearOverlays();
+    log.info('Overlays and indicators cleared');
     
     // Force THREE.js to clear its texture cache
     if (THREE.Cache) {
@@ -1267,68 +1319,39 @@ export default class PolygonRenderer {
    * Clean up resources with error handling
    */
   public cleanup() {
-    log.info(`Cleaning up PolygonRenderer with ${this.polygonMeshes.length} meshes`);
+    log.info(`Cleaning up PolygonRenderer with ${this.basePolygons.size} base polygons and ${this.overlayPolygons.size} overlays`);
     
     // Remove event listener for cache clearing
     if (typeof window !== 'undefined') {
       window.removeEventListener('clearPolygonRendererCaches', this.clearCaches.bind(this));
     }
     
-    // Clean up all polygon meshes with error handling
-    this.polygonMeshes.forEach(polygonMesh => {
+    // Clean up base polygons
+    this.basePolygons.forEach(mesh => {
       withErrorHandling(
-        () => polygonMesh.cleanup(),
+        () => {
+          this.scene.remove(mesh);
+          if (mesh.geometry) mesh.geometry.dispose();
+          if (mesh.material) {
+            if (Array.isArray(mesh.material)) {
+              mesh.material.forEach(mat => mat.dispose());
+            } else {
+              mesh.material.dispose();
+            }
+          }
+        },
         RenderingErrorType.RESOURCE_DISPOSAL,
-        'polygon-mesh-cleanup'
+        'base-polygon-cleanup'
       );
     });
     
-    // Clear the arrays and maps
-    this.polygonMeshes = [];
+    // Clear overlays and indicators
+    this.clearOverlays();
+    
+    // Clear the maps and sets
+    this.basePolygons.clear();
     this.createdPolygonIds.clear();
     this.failedPolygons.clear();
-    
-    // Clean up coat of arms objects with error handling
-    withErrorHandling(
-      () => {
-        Object.values(this.coatOfArmSprites).forEach(obj => {
-          try {
-            this.facade.removeFromScene(obj);
-            if (obj instanceof THREE.Mesh) {
-              if (obj.geometry) obj.geometry.dispose();
-              if (obj.material) {
-                if (Array.isArray(obj.material)) {
-                  obj.material.forEach((mat: THREE.Material) => {
-                    try {
-                      if ('map' in mat && (mat as THREE.MeshBasicMaterial | THREE.MeshStandardMaterial).map) {
-                        (mat as THREE.MeshBasicMaterial | THREE.MeshStandardMaterial).map?.dispose();
-                      }
-                      mat.dispose();
-                    } catch (matError) {
-                      log.error('Error disposing material:', matError);
-                    }
-                  });
-                } else {
-                  try {
-                    if ('map' in obj.material && (obj.material as THREE.MeshBasicMaterial | THREE.MeshStandardMaterial).map) {
-                      (obj.material as THREE.MeshBasicMaterial | THREE.MeshStandardMaterial).map?.dispose();
-                    }
-                    obj.material.dispose();
-                  } catch (matError) {
-                    log.error('Error disposing material:', matError);
-                  }
-                }
-              }
-            }
-          } catch (objError) {
-            log.error('Error cleaning up coat of arms object:', objError);
-          }
-        });
-        this.coatOfArmSprites = {};
-      },
-      RenderingErrorType.RESOURCE_DISPOSAL,
-      'coat-of-arms-cleanup'
-    );
     
     // Dispose of the facade with error handling
     withErrorHandling(
