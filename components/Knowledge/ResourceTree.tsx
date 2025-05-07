@@ -23,11 +23,17 @@ const ResourceTree: React.FC<ResourceTreeProps> = ({ onClose }) => {
       try {
         setLoading(true);
         const data = await fetchResources();
-        setResources(data);
-        setError(null);
+        if (Array.isArray(data)) {
+          setResources(data);
+          setError(null);
+        } else {
+          throw new Error('Invalid data format received');
+        }
       } catch (err) {
         setError('Failed to load resources. Please try again later.');
         console.error('Error loading resources:', err);
+        // Set empty array to prevent undefined errors
+        setResources([]);
       } finally {
         setLoading(false);
       }
@@ -215,7 +221,7 @@ const ResourceTree: React.FC<ResourceTreeProps> = ({ onClose }) => {
               <div className="mb-4 text-amber-300">
                 <span className="font-medium">{filteredResources.length}</span> resources found
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" key="resource-grid">
                 {filteredResources.map(resource => (
                 <div 
                   key={resource.id}
@@ -299,7 +305,7 @@ const ResourceTree: React.FC<ResourceTreeProps> = ({ onClose }) => {
         
         {/* Resource Details Panel */}
         {selectedResource && (
-          <div className="w-1/3 bg-amber-900/30 border-l border-amber-700 overflow-auto p-6 tech-tree-scroll">
+          <div className="w-1/3 bg-amber-900/30 border-l border-amber-700 overflow-auto p-6 tech-tree-scroll" key={`detail-${selectedResource.id}`}>
             <div className="flex justify-between items-start mb-4">
               <h3 className="text-2xl font-serif text-amber-300">{selectedResource.name}</h3>
               <button 
