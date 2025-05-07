@@ -155,7 +155,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
   }, [selectedPolygon, landRendered]);
 
   // Function to render a top-down view of the land
-  const renderLandTopView = (polygon: Polygon, canvas: HTMLCanvasElement) => {
+  const renderLandTopView = (polygon: Polygon, canvas: HTMLCanvasElement): void => {
     if (!polygon.coordinates || polygon.coordinates.length < 3) return;
     
     // Set canvas size
