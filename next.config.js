@@ -1,15 +1,17 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // Disable static generation for all pages
-  // This ensures pages are server-rendered or SSR on each request
-  staticPageGenerationTimeout: 0,
-  // Set pages to be dynamic by default
-  trailingSlash: true,
-  // Disable automatic static optimization
+  // Allow trailing slash but don't force it
+  trailingSlash: false,
+  // Modify experimental features
   experimental: {
-    // Disable static generation for all pages
-    disableStaticGeneration: true,
+    // Allow static generation for error pages
+    disableStaticGeneration: false,
+  },
+  // Add more detailed error reporting
+  onDemandEntries: {
+    maxInactiveAge: 25 * 1000,
+    pagesBufferLength: 2,
   }
 }
 
