@@ -282,18 +282,6 @@ def distribute_income():
     if not telegram_connected:
         log.warning("Telegram connection test failed, notifications may not be delivered")
     
-    # Add debug notification at the beginning
-    try:
-        log.info("Sending debug notification to Telegram")
-        notification_message = (
-            "🏛️ Income Distribution Debug 🏛️\n\n"
-            "The income distribution script has started running."
-        )
-        send_telegram_notification(notification_message)
-    except Exception as e:
-        log.error(f"Error sending debug notification: {str(e)}")
-        # Continue with the script even if notification fails
-    
     # Initialize Airtable
     users_table, lands_table, transactions_table = initialize_airtable()
     
