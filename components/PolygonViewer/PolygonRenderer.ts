@@ -444,7 +444,7 @@ export default class PolygonRenderer {
       // Store reference
       this.polygonMeshesRef.current[polygon.id] = mesh;
       
-      // Create a simple PolygonMeshFacade wrapper for this mesh
+      // Create a simplified PolygonMeshFacade wrapper for this mesh
       const simplifiedFacade = {
         getMesh: () => mesh,
         updateViewMode: () => {},
@@ -469,11 +469,15 @@ export default class PolygonRenderer {
           this.scene.remove(mesh);
           geometry.dispose();
           material.dispose();
-        }
+        },
+        configure: () => {},
+        reset: () => {},
+        isActive: () => true,
+        setActive: () => {}
       };
       
       // Add to our collection
-      this.polygonMeshes.push(simplifiedFacade as any);
+      this.polygonMeshes.push(simplifiedFacade as PolygonMeshFacade);
       this.createdPolygonIds.add(polygon.id);
       
       log.info(`Created simplified representation for polygon ${polygon.id}`);
