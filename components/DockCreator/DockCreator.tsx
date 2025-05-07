@@ -333,7 +333,6 @@ const DockCreator: React.FC<DockCreatorProps> = ({
             }
           }}
         />
-      />
       
       {/* UI Controls */}
       <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-black/80 text-white p-4 rounded-lg z-20 w-96">
