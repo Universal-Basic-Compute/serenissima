@@ -14,8 +14,8 @@ export default class SimpleCamera {
       500 // Far clipping plane (decreased from 1000 to reduce depth range)
     );
     
-    // Position camera for better view of the land and water
-    this.camera.position.set(0, 50, 45); // Slightly less vertical, more zoomed in
+    // Position camera for better view of the land and water - more zoomed in
+    this.camera.position.set(0, 30, 25); // Reduced from (0, 50, 45) for more zoom
     this.camera.lookAt(0, 0, 0); // Looking at the origin where everything is positioned
     
     // Create controls
@@ -26,8 +26,8 @@ export default class SimpleCamera {
     this.controls.dampingFactor = 0.05;
     this.controls.minPolarAngle = 0.1; // Allow more downward angle to see water
     this.controls.maxPolarAngle = Math.PI / 2.2; // Increased to allow more top-down view
-    this.controls.minDistance = 4; // Restrict zoom-in to 4 units
-    this.controls.maxDistance = 60; // Allow zooming out a bit more
+    this.controls.minDistance = 3; // Reduced from 4 to allow closer zoom
+    this.controls.maxDistance = 50; // Reduced from 60 to keep focus on the map
     this.controls.screenSpacePanning = true; // Enable screen space panning
     
     // Disable left mouse button for rotation (button 0)
