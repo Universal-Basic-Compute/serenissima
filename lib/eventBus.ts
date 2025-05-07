@@ -91,6 +91,8 @@ export const EventTypes = {
   // Building and infrastructure events
   DOCK_DELETED: 'dockDeleted',
   DOCK_UPDATED: 'dockUpdated',
+  DOCK_SELECTED: 'dockSelected',
+  DOCK_HOVER: 'dockHover',
   // Interaction events
   INTERACTION_CLICK: 'interactionClick',
   INTERACTION_MOUSE_DOWN: 'interactionMouseDown',
