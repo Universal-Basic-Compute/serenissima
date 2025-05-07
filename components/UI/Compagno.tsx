@@ -251,7 +251,12 @@ const Compagno: React.FC<CompagnoProps> = ({ className }) => {
           </div>
           
           {/* Messages area */}
-          <div className="flex-1 overflow-y-auto p-3 bg-amber-50">
+          <div className="flex-1 overflow-y-auto p-3 bg-amber-50 bg-opacity-80" 
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E")`,
+              backgroundRepeat: 'repeat'
+            }}
+          >
             {/* Load more button */}
             {pagination && pagination.has_more && (
               <div className="text-center mb-4">
@@ -347,19 +352,19 @@ const Compagno: React.FC<CompagnoProps> = ({ className }) => {
               <div className="flex flex-wrap gap-1">
                 <button
                   onClick={() => handleSuggestedQuestion("How do I purchase land?")}
-                  className="text-xs bg-gradient-to-r from-amber-100 to-amber-200 hover:from-amber-200 hover:to-amber-300 text-amber-800 px-3 py-1.5 rounded-full border border-amber-200 transition-colors shadow-sm"
+                  className="text-xs bg-gradient-to-r from-amber-100 to-amber-200 hover:from-amber-200 hover:to-amber-300 text-amber-900 px-3 py-1.5 rounded-full border border-amber-300 transition-colors shadow-sm"
                 >
                   How do I purchase land?
                 </button>
                 <button
                   onClick={() => handleSuggestedQuestion("What are $COMPUTE tokens?")}
-                  className="text-xs bg-gradient-to-r from-amber-100 to-amber-200 hover:from-amber-200 hover:to-amber-300 text-amber-800 px-3 py-1.5 rounded-full border border-amber-200 transition-colors shadow-sm"
+                  className="text-xs bg-gradient-to-r from-amber-100 to-amber-200 hover:from-amber-200 hover:to-amber-300 text-amber-900 px-3 py-1.5 rounded-full border border-amber-300 transition-colors shadow-sm"
                 >
                   What are $COMPUTE tokens?
                 </button>
                 <button
                   onClick={() => handleSuggestedQuestion("How do I build structures?")}
-                  className="text-xs bg-gradient-to-r from-amber-100 to-amber-200 hover:from-amber-200 hover:to-amber-300 text-amber-800 px-3 py-1.5 rounded-full border border-amber-200 transition-colors shadow-sm"
+                  className="text-xs bg-gradient-to-r from-amber-100 to-amber-200 hover:from-amber-200 hover:to-amber-300 text-amber-900 px-3 py-1.5 rounded-full border border-amber-300 transition-colors shadow-sm"
                 >
                   How do I build structures?
                 </button>
@@ -382,7 +387,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className }) => {
               className={`px-4 rounded-r-lg transition-colors ${
                 isTyping || !inputValue.trim()
                   ? 'bg-gray-400 text-white cursor-not-allowed'
-                  : 'bg-gradient-to-r from-amber-600 to-amber-500 text-white hover:from-amber-500 hover:to-amber-400'
+                  : 'bg-gradient-to-r from-amber-800 to-amber-700 text-white hover:from-amber-700 hover:to-amber-600'
               }`}
               disabled={isTyping || !inputValue.trim()}
             >

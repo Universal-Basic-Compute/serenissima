@@ -81,18 +81,18 @@ button:hover, a:hover {
   animation: slideIn 0.3s ease-out forwards;
 }
 
-/* Metallic bubble effects */
+/* Parchment-like bubble effects */
 .assistant-bubble {
-  background: linear-gradient(145deg, #f8e3c5, #e6c89b);
+  background: linear-gradient(to bottom, #f5e7c1, #e8d4a9);
   color: #4b3621;
-  border: 1px solid rgba(218, 165, 32, 0.3);
+  border: 1px solid #c9b18d;
   box-shadow: 
     0 2px 5px rgba(0, 0, 0, 0.1),
-    inset 0 1px 1px rgba(255, 255, 255, 0.7),
-    inset 0 -1px 1px rgba(0, 0, 0, 0.05);
+    inset 0 1px 1px rgba(255, 255, 255, 0.7);
   position: relative;
   overflow: hidden;
   animation: bubbleAppear 0.3s ease-out forwards;
+  background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E");
 }
 
 .assistant-bubble::before {
@@ -103,8 +103,8 @@ button:hover, a:hover {
   right: 0;
   height: 40%;
   background: linear-gradient(to bottom, 
-    rgba(255, 255, 255, 0.4) 0%, 
-    rgba(255, 255, 255, 0.1) 100%);
+    rgba(255, 255, 255, 0.2) 0%, 
+    rgba(255, 255, 255, 0) 100%);
   border-radius: inherit;
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
@@ -112,16 +112,16 @@ button:hover, a:hover {
 }
 
 .user-bubble {
-  background: linear-gradient(145deg, #6a82fb, #5465ca);
+  background: linear-gradient(to bottom, #8a5a44, #73483a);
   color: white;
-  border: 1px solid rgba(106, 130, 251, 0.3);
+  border: 1px solid #5e3a2e;
   box-shadow: 
     0 2px 5px rgba(0, 0, 0, 0.1),
-    inset 0 1px 1px rgba(255, 255, 255, 0.3),
-    inset 0 -1px 1px rgba(0, 0, 0, 0.05);
+    inset 0 1px 1px rgba(255, 255, 255, 0.3);
   position: relative;
   overflow: hidden;
   animation: bubbleAppear 0.3s ease-out forwards;
+  background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E");
 }
 
 .user-bubble::before {
@@ -132,8 +132,8 @@ button:hover, a:hover {
   right: 0;
   height: 40%;
   background: linear-gradient(to bottom, 
-    rgba(255, 255, 255, 0.3) 0%, 
-    rgba(255, 255, 255, 0.05) 100%);
+    rgba(255, 255, 255, 0.2) 0%, 
+    rgba(255, 255, 255, 0) 100%);
   border-radius: inherit;
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
@@ -160,6 +160,7 @@ button:hover, a:hover {
 /* Markdown content styling */
 .markdown-content {
   line-height: 1.5;
+  position: relative;
 }
 
 .markdown-content p {
@@ -184,22 +185,29 @@ button:hover, a:hover {
 .markdown-content code {
   font-family: var(--font-geist-mono);
   font-size: 0.9em;
+  background-color: rgba(0, 0, 0, 0.05);
+  border-radius: 3px;
+  padding: 0.1em 0.3em;
 }
 
 .markdown-content pre {
   white-space: pre-wrap;
   word-break: break-word;
+  background-color: rgba(0, 0, 0, 0.05);
+  border-radius: 3px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
-/* Typing indicator with metallic effect */
+/* Typing indicator with parchment-like effect */
 .typing-indicator {
-  background: linear-gradient(145deg, #f8e3c5, #e6c89b);
-  border: 1px solid rgba(218, 165, 32, 0.3);
+  background: linear-gradient(to bottom, #f5e7c1, #e8d4a9);
+  border: 1px solid #c9b18d;
   box-shadow: 
     0 2px 5px rgba(0, 0, 0, 0.1),
     inset 0 1px 1px rgba(255, 255, 255, 0.7);
   position: relative;
   overflow: hidden;
+  background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E");
 }
 
 .typing-indicator::before {
@@ -210,8 +218,8 @@ button:hover, a:hover {
   right: 0;
   height: 40%;
   background: linear-gradient(to bottom, 
-    rgba(255, 255, 255, 0.4) 0%, 
-    rgba(255, 255, 255, 0.1) 100%);
+    rgba(255, 255, 255, 0.2) 0%, 
+    rgba(255, 255, 255, 0) 100%);
   border-radius: inherit;
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
@@ -221,7 +229,7 @@ button:hover, a:hover {
 .typing-dot {
   width: 8px;
   height: 8px;
-  background: linear-gradient(145deg, #daa520, #b8860b);
+  background: #73483a;
   border-radius: 50%;
   display: inline-block;
   margin: 0 1px;
