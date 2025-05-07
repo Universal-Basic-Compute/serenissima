@@ -12,6 +12,11 @@ import {
 import { getWalletAddress } from '../walletUtils';
 import { Listing, Offer, Transaction } from '../store/marketStore';
 
+// Define event types for land ownership changes
+export const EventTypes = {
+  LAND_OWNERSHIP_CHANGED: 'landOwnershipChanged'
+};
+
 // Cache configuration
 interface CacheConfig {
   enabled: boolean;
@@ -574,7 +579,6 @@ export class TransactionService {
       // Convert API response to our Listing interface
       const listing: Listing = {
         id: data.id,
-        type: data.type,
         assetId: data.asset_id,
         seller: data.seller,
         price: data.price,
@@ -760,13 +764,10 @@ export class TransactionService {
       // Convert API response to our Offer interface
       const offer: Offer = {
         id: data.id,
-        type: data.type,
-        assetId: data.asset_id,
-        seller: data.seller,
+        listingId: data.asset_id, // Using asset_id as listingId
         buyer: data.buyer,
         price: data.price,
         createdAt: data.created_at,
-        updatedAt: data.updated_at,
         status: 'pending',
         metadata: {
           historicalName: metadata?.historicalName,
@@ -777,8 +778,8 @@ export class TransactionService {
       
       // Invalidate cache
       this.invalidateTransactionsCache({ 
-        assetId: offer.assetId,
-        seller: offer.seller,
+        assetId: data.asset_id,
+        seller: data.seller,
         buyer: offer.buyer
       });
       
