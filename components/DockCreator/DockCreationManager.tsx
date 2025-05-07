@@ -74,14 +74,11 @@ export class DockCreationManager {
    * Update mouse position for raycasting
    */
   public updateMousePosition(clientX: number, clientY: number): void {
-    console.log('DockCreationManager: Updating mouse position to', clientX, clientY);
-    
     try {
       // Simplify the mouse position calculation to use window dimensions
       // This is more reliable than trying to get the renderer's domElement
       this.mouse.x = (clientX / window.innerWidth) * 2 - 1;
       this.mouse.y = -(clientY / window.innerHeight) * 2 + 1;
-      console.log('DockCreationManager: Normalized mouse coordinates =', this.mouse.x, this.mouse.y);
       
       // Update preview position
       this.updatePreviewPosition();
@@ -195,14 +192,9 @@ export class DockCreationManager {
    * Update the preview position based on mouse position
    */
   private updatePreviewPosition(): void {
-    console.log('DockCreationManager: Updating preview position');
-    
     // Get the active preview mesh (either the model or fallback)
     const activeMesh = this.isModelLoaded ? this.previewMesh : this.fallbackPreviewMesh;
-    if (!activeMesh) {
-      console.log('DockCreationManager: No active mesh available');
-      return;
-    }
+    if (!activeMesh) return;
     
     // Cast ray from mouse position
     this.raycaster.setFromCamera(this.mouse, this.camera);
@@ -213,15 +205,10 @@ export class DockCreationManager {
     const intersected = this.raycaster.ray.intersectPlane(waterPlane, intersection);
     
     if (intersected) {
-      console.log('DockCreationManager: Ray intersected water plane at', intersection);
-      
       // Find nearest water edge and adjacent land
       const result = this.waterEdgeDetector.findNearestWaterEdge(intersection);
-      console.log('DockCreationManager: Nearest water edge result:', result);
       
       if (result.position && result.landId && result.edge) {
-        console.log('DockCreationManager: Found valid water edge, snapping dock');
-        
         // Snap the dock precisely to the edge
         activeMesh.position.copy(result.position);
         activeMesh.position.y = 0.1; // Slightly above water level
@@ -256,8 +243,6 @@ export class DockCreationManager {
           });
         }
       } else {
-        console.log('DockCreationManager: No valid water edge found, showing at cursor position');
-        
         // Show preview at cursor but indicate invalid placement
         activeMesh.position.copy(intersection);
         activeMesh.position.y = 0.1;
@@ -337,46 +322,8 @@ export class DockCreationManager {
    * Visualize water edges for debugging
    */
   private visualizeWaterEdges(): void {
-    console.log('DockCreationManager: Visualizing water edges');
-    
-    // Remove any existing visualizations
-    const existingEdges = this.scene.children.filter(child => child.name === 'waterEdgeVisualization');
-    existingEdges.forEach(edge => this.scene.remove(edge));
-    
-    // Create a material for the edges
-    const edgeMaterial = new THREE.LineBasicMaterial({ color: 0x00ffff, linewidth: 2 });
-    
-    // Visualize water edges for each polygon
-    for (const polygon of this.waterEdgeDetector.getPolygons()) {
-      const waterEdges = this.waterEdgeDetector.getWaterEdgesForPolygon(polygon);
-      
-      console.log(`Visualizing ${waterEdges.length} water edges for polygon ${polygon.id || 'unknown'}`);
-      
-      for (const edge of waterEdges) {
-        const geometry = new THREE.BufferGeometry().setFromPoints([edge.start, edge.end]);
-        const line = new THREE.Line(geometry, edgeMaterial);
-        line.name = 'waterEdgeVisualization';
-        line.position.y = 0.2; // Slightly above water level
-        this.scene.add(line);
-        
-        // Add small spheres at the start and end points for better visibility
-        const sphereGeometry = new THREE.SphereGeometry(0.1, 8, 8);
-        const startMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 }); // Green
-        const endMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 }); // Red
-        
-        const startSphere = new THREE.Mesh(sphereGeometry, startMaterial);
-        startSphere.position.copy(edge.start);
-        startSphere.position.y = 0.2;
-        startSphere.name = 'waterEdgeVisualization';
-        this.scene.add(startSphere);
-        
-        const endSphere = new THREE.Mesh(sphereGeometry, endMaterial);
-        endSphere.position.copy(edge.end);
-        endSphere.position.y = 0.2;
-        endSphere.name = 'waterEdgeVisualization';
-        this.scene.add(endSphere);
-      }
-    }
+    // Disabled for performance reasons
+    return;
   }
 
   /**

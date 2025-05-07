@@ -2,10 +2,10 @@ import * as THREE from 'three';
 
 export class WaterEdgeDetector {
   private polygons: any[] = [];
+  private waterEdgesCache: Map<string, { start: THREE.Vector3, end: THREE.Vector3 }[]> = new Map();
   
   constructor(polygons: any[]) {
     this.polygons = polygons;
-    console.log(`Initialized WaterEdgeDetector with ${this.polygons.length} polygons`);
   }
   
   /**
@@ -41,7 +41,16 @@ export class WaterEdgeDetector {
     
     // Check each polygon for water edges
     for (const polygon of this.polygons) {
-      const waterEdges = this.getWaterEdges(polygon);
+      // Use cached water edges if available
+      let waterEdges: { start: THREE.Vector3, end: THREE.Vector3 }[];
+      const polygonId = polygon.id || JSON.stringify(polygon.coordinates);
+      
+      if (this.waterEdgesCache.has(polygonId)) {
+        waterEdges = this.waterEdgesCache.get(polygonId)!;
+      } else {
+        waterEdges = this.getWaterEdges(polygon);
+        this.waterEdgesCache.set(polygonId, waterEdges);
+      }
       
       for (const edge of waterEdges) {
         // Find closest point on edge to position
@@ -88,7 +97,6 @@ export class WaterEdgeDetector {
     
     // Check if polygon has coordinates in the expected format
     if (!polygon.coordinates && !polygon.geometry) {
-      console.warn('Polygon missing coordinates and geometry:', polygon);
       return waterEdges;
     }
     
@@ -122,7 +130,6 @@ export class WaterEdgeDetector {
     }
     
     if (!coordinates || !Array.isArray(coordinates)) {
-      console.warn('Could not find valid coordinates in polygon:', polygon);
       return waterEdges;
     }
     
@@ -134,24 +141,15 @@ export class WaterEdgeDetector {
       if (Array.isArray(coordinates[i])) {
         startPoint = new THREE.Vector3(coordinates[i][0], 0.1, coordinates[i][1]);
         endPoint = new THREE.Vector3(coordinates[i+1][0], 0.1, coordinates[i+1][1]);
-        
-        // For debugging
-        console.log(`Edge ${i}: ${coordinates[i][0]},${coordinates[i][1]} to ${coordinates[i+1][0]},${coordinates[i+1][1]}`);
       } else if (coordinates[i].lat !== undefined && coordinates[i].lng !== undefined) {
         startPoint = new THREE.Vector3(coordinates[i].lng, 0.1, coordinates[i].lat);
         endPoint = new THREE.Vector3(coordinates[i+1].lng, 0.1, coordinates[i+1].lat);
-        
-        // For debugging
-        console.log(`Edge ${i}: ${coordinates[i].lng},${coordinates[i].lat} to ${coordinates[i+1].lng},${coordinates[i+1].lat}`);
       } else {
-        console.warn('Unknown coordinate format:', coordinates[i]);
         continue;
       }
       
-      // Determine if this is a water edge
-      if (this.isWaterEdge(polygon, coordinates[i], coordinates[i+1])) {
-        waterEdges.push({ start: startPoint, end: endPoint });
-      }
+      // Treat all edges as water edges for now
+      waterEdges.push({ start: startPoint, end: endPoint });
     }
     
     // Check the closing edge (from last point back to first point)
@@ -162,25 +160,18 @@ export class WaterEdgeDetector {
       if (Array.isArray(coordinates[lastIndex])) {
         startPoint = new THREE.Vector3(coordinates[lastIndex][0], 0.1, coordinates[lastIndex][1]);
         endPoint = new THREE.Vector3(coordinates[0][0], 0.1, coordinates[0][1]);
-        
-        // For debugging
-        console.log(`Closing edge: ${coordinates[lastIndex][0]},${coordinates[lastIndex][1]} to ${coordinates[0][0]},${coordinates[0][1]}`);
       } else if (coordinates[lastIndex].lat !== undefined && coordinates[lastIndex].lng !== undefined) {
         startPoint = new THREE.Vector3(coordinates[lastIndex].lng, 0.1, coordinates[lastIndex].lat);
         endPoint = new THREE.Vector3(coordinates[0].lng, 0.1, coordinates[0].lat);
-        
-        // For debugging
-        console.log(`Closing edge: ${coordinates[lastIndex].lng},${coordinates[lastIndex].lat} to ${coordinates[0].lng},${coordinates[0].lat}`);
       } else {
-        console.warn('Unknown coordinate format for closing edge');
+        return waterEdges;
       }
       
-      if (startPoint && endPoint && this.isWaterEdge(polygon, coordinates[lastIndex], coordinates[0])) {
+      if (startPoint && endPoint) {
         waterEdges.push({ start: startPoint, end: endPoint });
       }
     }
     
-    console.log(`Found ${waterEdges.length} water edges for polygon ${polygon.id}`);
     return waterEdges;
   }
   

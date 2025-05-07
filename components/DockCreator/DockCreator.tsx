@@ -108,55 +108,41 @@ const DockCreator: React.FC<DockCreatorProps> = ({
   }, [active, actualScene, actualCamera, polygons]);
   
   
-  // Handle mouse movement for dock placement preview
-  const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    if (!active || !managerRef.current) {
-      console.log('DockCreator: Mouse move ignored - active =', active, 'manager =', !!managerRef.current);
-      return;
-    }
+  // Add throttling for mouse movement
+  const lastUpdateTimeRef = useRef<number>(0);
+  const throttleIntervalRef = useRef<number>(50); // 50ms throttle
+  
+  // Throttled mouse move handler
+  const handleMouseMove = useCallback((e: React.MouseEvent | MouseEvent) => {
+    if (!active || !managerRef.current) return;
     
-    console.log('DockCreator: Mouse move at', e.clientX, e.clientY);
+    const now = Date.now();
+    if (now - lastUpdateTimeRef.current < throttleIntervalRef.current) return;
+    
+    lastUpdateTimeRef.current = now;
+    
     managerRef.current.updateMousePosition(e.clientX, e.clientY);
     
     // Get the preview position (snapped to water edge)
     const position = managerRef.current.getPreviewPosition();
     if (position) {
-      console.log('DockCreator: Preview position updated to', position);
       setPreviewPosition(position);
       const isValid = managerRef.current.isPlacementValid();
-      console.log('DockCreator: Placement valid =', isValid);
       setIsPlacementValid(isValid);
     }
   }, [active]);
   
-  // Add document-level event listeners as a fallback
+  // Use a single document-level event listener
   useEffect(() => {
     if (!active) return;
     
-    console.log('DockCreator: Adding document event listeners');
-    
     const handleDocumentMouseMove = (e: MouseEvent) => {
-      // Only handle left mouse button or no button events
-      if ((e.buttons !== 1 && e.buttons !== 0) || e.button !== 0) return;
-      
-      if (!managerRef.current) return;
-      console.log('Document mouse move detected at', e.clientX, e.clientY);
-      managerRef.current.updateMousePosition(e.clientX, e.clientY);
-      
-      // Get the preview position (snapped to water edge)
-      const position = managerRef.current.getPreviewPosition();
-      if (position) {
-        setPreviewPosition(position);
-        setIsPlacementValid(managerRef.current.isPlacementValid());
-      }
+      handleMouseMove(e);
     };
     
     const handleDocumentClick = (e: MouseEvent) => {
       // Only handle left mouse button clicks
       if (e.button !== 0) return;
-      
-      console.log('Document click detected at', e.clientX, e.clientY);
-      // Call the handleClick function directly
       handleClick();
     };
     
@@ -167,29 +153,23 @@ const DockCreator: React.FC<DockCreatorProps> = ({
       document.removeEventListener('mousemove', handleDocumentMouseMove);
       document.removeEventListener('click', handleDocumentClick);
     };
-  }, [active]); // Remove handleClick from dependencies
+  }, [active, handleMouseMove]); // Include handleClick in dependencies
   
   // Handle click to place dock
   const handleClick = () => {
-    console.log('DockCreator: Click detected, active =', active, 'manager =', !!managerRef.current);
-    
     if (!active || !managerRef.current) {
-      console.log('DockCreator: Click ignored - component not active or manager not initialized');
       return;
     }
     
     // Get the current preview position directly from the manager
     const currentPosition = managerRef.current.getPreviewPosition();
-    console.log('DockCreator: Current preview position =', currentPosition);
     
     if (!currentPosition) {
-      console.log('DockCreator: No valid position found');
       return;
     }
     
     // Check if placement is valid
     const isValid = managerRef.current.isPlacementValid();
-    console.log('DockCreator: Placement valid =', isValid);
     
     if (!isValid) {
       setErrorMessage('Dock must be placed along a water edge adjacent to land');
@@ -296,44 +276,21 @@ const DockCreator: React.FC<DockCreatorProps> = ({
   
   return (
     <div className="dock-creator">
-      {/* Overlay for mouse events */}
+      {/* Overlay for mouse events - SIMPLIFIED */}
       <div 
         className="fixed inset-0"
         style={{ 
-          pointerEvents: 'none', // Change from 'all' to 'none' as base setting
+          pointerEvents: 'none',
           cursor: 'crosshair',
           position: 'fixed',
           top: 0,
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundColor: 'rgba(0,0,255,0.01)', // Make it almost invisible
-          zIndex: 1000 // Keep high z-index
+          backgroundColor: 'rgba(0,0,255,0.01)',
+          zIndex: 1000
         }}
-        onClick={(e) => {
-          // Only handle left mouse button clicks for dock placement
-          if (e.button === 0) {
-            console.log('Overlay click detected at', e.clientX, e.clientY);
-            e.preventDefault();
-            e.stopPropagation();
-            handleClick();
-          }
-          // Let other mouse events pass through
-        }}
-      >
-        {/* Add a pointer-events-auto div that only captures mousemove for the preview */}
-        <div 
-          className="absolute inset-0" 
-          style={{ pointerEvents: 'auto' }}
-          onMouseMove={(e) => {
-            // Only handle left mouse button or no button events for preview
-            if (e.buttons === 1 || e.buttons === 0) {
-              console.log('Overlay mouse move detected at', e.clientX, e.clientY);
-              handleMouseMove(e);
-            }
-          }}
-        />
-      </div>
+      />
       
       {/* UI Controls */}
       <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-black/80 text-white p-4 rounded-lg z-20 w-96">
