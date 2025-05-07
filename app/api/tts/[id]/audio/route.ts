@@ -1,13 +1,13 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
 // This is a simplified implementation
 // In a real app, you would store the audio data and retrieve it by ID
 export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  context: { params: { id: string } }
 ) {
   try {
-    const id = params.id;
+    const id = context.params.id;
     
     // In a real implementation, you would retrieve the text associated with this ID
     // and generate the audio or retrieve it from storage
