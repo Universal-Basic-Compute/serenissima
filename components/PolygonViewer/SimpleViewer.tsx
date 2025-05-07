@@ -268,9 +268,21 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
       if (polygonRendererRef.current) {
         // Reload users data
         loadUsers().then(() => {
-          // Update coat of arms in the renderer
-          if (polygonRendererRef.current) {
-            polygonRendererRef.current.createCoatOfArmsSprites();
+          // Only update coat of arms in the renderer if we're in land view
+          if (polygonRendererRef.current && activeView === 'land') {
+            // Force a refresh by updating the coat of arms map
+            const updatedUsers = users || {};
+            const coatOfArmsMap: Record<string, string> = {};
+            
+            Object.values(updatedUsers).forEach(user => {
+              if (user.user_name && user.coat_of_arms_image) {
+                coatOfArmsMap[user.user_name] = user.coat_of_arms_image;
+              }
+            });
+            
+            if (Object.keys(coatOfArmsMap).length > 0) {
+              polygonRendererRef.current.updateCoatOfArms(coatOfArmsMap);
+            }
           }
         });
       }
@@ -281,7 +293,7 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
     return () => {
       window.removeEventListener('userProfileUpdated', handleUserProfileUpdated as EventListener);
     };
-  }, [loadUsers]);
+  }, [loadUsers, activeView, users]);
   
   
   // The handleMouseDown function is already defined above

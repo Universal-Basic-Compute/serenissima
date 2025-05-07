@@ -169,6 +169,10 @@ export default class SimplePolygonRenderer {
     }
   }
   
+  // Track if coat of arms have been rendered to prevent duplicate rendering
+  private hasRenderedCoatOfArms: boolean = false;
+  private isRenderingCoatOfArms: boolean = false;
+  
   private renderPolygons() {
     // Create a single shared material for all polygons
     this.sharedMaterial = new THREE.MeshStandardMaterial({
@@ -271,17 +275,22 @@ export default class SimplePolygonRenderer {
    * Create coat of arms sprites for all polygons with owners
    */
   public createCoatOfArmsSprites() {
-    console.log('Creating coat of arms sprites for land view');
+    // Prevent concurrent or duplicate rendering
+    if (this.isRenderingCoatOfArms) {
+      console.log('Already rendering coat of arms, skipping duplicate call');
+      return;
+    }
     
-    // Remove any existing sprites
-    Object.values(this.coatOfArmsSprites).forEach(sprite => {
-      this.scene.remove(sprite);
-    });
-    this.coatOfArmsSprites = {};
+    console.log('Creating coat of arms sprites for land view');
+    this.isRenderingCoatOfArms = true;
+    
+    // Remove any existing sprites first
+    this.clearCoatOfArmsSprites();
     
     // Only create sprites if in land view
     if (this.activeView !== 'land') {
       console.log('Not in land view, skipping coat of arms sprites');
+      this.isRenderingCoatOfArms = false;
       return;
     }
     
@@ -373,7 +382,26 @@ export default class SimplePolygonRenderer {
       createdCount++;
     });
     
+    this.hasRenderedCoatOfArms = true;
+    this.isRenderingCoatOfArms = false;
     console.log(`Created ${createdCount} coat of arms sprites`);
+  }
+  
+  /**
+   * Clear all coat of arms sprites
+   */
+  private clearCoatOfArmsSprites() {
+    Object.values(this.coatOfArmsSprites).forEach(sprite => {
+      this.scene.remove(sprite);
+      // Check if sprite is a Mesh before accessing material property
+      if (sprite instanceof THREE.Mesh && sprite.material) {
+        if (sprite.material instanceof THREE.MeshBasicMaterial && sprite.material.map) {
+          sprite.material.map.dispose();
+        }
+        sprite.material.dispose();
+      }
+    });
+    this.coatOfArmsSprites = {};
   }
   
   /**
@@ -656,13 +684,14 @@ export default class SimplePolygonRenderer {
     
     // Update coat of arms sprites based on view mode
     if (activeView === 'land') {
-      this.createCoatOfArmsSprites();
+      // Only create if we haven't rendered them yet or if we're switching back to land view
+      if (!this.hasRenderedCoatOfArms) {
+        this.createCoatOfArmsSprites();
+      }
     } else {
       // Remove coat of arms sprites if not in land view
-      Object.values(this.coatOfArmsSprites).forEach(sprite => {
-        this.scene.remove(sprite);
-      });
-      this.coatOfArmsSprites = {};
+      this.clearCoatOfArmsSprites();
+      this.hasRenderedCoatOfArms = false;
     }
   }
 
@@ -674,6 +703,8 @@ export default class SimplePolygonRenderer {
     
     // Refresh coat of arms sprites if in land view
     if (this.activeView === 'land') {
+      // Reset the rendered flag to force a refresh with new data
+      this.hasRenderedCoatOfArms = false;
       this.createCoatOfArmsSprites();
     }
   }
@@ -682,6 +713,12 @@ export default class SimplePolygonRenderer {
    * Fetch land owners data and apply to polygons
    */
   private async fetchAndApplyLandOwners() {
+    // Only fetch if we haven't rendered coat of arms yet
+    if (this.hasRenderedCoatOfArms) {
+      console.log('Coat of arms already rendered, skipping fetch');
+      return;
+    }
+    
     console.log('Fetching land owners data...');
     try {
       const response = await fetch('/api/get-land-owners');
@@ -714,8 +751,8 @@ export default class SimplePolygonRenderer {
           // If no owners were found or applied, use default owners
           if (updatedCount === 0) {
             this.assignDefaultOwners();
-          } else {
-            // Now that we have owners, create coat of arms sprites
+          } else if (this.activeView === 'land') {
+            // Now that we have owners, create coat of arms sprites only if in land view
             this.createCoatOfArmsSprites();
           }
         } else {
@@ -761,8 +798,10 @@ export default class SimplePolygonRenderer {
     
     console.log(`Assigned default owners to ${polygonsToAssign} polygons`);
     
-    // Create coat of arms sprites with the new owners
-    this.createCoatOfArmsSprites();
+    // Create coat of arms sprites with the new owners only if in land view
+    if (this.activeView === 'land' && !this.hasRenderedCoatOfArms) {
+      this.createCoatOfArmsSprites();
+    }
   }
   
 
@@ -1003,18 +1042,12 @@ export default class SimplePolygonRenderer {
     // Clear array
     this.meshes = [];
     
-    // Remove coat of arms sprites
-    Object.values(this.coatOfArmsSprites).forEach(sprite => {
-      this.scene.remove(sprite);
-      // Check if sprite is a Mesh before accessing material property
-      if (sprite instanceof THREE.Mesh && sprite.material) {
-        if (sprite.material instanceof THREE.SpriteMaterial && sprite.material.map) {
-          sprite.material.map.dispose();
-        }
-        sprite.material.dispose();
-      }
-    });
-    this.coatOfArmsSprites = {};
+    // Clear coat of arms sprites
+    this.clearCoatOfArmsSprites();
+    
+    // Reset rendering flags
+    this.hasRenderedCoatOfArms = false;
+    this.isRenderingCoatOfArms = false;
     
     // Dispose textures
     if (this.sandTexture) {
