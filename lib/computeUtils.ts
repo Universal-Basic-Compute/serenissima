@@ -19,22 +19,29 @@ export async function transferCompute(walletAddress: string, amount: number) {
     // Check if we have a valid wallet address
     let publicKey;
     try {
+      // Log the wallet address for debugging
+      console.log('Validating wallet address:', walletAddress);
+      
       // Validate the wallet address format
       if (!walletAddress.match(/^[1-9A-HJ-NP-Za-km-z]{32,44}$/)) {
+        console.error('Invalid wallet address format:', walletAddress);
         throw new Error('Invalid wallet address format. Please connect a valid Solana wallet.');
       }
       
       publicKey = new PublicKey(walletAddress);
+      console.log('Valid PublicKey created:', publicKey.toString());
     } catch (error) {
       console.error('Invalid wallet address:', error);
-      throw new Error('Invalid wallet address. Please connect a valid Solana wallet.');
+      throw new Error(`Invalid wallet address. Please connect a valid Solana wallet. Details: ${error.message}`);
     }
     
     // Get the wallet adapter
     const wallet = window.solana;
     if (!wallet) {
-      throw new Error('Solana wallet not found. Please install a Solana wallet extension like Phantom.');
+      throw new Error('Solana wallet not found. Please install a Phantom wallet extension.');
     }
+    
+    console.log('Found wallet adapter:', wallet.isPhantom ? 'Phantom' : 'Unknown');
     
     // Request wallet connection if not already connected
     if (!wallet.isPhantom) {
@@ -42,41 +49,57 @@ export async function transferCompute(walletAddress: string, amount: number) {
     }
     
     try {
-      await wallet.connect();
+      console.log('Connecting to wallet...');
+      const { publicKey: connectedPublicKey } = await wallet.connect();
+      console.log('Connected to wallet with public key:', connectedPublicKey.toString());
+      
+      // Verify that the connected wallet matches the expected wallet
+      if (connectedPublicKey.toString() !== publicKey.toString()) {
+        console.warn('Connected wallet does not match expected wallet:',
+          { connected: connectedPublicKey.toString(), expected: publicKey.toString() });
+      }
     } catch (connectError) {
       console.error('Failed to connect to wallet:', connectError);
-      throw new Error('Failed to connect to your wallet. Please try again.');
+      throw new Error(`Failed to connect to your wallet: ${connectError.message}`);
     }
     
     // Get the connection to Solana
+    console.log('Creating Solana connection...');
     const connection = new Connection(
       process.env.NEXT_PUBLIC_SOLANA_RPC_URL || 'https://api.devnet.solana.com',
       'confirmed'
     );
     
     // Get the COMPUTE token mint address
+    console.log('Getting COMPUTE token mint address...');
     const COMPUTE_TOKEN_MINT = new PublicKey(
       process.env.NEXT_PUBLIC_COMPUTE_TOKEN_MINT || '4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU'
     );
     
     // Get the treasury public key
+    console.log('Getting treasury public key...');
     const TREASURY_PUBLIC_KEY = new PublicKey(
       process.env.NEXT_PUBLIC_TREASURY_PUBLIC_KEY || 'YOUR_TREASURY_PUBLIC_KEY_HERE'
     );
     
     // Get the token account for the treasury
+    console.log('Getting treasury token account...');
     const treasuryTokenAccount = await getAssociatedTokenAddress(
       COMPUTE_TOKEN_MINT,
       TREASURY_PUBLIC_KEY
     );
+    console.log('Treasury token account:', treasuryTokenAccount.toString());
     
     // Get the token account for the sender
+    console.log('Getting sender token account...');
     const senderTokenAccount = await getAssociatedTokenAddress(
       COMPUTE_TOKEN_MINT,
       publicKey
     );
+    console.log('Sender token account:', senderTokenAccount.toString());
     
     // Create transfer instruction - FROM sender TO treasury
+    console.log('Creating transfer instruction...');
     const transferIx = createTransferInstruction(
       senderTokenAccount,
       treasuryTokenAccount,
@@ -85,30 +108,37 @@ export async function transferCompute(walletAddress: string, amount: number) {
     );
     
     // Create transaction and add the transfer instruction
+    console.log('Creating transaction...');
     const transaction = new Transaction().add(transferIx);
     
     // Get the recent blockhash
+    console.log('Getting recent blockhash...');
     const { blockhash } = await connection.getLatestBlockhash();
     transaction.recentBlockhash = blockhash;
     transaction.feePayer = publicKey;  // The sender pays the fee
     
     // Request the wallet to sign the transaction
+    console.log('Requesting wallet to sign transaction...');
     const signedTransaction = await wallet.signTransaction(transaction);
     
     // Serialize the signed transaction
+    console.log('Serializing signed transaction...');
     const serializedTransaction = signedTransaction.serialize();
     
     // Send the signed transaction to the network
+    console.log('Sending transaction to network...');
     const signature = await connection.sendRawTransaction(serializedTransaction);
     
     console.log('Transaction sent with signature:', signature);
     
     // Wait for confirmation
+    console.log('Waiting for transaction confirmation...');
     await connection.confirmTransaction(signature);
     
     console.log('Transaction confirmed!');
     
     // Now update the backend database with the completed transaction
+    console.log('Updating backend database...');
     const { getApiBaseUrl } = await import('@/lib/apiUtils');
     const response = await fetch(`${getApiBaseUrl()}/api/inject-compute-complete`, {
       method: 'POST',
