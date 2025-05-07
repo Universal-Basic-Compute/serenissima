@@ -211,16 +211,45 @@ export class PolygonRendererFacade {
   
   /**
    * Load a texture with error handling
+   * In land mode, returns a placeholder texture without loading from network
    */
   public loadTexture(
     url: string,
     onLoad?: (texture: THREE.Texture) => void,
-    onError?: (error: Error) => void
+    onError?: (error: Error) => void,
+    isLandMode: boolean = false
   ): THREE.Texture {
     if (this.isDisposed) {
       throw new Error('PolygonRendererFacade has been disposed');
     }
     
+    // In land mode, return a placeholder texture without loading from network
+    if (isLandMode) {
+      console.log('Land mode active: Using placeholder texture instead of loading:', url);
+      const placeholderTexture = new THREE.Texture();
+      
+      // Create a simple canvas with a colored circle
+      const canvas = document.createElement('canvas');
+      const size = 64; // Small size for performance
+      canvas.width = size;
+      canvas.height = size;
+      
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.fillStyle = '#8B4513'; // Brown color
+        ctx.beginPath();
+        ctx.arc(size/2, size/2, size/2 - 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      
+      placeholderTexture.image = canvas;
+      placeholderTexture.needsUpdate = true;
+      
+      if (onLoad) onLoad(placeholderTexture);
+      return placeholderTexture;
+    }
+    
+    // Normal texture loading for other modes
     const texture = new THREE.Texture();
     
     // Handle both external and local URLs
@@ -270,19 +299,20 @@ export class PolygonRendererFacade {
   
   /**
    * Create a circular texture from an existing texture
+   * In land mode, creates a simple colored circle without processing the input texture
    */
-  public createCircularTexture(texture: THREE.Texture): THREE.Texture {
+  public createCircularTexture(texture: THREE.Texture, isLandMode: boolean = false): THREE.Texture {
     if (this.isDisposed) {
       throw new Error('PolygonRendererFacade has been disposed');
     }
     
-    // Check if texture.image exists
-    if (!texture.image) {
-      console.warn('Texture image is null, creating fallback texture');
+    // In land mode or if texture.image doesn't exist, create a simple colored circle
+    if (isLandMode || !texture.image) {
+      console.log('Creating simple colored circle texture for land mode');
       
-      // Create a canvas for a fallback texture
+      // Create a canvas for a simple texture
       const canvas = document.createElement('canvas');
-      const size = 256;
+      const size = 64; // Smaller size for better performance
       canvas.width = size;
       canvas.height = size;
       
@@ -291,17 +321,19 @@ export class PolygonRendererFacade {
       
       // Draw a colored circle as fallback
       ctx.beginPath();
-      ctx.arc(size/2, size/2, size/2 - 4, 0, Math.PI * 2);
+      ctx.arc(size/2, size/2, size/2 - 2, 0, Math.PI * 2);
       ctx.fillStyle = '#8B4513'; // Default brown color
       ctx.fill();
+      
+      // Thinner border for performance
       ctx.strokeStyle = '#FFFFFF';
-      ctx.lineWidth = 8;
+      ctx.lineWidth = 2;
       ctx.stroke();
       
       // Create a new texture from the canvas
-      const fallbackTexture = new THREE.Texture(canvas);
-      fallbackTexture.needsUpdate = true;
-      return fallbackTexture;
+      const simpleTexture = new THREE.Texture(canvas);
+      simpleTexture.needsUpdate = true;
+      return simpleTexture;
     }
     
     // Create a canvas to draw the circular mask
@@ -382,20 +414,22 @@ export class PolygonRendererFacade {
   
   /**
    * Create a polygon-shaped texture from an existing texture
+   * In land mode, creates a simple colored shape without processing the input texture
    */
   public createPolygonShapedTexture(
     texture: THREE.Texture, 
     polygonCoords: {x: number, y: number}[],
-    ownerName?: string
+    ownerName?: string,
+    isLandMode: boolean = false
   ): THREE.Texture {
     if (this.isDisposed) {
       throw new Error('PolygonRendererFacade has been disposed');
     }
     
-    // Check if texture.image exists
-    if (!texture.image || polygonCoords.length < 3) {
-      console.warn('Invalid texture image or polygon coordinates, falling back to circular texture');
-      return this.createCircularTexture(texture);
+    // In land mode or if texture.image doesn't exist or polygon coords are invalid, create a simple shape
+    if (isLandMode || !texture.image || polygonCoords.length < 3) {
+      console.log('Creating simple colored shape texture for land mode');
+      return this.createCircularTexture(texture, isLandMode);
     }
     
     // Calculate bounds of the polygon

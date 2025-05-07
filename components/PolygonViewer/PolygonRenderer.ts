@@ -802,6 +802,7 @@ export default class PolygonRenderer {
 
   /**
    * Update coat of arms sprites for all polygons with error handling
+   * Optimized for performance in land mode
    */
   public updateCoatOfArmsSprites() {
     log.info('Updating coat of arms sprites, active view:', this.activeView);
@@ -860,57 +861,77 @@ export default class PolygonRenderer {
     // In land view, we'll use colored circles instead of textures
     log.info('Creating colored indicators for land view, polygons count:', this.polygons.length);
     
+    // Performance optimization: Process polygons in batches
+    const BATCH_SIZE = 50; // Process 50 polygons at a time
+    const polygonsWithOwners = this.polygons.filter(p => p.owner && p.id && p.centroid);
+    
     // Track success and failure counts
     let successCount = 0;
     let failureCount = 0;
     
-    // Process each polygon with an owner
-    this.polygons.forEach(polygon => {
-      if (!polygon.owner || !polygon.id || !polygon.centroid) return;
+    // Function to process a batch of polygons
+    const processBatch = (startIndex: number) => {
+      const endIndex = Math.min(startIndex + BATCH_SIZE, polygonsWithOwners.length);
       
-      const success = withErrorHandling(
-        () => {
-          log.debug(`Processing polygon ${polygon.id} with owner ${polygon.owner}`);
-          
-          // Get the owner's color
-          const ownerColor = this.getOwnerColor(polygon.owner);
-          
-          // Create a colored circle on the land - no texture loading
-          if (polygon.centroid) {
-            this.createColoredCircleOnLand(polygon, ownerColor || '#8B4513');
-            return true;
-          }
-          
-          return false;
-        },
-        RenderingErrorType.MESH_CREATION,
-        polygon.id,
-        () => {
-          // Fallback: just create a colored circle if creation fails
-          if (polygon.centroid) {
+      // Process this batch
+      for (let i = startIndex; i < endIndex; i++) {
+        const polygon = polygonsWithOwners[i];
+        
+        const success = withErrorHandling(
+          () => {
+            // Get the owner's color
             const ownerColor = this.getOwnerColor(polygon.owner);
-            this.createColoredCircleOnLand(polygon, ownerColor || '#8B4513');
-            return true;
+            
+            // Create a colored circle on the land - no texture loading
+            if (polygon.centroid) {
+              this.createColoredCircleOnLand(polygon, ownerColor || '#8B4513');
+              return true;
+            }
+            
+            return false;
+          },
+          RenderingErrorType.MESH_CREATION,
+          polygon.id,
+          () => {
+            // Fallback: just create a colored circle if creation fails
+            if (polygon.centroid) {
+              const ownerColor = this.getOwnerColor(polygon.owner);
+              this.createColoredCircleOnLand(polygon, ownerColor || '#8B4513');
+              return true;
+            }
+            return false;
           }
-          return false;
+        );
+        
+        if (success) {
+          successCount++;
+        } else {
+          failureCount++;
         }
-      );
-      
-      if (success) {
-        successCount++;
-      } else {
-        failureCount++;
       }
-    });
+      
+      // If there are more polygons to process, schedule the next batch
+      if (endIndex < polygonsWithOwners.length) {
+        setTimeout(() => processBatch(endIndex), 0);
+      } else {
+        // All batches processed, log results and force render
+        log.info(`Updated owner indicators: ${successCount} successful, ${failureCount} failed`);
+        
+        // Force a render to apply the changes with error handling
+        withErrorHandling(
+          () => this.facade.forceRender(),
+          RenderingErrorType.SCENE_MANIPULATION,
+          'force-render'
+        );
+      }
+    };
     
-    log.info(`Updated owner indicators: ${successCount} successful, ${failureCount} failed`);
-    
-    // Force a render to apply the changes with error handling
-    withErrorHandling(
-      () => this.facade.forceRender(),
-      RenderingErrorType.SCENE_MANIPULATION,
-      'force-render'
-    );
+    // Start processing the first batch
+    if (polygonsWithOwners.length > 0) {
+      processBatch(0);
+    } else {
+      log.info('No polygons with owners to process');
+    }
   }
 
   // Helper method to create a flat texture on the land for a polygon - disabled
@@ -933,6 +954,7 @@ export default class PolygonRenderer {
   
   /**
    * Create a colored circle on the land for a polygon with error handling
+   * Optimized for performance in land mode
    */
   private createColoredCircleOnLand(polygon: Polygon, color: string) {
     if (!polygon.centroid || !polygon.id) {
@@ -964,8 +986,8 @@ export default class PolygonRenderer {
           this.bounds.latCorrectionFactor
         )[0];
         
-        // Create a simple circle geometry
-        const circleGeometry = new THREE.CircleGeometry(0.25, 16);
+        // Performance optimization: Use fewer segments for circle geometry
+        const circleGeometry = new THREE.CircleGeometry(0.25, 8); // Reduced from 16 to 8 segments
         const circleMaterial = new THREE.MeshBasicMaterial({
           color: circleColor,
           side: THREE.DoubleSide,
@@ -986,7 +1008,10 @@ export default class PolygonRenderer {
         // Store reference
         this.coatOfArmSprites[polygon.id] = circleMesh;
         
-        log.debug(`Created colored circle for polygon ${polygon.id} at position:`, normalizedCoord);
+        // Reduce debug logging in production for performance
+        if (process.env.NODE_ENV !== 'production') {
+          log.debug(`Created colored circle for polygon ${polygon.id} at position:`, normalizedCoord);
+        }
       },
       RenderingErrorType.MESH_CREATION,
       polygon.id,
@@ -1009,8 +1034,8 @@ export default class PolygonRenderer {
             fallbackColor = this.ownerColorMap[polygon.owner];
           }
           
-          // Create a simple dot as fallback (instead of a box)
-          const geometry = new THREE.CircleGeometry(0.2, 8);
+          // Create a simple dot as fallback with minimal segments
+          const geometry = new THREE.CircleGeometry(0.2, 6); // Reduced from 8 to 6 segments
           const material = new THREE.MeshBasicMaterial({ 
             color: fallbackColor,
             transparent: true,
