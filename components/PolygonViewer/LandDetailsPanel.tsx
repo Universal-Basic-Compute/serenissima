@@ -617,46 +617,92 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
                 </span>
               </p>
               
-              {/* Add Acquire Land button with improved styling */}
-              <button
-                onClick={() => {
-                  // Get the current wallet address
-                  const walletAddress = sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress') || '';
-                  
-                  if (!walletAddress) {
-                    alert('Please connect your wallet first');
-                    return;
-                  }
-                  
-                  // Check if this is the user's own listing
-                  if (transaction.seller === walletAddress) {
-                    alert('You cannot purchase your own listing');
-                    return;
-                  }
-                  
-                  console.log('Dispatching showLandPurchaseModal event');
-                  // Dispatch a global event to show the purchase modal
-                  window.dispatchEvent(new CustomEvent('showLandPurchaseModal', {
-                    detail: { 
-                      landId: selectedPolygonId,
-                      landName: selectedPolygon?.historicalName || selectedPolygon?.englishName,
-                      transaction: transaction,
-                      onComplete: () => {
-                        // This will be called after the purchase is complete
-                        console.log('Purchase completed, refreshing panel');
-                        setRefreshKey(prevKey => prevKey + 1);
-                        setJustCompletedTransaction(true);
-                      }
+              {/* Check if current user is the owner */}
+              {transaction.seller === (sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress')) ? (
+                /* Show Remove from Sale button if user is the owner */
+                <button
+                  onClick={async () => {
+                    // Get the current wallet address
+                    const walletAddress = sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress') || '';
+                    
+                    if (!walletAddress) {
+                      alert('Please connect your wallet first');
+                      return;
                     }
-                  }));
-                }}
-                className="mt-4 w-full px-4 py-3 bg-amber-600 text-white text-base font-medium rounded-lg hover:bg-amber-700 transition-colors flex items-center justify-center"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                Acquire Land
-              </button>
+                    
+                    try {
+                      // Cancel the transaction
+                      const response = await fetch(`${getApiBaseUrl()}/api/transaction/${transaction.id}/cancel`, {
+                        method: 'POST',
+                        headers: {
+                          'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                          seller: walletAddress
+                        }),
+                      });
+                      
+                      if (!response.ok) {
+                        throw new Error('Failed to remove listing');
+                      }
+                      
+                      alert('Your land has been removed from sale');
+                      // Refresh the panel
+                      setRefreshKey(prevKey => prevKey + 1);
+                    } catch (error) {
+                      console.error('Error removing listing:', error);
+                      alert('Failed to remove listing. Please try again.');
+                    }
+                  }}
+                  className="mt-4 w-full px-4 py-3 bg-red-600 text-white text-base font-medium rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                  Remove from Sale
+                </button>
+              ) : (
+                /* Show Acquire Land button if user is not the owner */
+                <button
+                  onClick={() => {
+                    // Get the current wallet address
+                    const walletAddress = sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress') || '';
+                    
+                    if (!walletAddress) {
+                      alert('Please connect your wallet first');
+                      return;
+                    }
+                    
+                    // Check if this is the user's own listing
+                    if (transaction.seller === walletAddress) {
+                      alert('You cannot purchase your own listing');
+                      return;
+                    }
+                    
+                    console.log('Dispatching showLandPurchaseModal event');
+                    // Dispatch a global event to show the purchase modal
+                    window.dispatchEvent(new CustomEvent('showLandPurchaseModal', {
+                      detail: { 
+                        landId: selectedPolygonId,
+                        landName: selectedPolygon?.historicalName || selectedPolygon?.englishName,
+                        transaction: transaction,
+                        onComplete: () => {
+                          // This will be called after the purchase is complete
+                          console.log('Purchase completed, refreshing panel');
+                          setRefreshKey(prevKey => prevKey + 1);
+                          setJustCompletedTransaction(true);
+                        }
+                      }
+                    }));
+                  }}
+                  className="mt-4 w-full px-4 py-3 bg-amber-600 text-white text-base font-medium rounded-lg hover:bg-amber-700 transition-colors flex items-center justify-center"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Acquire Land
+                </button>
+              )}
             </div>
           )}
           
