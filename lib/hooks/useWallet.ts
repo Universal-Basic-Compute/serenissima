@@ -151,25 +151,9 @@ export function useWallet() {
         
         console.log("Wallet disconnected successfully");
         
-        // Force Phantom to forget the connection by directly accessing the window.solana object
-        if (typeof window !== 'undefined' && window.solana && window.solana.isPhantom) {
-          try {
-            // First try to disconnect using Phantom's own method
-            window.solana.disconnect();
-            console.log("Called window.solana.disconnect()");
-            
-            // Then try to clear the connection state by reloading the page
-            // This is the most reliable way to force Phantom to show the account selector
-            console.log("Reloading page to completely reset Phantom connection state");
-            window.location.reload();
-            return; // Return early since we're reloading the page
-          } catch (e) {
-            console.warn("Could not access Phantom browser API:", e);
-          }
-        }
-        
-        // If we couldn't reload the page, continue with the normal flow
-        // but the account selector might not show
+        // Force page reload to completely reset the connection state
+        window.location.reload();
+        return; // Return early since we're reloading the page
       } catch (error) {
         console.error("Error during disconnect flow:", error);
         alert(`Failed to disconnect wallet: ${error instanceof Error ? error.message : String(error)}`);

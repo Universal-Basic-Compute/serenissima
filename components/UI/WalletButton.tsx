@@ -130,11 +130,34 @@ export default function WalletButton({ className = '' }: WalletButtonProps) {
                   // First, update the UI state immediately
                   setDropdownOpen(false);
                   
-                  // Then disconnect the wallet
-                  await connectWallet();
+                  // Clear current wallet connection
+                  localStorage.removeItem('userProfile');
                   
-                  // No need to do anything else here as the connectWallet function
-                  // will handle the state updates and event dispatching
+                  // Disconnect the current wallet first
+                  sessionStorage.removeItem('walletAddress');
+                  localStorage.removeItem('walletAddress');
+                  
+                  // Dispatch event to notify components about wallet change
+                  window.dispatchEvent(new Event('walletChanged'));
+                  
+                  // Force Phantom to forget the connection by directly accessing the window.solana object
+                  if (typeof window !== 'undefined' && window.solana && window.solana.isPhantom) {
+                    try {
+                      // First try to disconnect using Phantom's own method
+                      window.solana.disconnect();
+                      
+                      // Then reload the page to completely reset the connection state
+                      // This is the most reliable way to force Phantom to show the account selector
+                      window.location.reload();
+                    } catch (e) {
+                      console.warn("Could not access Phantom browser API:", e);
+                      // If we couldn't access the Phantom API, just try to connect
+                      connectWallet();
+                    }
+                  } else {
+                    // If window.solana is not available, just try to connect
+                    connectWallet();
+                  }
                 } catch (error) {
                   console.error("Error disconnecting wallet:", error);
                   alert(`Failed to disconnect wallet: ${error instanceof Error ? error.message : String(error)}`);
