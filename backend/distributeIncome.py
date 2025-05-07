@@ -50,9 +50,11 @@ def initialize_airtable():
     """Initialize Airtable connections"""
     try:
         airtable = Api(AIRTABLE_API_KEY)
-        users_table = Table(AIRTABLE_API_KEY, AIRTABLE_BASE_ID, AIRTABLE_USERS_TABLE)
-        lands_table = Table(AIRTABLE_API_KEY, AIRTABLE_BASE_ID, AIRTABLE_LANDS_TABLE)
-        transactions_table = Table(AIRTABLE_API_KEY, AIRTABLE_BASE_ID, AIRTABLE_TRANSACTIONS_TABLE)
+        
+        # Use the recommended approach instead of direct Table constructor
+        users_table = airtable.table(AIRTABLE_BASE_ID, AIRTABLE_USERS_TABLE)
+        lands_table = airtable.table(AIRTABLE_BASE_ID, AIRTABLE_LANDS_TABLE)
+        transactions_table = airtable.table(AIRTABLE_BASE_ID, AIRTABLE_TRANSACTIONS_TABLE)
         
         # Test the connection
         log.info("Testing Airtable connection...")
