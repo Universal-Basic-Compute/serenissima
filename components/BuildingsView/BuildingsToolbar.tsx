@@ -53,8 +53,10 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
         <span>Create Dock</span>
       </button>
       
-      {isRoadCreatorActive && (
+      {isRoadCreatorActive && scene && camera && (
         <RoadCreator
+          scene={scene}
+          camera={camera}
           active={isRoadCreatorActive}
           onComplete={(roadPoints, roadId) => {
             console.log('Road created with ID:', roadId);
