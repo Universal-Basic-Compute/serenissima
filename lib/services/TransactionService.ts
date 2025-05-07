@@ -1,5 +1,5 @@
 import { getApiBaseUrl } from '../apiUtils';
-import { eventBus, EventTypes } from '../eventBus';
+import { eventBus } from '../eventBus';
 import { log } from '../logUtils';
 import { 
   ApiError, 
@@ -29,7 +29,7 @@ interface CacheEntry<T> {
 let transactionServiceInstance: TransactionService | null = null;
 
 // Define event types for marketplace events
-export const EventTypes = {
+export const TransactionEventTypes = {
   TRANSACTION_CREATED: 'transactionCreated',
   TRANSACTION_EXECUTED: 'transactionExecuted',
   LISTING_CANCELLED: 'listingCancelled',
@@ -62,10 +62,10 @@ export class TransactionService {
     log.info('Initializing TransactionService');
     
     // Listen for events that should invalidate cache
-    eventBus.subscribe(EventTypes.TRANSACTION_CREATED, this.invalidateTransactionsCache.bind(this));
-    eventBus.subscribe(EventTypes.TRANSACTION_EXECUTED, this.invalidateTransactionsCache.bind(this));
-    eventBus.subscribe(EventTypes.LISTING_CANCELLED, this.invalidateTransactionsCache.bind(this));
-    eventBus.subscribe(EventTypes.OFFER_ACCEPTED, this.invalidateTransactionsCache.bind(this));
+    eventBus.subscribe(TransactionEventTypes.TRANSACTION_CREATED, this.invalidateTransactionsCache.bind(this));
+    eventBus.subscribe(TransactionEventTypes.TRANSACTION_EXECUTED, this.invalidateTransactionsCache.bind(this));
+    eventBus.subscribe(TransactionEventTypes.LISTING_CANCELLED, this.invalidateTransactionsCache.bind(this));
+    eventBus.subscribe(TransactionEventTypes.OFFER_ACCEPTED, this.invalidateTransactionsCache.bind(this));
     
     log.info('TransactionService initialized successfully');
   }
@@ -240,7 +240,7 @@ export class TransactionService {
       });
       
       // Emit event
-      eventBus.emit(EventTypes.TRANSACTION_CREATED, transaction);
+      eventBus.emit(TransactionEventTypes.TRANSACTION_CREATED, transaction);
       
       // Also emit land ownership changed event if this is a land transaction
       if (assetType === 'land') {
@@ -595,7 +595,7 @@ export class TransactionService {
       });
       
       // Emit event
-      eventBus.emit(EventTypes.TRANSACTION_CREATED, listing);
+      eventBus.emit(TransactionEventTypes.TRANSACTION_CREATED, listing);
       
       return listing;
     } catch (error) {
@@ -663,7 +663,7 @@ export class TransactionService {
       this.invalidateTransactionsCache({ id: listingId });
       
       // Emit event
-      eventBus.emit(EventTypes.LISTING_CANCELLED, { id: listingId });
+      eventBus.emit(TransactionEventTypes.LISTING_CANCELLED, { id: listingId });
       
       return true;
     } catch (error) {
@@ -783,7 +783,7 @@ export class TransactionService {
       });
       
       // Emit event
-      eventBus.emit(EventTypes.TRANSACTION_CREATED, offer);
+      eventBus.emit(TransactionEventTypes.TRANSACTION_CREATED, offer);
       
       return offer;
     } catch (error) {
@@ -851,7 +851,7 @@ export class TransactionService {
       this.invalidateTransactionsCache({ id: offerId });
       
       // Emit event
-      eventBus.emit(EventTypes.LISTING_CANCELLED, { id: offerId });
+      eventBus.emit(TransactionEventTypes.LISTING_CANCELLED, { id: offerId });
       
       return true;
     } catch (error) {
@@ -939,7 +939,7 @@ export class TransactionService {
       });
       
       // Emit event
-      eventBus.emit(EventTypes.TRANSACTION_EXECUTED, transaction);
+      eventBus.emit(TransactionEventTypes.TRANSACTION_EXECUTED, transaction);
       
       // Also emit land ownership changed event if this is a land transaction
       if (transaction.type === 'land') {
