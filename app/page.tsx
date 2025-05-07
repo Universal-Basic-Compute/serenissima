@@ -3,6 +3,7 @@
 import dynamic from 'next/dynamic';
 import { useState, useRef, useEffect } from 'react';
 import TechTree from '../components/Knowledge/TechTree';
+import ProjectPresentation from '../components/Knowledge/ProjectPresentation';
 import Link from 'next/link';
 import { clearLandOwnershipCaches } from '@/lib/cacheUtils';
 import { eventBus, EventTypes } from '@/lib/eventBus';
@@ -91,6 +92,7 @@ export default function SimplePage() {
   const [selectedLoan, setSelectedLoan] = useState<any>(null);
   const [showSettingsModal, setShowSettingsModal] = useState<boolean>(false);
   const [showTechTree, setShowTechTree] = useState<boolean>(false);
+  const [showPresentation, setShowPresentation] = useState<boolean>(false);
   const [userProfile, setUserProfile] = useState<{
     username: string;
     firstName: string;
@@ -559,13 +561,12 @@ export default function SimplePage() {
                     Learn about the vision, architecture, and technical implementation of La Serenissima 
                     through our comprehensive project presentation.
                   </p>
-                  <a 
-                    href="/docs/presentation.pdf" 
-                    target="_blank"
+                  <button 
+                    onClick={() => setShowPresentation(true)}
                     className="inline-block px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors"
                   >
                     View Presentation
-                  </a>
+                  </button>
                 </div>
               </div>
             </div>
@@ -1140,6 +1141,11 @@ export default function SimplePage() {
       {/* Tech Tree Modal */}
       {showTechTree && (
         <TechTree onClose={() => setShowTechTree(false)} />
+      )}
+      
+      {/* Project Presentation Modal */}
+      {showPresentation && (
+        <ProjectPresentation onClose={() => setShowPresentation(false)} />
       )}
       
       {/* Land Purchase Confirmation Modal */}
