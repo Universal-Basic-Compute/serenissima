@@ -276,7 +276,7 @@ const LoanMarketplace: React.FC = () => {
                           )}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {loan.principalAmount.toLocaleString()} $COMPUTE
+                          {loan.principalAmount.toLocaleString()} Ducats
                         </td>
                         <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${getInterestRateColor(loan.interestRate)}`}>
                           {loan.interestRate}%

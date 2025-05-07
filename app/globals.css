@@ -81,28 +81,28 @@ button:hover, a:hover {
   animation: slideIn 0.3s ease-out forwards;
 }
 
-/* Animated metallic $COMPUTE text effect - updated for more pronounced metallic effect */
-.compute-token {
+/* Animated metallic Ducats text effect - updated for more pronounced metallic effect */
+.ducats-token, .compute-token {
   font-family: 'Geist', sans-serif;
   font-weight: 300; /* Thin font weight */
-  color: #8a2be2; /* Base purple color */
+  color: #b8860b; /* Gold color for ducats */
   display: inline-block;
   position: relative;
   letter-spacing: 0.5px;
   background: linear-gradient(
     to right,
-    #9932CC, /* Dark orchid */
-    #E0B0FF, /* Mauve */
-    #9370DB, /* Medium purple */
-    #B19CD9, /* Light purple */
-    #9932CC  /* Dark orchid again */
+    #b8860b, /* Dark goldenrod */
+    #ffd700, /* Gold */
+    #daa520, /* Goldenrod */
+    #ffd700, /* Gold */
+    #b8860b  /* Dark goldenrod again */
   );
   background-size: 200% auto;
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   animation: shine 2s linear infinite; /* Faster animation */
-  text-shadow: 0 0 3px rgba(138, 43, 226, 0.3);
+  text-shadow: 0 0 3px rgba(184, 134, 11, 0.3);
 }
 
 @keyframes shine {
