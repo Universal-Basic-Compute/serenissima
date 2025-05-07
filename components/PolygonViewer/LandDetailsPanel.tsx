@@ -1043,7 +1043,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
           landId={selectedPolygonId || ''}
           landName={selectedPolygon?.historicalName || selectedPolygon?.englishName}
           price={transaction.price}
-          onConfirm={handleConfirmPurchase}
+          onConfirm={() => handleConfirmPurchase()}
           onCancel={() => setShowPurchaseConfirmation(false)}
           isLoading={isPurchasing}
         />
@@ -1067,7 +1067,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
   );
   
   // Land purchase confirmation is disabled to prevent land modification
-  function handleConfirmPurchase() {
+  function handleConfirmPurchase(): void {
     console.log('Land purchase is disabled to prevent land modification');
     alert('Land purchase is not allowed in this version');
     setIsPurchasing(false);
