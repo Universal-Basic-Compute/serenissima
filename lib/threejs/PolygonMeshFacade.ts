@@ -426,6 +426,13 @@ export class PolygonMeshFacade implements Poolable {
               if (material.color instanceof THREE.Color) {
                 material.color.copy(hoverColor);
               }
+            } else if (material.color instanceof THREE.Color) {
+              // If we don't have an original color, just lighten the current color
+              const hoverColor = material.color.clone();
+              hoverColor.r = Math.min(1, hoverColor.r * 1.2);
+              hoverColor.g = Math.min(1, hoverColor.g * 1.2);
+              hoverColor.b = Math.min(1, hoverColor.b * 1.2);
+              material.color.copy(hoverColor);
             }
           } else {
             // Restore original color
