@@ -204,6 +204,29 @@ The system uses a layered approach to render land and its visualizations:
 
 This separation of concerns ensures optimal performance while maintaining visual clarity. The base land never needs to be re-rendered, significantly reducing GPU load during view transitions and updates.
 
+## Benefits of Layered Land Rendering Approach
+
+### Performance Improvements:
+- Base land never needs to be re-rendered
+- Texture loading only happens once at startup
+- View switching becomes much faster
+- Memory usage is reduced
+
+### Simplified Architecture:
+- Clear separation between base geometry and visualization
+- No need for complex material swapping
+- Easier to debug and maintain
+
+### Enhanced Flexibility:
+- New visualization modes can be added without affecting base rendering
+- Animations and transitions between views become possible
+- Can easily add/remove visual elements without touching base geometry
+
+### Improved Stability:
+- Less chance of rendering errors or flickering
+- Reduced risk of memory leaks from texture/material disposal
+- More predictable behavior across different devices
+
 ## Facade Pattern Implementation
 
 The rendering system uses the facade pattern to hide Three.js complexity:
