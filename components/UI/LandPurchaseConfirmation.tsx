@@ -1,5 +1,7 @@
 import React from 'react';
 import NextImage from 'next/image';
+import { eventBus, EventTypes } from '@/lib/eventBus';
+import { clearLandOwnershipCaches } from '@/lib/cacheUtils';
 
 interface LandPurchaseConfirmationProps {
   landId: string;
@@ -18,6 +20,39 @@ const LandPurchaseConfirmation: React.FC<LandPurchaseConfirmationProps> = ({
   onCancel,
   isLoading = false
 }) => {
+  // Function to handle successful purchase
+  const handleSuccessfulPurchase = () => {
+    // Clear caches
+    clearLandOwnershipCaches();
+    
+    // Dispatch events to update UI
+    console.log('Dispatching events to update UI after land purchase');
+    
+    // Get wallet address
+    const walletAddress = sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress');
+    
+    if (walletAddress) {
+      // Update land ownership in the polygon renderer
+      eventBus.emit(EventTypes.LAND_OWNERSHIP_CHANGED, {
+        landId: landId,
+        newOwner: walletAddress,
+        previousOwner: null, // We don't know the previous owner here
+        timestamp: Date.now()
+      });
+      
+      // Force polygon renderer to update owner colors
+      eventBus.emit(EventTypes.POLYGON_OWNER_UPDATED, {
+        polygonId: landId,
+        owner: walletAddress
+      });
+      
+      // Keep land details panel open
+      eventBus.emit(EventTypes.KEEP_LAND_DETAILS_PANEL_OPEN, {
+        polygonId: landId
+      });
+    }
+  };
+
   return (
     <div 
       className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4"
@@ -85,7 +120,10 @@ const LandPurchaseConfirmation: React.FC<LandPurchaseConfirmationProps> = ({
           {/* Action buttons */}
           <div className="flex flex-col space-y-3">
             <button
-              onClick={onConfirm}
+              onClick={() => {
+                onConfirm();
+                handleSuccessfulPurchase();
+              }}
               disabled={isLoading}
               className={`w-full py-3 rounded-lg font-medium transition-colors flex items-center justify-center ${
                 isLoading 

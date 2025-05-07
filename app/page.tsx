@@ -3,6 +3,8 @@
 import dynamic from 'next/dynamic';
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
+import { clearLandOwnershipCaches } from '@/lib/cacheUtils';
+import { eventBus, EventTypes } from '@/lib/eventBus';
 import PlayerProfile from '../components/UI/PlayerProfile';
 import TransferComputeMenu from '../components/UI/TransferComputeMenu';
 import WithdrawComputeMenu from '../components/UI/WithdrawComputeMenu';
@@ -838,6 +840,39 @@ export default function SimplePage() {
               setSuccessMessage({
                 message: `Successfully purchased ${landPurchaseData.landName || 'land'} for ${landPurchaseData.transaction.price.toLocaleString()} $COMPUTE`,
                 signature: 'Transaction completed'
+              });
+              
+              // Clear caches to ensure UI updates
+              clearLandOwnershipCaches();
+              
+              // Dispatch events to update UI
+              console.log('Dispatching events to update UI after land purchase');
+              
+              // Use both the event bus and custom events for maximum compatibility
+              eventBus.emit(EventTypes.LAND_OWNERSHIP_CHANGED, {
+                landId: landPurchaseData.landId,
+                newOwner: walletAddress,
+                previousOwner: landPurchaseData.transaction.seller,
+                timestamp: Date.now()
+              });
+              
+              window.dispatchEvent(new CustomEvent('landOwnershipChanged', {
+                detail: {
+                  landId: landPurchaseData.landId,
+                  newOwner: walletAddress,
+                  previousOwner: landPurchaseData.transaction.seller
+                }
+              }));
+              
+              // Force polygon renderer to update owner colors
+              eventBus.emit(EventTypes.POLYGON_OWNER_UPDATED, {
+                polygonId: landPurchaseData.landId,
+                owner: walletAddress
+              });
+              
+              // Keep land details panel open
+              eventBus.emit(EventTypes.KEEP_LAND_DETAILS_PANEL_OPEN, {
+                polygonId: landPurchaseData.landId
               });
               
               // Call the onComplete callback if provided
