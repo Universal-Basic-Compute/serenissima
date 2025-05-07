@@ -4,8 +4,8 @@
   "category": "processed_materials",
   "subcategory": "metallurgy",
   "baseValue": 25,
-  "weight": 4.0,
-  "volume": 1.0,
+  "weight": 4,
+  "volume": 1,
   "stackSize": 20,
   "description": "Refined iron ingots and bars ready for blacksmithing.",
   "longDescription": "Processed in foundries from raw ore, these iron ingots and bars represent the crucial intermediate stage in metalworking. With most impurities removed and carbon content carefully controlled, this versatile metal awaits transformation into tools, weapons, and architectural elements essential to Venetian industry and construction.",
@@ -43,24 +43,24 @@
   "varieties": [
     {
       "type": "soft_iron",
-      "carbon_content": "low",
+      "carbonContent": "low",
       "malleability": "high",
-      "value_multiplier": 0.9,
-      "primary_use": "decorative_elements"
+      "valueMultiplier": 0.9,
+      "primaryUse": "decorative_elements"
     },
     {
       "type": "medium_iron",
-      "carbon_content": "medium",
+      "carbonContent": "medium",
       "malleability": "medium",
-      "value_multiplier": 1.0,
-      "primary_use": "general_purpose"
+      "valueMultiplier": 1,
+      "primaryUse": "general_purpose"
     },
     {
       "type": "hard_iron",
-      "carbon_content": "high",
+      "carbonContent": "high",
       "malleability": "low",
-      "value_multiplier": 1.2,
-      "primary_use": "tools_weapons"
+      "valueMultiplier": 1.2,
+      "primaryUse": "tools_weapons"
     }
   ],
   "producedFrom": [
@@ -146,8 +146,8 @@
       "preservation": 0.95
     },
     "foundry": {
-      "capacityMultiplier": 1.0,
-      "preservation": 1.0
+      "capacityMultiplier": 1,
+      "preservation": 1
     },
     "blacksmith": {
       "capacityMultiplier": 0.6,

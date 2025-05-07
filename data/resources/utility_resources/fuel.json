@@ -5,7 +5,7 @@
   "subcategory": "energy",
   "baseValue": 3,
   "weight": 1.5,
-  "volume": 1.0,
+  "volume": 1,
   "stackSize": 100,
   "description": "Burnable material for heating and power, typically wood or charcoal. Essential for most production processes in Venice.",
   "lore": "Without fuel, the furnaces of Murano would fall cold, the bakeries would produce no bread, and in winter, the palaces would stand empty. From the humblest fisherman to the Doge himself, all depend on this most basic resource.",
@@ -26,9 +26,9 @@
       "description": "Low-quality fuel that burns quickly with much smoke."
     },
     "common": {
-      "valueModifier": 1.0,
-      "burnEfficiency": 1.0,
-      "smokeProduction": 1.0,
+      "valueModifier": 1,
+      "burnEfficiency": 1,
+      "smokeProduction": 1,
       "description": "Standard fuel that provides reliable heat for most applications."
     },
     "fine": {
@@ -96,9 +96,9 @@
     }
   ],
   "seasonalAvailability": {
-    "spring": 1.0,
+    "spring": 1,
     "summer": 1.2,
-    "autumn": 1.0,
+    "autumn": 1,
     "winter": 0.7
   },
   "seasonalDemand": {
@@ -123,7 +123,7 @@
       ],
       "reliability": 0.85,
       "quality": "varies",
-      "costFactor": 1.0
+      "costFactor": 1
     },
     {
       "type": "local_production",
@@ -152,7 +152,7 @@
   "transport": {
     "methods": {
       "barge": {
-        "efficiency": 1.0,
+        "efficiency": 1,
         "risk": 0.15,
         "capacity": 300
       },
@@ -250,23 +250,23 @@
     ]
   },
   "economicEffects": {
-    "price_increase": {
-      "glass_production_cost": 1.2,
-      "heating_cost": 1.5,
-      "food_production_cost": 1.1
+    "priceIncrease": {
+      "glassProductionCost": 1.2,
+      "heatingCost": 1.5,
+      "foodProductionCost": 1.1
     },
     "shortages": {
-      "production_slowdown": true,
-      "residential_discomfort": true,
-      "price_speculation": true
+      "productionSlowdown": true,
+      "residentialDiscomfort": true,
+      "priceSpeculation": true
     }
   },
   "regulations": {
-    "quality_control": "minimal",
-    "price_controls": "during_winter",
-    "import_taxes": 0.05,
-    "storage_restrictions": "safety_regulations",
-    "usage_limitations": "fire_prevention_ordinances"
+    "qualityControl": "minimal",
+    "priceControls": "during_winter",
+    "importTaxes": 0.05,
+    "storageRestrictions": "safety_regulations",
+    "usageLimitations": "fire_prevention_ordinances"
   },
   "historicalNotes": "Venice's unique situation as a city built on water made fuel a particularly precious commodity. With no forests of its own, the Republic depended entirely on imported wood and charcoal from its mainland territories and neighboring regions. This dependency influenced Venetian foreign policy and territorial expansion, particularly into the forests of the Dalmatian coast. Special magistrates oversaw the fuel supply, recognizing its critical importance to both industry and daily life."
 }

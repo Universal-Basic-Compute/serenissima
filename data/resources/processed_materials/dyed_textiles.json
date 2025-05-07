@@ -46,37 +46,37 @@
       "color": "crimson",
       "source": "kermes",
       "rarity": "high",
-      "value_multiplier": 1.8
+      "valueMultiplier": 1.8
     },
     {
       "color": "royal_purple",
       "source": "murex",
       "rarity": "very_high",
-      "value_multiplier": 2.5
+      "valueMultiplier": 2.5
     },
     {
       "color": "azure_blue",
       "source": "indigo",
       "rarity": "high",
-      "value_multiplier": 1.7
+      "valueMultiplier": 1.7
     },
     {
       "color": "emerald_green",
       "source": "verdigris",
       "rarity": "medium",
-      "value_multiplier": 1.5
+      "valueMultiplier": 1.5
     },
     {
       "color": "golden_yellow",
       "source": "saffron",
       "rarity": "high",
-      "value_multiplier": 1.6
+      "valueMultiplier": 1.6
     },
     {
       "color": "rich_black",
       "source": "oak_gall",
       "rarity": "medium",
-      "value_multiplier": 1.4
+      "valueMultiplier": 1.4
     }
   ],
   "producedFrom": [
@@ -155,15 +155,15 @@
   "loadingTime": 12,
   "routeRestrictions": [],
   "storageOptions": {
-    "small_warehouse": {
+    "smallWarehouse": {
       "capacityMultiplier": 0.8,
       "preservation": 0.9
     },
-    "dye_works": {
+    "dyeWorks": {
       "capacityMultiplier": 0.5,
-      "preservation": 1.0
+      "preservation": 1
     },
-    "tailor_workshop": {
+    "tailorWorkshop": {
       "capacityMultiplier": 0.7,
       "preservation": 0.95
     }

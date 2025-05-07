@@ -5,7 +5,7 @@
   "subcategory": "construction",
   "baseValue": 8,
   "weight": 2.5,
-  "volume": 1.0,
+  "volume": 1,
   "stackSize": 50,
   "description": "Fired clay blocks used for construction throughout Venice.",
   "longDescription": "Though Venice is famous for its stone palaces, brick is the true workhorse of Venetian construction. Produced in kilns on the mainland and transported to the city, these durable building blocks form the structure of countless buildings, from humble homes to the imposing walls of the Arsenal.",
@@ -43,22 +43,22 @@
     {
       "type": "common_brick",
       "durability": "standard",
-      "value_multiplier": 1.0,
-      "primary_use": "general_construction"
+      "valueMultiplier": 1,
+      "primaryUse": "general_construction"
     },
     {
       "type": "facing_brick",
       "durability": "high",
       "appearance": "superior",
-      "value_multiplier": 1.4,
-      "primary_use": "visible_exteriors"
+      "valueMultiplier": 1.4,
+      "primaryUse": "visible_exteriors"
     },
     {
       "type": "fire_brick",
       "durability": "very_high",
-      "heat_resistance": "excellent",
-      "value_multiplier": 1.6,
-      "primary_use": "furnaces_fireplaces"
+      "heatResistance": "excellent",
+      "valueMultiplier": 1.6,
+      "primaryUse": "furnaces_fireplaces"
     }
   ],
   "producedFrom": [
@@ -112,7 +112,7 @@
   "transportOptions": {
     "barge": {
       "capacity": 500,
-      "efficiency": 1.0,
+      "efficiency": 1,
       "risk": 0.1
     },
     "cart": {
@@ -130,13 +130,13 @@
     "weight_limits"
   ],
   "storageOptions": {
-    "construction_yard": {
-      "capacityMultiplier": 1.0,
-      "preservation": 1.0
+    "constructionYard": {
+      "capacityMultiplier": 1,
+      "preservation": 1
     },
-    "construction_site": {
+    "constructionSite": {
       "capacityMultiplier": 0.8,
-      "preservation": 1.0
+      "preservation": 1
     }
   },
   "storageRequirements": [

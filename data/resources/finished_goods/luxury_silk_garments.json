@@ -6,91 +6,91 @@
   "description": "Exquisite clothing crafted from the finest Venetian silk, featuring intricate embroidery and adorned with precious elements. These garments are sought by nobility across Europe.",
   "icon": "/assets/icons/resources/luxury_silk_garments.png",
   "model": "models/resources/luxury_silk_garments.glb",
-  "base_properties": {
-    "base_value": 85,
+  "baseProperties": {
+    "baseValue": 85,
     "weight": 1.5,
-    "volume": 2.0,
-    "stack_size": 5,
+    "volume": 2,
+    "stackSize": 5,
     "perishable": false,
-    "fashion_dependent": true,
-    "fashion_cycle_length": 1440
+    "fashionDependent": true,
+    "fashionCycleLength": 1440
   },
-  "market_properties": {
-    "luxury_level": 8,
-    "target_customers": [
+  "marketProperties": {
+    "luxuryLevel": 8,
+    "targetCustomers": [
       "nobility",
       "patrician_families",
       "foreign_royalty",
       "wealthy_merchants"
     ],
-    "fashion_sensitivity": 0.7,
-    "export_value_multiplier": 1.7,
-    "market_demand": "high",
-    "price_volatility": 0.4,
-    "seasonal_demand": {
+    "fashionSensitivity": 0.7,
+    "exportValueMultiplier": 1.7,
+    "marketDemand": "high",
+    "priceVolatility": 0.4,
+    "seasonalDemand": {
       "spring": 1.2,
       "summer": 0.7,
-      "autumn": 1.0,
+      "autumn": 1,
       "winter": 1.4
     }
   },
-  "production_properties": {
-    "producer_building": "tailor_workshop",
-    "production_complexity": 8,
-    "required_skill": "tailoring:6",
-    "production_time": 480,
+  "productionProperties": {
+    "producerBuilding": "tailor_workshop",
+    "productionComplexity": 8,
+    "requiredSkill": "tailoring:6",
+    "productionTime": 480,
     "inputs": [
       {
         "resource": "dyed_silk_fabric",
         "amount": 4,
-        "quality_impact": 0.6
+        "qualityImpact": 0.6
       },
       {
         "resource": "fine_thread",
         "amount": 2,
-        "quality_impact": 0.1
+        "qualityImpact": 0.1
       },
       {
         "resource": "buttons_fasteners",
         "amount": 1,
-        "quality_impact": 0.1
+        "qualityImpact": 0.1
       },
       {
         "resource": "gold_thread",
         "amount": 0.5,
         "optional": true,
-        "quality_impact": 0.2
+        "qualityImpact": 0.2
       }
     ],
-    "production_chain": "Dyed Textiles → Tailor Workshop → Luxury Silk Garments"
+    "productionChain": "Dyed Textiles → Tailor Workshop → Luxury Silk Garments"
   },
-  "quality_variations": {
-    "available_qualities": [
+  "qualityVariations": {
+    "availableQualities": [
       "fine",
       "superior",
       "masterwork",
       "legendary"
     ],
-    "default_quality": "superior",
-    "quality_multipliers": {
+    "defaultQuality": "superior",
+    "qualityMultipliers": {
       "fine": {
         "value": 0.7,
         "prestige": 0.6
       },
       "superior": {
-        "value": 1.0,
-        "prestige": 1.0
+        "value": 1,
+        "prestige": 1
       },
       "masterwork": {
-        "value": 2.0,
-        "prestige": 2.0
+        "value": 2,
+        "prestige": 2
       },
       "legendary": {
-        "value": 4.0,
-        "prestige": 5.0
+        "value": 4,
+        "prestige": 5
       }
     },
-    "quality_factors": [
+    "qualityFactors": [
       {
         "factor": "input_quality",
         "weight": 0.5
@@ -108,41 +108,41 @@
   "varieties": [
     {
       "type": "robe",
-      "production_difficulty": "high",
+      "productionDifficulty": "high",
       "popularity": "very_high",
-      "value_multiplier": 1.2,
-      "model_variant": "models/resources/luxury_silk_garments_robe.glb"
+      "valueMultiplier": 1.2,
+      "modelVariant": "models/resources/luxury_silk_garments_robe.glb"
     },
     {
       "type": "gown",
-      "production_difficulty": "very_high",
+      "productionDifficulty": "very_high",
       "popularity": "high",
-      "value_multiplier": 1.5,
-      "model_variant": "models/resources/luxury_silk_garments_gown.glb"
+      "valueMultiplier": 1.5,
+      "modelVariant": "models/resources/luxury_silk_garments_gown.glb"
     },
     {
       "type": "doublet",
-      "production_difficulty": "high",
+      "productionDifficulty": "high",
       "popularity": "medium",
-      "value_multiplier": 0.9,
-      "model_variant": "models/resources/luxury_silk_garments_doublet.glb"
+      "valueMultiplier": 0.9,
+      "modelVariant": "models/resources/luxury_silk_garments_doublet.glb"
     },
     {
       "type": "ceremonial_garment",
-      "production_difficulty": "very_high",
+      "productionDifficulty": "very_high",
       "popularity": "low",
-      "value_multiplier": 2.5,
-      "model_variant": "models/resources/luxury_silk_garments_ceremonial.glb"
+      "valueMultiplier": 2.5,
+      "modelVariant": "models/resources/luxury_silk_garments_ceremonial.glb"
     }
   ],
-  "decorative_techniques": [
+  "decorativeTechniques": [
     {
       "technique": "gold_embroidery",
       "difficulty": "very_high",
       "materials": [
         "gold_thread"
       ],
-      "value_addition": 40
+      "valueAddition": 40
     },
     {
       "technique": "pearl_adornment",
@@ -150,7 +150,7 @@
       "materials": [
         "pearls"
       ],
-      "value_addition": 35
+      "valueAddition": 35
     },
     {
       "technique": "lace_trim",
@@ -158,7 +158,7 @@
       "materials": [
         "burano_lace"
       ],
-      "value_addition": 30
+      "valueAddition": 30
     },
     {
       "technique": "velvet_inlay",
@@ -166,33 +166,33 @@
       "materials": [
         "velvet_fabric"
       ],
-      "value_addition": 20
+      "valueAddition": 20
     }
   ],
-  "usage_properties": {
+  "usageProperties": {
     "uses": [
       "formal_wear",
       "ceremonial_dress",
       "social_status",
       "diplomatic_gifting"
     ],
-    "special_features": [
+    "specialFeatures": [
       "distinctive_venetian_style",
       "status_symbol",
       "family_heritage_item"
     ],
-    "complementary_resources": [
+    "complementaryResources": [
       "jewelry",
       "fine_shoes",
       "aristocratic_feast",
       "opera_performance"
     ]
   },
-  "transport_properties": {
-    "transport_methods": {
+  "transportProperties": {
+    "transportMethods": {
       "gondola": {
         "capacity": 5,
-        "efficiency": 1.0,
+        "efficiency": 1,
         "risk": 0.1
       },
       "porter": {
@@ -201,46 +201,46 @@
         "risk": 0.15
       }
     },
-    "special_requirements": [
+    "specialRequirements": [
       "moisture_protection",
       "secure_packaging",
       "handling_care"
     ],
-    "loading_time": 8,
-    "route_restrictions": [
+    "loadingTime": 8,
+    "routeRestrictions": [
       "avoid_public_areas",
       "avoid_markets"
     ]
   },
-  "storage_properties": {
-    "storage_facilities": {
-      "secure_wardrobe": {
-        "capacity_multiplier": 1.0,
-        "preservation": 1.0
+  "storageProperties": {
+    "storageFacilities": {
+      "secureWardrobe": {
+        "capacityMultiplier": 1,
+        "preservation": 1
       },
-      "luxury_showroom": {
-        "capacity_multiplier": 0.5,
+      "luxuryShowroom": {
+        "capacityMultiplier": 0.5,
         "preservation": 0.9
       },
-      "secure_vault": {
-        "capacity_multiplier": 0.3,
+      "secureVault": {
+        "capacityMultiplier": 0.3,
         "preservation": 0.95
       }
     },
-    "storage_requirements": [
+    "storageRequirements": [
       "dry",
       "moth_protection",
       "secure"
     ],
-    "special_risks": [
+    "specialRisks": [
       "moisture_damage",
       "moth_damage",
       "theft",
       "fashion_obsolescence"
     ],
-    "max_storage_time": "unlimited"
+    "maxStorageTime": "unlimited"
   },
-  "production_chain_position": {
+  "productionChainPosition": {
     "predecessors": [
       {
         "resource": "dyed_silk_fabric",
@@ -262,14 +262,14 @@
       }
     ]
   },
-  "historical_notes": {
-    "introduction_year": 1300,
-    "notable_producers": [
+  "historicalNotes": {
+    "introductionYear": 1300,
+    "notableProducers": [
       "Venetian Tailor Guild",
       "Court Tailors of the Doge"
     ],
-    "historical_significance": "Venetian silk garments were coveted status symbols throughout Europe. Their distinctive styles and sumptuous materials made them favorites among nobility, and they were frequent diplomatic gifts between states. The Republic strictly regulated their production and export to maintain quality and exclusivity.",
-    "historical_markets": [
+    "historicalSignificance": "Venetian silk garments were coveted status symbols throughout Europe. Their distinctive styles and sumptuous materials made them favorites among nobility, and they were frequent diplomatic gifts between states. The Republic strictly regulated their production and export to maintain quality and exclusivity.",
+    "historicalMarkets": [
       "European royal courts",
       "Venetian nobility",
       "Papal court",

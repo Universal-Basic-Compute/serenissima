@@ -6,72 +6,72 @@
   "description": "The iconic Venetian boat designed for canal transportation. With its asymmetrical design and skilled gondolier, it serves as the primary means of passenger transport through Venice's narrow waterways.",
   "icon": "/assets/icons/resources/gondola.png",
   "model": "models/resources/gondola.glb",
-  "base_properties": {
-    "base_value": 200,
+  "baseProperties": {
+    "baseValue": 200,
     "weight": 300,
     "volume": 150,
-    "stack_size": 1,
+    "stackSize": 1,
     "perishable": false,
-    "maintenance_required": true,
-    "maintenance_interval": 720
+    "maintenanceRequired": true,
+    "maintenanceInterval": 720
   },
-  "market_properties": {
-    "luxury_level": 2,
-    "target_customers": [
+  "marketProperties": {
+    "luxuryLevel": 2,
+    "targetCustomers": [
       "transportation_guild",
       "wealthy_citizens",
       "tourism_services"
     ],
-    "fashion_sensitivity": 0.2,
-    "export_value_multiplier": 1.0,
-    "market_demand": "steady",
-    "price_volatility": 0.2
+    "fashionSensitivity": 0.2,
+    "exportValueMultiplier": 1,
+    "marketDemand": "steady",
+    "priceVolatility": 0.2
   },
-  "production_properties": {
-    "producer_building": "boat_workshop",
-    "production_complexity": 5,
-    "required_skill": "boatbuilding:3",
-    "production_time": 1440,
+  "productionProperties": {
+    "producerBuilding": "boat_workshop",
+    "productionComplexity": 5,
+    "requiredSkill": "boatbuilding:3",
+    "productionTime": 1440,
     "inputs": [
       {
         "resource": "timber",
         "amount": 15,
-        "quality_impact": 0.5
+        "qualityImpact": 0.5
       },
       {
         "resource": "pitch",
         "amount": 5,
-        "quality_impact": 0.2
+        "qualityImpact": 0.2
       },
       {
         "resource": "iron_fittings",
         "amount": 3,
-        "quality_impact": 0.2
+        "qualityImpact": 0.2
       },
       {
         "resource": "tools",
         "amount": 1,
-        "quality_impact": 0.1
+        "qualityImpact": 0.1
       }
     ]
   },
-  "quality_variations": {
-    "available_qualities": [
+  "qualityVariations": {
+    "availableQualities": [
       "common",
       "fine",
       "superior"
     ],
-    "default_quality": "common",
-    "quality_multipliers": {
+    "defaultQuality": "common",
+    "qualityMultipliers": {
       "common": {
         "value": 0.8,
         "durability": 0.8,
         "prestige": 0.7
       },
       "fine": {
-        "value": 1.0,
-        "durability": 1.0,
-        "prestige": 1.0
+        "value": 1,
+        "durability": 1,
+        "prestige": 1
       },
       "superior": {
         "value": 1.5,
@@ -79,7 +79,7 @@
         "prestige": 1.8
       }
     },
-    "quality_factors": [
+    "qualityFactors": [
       {
         "factor": "material_quality",
         "weight": 0.5
@@ -97,35 +97,35 @@
   "varieties": [
     {
       "type": "standard_gondola",
-      "production_difficulty": "medium",
+      "productionDifficulty": "medium",
       "popularity": "high",
-      "value_multiplier": 1.0,
-      "passenger_capacity": 6,
-      "model_variant": "models/resources/gondola_standard.glb"
+      "valueMultiplier": 1,
+      "passengerCapacity": 6,
+      "modelVariant": "models/resources/gondola_standard.glb"
     },
     {
       "type": "luxury_gondola",
-      "production_difficulty": "high",
+      "productionDifficulty": "high",
       "popularity": "medium",
-      "value_multiplier": 1.8,
-      "passenger_capacity": 4,
-      "model_variant": "models/resources/gondola_luxury.glb"
+      "valueMultiplier": 1.8,
+      "passengerCapacity": 4,
+      "modelVariant": "models/resources/gondola_luxury.glb"
     },
     {
       "type": "ceremonial_gondola",
-      "production_difficulty": "very_high",
+      "productionDifficulty": "very_high",
       "popularity": "low",
-      "value_multiplier": 3.0,
-      "passenger_capacity": 8,
-      "model_variant": "models/resources/gondola_ceremonial.glb"
+      "valueMultiplier": 3,
+      "passengerCapacity": 8,
+      "modelVariant": "models/resources/gondola_ceremonial.glb"
     }
   ],
-  "vessel_properties": {
+  "vesselProperties": {
     "propulsion": "manual",
     "speed": "medium",
     "maneuverability": "excellent",
-    "canal_access": "all",
-    "maintenance_requirements": {
+    "canalAccess": "all",
+    "maintenanceRequirements": {
       "caulking": {
         "interval": 720,
         "cost": 10
@@ -136,64 +136,64 @@
       }
     }
   },
-  "usage_properties": {
+  "usageProperties": {
     "uses": [
       "passenger_transport",
       "small_cargo_transport",
       "tourism",
       "ceremonial_processions"
     ],
-    "special_features": [
+    "specialFeatures": [
       "narrow_canal_access",
       "venetian_symbol",
       "quiet_operation"
     ],
-    "complementary_resources": [
+    "complementaryResources": [
       "gondola_station",
       "private_dock",
       "public_dock"
     ]
   },
-  "transport_properties": {
-    "transport_methods": {
+  "transportProperties": {
+    "transportMethods": {
       "barge": {
         "capacity": 2,
-        "efficiency": 1.0,
+        "efficiency": 1,
         "risk": 0.1
       }
     },
-    "special_requirements": [
+    "specialRequirements": [
       "careful_handling",
       "water_transport"
     ],
-    "loading_time": 30
+    "loadingTime": 30
   },
-  "storage_properties": {
-    "storage_facilities": {
-      "boat_workshop": {
-        "capacity_multiplier": 1.0,
-        "preservation": 1.0
+  "storageProperties": {
+    "storageFacilities": {
+      "boatWorkshop": {
+        "capacityMultiplier": 1,
+        "preservation": 1
       },
-      "gondola_station": {
-        "capacity_multiplier": 0.8,
+      "gondolaStation": {
+        "capacityMultiplier": 0.8,
         "preservation": 0.9
       },
-      "private_dock": {
-        "capacity_multiplier": 0.5,
+      "privateDock": {
+        "capacityMultiplier": 0.5,
         "preservation": 0.8
       }
     },
-    "storage_requirements": [
+    "storageRequirements": [
       "water_access",
       "covered_preferred"
     ],
-    "special_risks": [
+    "specialRisks": [
       "weather_damage",
       "theft"
     ],
-    "max_storage_time": "unlimited"
+    "maxStorageTime": "unlimited"
   },
-  "production_chain_position": {
+  "productionChainPosition": {
     "predecessors": [
       {
         "resource": "timber",
@@ -215,14 +215,14 @@
       }
     ]
   },
-  "historical_notes": {
-    "introduction_year": 1100,
-    "notable_producers": [
+  "historicalNotes": {
+    "introductionYear": 1100,
+    "notableProducers": [
       "Venetian Boat Builders Guild",
       "Squero di San Trovaso"
     ],
-    "historical_significance": "The gondola evolved over centuries to become perfectly adapted to Venice's unique environment. Its asymmetrical design allows a single gondolier to propel and steer it through narrow canals. Originally colorful, a 16th-century decree mandated the now-iconic black color. Gondolas served as the primary transportation method for Venetians of all classes before becoming more associated with wealthy citizens and tourists in later centuries.",
-    "historical_markets": [
+    "historicalSignificance": "The gondola evolved over centuries to become perfectly adapted to Venice's unique environment. Its asymmetrical design allows a single gondolier to propel and steer it through narrow canals. Originally colorful, a 16th-century decree mandated the now-iconic black color. Gondolas served as the primary transportation method for Venetians of all classes before becoming more associated with wealthy citizens and tourists in later centuries.",
+    "historicalMarkets": [
       "Venetian transportation system",
       "Wealthy families",
       "Ceremonial functions"

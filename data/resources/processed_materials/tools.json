@@ -4,8 +4,8 @@
   "category": "processed_materials",
   "subcategory": "equipment",
   "baseValue": 30,
-  "weight": 3.0,
-  "volume": 2.0,
+  "weight": 3,
+  "volume": 2,
   "stackSize": 15,
   "description": "Crafted implements for construction, shipbuilding, and artisanal work.",
   "longDescription": "Forged by skilled blacksmiths, these durable tools enable Venice's craftsmen to practice their trades with precision and efficiency. From the shipyards of the Arsenal to the workshops of Murano, these essential implements form the foundation of Venetian industry and craftsmanship.",
@@ -44,26 +44,26 @@
     {
       "type": "carpentry_tools",
       "precision": "high",
-      "value_multiplier": 1.0,
-      "primary_use": "woodworking"
+      "valueMultiplier": 1,
+      "primaryUse": "woodworking"
     },
     {
       "type": "masonry_tools",
       "precision": "medium",
-      "value_multiplier": 0.9,
-      "primary_use": "stonework"
+      "valueMultiplier": 0.9,
+      "primaryUse": "stonework"
     },
     {
       "type": "shipwright_tools",
       "precision": "very_high",
-      "value_multiplier": 1.3,
-      "primary_use": "shipbuilding"
+      "valueMultiplier": 1.3,
+      "primaryUse": "shipbuilding"
     },
     {
       "type": "glassmaking_tools",
       "precision": "extreme",
-      "value_multiplier": 1.5,
-      "primary_use": "glassblowing"
+      "valueMultiplier": 1.5,
+      "primaryUse": "glassblowing"
     }
   ],
   "producedFrom": [
@@ -158,7 +158,7 @@
       "preservation": 0.9
     },
     "blacksmith": {
-      "capacityMultiplier": 1.0,
+      "capacityMultiplier": 1,
       "preservation": 0.95
     },
     "workshop": {

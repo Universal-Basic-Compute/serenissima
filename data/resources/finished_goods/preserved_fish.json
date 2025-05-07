@@ -6,97 +6,97 @@
   "description": "Fish preserved through salting, smoking, or drying for extended storage and transport. A staple protein source for Venetians and an important trade good.",
   "icon": "/assets/icons/resources/preserved_fish.png",
   "model": "models/resources/preserved_fish.glb",
-  "base_properties": {
-    "base_value": 12,
+  "baseProperties": {
+    "baseValue": 12,
     "weight": 0.8,
     "volume": 0.7,
-    "stack_size": 25,
+    "stackSize": 25,
     "perishable": true,
-    "perish_time": 4320,
-    "nutrition_value": 4
+    "perishTime": 4320,
+    "nutritionValue": 4
   },
-  "market_properties": {
-    "luxury_level": 1,
-    "target_customers": [
+  "marketProperties": {
+    "luxuryLevel": 1,
+    "targetCustomers": [
       "common_households",
       "ships",
       "taverns",
       "military"
     ],
-    "fashion_sensitivity": 0.1,
-    "export_value_multiplier": 1.2,
-    "market_demand": "steady",
-    "price_volatility": 0.3,
-    "seasonal_demand": {
-      "spring": 1.0,
+    "fashionSensitivity": 0.1,
+    "exportValueMultiplier": 1.2,
+    "marketDemand": "steady",
+    "priceVolatility": 0.3,
+    "seasonalDemand": {
+      "spring": 1,
       "summer": 0.8,
-      "autumn": 1.0,
+      "autumn": 1,
       "winter": 1.3
     }
   },
-  "production_properties": {
-    "producer_building": "salting_house",
-    "production_complexity": 4,
-    "required_skill": "food_preservation:3",
-    "production_time": 360,
-    "batch_size": 30,
+  "productionProperties": {
+    "producerBuilding": "salting_house",
+    "productionComplexity": 4,
+    "requiredSkill": "food_preservation:3",
+    "productionTime": 360,
+    "batchSize": 30,
     "inputs": [
       {
         "resource": "fish",
         "amount": 20,
-        "quality_impact": 0.7
+        "qualityImpact": 0.7
       },
       {
         "resource": "salt",
         "amount": 8,
-        "quality_impact": 0.3
+        "qualityImpact": 0.3
       }
     ],
-    "alternative_production": {
-      "producer_building": "smokehouse",
+    "alternativeProduction": {
+      "producerBuilding": "smokehouse",
       "inputs": [
         {
           "resource": "fish",
           "amount": 20,
-          "quality_impact": 0.6
+          "qualityImpact": 0.6
         },
         {
           "resource": "fuel",
           "amount": 10,
-          "quality_impact": 0.4
+          "qualityImpact": 0.4
         }
       ],
-      "production_time": 480
+      "productionTime": 480
     }
   },
-  "quality_variations": {
-    "available_qualities": [
+  "qualityVariations": {
+    "availableQualities": [
       "poor",
       "common",
       "fine"
     ],
-    "default_quality": "common",
-    "quality_multipliers": {
+    "defaultQuality": "common",
+    "qualityMultipliers": {
       "poor": {
         "value": 0.7,
         "nutrition": 0.8,
         "taste": 0.6,
-        "shelf_life": 0.7
+        "shelfLife": 0.7
       },
       "common": {
-        "value": 1.0,
-        "nutrition": 1.0,
-        "taste": 1.0,
-        "shelf_life": 1.0
+        "value": 1,
+        "nutrition": 1,
+        "taste": 1,
+        "shelfLife": 1
       },
       "fine": {
         "value": 1.4,
         "nutrition": 1.1,
         "taste": 1.3,
-        "shelf_life": 1.2
+        "shelfLife": 1.2
       }
     },
-    "quality_factors": [
+    "qualityFactors": [
       {
         "factor": "input_quality",
         "weight": 0.6
@@ -114,80 +114,80 @@
   "varieties": [
     {
       "type": "salted_cod",
-      "production_difficulty": "medium",
+      "productionDifficulty": "medium",
       "popularity": "very_high",
-      "value_multiplier": 1.0,
-      "preservation_method": "salting",
-      "shelf_life_multiplier": 1.0,
-      "model_variant": "models/resources/preserved_fish_salted.glb"
+      "valueMultiplier": 1,
+      "preservationMethod": "salting",
+      "shelfLifeMultiplier": 1,
+      "modelVariant": "models/resources/preserved_fish_salted.glb"
     },
     {
       "type": "smoked_herring",
-      "production_difficulty": "medium",
+      "productionDifficulty": "medium",
       "popularity": "high",
-      "value_multiplier": 0.9,
-      "preservation_method": "smoking",
-      "shelf_life_multiplier": 0.8,
-      "model_variant": "models/resources/preserved_fish_smoked.glb"
+      "valueMultiplier": 0.9,
+      "preservationMethod": "smoking",
+      "shelfLifeMultiplier": 0.8,
+      "modelVariant": "models/resources/preserved_fish_smoked.glb"
     },
     {
       "type": "dried_anchovy",
-      "production_difficulty": "low",
+      "productionDifficulty": "low",
       "popularity": "medium",
-      "value_multiplier": 0.8,
-      "preservation_method": "drying",
-      "shelf_life_multiplier": 1.2,
-      "model_variant": "models/resources/preserved_fish_dried.glb"
+      "valueMultiplier": 0.8,
+      "preservationMethod": "drying",
+      "shelfLifeMultiplier": 1.2,
+      "modelVariant": "models/resources/preserved_fish_dried.glb"
     },
     {
       "type": "pickled_eel",
-      "production_difficulty": "high",
+      "productionDifficulty": "high",
       "popularity": "medium",
-      "value_multiplier": 1.2,
-      "preservation_method": "pickling",
-      "shelf_life_multiplier": 1.1,
-      "model_variant": "models/resources/preserved_fish_pickled.glb"
+      "valueMultiplier": 1.2,
+      "preservationMethod": "pickling",
+      "shelfLifeMultiplier": 1.1,
+      "modelVariant": "models/resources/preserved_fish_pickled.glb"
     }
   ],
-  "consumption_properties": {
-    "consumption_method": "cooking_required",
-    "satiety_value": 3,
-    "health_effects": [
+  "consumptionProperties": {
+    "consumptionMethod": "cooking_required",
+    "satietyValue": 3,
+    "healthEffects": [
       "protein_source",
       "salt_intake_high"
     ],
-    "consumption_contexts": [
+    "consumptionContexts": [
       "everyday_meals",
       "travel_provisions",
       "lenten_food"
     ],
-    "cultural_significance": "staple_protein",
-    "preparation_methods": [
+    "culturalSignificance": "staple_protein",
+    "preparationMethods": [
       "soaking",
       "boiling",
       "frying",
       "stewing"
     ]
   },
-  "usage_properties": {
+  "usageProperties": {
     "uses": [
       "food_consumption",
       "ship_provisions",
       "military_rations",
       "trade_good"
     ],
-    "complementary_resources": [
+    "complementaryResources": [
       "bread",
       "vegetables",
       "olive_oil",
       "wine"
     ]
   },
-  "transport_properties": {
-    "transport_methods": {
+  "transportProperties": {
+    "transportMethods": {
       "barge": {
         "capacity": 300,
-        "efficiency": 1.0,
+        "efficiency": 1,
         "risk": 0.1
       },
       "cart": {
@@ -201,59 +201,59 @@
         "risk": 0.2
       }
     },
-    "special_requirements": [
+    "specialRequirements": [
       "odor_containment",
       "moisture_control"
     ],
-    "loading_time": 8,
-    "route_restrictions": []
+    "loadingTime": 8,
+    "routeRestrictions": []
   },
-  "storage_properties": {
-    "storage_facilities": {
+  "storageProperties": {
+    "storageFacilities": {
       "warehouse": {
-        "capacity_multiplier": 1.0,
+        "capacityMultiplier": 1,
         "preservation": 0.9
       },
-      "salting_house": {
-        "capacity_multiplier": 1.2,
-        "preservation": 1.0
+      "saltingHouse": {
+        "capacityMultiplier": 1.2,
+        "preservation": 1
       },
       "household": {
-        "capacity_multiplier": 0.5,
+        "capacityMultiplier": 0.5,
         "preservation": 0.8
       }
     },
-    "storage_requirements": [
+    "storageRequirements": [
       "cool",
       "dry",
       "ventilated",
       "odor_isolated"
     ],
-    "special_risks": [
+    "specialRisks": [
       "over_drying",
       "insect_infestation",
       "odor_contamination"
     ],
-    "max_storage_time": 4320,
-    "container_types": [
+    "maxStorageTime": 4320,
+    "containerTypes": [
       {
         "type": "wooden_barrel",
         "capacity": 50,
-        "preservation_bonus": 0.1
+        "preservationBonus": 0.1
       },
       {
         "type": "clay_pot",
         "capacity": 20,
-        "preservation_bonus": 0.05
+        "preservationBonus": 0.05
       },
       {
         "type": "cloth_sack",
         "capacity": 10,
-        "preservation_bonus": -0.05
+        "preservationBonus": -0.05
       }
     ]
   },
-  "production_chain_position": {
+  "productionChainPosition": {
     "predecessors": [
       {
         "resource": "fish",
@@ -275,9 +275,9 @@
       }
     ]
   },
-  "historical_notes": {
-    "introduction_year": "ancient",
-    "historical_significance": "Preserved fish was essential to Venice's food security and maritime activities. The city's position as a trading hub meant it could import salt cheaply, allowing for large-scale fish preservation. This preserved protein source enabled long sea voyages and provided year-round nutrition for the population, especially during religious fasting periods when meat was forbidden but fish was permitted.",
-    "cultural_context": "Preserved fish became deeply embedded in Venetian cuisine, with distinctive recipes developing to make the most of these preserved products. The smell of fish preservation was a common feature of certain neighborhoods, particularly around the Rialto market."
+  "historicalNotes": {
+    "introductionYear": "ancient",
+    "historicalSignificance": "Preserved fish was essential to Venice's food security and maritime activities. The city's position as a trading hub meant it could import salt cheaply, allowing for large-scale fish preservation. This preserved protein source enabled long sea voyages and provided year-round nutrition for the population, especially during religious fasting periods when meat was forbidden but fish was permitted.",
+    "culturalContext": "Preserved fish became deeply embedded in Venetian cuisine, with distinctive recipes developing to make the most of these preserved products. The smell of fish preservation was a common feature of certain neighborhoods, particularly around the Rialto market."
   }
 }

@@ -6,93 +6,93 @@
   "description": "Carefully prepared botanical and mineral substances for creating various poisons. Ostensibly for pest control or medicinal purposes, but primarily used for more nefarious ends.",
   "icon": "/assets/icons/resources/poison_components.png",
   "model": "models/resources/poison_components.glb",
-  "base_properties": {
-    "base_value": 80,
+  "baseProperties": {
+    "baseValue": 80,
     "weight": 0.5,
     "volume": 0.3,
-    "stack_size": 10,
+    "stackSize": 10,
     "perishable": true,
-    "perish_time": 4320,
-    "contraband_level": "extreme",
-    "toxicity_level": "high"
+    "perishTime": 4320,
+    "contrabandLevel": "extreme",
+    "toxicityLevel": "high"
   },
-  "market_properties": {
-    "luxury_level": 0,
-    "target_customers": [
+  "marketProperties": {
+    "luxuryLevel": 0,
+    "targetCustomers": [
       "assassins",
       "nobles",
       "spies",
       "jealous_lovers"
     ],
-    "fashion_sensitivity": 0.0,
-    "export_value_multiplier": 1.2,
-    "market_demand": "low",
-    "price_volatility": 0.7,
-    "black_market_only": true
+    "fashionSensitivity": 0,
+    "exportValueMultiplier": 1.2,
+    "marketDemand": "low",
+    "priceVolatility": 0.7,
+    "blackMarketOnly": true
   },
-  "production_properties": {
-    "producer_building": "apothecary_backroom",
-    "production_complexity": 7,
-    "required_skill": "alchemy:5",
-    "production_time": 720,
+  "productionProperties": {
+    "producerBuilding": "apothecary_backroom",
+    "productionComplexity": 7,
+    "requiredSkill": "alchemy:5",
+    "productionTime": 720,
     "inputs": [
       {
         "resource": "exotic_herbs",
         "amount": 5,
-        "quality_impact": 0.4
+        "qualityImpact": 0.4
       },
       {
         "resource": "minerals",
         "amount": 3,
-        "quality_impact": 0.3
+        "qualityImpact": 0.3
       },
       {
         "resource": "distilled_spirits",
         "amount": 2,
-        "quality_impact": 0.2
+        "qualityImpact": 0.2
       },
       {
         "resource": "glass_vials",
         "amount": 3,
-        "quality_impact": 0.1
+        "qualityImpact": 0.1
       }
     ]
   },
-  "quality_variations": {
-    "available_qualities": [
+  "qualityVariations": {
+    "availableQualities": [
       "common",
       "fine",
       "superior",
       "masterwork"
     ],
-    "default_quality": "common",
-    "quality_multipliers": {
+    "defaultQuality": "common",
+    "qualityMultipliers": {
       "poor": {
         "value": 0.6,
-        "detection_risk": 1.5,
+        "detectionRisk": 1.5,
         "effectiveness": 0.5,
-        "trace_evidence": 1.5
+        "traceEvidence": 1.5
       },
       "common": {
-        "value": 1.0,
-        "detection_risk": 1.0,
-        "effectiveness": 1.0,
-        "trace_evidence": 1.0
+        "value": 1,
+        "detectionRisk": 1,
+        "effectiveness": 1,
+        "traceEvidence": 1
       },
       "fine": {
         "value": 1.8,
-        "detection_risk": 0.7,
+        "detectionRisk": 0.7,
         "effectiveness": 1.5,
-        "trace_evidence": 0.7
+        "traceEvidence": 0.7
       },
       "superior": {
-        "value": 3.0,
-        "detection_risk": 0.4,
-        "effectiveness": 2.0,
-        "trace_evidence": 0.4
+        "value": 3,
+        "detectionRisk": 0.4,
+        "effectiveness": 2,
+        "traceEvidence": 0.4
       }
     },
-    "quality_factors": [
+    "qualityFactors": [
       {
         "factor": "input_quality",
         "weight": 0.5
@@ -110,113 +110,113 @@
   "varieties": [
     {
       "type": "slow_acting_components",
-      "production_difficulty": "high",
+      "productionDifficulty": "high",
       "popularity": "high",
-      "value_multiplier": 1.2,
-      "detection_difficulty": "very_high",
-      "model_variant": "models/resources/poison_components_slow.glb"
+      "valueMultiplier": 1.2,
+      "detectionDifficulty": "very_high",
+      "modelVariant": "models/resources/poison_components_slow.glb"
     },
     {
       "type": "fast_acting_components",
-      "production_difficulty": "medium",
+      "productionDifficulty": "medium",
       "popularity": "medium",
-      "value_multiplier": 1.0,
-      "detection_difficulty": "medium",
-      "model_variant": "models/resources/poison_components_fast.glb"
+      "valueMultiplier": 1,
+      "detectionDifficulty": "medium",
+      "modelVariant": "models/resources/poison_components_fast.glb"
     },
     {
       "type": "exotic_components",
-      "production_difficulty": "very_high",
+      "productionDifficulty": "very_high",
       "popularity": "low",
-      "value_multiplier": 2.0,
-      "detection_difficulty": "high",
-      "model_variant": "models/resources/poison_components_exotic.glb"
+      "valueMultiplier": 2,
+      "detectionDifficulty": "high",
+      "modelVariant": "models/resources/poison_components_exotic.glb"
     },
     {
       "type": "truth_serum_components",
-      "production_difficulty": "extreme",
+      "productionDifficulty": "extreme",
       "popularity": "very_low",
-      "value_multiplier": 2.5,
-      "detection_difficulty": "high",
-      "model_variant": "models/resources/poison_components_truth.glb"
+      "valueMultiplier": 2.5,
+      "detectionDifficulty": "high",
+      "modelVariant": "models/resources/poison_components_truth.glb"
     }
   ],
-  "usage_properties": {
+  "usageProperties": {
     "uses": [
       "assassination",
       "incapacitation",
       "truth_extraction",
       "pest_control_cover"
     ],
-    "special_features": [
+    "specialFeatures": [
       "difficult_to_trace",
       "variable_dosage_effects",
       "delayed_action_options"
     ],
-    "complementary_resources": [
+    "complementaryResources": [
       "criminal_contacts",
       "blackmail_evidence",
       "disguise_materials"
     ]
   },
-  "legal_properties": {
+  "legalProperties": {
     "legality": "highly_illegal",
-    "penalty_if_caught": "execution",
-    "confiscation_risk": "certain",
-    "detection_difficulty": "medium"
+    "penaltyIfCaught": "execution",
+    "confiscationRisk": "certain",
+    "detectionDifficulty": "medium"
   },
-  "transport_properties": {
-    "transport_methods": {
-      "personal_courier": {
+  "transportProperties": {
+    "transportMethods": {
+      "personalCourier": {
         "capacity": 3,
-        "efficiency": 1.0,
+        "efficiency": 1,
         "risk": 0.5
       },
-      "hidden_compartment": {
+      "hiddenCompartment": {
         "capacity": 5,
         "efficiency": 0.9,
         "risk": 0.6
       }
     },
-    "special_requirements": [
+    "specialRequirements": [
       "extreme_discretion",
       "breakage_prevention",
       "contamination_prevention"
     ],
-    "loading_time": 20,
-    "route_restrictions": [
+    "loadingTime": 20,
+    "routeRestrictions": [
       "avoid_all_authorities",
       "night_movement_only"
     ]
   },
-  "storage_properties": {
-    "storage_facilities": {
-      "secret_laboratory": {
-        "capacity_multiplier": 1.0,
-        "preservation": 1.0
+  "storageProperties": {
+    "storageFacilities": {
+      "secretLaboratory": {
+        "capacityMultiplier": 1,
+        "preservation": 1
       },
-      "hidden_compartment": {
-        "capacity_multiplier": 0.5,
+      "hiddenCompartment": {
+        "capacityMultiplier": 0.5,
         "preservation": 0.8
       }
     },
-    "storage_requirements": [
+    "storageRequirements": [
       "cool",
       "dark",
       "secure",
       "separate_from_food"
     ],
-    "special_risks": [
+    "specialRisks": [
       "accidental_exposure",
       "discovery_by_authorities",
       "theft_by_rivals"
     ],
-    "max_storage_time": 4320
+    "maxStorageTime": 4320
   },
-  "historical_notes": {
-    "introduction_year": 1250,
-    "historical_significance": "Poison was the subtle weapon of choice in Renaissance Venice's political intrigues. The Republic's position as a trade hub gave it access to exotic toxic substances from around the world. The Council of Ten even maintained its own official poisoners for state-sanctioned eliminations of enemies, though this was never publicly acknowledged.",
-    "notable_cases": [
+  "historicalNotes": {
+    "introductionYear": 1250,
+    "historicalSignificance": "Poison was the subtle weapon of choice in Renaissance Venice's political intrigues. The Republic's position as a trade hub gave it access to exotic toxic substances from around the world. The Council of Ten even maintained its own official poisoners for state-sanctioned eliminations of enemies, though this was never publicly acknowledged.",
+    "notableCases": [
       "The mysterious death of Doge Giovanni Bembo in 1618",
       "The poisoning of the Cypriot ambassador in 1543"
     ]

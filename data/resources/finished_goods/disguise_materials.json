@@ -6,85 +6,85 @@
   "description": "Specialized materials for altering appearance, including facial prosthetics, hair dyes, voice-changing devices, and costume elements. Essential tools for spies, infiltrators, and anyone wishing to avoid recognition.",
   "icon": "/assets/icons/resources/disguise_materials.png",
   "model": "models/resources/disguise_materials.glb",
-  "base_properties": {
-    "base_value": 45,
+  "baseProperties": {
+    "baseValue": 45,
     "weight": 1.5,
-    "volume": 2.0,
-    "stack_size": 5,
+    "volume": 2,
+    "stackSize": 5,
     "perishable": true,
-    "perish_time": 2880,
-    "contraband_level": "medium"
+    "perishTime": 2880,
+    "contrabandLevel": "medium"
   },
-  "market_properties": {
-    "luxury_level": 0,
-    "target_customers": [
+  "marketProperties": {
+    "luxuryLevel": 0,
+    "targetCustomers": [
       "spies",
       "thieves",
       "fugitives",
       "infiltrators"
     ],
-    "fashion_sensitivity": 0.2,
-    "export_value_multiplier": 0.9,
-    "market_demand": "steady",
-    "price_volatility": 0.3,
-    "black_market_only": false
+    "fashionSensitivity": 0.2,
+    "exportValueMultiplier": 0.9,
+    "marketDemand": "steady",
+    "priceVolatility": 0.3,
+    "blackMarketOnly": false
   },
-  "production_properties": {
-    "producer_building": "theatrical_workshop",
-    "production_complexity": 5,
-    "required_skill": "disguise:3",
-    "production_time": 360,
+  "productionProperties": {
+    "producerBuilding": "theatrical_workshop",
+    "productionComplexity": 5,
+    "requiredSkill": "disguise:3",
+    "productionTime": 360,
     "inputs": [
       {
         "resource": "textiles",
         "amount": 3,
-        "quality_impact": 0.2
+        "qualityImpact": 0.2
       },
       {
         "resource": "cosmetics",
         "amount": 2,
-        "quality_impact": 0.3
+        "qualityImpact": 0.3
       },
       {
         "resource": "wax",
         "amount": 1,
-        "quality_impact": 0.2
+        "qualityImpact": 0.2
       },
       {
         "resource": "dyes",
         "amount": 1,
-        "quality_impact": 0.3
+        "qualityImpact": 0.3
       }
     ]
   },
-  "quality_variations": {
-    "available_qualities": [
+  "qualityVariations": {
+    "availableQualities": [
       "poor",
       "common",
       "fine"
     ],
-    "default_quality": "common",
-    "quality_multipliers": {
+    "defaultQuality": "common",
+    "qualityMultipliers": {
       "poor": {
         "value": 0.6,
-        "detection_risk": 1.5,
+        "detectionRisk": 1.5,
         "comfort": 0.6,
         "versatility": 0.5
       },
       "common": {
-        "value": 1.0,
-        "detection_risk": 1.0,
-        "comfort": 1.0,
-        "versatility": 1.0
+        "value": 1,
+        "detectionRisk": 1,
+        "comfort": 1,
+        "versatility": 1
       },
       "fine": {
-        "value": 2.0,
-        "detection_risk": 0.5,
+        "value": 2,
+        "detectionRisk": 0.5,
         "comfort": 1.5,
         "versatility": 1.8
       }
     },
-    "quality_factors": [
+    "qualityFactors": [
       {
         "factor": "input_quality",
         "weight": 0.3
@@ -102,108 +102,108 @@
   "varieties": [
     {
       "type": "facial_alterations",
-      "production_difficulty": "high",
+      "productionDifficulty": "high",
       "popularity": "very_high",
-      "value_multiplier": 1.2,
-      "primary_use": "identity_concealment",
-      "model_variant": "models/resources/disguise_materials_facial.glb"
+      "valueMultiplier": 1.2,
+      "primaryUse": "identity_concealment",
+      "modelVariant": "models/resources/disguise_materials_facial.glb"
     },
     {
       "type": "voice_modifiers",
-      "production_difficulty": "very_high",
+      "productionDifficulty": "very_high",
       "popularity": "medium",
-      "value_multiplier": 1.5,
-      "primary_use": "voice_disguise",
-      "model_variant": "models/resources/disguise_materials_voice.glb"
+      "valueMultiplier": 1.5,
+      "primaryUse": "voice_disguise",
+      "modelVariant": "models/resources/disguise_materials_voice.glb"
     },
     {
       "type": "class_transformation",
-      "production_difficulty": "medium",
+      "productionDifficulty": "medium",
       "popularity": "high",
-      "value_multiplier": 1.0,
-      "primary_use": "social_infiltration",
-      "model_variant": "models/resources/disguise_materials_class.glb"
+      "valueMultiplier": 1,
+      "primaryUse": "social_infiltration",
+      "modelVariant": "models/resources/disguise_materials_class.glb"
     },
     {
       "type": "gender_alteration",
-      "production_difficulty": "high",
+      "productionDifficulty": "high",
       "popularity": "medium",
-      "value_multiplier": 1.3,
-      "primary_use": "complete_deception",
-      "model_variant": "models/resources/disguise_materials_gender.glb"
+      "valueMultiplier": 1.3,
+      "primaryUse": "complete_deception",
+      "modelVariant": "models/resources/disguise_materials_gender.glb"
     }
   ],
-  "usage_properties": {
+  "usageProperties": {
     "uses": [
       "identity_concealment",
       "infiltration",
       "escape_facilitation",
       "theatrical_performance"
     ],
-    "special_features": [
+    "specialFeatures": [
       "quick_application",
       "realistic_appearance",
       "comfortable_for_extended_wear"
     ],
-    "complementary_resources": [
+    "complementaryResources": [
       "criminal_contacts",
       "smuggler_maps",
       "forged_documents",
       "forgery_tools"
     ]
   },
-  "legal_properties": {
+  "legalProperties": {
     "legality": "questionable",
-    "penalty_if_caught": "minor",
-    "confiscation_risk": "possible",
-    "detection_difficulty": "medium"
+    "penaltyIfCaught": "minor",
+    "confiscationRisk": "possible",
+    "detectionDifficulty": "medium"
   },
-  "transport_properties": {
-    "transport_methods": {
-      "theatrical_supply": {
+  "transportProperties": {
+    "transportMethods": {
+      "theatricalSupply": {
         "capacity": 10,
-        "efficiency": 1.0,
+        "efficiency": 1,
         "risk": 0.1
       },
-      "personal_luggage": {
+      "personalLuggage": {
         "capacity": 3,
         "efficiency": 0.9,
         "risk": 0.2
       }
     },
-    "special_requirements": [
+    "specialRequirements": [
       "careful_packing",
       "component_separation"
     ],
-    "loading_time": 10,
-    "route_restrictions": []
+    "loadingTime": 10,
+    "routeRestrictions": []
   },
-  "storage_properties": {
-    "storage_facilities": {
-      "theatrical_workshop": {
-        "capacity_multiplier": 1.0,
-        "preservation": 1.0
+  "storageProperties": {
+    "storageFacilities": {
+      "theatricalWorkshop": {
+        "capacityMultiplier": 1,
+        "preservation": 1
       },
-      "spy_safehouse": {
-        "capacity_multiplier": 0.7,
+      "spySafehouse": {
+        "capacityMultiplier": 0.7,
         "preservation": 0.9
       }
     },
-    "storage_requirements": [
+    "storageRequirements": [
       "dry",
       "temperature_controlled",
       "organized"
     ],
-    "special_risks": [
+    "specialRisks": [
       "component_degradation",
       "suspicious_discovery",
       "mold_growth"
     ],
-    "max_storage_time": 2880
+    "maxStorageTime": 2880
   },
-  "historical_notes": {
-    "introduction_year": 1300,
-    "historical_significance": "Venice's carnival tradition provided the perfect cover for disguise expertise to flourish. The city's position as a theater and opera center further developed sophisticated makeup and costume techniques. Spies from all European powers utilized Venetian disguise artists' skills, while the Republic's own intelligence operatives were masters of the craft.",
-    "cultural_context": "In a city where masks were worn for months during Carnival, the line between disguise for entertainment and disguise for deception was often blurred. Theatrical workshops openly sold materials that could be used for both purposes, creating a gray market that served both legitimate performers and those with more clandestine intentions."
+  "historicalNotes": {
+    "introductionYear": 1300,
+    "historicalSignificance": "Venice's carnival tradition provided the perfect cover for disguise expertise to flourish. The city's position as a theater and opera center further developed sophisticated makeup and costume techniques. Spies from all European powers utilized Venetian disguise artists' skills, while the Republic's own intelligence operatives were masters of the craft.",
+    "culturalContext": "In a city where masks were worn for months during Carnival, the line between disguise for entertainment and disguise for deception was often blurred. Theatrical workshops openly sold materials that could be used for both purposes, creating a gray market that served both legitimate performers and those with more clandestine intentions."
   }
 }

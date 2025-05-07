@@ -4,8 +4,8 @@
   "category": "processed_materials",
   "subcategory": "food",
   "baseValue": 20,
-  "weight": 2.0,
-  "volume": 1.0,
+  "weight": 2,
+  "volume": 1,
   "stackSize": 15,
   "description": "Pressed oil from olives, used in cooking and various industries.",
   "longDescription": "This golden liquid is pressed from olives grown in Venetian mainland territories and imported from across the Mediterranean. Essential for Venetian cuisine and used in industries from soap-making to lamp fuel, olive oil represents one of the fundamental commodities of Mediterranean life.",
@@ -44,20 +44,20 @@
     {
       "type": "common_oil",
       "acidity": "medium",
-      "value_multiplier": 1.0,
-      "primary_use": "cooking"
+      "valueMultiplier": 1,
+      "primaryUse": "cooking"
     },
     {
       "type": "first_press",
       "acidity": "low",
-      "value_multiplier": 1.5,
-      "primary_use": "fine_cuisine"
+      "valueMultiplier": 1.5,
+      "primaryUse": "fine_cuisine"
     },
     {
       "type": "lamp_oil",
       "acidity": "high",
-      "value_multiplier": 0.7,
-      "primary_use": "lighting"
+      "valueMultiplier": 0.7,
+      "primaryUse": "lighting"
     }
   ],
   "producedFrom": [
@@ -129,7 +129,7 @@
   "routeRestrictions": [],
   "storageOptions": {
     "warehouse": {
-      "capacityMultiplier": 1.0,
+      "capacityMultiplier": 1,
       "preservation": 0.95
     },
     "tavern": {

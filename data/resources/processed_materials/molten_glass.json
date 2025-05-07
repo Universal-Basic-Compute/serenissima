@@ -4,8 +4,8 @@
   "category": "processed_materials",
   "subcategory": "glass",
   "baseValue": 20,
-  "weight": 3.0,
-  "volume": 1.0,
+  "weight": 3,
+  "volume": 1,
   "stackSize": 15,
   "description": "Heated glass ready for shaping by skilled glassblowers.",
   "longDescription": "Molten glass is the essential intermediate product of Venice's renowned glass industry. Produced in the foundries of Murano, this carefully heated mixture of sand, soda ash, and minerals must be maintained at precise temperatures to allow glassblowers to shape it into Venice's famous glass products.",
@@ -50,19 +50,19 @@
     {
       "type": "cristallo",
       "clarity": "high",
-      "required_inputs": [
+      "requiredInputs": [
         "high_quality_sand",
         "refined_soda_ash"
       ],
-      "value_multiplier": 1.5
+      "valueMultiplier": 1.5
     },
     {
       "type": "colored",
       "clarity": "medium",
-      "required_inputs": [
+      "requiredInputs": [
         "minerals_colorants"
       ],
-      "value_multiplier": 1.2
+      "valueMultiplier": 1.2
     }
   ],
   "producedFrom": [
@@ -112,7 +112,7 @@
     }
   ],
   "transportOptions": {
-    "specialized_cart": {
+    "specializedCart": {
       "capacity": 3,
       "efficiency": 0.8,
       "risk": 0.5,
@@ -129,7 +129,7 @@
     "no_bridges"
   ],
   "storageOptions": {
-    "glass_foundry": {
+    "glassFoundry": {
       "capacityMultiplier": 0.5,
       "preservation": 0.8,
       "special": "heated_storage"

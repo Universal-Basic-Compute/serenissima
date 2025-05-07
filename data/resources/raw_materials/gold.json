@@ -4,21 +4,21 @@
   "category": "raw_materials",
   "subcategory": "mineral",
   "icon": "/assets/icons/resources/gold.png",
-  "base_properties": {
-    "base_value": 100,
+  "baseProperties": {
+    "baseValue": 100,
     "weight": 0.5,
     "volume": 0.1,
-    "stack_size": 10,
+    "stackSize": 10,
     "perishable": false
   },
   "description": {
     "short": "Precious metal valued for its beauty and rarity.",
     "full": "Refined gold in ingot or powder form, used for creating jewelry, ornamentation, and gold leaf. Primarily imported from African and Eastern sources.",
-    "flavor": "In this metal we trust, trade, and transform\u00e2\u20ac\u201dthe universal language of wealth that makes Venice's voice heard from Constantinople to London."
+    "flavor": "In this metal we trust, trade, and transformâ€”the universal language of wealth that makes Venice's voice heard from Constantinople to London."
   },
-  "source_properties": {
+  "sourceProperties": {
     "source": "imported",
-    "harvest_method": "mining_and_trade",
+    "harvestMethod": "mining_and_trade",
     "locations": [
       "africa",
       "hungary",
@@ -28,16 +28,16 @@
     "availability": "rare",
     "seasonality": "year_round"
   },
-  "quality_variations": {
-    "available_qualities": [
+  "qualityVariations": {
+    "availableQualities": [
       "common",
       "fine",
       "superior"
     ],
-    "default_quality": "common",
-    "quality_multipliers": {
+    "defaultQuality": "common",
+    "qualityMultipliers": {
       "common": {
-        "value": 1.0,
+        "value": 1,
         "purity": 0.85
       },
       "fine": {
@@ -53,30 +53,30 @@
   "forms": [
     {
       "form": "ingot",
-      "value_multiplier": 1.0,
-      "primary_use": "storage_and_trade"
+      "valueMultiplier": 1,
+      "primaryUse": "storage_and_trade"
     },
     {
       "form": "powder",
-      "value_multiplier": 0.95,
-      "primary_use": "goldsmithing"
+      "valueMultiplier": 0.95,
+      "primaryUse": "goldsmithing"
     },
     {
       "form": "leaf",
-      "value_multiplier": 1.3,
-      "primary_use": "decoration"
+      "valueMultiplier": 1.3,
+      "primaryUse": "decoration"
     },
     {
       "form": "wire",
-      "value_multiplier": 1.2,
-      "primary_use": "jewelry"
+      "valueMultiplier": 1.2,
+      "primaryUse": "jewelry"
     }
   ],
-  "production_properties": {
-    "processor_building": "goldsmith_workshop",
-    "processing_complexity": 5,
-    "required_skill": "goldsmithing:4",
-    "processing_time": 480,
+  "productionProperties": {
+    "processorBuilding": "goldsmith_workshop",
+    "processingComplexity": 5,
+    "requiredSkill": "goldsmithing:4",
+    "processingTime": 480,
     "outputs": [
       {
         "resource": "jewelry",
@@ -85,17 +85,17 @@
       {
         "resource": "gold_leaf",
         "amount": 1,
-        "alternative_output": true,
+        "alternativeOutput": true,
         "facility": "gold_beater_workshop"
       },
       {
         "resource": "gold_ducats",
         "amount": 1,
-        "alternative_output": true,
+        "alternativeOutput": true,
         "facility": "mint"
       }
     ],
-    "production_chains": [
+    "productionChains": [
       {
         "process": "goldsmithing",
         "chain": "Gold → Goldsmith Workshop → Jewelry"
@@ -113,82 +113,82 @@
   "substitutes": [],
   "complements": [
     {
-      "resource_id": "silver",
+      "resourceId": "silver",
       "context": "jewelry_making",
       "relationship": "optional"
     },
     {
-      "resource_id": "gems",
+      "resourceId": "gems",
       "context": "jewelry_making",
       "relationship": "optional"
     }
   ],
-  "transport_properties": {
-    "transport_methods": {
-      "armed_escort": {
+  "transportProperties": {
+    "transportMethods": {
+      "armedEscort": {
         "capacity": 5,
-        "efficiency": 1.0,
+        "efficiency": 1,
         "risk": 0.05
       },
-      "secure_shipment": {
+      "secureShipment": {
         "capacity": 10,
-        "efficiency": 1.0,
+        "efficiency": 1,
         "risk": 0.1
       }
     },
-    "special_requirements": [
+    "specialRequirements": [
       "armed_guard",
       "secure_container",
       "documentation"
     ],
-    "loading_time": 10,
-    "route_restrictions": [
+    "loadingTime": 10,
+    "routeRestrictions": [
       "restricted_routes",
       "daylight_only"
     ]
   },
-  "storage_properties": {
-    "storage_facilities": {
-      "secure_vault": {
-        "capacity_multiplier": 1.0,
-        "preservation": 1.0
+  "storageProperties": {
+    "storageFacilities": {
+      "secureVault": {
+        "capacityMultiplier": 1,
+        "preservation": 1
       },
       "treasury": {
-        "capacity_multiplier": 1.0,
-        "preservation": 1.0
+        "capacityMultiplier": 1,
+        "preservation": 1
       }
     },
-    "storage_requirements": [
+    "storageRequirements": [
       "high_security",
       "inventory_tracking"
     ],
-    "special_risks": [
+    "specialRisks": [
       "theft"
     ],
-    "max_storage_time": "unlimited"
+    "maxStorageTime": "unlimited"
   },
-  "market_dynamics": {
-    "base_availability": 0.3,
-    "demand_level": "very_high",
-    "price_volatility": 0.2,
-    "regional_factors": [
+  "marketDynamics": {
+    "baseAvailability": 0.3,
+    "demandLevel": "very_high",
+    "priceVolatility": 0.2,
+    "regionalFactors": [
       {
         "region": "rialto",
-        "availability_modifier": 1.3,
-        "price_modifier": 1.0
+        "availabilityModifier": 1.3,
+        "priceModifier": 1
       }
     ],
-    "seasonal_factors": [],
-    "economic_factors": {
-      "political_stability": {
+    "seasonalFactors": [],
+    "economicFactors": {
+      "politicalStability": {
         "impact": "high"
       },
-      "international_trade": {
+      "internationalTrade": {
         "impact": "high"
       }
     }
   },
-  "production_chain_position": {
+  "productionChainPosition": {
     "predecessors": [],
     "successors": [
       {

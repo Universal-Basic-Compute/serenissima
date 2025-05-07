@@ -4,8 +4,8 @@
   "category": "processed_materials",
   "subcategory": "food",
   "baseValue": 12,
-  "weight": 1.0,
-  "volume": 1.0,
+  "weight": 1,
+  "volume": 1,
   "stackSize": 50,
   "description": "Milled grain ready for baking into bread and pastries.",
   "longDescription": "The foundation of Venice's daily bread, flour is produced by grinding imported grain from the mainland and Venetian territories. Stored in the city's carefully maintained granaries and distributed to bakeries throughout the neighborhoods, this essential resource ensures the city's food security despite its lagoon isolation.",
@@ -44,22 +44,22 @@
     {
       "type": "wheat",
       "usage": "bread",
-      "value_multiplier": 1.0
+      "valueMultiplier": 1
     },
     {
       "type": "fine_wheat",
       "usage": "pastry",
-      "value_multiplier": 1.3
+      "valueMultiplier": 1.3
     },
     {
       "type": "rye",
       "usage": "dark_bread",
-      "value_multiplier": 0.9
+      "valueMultiplier": 0.9
     },
     {
       "type": "corn",
       "usage": "polenta",
-      "value_multiplier": 0.8
+      "valueMultiplier": 0.8
     }
   ],
   "producedFrom": [
@@ -135,8 +135,8 @@
   "loadingTime": 5,
   "routeRestrictions": [],
   "storageOptions": {
-    "small_warehouse": {
-      "capacityMultiplier": 1.0,
+    "smallWarehouse": {
+      "capacityMultiplier": 1,
       "preservation": 0.9
     },
     "granary": {

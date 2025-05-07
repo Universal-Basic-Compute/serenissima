@@ -6,86 +6,86 @@
   "description": "Exquisite Venetian glassware, renowned throughout Europe for its clarity and craftsmanship. Each piece showcases the mastery of Murano glassblowers.",
   "icon": "/assets/icons/resources/fine_glassware.png",
   "model": "models/resources/fine_glassware.glb",
-  "base_properties": {
-    "base_value": 50,
-    "weight": 2.0,
-    "volume": 2.0,
-    "stack_size": 10,
+  "baseProperties": {
+    "baseValue": 50,
+    "weight": 2,
+    "volume": 2,
+    "stackSize": 10,
     "perishable": false,
     "fragile": true,
-    "breakage_risk": 0.2
+    "breakageRisk": 0.2
   },
-  "market_properties": {
-    "luxury_level": 6,
-    "target_customers": [
+  "marketProperties": {
+    "luxuryLevel": 6,
+    "targetCustomers": [
       "nobility",
       "wealthy_merchants",
       "foreign_buyers",
       "church"
     ],
-    "fashion_sensitivity": 0.4,
-    "export_value_multiplier": 1.5,
-    "market_demand": "high",
-    "price_volatility": 0.3,
-    "seasonal_demand": {
-      "spring": 1.0,
+    "fashionSensitivity": 0.4,
+    "exportValueMultiplier": 1.5,
+    "marketDemand": "high",
+    "priceVolatility": 0.3,
+    "seasonalDemand": {
+      "spring": 1,
       "summer": 0.9,
       "autumn": 1.1,
       "winter": 1.2
     }
   },
-  "production_properties": {
-    "producer_building": "glassblower_workshop",
-    "production_complexity": 7,
-    "required_skill": "glassblowing:5",
-    "production_time": 360,
+  "productionProperties": {
+    "producerBuilding": "glassblower_workshop",
+    "productionComplexity": 7,
+    "requiredSkill": "glassblowing:5",
+    "productionTime": 360,
     "inputs": [
       {
         "resource": "molten_glass",
         "amount": 3,
-        "quality_impact": 0.7
+        "qualityImpact": 0.7
       },
       {
         "resource": "fuel",
         "amount": 2,
-        "quality_impact": 0.1
+        "qualityImpact": 0.1
       },
       {
         "resource": "gold_leaf",
         "amount": 0.1,
         "optional": true,
-        "quality_impact": 0.2
+        "qualityImpact": 0.2
       }
     ],
-    "production_chain": "Molten Glass → Glassblower Workshop → Fine Glassware"
+    "productionChain": "Molten Glass → Glassblower Workshop → Fine Glassware"
   },
-  "quality_variations": {
-    "available_qualities": [
+  "qualityVariations": {
+    "availableQualities": [
       "common",
       "fine",
       "superior",
       "masterwork"
     ],
-    "default_quality": "fine",
-    "quality_multipliers": {
+    "defaultQuality": "fine",
+    "qualityMultipliers": {
       "common": {
         "value": 0.7,
-        "breakage_risk": 1.2
+        "breakageRisk": 1.2
       },
       "fine": {
-        "value": 1.0,
-        "breakage_risk": 1.0
+        "value": 1,
+        "breakageRisk": 1
       },
       "superior": {
         "value": 1.5,
-        "breakage_risk": 0.8
+        "breakageRisk": 0.8
       },
       "masterwork": {
         "value": 2.5,
-        "breakage_risk": 0.5
+        "breakageRisk": 0.5
       }
     },
-    "quality_factors": [
+    "qualityFactors": [
       {
         "factor": "input_quality",
         "weight": 0.4
@@ -103,47 +103,47 @@
   "varieties": [
     {
       "type": "goblet",
-      "production_difficulty": "medium",
+      "productionDifficulty": "medium",
       "popularity": "high",
-      "value_multiplier": 1.0,
-      "model_variant": "models/resources/fine_glassware_goblet.glb"
+      "valueMultiplier": 1,
+      "modelVariant": "models/resources/fine_glassware_goblet.glb"
     },
     {
       "type": "chandelier",
-      "production_difficulty": "very_high",
+      "productionDifficulty": "very_high",
       "popularity": "high",
-      "value_multiplier": 3.0,
-      "model_variant": "models/resources/fine_glassware_chandelier.glb"
+      "valueMultiplier": 3,
+      "modelVariant": "models/resources/fine_glassware_chandelier.glb"
     },
     {
       "type": "mirror",
-      "production_difficulty": "high",
+      "productionDifficulty": "high",
       "popularity": "very_high",
-      "value_multiplier": 2.0,
-      "model_variant": "models/resources/fine_glassware_mirror.glb"
+      "valueMultiplier": 2,
+      "modelVariant": "models/resources/fine_glassware_mirror.glb"
     },
     {
       "type": "decorative_vessel",
-      "production_difficulty": "high",
+      "productionDifficulty": "high",
       "popularity": "medium",
-      "value_multiplier": 1.8,
-      "model_variant": "models/resources/fine_glassware_vessel.glb"
+      "valueMultiplier": 1.8,
+      "modelVariant": "models/resources/fine_glassware_vessel.glb"
     }
   ],
-  "decorative_techniques": [
+  "decorativeTechniques": [
     {
       "technique": "gold_leaf",
       "difficulty": "high",
       "materials": [
         "gold_leaf"
       ],
-      "value_addition": 25
+      "valueAddition": 25
     },
     {
       "technique": "filigree",
       "difficulty": "very_high",
       "materials": [],
-      "value_addition": 40
+      "valueAddition": 40
     },
     {
       "technique": "enameling",
@@ -151,38 +151,38 @@
       "materials": [
         "enamel_paints"
       ],
-      "value_addition": 30
+      "valueAddition": 30
     },
     {
       "technique": "cristallo",
       "difficulty": "medium",
       "materials": [],
-      "value_addition": 20
+      "valueAddition": 20
     }
   ],
-  "usage_properties": {
+  "usageProperties": {
     "uses": [
       "dining",
       "decoration",
       "gifting",
       "social_status"
     ],
-    "special_features": [
+    "specialFeatures": [
       "transparent",
       "decorative",
       "status_symbol"
     ],
-    "complementary_resources": [
+    "complementaryResources": [
       "fine_wine",
       "luxury_furniture",
       "aristocratic_feast"
     ]
   },
-  "transport_properties": {
-    "transport_methods": {
+  "transportProperties": {
+    "transportMethods": {
       "gondola": {
         "capacity": 10,
-        "efficiency": 1.0,
+        "efficiency": 1,
         "risk": 0.2
       },
       "porter": {
@@ -191,43 +191,43 @@
         "risk": 0.15
       }
     },
-    "special_requirements": [
+    "specialRequirements": [
       "careful_handling",
       "cushioning",
       "weather_protection"
     ],
-    "loading_time": 10,
-    "route_restrictions": [
+    "loadingTime": 10,
+    "routeRestrictions": [
       "avoid_crowded_areas"
     ]
   },
-  "storage_properties": {
-    "storage_facilities": {
-      "small_warehouse": {
-        "capacity_multiplier": 0.6,
+  "storageProperties": {
+    "storageFacilities": {
+      "smallWarehouse": {
+        "capacityMultiplier": 0.6,
         "preservation": 0.9
       },
-      "luxury_showroom": {
-        "capacity_multiplier": 0.4,
-        "preservation": 1.0
+      "luxuryShowroom": {
+        "capacityMultiplier": 0.4,
+        "preservation": 1
       },
-      "secure_vault": {
-        "capacity_multiplier": 0.3,
-        "preservation": 1.0
+      "secureVault": {
+        "capacityMultiplier": 0.3,
+        "preservation": 1
       }
     },
-    "storage_requirements": [
+    "storageRequirements": [
       "secure",
       "cushioned",
       "dry"
     ],
-    "special_risks": [
+    "specialRisks": [
       "breakage",
       "theft"
     ],
-    "max_storage_time": "unlimited"
+    "maxStorageTime": "unlimited"
   },
-  "production_chain_position": {
+  "productionChainPosition": {
     "predecessors": [
       {
         "resource": "molten_glass",
@@ -245,14 +245,14 @@
       }
     ]
   },
-  "historical_notes": {
-    "introduction_year": 1290,
-    "notable_producers": [
+  "historicalNotes": {
+    "introductionYear": 1290,
+    "notableProducers": [
       "Angelo Barovier",
       "Murano Guild"
     ],
-    "historical_significance": "Venetian glassware became one of the Republic's most prestigious exports. The secrets of its production were closely guarded, with glassmakers confined to Murano island and forbidden from leaving the Republic.",
-    "historical_markets": [
+    "historicalSignificance": "Venetian glassware became one of the Republic's most prestigious exports. The secrets of its production were closely guarded, with glassmakers confined to Murano island and forbidden from leaving the Republic.",
+    "historicalMarkets": [
       "European nobility",
       "Ottoman court",
       "Papal states"

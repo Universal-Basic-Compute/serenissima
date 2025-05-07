@@ -1,20 +1,5 @@
 [
   {
-    "id": "TODO-001",
-    "description": "Move CloudSystem to lib/threejs directory as part of the rendering layer",
-    "files": [
-      "components/PolygonViewer/CloudSystem.ts",
-      "lib/threejs/CloudSystem.ts",
-      "docs/architecture/rendering.md",
-      "docs/architecture/components.md",
-      "lib/threejs/ThreeJSFacade.ts",
-      "lib/threejs/SceneFacade.ts",
-      "components/PolygonViewer/PolygonViewer.tsx",
-      "docs/architecture/README.md"
-    ],
-    "details": "Refactor CloudSystem to follow the architecture by moving it to the rendering layer and implementing the facade pattern to hide Three.js complexity."
-  },
-  {
     "id": "TODO-002",
     "description": "Fix income and maintenance discrepancies in building descriptions",
     "files": [

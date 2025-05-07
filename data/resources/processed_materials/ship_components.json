@@ -4,8 +4,8 @@
   "category": "processed_materials",
   "subcategory": "shipbuilding",
   "baseValue": 120,
-  "weight": 50.0,
-  "volume": 30.0,
+  "weight": 50,
+  "volume": 30,
   "stackSize": 5,
   "description": "Prefabricated wooden parts ready for ship assembly.",
   "longDescription": "Created by skilled shipwrights, these precisely cut and shaped wooden components represent the building blocks of Venice's maritime power. Crafted to standardized specifications that revolutionized shipbuilding efficiency, these components await assembly into the vessels that will carry Venetian trade and naval power across the Mediterranean.",
@@ -43,26 +43,26 @@
     {
       "type": "hull_ribs",
       "complexity": "high",
-      "structural_importance": "critical",
-      "value_multiplier": 1.2
+      "structuralImportance": "critical",
+      "valueMultiplier": 1.2
     },
     {
       "type": "keels",
       "complexity": "very_high",
-      "structural_importance": "critical",
-      "value_multiplier": 1.5
+      "structuralImportance": "critical",
+      "valueMultiplier": 1.5
     },
     {
       "type": "deck_beams",
       "complexity": "medium",
-      "structural_importance": "high",
-      "value_multiplier": 1.0
+      "structuralImportance": "high",
+      "valueMultiplier": 1
     },
     {
       "type": "mast_sections",
       "complexity": "high",
-      "structural_importance": "high",
-      "value_multiplier": 1.3
+      "structuralImportance": "high",
+      "valueMultiplier": 1.3
     }
   ],
   "producedFrom": [
@@ -122,7 +122,7 @@
       "efficiency": 0.9,
       "risk": 0.2
     },
-    "specialized_cargo_boat": {
+    "specializedCargoBoat": {
       "capacity": 5,
       "efficiency": 0.95,
       "risk": 0.15
@@ -138,12 +138,12 @@
   ],
   "storageOptions": {
     "shipyard": {
-      "capacityMultiplier": 1.0,
+      "capacityMultiplier": 1,
       "preservation": 0.95
     },
-    "arsenal_warehouse": {
+    "arsenalWarehouse": {
       "capacityMultiplier": 1.2,
-      "preservation": 1.0
+      "preservation": 1
     }
   },
   "storageRequirements": [

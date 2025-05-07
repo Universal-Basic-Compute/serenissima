@@ -4,8 +4,8 @@
   "category": "processed_materials",
   "subcategory": "construction",
   "baseValue": 20,
-  "weight": 5.0,
-  "volume": 2.0,
+  "weight": 5,
+  "volume": 2,
   "stackSize": 15,
   "description": "Precisely shaped stone blocks ready for construction.",
   "longDescription": "Quarried stone that has been carefully cut and shaped by skilled stonecutters, ready for use in Venice's grand buildings. From humble foundations to ornate facades, these blocks form the literal building blocks of the city's architectural splendor, allowing structures to rise from the lagoon's unstable bed.",
@@ -43,26 +43,26 @@
     {
       "type": "foundation_blocks",
       "precision": "low",
-      "value_multiplier": 0.8,
-      "primary_use": "foundations"
+      "valueMultiplier": 0.8,
+      "primaryUse": "foundations"
     },
     {
       "type": "wall_blocks",
       "precision": "medium",
-      "value_multiplier": 1.0,
-      "primary_use": "walls"
+      "valueMultiplier": 1,
+      "primaryUse": "walls"
     },
     {
       "type": "facade_blocks",
       "precision": "high",
-      "value_multiplier": 1.5,
-      "primary_use": "visible_exteriors"
+      "valueMultiplier": 1.5,
+      "primaryUse": "visible_exteriors"
     },
     {
       "type": "ornamental_pieces",
       "precision": "very_high",
-      "value_multiplier": 2.0,
-      "primary_use": "decorative_elements"
+      "valueMultiplier": 2,
+      "primaryUse": "decorative_elements"
     }
   ],
   "producedFrom": [
@@ -132,10 +132,10 @@
   "transportOptions": {
     "barge": {
       "capacity": 50,
-      "efficiency": 1.0,
+      "efficiency": 1,
       "risk": 0.15
     },
-    "specialized_cart": {
+    "specializedCart": {
       "capacity": 5,
       "efficiency": 0.8,
       "risk": 0.2
@@ -151,13 +151,13 @@
     "bridge_restrictions"
   ],
   "storageOptions": {
-    "stone_yard": {
-      "capacityMultiplier": 1.0,
-      "preservation": 1.0
+    "stoneYard": {
+      "capacityMultiplier": 1,
+      "preservation": 1
     },
-    "construction_site": {
+    "constructionSite": {
       "capacityMultiplier": 0.8,
-      "preservation": 1.0
+      "preservation": 1
     }
   },
   "storageRequirements": [

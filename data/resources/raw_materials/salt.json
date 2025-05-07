@@ -58,23 +58,23 @@
     {
       "type": "coarse_salt",
       "purity": "medium",
-      "value_multiplier": 0.8,
-      "primarily_used_for": "basic_preservation"
+      "valueMultiplier": 0.8,
+      "primarilyUsedFor": "basic_preservation"
     },
     {
       "type": "fine_salt",
       "purity": "high",
-      "value_multiplier": 1.2,
-      "primarily_used_for": "cooking_and_quality_preservation"
+      "valueMultiplier": 1.2,
+      "primarilyUsedFor": "cooking_and_quality_preservation"
     },
     {
       "type": "fleur_de_sel",
       "purity": "very_high",
-      "value_multiplier": 2.0,
-      "primarily_used_for": "luxury_cuisine"
+      "valueMultiplier": 2.0,
+      "primarilyUsedFor": "luxury_cuisine"
     }
   ],
-  "production_properties": {
+  "productionProperties": {
     "processor_building": "salting_house",
     "processing_complexity": 3,
     "required_skill": "food_preservation:2",
@@ -113,12 +113,12 @@
   "substitutes": [],
   "complements": [
     {
-      "resource_id": "fish",
+      "resourceId": "fish",
       "context": "fish_preservation",
       "relationship": "required"
     },
     {
-      "resource_id": "meat",
+      "resourceId": "meat",
       "context": "meat_preservation",
       "relationship": "required"
     }

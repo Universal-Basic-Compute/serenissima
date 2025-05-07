@@ -6,84 +6,84 @@
   "description": "Exquisite ornamental pieces crafted from precious metals and gems. Venetian jewelry combines Byzantine, Islamic, and European influences into distinctive styles sought by elites across the Mediterranean.",
   "icon": "/assets/icons/resources/jewelry.png",
   "model": "models/resources/jewelry.glb",
-  "base_properties": {
-    "base_value": 80,
+  "baseProperties": {
+    "baseValue": 80,
     "weight": 0.2,
     "volume": 0.1,
-    "stack_size": 10,
+    "stackSize": 10,
     "perishable": false,
     "fragile": true,
-    "breakage_risk": 0.1
+    "breakageRisk": 0.1
   },
-  "market_properties": {
-    "luxury_level": 7,
-    "target_customers": [
+  "marketProperties": {
+    "luxuryLevel": 7,
+    "targetCustomers": [
       "nobility",
       "wealthy_merchants",
       "patrician_families",
       "foreign_elites"
     ],
-    "fashion_sensitivity": 0.6,
-    "export_value_multiplier": 1.6,
-    "market_demand": "high",
-    "price_volatility": 0.3,
-    "seasonal_demand": {
+    "fashionSensitivity": 0.6,
+    "exportValueMultiplier": 1.6,
+    "marketDemand": "high",
+    "priceVolatility": 0.3,
+    "seasonalDemand": {
       "spring": 1.1,
       "summer": 0.9,
       "autumn": 0.8,
       "winter": 1.3
     }
   },
-  "production_properties": {
-    "producer_building": "goldsmith_workshop",
-    "production_complexity": 8,
-    "required_skill": "goldsmithing:6",
-    "production_time": 720,
-    "batch_size": 5,
+  "productionProperties": {
+    "producerBuilding": "goldsmith_workshop",
+    "productionComplexity": 8,
+    "requiredSkill": "goldsmithing:6",
+    "productionTime": 720,
+    "batchSize": 5,
     "inputs": [
       {
         "resource": "gold",
         "amount": 1,
-        "quality_impact": 0.5
+        "qualityImpact": 0.5
       },
       {
         "resource": "silver",
         "amount": 1,
         "optional": true,
-        "quality_impact": 0.2
+        "qualityImpact": 0.2
       },
       {
         "resource": "gems",
         "amount": 2,
         "optional": true,
-        "quality_impact": 0.3
+        "qualityImpact": 0.3
       },
       {
         "resource": "tools",
         "amount": 1,
-        "quality_impact": 0.1
+        "qualityImpact": 0.1
       }
     ]
   },
-  "quality_variations": {
-    "available_qualities": [
+  "qualityVariations": {
+    "availableQualities": [
       "common",
       "fine",
       "superior",
       "masterwork",
       "legendary"
     ],
-    "default_quality": "fine",
-    "quality_multipliers": {
+    "defaultQuality": "fine",
+    "qualityMultipliers": {
       "common": {
         "value": 0.7,
         "prestige": 0.6,
         "craftsmanship": 0.7
       },
       "fine": {
-        "value": 1.0,
-        "prestige": 1.0,
-        "craftsmanship": 1.0
+        "value": 1,
+        "prestige": 1,
+        "craftsmanship": 1
       },
       "superior": {
         "value": 1.8,
@@ -91,17 +91,17 @@
         "craftsmanship": 1.5
       },
       "masterwork": {
-        "value": 3.0,
-        "prestige": 3.0,
-        "craftsmanship": 2.0
+        "value": 3,
+        "prestige": 3,
+        "craftsmanship": 2
       },
       "legendary": {
-        "value": 6.0,
-        "prestige": 6.0,
-        "craftsmanship": 3.0
+        "value": 6,
+        "prestige": 6,
+        "craftsmanship": 3
       }
     },
-    "quality_factors": [
+    "qualityFactors": [
       {
         "factor": "material_quality",
         "weight": 0.4
@@ -119,145 +119,145 @@
   "varieties": [
     {
       "type": "necklace",
-      "production_difficulty": "high",
+      "productionDifficulty": "high",
       "popularity": "very_high",
-      "value_multiplier": 1.2,
-      "material_requirement": "high",
-      "model_variant": "models/resources/jewelry_necklace.glb"
+      "valueMultiplier": 1.2,
+      "materialRequirement": "high",
+      "modelVariant": "models/resources/jewelry_necklace.glb"
     },
     {
       "type": "ring",
-      "production_difficulty": "medium",
+      "productionDifficulty": "medium",
       "popularity": "high",
-      "value_multiplier": 0.8,
-      "material_requirement": "low",
-      "model_variant": "models/resources/jewelry_ring.glb"
+      "valueMultiplier": 0.8,
+      "materialRequirement": "low",
+      "modelVariant": "models/resources/jewelry_ring.glb"
     },
     {
       "type": "earrings",
-      "production_difficulty": "medium",
+      "productionDifficulty": "medium",
       "popularity": "high",
-      "value_multiplier": 0.9,
-      "material_requirement": "medium",
-      "model_variant": "models/resources/jewelry_earrings.glb"
+      "valueMultiplier": 0.9,
+      "materialRequirement": "medium",
+      "modelVariant": "models/resources/jewelry_earrings.glb"
     },
     {
       "type": "brooch",
-      "production_difficulty": "high",
+      "productionDifficulty": "high",
       "popularity": "medium",
-      "value_multiplier": 1.0,
-      "material_requirement": "medium",
-      "model_variant": "models/resources/jewelry_brooch.glb"
+      "valueMultiplier": 1,
+      "materialRequirement": "medium",
+      "modelVariant": "models/resources/jewelry_brooch.glb"
     },
     {
       "type": "ceremonial_piece",
-      "production_difficulty": "very_high",
+      "productionDifficulty": "very_high",
       "popularity": "low",
-      "value_multiplier": 2.5,
-      "material_requirement": "very_high",
-      "model_variant": "models/resources/jewelry_ceremonial.glb"
+      "valueMultiplier": 2.5,
+      "materialRequirement": "very_high",
+      "modelVariant": "models/resources/jewelry_ceremonial.glb"
     }
   ],
-  "design_styles": [
+  "designStyles": [
     {
       "style": "byzantine_influenced",
       "complexity": "high",
       "popularity": "medium",
-      "value_multiplier": 1.2,
+      "valueMultiplier": 1.2,
       "characteristic": "elaborate_filigree"
     },
     {
       "style": "islamic_motifs",
       "complexity": "high",
       "popularity": "medium",
-      "value_multiplier": 1.3,
+      "valueMultiplier": 1.3,
       "characteristic": "geometric_patterns"
     },
     {
       "style": "venetian_gothic",
       "complexity": "very_high",
       "popularity": "high",
-      "value_multiplier": 1.4,
+      "valueMultiplier": 1.4,
       "characteristic": "ornate_detailing"
     },
     {
       "style": "classical_revival",
       "complexity": "medium",
       "popularity": "medium",
-      "value_multiplier": 1.1,
+      "valueMultiplier": 1.1,
       "characteristic": "greco_roman_motifs"
     }
   ],
-  "usage_properties": {
+  "usageProperties": {
     "uses": [
       "personal_adornment",
       "status_symbol",
       "wealth_storage",
       "diplomatic_gift"
     ],
-    "special_features": [
+    "specialFeatures": [
       "heirloom_quality",
       "investment_value",
       "cultural_significance"
     ],
-    "complementary_resources": [
+    "complementaryResources": [
       "luxury_silk_garments",
       "fine_clothing",
       "secure_storage"
     ]
   },
-  "transport_properties": {
-    "transport_methods": {
-      "armed_escort": {
+  "transportProperties": {
+    "transportMethods": {
+      "armedEscort": {
         "capacity": 20,
-        "efficiency": 1.0,
+        "efficiency": 1,
         "risk": 0.05
       },
-      "secure_chest": {
+      "secureChest": {
         "capacity": 10,
-        "efficiency": 1.0,
+        "efficiency": 1,
         "risk": 0.1
       }
     },
-    "special_requirements": [
+    "specialRequirements": [
       "armed_guards",
       "secure_containers",
       "discreet_handling"
     ],
-    "loading_time": 5,
-    "route_restrictions": [
+    "loadingTime": 5,
+    "routeRestrictions": [
       "secure_routes_only",
       "daylight_preferred"
     ]
   },
-  "storage_properties": {
-    "storage_facilities": {
-      "secure_vault": {
-        "capacity_multiplier": 1.0,
-        "preservation": 1.0
+  "storageProperties": {
+    "storageFacilities": {
+      "secureVault": {
+        "capacityMultiplier": 1,
+        "preservation": 1
       },
-      "goldsmith_workshop": {
-        "capacity_multiplier": 0.5,
-        "preservation": 1.0
+      "goldsmithWorkshop": {
+        "capacityMultiplier": 0.5,
+        "preservation": 1
       },
-      "wealthy_household": {
-        "capacity_multiplier": 0.3,
+      "wealthyHousehold": {
+        "capacityMultiplier": 0.3,
         "preservation": 0.95
       }
     },
-    "storage_requirements": [
+    "storageRequirements": [
       "high_security",
       "humidity_control",
       "inventory_tracking"
     ],
-    "special_risks": [
+    "specialRisks": [
       "theft",
       "tarnishing",
       "damage"
     ],
-    "max_storage_time": "unlimited"
+    "maxStorageTime": "unlimited"
   },
-  "production_chain_position": {
+  "productionChainPosition": {
     "predecessors": [
       {
         "resource": "gold",
@@ -283,14 +283,14 @@
       }
     ]
   },
-  "historical_notes": {
-    "introduction_year": 1100,
-    "notable_producers": [
+  "historicalNotes": {
+    "introductionYear": 1100,
+    "notableProducers": [
       "Venetian Goldsmiths Guild",
       "Rialto Jewelers"
     ],
-    "historical_significance": "Venetian jewelry represented a fusion of Eastern and Western styles, reflecting the city's position as a crossroads of cultures. The goldsmith trade was strictly regulated, with high standards enforced to maintain Venice's reputation for quality. Jewelry served not only as personal adornment but as portable wealth, diplomatic gifts, and markers of social status.",
-    "historical_markets": [
+    "historicalSignificance": "Venetian jewelry represented a fusion of Eastern and Western styles, reflecting the city's position as a crossroads of cultures. The goldsmith trade was strictly regulated, with high standards enforced to maintain Venice's reputation for quality. Jewelry served not only as personal adornment but as portable wealth, diplomatic gifts, and markers of social status.",
+    "historicalMarkets": [
       "Venetian nobility",
       "European courts",
       "Byzantine elites",

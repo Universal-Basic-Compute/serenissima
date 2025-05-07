@@ -4,8 +4,8 @@
   "category": "processed_materials",
   "subcategory": "metallurgy",
   "baseValue": 35,
-  "weight": 8.0,
-  "volume": 3.0,
+  "weight": 8,
+  "volume": 3,
   "stackSize": 25,
   "description": "Forged iron hardware for construction and shipbuilding.",
   "longDescription": "Essential to Venice's construction and shipbuilding industries, these iron fittings include nails, hinges, brackets, and specialized fasteners. Created by skilled blacksmiths, they provide the critical connections that hold together everything from humble fishing boats to grand palazzos.",
@@ -45,25 +45,25 @@
       "type": "nails",
       "usage": "general_construction",
       "complexity": "low",
-      "value_multiplier": 0.8
+      "valueMultiplier": 0.8
     },
     {
       "type": "hinges",
       "usage": "doors_windows",
       "complexity": "medium",
-      "value_multiplier": 1.0
+      "valueMultiplier": 1
     },
     {
       "type": "ship_fittings",
       "usage": "shipbuilding",
       "complexity": "high",
-      "value_multiplier": 1.3
+      "valueMultiplier": 1.3
     },
     {
       "type": "structural_brackets",
       "usage": "heavy_construction",
       "complexity": "medium",
-      "value_multiplier": 1.1
+      "valueMultiplier": 1.1
     }
   ],
   "producedFrom": [
@@ -144,12 +144,12 @@
   "loadingTime": 15,
   "routeRestrictions": [],
   "storageOptions": {
-    "small_warehouse": {
+    "smallWarehouse": {
       "capacityMultiplier": 0.8,
       "preservation": 0.9
     },
     "blacksmith": {
-      "capacityMultiplier": 1.0,
+      "capacityMultiplier": 1,
       "preservation": 0.95
     },
     "shipyard": {

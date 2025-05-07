@@ -45,24 +45,24 @@
     {
       "type": "plain",
       "complexity": "low",
-      "value_multiplier": 1.0
+      "valueMultiplier": 1
     },
     {
       "type": "twill",
       "complexity": "medium",
-      "value_multiplier": 1.2
+      "valueMultiplier": 1.2
     },
     {
       "type": "damask",
       "complexity": "high",
-      "value_multiplier": 1.5,
-      "skill_requirement": 8
+      "valueMultiplier": 1.5,
+      "skillRequirement": 8
     },
     {
       "type": "brocade",
       "complexity": "very_high",
-      "value_multiplier": 2.0,
-      "skill_requirement": 10
+      "valueMultiplier": 2,
+      "skillRequirement": 10
     }
   ],
   "producedFrom": [
@@ -128,15 +128,15 @@
   "loadingTime": 10,
   "routeRestrictions": [],
   "storageOptions": {
-    "small_warehouse": {
+    "smallWarehouse": {
       "capacityMultiplier": 0.9,
       "preservation": 0.9
     },
-    "weaving_workshop": {
+    "weavingWorkshop": {
       "capacityMultiplier": 0.6,
-      "preservation": 1.0
+      "preservation": 1
     },
-    "dye_works": {
+    "dyeWorks": {
       "capacityMultiplier": 0.5,
       "preservation": 0.95
     }

@@ -4,8 +4,8 @@
   "category": "processed_materials",
   "subcategory": "naval_supplies",
   "baseValue": 15,
-  "weight": 2.0,
-  "volume": 1.0,
+  "weight": 2,
+  "volume": 1,
   "stackSize": 25,
   "description": "Sticky, waterproof tar essential for shipbuilding and maintenance.",
   "longDescription": "This dark, viscous substance is produced by heating pine resin and is crucial for waterproofing ships' hulls and sealing wooden joints. Without this humble material, Venice's maritime power would be impossible, as no vessel could withstand the sea for long. Primarily sourced from mainland pine forests and processed in specialized facilities.",
@@ -44,15 +44,15 @@
       "type": "liquid_pitch",
       "viscosity": "medium",
       "waterproofing": "good",
-      "value_multiplier": 1.0,
-      "primary_use": "hull_sealing"
+      "valueMultiplier": 1,
+      "primaryUse": "hull_sealing"
     },
     {
       "type": "thick_pitch",
       "viscosity": "high",
       "waterproofing": "excellent",
-      "value_multiplier": 1.2,
-      "primary_use": "critical_seams"
+      "valueMultiplier": 1.2,
+      "primaryUse": "critical_seams"
     }
   ],
   "producedFrom": [
@@ -135,12 +135,12 @@
       "preservation": 0.95
     },
     "shipyard": {
-      "capacityMultiplier": 1.0,
-      "preservation": 1.0
+      "capacityMultiplier": 1,
+      "preservation": 1
     },
-    "arsenal_warehouse": {
+    "arsenalWarehouse": {
       "capacityMultiplier": 1.2,
-      "preservation": 1.0
+      "preservation": 1
     }
   },
   "storageRequirements": [

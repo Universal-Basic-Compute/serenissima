@@ -20,9 +20,9 @@
   "defaultQuality": "standard",
   "qualityEffects": {
     "standard": {
-      "valueModifier": 1.0,
-      "interestRate": 1.0,
-      "serviceRange": 1.0,
+      "valueModifier": 1,
+      "interestRate": 1,
+      "serviceRange": 1,
       "description": "Basic banking services available to established merchants and citizens."
     },
     "premium": {
@@ -48,7 +48,7 @@
         "voyage_specific"
       ],
       "primaryUse": "merchant_ventures",
-      "risk_level": "high"
+      "riskLevel": "high"
     },
     {
       "id": "deposit_services",
@@ -59,18 +59,18 @@
         "interest_bearing"
       ],
       "primaryUse": "wealth_storage",
-      "risk_level": "low"
+      "riskLevel": "low"
     },
     {
       "id": "currency_exchange",
       "name": "Currency Exchange",
-      "valueModifier": 1.0,
+      "valueModifier": 1,
       "properties": [
         "fluctuating_rates",
         "international"
       ],
       "primaryUse": "foreign_trade",
-      "risk_level": "medium"
+      "riskLevel": "medium"
     },
     {
       "id": "public_debt",
@@ -81,18 +81,18 @@
         "long_term"
       ],
       "primaryUse": "government_financing",
-      "risk_level": "low"
+      "riskLevel": "low"
     }
   ],
   "seasonalAvailability": {
-    "spring": 1.0,
-    "summer": 1.0,
-    "autumn": 1.0,
-    "winter": 1.0
+    "spring": 1,
+    "summer": 1,
+    "autumn": 1,
+    "winter": 1
   },
   "seasonalDemand": {
     "spring": 1.2,
-    "summer": 1.0,
+    "summer": 1,
     "autumn": 1.1,
     "winter": 0.8
   },
@@ -111,7 +111,7 @@
       ],
       "reliability": 0.9,
       "quality": "varies",
-      "costFactor": 1.0,
+      "costFactor": 1,
       "affectedBy": [
         "political_stability",
         "trade_volume",
@@ -149,49 +149,49 @@
   ],
   "financialInstruments": {
     "loans": {
-      "interest_rates": {
+      "interestRates": {
         "standard": 0.08,
         "premium": 0.06,
         "exclusive": 0.04
       },
-      "term_options": [
+      "termOptions": [
         180,
         360,
         720,
         1440
       ],
-      "collateral_requirements": true
+      "collateralRequirements": true
     },
     "deposits": {
-      "interest_rates": {
+      "interestRates": {
         "standard": 0.03,
         "premium": 0.04,
         "exclusive": 0.05
       },
-      "term_options": [
+      "termOptions": [
         360,
         720,
         1440,
         2880
       ],
-      "withdrawal_restrictions": true
+      "withdrawalRestrictions": true
     },
-    "trade_investments": {
-      "expected_returns": {
-        "low_risk": 0.06,
-        "medium_risk": 0.12,
-        "high_risk": 0.25
+    "tradeInvestments": {
+      "expectedReturns": {
+        "lowRisk": 0.06,
+        "mediumRisk": 0.12,
+        "highRisk": 0.25
       },
-      "voyage_duration": [
+      "voyageDuration": [
         90,
         180,
         360
       ],
-      "risk_sharing_options": true
+      "riskSharingOptions": true
     },
-    "government_bonds": {
-      "interest_rates": 0.05,
-      "term_options": [
+    "governmentBonds": {
+      "interestRates": 0.05,
+      "termOptions": [
         1440,
         2880,
         4320
@@ -228,7 +228,7 @@
   "producedBy": [
     {
       "building": "bank",
-      "service_capacity": 100,
+      "serviceCapacity": 100,
       "inputs": [
         {
           "resource": "capital",
@@ -239,12 +239,12 @@
           "quantity": 5
         }
       ],
-      "production_cycle": 24,
+      "productionCycle": 24,
       "productionNotes": "Daily banking operations"
     },
     {
       "building": "mint",
-      "service_capacity": 50,
+      "serviceCapacity": 50,
       "inputs": [
         {
           "resource": "precious_metals",
@@ -255,7 +255,7 @@
           "quantity": 10
         }
       ],
-      "production_cycle": 24,
+      "productionCycle": 24,
       "productionNotes": "Currency production and management"
     }
   ],
@@ -277,23 +277,23 @@
     ]
   },
   "economicEffects": {
-    "availability_increase": {
-      "trade_volume": 1.3,
-      "construction_projects": 1.2,
-      "business_formation": 1.4
+    "availabilityIncrease": {
+      "tradeVolume": 1.3,
+      "constructionProjects": 1.2,
+      "businessFormation": 1.4
     },
     "shortages": {
-      "trade_reduction": true,
-      "investment_decline": true,
-      "economic_contraction": true
+      "tradeReduction": true,
+      "investmentDecline": true,
+      "economicContraction": true
     }
   },
   "regulations": {
-    "interest_rate_controls": "partial",
-    "reserve_requirements": "enforced",
-    "foreign_exchange_rules": "strictly_regulated",
-    "lending_restrictions": "by_client_category",
-    "state_oversight": "comprehensive"
+    "interestRateControls": "partial",
+    "reserveRequirements": "enforced",
+    "foreignExchangeRules": "strictly_regulated",
+    "lendingRestrictions": "by_client_category",
+    "stateOversight": "comprehensive"
   },
   "historicalNotes": "Venetian banking evolved from the needs of its maritime trade, developing sophisticated financial instruments to manage risk and capital. The city pioneered concepts like double-entry bookkeeping and bills of exchange that facilitated long-distance trade. The Banco della Piazza di Rialto, founded in 1587, became one of Europe's first public banks, providing secure deposits and regulated exchange services. Unlike some banking centers, Venice maintained tight state oversight of financial activities, viewing them as extensions of the Republic's commercial policy rather than independent enterprises. This integration of banking with state interests helped finance Venice's commercial and military power while providing stability during periods of European financial turbulence."
 }

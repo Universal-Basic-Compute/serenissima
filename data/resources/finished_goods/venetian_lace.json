@@ -6,86 +6,86 @@
   "description": "Exquisite handmade lace renowned throughout Europe for its intricate patterns and delicate craftsmanship. Primarily produced on the island of Burano, this prestigious textile represents the pinnacle of Venetian decorative arts.",
   "icon": "/assets/icons/resources/venetian_lace.png",
   "model": "models/resources/venetian_lace.glb",
-  "base_properties": {
-    "base_value": 70,
+  "baseProperties": {
+    "baseValue": 70,
     "weight": 0.2,
     "volume": 0.3,
-    "stack_size": 10,
+    "stackSize": 10,
     "perishable": false,
     "fragile": true,
-    "damage_sensitivity": 0.7
+    "damageSensitivity": 0.7
   },
-  "market_properties": {
-    "luxury_level": 8,
-    "target_customers": [
+  "marketProperties": {
+    "luxuryLevel": 8,
+    "targetCustomers": [
       "nobility",
       "aristocratic_women",
       "church",
       "wealthy_merchants",
       "royal_courts"
     ],
-    "fashion_sensitivity": 0.4,
-    "export_value_multiplier": 1.8,
-    "market_demand": "high",
-    "price_volatility": 0.2,
-    "seasonal_demand": {
+    "fashionSensitivity": 0.4,
+    "exportValueMultiplier": 1.8,
+    "marketDemand": "high",
+    "priceVolatility": 0.2,
+    "seasonalDemand": {
       "spring": 1.2,
       "summer": 0.9,
       "autumn": 0.8,
       "winter": 1.3
     }
   },
-  "production_properties": {
-    "producer_building": "lace_workshop",
-    "production_complexity": 9,
-    "required_skill": "lacemaking:7",
-    "production_time": 1440,
-    "labor_intensive": true,
-    "eyesight_requirement": "excellent",
+  "productionProperties": {
+    "producerBuilding": "lace_workshop",
+    "productionComplexity": 9,
+    "requiredSkill": "lacemaking:7",
+    "productionTime": 1440,
+    "laborIntensive": true,
+    "eyesightRequirement": "excellent",
     "inputs": [
       {
         "resource": "fine_thread",
         "amount": 3,
-        "quality_impact": 0.7
+        "qualityImpact": 0.7
       },
       {
         "resource": "lace_pattern",
         "amount": 1,
-        "quality_impact": 0.3
+        "qualityImpact": 0.3
       }
     ]
   },
-  "quality_variations": {
-    "available_qualities": [
+  "qualityVariations": {
+    "availableQualities": [
       "fine",
       "superior",
       "masterwork",
       "legendary"
     ],
-    "default_quality": "superior",
-    "quality_multipliers": {
+    "defaultQuality": "superior",
+    "qualityMultipliers": {
       "fine": {
         "value": 0.7,
         "prestige": 0.6,
         "complexity": 0.7
       },
       "superior": {
-        "value": 1.0,
-        "prestige": 1.0,
-        "complexity": 1.0
+        "value": 1,
+        "prestige": 1,
+        "complexity": 1
       },
       "masterwork": {
-        "value": 2.0,
-        "prestige": 2.0,
+        "value": 2,
+        "prestige": 2,
         "complexity": 1.5
       },
       "legendary": {
-        "value": 4.0,
-        "prestige": 4.0,
+        "value": 4,
+        "prestige": 4,
         "complexity": 2.5
       }
     },
-    "quality_factors": [
+    "qualityFactors": [
       {
         "factor": "thread_quality",
         "weight": 0.2
@@ -103,43 +103,43 @@
   "varieties": [
     {
       "type": "punto_in_aria",
-      "production_difficulty": "very_high",
+      "productionDifficulty": "very_high",
       "popularity": "high",
-      "value_multiplier": 1.3,
-      "visual_complexity": "extreme",
+      "valueMultiplier": 1.3,
+      "visualComplexity": "extreme",
       "origin": "burano",
-      "model_variant": "models/resources/venetian_lace_punto.glb"
+      "modelVariant": "models/resources/venetian_lace_punto.glb"
     },
     {
       "type": "gros_point",
-      "production_difficulty": "high",
+      "productionDifficulty": "high",
       "popularity": "very_high",
-      "value_multiplier": 1.2,
-      "visual_complexity": "high",
+      "valueMultiplier": 1.2,
+      "visualComplexity": "high",
       "origin": "burano",
-      "model_variant": "models/resources/venetian_lace_gros.glb"
+      "modelVariant": "models/resources/venetian_lace_gros.glb"
     },
     {
       "type": "rose_point",
-      "production_difficulty": "extreme",
+      "productionDifficulty": "extreme",
       "popularity": "medium",
-      "value_multiplier": 1.5,
-      "visual_complexity": "extreme",
+      "valueMultiplier": 1.5,
+      "visualComplexity": "extreme",
       "origin": "burano",
-      "model_variant": "models/resources/venetian_lace_rose.glb"
+      "modelVariant": "models/resources/venetian_lace_rose.glb"
     },
     {
       "type": "burano_lace",
-      "production_difficulty": "high",
+      "productionDifficulty": "high",
       "popularity": "high",
-      "value_multiplier": 1.0,
-      "visual_complexity": "high",
+      "valueMultiplier": 1,
+      "visualComplexity": "high",
       "origin": "burano",
-      "model_variant": "models/resources/venetian_lace_burano.glb"
+      "modelVariant": "models/resources/venetian_lace_burano.glb"
     }
   ],
-  "pattern_properties": {
-    "traditional_patterns": [
+  "patternProperties": {
+    "traditionalPatterns": [
       {
         "name": "floral_motif",
         "complexity": "high",
@@ -161,142 +161,142 @@
         "popularity": "medium"
       }
     ],
-    "pattern_protection": true,
-    "pattern_registry": "burano_lace_guild",
-    "custom_patterns": {
+    "patternProtection": true,
+    "patternRegistry": "burano_lace_guild",
+    "customPatterns": {
       "available": true,
-      "cost_multiplier": 1.5,
-      "time_multiplier": 1.3
+      "costMultiplier": 1.5,
+      "timeMultiplier": 1.3
     }
   },
-  "usage_properties": {
+  "usageProperties": {
     "uses": [
       "clothing_adornment",
       "home_decoration",
       "ecclesiastical_decoration",
       "personal_accessory"
     ],
-    "application_types": [
+    "applicationTypes": [
       {
         "type": "collar",
-        "material_required": 0.5,
-        "value_added": 25
+        "materialRequired": 0.5,
+        "valueAdded": 25
       },
       {
         "type": "cuff",
-        "material_required": 0.3,
-        "value_added": 15
+        "materialRequired": 0.3,
+        "valueAdded": 15
       },
       {
         "type": "tablecloth_border",
-        "material_required": 3.0,
-        "value_added": 40
+        "materialRequired": 3,
+        "valueAdded": 40
       },
       {
         "type": "handkerchief",
-        "material_required": 0.4,
-        "value_added": 20
+        "materialRequired": 0.4,
+        "valueAdded": 20
       },
       {
         "type": "altar_cloth",
-        "material_required": 2.0,
-        "value_added": 50
+        "materialRequired": 2,
+        "valueAdded": 50
       },
       {
         "type": "veil",
-        "material_required": 1.0,
-        "value_added": 35
+        "materialRequired": 1,
+        "valueAdded": 35
       }
     ],
-    "special_features": [
+    "specialFeatures": [
       "heirloom_quality",
       "status_symbol",
       "artistic_masterpiece"
     ],
-    "complementary_resources": [
+    "complementaryResources": [
       "luxury_silk_garments",
       "fine_clothing",
       "church_vestments",
       "aristocratic_furnishings"
     ]
   },
-  "technical_properties": {
-    "work_techniques": [
+  "technicalProperties": {
+    "workTechniques": [
       "needle_lace",
       "bobbin_lace",
       "mixed_technique"
     ],
-    "stitch_density": "very_high",
-    "thread_count": "exceptional",
+    "stitchDensity": "very_high",
+    "threadCount": "exceptional",
     "transparency": "high",
-    "durability_with_care": "moderate",
-    "cleaning_requirements": [
+    "durabilityWithCare": "moderate",
+    "cleaningRequirements": [
       "specialist_only",
       "gentle_hand_washing"
     ],
-    "repair_difficulty": "extreme"
+    "repairDifficulty": "extreme"
   },
-  "transport_properties": {
-    "transport_methods": {
-      "small_boat": {
+  "transportProperties": {
+    "transportMethods": {
+      "smallBoat": {
         "capacity": 50,
-        "efficiency": 1.0,
+        "efficiency": 1,
         "risk": 0.1
       },
-      "secured_chest": {
+      "securedChest": {
         "capacity": 20,
-        "efficiency": 1.0,
+        "efficiency": 1,
         "risk": 0.05
       },
-      "specialized_carrier": {
+      "specializedCarrier": {
         "capacity": 5,
-        "efficiency": 1.0,
+        "efficiency": 1,
         "risk": 0.02
       }
     },
-    "special_requirements": [
+    "specialRequirements": [
       "moisture_protection",
       "cushioned_packaging",
       "secure_containment"
     ],
-    "loading_time": 15,
-    "route_restrictions": [
+    "loadingTime": 15,
+    "routeRestrictions": [
       "avoid_rain",
       "avoid_crowds"
     ]
   },
-  "storage_properties": {
-    "storage_facilities": {
-      "dry_textile_storage": {
-        "capacity_multiplier": 1.0,
-        "preservation": 1.0
+  "storageProperties": {
+    "storageFacilities": {
+      "dryTextileStorage": {
+        "capacityMultiplier": 1,
+        "preservation": 1
       },
-      "luxury_showroom": {
-        "capacity_multiplier": 0.7,
+      "luxuryShowroom": {
+        "capacityMultiplier": 0.7,
         "preservation": 0.95
       },
-      "secured_chest": {
-        "capacity_multiplier": 0.5,
-        "preservation": 1.0
+      "securedChest": {
+        "capacityMultiplier": 0.5,
+        "preservation": 1
       }
     },
-    "storage_requirements": [
+    "storageRequirements": [
       "dry",
       "acid_free",
       "insect_free",
       "flat_or_rolled"
     ],
-    "special_risks": [
+    "specialRisks": [
       "discoloration",
       "insect_damage",
       "fiber_deterioration",
       "theft"
     ],
-    "max_storage_time": "unlimited",
-    "ideal_humidity": 50,
-    "humidity_tolerance": 10
+    "maxStorageTime": "unlimited",
+    "idealHumidity": 50,
+    "humidityTolerance": 10
   },
-  "production_chain_position": {
+  "productionChainPosition": {
     "predecessors": [
       {
         "resource": "fine_thread",
@@ -322,26 +322,26 @@
       }
     ]
   },
-  "historical_notes": {
-    "introduction_year": 1400,
-    "notable_producers": [
+  "historicalNotes": {
+    "introductionYear": 1400,
+    "notableProducers": [
       "Burano Lace Guild",
       "Jesurum",
       "Lace School of Burano"
     ],
-    "historical_significance": "Venetian lace, particularly from Burano, became one of Venice's most prestigious luxury exports from the 15th century onwards. The techniques were carefully guarded, with designs treated as valuable intellectual property. The industry's development was supported by the Dogaressa Morosina Morosini in the late 16th century, who established a lace school and guild to formalize production. Venetian lace adorned both secular and religious attire throughout Europe, becoming symbols of status and refinement.",
-    "historical_markets": [
+    "historicalSignificance": "Venetian lace, particularly from Burano, became one of Venice's most prestigious luxury exports from the 15th century onwards. The techniques were carefully guarded, with designs treated as valuable intellectual property. The industry's development was supported by the Dogaressa Morosina Morosini in the late 16th century, who established a lace school and guild to formalize production. Venetian lace adorned both secular and religious attire throughout Europe, becoming symbols of status and refinement.",
+    "historicalMarkets": [
       "European royal courts",
       "Venetian nobility",
       "Catholic Church",
       "Wealthy merchant families"
     ],
-    "decline_factors": [
+    "declineFactors": [
       "Cost of production",
       "Rise of machine-made lace",
       "Changing fashion"
     ],
-    "revival_initiatives": [
+    "revivalInitiatives": [
       "Burano Lace School (1872)",
       "Contemporary artisan revival"
     ]

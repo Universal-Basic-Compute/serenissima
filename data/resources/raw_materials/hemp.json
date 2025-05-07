@@ -4,11 +4,11 @@
   "category": "raw_materials",
   "subcategory": "textile_fiber",
   "icon": "/assets/icons/resources/hemp.png",
-  "base_properties": {
-    "base_value": 15,
+  "baseProperties": {
+    "baseValue": 15,
     "weight": 1.2,
     "volume": 1.5,
-    "stack_size": 30,
+    "stackSize": 30,
     "perishable": false
   },
   "description": {
@@ -16,9 +16,9 @@
     "full": "Durable plant fibers harvested from hemp plants grown on the Venetian mainland and imported from surrounding regions. Essential for maritime industries.",
     "flavor": "Without these humble fibers, no ship would sail, no cargo would be secured, and Venice's maritime empire would unravel like a poorly spun thread."
   },
-  "source_properties": {
+  "sourceProperties": {
     "source": "territorial_and_imported",
-    "harvest_method": "agriculture",
+    "harvestMethod": "agriculture",
     "locations": [
       "mainland_territories",
       "dalmatia",
@@ -31,36 +31,36 @@
       "note": "Requires processing after harvest to extract fibers"
     }
   },
-  "quality_variations": {
-    "available_qualities": [
+  "qualityVariations": {
+    "availableQualities": [
       "poor",
       "common",
       "fine"
     ],
-    "default_quality": "common",
-    "quality_multipliers": {
+    "defaultQuality": "common",
+    "qualityMultipliers": {
       "poor": {
         "value": 0.7,
-        "production_efficiency": 0.8,
+        "productionEfficiency": 0.8,
         "durability": 0.7
       },
       "common": {
-        "value": 1.0,
-        "production_efficiency": 1.0,
-        "durability": 1.0
+        "value": 1,
+        "productionEfficiency": 1,
+        "durability": 1
       },
       "fine": {
         "value": 1.4,
-        "production_efficiency": 1.2,
+        "productionEfficiency": 1.2,
         "durability": 1.3
       }
     }
   },
-  "production_properties": {
-    "processor_building": "fiber_workshop",
-    "processing_complexity": 3,
-    "required_skill": "fiber_processing:2",
-    "processing_time": 240,
+  "productionProperties": {
+    "processorBuilding": "fiber_workshop",
+    "processingComplexity": 3,
+    "requiredSkill": "fiber_processing:2",
+    "processingTime": 240,
     "outputs": [
       {
         "resource": "processed_hemp",
@@ -69,18 +69,18 @@
       {
         "resource": "rope",
         "amount": 1,
-        "alternative_output": true,
+        "alternativeOutput": true,
         "facility": "rope_works"
       },
       {
         "resource": "sailcloth",
         "amount": 1,
-        "alternative_output": true,
+        "alternativeOutput": true,
         "facility": "weaving_workshop"
       }
     ]
   },
-  "production_chain_position": {
+  "productionChainPosition": {
     "predecessors": [],
     "successors": [
       {
@@ -99,24 +99,24 @@
   },
   "substitutes": [
     {
-      "resource_id": "flax",
+      "resourceId": "flax",
       "efficiency": 0.8,
-      "quality_penalty": 1,
+      "qualityPenalty": 1,
       "context": "sailcloth_production"
     }
   ],
   "complements": [
     {
-      "resource_id": "water",
+      "resourceId": "water",
       "context": "fiber_processing",
       "relationship": "required"
     }
   ],
-  "transport_properties": {
-    "transport_methods": {
-      "large_ship": {
+  "transportProperties": {
+    "transportMethods": {
+      "largeShip": {
         "capacity": 400,
-        "efficiency": 1.0,
+        "efficiency": 1,
         "risk": 0.1
       },
       "barge": {
@@ -130,60 +130,60 @@
         "risk": 0.2
       }
     },
-    "special_requirements": [
+    "specialRequirements": [
       "dry_storage"
     ],
-    "loading_time": 10,
-    "route_restrictions": []
+    "loadingTime": 10,
+    "routeRestrictions": []
   },
-  "storage_properties": {
-    "storage_facilities": {
+  "storageProperties": {
+    "storageFacilities": {
       "warehouse": {
-        "capacity_multiplier": 1.0,
-        "preservation": 1.0
+        "capacityMultiplier": 1,
+        "preservation": 1
       },
-      "rope_works": {
-        "capacity_multiplier": 0.7,
-        "preservation": 1.0
+      "ropeWorks": {
+        "capacityMultiplier": 0.7,
+        "preservation": 1
       },
-      "weaving_workshop": {
-        "capacity_multiplier": 0.7,
-        "preservation": 1.0
+      "weavingWorkshop": {
+        "capacityMultiplier": 0.7,
+        "preservation": 1
       }
     },
-    "storage_requirements": [
+    "storageRequirements": [
       "dry",
       "ventilated"
     ],
-    "special_risks": [
+    "specialRisks": [
       "moisture",
       "pests",
       "fire"
     ],
-    "max_storage_time": 43200
+    "maxStorageTime": 43200
   },
-  "market_dynamics": {
-    "base_availability": 0.8,
-    "demand_level": "high",
-    "price_volatility": 0.3,
-    "regional_factors": [
+  "marketDynamics": {
+    "baseAvailability": 0.8,
+    "demandLevel": "high",
+    "priceVolatility": 0.3,
+    "regionalFactors": [
       {
         "region": "arsenal",
-        "availability_modifier": 1.3,
-        "price_modifier": 0.9
+        "availabilityModifier": 1.3,
+        "priceModifier": 0.9
       }
     ],
-    "seasonal_factors": [
+    "seasonalFactors": [
       {
         "season": "autumn",
-        "availability_modifier": 1.4,
-        "price_modifier": 0.8,
+        "availabilityModifier": 1.4,
+        "priceModifier": 0.8,
         "note": "Post-harvest abundance"
       },
       {
         "season": "spring",
-        "availability_modifier": 0.7,
-        "price_modifier": 1.2,
+        "availabilityModifier": 0.7,
+        "priceModifier": 1.2,
         "note": "Pre-harvest scarcity"
       }
     ]

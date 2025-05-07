@@ -1,0 +1,1 @@
+lib/threejs/PolygonMeshFacade.ts:288:10 - TS2531: Object is possibly 'null'.

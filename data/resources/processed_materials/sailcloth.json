@@ -4,7 +4,7 @@
   "category": "processed_materials",
   "subcategory": "naval_supplies",
   "baseValue": 30,
-  "weight": 1.0,
+  "weight": 1,
   "volume": 1.5,
   "stackSize": 20,
   "description": "Durable woven fabric for ship sails and awnings.",
@@ -42,26 +42,26 @@
   "varieties": [
     {
       "type": "standard_sailcloth",
-      "weave_density": "medium",
-      "wind_efficiency": "good",
-      "value_multiplier": 1.0,
-      "primary_use": "merchant_vessels"
+      "weaveDensity": "medium",
+      "windEfficiency": "good",
+      "valueMultiplier": 1,
+      "primaryUse": "merchant_vessels"
     },
     {
       "type": "light_sailcloth",
-      "weave_density": "low",
-      "wind_efficiency": "excellent",
+      "weaveDensity": "low",
+      "windEfficiency": "excellent",
       "durability": "reduced",
-      "value_multiplier": 1.2,
-      "primary_use": "racing_vessels"
+      "valueMultiplier": 1.2,
+      "primaryUse": "racing_vessels"
     },
     {
       "type": "heavy_sailcloth",
-      "weave_density": "high",
-      "wind_efficiency": "moderate",
+      "weaveDensity": "high",
+      "windEfficiency": "moderate",
       "durability": "excellent",
-      "value_multiplier": 1.3,
-      "primary_use": "naval_vessels"
+      "valueMultiplier": 1.3,
+      "primaryUse": "naval_vessels"
     }
   ],
   "producedFrom": [
@@ -157,12 +157,12 @@
       "preservation": 0.95
     },
     "shipyard": {
-      "capacityMultiplier": 1.0,
-      "preservation": 1.0
+      "capacityMultiplier": 1,
+      "preservation": 1
     },
-    "arsenal_warehouse": {
+    "arsenalWarehouse": {
       "capacityMultiplier": 1.2,
-      "preservation": 1.0
+      "preservation": 1
     }
   },
   "storageRequirements": [

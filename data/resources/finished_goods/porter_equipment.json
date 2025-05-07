@@ -6,72 +6,72 @@
   "description": "Specialized equipment for professional porters to transport goods through Venice's narrow streets and over countless bridges. Includes carrying poles, balanced containers, and harnesses designed for the unique challenges of Venetian terrain.",
   "icon": "/assets/icons/resources/porter_equipment.png",
   "model": "models/resources/porter_equipment.glb",
-  "base_properties": {
-    "base_value": 40,
-    "weight": 5.0,
-    "volume": 3.0,
-    "stack_size": 5,
+  "baseProperties": {
+    "baseValue": 40,
+    "weight": 5,
+    "volume": 3,
+    "stackSize": 5,
     "perishable": false,
-    "maintenance_required": true,
-    "maintenance_interval": 360
+    "maintenanceRequired": true,
+    "maintenanceInterval": 360
   },
-  "market_properties": {
-    "luxury_level": 0,
-    "target_customers": [
+  "marketProperties": {
+    "luxuryLevel": 0,
+    "targetCustomers": [
       "porters_guild",
       "merchants",
       "transportation_services"
     ],
-    "fashion_sensitivity": 0.0,
-    "export_value_multiplier": 0.8,
-    "market_demand": "steady",
-    "price_volatility": 0.1
+    "fashionSensitivity": 0,
+    "exportValueMultiplier": 0.8,
+    "marketDemand": "steady",
+    "priceVolatility": 0.1
   },
-  "production_properties": {
-    "producer_building": "craftsman_workshop",
-    "production_complexity": 3,
-    "required_skill": "woodworking:2",
-    "production_time": 360,
+  "productionProperties": {
+    "producerBuilding": "craftsman_workshop",
+    "productionComplexity": 3,
+    "requiredSkill": "woodworking:2",
+    "productionTime": 360,
     "inputs": [
       {
         "resource": "timber",
         "amount": 3,
-        "quality_impact": 0.4
+        "qualityImpact": 0.4
       },
       {
         "resource": "rope",
         "amount": 2,
-        "quality_impact": 0.3
+        "qualityImpact": 0.3
       },
       {
         "resource": "tools",
         "amount": 1,
-        "quality_impact": 0.2
+        "qualityImpact": 0.2
       },
       {
         "resource": "iron_fittings",
         "amount": 1,
-        "quality_impact": 0.1
+        "qualityImpact": 0.1
       }
     ]
   },
-  "quality_variations": {
-    "available_qualities": [
+  "qualityVariations": {
+    "availableQualities": [
       "poor",
       "common",
       "fine"
     ],
-    "default_quality": "common",
-    "quality_multipliers": {
+    "defaultQuality": "common",
+    "qualityMultipliers": {
       "poor": {
         "value": 0.7,
         "durability": 0.6,
         "capacity": 0.8
       },
       "common": {
-        "value": 1.0,
-        "durability": 1.0,
-        "capacity": 1.0
+        "value": 1,
+        "durability": 1,
+        "capacity": 1
       },
       "fine": {
         "value": 1.4,
@@ -79,7 +79,7 @@
         "capacity": 1.2
       }
     },
-    "quality_factors": [
+    "qualityFactors": [
       {
         "factor": "material_quality",
         "weight": 0.5
@@ -97,62 +97,62 @@
   "varieties": [
     {
       "type": "carrying_pole",
-      "production_difficulty": "low",
+      "productionDifficulty": "low",
       "popularity": "high",
-      "value_multiplier": 0.8,
+      "valueMultiplier": 0.8,
       "capacity": "balanced_loads",
-      "model_variant": "models/resources/porter_pole.glb"
+      "modelVariant": "models/resources/porter_pole.glb"
     },
     {
       "type": "back_harness",
-      "production_difficulty": "medium",
+      "productionDifficulty": "medium",
       "popularity": "medium",
-      "value_multiplier": 1.0,
+      "valueMultiplier": 1,
       "capacity": "heavy_single_items",
-      "model_variant": "models/resources/porter_harness.glb"
+      "modelVariant": "models/resources/porter_harness.glb"
     },
     {
       "type": "specialized_carriers",
-      "production_difficulty": "high",
+      "productionDifficulty": "high",
       "popularity": "low",
-      "value_multiplier": 1.5,
+      "valueMultiplier": 1.5,
       "capacity": "fragile_or_liquid_goods",
-      "model_variant": "models/resources/porter_specialized.glb"
+      "modelVariant": "models/resources/porter_specialized.glb"
     }
   ],
-  "carrier_properties": {
-    "base_capacity": 3,
-    "terrain_adaptation": "bridges_and_stairs",
+  "carrierProperties": {
+    "baseCapacity": 3,
+    "terrainAdaptation": "bridges_and_stairs",
     "speed": "slow",
-    "maintenance_requirements": {
+    "maintenanceRequirements": {
       "repair": {
         "interval": 360,
         "cost": 5
       }
     }
   },
-  "usage_properties": {
+  "usageProperties": {
     "uses": [
       "goods_transport",
       "market_deliveries",
       "household_moving"
     ],
-    "special_features": [
+    "specialFeatures": [
       "bridge_crossing_capability",
       "narrow_street_access",
       "stair_climbing_design"
     ],
-    "complementary_resources": [
+    "complementaryResources": [
       "labor",
       "market_stalls",
       "warehouses"
     ]
   },
-  "transport_properties": {
-    "transport_methods": {
+  "transportProperties": {
+    "transportMethods": {
       "porter": {
         "capacity": 5,
-        "efficiency": 1.0,
+        "efficiency": 1,
         "risk": 0.1
       },
       "cart": {
@@ -161,41 +161,41 @@
         "risk": 0.15
       }
     },
-    "special_requirements": [],
-    "loading_time": 5
+    "specialRequirements": [],
+    "loadingTime": 5
   },
-  "storage_properties": {
-    "storage_facilities": {
-      "craftsman_workshop": {
-        "capacity_multiplier": 1.0,
-        "preservation": 1.0
+  "storageProperties": {
+    "storageFacilities": {
+      "craftsmanWorkshop": {
+        "capacityMultiplier": 1,
+        "preservation": 1
       },
       "warehouse": {
-        "capacity_multiplier": 0.8,
+        "capacityMultiplier": 0.8,
         "preservation": 0.9
       },
-      "porter_guild_hall": {
-        "capacity_multiplier": 1.2,
+      "porterGuildHall": {
+        "capacityMultiplier": 1.2,
         "preservation": 0.95
       }
     },
-    "storage_requirements": [
+    "storageRequirements": [
       "dry"
     ],
-    "special_risks": [
+    "specialRisks": [
       "theft",
       "wood_rot"
     ],
-    "max_storage_time": "unlimited"
+    "maxStorageTime": "unlimited"
   },
-  "historical_notes": {
-    "introduction_year": "ancient",
-    "notable_producers": [
+  "historicalNotes": {
+    "introductionYear": "ancient",
+    "notableProducers": [
       "Venetian Porters Guild",
       "Local Craftsmen"
     ],
-    "historical_significance": "In a city with no wheeled transport due to countless bridges and narrow streets, professional porters were essential to Venice's commercial system. Their specialized equipment evolved to address the unique challenges of transporting goods through the city's vertical terrain. Organized into guilds with specific territories and rates, porters formed a critical link in Venice's commercial infrastructure.",
-    "historical_markets": [
+    "historicalSignificance": "In a city with no wheeled transport due to countless bridges and narrow streets, professional porters were essential to Venice's commercial system. Their specialized equipment evolved to address the unique challenges of transporting goods through the city's vertical terrain. Organized into guilds with specific territories and rates, porters formed a critical link in Venice's commercial infrastructure.",
+    "historicalMarkets": [
       "Rialto market suppliers",
       "Warehouse operations",
       "Household moving services"

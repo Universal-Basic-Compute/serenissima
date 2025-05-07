@@ -4,21 +4,21 @@
   "category": "raw_materials",
   "subcategory": "mineral",
   "icon": "/assets/icons/resources/iron_ore.png",
-  "base_properties": {
-    "base_value": 10,
-    "weight": 5.0,
-    "volume": 1.0,
-    "stack_size": 40,
+  "baseProperties": {
+    "baseValue": 10,
+    "weight": 5,
+    "volume": 1,
+    "stackSize": 40,
     "perishable": false
   },
   "description": {
     "short": "Unprocessed iron-bearing rock.",
     "full": "Heavy mineral ore containing iron, mined from the mainland territories under Venetian control and imported from Alpine regions.",
-    "flavor": "From these humble stones of earth comes the skeleton of our ships, the strength of our tools, and the protection of our warriors\u00e2\u20ac\u201dtruly the bones of civilization."
+    "flavor": "From these humble stones of earth comes the skeleton of our ships, the strength of our tools, and the protection of our warriorsâ€”truly the bones of civilization."
   },
-  "source_properties": {
+  "sourceProperties": {
     "source": "territorial_and_imported",
-    "harvest_method": "mining",
+    "harvestMethod": "mining",
     "locations": [
       "mainland_territories",
       "alpine_regions",
@@ -27,49 +27,49 @@
     "availability": "common",
     "seasonality": "year_round"
   },
-  "quality_variations": {
-    "available_qualities": [
+  "qualityVariations": {
+    "availableQualities": [
       "poor",
       "common",
       "fine",
       "superior"
     ],
-    "default_quality": "common",
-    "quality_multipliers": {
+    "defaultQuality": "common",
+    "qualityMultipliers": {
       "poor": {
         "value": 0.7,
-        "production_efficiency": 0.8,
-        "yield_modifier": 0.7
+        "productionEfficiency": 0.8,
+        "yieldModifier": 0.7
       },
       "common": {
-        "value": 1.0,
-        "production_efficiency": 1.0,
-        "yield_modifier": 1.0
+        "value": 1,
+        "productionEfficiency": 1,
+        "yieldModifier": 1
       },
       "fine": {
         "value": 1.4,
-        "production_efficiency": 1.2,
-        "yield_modifier": 1.3
+        "productionEfficiency": 1.2,
+        "yieldModifier": 1.3
       },
       "superior": {
-        "value": 2.0,
-        "production_efficiency": 1.5,
-        "yield_modifier": 1.6
+        "value": 2,
+        "productionEfficiency": 1.5,
+        "yieldModifier": 1.6
       }
     }
   },
-  "production_properties": {
-    "processor_building": "foundry",
-    "processing_complexity": 4,
-    "required_skill": "smelting:3",
-    "processing_time": 360,
+  "productionProperties": {
+    "processorBuilding": "foundry",
+    "processingComplexity": 4,
+    "requiredSkill": "smelting:3",
+    "processingTime": 360,
     "outputs": [
       {
         "resource": "processed_iron",
         "amount": 1
       }
     ],
-    "production_chains": [
+    "productionChains": [
       {
         "process": "smelting",
         "chain": "Iron Ore → Foundry → Processed Iron"
@@ -79,16 +79,16 @@
   "substitutes": [],
   "complements": [
     {
-      "resource_id": "fuel",
+      "resourceId": "fuel",
       "context": "smelting",
       "relationship": "required"
     }
   ],
-  "transport_properties": {
-    "transport_methods": {
-      "large_ship": {
+  "transportProperties": {
+    "transportMethods": {
+      "largeShip": {
         "capacity": 300,
-        "efficiency": 1.0,
+        "efficiency": 1,
         "risk": 0.1
       },
       "barge": {
@@ -97,47 +97,47 @@
         "risk": 0.15
       }
     },
-    "special_requirements": [
+    "specialRequirements": [
       "sturdy_vessel"
     ],
-    "loading_time": 20,
-    "route_restrictions": [
+    "loadingTime": 20,
+    "routeRestrictions": [
       "weight_limits"
     ]
   },
-  "storage_properties": {
-    "storage_facilities": {
-      "bulk_materials_yard": {
-        "capacity_multiplier": 1.0,
-        "preservation": 1.0
+  "storageProperties": {
+    "storageFacilities": {
+      "bulkMaterialsYard": {
+        "capacityMultiplier": 1,
+        "preservation": 1
       },
       "foundry": {
-        "capacity_multiplier": 0.6,
-        "preservation": 1.0
+        "capacityMultiplier": 0.6,
+        "preservation": 1
       }
     },
-    "storage_requirements": [
+    "storageRequirements": [
       "reinforced_flooring"
     ],
-    "special_risks": [
+    "specialRisks": [
       "moisture"
     ],
-    "max_storage_time": "unlimited"
+    "maxStorageTime": "unlimited"
   },
-  "market_dynamics": {
-    "base_availability": 0.7,
-    "demand_level": "steady",
-    "price_volatility": 0.3,
-    "regional_factors": [
+  "marketDynamics": {
+    "baseAvailability": 0.7,
+    "demandLevel": "steady",
+    "priceVolatility": 0.3,
+    "regionalFactors": [
       {
         "region": "arsenal",
-        "availability_modifier": 1.2,
-        "price_modifier": 0.9
+        "availabilityModifier": 1.2,
+        "priceModifier": 0.9
       }
     ],
-    "seasonal_factors": [],
-    "environmental_factors": {
-      "mining_conditions": {
+    "seasonalFactors": [],
+    "environmentalFactors": {
+      "miningConditions": {
         "impact": "medium",
         "note": "Flooding or collapses can disrupt supply"
       }

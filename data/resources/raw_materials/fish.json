@@ -4,22 +4,22 @@
   "category": "raw_materials",
   "subcategory": "food",
   "icon": "/assets/icons/resources/fish.png",
-  "base_properties": {
-    "base_value": 6,
-    "weight": 1.0,
-    "volume": 1.0,
-    "stack_size": 20,
+  "baseProperties": {
+    "baseValue": 6,
+    "weight": 1,
+    "volume": 1,
+    "stackSize": 20,
     "perishable": true,
-    "perish_time": 720
+    "perishTime": 720
   },
   "description": {
     "short": "Fresh fish caught from the lagoon and Adriatic.",
     "full": "Various species of fish harvested from Venice's lagoon waters and nearby Adriatic Sea. A staple food for Venetians of all classes.",
-    "flavor": "The fishermen's nets haul in more than sustenance\u00e2\u20ac\u201dthey draw forth the very identity of Venice, a city as much of the water as beside it."
+    "flavor": "The fishermen's nets haul in more than sustenanceâ€”they draw forth the very identity of Venice, a city as much of the water as beside it."
   },
-  "source_properties": {
+  "sourceProperties": {
     "source": "local",
-    "harvest_method": "fishing",
+    "harvestMethod": "fishing",
     "locations": [
       "lagoon",
       "adriatic"
@@ -31,70 +31,72 @@
       "note": "Different species available in different seasons"
     }
   },
-  "quality_variations": {
-    "available_qualities": [
+  "qualityVariations": {
+    "availableQualities": [
       "poor",
       "common",
       "fine"
     ],
-    "default_quality": "common",
-    "quality_multipliers": {
+    "defaultQuality": "common",
+    "qualityMultipliers": {
       "poor": {
         "value": 0.7,
-        "perish_time_modifier": 0.7
+        "perishTimeModifier": 0.7
       },
       "common": {
-        "value": 1.0,
-        "perish_time_modifier": 1.0
+        "value": 1,
+        "perishTimeModifier": 1
       },
       "fine": {
         "value": 1.5,
-        "perish_time_modifier": 1.2
+        "perishTimeModifier": 1.2
       }
     }
   },
   "varieties": [
     {
       "type": "lagoon_fish",
-      "value_multiplier": 0.8,
+      "valueMultiplier": 0.8,
       "availability": "very_common"
     },
     {
       "type": "adriatic_fish",
-      "value_multiplier": 1.2,
+      "valueMultiplier": 1.2,
       "availability": "common"
     },
     {
       "type": "deep_sea_fish",
-      "value_multiplier": 1.6,
+      "valueMultiplier": 1.6,
       "availability": "uncommon"
     }
   ],
-  "production_properties": {
-    "processor_building": "salting_house",
-    "processing_complexity": 3,
-    "required_skill": "food_preservation:2",
-    "processing_time": 240,
+  "productionProperties": {
+    "processorBuilding": "salting_house",
+    "processingComplexity": 3,
+    "requiredSkill": "food_preservation:2",
+    "processingTime": 240,
     "outputs": [
       {
         "resource": "preserved_fish",
         "amount": 1,
-        "requires": ["salt"]
+        "requires": [
+          "salt"
+        ]
       },
       {
         "resource": "smoked_fish",
         "amount": 1,
-        "alternative_output": true,
+        "alternativeOutput": true,
         "facility": "smoker"
       },
       {
         "resource": "prepared_meal",
         "amount": 1,
-        "alternative_output": true,
+        "alternativeOutput": true,
         "facility": "tavern"
       }
     ],
-    "production_chains": [
+    "productionChains": [
       {
         "process": "cooking",
         "chain": "Fish → Tavern → Prepared Meal"
@@ -112,21 +114,21 @@
   "substitutes": [],
   "complements": [
     {
-      "resource_id": "salt",
+      "resourceId": "salt",
       "context": "preserving",
       "relationship": "required"
     },
     {
-      "resource_id": "spices",
+      "resourceId": "spices",
       "context": "cooking",
       "relationship": "optional"
     }
   ],
-  "transport_properties": {
-    "transport_methods": {
-      "fishing_boat": {
+  "transportProperties": {
+    "transportMethods": {
+      "fishingBoat": {
         "capacity": 20,
-        "efficiency": 1.0,
+        "efficiency": 1,
         "risk": 0.1
       },
       "cart": {
@@ -140,72 +142,72 @@
         "risk": 0.2
       }
     },
-    "special_requirements": [
+    "specialRequirements": [
       "cool_conditions",
       "quick_delivery"
     ],
-    "loading_time": 5,
-    "route_restrictions": [
+    "loadingTime": 5,
+    "routeRestrictions": [
       "time_sensitive"
     ]
   },
-  "storage_properties": {
-    "storage_facilities": {
-      "ice_storage": {
-        "capacity_multiplier": 1.0,
-        "preservation": 1.0,
-        "perish_time_extension": 2880
+  "storageProperties": {
+    "storageFacilities": {
+      "iceStorage": {
+        "capacityMultiplier": 1,
+        "preservation": 1,
+        "perishTimeExtension": 2880
       },
-      "market_stall": {
-        "capacity_multiplier": 0.5,
+      "marketStall": {
+        "capacityMultiplier": 0.5,
         "preservation": 0.8,
-        "perish_time_extension": 0
+        "perishTimeExtension": 0
       }
     },
-    "storage_requirements": [
+    "storageRequirements": [
       "cold",
       "ventilation"
     ],
-    "special_risks": [
+    "specialRisks": [
       "spoilage",
       "odor"
     ],
-    "max_storage_time": "depends_on_preservation"
+    "maxStorageTime": "depends_on_preservation"
   },
-  "market_dynamics": {
-    "base_availability": 0.9,
-    "demand_level": "high",
-    "price_volatility": 0.4,
-    "regional_factors": [
+  "marketDynamics": {
+    "baseAvailability": 0.9,
+    "demandLevel": "high",
+    "priceVolatility": 0.4,
+    "regionalFactors": [
       {
         "region": "fish_market",
-        "availability_modifier": 2.0,
-        "price_modifier": 0.8
+        "availabilityModifier": 2,
+        "priceModifier": 0.8
       }
     ],
-    "seasonal_factors": [
+    "seasonalFactors": [
       {
         "season": "spring",
-        "availability_modifier": 1.3,
-        "price_modifier": 0.8,
+        "availabilityModifier": 1.3,
+        "priceModifier": 0.8,
         "note": "Spawning season for many species"
       },
       {
         "season": "winter",
-        "availability_modifier": 0.7,
-        "price_modifier": 1.3,
+        "availabilityModifier": 0.7,
+        "priceModifier": 1.3,
         "note": "Rough seas reduce fishing"
       }
     ],
-    "environmental_factors": {
+    "environmentalFactors": {
       "weather": {
-        "storm_effect": "reduced_availability"
+        "stormEffect": "reduced_availability"
       },
       "pollution": {
         "effect": "quality_reduction"
       },
       "overfishing": {
-        "long_term_effect": "reduced_availability"
+        "longTermEffect": "reduced_availability"
       }
     }
   }

@@ -19,7 +19,7 @@
   ],
   "defaultQuality": "established",
   "qualityEffects": {
-    "street_level": {
+    "streetLevel": {
       "valueModifier": 0.6,
       "informationQuality": 0.5,
       "serviceRange": 0.7,
@@ -27,9 +27,9 @@
       "description": "Basic connections to petty criminals, street informants, and minor smugglers."
     },
     "established": {
-      "valueModifier": 1.0,
-      "informationQuality": 1.0,
-      "serviceRange": 1.0,
+      "valueModifier": 1,
+      "informationQuality": 1,
+      "serviceRange": 1,
       "reliability": 0.8,
       "description": "Solid network of professional criminals, corrupt officials, and reliable fences."
     },
@@ -51,7 +51,7 @@
         "customs_evasion"
       ],
       "primaryUse": "contraband_trade",
-      "risk_level": "medium"
+      "riskLevel": "medium"
     },
     {
       "id": "information_network",
@@ -62,7 +62,7 @@
         "rumor_collection"
       ],
       "primaryUse": "espionage",
-      "risk_level": "low"
+      "riskLevel": "low"
     },
     {
       "id": "enforcement_network",
@@ -74,7 +74,7 @@
         "debt_collection"
       ],
       "primaryUse": "criminal_enforcement",
-      "risk_level": "high"
+      "riskLevel": "high"
     },
     {
       "id": "corruption_network",
@@ -86,19 +86,19 @@
         "legal_interference"
       ],
       "primaryUse": "system_manipulation",
-      "risk_level": "very_high"
+      "riskLevel": "very_high"
     }
   ],
   "seasonalAvailability": {
-    "spring": 1.0,
-    "summer": 1.0,
-    "autumn": 1.0,
-    "winter": 1.0
+    "spring": 1,
+    "summer": 1,
+    "autumn": 1,
+    "winter": 1
   },
   "seasonalDemand": {
-    "spring": 1.0,
+    "spring": 1,
     "summer": 1.2,
-    "autumn": 1.0,
+    "autumn": 1,
     "winter": 0.9
   },
   "marketDynamics": {
@@ -146,7 +146,7 @@
       ],
       "reliability": 0.6,
       "quality": "elite",
-      "costFactor": 2.0,
+      "costFactor": 2,
       "affectedBy": [
         "political_alliances",
         "council_investigations",
@@ -163,15 +163,15 @@
         "blackmail_material"
       ],
       "reliability": {
-        "street_level": 0.6,
+        "streetLevel": 0.6,
         "established": 0.8,
         "elite": 0.9
       },
-      "cost_factor": 1.0
+      "costFactor": 1
     },
     "smuggling": {
       "capacity": {
-        "street_level": "small_items",
+        "streetLevel": "small_items",
         "established": "medium_cargo",
         "elite": "any_cargo"
       },
@@ -180,11 +180,11 @@
         "canal_network",
         "lagoon_passages"
       ],
-      "cost_factor": 1.5
+      "costFactor": 1.5
     },
     "protection": {
       "effectiveness": {
-        "street_level": 0.5,
+        "streetLevel": 0.5,
         "established": 0.7,
         "elite": 0.9
       },
@@ -193,7 +193,7 @@
         "bribery",
         "diversion"
       ],
-      "cost_factor": 2.0
+      "costFactor": 2
     }
   },
   "usedBy": [
@@ -225,7 +225,7 @@
   "producedBy": [
     {
       "building": "tavern",
-      "service_capacity": 10,
+      "serviceCapacity": 10,
       "inputs": [
         {
           "resource": "wine",
@@ -236,12 +236,12 @@
           "quantity": 10
         }
       ],
-      "production_cycle": 720,
+      "productionCycle": 720,
       "productionNotes": "Cultivated through regular meetings and information exchange"
     },
     {
       "building": "gambling_den",
-      "service_capacity": 15,
+      "serviceCapacity": 15,
       "inputs": [
         {
           "resource": "entertainment",
@@ -252,7 +252,7 @@
           "quantity": 15
         }
       ],
-      "production_cycle": 720,
+      "productionCycle": 720,
       "productionNotes": "Developed through shared risk and debt relationships"
     }
   ],
@@ -273,22 +273,22 @@
     ]
   },
   "economicEffects": {
-    "availability_increase": {
-      "contraband_access": 1.5,
-      "information_quality": 1.3,
-      "security_bypass": 1.4
+    "availabilityIncrease": {
+      "contrabandAccess": 1.5,
+      "informationQuality": 1.3,
+      "securityBypass": 1.4
     },
     "shortages": {
-      "increased_arrest_risk": true,
-      "higher_bribe_costs": true,
-      "reduced_criminal_operations": true
+      "increasedArrestRisk": true,
+      "higherBribeCosts": true,
+      "reducedCriminalOperations": true
     }
   },
   "regulations": {
     "legality": "illegal",
-    "enforcement_priority": "medium",
-    "punishment_severity": "imprisonment",
-    "detection_difficulty": "high"
+    "enforcementPriority": "medium",
+    "punishmentSeverity": "imprisonment",
+    "detectionDifficulty": "high"
   },
   "historicalNotes": "Venice's unique geography and position as a trading crossroads made it an ideal environment for sophisticated criminal networks. The labyrinthine canals, crowded campos, and masked celebrations provided perfect cover for clandestine meetings and exchanges. The Republic's Council of Ten maintained an extensive network of informants, creating a culture where information was a valuable currency. Criminal organizations often specialized by district or trade, with some focusing on smuggling contraband through the lagoon's countless approaches, while others specialized in document forgery to navigate Venice's complex bureaucracy. Despite the Republic's fearsome reputation for justice, corruption was endemic, creating a parallel system of influence that operated alongside official channels."
 }

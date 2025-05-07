@@ -4,21 +4,21 @@
   "category": "raw_materials",
   "subcategory": "forestry",
   "icon": "/assets/icons/resources/pine_resin.png",
-  "base_properties": {
-    "base_value": 8,
-    "weight": 1.0,
+  "baseProperties": {
+    "baseValue": 8,
+    "weight": 1,
     "volume": 0.7,
-    "stack_size": 25,
+    "stackSize": 25,
     "perishable": false
   },
   "description": {
     "short": "Sticky substance harvested from pine trees.",
     "full": "Viscous, aromatic resin collected from pine trees in mainland forests. Essential raw material for producing pitch used in shipbuilding and waterproofing.",
-    "flavor": "The lifeblood of the forest becomes the lifeblood of our ships\u00e2\u20ac\u201dwithout this golden sap, Venice's wooden vessels would succumb to the hungry sea."
+    "flavor": "The lifeblood of the forest becomes the lifeblood of our shipsâ€”without this golden sap, Venice's wooden vessels would succumb to the hungry sea."
   },
-  "source_properties": {
+  "sourceProperties": {
     "source": "territorial",
-    "harvest_method": "tapping",
+    "harvestMethod": "tapping",
     "locations": [
       "mainland_forests",
       "alpine_foothills",
@@ -31,38 +31,38 @@
       "note": "Resin flows most freely during warm months"
     }
   },
-  "quality_variations": {
-    "available_qualities": [
+  "qualityVariations": {
+    "availableQualities": [
       "poor",
       "common",
       "fine",
       "superior"
     ],
-    "default_quality": "common",
-    "quality_multipliers": {
+    "defaultQuality": "common",
+    "qualityMultipliers": {
       "poor": {
         "value": 0.7,
-        "production_efficiency": 0.8
+        "productionEfficiency": 0.8
       },
       "common": {
-        "value": 1.0,
-        "production_efficiency": 1.0
+        "value": 1,
+        "productionEfficiency": 1
       },
       "fine": {
         "value": 1.4,
-        "production_efficiency": 1.2
+        "productionEfficiency": 1.2
       },
       "superior": {
-        "value": 2.0,
-        "production_efficiency": 1.5
+        "value": 2,
+        "productionEfficiency": 1.5
       }
     }
   },
-  "production_properties": {
-    "processor_building": "pitch_works",
-    "processing_complexity": 3,
-    "required_skill": "pitch_making:2",
-    "processing_time": 360,
+  "productionProperties": {
+    "processorBuilding": "pitch_works",
+    "processingComplexity": 3,
+    "requiredSkill": "pitch_making:2",
+    "processingTime": 360,
     "outputs": [
       {
         "resource": "pitch",
@@ -71,11 +71,11 @@
       {
         "resource": "varnish",
         "amount": 1,
-        "alternative_output": true,
+        "alternativeOutput": true,
         "facility": "varnish_workshop"
       }
     ],
-    "production_chains": [
+    "productionChains": [
       {
         "process": "pitch_making",
         "chain": "Pine Resin → Pitch Works → Pitch"
@@ -89,14 +89,14 @@
   "substitutes": [],
   "complements": [
     {
-      "resource_id": "fuel",
+      "resourceId": "fuel",
       "context": "pitch_making",
       "relationship": "required"
     }
   ],
-  "transport_properties": {
-    "transport_methods": {
-      "large_ship": {
+  "transportProperties": {
+    "transportMethods": {
+      "largeShip": {
         "capacity": 300,
         "efficiency": 0.9,
         "risk": 0.2
@@ -112,65 +112,65 @@
         "risk": 0.25
       }
     },
-    "special_requirements": [
+    "specialRequirements": [
       "sealed_containers",
       "careful_handling"
     ],
-    "loading_time": 12,
-    "route_restrictions": [
+    "loadingTime": 12,
+    "routeRestrictions": [
       "fire_safety"
     ]
   },
-  "storage_properties": {
-    "storage_facilities": {
+  "storageProperties": {
+    "storageFacilities": {
       "warehouse": {
-        "capacity_multiplier": 0.8,
+        "capacityMultiplier": 0.8,
         "preservation": 0.95
       },
-      "pitch_works": {
-        "capacity_multiplier": 1.0,
-        "preservation": 1.0
+      "pitchWorks": {
+        "capacityMultiplier": 1,
+        "preservation": 1
       }
     },
-    "storage_requirements": [
+    "storageRequirements": [
       "cool",
       "sealed_containers",
       "fire_safety"
     ],
-    "special_risks": [
+    "specialRisks": [
       "fire",
       "hardening",
       "contamination"
     ],
-    "max_storage_time": 10080
+    "maxStorageTime": 10080
   },
-  "market_dynamics": {
-    "base_availability": 0.7,
-    "demand_level": "high",
-    "price_volatility": 0.3,
-    "regional_factors": [
+  "marketDynamics": {
+    "baseAvailability": 0.7,
+    "demandLevel": "high",
+    "priceVolatility": 0.3,
+    "regionalFactors": [
       {
         "region": "arsenal",
-        "availability_modifier": 1.2,
-        "price_modifier": 0.9
+        "availabilityModifier": 1.2,
+        "priceModifier": 0.9
       }
     ],
-    "seasonal_factors": [
+    "seasonalFactors": [
       {
         "season": "summer",
-        "availability_modifier": 1.3,
-        "price_modifier": 0.8,
+        "availabilityModifier": 1.3,
+        "priceModifier": 0.8,
         "note": "Peak harvesting season"
       },
       {
         "season": "winter",
-        "availability_modifier": 0.6,
-        "price_modifier": 1.3,
+        "availabilityModifier": 0.6,
+        "priceModifier": 1.3,
         "note": "Minimal harvesting possible"
       }
     ],
-    "environmental_factors": {
-      "forest_management": {
+    "environmentalFactors": {
+      "forestManagement": {
         "impact": "high",
         "note": "Sustainable tapping practices required for long-term supply"
       }
