@@ -702,9 +702,13 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
                 </span>
               </p>
               
-              {/* Log transaction data for debugging */}
-              {console.log('Transaction data:', transaction)}
-              {console.log('Transaction seller type:', typeof transaction.seller)}
+              {/* Transaction data debugging - not rendered */}
+              {(() => {
+                // This is an immediately-invoked function expression (IIFE) that doesn't return anything
+                console.log('Transaction data:', transaction);
+                console.log('Transaction seller type:', typeof transaction.seller);
+                return null; // Return null to avoid the TypeScript error
+              })()}
               
               {/* Check if current user is the seller using our helper function */}
               {isCurrentUserTheSeller(transaction) ? (
