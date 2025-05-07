@@ -296,26 +296,27 @@ const Compagno: React.FC<CompagnoProps> = ({ className }) => {
                       : 'assistant-bubble rounded-bl-none'
                   }`}
                 >
-                  <ReactMarkdown 
-                    remarkPlugins={[remarkGfm]}
-                    className="markdown-content"
-                    components={{
-                      // Customize how certain markdown elements are rendered
-                      a: ({node, ...props}) => <a {...props} className="text-amber-700 underline hover:text-amber-500" target="_blank" rel="noopener noreferrer" />,
-                      code: ({node, ...props}) => <code {...props} className="bg-amber-50 px-1 py-0.5 rounded text-sm font-mono" />,
-                      pre: ({node, ...props}) => <pre {...props} className="bg-amber-50 p-2 rounded my-2 overflow-x-auto text-sm font-mono" />,
-                      ul: ({node, ...props}) => <ul {...props} className="list-disc pl-5 my-1" />,
-                      ol: ({node, ...props}) => <ol {...props} className="list-decimal pl-5 my-1" />,
-                      li: ({node, ...props}) => <li {...props} className="my-0.5" />,
-                      blockquote: ({node, ...props}) => <blockquote {...props} className="border-l-4 border-amber-300 pl-3 italic my-2" />,
-                      h1: ({node, ...props}) => <h1 {...props} className="text-lg font-bold my-2" />,
-                      h2: ({node, ...props}) => <h2 {...props} className="text-md font-bold my-2" />,
-                      h3: ({node, ...props}) => <h3 {...props} className="text-sm font-bold my-1" />,
-                      p: ({node, ...props}) => <p {...props} className="my-1" />
-                    }}
-                  >
-                    {message.content}
-                  </ReactMarkdown>
+                  <div className="markdown-content">
+                    <ReactMarkdown 
+                      remarkPlugins={[remarkGfm]}
+                      components={{
+                        // Customize how certain markdown elements are rendered
+                        a: ({node, ...props}) => <a {...props} className="text-amber-700 underline hover:text-amber-500" target="_blank" rel="noopener noreferrer" />,
+                        code: ({node, ...props}) => <code {...props} className="bg-amber-50 px-1 py-0.5 rounded text-sm font-mono" />,
+                        pre: ({node, ...props}) => <pre {...props} className="bg-amber-50 p-2 rounded my-2 overflow-x-auto text-sm font-mono" />,
+                        ul: ({node, ...props}) => <ul {...props} className="list-disc pl-5 my-1" />,
+                        ol: ({node, ...props}) => <ol {...props} className="list-decimal pl-5 my-1" />,
+                        li: ({node, ...props}) => <li {...props} className="my-0.5" />,
+                        blockquote: ({node, ...props}) => <blockquote {...props} className="border-l-4 border-amber-300 pl-3 italic my-2" />,
+                        h1: ({node, ...props}) => <h1 {...props} className="text-lg font-bold my-2" />,
+                        h2: ({node, ...props}) => <h2 {...props} className="text-md font-bold my-2" />,
+                        h3: ({node, ...props}) => <h3 {...props} className="text-sm font-bold my-1" />,
+                        p: ({node, ...props}) => <p {...props} className="my-1" />
+                      }}
+                    >
+                      {message.content}
+                    </ReactMarkdown>
+                  </div>
                 </div>
                 <div className="text-xs text-gray-500 mt-1 px-1">
                   {new Date(message.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
