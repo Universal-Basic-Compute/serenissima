@@ -621,7 +621,8 @@ export class PolygonMeshFacade implements Poolable {
     
     // If the geometry has an index buffer, we can simplify by removing vertices
     if (simplifiedGeometry.index) {
-      const originalIndices = Array.from(simplifiedGeometry.index.array);
+      // Use non-null assertion operator since we've already checked that index exists
+      const originalIndices = Array.from(simplifiedGeometry.index!.array);
       const totalTriangles = originalIndices.length / 3;
       
       // Calculate how many triangles to keep
