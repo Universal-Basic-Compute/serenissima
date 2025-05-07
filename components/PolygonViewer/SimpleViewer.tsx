@@ -217,6 +217,17 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
       incomeRendererRef.current = incomeRenderer;
     }
     
+    // Create income renderer if in land view
+    if (activeView === 'land') {
+      console.log('Creating income renderer for land view');
+      const incomeRenderer = new IncomePolygonRenderer({
+        scene,
+        polygons,
+        bounds
+      });
+      incomeRendererRef.current = incomeRenderer;
+    }
+    
     // Add ambient light
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
     scene.add(ambientLight);

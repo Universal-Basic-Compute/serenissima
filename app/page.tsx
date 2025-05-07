@@ -158,6 +158,7 @@ export default function Home() {
   const [activeView, setActiveView] = useState<'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance'>('land');
   const [marketPanelVisible, setMarketPanelVisible] = useState(false);
   const polygonRendererRef = useRef<any>(null);
+  const incomeRendererRef = useRef<IncomePolygonRenderer | null>(null);
   const [polygons, setPolygons] = useState<any[]>([]);
   
   // Function to generate coat of arms image
@@ -800,6 +801,38 @@ export default function Home() {
         }
       }
     };
+    
+    try {
+      // Subscribe to income data events
+      const incomeDataSubscription = eventBus.subscribe(
+        EventTypes.INCOME_DATA_UPDATED, 
+        handleIncomeDataUpdated
+      );
+      
+      const polygonIncomeSubscription = eventBus.subscribe(
+        EventTypes.POLYGON_INCOME_UPDATED, 
+        handlePolygonIncomeUpdated
+      );
+      
+      // Also listen for custom events
+      const handleCustomIncomeDataUpdated = (event: CustomEvent) => {
+        if (incomeRendererRef.current && activeView === 'land') {
+          incomeRendererRef.current.updateIncomeVisualization();
+        }
+      };
+      
+      window.addEventListener('incomeDataUpdated', handleCustomIncomeDataUpdated as EventListener);
+      
+      // Cleanup subscriptions
+      return () => {
+        incomeDataSubscription.unsubscribe();
+        polygonIncomeSubscription.unsubscribe();
+        window.removeEventListener('incomeDataUpdated', handleCustomIncomeDataUpdated as EventListener);
+      };
+    } catch (error) {
+      console.warn('Error setting up income data event handlers:', error);
+      return () => {}; // Empty cleanup function
+    }
     
     try {
       // Subscribe to income data events

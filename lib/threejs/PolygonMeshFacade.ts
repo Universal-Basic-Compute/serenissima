@@ -351,6 +351,29 @@ export class PolygonMeshFacade implements Poolable {
   }
   
   /**
+   * Update polygon colors based on owner
+   */
+  public updatePolygonOwnerColors(): void {
+    // Skip if not in land view
+    if (this.activeView !== 'land') return;
+    
+    // Update material color based on owner
+    if (this.polygon.owner && this.ownerColor) {
+      if (this.mesh) {
+        if (this.mesh.material instanceof THREE.MeshBasicMaterial) {
+          this.updateMaterialColor(this.mesh.material);
+        } else if (Array.isArray(this.mesh.material)) {
+          this.mesh.material.forEach(mat => {
+            if (mat instanceof THREE.MeshBasicMaterial) {
+              this.updateMaterialColor(mat);
+            }
+          });
+        }
+      }
+    }
+  }
+  
+  /**
    * Update coat of arms texture
    */
   public updateCoatOfArmsTexture(coatOfArmsUrl: string | null): void {
