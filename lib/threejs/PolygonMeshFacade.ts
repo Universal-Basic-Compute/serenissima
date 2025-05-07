@@ -200,7 +200,6 @@ export class PolygonMeshFacade implements Poolable {
         transparent: false,
         roughness: 0.8,
         metalness: 0.1
-        // Shadow properties removed as they don't exist on MeshStandardMaterialParameters
       });
     }
   }
