@@ -819,8 +819,8 @@ export default class PolygonRenderer {
                   obj.material.forEach((mat: THREE.Material) => {
                     try {
                       // Check if material has a map property (like MeshBasicMaterial or MeshStandardMaterial)
-                      if ('map' in mat && (mat as any).map) {
-                        (mat as any).map?.dispose();
+                      if ('map' in mat && (mat as THREE.MeshBasicMaterial | THREE.MeshStandardMaterial).map) {
+                        (mat as THREE.MeshBasicMaterial | THREE.MeshStandardMaterial).map?.dispose();
                       }
                       mat.dispose();
                     } catch (matError) {
@@ -830,8 +830,8 @@ export default class PolygonRenderer {
                 } else {
                   try {
                     // Check if material has a map property
-                    if ('map' in obj.material && (obj.material as any).map) {
-                      (obj.material as any).map?.dispose();
+                    if ('map' in obj.material && (obj.material as THREE.MeshBasicMaterial | THREE.MeshStandardMaterial).map) {
+                      (obj.material as THREE.MeshBasicMaterial | THREE.MeshStandardMaterial).map?.dispose();
                     }
                     obj.material.dispose();
                   } catch (matError) {
@@ -1076,7 +1076,7 @@ export default class PolygonRenderer {
     // Update the PolygonMesh with the new owner's color and coat of arms
     try {
       console.log(`Updating PolygonMesh for ${polygonId} with owner ${newOwner} and color ${ownerColor}`);
-      polygonMesh.updateOwner(newOwner, ownerColor || '');
+      polygonMesh.updateOwner(newOwner, ownerColor || '#7cac6a');
       
       if (ownerCoatOfArmsUrl) {
         console.log(`Updating coat of arms texture for ${polygonId} with URL ${ownerCoatOfArmsUrl}`);
