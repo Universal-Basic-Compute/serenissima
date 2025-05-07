@@ -1431,8 +1431,8 @@ export default function PolygonViewer() {
       const walletAddress = sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress');
       
       // Save the road to Airtable
-      if (roadId && roadManagerRef.current) {
-        roadManagerRef.current.saveRoadToAirtable(roadId, selectedPolygonId ?? undefined, walletAddress || undefined)
+      if (roadId) {
+        roadManagerRef.current?.saveRoadToAirtable(roadId, selectedPolygonId ?? undefined, walletAddress || undefined)
           .then(response => {
             console.log('Road saved to Airtable:', response);
             // Show success message
