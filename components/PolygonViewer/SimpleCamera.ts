@@ -15,7 +15,7 @@ export default class SimpleCamera {
     );
     
     // Position camera for better view of the land and water
-    this.camera.position.set(0, 60, 50); // More vertical and zoomed in
+    this.camera.position.set(0, 50, 45); // Slightly less vertical, more zoomed in
     this.camera.lookAt(0, 0, 0); // Looking at the origin where everything is positioned
     
     // Create controls
