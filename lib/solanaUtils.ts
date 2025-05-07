@@ -267,3 +267,16 @@ export async function prepareInjectComputeTransaction(
     throw error;
   }
 }
+// Add a type definition for the window.solana object
+declare global {
+  interface Window {
+    solana?: {
+      isPhantom?: boolean;
+      connect: () => Promise<{ publicKey: any }>;
+      disconnect: () => Promise<void>;
+      signTransaction: (transaction: any) => Promise<any>;
+      signAllTransactions: (transactions: any[]) => Promise<any[]>;
+      signMessage: (message: Uint8Array, encoding: string) => Promise<{ signature: Uint8Array }>;
+    };
+  }
+}
