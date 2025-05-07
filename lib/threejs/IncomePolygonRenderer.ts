@@ -104,8 +104,8 @@ export class IncomePolygonRenderer {
         const edgeMaterial = new THREE.LineBasicMaterial({
           color: 0xffffff,  // White edges
           transparent: true,
-          opacity: 0.3,     // Very subtle
-          linewidth: 1      // Thin lines
+          opacity: 0.4,     // Increased opacity for better visibility
+          linewidth: 2      // Thicker lines for better visibility
         });
       
         // Create wireframe for edges
@@ -114,7 +114,7 @@ export class IncomePolygonRenderer {
       
         // Position the wireframe exactly like the main mesh
         line.rotation.x = -Math.PI / 2;
-        line.position.y = 0.011; // Slightly above the colored mesh to prevent z-fighting
+        line.position.y = 0.012; // Slightly higher above the colored mesh to prevent z-fighting
         line.renderOrder = 3;    // Higher than the colored mesh
       
         // Add to scene
