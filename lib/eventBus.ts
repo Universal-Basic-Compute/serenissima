@@ -93,5 +93,8 @@ export const EventTypes = {
   INTERACTION_MOUSE_MOVE: 'interactionMouseMove',
   INTERACTION_DRAG: 'interactionDrag',
   INTERACTION_DRAG_END: 'interactionDragEnd',
-  POLYGON_UPDATED: 'polygonUpdated'
+  POLYGON_UPDATED: 'polygonUpdated',
+  // Income data events
+  INCOME_DATA_UPDATED: 'incomeDataUpdated',
+  POLYGON_INCOME_UPDATED: 'polygonIncomeUpdated'
 };

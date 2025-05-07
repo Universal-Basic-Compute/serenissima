@@ -210,41 +210,39 @@ export class PolygonMeshFacade implements Poolable {
    * Determine the color for land based on income
    */
   private determineLandColor(): THREE.Color {
-    // If we're in land view and have income data, use income-based coloring
-    if (this.activeView === 'land' && this.polygon.simulatedIncome !== undefined) {
-      return this.getIncomeBasedColor(this.polygon.simulatedIncome);
+    // If we're in land view, use income-based coloring
+    if (this.activeView === 'land') {
+      // Get the income data service
+      try {
+        const { getIncomeDataService } = require('../../lib/services/IncomeDataService');
+        const { getIncomeBasedColor } = require('../../lib/colorUtils');
+        
+        const incomeService = getIncomeDataService();
+        
+        // Get income for this polygon
+        const income = this.polygon.simulatedIncome !== undefined 
+          ? this.polygon.simulatedIncome 
+          : incomeService.getIncome(this.polygon.id);
+        
+        if (income !== undefined) {
+          // Use the shared utility with the current min/max income range
+          return getIncomeBasedColor(income, {
+            minIncome: incomeService.getMinIncome(),
+            maxIncome: incomeService.getMaxIncome()
+          });
+        }
+      } catch (error) {
+        console.warn('Error getting income data service:', error);
+        // Fall back to using polygon's simulated income if available
+        if (this.polygon.simulatedIncome !== undefined) {
+          const { getIncomeBasedColor } = require('../../lib/colorUtils');
+          return getIncomeBasedColor(this.polygon.simulatedIncome);
+        }
+      }
     }
     
     // Default sand color for all other cases - lighter, more yellow
     return new THREE.Color(0xfff8e0);
-  }
-  
-  /**
-   * Calculate color based on income value
-   * Red (high income) -> Yellow -> Green (low income)
-   */
-  private getIncomeBasedColor(income: number): THREE.Color {
-    // Define our color scale with more vibrant colors
-    const highIncomeColor = new THREE.Color(0xff3300); // Bright orange-red
-    const midIncomeColor = new THREE.Color(0xffcc00);  // Golden yellow
-    const lowIncomeColor = new THREE.Color(0x33cc33);  // Rich green
-    
-    // Normalize income to a 0-1 scale
-    const maxIncome = this.maxIncome || 1000; // Use class property or default
-    const normalizedIncome = Math.min(Math.max(income / maxIncome, 0), 1);
-    
-    // Map the normalized income to our color scale
-    const resultColor = new THREE.Color();
-    
-    if (normalizedIncome >= 0.5) {
-      // Map from yellow to red
-      const t = (normalizedIncome - 0.5) * 2; // Scale 0.5-1.0 to 0-1
-      return resultColor.lerpColors(midIncomeColor, highIncomeColor, t);
-    } else {
-      // Map from green to yellow
-      const t = normalizedIncome * 2; // Scale 0-0.5 to 0-1
-      return resultColor.lerpColors(lowIncomeColor, midIncomeColor, t);
-    }
   }
   
   /**

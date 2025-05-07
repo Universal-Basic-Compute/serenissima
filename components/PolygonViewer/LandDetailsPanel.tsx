@@ -126,33 +126,101 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
     ctx.lineWidth = 2;
     ctx.stroke();
       
-    // If there's a simulated income, color the polygon accordingly
-    if (polygon.simulatedIncome !== undefined) {
-      // Normalize income to a 0-1 scale for coloring
-      const maxIncome = 1000; // Adjust based on your actual data range
-      const normalizedIncome = Math.min(Math.max(polygon.simulatedIncome / maxIncome, 0), 1);
-        
-      // Create a semi-transparent overlay with color based on income
-      ctx.globalAlpha = 0.4;
-        
-      if (normalizedIncome >= 0.5) {
-        // Higher income: yellow to red
-        const t = (normalizedIncome - 0.5) * 2; // Scale 0.5-1.0 to 0-1
-        const r = Math.floor(255);
-        const g = Math.floor(255 * (1 - t));
-        const b = 0;
-        ctx.fillStyle = `rgb(${r},${g},${b})`;
-      } else {
-        // Lower income: green to yellow
-        const t = normalizedIncome * 2; // Scale 0-0.5 to 0-1
-        const r = Math.floor(255 * t);
-        const g = Math.floor(255);
-        const b = 0;
-        ctx.fillStyle = `rgb(${r},${g},${b})`;
+    // If there's a simulated income or income from service, color the polygon accordingly
+    const hasIncome = polygon.simulatedIncome !== undefined || (() => {
+      try {
+        const { getIncomeDataService } = require('../../lib/services/IncomeDataService');
+        return getIncomeDataService().getIncome(polygon.id) !== undefined;
+      } catch (error) {
+        return false;
       }
+    })();
+    
+    if (hasIncome) {
+      try {
+        // Get income from polygon or service
+        const income = polygon.simulatedIncome !== undefined 
+          ? polygon.simulatedIncome 
+          : (() => {
+              const { getIncomeDataService } = require('../../lib/services/IncomeDataService');
+              return getIncomeDataService().getIncome(polygon.id);
+            })();
         
-      ctx.fill();
-      ctx.globalAlpha = 1.0;
+        // Get min/max income from service
+        const minIncome = (() => {
+          try {
+            const { getIncomeDataService } = require('../../lib/services/IncomeDataService');
+            return getIncomeDataService().getMinIncome();
+          } catch (error) {
+            return 0;
+          }
+        })();
+        
+        const maxIncome = (() => {
+          try {
+            const { getIncomeDataService } = require('../../lib/services/IncomeDataService');
+            return getIncomeDataService().getMaxIncome();
+          } catch (error) {
+            return 1000;
+          }
+        })();
+        
+        // Normalize income to a 0-1 scale for coloring
+        const normalizedIncome = Math.min(Math.max((income - minIncome) / (maxIncome - minIncome), 0), 1);
+        
+        // Create a semi-transparent overlay with color based on income
+        ctx.globalAlpha = 0.4;
+        
+        if (normalizedIncome >= 0.5) {
+          // Higher income: yellow to red
+          const t = (normalizedIncome - 0.5) * 2; // Scale 0.5-1.0 to 0-1
+          const r = Math.floor(255);
+          const g = Math.floor(255 * (1 - t));
+          const b = 0;
+          ctx.fillStyle = `rgb(${r},${g},${b})`;
+        } else {
+          // Lower income: green to yellow
+          const t = normalizedIncome * 2; // Scale 0-0.5 to 0-1
+          const r = Math.floor(255 * t);
+          const g = Math.floor(255);
+          const b = 0;
+          ctx.fillStyle = `rgb(${r},${g},${b})`;
+        }
+        
+        ctx.fill();
+        ctx.globalAlpha = 1.0;
+      } catch (error) {
+        console.warn('Error applying income-based coloring:', error);
+        
+        // Fallback to simple coloring if there's an error
+        if (polygon.simulatedIncome !== undefined) {
+          // Normalize income to a 0-1 scale for coloring
+          const maxIncome = 1000; // Default max income
+          const normalizedIncome = Math.min(Math.max(polygon.simulatedIncome / maxIncome, 0), 1);
+          
+          // Create a semi-transparent overlay with color based on income
+          ctx.globalAlpha = 0.4;
+          
+          if (normalizedIncome >= 0.5) {
+            // Higher income: yellow to red
+            const t = (normalizedIncome - 0.5) * 2; // Scale 0.5-1.0 to 0-1
+            const r = Math.floor(255);
+            const g = Math.floor(255 * (1 - t));
+            const b = 0;
+            ctx.fillStyle = `rgb(${r},${g},${b})`;
+          } else {
+            // Lower income: green to yellow
+            const t = normalizedIncome * 2; // Scale 0-0.5 to 0-1
+            const r = Math.floor(255 * t);
+            const g = Math.floor(255);
+            const b = 0;
+            ctx.fillStyle = `rgb(${r},${g},${b})`;
+          }
+          
+          ctx.fill();
+          ctx.globalAlpha = 1.0;
+        }
+      }
     }
     
     // If there's a simulated income, color the polygon accordingly
@@ -462,6 +530,70 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
             <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
               <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Historical Description</h3>
               <p className="text-sm text-gray-700 leading-relaxed">{selectedPolygon.historicalDescription}</p>
+            </div>
+          )}
+      
+          {/* Income information */}
+          {(selectedPolygon?.simulatedIncome !== undefined || 
+            (selectedPolygonId && (() => {
+              try {
+                const { getIncomeDataService } = require('../../lib/services/IncomeDataService');
+                return getIncomeDataService().getIncome(selectedPolygonId) !== undefined;
+              } catch (error) {
+                return false;
+              }
+            })())) && (
+            <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
+              <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Income</h3>
+              <div className="flex items-center justify-between">
+                <span className="text-gray-700">Annual Income:</span>
+                <span className="font-semibold text-amber-800">
+                  {(() => {
+                    try {
+                      const income = selectedPolygon?.simulatedIncome !== undefined 
+                        ? selectedPolygon.simulatedIncome 
+                        : (() => {
+                            const { getIncomeDataService } = require('../../lib/services/IncomeDataService');
+                            return getIncomeDataService().getIncome(selectedPolygonId!);
+                          })();
+                      return income !== undefined ? income.toLocaleString() : '0';
+                    } catch (error) {
+                      return selectedPolygon?.simulatedIncome !== undefined 
+                        ? selectedPolygon.simulatedIncome.toLocaleString() 
+                        : '0';
+                    }
+                  })()} ⚜️ ducats
+                </span>
+              </div>
+          
+              {/* Income visualization */}
+              <div className="mt-3 h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div 
+                  className="h-full rounded-full" 
+                  style={{
+                    width: `${(() => {
+                      try {
+                        const { getIncomeDataService } = require('../../lib/services/IncomeDataService');
+                        const incomeService = getIncomeDataService();
+                        const income = selectedPolygon?.simulatedIncome !== undefined 
+                          ? selectedPolygon.simulatedIncome 
+                          : incomeService.getIncome(selectedPolygonId!);
+                        return Math.min(100, Math.max(5, ((income || 0) / incomeService.getMaxIncome()) * 100));
+                      } catch (error) {
+                        return selectedPolygon?.simulatedIncome !== undefined 
+                          ? Math.min(100, Math.max(5, (selectedPolygon.simulatedIncome / 1000) * 100))
+                          : 5;
+                      }
+                    })()}%`,
+                    background: 'linear-gradient(90deg, #33cc33 0%, #ffcc00 50%, #ff3300 100%)'
+                  }}
+                ></div>
+              </div>
+              <div className="flex justify-between text-xs text-gray-500 mt-1">
+                <span>Low</span>
+                <span>Medium</span>
+                <span>High</span>
+              </div>
             </div>
           )}
           

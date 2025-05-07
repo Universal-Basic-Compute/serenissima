@@ -633,12 +633,27 @@ export default function Home() {
   useEffect(() => {
     loadUsers();
     
+    // Load income data after users
+    try {
+      const { getIncomeDataService } = require('../lib/services/IncomeDataService');
+      const incomeService = getIncomeDataService();
+      
+      // Load income data or generate simulated data
+      incomeService.loadIncomeData().catch(error => {
+        console.error('Error loading income data:', error);
+        // Generate simulated data as fallback
+        incomeService.generateSimulatedIncomeData(polygons);
+      });
+    } catch (error) {
+      console.warn('Error initializing income data service:', error);
+    }
+    
     // No additional timeout here - the main loading timer handles both states
     
     return () => {
       // Just cleanup, no need for additional timers
     };
-  }, [loadUsers]);
+  }, [loadUsers, polygons]);
   
   // Function to ensure all polygons remain visible
   const ensurePolygonsVisible = useCallback(() => {
@@ -748,11 +763,73 @@ export default function Home() {
     }));
   }, [activeView]);
   
-  // Add effect to trigger color and coat of arms updates when users data changes
+  // Add effect to trigger coat of arms updates when users data changes
   useEffect(() => {
-    updatePolygonColors();
     updateCoatOfArms();
-  }, [updatePolygonColors, updateCoatOfArms]);
+  }, [updateCoatOfArms]);
+  
+  // Add effect to handle income data updates
+  useEffect(() => {
+    // Handle income data updates
+    const handleIncomeDataUpdated = (data: any) => {
+      console.log('Income data updated:', data);
+      
+      // Force an update of the view mode to refresh colors
+      if (polygonRendererRef.current && activeView === 'land') {
+        if (typeof polygonRendererRef.current.updatePolygonIncomeColors === 'function') {
+          polygonRendererRef.current.updatePolygonIncomeColors();
+        } else {
+          // Fallback to updating the view mode
+          polygonRendererRef.current.updateViewMode(activeView);
+        }
+      }
+    };
+    
+    // Handle individual polygon income updates
+    const handlePolygonIncomeUpdated = (data: any) => {
+      console.log('Polygon income updated:', data);
+      
+      // If we're in land view, update the specific polygon
+      if (polygonRendererRef.current && activeView === 'land') {
+        // Find the polygon in our data
+        const polygon = polygons.find(p => p.id === data.polygonId);
+        if (polygon) {
+          // Update the polygon's simulated income
+          polygon.simulatedIncome = data.income;
+          
+          // Force an update of the overlay for this polygon
+          if (typeof polygonRendererRef.current.updatePolygonIncomeColors === 'function') {
+            polygonRendererRef.current.updatePolygonIncomeColors();
+          } else {
+            // Fallback to updating the view mode
+            polygonRendererRef.current.updateViewMode(activeView);
+          }
+        }
+      }
+    };
+    
+    try {
+      // Subscribe to income data events
+      const incomeDataSubscription = eventBus.subscribe(
+        EventTypes.INCOME_DATA_UPDATED, 
+        handleIncomeDataUpdated
+      );
+      
+      const polygonIncomeSubscription = eventBus.subscribe(
+        EventTypes.POLYGON_INCOME_UPDATED, 
+        handlePolygonIncomeUpdated
+      );
+      
+      // Cleanup subscriptions
+      return () => {
+        incomeDataSubscription.unsubscribe();
+        polygonIncomeSubscription.unsubscribe();
+      };
+    } catch (error) {
+      console.warn('Error setting up income data event handlers:', error);
+      return () => {}; // Empty cleanup function
+    }
+  }, [activeView, polygons, eventBus, EventTypes]);
   
   // Add caching for polygon renderer snapshot to prevent infinite loops
   useEffect(() => {

@@ -699,19 +699,41 @@ export default class PolygonRenderer {
       // Create geometry from shape
       const geometry = new THREE.ShapeGeometry(shape);
       
-      // Determine color based on income or ownership
+      // Determine color based on income
       let color: THREE.Color;
       
-      if (polygon.simulatedIncome !== undefined) {
-        // Use income-based coloring
-        color = this.getIncomeBasedColor(polygon.simulatedIncome);
-      } else if (polygon.owner) {
-        // Use owner-based coloring
-        const ownerColor = this.getOwnerColor(polygon.owner);
-        color = new THREE.Color(ownerColor || '#7cac6a');
-      } else {
-        // Default color for unowned land
-        color = new THREE.Color(0xf5e9c8);
+      try {
+        // Get the income data service
+        const { getIncomeDataService } = require('../../lib/services/IncomeDataService');
+        const { getIncomeBasedColor } = require('../../lib/colorUtils');
+        
+        const incomeService = getIncomeDataService();
+        
+        // Get income for this polygon
+        const income = polygon.simulatedIncome !== undefined 
+          ? polygon.simulatedIncome 
+          : incomeService.getIncome(polygon.id);
+        
+        if (income !== undefined) {
+          // Use the shared utility with the current min/max income range
+          color = getIncomeBasedColor(income, {
+            minIncome: incomeService.getMinIncome(),
+            maxIncome: incomeService.getMaxIncome()
+          });
+        } else {
+          // Default color for land without income data
+          color = new THREE.Color(0xf5e9c8);
+        }
+      } catch (error) {
+        console.warn('Error getting income data service:', error);
+        
+        // Fallback to using polygon's simulated income if available
+        if (polygon.simulatedIncome !== undefined) {
+          color = this.getIncomeBasedColor(polygon.simulatedIncome);
+        } else {
+          // Default color for land without income data
+          color = new THREE.Color(0xf5e9c8);
+        }
       }
       
       // Create material for the overlay
@@ -752,26 +774,41 @@ export default class PolygonRenderer {
    * Red (high income) -> Yellow -> Green (low income)
    */
   private getIncomeBasedColor(income: number): THREE.Color {
-    // Define our color scale with more vibrant colors
-    const highIncomeColor = new THREE.Color(0xff3300); // Bright orange-red
-    const midIncomeColor = new THREE.Color(0xffcc00);  // Golden yellow
-    const lowIncomeColor = new THREE.Color(0x33cc33);  // Rich green
-    
-    // Normalize income to a 0-1 scale
-    const maxIncome = 1000; // Default max income value
-    const normalizedIncome = Math.min(Math.max(income / maxIncome, 0), 1);
-    
-    // Map the normalized income to our color scale
-    const resultColor = new THREE.Color();
-    
-    if (normalizedIncome >= 0.5) {
-      // Map from yellow to red
-      const t = (normalizedIncome - 0.5) * 2; // Scale 0.5-1.0 to 0-1
-      return resultColor.lerpColors(midIncomeColor, highIncomeColor, t);
-    } else {
-      // Map from green to yellow
-      const t = normalizedIncome * 2; // Scale 0-0.5 to 0-1
-      return resultColor.lerpColors(lowIncomeColor, midIncomeColor, t);
+    try {
+      const { getIncomeBasedColor } = require('../../lib/colorUtils');
+      const { getIncomeDataService } = require('../../lib/services/IncomeDataService');
+      
+      const incomeService = getIncomeDataService();
+      
+      return getIncomeBasedColor(income, {
+        minIncome: incomeService.getMinIncome(),
+        maxIncome: incomeService.getMaxIncome()
+      });
+    } catch (error) {
+      console.warn('Error using shared income color utility:', error);
+      
+      // Fallback implementation if the shared utility fails
+      // Define our color scale with more vibrant colors
+      const highIncomeColor = new THREE.Color(0xff3300); // Bright orange-red
+      const midIncomeColor = new THREE.Color(0xffcc00);  // Golden yellow
+      const lowIncomeColor = new THREE.Color(0x33cc33);  // Rich green
+      
+      // Normalize income to a 0-1 scale
+      const maxIncome = 1000; // Default max income value
+      const normalizedIncome = Math.min(Math.max(income / maxIncome, 0), 1);
+      
+      // Map the normalized income to our color scale
+      const resultColor = new THREE.Color();
+      
+      if (normalizedIncome >= 0.5) {
+        // Map from yellow to red
+        const t = (normalizedIncome - 0.5) * 2; // Scale 0.5-1.0 to 0-1
+        return resultColor.lerpColors(midIncomeColor, highIncomeColor, t);
+      } else {
+        // Map from green to yellow
+        const t = normalizedIncome * 2; // Scale 0-0.5 to 0-1
+        return resultColor.lerpColors(lowIncomeColor, midIncomeColor, t);
+      }
     }
   }
   
@@ -891,11 +928,46 @@ export default class PolygonRenderer {
   
   /**
    * Update colors for all polygons based on simulated income
-   * This method is now disabled to prevent land modification
    */
-  public updatePolygonOwnerColors() {
-    console.log('Polygon color updates disabled to prevent land modification');
-    // No implementation to prevent land modification
+  public updatePolygonIncomeColors() {
+    console.log('Updating polygon colors based on income data');
+    
+    try {
+      // Get the income data service
+      const { getIncomeDataService } = require('../../lib/services/IncomeDataService');
+      const incomeService = getIncomeDataService();
+      
+      // Only update if we're in land view
+      if (this.activeView === 'land') {
+        // Update overlay polygons with income-based colors
+        this.overlayPolygons.forEach((mesh, polygonId) => {
+          try {
+            // Find the polygon in our data
+            const polygon = this.polygons.find(p => p.id === polygonId);
+            if (!polygon) return;
+            
+            // Get income for this polygon
+            const income = polygon.simulatedIncome !== undefined 
+              ? polygon.simulatedIncome 
+              : incomeService.getIncome(polygonId);
+            
+            if (income !== undefined && mesh.material instanceof THREE.MeshBasicMaterial) {
+              // Update the color based on income
+              const color = this.getIncomeBasedColor(income);
+              mesh.material.color.copy(color);
+              mesh.material.needsUpdate = true;
+              
+              // Store the original color for hover/selection effects
+              mesh.userData.originalColor = color.clone();
+            }
+          } catch (error) {
+            console.error(`Error updating color for polygon ${polygonId}:`, error);
+          }
+        });
+      }
+    } catch (error) {
+      console.warn('Error updating polygon income colors:', error);
+    }
   }
 
   /**
