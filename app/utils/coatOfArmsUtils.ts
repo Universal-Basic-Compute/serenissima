@@ -34,5 +34,7 @@ export async function generateCoatOfArmsImage(description: string, username?: st
   }
   
   // Return the local image path
-  return generateData.local_image_url;
+  const imagePath = generateData.local_image_url;
+  console.log('Using image path:', imagePath);
+  return imagePath;
 }

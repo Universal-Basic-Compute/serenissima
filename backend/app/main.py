@@ -1420,11 +1420,13 @@ async def generate_coat_of_arms(data: dict):
         
         # Save the image to the public folder
         file_path = os.path.join(coat_of_arms_dir, filename)
+        print(f"Saving coat of arms image to: {file_path}")
         with open(file_path, 'wb') as f:
             f.write(image_response.content)
         
         # Return the path to the saved image (relative to public folder)
         relative_path = f"/coat-of-arms/{filename}"
+        print(f"Returning relative path: {relative_path}")
         
         return {
             "success": True,

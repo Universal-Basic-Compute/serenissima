@@ -166,6 +166,15 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
               src={displayData.coatOfArmsImage} 
               alt={`${displayData.username}'s Coat of Arms`}
               className={`${dim.image} object-cover`}
+              onError={(e) => {
+                console.error('Error loading coat of arms image in PlayerProfile:', displayData.coatOfArmsImage);
+                // Fallback to initials if image fails to load
+                (e.target as HTMLImageElement).style.display = 'none';
+                const parent = (e.target as HTMLImageElement).parentElement;
+                if (parent) {
+                  parent.innerHTML += `<div class="${dim.initials} flex items-center justify-center"><span class="text-amber-800 font-bold">${displayData.firstName.charAt(0)}${displayData.lastName.charAt(0)}</span></div>`;
+                }
+              }}
             />
           </div>
         ) : (

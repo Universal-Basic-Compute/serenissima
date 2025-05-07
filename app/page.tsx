@@ -927,11 +927,20 @@ export default function SimplePage() {
                       alt="Family Coat of Arms" 
                       className="w-full h-auto max-h-[300px] object-contain"
                       style={{ maxWidth: "250px" }} // Slightly smaller for better fit
+                      onError={(e) => {
+                        console.error('Error loading coat of arms image:', coatOfArmsImage);
+                        // Add a fallback image or placeholder
+                        (e.target as HTMLImageElement).style.display = 'none';
+                        // You could also set a fallback image:
+                        // (e.target as HTMLImageElement).src = '/images/placeholder.png';
+                      }}
                     />
                   </div>
                   <p className="mt-4 text-center italic text-amber-800 font-medium">
                     The Coat of Arms of the House of {lastName || "Your Family"}
                   </p>
+                  {/* Add this for debugging */}
+                  <p className="text-xs text-gray-500 mt-1">Image path: {coatOfArmsImage}</p>
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center">
@@ -949,6 +958,17 @@ export default function SimplePage() {
               )}
             </div>
       
+            {/* Test image for static file serving */}
+            <div className="mt-4">
+              <p>Test image (should appear below):</p>
+              <img 
+                src="/favicon.ico" 
+                alt="Test image" 
+                style={{ width: '32px', height: '32px' }} 
+                onError={(e) => console.error('Error loading test image')}
+              />
+            </div>
+            
             {/* Oath Section - Moved below the image */}
             <div className="mt-6 border-2 border-amber-600 rounded-lg p-4 bg-amber-50 w-full">
               <h4 className="text-lg font-medium text-amber-800 mb-2">
