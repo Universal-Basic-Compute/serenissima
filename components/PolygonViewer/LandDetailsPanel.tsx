@@ -108,7 +108,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
     coords.forEach((coord, index) => {
       const x = (coord.lng * scale) + centerX;
       const y = centerY - (coord.lat * scale);
-      
+        
       if (index === 0) {
         ctx.moveTo(x, y);
       } else {
@@ -116,15 +116,44 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
       }
     });
     ctx.closePath();
-    
+      
     // Fill with a sand color
     ctx.fillStyle = '#f5e9c8';
     ctx.fill();
-    
+      
     // Draw border
     ctx.strokeStyle = '#8B4513';
     ctx.lineWidth = 2;
     ctx.stroke();
+      
+    // If there's a simulated income, color the polygon accordingly
+    if (polygon.simulatedIncome !== undefined) {
+      // Normalize income to a 0-1 scale for coloring
+      const maxIncome = 1000; // Adjust based on your actual data range
+      const normalizedIncome = Math.min(Math.max(polygon.simulatedIncome / maxIncome, 0), 1);
+        
+      // Create a semi-transparent overlay with color based on income
+      ctx.globalAlpha = 0.4;
+        
+      if (normalizedIncome >= 0.5) {
+        // Higher income: yellow to red
+        const t = (normalizedIncome - 0.5) * 2; // Scale 0.5-1.0 to 0-1
+        const r = Math.floor(255);
+        const g = Math.floor(255 * (1 - t));
+        const b = 0;
+        ctx.fillStyle = `rgb(${r},${g},${b})`;
+      } else {
+        // Lower income: green to yellow
+        const t = normalizedIncome * 2; // Scale 0-0.5 to 0-1
+        const r = Math.floor(255 * t);
+        const g = Math.floor(255);
+        const b = 0;
+        ctx.fillStyle = `rgb(${r},${g},${b})`;
+      }
+        
+      ctx.fill();
+      ctx.globalAlpha = 1.0;
+    }
     
     // If there's a simulated income, color the polygon accordingly
     if (polygon.simulatedIncome !== undefined) {

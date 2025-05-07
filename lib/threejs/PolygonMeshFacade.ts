@@ -28,6 +28,8 @@ export class PolygonMeshFacade implements Poolable {
   private minIncome: number = 0;
   private maxIncome: number = 1000;
   private hasIncomeData: boolean = false;
+  private minIncome: number = 0;
+  private maxIncome: number = 1000;
 
   constructor(
     scene: THREE.Scene,
