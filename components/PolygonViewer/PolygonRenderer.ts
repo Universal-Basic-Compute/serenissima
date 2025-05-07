@@ -969,6 +969,40 @@ export default class PolygonRenderer {
       console.warn('Error updating polygon income colors:', error);
     }
   }
+  
+  /**
+   * Update colors for all polygons based on owner
+   */
+  public updatePolygonOwnerColors() {
+    console.log('Updating polygon colors based on owner data');
+    
+    // Only update if we're in land view
+    if (this.activeView === 'land') {
+      // Update overlay polygons with owner-based colors
+      this.overlayPolygons.forEach((mesh, polygonId) => {
+        try {
+          // Find the polygon in our data
+          const polygon = this.polygons.find(p => p.id === polygonId);
+          if (!polygon || !polygon.owner) return;
+          
+          // Get color for this owner
+          const ownerColor = this.getOwnerColor(polygon.owner);
+          
+          if (ownerColor && mesh.material instanceof THREE.MeshBasicMaterial) {
+            // Update the color based on owner
+            const color = new THREE.Color(ownerColor);
+            mesh.material.color.copy(color);
+            mesh.material.needsUpdate = true;
+            
+            // Store the original color for hover/selection effects
+            mesh.userData.originalColor = color.clone();
+          }
+        } catch (error) {
+          console.error(`Error updating color for polygon ${polygonId}:`, error);
+        }
+      });
+    }
+  }
 
   /**
    * Update quality settings

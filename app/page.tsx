@@ -47,6 +47,7 @@ import SuccessAlert from '../components/UI/SuccessAlert';
 import { transferComputeTokens } from '../lib/tokenUtils';
 import { transferComputeInAirtable } from '../lib/airtableUtils';
 import { eventBus, EventTypes } from '../lib/eventBus';
+import { IncomePolygonRenderer } from '../lib/threejs/IncomePolygonRenderer';
 
 // Import PolygonViewer with no SSR to avoid hydration issues
 const PolygonViewer = dynamic<PolygonViewerProps>(() => import('../components/PolygonViewer/PolygonViewer'), {
