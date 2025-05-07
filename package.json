@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
-    "start": "next start",
+    "start": "cd backend && python run.py",
+    "start:next": "next start",
     "lint": "next lint",
     "backend:install": "pip install -r backend/requirements.txt",
     "backend:dev": "cd backend && python run.py",
