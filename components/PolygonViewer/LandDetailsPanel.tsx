@@ -31,8 +31,8 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
   const [showPurchaseConfirmation, setShowPurchaseConfirmation] = useState(false);
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [justCompletedTransaction, setJustCompletedTransaction] = useState(false);
-  const [landRendered, setLandRendered] = useState(false);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [landRendered, setLandRendered] = useState<boolean>(false);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   
   // Find the selected polygon
   const selectedPolygon = selectedPolygonId 
@@ -59,7 +59,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
       renderLandTopView(selectedPolygon, canvasRef.current);
       setLandRendered(true);
     }
-  }, [selectedPolygon, landRendered]);
+  }, [selectedPolygon, landRendered, canvasRef]);
 
   // Function to render a top-down view of the land
   const renderLandTopView = (polygon: Polygon, canvas: HTMLCanvasElement) => {
