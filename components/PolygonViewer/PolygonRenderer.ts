@@ -944,6 +944,16 @@ export default class PolygonRenderer {
     
     withErrorHandling(
       () => {
+        // Get the owner's color from the ownerColorMap if available
+        let circleColor = color;
+        if (polygon.owner && this.ownerColorMap[polygon.owner]) {
+          // Use the owner's color from the map instead of the passed color
+          circleColor = this.ownerColorMap[polygon.owner];
+          log.debug(`Using owner color for ${polygon.id}: ${circleColor} (owner: ${polygon.owner})`);
+        } else {
+          log.debug(`Using default color for ${polygon.id}: ${color} (owner: ${polygon.owner || 'none'})`);
+        }
+        
         // Convert centroid to 3D position
         const normalizedCoord = normalizeCoordinates(
           [centroid],
@@ -956,7 +966,7 @@ export default class PolygonRenderer {
         // Create a simple circle geometry
         const circleGeometry = new THREE.CircleGeometry(0.25, 16);
         const circleMaterial = new THREE.MeshBasicMaterial({
-          color: color,
+          color: circleColor,
           side: THREE.DoubleSide,
           transparent: true,
           opacity: 0.8,
@@ -992,10 +1002,16 @@ export default class PolygonRenderer {
             this.bounds.latCorrectionFactor
           )[0];
           
+          // Get the owner's color for the fallback too
+          let fallbackColor = color;
+          if (polygon.owner && this.ownerColorMap[polygon.owner]) {
+            fallbackColor = this.ownerColorMap[polygon.owner];
+          }
+          
           // Create a simple box as fallback
           const geometry = new THREE.BoxGeometry(0.3, 0.1, 0.3);
           const material = new THREE.MeshBasicMaterial({ 
-            color: color,
+            color: fallbackColor,
             wireframe: true
           });
           
