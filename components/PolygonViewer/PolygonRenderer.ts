@@ -809,11 +809,8 @@ export default class PolygonRenderer {
                   obj.material.forEach((mat: THREE.Material) => {
                     try {
                       // Check if material has a map property (like MeshBasicMaterial or MeshStandardMaterial)
-                      if (mat.type === 'MeshBasicMaterial' || mat.type === 'MeshStandardMaterial') {
-                        const matWithMap = mat as THREE.MeshBasicMaterial | THREE.MeshStandardMaterial;
-                        if (matWithMap.map) {
-                          matWithMap.map.dispose();
-                        }
+                      if ((mat as any).map) {
+                        (mat as any).map.dispose();
                       }
                       mat.dispose();
                     } catch (matError) {
@@ -823,11 +820,8 @@ export default class PolygonRenderer {
                 } else {
                   try {
                     // Check if material has a map property
-                    if (obj.material.type === 'MeshBasicMaterial' || obj.material.type === 'MeshStandardMaterial') {
-                      const matWithMap = obj.material as THREE.MeshBasicMaterial | THREE.MeshStandardMaterial;
-                      if (matWithMap.map) {
-                        matWithMap.map.dispose();
-                      }
+                    if ((obj.material as any).map) {
+                      (obj.material as any).map.dispose();
                     }
                     obj.material.dispose();
                   } catch (matError) {
@@ -1223,7 +1217,7 @@ export default class PolygonRenderer {
     
     // Get the owner's coat of arms URL if available
     let ownerCoatOfArmsUrl: string | null = null;
-    if (newOwner && this.ownerCoatOfArmsMap) {
+    if (newOwner && this.ownerCoatOfArmsMap && newOwner in this.ownerCoatOfArmsMap) {
       ownerCoatOfArmsUrl = this.ownerCoatOfArmsMap[newOwner] || null;
       console.log(`Found coat of arms for ${newOwner}: ${ownerCoatOfArmsUrl}`);
     }
@@ -1350,11 +1344,8 @@ export default class PolygonRenderer {
                 if (Array.isArray(obj.material)) {
                   obj.material.forEach((mat: THREE.Material) => {
                     try {
-                      if (mat.type === 'MeshBasicMaterial' || mat.type === 'MeshStandardMaterial') {
-                        const matWithMap = mat as THREE.MeshBasicMaterial | THREE.MeshStandardMaterial;
-                        if (matWithMap.map) {
-                          matWithMap.map.dispose();
-                        }
+                      if ((mat as any).map) {
+                        (mat as any).map.dispose();
                       }
                       mat.dispose();
                     } catch (matError) {
@@ -1363,11 +1354,8 @@ export default class PolygonRenderer {
                   });
                 } else {
                   try {
-                    if (obj.material.type === 'MeshBasicMaterial' || obj.material.type === 'MeshStandardMaterial') {
-                      const matWithMap = obj.material as THREE.MeshBasicMaterial | THREE.MeshStandardMaterial;
-                      if (matWithMap.map) {
-                        matWithMap.map.dispose();
-                      }
+                    if ((obj.material as any).map) {
+                      (obj.material as any).map.dispose();
                     }
                     obj.material.dispose();
                   } catch (matError) {
