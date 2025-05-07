@@ -19,8 +19,8 @@ export async function GET(request: Request) {
         averageRent: landRents.length > 0 
           ? Math.round(landRents.reduce((sum: number, land: LandRent) => sum + land.dailyRent, 0) / landRents.length)
           : 0,
-        minRent: landRents.length > 0 ? Math.min(...landRents.map(land => land.dailyRent)) : 0,
-        maxRent: landRents.length > 0 ? Math.max(...landRents.map(land => land.dailyRent)) : 0
+        minRent: landRents.length > 0 ? Math.min(...landRents.map((land: LandRent) => land.dailyRent)) : 0,
+        maxRent: landRents.length > 0 ? Math.max(...landRents.map((land: LandRent) => land.dailyRent)) : 0
       }
     }), {
       status: 200,
