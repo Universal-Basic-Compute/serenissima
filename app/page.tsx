@@ -158,6 +158,7 @@ export default function Home() {
   const [activeView, setActiveView] = useState<'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance'>('land');
   const [marketPanelVisible, setMarketPanelVisible] = useState(false);
   const polygonRendererRef = useRef<any>(null);
+  const [polygons, setPolygons] = useState<any[]>([]);
   
   // Function to generate coat of arms image
   const generateCoatOfArmsImage = async () => {
@@ -1529,6 +1530,9 @@ export default function Home() {
           console.warn('No polygons returned from API');
           return;
         }
+        
+        // Update the polygons state
+        setPolygons(data.polygons);
         
         data.polygons.forEach((polygon: any, index: number) => {
           if (polygon.coordinates && polygon.coordinates.length > 2) {
