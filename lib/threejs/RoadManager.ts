@@ -1420,7 +1420,7 @@ export class RoadManager {
           material instanceof THREE.MeshPhongMaterial) {
         
         // Dispose of all possible texture maps
-        if (material.map) material.map.dispose();
+        if (material.map && material.map !== null) material.map.dispose();
         
         // Check for properties that might not exist on all material types
         if ('normalMap' in material && (material as THREE.MeshStandardMaterial).normalMap) 
@@ -1457,9 +1457,9 @@ export class RoadManager {
             material.displacementMap.dispose();
           }
         }
-        if ('envMap' in material && material.envMap) material.envMap.dispose();
-        if ('lightMap' in material && material.lightMap) material.lightMap.dispose();
-        if ('alphaMap' in material && material.alphaMap) material.alphaMap.dispose();
+        if ('envMap' in material && material.envMap && material.envMap !== null) material.envMap.dispose();
+        if ('lightMap' in material && material.lightMap && material.lightMap !== null) material.lightMap.dispose();
+        if ('alphaMap' in material && material.alphaMap && material.alphaMap !== null) material.alphaMap.dispose();
         
         // Clear references
         if (material.map) material.map = null as unknown as THREE.Texture;
