@@ -393,7 +393,7 @@ export default function SimplePage() {
     <>
     <div className="relative w-full h-screen">
       {/* Main 3D Viewer (should be first in the DOM for proper layering) */}
-      <SimpleViewer qualityMode={qualityMode} activeView={activeView} />
+      <SimpleViewer qualityMode={qualityMode} activeView={activeView as 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance'} />
       
       {/* Buildings Toolbar - only visible in buildings view */}
       {activeView === 'buildings' && (
