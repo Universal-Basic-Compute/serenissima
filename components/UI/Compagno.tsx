@@ -280,7 +280,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className }) => {
             {/* Messages */}
             {messages.map((message, index) => (
               <div 
-                key={message.id} 
+                key={message.id || `msg-${index}`} 
                 className={`mb-3 ${
                   message.role === 'user' 
                     ? 'text-right' 
