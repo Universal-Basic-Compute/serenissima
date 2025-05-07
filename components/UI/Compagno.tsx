@@ -97,14 +97,14 @@ const Compagno: React.FC<CompagnoProps> = ({ className }) => {
       {!isOpen && (
         <button 
           onClick={() => setIsOpen(true)}
-          className="p-2 shadow-lg transition-all duration-300 flex items-center justify-center"
+          className="p-2 transition-all duration-300 flex items-center justify-center"
           aria-label="Open Compagno chat assistant"
         >
           <div className="relative">
             <img 
               src="/images/venetian-mask.png" 
               alt="Compagno" 
-              className="w-16 h-16 mask-float"
+              className="w-32 h-32 mask-float"
               onError={(e) => {
                 // Fallback if image doesn't exist
                 (e.target as HTMLImageElement).style.display = 'none';
