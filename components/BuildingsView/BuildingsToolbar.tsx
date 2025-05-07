@@ -42,6 +42,8 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
       
       <button
         onClick={() => {
+          console.log('Create Dock button clicked');
+          console.log('Scene:', !!scene, 'Camera:', !!camera, 'Polygons:', polygons?.length);
           setIsDockCreatorActive(true);
           setIsRoadCreatorActive(false);
         }}

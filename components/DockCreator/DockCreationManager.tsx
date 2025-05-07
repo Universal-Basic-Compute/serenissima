@@ -74,27 +74,14 @@ export class DockCreationManager {
     console.log('DockCreationManager: Updating mouse position to', clientX, clientY);
     
     try {
-      // Convert mouse position to normalized device coordinates
-      const rect = this.renderer.domElement.getBoundingClientRect();
-      console.log('DockCreationManager: Renderer rect =', rect);
+      // Simplify the mouse position calculation to use window dimensions
+      // This is more reliable than trying to get the renderer's domElement
+      this.mouse.x = (clientX / window.innerWidth) * 2 - 1;
+      this.mouse.y = -(clientY / window.innerHeight) * 2 + 1;
+      console.log('DockCreationManager: Normalized mouse coordinates =', this.mouse.x, this.mouse.y);
       
-      // Check if we have valid dimensions
-      if (rect.width > 0 && rect.height > 0) {
-        this.mouse.x = ((clientX - rect.left) / rect.width) * 2 - 1;
-        this.mouse.y = -((clientY - rect.top) / rect.height) * 2 + 1;
-        console.log('DockCreationManager: Normalized mouse coordinates =', this.mouse.x, this.mouse.y);
-        
-        // Update preview position
-        this.updatePreviewPosition();
-      } else {
-        // Fallback for when rect dimensions are invalid
-        console.warn('DockCreationManager: Invalid renderer rect dimensions, using fallback calculation');
-        this.mouse.x = (clientX / window.innerWidth) * 2 - 1;
-        this.mouse.y = -(clientY / window.innerHeight) * 2 + 1;
-        
-        // Update preview position
-        this.updatePreviewPosition();
-      }
+      // Update preview position
+      this.updatePreviewPosition();
     } catch (error) {
       console.error('DockCreationManager: Error updating mouse position:', error);
     }

@@ -33,12 +33,26 @@ const DockCreator: React.FC<DockCreatorProps> = ({
   // Reference to the dock creation manager
   const managerRef = useRef<DockCreationManager | null>(null);
   
+  // Get scene and camera with fallbacks if props are not provided
+  const actualScene = scene || (document.querySelector('canvas')?.__scene as THREE.Scene);
+  const actualCamera = camera || (document.querySelector('canvas')?.__camera as THREE.PerspectiveCamera);
+  
   // Initialize the dock creation manager
   useEffect(() => {
     console.log('DockCreator: Initializing with active =', active, 'polygons =', polygons.length);
-    if (active && !managerRef.current && polygons.length > 0) {
+    console.log('DockCreator: Scene =', !!actualScene, 'Camera =', !!actualCamera);
+    
+    if (active && !managerRef.current && actualScene && actualCamera && polygons.length > 0) {
       console.log('DockCreator: Creating new DockCreationManager');
-      managerRef.current = new DockCreationManager(scene, camera, polygons);
+      try {
+        managerRef.current = new DockCreationManager(actualScene, actualCamera, polygons);
+        // Force an initial update of the mouse position to show the preview
+        const centerX = window.innerWidth / 2;
+        const centerY = window.innerHeight / 2;
+        managerRef.current.updateMousePosition(centerX, centerY);
+      } catch (error) {
+        console.error('Error creating DockCreationManager:', error);
+      }
     }
     
     return () => {
@@ -48,7 +62,7 @@ const DockCreator: React.FC<DockCreatorProps> = ({
         managerRef.current = null;
       }
     };
-  }, [active, scene, camera, polygons]);
+  }, [active, actualScene, actualCamera, polygons]);
   
   // Update rotation in the manager when it changes
   useEffect(() => {
@@ -241,16 +255,17 @@ const DockCreator: React.FC<DockCreatorProps> = ({
     <div className="dock-creator">
       {/* Overlay for mouse events */}
       <div 
-        className="fixed inset-0 z-[100]" // Increase z-index to be higher than anything else
+        className="fixed inset-0"
         style={{ 
           pointerEvents: 'all',
           cursor: 'crosshair',
-          position: 'fixed', // Change from absolute to fixed
+          position: 'fixed',
           top: 0,
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundColor: 'rgba(255,0,0,0.05)' // Make it slightly visible for debugging
+          backgroundColor: 'rgba(0,0,255,0.05)', // Blue tint for debugging
+          zIndex: 1000 // Much higher z-index
         }}
         onMouseMove={(e) => {
           console.log('Overlay mouse move detected at', e.clientX, e.clientY);
@@ -258,8 +273,8 @@ const DockCreator: React.FC<DockCreatorProps> = ({
         }}
         onClick={(e) => {
           console.log('Overlay click detected at', e.clientX, e.clientY);
-          e.preventDefault(); // Add this
-          e.stopPropagation(); // Keep this
+          e.preventDefault();
+          e.stopPropagation();
           handleClick();
         }}
       />
