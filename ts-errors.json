@@ -1,30 +1,10 @@
 {
-  "totalErrors": 2,
+  "totalErrors": 0,
   "totalWarnings": 0,
-  "exitCode": 1,
-  "timestamp": "2025-05-07T05:41:31.548Z",
-  "errors": [
-    {
-      "filePath": "components/PolygonViewer/LandDetailsPanel.tsx",
-      "line": 705,
-      "column": 15,
-      "code": "TS2322",
-      "message": "Type 'void' is not assignable to type 'ReactNode'.",
-      "type": "error"
-    },
-    {
-      "filePath": "components/PolygonViewer/LandDetailsPanel.tsx",
-      "line": 706,
-      "column": 15,
-      "code": "TS2322",
-      "message": "Type 'void' is not assignable to type 'ReactNode'.",
-      "type": "error"
-    }
-  ],
-  "rawOutputLines": 3,
-  "firstFewLines": [
-    "components/PolygonViewer/LandDetailsPanel.tsx(705,15): error TS2322: Type 'void' is not assignable to type 'ReactNode'.\r",
-    "components/PolygonViewer/LandDetailsPanel.tsx(706,15): error TS2322: Type 'void' is not assignable to type 'ReactNode'.\r"
-  ],
-  "compilerExitCode": 1
+  "exitCode": 0,
+  "timestamp": "2025-05-07T10:28:52.336Z",
+  "errors": [],
+  "rawOutputLines": 1,
+  "firstFewLines": [],
+  "compilerExitCode": 0
 }
