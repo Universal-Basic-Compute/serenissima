@@ -1,5 +1,5 @@
 // Interface for land rent data
-interface LandRent {
+export interface LandRent {
   id: string;
   centroid: {
     lat: number;
@@ -23,6 +23,17 @@ export const airtableUtils = {
     // Implementation would go here
     console.log(`Saving ${landRents.length} land rent records to Airtable`);
     return Promise.resolve();
+  },
+  
+  /**
+   * Get land rent data from Airtable
+   * @returns Promise resolving to array of land rent data
+   */
+  async getLandRents(): Promise<LandRent[]> {
+    // Implementation would go here
+    console.log('Fetching land rent records from Airtable');
+    // Return mock data for now
+    return Promise.resolve([]);
   },
   
   /**
