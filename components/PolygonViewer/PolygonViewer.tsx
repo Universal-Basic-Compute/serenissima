@@ -1024,7 +1024,7 @@ export default function PolygonViewer() {
         }
         
         // Update clouds based on camera position
-        if (sceneRef.current?.updateClouds) {
+        if (sceneRef.current && typeof sceneRef.current.updateClouds === 'function') {
           try {
             sceneRef.current.updateClouds(frameCount);
           } catch (error) {
@@ -1039,8 +1039,9 @@ export default function PolygonViewer() {
           // CRITICAL: Add additional checks to ensure all required objects exist before rendering
           if (sceneRef.current && sceneRef.current.scene && 
               sceneRef.current.camera && 
+              sceneRef.current.scene.userData && 
               !sceneRef.current.scene.userData.isDisposed) {
-            
+          
             // Check if any materials in the scene have issues
             try {
               // Render the scene
@@ -1180,7 +1181,7 @@ export default function PolygonViewer() {
       }
       
       // Force a render
-      if (sceneRef.current && sceneRef.current.scene && sceneRef.current.scene.userData && sceneRef.current.scene.userData.forceRender) {
+      if (sceneRef.current && sceneRef.current.scene && sceneRef.current.scene.userData && typeof sceneRef.current.scene.userData.forceRender === 'function') {
         sceneRef.current.scene.userData.forceRender();
       }
     }
@@ -1235,7 +1236,7 @@ export default function PolygonViewer() {
           });
           
           // Connect land to water
-          if (landObjects.length > 0 && sceneRef.current && sceneRef.current.scene) {
+          if (landObjects.length > 0 && sceneRef.current) {
             console.log(`Connecting ${landObjects.length} land objects to water`);
             if (typeof sceneRef.current.connectLandToWater === 'function') {
               sceneRef.current.connectLandToWater(landObjects);
