@@ -526,7 +526,7 @@ export default class PolygonRenderer {
       () => {
         if (this.ownerColorMap[owner]) {
           return this.ownerColorMap[owner];
-        } else if (owner in this.users && this.users[owner] && this.users[owner].color) {
+        } else if (owner && owner in this.users && this.users[owner] && this.users[owner].color) {
           const color = this.users[owner].color;
           // Cache for future use
           this.ownerColorMap[owner] = color;
@@ -809,8 +809,11 @@ export default class PolygonRenderer {
                   obj.material.forEach((mat: THREE.Material) => {
                     try {
                       // Check if material has a map property (like MeshBasicMaterial or MeshStandardMaterial)
-                      if ('map' in mat && (mat as any).map) {
-                        (mat as any).map.dispose();
+                      if (mat.type === 'MeshBasicMaterial' || mat.type === 'MeshStandardMaterial') {
+                        const matWithMap = mat as THREE.MeshBasicMaterial | THREE.MeshStandardMaterial;
+                        if (matWithMap.map) {
+                          matWithMap.map.dispose();
+                        }
                       }
                       mat.dispose();
                     } catch (matError) {
@@ -820,8 +823,11 @@ export default class PolygonRenderer {
                 } else {
                   try {
                     // Check if material has a map property
-                    if ('map' in obj.material && (obj.material as any).map) {
-                      (obj.material as any).map.dispose();
+                    if (obj.material.type === 'MeshBasicMaterial' || obj.material.type === 'MeshStandardMaterial') {
+                      const matWithMap = obj.material as THREE.MeshBasicMaterial | THREE.MeshStandardMaterial;
+                      if (matWithMap.map) {
+                        matWithMap.map.dispose();
+                      }
                     }
                     obj.material.dispose();
                   } catch (matError) {
@@ -1344,8 +1350,11 @@ export default class PolygonRenderer {
                 if (Array.isArray(obj.material)) {
                   obj.material.forEach((mat: THREE.Material) => {
                     try {
-                      if ('map' in mat && (mat as any).map) {
-                        (mat as any).map.dispose();
+                      if (mat.type === 'MeshBasicMaterial' || mat.type === 'MeshStandardMaterial') {
+                        const matWithMap = mat as THREE.MeshBasicMaterial | THREE.MeshStandardMaterial;
+                        if (matWithMap.map) {
+                          matWithMap.map.dispose();
+                        }
                       }
                       mat.dispose();
                     } catch (matError) {
@@ -1354,8 +1363,11 @@ export default class PolygonRenderer {
                   });
                 } else {
                   try {
-                    if ('map' in obj.material && (obj.material as any).map) {
-                      (obj.material as any).map.dispose();
+                    if (obj.material.type === 'MeshBasicMaterial' || obj.material.type === 'MeshStandardMaterial') {
+                      const matWithMap = obj.material as THREE.MeshBasicMaterial | THREE.MeshStandardMaterial;
+                      if (matWithMap.map) {
+                        matWithMap.map.dispose();
+                      }
                     }
                     obj.material.dispose();
                   } catch (matError) {
