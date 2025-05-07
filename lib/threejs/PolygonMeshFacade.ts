@@ -51,9 +51,6 @@ export class PolygonMeshFacade implements Poolable {
     // Check if we have income data
     this.hasIncomeData = polygon.simulatedIncome !== undefined;
     
-    // Check if we have income data
-    this.hasIncomeData = polygon.simulatedIncome !== undefined;
-    
     // Create the mesh
     this.createMesh();
   }
