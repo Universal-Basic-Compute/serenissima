@@ -27,10 +27,9 @@ declare global {
 // Define interface for PolygonViewer props
 interface PolygonViewerProps {
   getSnapshotWithCache: <T>(getSnapshotFn: () => T, dependencies: any[]) => T;
-  ref: MutableRefObject<any>;
+  ref?: MutableRefObject<any>;
   activeView: 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance';
-  key?: 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance';
-  [key: string]: any; // Allow additional props
+  key?: string;
 }
 
 import { useEffect, useRef, useState, useCallback, MutableRefObject } from 'react';
@@ -2552,7 +2551,6 @@ export default function Home() {
           getSnapshotWithCache={getSnapshotWithCache}
           ref={polygonRendererRef}
           activeView={activeView}
-          // Add any additional required props here
           key={activeView} // Adding a key prop to ensure re-render on view change
         />
       </>
