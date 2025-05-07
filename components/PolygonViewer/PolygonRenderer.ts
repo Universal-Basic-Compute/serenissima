@@ -874,7 +874,7 @@ export default class PolygonRenderer {
           // Get the owner's color
           const ownerColor = this.getOwnerColor(polygon.owner);
           
-          // Create a colored circle on the land instead of loading a texture
+          // Create a colored circle on the land - no texture loading
           if (polygon.centroid) {
             this.createColoredCircleOnLand(polygon, ownerColor || '#8B4513');
             return true;
@@ -926,28 +926,8 @@ export default class PolygonRenderer {
   private createCircularTexture(texture: THREE.Texture): THREE.Texture {
     console.log('createCircularTexture is disabled - using colored circles instead');
     
-    // Create a simple colored circle texture without loading any images
-    const canvas = document.createElement('canvas');
-    const size = 256;
-    canvas.width = size;
-    canvas.height = size;
-    
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return texture;
-    
-    // Draw a colored circle
-    ctx.beginPath();
-    ctx.arc(size/2, size/2, size/2 - 4, 0, Math.PI * 2);
-    ctx.fillStyle = '#FFF8E0'; // Much lighter, more yellow sand color
-    ctx.fill();
-    ctx.strokeStyle = '#FFFFFF';
-    ctx.lineWidth = 8;
-    ctx.stroke();
-    
-    // Create a new texture from the canvas
-    const fallbackTexture = new THREE.Texture(canvas);
-    fallbackTexture.needsUpdate = true;
-    return fallbackTexture;
+    // We're not using textures at all in land view, so this is a no-op
+    return texture;
   }
   
   /**
@@ -1125,24 +1105,14 @@ export default class PolygonRenderer {
   }
   
   /**
-   * Load a coat of arms texture from a URL
+   * Load a coat of arms texture from a URL - disabled in land view
    * @param url The URL of the texture to load
    * @returns A THREE.Texture object
    */
   private loadCoatOfArmsTexture(url: string): THREE.Texture {
-    const texture = new THREE.Texture();
-    const loader = new THREE.TextureLoader();
-    loader.load(url, 
-      (loadedTexture) => {
-        texture.image = loadedTexture.image;
-        texture.needsUpdate = true;
-      },
-      undefined,
-      (error) => {
-        console.error('Error loading coat of arms texture:', error);
-      }
-    );
-    return texture;
+    console.log('loadCoatOfArmsTexture is disabled in land view');
+    // Return an empty texture without loading anything
+    return new THREE.Texture();
   }
   
   /**
