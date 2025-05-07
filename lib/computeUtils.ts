@@ -76,7 +76,7 @@ export async function transferCompute(walletAddress: string, amount: number) {
     // Get the connection to Solana
     console.log('Creating Solana connection...');
     const connection = new Connection(
-      process.env.NEXT_PUBLIC_SOLANA_RPC_URL || 'https://api.devnet.solana.com',
+      process.env.NEXT_PUBLIC_HELIUS_RPC_URL || 'https://api.devnet.solana.com',
       'confirmed'
     );
     
@@ -110,6 +110,9 @@ export async function transferCompute(walletAddress: string, amount: number) {
     
     // Check sender token account balance
     console.log('Checking sender token account balance...');
+    console.log(`Using RPC URL: ${process.env.NEXT_PUBLIC_HELIUS_RPC_URL || 'https://api.devnet.solana.com'}`);
+    console.log(`Checking balance for token account: ${senderTokenAccount.toString()}`);
+    
     try {
       const tokenBalance = await connection.getTokenAccountBalance(senderTokenAccount);
       console.log('Token balance:', tokenBalance.value.uiAmount);

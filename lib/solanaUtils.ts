@@ -15,7 +15,7 @@ const COMPUTE_MULTIPLIER = Math.pow(10, COMPUTE_DECIMALS);
 
 // Solana connection - use devnet for testing, mainnet for production
 const connection = new Connection(
-  process.env.SOLANA_RPC_URL || 'https://api.devnet.solana.com',
+  process.env.NEXT_PUBLIC_HELIUS_RPC_URL || 'https://api.devnet.solana.com',
   'confirmed'
 );
 
