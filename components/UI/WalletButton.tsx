@@ -89,6 +89,15 @@ export default function WalletButton({ className = '' }: WalletButtonProps) {
               Cash out <span className="compute-token">$COMPUTE</span>
             </button>
             <button
+              onClick={() => {
+                setDropdownOpen(false);
+                onSettingsClick?.();
+              }}
+              className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-amber-500 hover:text-white transition-colors"
+            >
+              Settings
+            </button>
+            <button
               onClick={async () => {
                 // Clear current wallet connection
                 localStorage.removeItem('userProfile');
