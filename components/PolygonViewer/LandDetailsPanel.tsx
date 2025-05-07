@@ -842,30 +842,28 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
                       }
                       
                       try {
+                        // Use the TransactionService to create the transaction
+                        const { getTransactionService } = require('../../lib/services/TransactionService');
+                        const transactionService = getTransactionService();
+                        
                         // Create a transaction for the land
-                        const response = await fetch(`${getApiBaseUrl()}/api/transaction`, {
-                          method: 'POST',
-                          headers: {
-                            'Content-Type': 'application/json',
-                          },
-                          body: JSON.stringify({
-                            type: 'land',
-                            asset_id: selectedPolygonId,
-                            seller: owner, // Current owner
-                            price: offerAmount,
-                            historical_name: selectedPolygon?.historicalName,
-                            english_name: selectedPolygon?.englishName,
+                        const transaction = await transactionService.createOffer(
+                          selectedPolygonId!, // The land ID
+                          'land', // Explicitly set type to 'land'
+                          owner!, // Current owner as seller
+                          offerAmount, // The offer amount
+                          {
+                            historicalName: selectedPolygon?.historicalName,
+                            englishName: selectedPolygon?.englishName,
                             description: selectedPolygon?.historicalDescription
-                          }),
-                        });
+                          }
+                        );
                         
-                        if (!response.ok) {
-                          throw new Error('Failed to create offer');
-                        }
-                        
-                        const data = await response.json();
                         alert(`Offer of ${offerAmount.toLocaleString()} ⚜️ ducats created successfully!`);
                         setShowOfferInput(false);
+                        
+                        // Refresh the offers list
+                        setRefreshKey(prevKey => prevKey + 1);
                       } catch (error) {
                         console.error('Error creating offer:', error);
                         alert('Failed to create offer. Please try again.');
