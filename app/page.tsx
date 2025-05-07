@@ -2,6 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import { useState, useRef, useEffect } from 'react';
+import TechTree from '../components/Knowledge/TechTree';
 import Link from 'next/link';
 import { clearLandOwnershipCaches } from '@/lib/cacheUtils';
 import { eventBus, EventTypes } from '@/lib/eventBus';
@@ -89,6 +90,7 @@ export default function SimplePage() {
   const [showLoanApplicationModal, setShowLoanApplicationModal] = useState<boolean>(false);
   const [selectedLoan, setSelectedLoan] = useState<any>(null);
   const [showSettingsModal, setShowSettingsModal] = useState<boolean>(false);
+  const [showTechTree, setShowTechTree] = useState<boolean>(false);
   const [userProfile, setUserProfile] = useState<{
     username: string;
     firstName: string;
@@ -529,13 +531,12 @@ export default function SimplePage() {
                     Explore the future development plans for La Serenissima, including upcoming features, 
                     economic expansions, and governance implementations.
                   </p>
-                  <a 
-                    href="/docs/roadmap.pdf" 
-                    target="_blank"
+                  <button 
+                    onClick={() => setShowTechTree(true)}
                     className="inline-block px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors"
                   >
-                    View Roadmap
-                  </a>
+                    View Tech Tree
+                  </button>
                 </div>
               </div>
               
@@ -1134,6 +1135,11 @@ export default function SimplePage() {
       {/* Settings Modal */}
       {showSettingsModal && (
         <Settings onClose={() => setShowSettingsModal(false)} />
+      )}
+      
+      {/* Tech Tree Modal */}
+      {showTechTree && (
+        <TechTree onClose={() => setShowTechTree(false)} />
       )}
       
       {/* Land Purchase Confirmation Modal */}
