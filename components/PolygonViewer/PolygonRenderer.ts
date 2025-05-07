@@ -1122,7 +1122,6 @@ export default class PolygonRenderer {
       
       if (ownerCoatOfArmsUrl) {
         console.log(`Updating coat of arms texture for ${polygonId} with URL ${ownerCoatOfArmsUrl}`);
-        // Ensure we're passing a string, not null
         polygonMesh.updateCoatOfArmsTexture(ownerCoatOfArmsUrl);
       }
     } catch (error) {
