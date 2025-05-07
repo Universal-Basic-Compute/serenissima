@@ -1924,16 +1924,6 @@ export default function Home() {
 
   return (
     <>
-      {/* Debug overlay - will show even if other components fail */}
-      <div className="fixed top-0 left-0 z-50 bg-white p-2 text-xs">
-        <button 
-          onClick={() => window.location.reload()}
-          className="bg-red-500 text-white px-2 py-1 rounded mr-2"
-        >
-          Reload
-        </button>
-        <span className="ml-2">Polygons: {Object.keys(activeLandPolygons).length}</span>
-      </div>
       
       {/* Minimal fallback removed */}
       

@@ -453,36 +453,7 @@ export default function SimplePage() {
         </div>
       </div>
       
-      {/* Debug overlay - will show even if other components fail */}
-      <div className="fixed top-0 left-0 z-50 bg-white p-2 text-xs">
-        <button 
-          onClick={() => window.location.reload()}
-          className="bg-red-500 text-white px-2 py-1 rounded mr-2"
-        >
-          Reload
-        </button>
-        <span>Simple Viewer</span>
-      </div>
       
-      {/* Cache flush button */}
-      <div className="fixed bottom-4 right-4 z-50">
-        <button
-          onClick={flushAllCaches}
-          className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg shadow-lg flex items-center"
-          title="Clear all caches and reload the page"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-            <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
-          </svg>
-          Flush Caches
-        </button>
-        
-        {cacheCleared && (
-          <div className="absolute top-0 right-0 mt-[-40px] bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg animate-fade-out">
-            Caches cleared!
-          </div>
-        )}
-      </div>
       
       {/* Top Navigation Bar */}
       <div className="absolute top-0 left-0 right-0 bg-black/50 text-white p-4 flex justify-between items-center">
