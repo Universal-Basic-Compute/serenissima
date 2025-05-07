@@ -203,7 +203,8 @@ const Compagno: React.FC<CompagnoProps> = ({ className }) => {
               onError={(e) => {
                 // Fallback if image doesn't exist
                 (e.target as HTMLImageElement).style.display = 'none';
-                (e.target as HTMLImageElement).nextElementSibling!.style.display = 'block';
+                const sibling = (e.target as HTMLImageElement).nextElementSibling as HTMLElement;
+                if (sibling) sibling.style.display = 'block';
               }}
             />
             <div className="hidden text-2xl font-serif">C</div>
@@ -225,7 +226,8 @@ const Compagno: React.FC<CompagnoProps> = ({ className }) => {
                   onError={(e) => {
                     // Fallback if image doesn't exist
                     (e.target as HTMLImageElement).style.display = 'none';
-                    (e.target as HTMLImageElement).nextElementSibling!.style.display = 'block';
+                    const sibling = (e.target as HTMLImageElement).nextElementSibling as HTMLElement;
+                    if (sibling) sibling.style.display = 'block';
                   }}
                 />
                 <div className="hidden text-xl font-serif">C</div>
