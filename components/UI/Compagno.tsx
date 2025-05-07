@@ -210,8 +210,8 @@ const Compagno: React.FC<CompagnoProps> = ({ className }) => {
       // Set the current message as playing
       setPlayingMessageId(message.id);
       
-      // Call our API endpoint which will call the Kinos Engine API
-      const response = await fetch('/api/tts', {
+      // Call the Kinos Engine API directly to get the audio file
+      const response = await fetch('https://api.kinos-engine.ai/v2/tts', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -227,11 +227,11 @@ const Compagno: React.FC<CompagnoProps> = ({ className }) => {
         throw new Error(`Failed to generate speech: ${response.status}`);
       }
       
-      // Get the response from our API
-      const data = await response.json();
+      // Get the audio blob directly from the response
+      const audioBlob = await response.blob();
       
-      // Construct the full audio URL from the Kinos Engine API
-      const audioUrl = `https://api.kinos-engine.ai${data.audio_url}`;
+      // Create a URL for the blob
+      const audioUrl = URL.createObjectURL(audioBlob);
       
       // Create a new audio element
       const audio = new Audio(audioUrl);
@@ -240,9 +240,10 @@ const Compagno: React.FC<CompagnoProps> = ({ className }) => {
       // Play the audio
       audio.play();
       
-      // When audio ends, reset the playing state
+      // When audio ends, reset the playing state and revoke the blob URL
       audio.onended = () => {
         setPlayingMessageId(null);
+        URL.revokeObjectURL(audioUrl); // Clean up the blob URL
       };
       
     } catch (error) {
