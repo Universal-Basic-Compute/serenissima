@@ -516,7 +516,7 @@ export default function SimplePage() {
               <div className="bg-white rounded-lg overflow-hidden shadow-md border border-amber-200">
                 <div className="h-48 overflow-hidden">
                   <img 
-                    src="/images/roadmap.jpg" 
+                    src="/images/project-roadmap.png" 
                     alt="Project Roadmap" 
                     className="w-full h-full object-cover transition-transform hover:scale-105"
                     onError={(e) => {
@@ -544,7 +544,7 @@ export default function SimplePage() {
               <div className="bg-white rounded-lg overflow-hidden shadow-md border border-amber-200">
                 <div className="h-48 overflow-hidden">
                   <img 
-                    src="/images/presentation.jpg" 
+                    src="/images/project-presentation.png" 
                     alt="Project Presentation" 
                     className="w-full h-full object-cover transition-transform hover:scale-105"
                     onError={(e) => {
