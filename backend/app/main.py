@@ -1999,7 +1999,7 @@ except Exception as e:
 async def get_available_loans():
     """Get all available loans"""
     try:
-        formula = "AND({Status}='available')"
+        formula = "OR({Status}='available', {Status}='template')"
         print(f"Backend: Fetching available loans with formula: {formula}")
         records = loans_table.all(formula=formula)
         
