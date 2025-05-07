@@ -1942,3 +1942,187 @@ async def cancel_transaction(transaction_id: str, data: dict):
         print(f"ERROR: {error_msg}")
         traceback.print_exc(file=sys.stdout)
         raise HTTPException(status_code=500, detail=error_msg)
+@app.post("/api/inject-compute-solana")
+async def inject_compute_solana(wallet_data: WalletRequest):
+    """Inject compute resources from a user's wallet to the treasury using Solana blockchain"""
+    
+    if not wallet_data.wallet_address:
+        raise HTTPException(status_code=400, detail="Wallet address is required")
+    
+    if wallet_data.compute_amount is None or wallet_data.compute_amount <= 0:
+        raise HTTPException(status_code=400, detail="Compute amount must be greater than 0")
+    
+    try:
+        # Check if wallet exists - try multiple search approaches
+        existing_records = None
+        
+        # First try exact wallet match
+        formula = f"{{Wallet}}='{wallet_data.wallet_address}'"
+        print(f"Searching for wallet with formula: {formula}")
+        existing_records = users_table.all(formula=formula)
+        
+        # If not found, try username match
+        if not existing_records:
+            formula = f"{{Username}}='{wallet_data.wallet_address}'"
+            print(f"Searching for username with formula: {formula}")
+            existing_records = users_table.all(formula=formula)
+        
+        # Log the incoming amount for debugging
+        print(f"Received compute injection request: {wallet_data.compute_amount} COMPUTE")
+        
+        # Use the full amount without any conversion
+        transfer_amount = wallet_data.compute_amount
+        
+        # Call the Node.js script to prepare the injection transaction
+        # This will create a transaction that needs to be signed by the user
+        import subprocess
+        import json
+        import time
+        
+        # Create a temporary JSON file with the transfer details
+        transfer_data = {
+            "sender": wallet_data.wallet_address,
+            "amount": transfer_amount,
+            "timestamp": time.time()
+        }
+        
+        with open("inject_data.json", "w") as f:
+            json.dump(transfer_data, f)
+        
+        # Call the Node.js script to prepare the transaction
+        try:
+            result = subprocess.run(
+                ["node", "scripts/prepare-inject-compute.js"],
+                capture_output=True,
+                text=True,
+                timeout=30  # 30 second timeout
+            )
+        except subprocess.TimeoutExpired:
+            print("Solana transaction preparation timed out after 30 seconds")
+            raise HTTPException(status_code=504, detail="Solana transaction preparation timed out")
+        
+        if result.returncode != 0:
+            print(f"Error preparing Solana transaction: {result.stderr}")
+            error_detail = result.stderr or "Unknown error"
+            raise HTTPException(status_code=500, detail=f"Failed to prepare Solana transaction: {error_detail}")
+        
+        # Parse the result to get the transaction data
+        try:
+            transaction_result = json.loads(result.stdout)
+            
+            if not transaction_result.get("success", False):
+                error_msg = transaction_result.get("error", "Unknown error")
+                error_code = transaction_result.get("errorCode", "UNKNOWN")
+                
+                raise HTTPException(status_code=500, detail=f"Transaction preparation failed: {error_msg} (Code: {error_code})")
+                
+            # Return the transaction data for the frontend to have the user sign
+            serialized_transaction = transaction_result.get("serializedTransaction")
+            message = transaction_result.get("message")
+            
+            # For now, we'll simulate a successful transaction
+            # In a real app, the frontend would have the user sign this transaction
+            # and then submit it to the blockchain
+            
+            if existing_records:
+                # Update existing record
+                record = existing_records[0]
+                current_amount = record["fields"].get("ComputeAmount", 0)
+                new_amount = current_amount + transfer_amount
+                
+                print(f"Updating wallet {record['id']} compute amount from {current_amount} to {new_amount}")
+                updated_record = users_table.update(record["id"], {
+                    "ComputeAmount": new_amount
+                })
+                
+                # Add transaction record to TRANSACTIONS table
+                try:
+                    transaction_record = transactions_table.create({
+                        "Type": "inject",
+                        "AssetId": "compute_token",
+                        "Seller": wallet_data.wallet_address,
+                        "Buyer": "Treasury",
+                        "Price": transfer_amount,
+                        "CreatedAt": datetime.datetime.now().isoformat(),
+                        "UpdatedAt": datetime.datetime.now().isoformat(),
+                        "ExecutedAt": datetime.datetime.now().isoformat(),
+                        "Notes": json.dumps({
+                            "operation": "inject",
+                            "method": "solana",
+                            "status": "pending_signature",
+                            "serialized_transaction": serialized_transaction
+                        })
+                    })
+                    print(f"Created transaction record: {transaction_record['id']}")
+                except Exception as tx_error:
+                    print(f"Warning: Failed to create transaction record: {str(tx_error)}")
+                
+                return {
+                    "id": updated_record["id"],
+                    "wallet_address": updated_record["fields"].get("Wallet", ""),
+                    "compute_amount": updated_record["fields"].get("ComputeAmount", 0),
+                    "user_name": updated_record["fields"].get("Username", None),
+                    "email": updated_record["fields"].get("Email", None),
+                    "family_motto": updated_record["fields"].get("FamilyMotto", None),
+                    "coat_of_arms_image": updated_record["fields"].get("CoatOfArmsImage", None),
+                    "transaction_details": {
+                        "status": "pending_signature",
+                        "serialized_transaction": serialized_transaction,
+                        "message": message
+                    }
+                }
+            else:
+                # Create new record
+                print(f"Creating new wallet record with compute amount {transfer_amount}")
+                record = users_table.create({
+                    "Wallet": wallet_data.wallet_address,
+                    "ComputeAmount": transfer_amount
+                })
+                
+                # Add transaction record to TRANSACTIONS table
+                try:
+                    transaction_record = transactions_table.create({
+                        "Type": "inject",
+                        "AssetId": "compute_token",
+                        "Seller": wallet_data.wallet_address,
+                        "Buyer": "Treasury",
+                        "Price": transfer_amount,
+                        "CreatedAt": datetime.datetime.now().isoformat(),
+                        "UpdatedAt": datetime.datetime.now().isoformat(),
+                        "ExecutedAt": datetime.datetime.now().isoformat(),
+                        "Notes": json.dumps({
+                            "operation": "inject",
+                            "method": "solana",
+                            "status": "pending_signature",
+                            "serialized_transaction": serialized_transaction
+                        })
+                    })
+                    print(f"Created transaction record: {transaction_record['id']}")
+                except Exception as tx_error:
+                    print(f"Warning: Failed to create transaction record: {str(tx_error)}")
+                
+                return {
+                    "id": record["id"],
+                    "wallet_address": record["fields"].get("Wallet", ""),
+                    "compute_amount": record["fields"].get("ComputeAmount", 0),
+                    "user_name": record["fields"].get("Username", None),
+                    "email": record["fields"].get("Email", None),
+                    "family_motto": record["fields"].get("FamilyMotto", None),
+                    "transaction_details": {
+                        "status": "pending_signature",
+                        "serialized_transaction": serialized_transaction,
+                        "message": message
+                    }
+                }
+                
+        except json.JSONDecodeError:
+            print(f"Error parsing transaction result: {result.stdout}")
+            raise HTTPException(status_code=500, detail="Failed to parse transaction result")
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        error_msg = f"Failed to inject compute: {str(e)}"
+        print(f"ERROR: {error_msg}")
+        traceback.print_exc(file=sys.stdout)
+        raise HTTPException(status_code=500, detail=error_msg)

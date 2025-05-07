@@ -197,3 +197,73 @@ export async function withdrawComputeToTreasury(
     throw error;
   }
 }
+/**
+ * Prepare a transaction for injecting COMPUTE tokens from a user to the treasury
+ * This creates a transaction that needs to be signed by the user
+ * @param senderAddress The sender's wallet address
+ * @param amount The amount of tokens to transfer
+ * @returns Serialized transaction that needs to be signed by the user
+ */
+export async function prepareInjectComputeTransaction(
+  senderAddress: string,
+  amount: number
+): Promise<{ serializedTransaction: string, message: string }> {
+  try {
+    // Initialize treasury keypair
+    const treasury = initializeTreasuryKeypair();
+    
+    // Convert sender address to PublicKey
+    const sender = new PublicKey(senderAddress);
+    
+    // Get the token account for the treasury
+    const treasuryTokenAccount = await getAssociatedTokenAddress(
+      COMPUTE_TOKEN_MINT,
+      treasury.publicKey
+    );
+    
+    // Get the token account for the sender
+    const senderTokenAccount = await getAssociatedTokenAddress(
+      COMPUTE_TOKEN_MINT,
+      sender
+    );
+    
+    // Check if the sender token account exists
+    const accountInfo = await connection.getAccountInfo(senderTokenAccount);
+    if (!accountInfo) {
+      throw new Error(`User ${senderAddress} does not have a COMPUTE token account`);
+    }
+    
+    // Create transfer instruction - FROM sender TO treasury
+    const transferIx = createTransferInstruction(
+      senderTokenAccount,
+      treasuryTokenAccount,
+      sender,  // The sender needs to sign this transaction
+      amount
+    );
+    
+    // Create transaction and add the transfer instruction
+    const transaction = new Transaction().add(transferIx);
+    
+    // Get the recent blockhash
+    const { blockhash } = await connection.getLatestBlockhash();
+    transaction.recentBlockhash = blockhash;
+    transaction.feePayer = sender;  // The sender pays the fee
+    
+    // Serialize the transaction
+    const serializedTransaction = transaction.serialize({
+      requireAllSignatures: false,  // We don't have the sender's signature yet
+      verifySignatures: false
+    }).toString('base64');
+    
+    // Create a message for the user to understand what they're signing
+    const message = `You are injecting ${amount} COMPUTE tokens to the Republic's treasury.`;
+    
+    return {
+      serializedTransaction,
+      message
+    };
+  } catch (error) {
+    console.error('Error preparing COMPUTE token injection transaction:', error);
+    throw error;
+  }
+}

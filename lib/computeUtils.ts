@@ -1,21 +1,21 @@
 import { getApiBaseUrl } from '@/lib/apiUtils';
 
 /**
- * Transfers compute to a user's wallet
- * @param walletAddress The wallet address to transfer compute to
- * @param amount The amount of compute to transfer
+ * Injects compute from a user's wallet to the treasury
+ * @param walletAddress The wallet address to inject compute from
+ * @param amount The amount of compute to inject
  * @returns The response data from the API
  */
 export async function transferCompute(walletAddress: string, amount: number) {
   try {
-    console.log('Starting compute transfer process...');
+    console.log('Starting compute injection process...');
     
     if (!walletAddress) {
       throw new Error('Please connect your wallet first');
     }
     
-    // Call the backend API to transfer compute using Solana
-    const response = await fetch(`${getApiBaseUrl()}/api/transfer-compute-solana`, {
+    // Call the backend API to inject compute FROM user TO treasury using Solana
+    const response = await fetch(`${getApiBaseUrl()}/api/inject-compute-solana`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -28,15 +28,15 @@ export async function transferCompute(walletAddress: string, amount: number) {
     
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.detail || 'Failed to transfer compute');
+      throw new Error(errorData.detail || 'Failed to inject compute');
     }
     
     const data = await response.json();
-    console.log('Compute transfer successful:', data);
+    console.log('Compute injection successful:', data);
     
     return data;
   } catch (error) {
-    console.error('Error transferring compute:', error);
+    console.error('Error injecting compute:', error);
     throw error;
   }
 }
