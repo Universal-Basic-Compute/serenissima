@@ -300,7 +300,7 @@ const DockCreator: React.FC<DockCreatorProps> = ({
       <div 
         className="fixed inset-0"
         style={{ 
-          pointerEvents: 'all',
+          pointerEvents: 'none', // Change from 'all' to 'none' as base setting
           cursor: 'crosshair',
           position: 'fixed',
           top: 0,
@@ -309,14 +309,6 @@ const DockCreator: React.FC<DockCreatorProps> = ({
           bottom: 0,
           backgroundColor: 'rgba(0,0,255,0.01)', // Make it almost invisible
           zIndex: 1000 // Keep high z-index
-        }}
-        onMouseMove={(e) => {
-          // Only handle left mouse button events for dock placement
-          if (e.buttons === 1 || e.buttons === 0) {
-            console.log('Overlay mouse move detected at', e.clientX, e.clientY);
-            handleMouseMove(e);
-          }
-          // Let other mouse events pass through
         }}
         onClick={(e) => {
           // Only handle left mouse button clicks for dock placement
@@ -328,22 +320,19 @@ const DockCreator: React.FC<DockCreatorProps> = ({
           }
           // Let other mouse events pass through
         }}
-        onContextMenu={(e) => {
-          // Let right-click events pass through to the camera controls
-          e.stopPropagation();
-          return true;
-        }}
-        onMouseDown={(e) => {
-          // Only capture left mouse button events
-          if (e.button !== 0) {
-            // For middle and right mouse buttons, don't prevent default
-            return true;
-          }
-        }}
-        onWheel={(e) => {
-          // Let wheel events pass through to the camera controls
-          return true;
-        }}
+      >
+        {/* Add a pointer-events-auto div that only captures mousemove for the preview */}
+        <div 
+          className="absolute inset-0" 
+          style={{ pointerEvents: 'auto' }}
+          onMouseMove={(e) => {
+            // Only handle left mouse button or no button events for preview
+            if (e.buttons === 1 || e.buttons === 0) {
+              console.log('Overlay mouse move detected at', e.clientX, e.clientY);
+              handleMouseMove(e);
+            }
+          }}
+        />
       />
       
       {/* UI Controls */}
