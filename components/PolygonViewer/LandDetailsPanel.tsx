@@ -452,7 +452,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
     } else {
       setOffers([]);
     }
-  }, [selectedPolygonId, transaction]); // Add transaction as a dependency
+  }, [selectedPolygonId, transaction, refreshKey]); // Add refreshKey as a dependency to refresh offers when an offer is created
   
   // Show panel with animation when a polygon is selected
   useEffect(() => {
