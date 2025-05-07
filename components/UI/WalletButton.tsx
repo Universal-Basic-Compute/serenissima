@@ -89,6 +89,19 @@ export default function WalletButton({ className = '' }: WalletButtonProps) {
             </button>
             <button
               onClick={() => {
+                // Clear current wallet connection but keep the session
+                localStorage.removeItem('userProfile');
+                
+                // Trigger wallet connection flow to select a new wallet
+                connectWallet();
+                setDropdownOpen(false);
+              }}
+              className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-amber-500 hover:text-white transition-colors"
+            >
+              Switch Account
+            </button>
+            <button
+              onClick={() => {
                 connectWallet();
                 setDropdownOpen(false);
               }}
