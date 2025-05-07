@@ -106,15 +106,15 @@ function calculateLocationMultiplier(distance) {
   return Math.max(1, multiplier);
 }
 
-// Calculate base rent based on area - recalibrated to match target economy with reduced area importance
+// Calculate base rent based on area - recalibrated to match target economy with greatly reduced area importance
 function calculateBaseRent(areaInSquareMeters) {
   // Base value calculation - using a reference size of 100 sq meters
   const REFERENCE_SIZE = 100; // sq meters
   const REFERENCE_RENT = TARGET_DAILY_RENT_PER_MILLION; // ~137 ducats per day for 1M value
   
   // Calculate size factor with diminishing returns for larger areas
-  // Reduce the exponent from 0.7 to 0.3 (more than 50% reduction) to make area less important
-  const sizeFactor = Math.pow(areaInSquareMeters / REFERENCE_SIZE, 0.3);
+  // Reduce the exponent from 0.3 to 0.15 (making area much less important)
+  const sizeFactor = Math.pow(areaInSquareMeters / REFERENCE_SIZE, 0.15);
   
   // Calculate base rent
   return REFERENCE_RENT * sizeFactor;
