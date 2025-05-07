@@ -104,18 +104,19 @@ export class IncomePolygonRenderer {
         const edgeMaterial = new THREE.LineBasicMaterial({
           color: 0xffffff,  // White edges
           transparent: true,
-          opacity: 0.4,     // Increased opacity for better visibility
-          linewidth: 2      // Thicker lines for better visibility
+          opacity: 0.6,     // Increased opacity for better visibility
+          linewidth: 3      // Thicker lines for better visibility
         });
       
         // Create wireframe for edges
-        const edges = new THREE.EdgesGeometry(geometry);
+        const edges = new THREE.EdgesGeometry(geometry, 15); // Add angle threshold to only show more significant edges
         const line = new THREE.LineSegments(edges, edgeMaterial);
       
-        // Position the wireframe exactly like the main mesh
+        // Position the wireframe exactly like the main mesh but slightly lower
+        // to ensure it appears inside the polygon rather than on top
         line.rotation.x = -Math.PI / 2;
-        line.position.y = 0.012; // Slightly higher above the colored mesh to prevent z-fighting
-        line.renderOrder = 3;    // Higher than the colored mesh
+        line.position.y = 0.005; // Position lower than the colored mesh (0.01) to be inside
+        line.renderOrder = 2;    // Same as the colored mesh to integrate with it
       
         // Add to scene
         this.scene.add(line);
