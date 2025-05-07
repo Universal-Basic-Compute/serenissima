@@ -798,7 +798,7 @@ export class WaterFacade {
     this.landObjects.forEach(object => {
       // Cast object to Mesh to access geometry property
       const mesh = object as THREE.Mesh;
-      if (mesh.geometry) {
+      if ('geometry' in object && mesh.geometry) {
         try {
           // Get the vertices from the geometry
           const geometry = (object as THREE.Mesh).geometry;
@@ -1141,7 +1141,7 @@ if (shoreFactor > 0.01) {
         } else if (this.water.material && 'map' in this.water.material && 
                   this.water.material.type === 'MeshBasicMaterial') {
           // For fallback mode with basic material
-          const material = this.water.material as THREE.Material & { map?: THREE.Texture };
+          const material = this.water.material as THREE.MeshBasicMaterial;
           if (material.map) {
             material.map.dispose();
           }
