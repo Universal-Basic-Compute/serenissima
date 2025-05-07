@@ -25,8 +25,6 @@ export class PolygonMeshFacade implements Poolable {
   private _isActive: boolean = false; // Renamed to avoid conflict with isActive() method
   private originalGeometry: THREE.BufferGeometry | null = null;
   private simplifiedGeometries: Map<number, THREE.BufferGeometry> = new Map();
-  private minIncome: number = 0;
-  private maxIncome: number = 1000;
   private hasIncomeData: boolean = false;
   private minIncome: number = 0;
   private maxIncome: number = 1000;

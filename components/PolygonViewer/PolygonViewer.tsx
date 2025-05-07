@@ -726,8 +726,9 @@ export default function PolygonViewer() {
     
     // Add camera reference to window for debugging
     if (typeof window !== 'undefined' && sceneRef.current) {
-      if (sceneRef.current && sceneRef.current.camera) {
-        (window as any).threeJsCamera = sceneRef.current.camera;
+      const currentScene = sceneRef.current;
+      if (currentScene.camera) {
+        (window as any).threeJsCamera = currentScene.camera;
       }
     }
     
@@ -768,7 +769,7 @@ export default function PolygonViewer() {
         if (roadManagerRef.current === null) {
           roadManagerRef.current = new RoadManager(scene);
         }
-            
+              
         // Load roads from Airtable
         if (roadManagerRef.current) {
           roadManagerRef.current.loadRoadsFromAirtable()
