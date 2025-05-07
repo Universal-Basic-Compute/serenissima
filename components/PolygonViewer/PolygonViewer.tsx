@@ -1434,7 +1434,7 @@ export default function PolygonViewer() {
         // Create a local reference to ensure TypeScript knows it's not null
         const roadManager = roadManagerRef.current;
         // Now TypeScript knows roadManager is not null in this scope
-        roadManager.saveRoadToAirtable(roadId, selectedPolygonId ?? undefined, walletAddress || undefined)
+        roadManager?.saveRoadToAirtable(roadId, selectedPolygonId ?? undefined, walletAddress || undefined)
           .then(response => {
             console.log('Road saved to Airtable:', response);
             // Show success message
