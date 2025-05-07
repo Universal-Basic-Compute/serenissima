@@ -309,8 +309,8 @@ async function main() {
   }
   
   if (remainingErrors > 0) {
-    console.log(`\nCompleted ${MAX_ITERATIONS} iterations but still have ${remainingErrors} errors remaining.`);
-    console.log('You may need to fix the remaining errors manually or run this script again.');
+    console.log(`\nCompleted with ${remainingErrors} errors remaining.`);
+    console.log('Run this script again to continue fixing errors.');
   } else {
     console.log('\nAll TypeScript errors have been successfully fixed!');
   }
