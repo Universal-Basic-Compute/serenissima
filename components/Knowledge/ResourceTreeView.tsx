@@ -1,368 +1,74 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ResourceNode } from '../../lib/resourceUtils';
-import * as d3 from 'd3';
+import { FaProjectDiagram, FaChevronRight, FaChevronDown, FaLeaf, FaIndustry, FaGem, FaArrowRight } from 'react-icons/fa';
 
 interface ResourceTreeViewProps {
-  resources: ResourceNode[];
-  onSelectResource: (resource: ResourceNode) => void;
+  resources?: ResourceNode[];
+  onSelectResource?: (resource: ResourceNode) => void;
   loading?: boolean;
 }
 
-const ResourceTreeView: React.FC<ResourceTreeViewProps> = ({
-  resources = [],
+const ResourceTreeView: React.FC<ResourceTreeViewProps> = ({ 
+  resources = [], 
   onSelectResource,
   loading = false
 }) => {
-  const svgRef = useRef<SVGSVGElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
-  const [simulation, setSimulation] = useState<d3.Simulation<any, any> | null>(null);
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(['raw_materials']));
+  const [resourceMap, setResourceMap] = useState<Record<string, ResourceNode>>({});
   
-  // Helper function to throttle frequent events
-  const throttle = (func: Function, limit: number) => {
-    let inThrottle: boolean;
-    return function(this: any, ...args: any[]) {
-      if (!inThrottle) {
-        func.apply(this, args);
-        inThrottle = true;
-        setTimeout(() => inThrottle = false, limit);
-      }
-    };
+  // Build a map of resources by ID for quick lookup
+  useEffect(() => {
+    if (resources.length > 0) {
+      const map: Record<string, ResourceNode> = {};
+      resources.forEach(resource => {
+        map[resource.id] = resource;
+      });
+      setResourceMap(map);
+    }
+  }, [resources]);
+  
+  // Toggle category expansion
+  const toggleCategory = (category: string) => {
+    const newExpanded = new Set(expandedCategories);
+    if (newExpanded.has(category)) {
+      newExpanded.delete(category);
+    } else {
+      newExpanded.add(category);
+    }
+    setExpandedCategories(newExpanded);
   };
   
-  // Update dimensions when container size changes
-  useEffect(() => {
-    if (!containerRef.current) return;
-    
-    const updateDimensions = () => {
-      if (containerRef.current) {
-        const { width, height } = containerRef.current.getBoundingClientRect();
-        setDimensions({ width, height });
-      }
-    };
-    
-    updateDimensions();
-    window.addEventListener('resize', updateDimensions);
-    
-    return () => {
-      window.removeEventListener('resize', updateDimensions);
-    };
-  }, []);
-  
-  // Create and update the force-directed graph
-  useEffect(() => {
-    if (!svgRef.current || resources.length === 0) return;
-    
-    // Clear previous graph
-    d3.select(svgRef.current).selectAll("*").remove();
-    
-    // Prepare data for the graph
-    const nodes = resources.map(resource => ({
-      id: resource.id,
-      name: resource.name,
-      category: resource.category,
-      icon: resource.icon,
-      resource: resource,
-      x: 0,
-      y: 0
-    }));
-    
-    // Create links between resources
-    const links: { source: string; target: string; type: string }[] = [];
-    
-    resources.forEach(resource => {
-      // Add links from inputs to this resource
-      if (resource.inputs) {
-        resource.inputs.forEach(inputId => {
-          // Check if the input resource exists in our dataset before creating a link
-          if (resources.some(r => r.id === inputId)) {
-            links.push({
-              source: inputId,
-              target: resource.id,
-              type: 'input'
-            });
-          } else {
-            console.warn(`Input resource not found: ${inputId} for resource ${resource.id}`);
-          }
-        });
-      }
-      
-      // Add links from this resource to its outputs
-      if (resource.outputs) {
-        resource.outputs.forEach(outputId => {
-          // Check if the output resource exists in our dataset before creating a link
-          if (resources.some(r => r.id === outputId)) {
-            links.push({
-              source: resource.id,
-              target: outputId,
-              type: 'output'
-            });
-          } else {
-            console.warn(`Output resource not found: ${outputId} for resource ${resource.id}`);
-          }
-        });
-      }
-    });
-    
-    // Create SVG element
-    const svg = d3.select(svgRef.current);
-    
-    // Create a group for the graph
-    const g = svg.append("g");
-    
-    // Add zoom behavior
-    const zoom = d3.zoom()
-      .scaleExtent([0.1, 4])
-      .on("zoom", (event) => {
-        g.attr("transform", event.transform);
-      });
-    
-    svg.call(zoom as any);
-    
-    // Reset zoom to center the graph
-    svg.call(zoom.transform as any, d3.zoomIdentity.translate(dimensions.width / 2, dimensions.height / 2).scale(0.8));
-    
-    // Add a reset zoom button
-    svg.append("rect")
-      .attr("x", 10)
-      .attr("y", 10)
-      .attr("width", 30)
-      .attr("height", 30)
-      .attr("rx", 5)
-      .attr("fill", "rgba(139, 69, 19, 0.5)")
-      .attr("cursor", "pointer")
-      .on("click", () => {
-        svg.transition()
-          .duration(750)
-          .call(zoom.transform as any, d3.zoomIdentity.translate(dimensions.width / 2, dimensions.height / 2).scale(0.8));
-      });
-
-    svg.append("text")
-      .attr("x", 25)
-      .attr("y", 25)
-      .attr("text-anchor", "middle")
-      .attr("dominant-baseline", "central")
-      .attr("fill", "white")
-      .attr("font-size", "16px")
-      .attr("pointer-events", "none")
-      .text("⟲");
-    
-    // Add loading indicator
-    const loadingIndicator = svg.append("text")
-      .attr("x", 0)
-      .attr("y", 0)
-      .attr("text-anchor", "middle")
-      .attr("fill", "#FFF")
-      .text("Organizing resources...");
-    
-    // Define node type for simulation
-    interface SimulationNode {
-      id: string;
-      name: string;
-      category: string;
-      icon: string;
-      resource: ResourceNode;
-      x: number;
-      y: number;
-      fx?: number | null;
-      fy?: number | null;
-    }
-
-    // Create the simulation with proper typing and add category-based forces
-    const sim = d3.forceSimulation<SimulationNode>(nodes as SimulationNode[])
-      // Modify the link force to be stronger and have more distance
-      .force("link", d3.forceLink<SimulationNode, {source: string; target: string; type: string}>(links)
-        .id(d => d.id)
-        .distance(150)  // Increase from 100 to 150
-        .strength((link: any) => {
-          // Return 0 strength for links with missing nodes
-          const sourceExists = nodes.some((node: SimulationNode) => 
-            node.id === (typeof link.source === 'string' ? link.source : link.source.id));
-          const targetExists = nodes.some((node: SimulationNode) => 
-            node.id === (typeof link.target === 'string' ? link.target : link.target.id));
-          return sourceExists && targetExists ? 0.7 : 0; // Increase strength for more stable connections
-        }))
-      // Reduce the charge strength to prevent nodes from repelling too strongly
-      .force("charge", d3.forceManyBody().strength(-200))
-      // Keep the center force
-      .force("center", d3.forceCenter(0, 0))
-      // Increase collision radius to prevent overlap
-      .force("collide", d3.forceCollide(50))
-      // Add a stronger category-based force
-      .force("category", d3.forceX<SimulationNode>().strength(0.2).x(d => {
-        // Raw materials go to the left
-        if (d.category === 'raw_materials') return -dimensions.width / 3;
-        // Processed materials in the middle
-        else if (d.category === 'processed_materials') return 0;
-        // Finished goods go to the right
-        else if (d.category === 'finished_goods' || d.category === 'luxury_goods') return dimensions.width / 3;
-        // Default position
-        return 0;
-      }))
-      // Add a vertical force to separate by subcategory
-      .force("subcategory", d3.forceY<SimulationNode>().strength(0.1).y(d => {
-        // Use the first character of the subcategory to create vertical separation
-        const hash = d.resource.subcategory ? 
-          d.resource.subcategory.charCodeAt(0) % 5 : 
-          0;
-        return (hash - 2) * dimensions.height / 10;
-      }));
-    
-    // Make the simulation stabilize faster
-    sim.alphaDecay(0.03); // Increase from 0.02 to 0.03 for faster cooling
-    
-    // Create links
-    const link = g.append("g")
-      .attr("stroke", "#999")
-      .attr("stroke-opacity", 0.6)
-      .selectAll("line")
-      .data(links)
-      .join("line")
-      .attr("stroke-width", 2)
-      .attr("stroke", d => d.type === 'input' ? "#8B4513" : "#8B6513")
-      .attr("stroke-dasharray", d => d.type === 'input' ? "5,5" : "3,3")
-      .attr("marker-end", "url(#arrowhead)");
-    
-    // Define arrow marker
-    svg.append("defs").append("marker")
-      .attr("id", "arrowhead")
-      .attr("viewBox", "0 0 10 10")
-      .attr("refX", 20)
-      .attr("refY", 5)
-      .attr("markerWidth", 6)
-      .attr("markerHeight", 6)
-      .attr("orient", "auto")
-      .append("path")
-      .attr("d", "M 0 0 L 10 5 L 0 10 z")
-      .attr("fill", "#8B4513");
-    
-    // Create node groups
-    const node = g.append("g")
-      .selectAll(".node")
-      .data(nodes)
-      .join("g")
-      .attr("class", "node")
-      .call(d3.drag()
-        .on("start", dragstarted)
-        .on("drag", dragged)
-        .on("end", dragended) as any)
-      .on("click", (event, d) => {
-        event.stopPropagation();
-        onSelectResource(d.resource);
-      });
-    
-    // Add circular background for nodes - make it larger
-    node.append("circle")
-      .attr("r", 40)  // Increase from 30 to 40
-      .attr("fill", d => getCategoryColor(d.category))
-      .attr("stroke", "#8B4513")
-      .attr("stroke-width", 2);
-    
-    // Add white circle for icon background - make it larger
-    node.append("circle")
-      .attr("r", 32)  // Increase from 24 to 32
-      .attr("fill", "white")
-      .attr("stroke", "#8B4513")
-      .attr("stroke-width", 1);
-    
-    // Add resource icons - make them larger
-    node.append("image")
-      .attr("xlink:href", d => d.icon)
-      .attr("x", -28)  // Increase from -20 to -28
-      .attr("y", -28)  // Increase from -20 to -28
-      .attr("width", 56)  // Increase from 40 to 56
-      .attr("height", 56) // Increase from 40 to 56
-      .attr("clip-path", "circle(28px at 0 0)") // Increase from 20px to 28px
-      .on("error", function() {
-        d3.select(this).attr("xlink:href", "/assets/resources/icons/default.png");
-      });
-    
-    // Add resource names with better visibility
-    node.append("text")
-      .attr("dy", 55)  // Move further down from 45 to 55
-      .attr("text-anchor", "middle")
-      .attr("fill", "#FFF")
-      .attr("stroke", "#000")
-      .attr("stroke-width", 0.7)  // Increase from 0.5 to 0.7
-      .attr("font-size", "12px")  // Increase from 10px to 12px
-      .text(d => d.name);
-    
-    // Update positions on simulation tick with performance optimizations
-    let tickCount = 0;
-    const maxTicks = 200; // Reduce from 300 to 200
-    
-    sim.on("tick", () => {
-      tickCount++;
-      
-      // Stop the simulation after maxTicks
-      if (tickCount > maxTicks && sim.alpha() < 0.01) {
-        sim.stop();
-      }
-      
-      // Only update the DOM every 3 ticks to reduce rendering load
-      if (tickCount % 3 === 0) {  // Change from 2 to 3
-        link
-          .attr("x1", d => (d.source as any).x)
-          .attr("y1", d => (d.source as any).y)
-          .attr("x2", d => (d.target as any).x)
-          .attr("y2", d => (d.target as any).y);
-        
-        node.attr("transform", d => `translate(${d.x},${d.y})`);
-      }
-    });
-    
-    // Remove the loading indicator when the simulation stops
-    sim.on("end", () => {
-      loadingIndicator.remove();
-    });
-    
-    // Drag functions with proper typing
-    function dragstarted(event: d3.D3DragEvent<SVGGElement, SimulationNode, SimulationNode>, d: SimulationNode) {
-      if (!event.active) sim.alphaTarget(0.3).restart();
-      d.fx = d.x;
-      d.fy = d.y;
-    }
-    
-    function dragged(event: d3.D3DragEvent<SVGGElement, SimulationNode, SimulationNode>, d: SimulationNode) {
-      // Throttled position update
-      throttle(() => {
-        d.fx = event.x;
-        d.fy = event.y;
-      }, 16)(); // 16ms = ~60fps
-    }
-    
-    function dragended(event: d3.D3DragEvent<SVGGElement, SimulationNode, SimulationNode>, d: SimulationNode) {
-      if (!event.active) sim.alphaTarget(0);
-      d.fx = null;
-      d.fy = null;
-    }
-    
-    // Store simulation for cleanup
-    setSimulation(sim);
-    
-    // Cleanup function
-    return () => {
-      if (simulation) simulation.stop();
-    };
-  }, [resources, dimensions, onSelectResource]);
-  
-  // Get color based on category
-  const getCategoryColor = (category: string): string => {
+  // Get icon for category
+  const getCategoryIcon = (category: string) => {
     switch(category) {
       case 'raw_materials':
-        return 'rgba(52, 211, 153, 0.8)'; // Green
+        return <FaLeaf className="text-green-600" />;
       case 'processed_materials':
-        return 'rgba(59, 130, 246, 0.8)'; // Blue
+        return <FaIndustry className="text-blue-600" />;
       case 'finished_goods':
-        return 'rgba(139, 92, 246, 0.8)'; // Purple
-      case 'luxury_goods':
-        return 'rgba(236, 72, 153, 0.8)'; // Pink
-      case 'imported_goods':
-        return 'rgba(239, 68, 68, 0.8)'; // Red
+        return <FaGem className="text-purple-600" />;
       default:
-        return 'rgba(249, 115, 22, 0.8)'; // Amber
+        return <FaProjectDiagram className="text-amber-600" />;
     }
   };
+  
+  // Format category names for display
+  const formatCategoryName = (name: string): string => {
+    return name
+      .split('_')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  };
+  
+  // Group resources by category
+  const resourcesByCategory = resources.reduce((acc, resource) => {
+    const category = resource.category || 'uncategorized';
+    if (!acc[category]) {
+      acc[category] = [];
+    }
+    acc[category].push(resource);
+    return acc;
+  }, {} as Record<string, ResourceNode[]>);
   
   if (loading) {
     return (
@@ -384,20 +90,157 @@ const ResourceTreeView: React.FC<ResourceTreeViewProps> = ({
   }
 
   return (
-    <div className="bg-amber-50/10 rounded-lg p-6 border border-amber-700/30 h-full" ref={containerRef}>
+    <div className="bg-amber-50/10 rounded-lg p-6 border border-amber-700/30 h-full">
       <div className="text-center text-amber-300 mb-6">
-        <h3 className="text-xl font-serif">Production Chains</h3>
+        <h3 className="text-xl font-serif">Resource Production Chains</h3>
         <p className="text-sm mt-1">Explore how resources are transformed through production chains</p>
-        <p className="text-xs mt-1 text-amber-400/70">Drag nodes to rearrange • Scroll to zoom • Click a resource to view details</p>
       </div>
       
-      <div className="w-full h-[calc(100vh-250px)]">
-        <svg 
-          ref={svgRef}
-          width={dimensions.width} 
-          height={dimensions.height}
-          className="w-full h-full bg-amber-950/30 rounded-lg"
-        />
+      <div className="overflow-auto max-h-[calc(100vh-200px)] tech-tree-scroll">
+        {/* Categories */}
+        {Object.keys(resourcesByCategory).sort().map(category => (
+          <div key={category} className="mb-6">
+            <div 
+              className="flex items-center p-2 bg-amber-900/30 rounded-lg cursor-pointer hover:bg-amber-900/40 transition-colors"
+              onClick={() => toggleCategory(category)}
+            >
+              <span className="mr-2 text-amber-300">
+                {expandedCategories.has(category) ? <FaChevronDown /> : <FaChevronRight />}
+              </span>
+              <span className="mr-2">{getCategoryIcon(category)}</span>
+              <span className="text-amber-200 font-medium">{formatCategoryName(category)}</span>
+              <span className="ml-2 text-amber-400/70 text-sm">
+                ({resourcesByCategory[category].length} resources)
+              </span>
+            </div>
+            
+            {/* Resources in category */}
+            {expandedCategories.has(category) && (
+              <div className="mt-4 pl-4">
+                {resourcesByCategory[category].map(resource => (
+                  <div key={resource.id} className="mb-6 bg-amber-900/20 rounded-lg p-4 border border-amber-700/30">
+                    {/* Resource header */}
+                    <div 
+                      className="flex items-center cursor-pointer"
+                      onClick={() => onSelectResource && onSelectResource(resource)}
+                    >
+                      <div className="w-12 h-12 bg-white rounded-full overflow-hidden flex items-center justify-center mr-3 border border-amber-200">
+                        <img 
+                          src={resource.icon} 
+                          alt={resource.name}
+                          className="w-10 h-10 object-contain"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            if (!target.dataset.usedFallback) {
+                              target.dataset.usedFallback = 'true';
+                              target.src = "/assets/resources/icons/default.png";
+                            }
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <h4 className="text-lg font-medium text-amber-200">{resource.name}</h4>
+                        <p className="text-sm text-amber-300/70">{resource.subcategory ? formatCategoryName(resource.subcategory) : ''}</p>
+                      </div>
+                    </div>
+                    
+                    {/* Production chain visualization */}
+                    <div className="mt-4">
+                      {/* Inputs */}
+                      {resource.inputs && resource.inputs.length > 0 && (
+                        <div className="mb-3">
+                          <div className="text-sm text-amber-300 mb-2">Inputs:</div>
+                          <div className="flex flex-wrap gap-2">
+                            {resource.inputs.map(inputId => {
+                              const inputResource = resourceMap[inputId];
+                              if (!inputResource) return null;
+                              
+                              return (
+                                <div 
+                                  key={inputId}
+                                  className="flex items-center bg-amber-900/30 rounded px-2 py-1 cursor-pointer hover:bg-amber-900/50"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    onSelectResource && onSelectResource(inputResource);
+                                  }}
+                                >
+                                  <div className="w-6 h-6 bg-white rounded-full overflow-hidden flex items-center justify-center mr-1 border border-amber-200">
+                                    <img 
+                                      src={inputResource.icon} 
+                                      alt={inputResource.name}
+                                      className="w-4 h-4 object-contain"
+                                      onError={(e) => {
+                                        const target = e.target as HTMLImageElement;
+                                        if (!target.dataset.usedFallback) {
+                                          target.dataset.usedFallback = 'true';
+                                          target.src = "/assets/resources/icons/default.png";
+                                        }
+                                      }}
+                                    />
+                                  </div>
+                                  <span className="text-xs text-amber-100">{inputResource.name}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Process arrow */}
+                      {(resource.inputs?.length > 0 || resource.outputs?.length > 0) && (
+                        <div className="flex justify-center my-2">
+                          <div className="bg-amber-700/50 rounded-full p-2">
+                            <FaArrowRight className="text-amber-200" />
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Outputs */}
+                      {resource.outputs && resource.outputs.length > 0 && (
+                        <div className="mt-3">
+                          <div className="text-sm text-amber-300 mb-2">Outputs:</div>
+                          <div className="flex flex-wrap gap-2">
+                            {resource.outputs.map(outputId => {
+                              const outputResource = resourceMap[outputId];
+                              if (!outputResource) return null;
+                              
+                              return (
+                                <div 
+                                  key={outputId}
+                                  className="flex items-center bg-amber-900/30 rounded px-2 py-1 cursor-pointer hover:bg-amber-900/50"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    onSelectResource && onSelectResource(outputResource);
+                                  }}
+                                >
+                                  <div className="w-6 h-6 bg-white rounded-full overflow-hidden flex items-center justify-center mr-1 border border-amber-200">
+                                    <img 
+                                      src={outputResource.icon} 
+                                      alt={outputResource.name}
+                                      className="w-4 h-4 object-contain"
+                                      onError={(e) => {
+                                        const target = e.target as HTMLImageElement;
+                                        if (!target.dataset.usedFallback) {
+                                          target.dataset.usedFallback = 'true';
+                                          target.src = "/assets/resources/icons/default.png";
+                                        }
+                                      }}
+                                    />
+                                  </div>
+                                  <span className="text-xs text-amber-100">{outputResource.name}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        ))}
       </div>
     </div>
   );
