@@ -14,23 +14,128 @@ const ResourceTreeView: React.FC<ResourceTreeViewProps> = ({
   loading = false
 }) => {
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
-  const [rootResources, setRootResources] = useState<ResourceNode[]>([]);
+  const [treeData, setTreeData] = useState<any>({ nodes: [], links: [] });
   const svgRef = useRef<SVGSVGElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   
-  // Find resources that are at the beginning of production chains (no inputs)
+  // Build the tree data when resources change
   useEffect(() => {
     if (resources.length > 0) {
-      // Find resources that have no inputs or have empty inputs array
-      const roots = resources.filter(resource => 
-        !resource.inputs || resource.inputs.length === 0
-      );
-      
-      // Sort alphabetically
-      roots.sort((a, b) => a.name.localeCompare(b.name));
-      
-      setRootResources(roots);
+      const { nodes, links } = buildTreeData(resources);
+      setTreeData({ nodes, links });
     }
   }, [resources]);
+  
+  // Get resource by ID
+  const getResourceById = (id: string): ResourceNode | undefined => {
+    return resources.find(r => r.id === id);
+  };
+  
+  // Build tree data with nodes and links
+  const buildTreeData = (resources: ResourceNode[]) => {
+    const nodes: any[] = [];
+    const links: any[] = [];
+    const nodeMap = new Map<string, number>();
+    
+    // First pass: create nodes and build node map
+    resources.forEach((resource, index) => {
+      nodeMap.set(resource.id, index);
+      
+      // Determine node level based on inputs
+      let level = 0;
+      if (!resource.inputs || resource.inputs.length === 0) {
+        level = 0; // Raw materials at level 0
+      } else {
+        // Find the maximum level of inputs and add 1
+        const inputLevels = (resource.inputs || [])
+          .map(inputId => {
+            const inputResource = resources.find(r => r.id === inputId);
+            return inputResource ? calculateLevel(inputResource, resources, new Set()) : 0;
+          });
+        
+        level = Math.max(0, ...inputLevels) + 1;
+      }
+      
+      nodes.push({
+        id: resource.id,
+        name: resource.name,
+        level: level,
+        category: resource.category,
+        subcategory: resource.subcategory,
+        icon: resource.icon,
+        inputs: resource.inputs || [],
+        outputs: resource.outputs || []
+      });
+    });
+    
+    // Sort nodes by level
+    nodes.sort((a, b) => a.level - b.level);
+    
+    // Second pass: create links
+    nodes.forEach(node => {
+      (node.inputs || []).forEach(inputId => {
+        if (nodeMap.has(inputId)) {
+          links.push({
+            source: nodeMap.get(inputId),
+            target: nodeMap.get(node.id),
+            sourceId: inputId,
+            targetId: node.id
+          });
+        }
+      });
+    });
+    
+    // Position nodes in a grid layout
+    const LEVEL_WIDTH = 280;
+    const NODE_HEIGHT = 100;
+    const LEVEL_PADDING = 50;
+    
+    // Group nodes by level
+    const nodesByLevel: { [level: number]: any[] } = {};
+    nodes.forEach(node => {
+      if (!nodesByLevel[node.level]) {
+        nodesByLevel[node.level] = [];
+      }
+      nodesByLevel[node.level].push(node);
+    });
+    
+    // Calculate x and y positions
+    Object.entries(nodesByLevel).forEach(([level, levelNodes]) => {
+      const numNodes = levelNodes.length;
+      const levelNum = parseInt(level);
+      
+      levelNodes.forEach((node, index) => {
+        node.x = levelNum * LEVEL_WIDTH + LEVEL_PADDING;
+        node.y = index * NODE_HEIGHT + LEVEL_PADDING;
+      });
+    });
+    
+    return { nodes, links };
+  };
+  
+  // Calculate the level of a resource based on its inputs
+  const calculateLevel = (
+    resource: ResourceNode, 
+    allResources: ResourceNode[], 
+    visited: Set<string>
+  ): number => {
+    // Prevent circular dependencies
+    if (visited.has(resource.id)) return 0;
+    visited.add(resource.id);
+    
+    if (!resource.inputs || resource.inputs.length === 0) {
+      return 0;
+    }
+    
+    // Get the maximum level of inputs and add 1
+    const inputLevels = (resource.inputs || [])
+      .map(inputId => {
+        const inputResource = allResources.find(r => r.id === inputId);
+        return inputResource ? calculateLevel(inputResource, allResources, new Set(visited)) : 0;
+      });
+    
+    return Math.max(0, ...inputLevels) + 1;
+  };
   
   // Toggle node expansion
   const toggleNode = (nodeId: string) => {
@@ -41,85 +146,6 @@ const ResourceTreeView: React.FC<ResourceTreeViewProps> = ({
       newExpanded.add(nodeId);
     }
     setExpandedNodes(newExpanded);
-  };
-  
-  // Get resource by ID
-  const getResourceById = (id: string): ResourceNode | undefined => {
-    return resources.find(r => r.id === id);
-  };
-  
-  // Get output resources for a given resource
-  const getOutputs = (resource: ResourceNode): ResourceNode[] => {
-    if (!resource.outputs || resource.outputs.length === 0) return [];
-    
-    return resource.outputs
-      .map(id => getResourceById(id))
-      .filter(Boolean) as ResourceNode[];
-  };
-  
-  // Render a resource node and its children recursively
-  const renderResourceNode = (resource: ResourceNode, level: number = 0, path: string[] = []): JSX.Element => {
-    const nodeId = resource.id;
-    const isExpanded = expandedNodes.has(nodeId);
-    const outputs = getOutputs(resource);
-    const hasOutputs = outputs.length > 0;
-    const indent = level * 24; // Indentation for each level
-    
-    // Check for circular references to prevent infinite recursion
-    const isCircular = path.includes(nodeId);
-    
-    // Create a new path for children
-    const newPath = [...path, nodeId];
-    
-    return (
-      <div key={nodeId} style={{ marginLeft: `${indent}px` }}>
-        <div className="flex items-center py-1 hover:bg-amber-900/20 rounded transition-colors">
-          {hasOutputs ? (
-            <button
-              onClick={() => toggleNode(nodeId)}
-              className="w-6 h-6 flex items-center justify-center text-amber-400"
-            >
-              {isExpanded ? <FaChevronDown size={14} /> : <FaChevronRight size={14} />}
-            </button>
-          ) : (
-            <span className="w-6 h-6"></span>
-          )}
-          
-          <div 
-            className="flex items-center flex-1 cursor-pointer"
-            onClick={() => onSelectResource(resource)}
-          >
-            <div className="w-6 h-6 bg-white rounded-full overflow-hidden flex items-center justify-center mr-2 border border-amber-200">
-              <img 
-                src={resource.icon} 
-                alt={resource.name}
-                className="w-4 h-4 object-contain"
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  if (!target.dataset.usedFallback) {
-                    target.dataset.usedFallback = 'true';
-                    target.src = "/assets/resources/icons/default.png";
-                  }
-                }}
-              />
-            </div>
-            <span className="text-amber-100">{resource.name}</span>
-          </div>
-        </div>
-        
-        {isExpanded && hasOutputs && !isCircular && (
-          <div className="ml-6 border-l border-amber-700/30">
-            {outputs.map(output => renderResourceNode(output, level + 1, newPath))}
-          </div>
-        )}
-        
-        {isExpanded && isCircular && (
-          <div className="ml-6 py-1 text-amber-500 italic text-sm">
-            Circular reference detected
-          </div>
-        )}
-      </div>
-    );
   };
   
   if (loading) {
@@ -141,24 +167,128 @@ const ResourceTreeView: React.FC<ResourceTreeViewProps> = ({
     );
   }
 
+  // Calculate the content dimensions
+  const contentWidth = Math.max(
+    ...treeData.nodes.map((node: any) => node.x + 200),
+    800
+  );
+  
+  const contentHeight = Math.max(
+    ...treeData.nodes.map((node: any) => node.y + 100),
+    600
+  );
+
   return (
-    <div className="bg-amber-50/10 rounded-lg p-6 border border-amber-700/30 h-full">
+    <div className="bg-amber-50/10 rounded-lg p-6 border border-amber-700/30 h-full" ref={containerRef}>
       <div className="text-center text-amber-300 mb-6">
         <h3 className="text-xl font-serif">Production Chains</h3>
         <p className="text-sm mt-1">Explore how resources are transformed through production chains</p>
       </div>
       
       <div className="overflow-auto max-h-[calc(100vh-200px)] tech-tree-scroll">
-        {rootResources.length > 0 ? (
-          <div>
-            <div className="text-amber-400 mb-2 font-medium">Raw Materials</div>
-            {rootResources.map(resource => renderResourceNode(resource))}
-          </div>
-        ) : (
-          <div className="text-amber-400 text-center italic">
-            No starting resources found
-          </div>
-        )}
+        <div style={{ width: `${contentWidth}px`, height: `${contentHeight}px`, position: 'relative' }}>
+          {/* SVG for links */}
+          <svg 
+            width={contentWidth} 
+            height={contentHeight} 
+            ref={svgRef}
+            className="absolute top-0 left-0 pointer-events-none"
+          >
+            {treeData.links.map((link: any, index: number) => {
+              const sourceNode = treeData.nodes[link.source];
+              const targetNode = treeData.nodes[link.target];
+              
+              if (!sourceNode || !targetNode) return null;
+              
+              // Calculate path points
+              const startX = sourceNode.x + 180; // Right side of source node
+              const startY = sourceNode.y + 40; // Middle of source node
+              const endX = targetNode.x; // Left side of target node
+              const endY = targetNode.y + 40; // Middle of target node
+              
+              // Create a curved path
+              const controlPointX = (startX + endX) / 2;
+              
+              return (
+                <g key={`link-${index}`}>
+                  <path
+                    d={`M${startX},${startY} C${controlPointX},${startY} ${controlPointX},${endY} ${endX},${endY}`}
+                    stroke="#8B4513"
+                    strokeWidth={2}
+                    fill="none"
+                    strokeDasharray="5,5"
+                    markerEnd="url(#arrowhead)"
+                  />
+                </g>
+              );
+            })}
+            
+            {/* Arrow marker definition */}
+            <defs>
+              <marker
+                id="arrowhead"
+                markerWidth="10"
+                markerHeight="7"
+                refX="9"
+                refY="3.5"
+                orient="auto"
+              >
+                <polygon points="0 0, 10 3.5, 0 7" fill="#8B4513" />
+              </marker>
+            </defs>
+          </svg>
+          
+          {/* Render nodes */}
+          {treeData.nodes.map((node: any) => (
+            <div
+              key={node.id}
+              className="absolute bg-amber-800/20 rounded-lg border border-amber-700/50 p-3 w-44 transition-all hover:shadow-lg hover:bg-amber-800/30"
+              style={{ 
+                left: `${node.x}px`, 
+                top: `${node.y}px`,
+                cursor: 'pointer'
+              }}
+              onClick={() => {
+                const resource = getResourceById(node.id);
+                if (resource) onSelectResource(resource);
+              }}
+            >
+              <div className="flex items-center">
+                <div className="w-10 h-10 bg-white rounded-full overflow-hidden flex items-center justify-center mr-2 border border-amber-200">
+                  <img 
+                    src={node.icon} 
+                    alt={node.name}
+                    className="w-8 h-8 object-contain"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      if (!target.dataset.usedFallback) {
+                        target.dataset.usedFallback = 'true';
+                        target.src = "/assets/resources/icons/default.png";
+                      }
+                    }}
+                  />
+                </div>
+                <div className="flex-1">
+                  <div className="text-amber-100 font-medium text-sm leading-tight">{node.name}</div>
+                  <div className="text-amber-300/70 text-xs">
+                    {node.category.split('_').map((word: string) => 
+                      word.charAt(0).toUpperCase() + word.slice(1)
+                    ).join(' ')}
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex justify-between mt-2 text-xs">
+                <div className="text-amber-200/70">
+                  <span className="font-medium">In:</span> {node.inputs.length}
+                </div>
+                <div className="text-amber-200/70">
+                  <span className="font-medium">Out:</span> {node.outputs.length}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
