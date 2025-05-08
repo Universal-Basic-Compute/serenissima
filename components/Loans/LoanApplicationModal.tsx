@@ -1,9 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { useLoanStore } from '@/store/loanStore';
 import { LoanData, LoanPurpose } from '@/lib/services/LoanService';
+
+// Extended interface to include autoApproved property from API response
+interface LoanApplicationResponse extends LoanData {
+  autoApproved?: boolean;
+}
 import { getWalletAddress } from '@/lib/walletUtils';
 import ErrorBoundary from '@/components/UI/ErrorBoundary';
 import { eventBus, EventTypes } from '@/lib/eventBus';
+
+// Ensure EventTypes has LOAN_APPROVED
+declare module '@/lib/eventBus' {
+  interface EventTypes {
+    LOAN_APPROVED: string;
+  }
+}
 
 interface LoanApplicationModalProps {
   loan: LoanData;
@@ -54,7 +66,7 @@ const LoanApplicationModal: React.FC<LoanApplicationModalProps> = ({ loan, onClo
         throw new Error('Please connect your wallet first');
       }
       
-      const result = await applyForLoan({
+      const result: LoanApplicationResponse = await applyForLoan({
         loanId: loan.id,
         borrower: walletAddress,
         principalAmount: loanAmount,
@@ -66,7 +78,7 @@ const LoanApplicationModal: React.FC<LoanApplicationModalProps> = ({ loan, onClo
       const isAutoApproved = result.autoApproved === true;
       
       // The event is already emitted in the store, but we can add more specific data here
-      eventBus.emit('LOAN_APPLIED', { 
+      eventBus.emit(EventTypes.LOAN_APPLIED, { 
         loan: result,
         borrower: walletAddress,
         loanAmount,
@@ -77,7 +89,7 @@ const LoanApplicationModal: React.FC<LoanApplicationModalProps> = ({ loan, onClo
       
       // If auto-approved, also emit a loan approval event
       if (isAutoApproved) {
-        eventBus.emit(EventTypes.LOAN_APPROVED, {
+        eventBus.emit('LOAN_APPROVED', {
           loan: result,
           borrower: walletAddress,
           lender: loan.lender,
