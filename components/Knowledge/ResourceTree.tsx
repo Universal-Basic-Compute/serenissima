@@ -5,6 +5,7 @@ import ResourceSearchBar from './ResourceSearchBar';
 import ResourceGrid from './ResourceGrid';
 import ResourceTreeView from './ResourceTreeView';
 import ResourceDetails from './ResourceDetails';
+import { FaTimes } from 'react-icons/fa';
 
 interface ResourceTreeProps {
   onClose: () => void;
@@ -21,6 +22,7 @@ const ResourceTree: React.FC<ResourceTreeProps> = ({ onClose }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedArticle, setSelectedArticle] = useState<string | null>(null);
+  const [currentSection, setCurrentSection] = useState<number>(0); // 0 = Articles, 1 = Encyclopedia
   
   // Load resources on component mount
   useEffect(() => {
@@ -125,20 +127,47 @@ const ResourceTree: React.FC<ResourceTreeProps> = ({ onClose }) => {
     >
       <ResourceHeader onClose={onClose} />
       
-      <ResourceSearchBar 
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-        selectedCategory={selectedCategory}
-        setSelectedCategory={setSelectedCategory}
-        selectedRarity={selectedRarity}
-        setSelectedRarity={setSelectedRarity}
-        viewMode={viewMode}
-        setViewMode={setViewMode}
-        categories={categories}
-        rarities={rarities}
-        getCategoryDisplayName={getCategoryDisplayName}
-        getRarityInfo={getRarityInfo}
-      />
+      {/* Only show search bar when in Encyclopedia section */}
+      {currentSection === 1 && (
+        <ResourceSearchBar 
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          selectedCategory={selectedCategory}
+          setSelectedCategory={setSelectedCategory}
+          selectedRarity={selectedRarity}
+          setSelectedRarity={setSelectedRarity}
+          viewMode={viewMode}
+          setViewMode={setViewMode}
+          categories={categories}
+          rarities={rarities}
+          getCategoryDisplayName={getCategoryDisplayName}
+          getRarityInfo={getRarityInfo}
+        />
+      )}
+      
+      {/* Section Tabs */}
+      <div className="bg-amber-800 text-amber-100 px-4 py-2 flex space-x-4">
+        <button
+          onClick={() => setCurrentSection(0)}
+          className={`px-4 py-2 rounded-lg transition-colors ${
+            currentSection === 0 
+              ? 'bg-amber-600 text-white' 
+              : 'hover:bg-amber-700 hover:text-white'
+          }`}
+        >
+          Articles & Guides
+        </button>
+        <button
+          onClick={() => setCurrentSection(1)}
+          className={`px-4 py-2 rounded-lg transition-colors ${
+            currentSection === 1 
+              ? 'bg-amber-600 text-white' 
+              : 'hover:bg-amber-700 hover:text-white'
+          }`}
+        >
+          Resource Encyclopedia
+        </button>
+      </div>
       
       {/* Main Content Area */}
       <div className="flex-grow flex overflow-hidden">
@@ -208,31 +237,121 @@ const ResourceTree: React.FC<ResourceTreeProps> = ({ onClose }) => {
           </div>
         )}
         
-        {/* Resource List */}
-        <div className={`${selectedResource ? 'w-2/3' : 'w-full'} overflow-auto p-6 tech-tree-scroll`}>
-          {loading ? (
-            <div className="flex items-center justify-center h-full">
-              <div className="text-amber-500 text-xl">Loading resources...</div>
+        {/* Articles View */}
+        {currentSection === 0 && (
+          <div className="w-full overflow-auto p-6 tech-tree-scroll">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* 20 Strategies Article Card */}
+              <div className="bg-white rounded-lg overflow-hidden shadow-md border border-amber-200">
+                <div className="h-48 overflow-hidden">
+                  <img 
+                    src="/images/strategies-article.png" 
+                    alt="Strategies Article" 
+                    className="w-full h-full object-cover transition-transform hover:scale-105"
+                    onError={(e) => {
+                      // Fallback if image doesn't exist
+                      (e.target as HTMLImageElement).src = 'https://via.placeholder.com/800x400?text=Strategies';
+                    }}
+                  />
+                </div>
+                <div className="p-6">
+                  <h3 className="text-xl font-serif text-amber-800 mb-2">20 Strategies to Get Ahead</h3>
+                  <p className="text-gray-600 mb-4">
+                    Learn essential strategies for economic success in the competitive markets of La Serenissima.
+                  </p>
+                  <button 
+                    onClick={() => setSelectedArticle("strategies")}
+                    className="inline-block px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors"
+                  >
+                    Read Article
+                  </button>
+                </div>
+              </div>
+              
+              {/* Beginner's Guide Card */}
+              <div className="bg-white rounded-lg overflow-hidden shadow-md border border-amber-200">
+                <div className="h-48 overflow-hidden">
+                  <img 
+                    src="/images/beginners-guide.png" 
+                    alt="Beginner's Guide" 
+                    className="w-full h-full object-cover transition-transform hover:scale-105"
+                    onError={(e) => {
+                      // Fallback if image doesn't exist
+                      (e.target as HTMLImageElement).src = 'https://via.placeholder.com/800x400?text=Beginners+Guide';
+                    }}
+                  />
+                </div>
+                <div className="p-6">
+                  <h3 className="text-xl font-serif text-amber-800 mb-2">Beginner's Guide to Venice</h3>
+                  <p className="text-gray-600 mb-4">
+                    Everything you need to know to get started in La Serenissima as a new merchant.
+                  </p>
+                  <button 
+                    onClick={() => setSelectedArticle("beginners-guide")}
+                    className="inline-block px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors"
+                  >
+                    Read Guide
+                  </button>
+                </div>
+              </div>
+              
+              {/* Economic System Guide Card */}
+              <div className="bg-white rounded-lg overflow-hidden shadow-md border border-amber-200">
+                <div className="h-48 overflow-hidden">
+                  <img 
+                    src="/images/economic-system.png" 
+                    alt="Economic System" 
+                    className="w-full h-full object-cover transition-transform hover:scale-105"
+                    onError={(e) => {
+                      // Fallback if image doesn't exist
+                      (e.target as HTMLImageElement).src = 'https://via.placeholder.com/800x400?text=Economic+System';
+                    }}
+                  />
+                </div>
+                <div className="p-6">
+                  <h3 className="text-xl font-serif text-amber-800 mb-2">Understanding the Economy</h3>
+                  <p className="text-gray-600 mb-4">
+                    A deep dive into the economic systems that power La Serenissima's closed economy.
+                  </p>
+                  <button 
+                    onClick={() => setSelectedArticle("economic-system")}
+                    className="inline-block px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors"
+                  >
+                    Read Guide
+                  </button>
+                </div>
+              </div>
             </div>
-          ) : error ? (
-            <div className="flex items-center justify-center h-full">
-              <div className="text-red-500 text-xl">{error}</div>
-            </div>
-          ) : viewMode === 'grid' ? (
-            <ResourceGrid 
-              resources={filteredResources}
-              onSelectResource={setSelectedResource}
-              getCategoryColor={getCategoryColor}
-              getCategoryDisplayName={getCategoryDisplayName}
-              getRarityInfo={getRarityInfo}
-            />
-          ) : (
-            <ResourceTreeView />
-          )}
-        </div>
+          </div>
+        )}
         
-        {/* Resource Details Panel */}
-        {selectedResource && (
+        {/* Resource Encyclopedia - only show when that section is active */}
+        {currentSection === 1 && (
+          <div className={`${selectedResource ? 'w-2/3' : 'w-full'} overflow-auto p-6 tech-tree-scroll`}>
+            {loading ? (
+              <div className="flex items-center justify-center h-full">
+                <div className="text-amber-500 text-xl">Loading resources...</div>
+              </div>
+            ) : error ? (
+              <div className="flex items-center justify-center h-full">
+                <div className="text-red-500 text-xl">{error}</div>
+              </div>
+            ) : viewMode === 'grid' ? (
+              <ResourceGrid 
+                resources={filteredResources}
+                onSelectResource={setSelectedResource}
+                getCategoryColor={getCategoryColor}
+                getCategoryDisplayName={getCategoryDisplayName}
+                getRarityInfo={getRarityInfo}
+              />
+            ) : (
+              <ResourceTreeView />
+            )}
+          </div>
+        )}
+        
+        {/* Resource Details Panel - show in encyclopedia section when a resource is selected */}
+        {selectedResource && currentSection === 1 && (
           <ResourceDetails 
             resource={selectedResource}
             onClose={() => setSelectedResource(null)}
