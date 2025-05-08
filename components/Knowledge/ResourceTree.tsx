@@ -16,7 +16,7 @@ const ResourceTree: React.FC<ResourceListProps> = ({ onClose }) => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedRarity, setSelectedRarity] = useState<string>('all');
-  const [viewMode, setViewMode] = useState<'tree' | 'grid'>('grid');
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('grid');
   const [selectedResource, setSelectedResource] = useState<ResourceNode | null>(null);
   const [resources, setResources] = useState<ResourceNode[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
