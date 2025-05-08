@@ -66,14 +66,30 @@ export default function SimplePage() {
   type ViewType = 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance' | 'loans' | 'knowledge';
   const [activeView, setActiveView] = useState<ViewType>('land');
   
-  // Update activeView based on current pathname
+  // Panel visibility state
+  const [showGovernancePanel, setShowGovernancePanel] = useState<boolean>(false);
+  const [showKnowledgePanel, setShowKnowledgePanel] = useState<boolean>(false);
+  const [showLoansPanel, setShowLoansPanel] = useState<boolean>(false);
+  
+  // Update activeView based on current pathname or panel visibility
+  useEffect(() => {
+    if (pathname === '/governance' || showGovernancePanel) {
+      setActiveView('governance');
+    } else if (pathname === '/loans' || showLoansPanel) {
+      setActiveView('loans');
+    } else if (pathname === '/knowledge' || showKnowledgePanel) {
+      setActiveView('knowledge');
+    }
+  }, [pathname, showGovernancePanel, showKnowledgePanel, showLoansPanel]);
+  
+  // Handle URL changes to show appropriate panels
   useEffect(() => {
     if (pathname === '/governance') {
-      setActiveView('governance');
+      setShowGovernancePanel(true);
     } else if (pathname === '/loans') {
-      setActiveView('loans');
+      setShowLoansPanel(true);
     } else if (pathname === '/knowledge') {
-      setActiveView('knowledge');
+      setShowKnowledgePanel(true);
     }
   }, [pathname]);
   const [qualityMode, setQualityMode] = useState<'high' | 'performance'>('high');
@@ -441,7 +457,61 @@ export default function SimplePage() {
         />
       )}
       
-      {/* Main views are now handled by the router */}
+      {/* Governance Panel */}
+      {showGovernancePanel && (
+        <GovernancePanel 
+          onClose={() => {
+            setShowGovernancePanel(false);
+            router.push('/', { shallow: true });
+          }}
+          standalone={false}
+        />
+      )}
+      
+      {/* Knowledge Repository Panel */}
+      {showKnowledgePanel && (
+        <KnowledgeRepository
+          onShowTechTree={() => setShowTechTree(true)}
+          onShowPresentation={() => setShowPresentation(true)}
+          onShowResourceTree={() => setShowResourceTree(true)}
+          onSelectArticle={setSelectedArticle}
+          onClose={() => {
+            setShowKnowledgePanel(false);
+            router.push('/', { shallow: true });
+          }}
+          standalone={false}
+        />
+      )}
+      
+      {/* Loans Panel */}
+      {showLoansPanel && (
+        <div className="absolute top-20 left-20 right-4 bottom-4 bg-black/30 rounded-lg p-4 overflow-auto">
+          <div className="bg-amber-50 border-2 border-amber-700 rounded-lg p-6 max-w-6xl mx-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-3xl font-serif text-amber-800">
+                Loans & Banking
+              </h2>
+              <button 
+                onClick={() => {
+                  setShowLoansPanel(false);
+                  router.push('/', { shallow: true });
+                }}
+                className="text-amber-600 hover:text-amber-800 p-2"
+                aria-label="Return to main view"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <div className="space-y-8">
+              <LoanMarketplace />
+              <LoanManagementDashboard />
+            </div>
+          </div>
+        </div>
+      )}
       
       {/* Left Side Menu */}
       <div className="absolute left-0 top-0 bottom-0 bg-black/70 text-white z-20 flex flex-col w-16">
@@ -454,30 +524,39 @@ export default function SimplePage() {
         <div className="flex-1 overflow-y-auto py-4">
           <ul className="space-y-2 px-2">
             <li>
-              <Link
-                href="/governance"
+              <button
+                onClick={() => {
+                  setShowGovernancePanel(true);
+                  router.push('/governance', { shallow: true });
+                }}
                 className={`w-full flex items-center p-2 rounded-lg transition-colors ${
                   activeView === 'governance' ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700'
                 }`}
                 title="Governance"
               >
                 <FaLandmark className="mx-auto h-5 w-5" />
-              </Link>
+              </button>
             </li>
             <li>
-              <Link
-                href="/knowledge"
+              <button
+                onClick={() => {
+                  setShowKnowledgePanel(true);
+                  router.push('/knowledge', { shallow: true });
+                }}
                 className={`w-full flex items-center p-2 rounded-lg transition-colors ${
                   activeView === 'knowledge' ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700'
                 }`}
                 title="Knowledge"
               >
                 <FaBook className="mx-auto h-5 w-5" />
-              </Link>
+              </button>
             </li>
             <li>
-              <Link
-                href="/loans"
+              <button
+                onClick={() => {
+                  setShowLoansPanel(true);
+                  router.push('/loans', { shallow: true });
+                }}
                 className={`w-full flex items-center p-2 rounded-lg transition-colors ${
                   activeView === 'loans' ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700'
                 }`}
@@ -486,7 +565,7 @@ export default function SimplePage() {
                 <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12a8 8 0 01-8 8m0 0a8 8 0 01-8-8m8 8a8 8 0 018-8m-8 0a8 8 0 00-8 8m8-8v14m0-14v14" />
                 </svg>
-              </Link>
+              </button>
             </li>
             <li>
               <button
