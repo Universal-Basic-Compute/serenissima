@@ -3,6 +3,14 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
+// Add custom window interface to handle our custom properties
+declare global {
+  interface Window {
+    __isClientNavigation?: boolean;
+    __directNavigation?: boolean;
+  }
+}
+
 export default function KnowledgePage() {
   const router = useRouter();
   
@@ -12,7 +20,8 @@ export default function KnowledgePage() {
     if (typeof window !== 'undefined' && window.location.pathname === '/knowledge' && !window.__isClientNavigation) {
       // Set a flag to indicate this was a direct navigation
       window.__directNavigation = true;
-      router.push('/', { shallow: true });
+      // Remove the shallow option as it's not supported in Next.js App Router
+      router.push('/');
     }
   }, [router]);
   
