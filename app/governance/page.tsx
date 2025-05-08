@@ -9,10 +9,10 @@ export default function GovernancePage() {
   // Instead of redirecting, check if we're in a client-side navigation
   useEffect(() => {
     // If this is a direct page load (not client navigation)
-    if (typeof window !== 'undefined' && window.location.pathname === '/governance' && !window.__isClientNavigation) {
+    if (typeof window !== 'undefined' && window.location.pathname === '/governance' && !(window as any).__isClientNavigation) {
       // Set a flag to indicate this was a direct navigation
-      window.__directNavigation = true;
-      router.push('/', { shallow: true });
+      (window as any).__directNavigation = true;
+      router.push('/');
     }
   }, [router]);
   
