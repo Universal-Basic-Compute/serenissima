@@ -89,6 +89,10 @@ const DecreesGovernanceArticle: React.FC<DecreesGovernanceArticleProps> = ({ onC
             </svg>
           </div>
           
+          <p className="mb-4">
+            In La Serenissima, unlike traditional games where rules are fixed, the governance system itself is part of the gameplay. As players rise in wealth and status, they gain the ability to shape the very rules that govern the economic simulation. This meta-layer of gameplay creates a dynamic environment where successful merchants don't just operate within the system—they actively transform it to their advantage. The laws, regulations, and decrees that emerge from player actions become part of the evolving economic landscape, creating a truly player-driven experience where political influence is as valuable as economic power.
+          </p>
+          
           <h3 className="text-2xl font-serif text-amber-700 mb-4">Pathways to Political Influence</h3>
           
           <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
