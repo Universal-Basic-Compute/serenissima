@@ -5,6 +5,7 @@ import { useState, useRef, useEffect } from 'react';
 import TechTree from '../components/Knowledge/TechTree';
 import ProjectPresentation from '../components/Knowledge/ProjectPresentation';
 import ResourceTree from '../components/Knowledge/ResourceTree';
+import KnowledgeRepository from '../components/Knowledge/KnowledgeRepository';
 import { StrategiesArticle, BeginnersGuideArticle, EconomicSystemArticle, LandOwnerGuideArticle } from '../components/Articles';
 import Link from 'next/link';
 import { clearLandOwnershipCaches } from '@/lib/cacheUtils';
@@ -468,121 +469,27 @@ export default function SimplePage() {
               </nav>
             </div>
             
-            {/* Articles & Guides Section */}
-            <div>
-              <h3 className="text-2xl font-serif text-amber-700 mb-4 border-b border-amber-200 pb-2">
-                Articles & Guides
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {/* Beginner's Guide Card */}
-                <div className="bg-white rounded-lg overflow-hidden shadow-md border border-amber-200">
-                  <div className="h-48 overflow-hidden">
-                    <img 
-                      src="/images/beginners-guide.png" 
-                      alt="Beginner's Guide" 
-                      className="w-full h-full object-cover transition-transform hover:scale-105"
-                      onError={(e) => {
-                        // Fallback if image doesn't exist
-                        (e.target as HTMLImageElement).src = 'https://via.placeholder.com/800x400?text=Beginners+Guide';
-                      }}
-                    />
-                  </div>
-                  <div className="p-6">
-                    <h3 className="text-xl font-serif text-amber-800 mb-2">Beginner's Guide to Venice</h3>
-                    <p className="text-gray-600 mb-4">
-                      Everything you need to know to get started in La Serenissima as a new merchant.
-                    </p>
-                    <button 
-                      onClick={() => setSelectedArticle("beginners-guide")}
-                      className="inline-block px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors"
-                    >
-                      Read Guide
-                    </button>
-                  </div>
-                </div>
-                
-                {/* Economic System Guide Card */}
-                <div className="bg-white rounded-lg overflow-hidden shadow-md border border-amber-200">
-                  <div className="h-48 overflow-hidden">
-                    <img 
-                      src="/images/economic-system.png" 
-                      alt="Economic System" 
-                      className="w-full h-full object-cover transition-transform hover:scale-105"
-                      onError={(e) => {
-                        // Fallback if image doesn't exist
-                        (e.target as HTMLImageElement).src = 'https://via.placeholder.com/800x400?text=Economic+System';
-                      }}
-                    />
-                  </div>
-                  <div className="p-6">
-                    <h3 className="text-xl font-serif text-amber-800 mb-2">Understanding the Economy</h3>
-                    <p className="text-gray-600 mb-4">
-                      A deep dive into the economic systems that power La Serenissima's closed economy.
-                    </p>
-                    <button 
-                      onClick={() => setSelectedArticle("economic-system")}
-                      className="inline-block px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors"
-                    >
-                      Read Guide
-                    </button>
-                  </div>
-                </div>
-                
-                {/* Land Owner Guide Card */}
-                <div className="bg-white rounded-lg overflow-hidden shadow-md border border-amber-200">
-                  <div className="h-48 overflow-hidden">
-                    <img 
-                      src="/images/landowner-guide.png" 
-                      alt="Land Owner Guide" 
-                      className="w-full h-full object-cover transition-transform hover:scale-105"
-                      onError={(e) => {
-                        // Fallback if image doesn't exist
-                        (e.target as HTMLImageElement).src = 'https://via.placeholder.com/800x400?text=Land+Owner+Guide';
-                      }}
-                    />
-                  </div>
-                  <div className="p-6">
-                    <h3 className="text-xl font-serif text-amber-800 mb-2">The Patrician's Guide to Land Ownership</h3>
-                    <p className="text-gray-600 mb-4">
-                      Master the art of Venetian land management and strategic property control to build lasting wealth.
-                    </p>
-                    <button 
-                      onClick={() => setSelectedArticle("landowner-guide")}
-                      className="inline-block px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors"
-                    >
-                      Read Guide
-                    </button>
-                  </div>
-                </div>
-                
-                {/* 20 Strategies Article Card */}
-                <div className="bg-white rounded-lg overflow-hidden shadow-md border border-amber-200">
-                  <div className="h-48 overflow-hidden">
-                    <img 
-                      src="/images/strategies-article.png" 
-                      alt="Strategies Article" 
-                      className="w-full h-full object-cover transition-transform hover:scale-105"
-                      onError={(e) => {
-                        // Fallback if image doesn't exist
-                        (e.target as HTMLImageElement).src = 'https://via.placeholder.com/800x400?text=Strategies';
-                      }}
-                    />
-                  </div>
-                  <div className="p-6">
-                    <h3 className="text-xl font-serif text-amber-800 mb-2">20 Strategies to Get Ahead</h3>
-                    <p className="text-gray-600 mb-4">
-                      Learn essential strategies for economic success in the competitive markets of La Serenissima.
-                    </p>
-                    <button 
-                      onClick={() => setSelectedArticle("strategies")}
-                      className="inline-block px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors"
-                    >
-                      Read Article
-                    </button>
-                  </div>
-                </div>
+            {/* Tab content */}
+            {governanceTab === 'council' && (
+              <div className="text-center py-8 text-gray-500 italic">
+                The Council of Ten governs La Serenissima with wisdom and discretion.
+                <p className="mt-4">Council features coming soon.</p>
               </div>
-            </div>
+            )}
+            
+            {governanceTab === 'laws' && (
+              <div className="text-center py-8 text-gray-500 italic">
+                The laws and decrees of Venice ensure order and prosperity.
+                <p className="mt-4">Legal system features coming soon.</p>
+              </div>
+            )}
+            
+            {governanceTab === 'loans' && (
+              <div className="space-y-8">
+                <LoanMarketplace />
+                <LoanManagementDashboard />
+              </div>
+            )}
             
             {/* Tab content */}
             {governanceTab === 'council' && (
@@ -627,221 +534,12 @@ export default function SimplePage() {
       
       {/* Knowledge View */}
       {activeView === 'knowledge' && (
-        <div className="absolute top-20 left-20 right-4 bottom-4 bg-black/30 rounded-lg p-4 overflow-auto">
-          <div className="bg-amber-50 border-2 border-amber-700 rounded-lg p-6 max-w-6xl mx-auto">
-            <h2 className="text-3xl font-serif text-amber-800 mb-6 text-center">
-              Knowledge Repository
-            </h2>
-            
-            {/* Project Resources Section - moved to be first */}
-            <div>
-              <h3 className="text-2xl font-serif text-amber-700 mb-4 border-b border-amber-200 pb-2">
-                Project Resources
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {/* Roadmap Resource */}
-                <div className="bg-white rounded-lg overflow-hidden shadow-md border border-amber-200">
-                  <div className="h-48 overflow-hidden">
-                    <img 
-                      src="/images/project-roadmap.png" 
-                      alt="Project Roadmap" 
-                      className="w-full h-full object-cover transition-transform hover:scale-105"
-                      onError={(e) => {
-                        // Fallback if image doesn't exist
-                        (e.target as HTMLImageElement).src = 'https://via.placeholder.com/800x400?text=Roadmap';
-                      }}
-                    />
-                  </div>
-                  <div className="p-6">
-                    <h3 className="text-xl font-serif text-amber-800 mb-2">Project Roadmap</h3>
-                    <p className="text-gray-600 mb-4">
-                      Explore the future development plans for La Serenissima, including upcoming features, 
-                      economic expansions, and governance implementations.
-                    </p>
-                    <button 
-                      onClick={() => setShowTechTree(true)}
-                      className="inline-block px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors"
-                    >
-                      View Tech Tree
-                    </button>
-                  </div>
-                </div>
-                
-                {/* Presentation Resource */}
-                <div className="bg-white rounded-lg overflow-hidden shadow-md border border-amber-200">
-                  <div className="h-48 overflow-hidden">
-                    <img 
-                      src="/images/project-presentation.png" 
-                      alt="Project Presentation" 
-                      className="w-full h-full object-cover transition-transform hover:scale-105"
-                      onError={(e) => {
-                        // Fallback if image doesn't exist
-                        (e.target as HTMLImageElement).src = 'https://via.placeholder.com/800x400?text=Presentation';
-                      }}
-                    />
-                  </div>
-                  <div className="p-6">
-                    <h3 className="text-xl font-serif text-amber-800 mb-2">Project Presentation</h3>
-                    <p className="text-gray-600 mb-4">
-                      Learn about the vision, architecture, and technical implementation of La Serenissima 
-                      through our comprehensive project presentation.
-                    </p>
-                    <button 
-                      onClick={() => setShowPresentation(true)}
-                      className="inline-block px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors"
-                    >
-                      View Presentation
-                    </button>
-                  </div>
-                </div>
-                
-                {/* Resource Tree Card */}
-                <div className="bg-white rounded-lg overflow-hidden shadow-md border border-amber-200">
-                  <div className="h-48 overflow-hidden">
-                    <img 
-                      src="/images/resource-tree.png" 
-                      alt="Resource Tree" 
-                      className="w-full h-full object-cover transition-transform hover:scale-105"
-                      onError={(e) => {
-                        // Fallback if image doesn't exist
-                        (e.target as HTMLImageElement).src = 'https://via.placeholder.com/800x400?text=Resources';
-                      }}
-                    />
-                  </div>
-                  <div className="p-6">
-                    <h3 className="text-xl font-serif text-amber-800 mb-2">Resource Encyclopedia</h3>
-                    <p className="text-gray-600 mb-4">
-                      Explore the complex web of resources, production chains, and economic relationships 
-                      that power the Venetian economy.
-                    </p>
-                    <button 
-                      onClick={() => setShowResourceTree(true)}
-                      className="inline-block px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors"
-                    >
-                      View Resource Tree
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            {/* Articles & Guides Section */}
-            <div className="mt-8">
-              <h3 className="text-2xl font-serif text-amber-700 mb-4 border-b border-amber-200 pb-2">
-                Articles & Guides
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {/* Beginner's Guide Card */}
-                <div className="bg-white rounded-lg overflow-hidden shadow-md border border-amber-200">
-                  <div className="h-48 overflow-hidden">
-                    <img 
-                      src="/images/beginners-guide.png" 
-                      alt="Beginner's Guide" 
-                      className="w-full h-full object-cover transition-transform hover:scale-105"
-                      onError={(e) => {
-                        // Fallback if image doesn't exist
-                        (e.target as HTMLImageElement).src = 'https://via.placeholder.com/800x400?text=Beginners+Guide';
-                      }}
-                    />
-                  </div>
-                  <div className="p-6">
-                    <h3 className="text-xl font-serif text-amber-800 mb-2">Beginner's Guide to Venice</h3>
-                    <p className="text-gray-600 mb-4">
-                      Everything you need to know to get started in La Serenissima as a new merchant.
-                    </p>
-                    <button 
-                      onClick={() => setSelectedArticle("beginners-guide")}
-                      className="inline-block px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors"
-                    >
-                      Read Guide
-                    </button>
-                  </div>
-                </div>
-              
-                {/* Economic System Guide Card */}
-                <div className="bg-white rounded-lg overflow-hidden shadow-md border border-amber-200">
-                  <div className="h-48 overflow-hidden">
-                    <img 
-                      src="/images/economic-system.png" 
-                      alt="Economic System" 
-                      className="w-full h-full object-cover transition-transform hover:scale-105"
-                      onError={(e) => {
-                        // Fallback if image doesn't exist
-                        (e.target as HTMLImageElement).src = 'https://via.placeholder.com/800x400?text=Economic+System';
-                      }}
-                    />
-                  </div>
-                  <div className="p-6">
-                    <h3 className="text-xl font-serif text-amber-800 mb-2">Understanding the Economy</h3>
-                    <p className="text-gray-600 mb-4">
-                      A deep dive into the economic systems that power La Serenissima's closed economy.
-                    </p>
-                    <button 
-                      onClick={() => setSelectedArticle("economic-system")}
-                      className="inline-block px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors"
-                    >
-                      Read Guide
-                    </button>
-                  </div>
-                </div>
-              
-                {/* Land Owner Guide Card */}
-                <div className="bg-white rounded-lg overflow-hidden shadow-md border border-amber-200">
-                  <div className="h-48 overflow-hidden">
-                    <img 
-                      src="/images/landowner-guide.png" 
-                      alt="Land Owner Guide" 
-                      className="w-full h-full object-cover transition-transform hover:scale-105"
-                      onError={(e) => {
-                        // Fallback if image doesn't exist
-                        (e.target as HTMLImageElement).src = 'https://via.placeholder.com/800x400?text=Land+Owner+Guide';
-                      }}
-                    />
-                  </div>
-                  <div className="p-6">
-                    <h3 className="text-xl font-serif text-amber-800 mb-2">The Patrician's Guide to Land Ownership</h3>
-                    <p className="text-gray-600 mb-4">
-                      Master the art of Venetian land management and strategic property control to build lasting wealth.
-                    </p>
-                    <button 
-                      onClick={() => setSelectedArticle("landowner-guide")}
-                      className="inline-block px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors"
-                    >
-                      Read Guide
-                    </button>
-                  </div>
-                </div>
-              
-                {/* 20 Strategies Article Card */}
-                <div className="bg-white rounded-lg overflow-hidden shadow-md border border-amber-200">
-                  <div className="h-48 overflow-hidden">
-                    <img 
-                      src="/images/strategies-article.png" 
-                      alt="Strategies Article" 
-                      className="w-full h-full object-cover transition-transform hover:scale-105"
-                      onError={(e) => {
-                        // Fallback if image doesn't exist
-                        (e.target as HTMLImageElement).src = 'https://via.placeholder.com/800x400?text=Strategies';
-                      }}
-                    />
-                  </div>
-                  <div className="p-6">
-                    <h3 className="text-xl font-serif text-amber-800 mb-2">20 Strategies to Get Ahead</h3>
-                    <p className="text-gray-600 mb-4">
-                      Learn essential strategies for economic success in the competitive markets of La Serenissima.
-                    </p>
-                    <button 
-                      onClick={() => setSelectedArticle("strategies")}
-                      className="inline-block px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors"
-                    >
-                      Read Article
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <KnowledgeRepository
+          onShowTechTree={() => setShowTechTree(true)}
+          onShowPresentation={() => setShowPresentation(true)}
+          onShowResourceTree={() => setShowResourceTree(true)}
+          onSelectArticle={setSelectedArticle}
+        />
       )}
       
       {/* Left Side Menu */}
