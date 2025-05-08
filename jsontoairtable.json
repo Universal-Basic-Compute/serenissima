@@ -1,21 +1,3 @@
 {
-  "DECREES": [
-    {
-      "DecreeId": "decree_001",
-      "Type": "Economic",
-      "Title": "Land Inactivity Resolution",
-      "Description": "A decree establishing a tiered system for handling inactive land ownership to ensure economic productivity while respecting property rights. The system implements three stages: (1) During the first 7 days of owner inactivity, all building rights remain exclusively with the land owner; (2) After 7 days and until 30 days of inactivity, any citizen may construct temporary buildings on the inactive land upon payment of a reasonable fee to the owner's account; (3) After 30 days of continued inactivity, the land shall be subject to a Dutch auction, beginning at twice the market value and decreasing daily until purchased, with proceeds transferred to the original owner's account.",
-      "Status": "Active",
-      "Category": "Economic",
-      "Subcategory": "Land Management",
-      "Proposer": "ConsiglioDeiDieci",
-      "CreatedAt": "2023-11-15T00:00:00Z",
-      "EnactedAt": "2023-11-20T00:00:00Z",
-      "ExpiresAt": null,
-      "FlavorText": "The Council of Ten, concerned with the economic stagnation caused by inactive land ownership, hereby establishes the following tiered system for land management.",
-      "HistoricalInspiration": "Inspired by Venetian property laws that balanced individual rights with the Republic's economic needs.",
-      "Notes": "Implemented to address growing concerns about economic stagnation in certain districts due to inactive landowners.",
-      "Rationale": "This decree serves to balance the sacred right of property ownership with the Republic's need for continued economic development. The tiered approach respects ownership rights during short absences while preventing long-term economic harm from abandoned properties. The 7-day exclusive period protects owners during brief periods of inactivity, while the temporary building rights in the 7-30 day period maintain economic activity without permanently altering the property. The final Dutch auction mechanism ensures that persistently abandoned land returns to productive use while compensating the original owner at a fair market value. This system aligns with Venice's pragmatic approach to governance, where individual rights are respected but subordinated to the greater economic needs of the Republic when necessary."
-    }
-  ]
+  "DECREES": []
 }
