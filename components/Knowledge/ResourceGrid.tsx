@@ -21,38 +21,6 @@ const ResourceGrid: React.FC<ResourceGridProps> = ({
       <div className="mb-4 text-amber-300">
         <span className="font-medium">{resources.length}</span> resources found
       </div>
-      <div className="mb-6">
-        <h3 className="text-xl font-serif text-amber-500 mb-4 border-b border-amber-300 pb-2">Articles & Guides</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-8">
-          <div className="bg-white rounded-lg overflow-hidden shadow-md border border-amber-200">
-            <div className="h-48 overflow-hidden">
-              <img 
-                src="/images/strategies-article.png" 
-                alt="Strategies Article" 
-                className="w-full h-full object-cover transition-transform hover:scale-105"
-                onError={(e) => {
-                  // Fallback if image doesn't exist
-                  (e.target as HTMLImageElement).src = 'https://via.placeholder.com/800x400?text=Strategies';
-                }}
-              />
-            </div>
-            <div className="p-6">
-              <h3 className="text-xl font-serif text-amber-800 mb-2">20 Strategies to Get Ahead</h3>
-              <p className="text-gray-600 mb-4">
-                Learn essential strategies for economic success in the competitive markets of La Serenissima.
-              </p>
-              <button 
-                onClick={() => {}}
-                className="inline-block px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors"
-              >
-                Read Article
-              </button>
-            </div>
-          </div>
-        </div>
-        
-        <h3 className="text-xl font-serif text-amber-500 mb-4 border-b border-amber-300 pb-2">Resource Encyclopedia</h3>
-      </div>
       
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" key="resource-grid">
         {resources.map(resource => (
