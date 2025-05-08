@@ -11,7 +11,7 @@ interface ResourceListProps {
   onClose: () => void;
 }
 
-const ResourceList: React.FC<ResourceListProps> = ({ onClose }) => {
+const ResourceTree: React.FC<ResourceListProps> = ({ onClose }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');

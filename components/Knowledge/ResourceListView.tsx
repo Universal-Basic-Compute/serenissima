@@ -2,30 +2,30 @@ import React, { useState, useEffect } from 'react';
 import { FaProjectDiagram, FaChevronRight, FaChevronDown, FaLeaf, FaIndustry, FaGem } from 'react-icons/fa';
 import { ResourceNode } from '../../lib/resourceUtils';
 
-interface ResourceTreeViewProps {
+interface ResourceListViewProps {
   resources?: ResourceNode[];
   onSelectResource?: (resource: ResourceNode) => void;
   loading?: boolean;
 }
 
-const ResourceTreeView: React.FC<ResourceTreeViewProps> = ({ 
+const ResourceListView: React.FC<ResourceListViewProps> = ({ 
   resources = [], 
   onSelectResource,
   loading = false
 }) => {
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(['raw_materials']));
-  const [resourceTree, setResourceTree] = useState<any>({});
+  const [ResourceList, setResourceList] = useState<any>({});
   
   // Build the resource tree when resources change
   useEffect(() => {
     if (resources.length > 0) {
-      const tree = buildResourceTree(resources);
-      setResourceTree(tree);
+      const tree = buildResourceList(resources);
+      setResourceList(tree);
     }
   }, [resources]);
   
-  // Build a hierarchical tree from flat resource data
-  const buildResourceTree = (resources: ResourceNode[]) => {
+  // Build a hierarchical list from flat resource data
+  const buildResourceList = (resources: ResourceNode[]) => {
     const tree: Record<string, any> = {};
     
     // Group resources by category
@@ -113,7 +113,7 @@ const ResourceTreeView: React.FC<ResourceTreeViewProps> = ({
       </div>
       
       <div className="overflow-auto max-h-[calc(100vh-200px)] tech-tree-scroll">
-        {Object.keys(resourceTree).sort().map(category => (
+        {Object.keys(ResourceList).sort().map(category => (
           <div key={category} className="mb-2">
             <div 
               className="flex items-center p-2 bg-amber-900/30 rounded-lg cursor-pointer hover:bg-amber-900/40 transition-colors"
@@ -123,10 +123,10 @@ const ResourceTreeView: React.FC<ResourceTreeViewProps> = ({
                 {expandedCategories.has(category) ? <FaChevronDown /> : <FaChevronRight />}
               </span>
               <span className="mr-2">{getCategoryIcon(category)}</span>
-              <span className="text-amber-200 font-medium">{resourceTree[category].name}</span>
+              <span className="text-amber-200 font-medium">{ResourceList[category].name}</span>
               <span className="ml-2 text-amber-400/70 text-sm">
-                ({Object.keys(resourceTree[category].subcategories).reduce(
-                  (count, subcat) => count + resourceTree[category].subcategories[subcat].resources.length, 
+                ({Object.keys(ResourceList[category].subcategories).reduce(
+                  (count, subcat) => count + ResourceList[category].subcategories[subcat].resources.length, 
                   0
                 )} resources)
               </span>
@@ -134,14 +134,14 @@ const ResourceTreeView: React.FC<ResourceTreeViewProps> = ({
             
             {expandedCategories.has(category) && (
               <div className="ml-6 mt-2">
-                {Object.keys(resourceTree[category].subcategories).sort().map(subcategory => (
+                {Object.keys(ResourceList[category].subcategories).sort().map(subcategory => (
                   <div key={`${category}-${subcategory}`} className="mb-2">
                     <div className="text-amber-300 font-medium p-1 border-b border-amber-700/30">
-                      {resourceTree[category].subcategories[subcategory].name}
+                      {ResourceList[category].subcategories[subcategory].name}
                     </div>
                     
                     <div className="ml-4 mt-1">
-                      {resourceTree[category].subcategories[subcategory].resources.sort((a: ResourceNode, b: ResourceNode) => 
+                      {ResourceList[category].subcategories[subcategory].resources.sort((a: ResourceNode, b: ResourceNode) => 
                         a.name.localeCompare(b.name)
                       ).map((resource: ResourceNode) => (
                         <div 
@@ -178,4 +178,4 @@ const ResourceTreeView: React.FC<ResourceTreeViewProps> = ({
   );
 };
 
-export default ResourceTreeView;
+export default ResourceListView;
