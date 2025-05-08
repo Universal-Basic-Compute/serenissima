@@ -44,7 +44,7 @@ const ResourceDetails: React.FC<ResourceDetailsProps> = ({
         return (
           <div key={key} className="mb-1">
             <span className="font-medium">{getCategoryDisplayName(key)}:</span>{' '}
-            {typeof value === 'boolean' ? (value ? 'Yes' : 'No') : value}
+            {typeof value === 'boolean' ? (value ? 'Yes' : 'No') : String(value)}
           </div>
         );
       });
