@@ -160,7 +160,7 @@ const ResourceTree: React.FC<ResourceListProps> = ({ onClose }) => {
               getCategoryDisplayName={getCategoryDisplayName}
               getRarityInfo={getRarityInfo}
             />
-          ) : (
+          ) : viewMode === 'list' ? (
             <ResourceListView 
               resources={filteredResources}
               onSelectResource={setSelectedResource}
