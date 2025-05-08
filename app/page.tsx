@@ -468,13 +468,13 @@ export default function SimplePage() {
               </nav>
             </div>
             
-            {/* Articles & Guides Section - moved to be second */}
+            {/* Articles & Guides Section */}
             <div>
               <h3 className="text-2xl font-serif text-amber-700 mb-4 border-b border-amber-200 pb-2">
                 Articles & Guides
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {/* Beginner's Guide Card - Now 1st */}
+                {/* Beginner's Guide Card */}
                 <div className="bg-white rounded-lg overflow-hidden shadow-md border border-amber-200">
                   <div className="h-48 overflow-hidden">
                     <img 
@@ -501,7 +501,7 @@ export default function SimplePage() {
                   </div>
                 </div>
                 
-                {/* Economic System Guide Card - Now 2nd */}
+                {/* Economic System Guide Card */}
                 <div className="bg-white rounded-lg overflow-hidden shadow-md border border-amber-200">
                   <div className="h-48 overflow-hidden">
                     <img 
@@ -524,60 +524,6 @@ export default function SimplePage() {
                       className="inline-block px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors"
                     >
                       Read Guide
-                    </button>
-                  </div>
-                </div>
-                
-                {/* Land Owner Guide Card - Now 3rd */}
-                <div className="bg-white rounded-lg overflow-hidden shadow-md border border-amber-200">
-                  <div className="h-48 overflow-hidden">
-                    <img 
-                      src="/images/landowner-guide.png" 
-                      alt="Land Owner Guide" 
-                      className="w-full h-full object-cover transition-transform hover:scale-105"
-                      onError={(e) => {
-                        // Fallback if image doesn't exist
-                        (e.target as HTMLImageElement).src = 'https://via.placeholder.com/800x400?text=Land+Owner+Guide';
-                      }}
-                    />
-                  </div>
-                  <div className="p-6">
-                    <h3 className="text-xl font-serif text-amber-800 mb-2">The Patrician's Guide to Land Ownership</h3>
-                    <p className="text-gray-600 mb-4">
-                      Master the art of Venetian land management and strategic property control to build lasting wealth.
-                    </p>
-                    <button 
-                      onClick={() => setSelectedArticle("landowner-guide")}
-                      className="inline-block px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors"
-                    >
-                      Read Guide
-                    </button>
-                  </div>
-                </div>
-                
-                {/* 20 Strategies Article Card - Now 4th */}
-                <div className="bg-white rounded-lg overflow-hidden shadow-md border border-amber-200">
-                  <div className="h-48 overflow-hidden">
-                    <img 
-                      src="/images/strategies-article.png" 
-                      alt="Strategies Article" 
-                      className="w-full h-full object-cover transition-transform hover:scale-105"
-                      onError={(e) => {
-                        // Fallback if image doesn't exist
-                        (e.target as HTMLImageElement).src = 'https://via.placeholder.com/800x400?text=Strategies';
-                      }}
-                    />
-                  </div>
-                  <div className="p-6">
-                    <h3 className="text-xl font-serif text-amber-800 mb-2">20 Strategies to Get Ahead</h3>
-                    <p className="text-gray-600 mb-4">
-                      Learn essential strategies for economic success in the competitive markets of La Serenissima.
-                    </p>
-                    <button 
-                      onClick={() => setSelectedArticle("strategies")}
-                      className="inline-block px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors"
-                    >
-                      Read Article
                     </button>
                   </div>
                 </div>
@@ -608,9 +554,35 @@ export default function SimplePage() {
                     </button>
                   </div>
                 </div>
+                
+                {/* 20 Strategies Article Card */}
+                <div className="bg-white rounded-lg overflow-hidden shadow-md border border-amber-200">
+                  <div className="h-48 overflow-hidden">
+                    <img 
+                      src="/images/strategies-article.png" 
+                      alt="Strategies Article" 
+                      className="w-full h-full object-cover transition-transform hover:scale-105"
+                      onError={(e) => {
+                        // Fallback if image doesn't exist
+                        (e.target as HTMLImageElement).src = 'https://via.placeholder.com/800x400?text=Strategies';
+                      }}
+                    />
+                  </div>
+                  <div className="p-6">
+                    <h3 className="text-xl font-serif text-amber-800 mb-2">20 Strategies to Get Ahead</h3>
+                    <p className="text-gray-600 mb-4">
+                      Learn essential strategies for economic success in the competitive markets of La Serenissima.
+                    </p>
+                    <button 
+                      onClick={() => setSelectedArticle("strategies")}
+                      className="inline-block px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors"
+                    >
+                      Read Article
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
-            
             
             {/* Tab content */}
             {governanceTab === 'council' && (
@@ -759,33 +731,6 @@ export default function SimplePage() {
                 Articles & Guides
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {/* 20 Strategies Article Card */}
-                <div className="bg-white rounded-lg overflow-hidden shadow-md border border-amber-200">
-                  <div className="h-48 overflow-hidden">
-                    <img 
-                      src="/images/strategies-article.png" 
-                      alt="Strategies Article" 
-                      className="w-full h-full object-cover transition-transform hover:scale-105"
-                      onError={(e) => {
-                        // Fallback if image doesn't exist
-                        (e.target as HTMLImageElement).src = 'https://via.placeholder.com/800x400?text=Strategies';
-                      }}
-                    />
-                  </div>
-                  <div className="p-6">
-                    <h3 className="text-xl font-serif text-amber-800 mb-2">20 Strategies to Get Ahead</h3>
-                    <p className="text-gray-600 mb-4">
-                      Learn essential strategies for economic success in the competitive markets of La Serenissima.
-                    </p>
-                    <button 
-                      onClick={() => setSelectedArticle("strategies")}
-                      className="inline-block px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors"
-                    >
-                      Read Article
-                    </button>
-                  </div>
-                </div>
-                
                 {/* Beginner's Guide Card */}
                 <div className="bg-white rounded-lg overflow-hidden shadow-md border border-amber-200">
                   <div className="h-48 overflow-hidden">
@@ -812,7 +757,7 @@ export default function SimplePage() {
                     </button>
                   </div>
                 </div>
-                
+              
                 {/* Economic System Guide Card */}
                 <div className="bg-white rounded-lg overflow-hidden shadow-md border border-amber-200">
                   <div className="h-48 overflow-hidden">
@@ -836,6 +781,60 @@ export default function SimplePage() {
                       className="inline-block px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors"
                     >
                       Read Guide
+                    </button>
+                  </div>
+                </div>
+              
+                {/* Land Owner Guide Card */}
+                <div className="bg-white rounded-lg overflow-hidden shadow-md border border-amber-200">
+                  <div className="h-48 overflow-hidden">
+                    <img 
+                      src="/images/landowner-guide.png" 
+                      alt="Land Owner Guide" 
+                      className="w-full h-full object-cover transition-transform hover:scale-105"
+                      onError={(e) => {
+                        // Fallback if image doesn't exist
+                        (e.target as HTMLImageElement).src = 'https://via.placeholder.com/800x400?text=Land+Owner+Guide';
+                      }}
+                    />
+                  </div>
+                  <div className="p-6">
+                    <h3 className="text-xl font-serif text-amber-800 mb-2">The Patrician's Guide to Land Ownership</h3>
+                    <p className="text-gray-600 mb-4">
+                      Master the art of Venetian land management and strategic property control to build lasting wealth.
+                    </p>
+                    <button 
+                      onClick={() => setSelectedArticle("landowner-guide")}
+                      className="inline-block px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors"
+                    >
+                      Read Guide
+                    </button>
+                  </div>
+                </div>
+              
+                {/* 20 Strategies Article Card */}
+                <div className="bg-white rounded-lg overflow-hidden shadow-md border border-amber-200">
+                  <div className="h-48 overflow-hidden">
+                    <img 
+                      src="/images/strategies-article.png" 
+                      alt="Strategies Article" 
+                      className="w-full h-full object-cover transition-transform hover:scale-105"
+                      onError={(e) => {
+                        // Fallback if image doesn't exist
+                        (e.target as HTMLImageElement).src = 'https://via.placeholder.com/800x400?text=Strategies';
+                      }}
+                    />
+                  </div>
+                  <div className="p-6">
+                    <h3 className="text-xl font-serif text-amber-800 mb-2">20 Strategies to Get Ahead</h3>
+                    <p className="text-gray-600 mb-4">
+                      Learn essential strategies for economic success in the competitive markets of La Serenissima.
+                    </p>
+                    <button 
+                      onClick={() => setSelectedArticle("strategies")}
+                      className="inline-block px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors"
+                    >
+                      Read Article
                     </button>
                   </div>
                 </div>
