@@ -2341,6 +2341,7 @@ async def create_loan_offer(loan_offer: dict):
         print(f"ERROR: {error_msg}")
         traceback.print_exc(file=sys.stdout)
         raise HTTPException(status_code=500, detail=error_msg)
+    
 @app.post("/api/inject-compute-complete")
 async def inject_compute_complete(data: dict):
     """Update the database after a successful compute injection"""
