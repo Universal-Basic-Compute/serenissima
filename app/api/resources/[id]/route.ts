@@ -1,15 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { loadAllResources } from '@/lib/serverResourceUtils';
 
-interface RouteParams {
-  params: {
-    id: string;
-  };
-}
-
 export async function GET(
   request: NextRequest,
-  { params }: RouteParams
+  { params }: { params: { id: string } }
 ) {
   try {
     const id = params.id;
