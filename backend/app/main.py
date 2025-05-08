@@ -2130,18 +2130,28 @@ async def apply_for_loan(loan_application: dict):
                 # Get the lender (usually Treasury for template loans)
                 lender = loan_record["fields"].get("Lender", "Treasury")
                 
-                # Update the loan record - set to active instead of pending
-                updated_record = loans_table.update(loan_id, {
+                # Create a new loan record instead of updating the template
+                new_loan = {
+                    "Name": f"Official Loan - {borrower}",
                     "Borrower": borrower,
+                    "Lender": lender,
                     "Status": "active",  # Set to active immediately
+                    "Type": "official",  # Mark as an official loan
                     "PrincipalAmount": principal,
                     "RemainingBalance": principal,
+                    "InterestRate": interest_rate,
+                    "TermDays": term_days,
                     "PaymentAmount": total_payment / term_days,  # Daily payment
                     "ApplicationText": loan_application.get("applicationText", ""),
                     "LoanPurpose": loan_application.get("loanPurpose", ""),
+                    "CreatedAt": now,
                     "UpdatedAt": now,
-                    "ApprovedAt": now  # Add approval timestamp
-                })
+                    "ApprovedAt": now,  # Add approval timestamp
+                    "TemplateId": loan_id  # Reference to the original template
+                }
+                
+                # Create the new loan record
+                new_loan_record = loans_table.create(new_loan)
                 
                 # Transfer funds from lender to borrower
                 try:
@@ -2173,7 +2183,7 @@ async def apply_for_loan(loan_application: dict):
                             "ExecutedAt": now,
                             "Notes": json.dumps({
                                 "operation": "loan_disbursement",
-                                "loan_id": loan_id,
+                                "loan_id": new_loan_record["id"],
                                 "interest_rate": interest_rate,
                                 "term_days": term_days
                             })
@@ -2185,23 +2195,23 @@ async def apply_for_loan(loan_application: dict):
                     # Continue execution even if transfer fails
                 
                 return {
-                    "id": updated_record["id"],
-                    "name": updated_record["fields"].get("Name", ""),
-                    "borrower": updated_record["fields"].get("Borrower", ""),
-                    "lender": updated_record["fields"].get("Lender", ""),
-                    "status": updated_record["fields"].get("Status", ""),
-                    "principalAmount": updated_record["fields"].get("PrincipalAmount", 0),
-                    "interestRate": updated_record["fields"].get("InterestRate", 0),
-                    "termDays": updated_record["fields"].get("TermDays", 0),
-                    "paymentAmount": updated_record["fields"].get("PaymentAmount", 0),
-                    "remainingBalance": updated_record["fields"].get("RemainingBalance", 0),
-                    "createdAt": updated_record["fields"].get("CreatedAt", ""),
-                    "updatedAt": updated_record["fields"].get("UpdatedAt", ""),
-                    "finalPaymentDate": updated_record["fields"].get("FinalPaymentDate", ""),
-                    "requirementsText": updated_record["fields"].get("RequirementsText", ""),
-                    "applicationText": updated_record["fields"].get("ApplicationText", ""),
-                    "loanPurpose": updated_record["fields"].get("LoanPurpose", ""),
-                    "notes": updated_record["fields"].get("Notes", ""),
+                    "id": new_loan_record["id"],
+                    "name": new_loan_record["fields"].get("Name", ""),
+                    "borrower": new_loan_record["fields"].get("Borrower", ""),
+                    "lender": new_loan_record["fields"].get("Lender", ""),
+                    "status": new_loan_record["fields"].get("Status", ""),
+                    "principalAmount": new_loan_record["fields"].get("PrincipalAmount", 0),
+                    "interestRate": new_loan_record["fields"].get("InterestRate", 0),
+                    "termDays": new_loan_record["fields"].get("TermDays", 0),
+                    "paymentAmount": new_loan_record["fields"].get("PaymentAmount", 0),
+                    "remainingBalance": new_loan_record["fields"].get("RemainingBalance", 0),
+                    "createdAt": new_loan_record["fields"].get("CreatedAt", ""),
+                    "updatedAt": new_loan_record["fields"].get("UpdatedAt", ""),
+                    "finalPaymentDate": new_loan_record["fields"].get("FinalPaymentDate", ""),
+                    "requirementsText": new_loan_record["fields"].get("RequirementsText", ""),
+                    "applicationText": new_loan_record["fields"].get("ApplicationText", ""),
+                    "loanPurpose": new_loan_record["fields"].get("LoanPurpose", ""),
+                    "notes": new_loan_record["fields"].get("Notes", ""),
                     "autoApproved": True  # Flag to indicate this was auto-approved
                 }
             
@@ -2223,37 +2233,81 @@ async def apply_for_loan(loan_application: dict):
             total_interest = principal * interest_decimal * (term_days / 365)
             total_payment = principal + total_interest
             
-            # Update the loan record
-            updated_record = loans_table.update(loan_id, {
-                "Borrower": loan_application.get("borrower"),
-                "Status": "pending",
-                "PrincipalAmount": principal,
-                "RemainingBalance": principal,
-                "PaymentAmount": total_payment / term_days,  # Daily payment
-                "ApplicationText": loan_application.get("applicationText", ""),
-                "LoanPurpose": loan_application.get("loanPurpose", ""),
-                "UpdatedAt": now
-            })
-            
-            return {
-                "id": updated_record["id"],
-                "name": updated_record["fields"].get("Name", ""),
-                "borrower": updated_record["fields"].get("Borrower", ""),
-                "lender": updated_record["fields"].get("Lender", ""),
-                "status": updated_record["fields"].get("Status", ""),
-                "principalAmount": updated_record["fields"].get("PrincipalAmount", 0),
-                "interestRate": updated_record["fields"].get("InterestRate", 0),
-                "termDays": updated_record["fields"].get("TermDays", 0),
-                "paymentAmount": updated_record["fields"].get("PaymentAmount", 0),
-                "remainingBalance": updated_record["fields"].get("RemainingBalance", 0),
-                "createdAt": updated_record["fields"].get("CreatedAt", ""),
-                "updatedAt": updated_record["fields"].get("UpdatedAt", ""),
-                "finalPaymentDate": updated_record["fields"].get("FinalPaymentDate", ""),
-                "requirementsText": updated_record["fields"].get("RequirementsText", ""),
-                "applicationText": updated_record["fields"].get("ApplicationText", ""),
-                "loanPurpose": updated_record["fields"].get("LoanPurpose", ""),
-                "notes": updated_record["fields"].get("Notes", "")
-            }
+            # For template loans, create a new loan record instead of updating the template
+            if loan_record["fields"].get("Status") == "template":
+                # Create a new loan record
+                new_loan = {
+                    "Name": f"Loan Application - {loan_application.get('borrower')}",
+                    "Borrower": loan_application.get("borrower"),
+                    "Lender": loan_record["fields"].get("Lender", "Treasury"),
+                    "Status": "pending",
+                    "Type": "official",  # Mark as an official loan
+                    "PrincipalAmount": principal,
+                    "RemainingBalance": principal,
+                    "InterestRate": interest_rate,
+                    "TermDays": term_days,
+                    "PaymentAmount": total_payment / term_days,  # Daily payment
+                    "ApplicationText": loan_application.get("applicationText", ""),
+                    "LoanPurpose": loan_application.get("loanPurpose", ""),
+                    "CreatedAt": now,
+                    "UpdatedAt": now,
+                    "TemplateId": loan_id  # Reference to the original template
+                }
+                
+                # Create the new loan record
+                new_loan_record = loans_table.create(new_loan)
+                
+                return {
+                    "id": new_loan_record["id"],
+                    "name": new_loan_record["fields"].get("Name", ""),
+                    "borrower": new_loan_record["fields"].get("Borrower", ""),
+                    "lender": new_loan_record["fields"].get("Lender", ""),
+                    "status": new_loan_record["fields"].get("Status", ""),
+                    "principalAmount": new_loan_record["fields"].get("PrincipalAmount", 0),
+                    "interestRate": new_loan_record["fields"].get("InterestRate", 0),
+                    "termDays": new_loan_record["fields"].get("TermDays", 0),
+                    "paymentAmount": new_loan_record["fields"].get("PaymentAmount", 0),
+                    "remainingBalance": new_loan_record["fields"].get("RemainingBalance", 0),
+                    "createdAt": new_loan_record["fields"].get("CreatedAt", ""),
+                    "updatedAt": new_loan_record["fields"].get("UpdatedAt", ""),
+                    "finalPaymentDate": new_loan_record["fields"].get("FinalPaymentDate", ""),
+                    "requirementsText": new_loan_record["fields"].get("RequirementsText", ""),
+                    "applicationText": new_loan_record["fields"].get("ApplicationText", ""),
+                    "loanPurpose": new_loan_record["fields"].get("LoanPurpose", ""),
+                    "notes": new_loan_record["fields"].get("Notes", "")
+                }
+            else:
+                # For non-template loans, update the existing loan record
+                updated_record = loans_table.update(loan_id, {
+                    "Borrower": loan_application.get("borrower"),
+                    "Status": "pending",
+                    "PrincipalAmount": principal,
+                    "RemainingBalance": principal,
+                    "PaymentAmount": total_payment / term_days,  # Daily payment
+                    "ApplicationText": loan_application.get("applicationText", ""),
+                    "LoanPurpose": loan_application.get("loanPurpose", ""),
+                    "UpdatedAt": now
+                })
+                
+                return {
+                    "id": updated_record["id"],
+                    "name": updated_record["fields"].get("Name", ""),
+                    "borrower": updated_record["fields"].get("Borrower", ""),
+                    "lender": updated_record["fields"].get("Lender", ""),
+                    "status": updated_record["fields"].get("Status", ""),
+                    "principalAmount": updated_record["fields"].get("PrincipalAmount", 0),
+                    "interestRate": updated_record["fields"].get("InterestRate", 0),
+                    "termDays": updated_record["fields"].get("TermDays", 0),
+                    "paymentAmount": updated_record["fields"].get("PaymentAmount", 0),
+                    "remainingBalance": updated_record["fields"].get("RemainingBalance", 0),
+                    "createdAt": updated_record["fields"].get("CreatedAt", ""),
+                    "updatedAt": updated_record["fields"].get("UpdatedAt", ""),
+                    "finalPaymentDate": updated_record["fields"].get("FinalPaymentDate", ""),
+                    "requirementsText": updated_record["fields"].get("RequirementsText", ""),
+                    "applicationText": updated_record["fields"].get("ApplicationText", ""),
+                    "loanPurpose": updated_record["fields"].get("LoanPurpose", ""),
+                    "notes": updated_record["fields"].get("Notes", "")
+                }
         else:
             # Create a new loan application
             now = datetime.datetime.now().isoformat()
@@ -2263,6 +2317,7 @@ async def apply_for_loan(loan_application: dict):
                 "Name": f"Loan Application - {loan_application.get('borrower')}",
                 "Borrower": loan_application.get("borrower"),
                 "Status": "pending",
+                "Type": "custom",  # Mark as a custom loan
                 "PrincipalAmount": loan_application.get("principalAmount"),
                 "RemainingBalance": loan_application.get("principalAmount"),
                 "ApplicationText": loan_application.get("applicationText", ""),
