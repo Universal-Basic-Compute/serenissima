@@ -5,6 +5,7 @@ import { useState, useRef, useEffect } from 'react';
 import TechTree from '../components/Knowledge/TechTree';
 import ProjectPresentation from '../components/Knowledge/ProjectPresentation';
 import ResourceTree from '../components/Knowledge/ResourceTree';
+import { StrategiesArticle, BeginnersGuideArticle, EconomicSystemArticle } from '../components/Articles';
 import Link from 'next/link';
 import { clearLandOwnershipCaches } from '@/lib/cacheUtils';
 import { eventBus, EventTypes } from '@/lib/eventBus';
@@ -1367,6 +1368,17 @@ export default function SimplePage() {
       {/* Resource Tree Modal */}
       {showResourceTree && (
         <ResourceTree onClose={() => setShowResourceTree(false)} />
+      )}
+      
+      {/* Article Modals */}
+      {selectedArticle === "strategies" && (
+        <StrategiesArticle onClose={() => setSelectedArticle(null)} />
+      )}
+      {selectedArticle === "beginners-guide" && (
+        <BeginnersGuideArticle onClose={() => setSelectedArticle(null)} />
+      )}
+      {selectedArticle === "economic-system" && (
+        <EconomicSystemArticle onClose={() => setSelectedArticle(null)} />
       )}
       
       {/* Land Purchase Confirmation Modal */}
