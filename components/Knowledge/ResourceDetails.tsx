@@ -2,8 +2,19 @@ import React from 'react';
 import { FaTimes, FaWeight, FaCube, FaCoins, FaHistory, FaBuilding, FaShip, FaWarehouse, FaExchangeAlt, FaChartLine, FaCalendarAlt } from 'react-icons/fa';
 import { ResourceNode } from '../../lib/resourceUtils';
 
+// Étendre l'interface ResourceNode pour inclure les propriétés manquantes
+interface ExtendedResourceNode extends ResourceNode {
+  substitutes?: Array<{
+    resourceId: string;
+    efficiency?: number;
+    qualityPenalty?: number;
+    context?: string;
+  }>;
+  complements?: string[];
+}
+
 interface ResourceDetailsProps {
-  resource: ResourceNode;
+  resource: ExtendedResourceNode;
   onClose: () => void;
   getInputResources: (resource: ResourceNode) => ResourceNode[];
   getOutputResources: (resource: ResourceNode) => ResourceNode[];
@@ -608,7 +619,7 @@ const ResourceDetails: React.FC<ResourceDetailsProps> = ({
       </div>
       
       {/* Substitutes and Complements */}
-      {(resource.substitutes || resource.complements) && (
+      {((resource as ExtendedResourceNode).substitutes || (resource as ExtendedResourceNode).complements) && (
         <div className="mb-6">
           <h4 className="text-lg font-serif text-amber-300 mb-2 border-b border-amber-700/50 pb-1">
             <div className="flex items-center">
@@ -617,11 +628,11 @@ const ResourceDetails: React.FC<ResourceDetailsProps> = ({
             </div>
           </h4>
           
-          {resource.substitutes && resource.substitutes.length > 0 && (
+          {(resource as ExtendedResourceNode).substitutes && (resource as ExtendedResourceNode).substitutes!.length > 0 && (
             <div className="mb-3">
               <h5 className="text-sm text-amber-200 font-medium mb-2">Substitutes</h5>
               <div className="space-y-2">
-                {resource.substitutes.map((substitute: any, index: number) => (
+                {(resource as ExtendedResourceNode).substitutes!.map((substitute: any, index: number) => (
                   <div key={index} className="bg-amber-900/20 rounded p-2 border border-amber-700/30">
                     <div className="text-amber-100 font-medium text-sm">{getCategoryDisplayName(substitute.resourceId)}</div>
                     <div className="grid grid-cols-2 gap-1 mt-1 text-xs text-amber-100/90">
@@ -647,11 +658,11 @@ const ResourceDetails: React.FC<ResourceDetailsProps> = ({
             </div>
           )}
           
-          {resource.complements && resource.complements.length > 0 && (
+          {(resource as ExtendedResourceNode).complements && (resource as ExtendedResourceNode).complements!.length > 0 && (
             <div>
               <h5 className="text-sm text-amber-200 font-medium mb-1">Complementary Resources</h5>
               <div className="flex flex-wrap gap-1">
-                {resource.complements.map((complement: string, index: number) => (
+                {(resource as ExtendedResourceNode).complements!.map((complement: string, index: number) => (
                   <span key={index} className="text-xs bg-amber-800/40 text-amber-100 px-2 py-0.5 rounded">
                     {getCategoryDisplayName(complement)}
                   </span>
