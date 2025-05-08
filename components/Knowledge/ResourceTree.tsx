@@ -186,4 +186,4 @@ const ResourceTree: React.FC<ResourceListProps> = ({ onClose }) => {
   );
 };
 
-export default ResourceList;
+export default ResourceTree;
