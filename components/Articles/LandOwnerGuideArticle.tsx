@@ -37,11 +37,12 @@ const LandOwnerGuideArticle: React.FC<LandOwnerGuideArticleProps> = ({ onClose }
               Land in Venice is not merely property—it is power. The closed economic system of La Serenissima means that wealth must be captured rather than created from nothing. As a landowner, you stand at the beginning of the economic cycle:
             </p>
             <ol className="list-decimal pl-5 space-y-2">
-              <li>You lease LAND for the construction of BUILDINGS</li>
-              <li>BUILDINGS house BUSINESSES and provide living space</li>
+              <li>You lease LAND to building owners for construction</li>
+              <li>Building owners rent BUILDINGS to BUSINESSES and residents</li>
               <li>BUSINESSES transform raw materials into valuable RESOURCES</li>
               <li>RESOURCES provision both Players and AI Citizens</li>
-              <li>Players & Citizens pay rent, completing the cycle back to LAND</li>
+              <li>Money flows back: Business owners pay rent to building owners, who pay land leases to you</li>
+              <li>All parties pay taxes to the Republic, completing the economic cycle</li>
             </ol>
             
             <div className="my-6 flex justify-center">

@@ -81,11 +81,11 @@ const EconomicSystemArticle: React.FC<EconomicSystemArticleProps> = ({ onClose }
               {/* Main cycle connections with labels */}
               {/* LAND to BUILDINGS */}
               <path d="M 393 120 Q 465 165 505 235" fill="none" stroke="#7c2d12" strokeWidth="2" markerEnd="url(#arrow)"/>
-              <text x="465" y="175" fontFamily="serif" fontSize="14" textAnchor="middle" fill="#7c2d12" transform="rotate(35, 465, 175)">Hosts</text>
+              <text x="465" y="175" fontFamily="serif" fontSize="14" textAnchor="middle" fill="#7c2d12" transform="rotate(35, 465, 175)">Leased to</text>
               
               {/* BUILDINGS to BUSINESSES */}
               <path d="M 500 315 Q 485 365 470 395" fill="none" stroke="#7c2d12" strokeWidth="2" markerEnd="url(#arrow)"/>
-              <text x="500" y="365" fontFamily="serif" fontSize="14" textAnchor="middle" fill="#7c2d12" transform="rotate(70, 500, 365)">Accommodates</text>
+              <text x="500" y="365" fontFamily="serif" fontSize="14" textAnchor="middle" fill="#7c2d12" transform="rotate(70, 500, 365)">Rented to</text>
               
               {/* BUSINESSES to RESOURCES */}
               <path d="M 390 435 L 310 435" fill="none" stroke="#7c2d12" strokeWidth="2" markerEnd="url(#arrow)"/>
@@ -95,9 +95,16 @@ const EconomicSystemArticle: React.FC<EconomicSystemArticleProps> = ({ onClose }
               <path d="M 220 410 Q 195 365 190 325" fill="none" stroke="#7c2d12" strokeWidth="2" markerEnd="url(#arrow)"/>
               <text x="185" y="380" fontFamily="serif" fontSize="14" textAnchor="middle" fill="#7c2d12" transform="rotate(-75, 185, 380)">Supply</text>
               
+              {/* Payment flows - added to show economic relationships */}
+              <path d="M 440 385 Q 485 330 480 275" fill="none" stroke="#b45309" strokeWidth="2" strokeDasharray="5,3" markerEnd="url(#arrow)"/>
+              <text x="470" y="330" fontFamily="serif" fontSize="12" textAnchor="middle" fill="#b45309" transform="rotate(-45, 470, 330)">Pay Rent</text>
+              
+              <path d="M 480 235 Q 420 165 380 145" fill="none" stroke="#b45309" strokeWidth="2" strokeDasharray="5,3" markerEnd="url(#arrow)"/>
+              <text x="420" y="180" fontFamily="serif" fontSize="12" textAnchor="middle" fill="#b45309" transform="rotate(-45, 420, 180)">Pay Land Lease</text>
+              
               {/* CITIZENS to LAND */}
               <path d="M 205 235 Q 250 150 320 115" fill="none" stroke="#7c2d12" strokeWidth="2" markerEnd="url(#arrow)"/>
-              <text x="240" y="165" fontFamily="serif" fontSize="14" textAnchor="middle" fill="#7c2d12" transform="rotate(-35, 240, 165)">Fund</text>
+              <text x="240" y="165" fontFamily="serif" fontSize="14" textAnchor="middle" fill="#7c2d12" transform="rotate(-35, 240, 165)">Pay Taxes</text>
               
               {/* COMPUTE connections (radiating from center) */}
               <line x1="350" y1="215" x2="350" y2="150" stroke="#b45309" strokeWidth="2" strokeDasharray="5,3"/>
