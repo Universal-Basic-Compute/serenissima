@@ -41,6 +41,8 @@ declare global {
       camera: THREE.PerspectiveCamera;
       renderer: THREE.WebGLRenderer;
     };
+    __isClientNavigation?: boolean;
+    __directNavigation?: boolean;
   }
   
   // Add custom properties to HTMLCanvasElement
@@ -84,13 +86,48 @@ export default function SimplePage() {
   
   // Handle URL changes to show appropriate panels
   useEffect(() => {
+    // Handle initial URL on page load
     if (pathname === '/governance') {
       setShowGovernancePanel(true);
+      setActiveView('governance');
     } else if (pathname === '/loans') {
       setShowLoansPanel(true);
+      setActiveView('loans');
     } else if (pathname === '/knowledge') {
       setShowKnowledgePanel(true);
+      setActiveView('knowledge');
     }
+    
+    // Set up a popstate event listener to handle browser back/forward buttons
+    const handlePopState = () => {
+      const path = window.location.pathname;
+      if (path === '/governance') {
+        setShowGovernancePanel(true);
+        setShowKnowledgePanel(false);
+        setShowLoansPanel(false);
+        setActiveView('governance');
+      } else if (path === '/loans') {
+        setShowGovernancePanel(false);
+        setShowKnowledgePanel(false);
+        setShowLoansPanel(true);
+        setActiveView('loans');
+      } else if (path === '/knowledge') {
+        setShowGovernancePanel(false);
+        setShowKnowledgePanel(true);
+        setShowLoansPanel(false);
+        setActiveView('knowledge');
+      } else if (path === '/') {
+        setShowGovernancePanel(false);
+        setShowKnowledgePanel(false);
+        setShowLoansPanel(false);
+        setActiveView('land');
+      }
+    };
+    
+    window.addEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
   }, [pathname]);
   const [qualityMode, setQualityMode] = useState<'high' | 'performance'>('high');
   const [marketPanelVisible, setMarketPanelVisible] = useState(false);
@@ -462,7 +499,10 @@ export default function SimplePage() {
         <GovernancePanel 
           onClose={() => {
             setShowGovernancePanel(false);
-            router.push('/', { shallow: true });
+            setActiveView('land');
+            // Update URL without page navigation
+            window.history.replaceState(null, '', '/');
+            window.__isClientNavigation = true;
           }}
           standalone={false}
         />
@@ -477,7 +517,10 @@ export default function SimplePage() {
           onSelectArticle={setSelectedArticle}
           onClose={() => {
             setShowKnowledgePanel(false);
-            router.push('/', { shallow: true });
+            setActiveView('land');
+            // Update URL without page navigation
+            window.history.replaceState(null, '', '/');
+            window.__isClientNavigation = true;
           }}
           standalone={false}
         />
@@ -494,7 +537,10 @@ export default function SimplePage() {
               <button 
                 onClick={() => {
                   setShowLoansPanel(false);
-                  router.push('/', { shallow: true });
+                  setActiveView('land');
+                  // Update URL without page navigation
+                  window.history.replaceState(null, '', '/');
+                  window.__isClientNavigation = true;
                 }}
                 className="text-amber-600 hover:text-amber-800 p-2"
                 aria-label="Return to main view"
@@ -527,7 +573,12 @@ export default function SimplePage() {
               <button
                 onClick={() => {
                   setShowGovernancePanel(true);
-                  router.push('/governance', { shallow: true });
+                  setShowKnowledgePanel(false);
+                  setShowLoansPanel(false);
+                  setActiveView('governance');
+                  // Update URL without page navigation using replaceState
+                  window.history.replaceState(null, '', '/governance');
+                  window.__isClientNavigation = true;
                 }}
                 className={`w-full flex items-center p-2 rounded-lg transition-colors ${
                   activeView === 'governance' ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700'
@@ -541,7 +592,12 @@ export default function SimplePage() {
               <button
                 onClick={() => {
                   setShowKnowledgePanel(true);
-                  router.push('/knowledge', { shallow: true });
+                  setShowGovernancePanel(false);
+                  setShowLoansPanel(false);
+                  setActiveView('knowledge');
+                  // Update URL without page navigation using replaceState
+                  window.history.replaceState(null, '', '/knowledge');
+                  window.__isClientNavigation = true;
                 }}
                 className={`w-full flex items-center p-2 rounded-lg transition-colors ${
                   activeView === 'knowledge' ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700'
@@ -555,7 +611,12 @@ export default function SimplePage() {
               <button
                 onClick={() => {
                   setShowLoansPanel(true);
-                  router.push('/loans', { shallow: true });
+                  setShowGovernancePanel(false);
+                  setShowKnowledgePanel(false);
+                  setActiveView('loans');
+                  // Update URL without page navigation using replaceState
+                  window.history.replaceState(null, '', '/loans');
+                  window.__isClientNavigation = true;
                 }}
                 className={`w-full flex items-center p-2 rounded-lg transition-colors ${
                   activeView === 'loans' ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700'

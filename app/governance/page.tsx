@@ -6,9 +6,14 @@ import { useRouter } from 'next/navigation';
 export default function GovernancePage() {
   const router = useRouter();
   
-  // Redirect to main page with governance panel
+  // Instead of redirecting, check if we're in a client-side navigation
   useEffect(() => {
-    router.push('/', { shallow: true });
+    // If this is a direct page load (not client navigation)
+    if (typeof window !== 'undefined' && window.location.pathname === '/governance' && !window.__isClientNavigation) {
+      // Set a flag to indicate this was a direct navigation
+      window.__directNavigation = true;
+      router.push('/', { shallow: true });
+    }
   }, [router]);
   
   // Return empty div while redirecting
