@@ -126,6 +126,79 @@ const LandOwnerGuideArticle: React.FC<LandOwnerGuideArticleProps> = ({ onClose }
               <p>
                 The most sophisticated landowners charge different rates to different tenants based on their strategic value. Offer discounts to businesses that complement your other ventures while charging premium rates to competitors or businesses that don't enhance your portfolio.
               </p>
+              
+              <div className="my-6 flex justify-center">
+                <svg width="400" height="250" viewBox="0 0 400 250" className="border border-amber-300 rounded bg-amber-50">
+                  {/* Background */}
+                  <rect x="0" y="0" width="400" height="250" fill="#fef3c7" />
+                  
+                  {/* Your properties with different pricing */}
+                  <rect x="50" y="50" width="100" height="70" fill="#f59e0b" stroke="#b45309" strokeWidth="2" opacity="0.9">
+                    <title>Premium Property</title>
+                  </rect>
+                  
+                  <rect x="50" y="150" width="100" height="70" fill="#f59e0b" stroke="#b45309" strokeWidth="2" opacity="0.6">
+                    <title>Discounted Property</title>
+                  </rect>
+                  
+                  <rect x="250" y="50" width="100" height="70" fill="#f59e0b" stroke="#b45309" strokeWidth="2" opacity="0.9">
+                    <title>Premium Property</title>
+                  </rect>
+                  
+                  <rect x="250" y="150" width="100" height="70" fill="#f59e0b" stroke="#b45309" strokeWidth="2" opacity="0.6">
+                    <title>Discounted Property</title>
+                  </rect>
+                  
+                  {/* Tenant types */}
+                  <circle cx="100" y="85" r="15" fill="#ef4444" stroke="#b91c1c" strokeWidth="2">
+                    <title>Competitor</title>
+                  </circle>
+                  
+                  <circle cx="100" y="185" r="15" fill="#059669" stroke="#047857" strokeWidth="2">
+                    <title>Complementary Business</title>
+                  </circle>
+                  
+                  <circle cx="300" y="85" r="15" fill="#ef4444" stroke="#b91c1c" strokeWidth="2">
+                    <title>Competitor</title>
+                  </circle>
+                  
+                  <circle cx="300" y="185" r="15" fill="#059669" stroke="#047857" strokeWidth="2">
+                    <title>Complementary Business</title>
+                  </circle>
+                  
+                  {/* Price indicators */}
+                  <text x="160" y="85" fill="#b45309" fontFamily="serif" fontSize="16" fontWeight="bold">500₫</text>
+                  <text x="160" y="185" fill="#b45309" fontFamily="serif" fontSize="16" fontWeight="bold">200₫</text>
+                  <text x="360" y="85" fill="#b45309" fontFamily="serif" fontSize="16" fontWeight="bold">500₫</text>
+                  <text x="360" y="185" fill="#b45309" fontFamily="serif" fontSize="16" fontWeight="bold">200₫</text>
+                  
+                  {/* Labels */}
+                  <text x="100" y="40" fill="#7c2d12" fontFamily="serif" fontSize="14" textAnchor="middle">Premium Rates</text>
+                  <text x="100" y="140" fill="#7c2d12" fontFamily="serif" fontSize="14" textAnchor="middle">Discounted Rates</text>
+                  <text x="100" y="110" fill="#7c2d12" fontFamily="serif" fontSize="12" textAnchor="middle">Competitor</text>
+                  <text x="100" y="210" fill="#7c2d12" fontFamily="serif" fontSize="12" textAnchor="middle">Ally</text>
+                  
+                  <text x="300" y="40" fill="#7c2d12" fontFamily="serif" fontSize="14" textAnchor="middle">Premium Rates</text>
+                  <text x="300" y="140" fill="#7c2d12" fontFamily="serif" fontSize="14" textAnchor="middle">Discounted Rates</text>
+                  <text x="300" y="110" fill="#7c2d12" fontFamily="serif" fontSize="12" textAnchor="middle">Competitor</text>
+                  <text x="300" y="210" fill="#7c2d12" fontFamily="serif" fontSize="12" textAnchor="middle">Ally</text>
+                  
+                  {/* Flow arrows */}
+                  <path d="M150,85 L250,85" stroke="#7c2d12" strokeWidth="1" markerEnd="url(#arrowhead)" />
+                  <path d="M150,185 L250,185" stroke="#7c2d12" strokeWidth="1" markerEnd="url(#arrowhead)" />
+                  
+                  {/* Arrow definition */}
+                  <defs>
+                    <marker id="arrowhead" markerWidth="10" markerHeight="7" 
+                            refX="9" refY="3.5" orient="auto">
+                      <polygon points="0 0, 10 3.5, 0 7" fill="#7c2d12" />
+                    </marker>
+                  </defs>
+                </svg>
+                <div className="text-sm text-amber-800 italic text-center mt-2">
+                  Charge premium rates to competitors while offering discounts to complementary businesses
+                </div>
+              </div>
             </div>
             
             <div className="mb-3">
@@ -163,6 +236,38 @@ const LandOwnerGuideArticle: React.FC<LandOwnerGuideArticleProps> = ({ onClose }
               By strategically acquiring land that forms natural chokepoints, you can effectively blockade parts of Venice from ground transportation. This forces competitors to rely on more expensive water transportation, increasing their costs while your own goods flow freely.
             </p>
             
+            <div className="my-6 flex justify-center">
+              <svg width="400" height="250" viewBox="0 0 400 250" className="border border-amber-300 rounded bg-amber-50">
+                {/* Water */}
+                <rect x="0" y="0" width="400" height="250" fill="#e0f2fe" />
+                
+                {/* Land masses */}
+                <path d="M0,0 L150,0 L150,100 L250,100 L250,250 L0,250 Z" fill="#fef3c7" stroke="#d97706" strokeWidth="2" />
+                <path d="M300,0 L400,0 L400,250 L350,250 L350,150 L300,150 Z" fill="#fef3c7" stroke="#d97706" strokeWidth="2" />
+                
+                {/* Strategic chokepoint */}
+                <rect x="150" y="100" width="100" height="50" fill="#f59e0b" stroke="#b45309" strokeWidth="2" opacity="0.7">
+                  <title>Strategic Chokepoint</title>
+                </rect>
+                
+                {/* Competitor's route - expensive water route */}
+                <path d="M75,50 C100,75 200,200 325,200" stroke="#3b82f6" strokeWidth="3" strokeDasharray="5,5" fill="none" />
+                
+                {/* Your route - efficient land route */}
+                <path d="M75,50 L200,125 L325,200" stroke="#059669" strokeWidth="3" fill="none" />
+                
+                {/* Labels */}
+                <text x="75" y="40" fill="#7c2d12" fontFamily="serif" fontSize="14">Your Property</text>
+                <text x="325" y="190" fill="#7c2d12" fontFamily="serif" fontSize="14">Market</text>
+                <text x="200" y="90" fill="#7c2d12" fontFamily="serif" fontSize="14" textAnchor="middle">Your Chokepoint</text>
+                <text x="200" y="220" fill="#3b82f6" fontFamily="serif" fontSize="12" textAnchor="middle">Competitor's Expensive Water Route</text>
+                <text x="200" y="170" fill="#059669" fontFamily="serif" fontSize="12" textAnchor="middle">Your Efficient Land Route</text>
+              </svg>
+              <div className="text-sm text-amber-800 italic text-center mt-2">
+                Strategic blockading forces competitors to use expensive water routes while your goods travel efficiently by land
+              </div>
+            </div>
+            
             <div className="bg-amber-50 p-3 rounded border border-amber-200 mb-3">
               <p className="italic text-amber-800">
                 <span className="font-bold">Case Study:</span> The Contarini family acquired three small but strategically positioned parcels that controlled all land access to the Dorsoduro district. By refusing road access to competing merchant families, they forced rivals to ship goods by gondola at five times the cost, effectively controlling which businesses could profitably operate in the district.
@@ -196,6 +301,47 @@ const LandOwnerGuideArticle: React.FC<LandOwnerGuideArticleProps> = ({ onClose }
               <span className="font-bold">Strategy:</span> Acquire key waterfront properties, particularly those at the intersection of major canals or near the entrances to smaller canals. Build docks only where they benefit your operations, and deny dock construction on your waterfront properties that would benefit competitors.
             </p>
             
+            <div className="my-6 flex justify-center">
+              <svg width="400" height="250" viewBox="0 0 400 250" className="border border-amber-300 rounded bg-amber-50">
+                {/* Water */}
+                <rect x="0" y="0" width="400" height="250" fill="#e0f2fe" />
+                
+                {/* Main canal */}
+                <path d="M150,0 L250,0 L250,250 L150,250 Z" fill="#93c5fd" stroke="#2563eb" strokeWidth="1" />
+                
+                {/* Land masses */}
+                <path d="M0,0 L150,0 L150,250 L0,250 Z" fill="#fef3c7" stroke="#d97706" strokeWidth="2" />
+                <path d="M250,0 L400,0 L400,250 L250,250 Z" fill="#fef3c7" stroke="#d97706" strokeWidth="2" />
+                
+                {/* Your waterfront properties */}
+                <rect x="130" y="50" width="20" height="40" fill="#f59e0b" stroke="#b45309" strokeWidth="2">
+                  <title>Your Dock</title>
+                </rect>
+                <rect x="130" y="150" width="20" height="40" fill="#f59e0b" stroke="#b45309" strokeWidth="2">
+                  <title>Your Dock</title>
+                </rect>
+                
+                {/* Competitor's property without dock access */}
+                <rect x="250" y="100" width="20" height="40" fill="#ef4444" stroke="#b91c1c" strokeWidth="2">
+                  <title>Competitor's Property (No Dock)</title>
+                </rect>
+                
+                {/* Your boats */}
+                <circle cx="170" cy="70" r="8" fill="#059669" stroke="#047857" strokeWidth="1" />
+                <circle cx="170" cy="170" r="8" fill="#059669" stroke="#047857" strokeWidth="1" />
+                
+                {/* Labels */}
+                <text x="100" y="70" fill="#7c2d12" fontFamily="serif" fontSize="14" textAnchor="end">Your Dock</text>
+                <text x="100" y="170" fill="#7c2d12" fontFamily="serif" fontSize="14" textAnchor="end">Your Dock</text>
+                <text x="300" y="120" fill="#7c2d12" fontFamily="serif" fontSize="14">Competitor's Land</text>
+                <text x="300" y="135" fill="#7c2d12" fontFamily="serif" fontSize="14">(No Dock Access)</text>
+                <text x="200" y="20" fill="#2563eb" fontFamily="serif" fontSize="14" textAnchor="middle">Grand Canal</text>
+              </svg>
+              <div className="text-sm text-amber-800 italic text-center mt-2">
+                Controlling waterfront properties with docks gives you exclusive access to efficient water transportation
+              </div>
+            </div>
+            
             <p>
               This forces competitors to take longer routes or use less efficient transportation methods, increasing their costs and delivery times while your goods move efficiently through the city.
             </p>
@@ -211,6 +357,55 @@ const LandOwnerGuideArticle: React.FC<LandOwnerGuideArticleProps> = ({ onClose }
             <p className="mb-3">
               <span className="font-bold">Example:</span> If a competitor operates a successful glassmaking business, acquire the land between their workshop and their sand suppliers. This forces them to find alternative, longer routes or pay you for passage rights.
             </p>
+            
+            <div className="my-6 flex justify-center">
+              <svg width="400" height="250" viewBox="0 0 400 250" className="border border-amber-300 rounded bg-amber-50">
+                {/* Background */}
+                <rect x="0" y="0" width="400" height="250" fill="#fef3c7" />
+                
+                {/* Water */}
+                <rect x="0" y="200" width="400" height="50" fill="#e0f2fe" stroke="#2563eb" strokeWidth="1" />
+                
+                {/* Competitor's glassmaking workshop */}
+                <rect x="350" y="100" width="40" height="40" fill="#ef4444" stroke="#b91c1c" strokeWidth="2">
+                  <title>Competitor's Glass Workshop</title>
+                </rect>
+                
+                {/* Sand supplier */}
+                <rect x="10" y="210" width="30" height="30" fill="#a3e635" stroke="#65a30d" strokeWidth="2">
+                  <title>Sand Supplier</title>
+                </rect>
+                
+                {/* Your strategic land acquisition */}
+                <rect x="150" y="50" width="100" height="150" fill="#f59e0b" stroke="#b45309" strokeWidth="2" opacity="0.7">
+                  <title>Your Strategic Land</title>
+                </rect>
+                
+                {/* Original direct route */}
+                <path d="M40,225 L350,120" stroke="#059669" strokeWidth="2" strokeDasharray="5,5" fill="none">
+                  <title>Original Direct Route</title>
+                </path>
+                
+                {/* New longer route */}
+                <path d="M40,225 L100,225 C120,225 120,50 150,50 L250,50 C280,50 280,100 350,120" 
+                      stroke="#ef4444" strokeWidth="3" fill="none">
+                  <title>New Longer Route</title>
+                </path>
+                
+                {/* Labels */}
+                <text x="370" y="95" fill="#7c2d12" fontFamily="serif" fontSize="12" textAnchor="middle">Glass</text>
+                <text x="370" y="110" fill="#7c2d12" fontFamily="serif" fontSize="12" textAnchor="middle">Workshop</text>
+                <text x="25" y="205" fill="#7c2d12" fontFamily="serif" fontSize="12" textAnchor="middle">Sand</text>
+                <text x="25" y="220" fill="#7c2d12" fontFamily="serif" fontSize="12" textAnchor="middle">Supplier</text>
+                <text x="200" y="125" fill="#7c2d12" fontFamily="serif" fontSize="14" textAnchor="middle">Your Strategic</text>
+                <text x="200" y="145" fill="#7c2d12" fontFamily="serif" fontSize="14" textAnchor="middle">Land Acquisition</text>
+                <text x="200" y="230" fill="#059669" fontFamily="serif" fontSize="12" textAnchor="middle" fontStyle="italic">Original Direct Route</text>
+                <text x="200" y="30" fill="#ef4444" fontFamily="serif" fontSize="12" textAnchor="middle">New Expensive Route</text>
+              </svg>
+              <div className="text-sm text-amber-800 italic text-center mt-2">
+                Acquiring land between a competitor's workshop and their suppliers forces them to use longer, more expensive routes
+              </div>
+            </div>
             
             <p>
               This strategy is particularly effective against businesses that require frequent deliveries of heavy or bulky raw materials, as the increased transportation costs significantly impact their profitability.
