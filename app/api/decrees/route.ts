@@ -15,8 +15,8 @@ export async function GET() {
     // Initialize Airtable
     const base = new Airtable({ apiKey: airtableApiKey }).base(airtableBaseId);
     
-    // Fetch decrees from the Decrees table
-    const records = await base('Decrees').select({
+    // Fetch decrees from the DECREES table
+    const records = await base('DECREES').select({
       // Sort by CreatedAt in descending order
       sort: [{ field: 'CreatedAt', direction: 'desc' }]
     }).all();
