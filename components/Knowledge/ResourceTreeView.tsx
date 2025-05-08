@@ -50,7 +50,9 @@ const ResourceTreeView: React.FC<ResourceTreeViewProps> = ({
       name: resource.name,
       category: resource.category,
       icon: resource.icon,
-      resource: resource
+      resource: resource,
+      x: 0,
+      y: 0
     }));
     
     // Create links between resources
@@ -98,9 +100,22 @@ const ResourceTreeView: React.FC<ResourceTreeViewProps> = ({
     // Reset zoom to center the graph
     svg.call(zoom.transform as any, d3.zoomIdentity.translate(dimensions.width / 2, dimensions.height / 2).scale(0.8));
     
-    // Create the simulation
-    const sim = d3.forceSimulation(nodes)
-      .force("link", d3.forceLink(links).id((d: any) => d.id).distance(100))
+    // Define node type for simulation
+    interface SimulationNode {
+      id: string;
+      name: string;
+      category: string;
+      icon: string;
+      resource: ResourceNode;
+      x: number;
+      y: number;
+      fx?: number | null;
+      fy?: number | null;
+    }
+
+    // Create the simulation with proper typing
+    const sim = d3.forceSimulation<SimulationNode>(nodes as SimulationNode[])
+      .force("link", d3.forceLink<SimulationNode, {source: string; target: string; type: string}>(links).id(d => d.id).distance(100))
       .force("charge", d3.forceManyBody().strength(-300))
       .force("center", d3.forceCenter(0, 0))
       .force("collide", d3.forceCollide(40));
@@ -192,19 +207,19 @@ const ResourceTreeView: React.FC<ResourceTreeViewProps> = ({
       node.attr("transform", d => `translate(${d.x},${d.y})`);
     });
     
-    // Drag functions
-    function dragstarted(event: any, d: any) {
+    // Drag functions with proper typing
+    function dragstarted(event: d3.D3DragEvent<SVGGElement, SimulationNode, SimulationNode>, d: SimulationNode) {
       if (!event.active) sim.alphaTarget(0.3).restart();
       d.fx = d.x;
       d.fy = d.y;
     }
     
-    function dragged(event: any, d: any) {
+    function dragged(event: d3.D3DragEvent<SVGGElement, SimulationNode, SimulationNode>, d: SimulationNode) {
       d.fx = event.x;
       d.fy = event.y;
     }
     
-    function dragended(event: any, d: any) {
+    function dragended(event: d3.D3DragEvent<SVGGElement, SimulationNode, SimulationNode>, d: SimulationNode) {
       if (!event.active) sim.alphaTarget(0);
       d.fx = null;
       d.fy = null;
