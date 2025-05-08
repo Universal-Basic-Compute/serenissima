@@ -466,57 +466,8 @@ export default function SimplePage() {
               </nav>
             </div>
             
-            {/* Tab content */}
-            {governanceTab === 'council' && (
-              <div className="text-center py-8 text-gray-500 italic">
-                The Council of Ten governs La Serenissima with wisdom and discretion.
-                <p className="mt-4">Council features coming soon.</p>
-              </div>
-            )}
-            
-            {governanceTab === 'laws' && (
-              <div className="text-center py-8 text-gray-500 italic">
-                The laws and decrees of Venice ensure order and prosperity.
-                <p className="mt-4">Legal system features coming soon.</p>
-              </div>
-            )}
-            
-            {governanceTab === 'loans' && (
-              <div className="space-y-8">
-                <LoanMarketplace />
-                <LoanManagementDashboard />
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-      
-      {/* Loans View */}
-      {activeView === 'loans' && (
-        <div className="absolute top-20 left-20 right-4 bottom-4 bg-black/30 rounded-lg p-4 overflow-auto">
-          <div className="bg-amber-50 border-2 border-amber-700 rounded-lg p-6 max-w-6xl mx-auto">
-            <h2 className="text-3xl font-serif text-amber-800 mb-6 text-center">
-              Loans & Banking
-            </h2>
-            
-            <div className="space-y-8">
-              <LoanMarketplace />
-              <LoanManagementDashboard />
-            </div>
-          </div>
-        </div>
-      )}
-      
-      {/* Knowledge View */}
-      {activeView === 'knowledge' && (
-        <div className="absolute top-20 left-20 right-4 bottom-4 bg-black/30 rounded-lg p-4 overflow-auto">
-          <div className="bg-amber-50 border-2 border-amber-700 rounded-lg p-6 max-w-6xl mx-auto">
-            <h2 className="text-3xl font-serif text-amber-800 mb-6 text-center">
-              Knowledge Repository
-            </h2>
-            
-            {/* Articles & Guides Section */}
-            <div className="mb-10">
+            {/* Articles & Guides Section - moved to be second */}
+            <div>
               <h3 className="text-2xl font-serif text-amber-700 mb-4 border-b border-amber-200 pb-2">
                 Articles & Guides
               </h3>
@@ -604,7 +555,56 @@ export default function SimplePage() {
               </div>
             </div>
             
-            {/* Project Resources Section */}
+            {/* Tab content */}
+            {governanceTab === 'council' && (
+              <div className="text-center py-8 text-gray-500 italic">
+                The Council of Ten governs La Serenissima with wisdom and discretion.
+                <p className="mt-4">Council features coming soon.</p>
+              </div>
+            )}
+            
+            {governanceTab === 'laws' && (
+              <div className="text-center py-8 text-gray-500 italic">
+                The laws and decrees of Venice ensure order and prosperity.
+                <p className="mt-4">Legal system features coming soon.</p>
+              </div>
+            )}
+            
+            {governanceTab === 'loans' && (
+              <div className="space-y-8">
+                <LoanMarketplace />
+                <LoanManagementDashboard />
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+      
+      {/* Loans View */}
+      {activeView === 'loans' && (
+        <div className="absolute top-20 left-20 right-4 bottom-4 bg-black/30 rounded-lg p-4 overflow-auto">
+          <div className="bg-amber-50 border-2 border-amber-700 rounded-lg p-6 max-w-6xl mx-auto">
+            <h2 className="text-3xl font-serif text-amber-800 mb-6 text-center">
+              Loans & Banking
+            </h2>
+            
+            <div className="space-y-8">
+              <LoanMarketplace />
+              <LoanManagementDashboard />
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Knowledge View */}
+      {activeView === 'knowledge' && (
+        <div className="absolute top-20 left-20 right-4 bottom-4 bg-black/30 rounded-lg p-4 overflow-auto">
+          <div className="bg-amber-50 border-2 border-amber-700 rounded-lg p-6 max-w-6xl mx-auto">
+            <h2 className="text-3xl font-serif text-amber-800 mb-6 text-center">
+              Knowledge Repository
+            </h2>
+            
+            {/* Project Resources Section - moved to be first */}
             <div>
               <h3 className="text-2xl font-serif text-amber-700 mb-4 border-b border-amber-200 pb-2">
                 Project Resources
