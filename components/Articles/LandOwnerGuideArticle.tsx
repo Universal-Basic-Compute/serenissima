@@ -206,6 +206,63 @@ const LandOwnerGuideArticle: React.FC<LandOwnerGuideArticleProps> = ({ onClose }
               <p>
                 Start with low prices to attract initial tenants, then gradually increase rates as an area becomes more developed. Implement seasonal pricing to reflect changing economic conditions, or offer introductory rates with scheduled increases to lock in tenants while ensuring growing returns.
               </p>
+              
+              <div className="my-6 flex justify-center">
+                <svg width="400" height="250" viewBox="0 0 400 250" className="border border-amber-300 rounded bg-amber-50">
+                  {/* Background */}
+                  <rect x="0" y="0" width="400" height="250" fill="#fef3c7" />
+                  
+                  {/* Timeline */}
+                  <line x1="50" y1="125" x2="350" y2="125" stroke="#7c2d12" strokeWidth="2" />
+                  
+                  {/* Timeline markers */}
+                  <line x1="50" y1="120" x2="50" y2="130" stroke="#7c2d12" strokeWidth="2" />
+                  <line x1="150" y1="120" x2="150" y2="130" stroke="#7c2d12" strokeWidth="2" />
+                  <line x1="250" y1="120" x2="250" y2="130" stroke="#7c2d12" strokeWidth="2" />
+                  <line x1="350" y1="120" x2="350" y2="130" stroke="#7c2d12" strokeWidth="2" />
+                  
+                  {/* Price curve */}
+                  <path d="M50,100 C100,110 125,90 150,80 C175,70 200,60 250,40 C300,20 325,30 350,25" 
+                        stroke="#f59e0b" strokeWidth="3" fill="none" />
+                  
+                  {/* Development curve */}
+                  <path d="M50,200 C75,190 100,170 150,150 C200,130 225,120 250,110 C300,100 325,95 350,90" 
+                        stroke="#059669" strokeWidth="3" fill="none" />
+                  
+                  {/* Labels */}
+                  <text x="50" y="140" fill="#7c2d12" fontFamily="serif" fontSize="12" textAnchor="middle">Initial</text>
+                  <text x="50" y="155" fill="#7c2d12" fontFamily="serif" fontSize="12" textAnchor="middle">Development</text>
+                  
+                  <text x="150" y="140" fill="#7c2d12" fontFamily="serif" fontSize="12" textAnchor="middle">Growing</text>
+                  <text x="150" y="155" fill="#7c2d12" fontFamily="serif" fontSize="12" textAnchor="middle">Popularity</text>
+                  
+                  <text x="250" y="140" fill="#7c2d12" fontFamily="serif" fontSize="12" textAnchor="middle">Established</text>
+                  <text x="250" y="155" fill="#7c2d12" fontFamily="serif" fontSize="12" textAnchor="middle">District</text>
+                  
+                  <text x="350" y="140" fill="#7c2d12" fontFamily="serif" fontSize="12" textAnchor="middle">Premium</text>
+                  <text x="350" y="155" fill="#7c2d12" fontFamily="serif" fontSize="12" textAnchor="middle">Location</text>
+                  
+                  {/* Curve labels */}
+                  <text x="370" y="25" fill="#f59e0b" fontFamily="serif" fontSize="14" fontWeight="bold">Rent Price</text>
+                  <text x="370" y="90" fill="#059669" fontFamily="serif" fontSize="14" fontWeight="bold">Development</text>
+                  
+                  {/* Price points */}
+                  <circle cx="50" cy="100" r="5" fill="#f59e0b" stroke="#b45309" strokeWidth="1" />
+                  <text x="40" y="100" fill="#b45309" fontFamily="serif" fontSize="12" textAnchor="end">100₫</text>
+                  
+                  <circle cx="150" cy="80" r="5" fill="#f59e0b" stroke="#b45309" strokeWidth="1" />
+                  <text x="140" y="80" fill="#b45309" fontFamily="serif" fontSize="12" textAnchor="end">200₫</text>
+                  
+                  <circle cx="250" cy="40" r="5" fill="#f59e0b" stroke="#b45309" strokeWidth="1" />
+                  <text x="240" y="40" fill="#b45309" fontFamily="serif" fontSize="12" textAnchor="end">350₫</text>
+                  
+                  <circle cx="350" cy="25" r="5" fill="#f59e0b" stroke="#b45309" strokeWidth="1" />
+                  <text x="340" y="25" fill="#b45309" fontFamily="serif" fontSize="12" textAnchor="end">400₫</text>
+                </svg>
+                <div className="text-sm text-amber-800 italic text-center mt-2">
+                  Temporal pricing strategies adjust rent over time as an area develops and becomes more valuable
+                </div>
+              </div>
             </div>
             
             <div className="mb-3">
@@ -220,6 +277,65 @@ const LandOwnerGuideArticle: React.FC<LandOwnerGuideArticleProps> = ({ onClose }
               <p>
                 Use low prices in strategic areas to gain control of entire districts, then gradually increase prices once your monopoly is established. Create "loss leader" properties that drive traffic to your higher-priced properties, and develop transportation choke points with differential pricing on either side.
               </p>
+              
+              <div className="my-6 flex justify-center">
+                <svg width="400" height="250" viewBox="0 0 400 250" className="border border-amber-300 rounded bg-amber-50">
+                  {/* Background */}
+                  <rect x="0" y="0" width="400" height="250" fill="#fef3c7" />
+                  
+                  {/* Water */}
+                  <rect x="175" y="0" width="50" height="250" fill="#e0f2fe" stroke="#2563eb" strokeWidth="1" />
+                  
+                  {/* Grid of properties */}
+                  {/* Left side - your monopoly */}
+                  <rect x="25" y="25" width="50" height="50" fill="#f59e0b" stroke="#b45309" strokeWidth="1" opacity="0.8" />
+                  <rect x="75" y="25" width="50" height="50" fill="#f59e0b" stroke="#b45309" strokeWidth="1" opacity="0.8" />
+                  <rect x="125" y="25" width="50" height="50" fill="#f59e0b" stroke="#b45309" strokeWidth="1" opacity="0.8" />
+                  
+                  <rect x="25" y="75" width="50" height="50" fill="#f59e0b" stroke="#b45309" strokeWidth="1" opacity="0.8" />
+                  <rect x="75" y="75" width="50" height="50" fill="#f59e0b" stroke="#b45309" strokeWidth="1" opacity="0.9" />
+                  <rect x="125" y="75" width="50" height="50" fill="#f59e0b" stroke="#b45309" strokeWidth="1" opacity="0.8" />
+                  
+                  <rect x="25" y="125" width="50" height="50" fill="#f59e0b" stroke="#b45309" strokeWidth="1" opacity="0.8" />
+                  <rect x="75" y="125" width="50" height="50" fill="#f59e0b" stroke="#b45309" strokeWidth="1" opacity="0.8" />
+                  <rect x="125" y="125" width="50" height="50" fill="#f59e0b" stroke="#b45309" strokeWidth="1" opacity="0.8" />
+                  
+                  <rect x="25" y="175" width="50" height="50" fill="#f59e0b" stroke="#b45309" strokeWidth="1" opacity="0.8" />
+                  <rect x="75" y="175" width="50" height="50" fill="#f59e0b" stroke="#b45309" strokeWidth="1" opacity="0.8" />
+                  <rect x="125" y="175" width="50" height="50" fill="#f59e0b" stroke="#b45309" strokeWidth="1" opacity="0.8" />
+                  
+                  {/* Right side - mixed ownership */}
+                  <rect x="225" y="25" width="50" height="50" fill="#f59e0b" stroke="#b45309" strokeWidth="1" opacity="0.8" />
+                  <rect x="275" y="25" width="50" height="50" fill="#ef4444" stroke="#b91c1c" strokeWidth="1" opacity="0.7" />
+                  <rect x="325" y="25" width="50" height="50" fill="#a3e635" stroke="#65a30d" strokeWidth="1" opacity="0.7" />
+                  
+                  <rect x="225" y="75" width="50" height="50" fill="#ef4444" stroke="#b91c1c" strokeWidth="1" opacity="0.7" />
+                  <rect x="275" y="75" width="50" height="50" fill="#a3e635" stroke="#65a30d" strokeWidth="1" opacity="0.7" />
+                  <rect x="325" y="75" width="50" height="50" fill="#f59e0b" stroke="#b45309" strokeWidth="1" opacity="0.8" />
+                  
+                  <rect x="225" y="125" width="50" height="50" fill="#a3e635" stroke="#65a30d" strokeWidth="1" opacity="0.7" />
+                  <rect x="275" y="125" width="50" height="50" fill="#f59e0b" stroke="#b45309" strokeWidth="1" opacity="0.8" />
+                  <rect x="325" y="125" width="50" height="50" fill="#ef4444" stroke="#b91c1c" strokeWidth="1" opacity="0.7" />
+                  
+                  <rect x="225" y="175" width="50" height="50" fill="#ef4444" stroke="#b91c1c" strokeWidth="1" opacity="0.7" />
+                  <rect x="275" y="175" width="50" height="50" fill="#ef4444" stroke="#b91c1c" strokeWidth="1" opacity="0.7" />
+                  <rect x="325" y="175" width="50" height="50" fill="#a3e635" stroke="#65a30d" strokeWidth="1" opacity="0.7" />
+                  
+                  {/* Price indicators */}
+                  <text x="100" y="100" fill="#7c2d12" fontFamily="serif" fontSize="16" fontWeight="bold">500₫</text>
+                  <text x="275" y="100" fill="#7c2d12" fontFamily="serif" fontSize="16" fontWeight="bold">300₫</text>
+                  
+                  {/* Labels */}
+                  <text x="100" y="15" fill="#7c2d12" fontFamily="serif" fontSize="14" textAnchor="middle">Your District Monopoly</text>
+                  <text x="275" y="15" fill="#7c2d12" fontFamily="serif" fontSize="14" textAnchor="middle">Mixed Ownership District</text>
+                  
+                  <text x="100" y="240" fill="#f59e0b" fontFamily="serif" fontSize="12" textAnchor="middle">Premium Pricing Power</text>
+                  <text x="275" y="240" fill="#7c2d12" fontFamily="serif" fontSize="12" textAnchor="middle">Competitive Pricing</text>
+                </svg>
+                <div className="text-sm text-amber-800 italic text-center mt-2">
+                  Controlling an entire district allows you to set premium prices without competition
+                </div>
+              </div>
             </div>
           </div>
           
@@ -441,6 +557,78 @@ const LandOwnerGuideArticle: React.FC<LandOwnerGuideArticleProps> = ({ onClose }
               Create mutually beneficial arrangements to counter common rivals. If another merchant family is being blockaded by a competitor, offer them access through your lands in exchange for favorable trade terms or support in the Council.
             </p>
             
+            <div className="my-6 flex justify-center">
+              <svg width="400" height="250" viewBox="0 0 400 250" className="border border-amber-300 rounded bg-amber-50">
+                {/* Background */}
+                <rect x="0" y="0" width="400" height="250" fill="#fef3c7" />
+                
+                {/* Water */}
+                <rect x="150" y="100" width="100" height="50" fill="#e0f2fe" stroke="#2563eb" strokeWidth="1" />
+                
+                {/* Your properties */}
+                <rect x="50" y="50" width="100" height="70" fill="#f59e0b" stroke="#b45309" strokeWidth="2" opacity="0.8">
+                  <title>Your Property</title>
+                </rect>
+                
+                <rect x="50" y="150" width="100" height="70" fill="#f59e0b" stroke="#b45309" strokeWidth="2" opacity="0.8">
+                  <title>Your Property</title>
+                </rect>
+                
+                {/* Ally properties */}
+                <rect x="250" y="50" width="100" height="70" fill="#059669" stroke="#047857" strokeWidth="2" opacity="0.8">
+                  <title>Ally Property</title>
+                </rect>
+                
+                <rect x="250" y="150" width="100" height="70" fill="#059669" stroke="#047857" strokeWidth="2" opacity="0.8">
+                  <title>Ally Property</title>
+                </rect>
+                
+                {/* Bridges/connections */}
+                <rect x="150" y="85" width="100" height="15" fill="#d97706" stroke="#92400e" strokeWidth="1">
+                  <title>Bridge/Connection</title>
+                </rect>
+                
+                <rect x="150" y="175" width="100" height="15" fill="#d97706" stroke="#92400e" strokeWidth="1">
+                  <title>Bridge/Connection</title>
+                </rect>
+                
+                {/* Competitor blockade */}
+                <rect x="150" y="0" width="100" height="50" fill="#ef4444" stroke="#b91c1c" strokeWidth="2" opacity="0.7">
+                  <title>Competitor Blockade</title>
+                </rect>
+                
+                <rect x="150" y="200" width="100" height="50" fill="#ef4444" stroke="#b91c1c" strokeWidth="2" opacity="0.7">
+                  <title>Competitor Blockade</title>
+                </rect>
+                
+                {/* Flow arrows */}
+                <path d="M100,85 L150,85" stroke="#7c2d12" strokeWidth="1" markerEnd="url(#arrowhead)" />
+                <path d="M250,85 L200,85" stroke="#7c2d12" strokeWidth="1" markerEnd="url(#arrowhead)" />
+                <path d="M100,175 L150,175" stroke="#7c2d12" strokeWidth="1" markerEnd="url(#arrowhead)" />
+                <path d="M250,175 L200,175" stroke="#7c2d12" strokeWidth="1" markerEnd="url(#arrowhead)" />
+                
+                {/* Labels */}
+                <text x="100" y="40" fill="#7c2d12" fontFamily="serif" fontSize="14" textAnchor="middle">Your Property</text>
+                <text x="300" y="40" fill="#7c2d12" fontFamily="serif" fontSize="14" textAnchor="middle">Ally Property</text>
+                <text x="200" y="25" fill="#7c2d12" fontFamily="serif" fontSize="14" textAnchor="middle">Competitor Blockade</text>
+                <text x="200" y="225" fill="#7c2d12" fontFamily="serif" fontSize="14" textAnchor="middle">Competitor Blockade</text>
+                <text x="200" y="125" fill="#2563eb" fontFamily="serif" fontSize="14" textAnchor="middle">Canal</text>
+                <text x="200" y="75" fill="#7c2d12" fontFamily="serif" fontSize="12" textAnchor="middle">Shared Access</text>
+                <text x="200" y="165" fill="#7c2d12" fontFamily="serif" fontSize="12" textAnchor="middle">Shared Access</text>
+                
+                {/* Arrow definition */}
+                <defs>
+                  <marker id="arrowhead" markerWidth="10" markerHeight="7" 
+                          refX="9" refY="3.5" orient="auto">
+                    <polygon points="0 0, 10 3.5, 0 7" fill="#7c2d12" />
+                  </marker>
+                </defs>
+              </svg>
+              <div className="text-sm text-amber-800 italic text-center mt-2">
+                Strategic alliances allow you to bypass competitor blockades through shared access
+              </div>
+            </div>
+            
             <p>
               These alliances can shift as circumstances change—the family you help today may become a rival tomorrow, but the political capital you gain will remain valuable.
             </p>
@@ -452,6 +640,69 @@ const LandOwnerGuideArticle: React.FC<LandOwnerGuideArticleProps> = ({ onClose }
             <p className="mb-3">
               Propose and fund infrastructure projects that disproportionately benefit your properties while appearing to serve the public good. A bridge that connects your commercial district to a major market creates value for you while earning political goodwill.
             </p>
+            
+            <div className="my-6 flex justify-center">
+              <svg width="400" height="250" viewBox="0 0 400 250" className="border border-amber-300 rounded bg-amber-50">
+                {/* Background */}
+                <rect x="0" y="0" width="400" height="250" fill="#fef3c7" />
+                
+                {/* Water */}
+                <rect x="175" y="0" width="50" height="250" fill="#e0f2fe" stroke="#2563eb" strokeWidth="1" />
+                
+                {/* Your properties */}
+                <rect x="50" y="50" width="125" height="70" fill="#f59e0b" stroke="#b45309" strokeWidth="2" opacity="0.8">
+                  <title>Your Commercial District</title>
+                </rect>
+                
+                {/* Market */}
+                <rect x="225" y="150" width="125" height="70" fill="#a3e635" stroke="#65a30d" strokeWidth="2" opacity="0.8">
+                  <title>Major Market</title>
+                </rect>
+                
+                {/* Bridge - your infrastructure project */}
+                <rect x="150" y="120" width="100" height="20" rx="5" fill="#d97706" stroke="#92400e" strokeWidth="2">
+                  <title>Your Bridge Project</title>
+                </rect>
+                
+                {/* Competitor properties */}
+                <rect x="225" y="50" width="125" height="70" fill="#ef4444" stroke="#b91c1c" strokeWidth="2" opacity="0.7">
+                  <title>Competitor District</title>
+                </rect>
+                
+                {/* People/traffic */}
+                <circle cx="100" y="85" r="5" fill="#7c2d12" />
+                <circle cx="120" y="85" r="5" fill="#7c2d12" />
+                <circle cx="140" y="85" r="5" fill="#7c2d12" />
+                
+                <circle cx="260" y="185" r="5" fill="#7c2d12" />
+                <circle cx="280" y="185" r="5" fill="#7c2d12" />
+                <circle cx="300" y="185" r="5" fill="#7c2d12" />
+                
+                {/* Traffic flow */}
+                <path d="M100,85 Q150,130 200,130 Q250,130 300,185" stroke="#7c2d12" strokeWidth="2" strokeDasharray="5,3" fill="none" />
+                
+                {/* Alternative route (longer) */}
+                <path d="M100,85 Q125,20 200,20 Q275,20 300,185" stroke="#ef4444" strokeWidth="1" strokeDasharray="3,3" fill="none" />
+                
+                {/* Labels */}
+                <text x="112" y="40" fill="#7c2d12" fontFamily="serif" fontSize="14" textAnchor="middle">Your Commercial</text>
+                <text x="112" y="55" fill="#7c2d12" fontFamily="serif" fontSize="14" textAnchor="middle">District</text>
+                
+                <text x="287" y="140" fill="#7c2d12" fontFamily="serif" fontSize="14" textAnchor="middle">Major Market</text>
+                
+                <text x="287" y="40" fill="#7c2d12" fontFamily="serif" fontSize="14" textAnchor="middle">Competitor</text>
+                <text x="287" y="55" fill="#7c2d12" fontFamily="serif" fontSize="14" textAnchor="middle">District</text>
+                
+                <text x="200" y="115" fill="#7c2d12" fontFamily="serif" fontSize="14" textAnchor="middle">Your Bridge Project</text>
+                
+                <text x="200" y="200" fill="#7c2d12" fontFamily="serif" fontSize="12" textAnchor="middle" fontStyle="italic">Direct Route via Your Bridge</text>
+                
+                <text x="200" y="30" fill="#ef4444" fontFamily="serif" fontSize="12" textAnchor="middle" fontStyle="italic">Longer Alternative Route</text>
+              </svg>
+              <div className="text-sm text-amber-800 italic text-center mt-2">
+                Strategic infrastructure projects like bridges can connect your properties to valuable markets while appearing to serve the public good
+              </div>
+            </div>
             
             <p>
               Conversely, oppose infrastructure that would benefit rivals by suggesting alternative projects that better "serve the Republic." The appearance of civic-mindedness can mask strategic economic maneuvering.
