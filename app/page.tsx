@@ -95,6 +95,7 @@ export default function SimplePage() {
   const [showTechTree, setShowTechTree] = useState<boolean>(false);
   const [showPresentation, setShowPresentation] = useState<boolean>(false);
   const [showResourceTree, setShowResourceTree] = useState<boolean>(false);
+  const [selectedArticle, setSelectedArticle] = useState<string | null>(null);
   const [userProfile, setUserProfile] = useState<{
     username: string;
     firstName: string;
