@@ -16,38 +16,39 @@ La Serenissima operates as a closed economic system where value circulates betwe
                                   │       LAND        │
                                   │                   │
                                   └─────────┬─────────┘
-                                            │ leases
+                                            │ leased to
                                             ▼
 ┌───────────────────┐           ┌───────────────────┐           ┌───────────────────┐
 │                   │           │                   │           │                   │
-│  Players &        │◄─pay rent─┤     BUILDINGS     │─houses───►│    BUSINESSES     │
+│  Players &        │◄─supplies─┤     BUILDINGS     │─rented to─►│    BUSINESSES     │
 │  AI Citizens      │           │                   │           │                   │
 │                   │           └─────────┬─────────┘           └─────────┬─────────┘
-└─────────┬─────────┘                     │                               │
+└─────────┬─────────┘                     ▲                               │
           │                               │                               │
-          │                               │                               │ transform
+          │                               │ pay rent                      │ transform
           │                               │                               ▼
-          │                     ┌─────────┴───────────┐         ┌───────────────────┐
-          │                     │                     │         │                   │
-          └────────provision────┤      RESOURCES      │◄────────┤   Raw Materials   │
-                                │                     │         │                   │
-                                └─────────┬───────────┘         └───────────────────┘
-                                          │
-                                          │ generates
-                                          ▼
+          │ pay taxes                     │                     ┌───────────────────┐
+          │                               │                     │                   │
+          ▼                               │                     │     RESOURCES     │
+┌───────────────────┐                     │                     │                   │
+│                   │                     │                     └─────────┬─────────┘
+│     REPUBLIC      │                     │                               │
+│                   │                     │                               │
+└───────────────────┘                     │                               │
+          ▲                               │                               │
+          │                               │                               │
+          │                     ┌─────────┴───────────┐                   │
+          │                     │                     │                   │
+          └─────pay taxes───────┤   LAND OWNERS      │◄──pay land lease──┘
+                                │                     │
+                                └───────────┬─────────┘
+                                            │
+                                            │ reinvest
+                                            ▼
                               ┌───────────────────────┐
                               │                       │
-                              │  Taxes, Fees, Rents   │
-                              │  & Value Extraction   │
-                              │                       │
-                              └───────────┬───────────┘
-                                          │
-                                          │ flows to
-                                          ▼
-                              ┌───────────────────────┐
-                              │                       │
-                              │  Reinvestment &       │
                               │  Wealth Accumulation  │
+                              │  & New Development    │
                               │                       │
                               └───────────────────────┘
 ```
@@ -55,18 +56,29 @@ La Serenissima operates as a closed economic system where value circulates betwe
 ### Closed Economy Principles
 
 1. **Economic Flow Cycle**: The economic loop follows a specific pattern:
-   - LAND is leased for the construction of BUILDINGS
-   - BUILDINGS house BUSINESSES and provide living space
+   - LAND is leased to building owners for construction
+   - BUILDINGS are rented to businesses and residents
    - BUSINESSES transform raw materials into valuable RESOURCES
    - RESOURCES provision both Players and AI Citizens
-   - Players & Citizens pay rent, completing the cycle back to LAND
+   - Money flows in the opposite direction:
+     - Business owners pay rent to building owners
+     - Building owners pay land leases to landowners
+     - All parties pay taxes to the Republic
 
 2. **Value Capture Mechanisms**:
-   - Landowners capture value through rent and leases
-   - Building owners profit from businesses and residents
-   - Business owners create value by transforming resources
+   - Landowners capture value through land leases from building owners
+   - Building owners profit from the difference between rents collected and leases paid
+   - Business owners create value by transforming resources and selling goods/services
    - Resource producers extract value from raw materials
    - Citizens and players consume resources and provide labor
+   
+3. **Dynamic Lease System**:
+   - Land leases are periodically renegotiated based on:
+     - Changes in land value due to surrounding development
+     - Infrastructure improvements
+     - Market conditions
+     - Effects of government decrees
+   - This creates strategic decisions around building placement and investment
 
 3. **Zero-Sum Competition**: The total amount of $COMPUTE in the system remains relatively constant. Economic success comes from capturing a larger share of the existing value pool rather than generating new value from nothing.
 

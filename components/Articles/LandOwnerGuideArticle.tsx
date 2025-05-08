@@ -399,6 +399,17 @@ const LandOwnerGuideArticle: React.FC<LandOwnerGuideArticleProps> = ({ onClose }
                 Tie lease prices to business performance with percentage-based components. Offer lower base rates with profit-sharing arrangements to align your interests with your tenants. This creates incentives for tenants to maximize their own profits, which in turn increases your income.
               </p>
             </div>
+              
+            <div className="mb-3">
+              <h5 className="font-bold text-amber-900">Lease Renegotiation Strategy</h5>
+              <p>
+                Land leases are periodically renegotiated based on changing economic conditions. Prepare for these negotiations by:
+                <br />• Documenting improvements you've made that increase land value
+                <br />• Researching comparable lease rates in the area
+                <br />• Building relationships with landowners to secure favorable terms
+                <br />• Maintaining multiple properties to increase your negotiating leverage
+              </p>
+            </div>
             
             <div>
               <h5 className="font-bold text-amber-900">Geographic Monopoly Building</h5>

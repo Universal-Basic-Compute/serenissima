@@ -104,6 +104,14 @@ const BuildingOwnersGuideArticle: React.FC<BuildingOwnersGuideArticleProps> = ({
               <li>Generate ongoing income through rents and fees</li>
               <li>Serve as physical manifestations of wealth and status</li>
             </ul>
+            <p className="mt-3 text-amber-800">
+              As a building owner, you occupy the crucial middle position in Venice's economic hierarchy:
+            </p>
+            <ul className="list-disc pl-5 space-y-1">
+              <li><span className="font-medium">You pay land leases</span> to landowners for the right to build on their parcels</li>
+              <li><span className="font-medium">You collect rent</span> from businesses and residents who occupy your buildings</li>
+              <li><span className="font-medium">Your profit</span> is the difference between the rents you collect and the leases you pay</li>
+            </ul>
             <p className="mt-3 italic">
               "The wise merchant builds not just for profit, but for posterity." — Venetian proverb
             </p>

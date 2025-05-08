@@ -123,7 +123,10 @@ const EconomicSystemArticle: React.FC<EconomicSystemArticleProps> = ({ onClose }
           <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
             <h4 className="text-xl font-serif text-amber-800 mb-2">Value Creation Chain</h4>
             <p>
-              Value flows through a continuous cycle: Land hosts Buildings, which accommodate Businesses, which produce Resources, which supply Citizens and Players, who fund Land acquisition and development—completing the economic loop.
+              Value flows through a continuous cycle: Land is leased to Building owners, who rent space to Businesses, which produce Resources, which supply Citizens and Players. Money flows in the opposite direction: Business owners pay rent to Building owners, who pay land leases to Land owners, and all pay taxes to the Republic—completing the economic loop.
+            </p>
+            <p className="mt-2">
+              This hierarchical relationship creates a dynamic property market where lease terms are periodically renegotiated based on changing economic conditions, infrastructure improvements, and market demand.
             </p>
           </div>
           
