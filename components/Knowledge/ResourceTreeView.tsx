@@ -18,6 +18,18 @@ const ResourceTreeView: React.FC<ResourceTreeViewProps> = ({
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
   const [simulation, setSimulation] = useState<d3.Simulation<any, any> | null>(null);
   
+  // Helper function to throttle frequent events
+  const throttle = (func: Function, limit: number) => {
+    let inThrottle: boolean;
+    return function(this: any, ...args: any[]) {
+      if (!inThrottle) {
+        func.apply(this, args);
+        inThrottle = true;
+        setTimeout(() => inThrottle = false, limit);
+      }
+    };
+  };
+  
   // Update dimensions when container size changes
   useEffect(() => {
     if (!containerRef.current) return;
@@ -110,6 +122,39 @@ const ResourceTreeView: React.FC<ResourceTreeViewProps> = ({
     // Reset zoom to center the graph
     svg.call(zoom.transform as any, d3.zoomIdentity.translate(dimensions.width / 2, dimensions.height / 2).scale(0.8));
     
+    // Add a reset zoom button
+    svg.append("rect")
+      .attr("x", 10)
+      .attr("y", 10)
+      .attr("width", 30)
+      .attr("height", 30)
+      .attr("rx", 5)
+      .attr("fill", "rgba(139, 69, 19, 0.5)")
+      .attr("cursor", "pointer")
+      .on("click", () => {
+        svg.transition()
+          .duration(750)
+          .call(zoom.transform as any, d3.zoomIdentity.translate(dimensions.width / 2, dimensions.height / 2).scale(0.8));
+      });
+
+    svg.append("text")
+      .attr("x", 25)
+      .attr("y", 25)
+      .attr("text-anchor", "middle")
+      .attr("dominant-baseline", "central")
+      .attr("fill", "white")
+      .attr("font-size", "16px")
+      .attr("pointer-events", "none")
+      .text("⟲");
+    
+    // Add loading indicator
+    const loadingIndicator = svg.append("text")
+      .attr("x", 0)
+      .attr("y", 0)
+      .attr("text-anchor", "middle")
+      .attr("fill", "#FFF")
+      .text("Organizing resources...");
+    
     // Define node type for simulation
     interface SimulationNode {
       id: string;
@@ -123,7 +168,7 @@ const ResourceTreeView: React.FC<ResourceTreeViewProps> = ({
       fy?: number | null;
     }
 
-    // Create the simulation with proper typing
+    // Create the simulation with proper typing and add category-based forces
     const sim = d3.forceSimulation<SimulationNode>(nodes as SimulationNode[])
       .force("link", d3.forceLink<SimulationNode, {source: string; target: string; type: string}>(links)
         .id(d => d.id)
@@ -138,7 +183,21 @@ const ResourceTreeView: React.FC<ResourceTreeViewProps> = ({
         }))
       .force("charge", d3.forceManyBody().strength(-300))
       .force("center", d3.forceCenter(0, 0))
-      .force("collide", d3.forceCollide(40));
+      .force("collide", d3.forceCollide(40))
+      // Add category-based forces to organize resources horizontally
+      .force("category", d3.forceX<SimulationNode>().strength(0.1).x(d => {
+        // Raw materials go to the left
+        if (d.category === 'raw_materials') return -dimensions.width / 3;
+        // Processed materials in the middle
+        else if (d.category === 'processed_materials') return 0;
+        // Finished goods go to the right
+        else if (d.category === 'finished_goods' || d.category === 'luxury_goods') return dimensions.width / 3;
+        // Default position
+        return 0;
+      }));
+    
+    // Make the simulation stabilize faster
+    sim.alphaDecay(0.02); // Default is 0.0228, higher value = faster cooling
     
     // Create links
     const link = g.append("g")
@@ -197,11 +256,11 @@ const ResourceTreeView: React.FC<ResourceTreeViewProps> = ({
     // Add resource icons
     node.append("image")
       .attr("xlink:href", d => d.icon)
-      .attr("x", -16)
-      .attr("y", -16)
-      .attr("width", 32)
-      .attr("height", 32)
-      .attr("clip-path", "circle(16px at 0 0)")
+      .attr("x", -20)
+      .attr("y", -20)
+      .attr("width", 40)
+      .attr("height", 40)
+      .attr("clip-path", "circle(20px at 0 0)")
       .on("error", function() {
         d3.select(this).attr("xlink:href", "/assets/resources/icons/default.png");
       });
@@ -216,15 +275,33 @@ const ResourceTreeView: React.FC<ResourceTreeViewProps> = ({
       .attr("font-size", "10px")
       .text(d => d.name);
     
-    // Update positions on simulation tick
+    // Update positions on simulation tick with performance optimizations
+    let tickCount = 0;
+    const maxTicks = 300; // Limit the number of simulation ticks
+    
     sim.on("tick", () => {
-      link
-        .attr("x1", d => (d.source as any).x)
-        .attr("y1", d => (d.source as any).y)
-        .attr("x2", d => (d.target as any).x)
-        .attr("y2", d => (d.target as any).y);
+      tickCount++;
       
-      node.attr("transform", d => `translate(${d.x},${d.y})`);
+      // Stop the simulation after maxTicks
+      if (tickCount > maxTicks && sim.alpha() < 0.01) {
+        sim.stop();
+      }
+      
+      // Only update the DOM every 2 ticks to reduce rendering load
+      if (tickCount % 2 === 0) {
+        link
+          .attr("x1", d => (d.source as any).x)
+          .attr("y1", d => (d.source as any).y)
+          .attr("x2", d => (d.target as any).x)
+          .attr("y2", d => (d.target as any).y);
+        
+        node.attr("transform", d => `translate(${d.x},${d.y})`);
+      }
+    });
+    
+    // Remove the loading indicator when the simulation stops
+    sim.on("end", () => {
+      loadingIndicator.remove();
     });
     
     // Drag functions with proper typing
@@ -235,8 +312,11 @@ const ResourceTreeView: React.FC<ResourceTreeViewProps> = ({
     }
     
     function dragged(event: d3.D3DragEvent<SVGGElement, SimulationNode, SimulationNode>, d: SimulationNode) {
-      d.fx = event.x;
-      d.fy = event.y;
+      // Throttled position update
+      throttle(() => {
+        d.fx = event.x;
+        d.fy = event.y;
+      }, 16)(); // 16ms = ~60fps
     }
     
     function dragended(event: d3.D3DragEvent<SVGGElement, SimulationNode, SimulationNode>, d: SimulationNode) {
