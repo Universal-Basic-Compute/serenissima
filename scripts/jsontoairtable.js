@@ -130,17 +130,22 @@ async function processJsonFile(filePath) {
 function mapFields(item, collectionName) {
   const mappings = FIELD_MAPPINGS[collectionName] || {};
   
-  // If no mappings, return the original item
-  if (Object.keys(mappings).length === 0) {
-    return item;
+  // Create a copy of the item to avoid modifying the original
+  const mappedItem = { ...item };
+  
+  // Special handling for date fields with "None" value
+  if (collectionName === 'DECREES' && mappedItem.ExpiresAt === 'None') {
+    // Set to null which Airtable accepts for empty date fields
+    mappedItem.ExpiresAt = null;
   }
   
-  // Apply mappings
-  const mappedItem = { ...item };
-  for (const [jsonField, airtableField] of Object.entries(mappings)) {
-    if (item[jsonField] !== undefined) {
-      mappedItem[airtableField] = item[jsonField];
-      delete mappedItem[jsonField];
+  // If there are field mappings, apply them
+  if (Object.keys(mappings).length > 0) {
+    for (const [jsonField, airtableField] of Object.entries(mappings)) {
+      if (item[jsonField] !== undefined) {
+        mappedItem[airtableField] = item[jsonField];
+        delete mappedItem[jsonField];
+      }
     }
   }
   
