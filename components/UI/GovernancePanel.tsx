@@ -108,7 +108,7 @@ const mockDecrees: Decree[] = [
 ];
 
 const GovernancePanel: React.FC<GovernancePanelProps> = ({ onClose }) => {
-  const [governanceTab, setGovernanceTab] = useState<'council' | 'laws'>('council');
+  const [governanceTab, setGovernanceTab] = useState<'council' | 'laws'>('laws');
   const [decrees, setDecrees] = useState<Decree[]>(mockDecrees);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -157,16 +157,6 @@ const GovernancePanel: React.FC<GovernancePanelProps> = ({ onClose }) => {
           <nav className="-mb-px flex space-x-8">
             <button
               className={`pb-4 px-1 border-b-2 font-medium text-sm ${
-                governanceTab === 'council' 
-                  ? 'border-amber-600 text-amber-800' 
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-              onClick={() => setGovernanceTab('council')}
-            >
-              Council of Ten
-            </button>
-            <button
-              className={`pb-4 px-1 border-b-2 font-medium text-sm ${
                 governanceTab === 'laws' 
                   ? 'border-amber-600 text-amber-800' 
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -174,6 +164,16 @@ const GovernancePanel: React.FC<GovernancePanelProps> = ({ onClose }) => {
               onClick={() => setGovernanceTab('laws')}
             >
               Laws & Decrees
+            </button>
+            <button
+              className={`pb-4 px-1 border-b-2 font-medium text-sm ${
+                governanceTab === 'council' 
+                  ? 'border-amber-600 text-amber-800' 
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+              onClick={() => setGovernanceTab('council')}
+            >
+              Council of Ten
             </button>
           </nav>
         </div>
