@@ -159,12 +159,6 @@ const LoanMarketplace: React.FC = () => {
   
   // These are now defined above the useEffect that references them
   
-  const getInterestRateColor = (rate: number) => {
-    if (rate < 5) return 'text-green-500';
-    if (rate < 10) return 'text-yellow-500';
-    return 'text-red-500';
-  };
-  
   return (
     <ErrorBoundary fallback={<div className="p-4 text-red-600">Error loading loan marketplace</div>}>
       <div className="bg-amber-50 border-2 border-amber-700 rounded-lg p-6 max-w-4xl mx-auto">
@@ -244,105 +238,103 @@ const LoanMarketplace: React.FC = () => {
                 No loans available at this time. Check back later or visit the Doge's Palace to inquire about special financing options.
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="min-w-full bg-white border border-amber-200 shadow-md rounded-lg overflow-hidden">
-                  <thead className="bg-amber-100">
-                    <tr>
-                      <th 
-                        className="px-6 py-3 text-left text-xs font-medium text-amber-800 uppercase tracking-wider cursor-pointer"
-                        onClick={() => handleSort('name')}
-                      >
-                        Loan Name
-                        {sortField === 'name' && (
-                          <span className="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {sortedLoans.map((loan) => (
+                  <div 
+                    key={loan.id} 
+                    className="bg-white rounded-lg border border-amber-200 shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
+                  >
+                    {/* Loan header with type indicator */}
+                    <div className="bg-gradient-to-r from-amber-100 to-amber-200 px-4 py-3 border-b border-amber-200">
+                      <div className="flex justify-between items-center">
+                        <h3 className="font-serif text-lg font-medium text-amber-800">{loan.name}</h3>
+                        {loan.lender === 'Treasury' ? (
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
+                            Treasury
+                          </span>
+                        ) : loan.lender === 'ConsiglioDeiDieci' ? (
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 border border-purple-200">
+                            Council of Ten
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 border border-amber-200">
+                            Private
+                          </span>
                         )}
-                      </th>
-                      <th 
-                        className="px-6 py-3 text-left text-xs font-medium text-amber-800 uppercase tracking-wider cursor-pointer"
-                        onClick={() => handleSort('lender')}
-                      >
-                        Lender
-                        {sortField === 'lender' && (
-                          <span className="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>
-                        )}
-                      </th>
-                      <th 
-                        className="px-6 py-3 text-left text-xs font-medium text-amber-800 uppercase tracking-wider cursor-pointer"
-                        onClick={() => handleSort('principalAmount')}
-                      >
-                        Amount
-                        {sortField === 'principalAmount' && (
-                          <span className="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>
-                        )}
-                      </th>
-                      <th 
-                        className="px-6 py-3 text-left text-xs font-medium text-amber-800 uppercase tracking-wider cursor-pointer"
-                        onClick={() => handleSort('interestRate')}
-                      >
-                        Interest Rate
-                        {sortField === 'interestRate' && (
-                          <span className="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>
-                        )}
-                      </th>
-                      <th 
-                        className="px-6 py-3 text-left text-xs font-medium text-amber-800 uppercase tracking-wider cursor-pointer"
-                        onClick={() => handleSort('termDays')}
-                      >
-                        Term
-                        {sortField === 'termDays' && (
-                          <span className="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>
-                        )}
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-amber-800 uppercase tracking-wider">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-amber-200">
-                    {sortedLoans.map((loan) => (
-                      <tr key={loan.id} className="hover:bg-amber-50">
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                          {loan.name}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {loan.lender === 'Treasury' ? (
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                              Treasury of Venice
-                            </span>
-                          ) : loan.lender === 'ConsiglioDeiDieci' ? (
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                              Council of Ten
-                            </span>
-                          ) : (
-                            loan.lender
-                          )}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {loan.principalAmount.toLocaleString()} ⚜️ Ducats
-                        </td>
-                        <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${getInterestRateColor(loan.interestRate)}`}>
+                      </div>
+                    </div>
+                    
+                    {/* Loan details */}
+                    <div className="p-4">
+                      <div className="mb-4">
+                        <div className="text-sm text-gray-500 mb-1">Offered by</div>
+                        <div className="font-medium text-gray-700">
+                          {loan.lender === 'Treasury' ? 'Treasury of Venice' : 
+                           loan.lender === 'ConsiglioDeiDieci' ? 'Council of Ten' : 
+                           loan.lender}
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                          <div className="text-sm text-gray-500 mb-1">Amount</div>
+                          <div className="font-medium text-gray-900">{loan.principalAmount.toLocaleString()} ⚜️</div>
+                        </div>
+                        <div>
+                          <div className="text-sm text-gray-500 mb-1">Term</div>
+                          <div className="font-medium text-gray-900">{loan.termDays} days</div>
+                        </div>
+                      </div>
+                      
+                      <div className="mb-4">
+                        <div className="text-sm text-gray-500 mb-1">Interest Rate</div>
+                        <div className={`text-lg font-bold ${
+                          loan.interestRate < 5 ? 'text-green-600' : 
+                          loan.interestRate < 10 ? 'text-amber-600' : 
+                          'text-red-600'
+                        }`}>
                           {loan.interestRate}%
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {loan.termDays} days
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                          <button
-                            onClick={() => {
-                              // Open loan application modal
-                              window.dispatchEvent(new CustomEvent('showLoanApplicationModal', {
-                                detail: { loan }
-                              }));
+                        </div>
+                      </div>
+                      
+                      {/* Loan details visualization */}
+                      <div className="bg-amber-50 p-3 rounded-lg border border-amber-100 mb-4">
+                        <div className="flex justify-between items-center text-xs text-amber-800 mb-2">
+                          <span>Principal</span>
+                          <span>Interest</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2.5 mb-1">
+                          <div 
+                            className="bg-amber-600 h-2.5 rounded-full" 
+                            style={{ 
+                              width: `${100 - (loan.interestRate * loan.termDays / 365)}%` 
                             }}
-                            className="text-amber-600 hover:text-amber-900"
-                          >
-                            Apply
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                          ></div>
+                        </div>
+                        <div className="flex justify-between items-center text-xs text-gray-500">
+                          <span>{Math.round(100 - (loan.interestRate * loan.termDays / 365))}%</span>
+                          <span>{Math.round(loan.interestRate * loan.termDays / 365)}%</span>
+                        </div>
+                      </div>
+                      
+                      {/* Apply button */}
+                      <button
+                        onClick={() => {
+                          // Open loan application modal
+                          window.dispatchEvent(new CustomEvent('showLoanApplicationModal', {
+                            detail: { loan }
+                          }));
+                        }}
+                        className="w-full px-4 py-2 bg-amber-600 text-white rounded-md hover:bg-amber-700 transition-colors flex items-center justify-center"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clipRule="evenodd" />
+                        </svg>
+                        Apply for Loan
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </>
