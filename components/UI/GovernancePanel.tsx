@@ -20,6 +20,7 @@ interface Decree {
   FlavorText?: string;
   HistoricalInspiration?: string;
   Notes?: string;
+  Rationale?: string; // New field for decree rationale
 }
 
 const mockDecrees: Decree[] = [
@@ -37,7 +38,8 @@ const mockDecrees: Decree[] = [
     ExpiresAt: "1526-04-01",
     FlavorText: "Let no inferior silk tarnish the reputation of Venetian craftsmanship.",
     HistoricalInspiration: "Based on the 1441 regulations of the Venetian Silk Guild.",
-    Notes: "Particularly affects trade with Ottoman territories."
+    Notes: "Particularly affects trade with Ottoman territories.",
+    Rationale: "This decree protects Venice's reputation for quality silk products, prevents fraud, and ensures fair competition among merchants. By maintaining high standards, we preserve our competitive advantage in luxury textile markets across Europe and the Mediterranean."
   },
   {
     DecreeId: "D-1525-002",
@@ -51,7 +53,8 @@ const mockDecrees: Decree[] = [
     CreatedAt: "1525-05-10",
     FlavorText: "The lifeblood of our city must flow unimpeded.",
     HistoricalInspiration: "Inspired by the historical Magistrato alle Acque (Water Magistracy) of Venice.",
-    Notes: "Awaiting final approval from the Senate."
+    Notes: "Awaiting final approval from the Senate.",
+    Rationale: "Minor canals are increasingly silting up, impeding transportation and commerce in outer districts. This dedicated fund ensures regular maintenance without burdening the general treasury. The modest surcharge distributes costs fairly among those who benefit most from our waterways, while preventing the long-term economic damage of neglected infrastructure."
   },
   {
     DecreeId: "D-1524-015",
@@ -66,7 +69,8 @@ const mockDecrees: Decree[] = [
     EnactedAt: "1525-01-05",
     FlavorText: "Vigilance is the price of our city's health.",
     HistoricalInspiration: "Based on Venice's pioneering quarantine system established in 1423.",
-    Notes: "Seasonal provisions apply from May through September."
+    Notes: "Seasonal provisions apply from May through September.",
+    Rationale: "Recent outbreaks in Constantinople and Alexandria have demonstrated that summer heat accelerates disease spread. Our physicians advise that the standard 14-day quarantine is insufficient during warmer months. While this measure may slightly delay trade, the catastrophic economic and human cost of an epidemic in Venice far outweighs these temporary inconveniences."
   },
   {
     DecreeId: "D-1524-012",
@@ -81,7 +85,8 @@ const mockDecrees: Decree[] = [
     EnactedAt: "1524-10-01",
     FlavorText: "Let those who enjoy luxury contribute to the strength of the Republic.",
     HistoricalInspiration: "Reflects Venice's historical practice of taxing luxury imports while protecting domestic industries.",
-    Notes: "Revenue earmarked for naval defense."
+    Notes: "Revenue earmarked for naval defense.",
+    Rationale: "This targeted tariff increase serves multiple purposes: it raises needed revenue for our naval defenses, encourages domestic production of finished luxury goods, and taxes consumption that is primarily non-essential. By exempting raw materials, we protect our artisans and manufacturers from increased costs, maintaining Venice's competitive advantage in high-value finished goods."
   },
   {
     DecreeId: "D-1524-008",
@@ -97,7 +102,8 @@ const mockDecrees: Decree[] = [
     ExpiresAt: "None",
     FlavorText: "Even in celebration, order must prevail.",
     HistoricalInspiration: "Based on historical Venetian laws regulating mask-wearing to prevent anonymous crimes.",
-    Notes: "Permanent decree with seasonal enforcement."
+    Notes: "Permanent decree with seasonal enforcement.",
+    Rationale: "While Carnival traditions are essential to Venetian culture, the anonymity of masks has increasingly led to criminal activity and moral transgressions. This decree balances our cherished traditions with necessary public order by clearly defining when and where masks are permitted. The new penalties target only those who abuse this privilege, while preserving the festive spirit that attracts visitors and commerce to our city."
   }
 ];
 
@@ -226,6 +232,19 @@ const GovernancePanel: React.FC<GovernancePanelProps> = ({ onClose }) => {
                           <div className="mt-1 text-amber-700">{decree.Description}</div>
                           {decree.FlavorText && (
                             <div className="mt-2 text-xs italic text-amber-600">"{decree.FlavorText}"</div>
+                          )}
+                          {/* Add the Rationale spoiler */}
+                          {decree.Rationale && (
+                            <div className="mt-3">
+                              <details className="bg-amber-50 rounded border border-amber-200 overflow-hidden">
+                                <summary className="px-3 py-2 cursor-pointer text-xs font-medium text-amber-800 hover:bg-amber-100 transition-colors">
+                                  View Rationale for this Decree
+                                </summary>
+                                <div className="px-3 py-2 text-xs text-amber-700 border-t border-amber-200 bg-amber-50/50">
+                                  {decree.Rationale}
+                                </div>
+                              </details>
+                            </div>
                           )}
                         </td>
                         <td className="px-4 py-4 whitespace-nowrap text-sm border-r border-amber-100">
