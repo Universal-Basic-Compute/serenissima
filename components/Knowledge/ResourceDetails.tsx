@@ -40,7 +40,7 @@ const ResourceDetails: React.FC<ResourceDetailsProps> = ({
             alt={resource.name}
             className="w-20 h-20 object-contain"
             onError={(e) => {
-              (e.target as HTMLImageElement).src = `https://via.placeholder.com/96?text=${resource.name.charAt(0)}`;
+              (e.target as HTMLImageElement).src = "/assets/resources/icons/default.png";
             }}
           />
         </div>
@@ -142,7 +142,7 @@ const ResourceDetails: React.FC<ResourceDetailsProps> = ({
                       alt={input.name}
                       className="w-6 h-6 object-contain"
                       onError={(e) => {
-                        (e.target as HTMLImageElement).src = `https://via.placeholder.com/32?text=${input.name.charAt(0)}`;
+                        (e.target as HTMLImageElement).src = "/assets/resources/icons/default.png";
                       }}
                     />
                   </div>
@@ -172,7 +172,7 @@ const ResourceDetails: React.FC<ResourceDetailsProps> = ({
                       alt={output.name}
                       className="w-6 h-6 object-contain"
                       onError={(e) => {
-                        (e.target as HTMLImageElement).src = `https://via.placeholder.com/32?text=${output.name.charAt(0)}`;
+                        (e.target as HTMLImageElement).src = "/assets/resources/icons/default.png";
                       }}
                     />
                   </div>
