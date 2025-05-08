@@ -114,7 +114,7 @@ export class LoanService {
     principalAmount: number;
     loanPurpose: LoanPurpose;
     applicationText: string;
-  }): Promise<LoanData> {
+  }): Promise<LoanData & { autoApproved?: boolean }> {
     try {
       const response = await fetch(`${getApiBaseUrl()}/api/loans/apply`, {
         method: 'POST',

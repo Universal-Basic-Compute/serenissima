@@ -81,12 +81,24 @@ export const useLoanStore = create<LoanState & LoanActions>((set, get) => ({
       const loanService = LoanService.getInstance();
       const loan = await loanService.applyForLoan(application);
       
+      // Check if the loan was auto-approved
+      const isAutoApproved = loan.autoApproved === true;
+      
+      // If auto-approved, update available loans list by removing this loan
+      if (isAutoApproved) {
+        const availableLoans = get().availableLoans.filter(l => l.id !== loan.id);
+        set({ availableLoans });
+      }
+      
       // Update user loans
       const userLoans = [...get().userLoans, loan];
       set({ userLoans, loading: false });
       
       // Emit event for loan application
-      eventBus.emit(ExtendedEventTypes.LOAN_APPLIED, { loan });
+      eventBus.emit(ExtendedEventTypes.LOAN_APPLIED, { 
+        loan,
+        autoApproved: isAutoApproved
+      });
       
       return loan;
     } catch (error) {

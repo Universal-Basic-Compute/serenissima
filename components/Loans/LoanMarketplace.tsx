@@ -123,10 +123,18 @@ const LoanMarketplace: React.FC = () => {
   // Show notification when events occur
   useEffect(() => {
     const handleLoanApplied = (data: LoanEventData) => {
-      setNotification({
-        message: `Loan application submitted successfully!`,
-        type: 'success'
-      });
+      // Check if the loan was auto-approved
+      if (data.autoApproved) {
+        setNotification({
+          message: `Your loan has been automatically approved and ${data.loan?.principalAmount.toLocaleString()} Ducats have been transferred to your account!`,
+          type: 'success'
+        });
+      } else {
+        setNotification({
+          message: `Loan application submitted successfully!`,
+          type: 'success'
+        });
+      }
       
       // Clear notification after 5 seconds
       setTimeout(() => {

@@ -2101,8 +2101,113 @@ async def apply_for_loan(loan_application: dict):
             if not loan_record:
                 raise HTTPException(status_code=404, detail="Loan not found")
             
+            # Check if this is a template loan and if the borrower is eligible for immediate approval
+            is_template_loan = loan_record["fields"].get("Status") == "template"
+            borrower = loan_application.get("borrower")
+            
+            # Check if borrower has any existing loans
+            borrower_has_loans = False
+            if borrower:
+                existing_loans_formula = f"{{Borrower}}='{borrower}'"
+                existing_loans = loans_table.all(formula=existing_loans_formula)
+                borrower_has_loans = len(existing_loans) > 0
+            
+            # Special case: If this is a template loan and borrower has no other loans,
+            # immediately approve and transfer funds
+            if is_template_loan and not borrower_has_loans:
+                now = datetime.datetime.now().isoformat()
+                
+                # Calculate payment details
+                principal = loan_application.get("principalAmount")
+                interest_rate = loan_record["fields"].get("InterestRate", 0)
+                term_days = loan_record["fields"].get("TermDays", 0)
+                
+                # Simple interest calculation
+                interest_decimal = interest_rate / 100
+                total_interest = principal * interest_decimal * (term_days / 365)
+                total_payment = principal + total_interest
+                
+                # Get the lender (usually Treasury for template loans)
+                lender = loan_record["fields"].get("Lender", "Treasury")
+                
+                # Update the loan record - set to active instead of pending
+                updated_record = loans_table.update(loan_id, {
+                    "Borrower": borrower,
+                    "Status": "active",  # Set to active immediately
+                    "PrincipalAmount": principal,
+                    "RemainingBalance": principal,
+                    "PaymentAmount": total_payment / term_days,  # Daily payment
+                    "ApplicationText": loan_application.get("applicationText", ""),
+                    "LoanPurpose": loan_application.get("loanPurpose", ""),
+                    "UpdatedAt": now,
+                    "ApprovedAt": now  # Add approval timestamp
+                })
+                
+                # Transfer funds from lender to borrower
+                try:
+                    # Find borrower record
+                    borrower_records = users_table.all(formula=f"{{Wallet}}='{borrower}'")
+                    if not borrower_records:
+                        borrower_records = users_table.all(formula=f"{{Username}}='{borrower}'")
+                    
+                    if borrower_records:
+                        borrower_record = borrower_records[0]
+                        current_compute = borrower_record["fields"].get("ComputeAmount", 0)
+                        
+                        # Update borrower's compute balance
+                        users_table.update(borrower_record["id"], {
+                            "ComputeAmount": current_compute + principal
+                        })
+                        
+                        print(f"Transferred {principal} compute to borrower {borrower}")
+                        
+                        # Create transaction record
+                        transactions_table.create({
+                            "Type": "loan",
+                            "AssetId": "compute_token",
+                            "Seller": lender,
+                            "Buyer": borrower,
+                            "Price": principal,
+                            "CreatedAt": now,
+                            "UpdatedAt": now,
+                            "ExecutedAt": now,
+                            "Notes": json.dumps({
+                                "operation": "loan_disbursement",
+                                "loan_id": loan_id,
+                                "interest_rate": interest_rate,
+                                "term_days": term_days
+                            })
+                        })
+                    else:
+                        print(f"Warning: Borrower {borrower} not found, but loan approved anyway")
+                except Exception as transfer_error:
+                    print(f"Warning: Error transferring funds, but loan approved: {str(transfer_error)}")
+                    # Continue execution even if transfer fails
+                
+                return {
+                    "id": updated_record["id"],
+                    "name": updated_record["fields"].get("Name", ""),
+                    "borrower": updated_record["fields"].get("Borrower", ""),
+                    "lender": updated_record["fields"].get("Lender", ""),
+                    "status": updated_record["fields"].get("Status", ""),
+                    "principalAmount": updated_record["fields"].get("PrincipalAmount", 0),
+                    "interestRate": updated_record["fields"].get("InterestRate", 0),
+                    "termDays": updated_record["fields"].get("TermDays", 0),
+                    "paymentAmount": updated_record["fields"].get("PaymentAmount", 0),
+                    "remainingBalance": updated_record["fields"].get("RemainingBalance", 0),
+                    "createdAt": updated_record["fields"].get("CreatedAt", ""),
+                    "updatedAt": updated_record["fields"].get("UpdatedAt", ""),
+                    "finalPaymentDate": updated_record["fields"].get("FinalPaymentDate", ""),
+                    "requirementsText": updated_record["fields"].get("RequirementsText", ""),
+                    "applicationText": updated_record["fields"].get("ApplicationText", ""),
+                    "loanPurpose": updated_record["fields"].get("LoanPurpose", ""),
+                    "notes": updated_record["fields"].get("Notes", ""),
+                    "autoApproved": True  # Flag to indicate this was auto-approved
+                }
+            
+            # Regular flow for non-template loans or borrowers with existing loans
             # Check if loan is available
-            if loan_record["fields"].get("Status") != "available":
+            if loan_record["fields"].get("Status") != "available" and loan_record["fields"].get("Status") != "template":
                 raise HTTPException(status_code=400, detail="Loan is not available")
             
             # Update the loan with borrower information

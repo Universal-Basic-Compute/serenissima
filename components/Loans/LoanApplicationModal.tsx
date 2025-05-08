@@ -62,14 +62,29 @@ const LoanApplicationModal: React.FC<LoanApplicationModalProps> = ({ loan, onClo
         applicationText
       });
       
+      // Check if the loan was auto-approved (for first-time borrowers with template loans)
+      const isAutoApproved = result.autoApproved === true;
+      
       // The event is already emitted in the store, but we can add more specific data here
       eventBus.emit('LOAN_APPLIED', { 
         loan: result,
         borrower: walletAddress,
         loanAmount,
         loanPurpose,
-        lender: loan.lender
+        lender: loan.lender,
+        autoApproved: isAutoApproved
       });
+      
+      // If auto-approved, also emit a loan approval event
+      if (isAutoApproved) {
+        eventBus.emit(EventTypes.LOAN_APPROVED, {
+          loan: result,
+          borrower: walletAddress,
+          lender: loan.lender,
+          amount: loanAmount,
+          autoApproved: true
+        });
+      }
       
       // Close modal - no need for alert as we'll show a notification via the event system
       onClose();
