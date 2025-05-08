@@ -68,7 +68,12 @@ const ResourceGrid: React.FC<ResourceGridProps> = ({
                 alt={resource.name}
                 className="w-12 h-12 object-contain"
                 onError={(e) => {
-                  (e.target as HTMLImageElement).src = "/assets/resources/icons/default.png";
+                  // Prevent infinite loops by checking if we've already tried the fallback
+                  const target = e.target as HTMLImageElement;
+                  if (!target.dataset.usedFallback) {
+                    target.dataset.usedFallback = 'true';
+                    target.src = "/assets/resources/icons/default.png";
+                  }
                 }}
               />
             </div>

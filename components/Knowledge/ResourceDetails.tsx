@@ -40,7 +40,11 @@ const ResourceDetails: React.FC<ResourceDetailsProps> = ({
             alt={resource.name}
             className="w-20 h-20 object-contain"
             onError={(e) => {
-              (e.target as HTMLImageElement).src = "/assets/resources/icons/default.png";
+              const target = e.target as HTMLImageElement;
+              if (!target.dataset.usedFallback) {
+                target.dataset.usedFallback = 'true';
+                target.src = "/assets/resources/icons/default.png";
+              }
             }}
           />
         </div>
@@ -142,7 +146,11 @@ const ResourceDetails: React.FC<ResourceDetailsProps> = ({
                       alt={input.name}
                       className="w-6 h-6 object-contain"
                       onError={(e) => {
-                        (e.target as HTMLImageElement).src = "/assets/resources/icons/default.png";
+                        const target = e.target as HTMLImageElement;
+                        if (!target.dataset.usedFallback) {
+                          target.dataset.usedFallback = 'true';
+                          target.src = "/assets/resources/icons/default.png";
+                        }
                       }}
                     />
                   </div>
@@ -172,7 +180,11 @@ const ResourceDetails: React.FC<ResourceDetailsProps> = ({
                       alt={output.name}
                       className="w-6 h-6 object-contain"
                       onError={(e) => {
-                        (e.target as HTMLImageElement).src = "/assets/resources/icons/default.png";
+                        const target = e.target as HTMLImageElement;
+                        if (!target.dataset.usedFallback) {
+                          target.dataset.usedFallback = 'true';
+                          target.src = "/assets/resources/icons/default.png";
+                        }
                       }}
                     />
                   </div>
