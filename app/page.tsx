@@ -1,7 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import GovernancePanel from '../components/UI/GovernancePanel';
 import TechTree from '../components/Knowledge/TechTree';
 import ProjectPresentation from '../components/Knowledge/ProjectPresentation';
@@ -9,6 +9,7 @@ import ResourceTree from '../components/Knowledge/ResourceTree';
 import KnowledgeRepository from '../components/Knowledge/KnowledgeRepository';
 import { StrategiesArticle, BeginnersGuideArticle, EconomicSystemArticle, LandOwnerGuideArticle, DecreesGovernanceArticle, BuildingOwnersGuideArticle } from '../components/Articles';
 import Link from 'next/link';
+import { useRouter, usePathname } from 'next/navigation';
 import { clearLandOwnershipCaches } from '@/lib/cacheUtils';
 import { eventBus, EventTypes } from '@/lib/eventBus';
 import PlayerProfile from '../components/UI/PlayerProfile';
@@ -56,11 +57,25 @@ const SimpleViewer = dynamic(() => import('../components/PolygonViewer/SimpleVie
 });
 
 export default function SimplePage() {
+  const router = useRouter();
+  const pathname = usePathname();
+  
   // UI state
   const [showInfo, setShowInfo] = useState(false);
   // Define the view type to ensure consistency
   type ViewType = 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance' | 'loans' | 'knowledge';
   const [activeView, setActiveView] = useState<ViewType>('land');
+  
+  // Update activeView based on current pathname
+  useEffect(() => {
+    if (pathname === '/governance') {
+      setActiveView('governance');
+    } else if (pathname === '/loans') {
+      setActiveView('loans');
+    } else if (pathname === '/knowledge') {
+      setActiveView('knowledge');
+    }
+  }, [pathname]);
   const [qualityMode, setQualityMode] = useState<'high' | 'performance'>('high');
   const [marketPanelVisible, setMarketPanelVisible] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -426,37 +441,7 @@ export default function SimplePage() {
         />
       )}
       
-      {/* Governance View */}
-      {activeView === 'governance' && (
-        <GovernancePanel onClose={() => setActiveView('land')} />
-      )}
-      
-      {/* Loans View */}
-      {activeView === 'loans' && (
-        <div className="absolute top-20 left-20 right-4 bottom-4 bg-black/30 rounded-lg p-4 overflow-auto">
-          <div className="bg-amber-50 border-2 border-amber-700 rounded-lg p-6 max-w-6xl mx-auto">
-            <h2 className="text-3xl font-serif text-amber-800 mb-6 text-center">
-              Loans & Banking
-            </h2>
-            
-            <div className="space-y-8">
-              <LoanMarketplace />
-              <LoanManagementDashboard />
-            </div>
-          </div>
-        </div>
-      )}
-      
-      {/* Knowledge View */}
-      {activeView === 'knowledge' && (
-        <KnowledgeRepository
-          onShowTechTree={() => setShowTechTree(true)}
-          onShowPresentation={() => setShowPresentation(true)}
-          onShowResourceTree={() => setShowResourceTree(true)}
-          onSelectArticle={setSelectedArticle}
-          onClose={() => setActiveView('land')} // Add this to close the knowledge view
-        />
-      )}
+      {/* Main views are now handled by the router */}
       
       {/* Left Side Menu */}
       <div className="absolute left-0 top-0 bottom-0 bg-black/70 text-white z-20 flex flex-col w-16">
@@ -469,33 +454,30 @@ export default function SimplePage() {
         <div className="flex-1 overflow-y-auto py-4">
           <ul className="space-y-2 px-2">
             <li>
-              <button
-                onClick={() => setActiveView('governance')}
+              <Link
+                href="/governance"
                 className={`w-full flex items-center p-2 rounded-lg transition-colors ${
                   activeView === 'governance' ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700'
                 }`}
                 title="Governance"
               >
                 <FaLandmark className="mx-auto h-5 w-5" />
-              </button>
+              </Link>
             </li>
             <li>
-              <button
-                onClick={() => setActiveView('knowledge')}
+              <Link
+                href="/knowledge"
                 className={`w-full flex items-center p-2 rounded-lg transition-colors ${
                   activeView === 'knowledge' ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700'
                 }`}
                 title="Knowledge"
               >
                 <FaBook className="mx-auto h-5 w-5" />
-              </button>
+              </Link>
             </li>
             <li>
-              <button
-                onClick={() => {
-                  setActiveView('loans');
-                  setGovernanceTab('loans');
-                }}
+              <Link
+                href="/loans"
                 className={`w-full flex items-center p-2 rounded-lg transition-colors ${
                   activeView === 'loans' ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700'
                 }`}
@@ -504,7 +486,7 @@ export default function SimplePage() {
                 <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12a8 8 0 01-8 8m0 0a8 8 0 01-8-8m8 8a8 8 0 018-8m-8 0a8 8 0 00-8 8m8-8v14m0-14v14" />
                 </svg>
-              </button>
+              </Link>
             </li>
             <li>
               <button

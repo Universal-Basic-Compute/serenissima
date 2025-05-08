@@ -3,6 +3,7 @@ import { getApiBaseUrl } from '@/lib/apiUtils';
 
 interface GovernancePanelProps {
   onClose: () => void;
+  standalone?: boolean;
 }
 
 interface Decree {
@@ -107,7 +108,7 @@ const mockDecrees: Decree[] = [
   }
 ];
 
-const GovernancePanel: React.FC<GovernancePanelProps> = ({ onClose }) => {
+const GovernancePanel: React.FC<GovernancePanelProps> = ({ onClose, standalone = false }) => {
   const [governanceTab, setGovernanceTab] = useState<'council' | 'laws'>('laws');
   const [decrees, setDecrees] = useState<Decree[]>(mockDecrees);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -146,11 +147,22 @@ const GovernancePanel: React.FC<GovernancePanelProps> = ({ onClose }) => {
   }, [governanceTab]);
 
   return (
-    <div className="absolute top-20 left-20 right-4 bottom-4 bg-black/30 rounded-lg p-4 overflow-auto">
+    <div className={`${standalone ? 'fixed inset-0 bg-black/80 z-50' : 'absolute top-20 left-20 right-4 bottom-4 bg-black/30'} rounded-lg p-4 overflow-auto`}>
       <div className="bg-amber-50 border-2 border-amber-700 rounded-lg p-6 max-w-6xl mx-auto">
-        <h2 className="text-3xl font-serif text-amber-800 mb-6 text-center">
-          Governance of La Serenissima
-        </h2>
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-3xl font-serif text-amber-800">
+            Governance of La Serenissima
+          </h2>
+          <button 
+            onClick={onClose}
+            className="text-amber-600 hover:text-amber-800 p-2"
+            aria-label="Close governance panel"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
         
         {/* Governance tabs */}
         <div className="border-b border-amber-200 mb-6">
