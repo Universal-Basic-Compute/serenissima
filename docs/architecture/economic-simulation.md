@@ -13,26 +13,27 @@ La Serenissima operates as a closed economic system where value circulates betwe
 ```ascii
                                   ┌───────────────────┐
                                   │                   │
-                                  │  Resource Inputs  │
+                                  │       LAND        │
                                   │                   │
                                   └─────────┬─────────┘
-                                            │
+                                            │ leases
                                             ▼
 ┌───────────────────┐           ┌───────────────────┐           ┌───────────────────┐
 │                   │           │                   │           │                   │
-│  Player Actions   │◄────────►│   Production &    │◄────────►│   AI Citizens     │
-│  & Investments    │           │   Manufacturing   │           │   & Merchants     │
-│                   │           │                   │           │                   │
-└─────────┬─────────┘           └─────────┬─────────┘           └─────────┬─────────┘
+│  Players &        │◄─pay rent─┤     BUILDINGS     │─houses───►│    BUSINESSES     │
+│  AI Citizens      │           │                   │           │                   │
+│                   │           └─────────┬─────────┘           └─────────┬─────────┘
+└─────────┬─────────┘                     │                               │
           │                               │                               │
-          │                               ▼                               │
-          │                     ┌───────────────────┐                     │
-          │                     │                   │                     │
-          └────────────────────►│   Marketplace    │◄────────────────────┘
-                                │   & Trading      │
-                                │                   │
-                                └─────────┬─────────┘
+          │                               │                               │ transform
+          │                               │                               ▼
+          │                     ┌─────────┴───────────┐         ┌───────────────────┐
+          │                     │                     │         │                   │
+          └────────provision────┤      RESOURCES      │◄────────┤   Raw Materials   │
+                                │                     │         │                   │
+                                └─────────┬───────────┘         └───────────────────┘
                                           │
+                                          │ generates
                                           ▼
                               ┌───────────────────────┐
                               │                       │
@@ -41,7 +42,7 @@ La Serenissima operates as a closed economic system where value circulates betwe
                               │                       │
                               └───────────┬───────────┘
                                           │
-                                          │
+                                          │ flows to
                                           ▼
                               ┌───────────────────────┐
                               │                       │
@@ -53,29 +54,28 @@ La Serenissima operates as a closed economic system where value circulates betwe
 
 ### Closed Economy Principles
 
-1. **Zero-Sum Value Capture**: The total amount of $COMPUTE in the system remains relatively constant. Economic success comes from capturing a larger share of the existing value pool rather than generating new value from nothing.
+1. **Economic Flow Cycle**: The economic loop follows a specific pattern:
+   - LAND is leased for the construction of BUILDINGS
+   - BUILDINGS house BUSINESSES and provide living space
+   - BUSINESSES transform raw materials into valuable RESOURCES
+   - RESOURCES provision both Players and AI Citizens
+   - Players & Citizens pay rent, completing the cycle back to LAND
 
-2. **Value Flow Cycles**: $COMPUTE tokens flow through the system in predictable cycles:
-   - Players invest in land, buildings, and production
-   - These investments generate goods and services
-   - AI citizens and other players purchase these goods and services
-   - Revenue is collected as profit, rent, or fees
-   - Profits are reinvested to expand economic activity
+2. **Value Capture Mechanisms**:
+   - Landowners capture value through rent and leases
+   - Building owners profit from businesses and residents
+   - Business owners create value by transforming resources
+   - Resource producers extract value from raw materials
+   - Citizens and players consume resources and provide labor
 
-3. **Competitive Advantage**: Players succeed by:
-   - Securing strategic locations with higher foot traffic
-   - Creating efficient production chains
-   - Developing specialized businesses that fill market gaps
-   - Building complementary businesses that create synergies
-   - Timing investments to match market conditions
+3. **Zero-Sum Competition**: The total amount of $COMPUTE in the system remains relatively constant. Economic success comes from capturing a larger share of the existing value pool rather than generating new value from nothing.
 
 4. **Economic Interdependence**: No player can succeed entirely alone:
-   - Raw materials must be sourced from specific locations
-   - Manufacturing requires specialized buildings and skills
-   - Distribution depends on transportation networks
-   - Consumption requires a population of AI citizens and other players
-
-This closed economic system creates meaningful economic gameplay where strategic decisions have lasting consequences and where cooperation can be as valuable as competition.
+   - Land requires buildings to generate income
+   - Buildings need businesses to attract customers
+   - Businesses depend on resources to operate
+   - Resources require consumers to have value
+   - The entire cycle depends on the circulation of $COMPUTE
 
 
 ## Land Value and Rent System
