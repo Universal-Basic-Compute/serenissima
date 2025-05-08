@@ -1182,6 +1182,10 @@ export default function SimplePage() {
         <BuildingOwnersGuideArticle onClose={() => setSelectedArticle(null)} />
       )}
       
+      {selectedArticle === "business-owners-guide" && (
+        <BusinessOwnersGuideArticle onClose={() => setSelectedArticle(null)} />
+      )}
+      
       {/* Land Purchase Confirmation Modal */}
       {showLandPurchaseModal && landPurchaseData && (
         <LandPurchaseConfirmation
