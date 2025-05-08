@@ -94,9 +94,9 @@ const ResourceSearchBar: React.FC<ResourceSearchBarProps> = ({
             <button
               className={`px-3 py-2 flex items-center ${viewMode === 'tree' ? 'bg-amber-700 text-white' : 'bg-amber-950/50 text-amber-300 hover:bg-amber-800/50'}`}
               onClick={() => setViewMode('tree')}
-              title="Tree View"
+              title="List View"
             >
-              <FaProjectDiagram className="mr-1" /> Tree
+              <FaProjectDiagram className="mr-1" /> List
             </button>
           </div>
         </div>
