@@ -146,38 +146,38 @@ const ResourceDetails: React.FC<ResourceDetailsProps> = ({
       )}
       
       {/* Source Properties */}
-      {resource.sourceProperties && (
+      {resource.storageProperties && (
         <div className="mb-6">
           <h4 className="text-lg font-serif text-amber-300 mb-2 border-b border-amber-700/50 pb-1">Source</h4>
           <div className="bg-amber-900/20 rounded p-3 border border-amber-700/30">
             <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm text-amber-100">
-              {resource.sourceProperties.source && (
+              {resource.storageProperties.source && (
                 <div className="col-span-2 mb-1">
-                  <span className="font-medium">Source:</span> {getCategoryDisplayName(resource.sourceProperties.source)}
+                  <span className="font-medium">Source:</span> {getCategoryDisplayName(resource.storageProperties.source)}
                 </div>
               )}
-              {resource.sourceProperties.harvestMethod && (
+              {resource.storageProperties.harvestMethod && (
                 <div className="col-span-2 mb-1">
-                  <span className="font-medium">Harvest Method:</span> {getCategoryDisplayName(resource.sourceProperties.harvestMethod)}
+                  <span className="font-medium">Harvest Method:</span> {getCategoryDisplayName(resource.storageProperties.harvestMethod)}
                 </div>
               )}
-              {resource.sourceProperties.availability && (
+              {resource.storageProperties.availability && (
                 <div>
-                  <span className="font-medium">Availability:</span> {getCategoryDisplayName(resource.sourceProperties.availability)}
+                  <span className="font-medium">Availability:</span> {getCategoryDisplayName(resource.storageProperties.availability)}
                 </div>
               )}
-              {resource.sourceProperties.seasonality && (
+              {resource.storageProperties.seasonality && (
                 <div>
-                  <span className="font-medium">Seasonality:</span> {getCategoryDisplayName(resource.sourceProperties.seasonality)}
+                  <span className="font-medium">Seasonality:</span> {getCategoryDisplayName(resource.storageProperties.seasonality)}
                 </div>
               )}
             </div>
             
-            {resource.sourceProperties.locations && resource.sourceProperties.locations.length > 0 && (
+            {resource.storageProperties.locations && resource.storageProperties.locations.length > 0 && (
               <div className="mt-2">
                 <span className="font-medium text-sm text-amber-100">Locations:</span>
                 <div className="flex flex-wrap gap-1 mt-1">
-                  {resource.sourceProperties.locations.map((location: string) => (
+                  {resource.storageProperties.locations.map((location: string) => (
                     <span key={location} className="text-xs bg-amber-800/50 text-amber-200 px-2 py-0.5 rounded">
                       {getCategoryDisplayName(location)}
                     </span>
