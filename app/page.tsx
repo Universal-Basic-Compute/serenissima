@@ -731,7 +731,7 @@ export default function SimplePage() {
               <h3 className="text-2xl font-serif text-amber-700 mb-4 border-b border-amber-200 pb-2">
                 Articles & Guides
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {/* 20 Strategies Article Card */}
                 <div className="bg-white rounded-lg overflow-hidden shadow-md border border-amber-200">
                   <div className="h-48 overflow-hidden">
