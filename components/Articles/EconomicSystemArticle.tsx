@@ -134,9 +134,392 @@ const EconomicSystemArticle: React.FC<EconomicSystemArticleProps> = ({ onClose }
             </p>
           </div>
           
-          <p className="italic text-center text-amber-700 my-8">
-            More detailed economic guides coming soon...
-          </p>
+          <h3 className="text-2xl font-serif text-amber-700 mb-4">Economic Roles in Venice</h3>
+
+          <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
+            <h4 className="text-xl font-serif text-amber-800 mb-2">Merchant Specializations</h4>
+            <p className="mb-4">
+              In La Serenissima, prosperity comes from finding your economic niche. Different specializations offer unique advantages and challenges:
+            </p>
+            
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="bg-amber-50 p-3 rounded border border-amber-200">
+                <h5 className="font-bold text-amber-900">Property Magnate</h5>
+                <p>
+                  Focus on acquiring prime real estate and developing it for maximum rental income. Success depends on location selection, building quality, and tenant management. Property values appreciate over time, creating a stable foundation for wealth.
+                </p>
+              </div>
+              
+              <div className="bg-amber-50 p-3 rounded border border-amber-200">
+                <h5 className="font-bold text-amber-900">Master Craftsman</h5>
+                <p>
+                  Specialize in production of high-value goods like Venetian glass, textiles, or shipbuilding. Requires securing reliable supply chains and skilled labor, but offers high profit margins on luxury exports.
+                </p>
+              </div>
+              
+              <div className="bg-amber-50 p-3 rounded border border-amber-200">
+                <h5 className="font-bold text-amber-900">Trade Merchant</h5>
+                <p>
+                  Buy low and sell high by moving goods between markets. Success depends on understanding price differentials, transportation efficiency, and market timing. Requires less capital than other specializations but demands constant attention.
+                </p>
+              </div>
+              
+              <div className="bg-amber-50 p-3 rounded border border-amber-200">
+                <h5 className="font-bold text-amber-900">Financier</h5>
+                <p>
+                  Provide capital to other merchants through loans and investments. Profit from interest and partial ownership in successful ventures. Requires deep understanding of risk assessment and diversification strategies.
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          <h3 className="text-2xl font-serif text-amber-700 mb-4">Market Mechanics</h3>
+
+          <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
+            <h4 className="text-xl font-serif text-amber-800 mb-2">Price Formation</h4>
+            <p className="mb-4">
+              Unlike games with fixed prices, La Serenissima features dynamic pricing based on multiple factors:
+            </p>
+            
+            <div className="flex flex-col md:flex-row gap-6 mb-4">
+              <div className="md:w-1/2">
+                <h5 className="font-bold text-amber-900 mb-2">Supply and Demand</h5>
+                <p>
+                  Prices respond to the balance of goods available versus consumer needs. When many merchants produce the same good, prices fall. When demand exceeds supply, prices rise accordingly.
+                </p>
+                <p className="mt-2">
+                  This creates natural market cycles as merchants respond to price signals, often leading to periodic oversupply and shortages as the market seeks equilibrium.
+                </p>
+              </div>
+              
+              <div className="md:w-1/2">
+                <h5 className="font-bold text-amber-900 mb-2">Quality Differentials</h5>
+                <p>
+                  Not all goods are created equal. Higher quality items command premium prices, creating incentives for craftsmanship and specialized production techniques.
+                </p>
+                <p className="mt-2">
+                  Master craftsmen can charge significantly more than novices for the same type of good, reflecting the real economic value of expertise and reputation.
+                </p>
+              </div>
+            </div>
+            
+            <div className="flex flex-col md:flex-row gap-6">
+              <div className="md:w-1/2">
+                <h5 className="font-bold text-amber-900 mb-2">Location Value</h5>
+                <p>
+                  The same good may command different prices in different districts. Luxury items sell for more along the Grand Canal, while basic necessities might be cheaper in residential areas where competition is higher.
+                </p>
+                <p className="mt-2">
+                  This creates opportunities for arbitrage—buying goods where they're cheap and selling where they're expensive.
+                </p>
+              </div>
+              
+              <div className="md:w-1/2">
+                <h5 className="font-bold text-amber-900 mb-2">Seasonal Fluctuations</h5>
+                <p>
+                  Prices follow seasonal patterns tied to festivals, trade winds, and agricultural cycles. Savvy merchants anticipate these fluctuations, building inventory before demand peaks.
+                </p>
+                <p className="mt-2">
+                  For example, textile prices rise before Carnival season, while building materials become more expensive during spring construction periods.
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          <h3 className="text-2xl font-serif text-amber-700 mb-4">Banking and Finance</h3>
+
+          <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
+            <h4 className="text-xl font-serif text-amber-800 mb-2">The Venetian Banking System</h4>
+            <p className="mb-4">
+              Venice pioneered many modern banking concepts, and La Serenissima recreates this sophisticated financial system:
+            </p>
+            
+            <div className="mb-4">
+              <h5 className="font-bold text-amber-900 mb-2">Loans and Credit</h5>
+              <p>
+                The banking system allows you to expand faster than your current capital would permit. Take calculated loans to acquire prime real estate or establish profitable businesses before competitors can act. Different loan types serve different purposes:
+              </p>
+              <ul className="list-disc pl-5 space-y-1 mt-2">
+                <li><span className="font-medium">Commercial Loans</span>: Short-term financing for trade expeditions and inventory</li>
+                <li><span className="font-medium">Property Mortgages</span>: Long-term financing for land and building acquisition</li>
+                <li><span className="font-medium">Development Loans</span>: Medium-term financing for construction and expansion</li>
+                <li><span className="font-medium">Merchant Partnerships</span>: Equity-based financing where investors share in profits</li>
+              </ul>
+            </div>
+            
+            <div className="mb-4">
+              <h5 className="font-bold text-amber-900 mb-2">Interest and Risk</h5>
+              <p>
+                Interest rates vary based on the borrower's reputation, collateral, and the loan's purpose. Riskier ventures command higher rates, while secured loans against valuable property offer more favorable terms.
+              </p>
+              <p className="mt-2">
+                Defaulting on loans has serious consequences, from asset seizure to reputation damage that affects future borrowing ability.
+              </p>
+            </div>
+            
+            <div>
+              <h5 className="font-bold text-amber-900 mb-2">Financial Instruments</h5>
+              <p>
+                Beyond basic loans, Venice developed sophisticated financial instruments that are recreated in La Serenissima:
+              </p>
+              <ul className="list-disc pl-5 space-y-1 mt-2">
+                <li><span className="font-medium">Letters of Credit</span>: Allow merchants to conduct business in distant markets without carrying physical currency</li>
+                <li><span className="font-medium">Maritime Insurance</span>: Protects against losses from shipwrecks and piracy</li>
+                <li><span className="font-medium">Futures Contracts</span>: Agreements to buy or sell goods at predetermined prices on future dates</li>
+                <li><span className="font-medium">Investment Partnerships</span>: Shared ventures where multiple investors pool capital for major projects</li>
+              </ul>
+            </div>
+          </div>
+          
+          <h3 className="text-2xl font-serif text-amber-700 mb-4">AI Citizens in the Economy</h3>
+
+          <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
+            <h4 className="text-xl font-serif text-amber-800 mb-2">Economic Agents</h4>
+            <p className="mb-4">
+              La Serenissima is populated by AI citizens who participate in the economy as consumers, workers, and entrepreneurs:
+            </p>
+            
+            <div className="grid md:grid-cols-2 gap-4 mb-4">
+              <div className="bg-amber-50 p-3 rounded border border-amber-200">
+                <h5 className="font-bold text-amber-900">Consumption Patterns</h5>
+                <p>
+                  AI citizens have realistic needs and preferences, purchasing food, clothing, luxury goods, and services. Their consumption patterns vary by social class, profession, and individual taste, creating diverse market demand.
+                </p>
+                <p className="mt-2">
+                  Wealthier citizens demand luxury goods and services, while working-class citizens focus on necessities, creating natural market segmentation.
+                </p>
+              </div>
+              
+              <div className="bg-amber-50 p-3 rounded border border-amber-200">
+                <h5 className="font-bold text-amber-900">Labor and Production</h5>
+                <p>
+                  Citizens work in workshops, markets, and service establishments, providing the labor necessary for production. Their skills improve over time, increasing productivity and the quality of goods produced.
+                </p>
+                <p className="mt-2">
+                  Skilled workers command higher wages, creating economic incentives for training and specialization. Labor shortages in specific sectors drive wage increases.
+                </p>
+              </div>
+            </div>
+            
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="bg-amber-50 p-3 rounded border border-amber-200">
+                <h5 className="font-bold text-amber-900">Economic Mobility</h5>
+                <p>
+                  AI citizens can rise or fall in economic status based on their success. A talented craftsman might save enough to open their own workshop, while a merchant who makes poor decisions might fall into debt.
+                </p>
+                <p className="mt-2">
+                  This social mobility creates dynamic economic conditions as new businesses emerge and others fail, constantly reshaping the competitive landscape.
+                </p>
+              </div>
+              
+              <div className="bg-amber-50 p-3 rounded border border-amber-200">
+                <h5 className="font-bold text-amber-900">Autonomous Decision-Making</h5>
+                <p>
+                  Rather than following simple scripts, AI citizens make economic decisions based on their needs, opportunities, and market conditions. They respond to price changes, seek better employment, and adjust their consumption patterns during economic downturns.
+                </p>
+                <p className="mt-2">
+                  This autonomous behavior creates emergent economic patterns that no single player can control, simulating the complexity of real markets.
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          <h3 className="text-2xl font-serif text-amber-700 mb-4">Taxation and Public Finance</h3>
+
+          <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
+            <h4 className="text-xl font-serif text-amber-800 mb-2">The Republic's Coffers</h4>
+            <p className="mb-4">
+              Venice maintained its power through a sophisticated system of taxation and public finance, recreated in La Serenissima:
+            </p>
+            
+            <div className="mb-4">
+              <h5 className="font-bold text-amber-900 mb-2">Tax Types</h5>
+              <p>
+                Various taxes fund the Republic's operations and provide economic balancing mechanisms:
+              </p>
+              <ul className="list-disc pl-5 space-y-1 mt-2">
+                <li><span className="font-medium">Property Tax</span>: Regular payments based on land value and improvements</li>
+                <li><span className="font-medium">Trade Duties</span>: Fees on goods entering and leaving the city</li>
+                <li><span className="font-medium">Guild Fees</span>: Payments for the right to practice certain trades</li>
+                <li><span className="font-medium">Luxury Tax</span>: Additional charges on high-end goods and services</li>
+                <li><span className="font-medium">Special Assessments</span>: One-time taxes for specific projects or emergencies</li>
+              </ul>
+            </div>
+            
+            <div className="mb-4">
+              <h5 className="font-bold text-amber-900 mb-2">Public Expenditure</h5>
+              <p>
+                Tax revenue funds essential public services and infrastructure:
+              </p>
+              <ul className="list-disc pl-5 space-y-1 mt-2">
+                <li><span className="font-medium">Infrastructure</span>: Bridges, canals, public buildings, and city walls</li>
+                <li><span className="font-medium">Defense</span>: Naval fleet maintenance and city guards</li>
+                <li><span className="font-medium">Public Services</span>: Water supply, waste management, and fire prevention</li>
+                <li><span className="font-medium">Festivals and Ceremonies</span>: Public celebrations that enhance city prestige</li>
+              </ul>
+              <p className="mt-2">
+                These expenditures create economic opportunities for merchants who secure government contracts or benefit from improved infrastructure.
+              </p>
+            </div>
+            
+            <div>
+              <h5 className="font-bold text-amber-900 mb-2">Tax Strategies</h5>
+              <p>
+                Savvy merchants develop strategies to optimize their tax burden:
+              </p>
+              <ul className="list-disc pl-5 space-y-1 mt-2">
+                <li>Investing in public works to receive tax exemptions</li>
+                <li>Timing major transactions to minimize trade duties</li>
+                <li>Forming partnerships with tax-privileged entities</li>
+                <li>Negotiating special tax arrangements through political connections</li>
+              </ul>
+              <p className="mt-2">
+                However, tax evasion carries significant risks, including fines, property seizure, and damage to social standing.
+              </p>
+            </div>
+          </div>
+          
+          <h3 className="text-2xl font-serif text-amber-700 mb-4">Economic Example: The Silk Trade</h3>
+
+          <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
+            <h4 className="text-xl font-serif text-amber-800 mb-2">Following the Silk</h4>
+            <p className="mb-4">
+              Let's trace how a luxury product moves through Venice's economy, creating value at each step:
+            </p>
+            
+            <div className="relative overflow-x-auto mb-4">
+              <div className="flex flex-col md:flex-row items-stretch">
+                {/* Step 1: Raw Materials */}
+                <div className="md:w-1/5 p-3 bg-amber-50 border border-amber-200 flex flex-col">
+                  <h5 className="font-bold text-amber-900 text-center mb-2">Raw Materials</h5>
+                  <div className="flex-grow">
+                    <p className="text-sm">
+                      Raw silk arrives from the East through import merchants who pay 50₫ per unit.
+                    </p>
+                  </div>
+                  <div className="text-center mt-2">
+                    <span className="text-amber-800 font-bold">Cost: 50₫</span>
+                  </div>
+                </div>
+                
+                {/* Arrow */}
+                <div className="hidden md:flex items-center justify-center px-2">
+                  <svg className="w-6 h-6 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
+                </div>
+                
+                {/* Step 2: Processing */}
+                <div className="md:w-1/5 p-3 bg-amber-50 border border-amber-200 flex flex-col">
+                  <h5 className="font-bold text-amber-900 text-center mb-2">Processing</h5>
+                  <div className="flex-grow">
+                    <p className="text-sm">
+                      Silk workshops clean and prepare the raw silk, employing skilled workers.
+                    </p>
+                  </div>
+                  <div className="text-center mt-2">
+                    <span className="text-amber-800 font-bold">Value Added: +30₫</span>
+                  </div>
+                </div>
+                
+                {/* Arrow */}
+                <div className="hidden md:flex items-center justify-center px-2">
+                  <svg className="w-6 h-6 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
+                </div>
+                
+                {/* Step 3: Weaving */}
+                <div className="md:w-1/5 p-3 bg-amber-50 border border-amber-200 flex flex-col">
+                  <h5 className="font-bold text-amber-900 text-center mb-2">Weaving</h5>
+                  <div className="flex-grow">
+                    <p className="text-sm">
+                      Master weavers transform prepared silk into luxurious fabrics with distinctive patterns.
+                    </p>
+                  </div>
+                  <div className="text-center mt-2">
+                    <span className="text-amber-800 font-bold">Value Added: +70₫</span>
+                  </div>
+                </div>
+                
+                {/* Arrow */}
+                <div className="hidden md:flex items-center justify-center px-2">
+                  <svg className="w-6 h-6 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
+                </div>
+                
+                {/* Step 4: Retail */}
+                <div className="md:w-1/5 p-3 bg-amber-50 border border-amber-200 flex flex-col">
+                  <h5 className="font-bold text-amber-900 text-center mb-2">Retail</h5>
+                  <div className="flex-grow">
+                    <p className="text-sm">
+                      Luxury merchants sell the finished silk to wealthy citizens and visitors in elegant shops.
+                    </p>
+                  </div>
+                  <div className="text-center mt-2">
+                    <span className="text-amber-800 font-bold">Value Added: +100₫</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-amber-50 p-3 rounded border border-amber-200 mb-4">
+              <h5 className="font-bold text-amber-900 mb-2">Value Creation</h5>
+              <p>
+                Notice how the original 50₫ raw material becomes a 250₫ luxury product through the economic chain. Each participant adds value and extracts profit:
+              </p>
+              <ul className="list-disc pl-5 space-y-1 mt-2">
+                <li>The importer earns 5-10₫ per unit in profit</li>
+                <li>The processor converts 50₫ materials into 80₫ prepared silk</li>
+                <li>The weaver transforms 80₫ prepared silk into 150₫ fabric</li>
+                <li>The retailer sells 150₫ fabric for 250₫ to end consumers</li>
+              </ul>
+              <p className="mt-2">
+                This value chain creates multiple business opportunities. You might specialize in one step or vertically integrate to capture more of the total value.
+              </p>
+            </div>
+            
+            <div className="bg-amber-50 p-3 rounded border border-amber-200">
+              <h5 className="font-bold text-amber-900 mb-2">Economic Ripple Effects</h5>
+              <p>
+                Beyond direct participants, the silk trade creates broader economic impacts:
+              </p>
+              <ul className="list-disc pl-5 space-y-1 mt-2">
+                <li>Dock workers earn wages unloading silk shipments</li>
+                <li>Transporters move goods between workshops</li>
+                <li>Tool makers supply specialized equipment to weavers</li>
+                <li>Dye producers provide colorants for the fabrics</li>
+                <li>Property owners collect rent from workshops and shops</li>
+                <li>The Republic collects taxes at multiple points in the chain</li>
+              </ul>
+              <p className="mt-2">
+                This interconnectedness means that changes in one sector ripple throughout the economy, creating the dynamic economic environment of La Serenissima.
+              </p>
+            </div>
+          </div>
+          
+          <div className="mt-8 bg-gradient-to-r from-amber-100 to-amber-200 p-6 rounded-lg border border-amber-300">
+            <h3 className="text-2xl font-serif text-amber-800 mb-4 text-center">Your Place in Venice's Economy</h3>
+            
+            <p className="text-amber-900 mb-4">
+              La Serenissima's economic system offers unprecedented depth and authenticity. Unlike games with simplistic economies, every transaction here has meaning and ripple effects. Your economic decisions shape not just your own fortune, but the development of Venice itself.
+            </p>
+            
+            <p className="text-amber-900 mb-4">
+              Whether you choose to become a property magnate, master craftsman, trade merchant, or financier, your path to prosperity requires understanding these economic principles and applying them strategically.
+            </p>
+            
+            <p className="text-amber-900 mb-6 font-medium text-center">
+              The question is not whether you will participate in Venice's economy—but how you will make your mark upon it.
+            </p>
+            
+            <div className="flex justify-center">
+              <button className="px-6 py-3 bg-amber-700 hover:bg-amber-600 text-white rounded-lg flex items-center transition-colors">
+                Begin Your Economic Journey
+              </button>
+            </div>
+          </div>
         </div>
         
         <div className="mt-8 text-center">
