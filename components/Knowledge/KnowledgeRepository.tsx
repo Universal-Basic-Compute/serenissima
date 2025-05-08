@@ -1,25 +1,38 @@
 import React from 'react';
 import Image from 'next/image';
+import { FaTimes } from 'react-icons/fa'; // Import the X icon
 
 interface KnowledgeRepositoryProps {
   onShowTechTree: () => void;
   onShowPresentation: () => void;
   onShowResourceTree: () => void;
   onSelectArticle: (article: string) => void;
+  onClose: () => void; // Add this prop for closing the repository
 }
 
 const KnowledgeRepository: React.FC<KnowledgeRepositoryProps> = ({
   onShowTechTree,
   onShowPresentation,
   onShowResourceTree,
-  onSelectArticle
+  onSelectArticle,
+  onClose // Add this parameter
 }) => {
   return (
     <div className="absolute top-20 left-20 right-4 bottom-4 bg-black/30 rounded-lg p-4 overflow-auto">
       <div className="bg-amber-50 border-2 border-amber-700 rounded-lg p-6 max-w-6xl mx-auto">
-        <h2 className="text-3xl font-serif text-amber-800 mb-6 text-center">
-          Knowledge Repository
-        </h2>
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-3xl font-serif text-amber-800">
+            Knowledge Repository
+          </h2>
+          {/* Add close button */}
+          <button 
+            onClick={onClose}
+            className="text-amber-600 hover:text-amber-800 p-2"
+            aria-label="Close knowledge repository"
+          >
+            <FaTimes size={24} />
+          </button>
+        </div>
         
         {/* Project Resources Section - moved to be first */}
         <div>

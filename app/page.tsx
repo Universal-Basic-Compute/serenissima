@@ -539,6 +539,7 @@ export default function SimplePage() {
           onShowPresentation={() => setShowPresentation(true)}
           onShowResourceTree={() => setShowResourceTree(true)}
           onSelectArticle={setSelectedArticle}
+          onClose={() => setActiveView('land')} // Add this to close the knowledge view
         />
       )}
       
