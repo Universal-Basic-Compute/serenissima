@@ -32,31 +32,31 @@ const StrategiesArticle: React.FC<StrategiesArticleProps> = ({ onClose }) => {
           </p>
           
           <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
-            <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #1: Cultivate a Network of Informants</h3>
+            <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #1: Cultivate a Network of Market Intelligence</h3>
             <p>
-              Information is the most valuable currency in Venice. Establish relationships with servants in noble households, clerks in government offices, and workers at key docks and markets. These seemingly insignificant connections can provide advance notice of economic policies, trade shipments, or political appointments before they become public knowledge.
+              Information is the most valuable currency in Venice, even more precious than $COMPUTE. Establish relationships with dock workers, market vendors, and guild members who can provide advance notice of resource shipments, price fluctuations, or upcoming decree proposals before they become public knowledge.
             </p>
             <p className="mt-2">
-              <span className="font-medium">Implementation:</span> Invest in regular small gifts and favors rather than one-time large payments. A servant who receives a modest but reliable stipend will provide information for years, while a large bribe creates risk and temporary loyalty at best.
+              <span className="font-medium">Implementation:</span> Invest in regular small gifts and favors rather than one-time large payments. A dock worker who receives a modest but reliable stipend will alert you to valuable shipments for months, giving you first access to critical resources when they arrive.
             </p>
             <div className="mt-3 bg-amber-50 p-3 rounded border border-amber-200">
               <p className="italic text-amber-800">
-                <span className="font-bold">Historical Example:</span> The Contarini family maintained a network of informants among customs officials, allowing them to know precisely when competitors' shipments would arrive and adjust their own market activities accordingly. This information advantage allowed them to buy low and sell high with remarkable consistency.
+                <span className="font-bold">Application:</span> The Contarini family maintained a network of informants among customs officials, allowing them to know precisely when competitors' shipments would arrive. By positioning their agents at key docks, they could purchase raw materials before competitors even knew they had arrived, securing advantageous positions in the glass and textile markets.
               </p>
             </div>
           </div>
           
           <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
-            <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #2: Master the Art of Strategic Marriages</h3>
+            <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #2: Master the Art of Strategic Alliances</h3>
             <p>
-              In Venice, marriage was rarely about romance—it was about creating alliances, securing access to new markets, and consolidating influence. Arrange marriages between your family members and those of complementary business interests or political connections. A strategic marriage can open doors that remain firmly closed to even the wealthiest merchants.
+              In Venice, business partnerships are rarely just about commerce—they're about creating alliances, securing access to new resources, and consolidating influence. Form partnerships with players who control complementary assets or skills. A strategic alliance can open doors that remain firmly closed to even the wealthiest solo merchants.
             </p>
             <p className="mt-2">
-              <span className="font-medium">Implementation:</span> Look beyond immediate financial gain when considering marriage alliances. A connection to a family with political influence but modest wealth may prove more valuable than one to a wealthy family without connections. Map out potential alliances based on what specific advantages they bring—access to Eastern trade routes, influence in the Senate, or connections to particular guilds.
+              <span className="font-medium">Implementation:</span> Look beyond immediate financial gain when forming partnerships. An alliance with a player who controls key transportation routes but has modest wealth may prove more valuable than one with a wealthy player who lacks strategic assets. Map out potential alliances based on what specific advantages they bring—access to rare resources, control of critical docks, or influence with particular guilds.
             </p>
             <div className="mt-3 bg-amber-50 p-3 rounded border border-amber-200">
               <p className="italic text-amber-800">
-                <span className="font-bold">Application:</span> When seeking a marriage alliance, investigate which families control access to resources you need. If your textile business requires reliable silk imports, a marriage connection to a family with trading rights in Constantinople could reduce your costs significantly while simultaneously blocking competitors from the same advantage.
+                <span className="font-bold">Application:</span> When seeking business partners, investigate which players control resources you need. If your glassmaking workshop requires reliable sand supplies, an alliance with a player who controls the transportation routes from the lagoon islands could reduce your costs significantly while simultaneously blocking competitors from the same advantage.
               </p>
             </div>
           </div>
@@ -64,29 +64,29 @@ const StrategiesArticle: React.FC<StrategiesArticleProps> = ({ onClose }) => {
           <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
             <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #3: Create Dependency Through Strategic Lending</h3>
             <p>
-              The Venetian saying "debtors make the most reliable allies" reveals a fundamental truth: those who owe you become instruments of your will. Offer loans to promising merchants, struggling nobles, or ambitious politicians—not primarily for the interest income, but for the influence it provides. A debtor will support your proposals, share information, and grant favors simply to maintain good relations.
+              The Venetian saying "debtors make the most reliable allies" reveals a fundamental truth: those who owe you become instruments of your will. Use the loan system to offer $COMPUTE to promising merchants, struggling landowners, or ambitious guild members—not primarily for the interest income, but for the influence it provides. A debtor will support your decree proposals, share market information, and grant favorable trade terms simply to maintain good relations.
             </p>
             <p className="mt-2">
-              <span className="font-medium">Implementation:</span> Structure loans to maximize dependency rather than profit. Offer generous terms initially, then use refinancing opportunities to extract non-monetary concessions. For example, when a debtor cannot make a payment, offer to extend terms in exchange for their support on a guild regulation or their vote in the Great Council.
+              <span className="font-medium">Implementation:</span> Structure loans to maximize dependency rather than profit. Offer generous terms initially, then use refinancing opportunities to extract non-monetary concessions. For example, when a debtor cannot make a payment, offer to extend terms in exchange for their support on a guild regulation or their vote in the Council.
             </p>
             <div className="mt-3 bg-amber-50 p-3 rounded border border-amber-200">
               <p className="italic text-amber-800">
-                <span className="font-bold">Historical Example:</span> The Pisani banking family rarely called in loans to members of the Council of Ten. Instead, they maintained these debts as leverage, ensuring their commercial interests received favorable treatment in matters of regulation and taxation. Their debtors remained in perpetual service, all while believing they were receiving generous treatment on their loans.
+                <span className="font-bold">Application:</span> The Pisani banking family rarely called in loans to members of the Council of Ten. Instead, they maintained these debts as leverage, ensuring their commercial interests received favorable treatment in matters of regulation and taxation. In La Serenissima, you can similarly use the loan system to create a network of obligated allies who will support your decree proposals and business ventures.
               </p>
             </div>
           </div>
           
           <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
-            <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #4: Manipulate Public Perception Through Patronage</h3>
+            <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #4: Manipulate Public Perception Through Infrastructure Investment</h3>
             <p>
-              In Venice, reputation was as valuable as gold. Strategic patronage of churches, arts, and public works creates an image of civic virtue that masks self-interest. Fund projects that simultaneously enhance your public image while providing specific benefits to your business interests—a bridge that improves access to your properties, a church renovation near your commercial district, or art that glorifies industries where you hold investments.
+              In Venice, reputation was as valuable as gold. Strategic investment in roads, bridges, and public works creates an image of civic virtue that masks self-interest. Fund infrastructure projects that simultaneously enhance your public image while providing specific benefits to your business interests—a bridge that improves access to your properties, a dock near your warehouse, or roads that connect your workshops to key markets.
             </p>
             <p className="mt-2">
-              <span className="font-medium">Implementation:</span> Always ensure your patronage is highly visible while appearing motivated by piety or civic duty. Place family emblems prominently on funded projects, commission paintings that subtly include your business activities in religious scenes, and time major donations to coincide with periods when you need political support for commercial ventures.
+              <span className="font-medium">Implementation:</span> Always ensure your infrastructure investments are highly visible while appearing motivated by civic duty. Place your buildings strategically around these improvements, and time major projects to coincide with periods when you need political support for commercial ventures or decree proposals.
             </p>
             <div className="mt-3 bg-amber-50 p-3 rounded border border-amber-200">
               <p className="italic text-amber-800">
-                <span className="font-bold">Application:</span> When seeking approval for a controversial business expansion, first announce a generous donation to restore a beloved local church. The goodwill generated will make officials reluctant to deny your subsequent business request, as doing so would appear ungrateful and risk alienating a public benefactor.
+                <span className="font-bold">Application:</span> When seeking approval for a controversial decree that would benefit your business, first invest in a new bridge connecting an underserved district to the main market. The goodwill generated will make Council members reluctant to deny your subsequent proposal, as doing so would appear ungrateful and risk alienating a public benefactor.
               </p>
             </div>
           </div>
@@ -94,59 +94,59 @@ const StrategiesArticle: React.FC<StrategiesArticleProps> = ({ onClose }) => {
           <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
             <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #5: Divide and Rule Your Competitors</h3>
             <p>
-              Direct confrontation with business rivals is rarely the optimal strategy. Instead, work to create divisions among your competitors by selectively sharing information, exploiting existing tensions, and forming temporary alliances. When rivals are busy fighting each other, they have fewer resources to challenge your interests.
+              Direct confrontation with business rivals is rarely the optimal strategy in La Serenissima's closed economy. Instead, work to create divisions among your competitors by selectively sharing information, exploiting existing tensions, and forming temporary alliances. When rivals are busy fighting each other, they have fewer resources to challenge your interests.
             </p>
             <p className="mt-2">
-              <span className="font-medium">Implementation:</span> Identify natural fault lines among competitor groups—differences in business models, geographic focus, or family histories. Subtly exacerbate these divisions through strategic information sharing. For example, ensure one competitor learns that another has been speaking poorly of their product quality, or hint to one family that another is encroaching on their traditional market.
+              <span className="font-medium">Implementation:</span> Identify natural fault lines among competitor groups—differences in production methods, geographic focus, or guild affiliations. Subtly exacerbate these divisions through strategic information sharing. For example, ensure one competitor learns that another is planning to expand into their territory, or hint to one guild member that another is seeking regulatory changes that would harm their business.
             </p>
             <div className="mt-3 bg-amber-50 p-3 rounded border border-amber-200">
               <p className="italic text-amber-800">
-                <span className="font-bold">Historical Example:</span> When three glassmaking families dominated the Murano trade, the Barovier family maintained their position by subtly encouraging disputes between their two larger rivals. They would share "confidential" information with each about the other's plans to expand into new techniques or markets, creating an atmosphere of suspicion that prevented the larger families from cooperating to squeeze out smaller producers.
+                <span className="font-bold">Application:</span> When three glassmaking workshops dominated the Murano trade, the Barovier family maintained their position by subtly encouraging disputes between their two larger rivals. They would share "confidential" information with each about the other's plans to expand into new techniques or markets, creating an atmosphere of suspicion that prevented the larger workshops from cooperating to squeeze out smaller producers. Meanwhile, the Baroviers secured exclusive access to critical sand supplies.
               </p>
             </div>
           </div>
           
           <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
-            <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #6: Control Access to Decision Makers</h3>
+            <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #6: Control Access to Guild Leadership</h3>
             <p>
-              Direct power is visible and therefore vulnerable to challenge. Indirect power—controlling access to those who make decisions—is often more valuable and less likely to provoke opposition. Position family members or loyal allies as secretaries, advisors, or assistants to key officials. These positions allow you to filter information, shape perceptions, and influence decisions without holding formal authority.
+              Direct power is visible and therefore vulnerable to challenge. Indirect power—controlling access to those who make guild regulations—is often more valuable and less likely to provoke opposition. Position yourself or loyal allies in guild leadership positions that influence industry standards, quality certifications, and market access. These positions allow you to shape regulations that favor your production methods while creating barriers for competitors.
             </p>
             <p className="mt-2">
-              <span className="font-medium">Implementation:</span> Identify promising young relatives or clients and secure them positions in the households or offices of rising political figures. Ensure they understand their role is to subtly advance family interests while appearing completely loyal to their employer. The most effective gatekeepers are those whose influence is invisible even to those they influence.
+              <span className="font-medium">Implementation:</span> Identify promising guild members and support their advancement to leadership positions. Ensure they understand their role is to subtly advance your interests while appearing to serve the guild as a whole. The most effective influence is invisible even to those being influenced.
             </p>
             <div className="mt-3 bg-amber-50 p-3 rounded border border-amber-200">
               <p className="italic text-amber-800">
-                <span className="font-bold">Application:</span> Rather than seeking appointment to the maritime regulatory committee yourself, place a loyal family member as secretary to the committee chair. From this position, they can prioritize which matters reach the chair's attention, subtly frame issues in ways favorable to your shipping interests, and provide you with advance notice of upcoming decisions.
+                <span className="font-bold">Application:</span> Rather than proposing industry regulations yourself, work through a guild leader who can present them as quality standards that "protect Venice's reputation." From this position, they can prioritize regulations that favor your production methods, frame issues in ways favorable to your business model, and provide you with advance notice of upcoming changes to prepare while competitors scramble to adapt.
               </p>
             </div>
           </div>
           
           <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
-            <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #7: Create Leverage Through Infrastructure Control</h3>
+            <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #7: Create Leverage Through Transportation Control</h3>
             <p>
-              In Venice's complex urban environment, controlling key infrastructure creates power disproportionate to the investment required. Strategic ownership of docks, bridges, warehouses, or water access points allows you to influence entire industries by controlling their essential pathways. This physical leverage can be converted into economic and political advantage.
+              In Venice's complex urban environment, controlling key transportation infrastructure creates power disproportionate to the $COMPUTE investment required. Strategic placement of docks, roads, and bridges allows you to influence entire industries by controlling their essential supply routes. This physical leverage can be converted into economic and political advantage.
             </p>
             <p className="mt-2">
-              <span className="font-medium">Implementation:</span> Map the critical infrastructure that your competitors rely upon, then systematically acquire control of strategic chokepoints. A small dock at a canal intersection may seem insignificant, but if it provides the only efficient access to a commercial district, controlling it gives you leverage over all businesses in that area.
+              <span className="font-medium">Implementation:</span> Map the critical transportation routes that your competitors rely upon, then systematically build infrastructure at strategic chokepoints. A dock at a canal intersection may seem like a modest investment, but if it provides the only efficient access to a commercial district, controlling it gives you leverage over all businesses in that area.
             </p>
             <div className="mt-3 bg-amber-50 p-3 rounded border border-amber-200">
               <p className="italic text-amber-800">
-                <span className="font-bold">Historical Example:</span> The Dandolo family controlled several small but strategically positioned warehouses near the Rialto market. Rather than charging excessive fees, they provided preferential access and favorable terms to allies while creating "unfortunate delays" for competitors. This subtle approach avoided accusations of unfair practices while effectively handicapping rival merchants during crucial market periods.
+                <span className="font-bold">Application:</span> The Dandolo family built several small but strategically positioned docks near the Rialto market. Rather than charging excessive fees, they provided preferential access and favorable terms to allies while creating "unfortunate delays" for competitors. This subtle approach avoided accusations of unfair practices while effectively handicapping rival merchants during crucial market periods. By controlling these transportation nodes, they influenced the flow of goods throughout the district.
               </p>
             </div>
           </div>
           
           <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
-            <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #8: Weaponize Guild Regulations</h3>
+            <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #8: Weaponize Decree Proposals</h3>
             <p>
-              Venice's guild system was ostensibly designed to maintain quality standards, but savvy operators recognized it as a powerful tool for controlling competition. By securing positions in guild leadership or influencing guild regulations, you can create rules that favor your specific production methods, materials, or business model while disadvantaging competitors.
+              Venice's governance system allows for decree proposals that can reshape economic regulations. By carefully crafting decree proposals through the proper channels, you can create rules that favor your specific production methods, building types, or business model while disadvantaging competitors.
             </p>
             <p className="mt-2">
-              <span className="font-medium">Implementation:</span> Study your own production advantages and your competitors' vulnerabilities, then craft guild regulations that transform your natural advantages into regulatory requirements. If your glassworks has access to superior manganese for clarifying glass, push for regulations requiring all "premium" glass to meet clarity standards that only your manganese source can achieve.
+              <span className="font-medium">Implementation:</span> Study your own production advantages and your competitors' vulnerabilities, then craft decree proposals that transform your natural advantages into regulatory requirements. If your glassworks has access to superior sand for making glass, propose quality standards that only your sand source can reliably meet.
             </p>
             <div className="mt-3 bg-amber-50 p-3 rounded border border-amber-200">
               <p className="italic text-amber-800">
-                <span className="font-bold">Application:</span> When appointed to a guild quality committee, propose new "consumer protection" standards that require expensive retooling for competitors but minimal changes for your own operations. Frame these self-serving regulations as civic-minded reforms that protect Venice's reputation for quality, making opposition appear self-interested and unpatriotic.
+                <span className="font-bold">Application:</span> When preparing a decree proposal for the Council of Ten, frame new "consumer protection" standards that require expensive retooling for competitors but minimal changes for your own operations. Present these self-serving regulations as civic-minded reforms that protect Venice's reputation for quality, making opposition appear self-interested and unpatriotic. The decree system allows you to institutionalize your advantages through seemingly neutral regulations.
               </p>
             </div>
           </div>
@@ -154,29 +154,29 @@ const StrategiesArticle: React.FC<StrategiesArticleProps> = ({ onClose }) => {
           <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
             <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #9: Master the Art of Beneficial Crisis</h3>
             <p>
-              The ancient wisdom that one should "never waste a good crisis" finds its perfect expression in Venetian politics. Skilled operators recognize that disruptions—whether market fluctuations, supply shortages, or political upheavals—create opportunities to reshape systems to their advantage while appearing to act for the common good.
+              The ancient wisdom that one should "never waste a good crisis" finds its perfect expression in Venetian economics. Skilled operators recognize that disruptions—whether resource shortages, transportation blockages, or market fluctuations—create opportunities to reshape systems to their advantage while appearing to act for the common good.
             </p>
             <p className="mt-2">
-              <span className="font-medium">Implementation:</span> Prepare contingency plans for likely crises in your industry. When disruption occurs, be the first to propose "solutions" that address the immediate problem while subtly advancing your long-term interests. The chaos and urgency of crisis situations reduce scrutiny of the secondary effects of proposed remedies.
+              <span className="font-medium">Implementation:</span> Prepare contingency plans for likely crises in your industry by stockpiling key resources or maintaining reserve $COMPUTE. When disruption occurs, be the first to propose "solutions" that address the immediate problem while subtly advancing your long-term interests. The chaos and urgency of crisis situations reduce scrutiny of the secondary effects of proposed remedies.
             </p>
             <div className="mt-3 bg-amber-50 p-3 rounded border border-amber-200">
               <p className="italic text-amber-800">
-                <span className="font-bold">Historical Example:</span> During a silk shortage caused by disrupted Eastern trade routes, the Mocenigo family—who had presciently stockpiled raw silk—proposed new regulations requiring all Venetian silk products to contain a higher percentage of pure silk "to maintain quality standards during the shortage." This seemingly responsible measure allowed them to sell their stockpiles at premium prices while forcing competitors who relied on silk blends either to buy from them or cease production.
+                <span className="font-bold">Application:</span> During a glass material shortage caused by disrupted transportation routes, the Mocenigo family—who had presciently stockpiled sand and other raw materials in their warehouses—proposed new regulations requiring all Venetian glass products to meet higher quality standards "to maintain Venice's reputation during the shortage." This seemingly responsible measure allowed them to sell their stockpiles at premium prices while forcing competitors who relied on lower-grade materials either to buy from them or cease production entirely.
               </p>
             </div>
           </div>
           
           <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
-            <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #10: Create the Illusion of Transparency</h3>
+            <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #10: Strategic Building Placement</h3>
             <p>
-              In a republic suspicious of concentrated power, the appearance of openness can provide effective cover for private machinations. By selectively sharing information—revealing impressive but ultimately inconsequential details while concealing critical facts—you create an impression of transparency that disarms potential opposition and builds trust that can be strategically exploited.
+              In La Serenissima's property-based economy, the strategic placement of buildings can create powerful economic advantages. Different building types serve different functions, and their placement relative to resources, transportation networks, and markets can dramatically affect their value and utility.
             </p>
             <p className="mt-2">
-              <span className="font-medium">Implementation:</span> Develop a reputation for candor by freely sharing information when the stakes are low. Maintain meticulous records that can be displayed to demonstrate your honest business practices. When crucial matters arise, leverage this reputation to have your characterizations of situations accepted with minimal scrutiny.
+              <span className="font-medium">Implementation:</span> Study the map carefully before placing any building. Consider not just the immediate benefits of a location but how it fits into your broader strategy. Position workshops near resource sources, warehouses near transportation hubs, and luxury shops along high-traffic routes. Create clusters of complementary buildings that enhance each other's effectiveness.
             </p>
             <div className="mt-3 bg-amber-50 p-3 rounded border border-amber-200">
               <p className="italic text-amber-800">
-                <span className="font-bold">Application:</span> When negotiating a major contract, overwhelm counterparties with detailed information about production processes, quality control measures, and minor costs. This flood of transparency creates the impression of complete openness while directing attention away from the few crucial terms—payment timing, exclusivity clauses, or liability limitations—where your true advantage lies.
+                <span className="font-bold">Application:</span> The Barbarigo family dominated the luxury textile trade not through superior products but through masterful building placement. They positioned their workshops near wool and silk suppliers, built warehouses with direct dock access for efficient shipping, and placed their retail shops along the Grand Canal where wealthy customers naturally congregated. This integrated approach reduced their transportation costs while maximizing customer access, allowing them to undercut competitors while maintaining higher profit margins.
               </p>
             </div>
           </div>
@@ -184,16 +184,16 @@ const StrategiesArticle: React.FC<StrategiesArticleProps> = ({ onClose }) => {
           <div className="mt-8 p-6 bg-amber-200 rounded-lg border border-amber-400">
             <h3 className="text-xl font-serif text-amber-800 mb-2">The Ultimate Strategy: Layered Power</h3>
             <p className="mb-4 text-amber-800">
-              The most successful Venetian operators understood that true influence comes not from applying these strategies individually but from layering them in complementary ways. Your informant network identifies opportunities that your strategic marriages help you exploit. Your infrastructure control creates leverage that your guild influence magnifies. Your public patronage builds goodwill that your crisis management converts to concrete advantage.
+              The most successful Venetian operators understood that true influence comes not from applying these strategies individually but from layering them in complementary ways. Your market intelligence network identifies opportunities that your strategic alliances help you exploit. Your transportation control creates leverage that your decree influence magnifies. Your infrastructure investments build goodwill that your crisis management converts to concrete advantage.
             </p>
             <p className="mb-4 text-amber-800">
               This layered approach creates power structures that are difficult to recognize, let alone challenge. While flamboyant displays of wealth might provoke envy and opposition, subtle networks of influence operate beneath notice until they become too entrenched to dismantle.
             </p>
             <p className="text-amber-800">
-              Remember the unofficial motto of Venice's most effective power brokers: <span className="italic">"Videri quam esse"</span>—"To seem rather than to be." Let others hold impressive titles while you hold the true levers of power. Let others engage in visible conflicts while you quietly shape the environment in which those conflicts occur. Let others believe they are making independent decisions while you control the options available to them.
+              Remember the unofficial motto of Venice's most effective power brokers: <span className="italic">"Videri quam esse"</span>—"To seem rather than to be." Let others accumulate the most $COMPUTE while you control the true levers of power. Let others engage in visible market competition while you quietly shape the economic environment in which those markets operate. Let others believe they are making independent decisions while you control the infrastructure, resources, and regulations that determine their options.
             </p>
             <p className="text-amber-800 mt-4">
-              In La Serenissima, the most dangerous player is not the one with the most obvious power, but the one whose influence remains invisible until it is too late to counter.
+              In La Serenissima, the most dangerous player is not the one with the most obvious wealth, but the one whose influence remains invisible until it is too late to counter.
             </p>
           </div>
         </div>
