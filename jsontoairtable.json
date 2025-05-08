@@ -1,0 +1,21 @@
+{
+  "DECREES": [
+    {
+      "DecreeId": "D-1525-003",
+      "Type": "Economic Regulation",
+      "Title": "Monthly Lease Price Adjustment Act",
+      "Description": "Grants landowners the right to adjust lease prices once per month for each building on their property.",
+      "Status": "Enacted",
+      "Category": "Commerce",
+      "Subcategory": "Property Rights",
+      "Proposer": "Consiglio dei Dieci",
+      "CreatedAt": "1525-06-01",
+      "EnactedAt": "1525-06-15",
+      "ExpiresAt": "None",
+      "FlavorText": "As the tides of commerce ebb and flow, so too must the value of our lands reflect the changing fortunes of the Republic.",
+      "HistoricalInspiration": "Based on Venetian property laws that balanced landlord rights with economic stability.",
+      "Notes": "Applies to all registered properties within the jurisdiction of La Serenissima.",
+      "Rationale": "This decree recognizes the dynamic nature of Venice's property market and empowers landowners to respond to changing economic conditions. By allowing monthly adjustments rather than arbitrary changes, we maintain market stability while providing flexibility. This balanced approach protects both landowners' interests and tenants' need for predictable business conditions, ultimately strengthening the Republic's commercial foundation and ensuring fair valuation of our limited land resources."
+    }
+  ]
+}
