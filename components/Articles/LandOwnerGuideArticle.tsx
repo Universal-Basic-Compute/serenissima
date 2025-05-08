@@ -114,8 +114,24 @@ const LandOwnerGuideArticle: React.FC<LandOwnerGuideArticleProps> = ({ onClose }
           <h3 className="text-2xl font-serif text-amber-700 mb-4">Strategic Lease Pricing</h3>
           
           <p className="mb-4">
-            As a landowner, setting the right lease price is perhaps your most powerful economic tool. Different pricing strategies serve different goals:
+            As a landowner, setting the right lease price for building owners is perhaps your most powerful economic tool. Different pricing strategies serve different goals:
           </p>
+          
+          <div className="bg-amber-50 p-3 rounded border border-amber-200 mb-4">
+            <h5 className="font-bold text-amber-900">Dynamic Lease System</h5>
+            <p className="text-amber-800">
+              Land leases in Venice are not permanent. They are periodically renegotiated based on:
+            </p>
+            <ul className="list-disc pl-5 space-y-1 text-amber-800 mt-2">
+              <li>Changes in land value due to surrounding development</li>
+              <li>Infrastructure improvements (new bridges, docks, or public buildings)</li>
+              <li>Market conditions and economic cycles</li>
+              <li>Effects of government decrees and regulations</li>
+            </ul>
+            <p className="mt-2 text-amber-800">
+              This dynamic system creates strategic opportunities for both landowners and building owners, as each lease renewal becomes a negotiation influenced by changing circumstances.
+            </p>
+          </div>
           
           <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
             <h4 className="text-xl font-serif text-amber-800 mb-2">High Lease Price Strategies</h4>
