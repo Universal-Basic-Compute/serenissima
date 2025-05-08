@@ -150,61 +150,73 @@ const GovernancePanel: React.FC<GovernancePanelProps> = ({ onClose }) => {
               Laws & Decrees of La Serenissima
             </h3>
             
-            <div className="bg-amber-50 border border-amber-200 rounded-lg overflow-hidden">
+            <div className="bg-amber-50 border border-amber-300 rounded-lg overflow-hidden shadow-md">
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-amber-300">
-                  <thead className="bg-amber-100">
+                  <thead className="bg-gradient-to-r from-amber-100 to-amber-200">
                     <tr>
-                      <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-amber-900 uppercase tracking-wider">Decree</th>
-                      <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-amber-900 uppercase tracking-wider">Title & Description</th>
-                      <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-amber-900 uppercase tracking-wider">Status</th>
-                      <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-amber-900 uppercase tracking-wider">Category</th>
-                      <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-amber-900 uppercase tracking-wider">Dates</th>
+                      <th scope="col" className="px-4 py-3 text-left text-xs font-serif font-medium text-amber-900 uppercase tracking-wider border-r border-amber-200">Decree</th>
+                      <th scope="col" className="px-4 py-3 text-left text-xs font-serif font-medium text-amber-900 uppercase tracking-wider border-r border-amber-200">Title & Description</th>
+                      <th scope="col" className="px-4 py-3 text-left text-xs font-serif font-medium text-amber-900 uppercase tracking-wider border-r border-amber-200">Status</th>
+                      <th scope="col" className="px-4 py-3 text-left text-xs font-serif font-medium text-amber-900 uppercase tracking-wider border-r border-amber-200">Category</th>
+                      <th scope="col" className="px-4 py-3 text-left text-xs font-serif font-medium text-amber-900 uppercase tracking-wider">Dates</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-amber-200">
                     {mockDecrees.sort((a, b) => new Date(b.CreatedAt).getTime() - new Date(a.CreatedAt).getTime()).map((decree, index) => (
-                      <tr key={decree.DecreeId} className={index % 2 === 0 ? 'bg-amber-50' : 'bg-white'}>
-                        <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-amber-900">
+                      <tr key={decree.DecreeId} className={`${index % 2 === 0 ? 'bg-amber-50' : 'bg-white'} hover:bg-amber-100 transition-colors duration-150`}>
+                        <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-amber-900 border-r border-amber-100">
                           <div className="font-serif">{decree.DecreeId}</div>
                           <div className="text-xs text-amber-700 mt-1">{decree.Type}</div>
                         </td>
-                        <td className="px-4 py-4 text-sm text-amber-900">
+                        <td className="px-4 py-4 text-sm text-amber-900 border-r border-amber-100">
                           <div className="font-serif font-medium">{decree.Title}</div>
                           <div className="mt-1 text-amber-700">{decree.Description}</div>
                           {decree.FlavorText && (
                             <div className="mt-2 text-xs italic text-amber-600">"{decree.FlavorText}"</div>
                           )}
                         </td>
-                        <td className="px-4 py-4 whitespace-nowrap text-sm">
-                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                            decree.Status === 'Enacted' ? 'bg-green-100 text-green-800' : 
-                            decree.Status === 'Proposed' ? 'bg-blue-100 text-blue-800' :
-                            decree.Status === 'Rejected' ? 'bg-red-100 text-red-800' :
-                            'bg-gray-100 text-gray-800'
-                          }`}>
-                            {decree.Status}
-                          </span>
-                          <div className="text-xs text-amber-700 mt-1">
-                            Proposed by:<br/>{decree.Proposer}
+                        <td className="px-4 py-4 whitespace-nowrap text-sm border-r border-amber-100">
+                          <div className="flex flex-col items-center">
+                            {decree.Status === 'Enacted' && (
+                              <div className="mb-2">
+                                <img 
+                                  src="/images/venice-seal.png" 
+                                  alt="Official Seal" 
+                                  className="w-12 h-12 object-contain opacity-80"
+                                  title="Officially enacted by the Council of Ten"
+                                />
+                              </div>
+                            )}
+                            <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                              decree.Status === 'Enacted' ? 'bg-green-100 text-green-800 border border-green-300' : 
+                              decree.Status === 'Proposed' ? 'bg-blue-100 text-blue-800 border border-blue-300' :
+                              decree.Status === 'Rejected' ? 'bg-red-100 text-red-800 border border-red-300' :
+                              'bg-gray-100 text-gray-800 border border-gray-300'
+                            }`}>
+                              {decree.Status}
+                            </span>
+                            <div className="text-xs text-amber-700 mt-2 text-center">
+                              Proposed by:<br/><span className="font-serif">{decree.Proposer}</span>
+                            </div>
                           </div>
                         </td>
-                        <td className="px-4 py-4 whitespace-nowrap text-sm text-amber-700">
-                          <div>{decree.Category}</div>
-                          <div className="text-xs mt-1">{decree.Subcategory}</div>
+                        <td className="px-4 py-4 whitespace-nowrap text-sm text-amber-700 border-r border-amber-100">
+                          <div className="font-serif">{decree.Category}</div>
+                          <div className="text-xs mt-1 italic">{decree.Subcategory}</div>
                         </td>
                         <td className="px-4 py-4 whitespace-nowrap text-sm text-amber-700">
                           <div>
-                            <span className="font-medium">Created:</span> {decree.CreatedAt}
+                            <span className="font-medium">Created:</span> <span className="font-serif">{decree.CreatedAt}</span>
                           </div>
                           {decree.EnactedAt && (
                             <div className="mt-1">
-                              <span className="font-medium">Enacted:</span> {decree.EnactedAt}
+                              <span className="font-medium">Enacted:</span> <span className="font-serif">{decree.EnactedAt}</span>
                             </div>
                           )}
                           {decree.ExpiresAt && decree.ExpiresAt !== 'None' && (
                             <div className="mt-1">
-                              <span className="font-medium">Expires:</span> {decree.ExpiresAt}
+                              <span className="font-medium">Expires:</span> <span className="font-serif">{decree.ExpiresAt}</span>
                             </div>
                           )}
                         </td>
@@ -215,10 +227,18 @@ const GovernancePanel: React.FC<GovernancePanelProps> = ({ onClose }) => {
               </div>
             </div>
             
-            <div className="mt-6 text-center">
-              <button className="px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors">
-                Propose New Decree
+            <div className="mt-8 text-center">
+              <button className="px-6 py-3 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors shadow-md border border-amber-700 font-serif">
+                <div className="flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  Propose New Decree
+                </div>
               </button>
+              <p className="mt-2 text-xs text-amber-700 italic">
+                Proposals require approval from the Council of Ten
+              </p>
             </div>
           </div>
         )}
