@@ -73,6 +73,7 @@ const ResourceTreeView: React.FC<ResourceTreeViewProps> = ({
     
     // Second pass: create links
     nodes.forEach(node => {
+      // Create links from inputs to this node
       (node.inputs || []).forEach(inputId => {
         if (nodeMap.has(inputId)) {
           links.push({
@@ -80,6 +81,18 @@ const ResourceTreeView: React.FC<ResourceTreeViewProps> = ({
             target: nodeMap.get(node.id),
             sourceId: inputId,
             targetId: node.id
+          });
+        }
+      });
+      
+      // Also create links from this node to its outputs for bidirectional visualization
+      (node.outputs || []).forEach(outputId => {
+        if (nodeMap.has(outputId)) {
+          links.push({
+            source: nodeMap.get(node.id),
+            target: nodeMap.get(outputId),
+            sourceId: node.id,
+            targetId: outputId
           });
         }
       });
@@ -206,17 +219,21 @@ const ResourceTreeView: React.FC<ResourceTreeViewProps> = ({
               const endX = targetNode.x; // Left side of target node
               const endY = targetNode.y + 40; // Middle of target node
               
-              // Create a curved path
-              const controlPointX = (startX + endX) / 2;
+              // Create a curved path with better curvature
+              const controlPointX1 = startX + 50; // First control point closer to source
+              const controlPointX2 = endX - 50; // Second control point closer to target
+              
+              // Determine if this is an input or output link for styling
+              const isOutputLink = link.sourceId === sourceNode.id && link.targetId === targetNode.id;
               
               return (
                 <g key={`link-${index}`}>
                   <path
-                    d={`M${startX},${startY} C${controlPointX},${startY} ${controlPointX},${endY} ${endX},${endY}`}
-                    stroke="#8B4513"
+                    d={`M${startX},${startY} C${controlPointX1},${startY} ${controlPointX2},${endY} ${endX},${endY}`}
+                    stroke={isOutputLink ? "#8B6513" : "#8B4513"} // Different color for output links
                     strokeWidth={2}
                     fill="none"
-                    strokeDasharray="5,5"
+                    strokeDasharray={isOutputLink ? "3,3" : "5,5"} // Different dash pattern for output links
                     markerEnd="url(#arrowhead)"
                   />
                 </g>
@@ -227,13 +244,13 @@ const ResourceTreeView: React.FC<ResourceTreeViewProps> = ({
             <defs>
               <marker
                 id="arrowhead"
-                markerWidth="10"
-                markerHeight="7"
-                refX="9"
-                refY="3.5"
+                markerWidth="12"
+                markerHeight="8"
+                refX="10"
+                refY="4"
                 orient="auto"
               >
-                <polygon points="0 0, 10 3.5, 0 7" fill="#8B4513" />
+                <polygon points="0 0, 12 4, 0 8" fill="#8B4513" />
               </marker>
             </defs>
           </svg>
