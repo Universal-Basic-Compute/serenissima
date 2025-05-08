@@ -170,22 +170,26 @@ const ResourceTreeView: React.FC<ResourceTreeViewProps> = ({
 
     // Create the simulation with proper typing and add category-based forces
     const sim = d3.forceSimulation<SimulationNode>(nodes as SimulationNode[])
+      // Modify the link force to be stronger and have more distance
       .force("link", d3.forceLink<SimulationNode, {source: string; target: string; type: string}>(links)
         .id(d => d.id)
-        .distance(100)
+        .distance(150)  // Increase from 100 to 150
         .strength((link: any) => {
           // Return 0 strength for links with missing nodes
           const sourceExists = nodes.some((node: SimulationNode) => 
             node.id === (typeof link.source === 'string' ? link.source : link.source.id));
           const targetExists = nodes.some((node: SimulationNode) => 
             node.id === (typeof link.target === 'string' ? link.target : link.target.id));
-          return sourceExists && targetExists ? 1 : 0;
+          return sourceExists && targetExists ? 0.7 : 0; // Increase strength for more stable connections
         }))
-      .force("charge", d3.forceManyBody().strength(-300))
+      // Reduce the charge strength to prevent nodes from repelling too strongly
+      .force("charge", d3.forceManyBody().strength(-200))
+      // Keep the center force
       .force("center", d3.forceCenter(0, 0))
-      .force("collide", d3.forceCollide(40))
-      // Add category-based forces to organize resources horizontally
-      .force("category", d3.forceX<SimulationNode>().strength(0.1).x(d => {
+      // Increase collision radius to prevent overlap
+      .force("collide", d3.forceCollide(50))
+      // Add a stronger category-based force
+      .force("category", d3.forceX<SimulationNode>().strength(0.2).x(d => {
         // Raw materials go to the left
         if (d.category === 'raw_materials') return -dimensions.width / 3;
         // Processed materials in the middle
@@ -194,10 +198,18 @@ const ResourceTreeView: React.FC<ResourceTreeViewProps> = ({
         else if (d.category === 'finished_goods' || d.category === 'luxury_goods') return dimensions.width / 3;
         // Default position
         return 0;
+      }))
+      // Add a vertical force to separate by subcategory
+      .force("subcategory", d3.forceY<SimulationNode>().strength(0.1).y(d => {
+        // Use the first character of the subcategory to create vertical separation
+        const hash = d.resource.subcategory ? 
+          d.resource.subcategory.charCodeAt(0) % 5 : 
+          0;
+        return (hash - 2) * dimensions.height / 10;
       }));
     
     // Make the simulation stabilize faster
-    sim.alphaDecay(0.02); // Default is 0.0228, higher value = faster cooling
+    sim.alphaDecay(0.03); // Increase from 0.02 to 0.03 for faster cooling
     
     // Create links
     const link = g.append("g")
@@ -239,45 +251,45 @@ const ResourceTreeView: React.FC<ResourceTreeViewProps> = ({
         onSelectResource(d.resource);
       });
     
-    // Add circular background for nodes
+    // Add circular background for nodes - make it larger
     node.append("circle")
-      .attr("r", 30)
+      .attr("r", 40)  // Increase from 30 to 40
       .attr("fill", d => getCategoryColor(d.category))
       .attr("stroke", "#8B4513")
       .attr("stroke-width", 2);
     
-    // Add white circle for icon background
+    // Add white circle for icon background - make it larger
     node.append("circle")
-      .attr("r", 24)
+      .attr("r", 32)  // Increase from 24 to 32
       .attr("fill", "white")
       .attr("stroke", "#8B4513")
       .attr("stroke-width", 1);
     
-    // Add resource icons
+    // Add resource icons - make them larger
     node.append("image")
       .attr("xlink:href", d => d.icon)
-      .attr("x", -20)
-      .attr("y", -20)
-      .attr("width", 40)
-      .attr("height", 40)
-      .attr("clip-path", "circle(20px at 0 0)")
+      .attr("x", -28)  // Increase from -20 to -28
+      .attr("y", -28)  // Increase from -20 to -28
+      .attr("width", 56)  // Increase from 40 to 56
+      .attr("height", 56) // Increase from 40 to 56
+      .attr("clip-path", "circle(28px at 0 0)") // Increase from 20px to 28px
       .on("error", function() {
         d3.select(this).attr("xlink:href", "/assets/resources/icons/default.png");
       });
     
-    // Add resource names
+    // Add resource names with better visibility
     node.append("text")
-      .attr("dy", 45)
+      .attr("dy", 55)  // Move further down from 45 to 55
       .attr("text-anchor", "middle")
       .attr("fill", "#FFF")
       .attr("stroke", "#000")
-      .attr("stroke-width", 0.5)
-      .attr("font-size", "10px")
+      .attr("stroke-width", 0.7)  // Increase from 0.5 to 0.7
+      .attr("font-size", "12px")  // Increase from 10px to 12px
       .text(d => d.name);
     
     // Update positions on simulation tick with performance optimizations
     let tickCount = 0;
-    const maxTicks = 300; // Limit the number of simulation ticks
+    const maxTicks = 200; // Reduce from 300 to 200
     
     sim.on("tick", () => {
       tickCount++;
@@ -287,8 +299,8 @@ const ResourceTreeView: React.FC<ResourceTreeViewProps> = ({
         sim.stop();
       }
       
-      // Only update the DOM every 2 ticks to reduce rendering load
-      if (tickCount % 2 === 0) {
+      // Only update the DOM every 3 ticks to reduce rendering load
+      if (tickCount % 3 === 0) {  // Change from 2 to 3
         link
           .attr("x1", d => (d.source as any).x)
           .attr("y1", d => (d.source as any).y)
