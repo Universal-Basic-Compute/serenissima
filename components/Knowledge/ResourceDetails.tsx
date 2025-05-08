@@ -2,7 +2,7 @@ import React from 'react';
 import { FaTimes, FaWeight, FaCube, FaCoins, FaHistory, FaBuilding, FaShip, FaWarehouse, FaExchangeAlt, FaChartLine, FaCalendarAlt } from 'react-icons/fa';
 import { ResourceNode } from '../../lib/resourceUtils';
 
-// Étendre l'interface ResourceNode pour inclure les propriétés manquantes
+// Étendre l'interface ResourceNode pour inclure les propriétés spécifiques
 interface ExtendedResourceNode extends ResourceNode {
   substitutes?: Array<{
     resourceId: string;
@@ -10,7 +10,6 @@ interface ExtendedResourceNode extends ResourceNode {
     qualityPenalty?: number;
     context?: string;
   }>;
-  complements?: string[];
 }
 
 interface ResourceDetailsProps {
@@ -662,7 +661,7 @@ const ResourceDetails: React.FC<ResourceDetailsProps> = ({
             <div>
               <h5 className="text-sm text-amber-200 font-medium mb-1">Complementary Resources</h5>
               <div className="flex flex-wrap gap-1">
-                {resource.complements!.map((complement: string, index: number) => (
+                {resource.complements.map((complement: string, index: number) => (
                   <span key={index} className="text-xs bg-amber-800/40 text-amber-100 px-2 py-0.5 rounded">
                     {getCategoryDisplayName(complement)}
                   </span>
