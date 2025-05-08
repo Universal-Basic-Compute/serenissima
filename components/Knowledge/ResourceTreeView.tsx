@@ -1,27 +1,178 @@
-import React from 'react';
-import { FaProjectDiagram } from 'react-icons/fa';
+import React, { useState, useEffect } from 'react';
+import { FaProjectDiagram, FaChevronRight, FaChevronDown, FaLeaf, FaIndustry, FaGem } from 'react-icons/fa';
+import { ResourceNode } from '../../lib/resourceUtils';
 
-const ResourceTreeView: React.FC = () => {
+interface ResourceTreeViewProps {
+  resources?: ResourceNode[];
+  onSelectResource?: (resource: ResourceNode) => void;
+  loading?: boolean;
+}
+
+const ResourceTreeView: React.FC<ResourceTreeViewProps> = ({ 
+  resources = [], 
+  onSelectResource,
+  loading = false
+}) => {
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(['raw_materials']));
+  const [resourceTree, setResourceTree] = useState<any>({});
+  
+  // Build the resource tree when resources change
+  useEffect(() => {
+    if (resources.length > 0) {
+      const tree = buildResourceTree(resources);
+      setResourceTree(tree);
+    }
+  }, [resources]);
+  
+  // Build a hierarchical tree from flat resource data
+  const buildResourceTree = (resources: ResourceNode[]) => {
+    const tree: Record<string, any> = {};
+    
+    // Group resources by category
+    resources.forEach(resource => {
+      const category = resource.category || 'uncategorized';
+      const subcategory = resource.subcategory || 'general';
+      
+      if (!tree[category]) {
+        tree[category] = {
+          name: formatCategoryName(category),
+          subcategories: {}
+        };
+      }
+      
+      if (!tree[category].subcategories[subcategory]) {
+        tree[category].subcategories[subcategory] = {
+          name: formatCategoryName(subcategory),
+          resources: []
+        };
+      }
+      
+      tree[category].subcategories[subcategory].resources.push(resource);
+    });
+    
+    return tree;
+  };
+  
+  // Format category names for display
+  const formatCategoryName = (name: string): string => {
+    return name
+      .split('_')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  };
+  
+  // Toggle category expansion
+  const toggleCategory = (category: string) => {
+    const newExpanded = new Set(expandedCategories);
+    if (newExpanded.has(category)) {
+      newExpanded.delete(category);
+    } else {
+      newExpanded.add(category);
+    }
+    setExpandedCategories(newExpanded);
+  };
+  
+  // Get icon for category
+  const getCategoryIcon = (category: string) => {
+    switch(category) {
+      case 'raw_materials':
+        return <FaLeaf className="text-green-600" />;
+      case 'processed_materials':
+        return <FaIndustry className="text-blue-600" />;
+      case 'finished_goods':
+        return <FaGem className="text-purple-600" />;
+      default:
+        return <FaProjectDiagram className="text-amber-600" />;
+    }
+  };
+  
+  if (loading) {
+    return (
+      <div className="bg-amber-50/10 rounded-lg p-6 border border-amber-700/30 h-full flex items-center justify-center">
+        <div className="text-amber-300 animate-pulse">Loading resource tree...</div>
+      </div>
+    );
+  }
+  
+  if (resources.length === 0) {
+    return (
+      <div className="bg-amber-50/10 rounded-lg p-6 border border-amber-700/30">
+        <div className="text-center text-amber-300 mb-6">
+          <h3 className="text-xl font-serif">Resource Production Chains</h3>
+          <p className="text-sm mt-1">No resources found to display</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="bg-amber-50/10 rounded-lg p-6 border border-amber-700/30">
+    <div className="bg-amber-50/10 rounded-lg p-6 border border-amber-700/30 h-full">
       <div className="text-center text-amber-300 mb-6">
         <h3 className="text-xl font-serif">Resource Production Chains</h3>
         <p className="text-sm mt-1">Visualizing the relationships between resources in the Venetian economy</p>
       </div>
       
-      {/* Simple tree visualization - in a real implementation, this would use a proper graph visualization library */}
-      <div className="flex justify-center">
-        <div className="relative w-full max-w-4xl h-[600px] bg-amber-950/30 rounded-lg border border-amber-700/50">
-          {/* This is a simplified placeholder for a proper tree visualization */}
-          {/* In a real implementation, you would use a library like react-flow or d3.js */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-amber-400 text-center">
-              <FaProjectDiagram size={48} className="mx-auto mb-4 opacity-50" />
-              <p>Tree visualization would be implemented here with a proper graph library.</p>
-              <p className="mt-2 text-sm">Please use the Grid view to explore resources for now.</p>
+      <div className="overflow-auto max-h-[calc(100vh-200px)] tech-tree-scroll">
+        {Object.keys(resourceTree).sort().map(category => (
+          <div key={category} className="mb-2">
+            <div 
+              className="flex items-center p-2 bg-amber-900/30 rounded-lg cursor-pointer hover:bg-amber-900/40 transition-colors"
+              onClick={() => toggleCategory(category)}
+            >
+              <span className="mr-2 text-amber-300">
+                {expandedCategories.has(category) ? <FaChevronDown /> : <FaChevronRight />}
+              </span>
+              <span className="mr-2">{getCategoryIcon(category)}</span>
+              <span className="text-amber-200 font-medium">{resourceTree[category].name}</span>
+              <span className="ml-2 text-amber-400/70 text-sm">
+                ({Object.keys(resourceTree[category].subcategories).reduce(
+                  (count, subcat) => count + resourceTree[category].subcategories[subcat].resources.length, 
+                  0
+                )} resources)
+              </span>
             </div>
+            
+            {expandedCategories.has(category) && (
+              <div className="ml-6 mt-2">
+                {Object.keys(resourceTree[category].subcategories).sort().map(subcategory => (
+                  <div key={`${category}-${subcategory}`} className="mb-2">
+                    <div className="text-amber-300 font-medium p-1 border-b border-amber-700/30">
+                      {resourceTree[category].subcategories[subcategory].name}
+                    </div>
+                    
+                    <div className="ml-4 mt-1">
+                      {resourceTree[category].subcategories[subcategory].resources.sort((a: ResourceNode, b: ResourceNode) => 
+                        a.name.localeCompare(b.name)
+                      ).map((resource: ResourceNode) => (
+                        <div 
+                          key={resource.id}
+                          className="flex items-center p-1 hover:bg-amber-900/20 rounded cursor-pointer transition-colors"
+                          onClick={() => onSelectResource && onSelectResource(resource)}
+                        >
+                          <div className="w-6 h-6 bg-white rounded-full overflow-hidden flex items-center justify-center mr-2 border border-amber-200">
+                            <img 
+                              src={resource.icon} 
+                              alt={resource.name}
+                              className="w-4 h-4 object-contain"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                if (!target.dataset.usedFallback) {
+                                  target.dataset.usedFallback = 'true';
+                                  target.src = "/assets/resources/icons/default.png";
+                                }
+                              }}
+                            />
+                          </div>
+                          <span className="text-amber-100">{resource.name}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-        </div>
+        ))}
       </div>
     </div>
   );

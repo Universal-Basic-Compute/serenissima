@@ -161,7 +161,11 @@ const ResourceTree: React.FC<ResourceTreeProps> = ({ onClose }) => {
               getRarityInfo={getRarityInfo}
             />
           ) : (
-            <ResourceTreeView />
+            <ResourceTreeView 
+              resources={filteredResources}
+              onSelectResource={setSelectedResource}
+              loading={loading}
+            />
           )}
         </div>
         
