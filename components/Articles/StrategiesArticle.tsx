@@ -11,7 +11,7 @@ const StrategiesArticle: React.FC<StrategiesArticleProps> = ({ onClose }) => {
       <div className="bg-amber-50 border-2 border-amber-700 rounded-lg p-6 max-w-4xl mx-auto my-20">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-3xl font-serif text-amber-800">
-            20 Strategies to Get Ahead in Serenissima
+            10 Cunning Strategies for Venetian Power
           </h2>
           <button 
             onClick={onClose}
@@ -24,193 +24,176 @@ const StrategiesArticle: React.FC<StrategiesArticleProps> = ({ onClose }) => {
         
         <div className="prose prose-amber max-w-none">
           <p className="text-lg font-medium text-amber-800 mb-4">
-            Understanding Serenissima's Closed Economic System
+            The Art of Influence in La Serenissima
           </p>
           
           <p className="mb-4">
-            La Serenissima operates as a closed economic system where all value circulates between players and AI-controlled entities. Unlike traditional games where resources spawn infinitely, the economy of Venice functions as a zero-sum game in many respects - wealth must be captured rather than created from nothing.
-          </p>
-          
-          <p className="mb-4">
-            The fundamental principle to understand is that each economic cycle represents an opportunity to increase your share of the total economic value in the system. When ducats change hands, they don't disappear - they simply move from one participant to another. Your goal is to position yourself to capture more value with each turn of the economic wheel.
+            In Renaissance Venice, true power was rarely achieved through direct means. The most successful patricians understood that manipulation of people, systems, and perceptions was far more effective than brute economic force. This guide reveals the subtle arts of influence that transformed ordinary merchants into the power brokers of the Most Serene Republic.
           </p>
           
           <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
-            <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #1: Location, Location, Location</h3>
+            <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #1: Cultivate a Network of Informants</h3>
             <p>
-              In Venice, perhaps more than anywhere else, the value of property is determined by its location. A small shop on the Grand Canal will generate far more income than a large warehouse in the outer districts. When purchasing land, prioritize central locations and water access over size.
-            </p>
-          </div>
-          
-          <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
-            <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #2: Diversify Your Holdings</h3>
-            <p>
-              The wisest Venetian merchants never rely on a single source of income. Spread your investments across different districts, building types, and economic activities. This protects you from localized economic downturns and allows you to capitalize on opportunities in multiple sectors.
-            </p>
-          </div>
-          
-          <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
-            <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #3: Control Transportation Networks</h3>
-            <p>
-              Roads and docks are the lifeblood of commerce. Properties connected to efficient transportation networks command higher rents and facilitate more trade. However, there's a deeper strategic element: controlling multiple adjacent land parcels allows you to influence the flow of goods throughout Venice.
+              Information is the most valuable currency in Venice. Establish relationships with servants in noble households, clerks in government offices, and workers at key docks and markets. These seemingly insignificant connections can provide advance notice of economic policies, trade shipments, or political appointments before they become public knowledge.
             </p>
             <p className="mt-2">
-              <span className="font-medium">Advanced tactic:</span> By strategically acquiring land that forms natural chokepoints, you can effectively blockade parts of Venice from ground transportation. This forces competitors to rely on more expensive water transportation, increasing their costs while your own goods flow freely. Be cautious though—this strategy can backfire if rival merchant families unite against you or employ the same tactics in areas where you need access.
+              <span className="font-medium">Implementation:</span> Invest in regular small gifts and favors rather than one-time large payments. A servant who receives a modest but reliable stipend will provide information for years, while a large bribe creates risk and temporary loyalty at best.
             </p>
+            <div className="mt-3 bg-amber-50 p-3 rounded border border-amber-200">
+              <p className="italic text-amber-800">
+                <span className="font-bold">Historical Example:</span> The Contarini family maintained a network of informants among customs officials, allowing them to know precisely when competitors' shipments would arrive and adjust their own market activities accordingly. This information advantage allowed them to buy low and sell high with remarkable consistency.
+              </p>
+            </div>
           </div>
           
           <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
-            <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #4: Manipulate Supply Chains</h3>
+            <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #2: Master the Art of Strategic Marriages</h3>
             <p>
-              Every finished product in Venice requires raw materials and processing. Study the resource system to identify bottlenecks in supply chains. Controlling key points in popular production chains can be more profitable than owning the final production facility.
+              In Venice, marriage was rarely about romance—it was about creating alliances, securing access to new markets, and consolidating influence. Arrange marriages between your family members and those of complementary business interests or political connections. A strategic marriage can open doors that remain firmly closed to even the wealthiest merchants.
             </p>
             <p className="mt-2">
-              <span className="font-medium">Advanced tactic:</span> Identify which resources have the fewest sources, then secure those sources before competitors realize their importance. For example, if a particular dye comes from only two locations, controlling both gives you pricing power over the entire textile industry. This "resource bottleneck" strategy is less visible than land blockades but often more profitable.
+              <span className="font-medium">Implementation:</span> Look beyond immediate financial gain when considering marriage alliances. A connection to a family with political influence but modest wealth may prove more valuable than one to a wealthy family without connections. Map out potential alliances based on what specific advantages they bring—access to Eastern trade routes, influence in the Senate, or connections to particular guilds.
             </p>
+            <div className="mt-3 bg-amber-50 p-3 rounded border border-amber-200">
+              <p className="italic text-amber-800">
+                <span className="font-bold">Application:</span> When seeking a marriage alliance, investigate which families control access to resources you need. If your textile business requires reliable silk imports, a marriage connection to a family with trading rights in Constantinople could reduce your costs significantly while simultaneously blocking competitors from the same advantage.
+              </p>
+            </div>
           </div>
           
           <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
-            <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #5: Form Strategic Partnerships</h3>
+            <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #3: Create Dependency Through Strategic Lending</h3>
             <p>
-              Venice's economy rewards cooperation. Form alliances with complementary businesses to create efficient supply chains. A glassmaker partnered with a sand supplier and a luxury merchant will outperform isolated competitors.
-            </p>
-          </div>
-          
-          <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
-            <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #6: Invest in Luxury Production</h3>
-            <p>
-              Luxury goods like Venetian glass, fine textiles, and spice blends command the highest profit margins. While they require more complex supply chains, the returns justify the investment. A single successful luxury workshop can outperform multiple basic production facilities.
-            </p>
-          </div>
-          
-          <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
-            <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #7: Monitor Market Fluctuations</h3>
-            <p>
-              Prices in Serenissima fluctuate based on supply and demand. Keep track of price trends and adjust your production accordingly. Sometimes holding inventory until prices rise can be more profitable than immediate sales.
-            </p>
-          </div>
-          
-          <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
-            <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #8: Leverage Banking and Loans</h3>
-            <p>
-              The banking system allows you to expand faster than your current capital would permit. Take calculated loans to acquire prime real estate or establish profitable businesses before competitors can act. Just ensure your new ventures will generate enough income to cover loan payments.
-            </p>
-          </div>
-          
-          <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
-            <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #9: Build Vertically</h3>
-            <p>
-              Land in Venice is scarce, so successful merchants build upward. Multi-story buildings generate more rent per square meter of land. Upgrade your properties to maximize their capacity and income potential.
-            </p>
-          </div>
-          
-          <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
-            <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #10: Cultivate Political Connections</h3>
-            <p>
-              In Venice, commerce and politics are inseparable. Cultivate relationships with the Council of Ten and other governing bodies. Political favor can lead to preferential treatment in contracts, tax benefits, and advance notice of economic policy changes.
-            </p>
-          </div>
-          
-          <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
-            <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #11: Focus on High-Traffic Areas</h3>
-            <p>
-              Retail businesses thrive on foot traffic. Establish shops near landmarks, major bridges, and busy squares. The additional rent for these locations is offset by increased customer volume and higher sales.
-            </p>
-          </div>
-          
-          <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
-            <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #12: Strategic Infrastructure Investment</h3>
-            <p>
-              Public works like bridges, wells, and piazzas increase property values in their vicinity. Contributing to infrastructure development can raise the value of your existing holdings while improving your standing with local authorities.
+              The Venetian saying "debtors make the most reliable allies" reveals a fundamental truth: those who owe you become instruments of your will. Offer loans to promising merchants, struggling nobles, or ambitious politicians—not primarily for the interest income, but for the influence it provides. A debtor will support your proposals, share information, and grant favors simply to maintain good relations.
             </p>
             <p className="mt-2">
-              <span className="font-medium">Advanced tactic:</span> Propose and fund infrastructure projects that disproportionately benefit your properties while appearing to serve the public good. A bridge that connects your commercial district to a major market creates value for you while earning political goodwill. Conversely, oppose infrastructure that would benefit rivals by suggesting alternative projects that better "serve the Republic."
+              <span className="font-medium">Implementation:</span> Structure loans to maximize dependency rather than profit. Offer generous terms initially, then use refinancing opportunities to extract non-monetary concessions. For example, when a debtor cannot make a payment, offer to extend terms in exchange for their support on a guild regulation or their vote in the Great Council.
             </p>
+            <div className="mt-3 bg-amber-50 p-3 rounded border border-amber-200">
+              <p className="italic text-amber-800">
+                <span className="font-bold">Historical Example:</span> The Pisani banking family rarely called in loans to members of the Council of Ten. Instead, they maintained these debts as leverage, ensuring their commercial interests received favorable treatment in matters of regulation and taxation. Their debtors remained in perpetual service, all while believing they were receiving generous treatment on their loans.
+              </p>
+            </div>
           </div>
           
           <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
-            <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #13: Anticipate Seasonal Patterns</h3>
+            <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #4: Manipulate Public Perception Through Patronage</h3>
             <p>
-              Venice's economy follows seasonal patterns tied to festivals, trade winds, and agricultural cycles. Plan your investments to capitalize on these predictable fluctuations, building inventory before demand peaks.
-            </p>
-          </div>
-          
-          <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
-            <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #14: Specialize in Rare Resources</h3>
-            <p>
-              Some resources are naturally scarce in the Venetian lagoon. Controlling access to rare materials like certain dyes, metals, or exotic imports can create lucrative monopolies or near-monopolies.
-            </p>
-          </div>
-          
-          <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
-            <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #15: Balance Short and Long-Term Investments</h3>
-            <p>
-              Maintain a portfolio of both quick-return ventures and long-term appreciating assets. Trade and manufacturing provide immediate income, while prime real estate appreciates over time, building lasting wealth.
-            </p>
-          </div>
-          
-          <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
-            <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #16: Establish Trade Routes</h3>
-            <p>
-              Formalized trade routes between production centers and markets increase efficiency and profitability. Invest in creating optimized paths for goods to flow through the city, reducing transportation costs and time.
-            </p>
-          </div>
-          
-          <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
-            <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #17: Maintain Liquid Reserves</h3>
-            <p>
-              Always keep a portion of your wealth in liquid form (cash). This allows you to capitalize on sudden opportunities or weather unexpected economic challenges without selling valuable assets at unfavorable prices.
-            </p>
-          </div>
-          
-          <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
-            <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #18: Invest in Aesthetic Improvements</h3>
-            <p>
-              In Venice, beauty has economic value. Buildings with artistic elements command higher rents and attract wealthier clients. Commissioning artwork, ornate facades, and elegant interiors for your properties increases their prestige and profitability.
-            </p>
-          </div>
-          
-          <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
-            <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #19: Study Historical Patterns</h3>
-            <p>
-              Venice's economy follows historical patterns that repeat over time. Study these cycles to anticipate future trends. Those who understand history gain a significant advantage in predicting market movements.
-            </p>
-          </div>
-          
-          <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
-            <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #20: Build Your Family Legacy</h3>
-            <p>
-              The greatest Venetian fortunes were built across generations. Think beyond immediate profits to create lasting economic structures that will continue to generate wealth over time. Your family name and reputation are assets that appreciate with wise stewardship.
-            </p>
-          </div>
-          
-          <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
-            <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #21: Competitive Isolation</h3>
-            <p>
-              In Venice's closed economic system, sometimes limiting your competitors' options is as valuable as expanding your own. Study the geographic and economic connections between rival merchant families to identify their vulnerabilities.
+              In Venice, reputation was as valuable as gold. Strategic patronage of churches, arts, and public works creates an image of civic virtue that masks self-interest. Fund projects that simultaneously enhance your public image while providing specific benefits to your business interests—a bridge that improves access to your properties, a church renovation near your commercial district, or art that glorifies industries where you hold investments.
             </p>
             <p className="mt-2">
-              <span className="font-medium">Advanced tactic:</span> If a rival family specializes in glassmaking, acquiring the land between their workshops and their sand suppliers forces them to navigate around your territory, increasing their costs. Similarly, purchasing key waterfront properties can deny dock access to competitors, making their shipping operations more expensive and time-consuming. Remember that such aggressive tactics will likely trigger retaliation, so secure your own supply lines first.
+              <span className="font-medium">Implementation:</span> Always ensure your patronage is highly visible while appearing motivated by piety or civic duty. Place family emblems prominently on funded projects, commission paintings that subtly include your business activities in religious scenes, and time major donations to coincide with periods when you need political support for commercial ventures.
             </p>
+            <div className="mt-3 bg-amber-50 p-3 rounded border border-amber-200">
+              <p className="italic text-amber-800">
+                <span className="font-bold">Application:</span> When seeking approval for a controversial business expansion, first announce a generous donation to restore a beloved local church. The goodwill generated will make officials reluctant to deny your subsequent business request, as doing so would appear ungrateful and risk alienating a public benefactor.
+              </p>
+            </div>
           </div>
           
           <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
-            <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #22: Form Strategic Alliances</h3>
+            <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #5: Divide and Rule Your Competitors</h3>
             <p>
-              No single family, no matter how wealthy, can control all of Venice. Identifying potential allies whose interests complement rather than compete with yours is essential for long-term success.
+              Direct confrontation with business rivals is rarely the optimal strategy. Instead, work to create divisions among your competitors by selectively sharing information, exploiting existing tensions, and forming temporary alliances. When rivals are busy fighting each other, they have fewer resources to challenge your interests.
             </p>
             <p className="mt-2">
-              <span className="font-medium">Advanced tactic:</span> Create mutually beneficial arrangements with other families to counter common rivals. If another merchant family is being blockaded by a competitor, offer them access through your lands in exchange for favorable trade terms or support in the Council. These alliances can shift as circumstances change—the family you help today may become a rival tomorrow, but the political capital you gain will remain valuable.
+              <span className="font-medium">Implementation:</span> Identify natural fault lines among competitor groups—differences in business models, geographic focus, or family histories. Subtly exacerbate these divisions through strategic information sharing. For example, ensure one competitor learns that another has been speaking poorly of their product quality, or hint to one family that another is encroaching on their traditional market.
             </p>
+            <div className="mt-3 bg-amber-50 p-3 rounded border border-amber-200">
+              <p className="italic text-amber-800">
+                <span className="font-bold">Historical Example:</span> When three glassmaking families dominated the Murano trade, the Barovier family maintained their position by subtly encouraging disputes between their two larger rivals. They would share "confidential" information with each about the other's plans to expand into new techniques or markets, creating an atmosphere of suspicion that prevented the larger families from cooperating to squeeze out smaller producers.
+              </p>
+            </div>
+          </div>
+          
+          <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
+            <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #6: Control Access to Decision Makers</h3>
+            <p>
+              Direct power is visible and therefore vulnerable to challenge. Indirect power—controlling access to those who make decisions—is often more valuable and less likely to provoke opposition. Position family members or loyal allies as secretaries, advisors, or assistants to key officials. These positions allow you to filter information, shape perceptions, and influence decisions without holding formal authority.
+            </p>
+            <p className="mt-2">
+              <span className="font-medium">Implementation:</span> Identify promising young relatives or clients and secure them positions in the households or offices of rising political figures. Ensure they understand their role is to subtly advance family interests while appearing completely loyal to their employer. The most effective gatekeepers are those whose influence is invisible even to those they influence.
+            </p>
+            <div className="mt-3 bg-amber-50 p-3 rounded border border-amber-200">
+              <p className="italic text-amber-800">
+                <span className="font-bold">Application:</span> Rather than seeking appointment to the maritime regulatory committee yourself, place a loyal family member as secretary to the committee chair. From this position, they can prioritize which matters reach the chair's attention, subtly frame issues in ways favorable to your shipping interests, and provide you with advance notice of upcoming decisions.
+              </p>
+            </div>
+          </div>
+          
+          <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
+            <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #7: Create Leverage Through Infrastructure Control</h3>
+            <p>
+              In Venice's complex urban environment, controlling key infrastructure creates power disproportionate to the investment required. Strategic ownership of docks, bridges, warehouses, or water access points allows you to influence entire industries by controlling their essential pathways. This physical leverage can be converted into economic and political advantage.
+            </p>
+            <p className="mt-2">
+              <span className="font-medium">Implementation:</span> Map the critical infrastructure that your competitors rely upon, then systematically acquire control of strategic chokepoints. A small dock at a canal intersection may seem insignificant, but if it provides the only efficient access to a commercial district, controlling it gives you leverage over all businesses in that area.
+            </p>
+            <div className="mt-3 bg-amber-50 p-3 rounded border border-amber-200">
+              <p className="italic text-amber-800">
+                <span className="font-bold">Historical Example:</span> The Dandolo family controlled several small but strategically positioned warehouses near the Rialto market. Rather than charging excessive fees, they provided preferential access and favorable terms to allies while creating "unfortunate delays" for competitors. This subtle approach avoided accusations of unfair practices while effectively handicapping rival merchants during crucial market periods.
+              </p>
+            </div>
+          </div>
+          
+          <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
+            <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #8: Weaponize Guild Regulations</h3>
+            <p>
+              Venice's guild system was ostensibly designed to maintain quality standards, but savvy operators recognized it as a powerful tool for controlling competition. By securing positions in guild leadership or influencing guild regulations, you can create rules that favor your specific production methods, materials, or business model while disadvantaging competitors.
+            </p>
+            <p className="mt-2">
+              <span className="font-medium">Implementation:</span> Study your own production advantages and your competitors' vulnerabilities, then craft guild regulations that transform your natural advantages into regulatory requirements. If your glassworks has access to superior manganese for clarifying glass, push for regulations requiring all "premium" glass to meet clarity standards that only your manganese source can achieve.
+            </p>
+            <div className="mt-3 bg-amber-50 p-3 rounded border border-amber-200">
+              <p className="italic text-amber-800">
+                <span className="font-bold">Application:</span> When appointed to a guild quality committee, propose new "consumer protection" standards that require expensive retooling for competitors but minimal changes for your own operations. Frame these self-serving regulations as civic-minded reforms that protect Venice's reputation for quality, making opposition appear self-interested and unpatriotic.
+              </p>
+            </div>
+          </div>
+          
+          <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
+            <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #9: Master the Art of Beneficial Crisis</h3>
+            <p>
+              The ancient wisdom that one should "never waste a good crisis" finds its perfect expression in Venetian politics. Skilled operators recognize that disruptions—whether market fluctuations, supply shortages, or political upheavals—create opportunities to reshape systems to their advantage while appearing to act for the common good.
+            </p>
+            <p className="mt-2">
+              <span className="font-medium">Implementation:</span> Prepare contingency plans for likely crises in your industry. When disruption occurs, be the first to propose "solutions" that address the immediate problem while subtly advancing your long-term interests. The chaos and urgency of crisis situations reduce scrutiny of the secondary effects of proposed remedies.
+            </p>
+            <div className="mt-3 bg-amber-50 p-3 rounded border border-amber-200">
+              <p className="italic text-amber-800">
+                <span className="font-bold">Historical Example:</span> During a silk shortage caused by disrupted Eastern trade routes, the Mocenigo family—who had presciently stockpiled raw silk—proposed new regulations requiring all Venetian silk products to contain a higher percentage of pure silk "to maintain quality standards during the shortage." This seemingly responsible measure allowed them to sell their stockpiles at premium prices while forcing competitors who relied on silk blends either to buy from them or cease production.
+              </p>
+            </div>
+          </div>
+          
+          <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
+            <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #10: Create the Illusion of Transparency</h3>
+            <p>
+              In a republic suspicious of concentrated power, the appearance of openness can provide effective cover for private machinations. By selectively sharing information—revealing impressive but ultimately inconsequential details while concealing critical facts—you create an impression of transparency that disarms potential opposition and builds trust that can be strategically exploited.
+            </p>
+            <p className="mt-2">
+              <span className="font-medium">Implementation:</span> Develop a reputation for candor by freely sharing information when the stakes are low. Maintain meticulous records that can be displayed to demonstrate your honest business practices. When crucial matters arise, leverage this reputation to have your characterizations of situations accepted with minimal scrutiny.
+            </p>
+            <div className="mt-3 bg-amber-50 p-3 rounded border border-amber-200">
+              <p className="italic text-amber-800">
+                <span className="font-bold">Application:</span> When negotiating a major contract, overwhelm counterparties with detailed information about production processes, quality control measures, and minor costs. This flood of transparency creates the impression of complete openness while directing attention away from the few crucial terms—payment timing, exclusivity clauses, or liability limitations—where your true advantage lies.
+              </p>
+            </div>
           </div>
           
           <div className="mt-8 p-6 bg-amber-200 rounded-lg border border-amber-400">
-            <h3 className="text-xl font-serif text-amber-800 mb-2">Conclusion: The Venetian Approach</h3>
-            <p className="mb-4">
-              The most successful merchants of Venice understood that true wealth comes not from a single venture but from creating systems that generate ongoing value. By applying these strategies in combination, you can build an economic empire that captures an ever-increasing share of La Serenissima's prosperity.
+            <h3 className="text-xl font-serif text-amber-800 mb-2">The Ultimate Strategy: Layered Power</h3>
+            <p className="mb-4 text-amber-800">
+              The most successful Venetian operators understood that true influence comes not from applying these strategies individually but from layering them in complementary ways. Your informant network identifies opportunities that your strategic marriages help you exploit. Your infrastructure control creates leverage that your guild influence magnifies. Your public patronage builds goodwill that your crisis management converts to concrete advantage.
             </p>
-            <p>
-              Remember that in a closed economic system, your gain often comes at another's expense. Act with strategic precision, and may your family name be recorded among the greatest in Venetian history.
+            <p className="mb-4 text-amber-800">
+              This layered approach creates power structures that are difficult to recognize, let alone challenge. While flamboyant displays of wealth might provoke envy and opposition, subtle networks of influence operate beneath notice until they become too entrenched to dismantle.
+            </p>
+            <p className="text-amber-800">
+              Remember the unofficial motto of Venice's most effective power brokers: <span className="italic">"Videri quam esse"</span>—"To seem rather than to be." Let others hold impressive titles while you hold the true levers of power. Let others engage in visible conflicts while you quietly shape the environment in which those conflicts occur. Let others believe they are making independent decisions while you control the options available to them.
+            </p>
+            <p className="text-amber-800 mt-4">
+              In La Serenissima, the most dangerous player is not the one with the most obvious power, but the one whose influence remains invisible until it is too late to counter.
             </p>
           </div>
         </div>
