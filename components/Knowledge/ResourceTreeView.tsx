@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ResourceNode } from '../../lib/resourceUtils';
-import { FaChevronDown, FaChevronRight, FaArrowRight } from 'react-icons/fa';
+import * as d3 from 'd3';
 
 interface ResourceTreeViewProps {
   resources: ResourceNode[];
@@ -13,152 +13,228 @@ const ResourceTreeView: React.FC<ResourceTreeViewProps> = ({
   onSelectResource,
   loading = false
 }) => {
-  const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
-  const [treeData, setTreeData] = useState<any>({ nodes: [], links: [] });
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
+  const [simulation, setSimulation] = useState<d3.Simulation<any, any> | null>(null);
   
-  // Build the tree data when resources change
+  // Update dimensions when container size changes
   useEffect(() => {
-    if (resources.length > 0) {
-      const { nodes, links } = buildTreeData(resources);
-      setTreeData({ nodes, links });
-    }
-  }, [resources]);
-  
-  // Get resource by ID
-  const getResourceById = (id: string): ResourceNode | undefined => {
-    return resources.find(r => r.id === id);
-  };
-  
-  // Build tree data with nodes and links
-  const buildTreeData = (resources: ResourceNode[]) => {
-    const nodes: any[] = [];
-    const links: any[] = [];
-    const nodeMap = new Map<string, number>();
+    if (!containerRef.current) return;
     
-    // First pass: create nodes and build node map
-    resources.forEach((resource, index) => {
-      nodeMap.set(resource.id, index);
-      
-      // Determine node level based on inputs
-      let level = 0;
-      if (!resource.inputs || resource.inputs.length === 0) {
-        level = 0; // Raw materials at level 0
-      } else {
-        // Find the maximum level of inputs and add 1
-        const inputLevels = (resource.inputs || [])
-          .map(inputId => {
-            const inputResource = resources.find(r => r.id === inputId);
-            return inputResource ? calculateLevel(inputResource, resources, new Set()) : 0;
+    const updateDimensions = () => {
+      if (containerRef.current) {
+        const { width, height } = containerRef.current.getBoundingClientRect();
+        setDimensions({ width, height });
+      }
+    };
+    
+    updateDimensions();
+    window.addEventListener('resize', updateDimensions);
+    
+    return () => {
+      window.removeEventListener('resize', updateDimensions);
+    };
+  }, []);
+  
+  // Create and update the force-directed graph
+  useEffect(() => {
+    if (!svgRef.current || resources.length === 0) return;
+    
+    // Clear previous graph
+    d3.select(svgRef.current).selectAll("*").remove();
+    
+    // Prepare data for the graph
+    const nodes = resources.map(resource => ({
+      id: resource.id,
+      name: resource.name,
+      category: resource.category,
+      icon: resource.icon,
+      resource: resource
+    }));
+    
+    // Create links between resources
+    const links: { source: string; target: string; type: string }[] = [];
+    
+    resources.forEach(resource => {
+      // Add links from inputs to this resource
+      if (resource.inputs) {
+        resource.inputs.forEach(inputId => {
+          links.push({
+            source: inputId,
+            target: resource.id,
+            type: 'input'
           });
-        
-        level = Math.max(0, ...inputLevels) + 1;
+        });
       }
       
-      nodes.push({
-        id: resource.id,
-        name: resource.name,
-        level: level,
-        category: resource.category,
-        subcategory: resource.subcategory,
-        icon: resource.icon,
-        inputs: resource.inputs || [],
-        outputs: resource.outputs || []
-      });
-    });
-    
-    // Sort nodes by level
-    nodes.sort((a, b) => a.level - b.level);
-    
-    // Second pass: create links
-    nodes.forEach(node => {
-      // Create links from inputs to this node
-      (node.inputs || []).forEach(inputId => {
-        if (nodeMap.has(inputId)) {
+      // Add links from this resource to its outputs
+      if (resource.outputs) {
+        resource.outputs.forEach(outputId => {
           links.push({
-            source: nodeMap.get(inputId),
-            target: nodeMap.get(node.id),
-            sourceId: inputId,
-            targetId: node.id
+            source: resource.id,
+            target: outputId,
+            type: 'output'
           });
-        }
-      });
-      
-      // Also create links from this node to its outputs for bidirectional visualization
-      (node.outputs || []).forEach(outputId => {
-        if (nodeMap.has(outputId)) {
-          links.push({
-            source: nodeMap.get(node.id),
-            target: nodeMap.get(outputId),
-            sourceId: node.id,
-            targetId: outputId
-          });
-        }
-      });
-    });
-    
-    // Position nodes in a grid layout
-    const LEVEL_WIDTH = 280;
-    const NODE_HEIGHT = 100;
-    const LEVEL_PADDING = 50;
-    
-    // Group nodes by level
-    const nodesByLevel: { [level: number]: any[] } = {};
-    nodes.forEach(node => {
-      if (!nodesByLevel[node.level]) {
-        nodesByLevel[node.level] = [];
+        });
       }
-      nodesByLevel[node.level].push(node);
     });
     
-    // Calculate x and y positions
-    Object.entries(nodesByLevel).forEach(([level, levelNodes]) => {
-      const numNodes = levelNodes.length;
-      const levelNum = parseInt(level);
+    // Create SVG element
+    const svg = d3.select(svgRef.current);
+    
+    // Create a group for the graph
+    const g = svg.append("g");
+    
+    // Add zoom behavior
+    const zoom = d3.zoom()
+      .scaleExtent([0.1, 4])
+      .on("zoom", (event) => {
+        g.attr("transform", event.transform);
+      });
+    
+    svg.call(zoom as any);
+    
+    // Reset zoom to center the graph
+    svg.call(zoom.transform as any, d3.zoomIdentity.translate(dimensions.width / 2, dimensions.height / 2).scale(0.8));
+    
+    // Create the simulation
+    const sim = d3.forceSimulation(nodes)
+      .force("link", d3.forceLink(links).id((d: any) => d.id).distance(100))
+      .force("charge", d3.forceManyBody().strength(-300))
+      .force("center", d3.forceCenter(0, 0))
+      .force("collide", d3.forceCollide(40));
+    
+    // Create links
+    const link = g.append("g")
+      .attr("stroke", "#999")
+      .attr("stroke-opacity", 0.6)
+      .selectAll("line")
+      .data(links)
+      .join("line")
+      .attr("stroke-width", 2)
+      .attr("stroke", d => d.type === 'input' ? "#8B4513" : "#8B6513")
+      .attr("stroke-dasharray", d => d.type === 'input' ? "5,5" : "3,3")
+      .attr("marker-end", "url(#arrowhead)");
+    
+    // Define arrow marker
+    svg.append("defs").append("marker")
+      .attr("id", "arrowhead")
+      .attr("viewBox", "0 0 10 10")
+      .attr("refX", 20)
+      .attr("refY", 5)
+      .attr("markerWidth", 6)
+      .attr("markerHeight", 6)
+      .attr("orient", "auto")
+      .append("path")
+      .attr("d", "M 0 0 L 10 5 L 0 10 z")
+      .attr("fill", "#8B4513");
+    
+    // Create node groups
+    const node = g.append("g")
+      .selectAll(".node")
+      .data(nodes)
+      .join("g")
+      .attr("class", "node")
+      .call(d3.drag()
+        .on("start", dragstarted)
+        .on("drag", dragged)
+        .on("end", dragended) as any)
+      .on("click", (event, d) => {
+        event.stopPropagation();
+        onSelectResource(d.resource);
+      });
+    
+    // Add circular background for nodes
+    node.append("circle")
+      .attr("r", 30)
+      .attr("fill", d => getCategoryColor(d.category))
+      .attr("stroke", "#8B4513")
+      .attr("stroke-width", 2);
+    
+    // Add white circle for icon background
+    node.append("circle")
+      .attr("r", 24)
+      .attr("fill", "white")
+      .attr("stroke", "#8B4513")
+      .attr("stroke-width", 1);
+    
+    // Add resource icons
+    node.append("image")
+      .attr("xlink:href", d => d.icon)
+      .attr("x", -16)
+      .attr("y", -16)
+      .attr("width", 32)
+      .attr("height", 32)
+      .attr("clip-path", "circle(16px at 0 0)")
+      .on("error", function() {
+        d3.select(this).attr("xlink:href", "/assets/resources/icons/default.png");
+      });
+    
+    // Add resource names
+    node.append("text")
+      .attr("dy", 45)
+      .attr("text-anchor", "middle")
+      .attr("fill", "#FFF")
+      .attr("stroke", "#000")
+      .attr("stroke-width", 0.5)
+      .attr("font-size", "10px")
+      .text(d => d.name);
+    
+    // Update positions on simulation tick
+    sim.on("tick", () => {
+      link
+        .attr("x1", d => (d.source as any).x)
+        .attr("y1", d => (d.source as any).y)
+        .attr("x2", d => (d.target as any).x)
+        .attr("y2", d => (d.target as any).y);
       
-      levelNodes.forEach((node, index) => {
-        node.x = levelNum * LEVEL_WIDTH + LEVEL_PADDING;
-        node.y = index * NODE_HEIGHT + LEVEL_PADDING;
-      });
+      node.attr("transform", d => `translate(${d.x},${d.y})`);
     });
     
-    return { nodes, links };
-  };
-  
-  // Calculate the level of a resource based on its inputs
-  const calculateLevel = (
-    resource: ResourceNode, 
-    allResources: ResourceNode[], 
-    visited: Set<string>
-  ): number => {
-    // Prevent circular dependencies
-    if (visited.has(resource.id)) return 0;
-    visited.add(resource.id);
-    
-    if (!resource.inputs || resource.inputs.length === 0) {
-      return 0;
+    // Drag functions
+    function dragstarted(event: any, d: any) {
+      if (!event.active) sim.alphaTarget(0.3).restart();
+      d.fx = d.x;
+      d.fy = d.y;
     }
     
-    // Get the maximum level of inputs and add 1
-    const inputLevels = (resource.inputs || [])
-      .map(inputId => {
-        const inputResource = allResources.find(r => r.id === inputId);
-        return inputResource ? calculateLevel(inputResource, allResources, new Set(visited)) : 0;
-      });
-    
-    return Math.max(0, ...inputLevels) + 1;
-  };
-  
-  // Toggle node expansion
-  const toggleNode = (nodeId: string) => {
-    const newExpanded = new Set(expandedNodes);
-    if (newExpanded.has(nodeId)) {
-      newExpanded.delete(nodeId);
-    } else {
-      newExpanded.add(nodeId);
+    function dragged(event: any, d: any) {
+      d.fx = event.x;
+      d.fy = event.y;
     }
-    setExpandedNodes(newExpanded);
+    
+    function dragended(event: any, d: any) {
+      if (!event.active) sim.alphaTarget(0);
+      d.fx = null;
+      d.fy = null;
+    }
+    
+    // Store simulation for cleanup
+    setSimulation(sim);
+    
+    // Cleanup function
+    return () => {
+      if (simulation) simulation.stop();
+    };
+  }, [resources, dimensions, onSelectResource]);
+  
+  // Get color based on category
+  const getCategoryColor = (category: string): string => {
+    switch(category) {
+      case 'raw_materials':
+        return 'rgba(52, 211, 153, 0.8)'; // Green
+      case 'processed_materials':
+        return 'rgba(59, 130, 246, 0.8)'; // Blue
+      case 'finished_goods':
+        return 'rgba(139, 92, 246, 0.8)'; // Purple
+      case 'luxury_goods':
+        return 'rgba(236, 72, 153, 0.8)'; // Pink
+      case 'imported_goods':
+        return 'rgba(239, 68, 68, 0.8)'; // Red
+      default:
+        return 'rgba(249, 115, 22, 0.8)'; // Amber
+    }
   };
   
   if (loading) {
@@ -180,132 +256,21 @@ const ResourceTreeView: React.FC<ResourceTreeViewProps> = ({
     );
   }
 
-  // Calculate the content dimensions
-  const contentWidth = Math.max(
-    ...treeData.nodes.map((node: any) => node.x + 200),
-    800
-  );
-  
-  const contentHeight = Math.max(
-    ...treeData.nodes.map((node: any) => node.y + 100),
-    600
-  );
-
   return (
     <div className="bg-amber-50/10 rounded-lg p-6 border border-amber-700/30 h-full" ref={containerRef}>
       <div className="text-center text-amber-300 mb-6">
         <h3 className="text-xl font-serif">Production Chains</h3>
         <p className="text-sm mt-1">Explore how resources are transformed through production chains</p>
+        <p className="text-xs mt-1 text-amber-400/70">Drag nodes to rearrange • Scroll to zoom • Click a resource to view details</p>
       </div>
       
-      <div className="overflow-auto max-h-[calc(100vh-200px)] tech-tree-scroll">
-        <div style={{ width: `${contentWidth}px`, height: `${contentHeight}px`, position: 'relative' }}>
-          {/* SVG for links */}
-          <svg 
-            width={contentWidth} 
-            height={contentHeight} 
-            ref={svgRef}
-            className="absolute top-0 left-0 pointer-events-none"
-          >
-            {treeData.links.map((link: any, index: number) => {
-              const sourceNode = treeData.nodes[link.source];
-              const targetNode = treeData.nodes[link.target];
-              
-              if (!sourceNode || !targetNode) return null;
-              
-              // Calculate path points
-              const startX = sourceNode.x + 180; // Right side of source node
-              const startY = sourceNode.y + 40; // Middle of source node
-              const endX = targetNode.x; // Left side of target node
-              const endY = targetNode.y + 40; // Middle of target node
-              
-              // Create a curved path with better curvature
-              const controlPointX1 = startX + 50; // First control point closer to source
-              const controlPointX2 = endX - 50; // Second control point closer to target
-              
-              // Determine if this is an input or output link for styling
-              const isOutputLink = link.sourceId === sourceNode.id && link.targetId === targetNode.id;
-              
-              return (
-                <g key={`link-${index}`}>
-                  <path
-                    d={`M${startX},${startY} C${controlPointX1},${startY} ${controlPointX2},${endY} ${endX},${endY}`}
-                    stroke={isOutputLink ? "#8B6513" : "#8B4513"} // Different color for output links
-                    strokeWidth={2}
-                    fill="none"
-                    strokeDasharray={isOutputLink ? "3,3" : "5,5"} // Different dash pattern for output links
-                    markerEnd="url(#arrowhead)"
-                  />
-                </g>
-              );
-            })}
-            
-            {/* Arrow marker definition */}
-            <defs>
-              <marker
-                id="arrowhead"
-                markerWidth="12"
-                markerHeight="8"
-                refX="10"
-                refY="4"
-                orient="auto"
-              >
-                <polygon points="0 0, 12 4, 0 8" fill="#8B4513" />
-              </marker>
-            </defs>
-          </svg>
-          
-          {/* Render nodes */}
-          {treeData.nodes.map((node: any) => (
-            <div
-              key={node.id}
-              className="absolute bg-amber-800/20 rounded-lg border border-amber-700/50 p-3 w-44 transition-all hover:shadow-lg hover:bg-amber-800/30"
-              style={{ 
-                left: `${node.x}px`, 
-                top: `${node.y}px`,
-                cursor: 'pointer'
-              }}
-              onClick={() => {
-                const resource = getResourceById(node.id);
-                if (resource) onSelectResource(resource);
-              }}
-            >
-              <div className="flex items-center">
-                <div className="w-10 h-10 bg-white rounded-full overflow-hidden flex items-center justify-center mr-2 border border-amber-200">
-                  <img 
-                    src={node.icon} 
-                    alt={node.name}
-                    className="w-8 h-8 object-contain"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      if (!target.dataset.usedFallback) {
-                        target.dataset.usedFallback = 'true';
-                        target.src = "/assets/resources/icons/default.png";
-                      }
-                    }}
-                  />
-                </div>
-                <div className="flex-1">
-                  <div className="text-amber-100 font-medium text-sm leading-tight">{node.name}</div>
-                  <div className="text-amber-300/70 text-xs">
-                    {node.category.split('_').map((word: string) => 
-                      word.charAt(0).toUpperCase() + word.slice(1)
-                    ).join(' ')}
-                  </div>
-                </div>
-              </div>
-              
-              <div className="flex justify-between mt-2 text-xs">
-                <div className="text-amber-200/70">
-                  <span className="font-medium">In:</span> {node.inputs.length}
-                </div>
-                <div className="text-amber-200/70">
-                  <span className="font-medium">Out:</span> {node.outputs.length}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+      <div className="w-full h-[calc(100vh-250px)]">
+        <svg 
+          ref={svgRef}
+          width={dimensions.width} 
+          height={dimensions.height}
+          className="w-full h-full bg-amber-950/30 rounded-lg"
+        />
       </div>
     </div>
   );
