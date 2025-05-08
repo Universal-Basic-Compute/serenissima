@@ -44,5 +44,14 @@
   "banking_services",
   "clean_water",
   "fuel",
-  "labor"
+  "labor",
+  "blackmail_evidence",
+  "disguise_materials",
+  "forgery_tools",
+  "gondola",
+  "poison_components",
+  "porter_equipment",
+  "small_boats",
+  "smuggler_maps",
+  "criminal_contacts"
 ]

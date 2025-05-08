@@ -3,15 +3,15 @@ import { fetchResources, ResourceNode } from '../../lib/resourceUtils';
 import ResourceHeader from './ResourceHeader';
 import ResourceSearchBar from './ResourceSearchBar';
 import ResourceGrid from './ResourceGrid';
-import ResourceTreeView from './ResourceTreeView';
+import ResourceListView from './ResourceListView';
 import ResourceDetails from './ResourceDetails';
 import { FaTimes } from 'react-icons/fa';
 
-interface ResourceTreeProps {
+interface ResourceListProps {
   onClose: () => void;
 }
 
-const ResourceTree: React.FC<ResourceTreeProps> = ({ onClose }) => {
+const ResourceList: React.FC<ResourceListProps> = ({ onClose }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -161,7 +161,7 @@ const ResourceTree: React.FC<ResourceTreeProps> = ({ onClose }) => {
               getRarityInfo={getRarityInfo}
             />
           ) : (
-            <ResourceTreeView 
+            <ResourceListView 
               resources={filteredResources}
               onSelectResource={setSelectedResource}
               loading={loading}
@@ -186,4 +186,4 @@ const ResourceTree: React.FC<ResourceTreeProps> = ({ onClose }) => {
   );
 };
 
-export default ResourceTree;
+export default ResourceList;
