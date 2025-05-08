@@ -1,5 +1,5 @@
 import React from 'react';
-import { FaTimes, FaWeight, FaCube, FaCoins, FaHistory, FaBuilding } from 'react-icons/fa';
+import { FaTimes, FaWeight, FaCube, FaCoins, FaHistory, FaBuilding, FaShip, FaWarehouse, FaExchangeAlt, FaChartLine, FaCalendarAlt } from 'react-icons/fa';
 import { ResourceNode } from '../../lib/resourceUtils';
 
 interface ResourceDetailsProps {
@@ -21,6 +21,25 @@ const ResourceDetails: React.FC<ResourceDetailsProps> = ({
   getCategoryDisplayName,
   getRarityInfo
 }) => {
+  // Helper function to render object properties in a readable format
+  const renderProperties = (obj: any, excludeKeys: string[] = []) => {
+    if (!obj) return null;
+    
+    return Object.entries(obj)
+      .filter(([key]) => !excludeKeys.includes(key))
+      .map(([key, value]) => {
+        // Skip if value is an object or array (we'll handle these separately)
+        if (typeof value === 'object' && value !== null) return null;
+        
+        return (
+          <div key={key} className="mb-1">
+            <span className="font-medium">{getCategoryDisplayName(key)}:</span>{' '}
+            {typeof value === 'boolean' ? (value ? 'Yes' : 'No') : value}
+          </div>
+        );
+      });
+  };
+
   return (
     <div className="w-1/3 bg-amber-900/30 border-l border-amber-700 overflow-auto p-6 tech-tree-scroll" key={`detail-${resource.id}`}>
       <div className="flex justify-between items-start mb-4">
@@ -87,6 +106,12 @@ const ResourceDetails: React.FC<ResourceDetailsProps> = ({
                   <span>{resource.baseValue} ducats</span>
                 </div>
               )}
+              {resource.stackSize && (
+                <div className="flex items-center text-amber-200">
+                  <span className="mr-1 text-xs">×</span>
+                  <span>{resource.stackSize}</span>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -95,10 +120,74 @@ const ResourceDetails: React.FC<ResourceDetailsProps> = ({
       {/* Description */}
       <div className="mb-6">
         <h4 className="text-lg font-serif text-amber-300 mb-2 border-b border-amber-700/50 pb-1">Description</h4>
-        <p className="text-amber-100 text-sm">
+        <p className="text-amber-100 text-sm mb-2">
           {resource.description || "No description available."}
         </p>
+        {resource.longDescription && (
+          <p className="text-amber-100/80 text-sm italic">
+            {resource.longDescription}
+          </p>
+        )}
       </div>
+      
+      {/* Base Properties */}
+      {resource.baseProperties && (
+        <div className="mb-6">
+          <h4 className="text-lg font-serif text-amber-300 mb-2 border-b border-amber-700/50 pb-1">Properties</h4>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm text-amber-100">
+            {renderProperties(resource.baseProperties)}
+            {resource.perishable && (
+              <div className="col-span-2 mt-1 text-amber-200 italic">
+                This resource is perishable and will deteriorate over time.
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+      
+      {/* Source Properties */}
+      {resource.sourceProperties && (
+        <div className="mb-6">
+          <h4 className="text-lg font-serif text-amber-300 mb-2 border-b border-amber-700/50 pb-1">Source</h4>
+          <div className="bg-amber-900/20 rounded p-3 border border-amber-700/30">
+            <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm text-amber-100">
+              {resource.sourceProperties.source && (
+                <div className="col-span-2 mb-1">
+                  <span className="font-medium">Source:</span> {getCategoryDisplayName(resource.sourceProperties.source)}
+                </div>
+              )}
+              {resource.sourceProperties.harvestMethod && (
+                <div className="col-span-2 mb-1">
+                  <span className="font-medium">Harvest Method:</span> {getCategoryDisplayName(resource.sourceProperties.harvestMethod)}
+                </div>
+              )}
+              {resource.sourceProperties.availability && (
+                <div>
+                  <span className="font-medium">Availability:</span> {getCategoryDisplayName(resource.sourceProperties.availability)}
+                </div>
+              )}
+              {resource.sourceProperties.seasonality && (
+                <div>
+                  <span className="font-medium">Seasonality:</span> {getCategoryDisplayName(resource.sourceProperties.seasonality)}
+                </div>
+              )}
+            </div>
+            
+            {resource.sourceProperties.locations && resource.sourceProperties.locations.length > 0 && (
+              <div className="mt-2">
+                <span className="font-medium text-sm text-amber-100">Locations:</span>
+                <div className="flex flex-wrap gap-1 mt-1">
+                  {resource.sourceProperties.locations.map((location: string) => (
+                    <span key={location} className="text-xs bg-amber-800/50 text-amber-200 px-2 py-0.5 rounded">
+                      {getCategoryDisplayName(location)}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
       
       {/* Varieties */}
       {resource.varieties && resource.varieties.length > 0 && (
@@ -106,17 +195,26 @@ const ResourceDetails: React.FC<ResourceDetailsProps> = ({
           <h4 className="text-lg font-serif text-amber-300 mb-2 border-b border-amber-700/50 pb-1">Varieties</h4>
           <div className="grid grid-cols-1 gap-2">
             {resource.varieties.map((variety, index) => (
-              <div key={index} className="bg-amber-900/20 rounded p-2 border border-amber-700/30">
+              <div key={index} className="bg-amber-900/20 rounded p-3 border border-amber-700/30">
                 <div className="font-medium text-amber-200">{getCategoryDisplayName(variety.type)}</div>
-                <div className="text-xs text-amber-100 mt-1">
+                <div className="text-xs text-amber-100 mt-1 grid grid-cols-2 gap-x-4 gap-y-1">
                   {variety.appearance && (
                     <div><span className="font-medium">Appearance:</span> {getCategoryDisplayName(variety.appearance)}</div>
                   )}
                   {variety.valueMultiplier && (
-                    <div><span className="font-medium">Value:</span> {variety.valueMultiplier}x</div>
+                    <div><span className="font-medium">Value:</span> {variety.valueMultiplier}×</div>
                   )}
                   {variety.primaryUse && (
-                    <div><span className="font-medium">Primary Use:</span> {getCategoryDisplayName(variety.primaryUse)}</div>
+                    <div className="col-span-2"><span className="font-medium">Primary Use:</span> {getCategoryDisplayName(variety.primaryUse)}</div>
+                  )}
+                  {variety.primarilyUsedFor && (
+                    <div className="col-span-2"><span className="font-medium">Used For:</span> {getCategoryDisplayName(variety.primarilyUsedFor)}</div>
+                  )}
+                  {variety.durability && (
+                    <div><span className="font-medium">Durability:</span> {getCategoryDisplayName(variety.durability)}</div>
+                  )}
+                  {variety.popularity && (
+                    <div><span className="font-medium">Popularity:</span> {getCategoryDisplayName(variety.popularity)}</div>
                   )}
                 </div>
               </div>
@@ -125,9 +223,100 @@ const ResourceDetails: React.FC<ResourceDetailsProps> = ({
         </div>
       )}
       
+      {/* Quality Variations */}
+      {resource.qualityVariations && (
+        <div className="mb-6">
+          <h4 className="text-lg font-serif text-amber-300 mb-2 border-b border-amber-700/50 pb-1">Quality Levels</h4>
+          
+          {resource.qualityVariations.availableQualities && resource.qualityVariations.availableQualities.length > 0 && (
+            <div className="mb-3">
+              <div className="text-sm text-amber-100 mb-1">Available Qualities:</div>
+              <div className="flex flex-wrap gap-1">
+                {resource.qualityVariations.availableQualities.map((quality: string) => (
+                  <span 
+                    key={quality} 
+                    className={`text-xs px-2 py-0.5 rounded ${
+                      quality === resource.qualityVariations.defaultQuality 
+                        ? 'bg-amber-600 text-white' 
+                        : 'bg-amber-800/40 text-amber-200'
+                    }`}
+                  >
+                    {getCategoryDisplayName(quality)}
+                    {quality === resource.qualityVariations.defaultQuality && ' (Default)'}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          {resource.qualityVariations.qualityMultipliers && (
+            <div className="bg-amber-900/20 rounded p-3 border border-amber-700/30 mb-3">
+              <div className="text-sm text-amber-200 font-medium mb-2">Quality Effects</div>
+              <div className="grid grid-cols-1 gap-2">
+                {Object.entries(resource.qualityVariations.qualityMultipliers).map(([quality, multipliers]) => (
+                  <div key={quality} className="text-xs">
+                    <div className="text-amber-100 font-medium mb-1">{getCategoryDisplayName(quality)}:</div>
+                    <div className="grid grid-cols-2 gap-x-3 gap-y-1 pl-2 text-amber-100/90">
+                      {Object.entries(multipliers as Record<string, number>).map(([attribute, value]) => (
+                        <div key={attribute}>
+                          <span className="font-medium">{getCategoryDisplayName(attribute)}:</span> {value}×
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          {resource.qualityVariations.qualityFactors && resource.qualityVariations.qualityFactors.length > 0 && (
+            <div>
+              <div className="text-sm text-amber-100 mb-1">Quality Factors:</div>
+              <div className="grid grid-cols-1 gap-1">
+                {resource.qualityVariations.qualityFactors.map((factor: any, index: number) => (
+                  <div key={index} className="flex justify-between text-xs bg-amber-900/10 p-2 rounded">
+                    <span className="text-amber-200">{getCategoryDisplayName(factor.factor)}</span>
+                    <span className="text-amber-100">{factor.weight * 100}% impact</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+      
       {/* Production Chain */}
       <div className="mb-6">
         <h4 className="text-lg font-serif text-amber-300 mb-2 border-b border-amber-700/50 pb-1">Production Chain</h4>
+        
+        {/* Production Properties */}
+        {resource.productionProperties && (
+          <div className="mb-4 bg-amber-900/20 rounded p-3 border border-amber-700/30">
+            <div className="text-sm text-amber-200 font-medium mb-2">Production Details</div>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-amber-100">
+              {resource.productionProperties.processorBuilding && (
+                <div className="col-span-2 mb-1">
+                  <span className="font-medium">Produced in:</span> {getCategoryDisplayName(resource.productionProperties.processorBuilding)}
+                </div>
+              )}
+              {resource.productionProperties.processingTime && (
+                <div>
+                  <span className="font-medium">Processing Time:</span> {resource.productionProperties.processingTime} minutes
+                </div>
+              )}
+              {resource.productionProperties.processingComplexity && (
+                <div>
+                  <span className="font-medium">Complexity:</span> {resource.productionProperties.processingComplexity}/10
+                </div>
+              )}
+              {resource.productionProperties.requiredSkill && (
+                <div className="col-span-2">
+                  <span className="font-medium">Required Skill:</span> {getCategoryDisplayName(resource.productionProperties.requiredSkill)}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
         
         {/* Input Resources */}
         <div className="mb-4">
@@ -198,6 +387,195 @@ const ResourceDetails: React.FC<ResourceDetailsProps> = ({
         </div>
       </div>
       
+      {/* Transport Properties */}
+      {resource.transportProperties && (
+        <div className="mb-6">
+          <h4 className="text-lg font-serif text-amber-300 mb-2 border-b border-amber-700/50 pb-1">
+            <div className="flex items-center">
+              <FaShip className="mr-2" />
+              Transportation
+            </div>
+          </h4>
+          
+          {resource.transportProperties.transportMethods && (
+            <div className="mb-3">
+              <h5 className="text-sm text-amber-200 font-medium mb-2">Transport Methods</h5>
+              <div className="grid grid-cols-1 gap-2">
+                {Object.entries(resource.transportProperties.transportMethods).map(([method, details]) => (
+                  <div key={method} className="bg-amber-900/20 rounded p-2 border border-amber-700/30">
+                    <div className="text-amber-100 font-medium text-sm">{getCategoryDisplayName(method)}</div>
+                    <div className="grid grid-cols-3 gap-1 mt-1 text-xs text-amber-100/90">
+                      {Object.entries(details as Record<string, any>).map(([property, value]) => (
+                        <div key={property}>
+                          <span className="font-medium">{getCategoryDisplayName(property)}:</span> {property === 'risk' ? `${(value as number) * 100}%` : value}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          {resource.transportProperties.specialRequirements && resource.transportProperties.specialRequirements.length > 0 && (
+            <div className="mb-3">
+              <h5 className="text-sm text-amber-200 font-medium mb-1">Special Requirements</h5>
+              <div className="flex flex-wrap gap-1">
+                {resource.transportProperties.specialRequirements.map((req: string) => (
+                  <span key={req} className="text-xs bg-amber-800/40 text-amber-200 px-2 py-0.5 rounded">
+                    {getCategoryDisplayName(req)}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          {resource.transportProperties.routeRestrictions && resource.transportProperties.routeRestrictions.length > 0 && (
+            <div>
+              <h5 className="text-sm text-amber-200 font-medium mb-1">Route Restrictions</h5>
+              <div className="flex flex-wrap gap-1">
+                {resource.transportProperties.routeRestrictions.map((restriction: string) => (
+                  <span key={restriction} className="text-xs bg-amber-800/40 text-amber-100 px-2 py-0.5 rounded">
+                    {getCategoryDisplayName(restriction)}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+      
+      {/* Storage Properties */}
+      {resource.storageProperties && (
+        <div className="mb-6">
+          <h4 className="text-lg font-serif text-amber-300 mb-2 border-b border-amber-700/50 pb-1">
+            <div className="flex items-center">
+              <FaWarehouse className="mr-2" />
+              Storage
+            </div>
+          </h4>
+          
+          {resource.storageProperties.storageFacilities && (
+            <div className="mb-3">
+              <h5 className="text-sm text-amber-200 font-medium mb-2">Storage Facilities</h5>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {Object.entries(resource.storageProperties.storageFacilities).map(([facility, details]) => (
+                  <div key={facility} className="bg-amber-900/20 rounded p-2 border border-amber-700/30">
+                    <div className="text-amber-100 font-medium text-sm">{getCategoryDisplayName(facility)}</div>
+                    <div className="grid grid-cols-2 gap-1 mt-1 text-xs text-amber-100/90">
+                      {Object.entries(details as Record<string, any>).map(([property, value]) => (
+                        <div key={property}>
+                          <span className="font-medium">{getCategoryDisplayName(property)}:</span> {value}×
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          {resource.storageProperties.storageRequirements && resource.storageProperties.storageRequirements.length > 0 && (
+            <div className="mb-3">
+              <h5 className="text-sm text-amber-200 font-medium mb-1">Storage Requirements</h5>
+              <div className="flex flex-wrap gap-1">
+                {resource.storageProperties.storageRequirements.map((req: string) => (
+                  <span key={req} className="text-xs bg-amber-800/40 text-amber-200 px-2 py-0.5 rounded">
+                    {getCategoryDisplayName(req)}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          {resource.storageProperties.specialRisks && resource.storageProperties.specialRisks.length > 0 && (
+            <div className="mb-3">
+              <h5 className="text-sm text-amber-200 font-medium mb-1">Storage Risks</h5>
+              <div className="flex flex-wrap gap-1">
+                {resource.storageProperties.specialRisks.map((risk: string) => (
+                  <span key={risk} className="text-xs bg-amber-800/40 text-amber-100 px-2 py-0.5 rounded">
+                    {getCategoryDisplayName(risk)}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          {resource.storageProperties.maxStorageTime && (
+            <div className="text-sm text-amber-100">
+              <span className="font-medium">Maximum Storage Time:</span>{' '}
+              {resource.storageProperties.maxStorageTime === 'unlimited' 
+                ? 'Unlimited' 
+                : `${resource.storageProperties.maxStorageTime} hours`}
+            </div>
+          )}
+        </div>
+      )}
+      
+      {/* Market Dynamics */}
+      {resource.marketDynamics && (
+        <div className="mb-6">
+          <h4 className="text-lg font-serif text-amber-300 mb-2 border-b border-amber-700/50 pb-1">
+            <div className="flex items-center">
+              <FaChartLine className="mr-2" />
+              Market Dynamics
+            </div>
+          </h4>
+          
+          <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-amber-100 mb-3">
+            {resource.marketDynamics.baseAvailability !== undefined && (
+              <div>
+                <span className="font-medium">Base Availability:</span> {resource.marketDynamics.baseAvailability * 100}%
+              </div>
+            )}
+            {resource.marketDynamics.demandLevel && (
+              <div>
+                <span className="font-medium">Demand Level:</span> {getCategoryDisplayName(resource.marketDynamics.demandLevel)}
+              </div>
+            )}
+            {resource.marketDynamics.priceVolatility !== undefined && (
+              <div>
+                <span className="font-medium">Price Volatility:</span> {resource.marketDynamics.priceVolatility * 100}%
+              </div>
+            )}
+          </div>
+          
+          {resource.marketDynamics.influencedBy && resource.marketDynamics.influencedBy.length > 0 && (
+            <div className="mb-3">
+              <h5 className="text-sm text-amber-200 font-medium mb-1">Price Influenced By</h5>
+              <div className="flex flex-wrap gap-1">
+                {resource.marketDynamics.influencedBy.map((factor: string) => (
+                  <span key={factor} className="text-xs bg-amber-800/40 text-amber-200 px-2 py-0.5 rounded">
+                    {getCategoryDisplayName(factor)}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          {resource.marketDynamics.regionalFactors && resource.marketDynamics.regionalFactors.length > 0 && (
+            <div>
+              <h5 className="text-sm text-amber-200 font-medium mb-1">Regional Factors</h5>
+              <div className="grid grid-cols-1 gap-1">
+                {resource.marketDynamics.regionalFactors.map((factor: any, index: number) => (
+                  <div key={index} className="flex justify-between text-xs bg-amber-900/10 p-2 rounded">
+                    <span className="text-amber-200">{getCategoryDisplayName(factor.region)}</span>
+                    <div className="text-amber-100">
+                      {factor.availabilityModifier && (
+                        <span className="mr-2">Availability: {factor.availabilityModifier}×</span>
+                      )}
+                      {factor.priceModifier && (
+                        <span>Price: {factor.priceModifier}×</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+      
       {/* Buildings */}
       <div className="mb-6">
         <h4 className="text-lg font-serif text-amber-300 mb-2 border-b border-amber-700/50 pb-1">Production Buildings</h4>
@@ -229,6 +607,61 @@ const ResourceDetails: React.FC<ResourceDetailsProps> = ({
         )}
       </div>
       
+      {/* Substitutes and Complements */}
+      {(resource.substitutes || resource.complements) && (
+        <div className="mb-6">
+          <h4 className="text-lg font-serif text-amber-300 mb-2 border-b border-amber-700/50 pb-1">
+            <div className="flex items-center">
+              <FaExchangeAlt className="mr-2" />
+              Related Resources
+            </div>
+          </h4>
+          
+          {resource.substitutes && resource.substitutes.length > 0 && (
+            <div className="mb-3">
+              <h5 className="text-sm text-amber-200 font-medium mb-2">Substitutes</h5>
+              <div className="space-y-2">
+                {resource.substitutes.map((substitute: any, index: number) => (
+                  <div key={index} className="bg-amber-900/20 rounded p-2 border border-amber-700/30">
+                    <div className="text-amber-100 font-medium text-sm">{getCategoryDisplayName(substitute.resourceId)}</div>
+                    <div className="grid grid-cols-2 gap-1 mt-1 text-xs text-amber-100/90">
+                      {substitute.efficiency !== undefined && (
+                        <div>
+                          <span className="font-medium">Efficiency:</span> {substitute.efficiency * 100}%
+                        </div>
+                      )}
+                      {substitute.qualityPenalty !== undefined && (
+                        <div>
+                          <span className="font-medium">Quality Penalty:</span> {substitute.qualityPenalty}
+                        </div>
+                      )}
+                      {substitute.context && (
+                        <div className="col-span-2">
+                          <span className="font-medium">Context:</span> {getCategoryDisplayName(substitute.context)}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          {resource.complements && resource.complements.length > 0 && (
+            <div>
+              <h5 className="text-sm text-amber-200 font-medium mb-1">Complementary Resources</h5>
+              <div className="flex flex-wrap gap-1">
+                {resource.complements.map((complement: string, index: number) => (
+                  <span key={index} className="text-xs bg-amber-800/40 text-amber-100 px-2 py-0.5 rounded">
+                    {getCategoryDisplayName(complement)}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+      
       {/* Historical Notes */}
       {resource.historicalNotes && (
         <div className="mb-6">
@@ -238,10 +671,59 @@ const ResourceDetails: React.FC<ResourceDetailsProps> = ({
               Historical Context
             </div>
           </h4>
-          <div className="bg-amber-900/20 p-3 rounded border border-amber-700/30 text-amber-100 text-sm italic">
-            {resource.historicalNotes.historicalSignificance || 
-             resource.historicalNotes.culturalContext || 
-             "No historical notes available."}
+          
+          <div className="space-y-3">
+            {resource.historicalNotes.introductionYear && (
+              <div className="flex items-start">
+                <FaCalendarAlt className="text-amber-400 mt-1 mr-2" />
+                <div>
+                  <div className="text-sm text-amber-200 font-medium">Introduction</div>
+                  <div className="text-sm text-amber-100">
+                    {resource.historicalNotes.introductionYear === 'ancient' 
+                      ? 'Used since ancient times' 
+                      : `Introduced in ${resource.historicalNotes.introductionYear}`}
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {resource.historicalNotes.historicalSignificance && (
+              <div className="bg-amber-900/20 p-3 rounded border border-amber-700/30 text-amber-100 text-sm italic">
+                {resource.historicalNotes.historicalSignificance}
+              </div>
+            )}
+            
+            {resource.historicalNotes.culturalContext && resource.historicalNotes.historicalSignificance !== resource.historicalNotes.culturalContext && (
+              <div className="bg-amber-900/20 p-3 rounded border border-amber-700/30 text-amber-100 text-sm italic">
+                {resource.historicalNotes.culturalContext}
+              </div>
+            )}
+            
+            {resource.historicalNotes.notableProducers && resource.historicalNotes.notableProducers.length > 0 && (
+              <div>
+                <div className="text-sm text-amber-200 font-medium mb-1">Notable Producers</div>
+                <div className="flex flex-wrap gap-1">
+                  {resource.historicalNotes.notableProducers.map((producer: string, index: number) => (
+                    <span key={index} className="text-xs bg-amber-800/40 text-amber-100 px-2 py-0.5 rounded">
+                      {producer}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {resource.historicalNotes.historicalMarkets && resource.historicalNotes.historicalMarkets.length > 0 && (
+              <div>
+                <div className="text-sm text-amber-200 font-medium mb-1">Historical Markets</div>
+                <div className="flex flex-wrap gap-1">
+                  {resource.historicalNotes.historicalMarkets.map((market: string, index: number) => (
+                    <span key={index} className="text-xs bg-amber-800/40 text-amber-100 px-2 py-0.5 rounded">
+                      {market}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
