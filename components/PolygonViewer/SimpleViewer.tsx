@@ -34,35 +34,94 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
   // Define loadUsers as a reusable function
   const loadUsers = useCallback(async () => {
     try {
-      const response = await fetch(`${getApiBaseUrl()}/api/users`);
-      if (response.ok) {
-        const data = await response.json();
-        if (data && Array.isArray(data)) {
-          const usersMap: Record<string, any> = {};
-          data.forEach(user => {
-            if (user.user_name) {
-              usersMap[user.user_name] = user;
-            }
-          });
-          
-          // Ensure ConsiglioDeiDieci is always present
-          if (!usersMap['ConsiglioDeiDieci']) {
-            usersMap['ConsiglioDeiDieci'] = {
-              user_name: 'ConsiglioDeiDieci',
-              color: '#8B0000', // Dark red
-              coat_of_arms_image: null
-            };
+      // Add a fallback URL in case getApiBaseUrl() fails
+      const apiUrl = getApiBaseUrl() || window.location.origin;
+      
+      // Try to fetch from the API
+      console.log(`Attempting to fetch users from ${apiUrl}/api/users`);
+      
+      // Add a timeout to prevent hanging requests
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+      
+      const response = await fetch(`${apiUrl}/api/users`, {
+        signal: controller.signal
+      }).catch(error => {
+        console.warn('Fetch request failed:', error);
+        return null; // Return null to indicate fetch failed
+      });
+      
+      clearTimeout(timeoutId);
+      
+      // If fetch failed or returned non-OK status, use fallback data
+      if (!response || !response.ok) {
+        console.warn(`Using fallback user data because API is unavailable (${response ? response.status : 'connection failed'})`);
+        
+        // Create default users as fallback
+        const defaultUsers = {
+          'ConsiglioDeiDieci': {
+            user_name: 'ConsiglioDeiDieci',
+            color: '#8B0000', // Dark red
+            coat_of_arms_image: null
           }
-          
-          setUsers(usersMap);
-          console.log('Loaded users data:', Object.keys(usersMap).length, 'users');
-          return usersMap;
-        }
+        };
+        
+        setUsers(defaultUsers);
+        console.log('Using default users data due to API error');
+        return defaultUsers;
       }
-      return {};
+      
+      const data = await response.json();
+      if (data && Array.isArray(data)) {
+        const usersMap: Record<string, any> = {};
+        data.forEach(user => {
+          if (user.user_name) {
+            usersMap[user.user_name] = user;
+          }
+        });
+        
+        // Ensure ConsiglioDeiDieci is always present
+        if (!usersMap['ConsiglioDeiDieci']) {
+          usersMap['ConsiglioDeiDieci'] = {
+            user_name: 'ConsiglioDeiDieci',
+            color: '#8B0000', // Dark red
+            coat_of_arms_image: null
+          }
+        }
+        
+        setUsers(usersMap);
+        console.log('Loaded users data:', Object.keys(usersMap).length, 'users');
+        return usersMap;
+      } else {
+        console.warn('Invalid users data format received:', data);
+        
+        // Return fallback data
+        const fallbackUsers = {
+          'ConsiglioDeiDieci': {
+            user_name: 'ConsiglioDeiDieci',
+            color: '#8B0000',
+            coat_of_arms_image: null
+          }
+        };
+        
+        setUsers(fallbackUsers);
+        return fallbackUsers;
+      }
     } catch (error) {
       console.error('Error loading users data:', error);
-      return {};
+      
+      // Create a default ConsiglioDeiDieci user as fallback
+      const fallbackUsers = {
+        'ConsiglioDeiDieci': {
+          user_name: 'ConsiglioDeiDieci',
+          color: '#8B0000', // Dark red
+          coat_of_arms_image: null
+        }
+      };
+      
+      setUsers(fallbackUsers);
+      console.log('Using fallback users data due to error');
+      return fallbackUsers;
     }
   }, []);
   
