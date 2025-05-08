@@ -253,6 +253,35 @@ const KnowledgeRepository: React.FC<KnowledgeRepositoryProps> = ({
                 </button>
               </div>
             </div>
+            
+            {/* Decrees & Governance Card */}
+            <div className="bg-white rounded-lg overflow-hidden shadow-md border border-amber-200">
+              <div className="h-48 overflow-hidden">
+                <Image 
+                  src="/images/decrees-governance.png" 
+                  alt="Decrees & Governance" 
+                  width={800}
+                  height={400}
+                  className="w-full h-full object-cover transition-transform hover:scale-105"
+                  onError={(e) => {
+                    // Fallback if image doesn't exist
+                    (e.target as HTMLImageElement).src = 'https://via.placeholder.com/800x400?text=Decrees+%26+Governance';
+                  }}
+                />
+              </div>
+              <div className="p-6">
+                <h3 className="text-xl font-serif text-amber-800 mb-2">Decrees & Governance</h3>
+                <p className="text-gray-600 mb-4">
+                  Learn how to influence laws and shape the Republic as you rise in wealth and status.
+                </p>
+                <button 
+                  onClick={() => onSelectArticle("decrees-governance")}
+                  className="inline-block px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors"
+                >
+                  Read Guide
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
