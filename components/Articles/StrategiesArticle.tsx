@@ -50,16 +50,22 @@ const StrategiesArticle: React.FC<StrategiesArticleProps> = ({ onClose }) => {
           </div>
           
           <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
-            <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #3: Build Transportation Networks</h3>
+            <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #3: Control Transportation Networks</h3>
             <p>
-              Roads and docks are the lifeblood of commerce. Properties connected to efficient transportation networks command higher rents and facilitate more trade. Invest in creating connections between your properties and major thoroughfares to increase their value.
+              Roads and docks are the lifeblood of commerce. Properties connected to efficient transportation networks command higher rents and facilitate more trade. However, there's a deeper strategic element: controlling multiple adjacent land parcels allows you to influence the flow of goods throughout Venice.
+            </p>
+            <p className="mt-2">
+              <span className="font-medium">Advanced tactic:</span> By strategically acquiring land that forms natural chokepoints, you can effectively blockade parts of Venice from ground transportation. This forces competitors to rely on more expensive water transportation, increasing their costs while your own goods flow freely. Be cautious though—this strategy can backfire if rival merchant families unite against you or employ the same tactics in areas where you need access.
             </p>
           </div>
           
           <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
-            <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #4: Understand Supply Chains</h3>
+            <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #4: Manipulate Supply Chains</h3>
             <p>
               Every finished product in Venice requires raw materials and processing. Study the resource system to identify bottlenecks in supply chains. Controlling key points in popular production chains can be more profitable than owning the final production facility.
+            </p>
+            <p className="mt-2">
+              <span className="font-medium">Advanced tactic:</span> Identify which resources have the fewest sources, then secure those sources before competitors realize their importance. For example, if a particular dye comes from only two locations, controlling both gives you pricing power over the entire textile industry. This "resource bottleneck" strategy is less visible than land blockades but often more profitable.
             </p>
           </div>
           
@@ -113,9 +119,12 @@ const StrategiesArticle: React.FC<StrategiesArticleProps> = ({ onClose }) => {
           </div>
           
           <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
-            <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #12: Invest in Infrastructure</h3>
+            <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #12: Strategic Infrastructure Investment</h3>
             <p>
               Public works like bridges, wells, and piazzas increase property values in their vicinity. Contributing to infrastructure development can raise the value of your existing holdings while improving your standing with local authorities.
+            </p>
+            <p className="mt-2">
+              <span className="font-medium">Advanced tactic:</span> Propose and fund infrastructure projects that disproportionately benefit your properties while appearing to serve the public good. A bridge that connects your commercial district to a major market creates value for you while earning political goodwill. Conversely, oppose infrastructure that would benefit rivals by suggesting alternative projects that better "serve the Republic."
             </p>
           </div>
           
@@ -172,6 +181,26 @@ const StrategiesArticle: React.FC<StrategiesArticleProps> = ({ onClose }) => {
             <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #20: Build Your Family Legacy</h3>
             <p>
               The greatest Venetian fortunes were built across generations. Think beyond immediate profits to create lasting economic structures that will continue to generate wealth over time. Your family name and reputation are assets that appreciate with wise stewardship.
+            </p>
+          </div>
+          
+          <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
+            <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #21: Competitive Isolation</h3>
+            <p>
+              In Venice's closed economic system, sometimes limiting your competitors' options is as valuable as expanding your own. Study the geographic and economic connections between rival merchant families to identify their vulnerabilities.
+            </p>
+            <p className="mt-2">
+              <span className="font-medium">Advanced tactic:</span> If a rival family specializes in glassmaking, acquiring the land between their workshops and their sand suppliers forces them to navigate around your territory, increasing their costs. Similarly, purchasing key waterfront properties can deny dock access to competitors, making their shipping operations more expensive and time-consuming. Remember that such aggressive tactics will likely trigger retaliation, so secure your own supply lines first.
+            </p>
+          </div>
+          
+          <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
+            <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #22: Form Strategic Alliances</h3>
+            <p>
+              No single family, no matter how wealthy, can control all of Venice. Identifying potential allies whose interests complement rather than compete with yours is essential for long-term success.
+            </p>
+            <p className="mt-2">
+              <span className="font-medium">Advanced tactic:</span> Create mutually beneficial arrangements with other families to counter common rivals. If another merchant family is being blockaded by a competitor, offer them access through your lands in exchange for favorable trade terms or support in the Council. These alliances can shift as circumstances change—the family you help today may become a rival tomorrow, but the political capital you gain will remain valuable.
             </p>
           </div>
           
