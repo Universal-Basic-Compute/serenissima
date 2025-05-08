@@ -22,7 +22,14 @@ export interface ResourceNode {
   historicalNotes?: any;
   stackSize?: number;
   baseProperties?: Record<string, any>;
-  sourceProperties?: any;
+  sourceProperties?: {
+    source?: string;
+    harvestMethod?: string;
+    availability?: string;
+    seasonality?: string;
+    locations?: string[];
+    [key: string]: any;
+  };
   perishable?: boolean;
   substitutes?: any[];
   complements?: string[];
