@@ -43,6 +43,68 @@ const LandOwnerGuideArticle: React.FC<LandOwnerGuideArticleProps> = ({ onClose }
               <li>RESOURCES provision both Players and AI Citizens</li>
               <li>Players & Citizens pay rent, completing the cycle back to LAND</li>
             </ol>
+            
+            <div className="my-6 flex justify-center">
+              <svg width="400" height="300" viewBox="0 0 400 300" className="border border-amber-300 rounded bg-amber-50">
+                {/* Background */}
+                <rect x="0" y="0" width="400" height="300" fill="#fef3c7" />
+                
+                {/* Central cycle diagram */}
+                <ellipse cx="200" cy="150" rx="150" ry="120" fill="none" stroke="#d97706" strokeWidth="1" strokeDasharray="5,5" />
+                
+                {/* LAND node */}
+                <rect x="170" y="30" width="60" height="40" rx="5" fill="#f59e0b" stroke="#b45309" strokeWidth="2" />
+                <text x="200" y="55" fill="#7c2d12" fontFamily="serif" fontSize="14" textAnchor="middle" fontWeight="bold">LAND</text>
+                
+                {/* BUILDINGS node */}
+                <rect x="300" y="110" width="80" height="40" rx="5" fill="#f59e0b" stroke="#b45309" strokeWidth="2" />
+                <text x="340" y="135" fill="#7c2d12" fontFamily="serif" fontSize="14" textAnchor="middle" fontWeight="bold">BUILDINGS</text>
+                
+                {/* BUSINESSES node */}
+                <rect x="260" y="210" width="90" height="40" rx="5" fill="#f59e0b" stroke="#b45309" strokeWidth="2" />
+                <text x="305" y="235" fill="#7c2d12" fontFamily="serif" fontSize="14" textAnchor="middle" fontWeight="bold">BUSINESSES</text>
+                
+                {/* RESOURCES node */}
+                <rect x="50" y="210" width="90" height="40" rx="5" fill="#f59e0b" stroke="#b45309" strokeWidth="2" />
+                <text x="95" y="235" fill="#7c2d12" fontFamily="serif" fontSize="14" textAnchor="middle" fontWeight="bold">RESOURCES</text>
+                
+                {/* Players & Citizens node */}
+                <rect x="20" y="110" width="120" height="40" rx="5" fill="#f59e0b" stroke="#b45309" strokeWidth="2" />
+                <text x="80" y="135" fill="#7c2d12" fontFamily="serif" fontSize="14" textAnchor="middle">Players & Citizens</text>
+                
+                {/* Flow arrows */}
+                {/* LAND to BUILDINGS */}
+                <path d="M225,50 C270,60 300,80 320,110" stroke="#7c2d12" strokeWidth="2" fill="none" markerEnd="url(#arrowhead)" />
+                <text x="280" y="80" fill="#7c2d12" fontFamily="serif" fontSize="12" transform="rotate(25, 280, 80)">leases</text>
+                
+                {/* BUILDINGS to BUSINESSES */}
+                <path d="M340,150 C340,180 330,200 305,210" stroke="#7c2d12" strokeWidth="2" fill="none" markerEnd="url(#arrowhead)" />
+                <text x="345" y="180" fill="#7c2d12" fontFamily="serif" fontSize="12" transform="rotate(90, 345, 180)">houses</text>
+                
+                {/* BUSINESSES to RESOURCES */}
+                <path d="M260,230 C220,240 180,240 140,230" stroke="#7c2d12" strokeWidth="2" fill="none" markerEnd="url(#arrowhead)" />
+                <text x="200" y="250" fill="#7c2d12" fontFamily="serif" fontSize="12">transform</text>
+                
+                {/* RESOURCES to Players & Citizens */}
+                <path d="M80,210 C70,180 70,150 80,150" stroke="#7c2d12" strokeWidth="2" fill="none" markerEnd="url(#arrowhead)" />
+                <text x="55" y="180" fill="#7c2d12" fontFamily="serif" fontSize="12" transform="rotate(-90, 55, 180)">provision</text>
+                
+                {/* Players & Citizens to LAND */}
+                <path d="M120,110 C150,80 170,60 175,50" stroke="#7c2d12" strokeWidth="2" fill="none" markerEnd="url(#arrowhead)" />
+                <text x="130" y="80" fill="#7c2d12" fontFamily="serif" fontSize="12" transform="rotate(-25, 130, 80)">pay rent</text>
+                
+                {/* Arrow definition */}
+                <defs>
+                  <marker id="arrowhead" markerWidth="10" markerHeight="7" 
+                          refX="9" refY="3.5" orient="auto">
+                    <polygon points="0 0, 10 3.5, 0 7" fill="#7c2d12" />
+                  </marker>
+                </defs>
+              </svg>
+              <div className="text-sm text-amber-800 italic text-center mt-2">
+                The economic cycle of Venice: a closed system where value flows in a continuous loop
+              </div>
+            </div>
             <p className="mt-3 italic">
               "He who controls the land controls the flow of wealth." — Venetian proverb
             </p>
@@ -79,10 +141,76 @@ const LandOwnerGuideArticle: React.FC<LandOwnerGuideArticleProps> = ({ onClose }
             </div>
             
             <div>
-              <h5 className="font-bold text-amber-900">Strategic Resource Control</h5>
+              <h5 className="font-bold text-amber-900">Strategic Market Control</h5>
               <p>
-                If your land contains or provides access to valuable resources, high pricing can create bottlenecks in supply chains. This gives you leverage over entire industries that depend on those resources, allowing you to extract premium rates from those who have no choice but to pay.
+                If your land contains or provides access to valuable markets, high pricing can create bottlenecks in trade networks. This gives you leverage over entire industries that depend on those markets, allowing you to extract premium rates from those who have no choice but to pay.
               </p>
+              
+              <div className="my-6 flex justify-center">
+                <svg width="400" height="250" viewBox="0 0 400 250" className="border border-amber-300 rounded bg-amber-50">
+                  {/* Background */}
+                  <rect x="0" y="0" width="400" height="250" fill="#fef3c7" />
+                  
+                  {/* Central market */}
+                  <rect x="150" y="75" width="100" height="100" rx="5" fill="#f59e0b" stroke="#b45309" strokeWidth="2" opacity="0.8">
+                    <title>Your Market Property</title>
+                  </rect>
+                  
+                  {/* Market symbol */}
+                  <rect x="175" y="100" width="50" height="50" fill="#fef3c7" stroke="#b45309" strokeWidth="1" />
+                  <text x="200" y="130" fill="#7c2d12" fontFamily="serif" fontSize="14" textAnchor="middle">Market</text>
+                  
+                  {/* Surrounding properties */}
+                  <rect x="50" y="50" width="60" height="60" fill="#a3e635" stroke="#65a30d" strokeWidth="1" opacity="0.7">
+                    <title>Supplier Property</title>
+                  </rect>
+                  <text x="80" y="80" fill="#7c2d12" fontFamily="serif" fontSize="12" textAnchor="middle">Supplier</text>
+                  
+                  <rect x="50" y="140" width="60" height="60" fill="#a3e635" stroke="#65a30d" strokeWidth="1" opacity="0.7">
+                    <title>Supplier Property</title>
+                  </rect>
+                  <text x="80" y="170" fill="#7c2d12" fontFamily="serif" fontSize="12" textAnchor="middle">Supplier</text>
+                  
+                  <rect x="290" y="50" width="60" height="60" fill="#ef4444" stroke="#b91c1c" strokeWidth="1" opacity="0.7">
+                    <title>Competitor Property</title>
+                  </rect>
+                  <text x="320" y="80" fill="#7c2d12" fontFamily="serif" fontSize="12" textAnchor="middle">Competitor</text>
+                  
+                  <rect x="290" y="140" width="60" height="60" fill="#ef4444" stroke="#b91c1c" strokeWidth="1" opacity="0.7">
+                    <title>Competitor Property</title>
+                  </rect>
+                  <text x="320" y="170" fill="#7c2d12" fontFamily="serif" fontSize="12" textAnchor="middle">Competitor</text>
+                  
+                  {/* Flow arrows */}
+                  <path d="M110,80 L150,125" stroke="#059669" strokeWidth="2" fill="none" markerEnd="url(#arrowhead)" />
+                  <path d="M110,170 L150,125" stroke="#059669" strokeWidth="2" fill="none" markerEnd="url(#arrowhead)" />
+                  
+                  <path d="M250,125 L290,80" stroke="#ef4444" strokeWidth="2" strokeDasharray="5,3" fill="none" markerEnd="url(#arrowhead)" />
+                  <path d="M250,125 L290,170" stroke="#ef4444" strokeWidth="2" strokeDasharray="5,3" fill="none" markerEnd="url(#arrowhead)" />
+                  
+                  {/* Price indicators */}
+                  <text x="130" y="100" fill="#059669" fontFamily="serif" fontSize="12">Low Fee</text>
+                  <text x="130" y="150" fill="#059669" fontFamily="serif" fontSize="12">Low Fee</text>
+                  
+                  <text x="270" y="100" fill="#b91c1c" fontFamily="serif" fontSize="12">High Fee</text>
+                  <text x="270" y="150" fill="#b91c1c" fontFamily="serif" fontSize="12">High Fee</text>
+                  
+                  {/* Labels */}
+                  <text x="200" y="65" fill="#7c2d12" fontFamily="serif" fontSize="16" fontWeight="bold" textAnchor="middle">Your Market Property</text>
+                  <text x="200" y="200" fill="#7c2d12" fontFamily="serif" fontSize="14" textAnchor="middle">Differential Market Access Fees</text>
+                  
+                  {/* Arrow definition */}
+                  <defs>
+                    <marker id="arrowhead" markerWidth="10" markerHeight="7" 
+                            refX="9" refY="3.5" orient="auto">
+                      <polygon points="0 0, 10 3.5, 0 7" fill="#7c2d12" />
+                    </marker>
+                  </defs>
+                </svg>
+                <div className="text-sm text-amber-800 italic text-center mt-2">
+                  Controlling market properties allows you to charge differential fees, favoring allies and penalizing competitors
+                </div>
+              </div>
             </div>
           </div>
           
