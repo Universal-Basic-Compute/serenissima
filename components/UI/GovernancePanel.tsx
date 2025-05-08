@@ -120,8 +120,8 @@ const GovernancePanel: React.FC<GovernancePanelProps> = ({ onClose, standalone =
     setError(null);
     
     try {
-      const apiBaseUrl = getApiBaseUrl();
-      const response = await fetch(`${apiBaseUrl}/api/decrees`);
+      // Use relative URL instead of getApiBaseUrl()
+      const response = await fetch('/api/decrees');
       
       if (!response.ok) {
         throw new Error(`Failed to fetch decrees: ${response.status} ${response.statusText}`);
