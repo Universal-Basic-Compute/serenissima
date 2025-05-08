@@ -350,50 +350,6 @@ const BuildingOwnersGuideArticle: React.FC<BuildingOwnersGuideArticleProps> = ({
             </div>
           </div>
           
-          <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
-            <h4 className="text-xl font-serif text-amber-800 mb-2">District Specialization</h4>
-            
-            <p className="mb-3">
-              Creating specialized districts through strategic building placement generates significant economic advantages:
-            </p>
-            
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="bg-amber-50 p-3 rounded border border-amber-200">
-                <h5 className="font-bold text-amber-900 mb-1">Luxury Retail Clusters</h5>
-                <p className="text-sm">
-                  Grouping jewelry shops, fine textile merchants, and art dealers creates a destination for wealthy customers. Each business benefits from the combined draw, increasing rents and property values throughout the district.
-                </p>
-              </div>
-              
-              <div className="bg-amber-50 p-3 rounded border border-amber-200">
-                <h5 className="font-bold text-amber-900 mb-1">Craft Production Zones</h5>
-                <p className="text-sm">
-                  Concentrating related workshops—like Murano's glassmaking district—creates efficiencies in resource sharing, knowledge exchange, and apprentice training. This increases productivity and property values.
-                </p>
-              </div>
-              
-              <div className="bg-amber-50 p-3 rounded border border-amber-200">
-                <h5 className="font-bold text-amber-900 mb-1">Residential Neighborhoods</h5>
-                <p className="text-sm">
-                  Developing cohesive residential areas with appropriate amenities (wells, small markets, churches) creates desirable living environments that command premium rents and attract stable, long-term tenants.
-                </p>
-              </div>
-              
-              <div className="bg-amber-50 p-3 rounded border border-amber-200">
-                <h5 className="font-bold text-amber-900 mb-1">Waterfront Commercial Zones</h5>
-                <p className="text-sm">
-                  Creating integrated complexes of docks, warehouses, and trading houses along major canals maximizes the value of expensive waterfront property while creating efficient import/export hubs.
-                </p>
-              </div>
-            </div>
-            
-            <div className="mt-4 bg-amber-50 p-3 rounded border border-amber-200">
-              <p className="italic text-amber-800">
-                <span className="font-bold">Strategic Insight:</span> When developing a district, consider acquiring multiple adjacent properties before beginning construction. This allows you to implement a cohesive vision and capture the full value increase from your improvements rather than seeing it flow to neighboring property owners.
-              </p>
-            </div>
-          </div>
-          
           <h3 className="text-2xl font-serif text-amber-700 mb-4">Building Management</h3>
           
           <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
