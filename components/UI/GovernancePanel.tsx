@@ -220,58 +220,49 @@ const GovernancePanel: React.FC<GovernancePanelProps> = ({ onClose, standalone =
             )}
             
             {!isLoading && decrees.length > 0 && (
-              <div className="bg-amber-50 border border-amber-300 rounded-lg overflow-hidden shadow-md">
-                <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-amber-300">
-                    <thead className="bg-gradient-to-r from-amber-100 to-amber-200">
-                      <tr>
-                        <th scope="col" className="px-4 py-3 text-left text-xs font-serif font-medium text-amber-900 uppercase tracking-wider border-r border-amber-200">Decree</th>
-                        <th scope="col" className="px-4 py-3 text-left text-xs font-serif font-medium text-amber-900 uppercase tracking-wider border-r border-amber-200">Title & Description</th>
-                        <th scope="col" className="px-4 py-3 text-left text-xs font-serif font-medium text-amber-900 uppercase tracking-wider border-r border-amber-200">Status</th>
-                        <th scope="col" className="px-4 py-3 text-left text-xs font-serif font-medium text-amber-900 uppercase tracking-wider border-r border-amber-200">Category</th>
-                        <th scope="col" className="px-4 py-3 text-left text-xs font-serif font-medium text-amber-900 uppercase tracking-wider">Dates</th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-amber-200">
-                      {decrees.sort((a, b) => new Date(b.CreatedAt).getTime() - new Date(a.CreatedAt).getTime()).map((decree, index) => (
-                      <tr key={decree.DecreeId} className={`${index % 2 === 0 ? 'bg-amber-50' : 'bg-white'} hover:bg-amber-100 transition-colors duration-150`}>
-                        <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-amber-900 border-r border-amber-100">
-                          <div className="font-serif">{decree.DecreeId}</div>
-                          <div className="text-xs text-amber-700 mt-1">{decree.Type}</div>
-                        </td>
-                        <td className="px-4 py-4 text-sm text-amber-900 border-r border-amber-100">
-                          <div className="font-serif font-medium">{decree.Title}</div>
-                          <div className="mt-1 text-amber-700">{decree.Description}</div>
-                          {decree.FlavorText && (
-                            <div className="mt-2 text-xs italic text-amber-600">"{decree.FlavorText}"</div>
-                          )}
-                          {/* Add the Rationale spoiler */}
-                          {decree.Rationale && (
-                            <div className="mt-3">
-                              <details className="bg-amber-50 rounded border border-amber-200 overflow-hidden">
-                                <summary className="px-3 py-2 cursor-pointer text-xs font-medium text-amber-800 hover:bg-amber-100 transition-colors">
-                                  View Rationale for this Decree
-                                </summary>
-                                <div className="px-3 py-2 text-xs text-amber-700 border-t border-amber-200 bg-amber-50/50">
-                                  {decree.Rationale}
-                                </div>
-                              </details>
-                            </div>
-                          )}
-                        </td>
-                        <td className="px-4 py-4 whitespace-nowrap text-sm border-r border-amber-100">
-                          <div className="flex flex-col items-center">
-                            {decree.Status === 'Enacted' && (
-                              <div className="mb-2">
-                                <img 
-                                  src="/images/venice-seal.png" 
-                                  alt="Official Seal" 
-                                  className="w-12 h-12 object-contain opacity-80"
-                                  title="Officially enacted by the Council of Ten"
-                                />
-                              </div>
-                            )}
-                            <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {decrees.sort((a, b) => new Date(b.CreatedAt).getTime() - new Date(a.CreatedAt).getTime()).map((decree) => {
+                  // Format dates in a more readable way
+                  const createdDate = new Date(decree.CreatedAt);
+                  const formattedCreatedDate = `${createdDate.getDate()} ${
+                    ['January', 'February', 'March', 'April', 'May', 'June', 'July', 
+                     'August', 'September', 'October', 'November', 'December'][createdDate.getMonth()]
+                  } ${createdDate.getFullYear()}`;
+                  
+                  // Format enacted date if it exists
+                  let formattedEnactedDate = '';
+                  if (decree.EnactedAt) {
+                    const enactedDate = new Date(decree.EnactedAt);
+                    formattedEnactedDate = `${enactedDate.getDate()} ${
+                      ['January', 'February', 'March', 'April', 'May', 'June', 'July', 
+                       'August', 'September', 'October', 'November', 'December'][enactedDate.getMonth()]
+                    } ${enactedDate.getFullYear()}`;
+                  }
+                  
+                  return (
+                    <div key={decree.DecreeId} className="transform transition-all duration-300 hover:scale-105 hover:shadow-xl">
+                      <div className="relative bg-amber-50 border-2 border-amber-300 rounded-lg overflow-hidden shadow-md">
+                        {/* Parchment texture overlay */}
+                        <div className="absolute inset-0 opacity-10 pointer-events-none" 
+                             style={{
+                               backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E\")",
+                               backgroundRepeat: "repeat"
+                             }}>
+                        </div>
+                        
+                        {/* Decorative header */}
+                        <div className="bg-gradient-to-r from-amber-200 to-amber-100 px-4 py-3 border-b border-amber-300">
+                          <div className="flex justify-between items-center">
+                            <div className="font-serif text-amber-800 text-lg font-bold">{decree.Title}</div>
+                            <div className="text-xs text-amber-700 font-medium">{decree.Type}</div>
+                          </div>
+                        </div>
+                        
+                        {/* Main content */}
+                        <div className="p-4">
+                          {/* Status and seal */}
+                          <div className="flex justify-between items-start mb-4">
+                            <span className={`px-3 py-1 inline-flex text-xs leading-5 font-serif font-semibold rounded-full ${
                               decree.Status === 'Enacted' ? 'bg-green-100 text-green-800 border border-green-300' : 
                               decree.Status === 'Proposed' ? 'bg-blue-100 text-blue-800 border border-blue-300' :
                               decree.Status === 'Rejected' ? 'bg-red-100 text-red-800 border border-red-300' :
@@ -279,35 +270,101 @@ const GovernancePanel: React.FC<GovernancePanelProps> = ({ onClose, standalone =
                             }`}>
                               {decree.Status}
                             </span>
-                            <div className="text-xs text-amber-700 mt-2 text-center">
-                              Proposed by:<br/><span className="font-serif">{decree.Proposer}</span>
-                            </div>
+                            
+                            {decree.Status === 'Enacted' && (
+                              <div className="relative w-16 h-16 flex-shrink-0">
+                                <img 
+                                  src="/images/venice-seal.png" 
+                                  alt="Official Seal" 
+                                  className="w-full h-full object-contain opacity-90"
+                                  title="Officially enacted by the Council of Ten"
+                                />
+                                <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                                  <span className="text-xs text-amber-800 bg-amber-50/80 px-1 rounded">Official Seal</span>
+                                </div>
+                              </div>
+                            )}
                           </div>
-                        </td>
-                        <td className="px-4 py-4 whitespace-nowrap text-sm text-amber-700 border-r border-amber-100">
-                          <div className="font-serif">{decree.Category}</div>
-                          <div className="text-xs mt-1 italic">{decree.Subcategory}</div>
-                        </td>
-                        <td className="px-4 py-4 whitespace-nowrap text-sm text-amber-700">
-                          <div>
-                            <span className="font-medium">Created:</span> <span className="font-serif">{decree.CreatedAt}</span>
+                          
+                          {/* Description */}
+                          <div className="mb-4 text-sm text-amber-800 font-serif leading-relaxed">
+                            {decree.Description}
                           </div>
-                          {decree.EnactedAt && (
-                            <div className="mt-1">
-                              <span className="font-medium">Enacted:</span> <span className="font-serif">{decree.EnactedAt}</span>
+                          
+                          {/* Flavor text */}
+                          {decree.FlavorText && (
+                            <div className="mb-4 text-xs italic text-amber-600 font-serif border-l-2 border-amber-200 pl-3">
+                              "{decree.FlavorText}"
                             </div>
                           )}
-                          {decree.ExpiresAt && decree.ExpiresAt !== 'None' && (
-                            <div className="mt-1">
-                              <span className="font-medium">Expires:</span> <span className="font-serif">{decree.ExpiresAt}</span>
+                          
+                          {/* Category and subcategory */}
+                          <div className="flex justify-between text-xs text-amber-700 mb-4">
+                            <div>
+                              <span className="font-medium">Category:</span> {decree.Category}
+                              {decree.Subcategory && <span> • {decree.Subcategory}</span>}
+                            </div>
+                          </div>
+                          
+                          {/* Dates */}
+                          <div className="text-xs text-amber-700 space-y-1 mb-4">
+                            <div>
+                              <span className="font-medium">Proposed:</span> <span className="font-serif">{formattedCreatedDate}</span>
+                            </div>
+                            {decree.EnactedAt && (
+                              <div>
+                                <span className="font-medium">Enacted:</span> <span className="font-serif">{formattedEnactedDate}</span>
+                              </div>
+                            )}
+                            {decree.ExpiresAt && decree.ExpiresAt !== 'None' && (
+                              <div>
+                                <span className="font-medium">Expires:</span> <span className="font-serif">{decree.ExpiresAt}</span>
+                              </div>
+                            )}
+                          </div>
+                          
+                          {/* Proposer */}
+                          <div className="text-xs text-amber-700 mb-4">
+                            <span className="font-medium">Proposed by:</span> <span className="font-serif">{decree.Proposer}</span>
+                          </div>
+                          
+                          {/* Rationale spoiler */}
+                          {decree.Rationale && (
+                            <div className="mt-3">
+                              <details className="bg-amber-50 rounded border border-amber-200 overflow-hidden">
+                                <summary className="px-3 py-2 cursor-pointer text-xs font-medium text-amber-800 hover:bg-amber-100 transition-colors">
+                                  View Rationale for this Decree
+                                </summary>
+                                <div className="px-3 py-2 text-xs text-amber-700 border-t border-amber-200 bg-amber-50/50 font-serif">
+                                  {decree.Rationale}
+                                </div>
+                              </details>
                             </div>
                           )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                          
+                          {/* Historical inspiration - hidden by default */}
+                          {decree.HistoricalInspiration && (
+                            <div className="mt-2">
+                              <details className="text-xs">
+                                <summary className="cursor-pointer text-amber-600 hover:text-amber-800 transition-colors">
+                                  Historical Note
+                                </summary>
+                                <div className="mt-1 text-amber-700 italic font-serif">
+                                  {decree.HistoricalInspiration}
+                                </div>
+                              </details>
+                            </div>
+                          )}
+                        </div>
+                        
+                        {/* Decorative footer */}
+                        <div className="bg-gradient-to-r from-amber-100 to-amber-200 px-4 py-2 border-t border-amber-300 text-xs text-amber-700 text-right font-serif">
+                          Decree of La Serenissima
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             )}
             
