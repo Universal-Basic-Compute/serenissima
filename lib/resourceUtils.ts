@@ -20,6 +20,12 @@ export interface ResourceNode {
   storageProperties?: any;
   marketDynamics?: any;
   historicalNotes?: any;
+  stackSize?: number;
+  baseProperties?: Record<string, any>;
+  sourceProperties?: any;
+  perishable?: boolean;
+  substitutes?: any[];
+  complements?: string[];
   // Add any other properties that might be in the resource files
 }
 

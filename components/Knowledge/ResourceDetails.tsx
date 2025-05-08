@@ -22,7 +22,7 @@ const ResourceDetails: React.FC<ResourceDetailsProps> = ({
   getRarityInfo
 }) => {
   // Helper function to render object properties in a readable format
-  const renderProperties = (obj: any, excludeKeys: string[] = []) => {
+  const renderProperties = (obj: any, excludeKeys: string[] = []): React.ReactNode => {
     if (!obj) return null;
     
     return Object.entries(obj)
