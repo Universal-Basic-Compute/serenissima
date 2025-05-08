@@ -175,7 +175,12 @@ export class RoadService {
    */
   private saveRoadsToStorage(): void {
     try {
-      localStorage.setItem('roads', JSON.stringify(this.roads));
+      // Check if we're in a browser environment
+      if (typeof window !== 'undefined' && window.localStorage) {
+        localStorage.setItem('roads', JSON.stringify(this.roads));
+      } else {
+        console.log('RoadService: localStorage not available (server-side rendering)');
+      }
     } catch (error) {
       console.error('Failed to save roads to storage:', error);
     }
@@ -187,14 +192,21 @@ export class RoadService {
    */
   private loadRoadsFromStorage(): void {
     try {
-      const storedRoads = localStorage.getItem('roads');
-      if (storedRoads) {
-        this.roads = JSON.parse(storedRoads);
-        console.log(`RoadService: Loaded ${this.roads.length} roads from storage`);
+      // Check if we're in a browser environment before accessing localStorage
+      if (typeof window !== 'undefined' && window.localStorage) {
+        const storedRoads = localStorage.getItem('roads');
+        if (storedRoads) {
+          this.roads = JSON.parse(storedRoads);
+          console.log(`RoadService: Loaded ${this.roads.length} roads from storage`);
+        }
+      } else {
+        // We're in a server environment, so just initialize with empty array
+        this.roads = [];
+        console.log('RoadService: localStorage not available (server-side rendering)');
       }
     } catch (error) {
       console.error('Failed to load roads from storage:', error);
-      this.roads = [];
+      this.roads = []; // Ensure roads is initialized even if there's an error
     }
   }
   
