@@ -1,5 +1,5 @@
 import React from 'react';
-import { FaSearch, FaFilter, FaThLarge, FaList } from 'react-icons/fa';
+import { FaSearch, FaFilter, FaThLarge, FaList, FaProjectDiagram } from 'react-icons/fa';
 
 interface ResourceSearchBarProps {
   searchTerm: string;
@@ -8,8 +8,8 @@ interface ResourceSearchBarProps {
   setSelectedCategory: (category: string) => void;
   selectedRarity: string;
   setSelectedRarity: (rarity: string) => void;
-  viewMode: 'list' | 'grid';
-  setViewMode: (mode: 'list' | 'grid') => void;
+  viewMode: 'list' | 'grid' | 'tree';
+  setViewMode: (mode: 'list' | 'grid' | 'tree') => void;
   categories: string[];
   rarities: string[];
   getCategoryDisplayName: (category: string) => string;
@@ -97,6 +97,13 @@ const ResourceSearchBar: React.FC<ResourceSearchBarProps> = ({
               title="List View"
             >
               <FaList className="mr-1" /> List
+            </button>
+            <button
+              className={`px-3 py-2 flex items-center ${viewMode === 'tree' ? 'bg-amber-700 text-white' : 'bg-amber-950/50 text-amber-300 hover:bg-amber-800/50'}`}
+              onClick={() => setViewMode('tree')}
+              title="Production Tree View"
+            >
+              <FaProjectDiagram className="mr-1" /> Tree
             </button>
           </div>
         </div>

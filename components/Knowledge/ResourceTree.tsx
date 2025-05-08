@@ -4,6 +4,7 @@ import ResourceHeader from './ResourceHeader';
 import ResourceSearchBar from './ResourceSearchBar';
 import ResourceGrid from './ResourceGrid';
 import ResourceListView from './ResourceListView';
+import ResourceTreeView from './ResourceTreeView';
 import ResourceDetails from './ResourceDetails';
 import { FaTimes } from 'react-icons/fa';
 
@@ -16,7 +17,7 @@ const ResourceTree: React.FC<ResourceListProps> = ({ onClose }) => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedRarity, setSelectedRarity] = useState<string>('all');
-  const [viewMode, setViewMode] = useState<'list' | 'grid'>('grid');
+  const [viewMode, setViewMode] = useState<'list' | 'grid' | 'tree'>('grid');
   const [selectedResource, setSelectedResource] = useState<ResourceNode | null>(null);
   const [resources, setResources] = useState<ResourceNode[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -162,6 +163,12 @@ const ResourceTree: React.FC<ResourceListProps> = ({ onClose }) => {
             />
           ) : viewMode === 'list' ? (
             <ResourceListView 
+              resources={filteredResources}
+              onSelectResource={setSelectedResource}
+              loading={loading}
+            />
+          ) : viewMode === 'tree' ? (
+            <ResourceTreeView
               resources={filteredResources}
               onSelectResource={setSelectedResource}
               loading={loading}
