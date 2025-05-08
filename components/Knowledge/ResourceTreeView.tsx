@@ -62,22 +62,32 @@ const ResourceTreeView: React.FC<ResourceTreeViewProps> = ({
       // Add links from inputs to this resource
       if (resource.inputs) {
         resource.inputs.forEach(inputId => {
-          links.push({
-            source: inputId,
-            target: resource.id,
-            type: 'input'
-          });
+          // Check if the input resource exists in our dataset before creating a link
+          if (resources.some(r => r.id === inputId)) {
+            links.push({
+              source: inputId,
+              target: resource.id,
+              type: 'input'
+            });
+          } else {
+            console.warn(`Input resource not found: ${inputId} for resource ${resource.id}`);
+          }
         });
       }
       
       // Add links from this resource to its outputs
       if (resource.outputs) {
         resource.outputs.forEach(outputId => {
-          links.push({
-            source: resource.id,
-            target: outputId,
-            type: 'output'
-          });
+          // Check if the output resource exists in our dataset before creating a link
+          if (resources.some(r => r.id === outputId)) {
+            links.push({
+              source: resource.id,
+              target: outputId,
+              type: 'output'
+            });
+          } else {
+            console.warn(`Output resource not found: ${outputId} for resource ${resource.id}`);
+          }
         });
       }
     });
@@ -115,7 +125,17 @@ const ResourceTreeView: React.FC<ResourceTreeViewProps> = ({
 
     // Create the simulation with proper typing
     const sim = d3.forceSimulation<SimulationNode>(nodes as SimulationNode[])
-      .force("link", d3.forceLink<SimulationNode, {source: string; target: string; type: string}>(links).id(d => d.id).distance(100))
+      .force("link", d3.forceLink<SimulationNode, {source: string; target: string; type: string}>(links)
+        .id(d => d.id)
+        .distance(100)
+        .strength((link: any) => {
+          // Return 0 strength for links with missing nodes
+          const sourceExists = nodes.some((node: SimulationNode) => 
+            node.id === (typeof link.source === 'string' ? link.source : link.source.id));
+          const targetExists = nodes.some((node: SimulationNode) => 
+            node.id === (typeof link.target === 'string' ? link.target : link.target.id));
+          return sourceExists && targetExists ? 1 : 0;
+        }))
       .force("charge", d3.forceManyBody().strength(-300))
       .force("center", d3.forceCenter(0, 0))
       .force("collide", d3.forceCollide(40));

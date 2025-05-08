@@ -106,10 +106,18 @@ export async function fetchResources(): Promise<ResourceNode[]> {
     
     const resources = await response.json();
     
+    // Create a set of valid resource IDs for validation
+    const validResourceIds = new Set(resources.map((r: ResourceNode) => r.id));
+    
     // Process resources to add inputs and outputs
     resources.forEach((resource: ResourceNode) => {
-      resource.inputs = extractInputResources(resource);
-      resource.outputs = extractOutputResources(resource);
+      // Extract inputs and filter out any that don't exist in our resource set
+      const allInputs = extractInputResources(resource);
+      resource.inputs = allInputs.filter(id => validResourceIds.has(id));
+      
+      // Extract outputs and filter out any that don't exist in our resource set
+      const allOutputs = extractOutputResources(resource);
+      resource.outputs = allOutputs.filter(id => validResourceIds.has(id));
     });
     
     return resources;
