@@ -2,12 +2,13 @@ import React from 'react';
 import Image from 'next/image';
 import { FaTimes } from 'react-icons/fa'; // Import the X icon
 
-interface KnowledgeRepositoryProps {
+export interface KnowledgeRepositoryProps {
   onShowTechTree: () => void;
   onShowPresentation: () => void;
   onShowResourceTree: () => void;
   onSelectArticle: (article: string) => void;
   onClose: () => void; // Add this prop for closing the repository
+  standalone?: boolean;
 }
 
 const KnowledgeRepository: React.FC<KnowledgeRepositoryProps> = ({
