@@ -140,7 +140,8 @@ const LoanManagementDashboard: React.FC = () => {
           <>
             {userLoans.length === 0 ? (
               <div className="text-center py-8 text-gray-500 italic">
-                You have no active loans. Visit the Loan Marketplace to apply for a loan.
+                <p>You have no active loans.</p>
+                <p className="mt-2">Browse the available loans above and click "Apply" to request financing for your ventures.</p>
               </div>
             ) : (
               <div className="space-y-6">
