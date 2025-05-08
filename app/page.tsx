@@ -556,6 +556,95 @@ export default function SimplePage() {
               </div>
             </div>
             
+            {/* Articles & Guides Section */}
+            <div className="mt-8">
+              <h3 className="text-2xl font-serif text-amber-700 mb-4 border-b border-amber-200 pb-2">
+                Articles & Guides
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* 20 Strategies Article Card */}
+                <div className="bg-white rounded-lg overflow-hidden shadow-md border border-amber-200">
+                  <div className="h-48 overflow-hidden">
+                    <img 
+                      src="/images/strategies-article.png" 
+                      alt="Strategies Article" 
+                      className="w-full h-full object-cover transition-transform hover:scale-105"
+                      onError={(e) => {
+                        // Fallback if image doesn't exist
+                        (e.target as HTMLImageElement).src = 'https://via.placeholder.com/800x400?text=Strategies';
+                      }}
+                    />
+                  </div>
+                  <div className="p-6">
+                    <h3 className="text-xl font-serif text-amber-800 mb-2">20 Strategies to Get Ahead</h3>
+                    <p className="text-gray-600 mb-4">
+                      Learn essential strategies for economic success in the competitive markets of La Serenissima.
+                    </p>
+                    <button 
+                      onClick={() => setSelectedArticle("strategies")}
+                      className="inline-block px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors"
+                    >
+                      Read Article
+                    </button>
+                  </div>
+                </div>
+                
+                {/* Beginner's Guide Card */}
+                <div className="bg-white rounded-lg overflow-hidden shadow-md border border-amber-200">
+                  <div className="h-48 overflow-hidden">
+                    <img 
+                      src="/images/beginners-guide.png" 
+                      alt="Beginner's Guide" 
+                      className="w-full h-full object-cover transition-transform hover:scale-105"
+                      onError={(e) => {
+                        // Fallback if image doesn't exist
+                        (e.target as HTMLImageElement).src = 'https://via.placeholder.com/800x400?text=Beginners+Guide';
+                      }}
+                    />
+                  </div>
+                  <div className="p-6">
+                    <h3 className="text-xl font-serif text-amber-800 mb-2">Beginner's Guide to Venice</h3>
+                    <p className="text-gray-600 mb-4">
+                      Everything you need to know to get started in La Serenissima as a new merchant.
+                    </p>
+                    <button 
+                      onClick={() => setSelectedArticle("beginners-guide")}
+                      className="inline-block px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors"
+                    >
+                      Read Guide
+                    </button>
+                  </div>
+                </div>
+                
+                {/* Economic System Guide Card */}
+                <div className="bg-white rounded-lg overflow-hidden shadow-md border border-amber-200">
+                  <div className="h-48 overflow-hidden">
+                    <img 
+                      src="/images/economic-system.png" 
+                      alt="Economic System" 
+                      className="w-full h-full object-cover transition-transform hover:scale-105"
+                      onError={(e) => {
+                        // Fallback if image doesn't exist
+                        (e.target as HTMLImageElement).src = 'https://via.placeholder.com/800x400?text=Economic+System';
+                      }}
+                    />
+                  </div>
+                  <div className="p-6">
+                    <h3 className="text-xl font-serif text-amber-800 mb-2">Understanding the Economy</h3>
+                    <p className="text-gray-600 mb-4">
+                      A deep dive into the economic systems that power La Serenissima's closed economy.
+                    </p>
+                    <button 
+                      onClick={() => setSelectedArticle("economic-system")}
+                      className="inline-block px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors"
+                    >
+                      Read Guide
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
             {/* Tab content */}
             {governanceTab === 'council' && (
               <div className="text-center py-8 text-gray-500 italic">
