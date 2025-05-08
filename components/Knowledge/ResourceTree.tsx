@@ -166,7 +166,7 @@ const ResourceTree: React.FC<ResourceListProps> = ({ onClose }) => {
               onSelectResource={setSelectedResource}
               loading={loading}
             />
-          )}
+          ) : null}
         </div>
         
         {/* Resource Details Panel - show when a resource is selected */}
