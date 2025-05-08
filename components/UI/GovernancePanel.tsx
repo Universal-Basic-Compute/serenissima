@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { getApiBaseUrl } from '@/lib/apiUtils';
 
 interface GovernancePanelProps {
   onClose: () => void;
@@ -102,6 +103,41 @@ const mockDecrees: Decree[] = [
 
 const GovernancePanel: React.FC<GovernancePanelProps> = ({ onClose }) => {
   const [governanceTab, setGovernanceTab] = useState<'council' | 'laws'>('council');
+  const [decrees, setDecrees] = useState<Decree[]>(mockDecrees);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Function to fetch decrees from Airtable
+  const fetchDecrees = async () => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const apiBaseUrl = getApiBaseUrl();
+      const response = await fetch(`${apiBaseUrl}/api/decrees`);
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch decrees: ${response.status} ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      setDecrees(data);
+    } catch (err) {
+      console.error('Error fetching decrees:', err);
+      setError(err instanceof Error ? err.message : 'Failed to fetch decrees');
+      // Keep the mock data as fallback if fetch fails
+      setDecrees(mockDecrees);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Fetch decrees when the component mounts or when the tab changes to 'laws'
+  useEffect(() => {
+    if (governanceTab === 'laws') {
+      fetchDecrees();
+    }
+  }, [governanceTab]);
 
   return (
     <div className="absolute top-20 left-20 right-4 bottom-4 bg-black/30 rounded-lg p-4 overflow-auto">
@@ -150,20 +186,36 @@ const GovernancePanel: React.FC<GovernancePanelProps> = ({ onClose }) => {
               Laws & Decrees of La Serenissima
             </h3>
             
-            <div className="bg-amber-50 border border-amber-300 rounded-lg overflow-hidden shadow-md">
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-amber-300">
-                  <thead className="bg-gradient-to-r from-amber-100 to-amber-200">
-                    <tr>
-                      <th scope="col" className="px-4 py-3 text-left text-xs font-serif font-medium text-amber-900 uppercase tracking-wider border-r border-amber-200">Decree</th>
-                      <th scope="col" className="px-4 py-3 text-left text-xs font-serif font-medium text-amber-900 uppercase tracking-wider border-r border-amber-200">Title & Description</th>
-                      <th scope="col" className="px-4 py-3 text-left text-xs font-serif font-medium text-amber-900 uppercase tracking-wider border-r border-amber-200">Status</th>
-                      <th scope="col" className="px-4 py-3 text-left text-xs font-serif font-medium text-amber-900 uppercase tracking-wider border-r border-amber-200">Category</th>
-                      <th scope="col" className="px-4 py-3 text-left text-xs font-serif font-medium text-amber-900 uppercase tracking-wider">Dates</th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-amber-200">
-                    {mockDecrees.sort((a, b) => new Date(b.CreatedAt).getTime() - new Date(a.CreatedAt).getTime()).map((decree, index) => (
+            {isLoading && (
+              <div className="text-center py-8">
+                <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-amber-600"></div>
+                <p className="mt-2 text-amber-800">Loading decrees from the archives...</p>
+              </div>
+            )}
+            
+            {error && (
+              <div className="bg-red-50 border border-red-300 text-red-800 p-4 rounded-lg mb-6">
+                <p className="font-medium">Failed to retrieve decrees</p>
+                <p className="text-sm mt-1">{error}</p>
+                <p className="text-sm mt-2 italic">Showing historical records instead.</p>
+              </div>
+            )}
+            
+            {!isLoading && decrees.length > 0 && (
+              <div className="bg-amber-50 border border-amber-300 rounded-lg overflow-hidden shadow-md">
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-amber-300">
+                    <thead className="bg-gradient-to-r from-amber-100 to-amber-200">
+                      <tr>
+                        <th scope="col" className="px-4 py-3 text-left text-xs font-serif font-medium text-amber-900 uppercase tracking-wider border-r border-amber-200">Decree</th>
+                        <th scope="col" className="px-4 py-3 text-left text-xs font-serif font-medium text-amber-900 uppercase tracking-wider border-r border-amber-200">Title & Description</th>
+                        <th scope="col" className="px-4 py-3 text-left text-xs font-serif font-medium text-amber-900 uppercase tracking-wider border-r border-amber-200">Status</th>
+                        <th scope="col" className="px-4 py-3 text-left text-xs font-serif font-medium text-amber-900 uppercase tracking-wider border-r border-amber-200">Category</th>
+                        <th scope="col" className="px-4 py-3 text-left text-xs font-serif font-medium text-amber-900 uppercase tracking-wider">Dates</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-amber-200">
+                      {decrees.sort((a, b) => new Date(b.CreatedAt).getTime() - new Date(a.CreatedAt).getTime()).map((decree, index) => (
                       <tr key={decree.DecreeId} className={`${index % 2 === 0 ? 'bg-amber-50' : 'bg-white'} hover:bg-amber-100 transition-colors duration-150`}>
                         <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-amber-900 border-r border-amber-100">
                           <div className="font-serif">{decree.DecreeId}</div>
@@ -225,7 +277,14 @@ const GovernancePanel: React.FC<GovernancePanelProps> = ({ onClose }) => {
                   </tbody>
                 </table>
               </div>
-            </div>
+              </div>
+            )}
+            
+            {!isLoading && decrees.length === 0 && !error && (
+              <div className="text-center py-8 text-amber-700 italic">
+                No decrees have been recorded in the archives.
+              </div>
+            )}
             
             <div className="mt-8 text-center">
               <button className="px-6 py-3 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors shadow-md border border-amber-700 font-serif">
