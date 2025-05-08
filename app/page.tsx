@@ -7,7 +7,7 @@ import TechTree from '../components/Knowledge/TechTree';
 import ProjectPresentation from '../components/Knowledge/ProjectPresentation';
 import ResourceTree from '../components/Knowledge/ResourceTree';
 import KnowledgeRepository from '../components/Knowledge/KnowledgeRepository';
-import { StrategiesArticle, BeginnersGuideArticle, EconomicSystemArticle, LandOwnerGuideArticle, DecreesGovernanceArticle } from '../components/Articles';
+import { StrategiesArticle, BeginnersGuideArticle, EconomicSystemArticle, LandOwnerGuideArticle, DecreesGovernanceArticle, BuildingOwnersGuideArticle } from '../components/Articles';
 import Link from 'next/link';
 import { clearLandOwnershipCaches } from '@/lib/cacheUtils';
 import { eventBus, EventTypes } from '@/lib/eventBus';
@@ -1054,6 +1054,10 @@ export default function SimplePage() {
       
       {selectedArticle === "decrees-governance" && (
         <DecreesGovernanceArticle onClose={() => setSelectedArticle(null)} />
+      )}
+      
+      {selectedArticle === "building-owners-guide" && (
+        <BuildingOwnersGuideArticle onClose={() => setSelectedArticle(null)} />
       )}
       
       {/* Land Purchase Confirmation Modal */}

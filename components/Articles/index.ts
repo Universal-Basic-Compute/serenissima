@@ -3,3 +3,4 @@ export { default as BeginnersGuideArticle } from './BeginnersGuideArticle';
 export { default as EconomicSystemArticle } from './EconomicSystemArticle';
 export { default as LandOwnerGuideArticle } from './LandOwnerGuideArticle';
 export { default as DecreesGovernanceArticle } from './DecreesGovernanceArticle';
+export { default as BuildingOwnersGuideArticle } from './BuildingOwnersGuideArticle';

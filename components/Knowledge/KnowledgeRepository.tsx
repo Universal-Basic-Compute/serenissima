@@ -224,6 +224,35 @@ const KnowledgeRepository: React.FC<KnowledgeRepositoryProps> = ({
                 </button>
               </div>
             </div>
+            
+            {/* Building Owner's Guide Card */}
+            <div className="bg-white rounded-lg overflow-hidden shadow-md border border-amber-200">
+              <div className="h-48 overflow-hidden">
+                <Image 
+                  src="/images/building-owners-guide.png" 
+                  alt="Building Owner's Guide" 
+                  width={800}
+                  height={400}
+                  className="w-full h-full object-cover transition-transform hover:scale-105"
+                  onError={(e) => {
+                    // Fallback if image doesn't exist
+                    (e.target as HTMLImageElement).src = 'https://via.placeholder.com/800x400?text=Building+Owner+Guide';
+                  }}
+                />
+              </div>
+              <div className="p-6">
+                <h3 className="text-xl font-serif text-amber-800 mb-2">The Master Builder's Guide</h3>
+                <p className="text-gray-600 mb-4">
+                  Maximize value from your architectural investments and build a lasting legacy in Venice.
+                </p>
+                <button 
+                  onClick={() => onSelectArticle("building-owners-guide")}
+                  className="inline-block px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors"
+                >
+                  Read Guide
+                </button>
+              </div>
+            </div>
           
             {/* 20 Strategies Article Card */}
             <div className="bg-white rounded-lg overflow-hidden shadow-md border border-amber-200">
