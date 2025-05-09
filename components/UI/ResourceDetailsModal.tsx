@@ -330,7 +330,7 @@ const ResourceDetailsModal: React.FC<ResourceDetailsModalProps> = ({ resource, o
                       <div>
                         <div className="text-amber-200 font-medium mb-1">Successors:</div>
                         <div className="flex flex-wrap gap-2 ml-6">
-                          {resource.productionChainPosition.successors.map((succ: any, index: number) => (
+                          {extendedResource.productionChainPosition.successors.map((succ: any, index: number) => (
                             <div key={index} className="text-xs bg-amber-800/40 text-amber-100 px-2 py-1 rounded">
                               {formatCategoryName(succ.resource)}
                               {succ.facility && <span className="text-amber-200/70"> ({formatCategoryName(succ.facility)})</span>}
