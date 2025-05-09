@@ -81,11 +81,21 @@ export default function BuildingMenu({ visible, onClose, onBuildingSelect, onBui
     // Log to verify the function is being called
     console.log('Building menu close button clicked, dispatching buildingMenuClosed event');
     
-    // Direct state reset as a fallback
+    // IMPORTANT: Force the menu to close by directly manipulating the DOM
+    // This is a last resort but should ensure the menu closes
     if (typeof window !== 'undefined') {
-      // Force a state update in the parent component
-      const event = new Event('click');
-      document.dispatchEvent(event);
+      // Force the menu to close by setting display: none on the menu element
+      const menuElement = document.querySelector('.building-menu-container');
+      if (menuElement) {
+        (menuElement as HTMLElement).style.display = 'none';
+      }
+    }
+    
+    // Force a state update in the parent component
+    if (typeof window !== 'undefined') {
+      setTimeout(() => {
+        window.dispatchEvent(new Event('resize'));
+      }, 100);
     }
   };
 
@@ -98,7 +108,7 @@ export default function BuildingMenu({ visible, onClose, onBuildingSelect, onBui
         log.error('BuildingMenu error:', error, errorInfo);
       }}
     >
-      <div>
+      <div className="building-menu-container">
         <div className="fixed inset-x-0 bottom-0 z-30 transform transition-transform duration-300 ease-in-out" 
           onClick={(e) => {
             // Only stop propagation, don't close the menu when clicking inside
