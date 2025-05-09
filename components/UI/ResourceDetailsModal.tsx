@@ -105,6 +105,8 @@ const ResourceDetailsModal: React.FC<ResourceDetailsModalProps> = ({ resource, o
   // Helper function to get inputs from different possible structures
   const getInputs = () => {
     if (extendedResource.productionProperties?.inputs && Array.isArray(extendedResource.productionProperties.inputs)) {
+      // Log the inputs for debugging
+      console.log('Input resources:', extendedResource.productionProperties.inputs);
       return extendedResource.productionProperties.inputs;
     }
     return [];
@@ -113,14 +115,16 @@ const ResourceDetailsModal: React.FC<ResourceDetailsModalProps> = ({ resource, o
   // Helper function to get outputs from different possible structures
   const getOutputs = () => {
     // If there are explicit outputs, use those
-    if (extendedResource.productionProperties?.outputs && extendedResource.productionProperties.outputs.length > 0) {
+    if (extendedResource.productionProperties?.outputs && 
+        Array.isArray(extendedResource.productionProperties.outputs) && 
+        extendedResource.productionProperties.outputs.length > 0) {
       return extendedResource.productionProperties.outputs;
     }
     
     // If there are no explicit outputs but there's a batch size, the resource itself is the output
     if (extendedResource.productionProperties?.batchSize) {
       return [{
-        resource: extendedResource.id,
+        resource: extendedResource.name.toLowerCase(),
         amount: extendedResource.productionProperties.batchSize
       }];
     }
@@ -268,9 +272,9 @@ const ResourceDetailsModal: React.FC<ResourceDetailsModalProps> = ({ resource, o
                         <div className="mr-2 text-amber-100 text-sm">
                           {input.amount && <span className="font-medium mr-1">{input.amount}×</span>}
                           {formatCategoryName(input.resource)}
-                          {input.qualityImpact && (
+                          {input.qualityImpact !== undefined && (
                             <span className="ml-2 text-xs text-amber-200/70">
-                              (Quality impact: {input.qualityImpact * 100}%)
+                              (Quality impact: {(input.qualityImpact * 100).toFixed(0)}%)
                             </span>
                           )}
                         </div>
@@ -294,7 +298,9 @@ const ResourceDetailsModal: React.FC<ResourceDetailsModalProps> = ({ resource, o
                       >
                         <div className="mr-2 text-amber-100 text-sm">
                           {output.amount && <span className="font-medium mr-1">{output.amount}×</span>}
-                          {formatCategoryName(output.resource)}
+                          {output.resource === extendedResource.name.toLowerCase() 
+                            ? extendedResource.name 
+                            : formatCategoryName(output.resource)}
                         </div>
                       </div>
                     ))}
