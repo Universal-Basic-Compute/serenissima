@@ -329,6 +329,10 @@ export default function MapPage() {
         draggableCursor: newCanalMode ? 'crosshair' : ''
       });
     }
+    
+    // Add this debug message
+    console.log('Canal mode is now:', newCanalMode);
+    console.log('Map ref exists:', !!mapRef.current);
   };
   
   // Clear canal data
@@ -473,11 +477,7 @@ export default function MapPage() {
     } else if (canalMode) {
       console.log('Adding canal point at:', event.latLng.toString());
       
-      // Create a new array with the new point to ensure state update
-      const newPoints = [...canalPoints, event.latLng];
-      setCanalPoints(newPoints);
-      
-      // Draw a marker at the point
+      // Create a marker at the point
       const marker = new google.maps.Marker({
         position: event.latLng,
         map: mapRef.current,
@@ -494,9 +494,16 @@ export default function MapPage() {
       // Add the marker to our array
       setCanalMarkers(prev => [...prev, marker]);
       
-      // If we have at least 1 previous point, draw a line
-      if (newPoints.length > 1) {
-        // Create a line between the previous point and this one
+      // Add the point to our array
+      const newPoints = [...canalPoints, event.latLng];
+      setCanalPoints(newPoints);
+      
+      // If we have at least 2 points, draw or update the line
+      if (newPoints.length >= 2) {
+        // Remove any existing lines
+        canalLines.forEach(line => line.setMap(null));
+        
+        // Create a new line with all points
         const line = new google.maps.Polyline({
           path: newPoints,
           geodesic: true,
@@ -506,10 +513,7 @@ export default function MapPage() {
           map: mapRef.current
         });
         
-        // Remove previous lines
-        canalLines.forEach(line => line.setMap(null));
-        
-        // Set the new line as our only line
+        // Update the lines array
         setCanalLines([line]);
       }
     }
@@ -606,6 +610,9 @@ export default function MapPage() {
     
     // Add click listener for bridge and canal creation
     map.addListener('click', handleMapClick);
+    
+    // Add this debug message
+    console.log('Map click handler attached');
   };
 
   // Handle drawing manager load
