@@ -24,7 +24,7 @@ const CanalCreator: React.FC<CanalCreatorProps> = ({
     console.log('CanalCreator component active state:', active);
   }, [active]);
   const [points, setPoints] = useState<CanalPoint[]>([]);
-  const [width, setWidth] = useState<number>(5);
+  const [width, setWidth] = useState<number>(2);
   const [depth, setDepth] = useState<number>(1);
   const [color, setColor] = useState<string>('#3366ff');
   const [previewRoadId, setPreviewRoadId] = useState<string | null>(null);
@@ -290,8 +290,8 @@ const CanalCreator: React.FC<CanalCreatorProps> = ({
             <label className="text-sm mb-1">Width</label>
             <input
               type="range"
-              min="1"
-              max="20"
+              min="0.5"
+              max="10"
               value={width}
               onChange={(e) => setWidth(Number(e.target.value))}
               className="w-32"
