@@ -6,6 +6,7 @@ import DockRenderer from '@/components/DockCreator/DockRenderer';
 import BuildingCreationManager from '@/components/BuildingCreationManager';
 import BuildingRenderer from '@/components/BuildingRenderer';
 import { useBuildingMenu } from '@/hooks/useBuildingMenu';
+import { eventBus } from '@/lib/eventBus';
 
 interface BuildingsToolbarProps {
   scene?: THREE.Scene;
@@ -77,20 +78,22 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
       
       <button
         onClick={() => {
-          // Open a simple dropdown to select building type
-          setSelectedBuildingType('market-stall'); // Default to market stall
-          setSelectedVariant('model');
-          setIsBuildingCreatorActive(true);
+          // Trigger the building menu to open
+          const event = new CustomEvent('showBuildingMenu');
+          window.dispatchEvent(event);
+          
+          // Reset other active states
+          setIsBuildingCreatorActive(false);
           setIsRoadCreatorActive(false);
           setIsDockCreatorActive(false);
         }}
         className="px-4 py-2 bg-amber-600 text-white rounded-md shadow-md hover:bg-amber-700 transition-colors flex items-center space-x-2"
-        title="Place a building on your land"
+        title="Browse and place buildings on your land"
       >
         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
           <path fillRule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4zm3 1h6v4H7V5zm8 8v-4H7v4h8z" clipRule="evenodd" />
         </svg>
-        <span>Place Building</span>
+        <span>Browse Buildings</span>
       </button>
       
       {isRoadCreatorActive && scene && camera && (

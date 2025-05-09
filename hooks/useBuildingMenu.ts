@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import useBuildingStore from '@/store/useBuildingStore';
 import { Building } from '@/lib/services/BuildingService';
 import { log } from '@/lib/logUtils';
+import { eventBus } from '@/lib/eventBus';
+import { EventTypes } from '@/lib/eventTypes';
 
 /**
  * Custom hook to handle building menu logic
@@ -38,6 +40,20 @@ export function useBuildingMenu(visible: boolean) {
     if (!visible) return;
     loadBuildingCategories();
   }, [visible, loadBuildingCategories]);
+  
+  // Listen for custom events to show the building menu
+  useEffect(() => {
+    const handleShowBuildingMenu = () => {
+      // This will be handled by the parent component that controls visibility
+      console.log('Show building menu event received');
+    };
+    
+    window.addEventListener('showBuildingMenu', handleShowBuildingMenu);
+    
+    return () => {
+      window.removeEventListener('showBuildingMenu', handleShowBuildingMenu);
+    };
+  }, []);
 
   // Function to handle building selection
   const handleSelectBuilding = (building: Building) => {

@@ -1,7 +1,7 @@
 /**
  * Building menu component for browsing and placing buildings
  */
-import React, { ErrorInfo } from 'react';
+import React, { ErrorInfo, useEffect, useState } from 'react';
 import { Tab } from '@headlessui/react';
 import BuildingModelViewer from '../UI/BuildingModelViewer';
 import PlaceableBuilding from './PlaceableBuilding';
@@ -22,6 +22,22 @@ interface BuildingCategory {
 }
 
 export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
+  // Local state to track if the menu should be shown via custom event
+  const [showViaEvent, setShowViaEvent] = useState(false);
+  
+  // Listen for custom events to show the building menu
+  useEffect(() => {
+    const handleShowBuildingMenu = () => {
+      setShowViaEvent(true);
+    };
+    
+    window.addEventListener('showBuildingMenu', handleShowBuildingMenu);
+    
+    return () => {
+      window.removeEventListener('showBuildingMenu', handleShowBuildingMenu);
+    };
+  }, []);
+  
   // Use the custom hook to handle all building menu logic
   const {
     categories,
@@ -40,9 +56,15 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
     handleNextVariant,
     loadBuildingCategories,
     setSelectedBuilding
-  } = useBuildingMenu(visible);
+  } = useBuildingMenu(visible || showViaEvent);
 
-  if (!visible) return null;
+  // Handle closing the menu
+  const handleClose = () => {
+    setShowViaEvent(false);
+    onClose();
+  };
+
+  if (!visible && !showViaEvent) return null;
 
   return (
     <ErrorBoundary
@@ -63,7 +85,7 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
             <div className="flex justify-between items-center p-4 border-b border-amber-300">
               <h2 className="text-2xl font-serif text-amber-800">Buildings of La Serenissima</h2>
               <button 
-                onClick={onClose}
+                onClick={handleClose}
                 className="text-amber-700 hover:text-amber-900 transition-colors"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">

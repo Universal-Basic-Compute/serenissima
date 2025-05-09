@@ -20,6 +20,7 @@ import BackgroundMusic from '../components/UI/BackgroundMusic';
 import WalletButton from '../components/UI/WalletButton';
 import LandPurchaseConfirmation from '../components/UI/LandPurchaseConfirmation';
 import BuildingsToolbar from '../components/BuildingsView/BuildingsToolbar';
+import BuildingMenu from '../components/PolygonViewer/BuildingMenu';
 import { LoanMarketplace, LoanManagementDashboard, LoanApplicationModal } from '../components/Loans';
 import Settings from '../components/UI/Settings';
 import ResourceDropdowns from '../components/UI/ResourceDropdowns';
@@ -484,15 +485,24 @@ export default function SimplePage() {
       
       {/* Buildings Toolbar - only visible in buildings view */}
       {activeView === 'buildings' && (
-        <BuildingsToolbar 
-          scene={document.querySelector('canvas')?.__scene}
-          camera={document.querySelector('canvas')?.__camera as THREE.PerspectiveCamera}
-          polygons={window.__polygonData || []}
-          onRefreshBuildings={() => {
-            // Refresh buildings by dispatching an event
-            eventBus.emit(EventTypes.BUILDING_PLACED, { refresh: true });
-          }}
-        />
+        <>
+          <BuildingsToolbar 
+            scene={document.querySelector('canvas')?.__scene}
+            camera={document.querySelector('canvas')?.__camera as THREE.PerspectiveCamera}
+            polygons={window.__polygonData || []}
+            onRefreshBuildings={() => {
+              // Refresh buildings by dispatching an event
+              eventBus.emit(EventTypes.BUILDING_PLACED, { refresh: true });
+            }}
+          />
+          <BuildingMenu 
+            visible={true} 
+            onClose={() => {
+              // Keep the buildings view active, just close the menu
+              setActiveView('buildings');
+            }} 
+          />
+        </>
       )}
       
       {/* Governance Panel */}
