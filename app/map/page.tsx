@@ -1120,13 +1120,29 @@ export default function MapPage() {
   
   // Load WaterPoints when the map loads
   useEffect(() => {
-    if (mapRef.current && isGoogleLoaded && waterPointMode) {
+    if (mapRef.current && isGoogleLoaded) {
+      // Charger les WaterPoints au démarrage, pas seulement en mode WaterPoint
       loadWaterPoints();
     }
-  }, [mapRef.current, isGoogleLoaded, loadWaterPoints, waterPointMode]);
+  }, [mapRef.current, isGoogleLoaded, loadWaterPoints]);
   
   // Function to create a new WaterPoint
   const createWaterPoint = (position: google.maps.LatLng, type: string = 'regular') => {
+    // Ajouter un indicateur visuel temporaire avant la réponse de l'API
+    const tempMarker = new google.maps.Marker({
+      position: position,
+      map: mapRef.current,
+      icon: {
+        path: google.maps.SymbolPath.CIRCLE,
+        scale: 7,
+        fillColor: type === 'dock' ? '#FF8800' : '#0088FF',
+        fillOpacity: 0.5, // Semi-transparent pour indiquer qu'il est en cours de création
+        strokeWeight: 2,
+        strokeColor: '#FFFFFF'
+      },
+      title: 'Creating WaterPoint...'
+    });
+    
     const waterPoint = {
       position: {
         lat: position.lat(),
@@ -1146,14 +1162,85 @@ export default function MapPage() {
       if (data.success) {
         console.log('WaterPoint created:', data.waterpoint);
         
-        // Recharger les WaterPoints pour afficher le nouveau
-        loadWaterPoints();
+        // Supprimer le marqueur temporaire
+        tempMarker.setMap(null);
+        
+        // Créer le marqueur définitif
+        if (mapRef.current) {
+          const marker = new google.maps.Marker({
+            position: position,
+            map: mapRef.current,
+            icon: {
+              path: google.maps.SymbolPath.CIRCLE,
+              scale: 7,
+              fillColor: type === 'dock' ? '#FF8800' : '#0088FF',
+              fillOpacity: 1, // Opacité complète pour le marqueur définitif
+              strokeWeight: 2,
+              strokeColor: '#FFFFFF'
+            },
+            title: data.waterpoint.id
+          });
+          
+          // Ajouter un écouteur de clic pour sélectionner ce WaterPoint
+          marker.addListener('click', () => {
+            if (connectWaterPointMode && selectedWaterPoint && selectedWaterPoint.id !== data.waterpoint.id) {
+              // Créer une connexion entre les deux WaterPoints
+              createWaterPointConnection(selectedWaterPoint, data.waterpoint);
+            } else {
+              // Sélectionner ce WaterPoint
+              setSelectedWaterPoint(data.waterpoint);
+              
+              // Mettre à jour l'apparence du marqueur pour montrer qu'il est sélectionné
+              marker.setIcon({
+                path: google.maps.SymbolPath.CIRCLE,
+                scale: 9,
+                fillColor: '#FF0000',
+                fillOpacity: 1,
+                strokeWeight: 2,
+                strokeColor: '#FFFFFF'
+              });
+              
+              // Réinitialiser les autres marqueurs
+              Object.entries(waterPointMarkers).forEach(([id, m]) => {
+                if (id !== data.waterpoint.id) {
+                  m.setIcon({
+                    path: google.maps.SymbolPath.CIRCLE,
+                    scale: 7,
+                    fillColor: m.get('type') === 'dock' ? '#FF8800' : '#0088FF',
+                    fillOpacity: 1,
+                    strokeWeight: 2,
+                    strokeColor: '#FFFFFF'
+                  });
+                }
+              });
+            }
+          });
+          
+          // Stocker le type dans les propriétés du marqueur pour référence future
+          marker.set('type', type);
+          
+          // Ajouter le marqueur à l'état
+          setWaterPointMarkers(prev => ({
+            ...prev,
+            [data.waterpoint.id]: marker
+          }));
+          
+          // Ajouter le waterpoint à l'état local
+          setWaterPoints(prev => [...prev, data.waterpoint]);
+        }
+        
+        // Afficher un message de confirmation dans la console
+        console.log(`WaterPoint created with ID: ${data.waterpoint.id}`);
       } else {
+        // En cas d'erreur, supprimer le marqueur temporaire
+        tempMarker.setMap(null);
         console.error('Failed to create WaterPoint:', data.error);
         alert('Failed to create WaterPoint');
       }
     })
     .catch(error => {
+      // En cas d'erreur, supprimer le marqueur temporaire
+      tempMarker.setMap(null);
       console.error('Error creating WaterPoint:', error);
       alert('Error creating WaterPoint');
     });
@@ -1583,6 +1670,18 @@ export default function MapPage() {
               </button>
             </div>
           </div>
+        </div>
+      )}
+      
+      {/* Indicateur de statut pour les WaterPoints */}
+      {waterPointMode && (
+        <div className="absolute bottom-36 left-4 z-10 bg-white px-4 py-2 rounded shadow">
+          <p className="text-sm">
+            <span className="font-medium">WaterPoints:</span> {waterPoints.length}
+          </p>
+          <p className="text-xs text-gray-500 mt-1">
+            Click on the map to add a new WaterPoint
+          </p>
         </div>
       )}
       
