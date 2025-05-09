@@ -45,13 +45,13 @@ export interface ExtendedResource extends Resource {
 }
 
 interface ResourceDetailsModalProps {
-  resource: ExtendedResource;
+  resource: Resource & Partial<ExtendedResource>;
   onClose: () => void;
 }
 
 const ResourceDetailsModal: React.FC<ResourceDetailsModalProps> = ({ resource, onClose }) => {
   // Ensure resource is treated as ExtendedResource
-  const extendedResource = resource as ExtendedResource;
+  const extendedResource = resource as Resource & ExtendedResource;
   const modalRef = useRef<HTMLDivElement>(null);
   
   // Close when clicking outside the modal
