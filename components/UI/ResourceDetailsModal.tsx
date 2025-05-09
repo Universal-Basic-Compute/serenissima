@@ -41,6 +41,44 @@ const ResourceDetailsModal: React.FC<ResourceDetailsModalProps> = ({ resource, o
       default: return 'bg-gray-200 text-gray-800';
     }
   };
+  
+  // Helper function to get production building from different possible structures
+  const getProductionBuilding = () => {
+    if (resource.productionProperties?.processorBuilding) {
+      return resource.productionProperties.processorBuilding;
+    }
+    if (resource.productionProperties?.producerBuilding) {
+      return resource.productionProperties.producerBuilding;
+    }
+    return null;
+  };
+
+  // Helper function to get inputs from different possible structures
+  const getInputs = () => {
+    if (resource.productionProperties?.inputs) {
+      return resource.productionProperties.inputs;
+    }
+    return [];
+  };
+
+  // Helper function to get outputs from different possible structures
+  const getOutputs = () => {
+    if (resource.productionProperties?.outputs) {
+      return resource.productionProperties.outputs;
+    }
+    return [];
+  };
+
+  // Helper function to check if we have any production information
+  const hasProductionInfo = () => {
+    return (
+      getProductionBuilding() || 
+      getInputs().length > 0 || 
+      getOutputs().length > 0 ||
+      (resource.productionChainPosition?.predecessors && resource.productionChainPosition.predecessors.length > 0) ||
+      (resource.productionChainPosition?.successors && resource.productionChainPosition.successors.length > 0)
+    );
+  };
 
   return (
     <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
@@ -120,29 +158,41 @@ const ResourceDetailsModal: React.FC<ResourceDetailsModalProps> = ({ resource, o
             <h4 className="text-lg font-serif text-amber-300 mb-2 border-b border-amber-700/50 pb-1">Production Chain</h4>
             
             {/* Production Building */}
-            {resource.productionProperties?.processorBuilding && (
+            {getProductionBuilding() && (
               <div className="mb-4">
                 <div className="flex items-center text-amber-200 font-medium mb-2">
                   <FaIndustry className="mr-2" />
-                  <span>Produced in: {formatCategoryName(resource.productionProperties.processorBuilding)}</span>
+                  <span>Produced in: {formatCategoryName(getProductionBuilding())}</span>
                 </div>
                 
-                {resource.productionProperties.processingTime && (
+                {resource.productionProperties?.processingTime && (
                   <div className="text-amber-100 text-sm ml-6 mb-1">
                     <span className="font-medium">Processing Time:</span> {resource.productionProperties.processingTime} minutes
                   </div>
                 )}
                 
-                {resource.productionProperties.processingComplexity && (
+                {resource.productionProperties?.productionTime && (
+                  <div className="text-amber-100 text-sm ml-6 mb-1">
+                    <span className="font-medium">Production Time:</span> {resource.productionProperties.productionTime} minutes
+                  </div>
+                )}
+                
+                {resource.productionProperties?.processingComplexity && (
                   <div className="text-amber-100 text-sm ml-6">
                     <span className="font-medium">Complexity:</span> {resource.productionProperties.processingComplexity}/10
+                  </div>
+                )}
+                
+                {resource.productionProperties?.productionComplexity && (
+                  <div className="text-amber-100 text-sm ml-6">
+                    <span className="font-medium">Complexity:</span> {resource.productionProperties.productionComplexity}/10
                   </div>
                 )}
               </div>
             )}
             
             {/* Input Resources */}
-            {resource.productionProperties?.inputs && resource.productionProperties.inputs.length > 0 && (
+            {getInputs().length > 0 && (
               <div className="mb-4">
                 <div className="flex items-center text-amber-200 font-medium mb-2">
                   <FaArrowDown className="mr-2" />
@@ -150,7 +200,7 @@ const ResourceDetailsModal: React.FC<ResourceDetailsModalProps> = ({ resource, o
                 </div>
                 
                 <div className="grid grid-cols-2 gap-2 ml-6">
-                  {resource.productionProperties.inputs.map((input: any, index: number) => (
+                  {getInputs().map((input: any, index: number) => (
                     <div 
                       key={index}
                       className="flex items-center p-2 bg-amber-900/20 rounded border border-amber-700/30"
@@ -166,7 +216,7 @@ const ResourceDetailsModal: React.FC<ResourceDetailsModalProps> = ({ resource, o
             )}
             
             {/* Output Resources */}
-            {resource.productionProperties?.outputs && resource.productionProperties.outputs.length > 0 && (
+            {getOutputs().length > 0 && (
               <div>
                 <div className="flex items-center text-amber-200 font-medium mb-2">
                   <FaArrowRight className="mr-2" />
@@ -174,7 +224,7 @@ const ResourceDetailsModal: React.FC<ResourceDetailsModalProps> = ({ resource, o
                 </div>
                 
                 <div className="grid grid-cols-2 gap-2 ml-6">
-                  {resource.productionProperties.outputs.map((output: any, index: number) => (
+                  {getOutputs().map((output: any, index: number) => (
                     <div 
                       key={index}
                       className="flex items-center p-2 bg-amber-900/20 rounded border border-amber-700/30"
@@ -223,11 +273,7 @@ const ResourceDetailsModal: React.FC<ResourceDetailsModalProps> = ({ resource, o
             )}
             
             {/* Show message if no production information is available */}
-            {!resource.productionProperties?.processorBuilding && 
-             !resource.productionProperties?.inputs?.length && 
-             !resource.productionProperties?.outputs?.length &&
-             !resource.productionChainPosition?.predecessors?.length &&
-             !resource.productionChainPosition?.successors?.length && (
+            {!hasProductionInfo() && (
               <p className="text-amber-400/70 text-sm italic">No production information available</p>
             )}
           </div>
