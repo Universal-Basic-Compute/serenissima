@@ -68,7 +68,7 @@ const ResourceDropdowns: React.FC = () => {
   }
   
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap gap-2 relative z-30">
       {categories.map(category => (
         <ResourceDropdown 
           key={category.id}

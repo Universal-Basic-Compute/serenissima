@@ -116,7 +116,7 @@ const ResourceDropdown: React.FC<ResourceDropdownProps> = ({ category, resources
       </button>
       
       {isOpen && (
-        <div className="absolute left-0 mt-1 w-72 bg-black/90 border border-amber-800 rounded-md shadow-lg z-50 py-2 max-h-96 overflow-y-auto">
+        <div className="absolute left-0 mt-1 w-72 sm:w-80 md:w-96 lg:w-[32rem] xl:w-[40rem] bg-black/90 border border-amber-800 rounded-md shadow-lg z-50 py-2 max-h-[70vh] overflow-y-auto">
           <div className="px-3 py-2 border-b border-amber-800/50">
             <div className="flex justify-between items-center">
               <h3 className="text-amber-400 font-serif">{formatCategoryName(category)}</h3>

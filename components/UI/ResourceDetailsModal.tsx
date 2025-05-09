@@ -84,7 +84,7 @@ const ResourceDetailsModal: React.FC<ResourceDetailsModalProps> = ({ resource, o
     <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
       <div 
         ref={modalRef}
-        className="relative bg-amber-900/90 border-2 border-amber-700 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-auto"
+        className="relative bg-amber-900/90 border-2 border-amber-700 rounded-lg max-w-xs sm:max-w-xl md:max-w-2xl lg:max-w-4xl w-full max-h-[90vh] overflow-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="p-6">
@@ -199,7 +199,7 @@ const ResourceDetailsModal: React.FC<ResourceDetailsModalProps> = ({ resource, o
                   <span>Inputs</span>
                 </div>
                 
-                <div className="grid grid-cols-2 gap-2 ml-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 ml-6">
                   {getInputs().map((input: any, index: number) => (
                     <div 
                       key={index}
@@ -223,7 +223,7 @@ const ResourceDetailsModal: React.FC<ResourceDetailsModalProps> = ({ resource, o
                   <span>Outputs</span>
                 </div>
                 
-                <div className="grid grid-cols-2 gap-2 ml-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 ml-6">
                   {getOutputs().map((output: any, index: number) => (
                     <div 
                       key={index}
