@@ -106,8 +106,10 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
     // Skip if we've already rendered this building
     if (buildingMeshesRef.current.has(id)) return;
     
-    // Construct the path to the model
-    const modelPath = `/assets/buildings/models/${type}/${variant}.glb`;
+    // Construct the path to the model - ensure proper formatting
+    const modelPath = `/assets/buildings/models/${type.toLowerCase().replace(/\s+/g, '-')}/${variant}.glb`;
+    
+    console.log(`Attempting to load building model from: ${modelPath}`);
     
     // Add error handling for model loading
     try {

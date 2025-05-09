@@ -91,10 +91,11 @@ const PlaceableObjectManager: React.FC<PlaceableObjectProps> = ({
     
     // If this is a building with a name, try to load the actual model
     if (type === 'building' && objectData.name) {
-      const modelPath = `/assets/buildings/models/${objectData.name}/${objectData.variant || 'model'}.glb`;
-      
+      // Fix the model path - ensure it uses the correct format for the path
+      const modelPath = `/assets/buildings/models/${objectData.name.toLowerCase().replace(/\s+/g, '-')}/${objectData.variant || 'model'}.glb`;
+        
       console.log(`Attempting to load building model from: ${modelPath}`);
-      
+        
       // Load the actual building model
       gltfLoader.load(
         modelPath,
@@ -105,10 +106,10 @@ const PlaceableObjectManager: React.FC<PlaceableObjectProps> = ({
             previewMeshRef.current.geometry.dispose();
             (previewMeshRef.current.material as THREE.Material).dispose();
           }
-          
+            
           // Use the loaded model as the preview
           const model = gltf.scene;
-          
+            
           // Make the model semi-transparent
           model.traverse((child) => {
             if (child instanceof THREE.Mesh && child.material) {
@@ -123,12 +124,12 @@ const PlaceableObjectManager: React.FC<PlaceableObjectProps> = ({
               }
             }
           });
-          
+            
           // Add the model to the scene
           model.visible = false;
           actualScene.add(model);
           previewMeshRef.current = model;
-          
+            
           console.log(`Successfully loaded building model for ${objectData.name}`);
         },
         undefined,
@@ -394,9 +395,10 @@ const PlaceableObjectManager: React.FC<PlaceableObjectProps> = ({
       const buildingService = BuildingService.getInstance();
       let objectData;
       
-      // Treat docks as a special building type
+      // Fix the building data format
       objectData = await buildingService.saveBuilding({
-        type: type === 'dock' ? 'dock' : objectData.name,
+        // For buildings, use the actual name from objectData
+        type: type === 'building' ? objectData.name.toLowerCase().replace(/\s+/g, '-') : type,
         variant: objectData.variant || 'model',
         land_id: landId,
         position: {
