@@ -7,7 +7,6 @@ import { getApiBaseUrl } from '@/lib/apiUtils';
 // Import actual implementations
 import { GLTFLoader as ActualGLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { eventBus, EventTypes } from '@/lib/eventBus';
-import { getApiBaseUrl } from '@/lib/apiUtils';
 
 interface DockData {
   id: string;
