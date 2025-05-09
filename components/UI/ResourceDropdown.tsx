@@ -57,17 +57,6 @@ interface ResourceDropdownProps {
   resources: Resource[];
 }
 
-// Custom hook to track mouse position
-const useMousePosition = () => {
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  
-  const updateMousePosition = (e: React.MouseEvent) => {
-    setMousePosition({ x: e.clientX, y: e.clientY });
-  };
-  
-  return { mousePosition, updateMousePosition };
-};
-
 // Function to get the appropriate icon for each category
 const getCategoryIcon = (category: string) => {
   switch(category) {
@@ -97,7 +86,12 @@ const ResourceDropdown: React.FC<ResourceDropdownProps> = ({ category, resources
   const [groupBySubcategory, setGroupBySubcategory] = useState(true);
   const [selectedResource, setSelectedResource] = useState<Resource | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const { mousePosition, updateMousePosition } = useMousePosition();
+  const [tooltipState, setTooltipState] = useState({
+    visible: false,
+    content: '',
+    x: 0,
+    y: 0
+  });
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -123,12 +117,41 @@ const ResourceDropdown: React.FC<ResourceDropdownProps> = ({ category, resources
   // Function to handle resource click
   const handleResourceClick = (resource: Resource) => {
     setSelectedResource(resource);
-    // Keep dropdown open to allow multiple selections
+    // Hide tooltip when opening modal
+    setTooltipState(prev => ({ ...prev, visible: false }));
   };
 
   // Function to close the resource details
   const handleCloseDetails = () => {
     setSelectedResource(null);
+  };
+  
+  // Handle mouse enter for tooltip
+  const handleMouseEnter = (e: React.MouseEvent, resource: Resource) => {
+    if (resource.description) {
+      setTooltipState({
+        visible: true,
+        content: resource.description,
+        x: e.clientX + 10,
+        y: e.clientY - 10
+      });
+    }
+  };
+  
+  // Handle mouse move for tooltip
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (tooltipState.visible) {
+      setTooltipState(prev => ({
+        ...prev,
+        x: e.clientX + 10,
+        y: e.clientY - 10
+      }));
+    }
+  };
+  
+  // Handle mouse leave for tooltip
+  const handleMouseLeave = () => {
+    setTooltipState(prev => ({ ...prev, visible: false }));
   };
 
   // Get rarity color
@@ -194,23 +217,28 @@ const ResourceDropdown: React.FC<ResourceDropdownProps> = ({ category, resources
                     {subcategoryResources.map(resource => (
                       <li 
                         key={resource.id} 
-                        className="px-3 py-2 hover:bg-amber-900/30 transition-colors group cursor-pointer relative"
+                        className="px-3 py-2 hover:bg-amber-900/30 transition-colors cursor-pointer relative"
                         onClick={() => handleResourceClick(resource)}
-                        onMouseMove={updateMousePosition}
+                        onMouseEnter={(e) => handleMouseEnter(e, resource)}
+                        onMouseMove={handleMouseMove}
+                        onMouseLeave={handleMouseLeave}
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-2">
-                            <Image 
-                              src={resource.icon} 
-                              alt={resource.name} 
-                              width={16} 
-                              height={16}
-                              className="w-4 h-4"
-                              onError={(e) => {
-                                // Fallback if image doesn't exist
-                                (e.target as HTMLImageElement).src = `https://via.placeholder.com/16?text=${resource.name.charAt(0).toUpperCase()}`;
-                              }}
-                            />
+                            <div className="w-4 h-4 flex-shrink-0">
+                              <img 
+                                src={resource.icon} 
+                                alt={resource.name} 
+                                className="w-4 h-4 object-contain"
+                                onError={(e) => {
+                                  // Fallback if image doesn't exist - only set once
+                                  if (!(e.target as HTMLImageElement).dataset.fallback) {
+                                    (e.target as HTMLImageElement).dataset.fallback = "true";
+                                    (e.target as HTMLImageElement).src = `https://via.placeholder.com/16?text=${resource.name.charAt(0).toUpperCase()}`;
+                                  }
+                                }}
+                              />
+                            </div>
                             <span className="text-amber-200 text-sm truncate max-w-[120px]">{resource.name}</span>
                             {resource.rarity && resource.rarity !== 'common' && (
                               <span className={`text-xs px-1.5 py-0.5 rounded ${getRarityColor(resource.rarity)}`}>
@@ -220,19 +248,6 @@ const ResourceDropdown: React.FC<ResourceDropdownProps> = ({ category, resources
                           </div>
                           <span className="text-amber-400 text-sm font-medium">{resource.amount}</span>
                         </div>
-                        
-                        {/* Resource description tooltip - positioned at mouse cursor */}
-                        {resource.description && (
-                          <div 
-                            className="hidden group-hover:block fixed z-[60] p-3 bg-black/95 border border-amber-700 rounded shadow-lg text-xs text-amber-100 w-64 pointer-events-none"
-                            style={{
-                              left: `${mousePosition.x + 10}px`,
-                              top: `${mousePosition.y - 10}px`
-                            }}
-                          >
-                            <p>{resource.description}</p>
-                          </div>
-                        )}
                       </li>
                     ))}
                   </ul>
@@ -244,6 +259,19 @@ const ResourceDropdown: React.FC<ResourceDropdownProps> = ({ category, resources
               No resources in this category
             </div>
           )}
+        </div>
+      )}
+      
+      {/* Single tooltip element that's positioned based on state */}
+      {tooltipState.visible && (
+        <div 
+          className="fixed z-[60] p-3 bg-black/95 border border-amber-700 rounded shadow-lg text-xs text-amber-100 w-64 pointer-events-none"
+          style={{
+            left: `${tooltipState.x}px`,
+            top: `${tooltipState.y}px`
+          }}
+        >
+          <p>{tooltipState.content}</p>
         </div>
       )}
       

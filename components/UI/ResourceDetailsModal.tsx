@@ -169,8 +169,8 @@ const ResourceDetailsModal: React.FC<ResourceDetailsModalProps> = ({ resource, o
                 className="w-20 h-20 object-contain"
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
-                  if (!target.dataset.usedFallback) {
-                    target.dataset.usedFallback = 'true';
+                  if (!target.dataset.fallback) {
+                    target.dataset.fallback = 'true';
                     target.src = "/assets/resources/icons/default.png";
                   }
                 }}
