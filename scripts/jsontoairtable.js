@@ -23,6 +23,15 @@ const FIELD_MAPPINGS = {
     // If field names in JSON don't match Airtable, map them here
     // 'jsonField': 'airtableField'
   },
+  'CANALS': {
+    'id': 'Id',
+    'points': 'Points',
+    'width': 'Width',
+    'depth': 'Depth',
+    'color': 'Color',
+    'createdAt': 'CreatedAt',
+    'curvature': 'Curvature'
+  },
   // Add more mappings as needed
 };
 
@@ -144,12 +153,42 @@ function mapFields(item, collectionName) {
   if (collectionName === 'CANALS') {
     // Convert points array to a string for Airtable
     if (mappedItem.points && Array.isArray(mappedItem.points)) {
-      mappedItem.points = JSON.stringify(mappedItem.points);
+      mappedItem.Points = JSON.stringify(mappedItem.points);
+      delete mappedItem.points;
     }
     
     // Ensure createdAt is in ISO format
     if (!mappedItem.createdAt) {
-      mappedItem.createdAt = new Date().toISOString();
+      mappedItem.CreatedAt = new Date().toISOString();
+    } else {
+      mappedItem.CreatedAt = mappedItem.createdAt;
+      delete mappedItem.createdAt;
+    }
+    
+    // Ensure other fields follow proper capitalization
+    if (mappedItem.width !== undefined) {
+      mappedItem.Width = mappedItem.width;
+      delete mappedItem.width;
+    }
+    
+    if (mappedItem.depth !== undefined) {
+      mappedItem.Depth = mappedItem.depth;
+      delete mappedItem.depth;
+    }
+    
+    if (mappedItem.color !== undefined) {
+      mappedItem.Color = mappedItem.color;
+      delete mappedItem.color;
+    }
+    
+    if (mappedItem.curvature !== undefined) {
+      mappedItem.Curvature = mappedItem.curvature;
+      delete mappedItem.curvature;
+    }
+    
+    if (mappedItem.id !== undefined) {
+      mappedItem.Id = mappedItem.id;
+      delete mappedItem.id;
     }
   }
   
