@@ -110,15 +110,20 @@ const ResourceDetailsModal: React.FC<ResourceDetailsModalProps> = ({ resource, o
 
   // Helper function to get outputs from different possible structures
   const getOutputs = () => {
-    // For resources like bread, we need to create outputs from the resource itself
-    if (!resource.productionProperties?.outputs || resource.productionProperties.outputs.length === 0) {
-      // If the resource is the output itself (like bread), create a default output
+    // If there are explicit outputs, use those
+    if (resource.productionProperties?.outputs && resource.productionProperties.outputs.length > 0) {
+      return resource.productionProperties.outputs;
+    }
+    
+    // If there are no explicit outputs but there's a batch size, the resource itself is the output
+    if (resource.productionProperties?.batchSize) {
       return [{
         resource: resource.id,
-        amount: resource.productionProperties?.batchSize || 1
+        amount: resource.productionProperties.batchSize
       }];
     }
-    return resource.productionProperties.outputs;
+    
+    return [];
   };
 
   // Helper function to check if we have any production information
