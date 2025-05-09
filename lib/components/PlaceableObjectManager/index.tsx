@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import * as THREE from 'three';
-import { BuildingService } from '@/lib/services/BuildingService';
+import { BuildingService, BuildingData } from '@/lib/services/BuildingService';
 import { eventBus } from '@/lib/eventBus';
 import { EventTypes } from '@/lib/eventTypes';
 import { getWalletAddress } from '@/lib/walletUtils';

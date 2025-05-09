@@ -36,6 +36,20 @@ export interface Building {
   [key: string]: any;
 }
 
+export interface BuildingData {
+  id?: string;
+  type: string;
+  variant?: string;
+  land_id: string;
+  position: {
+    x: number;
+    y: number;
+    z: number;
+  };
+  rotation: number;
+  created_by: string;
+}
+
 export interface BuildingCategory {
   name: string;
   buildings: Building[];
