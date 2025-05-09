@@ -14,7 +14,6 @@ export interface Resource {
 export interface ResourceCategory {
   id: string;
   name: string;
-  icon: string;
   resources: Resource[];
 }
 
@@ -96,7 +95,6 @@ export class ResourceService {
       return {
         id: categoryId,
         name: categoryName,
-        icon: `/images/icons/${categoryId}.png`,
         resources: categoryResources.sort((a, b) => a.name.localeCompare(b.name)) // Sort resources alphabetically
       };
     });

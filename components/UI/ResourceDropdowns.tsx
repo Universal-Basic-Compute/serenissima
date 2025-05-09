@@ -52,7 +52,6 @@ const ResourceDropdowns: React.FC = () => {
         <ResourceDropdown 
           key={category.id}
           category={category.id}
-          icon={category.icon}
           resources={category.resources}
         />
       ))}

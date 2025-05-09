@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
-import { FaChevronDown, FaChevronUp } from 'react-icons/fa';
+import { FaChevronDown, FaChevronUp, FaLeaf, FaCogs, FaBox, FaTools, FaGem, FaShip, FaHammer, FaWater } from 'react-icons/fa';
 
 interface Resource {
   id: string;
@@ -15,11 +15,34 @@ interface Resource {
 
 interface ResourceDropdownProps {
   category: string;
-  icon: string;
   resources: Resource[];
 }
 
-const ResourceDropdown: React.FC<ResourceDropdownProps> = ({ category, icon, resources }) => {
+// Function to get the appropriate icon for each category
+const getCategoryIcon = (category: string) => {
+  switch(category) {
+    case 'raw_materials':
+      return <FaLeaf className="w-5 h-5 text-amber-400" />;
+    case 'processed_materials':
+      return <FaCogs className="w-5 h-5 text-blue-400" />;
+    case 'finished_goods':
+      return <FaBox className="w-5 h-5 text-green-400" />;
+    case 'utility_resources':
+      return <FaTools className="w-5 h-5 text-purple-400" />;
+    case 'luxury_goods':
+      return <FaGem className="w-5 h-5 text-pink-400" />;
+    case 'imported_goods':
+      return <FaShip className="w-5 h-5 text-red-400" />;
+    case 'building_materials':
+      return <FaHammer className="w-5 h-5 text-yellow-400" />;
+    case 'water_resources':
+      return <FaWater className="w-5 h-5 text-cyan-400" />;
+    default:
+      return <FaLeaf className="w-5 h-5 text-amber-400" />;
+  }
+};
+
+const ResourceDropdown: React.FC<ResourceDropdownProps> = ({ category, resources }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [groupBySubcategory, setGroupBySubcategory] = useState(true);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -74,17 +97,7 @@ const ResourceDropdown: React.FC<ResourceDropdownProps> = ({ category, icon, res
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center space-x-2 bg-black/60 hover:bg-black/80 text-amber-300 px-3 py-2 rounded-md transition-colors"
       >
-        <Image 
-          src={icon} 
-          alt={category} 
-          width={20} 
-          height={20}
-          className="w-5 h-5"
-          onError={(e) => {
-            // Fallback if image doesn't exist
-            (e.target as HTMLImageElement).src = `https://via.placeholder.com/20?text=${category.charAt(0).toUpperCase()}`;
-          }}
-        />
+        {getCategoryIcon(category)}
         <span className="font-serif">{formatCategoryName(category)}</span>
         {isOpen ? <FaChevronUp size={12} /> : <FaChevronDown size={12} />}
       </button>
