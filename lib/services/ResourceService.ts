@@ -1,9 +1,14 @@
+import { fetchResources, ResourceNode } from '../resourceUtils';
+
 export interface Resource {
   id: string;
   name: string;
   icon: string;
   amount: number;
   category: string;
+  subcategory?: string;
+  description?: string;
+  rarity?: string;
 }
 
 export interface ResourceCategory {
@@ -15,6 +20,8 @@ export interface ResourceCategory {
 
 export class ResourceService {
   private static instance: ResourceService;
+  private resourcesCache: Resource[] | null = null;
+  private categoriesCache: ResourceCategory[] | null = null;
   
   public static getInstance(): ResourceService {
     if (!ResourceService.instance) {
@@ -23,66 +30,107 @@ export class ResourceService {
     return ResourceService.instance;
   }
   
-  public async getResourceCategories(): Promise<ResourceCategory[]> {
-    // In the future, this would fetch from your API
-    // For now, return mock data
-    return [
-      {
-        id: 'raw_materials',
-        name: 'Raw Materials',
-        icon: '/images/icons/raw_materials.png',
-        resources: [
-          { id: 'wood', name: 'Wood', icon: '/images/resources/wood.png', amount: 0, category: 'raw_materials' },
-          { id: 'stone', name: 'Stone', icon: '/images/resources/stone.png', amount: 0, category: 'raw_materials' },
-          { id: 'iron_ore', name: 'Iron Ore', icon: '/images/resources/iron_ore.png', amount: 0, category: 'raw_materials' },
-          { id: 'clay', name: 'Clay', icon: '/images/resources/clay.png', amount: 0, category: 'raw_materials' },
-          { id: 'sand', name: 'Sand', icon: '/images/resources/sand.png', amount: 0, category: 'raw_materials' }
-        ]
-      },
-      {
-        id: 'processed_materials',
-        name: 'Processed Materials',
-        icon: '/images/icons/processed_materials.png',
-        resources: [
-          { id: 'planks', name: 'Planks', icon: '/images/resources/planks.png', amount: 0, category: 'processed_materials' },
-          { id: 'bricks', name: 'Bricks', icon: '/images/resources/bricks.png', amount: 0, category: 'processed_materials' },
-          { id: 'iron', name: 'Iron', icon: '/images/resources/iron.png', amount: 0, category: 'processed_materials' },
-          { id: 'glass', name: 'Glass', icon: '/images/resources/glass.png', amount: 0, category: 'processed_materials' }
-        ]
-      },
-      {
-        id: 'luxury_goods',
-        name: 'Luxury Goods',
-        icon: '/images/icons/luxury_goods.png',
-        resources: [
-          { id: 'silk', name: 'Silk', icon: '/images/resources/silk.png', amount: 0, category: 'luxury_goods' },
-          { id: 'spices', name: 'Spices', icon: '/images/resources/spices.png', amount: 0, category: 'luxury_goods' },
-          { id: 'jewelry', name: 'Jewelry', icon: '/images/resources/jewelry.png', amount: 0, category: 'luxury_goods' },
-          { id: 'fine_glass', name: 'Fine Glass', icon: '/images/resources/fine_glass.png', amount: 0, category: 'luxury_goods' }
-        ]
-      },
-      {
-        id: 'food',
-        name: 'Food',
-        icon: '/images/icons/food.png',
-        resources: [
-          { id: 'fish', name: 'Fish', icon: '/images/resources/fish.png', amount: 0, category: 'food' },
-          { id: 'bread', name: 'Bread', icon: '/images/resources/bread.png', amount: 0, category: 'food' },
-          { id: 'wine', name: 'Wine', icon: '/images/resources/wine.png', amount: 0, category: 'food' },
-          { id: 'olive_oil', name: 'Olive Oil', icon: '/images/resources/olive_oil.png', amount: 0, category: 'food' }
-        ]
-      }
-    ];
+  /**
+   * Load all resources from the API
+   */
+  private async loadAllResources(): Promise<Resource[]> {
+    // If we already have cached resources, return them
+    if (this.resourcesCache) {
+      return this.resourcesCache;
+    }
+    
+    try {
+      const resources = await fetchResources();
+      
+      // Process resources to ensure they have all required fields
+      const processedResources = resources.map(resource => ({
+        id: resource.id,
+        name: resource.name,
+        category: resource.category,
+        subcategory: resource.subcategory,
+        description: resource.description || resource.longDescription,
+        rarity: resource.rarity || 'common',
+        icon: resource.icon || `/images/resources/${resource.id}.png`,
+        amount: 0 // Default amount
+      }));
+      
+      // Cache the resources
+      this.resourcesCache = processedResources;
+      return processedResources;
+    } catch (error) {
+      console.error('Error loading resources:', error);
+      return [];
+    }
   }
   
+  /**
+   * Get all resource categories with their resources
+   */
+  public async getResourceCategories(): Promise<ResourceCategory[]> {
+    // If we already have cached categories, return them
+    if (this.categoriesCache) {
+      return this.categoriesCache;
+    }
+    
+    // Load all resources
+    const resources = await this.loadAllResources();
+    
+    // Group resources by category
+    const categoriesMap = new Map<string, Resource[]>();
+    
+    resources.forEach(resource => {
+      if (!categoriesMap.has(resource.category)) {
+        categoriesMap.set(resource.category, []);
+      }
+      categoriesMap.get(resource.category)?.push(resource);
+    });
+    
+    // Convert map to array of categories
+    const categories: ResourceCategory[] = Array.from(categoriesMap.entries()).map(([categoryId, categoryResources]) => {
+      // Format category name for display
+      const categoryName = categoryId
+        .split('_')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+      
+      return {
+        id: categoryId,
+        name: categoryName,
+        icon: `/images/icons/${categoryId}.png`,
+        resources: categoryResources.sort((a, b) => a.name.localeCompare(b.name)) // Sort resources alphabetically
+      };
+    });
+    
+    // Sort categories alphabetically
+    categories.sort((a, b) => a.name.localeCompare(b.name));
+    
+    // Cache the categories
+    this.categoriesCache = categories;
+    return categories;
+  }
+  
+  /**
+   * Get the amount of a specific resource
+   */
   public async getResourceAmount(resourceId: string): Promise<number> {
-    // This would fetch the current amount of a specific resource
+    // This would fetch the current amount of a specific resource from the server
     // For now, return 0
     return 0;
   }
   
+  /**
+   * Update the amount of a resource
+   */
   public async updateResourceAmount(resourceId: string, amount: number): Promise<void> {
-    // This would update the amount of a resource
+    // This would update the amount of a resource on the server
     console.log(`Updating resource ${resourceId} to amount ${amount}`);
+  }
+  
+  /**
+   * Clear the cache to force a reload of resources
+   */
+  public clearCache(): void {
+    this.resourcesCache = null;
+    this.categoriesCache = null;
   }
 }
