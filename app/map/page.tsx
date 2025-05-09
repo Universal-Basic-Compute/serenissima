@@ -301,7 +301,9 @@ export default function MapPage() {
   
   // Handle canal mode button
   const handleCanalMode = () => {
-    setCanalMode(!canalMode);
+    const newCanalMode = !canalMode;
+    console.log('Setting canal mode to:', newCanalMode);
+    setCanalMode(newCanalMode);
     
     // Turn off bridge mode if it's on
     if (bridgeMode) {
@@ -324,7 +326,7 @@ export default function MapPage() {
     // Change cursor style based on canal mode
     if (mapRef.current) {
       mapRef.current.setOptions({
-        draggableCursor: !canalMode ? 'crosshair' : ''
+        draggableCursor: newCanalMode ? 'crosshair' : ''
       });
     }
   };
@@ -355,6 +357,8 @@ export default function MapPage() {
   // Add this function to handle map clicks for bridge creation and canal creation
   const handleMapClick = (event: google.maps.MapMouseEvent) => {
     if (!event.latLng) return;
+    
+    console.log('Map clicked in mode:', bridgeMode ? 'bridge' : canalMode ? 'canal' : 'normal');
     
     if (bridgeMode) {
       // Find which polygon was clicked
@@ -467,8 +471,11 @@ export default function MapPage() {
         setBridgeStartLandId(null);
       }
     } else if (canalMode) {
-      // Add point to canal
-      setCanalPoints(prev => [...prev, event.latLng]);
+      console.log('Adding canal point at:', event.latLng.toString());
+      
+      // Create a new array with the new point to ensure state update
+      const newPoints = [...canalPoints, event.latLng];
+      setCanalPoints(newPoints);
       
       // Draw a marker at the point
       const marker = new google.maps.Marker({
@@ -484,21 +491,14 @@ export default function MapPage() {
         }
       });
       
-      // Store the marker to remove it later if needed
+      // Add the marker to our array
       setCanalMarkers(prev => [...prev, marker]);
       
-      // If we have at least 2 points, draw a line between them
-      if (canalPoints.length > 0) {
-        // Remove previous line if it exists
-        if (canalLines.length > 0) {
-          const lastLine = canalLines[canalLines.length - 1];
-          lastLine.setMap(null);
-          setCanalLines(prev => prev.slice(0, -1));
-        }
-        
-        // Draw new line with all points
+      // If we have at least 1 previous point, draw a line
+      if (newPoints.length > 1) {
+        // Create a line between the previous point and this one
         const line = new google.maps.Polyline({
-          path: [...canalPoints, event.latLng],
+          path: newPoints,
           geodesic: true,
           strokeColor: '#0088FF',
           strokeOpacity: 1.0,
@@ -506,7 +506,11 @@ export default function MapPage() {
           map: mapRef.current
         });
         
-        setCanalLines(prev => [...prev, line]);
+        // Remove previous lines
+        canalLines.forEach(line => line.setMap(null));
+        
+        // Set the new line as our only line
+        setCanalLines([line]);
       }
     }
   };
@@ -594,9 +598,13 @@ export default function MapPage() {
 
   // Handle map load
   const onMapLoad = (map: google.maps.Map) => {
+    console.log('Map loaded');
     mapRef.current = map;
     
-    // Add click listener for bridge creation
+    // Remove any existing click listeners to avoid duplicates
+    google.maps.event.clearListeners(map, 'click');
+    
+    // Add click listener for bridge and canal creation
     map.addListener('click', handleMapClick);
   };
 
