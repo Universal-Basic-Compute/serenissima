@@ -392,7 +392,8 @@ const PlaceableObjectManager: React.FC<PlaceableObjectProps> = ({
         return;
       }
       
-      console.log('Placing building with data:', {
+      // Prepare the building data
+      const buildingData = {
         type: type === 'building' ? objectData.name?.toLowerCase().replace(/\s+/g, '-') : type,
         variant: objectData.variant || 'model',
         land_id: landId,
@@ -403,46 +404,51 @@ const PlaceableObjectManager: React.FC<PlaceableObjectProps> = ({
         },
         rotation: rotation,
         created_by: walletAddress
-      });
+      };
       
-      const buildingService = BuildingService.getInstance();
-      let objectData;
+      console.log('Placing building with data:', buildingData);
       
-      // Fix the building data format
-      objectData = await buildingService.saveBuilding({
-        // For buildings, use the actual name from objectData
-        type: type === 'building' ? objectData.name?.toLowerCase().replace(/\s+/g, '-') : type,
-        variant: objectData.variant || 'model',
-        land_id: landId,
-        position: {
-          x: previewPosition.x,
-          y: previewPosition.y,
-          z: previewPosition.z
+      // Send the building data to the server
+      const response = await fetch('/api/buildings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
-        rotation: rotation,
-        created_by: walletAddress
+        body: JSON.stringify(buildingData),
       });
       
-      console.log(`${type} created:`, objectData);
+      if (!response.ok) {
+        throw new Error(`Failed to create building: ${response.status} ${response.statusText}`);
+      }
+      
+      const responseData = await response.json();
+      
+      if (!responseData.success || !responseData.building) {
+        throw new Error('Invalid response from server');
+      }
+      
+      const createdBuilding = responseData.building;
+      
+      console.log(`${type} created:`, createdBuilding);
       
       // Emit appropriate event
       if (type === 'dock') {
         eventBus.emit(EventTypes.DOCK_PLACED, {
-          dockId: objectData.id,
+          dockId: createdBuilding.id,
           type: 'dock',
-          data: objectData
+          data: createdBuilding
         });
       } else {
         eventBus.emit(EventTypes.BUILDING_PLACED, {
-          buildingId: objectData.id,
+          buildingId: createdBuilding.id,
           type: type === 'building' ? objectData.name : type,
           variant: objectData.variant || 'model',
-          data: objectData
+          data: createdBuilding
         });
       }
       
       // Call onComplete callback
-      onComplete(objectData);
+      onComplete(createdBuilding);
     } catch (error) {
       console.error(`Error creating ${type}:`, error);
       alert(`Failed to create ${type}: ${error instanceof Error ? error.message : String(error)}`);

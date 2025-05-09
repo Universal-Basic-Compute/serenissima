@@ -130,6 +130,24 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
             model.position.set(position.x, position.y, position.z);
             model.rotation.y = rotation || 0;
             
+            // Calculate bounding box to properly scale the model
+            const box = new THREE.Box3().setFromObject(model);
+            const size = box.getSize(new THREE.Vector3());
+            
+            // Scale model to a reasonable size if it's too large or too small
+            const maxDimension = Math.max(size.x, size.y, size.z);
+            if (maxDimension > 20) {
+              // Model is too large, scale it down
+              const scale = 10 / maxDimension;
+              model.scale.set(scale, scale, scale);
+              console.log(`Model was too large (${maxDimension} units), scaled down by ${scale}`);
+            } else if (maxDimension < 1) {
+              // Model is too small, scale it up
+              const scale = 5 / maxDimension;
+              model.scale.set(scale, scale, scale);
+              console.log(`Model was too small (${maxDimension} units), scaled up by ${scale}`);
+            }
+            
             // Add to scene
             scene.add(model);
             
@@ -144,7 +162,8 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
         },
         (progress) => {
           // Loading progress
-          console.log(`Loading building ${id} (${type}): ${Math.round(progress.loaded / progress.total * 100)}%`);
+          const percent = progress.total ? Math.round((progress.loaded / progress.total) * 100) : 0;
+          console.log(`Loading building ${id} (${type}): ${percent}%`);
         },
         (error) => {
           // Error handling
