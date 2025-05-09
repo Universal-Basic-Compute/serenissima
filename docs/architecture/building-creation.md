@@ -282,6 +282,9 @@ Buildings connect with the road and transportation systems:
 3. **Building Damage and Repair**: System for building damage and maintenance
 4. **Interior Spaces**: Support for building interiors and interior gameplay
 5. **Building Effects**: Visual effects for building activities (smoke, light, etc.)
+6. **Additional Placeable Objects**: Support for more types of placeable objects using the unified PlaceableObjectManager
+7. **Advanced Constraints**: More sophisticated placement constraints based on terrain, proximity, and other factors
+
 # Building Creation and Display Architecture
 
 This document outlines the architecture for building creation, placement, and display in La Serenissima, focusing on the components, data flow, and integration with existing systems.
@@ -354,11 +357,12 @@ The building system allows players to browse, place, and manage buildings in the
    - Toggle buttons for different building modes
    - Integration with other building-related tools
 
-5. **BuildingCreationManager**: Manages the creation and placement of buildings.
-   - Handles the UI for building placement
-   - Validates placement against land ownership and terrain
+5. **PlaceableObjectManager**: Unified component for creating placeable objects.
+   - Handles the UI for object placement (buildings, docks, etc.)
+   - Validates placement against type-specific constraints
    - Provides rotation controls
-   - Creates building data and communicates with services
+   - Creates object data and communicates with services
+   - Uses strategy pattern for type-specific behavior
 
 ### Domain Logic
 

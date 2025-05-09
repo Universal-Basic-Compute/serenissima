@@ -68,11 +68,11 @@ The building system follows a layered architecture with clear separation between
    - Toggle buttons for different building modes
    - Integration with other building-related tools
 
-5. **DockCreator**: Specialized component for creating docks along water edges.
-   - Detects valid water edges for dock placement
-   - Provides rotation controls for dock orientation
-   - Validates placement against terrain and other constraints
-   - Creates dock data and 3D representation
+5. **PlaceableObjectManager**: Unified component for placing different object types.
+   - Handles placement of buildings, docks, and other object types
+   - Applies type-specific constraints and validation
+   - Provides consistent UI for object placement
+   - Supports rotation and positioning for all object types
 
 6. **DockRenderer**: Renders placed docks in the 3D world.
    - Loads dock models and positions them in the scene
@@ -192,7 +192,7 @@ Docks are special buildings that connect water and land transportation:
 
 2. **Creation Process**:
    - User activates dock creation mode in BuildingsToolbar
-   - DockCreator component shows placement preview
+   - PlaceableObjectManager component with type="dock" shows placement preview
    - Water edge detection finds valid placement locations
    - User adjusts rotation and confirms placement
    - BuildingService.createDock() creates the dock data

@@ -71,6 +71,15 @@ export function useBuildingMenu(visible: boolean) {
       name: building.name,
       variant: variant
     });
+    
+    // Dispatch an event to notify the BuildingsToolbar to activate the building placement mode
+    window.dispatchEvent(new CustomEvent('activateBuildingPlacement', {
+      detail: {
+        buildingName: building.name,
+        variant: variant
+      }
+    }));
+    
     setSelectedBuilding(null); // Close the modal if open
   };
 

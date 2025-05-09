@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import * as THREE from 'three';
 import RoadCreator from '@/components/PolygonViewer/RoadCreator';
-import DockCreator from '@/components/DockCreator';
 import DockRenderer from '@/components/DockCreator/DockRenderer';
-import BuildingCreationManager from '@/components/BuildingCreationManager';
 import BuildingRenderer from '@/components/BuildingRenderer';
+import PlaceableObjectManager from '@/lib/components/PlaceableObjectManager';
 import { useBuildingMenu } from '@/hooks/useBuildingMenu';
 import { eventBus } from '@/lib/eventBus';
 
@@ -22,8 +21,7 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
   onRefreshBuildings
 }) => {
   const [isRoadCreatorActive, setIsRoadCreatorActive] = useState(false);
-  const [isDockCreatorActive, setIsDockCreatorActive] = useState(false);
-  const [isBuildingCreatorActive, setIsBuildingCreatorActive] = useState(false);
+  const [placeableObjectType, setPlaceableObjectType] = useState<'dock' | 'building' | null>(null);
   const [showDockRenderer, setShowDockRenderer] = useState(true);
   const [showBuildingRenderer, setShowBuildingRenderer] = useState(true);
   const [selectedBuildingType, setSelectedBuildingType] = useState<string>('');
@@ -41,6 +39,21 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
   // Load building categories when component mounts
   useEffect(() => {
     loadBuildingCategories();
+    
+    // Listen for building placement activation
+    const handleActivateBuildingPlacement = (event: CustomEvent) => {
+      const { buildingName, variant } = event.detail;
+      setSelectedBuildingType(buildingName);
+      setSelectedVariant(variant || 'model');
+      setPlaceableObjectType('building');
+      setIsRoadCreatorActive(false);
+    };
+    
+    window.addEventListener('activateBuildingPlacement', handleActivateBuildingPlacement as EventListener);
+    
+    return () => {
+      window.removeEventListener('activateBuildingPlacement', handleActivateBuildingPlacement as EventListener);
+    };
   }, [loadBuildingCategories]);
 
   return (
@@ -48,8 +61,7 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
       <button
         onClick={() => {
           setIsRoadCreatorActive(true);
-          setIsDockCreatorActive(false);
-          setIsBuildingCreatorActive(false);
+          setPlaceableObjectType(null);
         }}
         className="px-4 py-2 bg-amber-600 text-white rounded-md shadow-md hover:bg-amber-700 transition-colors flex items-center space-x-2"
         title="Create roads to connect buildings and docks"
@@ -63,9 +75,8 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
       <button
         onClick={() => {
           console.log('Create Dock button clicked');
-          setIsDockCreatorActive(true);
+          setPlaceableObjectType('dock');
           setIsRoadCreatorActive(false);
-          setIsBuildingCreatorActive(false);
         }}
         className="px-4 py-2 bg-blue-600 text-white rounded-md shadow-md hover:bg-blue-700 transition-colors flex items-center space-x-2"
         title="Place docks along shorelines to connect water and land transportation"
@@ -83,9 +94,8 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
           window.dispatchEvent(event);
           
           // Reset other active states
-          setIsBuildingCreatorActive(false);
+          setPlaceableObjectType(null);
           setIsRoadCreatorActive(false);
-          setIsDockCreatorActive(false);
         }}
         className="px-4 py-2 bg-amber-600 text-white rounded-md shadow-md hover:bg-amber-700 transition-colors flex items-center space-x-2"
         title="Browse and place buildings on your land"
@@ -114,42 +124,54 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
         />
       )}
       
-      {isDockCreatorActive && (
-        <DockCreator
+      {placeableObjectType === 'dock' && (
+        <PlaceableObjectManager
           scene={scene}
           camera={camera}
           polygons={polygons}
-          active={isDockCreatorActive}
+          active={true}
+          type="dock"
+          objectData={{}}
+          constraints={{
+            requireWaterEdge: true,
+            requireAdminPermission: true
+          }}
           onComplete={(dockData) => {
             console.log('Dock created:', dockData);
-            setIsDockCreatorActive(false);
+            setPlaceableObjectType(null);
             if (onRefreshBuildings) {
               onRefreshBuildings();
             }
           }}
           onCancel={() => {
-            setIsDockCreatorActive(false);
+            setPlaceableObjectType(null);
           }}
         />
       )}
       
-      {isBuildingCreatorActive && (
-        <BuildingCreationManager
+      {placeableObjectType === 'building' && (
+        <PlaceableObjectManager
           scene={scene}
           camera={camera}
           polygons={polygons}
-          active={isBuildingCreatorActive}
-          buildingName={selectedBuildingType}
-          variant={selectedVariant}
+          active={true}
+          type="building"
+          objectData={{
+            name: selectedBuildingType,
+            variant: selectedVariant
+          }}
+          constraints={{
+            requireLandOwnership: true
+          }}
           onComplete={(buildingData) => {
             console.log('Building created:', buildingData);
-            setIsBuildingCreatorActive(false);
+            setPlaceableObjectType(null);
             if (onRefreshBuildings) {
               onRefreshBuildings();
             }
           }}
           onCancel={() => {
-            setIsBuildingCreatorActive(false);
+            setPlaceableObjectType(null);
           }}
         />
       )}
