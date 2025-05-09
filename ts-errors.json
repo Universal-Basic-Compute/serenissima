@@ -1,10 +1,48 @@
 {
-  "totalErrors": 0,
+  "totalErrors": 4,
   "totalWarnings": 0,
-  "exitCode": 0,
-  "timestamp": "2025-05-08T05:36:32.477Z",
-  "errors": [],
-  "rawOutputLines": 1,
-  "firstFewLines": [],
-  "compilerExitCode": 0
+  "exitCode": 2,
+  "timestamp": "2025-05-09T21:43:14.155Z",
+  "errors": [
+    {
+      "filePath": "components/UI/ResourceDetailsModal.tsx",
+      "line": 7,
+      "column": 3,
+      "code": "TS2300",
+      "message": "Duplicate identifier 'id'.",
+      "type": "error"
+    },
+    {
+      "filePath": "components/UI/ResourceDetailsModal.tsx",
+      "line": 64,
+      "column": 3,
+      "code": "TS2300",
+      "message": "Duplicate identifier 'id'.",
+      "type": "error"
+    },
+    {
+      "filePath": "lib/roadCreationManager.ts",
+      "line": 2,
+      "column": 33,
+      "code": "TS2307",
+      "message": "Cannot find module './buildingService' or its corresponding type declarations.",
+      "type": "error"
+    },
+    {
+      "filePath": "store/useBuildingStore.ts",
+      "line": 112,
+      "column": 31,
+      "code": "TS2739",
+      "message": "Type '{ name: string; category: string; subcategory: string; tier: number; size: string; shortDescription: string; fullDescription: string; constructionCosts: { ducats: number; }; }' is missing the following properties from type 'Building': unlockCondition, flavorText, maintenanceCost, constructionTime",
+      "type": "error"
+    }
+  ],
+  "rawOutputLines": 5,
+  "firstFewLines": [
+    "components/UI/ResourceDetailsModal.tsx(7,3): error TS2300: Duplicate identifier 'id'.\r",
+    "components/UI/ResourceDetailsModal.tsx(64,3): error TS2300: Duplicate identifier 'id'.\r",
+    "lib/roadCreationManager.ts(2,33): error TS2307: Cannot find module './buildingService' or its corresponding type declarations.\r",
+    "store/useBuildingStore.ts(112,31): error TS2739: Type '{ name: string; category: string; subcategory: string; tier: number; size: string; shortDescription: string; fullDescription: string; constructionCosts: { ducats: number; }; }' is missing the following properties from type 'Building': unlockCondition, flavorText, maintenanceCost, constructionTime\r"
+  ],
+  "compilerExitCode": 2
 }
