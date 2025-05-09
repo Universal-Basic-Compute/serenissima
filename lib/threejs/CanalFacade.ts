@@ -25,8 +25,8 @@ export interface CanalOptions {
 }
 
 /**
- * CanalFacade provides a simplified interface for creating and managing water roads
- * (canals) in the 3D scene. It handles the creation, rendering, and animation of water roads.
+ * CanalFacade provides a simplified interface for creating and managing canals
+ * (canals) in the 3D scene. It handles the creation, rendering, and animation of canals.
  */
 export class CanalFacade {
   private scene: THREE.Scene;
@@ -63,11 +63,11 @@ export class CanalFacade {
   }
 
   /**
-   * Creates a water road between the specified points
-   * @param id Unique identifier for the water road
-   * @param points Array of points defining the water road path
-   * @param options Options for customizing the water road appearance
-   * @returns The ID of the created water road
+   * Creates a canal between the specified points
+   * @param id Unique identifier for the canal
+   * @param points Array of points defining the canal path
+   * @param options Options for customizing the canal appearance
+   * @returns The ID of the created canal
    */
   public createCanal(
     id: string,
@@ -75,7 +75,7 @@ export class CanalFacade {
     options: CanalOptions = {}
   ): string {
     if (points.length < 2) {
-      console.error('Water road requires at least 2 points');
+      console.error('Canal requires at least 2 points');
       return '';
     }
     
@@ -120,7 +120,7 @@ export class CanalFacade {
     // Add to scene
     this.scene.add(mesh);
     
-    // Store the water road
+    // Store the canal
     this.canals.set(id, {
       mesh,
       points,
@@ -132,9 +132,9 @@ export class CanalFacade {
   }
 
   /**
-   * Removes a water road from the scene
-   * @param id The ID of the water road to remove
-   * @returns True if the water road was removed, false otherwise
+   * Removes a canal from the scene
+   * @param id The ID of the canal to remove
+   * @returns True if the canal was removed, false otherwise
    */
   public removeCanal(id: string): boolean {
     const road = this.canals.get(id);
@@ -153,11 +153,11 @@ export class CanalFacade {
   }
 
   /**
-   * Updates the water road with new points or options
-   * @param id The ID of the water road to update
-   * @param points New points for the water road
-   * @param options New options for the water road
-   * @returns True if the water road was updated, false otherwise
+   * Updates the canal with new points or options
+   * @param id The ID of the canal to update
+   * @param points New points for the canal
+   * @param options New options for the canal
+   * @returns True if the canal was updated, false otherwise
    */
   public updateCanal(
     id: string,
@@ -170,7 +170,7 @@ export class CanalFacade {
     const updatedPoints = points || road.points;
     const updatedOptions = { ...road.options, ...options };
 
-    // Create a new water road with the updated parameters
+    // Create a new canal with the updated parameters
     this.removeCanal(id);
     this.createCanal(id, updatedPoints, updatedOptions);
     
@@ -178,13 +178,13 @@ export class CanalFacade {
   }
 
   /**
-   * Updates all water roads (animations, etc.)
+   * Updates all canals (animations, etc.)
    * @param deltaTime Time elapsed since the last update
    */
   public update(deltaTime?: number): void {
     const dt = deltaTime || this.clock.getDelta();
     
-    // Update each water road
+    // Update each canal
     this.canals.forEach((road, id) => {
       // Update flow animation
       road.flowOffset += dt * road.options.flowSpeed!;
@@ -220,17 +220,17 @@ export class CanalFacade {
   }
 
   /**
-   * Gets all water road IDs
-   * @returns Array of water road IDs
+   * Gets all canal IDs
+   * @returns Array of canal IDs
    */
   public getCanalIds(): string[] {
     return Array.from(this.canals.keys());
   }
 
   /**
-   * Gets a water road by ID
-   * @param id The ID of the water road to get
-   * @returns The water road data or null if not found
+   * Gets a canal by ID
+   * @param id The ID of the canal to get
+   * @returns The canal data or null if not found
    */
   public getCanal(id: string): {
     points: CanalPoint[];
@@ -262,7 +262,7 @@ export class CanalFacade {
    * Disposes of all resources
    */
   public dispose(): void {
-    // Remove all water roads
+    // Remove all canals
     this.canals.forEach((road, id) => {
       this.removeCanal(id);
     });
@@ -271,13 +271,13 @@ export class CanalFacade {
   }
 
   /**
-   * Sets the water level for all water roads
+   * Sets the water level for all canals
    * @param level The new water level
    */
   public setWaterLevel(level: number): void {
     this.waterLevel = level;
     
-    // Update all water roads
+    // Update all canals
     this.canals.forEach((road, id) => {
       road.mesh.position.y = level;
     });

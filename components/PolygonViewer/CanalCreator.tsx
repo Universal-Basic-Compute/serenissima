@@ -34,7 +34,7 @@ const CanalCreator: React.FC<CanalCreatorProps> = ({
   const mouseRef = useRef<THREE.Vector2>(new THREE.Vector2());
   const planeRef = useRef<THREE.Mesh | null>(null);
   
-  // Initialize water road facade
+  // Initialize canal facade
   useEffect(() => {
     if (scene && camera) {
       canalFacadeRef.current = new CanalFacade({
@@ -77,7 +77,7 @@ const CanalCreator: React.FC<CanalCreatorProps> = ({
       }
       
       // Create new preview
-      const roadId = `preview-water-road-${Date.now()}`;
+      const roadId = `preview-canal-${Date.now()}`;
       canalFacadeRef.current.createCanal(
         roadId,
         points,
@@ -176,8 +176,8 @@ const CanalCreator: React.FC<CanalCreatorProps> = ({
   // Handle complete button click
   const handleComplete = () => {
     if (points.length >= 2 && canalFacadeRef.current && previewRoadId) {
-      // Create a final water road
-      const finalRoadId = `water-road-${Date.now()}`;
+      // Create a final canal
+      const finalRoadId = `canal-${Date.now()}`;
       
       // Remove preview
       canalFacadeRef.current.removeCanal(previewRoadId);
@@ -213,11 +213,11 @@ const CanalCreator: React.FC<CanalCreatorProps> = ({
   
   return (
     <div className="absolute top-20 left-20 right-4 z-10 bg-black/70 text-white p-4 rounded-lg">
-      <h3 className="text-xl font-serif mb-4">Create Water Road</h3>
+      <h3 className="text-xl font-serif mb-4">Create Canal</h3>
       
       <div className="mb-4">
         <p className="text-sm mb-2">
-          Click on the map to place points for your water road. Add at least 2 points.
+          Click on the map to place points for your canal. Add at least 2 points.
         </p>
         <div className="flex flex-wrap gap-4 mb-4">
           <div className="flex flex-col">
@@ -288,7 +288,7 @@ const CanalCreator: React.FC<CanalCreatorProps> = ({
               : 'bg-blue-600 hover:bg-blue-700'
           }`}
         >
-          Complete Water Road
+          Complete Canal
         </button>
       </div>
     </div>

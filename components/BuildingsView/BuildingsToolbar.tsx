@@ -115,13 +115,13 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
           setIsRoadCreatorActive(false);
           setPlaceableObjectType(null);
           
-          // Dispatch custom event for water road creation
+          // Dispatch custom event for canal creation
           window.dispatchEvent(new CustomEvent('buildingToolbarAction', {
             detail: { action: 'canal' }
           }));
         }}
         className="px-4 py-2 bg-cyan-600 text-white rounded-md shadow-md hover:bg-cyan-700 transition-colors flex items-center space-x-2"
-        title="Create water roads (canals)"
+        title="Create canals (canals)"
       >
         <FaWater className="h-5 w-5" />
         <span>Create Canal</span>

@@ -397,7 +397,7 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
       incomeRendererRef.current.setVisible(activeView === 'land');
     }
     
-    // Hide water road creator when view changes
+    // Hide canal creator when view changes
     setShowCanalCreator(false);
   }, [activeView]);
   
@@ -472,9 +472,9 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
     }
   }, [qualityMode]);
   
-  // Handle water road creation completion
+  // Handle canal creation completion
   const handleCanalComplete = async (roadId: string, points: any[]) => {
-    console.log('Water road created:', roadId, points);
+    console.log('Canal created:', roadId, points);
     
     try {
       // Convert points to a format suitable for the API
@@ -488,8 +488,8 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
         depth: point.depth
       }));
       
-      // Save the water road to the backend
-      const response = await fetch(`${getApiBaseUrl()}/api/water-roads`, {
+      // Save the canal to the backend
+      const response = await fetch(`${getApiBaseUrl()}/api/canals`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -504,22 +504,22 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
       });
       
       if (!response.ok) {
-        throw new Error(`Failed to save water road: ${response.status} ${response.statusText}`);
+        throw new Error(`Failed to save canal: ${response.status} ${response.statusText}`);
       }
       
       const data = await response.json();
-      console.log('Water road saved to backend:', data);
+      console.log('Canal saved to backend:', data);
       
       // Hide the creator
       setShowCanalCreator(false);
       
-      // Notify any listeners that a water road was created
+      // Notify any listeners that a canal was created
       window.dispatchEvent(new CustomEvent('canalCreated', {
         detail: { roadId, points, data }
       }));
     } catch (error) {
-      console.error('Error saving water road:', error);
-      alert(`Failed to save water road: ${error instanceof Error ? error.message : String(error)}`);
+      console.error('Error saving canal:', error);
+      alert(`Failed to save canal: ${error instanceof Error ? error.message : String(error)}`);
       // Still hide the creator even if there was an error
       setShowCanalCreator(false);
     }
@@ -556,7 +556,7 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
         </div>
       )}
       
-      {/* Water Road Creator - make sure it's visible in transport view */}
+      {/* Canal Creator - make sure it's visible in transport view */}
       {showCanalCreator && sceneRef.current && cameraControllerRef.current && (
         <CanalCreator
           scene={sceneRef.current}

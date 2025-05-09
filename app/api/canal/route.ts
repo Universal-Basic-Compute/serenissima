@@ -4,17 +4,17 @@ import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 
 // Define the data directory
-const dataDir = path.join(process.cwd(), 'data', 'water-roads');
+const dataDir = path.join(process.cwd(), 'data', 'canals');
 
 // Ensure the directory exists
 if (!fs.existsSync(dataDir)) {
   fs.mkdirSync(dataDir, { recursive: true });
 }
 
-// Define the path to the water roads data file
-const canalsFile = path.join(dataDir, 'water-roads.json');
+// Define the path to the canals data file
+const canalsFile = path.join(dataDir, 'canals.json');
 
-// Initialize the water roads data file if it doesn't exist
+// Initialize the canals data file if it doesn't exist
 if (!fs.existsSync(canalsFile)) {
   fs.writeFileSync(canalsFile, JSON.stringify({
     canals: [],
@@ -22,23 +22,23 @@ if (!fs.existsSync(canalsFile)) {
   }));
 }
 
-// GET handler to retrieve all water roads
+// GET handler to retrieve all canals
 export async function GET() {
   try {
-    // Read the water roads data file
+    // Read the canals data file
     const data = JSON.parse(fs.readFileSync(canalsFile, 'utf8'));
     
     return NextResponse.json(data);
   } catch (error) {
-    console.error('Error reading water roads data:', error);
+    console.error('Error reading canals data:', error);
     return NextResponse.json(
-      { error: 'Failed to read water roads data' },
+      { error: 'Failed to read canals data' },
       { status: 500 }
     );
   }
 }
 
-// POST handler to create a new water road
+// POST handler to create a new canal
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -46,7 +46,7 @@ export async function POST(request: Request) {
     // Validate the request body
     if (!body.points || !Array.isArray(body.points) || body.points.length < 2) {
       return NextResponse.json(
-        { error: 'Invalid water road data. At least 2 points are required.' },
+        { error: 'Invalid canal data. At least 2 points are required.' },
         { status: 400 }
       );
     }
@@ -61,9 +61,9 @@ export async function POST(request: Request) {
     }
     
     // Generate a unique ID if not provided
-    const canalId = body.id || `water-road-${uuidv4()}`;
+    const canalId = body.id || `canal-${uuidv4()}`;
     
-    // Create the new water road
+    // Create the new canal
     const newCanal = {
       id: canalId,
       points: body.points,
@@ -74,7 +74,7 @@ export async function POST(request: Request) {
       createdAt: new Date().toISOString()
     };
     
-    // Add the new water road to the data
+    // Add the new canal to the data
     data.canals.push(newCanal);
     
     // Process transfer points if provided
@@ -140,8 +140,8 @@ export async function POST(request: Request) {
         fs.unlinkSync(tempFile);
       });
     } catch (error) {
-      console.error('Error adding water road to Airtable:', error);
-      // Continue anyway, as the water road is already saved to the JSON file
+      console.error('Error adding canal to Airtable:', error);
+      // Continue anyway, as the canal is already saved to the JSON file
     }
     
     return NextResponse.json({
@@ -149,9 +149,9 @@ export async function POST(request: Request) {
       canal: newCanal
     });
   } catch (error) {
-    console.error('Error creating water road:', error);
+    console.error('Error creating canal:', error);
     return NextResponse.json(
-      { error: 'Failed to create water road' },
+      { error: 'Failed to create canal' },
       { status: 500 }
     );
   }
