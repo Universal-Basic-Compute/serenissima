@@ -106,8 +106,8 @@ const useBuildingStore = create<BuildingState & BuildingActions>((set, get) => (
                   shortDescription: `This is a mock building for the ${displayName} category.`,
                   fullDescription: "This building is only used during development when real building data isn't available.",
                   flavorText: "A placeholder building for development purposes.",
-                  constructionCosts: { ducats: 1000 },
-                  maintenanceCost: { ducats: 100 },
+                  constructionCosts: 1000,
+                  maintenanceCost: 100,
                   constructionTime: 1
                 };
                 
