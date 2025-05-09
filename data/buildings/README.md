@@ -10,11 +10,11 @@ This directory contains buildings organized by category and subcategory.
 - Commercial: 10 buildings
 - Criminal: 3 buildings
 - Infrastructure: 14 buildings
-- Military & Defense: 10 buildings
+- Military & Defense: 10 buildings (directory: military_defence)
 - Production: 13 buildings
-- Public & Government: 11 buildings
+- Public & Government: 11 buildings (directory: public_government)
 - Residential: 6 buildings
-- Special Buildings: 9 buildings
+- Special Buildings: 9 buildings (directory: special)
 
 ## Subcategories
 - Commercial - Retail Shops: 5 buildings

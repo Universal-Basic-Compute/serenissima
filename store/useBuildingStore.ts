@@ -42,9 +42,10 @@ const useBuildingStore = create<BuildingState & BuildingActions>((set, get) => (
       'commercial',
       'production',
       'infrastructure',
-      'public&government',
-      'military&defence',
-      'special'
+      'public_government', // Changed from public&government to avoid URL encoding issues
+      'military_defence',  // Changed from military&defence to avoid URL encoding issues
+      'special',
+      'criminal'           // Added criminal category
     ];
     
     try {
@@ -54,6 +55,12 @@ const useBuildingStore = create<BuildingState & BuildingActions>((set, get) => (
       for (const category of categoryFiles) {
         try {
           console.log(`Fetching buildings for category: ${category}`);
+          
+          // Format display name (convert underscores to spaces and capitalize)
+          const displayName = category
+            .split('_')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' & ');
           
           // Try the Next.js API route first
           let response = await fetch(`/api/buildings/${category}`, {
@@ -72,12 +79,44 @@ const useBuildingStore = create<BuildingState & BuildingActions>((set, get) => (
             const buildings = await response.json();
             console.log(`Loaded ${buildings.length} buildings for category ${category}`);
             
-            loadedCategories.push({
-              name: category.charAt(0).toUpperCase() + category.slice(1).replace('&', ' & '),
-              buildings: buildings
-            });
+            // Only add the category if we have buildings
+            if (buildings && buildings.length > 0) {
+              loadedCategories.push({
+                name: displayName,
+                buildings: buildings
+              });
+            } else {
+              console.warn(`No buildings found for category ${category}`);
+            }
           } else {
             console.warn(`Failed to load buildings for ${category}: ${response.status}`);
+            
+            // Try to load from a mock/fallback source for development
+            try {
+              // Check if we're in development mode
+              if (process.env.NODE_ENV === 'development') {
+                // Try to load a mock building for this category
+                const mockBuilding = {
+                  name: `Mock ${displayName} Building`,
+                  category: displayName,
+                  subcategory: "Development",
+                  tier: 1,
+                  size: "Medium",
+                  shortDescription: `This is a mock building for the ${displayName} category.`,
+                  fullDescription: "This building is only used during development when real building data isn't available.",
+                  constructionCosts: { ducats: 1000 }
+                };
+                
+                loadedCategories.push({
+                  name: displayName,
+                  buildings: [mockBuilding]
+                });
+                
+                console.log(`Added mock building for ${category}`);
+              }
+            } catch (mockError) {
+              console.error(`Error creating mock building for ${category}:`, mockError);
+            }
           }
         } catch (error) {
           console.error(`Error loading ${category} buildings:`, error);
