@@ -239,7 +239,7 @@ const LoanApplicationModal: React.FC<LoanApplicationModalProps> = ({ loan, onClo
                     <div className="grid grid-cols-2 gap-4">
                       <div className="bg-white p-3 rounded border border-amber-100">
                         <div className="text-sm text-gray-500">Principal</div>
-                        <div className="text-lg font-medium text-gray-900">{loanAmount.toLocaleString()} ⚜️</div>
+                        <div className="text-lg font-medium text-gray-900">{Math.floor(loanAmount).toLocaleString()} ⚜️</div>
                       </div>
                       <div className="bg-white p-3 rounded border border-amber-100">
                         <div className="text-sm text-gray-500">Interest Rate</div>
@@ -251,15 +251,15 @@ const LoanApplicationModal: React.FC<LoanApplicationModalProps> = ({ loan, onClo
                       </div>
                       <div className="bg-white p-3 rounded border border-amber-100">
                         <div className="text-sm text-gray-500">Total Interest</div>
-                        <div className="text-lg font-medium text-gray-900">{totalInterest.toLocaleString()} ⚜️</div>
+                        <div className="text-lg font-medium text-gray-900">{Math.floor(totalInterest).toLocaleString()} ⚜️</div>
                       </div>
                       <div className="bg-white p-3 rounded border border-amber-100">
                         <div className="text-sm text-gray-500">Total Payment</div>
-                        <div className="text-lg font-medium text-gray-900">{totalPayment.toLocaleString()} ⚜️</div>
+                        <div className="text-lg font-medium text-gray-900">{Math.floor(totalPayment).toLocaleString()} ⚜️</div>
                       </div>
                       <div className="bg-white p-3 rounded border border-amber-100">
                         <div className="text-sm text-gray-500">Daily Payment</div>
-                        <div className="text-lg font-medium text-gray-900">{dailyPayment.toLocaleString()} ⚜️</div>
+                        <div className="text-lg font-medium text-gray-900">{Math.floor(dailyPayment).toLocaleString()} ⚜️</div>
                       </div>
                     </div>
                     
@@ -369,7 +369,7 @@ const LoanApplicationModal: React.FC<LoanApplicationModalProps> = ({ loan, onClo
                     </div>
                     
                     <div className="text-gray-600 font-medium">Principal Amount:</div>
-                    <div className="text-gray-900 font-medium">{loanAmount.toLocaleString()} ⚜️ Ducats</div>
+                    <div className="text-gray-900 font-medium">{Math.floor(loanAmount).toLocaleString()} ⚜️ Ducats</div>
                     
                     <div className="text-gray-600 font-medium">Interest Rate:</div>
                     <div className="text-gray-900">{loan.interestRate}% per annum</div>
@@ -378,7 +378,7 @@ const LoanApplicationModal: React.FC<LoanApplicationModalProps> = ({ loan, onClo
                     <div className="text-gray-900">{loan.termDays} days</div>
                     
                     <div className="text-gray-600 font-medium">Total Repayment:</div>
-                    <div className="text-gray-900 font-medium">{totalPayment.toLocaleString()} ⚜️ Ducats</div>
+                    <div className="text-gray-900 font-medium">{Math.floor(totalPayment).toLocaleString()} ⚜️ Ducats</div>
                     
                     <div className="text-gray-600 font-medium">Daily Payment:</div>
                     <div className="text-gray-900">{dailyPayment.toLocaleString()} ⚜️ Ducats</div>

@@ -286,7 +286,7 @@ const LoanMarketplace: React.FC = () => {
                       <div className="grid grid-cols-2 gap-4 mb-4">
                         <div>
                           <div className="text-sm text-gray-500 mb-1">Amount</div>
-                          <div className="font-medium text-gray-900">{loan.principalAmount.toLocaleString()} ⚜️</div>
+                          <div className="font-medium text-gray-900">{Math.floor(loan.principalAmount).toLocaleString()} ⚜️</div>
                         </div>
                         <div>
                           <div className="text-sm text-gray-500 mb-1">Term</div>
