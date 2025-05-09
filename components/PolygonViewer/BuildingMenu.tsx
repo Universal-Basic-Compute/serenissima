@@ -292,7 +292,19 @@ export default function BuildingMenu({ visible, onClose, onBuildingSelect, onBui
                   
                   <div className="mt-auto">
                     <button
-                      onClick={() => handlePlaceBuilding(selectedBuilding, selectedVariant)}
+                      onClick={() => {
+                        // Call handlePlaceBuilding to set up the placeable building
+                        handlePlaceBuilding(selectedBuilding, selectedVariant);
+                        
+                        // Close the detail modal
+                        handleCloseDetailModal();
+                        
+                        // Close the entire building menu
+                        handleClose();
+                        
+                        // If onBuildingClose callback exists, call it
+                        if (onBuildingClose) onBuildingClose();
+                      }}
                       className="w-full py-3 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors flex items-center justify-center"
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
