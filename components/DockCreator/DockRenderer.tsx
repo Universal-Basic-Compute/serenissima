@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import type { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import type { EventBus, EventTypes as EventTypesEnum } from '@/lib/eventBus';
-import type { ApiBaseUrl } from '@/lib/apiUtils';
+import { getApiBaseUrl } from '@/lib/apiUtils';
 
 // Import actual implementations
 import { GLTFLoader as ActualGLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
