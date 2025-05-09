@@ -14,7 +14,13 @@ const ResourceDropdowns: React.FC = () => {
         setLoading(true);
         const resourceService = ResourceService.getInstance();
         const loadedCategories = await resourceService.getResourceCategories();
-        setCategories(loadedCategories);
+        
+        // Filter out categories with no resources
+        const nonEmptyCategories = loadedCategories.filter(category => 
+          category.resources && category.resources.length > 0
+        );
+        
+        setCategories(nonEmptyCategories);
         setError(null);
       } catch (err) {
         console.error('Error loading resource categories:', err);
