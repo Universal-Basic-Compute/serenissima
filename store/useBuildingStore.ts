@@ -96,15 +96,19 @@ const useBuildingStore = create<BuildingState & BuildingActions>((set, get) => (
               // Check if we're in development mode
               if (process.env.NODE_ENV === 'development') {
                 // Try to load a mock building for this category
-                const mockBuilding = {
+                const mockBuilding: Building = {
                   name: `Mock ${displayName} Building`,
                   category: displayName,
                   subcategory: "Development",
                   tier: 1,
                   size: "Medium",
+                  unlockCondition: "None",
                   shortDescription: `This is a mock building for the ${displayName} category.`,
                   fullDescription: "This building is only used during development when real building data isn't available.",
-                  constructionCosts: { ducats: 1000 }
+                  flavorText: "A placeholder building for development purposes.",
+                  constructionCosts: { ducats: 1000 },
+                  maintenanceCost: { ducats: 100 },
+                  constructionTime: 1
                 };
                 
                 loadedCategories.push({
