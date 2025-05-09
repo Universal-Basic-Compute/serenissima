@@ -1,6 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import type { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import type { EventBus, EventTypes as EventTypesEnum } from '@/lib/eventBus';
+import type { ApiBaseUrl } from '@/lib/apiUtils';
+
+// Import actual implementations
+import { GLTFLoader as ActualGLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { eventBus, EventTypes } from '@/lib/eventBus';
 import { getApiBaseUrl } from '@/lib/apiUtils';
 
@@ -19,12 +24,13 @@ interface DockRendererProps {
   active: boolean;
 }
 
-const DockRenderer: React.FC<DockRendererProps> = ({ scene, active }) => {
+// Export the component to avoid redeclaration error
+export const DockRenderer: React.FC<DockRendererProps> = ({ scene, active }) => {
   const docksRef = useRef<DockData[]>([]);
   const meshesRef = useRef<THREE.Object3D[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const modelRef = useRef<THREE.Group | null>(null);
-  const loaderRef = useRef<GLTFLoader>(new GLTFLoader());
+  const loaderRef = useRef<ActualGLTFLoader>(new ActualGLTFLoader());
   const modelLoadingRef = useRef<boolean>(false);
   
   // Load the dock model once
