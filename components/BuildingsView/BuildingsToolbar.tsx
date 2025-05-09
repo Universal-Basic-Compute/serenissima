@@ -90,6 +90,20 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
         <span>Browse Buildings</span>
       </button>
       
+      <button
+        onClick={() => {
+          setPlaceableObjectType('dock');
+          setIsRoadCreatorActive(false);
+        }}
+        className="px-4 py-2 bg-blue-600 text-white rounded-md shadow-md hover:bg-blue-700 transition-colors flex items-center space-x-2"
+        title="Create docks for water transportation"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path d="M6 3a2 2 0 00-2 2v1h10V5a2 2 0 00-2-2H6zM4 7v9a2 2 0 002 2h8a2 2 0 002-2V7H4z" />
+        </svg>
+        <span>Create Dock</span>
+      </button>
+      
       {isRoadCreatorActive && scene && camera && (
         <RoadCreator
           scene={scene}
@@ -125,6 +139,34 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
           }}
           onComplete={(buildingData) => {
             console.log('Building created:', buildingData);
+            setPlaceableObjectType(null);
+            if (onRefreshBuildings) {
+              onRefreshBuildings();
+            }
+          }}
+          onCancel={() => {
+            setPlaceableObjectType(null);
+          }}
+        />
+      )}
+      
+      {placeableObjectType === 'dock' && (
+        <PlaceableObjectManager
+          scene={scene}
+          camera={camera}
+          polygons={polygons}
+          active={true}
+          type="dock"
+          objectData={{
+            name: 'dock',
+            variant: 'model'
+          }}
+          constraints={{
+            requireWaterEdge: true,
+            requireAdminPermission: true
+          }}
+          onComplete={(dockData) => {
+            console.log('Dock created:', dockData);
             setPlaceableObjectType(null);
             if (onRefreshBuildings) {
               onRefreshBuildings();

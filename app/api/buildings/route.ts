@@ -6,6 +6,11 @@ const airtableUtils = {
     // In a real implementation, this would create a record in Airtable
     console.log('Creating building in Airtable:', buildingData);
     
+    // Special handling for dock type
+    if (buildingData.type === 'dock') {
+      console.log('Creating dock with connection points:', buildingData.connection_points);
+    }
+    
     // Return a mock response
     return {
       id: `building_${Date.now()}`,

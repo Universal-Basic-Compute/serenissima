@@ -383,40 +383,30 @@ const PlaceableObjectManager: React.FC<PlaceableObjectProps> = ({
       const buildingService = BuildingService.getInstance();
       let objectData;
       
+      // Treat docks as a special building type
+      objectData = await buildingService.saveBuilding({
+        type: type === 'dock' ? 'dock' : objectData.name,
+        variant: objectData.variant || 'model',
+        land_id: landId,
+        position: {
+          x: previewPosition.x,
+          y: previewPosition.y,
+          z: previewPosition.z
+        },
+        rotation: rotation,
+        created_by: walletAddress
+      });
+      
+      console.log(`${type} created:`, objectData);
+      
+      // Emit appropriate event
       if (type === 'dock') {
-        // Create a dock
-        objectData = await buildingService.createDock(
-          landId,
-          previewPosition,
-          rotation
-        );
-        
-        console.log('Dock created:', objectData);
-        
-        // Emit event for dock creation
         eventBus.emit(EventTypes.DOCK_PLACED, {
           dockId: objectData.id,
           type: 'dock',
           data: objectData
         });
       } else {
-        // Create a building
-        objectData = await buildingService.saveBuilding({
-          type: objectData.name,
-          variant: objectData.variant || 'model',
-          land_id: landId,
-          position: {
-            x: previewPosition.x,
-            y: previewPosition.y,
-            z: previewPosition.z
-          },
-          rotation: rotation,
-          created_by: walletAddress
-        });
-        
-        console.log('Building created:', objectData);
-        
-        // Emit event for building creation
         eventBus.emit(EventTypes.BUILDING_PLACED, {
           buildingId: objectData.id,
           type: objectData.name,

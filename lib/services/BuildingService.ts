@@ -131,6 +131,42 @@ export class BuildingService {
    */
   public async saveBuilding(buildingData: BuildingData): Promise<BuildingData> {
     try {
+      // Special handling for dock type
+      if (buildingData.type === 'dock') {
+        // Generate connection points for docks
+        const position = new THREE.Vector3(
+          buildingData.position.x,
+          buildingData.position.y,
+          buildingData.position.z
+        );
+        
+        // Generate connection points based on position and rotation
+        const connectionPoints = [];
+        
+        // Front connection point (for roads connecting to the dock)
+        connectionPoints.push({
+          x: position.x + Math.sin(buildingData.rotation) * 1.25,
+          y: position.y + 0.2,
+          z: position.z + Math.cos(buildingData.rotation) * 1.25
+        });
+        
+        // Side connection points (for roads running alongside the dock)
+        connectionPoints.push({
+          x: position.x + Math.sin(buildingData.rotation + Math.PI/2) * 0.5,
+          y: position.y + 0.2,
+          z: position.z + Math.cos(buildingData.rotation + Math.PI/2) * 0.5
+        });
+        
+        connectionPoints.push({
+          x: position.x + Math.sin(buildingData.rotation - Math.PI/2) * 0.5,
+          y: position.y + 0.2,
+          z: position.z + Math.cos(buildingData.rotation - Math.PI/2) * 0.5
+        });
+        
+        // Add connection points to building data
+        buildingData.connection_points = connectionPoints;
+      }
+      
       // Send to server
       const response = await fetch(`${getApiBaseUrl()}/api/buildings`, {
         method: 'POST',
@@ -156,97 +192,6 @@ export class BuildingService {
     }
   }
   
-  /**
-   * Create a new dock
-   * @param landId The ID of the land parcel the dock is connected to
-   * @param position The position of the dock
-   * @param rotation The rotation of the dock in radians
-   * @returns The created dock data
-   */
-  public async createDock(
-    landId: string, 
-    position: THREE.Vector3, 
-    rotation: number
-  ): Promise<DockData> {
-    try {
-      // Generate connection points based on position and rotation
-      const connectionPoints = this.generateDockConnectionPoints(position, rotation);
-      
-      // Prepare dock data
-      const dockData = {
-        landId,
-        position: {
-          x: position.x,
-          y: position.y,
-          z: position.z
-        },
-        rotation,
-        connectionPoints,
-        createdBy: 'admin' // This should be the actual user ID in a real implementation
-      };
-      
-      // Send to server
-      const response = await fetch(`${getApiBaseUrl()}/api/docks`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(dockData),
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Failed to create dock: ${response.status} ${response.statusText}`);
-      }
-      
-      return await response.json();
-    } catch (error) {
-      console.error('Error creating dock:', error);
-      throw error;
-    }
-  }
-  
-  /**
-   * Get all docks
-   * @returns Array of dock data
-   */
-  public async getDocks(): Promise<DockData[]> {
-    try {
-      const response = await fetch(`${getApiBaseUrl()}/api/docks`);
-      
-      if (!response.ok) {
-        throw new Error(`Failed to get docks: ${response.status} ${response.statusText}`);
-      }
-      
-      return await response.json();
-    } catch (error) {
-      console.error('Error getting docks:', error);
-      throw error;
-    }
-  }
-  
-  /**
-   * Get a dock by ID
-   * @param id The dock ID
-   * @returns The dock data or null if not found
-   */
-  public async getDockById(id: string): Promise<DockData | null> {
-    try {
-      const response = await fetch(`${getApiBaseUrl()}/api/docks/${id}`);
-      
-      if (response.status === 404) {
-        return null;
-      }
-      
-      if (!response.ok) {
-        throw new Error(`Failed to get dock: ${response.status} ${response.statusText}`);
-      }
-      
-      return await response.json();
-    } catch (error) {
-      console.error('Error getting dock:', error);
-      throw error;
-    }
-  }
   
   /**
    * Get all buildings, optionally filtered by type
@@ -274,42 +219,6 @@ export class BuildingService {
     }
   }
   
-  /**
-   * Generate connection points for a dock
-   * @param position The position of the dock
-   * @param rotation The rotation of the dock in radians
-   * @returns Array of connection point positions
-   */
-  private generateDockConnectionPoints(
-    position: THREE.Vector3, 
-    rotation: number
-  ): { x: number; y: number; z: number }[] {
-    const points = [];
-    
-    // Front connection point (for roads connecting to the dock)
-    // Adjust distance to account for smaller size
-    points.push({
-      x: position.x + Math.sin(rotation) * 1.25, // Half of original 2.5
-      y: position.y + 0.2,
-      z: position.z + Math.cos(rotation) * 1.25
-    });
-    
-    // Side connection points (for roads running alongside the dock)
-    // Adjust distance to account for smaller size
-    points.push({
-      x: position.x + Math.sin(rotation + Math.PI/2) * 0.5, // Half of original 1
-      y: position.y + 0.2,
-      z: position.z + Math.cos(rotation + Math.PI/2) * 0.5
-    });
-    
-    points.push({
-      x: position.x + Math.sin(rotation - Math.PI/2) * 0.5, // Half of original 1
-      y: position.y + 0.2,
-      z: position.z + Math.cos(rotation - Math.PI/2) * 0.5
-    });
-    
-    return points;
-  }
 }
 
 // Create a singleton instance

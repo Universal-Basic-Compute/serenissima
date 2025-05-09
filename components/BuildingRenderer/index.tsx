@@ -99,7 +99,10 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
     if (buildingMeshesRef.current.has(id)) return;
     
     // Construct the path to the model
-    const modelPath = `/assets/buildings/models/${type}/${variant}.glb`;
+    // Handle dock type specially
+    const modelPath = type === 'dock' 
+      ? `/assets/buildings/models/dock/${variant}.glb`
+      : `/assets/buildings/models/${type}/${variant}.glb`;
     
     // Load the model
     gltfLoaderRef.current.load(
@@ -129,7 +132,10 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
         
         // Create a fallback mesh
         const geometry = new THREE.BoxGeometry(2, 1, 2);
-        const material = new THREE.MeshBasicMaterial({ color: 0xf59e0b });
+        // Use blue color for docks, amber for other buildings
+        const material = new THREE.MeshBasicMaterial({ 
+          color: type === 'dock' ? 0x3b82f6 : 0xf59e0b 
+        });
         const fallbackMesh = new THREE.Mesh(geometry, material);
         
         // Position and rotate the fallback
