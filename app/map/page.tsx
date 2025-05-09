@@ -378,6 +378,9 @@ export default function MapPage() {
     });
   };
   
+  // State for showing canals list
+  const [showCanalsList, setShowCanalsList] = useState<boolean>(false);
+  
   // Add this function to load existing canals
   const loadExistingCanals = useCallback(() => {
     fetch('/api/canal')
