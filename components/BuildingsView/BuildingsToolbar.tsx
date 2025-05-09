@@ -24,7 +24,7 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
   const [placeableObjectType, setPlaceableObjectType] = useState<'dock' | 'building' | null>(null);
   const [showBuildingRenderer, setShowBuildingRenderer] = useState(true);
   const [selectedBuildingType, setSelectedBuildingType] = useState<string>('');
-  const [showWaterRoadCreator, setShowWaterRoadCreator] = useState(false);
+  const [showCanalCreator, setShowCanalCreator] = useState(false);
   const [selectedVariant, setSelectedVariant] = useState<string>('model');
 
   // Get scene with fallback
@@ -62,7 +62,7 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
         onClick={() => {
           setIsRoadCreatorActive(true);
           setPlaceableObjectType(null);
-          setShowWaterRoadCreator(false);
+          setShowCanalCreator(false);
         }}
         className="px-4 py-2 bg-amber-600 text-white rounded-md shadow-md hover:bg-amber-700 transition-colors flex items-center space-x-2"
         title="Create roads to connect buildings and docks"
@@ -83,7 +83,7 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
           // Reset other active states
           setPlaceableObjectType(null);
           setIsRoadCreatorActive(false);
-          setShowWaterRoadCreator(false);
+          setShowCanalCreator(false);
         }}
         className="px-4 py-2 bg-amber-600 text-white rounded-md shadow-md hover:bg-amber-700 transition-colors flex items-center space-x-2"
         title="Browse and place buildings on your land"
@@ -98,7 +98,7 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
         onClick={() => {
           setPlaceableObjectType('dock');
           setIsRoadCreatorActive(false);
-          setShowWaterRoadCreator(false);
+          setShowCanalCreator(false);
         }}
         className="px-4 py-2 bg-blue-600 text-white rounded-md shadow-md hover:bg-blue-700 transition-colors flex items-center space-x-2"
         title="Create docks for water transportation"
@@ -111,13 +111,13 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
       
       <button
         onClick={() => {
-          setShowWaterRoadCreator(true);
+          setShowCanalCreator(true);
           setIsRoadCreatorActive(false);
           setPlaceableObjectType(null);
           
           // Dispatch custom event for water road creation
           window.dispatchEvent(new CustomEvent('buildingToolbarAction', {
-            detail: { action: 'waterRoad' }
+            detail: { action: 'canal' }
           }));
         }}
         className="px-4 py-2 bg-cyan-600 text-white rounded-md shadow-md hover:bg-cyan-700 transition-colors flex items-center space-x-2"
@@ -145,7 +145,7 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
         />
       )}
       
-      {showWaterRoadCreator && scene && camera && (
+      {showCanalCreator && scene && camera && (
         <div className="absolute top-0 left-0 right-0 bottom-0 z-30">
           {/* This div captures clicks to prevent interaction with the map */}
           <div 

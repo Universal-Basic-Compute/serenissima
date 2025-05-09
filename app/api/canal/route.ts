@@ -12,12 +12,12 @@ if (!fs.existsSync(dataDir)) {
 }
 
 // Define the path to the water roads data file
-const waterRoadsFile = path.join(dataDir, 'water-roads.json');
+const canalsFile = path.join(dataDir, 'water-roads.json');
 
 // Initialize the water roads data file if it doesn't exist
-if (!fs.existsSync(waterRoadsFile)) {
-  fs.writeFileSync(waterRoadsFile, JSON.stringify({
-    waterRoads: [],
+if (!fs.existsSync(canalsFile)) {
+  fs.writeFileSync(canalsFile, JSON.stringify({
+    canals: [],
     transferPoints: []
   }));
 }
@@ -26,7 +26,7 @@ if (!fs.existsSync(waterRoadsFile)) {
 export async function GET() {
   try {
     // Read the water roads data file
-    const data = JSON.parse(fs.readFileSync(waterRoadsFile, 'utf8'));
+    const data = JSON.parse(fs.readFileSync(canalsFile, 'utf8'));
     
     return NextResponse.json(data);
   } catch (error) {
@@ -54,18 +54,18 @@ export async function POST(request: Request) {
     // Read the existing data
     let data;
     try {
-      data = JSON.parse(fs.readFileSync(waterRoadsFile, 'utf8'));
+      data = JSON.parse(fs.readFileSync(canalsFile, 'utf8'));
     } catch (error) {
       // If the file doesn't exist or is invalid, create a new data structure
-      data = { waterRoads: [], transferPoints: [] };
+      data = { canals: [], transferPoints: [] };
     }
     
     // Generate a unique ID if not provided
-    const waterRoadId = body.id || `water-road-${uuidv4()}`;
+    const canalId = body.id || `water-road-${uuidv4()}`;
     
     // Create the new water road
-    const newWaterRoad = {
-      id: waterRoadId,
+    const newCanal = {
+      id: canalId,
       points: body.points,
       curvature: body.curvature || 0.5,
       width: body.width || 3,
@@ -75,14 +75,14 @@ export async function POST(request: Request) {
     };
     
     // Add the new water road to the data
-    data.waterRoads.push(newWaterRoad);
+    data.canals.push(newCanal);
     
     // Process transfer points if provided
     if (body.transferPoints && Array.isArray(body.transferPoints)) {
       body.transferPoints.forEach((tp) => {
         // Replace 'new-road' with the actual road ID
         const connectedRoadIds = tp.connectedRoadIds.map((id) => 
-          id === 'new-road' ? waterRoadId : id
+          id === 'new-road' ? canalId : id
         );
         
         // Check if this transfer point already exists
@@ -113,14 +113,14 @@ export async function POST(request: Request) {
     }
     
     // Write the updated data back to the file
-    fs.writeFileSync(waterRoadsFile, JSON.stringify(data, null, 2));
+    fs.writeFileSync(canalsFile, JSON.stringify(data, null, 2));
     
-    // Add to Airtable if WATER_ROADS is in the TABLE_MAP
+    // Add to Airtable if CANALS is in the TABLE_MAP
     try {
       // Create a temporary JSON file for the jsontoairtable script
       const tempFile = path.join(process.cwd(), 'jsontoairtable.json');
       fs.writeFileSync(tempFile, JSON.stringify({
-        WATER_ROADS: [newWaterRoad]
+        CANALS: [newCanal]
       }));
       
       // Execute the jsontoairtable script
@@ -146,7 +146,7 @@ export async function POST(request: Request) {
     
     return NextResponse.json({
       success: true,
-      waterRoad: newWaterRoad
+      canal: newCanal
     });
   } catch (error) {
     console.error('Error creating water road:', error);
