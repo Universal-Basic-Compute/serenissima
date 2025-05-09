@@ -169,7 +169,7 @@ export class BuildingService {
       if (!response.ok) {
         console.warn(`Failed to fetch buildings: ${response.status}. Using fallback data.`);
         
-        // Return mock data as fallback
+        // Return mock data as fallback - using market-stall instead of public-dock
         return [
           {
             id: 'building_1',
