@@ -560,6 +560,15 @@ export default function MapPage() {
         console.error('Error loading polygons:', error);
       });
   }, [isGoogleLoaded]);
+  
+  // Add useEffect to clean up preview marker when component unmounts
+  useEffect(() => {
+    return () => {
+      if (previewWaterPoint) {
+        previewWaterPoint.setMap(null);
+      }
+    };
+  }, [previewWaterPoint]);
 
   // Add useEffect to load polygons when map is ready
   useEffect(() => {
