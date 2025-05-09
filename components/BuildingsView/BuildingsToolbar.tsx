@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import * as THREE from 'three';
 import RoadCreator from '@/components/PolygonViewer/RoadCreator';
-import DockRenderer from '@/components/DockCreator/DockRenderer';
 import BuildingRenderer from '@/components/BuildingRenderer';
 import PlaceableObjectManager from '@/lib/components/PlaceableObjectManager';
 import { useBuildingMenu } from '@/hooks/useBuildingMenu';
@@ -22,7 +21,6 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
 }) => {
   const [isRoadCreatorActive, setIsRoadCreatorActive] = useState(false);
   const [placeableObjectType, setPlaceableObjectType] = useState<'dock' | 'building' | null>(null);
-  const [showDockRenderer, setShowDockRenderer] = useState(true);
   const [showBuildingRenderer, setShowBuildingRenderer] = useState(true);
   const [selectedBuildingType, setSelectedBuildingType] = useState<string>('');
   const [selectedVariant, setSelectedVariant] = useState<string>('model');
@@ -72,20 +70,6 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
         <span>Create Road</span>
       </button>
       
-      <button
-        onClick={() => {
-          console.log('Create Dock button clicked');
-          setPlaceableObjectType('dock');
-          setIsRoadCreatorActive(false);
-        }}
-        className="px-4 py-2 bg-blue-600 text-white rounded-md shadow-md hover:bg-blue-700 transition-colors flex items-center space-x-2"
-        title="Place docks along shorelines to connect water and land transportation"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-          <path d="M11 17a1 1 0 001.447.894l4-2A1 1 0 0017 15V9.236a1 1 0 00-1.447-.894l-4 2a1 1 0 00-.553.894V17zM15.211 6.276a1 1 0 000-1.788l-4.764-2.382a1 1 0 00-.894 0L4.789 4.488a1 1 0 000 1.788l4.764 2.382a1 1 0 00.894 0l4.764-2.382zM4.447 8.342A1 1 0 003 9.236V15a1 1 0 00.553.894l4 2A1 1 0 009 17v-5.764a1 1 0 00-.553-.894l-4-2z" />
-        </svg>
-        <span>Create Dock</span>
-      </button>
       
       <button
         onClick={() => {
@@ -124,30 +108,6 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
         />
       )}
       
-      {placeableObjectType === 'dock' && (
-        <PlaceableObjectManager
-          scene={scene}
-          camera={camera}
-          polygons={polygons}
-          active={true}
-          type="dock"
-          objectData={{}}
-          constraints={{
-            requireWaterEdge: true,
-            requireAdminPermission: true
-          }}
-          onComplete={(dockData) => {
-            console.log('Dock created:', dockData);
-            setPlaceableObjectType(null);
-            if (onRefreshBuildings) {
-              onRefreshBuildings();
-            }
-          }}
-          onCancel={() => {
-            setPlaceableObjectType(null);
-          }}
-        />
-      )}
       
       {placeableObjectType === 'building' && (
         <PlaceableObjectManager
@@ -176,10 +136,6 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
         />
       )}
       
-      {/* Always render the DockRenderer to show existing docks */}
-      {showDockRenderer && actualScene && (
-        <DockRenderer scene={actualScene} active={true} />
-      )}
       
       {/* Always render the BuildingRenderer to show existing buildings */}
       {showBuildingRenderer && actualScene && (
