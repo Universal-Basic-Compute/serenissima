@@ -60,25 +60,12 @@ const BuildingModelViewer: React.FC<BuildingModelViewerProps> = ({
     // Set mounted flag to true
     isMountedRef.current = true;
     
-    // Clean up any existing canvas before creating a new one
+    // Clean up any existing content before creating a new canvas
     try {
-      while (containerRef.current.firstChild) {
-        try {
-          containerRef.current.removeChild(containerRef.current.firstChild);
-        } catch (removeError) {
-          console.debug('Error removing child:', removeError);
-          // Break the loop if we encounter an error to avoid infinite loops
-          break;
-        }
-      }
+      // Use innerHTML to clear the container - this is safer than removeChild
+      containerRef.current.innerHTML = '';
     } catch (cleanupError) {
       console.debug('Error during initial cleanup:', cleanupError);
-      // Alternative approach: use innerHTML as a fallback
-      try {
-        containerRef.current.innerHTML = '';
-      } catch (innerHTMLError) {
-        console.debug('Error clearing innerHTML:', innerHTMLError);
-      }
     }
     
     // Get container dimensions
@@ -295,39 +282,24 @@ const BuildingModelViewer: React.FC<BuildingModelViewerProps> = ({
     return () => {
       // Mark component as unmounted to stop animation loop
       isMountedRef.current = false;
-      
+        
       if (containerRef.current) {
         try {
-          // Safely remove the renderer's canvas
-          if (rendererRef.current && rendererRef.current.domElement && 
-              containerRef.current.contains(rendererRef.current.domElement)) {
-            containerRef.current.removeChild(rendererRef.current.domElement);
-          }
-            
-          // Safely remove any error text elements
-          const textElements = containerRef.current.querySelectorAll('div');
-          textElements.forEach(el => {
-            try {
-              if (containerRef.current && containerRef.current.contains(el)) {
-                containerRef.current.removeChild(el);
-              }
-            } catch (removeError) {
-              // Silently handle removal errors
-              console.debug('Error removing text element:', removeError);
-            }
-          });
+          // Instead of trying to remove children one by one, which can cause errors,
+          // simply clear the innerHTML of the container
+          containerRef.current.innerHTML = '';
             
           // Properly dispose of Three.js objects to prevent memory leaks
           try {
             if (rendererRef.current) rendererRef.current.dispose();
             if (controlsRef.current) controlsRef.current.dispose();
-            
+              
             // Dispose of geometries and materials
             if (sceneRef.current) {
               sceneRef.current.traverse((object) => {
                 if (object instanceof THREE.Mesh) {
                   if (object.geometry) object.geometry.dispose();
-                    
+                      
                   if (object.material) {
                     if (Array.isArray(object.material)) {
                       object.material.forEach(material => material.dispose());
@@ -346,7 +318,7 @@ const BuildingModelViewer: React.FC<BuildingModelViewerProps> = ({
           // Don't rethrow - just log the error
         }
       }
-      
+        
       // Clear refs
       rendererRef.current = null;
       sceneRef.current = null;
