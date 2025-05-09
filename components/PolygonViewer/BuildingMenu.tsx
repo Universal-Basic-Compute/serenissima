@@ -188,37 +188,40 @@ export default function BuildingMenu({ visible, onClose, onBuildingSelect, onBui
               </div>
               
               <div className="flex-grow overflow-auto p-4 flex flex-col md:flex-row gap-6">
-                <div className="w-full md:w-1/2 bg-amber-100 rounded-lg overflow-hidden h-[300px]">
-                  <BuildingModelViewer 
-                    buildingName={selectedBuilding.name.toLowerCase().replace(/\s+/g, '-')} 
-                    variant={selectedVariant}
-                    className="w-full h-full"
-                  />
-                  
-                  {/* Variant selector */}
-                  {availableVariants.length > 1 && (
-                    <div className="flex items-center justify-center p-2 bg-amber-200">
-                      <button 
-                        onClick={handlePreviousVariant}
-                        className="p-1 text-amber-800 hover:text-amber-950"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
-                        </svg>
-                      </button>
-                      <span className="mx-2 text-sm font-medium text-amber-900">
-                        Variant: {selectedVariant || 'Default'} ({availableVariants.indexOf(selectedVariant || 'default') + 1}/{availableVariants.length})
-                      </span>
-                      <button 
-                        onClick={handleNextVariant}
-                        className="p-1 text-amber-800 hover:text-amber-950"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                        </svg>
-                      </button>
+                <div className="w-full md:w-1/2 bg-amber-100 rounded-lg overflow-hidden p-4">
+                  <div className="flex flex-col items-center justify-center h-[300px]">
+                    <div className="w-32 h-32 bg-amber-200 rounded-lg flex items-center justify-center mb-4">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-amber-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                      </svg>
                     </div>
-                  )}
+                    <h3 className="text-lg font-medium text-amber-800 mb-2">{selectedBuilding.name}</h3>
+                    
+                    {/* Variant selector - keep this if you still want to select variants */}
+                    {availableVariants.length > 1 && (
+                      <div className="flex items-center justify-center p-2 bg-amber-200 rounded-lg mt-4 w-full">
+                        <button 
+                          onClick={handlePreviousVariant}
+                          className="p-1 text-amber-800 hover:text-amber-950"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                        </button>
+                        <span className="mx-2 text-sm font-medium text-amber-900">
+                          Variant: {selectedVariant || 'Default'} ({availableVariants.indexOf(selectedVariant || 'default') + 1}/{availableVariants.length})
+                        </span>
+                        <button 
+                          onClick={handleNextVariant}
+                          className="p-1 text-amber-800 hover:text-amber-950"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                          </svg>
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
                 
                 <div className="w-full md:w-1/2 flex flex-col">
