@@ -106,8 +106,14 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
     // Skip if we've already rendered this building
     if (buildingMeshesRef.current.has(id)) return;
     
-    // Construct the path to the model - ensure proper formatting
-    const modelPath = `/assets/buildings/models/${type.toLowerCase().replace(/\s+/g, '-')}/${variant}.glb`;
+    // Log the building data for debugging
+    console.log('Rendering building:', building);
+    
+    // Ensure type is a string and properly formatted
+    const buildingType = typeof type === 'string' ? type.toLowerCase().replace(/\s+/g, '-') : 'unknown';
+    
+    // Construct the path to the model
+    const modelPath = `/assets/buildings/models/${buildingType}/${variant}.glb`;
     
     console.log(`Attempting to load building model from: ${modelPath}`);
     

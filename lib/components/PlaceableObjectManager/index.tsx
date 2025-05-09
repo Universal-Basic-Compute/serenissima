@@ -392,13 +392,26 @@ const PlaceableObjectManager: React.FC<PlaceableObjectProps> = ({
         return;
       }
       
+      console.log('Placing building with data:', {
+        type: type === 'building' ? objectData.name?.toLowerCase().replace(/\s+/g, '-') : type,
+        variant: objectData.variant || 'model',
+        land_id: landId,
+        position: {
+          x: previewPosition.x,
+          y: previewPosition.y,
+          z: previewPosition.z
+        },
+        rotation: rotation,
+        created_by: walletAddress
+      });
+      
       const buildingService = BuildingService.getInstance();
       let objectData;
       
       // Fix the building data format
       objectData = await buildingService.saveBuilding({
         // For buildings, use the actual name from objectData
-        type: type === 'building' ? objectData.name.toLowerCase().replace(/\s+/g, '-') : type,
+        type: type === 'building' ? objectData.name?.toLowerCase().replace(/\s+/g, '-') : type,
         variant: objectData.variant || 'model',
         land_id: landId,
         position: {
@@ -422,7 +435,7 @@ const PlaceableObjectManager: React.FC<PlaceableObjectProps> = ({
       } else {
         eventBus.emit(EventTypes.BUILDING_PLACED, {
           buildingId: objectData.id,
-          type: objectData.name,
+          type: type === 'building' ? objectData.name : type,
           variant: objectData.variant || 'model',
           data: objectData
         });

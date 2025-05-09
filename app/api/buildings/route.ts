@@ -62,15 +62,22 @@ export async function POST(request: Request) {
       );
     }
     
+    // Log the received data for debugging
+    console.log('Received building data:', data);
+    
     // Create building record in Airtable
     const building = await airtableUtils.createBuilding({
       type: data.type,
+      variant: data.variant || 'model',
       land_id: data.land_id,
       position: data.position,
       rotation: data.rotation || 0,
       connection_points: data.connection_points || [],
       created_by: data.created_by || 'system'
     });
+    
+    // Log the created building for debugging
+    console.log('Created building:', building);
     
     return NextResponse.json({ success: true, building });
   } catch (error) {
