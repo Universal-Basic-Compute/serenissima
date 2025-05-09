@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
+import { exec } from 'child_process';
 
 // Define the data directory
 const dataDir = path.join(process.cwd(), 'data', 'canals');
@@ -119,12 +120,21 @@ export async function POST(request: Request) {
     try {
       // Create a temporary JSON file for the jsontoairtable script
       const tempFile = path.join(process.cwd(), 'jsontoairtable.json');
+      
+      // Prepare canal data for Airtable
+      const canalForAirtable = {
+        ...newCanal,
+        // Convert points to string if they're not already
+        points: typeof newCanal.points === 'string' 
+          ? newCanal.points 
+          : JSON.stringify(newCanal.points)
+      };
+      
       fs.writeFileSync(tempFile, JSON.stringify({
-        CANALS: [newCanal]
+        CANALS: [canalForAirtable]
       }));
       
       // Execute the jsontoairtable script
-      const { exec } = require('child_process');
       exec(`node scripts/jsontoairtable.js ${tempFile}`, (error, stdout, stderr) => {
         if (error) {
           console.error(`Error executing jsontoairtable script: ${error.message}`);

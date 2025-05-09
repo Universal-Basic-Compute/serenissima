@@ -140,6 +140,19 @@ function mapFields(item, collectionName) {
     mappedItem.ExpiresAt = null;
   }
   
+  // Special handling for CANALS collection
+  if (collectionName === 'CANALS') {
+    // Convert points array to a string for Airtable
+    if (mappedItem.points && Array.isArray(mappedItem.points)) {
+      mappedItem.points = JSON.stringify(mappedItem.points);
+    }
+    
+    // Ensure createdAt is in ISO format
+    if (!mappedItem.createdAt) {
+      mappedItem.createdAt = new Date().toISOString();
+    }
+  }
+  
   // If there are field mappings, apply them
   if (Object.keys(mappings).length > 0) {
     for (const [jsonField, airtableField] of Object.entries(mappings)) {
