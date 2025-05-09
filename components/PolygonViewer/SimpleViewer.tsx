@@ -543,6 +543,19 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
         landOwners={landOwners}
       />
       
+      {/* Transport View Canal Button */}
+      {activeView === 'transport' && (
+        <div className="absolute top-20 left-20 z-10">
+          <button
+            onClick={() => setShowCanalCreator(true)}
+            className="px-4 py-2 bg-blue-600 text-white rounded-md shadow-md hover:bg-blue-700 transition-colors"
+            title="Create canals for water transportation"
+          >
+            Create Canal
+          </button>
+        </div>
+      )}
+      
       {/* Water Road Creator - make sure it's visible in transport view */}
       {showCanalCreator && sceneRef.current && cameraControllerRef.current && (
         <CanalCreator
