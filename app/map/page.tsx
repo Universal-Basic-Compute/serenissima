@@ -57,7 +57,7 @@ export default function MapPage() {
   
   
   // State for WaterPoints
-  const [waterPointMode, setWaterPointMode] = useState<boolean>(false);
+  const [waterPointMode, setWaterPointMode] = useState<boolean>(true);
   const [connectWaterPointMode, setConnectWaterPointMode] = useState<boolean>(false);
   const [selectedWaterPoint, setSelectedWaterPoint] = useState<any>(null);
   const [waterPoints, setWaterPoints] = useState<any[]>([]);
@@ -922,11 +922,6 @@ export default function MapPage() {
       }
     }
     
-    if (canalMode) {
-      setCanalMode(false);
-      clearCanalData();
-    }
-    
     // Changer le style du curseur
     if (mapRef.current) {
       mapRef.current.setOptions({
@@ -972,6 +967,15 @@ export default function MapPage() {
       });
     }
   }, [mapRef.current, isGoogleLoaded, handleMapMouseMove]);
+  
+  // Set cursor to crosshair on initial load if waterPointMode is active
+  useEffect(() => {
+    if (mapRef.current && waterPointMode) {
+      mapRef.current.setOptions({
+        draggableCursor: 'crosshair'
+      });
+    }
+  }, [mapRef.current]);
 
   // Create drawing manager options with client-side safety
   const [drawingManagerOptions, setDrawingManagerOptions] = useState<any>({
