@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { FaTimes, FaCoins, FaArrowRight, FaIndustry, FaArrowDown } from 'react-icons/fa';
 import { Resource } from '@/lib/services/ResourceService';
 
@@ -96,10 +96,15 @@ const ResourceDetailsModal: React.FC<ResourceDetailsModalProps> = ({ resource, o
     return null;
   };
 
+  // Add useEffect for debugging
+  useEffect(() => {
+    console.log('Resource data:', resource);
+  }, [resource]);
+
   // Helper function to get inputs from different possible structures
   const getInputs = () => {
     const extendedResource = resource as ExtendedResource;
-    if (extendedResource.productionProperties?.inputs) {
+    if (extendedResource.productionProperties?.inputs && Array.isArray(extendedResource.productionProperties.inputs)) {
       return extendedResource.productionProperties.inputs;
     }
     return [];
@@ -108,10 +113,15 @@ const ResourceDetailsModal: React.FC<ResourceDetailsModalProps> = ({ resource, o
   // Helper function to get outputs from different possible structures
   const getOutputs = () => {
     const extendedResource = resource as ExtendedResource;
-    if (extendedResource.productionProperties?.outputs) {
-      return extendedResource.productionProperties.outputs;
+    // For resources like bread, we need to create outputs from the resource itself
+    if (!extendedResource.productionProperties?.outputs || extendedResource.productionProperties.outputs.length === 0) {
+      // If the resource is the output itself (like bread), create a default output
+      return [{
+        resource: resource.id,
+        amount: extendedResource.productionProperties?.batchSize || 1
+      }];
     }
-    return [];
+    return extendedResource.productionProperties.outputs;
   };
 
   // Helper function to check if we have any production information
@@ -120,7 +130,7 @@ const ResourceDetailsModal: React.FC<ResourceDetailsModalProps> = ({ resource, o
     return (
       getProductionBuilding() || 
       getInputs().length > 0 || 
-      getOutputs().length > 0 ||
+      extendedResource.productionProperties?.batchSize || // Check for batch size
       (extendedResource.productionChainPosition?.predecessors && extendedResource.productionChainPosition.predecessors.length > 0) ||
       (extendedResource.productionChainPosition?.successors && extendedResource.productionChainPosition.successors.length > 0)
     );
