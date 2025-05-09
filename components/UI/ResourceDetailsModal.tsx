@@ -61,7 +61,6 @@ export interface ExtendedResource extends Omit<Resource, 'id'> {
     building?: string;
     processingTime?: number;
   }>;
-  id?: string;
 }
 
 interface ResourceDetailsModalProps {
