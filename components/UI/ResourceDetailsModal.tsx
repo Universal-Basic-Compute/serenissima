@@ -3,7 +3,8 @@ import { FaTimes, FaCoins, FaArrowRight, FaIndustry, FaArrowDown } from 'react-i
 import { Resource } from '@/lib/services/ResourceService';
 
 // Extended Resource interface to include production-related properties
-export interface ExtendedResource extends Resource {
+export interface ExtendedResource extends Omit<Resource, 'id'> {
+  id?: string; // Make id optional in ExtendedResource
   productionProperties?: {
     producerBuilding?: string;
     processorBuilding?: string;
