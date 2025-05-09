@@ -72,7 +72,11 @@ export async function POST(request: Request) {
       width: body.width || 3,
       depth: body.depth || 0.5,
       color: body.color || 0x0088ff,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      // Store which points are transfer points
+      transferPointIndices: body.points
+        .map((point: any, index: number) => point.isTransferPoint ? index : null)
+        .filter((index: number | null) => index !== null)
     };
     
     // Add the new canal to the data
@@ -121,13 +125,28 @@ export async function POST(request: Request) {
       // Create a temporary JSON file for the jsontoairtable script
       const tempFile = path.join(process.cwd(), 'jsontoairtable.json');
       
+      // Read the existing data to get transfer points
+      let existingData;
+      try {
+        existingData = JSON.parse(fs.readFileSync(canalsFile, 'utf8'));
+      } catch (error) {
+        existingData = { canals: [], transferPoints: [] };
+      }
+      
+      // Find transfer points related to this canal
+      const relatedTransferPoints = existingData.transferPoints.filter(tp => 
+        tp.connectedRoadIds && tp.connectedRoadIds.includes(canalId)
+      );
+      
       // Prepare canal data for Airtable
       const canalForAirtable = {
         ...newCanal,
         // Convert points to string if they're not already
         points: typeof newCanal.points === 'string' 
           ? newCanal.points 
-          : JSON.stringify(newCanal.points)
+          : JSON.stringify(newCanal.points),
+        // Add transfer points
+        transferPoints: JSON.stringify(relatedTransferPoints)
       };
       
       fs.writeFileSync(tempFile, JSON.stringify({

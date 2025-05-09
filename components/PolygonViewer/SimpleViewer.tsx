@@ -473,8 +473,9 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
   }, [qualityMode]);
   
   // Handle canal creation completion
-  const handleCanalComplete = async (roadId: string, points: any[]) => {
+  const handleCanalComplete = async (roadId: string, points: any[], transferPoints: any[] = []) => {
     console.log('Canal created:', roadId, points);
+    console.log('Transfer points:', transferPoints);
     
     try {
       // Convert points to a format suitable for the API
@@ -485,7 +486,19 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
           z: point.position.z
         },
         width: point.width,
-        depth: point.depth
+        depth: point.depth,
+        isTransferPoint: point.isTransferPoint || false
+      }));
+      
+      // Convert transfer points to a format suitable for the API
+      const apiTransferPoints = transferPoints.map(tp => ({
+        id: tp.id,
+        position: {
+          x: tp.position.x,
+          y: tp.position.y,
+          z: tp.position.z
+        },
+        connectedRoadIds: tp.connectedRoadIds
       }));
       
       // Save the canal to the backend
@@ -499,7 +512,8 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
           points: apiPoints,
           width: points[0]?.width || 5,
           depth: points[0]?.depth || 1,
-          color: 0x3366ff
+          color: 0x3366ff,
+          transferPoints: apiTransferPoints
         }),
       });
       

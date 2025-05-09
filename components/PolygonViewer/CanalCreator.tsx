@@ -29,6 +29,7 @@ const CanalCreator: React.FC<CanalCreatorProps> = ({
   const [color, setColor] = useState<string>('#3366ff');
   const [previewRoadId, setPreviewRoadId] = useState<string | null>(null);
   const [previewPoint, setPreviewPoint] = useState<THREE.Vector3 | null>(null);
+  const [transferPoints, setTransferPoints] = useState<boolean[]>([]);
   
   const canalFacadeRef = useRef<CanalFacade | null>(null);
   const raycasterRef = useRef<THREE.Raycaster>(new THREE.Raycaster());
@@ -224,6 +225,9 @@ const CanalCreator: React.FC<CanalCreatorProps> = ({
     if (intersects.length > 0) {
       const intersectionPoint = intersects[0].point;
       
+      // Check if Shift key is pressed to mark as transfer point
+      const isTransferPoint = event.shiftKey;
+      
       // Add the point
       const newPoint: CanalPoint = {
         position: new THREE.Vector3(
@@ -232,10 +236,12 @@ const CanalCreator: React.FC<CanalCreatorProps> = ({
           intersectionPoint.z
         ),
         width,
-        depth
+        depth,
+        isTransferPoint
       };
       
       setPoints(prevPoints => [...prevPoints, newPoint]);
+      setTransferPoints(prev => [...prev, isTransferPoint]);
     }
   };
   
@@ -249,11 +255,21 @@ const CanalCreator: React.FC<CanalCreatorProps> = ({
       canalFacadeRef.current.removeCanal(previewRoadId);
       setPreviewRoadId(null);
       
-      // Call the onComplete callback
-      onComplete(finalRoadId, points);
+      // Create transfer points data
+      const transferPointsData = points
+        .filter(point => point.isTransferPoint)
+        .map((point, index) => ({
+          id: `transfer-point-${Date.now()}-${index}`,
+          position: point.position,
+          connectedRoadIds: [finalRoadId]
+        }));
+      
+      // Call the onComplete callback with transfer points
+      onComplete(finalRoadId, points, transferPointsData);
       
       // Reset points
       setPoints([]);
+      setTransferPoints([]);
     }
   };
   
@@ -356,6 +372,12 @@ const CanalCreator: React.FC<CanalCreatorProps> = ({
         >
           Complete Canal
         </button>
+      </div>
+      
+      {/* Instructions for transfer points */}
+      <div className="mt-4 text-sm text-gray-300 bg-black/50 p-2 rounded">
+        <p>Tip: Hold <kbd className="px-2 py-1 bg-gray-700 rounded">Shift</kbd> while clicking to create a transfer point.</p>
+        <p>Transfer points allow canals to connect with other transportation networks.</p>
       </div>
       
       {/* Add this div to capture mouse events across the entire screen */}

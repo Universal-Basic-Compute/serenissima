@@ -10,6 +10,14 @@ export interface CanalPoint {
   position: THREE.Vector3;
   width?: number;
   depth?: number;
+  isTransferPoint?: boolean;
+}
+
+export interface TransferPoint {
+  id: string;
+  position: THREE.Vector3;
+  connectedRoadIds: string[];
+  createdAt?: string;
 }
 
 export interface CanalOptions {
@@ -22,6 +30,7 @@ export interface CanalOptions {
   flowDirection?: { x: number; z: number };
   waveHeight?: number;
   waveFrequency?: number;
+  transferPoints?: TransferPoint[];
 }
 
 /**
@@ -37,6 +46,11 @@ export class CanalFacade {
     points: CanalPoint[];
     options: CanalOptions;
     flowOffset: number;
+    transferPointMarkers?: THREE.Mesh[];
+  }> = new Map();
+  private transferPoints: Map<string, {
+    marker: THREE.Mesh;
+    transferPoint: TransferPoint;
   }> = new Map();
   private clock: THREE.Clock;
   private defaultOptions: CanalOptions = {
@@ -120,15 +134,70 @@ export class CanalFacade {
     // Add to scene
     this.scene.add(mesh);
     
+    // Create transfer point markers if provided
+    const transferPointMarkers: THREE.Mesh[] = [];
+    if (mergedOptions.transferPoints && mergedOptions.transferPoints.length > 0) {
+      mergedOptions.transferPoints.forEach(tp => {
+        const marker = this.createTransferPointMarker(tp, id);
+        if (marker) {
+          transferPointMarkers.push(marker);
+        }
+      });
+    }
+    
     // Store the canal
     this.canals.set(id, {
       mesh,
       points,
       options: mergedOptions,
-      flowOffset: 0
+      flowOffset: 0,
+      transferPointMarkers
     });
     
     return id;
+  }
+  
+  /**
+   * Creates a visual marker for a transfer point
+   * @param transferPoint The transfer point data
+   * @param canalId The ID of the canal this transfer point belongs to
+   * @returns The created marker mesh
+   */
+  private createTransferPointMarker(transferPoint: TransferPoint, canalId: string): THREE.Mesh | null {
+    if (!transferPoint.position) {
+      console.error('Transfer point missing position data');
+      return null;
+    }
+    
+    // Create a sphere geometry for the transfer point
+    const geometry = new THREE.SphereGeometry(0.5, 16, 16);
+    const material = new THREE.MeshStandardMaterial({
+      color: 0xffaa00, // Orange color for transfer points
+      emissive: 0x553300,
+      emissiveIntensity: 0.3,
+      roughness: 0.3,
+      metalness: 0.7
+    });
+    
+    const marker = new THREE.Mesh(geometry, material);
+    
+    // Position the marker
+    marker.position.set(
+      transferPoint.position.x,
+      this.waterLevel + 0.5, // Slightly above water level
+      transferPoint.position.z
+    );
+    
+    // Add to scene
+    this.scene.add(marker);
+    
+    // Store the transfer point
+    this.transferPoints.set(transferPoint.id, {
+      marker,
+      transferPoint
+    });
+    
+    return marker;
   }
 
   /**
@@ -137,16 +206,53 @@ export class CanalFacade {
    * @returns True if the canal was removed, false otherwise
    */
   public removeCanal(id: string): boolean {
-    const road = this.canals.get(id);
-    if (road) {
-      this.scene.remove(road.mesh);
-      road.mesh.geometry.dispose();
-      if (Array.isArray(road.mesh.material)) {
-        road.mesh.material.forEach(m => m.dispose());
+    const canal = this.canals.get(id);
+    if (canal) {
+      // Remove the main canal mesh
+      this.scene.remove(canal.mesh);
+      canal.mesh.geometry.dispose();
+      if (Array.isArray(canal.mesh.material)) {
+        canal.mesh.material.forEach(m => m.dispose());
       } else {
-        road.mesh.material.dispose();
+        canal.mesh.material.dispose();
       }
+      
+      // Remove any transfer point markers associated with this canal
+      if (canal.transferPointMarkers && canal.transferPointMarkers.length > 0) {
+        canal.transferPointMarkers.forEach(marker => {
+          this.scene.remove(marker);
+          marker.geometry.dispose();
+          if (marker.material) {
+            if (Array.isArray(marker.material)) {
+              marker.material.forEach(m => m.dispose());
+            } else {
+              marker.material.dispose();
+            }
+          }
+        });
+      }
+      
+      // Remove from our maps
       this.canals.delete(id);
+      
+      // Also remove any transfer points that only connect to this canal
+      this.transferPoints.forEach((tp, tpId) => {
+        if (tp.transferPoint.connectedRoadIds && 
+            tp.transferPoint.connectedRoadIds.length === 1 && 
+            tp.transferPoint.connectedRoadIds[0] === id) {
+          this.scene.remove(tp.marker);
+          tp.marker.geometry.dispose();
+          if (tp.marker.material) {
+            if (Array.isArray(tp.marker.material)) {
+              tp.marker.material.forEach(m => m.dispose());
+            } else {
+              tp.marker.material.dispose();
+            }
+          }
+          this.transferPoints.delete(tpId);
+        }
+      });
+      
       return true;
     }
     return false;
@@ -263,11 +369,25 @@ export class CanalFacade {
    */
   public dispose(): void {
     // Remove all canals
-    this.canals.forEach((road, id) => {
+    this.canals.forEach((canal, id) => {
       this.removeCanal(id);
     });
     
+    // Remove any remaining transfer points
+    this.transferPoints.forEach((tp, id) => {
+      this.scene.remove(tp.marker);
+      tp.marker.geometry.dispose();
+      if (tp.marker.material) {
+        if (Array.isArray(tp.marker.material)) {
+          tp.marker.material.forEach(m => m.dispose());
+        } else {
+          tp.marker.material.dispose();
+        }
+      }
+    });
+    
     this.canals.clear();
+    this.transferPoints.clear();
   }
 
   /**
