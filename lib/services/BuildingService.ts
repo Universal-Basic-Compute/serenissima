@@ -123,8 +123,8 @@ export class BuildingService {
    */
   public async saveBuilding(buildingData: BuildingData): Promise<BuildingData> {
     try {
-      // Send to server
-      const response = await fetch(`${getApiBaseUrl()}/api/buildings`, {
+      // Send to server using relative URL
+      const response = await fetch(`/api/buildings`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -156,10 +156,13 @@ export class BuildingService {
    */
   public async getBuildings(type?: string): Promise<any[]> {
     try {
-      let url = `${getApiBaseUrl()}/api/buildings`;
+      // Use a relative URL instead of an absolute one to avoid port issues
+      let url = `/api/buildings`;
       if (type) {
         url += `?type=${encodeURIComponent(type)}`;
       }
+      
+      console.log('Fetching buildings from:', url);
       
       const response = await fetch(url);
       
