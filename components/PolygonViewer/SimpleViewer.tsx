@@ -394,9 +394,6 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
     if (incomeRendererRef.current) {
       incomeRendererRef.current.setVisible(activeView === 'land');
     }
-    
-    // Hide canal creator when view changes
-    setShowCanalCreator(false);
   }, [activeView]);
   
   
