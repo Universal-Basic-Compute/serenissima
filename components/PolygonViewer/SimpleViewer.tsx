@@ -9,7 +9,6 @@ import { IncomePolygonRenderer } from '../../lib/threejs/IncomePolygonRenderer';
 import { calculateBounds } from './utils';
 import { getApiBaseUrl } from '@/lib/apiUtils';
 import LandDetailsPanel from './LandDetailsPanel'; // Import the existing panel
-import CanalCreator from './CanalCreator';
 
 export default function SimpleViewer({ qualityMode = 'high', activeView = 'land' }: {
   qualityMode: 'high' | 'performance';
@@ -31,7 +30,6 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
   // State for land selection and details panel
   const [selectedPolygonId, setSelectedPolygonId] = useState<string | null>(null);
   const [landOwners, setLandOwners] = useState<Record<string, string>>({});
-  const [showCanalCreator, setShowCanalCreator] = useState<boolean>(false);
   
   // Define loadUsers as a reusable function
   const loadUsers = useCallback(async () => {
@@ -401,22 +399,6 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
     setShowCanalCreator(false);
   }, [activeView]);
   
-  // Listen for building toolbar actions
-  useEffect(() => {
-    const handleBuildingToolbarAction = (event: CustomEvent) => {
-      if (event.detail?.action === 'canal') {
-        setShowCanalCreator(true);
-      } else {
-        setShowCanalCreator(false);
-      }
-    };
-    
-    window.addEventListener('buildingToolbarAction', handleBuildingToolbarAction as EventListener);
-    
-    return () => {
-      window.removeEventListener('buildingToolbarAction', handleBuildingToolbarAction as EventListener);
-    };
-  }, []);
   
   // Add effect to update coat of arms when user data changes
   useEffect(() => {
@@ -472,72 +454,6 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
     }
   }, [qualityMode]);
   
-  // Handle canal creation completion
-  const handleCanalComplete = async (roadId: string, points: any[], transferPoints: any[] = []) => {
-    console.log('Canal created:', roadId, points);
-    console.log('Transfer points:', transferPoints);
-    
-    try {
-      // Convert points to a format suitable for the API
-      const apiPoints = points.map(point => ({
-        position: {
-          x: point.position.x,
-          y: point.position.y,
-          z: point.position.z
-        },
-        width: point.width,
-        depth: point.depth,
-        isTransferPoint: point.isTransferPoint || false
-      }));
-      
-      // Convert transfer points to a format suitable for the API
-      const apiTransferPoints = transferPoints.map(tp => ({
-        id: tp.id,
-        position: {
-          x: tp.position.x,
-          y: tp.position.y,
-          z: tp.position.z
-        },
-        connectedRoadIds: tp.connectedRoadIds
-      }));
-      
-      // Save the canal to the backend
-      const response = await fetch(`${getApiBaseUrl()}/api/canals`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          id: roadId,
-          points: apiPoints,
-          width: points[0]?.width || 5,
-          depth: points[0]?.depth || 1,
-          color: 0x3366ff,
-          transferPoints: apiTransferPoints
-        }),
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Failed to save canal: ${response.status} ${response.statusText}`);
-      }
-      
-      const data = await response.json();
-      console.log('Canal saved to backend:', data);
-      
-      // Hide the creator
-      setShowCanalCreator(false);
-      
-      // Notify any listeners that a canal was created
-      window.dispatchEvent(new CustomEvent('canalCreated', {
-        detail: { roadId, points, data }
-      }));
-    } catch (error) {
-      console.error('Error saving canal:', error);
-      alert(`Failed to save canal: ${error instanceof Error ? error.message : String(error)}`);
-      // Still hide the creator even if there was an error
-      setShowCanalCreator(false);
-    }
-  };
   
   return (
     <div className="w-screen h-screen">
@@ -557,29 +473,6 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
         landOwners={landOwners}
       />
       
-      {/* Transport View Canal Button */}
-      {activeView === 'transport' && (
-        <div className="absolute top-20 left-20 z-10">
-          <button
-            onClick={() => setShowCanalCreator(true)}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md shadow-md hover:bg-blue-700 transition-colors"
-            title="Create canals for water transportation"
-          >
-            Create Canal
-          </button>
-        </div>
-      )}
-      
-      {/* Canal Creator - make sure it's visible in transport view */}
-      {showCanalCreator && sceneRef.current && cameraControllerRef.current && (
-        <CanalCreator
-          scene={sceneRef.current}
-          camera={cameraControllerRef.current.camera}
-          active={showCanalCreator}
-          onComplete={handleCanalComplete}
-          onCancel={() => setShowCanalCreator(false)}
-        />
-      )}
     </div>
   );
 }

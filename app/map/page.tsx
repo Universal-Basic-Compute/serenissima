@@ -55,19 +55,6 @@ export default function MapPage() {
   const [isDraggingCentroid, setIsDraggingCentroid] = useState(false);
   const [centroidDragMode, setCentroidDragMode] = useState(false);
   
-  // Canal creation states
-  const [canalMode, setCanalMode] = useState(false);
-  const [canalPoints, setCanalPoints] = useState<google.maps.LatLng[]>([]);
-  const [canalMarkers, setCanalMarkers] = useState<google.maps.Marker[]>([]);
-  const [canalLines, setCanalLines] = useState<google.maps.Polyline[]>([]);
-  const canalModeRef = useRef(false);
-  const [existingCanals, setExistingCanals] = useState<any[]>([]);
-  const [snapDistance, setSnapDistance] = useState<number>(0.0001); // Adjust based on your map zoom level
-  const [transferConnections, setTransferConnections] = useState<Array<{
-    canalId: string;
-    handleType: 'start' | 'end';
-    position: { lat: number; lng: number };
-  }>>([]);
   
   // State for WaterPoints
   const [waterPointMode, setWaterPointMode] = useState<boolean>(false);
@@ -289,12 +276,6 @@ export default function MapPage() {
   const handleBridgeMode = () => {
     setBridgeMode(!bridgeMode);
     
-    // Turn off canal mode if it's on
-    if (canalMode) {
-      setCanalMode(false);
-      clearCanalData();
-    }
-    
     // Turn off waterpoint mode if it's on
     if (waterPointMode) {
       setWaterPointMode(false);
@@ -322,82 +303,6 @@ export default function MapPage() {
     }
   };
   
-  // Handle canal mode button
-  const handleCanalMode = () => {
-    setCanalMode(prevMode => {
-      const newMode = !prevMode;
-      console.log('Setting canal mode to:', newMode);
-      
-      // Show/hide canals list when toggling canal mode
-      setShowCanalsList(newMode);
-      
-      // If turning on canal mode, load the existing canals
-      if (newMode) {
-        loadExistingCanals();
-      }
-      
-      // Turn off bridge mode if it's on
-      if (bridgeMode) {
-        setBridgeMode(false);
-        setBridgeStart(null);
-        setBridgeStartLandId(null);
-        
-        // Remove the start marker if it exists
-        if (bridgeStartMarker) {
-          bridgeStartMarker.setMap(null);
-          setBridgeStartMarker(null);
-        }
-      }
-      
-      // Turn off waterpoint mode if it's on
-      if (waterPointMode) {
-        setWaterPointMode(false);
-        setConnectWaterPointMode(false);
-        setSelectedWaterPoint(null);
-      }
-      
-      // Clear canal data if turning off canal mode
-      if (prevMode) {
-        clearCanalData();
-        setShowCanalsList(false); // Also hide the canals list
-      }
-      
-      // Change cursor style based on canal mode
-      if (mapRef.current) {
-        mapRef.current.setOptions({
-          draggableCursor: newMode ? 'crosshair' : ''
-        });
-      }
-      
-      // Add this debug message
-      console.log('Canal mode is now:', newMode);
-      console.log('Map ref exists:', !!mapRef.current);
-      
-      return newMode;
-    });
-  };
-  
-  // Keep the ref in sync with the state
-  useEffect(() => {
-    canalModeRef.current = canalMode;
-  }, [canalMode]);
-  
-  // Clear canal data
-  const clearCanalData = () => {
-    // Remove all canal markers
-    canalMarkers.forEach(marker => marker.setMap(null));
-    setCanalMarkers([]);
-    
-    // Remove all canal lines
-    canalLines.forEach(line => line.setMap(null));
-    setCanalLines([]);
-    
-    // Clear canal points
-    setCanalPoints([]);
-    
-    // Reset transfer connections
-    setTransferConnections([]);
-  };
 
   // Add a function to get polygon coordinates from a Google Maps polygon
   const getPolygonCoordinates = (polygon: google.maps.Polygon) => {
@@ -408,240 +313,7 @@ export default function MapPage() {
     });
   };
   
-  // State for showing canals list
-  const [showCanalsList, setShowCanalsList] = useState<boolean>(false);
   
-  // Function to add handles to canal endpoints
-  const addCanalHandles = (canals: any[]) => {
-    // Remove existing handles
-    const existingHandles = document.querySelectorAll('.canal-handle');
-    existingHandles.forEach(handle => handle.remove());
-  
-    if (!mapRef.current || typeof google === 'undefined') return;
-  
-    // Create handles for each canal endpoint
-    canals.forEach(canal => {
-      if (!canal.points || canal.points.length < 2) return;
-    
-      // Get canal points
-      const points = typeof canal.points === 'string' 
-        ? JSON.parse(canal.points) 
-        : canal.points;
-    
-      // Create a handle for the start point
-      const startPoint = points[0];
-      const startLatLng = new google.maps.LatLng(startPoint.lat, startPoint.lng);
-      createCanalHandle(startLatLng, canal.id, 'start');
-    
-      // Create a handle for the end point
-      const endPoint = points[points.length - 1];
-      const endLatLng = new google.maps.LatLng(endPoint.lat, endPoint.lng);
-      createCanalHandle(endLatLng, canal.id, 'end');
-    });
-  };
-
-  // Function to create a visual handle for a canal point
-  const createCanalHandle = (position: google.maps.LatLng, canalId: string, type: 'start' | 'end') => {
-    if (!mapRef.current) return;
-    
-    // Create a DOM element for the handle
-    const handleDiv = document.createElement('div');
-    handleDiv.className = 'canal-handle';
-    handleDiv.style.position = 'absolute';
-    handleDiv.style.width = '16px';
-    handleDiv.style.height = '16px';
-    handleDiv.style.borderRadius = '50%';
-    handleDiv.style.backgroundColor = type === 'start' ? '#00FF00' : '#FF8800';
-    handleDiv.style.border = '2px solid white';
-    handleDiv.style.cursor = 'pointer';
-    handleDiv.style.zIndex = '1000';
-    
-    // Store handle data
-    handleDiv.dataset.canalId = canalId;
-    handleDiv.dataset.handleType = type;
-    
-    // Add the handle to the map
-    const overlay = new google.maps.OverlayView();
-    overlay.onAdd = function() {
-      const panes = this.getPanes();
-      panes.overlayMouseTarget.appendChild(handleDiv);
-    };
-    
-    overlay.draw = function() {
-      const projection = this.getProjection();
-      const point = projection.fromLatLngToDivPixel(position);
-      
-      if (point) {
-        handleDiv.style.left = (point.x - 8) + 'px';
-        handleDiv.style.top = (point.y - 8) + 'px';
-      }
-    };
-    
-    overlay.onRemove = function() {
-      handleDiv.parentNode?.removeChild(handleDiv);
-    };
-    
-    overlay.setMap(mapRef.current);
-    
-    // Add events for snapping
-    handleDiv.addEventListener('mousedown', (e) => {
-      if (canalMode) {
-        e.stopPropagation();
-        
-        // Add this point to the canal being created
-        const latLng = position;
-        
-        // Create a marker at this point
-        const marker = new google.maps.Marker({
-          position: latLng,
-          map: mapRef.current,
-          icon: {
-            path: google.maps.SymbolPath.CIRCLE,
-            scale: 5,
-            fillColor: '#FF8800', // Orange for snapped points
-            fillOpacity: 1,
-            strokeWeight: 2,
-            strokeColor: '#FFFFFF'
-          }
-        });
-        
-        // Add the marker to our array
-        setCanalMarkers(prev => [...prev, marker]);
-        
-        // Add the point to our array with transfer information
-        setCanalPoints(prev => {
-          const newPoints = [...prev, latLng];
-          
-          // If we have at least 2 points, draw or update the line
-          if (newPoints.length >= 2) {
-            // Remove existing lines
-            canalLines.forEach(line => line.setMap(null));
-            
-            // Create a new line with all points
-            const line = new google.maps.Polyline({
-              path: newPoints,
-              geodesic: true,
-              strokeColor: '#0088FF',
-              strokeOpacity: 1.0,
-              strokeWeight: 3,
-              map: mapRef.current
-            });
-            
-            // Update the lines array
-            setCanalLines([line]);
-          }
-          
-          return newPoints;
-        });
-        
-        // Store transfer information
-        const transferInfo = {
-          canalId: canalId,
-          handleType: type,
-          position: { lat: latLng.lat(), lng: latLng.lng() }
-        };
-        
-        // Add this information to state for use when saving
-        setTransferConnections(prev => [...prev, transferInfo]);
-      }
-    });
-  };
-
-  // Add this function to load existing canals
-  const loadExistingCanals = useCallback(() => {
-    fetch('/api/canal')
-      .then(response => response.json())
-      .then(data => {
-        // Check both data.canals and direct data array format
-        const canals = Array.isArray(data) ? data : (data.canals || []);
-      
-        console.log('Canal data received:', data);
-        console.log(`Loaded ${canals.length} existing canals`);
-      
-        setExistingCanals(canals);
-      
-        // Visualize existing canals on the map
-        if (mapRef.current && typeof google !== 'undefined') { // Vérifiez que google est défini
-          // Clear any existing canal visualizations first
-          canalLines.forEach(line => line.setMap(null));
-        
-          canals.forEach((canal: any) => {
-            if (canal.points && canal.points.length >= 2) {
-              // Convert points to LatLng if they're stored as strings
-              const path = typeof canal.points === 'string' 
-                ? JSON.parse(canal.points).map((p: any) => new google.maps.LatLng(p.lat, p.lng))
-                : canal.points.map((p: any) => new google.maps.LatLng(p.lat, p.lng));
-            
-              // Draw the canal on the map
-              const canalLine = new google.maps.Polyline({
-                path,
-                geodesic: true,
-                strokeColor: '#0088FF',
-                strokeOpacity: 0.7,
-                strokeWeight: 3,
-                map: mapRef.current
-              });
-            
-              // Store the canal ID as a property of the line for reference
-              canalLine.set('canalId', canal.id);
-            
-              // Add to canalLines state to track for cleanup
-              setCanalLines(prev => [...prev, canalLine]);
-            }
-          });
-        
-          // Add handles to canal endpoints
-          addCanalHandles(canals);
-        }
-      })
-      .catch(error => {
-        console.error('Error loading canals:', error);
-      });
-  }, [canalLines]);
-  
-  // Add this function to find the nearest snap point
-  const findNearestSnapPoint = (point: google.maps.LatLng): google.maps.LatLng | null => {
-    if (!existingCanals || existingCanals.length === 0 || typeof google === 'undefined') return null;
-  
-    let closestPoint: google.maps.LatLng | null = null;
-    let minDistance = Number.MAX_VALUE;
-  
-    // Check each canal
-    existingCanals.forEach(canal => {
-      if (!canal.points || canal.points.length < 2) return;
-    
-      // Parse points if they're stored as a string
-      const canalPoints = typeof canal.points === 'string' 
-        ? JSON.parse(canal.points) 
-        : canal.points;
-    
-      // Check start and end points of the canal
-      const startPoint = canalPoints[0];
-      const endPoint = canalPoints[canalPoints.length - 1];
-    
-      // Calculate distance to start point
-      const startLatLng = new google.maps.LatLng(startPoint.lat, startPoint.lng);
-      const startDistance = google.maps.geometry.spherical.computeDistanceBetween(point, startLatLng);
-    
-      // Calculate distance to end point
-      const endLatLng = new google.maps.LatLng(endPoint.lat, endPoint.lng);
-      const endDistance = google.maps.geometry.spherical.computeDistanceBetween(point, endLatLng);
-    
-      // Check if start point is closer than current closest
-      if (startDistance < minDistance && startDistance < snapDistance * 1000) { // Convert to meters
-        minDistance = startDistance;
-        closestPoint = startLatLng;
-      }
-    
-      // Check if end point is closer than current closest
-      if (endDistance < minDistance && endDistance < snapDistance * 1000) { // Convert to meters
-        minDistance = endDistance;
-        closestPoint = endLatLng;
-      }
-    });
-  
-    return closestPoint;
-  };
 
   // This function is no longer needed as we've moved its logic directly into the map click listener
 
@@ -669,80 +341,6 @@ export default function MapPage() {
     });
   };
   
-  // Add this function to save canal to file
-  const saveCanalToFile = (canal: any) => {
-    // Send canal data to the API
-    fetch('/api/save-canal', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(canal)
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        console.log(`Canal created: ${data.filename}`);
-        const transferPointsCount = canal.transferPoints ? canal.transferPoints.length : 0;
-        alert(`Canal created with ${canal.points.length} points and ${transferPointsCount} transfer points`);
-      } else {
-        console.error('Failed to save canal:', data.error);
-        alert('Failed to create canal');
-      }
-    })
-    .catch(error => {
-      console.error('Error saving canal:', error);
-      alert('Error creating canal');
-    });
-  };
-  
-  // Complete canal creation
-  const completeCanal = () => {
-    if (canalPoints.length < 2) {
-      alert('Canal must have at least 2 points');
-      return;
-    }
-    
-    // Create canal object
-    const canalId = `canal-${Date.now()}`;
-    const canal = {
-      id: canalId,
-      points: canalPoints.map(point => ({
-        lat: point.lat(),
-        lng: point.lng()
-      })),
-      width: 3, // Default width in meters
-      depth: 1  // Default depth in meters
-    };
-    
-    // Prepare transfer points
-    const transferPoints = transferConnections.map(connection => ({
-      position: {
-        x: connection.position.lat,
-        y: 0.1, // Slightly above water level
-        z: connection.position.lng
-      },
-      connectedRoadIds: [canalId, connection.canalId]
-    }));
-    
-    // Save canal with transfer points
-    saveCanalToFile({
-      ...canal,
-      transferPoints
-    });
-    
-    // Reset canal mode
-    clearCanalData();
-    setCanalMode(false);
-    
-    // Reset cursor
-    if (mapRef.current) {
-      mapRef.current.setOptions({
-        draggableCursor: ''
-      });
-    }
-    
-    // Reload canals to show updates
-    loadExistingCanals();
-  };
 
   // Handle map load
   const onMapLoad = (map: google.maps.Map) => {
@@ -754,15 +352,11 @@ export default function MapPage() {
     
     // Add click listener for bridge and canal creation
     map.addListener('click', (e: google.maps.MapMouseEvent) => {
-      // Use the ref instead of the state
-      const currentCanalMode = canalModeRef.current;
-      console.log('Map click event triggered, canal mode:', currentCanalMode);
-      
       // Pass the event to handleMapClick with current state values
       const event = e as google.maps.MapMouseEvent;
       if (!event.latLng) return;
       
-      console.log('Map clicked in mode:', bridgeMode ? 'bridge' : currentCanalMode ? 'canal' : waterPointMode ? 'waterpoint' : 'normal');
+      console.log('Map clicked in mode:', bridgeMode ? 'bridge' : waterPointMode ? 'waterpoint' : 'normal');
       
       if (bridgeMode) {
         // Find which polygon was clicked
@@ -877,61 +471,6 @@ export default function MapPage() {
       } else if (waterPointMode) {
         // Create a new WaterPoint at the clicked location
         createWaterPoint(event.latLng);
-      } else if (currentCanalMode) {
-        console.log('Processing click in canal mode');
-        
-        // Get the clicked point
-        let pointToUse = event.latLng;
-        
-        // Check if we should snap to an existing canal point
-        const snapPoint = findNearestSnapPoint(event.latLng);
-        if (snapPoint) {
-          console.log('Snapping to existing canal point');
-          pointToUse = snapPoint;
-        }
-        
-        // Create a marker at the point (use the snapped point if available)
-        const marker = new google.maps.Marker({
-          position: pointToUse,
-          map: mapRef.current,
-          icon: {
-            path: google.maps.SymbolPath.CIRCLE,
-            scale: 5,
-            fillColor: snapPoint ? '#FF8800' : '#0088FF', // Use orange for snapped points
-            fillOpacity: 1,
-            strokeWeight: 2,
-            strokeColor: '#FFFFFF'
-          }
-        });
-        
-        // Add the marker to our array
-        setCanalMarkers(prev => [...prev, marker]);
-        
-        // Add the point to our array
-        setCanalPoints(prev => {
-          const newPoints = [...prev, pointToUse];
-          
-          // If we have at least 2 points, draw or update the line
-          if (newPoints.length >= 2) {
-            // Remove any existing lines
-            canalLines.forEach(line => line.setMap(null));
-            
-            // Create a new line with all points
-            const line = new google.maps.Polyline({
-              path: newPoints,
-              geodesic: true,
-              strokeColor: '#0088FF',
-              strokeOpacity: 1.0,
-              strokeWeight: 3,
-              map: mapRef.current
-            });
-            
-            // Update the lines array
-            setCanalLines([line]);
-          }
-          
-          return newPoints;
-        });
       }
     });
     
@@ -997,12 +536,6 @@ export default function MapPage() {
     }
   }, [mapRef.current, isGoogleLoaded, loadPolygonsOnMap, centroidDragMode]);
   
-  // Load existing canals when the map loads
-  useEffect(() => {
-    if (mapRef.current && isGoogleLoaded && typeof google !== 'undefined') {
-      loadExistingCanals();
-    }
-  }, [mapRef.current, isGoogleLoaded, loadExistingCanals]);
   
   // Function to load WaterPoints
   const loadWaterPoints = useCallback(() => {
@@ -1458,7 +991,7 @@ export default function MapPage() {
         Back to 3D View
       </a>
       
-      {/* Bridge and Canal mode buttons */}
+      {/* Bridge and WaterPoint mode buttons */}
       {isGoogleLoaded && (
         <div className="absolute bottom-4 left-4 z-10 flex space-x-2">
           <button
@@ -1468,15 +1001,6 @@ export default function MapPage() {
             }`}
           >
             {bridgeMode ? 'Cancel Bridge' : 'Add Bridge'}
-          </button>
-          
-          <button
-            onClick={handleCanalMode}
-            className={`px-4 py-2 rounded shadow ${
-              canalMode ? 'bg-blue-500 text-white' : 'bg-white'
-            }`}
-          >
-            {canalMode ? 'Cancel Canal' : 'Add Canal'}
           </button>
           
           <button
@@ -1504,116 +1028,6 @@ export default function MapPage() {
         </div>
       )}
       
-      {/* Canal point counter and controls */}
-      {canalMode && (
-        <div className="absolute top-20 left-4 z-10 bg-white px-4 py-2 rounded shadow">
-          <p>Canal Points: {canalPoints.length}</p>
-          {canalPoints.length > 0 && (
-            <button
-              onClick={() => {
-                // Remove the last point
-                if (canalPoints.length > 0) {
-                  // Remove the last point
-                  setCanalPoints(prev => prev.slice(0, -1));
-                  
-                  // Remove the last marker
-                  if (canalMarkers.length > 0) {
-                    const lastMarker = canalMarkers[canalMarkers.length - 1];
-                    lastMarker.setMap(null);
-                    setCanalMarkers(prev => prev.slice(0, -1));
-                  }
-                  
-                  // Update the line
-                  if (canalLines.length > 0) {
-                    const lastLine = canalLines[canalLines.length - 1];
-                    lastLine.setMap(null);
-                    setCanalLines(prev => prev.slice(0, -1));
-                    
-                    // If we still have points, draw a new line
-                    if (canalPoints.length > 1) {
-                      const newLine = new google.maps.Polyline({
-                        path: canalPoints.slice(0, -1),
-                        geodesic: true,
-                        strokeColor: '#0088FF',
-                        strokeOpacity: 1.0,
-                        strokeWeight: 3,
-                        map: mapRef.current
-                      });
-                      
-                      setCanalLines(prev => [...prev, newLine]);
-                    }
-                  }
-                }
-              }}
-              className="mt-2 px-2 py-1 bg-red-500 text-white text-sm rounded"
-            >
-              Remove Last Point
-            </button>
-          )}
-        </div>
-      )}
-      
-      {/* Existing Canals List */}
-      {showCanalsList && (
-        <div className="absolute top-20 right-4 z-10 bg-white p-4 rounded shadow max-h-[60vh] overflow-auto w-80">
-          <h3 className="text-lg font-bold mb-2">Existing Canals</h3>
-          {existingCanals.length > 0 ? (
-            <div className="space-y-2">
-              {existingCanals.map((canal, index) => (
-                <div 
-                  key={canal.id || index} 
-                  className="border border-blue-200 p-2 rounded bg-blue-50 hover:bg-blue-100 cursor-pointer"
-                  onClick={() => {
-                    // Center the map on the first point of the canal
-                    const points = typeof canal.points === 'string' 
-                      ? JSON.parse(canal.points) 
-                      : canal.points;
-                    
-                    if (points && points.length > 0 && mapRef.current) {
-                      mapRef.current.panTo(new google.maps.LatLng(
-                        points[0].lat,
-                        points[0].lng
-                      ));
-                      mapRef.current.setZoom(17); // Zoom in a bit
-                    }
-                  }}
-                >
-                  <div className="flex justify-between items-center">
-                    <span className="font-medium">{canal.id}</span>
-                    <span className="text-xs text-gray-500">
-                      {new Date(canal.createdAt).toLocaleDateString()}
-                    </span>
-                  </div>
-                  <div className="text-sm text-gray-600 mt-1">
-                    <span>{typeof canal.points === 'string' 
-                      ? JSON.parse(canal.points).length 
-                      : canal.points?.length || 0} points</span>
-                    {canal.width && <span> • Width: {canal.width}m</span>}
-                    {canal.depth && <span> • Depth: {canal.depth}m</span>}
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-gray-500 italic">No canals found</p>
-          )}
-          <div className="mt-4 text-xs text-gray-500">
-            Click on a canal to center the map on it. Click on the map to add new canal points.
-          </div>
-        </div>
-      )}
-      
-      {/* Complete Canal button */}
-      {canalMode && canalPoints.length >= 2 && (
-        <div className="absolute bottom-4 right-4 z-10">
-          <button
-            onClick={completeCanal}
-            className="px-4 py-2 bg-green-500 text-white rounded shadow hover:bg-green-600 transition-colors"
-          >
-            Complete Canal ({canalPoints.length} points)
-          </button>
-        </div>
-      )}
       
       {/* WaterPoint Info Panel */}
       {selectedWaterPoint && (
