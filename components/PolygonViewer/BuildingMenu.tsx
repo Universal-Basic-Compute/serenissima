@@ -66,6 +66,7 @@ export default function BuildingMenu({ visible, onClose, onBuildingSelect, onBui
     
     // Reset any selected building if there is one
     if (selectedBuilding) {
+      // Call handleCloseDetailModal to properly clean up the selected building state
       handleCloseDetailModal();
     }
     
