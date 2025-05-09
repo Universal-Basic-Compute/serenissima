@@ -42,6 +42,25 @@ export interface ExtendedResource extends Resource {
     perishTime?: number;
     nutritionValue?: number;
   };
+  // Add these new properties
+  producedFrom?: Array<{
+    inputs: Array<{
+      resource: string;
+      amount: number;
+      qualityImpact?: number;
+    }>;
+    building?: string;
+    processingTime?: number;
+  }>;
+  usedIn?: Array<{
+    outputs: Array<{
+      resource: string;
+      amount: number;
+    }>;
+    building?: string;
+    processingTime?: number;
+  }>;
+  id?: string;
 }
 
 interface ResourceDetailsModalProps {
@@ -99,32 +118,57 @@ const ResourceDetailsModal: React.FC<ResourceDetailsModalProps> = ({ resource, o
 
   // Add useEffect for debugging
   useEffect(() => {
-    console.log('Resource data:', resource);
-  }, [resource]);
+    console.log('Resource data:', extendedResource);
+    console.log('Inputs:', getInputs());
+    console.log('Outputs:', getOutputs());
+  }, [extendedResource]);
 
   // Helper function to get inputs from different possible structures
   const getInputs = () => {
-    if (extendedResource.productionProperties?.inputs && Array.isArray(extendedResource.productionProperties.inputs)) {
-      // Log the inputs for debugging
-      console.log('Input resources:', extendedResource.productionProperties.inputs);
+    // Check for productionProperties.inputs
+    if (extendedResource.productionProperties?.inputs && 
+        Array.isArray(extendedResource.productionProperties.inputs)) {
       return extendedResource.productionProperties.inputs;
     }
+    
+    // Check for producedFrom structure
+    if (extendedResource.producedFrom && 
+        Array.isArray(extendedResource.producedFrom) && 
+        extendedResource.producedFrom.length > 0) {
+      // Get inputs from the first production method
+      const firstMethod = extendedResource.producedFrom[0];
+      if (firstMethod.inputs && Array.isArray(firstMethod.inputs)) {
+        return firstMethod.inputs;
+      }
+    }
+    
     return [];
   };
 
   // Helper function to get outputs from different possible structures
   const getOutputs = () => {
-    // If there are explicit outputs, use those
+    // Check for productionProperties.outputs
     if (extendedResource.productionProperties?.outputs && 
         Array.isArray(extendedResource.productionProperties.outputs) && 
         extendedResource.productionProperties.outputs.length > 0) {
       return extendedResource.productionProperties.outputs;
     }
     
+    // Check for usedIn structure
+    if (extendedResource.usedIn && 
+        Array.isArray(extendedResource.usedIn) && 
+        extendedResource.usedIn.length > 0) {
+      // Get outputs from the first usage method
+      const firstUsage = extendedResource.usedIn[0];
+      if (firstUsage.outputs && Array.isArray(firstUsage.outputs)) {
+        return firstUsage.outputs;
+      }
+    }
+    
     // If there are no explicit outputs but there's a batch size, the resource itself is the output
     if (extendedResource.productionProperties?.batchSize) {
       return [{
-        resource: extendedResource.name.toLowerCase(),
+        resource: extendedResource.id || extendedResource.name.toLowerCase(),
         amount: extendedResource.productionProperties.batchSize
       }];
     }
@@ -298,7 +342,7 @@ const ResourceDetailsModal: React.FC<ResourceDetailsModalProps> = ({ resource, o
                       >
                         <div className="mr-2 text-amber-100 text-sm">
                           {output.amount && <span className="font-medium mr-1">{output.amount}×</span>}
-                          {output.resource === extendedResource.name.toLowerCase() 
+                          {output.resource === extendedResource.id || output.resource === extendedResource.name.toLowerCase() 
                             ? extendedResource.name 
                             : formatCategoryName(output.resource)}
                         </div>
