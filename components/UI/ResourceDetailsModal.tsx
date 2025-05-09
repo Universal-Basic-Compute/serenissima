@@ -50,6 +50,8 @@ interface ResourceDetailsModalProps {
 }
 
 const ResourceDetailsModal: React.FC<ResourceDetailsModalProps> = ({ resource, onClose }) => {
+  // Ensure resource is treated as ExtendedResource
+  const extendedResource = resource as ExtendedResource;
   const modalRef = useRef<HTMLDivElement>(null);
   
   // Close when clicking outside the modal
@@ -86,11 +88,11 @@ const ResourceDetailsModal: React.FC<ResourceDetailsModalProps> = ({ resource, o
   
   // Helper function to get production building from different possible structures
   const getProductionBuilding = () => {
-    if (resource.productionProperties?.processorBuilding) {
-      return resource.productionProperties.processorBuilding;
+    if (extendedResource.productionProperties?.processorBuilding) {
+      return extendedResource.productionProperties.processorBuilding;
     }
-    if (resource.productionProperties?.producerBuilding) {
-      return resource.productionProperties.producerBuilding;
+    if (extendedResource.productionProperties?.producerBuilding) {
+      return extendedResource.productionProperties.producerBuilding;
     }
     return null;
   };
@@ -102,8 +104,8 @@ const ResourceDetailsModal: React.FC<ResourceDetailsModalProps> = ({ resource, o
 
   // Helper function to get inputs from different possible structures
   const getInputs = () => {
-    if (resource.productionProperties?.inputs && Array.isArray(resource.productionProperties.inputs)) {
-      return resource.productionProperties.inputs;
+    if (extendedResource.productionProperties?.inputs && Array.isArray(extendedResource.productionProperties.inputs)) {
+      return extendedResource.productionProperties.inputs;
     }
     return [];
   };
@@ -131,9 +133,9 @@ const ResourceDetailsModal: React.FC<ResourceDetailsModalProps> = ({ resource, o
     return (
       getProductionBuilding() || 
       getInputs().length > 0 || 
-      resource.productionProperties?.batchSize || // Check for batch size
-      (resource.productionChainPosition?.predecessors && resource.productionChainPosition.predecessors.length > 0) ||
-      (resource.productionChainPosition?.successors && resource.productionChainPosition.successors.length > 0)
+      extendedResource.productionProperties?.batchSize || // Check for batch size
+      (extendedResource.productionChainPosition?.predecessors && extendedResource.productionChainPosition.predecessors.length > 0) ||
+      (extendedResource.productionChainPosition?.successors && extendedResource.productionChainPosition.successors.length > 0)
     );
   };
 
@@ -223,27 +225,27 @@ const ResourceDetailsModal: React.FC<ResourceDetailsModalProps> = ({ resource, o
                   </div>
                   
                   <div className="text-amber-100 text-sm ml-6 space-y-1">
-                    {resource.productionProperties?.processingTime && (
+                    {extendedResource.productionProperties?.processingTime && (
                       <div>
-                        <span className="font-medium">Processing Time:</span> {resource.productionProperties.processingTime} minutes
+                        <span className="font-medium">Processing Time:</span> {extendedResource.productionProperties.processingTime} minutes
                       </div>
                     )}
                     
-                    {resource.productionProperties?.productionTime && (
+                    {extendedResource.productionProperties?.productionTime && (
                       <div>
-                        <span className="font-medium">Production Time:</span> {resource.productionProperties.productionTime} minutes
+                        <span className="font-medium">Production Time:</span> {extendedResource.productionProperties.productionTime} minutes
                       </div>
                     )}
                     
-                    {resource.productionProperties?.processingComplexity && (
+                    {extendedResource.productionProperties?.processingComplexity && (
                       <div>
-                        <span className="font-medium">Complexity:</span> {resource.productionProperties.processingComplexity}/10
+                        <span className="font-medium">Complexity:</span> {extendedResource.productionProperties.processingComplexity}/10
                       </div>
                     )}
                     
-                    {resource.productionProperties?.productionComplexity && (
+                    {extendedResource.productionProperties?.productionComplexity && (
                       <div>
-                        <span className="font-medium">Complexity:</span> {resource.productionProperties.productionComplexity}/10
+                        <span className="font-medium">Complexity:</span> {extendedResource.productionProperties.productionComplexity}/10
                       </div>
                     )}
                   </div>
