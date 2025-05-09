@@ -416,23 +416,23 @@ export default function MapPage() {
     // Remove existing handles
     const existingHandles = document.querySelectorAll('.canal-handle');
     existingHandles.forEach(handle => handle.remove());
-    
-    if (!mapRef.current) return;
-    
+  
+    if (!mapRef.current || typeof google === 'undefined') return;
+  
     // Create handles for each canal endpoint
     canals.forEach(canal => {
       if (!canal.points || canal.points.length < 2) return;
-      
+    
       // Get canal points
       const points = typeof canal.points === 'string' 
         ? JSON.parse(canal.points) 
         : canal.points;
-      
+    
       // Create a handle for the start point
       const startPoint = points[0];
       const startLatLng = new google.maps.LatLng(startPoint.lat, startPoint.lng);
       createCanalHandle(startLatLng, canal.id, 'start');
-      
+    
       // Create a handle for the end point
       const endPoint = points[points.length - 1];
       const endLatLng = new google.maps.LatLng(endPoint.lat, endPoint.lng);
@@ -554,24 +554,24 @@ export default function MapPage() {
       .then(data => {
         // Check both data.canals and direct data array format
         const canals = Array.isArray(data) ? data : (data.canals || []);
-        
+      
         console.log('Canal data received:', data);
         console.log(`Loaded ${canals.length} existing canals`);
-        
+      
         setExistingCanals(canals);
-        
+      
         // Visualize existing canals on the map
-        if (mapRef.current) {
+        if (mapRef.current && typeof google !== 'undefined') { // Vérifiez que google est défini
           // Clear any existing canal visualizations first
           canalLines.forEach(line => line.setMap(null));
-          
+        
           canals.forEach((canal: any) => {
             if (canal.points && canal.points.length >= 2) {
               // Convert points to LatLng if they're stored as strings
               const path = typeof canal.points === 'string' 
                 ? JSON.parse(canal.points).map((p: any) => new google.maps.LatLng(p.lat, p.lng))
                 : canal.points.map((p: any) => new google.maps.LatLng(p.lat, p.lng));
-              
+            
               // Draw the canal on the map
               const canalLine = new google.maps.Polyline({
                 path,
@@ -581,15 +581,15 @@ export default function MapPage() {
                 strokeWeight: 3,
                 map: mapRef.current
               });
-              
+            
               // Store the canal ID as a property of the line for reference
               canalLine.set('canalId', canal.id);
-              
+            
               // Add to canalLines state to track for cleanup
               setCanalLines(prev => [...prev, canalLine]);
             }
           });
-          
+        
           // Add handles to canal endpoints
           addCanalHandles(canals);
         }
@@ -601,45 +601,45 @@ export default function MapPage() {
   
   // Add this function to find the nearest snap point
   const findNearestSnapPoint = (point: google.maps.LatLng): google.maps.LatLng | null => {
-    if (!existingCanals || existingCanals.length === 0) return null;
-    
+    if (!existingCanals || existingCanals.length === 0 || typeof google === 'undefined') return null;
+  
     let closestPoint: google.maps.LatLng | null = null;
     let minDistance = Number.MAX_VALUE;
-    
+  
     // Check each canal
     existingCanals.forEach(canal => {
       if (!canal.points || canal.points.length < 2) return;
-      
+    
       // Parse points if they're stored as a string
       const canalPoints = typeof canal.points === 'string' 
         ? JSON.parse(canal.points) 
         : canal.points;
-      
+    
       // Check start and end points of the canal
       const startPoint = canalPoints[0];
       const endPoint = canalPoints[canalPoints.length - 1];
-      
+    
       // Calculate distance to start point
       const startLatLng = new google.maps.LatLng(startPoint.lat, startPoint.lng);
       const startDistance = google.maps.geometry.spherical.computeDistanceBetween(point, startLatLng);
-      
+    
       // Calculate distance to end point
       const endLatLng = new google.maps.LatLng(endPoint.lat, endPoint.lng);
       const endDistance = google.maps.geometry.spherical.computeDistanceBetween(point, endLatLng);
-      
+    
       // Check if start point is closer than current closest
       if (startDistance < minDistance && startDistance < snapDistance * 1000) { // Convert to meters
         minDistance = startDistance;
         closestPoint = startLatLng;
       }
-      
+    
       // Check if end point is closer than current closest
       if (endDistance < minDistance && endDistance < snapDistance * 1000) { // Convert to meters
         minDistance = endDistance;
         closestPoint = endLatLng;
       }
     });
-    
+  
     return closestPoint;
   };
 
@@ -999,7 +999,7 @@ export default function MapPage() {
   
   // Load existing canals when the map loads
   useEffect(() => {
-    if (mapRef.current && isGoogleLoaded) {
+    if (mapRef.current && isGoogleLoaded && typeof google !== 'undefined') {
       loadExistingCanals();
     }
   }, [mapRef.current, isGoogleLoaded, loadExistingCanals]);
