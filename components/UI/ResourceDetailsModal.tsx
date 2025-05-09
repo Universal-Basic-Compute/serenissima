@@ -45,7 +45,7 @@ interface ExtendedResource extends Resource {
 }
 
 interface ResourceDetailsModalProps {
-  resource: ExtendedResource;
+  resource: Resource | ExtendedResource;
   onClose: () => void;
 }
 
@@ -86,39 +86,43 @@ const ResourceDetailsModal: React.FC<ResourceDetailsModalProps> = ({ resource, o
   
   // Helper function to get production building from different possible structures
   const getProductionBuilding = () => {
-    if (resource.productionProperties?.processorBuilding) {
-      return resource.productionProperties.processorBuilding;
+    const extendedResource = resource as ExtendedResource;
+    if (extendedResource.productionProperties?.processorBuilding) {
+      return extendedResource.productionProperties.processorBuilding;
     }
-    if (resource.productionProperties?.producerBuilding) {
-      return resource.productionProperties.producerBuilding;
+    if (extendedResource.productionProperties?.producerBuilding) {
+      return extendedResource.productionProperties.producerBuilding;
     }
     return null;
   };
 
   // Helper function to get inputs from different possible structures
   const getInputs = () => {
-    if (resource.productionProperties?.inputs) {
-      return resource.productionProperties.inputs;
+    const extendedResource = resource as ExtendedResource;
+    if (extendedResource.productionProperties?.inputs) {
+      return extendedResource.productionProperties.inputs;
     }
     return [];
   };
 
   // Helper function to get outputs from different possible structures
   const getOutputs = () => {
-    if (resource.productionProperties?.outputs) {
-      return resource.productionProperties.outputs;
+    const extendedResource = resource as ExtendedResource;
+    if (extendedResource.productionProperties?.outputs) {
+      return extendedResource.productionProperties.outputs;
     }
     return [];
   };
 
   // Helper function to check if we have any production information
   const hasProductionInfo = () => {
+    const extendedResource = resource as ExtendedResource;
     return (
       getProductionBuilding() || 
       getInputs().length > 0 || 
       getOutputs().length > 0 ||
-      (resource.productionChainPosition?.predecessors && resource.productionChainPosition.predecessors.length > 0) ||
-      (resource.productionChainPosition?.successors && resource.productionChainPosition.successors.length > 0)
+      (extendedResource.productionChainPosition?.predecessors && extendedResource.productionChainPosition.predecessors.length > 0) ||
+      (extendedResource.productionChainPosition?.successors && extendedResource.productionChainPosition.successors.length > 0)
     );
   };
 
@@ -208,27 +212,27 @@ const ResourceDetailsModal: React.FC<ResourceDetailsModalProps> = ({ resource, o
                   </div>
                   
                   <div className="text-amber-100 text-sm ml-6 space-y-1">
-                    {resource.productionProperties?.processingTime && (
+                    {(resource as ExtendedResource).productionProperties?.processingTime && (
                       <div>
-                        <span className="font-medium">Processing Time:</span> {resource.productionProperties.processingTime} minutes
+                        <span className="font-medium">Processing Time:</span> {(resource as ExtendedResource).productionProperties!.processingTime} minutes
                       </div>
                     )}
                     
-                    {resource.productionProperties?.productionTime && (
+                    {(resource as ExtendedResource).productionProperties?.productionTime && (
                       <div>
-                        <span className="font-medium">Production Time:</span> {resource.productionProperties.productionTime} minutes
+                        <span className="font-medium">Production Time:</span> {(resource as ExtendedResource).productionProperties!.productionTime} minutes
                       </div>
                     )}
                     
-                    {resource.productionProperties?.processingComplexity && (
+                    {(resource as ExtendedResource).productionProperties?.processingComplexity && (
                       <div>
-                        <span className="font-medium">Complexity:</span> {resource.productionProperties.processingComplexity}/10
+                        <span className="font-medium">Complexity:</span> {(resource as ExtendedResource).productionProperties!.processingComplexity}/10
                       </div>
                     )}
                     
-                    {resource.productionProperties?.productionComplexity && (
+                    {(resource as ExtendedResource).productionProperties?.productionComplexity && (
                       <div>
-                        <span className="font-medium">Complexity:</span> {resource.productionProperties.productionComplexity}/10
+                        <span className="font-medium">Complexity:</span> {(resource as ExtendedResource).productionProperties!.productionComplexity}/10
                       </div>
                     )}
                   </div>
@@ -288,13 +292,13 @@ const ResourceDetailsModal: React.FC<ResourceDetailsModalProps> = ({ resource, o
               <div>
                 <h4 className="text-lg font-serif text-amber-300 mb-2 border-b border-amber-700/50 pb-1">Production Chain</h4>
                 
-                {resource.productionChainPosition ? (
+                {(resource as ExtendedResource).productionChainPosition ? (
                   <>
-                    {resource.productionChainPosition.predecessors && resource.productionChainPosition.predecessors.length > 0 && (
+                    {(resource as ExtendedResource).productionChainPosition!.predecessors && (resource as ExtendedResource).productionChainPosition!.predecessors!.length > 0 && (
                       <div className="mb-3">
                         <div className="text-amber-200 font-medium mb-1">Predecessors:</div>
                         <div className="flex flex-wrap gap-2 ml-6">
-                          {resource.productionChainPosition.predecessors.map((pred: any, index: number) => (
+                          {(resource as ExtendedResource).productionChainPosition!.predecessors!.map((pred: any, index: number) => (
                             <div key={index} className="text-xs bg-amber-800/40 text-amber-100 px-2 py-1 rounded">
                               {formatCategoryName(pred.resource)} 
                               {pred.facility && <span className="text-amber-200/70"> ({formatCategoryName(pred.facility)})</span>}
@@ -304,11 +308,11 @@ const ResourceDetailsModal: React.FC<ResourceDetailsModalProps> = ({ resource, o
                       </div>
                     )}
                     
-                    {resource.productionChainPosition.successors && resource.productionChainPosition.successors.length > 0 && (
+                    {(resource as ExtendedResource).productionChainPosition!.successors && (resource as ExtendedResource).productionChainPosition!.successors!.length > 0 && (
                       <div>
                         <div className="text-amber-200 font-medium mb-1">Successors:</div>
                         <div className="flex flex-wrap gap-2 ml-6">
-                          {resource.productionChainPosition.successors.map((succ: any, index: number) => (
+                          {(resource as ExtendedResource).productionChainPosition!.successors!.map((succ: any, index: number) => (
                             <div key={index} className="text-xs bg-amber-800/40 text-amber-100 px-2 py-1 rounded">
                               {formatCategoryName(succ.resource)}
                               {succ.facility && <span className="text-amber-200/70"> ({formatCategoryName(succ.facility)})</span>}
