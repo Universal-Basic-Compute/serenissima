@@ -14,6 +14,22 @@ export interface DockData {
   createdAt: string;
 }
 
+export interface BuildingData {
+  id: string;
+  type: string;
+  variant: string;
+  landId: string;
+  position: { x: number; y: number; z: number };
+  rotation: number;
+  createdBy: string;
+  createdAt: string;
+  constructionStatus?: 'planned' | 'in_progress' | 'completed';
+  constructionProgress?: number;
+  health?: number;
+  income?: number;
+  lastIncomeGenerated?: string;
+}
+
 export class BuildingService {
   private static instance: BuildingService;
   
@@ -78,6 +94,27 @@ export class BuildingService {
    */
   public async saveBuilding(buildingData: any): Promise<any> {
     try {
+      // Validate user is logged in
+      const walletAddress = getWalletAddress();
+      if (!walletAddress) {
+        throw new Error('Wallet connection required');
+      }
+      
+      // Add created_by if not provided
+      if (!buildingData.created_by) {
+        buildingData.created_by = walletAddress;
+      }
+      
+      // Add construction status if not provided
+      if (!buildingData.construction_status) {
+        buildingData.construction_status = 'planned';
+      }
+      
+      // Add construction progress if not provided
+      if (!buildingData.construction_progress) {
+        buildingData.construction_progress = 0;
+      }
+      
       const response = await fetch(`${getApiBaseUrl()}/api/buildings`, {
         method: 'POST',
         headers: {
@@ -91,9 +128,75 @@ export class BuildingService {
       }
       
       const data = await response.json();
+      
+      // Emit event for UI updates
+      eventBus.emit(EventTypes.BUILDING_PLACED, {
+        buildingId: data.building.id,
+        type: buildingData.type,
+        variant: buildingData.variant || 'model',
+        data: data.building
+      });
+      
       return data.building;
     } catch (error) {
       console.error('Error saving building:', error);
+      throw error;
+    }
+  }
+  
+  /**
+   * Update a building
+   */
+  public async updateBuilding(id: string, updates: Partial<BuildingData>): Promise<any> {
+    try {
+      const response = await fetch(`${getApiBaseUrl()}/api/buildings/${id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updates),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to update building: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      // Emit event for UI updates
+      eventBus.emit(EventTypes.BUILDING_UPDATED, {
+        buildingId: id,
+        data: data.building
+      });
+      
+      return data.building;
+    } catch (error) {
+      console.error('Error updating building:', error);
+      throw error;
+    }
+  }
+  
+  /**
+   * Remove a building
+   */
+  public async removeBuilding(id: string): Promise<boolean> {
+    try {
+      const response = await fetch(`${getApiBaseUrl()}/api/buildings/${id}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to remove building: ${response.status}`);
+      }
+      
+      // Emit event for UI updates
+      eventBus.emit(EventTypes.BUILDING_REMOVED, {
+        buildingId: id
+      });
+      
+      return true;
+    } catch (error) {
+      console.error('Error removing building:', error);
       throw error;
     }
   }
@@ -124,7 +227,7 @@ export class BuildingService {
     
     // Create dock data
     const dockData: DockData = {
-      id: this.generateUniqueId(),
+      id: this.generateUniqueId('dock'),
       landId,
       position: { x: position.x, y: position.y, z: position.z },
       rotation,
@@ -257,9 +360,176 @@ export class BuildingService {
   }
   
   /**
-   * Generate a unique ID
+   * Generate connection points for a building based on position and rotation
    */
-  private generateUniqueId(): string {
-    return 'dock_' + Math.random().toString(36).substr(2, 9);
+  public generateBuildingConnectionPoints(position: THREE.Vector3, rotation: number, buildingType: string): { x: number; y: number; z: number }[] {
+    // Create a building-aligned coordinate system
+    const forward = new THREE.Vector3(Math.sin(rotation), 0, Math.cos(rotation));
+    const right = new THREE.Vector3(Math.cos(rotation), 0, -Math.sin(rotation));
+    
+    // Define connection points based on building type
+    const points = [];
+    
+    // Default connection points (front, back, left, right)
+    // Front
+    points.push({
+      x: position.x + forward.x * 2,
+      y: position.y,
+      z: position.z + forward.z * 2
+    });
+    
+    // Back
+    points.push({
+      x: position.x - forward.x * 2,
+      y: position.y,
+      z: position.z - forward.z * 2
+    });
+    
+    // Left
+    points.push({
+      x: position.x + right.x * 2,
+      y: position.y,
+      z: position.z + right.z * 2
+    });
+    
+    // Right
+    points.push({
+      x: position.x - right.x * 2,
+      y: position.y,
+      z: position.z - right.z * 2
+    });
+    
+    return points;
+  }
+  
+  /**
+   * Generate a unique ID with optional prefix
+   */
+  private generateUniqueId(prefix: string = 'building'): string {
+    return `${prefix}_${Math.random().toString(36).substr(2, 9)}`;
+  }
+  
+  /**
+   * Check if a building can be placed at the specified position
+   */
+  public async canPlaceBuilding(landId: string, position: THREE.Vector3, buildingType: string): Promise<boolean> {
+    try {
+      // In a real implementation, this would check:
+      // 1. If the user owns the land
+      // 2. If there are any conflicting buildings
+      // 3. If the terrain is suitable
+      // 4. If the user has the resources to build
+      
+      // For now, we'll just return true
+      return true;
+    } catch (error) {
+      console.error('Error checking building placement:', error);
+      return false;
+    }
+  }
+  
+  /**
+   * Start construction of a building
+   */
+  public async startConstruction(buildingId: string): Promise<any> {
+    try {
+      const building = await this.getBuildingById(buildingId);
+      
+      if (!building) {
+        throw new Error(`Building with ID ${buildingId} not found`);
+      }
+      
+      // Update construction status
+      const updatedBuilding = await this.updateBuilding(buildingId, {
+        constructionStatus: 'in_progress',
+        constructionProgress: 0
+      });
+      
+      // Emit event
+      eventBus.emit(EventTypes.BUILDING_CONSTRUCTION_STARTED, {
+        buildingId,
+        data: updatedBuilding
+      });
+      
+      return updatedBuilding;
+    } catch (error) {
+      console.error('Error starting construction:', error);
+      throw error;
+    }
+  }
+  
+  /**
+   * Update construction progress
+   */
+  public async updateConstructionProgress(buildingId: string, progress: number): Promise<any> {
+    try {
+      const building = await this.getBuildingById(buildingId);
+      
+      if (!building) {
+        throw new Error(`Building with ID ${buildingId} not found`);
+      }
+      
+      // Clamp progress between 0 and 100
+      const clampedProgress = Math.max(0, Math.min(100, progress));
+      
+      // Update construction progress
+      const updatedBuilding = await this.updateBuilding(buildingId, {
+        constructionProgress: clampedProgress,
+        constructionStatus: clampedProgress >= 100 ? 'completed' : 'in_progress'
+      });
+      
+      // If construction is complete, emit event
+      if (clampedProgress >= 100) {
+        eventBus.emit(EventTypes.BUILDING_CONSTRUCTION_COMPLETED, {
+          buildingId,
+          data: updatedBuilding
+        });
+      }
+      
+      return updatedBuilding;
+    } catch (error) {
+      console.error('Error updating construction progress:', error);
+      throw error;
+    }
+  }
+  
+  /**
+   * Generate income from a building
+   */
+  public async generateIncome(buildingId: string): Promise<any> {
+    try {
+      const building = await this.getBuildingById(buildingId);
+      
+      if (!building) {
+        throw new Error(`Building with ID ${buildingId} not found`);
+      }
+      
+      // Check if building is completed
+      if (building.construction_status !== 'completed') {
+        throw new Error(`Building is not completed yet`);
+      }
+      
+      // In a real implementation, this would:
+      // 1. Calculate income based on building type, location, etc.
+      // 2. Add income to user's balance
+      // 3. Update last income generated timestamp
+      
+      // For now, we'll just update the last income generated timestamp
+      const updatedBuilding = await this.updateBuilding(buildingId, {
+        lastIncomeGenerated: new Date().toISOString()
+      });
+      
+      // Emit event
+      eventBus.emit(EventTypes.BUILDING_INCOME_GENERATED, {
+        buildingId,
+        data: updatedBuilding,
+        income: building.income || 0
+      });
+      
+      return updatedBuilding;
+    } catch (error) {
+      console.error('Error generating income:', error);
+      throw error;
+    }
   }
 }

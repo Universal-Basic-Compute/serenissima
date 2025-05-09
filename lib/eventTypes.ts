@@ -11,6 +11,8 @@ export const EventTypes = {
   USER_PROFILE_UPDATED: 'userProfileUpdated',
   WALLET_CHANGED: 'walletChanged',
   BUILDING_PLACED: 'buildingPlaced',
+  BUILDING_REMOVED: 'buildingRemoved',
+  BUILDING_UPDATED: 'buildingUpdated',
   DOCK_PLACED: 'dockPlaced',
   VIEW_MODE_CHANGED: 'viewModeChanged',
   POLYGONS_LOADED: 'polygonsLoaded',
@@ -26,5 +28,12 @@ export const EventTypes = {
   // Rendering events
   OWNER_COLORS_UPDATED: 'ownerColorsUpdated',
   OWNER_COAT_OF_ARMS_UPDATED: 'ownerCoatOfArmsUpdated',
-  POLYGON_OWNER_UPDATED: 'polygonOwnerUpdated'
+  POLYGON_OWNER_UPDATED: 'polygonOwnerUpdated',
+  
+  // Building-specific events
+  BUILDING_SELECTED: 'buildingSelected',
+  BUILDING_HOVER: 'buildingHover',
+  BUILDING_CONSTRUCTION_STARTED: 'buildingConstructionStarted',
+  BUILDING_CONSTRUCTION_COMPLETED: 'buildingConstructionCompleted',
+  BUILDING_INCOME_GENERATED: 'buildingIncomeGenerated'
 };
