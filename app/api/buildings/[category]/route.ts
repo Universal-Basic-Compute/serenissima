@@ -7,19 +7,17 @@ export async function GET(
   { params }: { params: { category: string } }
 ) {
   try {
-    const category = params.category;
-    
-    // Sanitize the category name to prevent directory traversal
-    const sanitizedCategory = category.replace(/[^a-zA-Z0-9_-]/g, '');
+    // Map sanitized category to actual directory name if needed
+    let dirName = params.category.replace(/[^a-zA-Z0-9_-]/g, '');
     
     // Define the base directory for building data
     const baseDir = path.join(process.cwd(), 'data', 'buildings');
     
     // Check if the category directory exists
-    const categoryDir = path.join(baseDir, sanitizedCategory);
+    const categoryDir = path.join(baseDir, dirName);
     if (!fs.existsSync(categoryDir)) {
       return NextResponse.json(
-        { error: `Category '${sanitizedCategory}' not found` },
+        { error: `Category '${dirName}' not found` },
         { status: 404 }
       );
     }
