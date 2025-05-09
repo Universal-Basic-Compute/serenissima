@@ -63,6 +63,8 @@ export default function MapPage() {
   const [waterPoints, setWaterPoints] = useState<any[]>([]);
   const [waterPointMarkers, setWaterPointMarkers] = useState<{[id: string]: google.maps.Marker}>({});
   const [waterPointConnections, setWaterPointConnections] = useState<google.maps.Polyline[]>([]);
+  const [previewWaterPoint, setPreviewWaterPoint] = useState<google.maps.Marker | null>(null);
+  const [creationSuccess, setCreationSuccess] = useState<{id: string, position: google.maps.LatLng} | null>(null);
   
   // Initialize wallet adapter
   useEffect(() => {
@@ -341,6 +343,36 @@ export default function MapPage() {
     });
   };
   
+
+  // Handle map mouse move for WaterPoint preview
+  const handleMapMouseMove = useCallback((event: google.maps.MapMouseEvent) => {
+    if (!waterPointMode || !mapRef.current) return;
+    
+    const position = event.latLng;
+    if (!position) return;
+    
+    // Mettre à jour ou créer le marqueur d'aperçu
+    if (previewWaterPoint) {
+      previewWaterPoint.setPosition(position);
+    } else {
+      const marker = new google.maps.Marker({
+        position: position,
+        map: mapRef.current,
+        icon: {
+          path: google.maps.SymbolPath.CIRCLE,
+          scale: 7,
+          fillColor: '#0088FF',
+          fillOpacity: 0.5, // Semi-transparent pour l'aperçu
+          strokeWeight: 2,
+          strokeColor: '#FFFFFF'
+        },
+        title: 'Preview WaterPoint',
+        clickable: false,
+        zIndex: 0 // Placer sous les autres marqueurs
+      });
+      setPreviewWaterPoint(marker);
+    }
+  }, [waterPointMode, previewWaterPoint]);
 
   // Handle map load
   const onMapLoad = (map: google.maps.Map) => {
@@ -661,6 +693,12 @@ export default function MapPage() {
   
   // Function to create a new WaterPoint
   const createWaterPoint = (position: google.maps.LatLng, type: string = 'regular') => {
+    // Supprimer le marqueur d'aperçu s'il existe
+    if (previewWaterPoint) {
+      previewWaterPoint.setMap(null);
+      setPreviewWaterPoint(null);
+    }
+    
     // Ajouter un indicateur visuel temporaire avant la réponse de l'API
     const tempMarker = new google.maps.Marker({
       position: position,
@@ -711,7 +749,8 @@ export default function MapPage() {
               strokeWeight: 2,
               strokeColor: '#FFFFFF'
             },
-            title: data.waterpoint.id
+            title: data.waterpoint.id,
+            animation: google.maps.Animation.DROP // Ajouter une animation de chute
           });
           
           // Ajouter un écouteur de clic pour sélectionner ce WaterPoint
@@ -760,6 +799,14 @@ export default function MapPage() {
           
           // Ajouter le waterpoint à l'état local
           setWaterPoints(prev => [...prev, data.waterpoint]);
+          
+          // Afficher une notification de succès
+          setCreationSuccess({id: data.waterpoint.id, position: position});
+          
+          // Masquer la notification après 3 secondes
+          setTimeout(() => {
+            setCreationSuccess(null);
+          }, 3000);
         }
         
         // Afficher un message de confirmation dans la console
@@ -846,6 +893,12 @@ export default function MapPage() {
   
   // Handle WaterPoint mode
   const handleWaterPointMode = () => {
+    // Si on désactive le mode, supprimer le marqueur d'aperçu
+    if (waterPointMode && previewWaterPoint) {
+      previewWaterPoint.setMap(null);
+      setPreviewWaterPoint(null);
+    }
+    
     setWaterPointMode(!waterPointMode);
     
     // Désactiver les autres modes
@@ -899,6 +952,17 @@ export default function MapPage() {
   const handleScriptLoad = () => {
     setIsGoogleLoaded(true);
   };
+  
+  // Add mousemove listener to map
+  useEffect(() => {
+    if (mapRef.current && isGoogleLoaded) {
+      // Add mousemove listener for WaterPoint preview
+      google.maps.event.clearListeners(mapRef.current, 'mousemove');
+      mapRef.current.addListener('mousemove', (e: google.maps.MapMouseEvent) => {
+        handleMapMouseMove(e);
+      });
+    }
+  }, [mapRef.current, isGoogleLoaded, handleMapMouseMove]);
 
   // Create drawing manager options with client-side safety
   const [drawingManagerOptions, setDrawingManagerOptions] = useState<any>({
@@ -1120,6 +1184,23 @@ export default function MapPage() {
           )}
         </GoogleMap>
       </LoadScript>
+      
+      {/* Notification de succès pour la création de WaterPoint */}
+      {creationSuccess && (
+        <div className="absolute z-20 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg animate-bounce"
+             style={{
+               top: '50%',
+               left: '50%',
+               transform: 'translate(-50%, -50%)'
+             }}>
+          <div className="flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+            <span>WaterPoint created successfully!</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
