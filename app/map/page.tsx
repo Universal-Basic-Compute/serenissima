@@ -69,6 +69,14 @@ export default function MapPage() {
     position: { lat: number; lng: number };
   }>>([]);
   
+  // State for WaterPoints
+  const [waterPointMode, setWaterPointMode] = useState<boolean>(false);
+  const [connectWaterPointMode, setConnectWaterPointMode] = useState<boolean>(false);
+  const [selectedWaterPoint, setSelectedWaterPoint] = useState<any>(null);
+  const [waterPoints, setWaterPoints] = useState<any[]>([]);
+  const [waterPointMarkers, setWaterPointMarkers] = useState<{[id: string]: google.maps.Marker}>({});
+  const [waterPointConnections, setWaterPointConnections] = useState<google.maps.Polyline[]>([]);
+  
   // Initialize wallet adapter
   useEffect(() => {
     const adapter = new PhantomWalletAdapter();
