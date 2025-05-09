@@ -273,13 +273,18 @@ const BuildingModelViewer: React.FC<BuildingModelViewerProps> = ({
         }
         
         // Remove canvas from DOM - do this last
-        if (canvasRef.current && canvasRef.current.parentNode) {
+        if (canvasRef.current) {
           try {
-            canvasRef.current.parentNode.removeChild(canvasRef.current);
+            const parent = canvasRef.current.parentNode;
+            if (parent && parent.contains(canvasRef.current)) {
+              parent.removeChild(canvasRef.current);
+            }
           } catch (e) {
-            console.warn('Error removing canvas:', e);
+            console.warn('Error removing canvas during cleanup:', e);
+            // Just nullify the reference without trying to remove it
+          } finally {
+            canvasRef.current = null;
           }
-          canvasRef.current = null;
         }
       };
     } catch (error) {
