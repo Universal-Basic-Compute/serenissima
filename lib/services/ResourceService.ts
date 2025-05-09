@@ -9,6 +9,44 @@ export interface Resource {
   subcategory?: string;
   description?: string;
   rarity?: string;
+  productionProperties?: {
+    producerBuilding?: string;
+    processorBuilding?: string;
+    productionComplexity?: number;
+    processingComplexity?: number;
+    requiredSkill?: string;
+    productionTime?: number;
+    processingTime?: number;
+    batchSize?: number;
+    inputs?: Array<{
+      resource: string;
+      amount: number;
+      qualityImpact?: number;
+    }>;
+    outputs?: Array<{
+      resource: string;
+      amount: number;
+    }>;
+  };
+  productionChainPosition?: {
+    predecessors?: Array<{
+      resource: string;
+      facility?: string;
+    }>;
+    successors?: Array<{
+      resource: string;
+      facility?: string;
+    }>;
+  };
+  baseProperties?: {
+    baseValue?: number;
+    weight?: number;
+    volume?: number;
+    stackSize?: number;
+    perishable?: boolean;
+    perishTime?: number;
+    nutritionValue?: number;
+  };
 }
 
 export interface ResourceCategory {

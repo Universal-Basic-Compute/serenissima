@@ -2,8 +2,49 @@ import React, { useRef, useEffect } from 'react';
 import { FaTimes, FaCoins, FaArrowRight, FaIndustry, FaArrowDown } from 'react-icons/fa';
 import { Resource } from '@/lib/services/ResourceService';
 
+interface ExtendedResource extends Resource {
+  productionProperties?: {
+    producerBuilding?: string;
+    processorBuilding?: string;
+    productionComplexity?: number;
+    processingComplexity?: number;
+    requiredSkill?: string;
+    productionTime?: number;
+    processingTime?: number;
+    batchSize?: number;
+    inputs?: Array<{
+      resource: string;
+      amount: number;
+      qualityImpact?: number;
+    }>;
+    outputs?: Array<{
+      resource: string;
+      amount: number;
+    }>;
+  };
+  productionChainPosition?: {
+    predecessors?: Array<{
+      resource: string;
+      facility?: string;
+    }>;
+    successors?: Array<{
+      resource: string;
+      facility?: string;
+    }>;
+  };
+  baseProperties?: {
+    baseValue?: number;
+    weight?: number;
+    volume?: number;
+    stackSize?: number;
+    perishable?: boolean;
+    perishTime?: number;
+    nutritionValue?: number;
+  };
+}
+
 interface ResourceDetailsModalProps {
-  resource: Resource;
+  resource: ExtendedResource;
   onClose: () => void;
 }
 
@@ -67,6 +108,17 @@ const ResourceDetailsModal: React.FC<ResourceDetailsModalProps> = ({ resource, o
       return resource.productionProperties.outputs;
     }
     return [];
+  };
+
+  // Helper function to check if we have any production information
+  const hasProductionInfo = () => {
+    return (
+      getProductionBuilding() || 
+      getInputs().length > 0 || 
+      getOutputs().length > 0 ||
+      (resource.productionChainPosition?.predecessors && resource.productionChainPosition.predecessors.length > 0) ||
+      (resource.productionChainPosition?.successors && resource.productionChainPosition.successors.length > 0)
+    );
   };
 
   // Helper function to check if we have any production information
