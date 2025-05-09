@@ -13,6 +13,7 @@ const TABLE_MAP = {
   'TRANSACTIONS': 'Transactions',
   'BUILDINGS': 'Buildings',
   'LOANS': 'Loans',
+  'WATER_ROADS': 'WaterRoads',
   // Add more mappings as needed
 };
 

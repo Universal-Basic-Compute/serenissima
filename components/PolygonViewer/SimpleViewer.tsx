@@ -9,6 +9,7 @@ import { IncomePolygonRenderer } from '../../lib/threejs/IncomePolygonRenderer';
 import { calculateBounds } from './utils';
 import { getApiBaseUrl } from '@/lib/apiUtils';
 import LandDetailsPanel from './LandDetailsPanel'; // Import the existing panel
+import WaterRoadCreator from './WaterRoadCreator';
 
 export default function SimpleViewer({ qualityMode = 'high', activeView = 'land' }: {
   qualityMode: 'high' | 'performance';
@@ -30,6 +31,7 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
   // State for land selection and details panel
   const [selectedPolygonId, setSelectedPolygonId] = useState<string | null>(null);
   const [landOwners, setLandOwners] = useState<Record<string, string>>({});
+  const [showWaterRoadCreator, setShowWaterRoadCreator] = useState<boolean>(false);
   
   // Define loadUsers as a reusable function
   const loadUsers = useCallback(async () => {
@@ -394,7 +396,27 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
     if (incomeRendererRef.current) {
       incomeRendererRef.current.setVisible(activeView === 'land');
     }
+    
+    // Hide water road creator when view changes
+    setShowWaterRoadCreator(false);
   }, [activeView]);
+  
+  // Listen for building toolbar actions
+  useEffect(() => {
+    const handleBuildingToolbarAction = (event: CustomEvent) => {
+      if (event.detail?.action === 'waterRoad') {
+        setShowWaterRoadCreator(true);
+      } else {
+        setShowWaterRoadCreator(false);
+      }
+    };
+    
+    window.addEventListener('buildingToolbarAction', handleBuildingToolbarAction as EventListener);
+    
+    return () => {
+      window.removeEventListener('buildingToolbarAction', handleBuildingToolbarAction as EventListener);
+    };
+  }, []);
   
   // Add effect to update coat of arms when user data changes
   useEffect(() => {
@@ -450,6 +472,20 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
     }
   }, [qualityMode]);
   
+  // Handle water road creation completion
+  const handleWaterRoadComplete = (roadId: string, points: any[]) => {
+    console.log('Water road created:', roadId, points);
+    
+    // Here you would typically save the water road to your backend
+    // For now, we'll just log it and hide the creator
+    setShowWaterRoadCreator(false);
+    
+    // Notify any listeners that a water road was created
+    window.dispatchEvent(new CustomEvent('waterRoadCreated', {
+      detail: { roadId, points }
+    }));
+  };
+  
   return (
     <div className="w-screen h-screen">
       <canvas ref={canvasRef} className="w-full h-full" />
@@ -467,6 +503,17 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
         polygons={polygons}
         landOwners={landOwners}
       />
+      
+      {/* Water Road Creator */}
+      {showWaterRoadCreator && sceneRef.current && cameraControllerRef.current && (
+        <WaterRoadCreator
+          scene={sceneRef.current}
+          camera={cameraControllerRef.current.camera}
+          active={showWaterRoadCreator}
+          onComplete={handleWaterRoadComplete}
+          onCancel={() => setShowWaterRoadCreator(false)}
+        />
+      )}
     </div>
   );
 }
