@@ -71,7 +71,12 @@ export default function BuildingMenu({ visible, onClose, onBuildingSelect, onBui
     }
     
     // Call the parent's onClose callback
-    onClose();
+    if (onClose) {
+      onClose();
+    }
+    
+    // Explicitly dispatch an event to notify other components that the menu is closed
+    window.dispatchEvent(new CustomEvent('buildingMenuClosed'));
   };
 
   if (!visible && !showViaEvent) return null;

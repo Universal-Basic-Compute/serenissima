@@ -97,12 +97,19 @@ export default function SimplePage() {
       setShow3DView(true);
     };
     
+    const handleBuildingMenuClosed = () => {
+      // Reset to buildings view when menu is closed
+      setActiveView('buildings');
+    };
+    
     window.addEventListener('hide3DView', handleHide3DView);
     window.addEventListener('show3DView', handleShow3DView);
+    window.addEventListener('buildingMenuClosed', handleBuildingMenuClosed);
     
     return () => {
       window.removeEventListener('hide3DView', handleHide3DView);
       window.removeEventListener('show3DView', handleShow3DView);
+      window.removeEventListener('buildingMenuClosed', handleBuildingMenuClosed);
     };
   }, []);
 
