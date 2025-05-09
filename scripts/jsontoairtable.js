@@ -213,6 +213,18 @@ function mapFields(item, collectionName) {
  */
 async function createAirtableRecord(tableName, data) {
   return new Promise((resolve, reject) => {
+    // Process transferPoints field if it exists and is a string
+    if (data.transferPoints && typeof data.transferPoints === 'string') {
+      try {
+        // Parse the JSON string to ensure it's valid
+        JSON.parse(data.transferPoints);
+      } catch (error) {
+        console.warn(`Invalid transferPoints JSON for ${tableName} record:`, error.message);
+        // Set to empty array string if invalid
+        data.transferPoints = '[]';
+      }
+    }
+    
     base(tableName).create(data, (err, record) => {
       if (err) {
         reject(err);
