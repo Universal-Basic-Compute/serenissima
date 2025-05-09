@@ -2,30 +2,30 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import * as THREE from 'three';
-import { WaterRoadFacade, WaterRoadPoint } from '@/lib/threejs/WaterRoadFacade';
+import { CanalFacade, CanalPoint } from '@/lib/threejs/CanalFacade';
 
-interface WaterRoadCreatorProps {
+interface CanalCreatorProps {
   scene: THREE.Scene;
   camera: THREE.PerspectiveCamera;
   active: boolean;
-  onComplete: (roadId: string, points: WaterRoadPoint[]) => void;
+  onComplete: (roadId: string, points: CanalPoint[]) => void;
   onCancel: () => void;
 }
 
-const WaterRoadCreator: React.FC<WaterRoadCreatorProps> = ({
+const CanalCreator: React.FC<CanalCreatorProps> = ({
   scene,
   camera,
   active,
   onComplete,
   onCancel
 }) => {
-  const [points, setPoints] = useState<WaterRoadPoint[]>([]);
+  const [points, setPoints] = useState<CanalPoint[]>([]);
   const [width, setWidth] = useState<number>(5);
   const [depth, setDepth] = useState<number>(1);
   const [color, setColor] = useState<string>('#3366ff');
   const [previewRoadId, setPreviewRoadId] = useState<string | null>(null);
   
-  const waterRoadFacadeRef = useRef<WaterRoadFacade | null>(null);
+  const canalFacadeRef = useRef<CanalFacade | null>(null);
   const raycasterRef = useRef<THREE.Raycaster>(new THREE.Raycaster());
   const mouseRef = useRef<THREE.Vector2>(new THREE.Vector2());
   const planeRef = useRef<THREE.Mesh | null>(null);
@@ -33,7 +33,7 @@ const WaterRoadCreator: React.FC<WaterRoadCreatorProps> = ({
   // Initialize water road facade
   useEffect(() => {
     if (scene && camera) {
-      waterRoadFacadeRef.current = new WaterRoadFacade({
+      canalFacadeRef.current = new CanalFacade({
         scene,
         camera,
         waterLevel: 0.1 // Slightly above water level
@@ -52,8 +52,8 @@ const WaterRoadCreator: React.FC<WaterRoadCreatorProps> = ({
       planeRef.current = plane;
       
       return () => {
-        if (waterRoadFacadeRef.current) {
-          waterRoadFacadeRef.current.dispose();
+        if (canalFacadeRef.current) {
+          canalFacadeRef.current.dispose();
         }
         if (planeRef.current) {
           scene.remove(planeRef.current);
@@ -66,15 +66,15 @@ const WaterRoadCreator: React.FC<WaterRoadCreatorProps> = ({
   
   // Update preview when points change
   useEffect(() => {
-    if (active && waterRoadFacadeRef.current && points.length >= 2) {
+    if (active && canalFacadeRef.current && points.length >= 2) {
       // Remove previous preview
       if (previewRoadId) {
-        waterRoadFacadeRef.current.removeWaterRoad(previewRoadId);
+        canalFacadeRef.current.removeCanal(previewRoadId);
       }
       
       // Create new preview
       const roadId = `preview-water-road-${Date.now()}`;
-      waterRoadFacadeRef.current.createWaterRoad(
+      canalFacadeRef.current.createCanal(
         roadId,
         points,
         {
@@ -92,8 +92,8 @@ const WaterRoadCreator: React.FC<WaterRoadCreatorProps> = ({
   // Clean up preview when component unmounts or becomes inactive
   useEffect(() => {
     return () => {
-      if (waterRoadFacadeRef.current && previewRoadId) {
-        waterRoadFacadeRef.current.removeWaterRoad(previewRoadId);
+      if (canalFacadeRef.current && previewRoadId) {
+        canalFacadeRef.current.removeCanal(previewRoadId);
       }
     };
   }, [previewRoadId]);
@@ -117,7 +117,7 @@ const WaterRoadCreator: React.FC<WaterRoadCreatorProps> = ({
       const intersectionPoint = intersects[0].point;
       
       // Update the last point in the preview if we have at least one point
-      if (points.length > 0 && previewRoadId && waterRoadFacadeRef.current) {
+      if (points.length > 0 && previewRoadId && canalFacadeRef.current) {
         const updatedPoints = [...points.slice(0, -1), {
           position: new THREE.Vector3(
             intersectionPoint.x,
@@ -128,7 +128,7 @@ const WaterRoadCreator: React.FC<WaterRoadCreatorProps> = ({
           depth
         }];
         
-        waterRoadFacadeRef.current.updateWaterRoad(
+        canalFacadeRef.current.updateCanal(
           previewRoadId,
           updatedPoints
         );
@@ -155,7 +155,7 @@ const WaterRoadCreator: React.FC<WaterRoadCreatorProps> = ({
       const intersectionPoint = intersects[0].point;
       
       // Add the point
-      const newPoint: WaterRoadPoint = {
+      const newPoint: CanalPoint = {
         position: new THREE.Vector3(
           intersectionPoint.x,
           intersectionPoint.y,
@@ -171,12 +171,12 @@ const WaterRoadCreator: React.FC<WaterRoadCreatorProps> = ({
   
   // Handle complete button click
   const handleComplete = () => {
-    if (points.length >= 2 && waterRoadFacadeRef.current && previewRoadId) {
+    if (points.length >= 2 && canalFacadeRef.current && previewRoadId) {
       // Create a final water road
       const finalRoadId = `water-road-${Date.now()}`;
       
       // Remove preview
-      waterRoadFacadeRef.current.removeWaterRoad(previewRoadId);
+      canalFacadeRef.current.removeCanal(previewRoadId);
       setPreviewRoadId(null);
       
       // Call the onComplete callback
@@ -189,8 +189,8 @@ const WaterRoadCreator: React.FC<WaterRoadCreatorProps> = ({
   
   // Handle cancel button click
   const handleCancel = () => {
-    if (waterRoadFacadeRef.current && previewRoadId) {
-      waterRoadFacadeRef.current.removeWaterRoad(previewRoadId);
+    if (canalFacadeRef.current && previewRoadId) {
+      canalFacadeRef.current.removeCanal(previewRoadId);
       setPreviewRoadId(null);
     }
     
@@ -291,4 +291,4 @@ const WaterRoadCreator: React.FC<WaterRoadCreatorProps> = ({
   );
 };
 
-export default WaterRoadCreator;
+export default CanalCreator;

@@ -9,7 +9,7 @@ import { IncomePolygonRenderer } from '../../lib/threejs/IncomePolygonRenderer';
 import { calculateBounds } from './utils';
 import { getApiBaseUrl } from '@/lib/apiUtils';
 import LandDetailsPanel from './LandDetailsPanel'; // Import the existing panel
-import WaterRoadCreator from './WaterRoadCreator';
+import CanalCreator from './CanalCreator';
 
 export default function SimpleViewer({ qualityMode = 'high', activeView = 'land' }: {
   qualityMode: 'high' | 'performance';
@@ -31,7 +31,7 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
   // State for land selection and details panel
   const [selectedPolygonId, setSelectedPolygonId] = useState<string | null>(null);
   const [landOwners, setLandOwners] = useState<Record<string, string>>({});
-  const [showWaterRoadCreator, setShowWaterRoadCreator] = useState<boolean>(false);
+  const [showCanalCreator, setShowCanalCreator] = useState<boolean>(false);
   
   // Define loadUsers as a reusable function
   const loadUsers = useCallback(async () => {
@@ -398,16 +398,16 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
     }
     
     // Hide water road creator when view changes
-    setShowWaterRoadCreator(false);
+    setShowCanalCreator(false);
   }, [activeView]);
   
   // Listen for building toolbar actions
   useEffect(() => {
     const handleBuildingToolbarAction = (event: CustomEvent) => {
-      if (event.detail?.action === 'waterRoad') {
-        setShowWaterRoadCreator(true);
+      if (event.detail?.action === 'canal') {
+        setShowCanalCreator(true);
       } else {
-        setShowWaterRoadCreator(false);
+        setShowCanalCreator(false);
       }
     };
     
@@ -473,7 +473,7 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
   }, [qualityMode]);
   
   // Handle water road creation completion
-  const handleWaterRoadComplete = async (roadId: string, points: any[]) => {
+  const handleCanalComplete = async (roadId: string, points: any[]) => {
     console.log('Water road created:', roadId, points);
     
     try {
@@ -511,17 +511,17 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
       console.log('Water road saved to backend:', data);
       
       // Hide the creator
-      setShowWaterRoadCreator(false);
+      setShowCanalCreator(false);
       
       // Notify any listeners that a water road was created
-      window.dispatchEvent(new CustomEvent('waterRoadCreated', {
+      window.dispatchEvent(new CustomEvent('canalCreated', {
         detail: { roadId, points, data }
       }));
     } catch (error) {
       console.error('Error saving water road:', error);
       alert(`Failed to save water road: ${error instanceof Error ? error.message : String(error)}`);
       // Still hide the creator even if there was an error
-      setShowWaterRoadCreator(false);
+      setShowCanalCreator(false);
     }
   };
   
@@ -544,13 +544,13 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
       />
       
       {/* Water Road Creator */}
-      {showWaterRoadCreator && sceneRef.current && cameraControllerRef.current && (
-        <WaterRoadCreator
+      {showCanalCreator && sceneRef.current && cameraControllerRef.current && (
+        <CanalCreator
           scene={sceneRef.current}
           camera={cameraControllerRef.current.camera}
-          active={showWaterRoadCreator}
-          onComplete={handleWaterRoadComplete}
-          onCancel={() => setShowWaterRoadCreator(false)}
+          active={showCanalCreator}
+          onComplete={handleCanalComplete}
+          onCancel={() => setShowCanalCreator(false)}
         />
       )}
     </div>

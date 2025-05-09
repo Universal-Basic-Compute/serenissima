@@ -1,18 +1,18 @@
 import * as THREE from 'three';
 
-export interface WaterRoadFacadeProps {
+export interface CanalFacadeProps {
   scene: THREE.Scene;
   camera: THREE.PerspectiveCamera;
   waterLevel?: number;
 }
 
-export interface WaterRoadPoint {
+export interface CanalPoint {
   position: THREE.Vector3;
   width?: number;
   depth?: number;
 }
 
-export interface WaterRoadOptions {
+export interface CanalOptions {
   width?: number;
   depth?: number;
   color?: number | string;
@@ -25,21 +25,21 @@ export interface WaterRoadOptions {
 }
 
 /**
- * WaterRoadFacade provides a simplified interface for creating and managing water roads
+ * CanalFacade provides a simplified interface for creating and managing water roads
  * (canals) in the 3D scene. It handles the creation, rendering, and animation of water roads.
  */
-export class WaterRoadFacade {
+export class CanalFacade {
   private scene: THREE.Scene;
   private camera: THREE.PerspectiveCamera;
   private waterLevel: number;
-  private waterRoads: Map<string, {
+  private canals: Map<string, {
     mesh: THREE.Mesh;
-    points: WaterRoadPoint[];
-    options: WaterRoadOptions;
+    points: CanalPoint[];
+    options: CanalOptions;
     flowOffset: number;
   }> = new Map();
   private clock: THREE.Clock;
-  private defaultOptions: WaterRoadOptions = {
+  private defaultOptions: CanalOptions = {
     width: 5,
     depth: 1,
     color: 0x3366ff,
@@ -51,7 +51,7 @@ export class WaterRoadFacade {
     waveFrequency: 1
   };
 
-  constructor(props: WaterRoadFacadeProps) {
+  constructor(props: CanalFacadeProps) {
     this.scene = props.scene;
     this.camera = props.camera;
     this.waterLevel = props.waterLevel || 0;
@@ -65,10 +65,10 @@ export class WaterRoadFacade {
    * @param options Options for customizing the water road appearance
    * @returns The ID of the created water road
    */
-  public createWaterRoad(
+  public createCanal(
     id: string,
-    points: WaterRoadPoint[],
-    options: WaterRoadOptions = {}
+    points: CanalPoint[],
+    options: CanalOptions = {}
   ): string {
     if (points.length < 2) {
       console.error('Water road requires at least 2 points');
@@ -76,7 +76,7 @@ export class WaterRoadFacade {
     }
 
     // Remove existing road with the same ID if it exists
-    this.removeWaterRoad(id);
+    this.removeCanal(id);
 
     // Merge default options with provided options
     const mergedOptions = { ...this.defaultOptions, ...options };
@@ -113,7 +113,7 @@ export class WaterRoadFacade {
     this.scene.add(mesh);
     
     // Store the water road
-    this.waterRoads.set(id, {
+    this.canals.set(id, {
       mesh,
       points,
       options: mergedOptions,
@@ -128,8 +128,8 @@ export class WaterRoadFacade {
    * @param id The ID of the water road to remove
    * @returns True if the water road was removed, false otherwise
    */
-  public removeWaterRoad(id: string): boolean {
-    const road = this.waterRoads.get(id);
+  public removeCanal(id: string): boolean {
+    const road = this.canals.get(id);
     if (road) {
       this.scene.remove(road.mesh);
       road.mesh.geometry.dispose();
@@ -138,7 +138,7 @@ export class WaterRoadFacade {
       } else {
         road.mesh.material.dispose();
       }
-      this.waterRoads.delete(id);
+      this.canals.delete(id);
       return true;
     }
     return false;
@@ -151,20 +151,20 @@ export class WaterRoadFacade {
    * @param options New options for the water road
    * @returns True if the water road was updated, false otherwise
    */
-  public updateWaterRoad(
+  public updateCanal(
     id: string,
-    points?: WaterRoadPoint[],
-    options?: WaterRoadOptions
+    points?: CanalPoint[],
+    options?: CanalOptions
   ): boolean {
-    const road = this.waterRoads.get(id);
+    const road = this.canals.get(id);
     if (!road) return false;
 
     const updatedPoints = points || road.points;
     const updatedOptions = { ...road.options, ...options };
 
     // Create a new water road with the updated parameters
-    this.removeWaterRoad(id);
-    this.createWaterRoad(id, updatedPoints, updatedOptions);
+    this.removeCanal(id);
+    this.createCanal(id, updatedPoints, updatedOptions);
     
     return true;
   }
@@ -177,7 +177,7 @@ export class WaterRoadFacade {
     const dt = deltaTime || this.clock.getDelta();
     
     // Update each water road
-    this.waterRoads.forEach((road, id) => {
+    this.canals.forEach((road, id) => {
       // Update flow animation
       road.flowOffset += dt * road.options.flowSpeed!;
       
@@ -215,8 +215,8 @@ export class WaterRoadFacade {
    * Gets all water road IDs
    * @returns Array of water road IDs
    */
-  public getWaterRoadIds(): string[] {
-    return Array.from(this.waterRoads.keys());
+  public getCanalIds(): string[] {
+    return Array.from(this.canals.keys());
   }
 
   /**
@@ -224,11 +224,11 @@ export class WaterRoadFacade {
    * @param id The ID of the water road to get
    * @returns The water road data or null if not found
    */
-  public getWaterRoad(id: string): {
-    points: WaterRoadPoint[];
-    options: WaterRoadOptions;
+  public getCanal(id: string): {
+    points: CanalPoint[];
+    options: CanalOptions;
   } | null {
-    const road = this.waterRoads.get(id);
+    const road = this.canals.get(id);
     if (!road) return null;
     
     return {
@@ -242,7 +242,7 @@ export class WaterRoadFacade {
    * @param points Array of points
    * @returns THREE.Curve
    */
-  private createCurveFromPoints(points: WaterRoadPoint[]): THREE.Curve<THREE.Vector3> {
+  private createCurveFromPoints(points: CanalPoint[]): THREE.Curve<THREE.Vector3> {
     // Extract Vector3 positions from points
     const positions = points.map(p => p.position);
     
@@ -255,11 +255,11 @@ export class WaterRoadFacade {
    */
   public dispose(): void {
     // Remove all water roads
-    this.waterRoads.forEach((road, id) => {
-      this.removeWaterRoad(id);
+    this.canals.forEach((road, id) => {
+      this.removeCanal(id);
     });
     
-    this.waterRoads.clear();
+    this.canals.clear();
   }
 
   /**
@@ -270,7 +270,7 @@ export class WaterRoadFacade {
     this.waterLevel = level;
     
     // Update all water roads
-    this.waterRoads.forEach((road, id) => {
+    this.canals.forEach((road, id) => {
       road.mesh.position.y = level;
     });
   }
