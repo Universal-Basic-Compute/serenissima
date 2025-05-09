@@ -113,15 +113,15 @@ const ResourceDetailsModal: React.FC<ResourceDetailsModalProps> = ({ resource, o
   // Helper function to get outputs from different possible structures
   const getOutputs = () => {
     // If there are explicit outputs, use those
-    if (resource.productionProperties?.outputs && resource.productionProperties.outputs.length > 0) {
-      return resource.productionProperties.outputs;
+    if (extendedResource.productionProperties?.outputs && extendedResource.productionProperties.outputs.length > 0) {
+      return extendedResource.productionProperties.outputs;
     }
     
     // If there are no explicit outputs but there's a batch size, the resource itself is the output
-    if (resource.productionProperties?.batchSize) {
+    if (extendedResource.productionProperties?.batchSize) {
       return [{
-        resource: resource.id,
-        amount: resource.productionProperties.batchSize
+        resource: extendedResource.id,
+        amount: extendedResource.productionProperties.batchSize
       }];
     }
     
