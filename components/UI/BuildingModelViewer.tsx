@@ -25,6 +25,12 @@ const BuildingModelViewer: React.FC<BuildingModelViewerProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [availableVariants, setAvailableVariants] = useState<string[]>([]);
   
+  // Refs to track Three.js objects for safer cleanup
+  const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
+  const sceneRef = useRef<THREE.Scene | null>(null);
+  const controlsRef = useRef<OrbitControls | null>(null);
+  const isMountedRef = useRef(true);
+  
   // Construct the base path for the building models
   const basePath = `/assets/buildings/models/${buildingName}`;
   
@@ -51,9 +57,28 @@ const BuildingModelViewer: React.FC<BuildingModelViewerProps> = ({
   useEffect(() => {
     if (!containerRef.current) return;
     
+    // Set mounted flag to true
+    isMountedRef.current = true;
+    
     // Clean up any existing canvas before creating a new one
-    while (containerRef.current.firstChild) {
-      containerRef.current.removeChild(containerRef.current.firstChild);
+    try {
+      while (containerRef.current.firstChild) {
+        try {
+          containerRef.current.removeChild(containerRef.current.firstChild);
+        } catch (removeError) {
+          console.debug('Error removing child:', removeError);
+          // Break the loop if we encounter an error to avoid infinite loops
+          break;
+        }
+      }
+    } catch (cleanupError) {
+      console.debug('Error during initial cleanup:', cleanupError);
+      // Alternative approach: use innerHTML as a fallback
+      try {
+        containerRef.current.innerHTML = '';
+      } catch (innerHTMLError) {
+        console.debug('Error clearing innerHTML:', innerHTMLError);
+      }
     }
     
     // Get container dimensions
@@ -65,6 +90,7 @@ const BuildingModelViewer: React.FC<BuildingModelViewerProps> = ({
     // Initialize Three.js scene - wrap in try/catch for error handling
     try {
       const scene = new THREE.Scene();
+      sceneRef.current = scene;
       
       // Use a warmer background color - amber/beige tone
       scene.background = new THREE.Color(0xf5e9d6); // Warm beige color
@@ -104,6 +130,7 @@ const BuildingModelViewer: React.FC<BuildingModelViewerProps> = ({
         alpha: true,
         preserveDrawingBuffer: true // Needed for taking screenshots
       });
+      rendererRef.current = renderer;
       renderer.setSize(containerWidth, containerHeight);
       renderer.setPixelRatio(window.devicePixelRatio);
       
@@ -119,6 +146,7 @@ const BuildingModelViewer: React.FC<BuildingModelViewerProps> = ({
       
       // Add orbit controls
       const controls = new OrbitControls(camera, renderer.domElement);
+      controlsRef.current = controls;
       controls.enableDamping = true;
       controls.dampingFactor = 0.25;
       controls.enableZoom = true;
@@ -246,10 +274,14 @@ const BuildingModelViewer: React.FC<BuildingModelViewerProps> = ({
     
     // Animation loop with error handling
     const animate = () => {
+      if (!isMountedRef.current) return;
+      
       try {
         requestAnimationFrame(animate);
-        controls.update();
-        renderer.render(scene, camera);
+        if (controlsRef.current) controlsRef.current.update();
+        if (rendererRef.current && camera && sceneRef.current) {
+          rendererRef.current.render(sceneRef.current, camera);
+        }
       } catch (error) {
         console.error('Animation error:', error);
         // Don't rethrow - just log the error and continue
@@ -261,41 +293,64 @@ const BuildingModelViewer: React.FC<BuildingModelViewerProps> = ({
     
     // Cleanup
     return () => {
+      // Mark component as unmounted to stop animation loop
+      isMountedRef.current = false;
+      
       if (containerRef.current) {
-        // Remove the renderer's canvas
-        if (containerRef.current.contains(renderer.domElement)) {
-          containerRef.current.removeChild(renderer.domElement);
-        }
-          
-        // Remove any error text elements
-        const textElements = containerRef.current.querySelectorAll('div');
-        textElements.forEach(el => {
-          if (containerRef.current && containerRef.current.contains(el)) {
-            containerRef.current.removeChild(el);
-          }
-        });
-          
-        // Properly dispose of Three.js objects to prevent memory leaks
         try {
-          renderer.dispose();
-          // Dispose of geometries and materials
-          scene.traverse((object) => {
-            if (object instanceof THREE.Mesh) {
-              if (object.geometry) object.geometry.dispose();
-                
-              if (object.material) {
-                if (Array.isArray(object.material)) {
-                  object.material.forEach(material => material.dispose());
-                } else {
-                  object.material.dispose();
-                }
+          // Safely remove the renderer's canvas
+          if (rendererRef.current && rendererRef.current.domElement && 
+              containerRef.current.contains(rendererRef.current.domElement)) {
+            containerRef.current.removeChild(rendererRef.current.domElement);
+          }
+            
+          // Safely remove any error text elements
+          const textElements = containerRef.current.querySelectorAll('div');
+          textElements.forEach(el => {
+            try {
+              if (containerRef.current && containerRef.current.contains(el)) {
+                containerRef.current.removeChild(el);
               }
+            } catch (removeError) {
+              // Silently handle removal errors
+              console.debug('Error removing text element:', removeError);
             }
           });
-        } catch (error) {
-          console.error('Error during cleanup:', error);
+            
+          // Properly dispose of Three.js objects to prevent memory leaks
+          try {
+            if (rendererRef.current) rendererRef.current.dispose();
+            if (controlsRef.current) controlsRef.current.dispose();
+            
+            // Dispose of geometries and materials
+            if (sceneRef.current) {
+              sceneRef.current.traverse((object) => {
+                if (object instanceof THREE.Mesh) {
+                  if (object.geometry) object.geometry.dispose();
+                    
+                  if (object.material) {
+                    if (Array.isArray(object.material)) {
+                      object.material.forEach(material => material.dispose());
+                    } else {
+                      object.material.dispose();
+                    }
+                  }
+                }
+              });
+            }
+          } catch (error) {
+            console.error('Error during Three.js cleanup:', error);
+          }
+        } catch (cleanupError) {
+          console.error('Error during component cleanup:', cleanupError);
+          // Don't rethrow - just log the error
         }
       }
+      
+      // Clear refs
+      rendererRef.current = null;
+      sceneRef.current = null;
+      controlsRef.current = null;
     };
   } catch (setupError) {
     // Handle errors during scene setup
