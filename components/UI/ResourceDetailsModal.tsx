@@ -84,7 +84,7 @@ const ResourceDetailsModal: React.FC<ResourceDetailsModalProps> = ({ resource, o
     <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
       <div 
         ref={modalRef}
-        className="relative bg-amber-900/90 border-2 border-amber-700 rounded-lg max-w-xs sm:max-w-xl md:max-w-3xl lg:max-w-5xl xl:max-w-6xl w-full max-h-[90vh] overflow-auto"
+        className="relative bg-amber-900/90 border-2 border-amber-700 rounded-lg w-full max-w-xs sm:max-w-xl md:max-w-3xl lg:max-w-5xl xl:max-w-6xl max-h-[90vh] overflow-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="p-6">

@@ -19,6 +19,17 @@ interface ResourceDropdownProps {
   resources: Resource[];
 }
 
+// Custom hook to track mouse position
+const useMousePosition = () => {
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  
+  const updateMousePosition = (e: React.MouseEvent) => {
+    setMousePosition({ x: e.clientX, y: e.clientY });
+  };
+  
+  return { mousePosition, updateMousePosition };
+};
+
 // Function to get the appropriate icon for each category
 const getCategoryIcon = (category: string) => {
   switch(category) {
@@ -48,6 +59,7 @@ const ResourceDropdown: React.FC<ResourceDropdownProps> = ({ category, resources
   const [groupBySubcategory, setGroupBySubcategory] = useState(true);
   const [selectedResource, setSelectedResource] = useState<Resource | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const { mousePosition, updateMousePosition } = useMousePosition();
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -140,12 +152,13 @@ const ResourceDropdown: React.FC<ResourceDropdownProps> = ({ category, resources
                       {formatCategoryName(subcategory)}
                     </div>
                   )}
-                  <ul className="py-1">
+                  <ul className="py-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1">
                     {subcategoryResources.map(resource => (
                       <li 
                         key={resource.id} 
-                        className="px-3 py-2 hover:bg-amber-900/30 transition-colors group cursor-pointer"
+                        className="px-3 py-2 hover:bg-amber-900/30 transition-colors group cursor-pointer relative"
                         onClick={() => handleResourceClick(resource)}
+                        onMouseMove={updateMousePosition}
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-2">
@@ -160,7 +173,7 @@ const ResourceDropdown: React.FC<ResourceDropdownProps> = ({ category, resources
                                 (e.target as HTMLImageElement).src = `https://via.placeholder.com/16?text=${resource.name.charAt(0).toUpperCase()}`;
                               }}
                             />
-                            <span className="text-amber-200 text-sm">{resource.name}</span>
+                            <span className="text-amber-200 text-sm truncate max-w-[120px]">{resource.name}</span>
                             {resource.rarity && resource.rarity !== 'common' && (
                               <span className={`text-xs px-1.5 py-0.5 rounded ${getRarityColor(resource.rarity)}`}>
                                 {resource.rarity.charAt(0).toUpperCase() + resource.rarity.slice(1)}
@@ -170,9 +183,15 @@ const ResourceDropdown: React.FC<ResourceDropdownProps> = ({ category, resources
                           <span className="text-amber-400 text-sm font-medium">{resource.amount}</span>
                         </div>
                         
-                        {/* Resource description tooltip */}
+                        {/* Resource description tooltip - positioned at mouse cursor */}
                         {resource.description && (
-                          <div className="hidden group-hover:block absolute left-full ml-2 w-64 p-3 bg-black/95 border border-amber-700 rounded shadow-lg z-50 text-xs text-amber-100">
+                          <div 
+                            className="hidden group-hover:block fixed z-[60] p-3 bg-black/95 border border-amber-700 rounded shadow-lg text-xs text-amber-100 w-64 pointer-events-none"
+                            style={{
+                              left: `${mousePosition.x + 10}px`,
+                              top: `${mousePosition.y - 10}px`
+                            }}
+                          >
                             <p>{resource.description}</p>
                           </div>
                         )}
