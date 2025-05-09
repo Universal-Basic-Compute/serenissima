@@ -273,6 +273,12 @@ export default function MapPage() {
   const handleBridgeMode = () => {
     setBridgeMode(!bridgeMode);
     
+    // Turn off canal mode if it's on
+    if (canalMode) {
+      setCanalMode(false);
+      clearCanalData();
+    }
+    
     // Reset bridge start if turning off bridge mode
     if (bridgeMode) {
       setBridgeStart(null);
@@ -291,6 +297,50 @@ export default function MapPage() {
         draggableCursor: !bridgeMode ? 'crosshair' : ''
       });
     }
+  };
+  
+  // Handle canal mode button
+  const handleCanalMode = () => {
+    setCanalMode(!canalMode);
+    
+    // Turn off bridge mode if it's on
+    if (bridgeMode) {
+      setBridgeMode(false);
+      setBridgeStart(null);
+      setBridgeStartLandId(null);
+      
+      // Remove the start marker if it exists
+      if (bridgeStartMarker) {
+        bridgeStartMarker.setMap(null);
+        setBridgeStartMarker(null);
+      }
+    }
+    
+    // Clear canal data if turning off canal mode
+    if (canalMode) {
+      clearCanalData();
+    }
+    
+    // Change cursor style based on canal mode
+    if (mapRef.current) {
+      mapRef.current.setOptions({
+        draggableCursor: !canalMode ? 'crosshair' : ''
+      });
+    }
+  };
+  
+  // Clear canal data
+  const clearCanalData = () => {
+    // Remove all canal markers
+    canalMarkers.forEach(marker => marker.setMap(null));
+    setCanalMarkers([]);
+    
+    // Remove all canal lines
+    canalLines.forEach(line => line.setMap(null));
+    setCanalLines([]);
+    
+    // Clear canal points
+    setCanalPoints([]);
   };
 
   // Add a function to get polygon coordinates from a Google Maps polygon
