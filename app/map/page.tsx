@@ -390,6 +390,10 @@ export default function MapPage() {
       
       console.log('Map clicked in mode:', bridgeMode ? 'bridge' : waterPointMode ? 'waterpoint' : 'normal');
       
+      // Vérifier si c'est un clic droit (e.domEvent contient l'événement DOM original)
+      const isDomEvent = e.hasOwnProperty('domEvent');
+      const isRightClick = isDomEvent && (e as any).domEvent && (e as any).domEvent.button === 2;
+      
       if (bridgeMode) {
         // Find which polygon was clicked
         let clickedPolygonId = null;
@@ -501,8 +505,56 @@ export default function MapPage() {
           setBridgeStartLandId(null);
         }
       } else if (waterPointMode) {
-        // Create a new WaterPoint at the clicked location
-        createWaterPoint(event.latLng);
+        if (isRightClick) {
+          // Clic droit en mode waterpoint - chercher un waterpoint existant à proximité
+          let targetPoint = null;
+          for (const point of waterPoints) {
+            const pointPos = typeof point.position === 'string' 
+              ? JSON.parse(point.position) 
+              : point.position;
+            
+            const clickPos = {
+              lat: event.latLng.lat(),
+              lng: event.latLng.lng()
+            };
+            
+            // Calculer la distance entre le clic et le point
+            const distance = google.maps.geometry.spherical.computeDistanceBetween(
+              new google.maps.LatLng(clickPos.lat, clickPos.lng),
+              new google.maps.LatLng(pointPos.lat, pointPos.lng)
+            );
+            
+            // Si le clic est assez proche d'un point (dans un rayon de 10 mètres)
+            if (distance < 10) {
+              targetPoint = point;
+              break;
+            }
+          }
+          
+          // Si on a trouvé un point cible et qu'un point est déjà sélectionné
+          if (targetPoint && selectedWaterPoint && targetPoint.id !== selectedWaterPoint.id) {
+            createWaterPointConnection(selectedWaterPoint, targetPoint);
+          } else if (targetPoint) {
+            // Si on a trouvé un point mais qu'aucun n'est sélectionné, le sélectionner
+            setSelectedWaterPoint(targetPoint);
+            
+            // Mettre à jour l'apparence du marqueur
+            const marker = waterPointMarkers[targetPoint.id];
+            if (marker) {
+              marker.setIcon({
+                path: google.maps.SymbolPath.CIRCLE,
+                scale: 9,
+                fillColor: '#FF0000',
+                fillOpacity: 1,
+                strokeWeight: 2,
+                strokeColor: '#FFFFFF'
+              });
+            }
+          }
+        } else {
+          // Clic gauche normal - créer un nouveau WaterPoint
+          createWaterPoint(event.latLng);
+        }
       } else if (connectWaterPointMode && selectedWaterPoint) {
         // In connect mode, check if we clicked on another waterpoint
         let targetPoint = null;
@@ -534,6 +586,12 @@ export default function MapPage() {
           createWaterPointConnection(selectedWaterPoint, targetPoint);
         }
       }
+    });
+    
+    // Empêcher l'apparition du menu contextuel du navigateur
+    map.addListener('rightclick', (e: google.maps.MapMouseEvent) => {
+      // Empêcher le menu contextuel par défaut
+      e.stop();
     });
     
     // Add this debug message
@@ -600,6 +658,22 @@ export default function MapPage() {
     };
   }, [previewWaterPoint]);
 
+  // Add useEffect to prevent context menu on the page
+  useEffect(() => {
+    const handleContextMenu = (e: MouseEvent) => {
+      // Empêcher le menu contextuel par défaut uniquement en mode waterpoint
+      if (waterPointMode) {
+        e.preventDefault();
+      }
+    };
+    
+    document.addEventListener('contextmenu', handleContextMenu);
+    
+    return () => {
+      document.removeEventListener('contextmenu', handleContextMenu);
+    };
+  }, [waterPointMode]);
+  
   // Add useEffect to load polygons when map is ready
   useEffect(() => {
     if (mapRef.current && isGoogleLoaded) {
@@ -1349,7 +1423,10 @@ export default function MapPage() {
             <span className="font-medium">WaterPoints:</span> {waterPoints.length}
           </p>
           <p className="text-xs text-gray-500 mt-1">
-            Click on the map to add a new WaterPoint
+            <span className="font-medium">Left-click:</span> Add new WaterPoint
+          </p>
+          <p className="text-xs text-gray-500">
+            <span className="font-medium">Right-click:</span> Select or connect WaterPoints
           </p>
         </div>
       )}
