@@ -70,28 +70,17 @@ const PlaceableObjectManager: React.FC<PlaceableObjectProps> = ({
     let geometry: THREE.BufferGeometry;
     let material: THREE.Material;
     
-    if (type === 'dock') {
-      // Dock preview - simple box but longer and thinner
-      geometry = new THREE.BoxGeometry(2, 0.5, 4);
-      material = new THREE.MeshBasicMaterial({
-        color: 0x3b82f6, // Blue color for docks
-        transparent: true,
-        opacity: 0.7,
-        wireframe: false
-      });
-    } else {
-      // Building preview - simple box
-      geometry = new THREE.BoxGeometry(2, 1, 2);
-      material = new THREE.MeshBasicMaterial({
-        color: 0xf59e0b, // Amber color for buildings
-        transparent: true,
-        opacity: 0.7,
-        wireframe: false
-      });
-    }
+    // Building preview - simple box
+    geometry = new THREE.BoxGeometry(2, 1, 2);
+    material = new THREE.MeshBasicMaterial({
+      color: 0xf59e0b, // Amber color for buildings
+      transparent: true,
+      opacity: 0.7,
+      wireframe: false
+    });
     
     const previewMesh = new THREE.Mesh(geometry, material);
-    previewMesh.position.y = type === 'dock' ? 0.25 : 0.5; // Docks slightly lower than buildings
+    previewMesh.position.y = 0.5; // Position buildings at half their height
     previewMesh.visible = false;
     actualScene.add(previewMesh);
     previewMeshRef.current = previewMesh;
@@ -99,7 +88,7 @@ const PlaceableObjectManager: React.FC<PlaceableObjectProps> = ({
     // Create helper line
     const edgeGeometry = new THREE.BufferGeometry();
     const edgeMaterial = new THREE.LineBasicMaterial({ 
-      color: type === 'dock' ? 0x00ffff : 0xf59e0b 
+      color: 0xf59e0b 
     });
     const edgeLine = new THREE.Line(edgeGeometry, edgeMaterial);
     edgeLine.visible = false;
@@ -126,14 +115,9 @@ const PlaceableObjectManager: React.FC<PlaceableObjectProps> = ({
       if (raycaster.ray.intersectPlane(groundPlane, target)) {
         // Find placement info based on object type
         let placementInfo;
-        
-        if (constraints?.requireWaterEdge) {
-          // For docks, find nearest water edge
-          placementInfo = findNearestWaterEdge(target, polygons);
-        } else {
-          // For buildings, find land at position
-          placementInfo = findLandAtPosition(target, polygons);
-        }
+      
+        // For buildings, find land at position
+        placementInfo = findLandAtPosition(target, polygons);
         
         if (placementInfo.position && placementInfo.landId) {
           // Update preview mesh position
@@ -229,76 +213,6 @@ const PlaceableObjectManager: React.FC<PlaceableObjectProps> = ({
     };
   }, [active, actualScene, actualCamera, polygons, rotation, type, constraints, onCancel]);
   
-  // Function to find nearest water edge (for docks)
-  const findNearestWaterEdge = (position: THREE.Vector3, polygons: any[]) => {
-    let closestEdge = null;
-    let closestDistance = Infinity;
-    let closestLandId = null;
-    let closestPoint = null;
-    
-    for (const polygon of polygons) {
-      const waterEdges = getWaterEdges(polygon);
-      
-      for (const edge of waterEdges) {
-        const point = getClosestPointOnEdge(edge.start, edge.end, position);
-        const distance = position.distanceTo(point);
-        
-        if (distance < closestDistance && distance < 10) { // Only consider edges within 10 units
-          closestDistance = distance;
-          closestEdge = edge;
-          closestLandId = polygon.id;
-          closestPoint = point;
-        }
-      }
-    }
-    
-    // Check if admin permission is required
-    let isValid = closestDistance < 5; // Consider valid if within 5 units
-    
-    if (isValid && constraints?.requireAdminPermission) {
-      isValid = checkAdminPermission();
-    }
-    
-    return {
-      position: closestPoint,
-      landId: closestLandId,
-      edge: closestEdge,
-      isValid: isValid
-    };
-  };
-  
-  // Function to get water edges of a polygon
-  const getWaterEdges = (polygon: any) => {
-    const waterEdges = [];
-    const vertices = polygon.vertices || [];
-    
-    // Check each edge to see if it's a water edge (not shared with another polygon)
-    for (let i = 0; i < vertices.length; i++) {
-      const start = vertices[i];
-      const end = vertices[(i + 1) % vertices.length];
-      
-      // Simple check: if this edge is not shared with another polygon, it's a water edge
-      // In a real implementation, this would check against all other polygons
-      const isWaterEdge = true; // Simplified for this example
-      
-      if (isWaterEdge) {
-        waterEdges.push({
-          start: new THREE.Vector3(start.x, 0, start.z),
-          end: new THREE.Vector3(end.x, 0, end.z)
-        });
-      }
-    }
-    
-    return waterEdges;
-  };
-  
-  // Function to get the closest point on an edge
-  const getClosestPointOnEdge = (start: THREE.Vector3, end: THREE.Vector3, point: THREE.Vector3) => {
-    const edge = new THREE.Line3(start, end);
-    const closestPoint = new THREE.Vector3();
-    edge.closestPointToPoint(point, true, closestPoint);
-    return closestPoint;
-  };
   
   // Function to find land at a position (for buildings)
   const findLandAtPosition = (position: THREE.Vector3, polygons: any[]) => {

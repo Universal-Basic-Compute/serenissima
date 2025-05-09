@@ -13,7 +13,6 @@ export const EventTypes = {
   BUILDING_PLACED: 'buildingPlaced',
   BUILDING_REMOVED: 'buildingRemoved',
   BUILDING_UPDATED: 'buildingUpdated',
-  DOCK_PLACED: 'dockPlaced',
   VIEW_MODE_CHANGED: 'viewModeChanged',
   POLYGONS_LOADED: 'polygonsLoaded',
   POLYGON_DELETED: 'polygonDeleted',

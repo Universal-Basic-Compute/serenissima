@@ -107,10 +107,7 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
     if (buildingMeshesRef.current.has(id)) return;
     
     // Construct the path to the model
-    // Handle dock type specially
-    const modelPath = type === 'dock' 
-      ? `/assets/buildings/models/dock/${variant}.glb`
-      : `/assets/buildings/models/${type}/${variant}.glb`;
+    const modelPath = `/assets/buildings/models/${type}/${variant}.glb`;
     
     // Add error handling for model loading
     try {
@@ -159,9 +156,9 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
     
     // Create a fallback mesh
     const geometry = new THREE.BoxGeometry(2, 1, 2);
-    // Use blue color for docks, amber for other buildings
+    // Use amber color for all buildings
     const material = new THREE.MeshBasicMaterial({ 
-      color: type === 'dock' ? 0x3b82f6 : 0xf59e0b 
+      color: 0xf59e0b 
     });
     const fallbackMesh = new THREE.Mesh(geometry, material);
     

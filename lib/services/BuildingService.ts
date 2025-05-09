@@ -56,15 +56,6 @@ export interface BuildingCategory {
   buildings: Building[];
 }
 
-export interface DockData {
-  id: string;
-  landId: string;
-  position: { x: number; y: number; z: number };
-  rotation: number;
-  connectionPoints: { x: number; y: number; z: number }[];
-  createdBy: string;
-  createdAt: string;
-}
 
 /**
  * Service for managing building data
@@ -132,42 +123,6 @@ export class BuildingService {
    */
   public async saveBuilding(buildingData: BuildingData): Promise<BuildingData> {
     try {
-      // Special handling for dock type
-      if (buildingData.type === 'dock') {
-        // Generate connection points for docks
-        const position = new THREE.Vector3(
-          buildingData.position.x,
-          buildingData.position.y,
-          buildingData.position.z
-        );
-        
-        // Generate connection points based on position and rotation
-        const connectionPoints = [];
-        
-        // Front connection point (for roads connecting to the dock)
-        connectionPoints.push({
-          x: position.x + Math.sin(buildingData.rotation) * 1.25,
-          y: position.y + 0.2,
-          z: position.z + Math.cos(buildingData.rotation) * 1.25
-        });
-        
-        // Side connection points (for roads running alongside the dock)
-        connectionPoints.push({
-          x: position.x + Math.sin(buildingData.rotation + Math.PI/2) * 0.5,
-          y: position.y + 0.2,
-          z: position.z + Math.cos(buildingData.rotation + Math.PI/2) * 0.5
-        });
-        
-        connectionPoints.push({
-          x: position.x + Math.sin(buildingData.rotation - Math.PI/2) * 0.5,
-          y: position.y + 0.2,
-          z: position.z + Math.cos(buildingData.rotation - Math.PI/2) * 0.5
-        });
-        
-        // Add connection points to building data
-        buildingData.connection_points = connectionPoints;
-      }
-      
       // Send to server
       const response = await fetch(`${getApiBaseUrl()}/api/buildings`, {
         method: 'POST',
@@ -215,15 +170,10 @@ export class BuildingService {
         return [
           {
             id: 'building_1',
-            type: 'dock',
+            type: 'market-stall',
             land_id: 'land_1',
             position: { x: 100, y: 0, z: 100 },
             rotation: 0,
-            connection_points: [
-              { x: 90, y: 0, z: 100 },
-              { x: 105, y: 0, z: 95 },
-              { x: 105, y: 0, z: 105 }
-            ],
             created_by: 'ConsiglioDeiDieci',
             created_at: '2023-01-01T00:00:00Z'
           }
