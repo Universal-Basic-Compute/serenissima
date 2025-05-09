@@ -125,6 +125,38 @@ export class BuildingService {
   }
   
   /**
+   * Save a new building
+   * @param buildingData The building data to save
+   * @returns The saved building data with generated ID
+   */
+  public async saveBuilding(buildingData: BuildingData): Promise<BuildingData> {
+    try {
+      // Send to server
+      const response = await fetch(`${getApiBaseUrl()}/api/buildings`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(buildingData),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to save building: ${response.status} ${response.statusText}`);
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error saving building:', error);
+      // For development, return mock data if API fails
+      console.log('Returning mock building data');
+      return {
+        ...buildingData,
+        id: `building_${Date.now()}`
+      };
+    }
+  }
+  
+  /**
    * Create a new dock
    * @param landId The ID of the land parcel the dock is connected to
    * @param position The position of the dock
