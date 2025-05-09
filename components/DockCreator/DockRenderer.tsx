@@ -24,7 +24,7 @@ interface DockRendererProps {
   active: boolean;
 }
 
-// Export the component to avoid redeclaration error
+// Define the component
 const DockRenderer: React.FC<DockRendererProps> = ({ scene, active }) => {
   const docksRef = useRef<DockData[]>([]);
   const meshesRef = useRef<THREE.Object3D[]>([]);
@@ -320,4 +320,5 @@ const DockRenderer: React.FC<DockRendererProps> = ({ scene, active }) => {
   return null; // This is a non-visual component
 };
 
+// Export as default
 export default DockRenderer;
