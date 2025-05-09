@@ -84,7 +84,7 @@ const ResourceDetailsModal: React.FC<ResourceDetailsModalProps> = ({ resource, o
     <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
       <div 
         ref={modalRef}
-        className="relative bg-amber-900/90 border-2 border-amber-700 rounded-lg max-w-xs sm:max-w-xl md:max-w-2xl lg:max-w-4xl w-full max-h-[90vh] overflow-auto"
+        className="relative bg-amber-900/90 border-2 border-amber-700 rounded-lg max-w-xs sm:max-w-xl md:max-w-3xl lg:max-w-5xl xl:max-w-6xl w-full max-h-[90vh] overflow-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="p-6">
@@ -143,139 +143,149 @@ const ResourceDetailsModal: React.FC<ResourceDetailsModalProps> = ({ resource, o
             </div>
           </div>
           
-          {/* Description */}
-          {resource.description && (
-            <div className="mb-6">
-              <h4 className="text-lg font-serif text-amber-300 mb-2 border-b border-amber-700/50 pb-1">Description</h4>
-              <p className="text-amber-100 text-sm mb-2">
-                {resource.description}
-              </p>
+          {/* Multi-column layout for content sections */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Description - always in first column */}
+            <div className="space-y-6">
+              {resource.description && (
+                <div>
+                  <h4 className="text-lg font-serif text-amber-300 mb-2 border-b border-amber-700/50 pb-1">Description</h4>
+                  <p className="text-amber-100 text-sm mb-2">
+                    {resource.description}
+                  </p>
+                </div>
+              )}
+              
+              {/* Production Building */}
+              {getProductionBuilding() && (
+                <div>
+                  <h4 className="text-lg font-serif text-amber-300 mb-2 border-b border-amber-700/50 pb-1">Production</h4>
+                  <div className="flex items-center text-amber-200 font-medium mb-2">
+                    <FaIndustry className="mr-2" />
+                    <span>Produced in: {formatCategoryName(getProductionBuilding())}</span>
+                  </div>
+                  
+                  <div className="text-amber-100 text-sm ml-6 space-y-1">
+                    {resource.productionProperties?.processingTime && (
+                      <div>
+                        <span className="font-medium">Processing Time:</span> {resource.productionProperties.processingTime} minutes
+                      </div>
+                    )}
+                    
+                    {resource.productionProperties?.productionTime && (
+                      <div>
+                        <span className="font-medium">Production Time:</span> {resource.productionProperties.productionTime} minutes
+                      </div>
+                    )}
+                    
+                    {resource.productionProperties?.processingComplexity && (
+                      <div>
+                        <span className="font-medium">Complexity:</span> {resource.productionProperties.processingComplexity}/10
+                      </div>
+                    )}
+                    
+                    {resource.productionProperties?.productionComplexity && (
+                      <div>
+                        <span className="font-medium">Complexity:</span> {resource.productionProperties.productionComplexity}/10
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
-          )}
-          
-          {/* Production Information */}
-          <div className="mb-6">
-            <h4 className="text-lg font-serif text-amber-300 mb-2 border-b border-amber-700/50 pb-1">Production Chain</h4>
             
-            {/* Production Building */}
-            {getProductionBuilding() && (
-              <div className="mb-4">
-                <div className="flex items-center text-amber-200 font-medium mb-2">
-                  <FaIndustry className="mr-2" />
-                  <span>Produced in: {formatCategoryName(getProductionBuilding())}</span>
-                </div>
-                
-                {resource.productionProperties?.processingTime && (
-                  <div className="text-amber-100 text-sm ml-6 mb-1">
-                    <span className="font-medium">Processing Time:</span> {resource.productionProperties.processingTime} minutes
-                  </div>
-                )}
-                
-                {resource.productionProperties?.productionTime && (
-                  <div className="text-amber-100 text-sm ml-6 mb-1">
-                    <span className="font-medium">Production Time:</span> {resource.productionProperties.productionTime} minutes
-                  </div>
-                )}
-                
-                {resource.productionProperties?.processingComplexity && (
-                  <div className="text-amber-100 text-sm ml-6">
-                    <span className="font-medium">Complexity:</span> {resource.productionProperties.processingComplexity}/10
-                  </div>
-                )}
-                
-                {resource.productionProperties?.productionComplexity && (
-                  <div className="text-amber-100 text-sm ml-6">
-                    <span className="font-medium">Complexity:</span> {resource.productionProperties.productionComplexity}/10
-                  </div>
-                )}
-              </div>
-            )}
-            
-            {/* Input Resources */}
-            {getInputs().length > 0 && (
-              <div className="mb-4">
-                <div className="flex items-center text-amber-200 font-medium mb-2">
-                  <FaArrowDown className="mr-2" />
-                  <span>Inputs</span>
-                </div>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 ml-6">
-                  {getInputs().map((input: any, index: number) => (
-                    <div 
-                      key={index}
-                      className="flex items-center p-2 bg-amber-900/20 rounded border border-amber-700/30"
-                    >
-                      <div className="mr-2 text-amber-100 text-sm">
-                        {input.amount && <span className="font-medium mr-1">{input.amount}×</span>}
-                        {formatCategoryName(input.resource)}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-            
-            {/* Output Resources */}
-            {getOutputs().length > 0 && (
+            {/* Input/Output Resources - second column */}
+            <div className="space-y-6">
+              {/* Input Resources */}
               <div>
-                <div className="flex items-center text-amber-200 font-medium mb-2">
-                  <FaArrowRight className="mr-2" />
-                  <span>Outputs</span>
-                </div>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 ml-6">
-                  {getOutputs().map((output: any, index: number) => (
-                    <div 
-                      key={index}
-                      className="flex items-center p-2 bg-amber-900/20 rounded border border-amber-700/30"
-                    >
-                      <div className="mr-2 text-amber-100 text-sm">
-                        {output.amount && <span className="font-medium mr-1">{output.amount}×</span>}
-                        {formatCategoryName(output.resource)}
+                <h4 className="text-lg font-serif text-amber-300 mb-2 border-b border-amber-700/50 pb-1">Inputs</h4>
+                {getInputs().length > 0 ? (
+                  <div className="grid grid-cols-1 gap-2">
+                    {getInputs().map((input: any, index: number) => (
+                      <div 
+                        key={index}
+                        className="flex items-center p-2 bg-amber-900/20 rounded border border-amber-700/30"
+                      >
+                        <div className="mr-2 text-amber-100 text-sm">
+                          {input.amount && <span className="font-medium mr-1">{input.amount}×</span>}
+                          {formatCategoryName(input.resource)}
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-            
-            {/* Production Chain Position */}
-            {resource.productionChainPosition && (
-              <div className="mt-4">
-                {resource.productionChainPosition.predecessors && resource.productionChainPosition.predecessors.length > 0 && (
-                  <div className="mb-3">
-                    <div className="text-amber-200 font-medium mb-1">Predecessors:</div>
-                    <div className="flex flex-wrap gap-2 ml-6">
-                      {resource.productionChainPosition.predecessors.map((pred: any, index: number) => (
-                        <div key={index} className="text-xs bg-amber-800/40 text-amber-100 px-2 py-1 rounded">
-                          {formatCategoryName(pred.resource)} 
-                          {pred.facility && <span className="text-amber-200/70"> ({formatCategoryName(pred.facility)})</span>}
-                        </div>
-                      ))}
-                    </div>
+                    ))}
                   </div>
+                ) : (
+                  <p className="text-amber-400/70 text-sm italic">No input resources required</p>
                 )}
+              </div>
+              
+              {/* Output Resources */}
+              <div>
+                <h4 className="text-lg font-serif text-amber-300 mb-2 border-b border-amber-700/50 pb-1">Outputs</h4>
+                {getOutputs().length > 0 ? (
+                  <div className="grid grid-cols-1 gap-2">
+                    {getOutputs().map((output: any, index: number) => (
+                      <div 
+                        key={index}
+                        className="flex items-center p-2 bg-amber-900/20 rounded border border-amber-700/30"
+                      >
+                        <div className="mr-2 text-amber-100 text-sm">
+                          {output.amount && <span className="font-medium mr-1">{output.amount}×</span>}
+                          {formatCategoryName(output.resource)}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-amber-400/70 text-sm italic">No output resources</p>
+                )}
+              </div>
+            </div>
+            
+            {/* Production Chain Position - third column */}
+            <div className="space-y-6">
+              <div>
+                <h4 className="text-lg font-serif text-amber-300 mb-2 border-b border-amber-700/50 pb-1">Production Chain</h4>
                 
-                {resource.productionChainPosition.successors && resource.productionChainPosition.successors.length > 0 && (
-                  <div>
-                    <div className="text-amber-200 font-medium mb-1">Successors:</div>
-                    <div className="flex flex-wrap gap-2 ml-6">
-                      {resource.productionChainPosition.successors.map((succ: any, index: number) => (
-                        <div key={index} className="text-xs bg-amber-800/40 text-amber-100 px-2 py-1 rounded">
-                          {formatCategoryName(succ.resource)}
-                          {succ.facility && <span className="text-amber-200/70"> ({formatCategoryName(succ.facility)})</span>}
+                {resource.productionChainPosition ? (
+                  <>
+                    {resource.productionChainPosition.predecessors && resource.productionChainPosition.predecessors.length > 0 && (
+                      <div className="mb-3">
+                        <div className="text-amber-200 font-medium mb-1">Predecessors:</div>
+                        <div className="flex flex-wrap gap-2 ml-6">
+                          {resource.productionChainPosition.predecessors.map((pred: any, index: number) => (
+                            <div key={index} className="text-xs bg-amber-800/40 text-amber-100 px-2 py-1 rounded">
+                              {formatCategoryName(pred.resource)} 
+                              {pred.facility && <span className="text-amber-200/70"> ({formatCategoryName(pred.facility)})</span>}
+                            </div>
+                          ))}
                         </div>
-                      ))}
-                    </div>
-                  </div>
+                      </div>
+                    )}
+                    
+                    {resource.productionChainPosition.successors && resource.productionChainPosition.successors.length > 0 && (
+                      <div>
+                        <div className="text-amber-200 font-medium mb-1">Successors:</div>
+                        <div className="flex flex-wrap gap-2 ml-6">
+                          {resource.productionChainPosition.successors.map((succ: any, index: number) => (
+                            <div key={index} className="text-xs bg-amber-800/40 text-amber-100 px-2 py-1 rounded">
+                              {formatCategoryName(succ.resource)}
+                              {succ.facility && <span className="text-amber-200/70"> ({formatCategoryName(succ.facility)})</span>}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <p className="text-amber-400/70 text-sm italic">No production chain information available</p>
                 )}
               </div>
-            )}
-            
-            {/* Show message if no production information is available */}
-            {!hasProductionInfo() && (
-              <p className="text-amber-400/70 text-sm italic">No production information available</p>
-            )}
+              
+              {/* Show message if no production information is available */}
+              {!hasProductionInfo() && (
+                <p className="text-amber-400/70 text-sm italic">No production information available</p>
+              )}
+            </div>
           </div>
         </div>
       </div>
