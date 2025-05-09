@@ -837,6 +837,19 @@ export default function MapPage() {
   
   // Function to create a connection between two WaterPoints
   const createWaterPointConnection = (sourcePoint: any, targetPoint: any) => {
+    // Show loading indicator
+    const loadingIndicator = document.createElement('div');
+    loadingIndicator.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+    loadingIndicator.innerHTML = `
+      <div class="bg-white p-4 rounded-lg shadow-lg">
+        <div class="flex items-center space-x-3">
+          <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+          <p>Creating canal connection...</p>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(loadingIndicator);
+    
     // Créer la connexion dans le WaterPoint source
     const connection = {
       targetId: targetPoint.id,
@@ -844,13 +857,40 @@ export default function MapPage() {
       depth: 1  // Profondeur par défaut en mètres
     };
     
-    fetch('/api/waterpoint', {
-      method: 'PUT',
+    // Create a unique connection ID
+    const connectionId = `connection-${Date.now()}-${sourcePoint.id}-${targetPoint.id}`;
+    
+    // First, create the connection record
+    fetch('/api/waterpoint-connection', {
+      method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        id: sourcePoint.id,
-        addConnection: connection
+        id: connectionId,
+        sourceId: sourcePoint.id,
+        targetId: targetPoint.id,
+        width: 3,
+        depth: 1,
+        createdAt: new Date().toISOString()
       })
+    })
+    .then(response => response.json())
+    .then(connectionData => {
+      console.log('Connection record created:', connectionData);
+      
+      // Now update the source waterpoint
+      return fetch('/api/waterpoint', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: sourcePoint.id,
+          addConnection: {
+            targetId: targetPoint.id,
+            connectionId: connectionId,
+            width: 3,
+            depth: 1
+          }
+        })
+      });
     })
     .then(response => response.json())
     .then(data => {
@@ -858,18 +898,17 @@ export default function MapPage() {
         console.log('Connection added to source WaterPoint:', data.waterpoint);
         
         // Créer la connexion inverse dans le WaterPoint cible
-        const reverseConnection = {
-          targetId: sourcePoint.id,
-          width: 3,
-          depth: 1
-        };
-        
         return fetch('/api/waterpoint', {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             id: targetPoint.id,
-            addConnection: reverseConnection
+            addConnection: {
+              targetId: sourcePoint.id,
+              connectionId: connectionId,
+              width: 3,
+              depth: 1
+            }
           })
         });
       } else {
@@ -881,6 +920,35 @@ export default function MapPage() {
       if (data.success) {
         console.log('Connection added to target WaterPoint:', data.waterpoint);
         
+        // Remove loading indicator
+        document.body.removeChild(loadingIndicator);
+        
+        // Create visual connection line
+        if (mapRef.current) {
+          const sourcePos = typeof sourcePoint.position === 'string' 
+            ? JSON.parse(sourcePoint.position) 
+            : sourcePoint.position;
+          
+          const targetPos = typeof targetPoint.position === 'string' 
+            ? JSON.parse(targetPoint.position) 
+            : targetPoint.position;
+          
+          const line = new google.maps.Polyline({
+            path: [
+              new google.maps.LatLng(sourcePos.lat, sourcePos.lng),
+              new google.maps.LatLng(targetPos.lat, targetPos.lng)
+            ],
+            geodesic: true,
+            strokeColor: '#0088FF',
+            strokeOpacity: 0.7,
+            strokeWeight: 3,
+            map: mapRef.current
+          });
+          
+          // Add to connections array
+          setWaterPointConnections(prev => [...prev, line]);
+        }
+        
         // Recharger les WaterPoints pour afficher la nouvelle connexion
         loadWaterPoints();
         
@@ -888,13 +956,35 @@ export default function MapPage() {
         setConnectWaterPointMode(false);
         setSelectedWaterPoint(null);
         
-        alert('Canal connection created successfully');
+        // Show success message
+        const successMessage = document.createElement('div');
+        successMessage.className = 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 animate-bounce';
+        successMessage.innerHTML = `
+          <div class="flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            <span>Canal connection created successfully!</span>
+          </div>
+        `;
+        document.body.appendChild(successMessage);
+        
+        // Remove success message after 3 seconds
+        setTimeout(() => {
+          document.body.removeChild(successMessage);
+        }, 3000);
       } else {
+        // Remove loading indicator
+        document.body.removeChild(loadingIndicator);
         console.error('Failed to add connection to target WaterPoint:', data.error);
         alert('Failed to complete canal connection');
       }
     })
     .catch(error => {
+      // Remove loading indicator
+      if (document.body.contains(loadingIndicator)) {
+        document.body.removeChild(loadingIndicator);
+      }
       console.error('Error creating WaterPoint connection:', error);
       alert('Error creating canal connection');
     });
@@ -949,6 +1039,36 @@ export default function MapPage() {
       mapRef.current.setOptions({
         draggableCursor: !connectWaterPointMode ? 'crosshair' : ''
       });
+    }
+    
+    // Show instructions tooltip
+    if (!connectWaterPointMode) {
+      const tooltip = document.createElement('div');
+      tooltip.className = 'fixed bottom-20 right-4 bg-blue-500 text-white p-3 rounded-lg shadow-lg z-50';
+      tooltip.innerHTML = `
+        <div class="flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+          </svg>
+          <span>Click on another WaterPoint to create a connection</span>
+        </div>
+      `;
+      tooltip.id = 'connection-tooltip';
+      document.body.appendChild(tooltip);
+      
+      // Remove tooltip after 5 seconds
+      setTimeout(() => {
+        const existingTooltip = document.getElementById('connection-tooltip');
+        if (existingTooltip) {
+          document.body.removeChild(existingTooltip);
+        }
+      }, 5000);
+    } else {
+      // Remove tooltip if canceling
+      const existingTooltip = document.getElementById('connection-tooltip');
+      if (existingTooltip) {
+        document.body.removeChild(existingTooltip);
+      }
     }
   };
 
@@ -1128,6 +1248,28 @@ export default function MapPage() {
                 ).length
               }
             </div>
+            
+            {/* Connection list */}
+            {(typeof selectedWaterPoint.connections === 'string' 
+              ? JSON.parse(selectedWaterPoint.connections) 
+              : (selectedWaterPoint.connections || [])
+            ).length > 0 && (
+              <div className="mt-2 border-t border-gray-200 pt-2">
+                <h4 className="text-sm font-medium mb-1">Connected to:</h4>
+                <div className="max-h-32 overflow-y-auto">
+                  {(typeof selectedWaterPoint.connections === 'string' 
+                    ? JSON.parse(selectedWaterPoint.connections) 
+                    : (selectedWaterPoint.connections || [])
+                  ).map((conn: any, index: number) => (
+                    <div key={index} className="text-xs bg-gray-100 p-1 rounded mb-1 flex justify-between items-center">
+                      <span>{conn.targetId}</span>
+                      <span className="text-gray-500">{conn.width}m × {conn.depth}m</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            
             <div className="flex space-x-2 mt-4">
               <button
                 onClick={() => {
@@ -1139,12 +1281,18 @@ export default function MapPage() {
                     marker.setIcon({
                       path: google.maps.SymbolPath.CIRCLE,
                       scale: 7,
-                      fillColor: '#0088FF',
+                      fillColor: marker.get('type') === 'dock' ? '#FF8800' : '#0088FF',
                       fillOpacity: 1,
                       strokeWeight: 2,
                       strokeColor: '#FFFFFF'
                     });
                   });
+                  
+                  // Remove any connection tooltip
+                  const existingTooltip = document.getElementById('connection-tooltip');
+                  if (existingTooltip) {
+                    document.body.removeChild(existingTooltip);
+                  }
                 }}
                 className="px-3 py-1 bg-gray-200 rounded text-sm"
               >

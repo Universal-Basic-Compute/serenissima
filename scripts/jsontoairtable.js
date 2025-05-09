@@ -15,6 +15,7 @@ const TABLE_MAP = {
   'LOANS': 'Loans',
   'CANALS': 'Canals',
   'WATERPOINTS': 'WaterPoints',
+  'WATERPOINTCONNECTIONS': 'WaterPointConnections',
   // Add more mappings as needed
 };
 
