@@ -100,6 +100,7 @@ export default function SimplePage() {
     const handleBuildingMenuClosed = () => {
       // Reset to buildings view when menu is closed
       setActiveView('buildings');
+      console.log('Received buildingMenuClosed event, setting activeView to buildings');
     };
     
     window.addEventListener('hide3DView', handleHide3DView);
