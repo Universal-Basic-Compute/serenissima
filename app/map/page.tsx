@@ -308,6 +308,14 @@ export default function MapPage() {
       const newMode = !prevMode;
       console.log('Setting canal mode to:', newMode);
       
+      // Show/hide canals list when toggling canal mode
+      setShowCanalsList(newMode);
+      
+      // If turning on canal mode, load the existing canals
+      if (newMode) {
+        loadExistingCanals();
+      }
+      
       // Turn off bridge mode if it's on
       if (bridgeMode) {
         setBridgeMode(false);
@@ -324,6 +332,7 @@ export default function MapPage() {
       // Clear canal data if turning off canal mode
       if (prevMode) {
         clearCanalData();
+        setShowCanalsList(false); // Also hide the canals list
       }
       
       // Change cursor style based on canal mode
@@ -961,6 +970,56 @@ export default function MapPage() {
               Remove Last Point
             </button>
           )}
+        </div>
+      )}
+      
+      {/* Existing Canals List */}
+      {showCanalsList && (
+        <div className="absolute top-20 right-4 z-10 bg-white p-4 rounded shadow max-h-[60vh] overflow-auto w-80">
+          <h3 className="text-lg font-bold mb-2">Existing Canals</h3>
+          {existingCanals.length > 0 ? (
+            <div className="space-y-2">
+              {existingCanals.map((canal, index) => (
+                <div 
+                  key={canal.id || index} 
+                  className="border border-blue-200 p-2 rounded bg-blue-50 hover:bg-blue-100 cursor-pointer"
+                  onClick={() => {
+                    // Center the map on the first point of the canal
+                    const points = typeof canal.points === 'string' 
+                      ? JSON.parse(canal.points) 
+                      : canal.points;
+                    
+                    if (points && points.length > 0 && mapRef.current) {
+                      mapRef.current.panTo(new google.maps.LatLng(
+                        points[0].lat,
+                        points[0].lng
+                      ));
+                      mapRef.current.setZoom(17); // Zoom in a bit
+                    }
+                  }}
+                >
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium">{canal.id}</span>
+                    <span className="text-xs text-gray-500">
+                      {new Date(canal.createdAt).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <div className="text-sm text-gray-600 mt-1">
+                    <span>{typeof canal.points === 'string' 
+                      ? JSON.parse(canal.points).length 
+                      : canal.points?.length || 0} points</span>
+                    {canal.width && <span> • Width: {canal.width}m</span>}
+                    {canal.depth && <span> • Depth: {canal.depth}m</span>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-gray-500 italic">No canals found</p>
+          )}
+          <div className="mt-4 text-xs text-gray-500">
+            Click on a canal to center the map on it. Click on the map to add new canal points.
+          </div>
         </div>
       )}
       
