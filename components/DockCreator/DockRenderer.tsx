@@ -25,7 +25,7 @@ interface DockRendererProps {
 }
 
 // Export the component to avoid redeclaration error
-export const DockRenderer: React.FC<DockRendererProps> = ({ scene, active }) => {
+const DockRenderer: React.FC<DockRendererProps> = ({ scene, active }) => {
   const docksRef = useRef<DockData[]>([]);
   const meshesRef = useRef<THREE.Object3D[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
