@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import * as THREE from 'three';
 import SimpleCamera from './SimpleCamera';
-import { WaterFacade as SimpleWater, WaterQualityLevel } from './SimpleWater';
+import { WaterFacade as SimpleWater, WaterQualityLevel } from '../../lib/threejs/WaterFacade';
 import SimplePolygonRenderer from './SimplePolygonRenderer';
 import { IncomePolygonRenderer } from '../../lib/threejs/IncomePolygonRenderer';
 import { calculateBounds } from './utils';
