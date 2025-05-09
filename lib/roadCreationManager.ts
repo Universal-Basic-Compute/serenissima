@@ -107,16 +107,24 @@ export class RoadCreationManager {
    */
   private findDockSnapPoint(position: THREE.Vector3): THREE.Vector3 | null {
     try {
-      // Get all docks
-      const buildingService = BuildingService.getInstance();
-      const docks = buildingService.getDocks();
+      // Use the pre-loaded dock connection points instead of fetching them synchronously
+      if (this.dockConnectionPoints.length === 0) {
+        return null;
+      }
       
-      // Since we're not using await, we need to handle the promise differently
-      // We'll return null for now and handle snap points in a different way
+      // Find the closest dock connection point
+      let closestPoint: THREE.Vector3 | null = null;
+      let closestDistance = this.snapDistance;
       
-      // This is a synchronous method that should return Vector3 | null
-      // not a Promise
-      return null;
+      for (const point of this.dockConnectionPoints) {
+        const distance = position.distanceTo(point);
+        if (distance < closestDistance) {
+          closestDistance = distance;
+          closestPoint = point;
+        }
+      }
+      
+      return closestPoint ? closestPoint.clone() : null;
     } catch (error) {
       console.error('Error finding dock snap points:', error);
       return null;
