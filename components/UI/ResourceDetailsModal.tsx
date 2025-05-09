@@ -310,13 +310,13 @@ const ResourceDetailsModal: React.FC<ResourceDetailsModalProps> = ({ resource, o
               <div>
                 <h4 className="text-lg font-serif text-amber-300 mb-2 border-b border-amber-700/50 pb-1">Production Chain</h4>
                 
-                {resource.productionChainPosition ? (
+                {extendedResource.productionChainPosition ? (
                   <>
-                    {resource.productionChainPosition.predecessors && resource.productionChainPosition.predecessors.length > 0 && (
+                    {extendedResource.productionChainPosition.predecessors && extendedResource.productionChainPosition.predecessors.length > 0 && (
                       <div className="mb-3">
                         <div className="text-amber-200 font-medium mb-1">Predecessors:</div>
                         <div className="flex flex-wrap gap-2 ml-6">
-                          {resource.productionChainPosition.predecessors.map((pred: any, index: number) => (
+                          {extendedResource.productionChainPosition.predecessors.map((pred: any, index: number) => (
                             <div key={index} className="text-xs bg-amber-800/40 text-amber-100 px-2 py-1 rounded">
                               {formatCategoryName(pred.resource)} 
                               {pred.facility && <span className="text-amber-200/70"> ({formatCategoryName(pred.facility)})</span>}
@@ -326,7 +326,7 @@ const ResourceDetailsModal: React.FC<ResourceDetailsModalProps> = ({ resource, o
                       </div>
                     )}
                     
-                    {resource.productionChainPosition.successors && resource.productionChainPosition.successors.length > 0 && (
+                    {extendedResource.productionChainPosition.successors && extendedResource.productionChainPosition.successors.length > 0 && (
                       <div>
                         <div className="text-amber-200 font-medium mb-1">Successors:</div>
                         <div className="flex flex-wrap gap-2 ml-6">
