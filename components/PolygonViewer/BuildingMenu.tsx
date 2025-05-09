@@ -181,10 +181,11 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
               </div>
               
               <div className="flex-grow overflow-auto p-4 flex flex-col md:flex-row gap-6">
-                <div className="w-full md:w-1/2 bg-amber-100 rounded-lg overflow-hidden">
+                <div className="w-full md:w-1/2 bg-amber-100 rounded-lg overflow-hidden h-[300px]">
                   <BuildingModelViewer 
                     buildingName={selectedBuilding.name.toLowerCase().replace(/\s+/g, '-')} 
                     variant={selectedVariant}
+                    className="w-full h-full"
                   />
                   
                   {/* Variant selector */}

@@ -13,11 +13,13 @@ interface BuildingModelViewerProps {
 
 const BuildingModelViewer: React.FC<BuildingModelViewerProps> = ({
   buildingName,
-  width = 150,
-  height = 150,
+  width,
+  height,
   className = '',
   variant = 'model'  // Default to 'model.glb' if no variant specified
 }) => {
+  // State to track container dimensions
+  const [containerDimensions, setContainerDimensions] = useState({ width: 0, height: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -49,6 +51,17 @@ const BuildingModelViewer: React.FC<BuildingModelViewerProps> = ({
   useEffect(() => {
     if (!containerRef.current) return;
     
+    // Clean up any existing canvas before creating a new one
+    while (containerRef.current.firstChild) {
+      containerRef.current.removeChild(containerRef.current.firstChild);
+    }
+    
+    // Get container dimensions
+    const container = containerRef.current;
+    const containerWidth = width || container.clientWidth;
+    const containerHeight = height || container.clientHeight;
+    setContainerDimensions({ width: containerWidth, height: containerHeight });
+    
     // Initialize Three.js scene - wrap in try/catch for error handling
     try {
       const scene = new THREE.Scene();
@@ -78,7 +91,7 @@ const BuildingModelViewer: React.FC<BuildingModelViewerProps> = ({
       // Add camera
       const camera = new THREE.PerspectiveCamera(
         45, 
-        width / height, 
+        containerWidth / containerHeight, 
         0.1, 
         1000
       );
@@ -91,7 +104,7 @@ const BuildingModelViewer: React.FC<BuildingModelViewerProps> = ({
         alpha: true,
         preserveDrawingBuffer: true // Needed for taking screenshots
       });
-      renderer.setSize(width, height);
+      renderer.setSize(containerWidth, containerHeight);
       renderer.setPixelRatio(window.devicePixelRatio);
       
       // Enable shadow mapping for better visual quality
@@ -290,13 +303,13 @@ const BuildingModelViewer: React.FC<BuildingModelViewerProps> = ({
     setError(`Failed to initialize 3D viewer: ${setupError instanceof Error ? setupError.message : String(setupError)}`);
     setIsLoading(false);
   }
-  }, [basePath, width, height, variant]);
+  }, [basePath, width, height, variant, buildingName]);
   
   return (
     <div 
       ref={containerRef} 
-      className={`relative ${className}`} 
-      style={{ width, height }}
+      className={`relative ${className} w-full h-full`} 
+      style={width && height ? { width, height } : undefined}
     >
       {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center bg-amber-50 bg-opacity-75">
