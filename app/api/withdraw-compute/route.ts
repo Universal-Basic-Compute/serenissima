@@ -18,6 +18,29 @@ export async function POST(request: Request) {
       );
     }
     
+    // Check if user has any active loans
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'}/api/loans/user/${wallet_address}`);
+      
+      if (response.ok) {
+        const userLoans = await response.json();
+        const activeLoans = userLoans.filter(loan => loan.status === 'active');
+        
+        if (activeLoans.length > 0) {
+          return NextResponse.json(
+            { 
+              success: false, 
+              error: 'You must repay all active loans before withdrawing compute. This is required by the Venetian Banking Guild.' 
+            },
+            { status: 400 }
+          );
+        }
+      }
+    } catch (error) {
+      console.warn('Error checking user loans, proceeding with withdrawal:', error);
+      // Continue with withdrawal if we can't check loans to avoid blocking users
+    }
+    
     // Call the backend API to withdraw compute
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'}/api/withdraw-compute`, {
       method: 'POST',

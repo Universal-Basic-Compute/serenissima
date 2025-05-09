@@ -1693,6 +1693,20 @@ async def withdraw_compute_solana(wallet_data: WalletRequest):
         raise HTTPException(status_code=400, detail="Compute amount must be greater than 0")
     
     try:
+        # Check if user has any active loans
+        try:
+            # Get loans for this user
+            loans_formula = f"{{Borrower}}='{wallet_data.wallet_address}' AND {{Status}}='active'"
+            active_loans = loans_table.all(formula=loans_formula)
+            
+            if active_loans and len(active_loans) > 0:
+                raise HTTPException(
+                    status_code=400, 
+                    detail="You must repay all active loans before withdrawing compute. This is required by the Venetian Banking Guild."
+                )
+        except Exception as loan_error:
+            print(f"Warning: Error checking user loans: {str(loan_error)}")
+            # Continue with withdrawal if we can't check loans to avoid blocking users
         # Check if wallet exists - try multiple search approaches
         existing_records = None
         

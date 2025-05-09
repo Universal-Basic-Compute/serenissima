@@ -1,6 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ActionButton from './ActionButton';
 import AnimatedDucats from './AnimatedDucats';
+import { useLoanStore } from '@/store/loanStore';
+import { getWalletAddress } from '@/lib/walletUtils';
+import { LoanStatus } from '@/lib/services/LoanService';
 
 interface WithdrawComputeMenuProps {
   onClose: () => void;
@@ -23,6 +26,26 @@ export default function WithdrawComputeMenu({ onClose, onWithdraw, computeAmount
     if (withdrawAmount > computeAmount) {
       setError('You cannot withdraw more than your available balance');
       return;
+    }
+
+    // Check if user has any active loans
+    const walletAddress = getWalletAddress();
+    if (walletAddress) {
+      try {
+        const loanStore = useLoanStore.getState();
+        const userLoans = await loanStore.loadUserLoans(walletAddress);
+        
+        // Check if there are any active loans
+        const activeLoans = userLoans.filter(loan => loan.status === LoanStatus.ACTIVE);
+        
+        if (activeLoans.length > 0) {
+          setError('You must repay all active loans before withdrawing compute. This is required by the Venetian Banking Guild.');
+          return;
+        }
+      } catch (error) {
+        console.error('Error checking user loans:', error);
+        // Continue with withdrawal if we can't check loans to avoid blocking users
+      }
     }
 
     setError(null);
