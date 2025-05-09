@@ -303,6 +303,8 @@ export default function MapPage() {
   const handleCanalMode = () => {
     const newCanalMode = !canalMode;
     console.log('Setting canal mode to:', newCanalMode);
+    
+    // Force update the state immediately
     setCanalMode(newCanalMode);
     
     // Turn off bridge mode if it's on
@@ -362,7 +364,9 @@ export default function MapPage() {
   const handleMapClick = (event: google.maps.MapMouseEvent) => {
     if (!event.latLng) return;
     
-    console.log('Map clicked in mode:', bridgeMode ? 'bridge' : canalMode ? 'canal' : 'normal');
+    // Debug the current mode
+    console.log('Map clicked in mode:', bridgeMode ? 'bridge' : canalMode ? 'canal' : 'normal', 
+                'Canal mode state:', canalMode);
     
     if (bridgeMode) {
       // Find which polygon was clicked
@@ -474,8 +478,8 @@ export default function MapPage() {
         setBridgeStart(null);
         setBridgeStartLandId(null);
       }
-    } else if (canalMode) {
-      console.log('Adding canal point at:', event.latLng.toString());
+    } else if (canalMode === true) { // Explicitly check for true
+      console.log('Processing click in canal mode');
       
       // Create a marker at the point
       const marker = new google.maps.Marker({
@@ -609,7 +613,10 @@ export default function MapPage() {
     google.maps.event.clearListeners(map, 'click');
     
     // Add click listener for bridge and canal creation
-    map.addListener('click', handleMapClick);
+    map.addListener('click', (e: google.maps.MapMouseEvent) => {
+      console.log('Map click event triggered, canal mode:', canalMode);
+      handleMapClick(e);
+    });
     
     // Add this debug message
     console.log('Map click handler attached');
