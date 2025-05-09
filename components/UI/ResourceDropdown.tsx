@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import { FaChevronDown, FaChevronUp, FaLeaf, FaCogs, FaBox, FaTools, FaGem, FaShip, FaHammer, FaWater } from 'react-icons/fa';
+import ResourceDetailsModal from './ResourceDetailsModal';
 
 interface Resource {
   id: string;
@@ -45,6 +46,7 @@ const getCategoryIcon = (category: string) => {
 const ResourceDropdown: React.FC<ResourceDropdownProps> = ({ category, resources }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [groupBySubcategory, setGroupBySubcategory] = useState(true);
+  const [selectedResource, setSelectedResource] = useState<Resource | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Close dropdown when clicking outside
@@ -66,6 +68,17 @@ const ResourceDropdown: React.FC<ResourceDropdownProps> = ({ category, resources
     return name.split('_').map(word => 
       word.charAt(0).toUpperCase() + word.slice(1)
     ).join(' ');
+  };
+  
+  // Function to handle resource click
+  const handleResourceClick = (resource: Resource) => {
+    setSelectedResource(resource);
+    // Keep dropdown open to allow multiple selections
+  };
+
+  // Function to close the resource details
+  const handleCloseDetails = () => {
+    setSelectedResource(null);
   };
 
   // Get rarity color
@@ -129,7 +142,11 @@ const ResourceDropdown: React.FC<ResourceDropdownProps> = ({ category, resources
                   )}
                   <ul className="py-1">
                     {subcategoryResources.map(resource => (
-                      <li key={resource.id} className="px-3 py-2 hover:bg-amber-900/30 transition-colors group">
+                      <li 
+                        key={resource.id} 
+                        className="px-3 py-2 hover:bg-amber-900/30 transition-colors group cursor-pointer"
+                        onClick={() => handleResourceClick(resource)}
+                      >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-2">
                             <Image 
@@ -171,6 +188,14 @@ const ResourceDropdown: React.FC<ResourceDropdownProps> = ({ category, resources
             </div>
           )}
         </div>
+      )}
+      
+      {/* Resource Details Modal */}
+      {selectedResource && (
+        <ResourceDetailsModal
+          resource={selectedResource}
+          onClose={handleCloseDetails}
+        />
       )}
     </div>
   );
