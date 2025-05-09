@@ -48,6 +48,7 @@ export interface BuildingData {
   };
   rotation: number;
   created_by: string;
+  connection_points?: { x: number; y: number; z: number }[];
 }
 
 export interface BuildingCategory {
