@@ -1183,7 +1183,7 @@ export default function SimplePage() {
       )}
       
       {selectedArticle === "business-owners-guide" && (
-        <BuildingOwnersGuideArticle onClose={() => setSelectedArticle(null)} />
+        <BusinessOwnersGuideArticle onClose={() => setSelectedArticle(null)} />
       )}
       
       {/* Land Purchase Confirmation Modal */}
