@@ -19,6 +19,10 @@ const CanalCreator: React.FC<CanalCreatorProps> = ({
   onComplete,
   onCancel
 }) => {
+  // Log when component is mounted or active state changes
+  useEffect(() => {
+    console.log('CanalCreator component active state:', active);
+  }, [active]);
   const [points, setPoints] = useState<CanalPoint[]>([]);
   const [width, setWidth] = useState<number>(5);
   const [depth, setDepth] = useState<number>(1);

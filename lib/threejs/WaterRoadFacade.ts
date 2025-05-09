@@ -56,6 +56,10 @@ export class CanalFacade {
     this.camera = props.camera;
     this.waterLevel = props.waterLevel || 0;
     this.clock = new THREE.Clock();
+    
+    if (this.debug) {
+      console.log('CanalFacade initialized with water level:', this.waterLevel);
+    }
   }
 
   /**
@@ -73,6 +77,10 @@ export class CanalFacade {
     if (points.length < 2) {
       console.error('Water road requires at least 2 points');
       return '';
+    }
+    
+    if (this.debug) {
+      console.log(`Creating canal with ID: ${id}, points: ${points.length}`);
     }
 
     // Remove existing road with the same ID if it exists

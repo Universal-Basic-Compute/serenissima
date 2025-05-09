@@ -543,7 +543,7 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
         landOwners={landOwners}
       />
       
-      {/* Water Road Creator */}
+      {/* Water Road Creator - make sure it's visible in transport view */}
       {showCanalCreator && sceneRef.current && cameraControllerRef.current && (
         <CanalCreator
           scene={sceneRef.current}
