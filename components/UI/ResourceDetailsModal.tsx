@@ -261,6 +261,11 @@ const ResourceDetailsModal: React.FC<ResourceDetailsModalProps> = ({ resource, o
                         <div className="mr-2 text-amber-100 text-sm">
                           {input.amount && <span className="font-medium mr-1">{input.amount}×</span>}
                           {formatCategoryName(input.resource)}
+                          {input.qualityImpact && (
+                            <span className="ml-2 text-xs text-amber-200/70">
+                              (Quality impact: {input.qualityImpact * 100}%)
+                            </span>
+                          )}
                         </div>
                       </div>
                     ))}
