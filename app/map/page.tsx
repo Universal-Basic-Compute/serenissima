@@ -503,6 +503,36 @@ export default function MapPage() {
       } else if (waterPointMode) {
         // Create a new WaterPoint at the clicked location
         createWaterPoint(event.latLng);
+      } else if (connectWaterPointMode && selectedWaterPoint) {
+        // In connect mode, check if we clicked on another waterpoint
+        let targetPoint = null;
+        for (const point of waterPoints) {
+          const pointPos = typeof point.position === 'string' 
+            ? JSON.parse(point.position) 
+            : point.position;
+          
+          const clickPos = {
+            lat: event.latLng.lat(),
+            lng: event.latLng.lng()
+          };
+          
+          // Calculate distance between click and point
+          const distance = google.maps.geometry.spherical.computeDistanceBetween(
+            new google.maps.LatLng(clickPos.lat, clickPos.lng),
+            new google.maps.LatLng(pointPos.lat, pointPos.lng)
+          );
+          
+          // If click is close enough to a point (within 10 meters)
+          if (distance < 10 && point.id !== selectedWaterPoint.id) {
+            targetPoint = point;
+            break;
+          }
+        }
+        
+        // If we found a target point, create connection
+        if (targetPoint) {
+          createWaterPointConnection(selectedWaterPoint, targetPoint);
+        }
       }
     });
     
