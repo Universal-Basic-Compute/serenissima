@@ -1,8 +1,8 @@
 {
-  "totalErrors": 4,
+  "totalErrors": 3,
   "totalWarnings": 0,
   "exitCode": 2,
-  "timestamp": "2025-05-09T21:43:14.155Z",
+  "timestamp": "2025-05-09T21:43:59.541Z",
   "errors": [
     {
       "filePath": "components/UI/ResourceDetailsModal.tsx",
@@ -21,14 +21,6 @@
       "type": "error"
     },
     {
-      "filePath": "lib/roadCreationManager.ts",
-      "line": 2,
-      "column": 33,
-      "code": "TS2307",
-      "message": "Cannot find module './buildingService' or its corresponding type declarations.",
-      "type": "error"
-    },
-    {
       "filePath": "store/useBuildingStore.ts",
       "line": 112,
       "column": 31,
@@ -37,11 +29,10 @@
       "type": "error"
     }
   ],
-  "rawOutputLines": 5,
+  "rawOutputLines": 4,
   "firstFewLines": [
     "components/UI/ResourceDetailsModal.tsx(7,3): error TS2300: Duplicate identifier 'id'.\r",
     "components/UI/ResourceDetailsModal.tsx(64,3): error TS2300: Duplicate identifier 'id'.\r",
-    "lib/roadCreationManager.ts(2,33): error TS2307: Cannot find module './buildingService' or its corresponding type declarations.\r",
     "store/useBuildingStore.ts(112,31): error TS2739: Type '{ name: string; category: string; subcategory: string; tier: number; size: string; shortDescription: string; fullDescription: string; constructionCosts: { ducats: number; }; }' is missing the following properties from type 'Building': unlockCondition, flavorText, maintenanceCost, constructionTime\r"
   ],
   "compilerExitCode": 2
