@@ -22,6 +22,7 @@ import LandPurchaseConfirmation from '../components/UI/LandPurchaseConfirmation'
 import BuildingsToolbar from '../components/BuildingsView/BuildingsToolbar';
 import { LoanMarketplace, LoanManagementDashboard, LoanApplicationModal } from '../components/Loans';
 import Settings from '../components/UI/Settings';
+import ResourceDropdowns from '../components/UI/ResourceDropdowns';
 import { getApiBaseUrl } from '@/lib/apiUtils';
 import { getWalletAddress } from '@/lib/walletUtils';
 import { transferCompute, withdrawCompute } from '@/lib/computeUtils';
@@ -699,9 +700,16 @@ export default function SimplePage() {
       
       {/* Top Navigation Bar */}
       <div className="absolute top-0 left-0 right-0 bg-black/50 text-white p-4 flex justify-between items-center">
-        <Link href="/" className="text-xl font-serif font-bold hover:text-amber-400 transition-colors">
-          La Serenissima
-        </Link>
+        <div className="flex items-center space-x-4">
+          <Link href="/" className="text-xl font-serif font-bold hover:text-amber-400 transition-colors">
+            La Serenissima
+          </Link>
+          
+          {/* Add the ResourceDropdowns component here */}
+          <div className="ml-6">
+            <ResourceDropdowns />
+          </div>
+        </div>
         
         <div className="flex space-x-4">
           <button 
