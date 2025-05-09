@@ -61,7 +61,15 @@ export default function BuildingMenu({ visible, onClose, onBuildingSelect, onBui
 
   // Handle closing the menu
   const handleClose = () => {
+    // Reset local state
     setShowViaEvent(false);
+    
+    // Reset any selected building if there is one
+    if (selectedBuilding) {
+      handleCloseDetailModal();
+    }
+    
+    // Call the parent's onClose callback
     onClose();
   };
 
