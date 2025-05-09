@@ -60,6 +60,7 @@ export default function MapPage() {
   const [canalPoints, setCanalPoints] = useState<google.maps.LatLng[]>([]);
   const [canalMarkers, setCanalMarkers] = useState<google.maps.Marker[]>([]);
   const [canalLines, setCanalLines] = useState<google.maps.Polyline[]>([]);
+  const canalModeRef = useRef(false);
   
   // Initialize wallet adapter
   useEffect(() => {
@@ -338,6 +339,11 @@ export default function MapPage() {
     });
   };
   
+  // Keep the ref in sync with the state
+  useEffect(() => {
+    canalModeRef.current = canalMode;
+  }, [canalMode]);
+  
   // Clear canal data
   const clearCanalData = () => {
     // Remove all canal markers
@@ -454,8 +460,8 @@ export default function MapPage() {
     
     // Add click listener for bridge and canal creation
     map.addListener('click', (e: google.maps.MapMouseEvent) => {
-      // Get the current state directly when the event fires
-      const currentCanalMode = canalMode;
+      // Use the ref instead of the state
+      const currentCanalMode = canalModeRef.current;
       console.log('Map click event triggered, canal mode:', currentCanalMode);
       
       // Pass the event to handleMapClick with current state values
