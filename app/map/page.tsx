@@ -287,6 +287,13 @@ export default function MapPage() {
       clearCanalData();
     }
     
+    // Turn off waterpoint mode if it's on
+    if (waterPointMode) {
+      setWaterPointMode(false);
+      setConnectWaterPointMode(false);
+      setSelectedWaterPoint(null);
+    }
+    
     // Reset bridge start if turning off bridge mode
     if (bridgeMode) {
       setBridgeStart(null);
@@ -332,6 +339,13 @@ export default function MapPage() {
           bridgeStartMarker.setMap(null);
           setBridgeStartMarker(null);
         }
+      }
+      
+      // Turn off waterpoint mode if it's on
+      if (waterPointMode) {
+        setWaterPointMode(false);
+        setConnectWaterPointMode(false);
+        setSelectedWaterPoint(null);
       }
       
       // Clear canal data if turning off canal mode
@@ -740,7 +754,7 @@ export default function MapPage() {
       const event = e as google.maps.MapMouseEvent;
       if (!event.latLng) return;
       
-      console.log('Map clicked in mode:', bridgeMode ? 'bridge' : currentCanalMode ? 'canal' : 'normal');
+      console.log('Map clicked in mode:', bridgeMode ? 'bridge' : currentCanalMode ? 'canal' : waterPointMode ? 'waterpoint' : 'normal');
       
       if (bridgeMode) {
         // Find which polygon was clicked
@@ -852,6 +866,9 @@ export default function MapPage() {
           setBridgeStart(null);
           setBridgeStartLandId(null);
         }
+      } else if (waterPointMode) {
+        // Create a new WaterPoint at the clicked location
+        createWaterPoint(event.latLng);
       } else if (currentCanalMode) {
         console.log('Processing click in canal mode');
         
@@ -978,6 +995,277 @@ export default function MapPage() {
       loadExistingCanals();
     }
   }, [mapRef.current, isGoogleLoaded, loadExistingCanals]);
+  
+  // Function to load WaterPoints
+  const loadWaterPoints = useCallback(() => {
+    fetch('/api/waterpoint')
+      .then(response => response.json())
+      .then(data => {
+        // Vérifier le format des données
+        const points = Array.isArray(data) ? data : (data.waterpoints || []);
+        
+        console.log('WaterPoints data received:', data);
+        console.log(`Loaded ${points.length} existing waterpoints`);
+        
+        setWaterPoints(points);
+        
+        // Visualiser les WaterPoints sur la carte
+        if (mapRef.current) {
+          // Supprimer les marqueurs existants
+          Object.values(waterPointMarkers).forEach(marker => marker.setMap(null));
+          const newMarkers: {[id: string]: google.maps.Marker} = {};
+          
+          // Supprimer les lignes de connexion existantes
+          waterPointConnections.forEach(line => line.setMap(null));
+          const newConnections: google.maps.Polyline[] = [];
+          
+          // Créer des marqueurs pour chaque WaterPoint
+          points.forEach((point: any) => {
+            // Convertir la position si elle est stockée sous forme de chaîne
+            const position = typeof point.position === 'string' 
+              ? JSON.parse(point.position) 
+              : point.position;
+            
+            const marker = new google.maps.Marker({
+              position: new google.maps.LatLng(position.lat, position.lng),
+              map: mapRef.current,
+              icon: {
+                path: google.maps.SymbolPath.CIRCLE,
+                scale: 7,
+                fillColor: point.type === 'dock' ? '#FF8800' : '#0088FF',
+                fillOpacity: 1,
+                strokeWeight: 2,
+                strokeColor: '#FFFFFF'
+              },
+              title: point.id
+            });
+            
+            // Ajouter un écouteur de clic pour sélectionner ce WaterPoint
+            marker.addListener('click', () => {
+              if (connectWaterPointMode && selectedWaterPoint && selectedWaterPoint.id !== point.id) {
+                // Créer une connexion entre les deux WaterPoints
+                createWaterPointConnection(selectedWaterPoint, point);
+              } else {
+                // Sélectionner ce WaterPoint
+                setSelectedWaterPoint(point);
+                
+                // Mettre à jour l'apparence du marqueur pour montrer qu'il est sélectionné
+                marker.setIcon({
+                  path: google.maps.SymbolPath.CIRCLE,
+                  scale: 9,
+                  fillColor: '#FF0000',
+                  fillOpacity: 1,
+                  strokeWeight: 2,
+                  strokeColor: '#FFFFFF'
+                });
+              }
+            });
+            
+            newMarkers[point.id] = marker;
+          });
+          
+          // Créer des lignes pour les connexions
+          points.forEach((point: any) => {
+            const connections = typeof point.connections === 'string' 
+              ? JSON.parse(point.connections) 
+              : (point.connections || []);
+            
+            connections.forEach((connection: any) => {
+              // Trouver le WaterPoint cible
+              const targetPoint = points.find((p: any) => p.id === connection.targetId);
+              if (targetPoint) {
+                // Convertir les positions si nécessaire
+                const sourcePos = typeof point.position === 'string' 
+                  ? JSON.parse(point.position) 
+                  : point.position;
+                
+                const targetPos = typeof targetPoint.position === 'string' 
+                  ? JSON.parse(targetPoint.position) 
+                  : targetPoint.position;
+                
+                // Créer une ligne pour la connexion
+                const line = new google.maps.Polyline({
+                  path: [
+                    new google.maps.LatLng(sourcePos.lat, sourcePos.lng),
+                    new google.maps.LatLng(targetPos.lat, targetPos.lng)
+                  ],
+                  geodesic: true,
+                  strokeColor: '#0088FF',
+                  strokeOpacity: 0.7,
+                  strokeWeight: 3,
+                  map: mapRef.current
+                });
+                
+                newConnections.push(line);
+              }
+            });
+          });
+          
+          setWaterPointMarkers(newMarkers);
+          setWaterPointConnections(newConnections);
+        }
+      })
+      .catch(error => {
+        console.error('Error loading waterpoints:', error);
+      });
+  }, [waterPointMarkers, waterPointConnections]);
+  
+  // Load WaterPoints when the map loads
+  useEffect(() => {
+    if (mapRef.current && isGoogleLoaded && waterPointMode) {
+      loadWaterPoints();
+    }
+  }, [mapRef.current, isGoogleLoaded, loadWaterPoints, waterPointMode]);
+  
+  // Function to create a new WaterPoint
+  const createWaterPoint = (position: google.maps.LatLng, type: string = 'regular') => {
+    const waterPoint = {
+      position: {
+        lat: position.lat(),
+        lng: position.lng()
+      },
+      type,
+      connections: []
+    };
+    
+    fetch('/api/waterpoint', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(waterPoint)
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        console.log('WaterPoint created:', data.waterpoint);
+        
+        // Recharger les WaterPoints pour afficher le nouveau
+        loadWaterPoints();
+      } else {
+        console.error('Failed to create WaterPoint:', data.error);
+        alert('Failed to create WaterPoint');
+      }
+    })
+    .catch(error => {
+      console.error('Error creating WaterPoint:', error);
+      alert('Error creating WaterPoint');
+    });
+  };
+  
+  // Function to create a connection between two WaterPoints
+  const createWaterPointConnection = (sourcePoint: any, targetPoint: any) => {
+    // Créer la connexion dans le WaterPoint source
+    const connection = {
+      targetId: targetPoint.id,
+      width: 3, // Largeur par défaut en mètres
+      depth: 1  // Profondeur par défaut en mètres
+    };
+    
+    fetch('/api/waterpoint', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id: sourcePoint.id,
+        addConnection: connection
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        console.log('Connection added to source WaterPoint:', data.waterpoint);
+        
+        // Créer la connexion inverse dans le WaterPoint cible
+        const reverseConnection = {
+          targetId: sourcePoint.id,
+          width: 3,
+          depth: 1
+        };
+        
+        return fetch('/api/waterpoint', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: targetPoint.id,
+            addConnection: reverseConnection
+          })
+        });
+      } else {
+        throw new Error('Failed to add connection to source WaterPoint');
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        console.log('Connection added to target WaterPoint:', data.waterpoint);
+        
+        // Recharger les WaterPoints pour afficher la nouvelle connexion
+        loadWaterPoints();
+        
+        // Réinitialiser le mode de connexion
+        setConnectWaterPointMode(false);
+        setSelectedWaterPoint(null);
+        
+        alert('Canal connection created successfully');
+      } else {
+        console.error('Failed to add connection to target WaterPoint:', data.error);
+        alert('Failed to complete canal connection');
+      }
+    })
+    .catch(error => {
+      console.error('Error creating WaterPoint connection:', error);
+      alert('Error creating canal connection');
+    });
+  };
+  
+  // Handle WaterPoint mode
+  const handleWaterPointMode = () => {
+    setWaterPointMode(!waterPointMode);
+    
+    // Désactiver les autres modes
+    if (bridgeMode) {
+      setBridgeMode(false);
+      setBridgeStart(null);
+      setBridgeStartLandId(null);
+      
+      if (bridgeStartMarker) {
+        bridgeStartMarker.setMap(null);
+        setBridgeStartMarker(null);
+      }
+    }
+    
+    if (canalMode) {
+      setCanalMode(false);
+      clearCanalData();
+    }
+    
+    // Changer le style du curseur
+    if (mapRef.current) {
+      mapRef.current.setOptions({
+        draggableCursor: !waterPointMode ? 'crosshair' : ''
+      });
+    }
+    
+    // Charger les WaterPoints existants si on active le mode
+    if (!waterPointMode) {
+      loadWaterPoints();
+    }
+  };
+  
+  // Handle connect WaterPoint mode
+  const handleConnectWaterPointMode = () => {
+    if (!selectedWaterPoint) {
+      alert('Please select a WaterPoint first');
+      return;
+    }
+    
+    setConnectWaterPointMode(!connectWaterPointMode);
+    
+    // Changer le style du curseur
+    if (mapRef.current) {
+      mapRef.current.setOptions({
+        draggableCursor: !connectWaterPointMode ? 'crosshair' : ''
+      });
+    }
+  };
 
   // Handle script load
   const handleScriptLoad = () => {
@@ -1095,6 +1383,29 @@ export default function MapPage() {
           >
             {canalMode ? 'Cancel Canal' : 'Add Canal'}
           </button>
+          
+          <button
+            onClick={handleWaterPointMode}
+            className={`px-4 py-2 rounded shadow ${
+              waterPointMode ? 'bg-green-500 text-white' : 'bg-white'
+            }`}
+          >
+            {waterPointMode ? 'Cancel WaterPoint' : 'Add WaterPoint'}
+          </button>
+        </div>
+      )}
+      
+      {/* WaterPoint mode buttons */}
+      {isGoogleLoaded && selectedWaterPoint && (
+        <div className="absolute bottom-20 left-4 z-10 flex space-x-2">
+          <button
+            onClick={handleConnectWaterPointMode}
+            className={`px-4 py-2 rounded shadow ${
+              connectWaterPointMode ? 'bg-purple-500 text-white' : 'bg-white'
+            }`}
+          >
+            {connectWaterPointMode ? 'Cancel Connection' : 'Connect WaterPoints'}
+          </button>
         </div>
       )}
       
@@ -1206,6 +1517,64 @@ export default function MapPage() {
           >
             Complete Canal ({canalPoints.length} points)
           </button>
+        </div>
+      )}
+      
+      {/* WaterPoint Info Panel */}
+      {selectedWaterPoint && (
+        <div className="absolute top-20 right-4 z-10 bg-white p-4 rounded shadow w-80">
+          <h3 className="text-lg font-bold mb-2">WaterPoint Details</h3>
+          <div className="space-y-2">
+            <div className="text-sm">
+              <span className="font-medium">ID:</span> {selectedWaterPoint.id}
+            </div>
+            <div className="text-sm">
+              <span className="font-medium">Type:</span> {selectedWaterPoint.type}
+            </div>
+            <div className="text-sm">
+              <span className="font-medium">Depth:</span> {selectedWaterPoint.depth}m
+            </div>
+            <div className="text-sm">
+              <span className="font-medium">Connections:</span> {
+                (typeof selectedWaterPoint.connections === 'string' 
+                  ? JSON.parse(selectedWaterPoint.connections) 
+                  : (selectedWaterPoint.connections || [])
+                ).length
+              }
+            </div>
+            <div className="flex space-x-2 mt-4">
+              <button
+                onClick={() => {
+                  setSelectedWaterPoint(null);
+                  setConnectWaterPointMode(false);
+                  
+                  // Réinitialiser l'apparence des marqueurs
+                  Object.values(waterPointMarkers).forEach(marker => {
+                    marker.setIcon({
+                      path: google.maps.SymbolPath.CIRCLE,
+                      scale: 7,
+                      fillColor: '#0088FF',
+                      fillOpacity: 1,
+                      strokeWeight: 2,
+                      strokeColor: '#FFFFFF'
+                    });
+                  });
+                }}
+                className="px-3 py-1 bg-gray-200 rounded text-sm"
+              >
+                Close
+              </button>
+              
+              <button
+                onClick={handleConnectWaterPointMode}
+                className={`px-3 py-1 rounded text-sm ${
+                  connectWaterPointMode ? 'bg-purple-500 text-white' : 'bg-blue-500 text-white'
+                }`}
+              >
+                {connectWaterPointMode ? 'Cancel Connection' : 'Connect to Another Point'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
       

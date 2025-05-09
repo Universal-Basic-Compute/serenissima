@@ -14,6 +14,7 @@ const TABLE_MAP = {
   'BUILDINGS': 'Buildings',
   'LOANS': 'Loans',
   'CANALS': 'Canals',
+  'WATERPOINTS': 'WaterPoints',
   // Add more mappings as needed
 };
 
@@ -31,6 +32,14 @@ const FIELD_MAPPINGS = {
     'color': 'Color',
     'createdAt': 'CreatedAt',
     'curvature': 'Curvature'
+  },
+  'WATERPOINTS': {
+    'id': 'Id',
+    'position': 'Position',
+    'connections': 'Connections',
+    'depth': 'Depth',
+    'type': 'Type',
+    'createdAt': 'CreatedAt'
   },
   // Add more mappings as needed
 };
