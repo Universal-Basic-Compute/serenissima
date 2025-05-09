@@ -61,6 +61,24 @@ export interface ExtendedResource extends Omit<Resource, 'id'> {
     building?: string;
     processingTime?: number;
   }>;
+  // Add these new properties
+  producedFrom?: Array<{
+    inputs: Array<{
+      resource: string;
+      amount: number;
+      qualityImpact?: number;
+    }>;
+    building?: string;
+    processingTime?: number;
+  }>;
+  usedIn?: Array<{
+    outputs: Array<{
+      resource: string;
+      amount: number;
+    }>;
+    building?: string;
+    processingTime?: number;
+  }>;
 }
 
 interface ResourceDetailsModalProps {
@@ -123,11 +141,19 @@ const ResourceDetailsModal: React.FC<ResourceDetailsModalProps> = ({ resource, o
     console.log('Outputs:', getOutputs());
   }, [extendedResource]);
 
+  // Add useEffect for debugging
+  useEffect(() => {
+    console.log('Resource data:', extendedResource);
+    console.log('Inputs:', getInputs());
+    console.log('Outputs:', getOutputs());
+  }, [extendedResource]);
+
   // Helper function to get inputs from different possible structures
   const getInputs = () => {
     // Check for productionProperties.inputs
     if (extendedResource.productionProperties?.inputs && 
-        Array.isArray(extendedResource.productionProperties.inputs)) {
+        Array.isArray(extendedResource.productionProperties.inputs) &&
+        extendedResource.productionProperties.inputs.length > 0) {
       return extendedResource.productionProperties.inputs;
     }
     
@@ -149,7 +175,7 @@ const ResourceDetailsModal: React.FC<ResourceDetailsModalProps> = ({ resource, o
   const getOutputs = () => {
     // Check for productionProperties.outputs
     if (extendedResource.productionProperties?.outputs && 
-        Array.isArray(extendedResource.productionProperties.outputs) && 
+        Array.isArray(extendedResource.productionProperties.outputs) &&
         extendedResource.productionProperties.outputs.length > 0) {
       return extendedResource.productionProperties.outputs;
     }
