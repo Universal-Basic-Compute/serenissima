@@ -61,6 +61,8 @@ export default function MapPage() {
   const [canalMarkers, setCanalMarkers] = useState<google.maps.Marker[]>([]);
   const [canalLines, setCanalLines] = useState<google.maps.Polyline[]>([]);
   const canalModeRef = useRef(false);
+  const [existingCanals, setExistingCanals] = useState<any[]>([]);
+  const [snapDistance, setSnapDistance] = useState<number>(0.0001); // Adjust based on your map zoom level
   
   // Initialize wallet adapter
   useEffect(() => {
@@ -366,6 +368,93 @@ export default function MapPage() {
       return { lat: point.lat(), lng: point.lng() };
     });
   };
+  
+  // Add this function to load existing canals
+  const loadExistingCanals = useCallback(() => {
+    fetch('/api/canal')
+      .then(response => response.json())
+      .then(data => {
+        if (data.canals && Array.isArray(data.canals)) {
+          console.log(`Loaded ${data.canals.length} existing canals`);
+          setExistingCanals(data.canals);
+          
+          // Visualize existing canals on the map
+          if (mapRef.current) {
+            // Clear any existing canal visualizations first
+            // (You might want to keep track of these in state to clear them properly)
+            
+            data.canals.forEach((canal: any) => {
+              if (canal.points && canal.points.length >= 2) {
+                // Convert points to LatLng if they're stored as strings
+                const path = typeof canal.points === 'string' 
+                  ? JSON.parse(canal.points).map((p: any) => new google.maps.LatLng(p.lat, p.lng))
+                  : canal.points.map((p: any) => new google.maps.LatLng(p.lat, p.lng));
+                
+                // Draw the canal on the map
+                const canalLine = new google.maps.Polyline({
+                  path,
+                  geodesic: true,
+                  strokeColor: '#0088FF',
+                  strokeOpacity: 0.7,
+                  strokeWeight: 3,
+                  map: mapRef.current
+                });
+                
+                // Store the canal ID as a property of the line for reference
+                canalLine.set('canalId', canal.id);
+              }
+            });
+          }
+        }
+      })
+      .catch(error => {
+        console.error('Error loading canals:', error);
+      });
+  }, []);
+  
+  // Add this function to find the nearest snap point
+  const findNearestSnapPoint = (point: google.maps.LatLng): google.maps.LatLng | null => {
+    if (!existingCanals || existingCanals.length === 0) return null;
+    
+    let closestPoint: google.maps.LatLng | null = null;
+    let minDistance = Number.MAX_VALUE;
+    
+    // Check each canal
+    existingCanals.forEach(canal => {
+      if (!canal.points || canal.points.length < 2) return;
+      
+      // Parse points if they're stored as a string
+      const canalPoints = typeof canal.points === 'string' 
+        ? JSON.parse(canal.points) 
+        : canal.points;
+      
+      // Check start and end points of the canal
+      const startPoint = canalPoints[0];
+      const endPoint = canalPoints[canalPoints.length - 1];
+      
+      // Calculate distance to start point
+      const startLatLng = new google.maps.LatLng(startPoint.lat, startPoint.lng);
+      const startDistance = google.maps.geometry.spherical.computeDistanceBetween(point, startLatLng);
+      
+      // Calculate distance to end point
+      const endLatLng = new google.maps.LatLng(endPoint.lat, endPoint.lng);
+      const endDistance = google.maps.geometry.spherical.computeDistanceBetween(point, endLatLng);
+      
+      // Check if start point is closer than current closest
+      if (startDistance < minDistance && startDistance < snapDistance * 1000) { // Convert to meters
+        minDistance = startDistance;
+        closestPoint = startLatLng;
+      }
+      
+      // Check if end point is closer than current closest
+      if (endDistance < minDistance && endDistance < snapDistance * 1000) { // Convert to meters
+        minDistance = endDistance;
+        closestPoint = endLatLng;
+      }
+    });
+    
+    return closestPoint;
+  };
 
   // This function is no longer needed as we've moved its logic directly into the map click listener
 
@@ -583,14 +672,24 @@ export default function MapPage() {
       } else if (currentCanalMode) {
         console.log('Processing click in canal mode');
         
-        // Create a marker at the point
+        // Get the clicked point
+        let pointToUse = event.latLng;
+        
+        // Check if we should snap to an existing canal point
+        const snapPoint = findNearestSnapPoint(event.latLng);
+        if (snapPoint) {
+          console.log('Snapping to existing canal point');
+          pointToUse = snapPoint;
+        }
+        
+        // Create a marker at the point (use the snapped point if available)
         const marker = new google.maps.Marker({
-          position: event.latLng,
+          position: pointToUse,
           map: mapRef.current,
           icon: {
             path: google.maps.SymbolPath.CIRCLE,
             scale: 5,
-            fillColor: '#0088FF',
+            fillColor: snapPoint ? '#FF8800' : '#0088FF', // Use orange for snapped points
             fillOpacity: 1,
             strokeWeight: 2,
             strokeColor: '#FFFFFF'
@@ -602,7 +701,7 @@ export default function MapPage() {
         
         // Add the point to our array
         setCanalPoints(prev => {
-          const newPoints = [...prev, event.latLng];
+          const newPoints = [...prev, pointToUse];
           
           // If we have at least 2 points, draw or update the line
           if (newPoints.length >= 2) {
@@ -689,6 +788,13 @@ export default function MapPage() {
       loadPolygonsOnMap();
     }
   }, [mapRef.current, isGoogleLoaded, loadPolygonsOnMap, centroidDragMode]);
+  
+  // Load existing canals when the map loads
+  useEffect(() => {
+    if (mapRef.current && isGoogleLoaded) {
+      loadExistingCanals();
+    }
+  }, [mapRef.current, isGoogleLoaded, loadExistingCanals]);
 
   // Handle script load
   const handleScriptLoad = () => {
