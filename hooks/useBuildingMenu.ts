@@ -58,6 +58,9 @@ export function useBuildingMenu(visible: boolean) {
   // Function to handle building selection
   const handleSelectBuilding = (building: Building) => {
     setSelectedBuilding(building);
+    
+    // Dispatch an event to hide the 3D view
+    window.dispatchEvent(new CustomEvent('hide3DView'));
   };
 
   // Function to handle variant selection
@@ -107,6 +110,9 @@ export function useBuildingMenu(visible: boolean) {
   // Function to close the building detail modal
   const handleCloseDetailModal = () => {
     setSelectedBuilding(null);
+    
+    // Dispatch an event to show the 3D view
+    window.dispatchEvent(new CustomEvent('show3DView'));
   };
 
   // Function to navigate to previous variant

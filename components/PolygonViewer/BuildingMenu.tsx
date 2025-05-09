@@ -13,6 +13,8 @@ import { log } from '@/lib/logUtils';
 interface BuildingMenuProps {
   visible: boolean;
   onClose: () => void;
+  onBuildingSelect?: () => void;
+  onBuildingClose?: () => void;
 }
 
 interface BuildingCategory {
@@ -21,7 +23,7 @@ interface BuildingCategory {
   buildings: Building[];
 }
 
-export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
+export default function BuildingMenu({ visible, onClose, onBuildingSelect, onBuildingClose }: BuildingMenuProps) {
   // Local state to track if the menu should be shown via custom event
   const [showViaEvent, setShowViaEvent] = useState(false);
   
@@ -131,7 +133,10 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
                             <div
                               key={building.name || building.id}
                               className="bg-amber-50 rounded-lg p-2 cursor-pointer hover:bg-amber-100 transition-colors"
-                              onClick={() => handleSelectBuilding(building)}
+                              onClick={() => {
+                                handleSelectBuilding(building);
+                                if (onBuildingSelect) onBuildingSelect();
+                              }}
                             >
                               <div className="aspect-square bg-amber-100 rounded-lg overflow-hidden mb-2">
                                 {building.thumbnail && (
@@ -171,7 +176,10 @@ export default function BuildingMenu({ visible, onClose }: BuildingMenuProps) {
               <div className="flex justify-between items-center p-4 border-b border-amber-300">
                 <h2 className="text-2xl font-serif text-amber-800">{selectedBuilding.name}</h2>
                 <button 
-                  onClick={handleCloseDetailModal}
+                  onClick={() => {
+                    handleCloseDetailModal();
+                    if (onBuildingClose) onBuildingClose();
+                  }}
                   className="text-amber-700 hover:text-amber-900 transition-colors"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">

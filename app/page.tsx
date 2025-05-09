@@ -69,6 +69,7 @@ export default function SimplePage() {
   // Define the view type to ensure consistency
   type ViewType = 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance' | 'loans' | 'knowledge';
   const [activeView, setActiveView] = useState<ViewType>('land');
+  const [show3DView, setShow3DView] = useState<boolean>(true);
   
   // Panel visibility state
   const [showGovernancePanel, setShowGovernancePanel] = useState<boolean>(false);
@@ -86,6 +87,25 @@ export default function SimplePage() {
     }
   }, [pathname, showGovernancePanel, showKnowledgePanel, showLoansPanel]);
   
+  // Listen for events to hide/show 3D view
+  useEffect(() => {
+    const handleHide3DView = () => {
+      setShow3DView(false);
+    };
+    
+    const handleShow3DView = () => {
+      setShow3DView(true);
+    };
+    
+    window.addEventListener('hide3DView', handleHide3DView);
+    window.addEventListener('show3DView', handleShow3DView);
+    
+    return () => {
+      window.removeEventListener('hide3DView', handleHide3DView);
+      window.removeEventListener('show3DView', handleShow3DView);
+    };
+  }, []);
+
   // Handle URL changes to show appropriate panels
   useEffect(() => {
     // Handle initial URL on page load
@@ -481,7 +501,9 @@ export default function SimplePage() {
     <>
     <div className="relative w-full h-screen">
       {/* Main 3D Viewer (should be first in the DOM for proper layering) */}
-      <SimpleViewer qualityMode={qualityMode} activeView={activeView as 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance'} />
+      {show3DView && (
+        <SimpleViewer qualityMode={qualityMode} activeView={activeView as 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance'} />
+      )}
       
       {/* Buildings Toolbar - only visible in buildings view */}
       {activeView === 'buildings' && (
@@ -500,7 +522,17 @@ export default function SimplePage() {
             onClose={() => {
               // Keep the buildings view active, just close the menu
               setActiveView('buildings');
-            }} 
+              // Show the 3D view again
+              setShow3DView(true);
+            }}
+            onBuildingSelect={() => {
+              // Hide the 3D view when a building is selected
+              setShow3DView(false);
+            }}
+            onBuildingClose={() => {
+              // Show the 3D view again when the building detail is closed
+              setShow3DView(true);
+            }}
           />
         </>
       )}
