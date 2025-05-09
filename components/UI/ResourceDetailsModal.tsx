@@ -43,25 +43,7 @@ export interface ExtendedResource extends Omit<Resource, 'id'> {
     perishTime?: number;
     nutritionValue?: number;
   };
-  // Add these new properties
-  producedFrom?: Array<{
-    inputs: Array<{
-      resource: string;
-      amount: number;
-      qualityImpact?: number;
-    }>;
-    building?: string;
-    processingTime?: number;
-  }>;
-  usedIn?: Array<{
-    outputs: Array<{
-      resource: string;
-      amount: number;
-    }>;
-    building?: string;
-    processingTime?: number;
-  }>;
-  // Add these new properties
+  // Production chain properties
   producedFrom?: Array<{
     inputs: Array<{
       resource: string;
@@ -133,13 +115,6 @@ const ResourceDetailsModal: React.FC<ResourceDetailsModalProps> = ({ resource, o
     }
     return null;
   };
-
-  // Add useEffect for debugging
-  useEffect(() => {
-    console.log('Resource data:', extendedResource);
-    console.log('Inputs:', getInputs());
-    console.log('Outputs:', getOutputs());
-  }, [extendedResource]);
 
   // Add useEffect for debugging
   useEffect(() => {
