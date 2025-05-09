@@ -473,17 +473,56 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
   }, [qualityMode]);
   
   // Handle water road creation completion
-  const handleWaterRoadComplete = (roadId: string, points: any[]) => {
+  const handleWaterRoadComplete = async (roadId: string, points: any[]) => {
     console.log('Water road created:', roadId, points);
     
-    // Here you would typically save the water road to your backend
-    // For now, we'll just log it and hide the creator
-    setShowWaterRoadCreator(false);
-    
-    // Notify any listeners that a water road was created
-    window.dispatchEvent(new CustomEvent('waterRoadCreated', {
-      detail: { roadId, points }
-    }));
+    try {
+      // Convert points to a format suitable for the API
+      const apiPoints = points.map(point => ({
+        position: {
+          x: point.position.x,
+          y: point.position.y,
+          z: point.position.z
+        },
+        width: point.width,
+        depth: point.depth
+      }));
+      
+      // Save the water road to the backend
+      const response = await fetch(`${getApiBaseUrl()}/api/water-roads`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: roadId,
+          points: apiPoints,
+          width: points[0]?.width || 5,
+          depth: points[0]?.depth || 1,
+          color: 0x3366ff
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to save water road: ${response.status} ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      console.log('Water road saved to backend:', data);
+      
+      // Hide the creator
+      setShowWaterRoadCreator(false);
+      
+      // Notify any listeners that a water road was created
+      window.dispatchEvent(new CustomEvent('waterRoadCreated', {
+        detail: { roadId, points, data }
+      }));
+    } catch (error) {
+      console.error('Error saving water road:', error);
+      alert(`Failed to save water road: ${error instanceof Error ? error.message : String(error)}`);
+      // Still hide the creator even if there was an error
+      setShowWaterRoadCreator(false);
+    }
   };
   
   return (
