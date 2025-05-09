@@ -321,4 +321,3 @@ const DockRenderer: React.FC<DockRendererProps> = ({ scene, active }) => {
 };
 
 export default DockRenderer;
-// Removed duplicate imports that were causing TypeScript errors
