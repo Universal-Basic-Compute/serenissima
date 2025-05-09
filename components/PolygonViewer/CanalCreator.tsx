@@ -28,6 +28,7 @@ const CanalCreator: React.FC<CanalCreatorProps> = ({
   const [depth, setDepth] = useState<number>(1);
   const [color, setColor] = useState<string>('#3366ff');
   const [previewRoadId, setPreviewRoadId] = useState<string | null>(null);
+  const [previewPoint, setPreviewPoint] = useState<THREE.Vector3 | null>(null);
   
   const canalFacadeRef = useRef<CanalFacade | null>(null);
   const raycasterRef = useRef<THREE.Raycaster>(new THREE.Raycaster());
@@ -102,6 +103,64 @@ const CanalCreator: React.FC<CanalCreatorProps> = ({
     };
   }, [previewRoadId]);
   
+  // Add a useEffect to create and update the preview circle
+  useEffect(() => {
+    if (!active || !scene || !previewPoint) return;
+    
+    // Create a circle geometry to show where the point will be placed
+    const circleGeometry = new THREE.CircleGeometry(width / 2, 32);
+    const circleMaterial = new THREE.MeshBasicMaterial({
+      color: new THREE.Color(color),
+      transparent: true,
+      opacity: 0.5,
+      side: THREE.DoubleSide
+    });
+    
+    const previewCircle = new THREE.Mesh(circleGeometry, circleMaterial);
+    previewCircle.position.copy(previewPoint);
+    previewCircle.rotation.x = -Math.PI / 2; // Make it horizontal
+    previewCircle.position.y += 0.1; // Slightly above the water
+    previewCircle.name = 'preview-circle';
+    
+    // Remove any existing preview circle
+    const existingPreview = scene.getObjectByName('preview-circle');
+    if (existingPreview) {
+      scene.remove(existingPreview);
+      if (existingPreview instanceof THREE.Mesh) {
+        existingPreview.geometry.dispose();
+        existingPreview.material.dispose();
+      }
+    }
+    
+    // Add the new preview circle
+    scene.add(previewCircle);
+    
+    return () => {
+      // Clean up
+      if (previewCircle) {
+        scene.remove(previewCircle);
+        previewCircle.geometry.dispose();
+        previewCircle.material.dispose();
+      }
+    };
+  }, [active, scene, previewPoint, width, color]);
+  
+  // Add a useEffect to clean up the preview circle when component unmounts
+  useEffect(() => {
+    return () => {
+      if (scene) {
+        const existingPreview = scene.getObjectByName('preview-circle');
+        if (existingPreview) {
+          scene.remove(existingPreview);
+          if (existingPreview instanceof THREE.Mesh) {
+            existingPreview.geometry.dispose();
+            existingPreview.material.dispose();
+          }
+        }
+      }
+    };
+  }, [scene]);
+  
   // Handle mouse move to show potential point placement
   const handleMouseMove = (event: React.MouseEvent) => {
     if (!active || !scene || !camera || !planeRef.current) return;
@@ -119,6 +178,13 @@ const CanalCreator: React.FC<CanalCreatorProps> = ({
     
     if (intersects.length > 0) {
       const intersectionPoint = intersects[0].point;
+      
+      // Update preview point
+      setPreviewPoint(new THREE.Vector3(
+        intersectionPoint.x,
+        intersectionPoint.y,
+        intersectionPoint.z
+      ));
       
       // Update the last point in the preview if we have at least one point
       if (points.length > 0 && previewRoadId && canalFacadeRef.current) {
@@ -291,6 +357,13 @@ const CanalCreator: React.FC<CanalCreatorProps> = ({
           Complete Canal
         </button>
       </div>
+      
+      {/* Add this div to capture mouse events across the entire screen */}
+      <div 
+        className="fixed inset-0 z-0 cursor-crosshair" 
+        onMouseMove={handleMouseMove}
+        onClick={handleClick}
+      />
     </div>
   );
 };
