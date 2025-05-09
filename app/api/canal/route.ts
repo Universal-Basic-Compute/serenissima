@@ -139,6 +139,22 @@ export async function POST(request: Request) {
           });
         }
       });
+      
+      // For each connected canal, update its transfer points
+      for (const tp of body.transferPoints) {
+        for (const connectedId of tp.connectedRoadIds) {
+          if (connectedId !== canalId) {
+            // Find the connected canal
+            const connectedCanalIndex = data.canals.findIndex(c => c.id === connectedId);
+            if (connectedCanalIndex >= 0) {
+              // Mark this canal as having a transfer point
+              if (!data.canals[connectedCanalIndex].hasTransferPoints) {
+                data.canals[connectedCanalIndex].hasTransferPoints = true;
+              }
+            }
+          }
+        }
+      }
     }
     
     // Write the updated data back to the file

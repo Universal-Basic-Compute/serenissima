@@ -63,6 +63,11 @@ export default function MapPage() {
   const canalModeRef = useRef(false);
   const [existingCanals, setExistingCanals] = useState<any[]>([]);
   const [snapDistance, setSnapDistance] = useState<number>(0.0001); // Adjust based on your map zoom level
+  const [transferConnections, setTransferConnections] = useState<Array<{
+    canalId: string;
+    handleType: 'start' | 'end';
+    position: { lat: number; lng: number };
+  }>>([]);
   
   // Initialize wallet adapter
   useEffect(() => {
@@ -367,6 +372,9 @@ export default function MapPage() {
     
     // Clear canal points
     setCanalPoints([]);
+    
+    // Reset transfer connections
+    setTransferConnections([]);
   };
 
   // Add a function to get polygon coordinates from a Google Maps polygon
@@ -381,6 +389,142 @@ export default function MapPage() {
   // State for showing canals list
   const [showCanalsList, setShowCanalsList] = useState<boolean>(false);
   
+  // Function to add handles to canal endpoints
+  const addCanalHandles = (canals: any[]) => {
+    // Remove existing handles
+    const existingHandles = document.querySelectorAll('.canal-handle');
+    existingHandles.forEach(handle => handle.remove());
+    
+    if (!mapRef.current) return;
+    
+    // Create handles for each canal endpoint
+    canals.forEach(canal => {
+      if (!canal.points || canal.points.length < 2) return;
+      
+      // Get canal points
+      const points = typeof canal.points === 'string' 
+        ? JSON.parse(canal.points) 
+        : canal.points;
+      
+      // Create a handle for the start point
+      const startPoint = points[0];
+      const startLatLng = new google.maps.LatLng(startPoint.lat, startPoint.lng);
+      createCanalHandle(startLatLng, canal.id, 'start');
+      
+      // Create a handle for the end point
+      const endPoint = points[points.length - 1];
+      const endLatLng = new google.maps.LatLng(endPoint.lat, endPoint.lng);
+      createCanalHandle(endLatLng, canal.id, 'end');
+    });
+  };
+
+  // Function to create a visual handle for a canal point
+  const createCanalHandle = (position: google.maps.LatLng, canalId: string, type: 'start' | 'end') => {
+    if (!mapRef.current) return;
+    
+    // Create a DOM element for the handle
+    const handleDiv = document.createElement('div');
+    handleDiv.className = 'canal-handle';
+    handleDiv.style.position = 'absolute';
+    handleDiv.style.width = '16px';
+    handleDiv.style.height = '16px';
+    handleDiv.style.borderRadius = '50%';
+    handleDiv.style.backgroundColor = type === 'start' ? '#00FF00' : '#FF8800';
+    handleDiv.style.border = '2px solid white';
+    handleDiv.style.cursor = 'pointer';
+    handleDiv.style.zIndex = '1000';
+    
+    // Store handle data
+    handleDiv.dataset.canalId = canalId;
+    handleDiv.dataset.handleType = type;
+    
+    // Add the handle to the map
+    const overlay = new google.maps.OverlayView();
+    overlay.onAdd = function() {
+      const panes = this.getPanes();
+      panes.overlayMouseTarget.appendChild(handleDiv);
+    };
+    
+    overlay.draw = function() {
+      const projection = this.getProjection();
+      const point = projection.fromLatLngToDivPixel(position);
+      
+      if (point) {
+        handleDiv.style.left = (point.x - 8) + 'px';
+        handleDiv.style.top = (point.y - 8) + 'px';
+      }
+    };
+    
+    overlay.onRemove = function() {
+      handleDiv.parentNode?.removeChild(handleDiv);
+    };
+    
+    overlay.setMap(mapRef.current);
+    
+    // Add events for snapping
+    handleDiv.addEventListener('mousedown', (e) => {
+      if (canalMode) {
+        e.stopPropagation();
+        
+        // Add this point to the canal being created
+        const latLng = position;
+        
+        // Create a marker at this point
+        const marker = new google.maps.Marker({
+          position: latLng,
+          map: mapRef.current,
+          icon: {
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: 5,
+            fillColor: '#FF8800', // Orange for snapped points
+            fillOpacity: 1,
+            strokeWeight: 2,
+            strokeColor: '#FFFFFF'
+          }
+        });
+        
+        // Add the marker to our array
+        setCanalMarkers(prev => [...prev, marker]);
+        
+        // Add the point to our array with transfer information
+        setCanalPoints(prev => {
+          const newPoints = [...prev, latLng];
+          
+          // If we have at least 2 points, draw or update the line
+          if (newPoints.length >= 2) {
+            // Remove existing lines
+            canalLines.forEach(line => line.setMap(null));
+            
+            // Create a new line with all points
+            const line = new google.maps.Polyline({
+              path: newPoints,
+              geodesic: true,
+              strokeColor: '#0088FF',
+              strokeOpacity: 1.0,
+              strokeWeight: 3,
+              map: mapRef.current
+            });
+            
+            // Update the lines array
+            setCanalLines([line]);
+          }
+          
+          return newPoints;
+        });
+        
+        // Store transfer information
+        const transferInfo = {
+          canalId: canalId,
+          handleType: type,
+          position: { lat: latLng.lat(), lng: latLng.lng() }
+        };
+        
+        // Add this information to state for use when saving
+        setTransferConnections(prev => [...prev, transferInfo]);
+      }
+    });
+  };
+
   // Add this function to load existing canals
   const loadExistingCanals = useCallback(() => {
     fetch('/api/canal')
@@ -423,6 +567,9 @@ export default function MapPage() {
               setCanalLines(prev => [...prev, canalLine]);
             }
           });
+          
+          // Add handles to canal endpoints
+          addCanalHandles(canals);
         }
       })
       .catch(error => {
@@ -512,7 +659,8 @@ export default function MapPage() {
     .then(data => {
       if (data.success) {
         console.log(`Canal created: ${data.filename}`);
-        alert(`Canal created with ${canal.points.length} points`);
+        const transferPointsCount = canal.transferPoints ? canal.transferPoints.length : 0;
+        alert(`Canal created with ${canal.points.length} points and ${transferPointsCount} transfer points`);
       } else {
         console.error('Failed to save canal:', data.error);
         alert('Failed to create canal');
@@ -532,8 +680,9 @@ export default function MapPage() {
     }
     
     // Create canal object
+    const canalId = `canal-${Date.now()}`;
     const canal = {
-      id: `canal-${Date.now()}`,
+      id: canalId,
       points: canalPoints.map(point => ({
         lat: point.lat(),
         lng: point.lng()
@@ -542,8 +691,21 @@ export default function MapPage() {
       depth: 1  // Default depth in meters
     };
     
-    // Save canal to file
-    saveCanalToFile(canal);
+    // Prepare transfer points
+    const transferPoints = transferConnections.map(connection => ({
+      position: {
+        x: connection.position.lat,
+        y: 0.1, // Slightly above water level
+        z: connection.position.lng
+      },
+      connectedRoadIds: [canalId, connection.canalId]
+    }));
+    
+    // Save canal with transfer points
+    saveCanalToFile({
+      ...canal,
+      transferPoints
+    });
     
     // Reset canal mode
     clearCanalData();
@@ -555,6 +717,9 @@ export default function MapPage() {
         draggableCursor: ''
       });
     }
+    
+    // Reload canals to show updates
+    loadExistingCanals();
   };
 
   // Handle map load
