@@ -7,7 +7,7 @@ import TechTree from '../components/Knowledge/TechTree';
 import ProjectPresentation from '../components/Knowledge/ProjectPresentation';
 import ResourceTree from '../components/Knowledge/ResourceTree';
 import KnowledgeRepository from '../components/Knowledge/KnowledgeRepository';
-import { StrategiesArticle, BeginnersGuideArticle, EconomicSystemArticle, LandOwnerGuideArticle, DecreesGovernanceArticle, BuildingOwnersGuideArticle } from '../components/Articles';
+import { StrategiesArticle, BeginnersGuideArticle, EconomicSystemArticle, LandOwnerGuideArticle, DecreesGovernanceArticle, BuildingOwnersGuideArticle, BusinessOwnersGuideArticle } from '../components/Articles';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { clearLandOwnershipCaches } from '@/lib/cacheUtils';
