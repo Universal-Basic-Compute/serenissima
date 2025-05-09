@@ -65,27 +65,35 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
     // Cleanup function
     return () => {
       subscription.unsubscribe();
-      
-      // Remove all building meshes from the scene
-      buildingMeshesRef.current.forEach((mesh, id) => {
-        scene.remove(mesh);
-        
-        // Dispose of geometries and materials
-        if (mesh instanceof THREE.Mesh) {
-          if (mesh.geometry) mesh.geometry.dispose();
-          
-          if (mesh.material) {
-            if (Array.isArray(mesh.material)) {
-              mesh.material.forEach(material => material.dispose());
-            } else {
-              mesh.material.dispose();
+    
+      // Safely remove all building meshes from the scene
+      if (scene) {
+        buildingMeshesRef.current.forEach((mesh, id) => {
+          try {
+            if (mesh && scene.children.includes(mesh)) {
+              scene.remove(mesh);
+            
+              // Dispose of geometries and materials
+              if (mesh instanceof THREE.Mesh) {
+                if (mesh.geometry) mesh.geometry.dispose();
+              
+                if (mesh.material) {
+                  if (Array.isArray(mesh.material)) {
+                    mesh.material.forEach(material => material.dispose());
+                  } else {
+                    mesh.material.dispose();
+                  }
+                }
+              }
             }
+          } catch (error) {
+            console.warn(`Error cleaning up mesh ${id}:`, error);
           }
-        }
-      });
+        });
       
-      // Clear the map
-      buildingMeshesRef.current.clear();
+        // Clear the map
+        buildingMeshesRef.current.clear();
+      }
     };
   }, [active, scene]);
   
@@ -104,51 +112,70 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
       ? `/assets/buildings/models/dock/${variant}.glb`
       : `/assets/buildings/models/${type}/${variant}.glb`;
     
-    // Load the model
-    gltfLoaderRef.current.load(
-      modelPath,
-      (gltf) => {
-        const model = gltf.scene;
-        
-        // Position and rotate the model
-        model.position.set(position.x, position.y, position.z);
-        model.rotation.y = rotation || 0;
-        
-        // Add to scene
-        scene.add(model);
-        
-        // Store reference
-        buildingMeshesRef.current.set(id, model);
-        
-        console.log(`Building ${id} (${type}) rendered at position:`, position);
-      },
-      (progress) => {
-        // Loading progress
-        console.log(`Loading building ${id} (${type}): ${Math.round(progress.loaded / progress.total * 100)}%`);
-      },
-      (error) => {
-        // Error handling
-        console.error(`Error loading building ${id} (${type}):`, error);
-        
-        // Create a fallback mesh
-        const geometry = new THREE.BoxGeometry(2, 1, 2);
-        // Use blue color for docks, amber for other buildings
-        const material = new THREE.MeshBasicMaterial({ 
-          color: type === 'dock' ? 0x3b82f6 : 0xf59e0b 
-        });
-        const fallbackMesh = new THREE.Mesh(geometry, material);
-        
-        // Position and rotate the fallback
-        fallbackMesh.position.set(position.x, position.y + 0.5, position.z);
-        fallbackMesh.rotation.y = rotation || 0;
-        
-        // Add to scene
-        scene.add(fallbackMesh);
-        
-        // Store reference
-        buildingMeshesRef.current.set(id, fallbackMesh);
-      }
-    );
+    // Add error handling for model loading
+    try {
+      // Load the model
+      gltfLoaderRef.current.load(
+        modelPath,
+        (gltf) => {
+          try {
+            const model = gltf.scene;
+            
+            // Position and rotate the model
+            model.position.set(position.x, position.y, position.z);
+            model.rotation.y = rotation || 0;
+            
+            // Add to scene
+            scene.add(model);
+            
+            // Store reference
+            buildingMeshesRef.current.set(id, model);
+            
+            console.log(`Building ${id} (${type}) rendered at position:`, position);
+          } catch (modelError) {
+            console.error(`Error processing model for building ${id}:`, modelError);
+            createFallbackMesh(id, type, position, rotation);
+          }
+        },
+        (progress) => {
+          // Loading progress
+          console.log(`Loading building ${id} (${type}): ${Math.round(progress.loaded / progress.total * 100)}%`);
+        },
+        (error) => {
+          // Error handling
+          console.error(`Error loading building ${id} (${type}):`, error);
+          createFallbackMesh(id, type, position, rotation);
+        }
+      );
+    } catch (error) {
+      console.error(`Error initiating model load for building ${id}:`, error);
+      createFallbackMesh(id, type, position, rotation);
+    }
+  };
+  
+  // Add a helper function to create fallback meshes
+  const createFallbackMesh = (id: string, type: string, position: any, rotation: number) => {
+    if (!scene) return;
+    
+    // Create a fallback mesh
+    const geometry = new THREE.BoxGeometry(2, 1, 2);
+    // Use blue color for docks, amber for other buildings
+    const material = new THREE.MeshBasicMaterial({ 
+      color: type === 'dock' ? 0x3b82f6 : 0xf59e0b 
+    });
+    const fallbackMesh = new THREE.Mesh(geometry, material);
+    
+    // Position and rotate the fallback
+    fallbackMesh.position.set(position.x, position.y + 0.5, position.z);
+    fallbackMesh.rotation.y = rotation || 0;
+    
+    // Add to scene
+    scene.add(fallbackMesh);
+    
+    // Store reference
+    buildingMeshesRef.current.set(id, fallbackMesh);
+    
+    console.log(`Created fallback mesh for building ${id}`);
   };
   
   // This component doesn't render any UI

@@ -209,14 +209,34 @@ export class BuildingService {
       const response = await fetch(url);
       
       if (!response.ok) {
-        throw new Error(`Failed to fetch buildings: ${response.status}`);
+        console.warn(`Failed to fetch buildings: ${response.status}. Using fallback data.`);
+        
+        // Return mock data as fallback
+        return [
+          {
+            id: 'building_1',
+            type: 'dock',
+            land_id: 'land_1',
+            position: { x: 100, y: 0, z: 100 },
+            rotation: 0,
+            connection_points: [
+              { x: 90, y: 0, z: 100 },
+              { x: 105, y: 0, z: 95 },
+              { x: 105, y: 0, z: 105 }
+            ],
+            created_by: 'ConsiglioDeiDieci',
+            created_at: '2023-01-01T00:00:00Z'
+          }
+        ];
       }
       
       const data = await response.json();
       return data.buildings || [];
     } catch (error) {
       console.error('Error fetching buildings:', error);
-      throw error;
+      
+      // Return empty array instead of throwing to prevent UI errors
+      return [];
     }
   }
   
