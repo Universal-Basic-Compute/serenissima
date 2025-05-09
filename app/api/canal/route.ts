@@ -29,6 +29,30 @@ export async function GET() {
     // Read the canals data file
     const data = JSON.parse(fs.readFileSync(canalsFile, 'utf8'));
     
+    // Check if we have data in the CANALS array in jsontoairtable.json
+    const airtableJsonPath = path.join(process.cwd(), 'jsontoairtable.json');
+    if (fs.existsSync(airtableJsonPath)) {
+      try {
+        const airtableData = JSON.parse(fs.readFileSync(airtableJsonPath, 'utf8'));
+        if (airtableData.CANALS && Array.isArray(airtableData.CANALS) && airtableData.CANALS.length > 0) {
+          console.log(`Found ${airtableData.CANALS.length} canals in jsontoairtable.json`);
+          
+          // Merge canals from both sources, avoiding duplicates
+          const existingIds = new Set(data.canals.map((c: any) => c.id));
+          
+          for (const canal of airtableData.CANALS) {
+            if (!existingIds.has(canal.id)) {
+              data.canals.push(canal);
+              existingIds.add(canal.id);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error reading jsontoairtable.json:', error);
+      }
+    }
+    
+    console.log(`Returning ${data.canals.length} canals`);
     return NextResponse.json(data);
   } catch (error) {
     console.error('Error reading canals data:', error);

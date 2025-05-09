@@ -386,43 +386,49 @@ export default function MapPage() {
     fetch('/api/canal')
       .then(response => response.json())
       .then(data => {
-        if (data.canals && Array.isArray(data.canals)) {
-          console.log(`Loaded ${data.canals.length} existing canals`);
-          setExistingCanals(data.canals);
+        // Check both data.canals and direct data array format
+        const canals = Array.isArray(data) ? data : (data.canals || []);
+        
+        console.log('Canal data received:', data);
+        console.log(`Loaded ${canals.length} existing canals`);
+        
+        setExistingCanals(canals);
+        
+        // Visualize existing canals on the map
+        if (mapRef.current) {
+          // Clear any existing canal visualizations first
+          canalLines.forEach(line => line.setMap(null));
           
-          // Visualize existing canals on the map
-          if (mapRef.current) {
-            // Clear any existing canal visualizations first
-            // (You might want to keep track of these in state to clear them properly)
-            
-            data.canals.forEach((canal: any) => {
-              if (canal.points && canal.points.length >= 2) {
-                // Convert points to LatLng if they're stored as strings
-                const path = typeof canal.points === 'string' 
-                  ? JSON.parse(canal.points).map((p: any) => new google.maps.LatLng(p.lat, p.lng))
-                  : canal.points.map((p: any) => new google.maps.LatLng(p.lat, p.lng));
-                
-                // Draw the canal on the map
-                const canalLine = new google.maps.Polyline({
-                  path,
-                  geodesic: true,
-                  strokeColor: '#0088FF',
-                  strokeOpacity: 0.7,
-                  strokeWeight: 3,
-                  map: mapRef.current
-                });
-                
-                // Store the canal ID as a property of the line for reference
-                canalLine.set('canalId', canal.id);
-              }
-            });
-          }
+          canals.forEach((canal: any) => {
+            if (canal.points && canal.points.length >= 2) {
+              // Convert points to LatLng if they're stored as strings
+              const path = typeof canal.points === 'string' 
+                ? JSON.parse(canal.points).map((p: any) => new google.maps.LatLng(p.lat, p.lng))
+                : canal.points.map((p: any) => new google.maps.LatLng(p.lat, p.lng));
+              
+              // Draw the canal on the map
+              const canalLine = new google.maps.Polyline({
+                path,
+                geodesic: true,
+                strokeColor: '#0088FF',
+                strokeOpacity: 0.7,
+                strokeWeight: 3,
+                map: mapRef.current
+              });
+              
+              // Store the canal ID as a property of the line for reference
+              canalLine.set('canalId', canal.id);
+              
+              // Add to canalLines state to track for cleanup
+              setCanalLines(prev => [...prev, canalLine]);
+            }
+          });
         }
       })
       .catch(error => {
         console.error('Error loading canals:', error);
       });
-  }, []);
+  }, [canalLines]);
   
   // Add this function to find the nearest snap point
   const findNearestSnapPoint = (point: google.maps.LatLng): google.maps.LatLng | null => {
