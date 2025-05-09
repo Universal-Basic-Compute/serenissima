@@ -3,7 +3,7 @@ import { FaTimes, FaCoins, FaArrowRight, FaIndustry, FaArrowDown } from 'react-i
 import { Resource } from '@/lib/services/ResourceService';
 
 // Extended Resource interface to include production-related properties
-interface ExtendedResource extends Resource {
+export interface ExtendedResource extends Resource {
   productionProperties?: {
     producerBuilding?: string;
     processorBuilding?: string;
@@ -86,12 +86,11 @@ const ResourceDetailsModal: React.FC<ResourceDetailsModalProps> = ({ resource, o
   
   // Helper function to get production building from different possible structures
   const getProductionBuilding = () => {
-    const extendedResource = resource as ExtendedResource;
-    if (extendedResource.productionProperties?.processorBuilding) {
-      return extendedResource.productionProperties.processorBuilding;
+    if (resource.productionProperties?.processorBuilding) {
+      return resource.productionProperties.processorBuilding;
     }
-    if (extendedResource.productionProperties?.producerBuilding) {
-      return extendedResource.productionProperties.producerBuilding;
+    if (resource.productionProperties?.producerBuilding) {
+      return resource.productionProperties.producerBuilding;
     }
     return null;
   };
@@ -103,36 +102,33 @@ const ResourceDetailsModal: React.FC<ResourceDetailsModalProps> = ({ resource, o
 
   // Helper function to get inputs from different possible structures
   const getInputs = () => {
-    const extendedResource = resource as ExtendedResource;
-    if (extendedResource.productionProperties?.inputs && Array.isArray(extendedResource.productionProperties.inputs)) {
-      return extendedResource.productionProperties.inputs;
+    if (resource.productionProperties?.inputs && Array.isArray(resource.productionProperties.inputs)) {
+      return resource.productionProperties.inputs;
     }
     return [];
   };
 
   // Helper function to get outputs from different possible structures
   const getOutputs = () => {
-    const extendedResource = resource as ExtendedResource;
     // For resources like bread, we need to create outputs from the resource itself
-    if (!extendedResource.productionProperties?.outputs || extendedResource.productionProperties.outputs.length === 0) {
+    if (!resource.productionProperties?.outputs || resource.productionProperties.outputs.length === 0) {
       // If the resource is the output itself (like bread), create a default output
       return [{
         resource: resource.id,
-        amount: extendedResource.productionProperties?.batchSize || 1
+        amount: resource.productionProperties?.batchSize || 1
       }];
     }
-    return extendedResource.productionProperties.outputs;
+    return resource.productionProperties.outputs;
   };
 
   // Helper function to check if we have any production information
   const hasProductionInfo = () => {
-    const extendedResource = resource as ExtendedResource;
     return (
       getProductionBuilding() || 
       getInputs().length > 0 || 
-      extendedResource.productionProperties?.batchSize || // Check for batch size
-      (extendedResource.productionChainPosition?.predecessors && extendedResource.productionChainPosition.predecessors.length > 0) ||
-      (extendedResource.productionChainPosition?.successors && extendedResource.productionChainPosition.successors.length > 0)
+      resource.productionProperties?.batchSize || // Check for batch size
+      (resource.productionChainPosition?.predecessors && resource.productionChainPosition.predecessors.length > 0) ||
+      (resource.productionChainPosition?.successors && resource.productionChainPosition.successors.length > 0)
     );
   };
 
