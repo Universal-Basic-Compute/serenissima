@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { BuildingService, BuildingData } from '@/lib/services/BuildingService';
 import { eventBus } from '@/lib/eventBus';
 import { EventTypes } from '@/lib/eventTypes';
@@ -66,6 +67,9 @@ const PlaceableObjectManager: React.FC<PlaceableObjectProps> = ({
     
     console.log(`PlaceableObjectManager: Initializing for ${type}`);
     
+    // Create a loader for GLTF models
+    const gltfLoader = new GLTFLoader();
+    
     // Create preview mesh based on object type
     let geometry: THREE.BufferGeometry;
     let material: THREE.Material;
@@ -84,6 +88,56 @@ const PlaceableObjectManager: React.FC<PlaceableObjectProps> = ({
     previewMesh.visible = false;
     actualScene.add(previewMesh);
     previewMeshRef.current = previewMesh;
+    
+    // If this is a building with a name, try to load the actual model
+    if (type === 'building' && objectData.name) {
+      const modelPath = `/assets/buildings/models/${objectData.name}/${objectData.variant || 'model'}.glb`;
+      
+      console.log(`Attempting to load building model from: ${modelPath}`);
+      
+      // Load the actual building model
+      gltfLoader.load(
+        modelPath,
+        (gltf) => {
+          // Remove the temporary preview mesh
+          if (previewMeshRef.current) {
+            actualScene.remove(previewMeshRef.current);
+            previewMeshRef.current.geometry.dispose();
+            (previewMeshRef.current.material as THREE.Material).dispose();
+          }
+          
+          // Use the loaded model as the preview
+          const model = gltf.scene;
+          
+          // Make the model semi-transparent
+          model.traverse((child) => {
+            if (child instanceof THREE.Mesh && child.material) {
+              if (Array.isArray(child.material)) {
+                child.material.forEach(mat => {
+                  mat.transparent = true;
+                  mat.opacity = 0.7;
+                });
+              } else {
+                child.material.transparent = true;
+                child.material.opacity = 0.7;
+              }
+            }
+          });
+          
+          // Add the model to the scene
+          model.visible = false;
+          actualScene.add(model);
+          previewMeshRef.current = model;
+          
+          console.log(`Successfully loaded building model for ${objectData.name}`);
+        },
+        undefined,
+        (error) => {
+          console.error(`Error loading building model: ${error.message}`);
+          // Keep using the simple box preview if model loading fails
+        }
+      );
+    }
     
     // Create helper line
     const edgeGeometry = new THREE.BufferGeometry();
@@ -126,9 +180,27 @@ const PlaceableObjectManager: React.FC<PlaceableObjectProps> = ({
             previewMeshRef.current.rotation.y = rotation;
             previewMeshRef.current.visible = true;
             
-            // Update material color based on validity
-            const material = previewMeshRef.current.material as THREE.MeshBasicMaterial;
-            material.color.set(placementInfo.isValid ? (type === 'dock' ? 0x3b82f6 : 0xf59e0b) : 0xff0000);
+            // Update material color based on validity for simple meshes
+            if (previewMeshRef.current instanceof THREE.Mesh && 
+                previewMeshRef.current.material instanceof THREE.MeshBasicMaterial) {
+              const material = previewMeshRef.current.material as THREE.MeshBasicMaterial;
+              material.color.set(placementInfo.isValid ? (type === 'dock' ? 0x3b82f6 : 0xf59e0b) : 0xff0000);
+            } else if (previewMeshRef.current.type === "Group" || previewMeshRef.current.type === "Object3D") {
+              // For GLTF models, update opacity based on validity
+              previewMeshRef.current.traverse((child) => {
+                if (child instanceof THREE.Mesh && child.material) {
+                  if (Array.isArray(child.material)) {
+                    child.material.forEach(mat => {
+                      mat.opacity = placementInfo.isValid ? 0.7 : 0.3;
+                      mat.color = new THREE.Color(placementInfo.isValid ? 0xffffff : 0xff0000);
+                    });
+                  } else {
+                    child.material.opacity = placementInfo.isValid ? 0.7 : 0.3;
+                    child.material.color = new THREE.Color(placementInfo.isValid ? 0xffffff : 0xff0000);
+                  }
+                }
+              });
+            }
           }
           
           // Update helper
@@ -199,11 +271,36 @@ const PlaceableObjectManager: React.FC<PlaceableObjectProps> = ({
       // Remove preview mesh and helper
       if (previewMeshRef.current) {
         actualScene.remove(previewMeshRef.current);
-        previewMeshRef.current.geometry.dispose();
-        (previewMeshRef.current.material as THREE.Material).dispose();
+      
+        // If it's a simple mesh, dispose of geometry and material
+        if (previewMeshRef.current instanceof THREE.Mesh) {
+          if (previewMeshRef.current.geometry) previewMeshRef.current.geometry.dispose();
+          if (previewMeshRef.current.material) {
+            if (Array.isArray(previewMeshRef.current.material)) {
+              previewMeshRef.current.material.forEach(material => material.dispose());
+            } else {
+              (previewMeshRef.current.material as THREE.Material).dispose();
+            }
+          }
+        } else {
+          // If it's a GLTF model, traverse and dispose all materials
+          previewMeshRef.current.traverse((child) => {
+            if (child instanceof THREE.Mesh) {
+              if (child.geometry) child.geometry.dispose();
+              if (child.material) {
+                if (Array.isArray(child.material)) {
+                  child.material.forEach(material => material.dispose());
+                } else {
+                  child.material.dispose();
+                }
+              }
+            }
+          });
+        }
+      
         previewMeshRef.current = null;
       }
-      
+    
       if (helperRef.current) {
         actualScene.remove(helperRef.current);
         helperRef.current.geometry.dispose();
