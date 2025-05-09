@@ -301,40 +301,41 @@ export default function MapPage() {
   
   // Handle canal mode button
   const handleCanalMode = () => {
-    const newCanalMode = !canalMode;
-    console.log('Setting canal mode to:', newCanalMode);
-    
-    // Force update the state immediately
-    setCanalMode(newCanalMode);
-    
-    // Turn off bridge mode if it's on
-    if (bridgeMode) {
-      setBridgeMode(false);
-      setBridgeStart(null);
-      setBridgeStartLandId(null);
+    setCanalMode(prevMode => {
+      const newMode = !prevMode;
+      console.log('Setting canal mode to:', newMode);
       
-      // Remove the start marker if it exists
-      if (bridgeStartMarker) {
-        bridgeStartMarker.setMap(null);
-        setBridgeStartMarker(null);
+      // Turn off bridge mode if it's on
+      if (bridgeMode) {
+        setBridgeMode(false);
+        setBridgeStart(null);
+        setBridgeStartLandId(null);
+        
+        // Remove the start marker if it exists
+        if (bridgeStartMarker) {
+          bridgeStartMarker.setMap(null);
+          setBridgeStartMarker(null);
+        }
       }
-    }
-    
-    // Clear canal data if turning off canal mode
-    if (canalMode) {
-      clearCanalData();
-    }
-    
-    // Change cursor style based on canal mode
-    if (mapRef.current) {
-      mapRef.current.setOptions({
-        draggableCursor: newCanalMode ? 'crosshair' : ''
-      });
-    }
-    
-    // Add this debug message
-    console.log('Canal mode is now:', newCanalMode);
-    console.log('Map ref exists:', !!mapRef.current);
+      
+      // Clear canal data if turning off canal mode
+      if (prevMode) {
+        clearCanalData();
+      }
+      
+      // Change cursor style based on canal mode
+      if (mapRef.current) {
+        mapRef.current.setOptions({
+          draggableCursor: newMode ? 'crosshair' : ''
+        });
+      }
+      
+      // Add this debug message
+      console.log('Canal mode is now:', newMode);
+      console.log('Map ref exists:', !!mapRef.current);
+      
+      return newMode;
+    });
   };
   
   // Clear canal data
@@ -360,168 +361,7 @@ export default function MapPage() {
     });
   };
 
-  // Add this function to handle map clicks for bridge creation and canal creation
-  const handleMapClick = (event: google.maps.MapMouseEvent) => {
-    if (!event.latLng) return;
-    
-    // Debug the current mode
-    console.log('Map clicked in mode:', bridgeMode ? 'bridge' : canalMode ? 'canal' : 'normal', 
-                'Canal mode state:', canalMode);
-    
-    if (bridgeMode) {
-      // Find which polygon was clicked
-      let clickedPolygonId = null;
-      let clickedPolygon = null;
-      
-      for (const [id, polygon] of Object.entries(activeLandPolygons)) {
-        if (google.maps.geometry.poly.containsLocation(event.latLng, polygon)) {
-          clickedPolygonId = id;
-          clickedPolygon = polygon;
-          break;
-        }
-      }
-      
-      if (!clickedPolygonId || !clickedPolygon) {
-        alert('Please click on a land polygon');
-        return;
-      }
-      
-      // Get the polygon coordinates
-      const polygonCoords = getPolygonCoordinates(clickedPolygon);
-      
-      // Get the clicked point
-      const clickedPoint = {
-        lat: event.latLng.lat(),
-        lng: event.latLng.lng()
-      };
-      
-      // Find the closest point on the polygon edge
-      const closestPoint = findClosestPointOnPolygonEdge(clickedPoint, polygonCoords);
-      
-      if (!closestPoint) {
-        console.error('Could not find closest point on polygon edge');
-        return;
-      }
-      
-      // Create a LatLng object from the closest point
-      const snappedPoint = new google.maps.LatLng(closestPoint.lat, closestPoint.lng);
-      
-      if (!bridgeStart) {
-        // Set bridge start point
-        setBridgeStart(snappedPoint);
-        setBridgeStartLandId(clickedPolygonId);
-        
-        // Show a marker at the snapped point
-        const startMarker = new google.maps.Marker({
-          position: snappedPoint,
-          map: mapRef.current,
-          icon: {
-            path: google.maps.SymbolPath.CIRCLE,
-            scale: 7,
-            fillColor: '#FF0000',
-            fillOpacity: 1,
-            strokeWeight: 2,
-            strokeColor: '#FFFFFF'
-          }
-        });
-        
-        // Store the marker to remove it later
-        setBridgeStartMarker(startMarker);
-        
-        alert(`Bridge start point set on land ${clickedPolygonId}`);
-      } else {
-        // Set bridge end point and create bridge
-        if (clickedPolygonId === bridgeStartLandId) {
-          alert('Bridge must connect two different lands');
-          return;
-        }
-        
-        // Create bridge
-        const bridge = {
-          id: `bridge-${Date.now()}`,
-          startPoint: {
-            lat: bridgeStart.lat(),
-            lng: bridgeStart.lng()
-          },
-          endPoint: {
-            lat: snappedPoint.lat(),
-            lng: snappedPoint.lng()
-          },
-          startLandId: bridgeStartLandId,
-          endLandId: clickedPolygonId
-        };
-        
-        // Save bridge to file
-        saveBridgeToFile(bridge);
-        
-        // Draw bridge line on map
-        const bridgeLine = new google.maps.Polyline({
-          path: [
-            { lat: bridge.startPoint.lat, lng: bridge.startPoint.lng },
-            { lat: bridge.endPoint.lat, lng: bridge.endPoint.lng }
-          ],
-          geodesic: true,
-          strokeColor: '#FF0000',
-          strokeOpacity: 1.0,
-          strokeWeight: 3
-        });
-        
-        bridgeLine.setMap(mapRef.current);
-        
-        // Remove the start marker
-        if (bridgeStartMarker) {
-          bridgeStartMarker.setMap(null);
-          setBridgeStartMarker(null);
-        }
-        
-        // Reset bridge mode
-        setBridgeStart(null);
-        setBridgeStartLandId(null);
-      }
-    } else if (canalMode === true) { // Explicitly check for true
-      console.log('Processing click in canal mode');
-      
-      // Create a marker at the point
-      const marker = new google.maps.Marker({
-        position: event.latLng,
-        map: mapRef.current,
-        icon: {
-          path: google.maps.SymbolPath.CIRCLE,
-          scale: 5,
-          fillColor: '#0088FF',
-          fillOpacity: 1,
-          strokeWeight: 2,
-          strokeColor: '#FFFFFF'
-        }
-      });
-      
-      // Add the marker to our array
-      setCanalMarkers(prev => [...prev, marker]);
-      
-      // Add the point to our array
-      const newPoints = [...canalPoints, event.latLng];
-      setCanalPoints(newPoints);
-      
-      // If we have at least 2 points, draw or update the line
-      if (newPoints.length >= 2) {
-        // Remove any existing lines
-        canalLines.forEach(line => line.setMap(null));
-        
-        // Create a new line with all points
-        const line = new google.maps.Polyline({
-          path: newPoints,
-          geodesic: true,
-          strokeColor: '#0088FF',
-          strokeOpacity: 1.0,
-          strokeWeight: 3,
-          map: mapRef.current
-        });
-        
-        // Update the lines array
-        setCanalLines([line]);
-      }
-    }
-  };
+  // This function is no longer needed as we've moved its logic directly into the map click listener
 
   // Add this function to save bridge to file
   const saveBridgeToFile = (bridge: any) => {
@@ -614,8 +454,172 @@ export default function MapPage() {
     
     // Add click listener for bridge and canal creation
     map.addListener('click', (e: google.maps.MapMouseEvent) => {
-      console.log('Map click event triggered, canal mode:', canalMode);
-      handleMapClick(e);
+      // Get the current state directly when the event fires
+      const currentCanalMode = canalMode;
+      console.log('Map click event triggered, canal mode:', currentCanalMode);
+      
+      // Pass the event to handleMapClick with current state values
+      const event = e as google.maps.MapMouseEvent;
+      if (!event.latLng) return;
+      
+      console.log('Map clicked in mode:', bridgeMode ? 'bridge' : currentCanalMode ? 'canal' : 'normal');
+      
+      if (bridgeMode) {
+        // Find which polygon was clicked
+        let clickedPolygonId = null;
+        let clickedPolygon = null;
+        
+        for (const [id, polygon] of Object.entries(activeLandPolygons)) {
+          if (google.maps.geometry.poly.containsLocation(event.latLng, polygon)) {
+            clickedPolygonId = id;
+            clickedPolygon = polygon;
+            break;
+          }
+        }
+        
+        if (!clickedPolygonId || !clickedPolygon) {
+          alert('Please click on a land polygon');
+          return;
+        }
+        
+        // Get the polygon coordinates
+        const polygonCoords = getPolygonCoordinates(clickedPolygon);
+        
+        // Get the clicked point
+        const clickedPoint = {
+          lat: event.latLng.lat(),
+          lng: event.latLng.lng()
+        };
+        
+        // Find the closest point on the polygon edge
+        const closestPoint = findClosestPointOnPolygonEdge(clickedPoint, polygonCoords);
+        
+        if (!closestPoint) {
+          console.error('Could not find closest point on polygon edge');
+          return;
+        }
+        
+        // Create a LatLng object from the closest point
+        const snappedPoint = new google.maps.LatLng(closestPoint.lat, closestPoint.lng);
+        
+        if (!bridgeStart) {
+          // Set bridge start point
+          setBridgeStart(snappedPoint);
+          setBridgeStartLandId(clickedPolygonId);
+          
+          // Show a marker at the snapped point
+          const startMarker = new google.maps.Marker({
+            position: snappedPoint,
+            map: mapRef.current,
+            icon: {
+              path: google.maps.SymbolPath.CIRCLE,
+              scale: 7,
+              fillColor: '#FF0000',
+              fillOpacity: 1,
+              strokeWeight: 2,
+              strokeColor: '#FFFFFF'
+            }
+          });
+          
+          // Store the marker to remove it later
+          setBridgeStartMarker(startMarker);
+          
+          alert(`Bridge start point set on land ${clickedPolygonId}`);
+        } else {
+          // Set bridge end point and create bridge
+          if (clickedPolygonId === bridgeStartLandId) {
+            alert('Bridge must connect two different lands');
+            return;
+          }
+          
+          // Create bridge
+          const bridge = {
+            id: `bridge-${Date.now()}`,
+            startPoint: {
+              lat: bridgeStart.lat(),
+              lng: bridgeStart.lng()
+            },
+            endPoint: {
+              lat: snappedPoint.lat(),
+              lng: snappedPoint.lng()
+            },
+            startLandId: bridgeStartLandId,
+            endLandId: clickedPolygonId
+          };
+          
+          // Save bridge to file
+          saveBridgeToFile(bridge);
+          
+          // Draw bridge line on map
+          const bridgeLine = new google.maps.Polyline({
+            path: [
+              { lat: bridge.startPoint.lat, lng: bridge.startPoint.lng },
+              { lat: bridge.endPoint.lat, lng: bridge.endPoint.lng }
+            ],
+            geodesic: true,
+            strokeColor: '#FF0000',
+            strokeOpacity: 1.0,
+            strokeWeight: 3
+          });
+          
+          bridgeLine.setMap(mapRef.current);
+          
+          // Remove the start marker
+          if (bridgeStartMarker) {
+            bridgeStartMarker.setMap(null);
+            setBridgeStartMarker(null);
+          }
+          
+          // Reset bridge mode
+          setBridgeStart(null);
+          setBridgeStartLandId(null);
+        }
+      } else if (currentCanalMode) {
+        console.log('Processing click in canal mode');
+        
+        // Create a marker at the point
+        const marker = new google.maps.Marker({
+          position: event.latLng,
+          map: mapRef.current,
+          icon: {
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: 5,
+            fillColor: '#0088FF',
+            fillOpacity: 1,
+            strokeWeight: 2,
+            strokeColor: '#FFFFFF'
+          }
+        });
+        
+        // Add the marker to our array
+        setCanalMarkers(prev => [...prev, marker]);
+        
+        // Add the point to our array
+        setCanalPoints(prev => {
+          const newPoints = [...prev, event.latLng];
+          
+          // If we have at least 2 points, draw or update the line
+          if (newPoints.length >= 2) {
+            // Remove any existing lines
+            canalLines.forEach(line => line.setMap(null));
+            
+            // Create a new line with all points
+            const line = new google.maps.Polyline({
+              path: newPoints,
+              geodesic: true,
+              strokeColor: '#0088FF',
+              strokeOpacity: 1.0,
+              strokeWeight: 3,
+              map: mapRef.current
+            });
+            
+            // Update the lines array
+            setCanalLines([line]);
+          }
+          
+          return newPoints;
+        });
+      }
     });
     
     // Add this debug message
