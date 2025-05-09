@@ -5,23 +5,6 @@ import { Resource } from '@/lib/services/ResourceService';
 // Extended Resource interface to include production-related properties
 interface ExtendedResource extends Resource {
   productionProperties?: {
-    processorBuilding?: string;
-    producerBuilding?: string;
-    inputs?: Array<{resource: string; amount?: number}>;
-    outputs?: Array<{resource: string; amount?: number}>;
-    processingTime?: number;
-    productionTime?: number;
-    processingComplexity?: number;
-    productionComplexity?: number;
-  };
-  productionChainPosition?: {
-    predecessors?: Array<{resource: string; facility?: string}>;
-    successors?: Array<{resource: string; facility?: string}>;
-  };
-}
-
-interface ExtendedResource extends Resource {
-  productionProperties?: {
     producerBuilding?: string;
     processorBuilding?: string;
     productionComplexity?: number;
@@ -126,17 +109,6 @@ const ResourceDetailsModal: React.FC<ResourceDetailsModalProps> = ({ resource, o
       return resource.productionProperties.outputs;
     }
     return [];
-  };
-
-  // Helper function to check if we have any production information
-  const hasProductionInfo = () => {
-    return (
-      getProductionBuilding() || 
-      getInputs().length > 0 || 
-      getOutputs().length > 0 ||
-      (resource.productionChainPosition?.predecessors && resource.productionChainPosition.predecessors.length > 0) ||
-      (resource.productionChainPosition?.successors && resource.productionChainPosition.successors.length > 0)
-    );
   };
 
   // Helper function to check if we have any production information
