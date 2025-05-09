@@ -3,7 +3,6 @@
  */
 import React, { ErrorInfo, useEffect, useState } from 'react';
 import { Tab } from '@headlessui/react';
-import BuildingModelViewer from '../UI/BuildingModelViewer';
 import PlaceableBuilding from './PlaceableBuilding';
 import { Building } from '@/lib/services/BuildingService';
 import ErrorBoundary from '../ErrorBoundary/ErrorBoundary';
