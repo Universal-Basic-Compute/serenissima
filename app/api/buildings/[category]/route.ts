@@ -7,11 +7,8 @@ export async function GET(
   { params }: { params: { category: string } }
 ) {
   try {
-    // In Next.js App Router, params is not a Promise, so we don't need to await it
-    const category = params.category;
-    
     // Sanitize the category name to prevent directory traversal
-    const sanitizedCategory = category.replace(/[^a-zA-Z0-9_-]/g, '');
+    const sanitizedCategory = params.category.replace(/[^a-zA-Z0-9_-]/g, '');
     
     // Define the base directory for building data
     const baseDir = path.join(process.cwd(), 'data', 'buildings');
