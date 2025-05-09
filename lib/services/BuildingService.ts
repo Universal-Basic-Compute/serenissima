@@ -203,6 +203,32 @@ export class BuildingService {
   }
   
   /**
+   * Get all buildings, optionally filtered by type
+   * @param type Optional building type to filter by
+   * @returns Array of building data
+   */
+  public async getBuildings(type?: string): Promise<any[]> {
+    try {
+      let url = `${getApiBaseUrl()}/api/buildings`;
+      if (type) {
+        url += `?type=${encodeURIComponent(type)}`;
+      }
+      
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch buildings: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return data.buildings || [];
+    } catch (error) {
+      console.error('Error fetching buildings:', error);
+      throw error;
+    }
+  }
+  
+  /**
    * Generate connection points for a dock
    * @param position The position of the dock
    * @param rotation The rotation of the dock in radians
