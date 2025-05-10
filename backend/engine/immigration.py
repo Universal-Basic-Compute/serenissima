@@ -256,33 +256,6 @@ def process_immigration(dry_run: bool = False):
         time.sleep(2)
     
     log.info(f"Immigration process complete. {immigration_count} new citizens immigrated to Venice.")
-    
-    if immigration_count > 0 and not dry_run:
-        # Run the househomelesscitizens.py script to house the new citizens
-        log.info("Running househomelesscitizens.py to house the new citizens...")
-        try:
-            # Change the path to use the correct location
-            # Use the current file's directory to determine the correct path
-            script_dir = os.path.dirname(os.path.abspath(__file__))
-            househomeless_script = os.path.join(script_dir, "househomelesscitizens.py")
-            
-            # Check if the script exists before trying to run it
-            if os.path.exists(househomeless_script):
-                result = subprocess.run(
-                    ["python", househomeless_script],
-                    capture_output=True,
-                    text=True
-                )
-                
-                if result.returncode != 0:
-                    log.error(f"Error running househomelesscitizens.py: {result.stderr}")
-                else:
-                    log.info("Successfully ran househomelesscitizens.py")
-            else:
-                log.warning(f"Househomeless script not found at {househomeless_script}, skipping automatic housing")
-                log.info("New citizens will remain homeless until the next scheduled housing run")
-        except Exception as e:
-            log.error(f"Error running househomelesscitizens.py: {e}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Process immigration to Venice.")
