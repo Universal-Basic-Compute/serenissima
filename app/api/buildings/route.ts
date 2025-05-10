@@ -150,9 +150,9 @@ export async function GET(request: Request) {
       type: 'market-stall',
       land_id: 'polygon-1746052711032',
       position: { 
-        x: 45.42623684734749, 
-        y: 5, // Set Y to 5 units above water level
-        z: 12.33922034185465 
+        x: 45, 
+        y: 10, // Higher position for better visibility
+        z: 12 
       },
       rotation: 0,
       created_by: 'ConsiglioDeiDieci',
@@ -164,9 +164,9 @@ export async function GET(request: Request) {
       type: 'market-stall',
       land_id: 'polygon-1746052711033',
       position: { 
-        x: 45.42623684734749 + 10, 
-        y: 5, // Set Y to 5 units above water level
-        z: 12.33922034185465 + 10
+        x: 55, 
+        y: 10, // Higher position for better visibility
+        z: 22
       },
       rotation: Math.PI / 4, // 45 degrees rotation
       created_by: 'ConsiglioDeiDieci',
@@ -178,9 +178,9 @@ export async function GET(request: Request) {
       type: 'market-stall',
       land_id: 'polygon-1746052711034',
       position: { 
-        x: 45.42623684734749 - 10, 
-        y: 5, // Set Y to 5 units above water level
-        z: 12.33922034185465 - 10
+        x: 35, 
+        y: 10, // Higher position for better visibility
+        z: 2
       },
       rotation: Math.PI / 2, // 90 degrees rotation
       created_by: 'ConsiglioDeiDieci',

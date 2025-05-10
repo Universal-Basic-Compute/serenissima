@@ -277,6 +277,13 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
       window.__polygonData = polygons;
     }
     
+    // Force refresh buildings when the component mounts
+    eventBus.emit(EventTypes.BUILDING_PLACED, { refresh: true });
+    
+    // Log the scene and camera for debugging
+    console.log('SimpleViewer scene:', scene);
+    console.log('SimpleViewer camera:', cameraController.camera);
+    
     // Create water first (so it's rendered first)
     const waterSize = Math.max(bounds.scale * 500, 1000);
     const water = new SimpleWater({

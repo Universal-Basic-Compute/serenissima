@@ -118,52 +118,7 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
     };
   }, [active, scene]);
   
-  // Function to normalize coordinates
-  const normalizeCoordinates = (position: any): THREE.Vector3 => {
-    // Make sure we have valid position data
-    if (!position) {
-      console.warn('Invalid position data:', position);
-      return new THREE.Vector3(0, 0, 0);
-    }
-    
-    // Log the incoming position for debugging
-    console.log('Normalizing position:', position);
-    
-    // Check if these are lat/lng coordinates (Venice is around 45.4, 12.3)
-    if (position.x >= 40 && position.x <= 50 && 
-        (position.z >= 10 && position.z <= 20 || 
-         (typeof position.lng === 'number' && position.lng >= 10 && position.lng <= 20))) {
-      
-      // These appear to be Venice lat/lng coordinates
-      // We need to transform them to Three.js world coordinates
-      
-      // Get the bounds from the scene if available
-      const canvas = document.querySelector('canvas');
-      const bounds = canvas?.__scene?.userData?.bounds;
-      
-      if (bounds) {
-        // Use the same transformation as in SimplePolygonRenderer
-        const normalizedX = (position.x - bounds.centerLat) * bounds.scale;
-        const normalizedZ = -(position.z - bounds.centerLng) * bounds.scale * bounds.latCorrectionFactor;
-        
-        console.log('Transformed lat/lng coordinates to world coordinates:', {
-          x: normalizedX,
-          y: position.y || 0.1, // Slightly above ground
-          z: normalizedZ
-        });
-        
-        return new THREE.Vector3(normalizedX, position.y || 0.1, normalizedZ);
-      }
-      
-      // If bounds not available, use a simple offset to place near origin
-      console.log('No bounds available, using simple offset for lat/lng coordinates');
-      return new THREE.Vector3(0, position.y || 0.1, 0);
-    }
-    
-    // For coordinates that are already in world space, use them directly
-    console.log('Using original coordinates (assumed to be world coordinates):', position);
-    return new THREE.Vector3(position.x, position.y || 0.1, position.z);
-  };
+  // We're no longer normalizing coordinates - using direct positions instead
 
   // Function to render a building
   const renderBuilding = (building: any) => {
@@ -177,53 +132,34 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
     console.log(`Rendering building ID: ${id}, Type: ${type}, Position:`, position);
     
     // Add a large debug sphere at the same position
-    const sphereGeometry = new THREE.SphereGeometry(30, 32, 32); // Much larger 30-unit radius sphere
+    const sphereGeometry = new THREE.SphereGeometry(5, 32, 32); // Smaller but still visible sphere
     const sphereMaterial = new THREE.MeshBasicMaterial({ 
       color: 0xff00ff,  // Bright magenta for better visibility
-      transparent: true,
-      opacity: 0.9
+      transparent: false, // Make fully opaque
+      opacity: 1.0
     });
     const debugSphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
 
-    // Use the exact same position as the building but 15 units above ground
-    debugSphere.position.set(position.x, 15, position.z); // 15 units above ground
+    // Use the exact position from the building data
+    debugSphere.position.set(position.x, position.y || 10, position.z);
     scene.add(debugSphere);
-    console.log(`Added debug sphere at 15 units above ground: ${JSON.stringify(debugSphere.position)}`);
+    console.log(`Added debug sphere at position:`, debugSphere.position);
 
     // Store reference to the debug sphere
     const debugId = `debug_sphere_${id}`;
     buildingMeshesRef.current.set(debugId, debugSphere);
     
-    // Add additional debug spheres at different heights with different colors
-    const debugSphere2 = new THREE.Mesh(
-      new THREE.SphereGeometry(25, 32, 32),
-      new THREE.MeshBasicMaterial({ color: 0x00ff00, transparent: true, opacity: 0.9 })
-    );
-    debugSphere2.position.set(position.x, 30, position.z); // 30 units above ground
-    scene.add(debugSphere2);
-    console.log(`Added second debug sphere at 30 units above ground: ${JSON.stringify(debugSphere2.position)}`);
-    buildingMeshesRef.current.set(`debug_sphere2_${id}`, debugSphere2);
-
-    const debugSphere3 = new THREE.Mesh(
-      new THREE.SphereGeometry(20, 32, 32),
-      new THREE.MeshBasicMaterial({ color: 0x0000ff, transparent: true, opacity: 0.9 })
-    );
-    debugSphere3.position.set(position.x, 45, position.z); // 45 units above ground
-    scene.add(debugSphere3);
-    console.log(`Added third debug sphere at 45 units above ground: ${JSON.stringify(debugSphere3.position)}`);
-    buildingMeshesRef.current.set(`debug_sphere3_${id}`, debugSphere3);
-    
     // Add a reference sphere at origin (0,0,0)
-    const originSphereGeometry = new THREE.SphereGeometry(15, 32, 32); // Larger sphere
+    const originSphereGeometry = new THREE.SphereGeometry(5, 32, 32);
     const originSphereMaterial = new THREE.MeshBasicMaterial({ 
       color: 0x00ff00,  // Bright green
-      transparent: true,
-      opacity: 0.9 // More visible
+      transparent: false,
+      opacity: 1.0
     });
     const originSphere = new THREE.Mesh(originSphereGeometry, originSphereMaterial);
-    originSphere.position.set(0, 15, 0); // At origin, 15 units up
+    originSphere.position.set(0, 10, 0); // At origin, 10 units up
     scene.add(originSphere);
-    console.log(`Added origin reference sphere at position: (0, 15, 0)`);
+    console.log(`Added origin reference sphere at position: (0, 10, 0)`);
 
     // Store reference
     buildingMeshesRef.current.set('debug_sphere_origin', originSphere);
@@ -255,47 +191,19 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
             console.log(`Successfully loaded model for building ${id}`);
             const model = gltf.scene;
             
-            // Position and rotate the model
-            // Use the normalized position values and place slightly above the ground
-            const normalizedPosition = normalizeCoordinates(position);
-            model.position.copy(normalizedPosition);
+            // Position and rotate the model - use the exact position from the data
+            model.position.set(position.x, position.y || 10, position.z);
             model.rotation.y = rotation || 0;
-            console.log(`Positioned model at normalized coordinates: x=${normalizedPosition.x}, y=${normalizedPosition.y}, z=${normalizedPosition.z}`);
+            console.log(`Positioned model at coordinates: x=${position.x}, y=${position.y || 10}, z=${position.z}`);
             
-            // Calculate bounding box to properly scale the model
-            const box = new THREE.Box3().setFromObject(model);
-            const size = box.getSize(new THREE.Vector3());
-            
-            // Scale model to a reasonable size - increase the scale to make buildings larger
-            const maxDimension = Math.max(size.x, size.y, size.z);
-            if (maxDimension > 20) {
-              // Model is too large, scale it down but still keep it visible
-              const scale = 1.0 / maxDimension; // Increased scale factor
-              model.scale.set(scale, scale, scale);
-              console.log(`Model was too large (${maxDimension} units), scaled down by ${scale}`);
-            } else if (maxDimension < 1) {
-              // Model is too small, scale it up significantly
-              const scale = 2.0 / maxDimension; // Increased scale factor
-              model.scale.set(scale, scale, scale);
-              console.log(`Model was too small (${maxDimension} units), scaled up by ${scale}`);
-            } else {
-              // Apply a default scale to make buildings more visible and larger
-              const scale = 5.0; // Increase scale even more for better visibility
-              model.scale.set(scale, scale, scale);
-              console.log(`Applied much larger scale of ${scale} to building`);
-            }
+            // Scale model to be much larger for visibility
+            const scale = 10.0; // Increase scale significantly
+            model.scale.set(scale, scale, scale);
+            console.log(`Applied scale of ${scale} to building`);
             
             // Store the building ID in userData for later reference
             model.userData.buildingId = id;
             model.userData.buildingType = type;
-            
-            // Add a visible helper at the building position
-            const helperGeometry = new THREE.SphereGeometry(0.5, 16, 16);
-            const helperMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-            const helper = new THREE.Mesh(helperGeometry, helperMaterial);
-            helper.position.set(position.x, 0, position.z);
-            scene.add(helper);
-            console.log(`Added position helper at ground level: ${JSON.stringify(helper.position)}`);
             
             // Add to scene
             scene.add(model);
@@ -340,42 +248,29 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
     
     console.log(`Creating fallback mesh for building ${id} (${type})`);
     
-    // Create a fallback mesh
-    const geometry = new THREE.BoxGeometry(2, 1, 2);
-    // Use amber color for all buildings
+    // Create a much larger fallback mesh
+    const geometry = new THREE.BoxGeometry(10, 10, 10);
+    // Use bright red for better visibility
     const material = new THREE.MeshBasicMaterial({ 
-      color: 0xf59e0b 
+      color: 0xff0000,
+      wireframe: false
     });
     const fallbackMesh = new THREE.Mesh(geometry, material);
     
-    // Position and rotate the fallback - place slightly above the ground
-    const normalizedPosition = normalizeCoordinates(position);
-    fallbackMesh.position.copy(normalizedPosition);
+    // Use the exact position from the data
+    fallbackMesh.position.set(position.x, position.y || 10, position.z);
     fallbackMesh.rotation.y = rotation || 0;
-    
-    // Make the fallback mesh much larger for better visibility
-    fallbackMesh.scale.set(10.0, 10.0, 10.0); // Double the scale for better visibility
-    console.log(`Created much larger fallback mesh for building ${id} with scale 10.0`);
     
     // Store the building ID in userData for later reference
     fallbackMesh.userData.buildingId = id;
     fallbackMesh.userData.buildingType = type;
     
-    // Add a visible helper at the building position
-    const helperGeometry = new THREE.SphereGeometry(15, 16, 16); // Much larger helper
-    const helperMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-    const helper = new THREE.Mesh(helperGeometry, helperMaterial);
-    helper.position.set(position.x, 0, position.z);
-    scene.add(helper);
-    console.log(`Added position helper at ground level: ${JSON.stringify(helper.position)}`);
-    
     // Add to scene
     scene.add(fallbackMesh);
+    console.log(`Added fallback mesh at position:`, fallbackMesh.position);
     
     // Store reference
     buildingMeshesRef.current.set(id, fallbackMesh);
-    
-    console.log(`Created fallback mesh for building ${id} slightly above ground level: x=${position.x}, y=0.1, z=${position.z}`);
   };
   
   // This component doesn't render any UI
