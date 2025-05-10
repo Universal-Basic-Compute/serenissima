@@ -54,43 +54,74 @@ export async function POST(request: Request) {
   try {
     const data = await request.json();
     
-    // Validate required fields
-    if (!data.type || !data.land_id || !data.position) {
+    // Enhanced validation with more detailed error messages
+    if (!data.type) {
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { success: false, error: 'Building type is required' },
+        { status: 400 }
+      );
+    }
+    
+    if (!data.land_id) {
+      return NextResponse.json(
+        { success: false, error: 'Land ID is required' },
+        { status: 400 }
+      );
+    }
+    
+    if (!data.position || typeof data.position !== 'object' || 
+        typeof data.position.x !== 'number' || 
+        typeof data.position.z !== 'number') {
+      return NextResponse.json(
+        { success: false, error: 'Valid position with x and z coordinates is required' },
         { status: 400 }
       );
     }
     
     // Log the received data for debugging
-    console.log('Received building data:', data);
+    console.log('Creating building with data:', JSON.stringify(data, null, 2));
     
     // Create a unique ID for the building
     const buildingId = `building_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
     
+    // Normalize the building type (remove apostrophes, replace spaces with hyphens)
+    const normalizedType = data.type.toLowerCase().replace(/'/g, '').replace(/\s+/g, '-');
+    
     // Create the building object
     const building = {
       id: buildingId,
-      type: data.type,
+      type: normalizedType,
       variant: data.variant || 'model',
       land_id: data.land_id,
-      position: data.position,
+      position: {
+        x: data.position.x,
+        y: data.position.y || 0,
+        z: data.position.z
+      },
       rotation: data.rotation || 0,
       connection_points: data.connection_points || [],
       created_by: data.created_by || 'system',
       created_at: new Date().toISOString()
     };
     
-    // In a real implementation, this would save to Airtable
-    // For now, we'll just log it
-    console.log('Created building:', building);
+    // In a real implementation, this would save to Airtable or another database
+    // For now, we'll just log it and return success
+    console.log('Successfully created building:', JSON.stringify(building, null, 2));
     
-    // Return the created building
-    return NextResponse.json({ success: true, building });
+    // Return the created building with success flag
+    return NextResponse.json({ 
+      success: true, 
+      building,
+      message: 'Building created successfully'
+    });
   } catch (error) {
     console.error('Error creating building:', error);
     return NextResponse.json(
-      { error: 'Failed to create building' },
+      { 
+        success: false, 
+        error: 'Failed to create building', 
+        details: error instanceof Error ? error.message : String(error)
+      },
       { status: 500 }
     );
   }
