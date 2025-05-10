@@ -75,6 +75,11 @@ def find_user_by_identifier(tables, identifier: str) -> Optional[Dict]:
     """Find a user by username or wallet address."""
     log.info(f"Looking up user: {identifier}")
     
+    # Handle known misspellings
+    if identifier == "ConsiglioDeiDeici":
+        identifier = "ConsiglioDeiDieci"
+        log.info(f"Corrected misspelled identifier from ConsiglioDeiDeici to {identifier}")
+    
     try:
         # First try to find by username
         formula = f"{{Username}}='{identifier}'"
@@ -91,6 +96,16 @@ def find_user_by_identifier(tables, identifier: str) -> Optional[Dict]:
         if users:
             log.info(f"Found user by wallet address: {identifier}")
             return users[0]
+        
+        # Special case for ConsiglioDeiDieci - try alternative spellings
+        if identifier == "ConsiglioDeiDieci":
+            # Try with different variations
+            for variation in ["Consiglio Dei Dieci", "Consiglio dei Dieci", "ConsiglioDeidieci"]:
+                formula = f"{{Username}}='{variation}'"
+                users = tables['users'].all(formula=formula)
+                if users:
+                    log.info(f"Found user by alternative spelling: {variation}")
+                    return users[0]
         
         log.warning(f"User not found: {identifier}")
         return None
