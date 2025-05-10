@@ -106,13 +106,13 @@ export class ResourceDisplayManager {
    */
   private subscribeToEvents(): void {
     // Listen for resource added event
-    eventBus.subscribe(EventTypes.RESOURCE_ADDED, (data) => {
+    eventBus.subscribe('RESOURCE_ADDED', (data) => {
       console.log('Resource added event received:', data);
       this.refreshResources();
     });
     
     // Listen for resource removed event
-    eventBus.subscribe(EventTypes.RESOURCE_REMOVED, (data) => {
+    eventBus.subscribe('RESOURCE_REMOVED', (data) => {
       console.log('Resource removed event received:', data);
       this.refreshResources();
     });
@@ -295,7 +295,7 @@ export class ResourceDisplayManager {
     
     // If we have a previously selected group, try to reselect it
     if (this.selectedGroup && this.resourceGroups.has(this.selectedGroup)) {
-      this.expandResourceGroup(this.selectedGroup);
+      this.createDetailedExpandedView(this.selectedGroup);
     }
   }
 
@@ -514,6 +514,7 @@ export class ResourceDisplayManager {
   
   /**
    * Create a detailed expanded view for a resource group (selected state)
+   * This method is called by expandResourceGroup
    */
   private createDetailedExpandedView(locationKey: string): void {
     const group = this.scene.getObjectByName(`resource-group-${locationKey}`) as THREE.Group;
@@ -850,7 +851,7 @@ export class ResourceDisplayManager {
     window.dispatchEvent(event);
     
     // Also emit through the event bus
-    eventBus.emit(EventTypes.SHOW_RESOURCE_DETAILS, {
+    eventBus.emit('SHOW_RESOURCE_DETAILS', {
       resource: resource
     });
   }
