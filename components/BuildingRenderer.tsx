@@ -41,8 +41,17 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
         }
       }
       
-      console.warn('BuildingRenderer: Could not find scene');
-      return null;
+      // If we still don't have a scene, create a new one as a last resort
+      console.warn('BuildingRenderer: Could not find scene, creating a new one');
+      const newScene = new THREE.Scene();
+      
+      // Store the new scene in global context for other components to find
+      if (typeof window !== 'undefined') {
+        window.__threeContext = window.__threeContext || {};
+        window.__threeContext.scene = newScene;
+      }
+      
+      return newScene;
     };
     
     // Try to find the scene
@@ -57,7 +66,8 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
   // Early return if not ready
   if (!isReady && !sceneRef.current) {
     console.log('BuildingRenderer: Not ready, scene not available');
-    return null;
+    // Instead of returning null, we'll continue with initialization
+    // since we now have a fallback to create a scene if needed
   }
   
   const [buildings, setBuildings] = useState<BuildingData[]>([]);
