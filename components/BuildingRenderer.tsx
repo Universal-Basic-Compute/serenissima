@@ -14,6 +14,11 @@ interface BuildingRendererProps {
 }
 
 const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) => {
+  // Add early return if scene is not available
+  if (!scene) {
+    console.warn('BuildingRenderer: scene is not provided or undefined');
+    return null; // Return null instead of rendering anything
+  }
   const [buildings, setBuildings] = useState<BuildingData[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -911,7 +916,10 @@ export default BuildingRenderer;
    * Update building visibility based on camera distance
    */
   const updateBuildingVisibility = () => {
-    if (!scene) return;
+    if (!scene) {
+      console.warn('Cannot update building visibility: scene is not defined');
+      return;
+    }
     
     // Get camera
     const camera = getCamera();
