@@ -11,11 +11,11 @@ export async function generateCoatOfArmsImage(description: string, username?: st
     throw new Error('Please provide a description for the coat of arms');
   }
   
-  // Always use the production URL for coat of arms generation
-  const productionUrl = 'https://serenissima.ai';
+  // Use the API base URL from the environment
+  const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
   
   // First, generate the image using the AI service
-  const generateResponse = await fetch(`${productionUrl}/api/generate-coat-of-arms`, {
+  const generateResponse = await fetch(`${apiBaseUrl}/api/generate-coat-of-arms`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -36,14 +36,14 @@ export async function generateCoatOfArmsImage(description: string, username?: st
     throw new Error(generateData.error || 'Failed to generate image');
   }
   
-  // Ensure the image URL uses the production domain
+  // Ensure the image URL uses the correct domain
   let imagePath = generateData.local_image_url;
   
-  // If the path is relative, prepend the production URL
+  // If the path is relative, prepend the API base URL
   if (imagePath.startsWith('/')) {
-    imagePath = `${productionUrl}${imagePath}`;
+    imagePath = `${apiBaseUrl}${imagePath}`;
   } else if (!imagePath.startsWith('http')) {
-    imagePath = `${productionUrl}/${imagePath}`;
+    imagePath = `${apiBaseUrl}/${imagePath}`;
   }
   
   console.log('Using image path:', imagePath);
