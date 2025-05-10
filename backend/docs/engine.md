@@ -6,6 +6,22 @@ This document explains the automated processes that occur daily in the La Sereni
 
 The game engine runs several automated processes at scheduled times throughout the day to simulate the living economy of Renaissance Venice. These processes occur without requiring player intervention.
 
+### Lease Distribution (9:00 AM UTC)
+
+**Script**: `backend/engine/distributeLeases.py`
+
+Every day at 9:00 AM UTC, the lease distribution system processes payments from building owners to land owners:
+
+1. For each land with an owner, the script identifies all buildings on that land
+2. For each building with a LeaseAmount, it transfers that amount from the building owner to the land owner
+3. Transaction records are created for all payments
+4. Notifications are sent to:
+   - Land owners summarizing all lease payments received for each of their lands
+   - Building owners summarizing all lease payments made for their buildings
+   - Administrators with statistics including top gainers and losers
+
+This process simulates the economic relationship between land owners and building owners, where building owners must pay for the right to build on land they don't own.
+
 ### Immigration (11:00 AM UTC)
 
 **Script**: `backend/engine/immigration.py`

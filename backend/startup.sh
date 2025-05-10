@@ -104,6 +104,18 @@ else
     echo "Citizen housing mobility cron job already exists. No changes made."
 fi
 
+# Add cron job for lease distribution
+if ! grep -q "distributeLeases.py" "$TEMP_CRONTAB"; then
+    # Add the cron job to run at 9am UTC daily
+    echo "0 9 * * * cd $REPO_PATH && python3 engine/distributeLeases.py >> $REPO_PATH/lease_distribution_cron.log 2>&1" >> "$TEMP_CRONTAB"
+    
+    # Install the new crontab
+    crontab "$TEMP_CRONTAB"
+    echo "Cron job installed successfully. Lease distribution will run daily at 9am UTC."
+else
+    echo "Lease distribution cron job already exists. No changes made."
+fi
+
 # Clean up
 rm "$TEMP_CRONTAB"
 
