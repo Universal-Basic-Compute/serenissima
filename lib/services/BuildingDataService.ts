@@ -17,20 +17,23 @@ export class BuildingDataService {
       throw new Error('Invalid building data: not an object');
     }
     
-    // Normalize position data
+    // First, validate and fix the building data using the BuildingPositionManager
+    const fixedBuilding = buildingPositionManager.validateAndFixBuildingData(building);
+    
+    // Now proceed with normalization using the fixed data
     let position: BuildingPosition;
     
-    if (typeof building.position === 'string') {
+    if (typeof fixedBuilding.position === 'string') {
       try {
-        const parsedPosition = JSON.parse(building.position);
+        const parsedPosition = JSON.parse(fixedBuilding.position);
         position = buildingPositionManager.validatePosition(parsedPosition) as BuildingPosition;
       } catch (error) {
         console.error('Error parsing position string:', error);
         // Default to center of Venice
         position = { lat: 45.4371, lng: 12.3358 };
       }
-    } else if (building.position && typeof building.position === 'object') {
-      position = buildingPositionManager.validatePosition(building.position) as BuildingPosition;
+    } else if (fixedBuilding.position && typeof fixedBuilding.position === 'object') {
+      position = buildingPositionManager.validatePosition(fixedBuilding.position) as BuildingPosition;
     } else {
       // Default position
       position = { lat: 45.4371, lng: 12.3358 };
@@ -38,20 +41,20 @@ export class BuildingDataService {
     
     // Ensure all required fields are present with defaults if needed
     return {
-      id: building.id || `building-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-      type: building.type || 'unknown',
-      land_id: building.land_id || '',
+      id: fixedBuilding.id || `building-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      type: fixedBuilding.type || 'unknown',
+      land_id: fixedBuilding.land_id || '',
       position: position,
-      rotation: typeof building.rotation === 'number' ? building.rotation : 0,
-      variant: building.variant || 'model',
-      created_by: building.created_by || 'system',
-      created_at: building.created_at || new Date().toISOString(),
-      updated_at: building.updated_at || new Date().toISOString(),
-      name: building.name || '',
-      description: building.description || '',
-      state: building.state || 'complete',
-      constructionProgress: building.constructionProgress || 100,
-      owner: building.owner || building.created_by || 'system'
+      rotation: typeof fixedBuilding.rotation === 'number' ? fixedBuilding.rotation : 0,
+      variant: fixedBuilding.variant || 'model',
+      created_by: fixedBuilding.created_by || 'system',
+      created_at: fixedBuilding.created_at || new Date().toISOString(),
+      updated_at: fixedBuilding.updated_at || new Date().toISOString(),
+      name: fixedBuilding.name || '',
+      description: fixedBuilding.description || '',
+      state: fixedBuilding.state || 'complete',
+      constructionProgress: fixedBuilding.constructionProgress || 100,
+      owner: fixedBuilding.owner || fixedBuilding.created_by || 'system'
     };
   }
 

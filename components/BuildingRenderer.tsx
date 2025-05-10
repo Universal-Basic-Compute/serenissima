@@ -134,6 +134,80 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
     }
   };
   
+  // Function to diagnose building positions
+  const diagnoseBuildingPositions = (buildings: BuildingData[]): void => {
+    console.log('Diagnosing building positions...');
+    
+    // Count buildings with different position formats
+    let latLngCount = 0;
+    let xzCount = 0;
+    let invalidCount = 0;
+    let extremeCount = 0;
+    
+    buildings.forEach((building, index) => {
+      console.log(`Building ${index + 1} (${building.id}):`);
+      console.log(`  Type: ${building.type}`);
+      
+      if (!building.position) {
+        console.error(`  No position data!`);
+        invalidCount++;
+        return;
+      }
+      
+      if ('lat' in building.position && 'lng' in building.position) {
+        latLngCount++;
+        const lat = parseFloat(building.position.lat.toString());
+        const lng = parseFloat(building.position.lng.toString());
+        
+        console.log(`  Position (lat/lng): ${lat}, ${lng}`);
+        
+        // Check for extreme values
+        if (isNaN(lat) || isNaN(lng) || Math.abs(lat) > 90 || Math.abs(lng) > 180) {
+          console.error(`  Invalid lat/lng values!`);
+          invalidCount++;
+        }
+        
+        // Check distance from Venice center
+        const centerLat = 45.4371;
+        const centerLng = 12.3358;
+        const distanceFromVenice = Math.sqrt(
+          Math.pow(lat - centerLat, 2) + 
+          Math.pow(lng - centerLng, 2)
+        );
+        
+        console.log(`  Distance from Venice center: ${distanceFromVenice.toFixed(4)} degrees`);
+        
+        if (distanceFromVenice > 0.5) {
+          console.error(`  Coordinates too far from Venice!`);
+          extremeCount++;
+        }
+      } else if ('x' in building.position && 'z' in building.position) {
+        xzCount++;
+        const x = parseFloat(building.position.x.toString());
+        const z = parseFloat(building.position.z.toString());
+        const y = building.position.y !== undefined ? parseFloat(building.position.y.toString()) : 5;
+        
+        console.log(`  Position (x/y/z): ${x}, ${y}, ${z}`);
+        
+        // Check for extreme values
+        if (isNaN(x) || isNaN(z) || Math.abs(x) > 500 || Math.abs(z) > 500) {
+          console.error(`  Extreme x/z values!`);
+          extremeCount++;
+        }
+      } else {
+        console.error(`  Unrecognized position format:`, building.position);
+        invalidCount++;
+      }
+    });
+    
+    console.log('Position diagnosis summary:');
+    console.log(`  Total buildings: ${buildings.length}`);
+    console.log(`  Buildings with lat/lng positions: ${latLngCount}`);
+    console.log(`  Buildings with x/z positions: ${xzCount}`);
+    console.log(`  Buildings with invalid positions: ${invalidCount}`);
+    console.log(`  Buildings with extreme positions: ${extremeCount}`);
+  };
+
   // Function to fetch buildings from API
   const fetchBuildings = async () => {
     try {
@@ -147,11 +221,8 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
       
       console.log(`Fetched ${buildingsData.length} buildings from API`);
       
-      // Log each building for debugging
-      buildingsData.forEach((building, index) => {
-        console.log(`Building ${index + 1}:`, building);
-        console.log(`Position data:`, building.position);
-      });
+      // Run diagnostics on the building data
+      diagnoseBuildingPositions(buildingsData);
       
       setBuildings(buildingsData);
       return buildingsData;

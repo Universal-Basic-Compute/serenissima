@@ -19,9 +19,34 @@ export class BuildingPositionManager {
    * @returns THREE.Vector3 position in scene coordinates
    */
   public latLngToScenePosition(position: {lat: number, lng: number}, height: number = 5): THREE.Vector3 {
-    // Check for extreme values that might indicate an error
+    // First, validate the input coordinates
+    if (!position || typeof position.lat !== 'number' || typeof position.lng !== 'number' || 
+        isNaN(position.lat) || isNaN(position.lng)) {
+      console.error(`Invalid position data received:`, position);
+      // Return a safe default position at the center of Venice
+      return new THREE.Vector3(0, height, 0);
+    }
+    
+    // Check for extreme values that might indicate an error in the input data
     if (Math.abs(position.lat) > 90 || Math.abs(position.lng) > 180) {
-      console.warn(`Invalid lat/lng values detected: ${position.lat}, ${position.lng}. Using default position.`);
+      console.error(`Invalid lat/lng values detected: ${position.lat}, ${position.lng}. These coordinates are outside the valid range for Earth.`);
+      // Return a safe default position at the center of Venice
+      return new THREE.Vector3(0, height, 0);
+    }
+    
+    // Check if the coordinates are too far from Venice (our expected area)
+    // Venice is roughly at 45.4371, 12.3358
+    const distanceFromVenice = Math.sqrt(
+      Math.pow(position.lat - this.bounds.centerLat, 2) + 
+      Math.pow(position.lng - this.bounds.centerLng, 2)
+    );
+    
+    // If coordinates are more than ~50km from Venice (in degrees, roughly 0.5 degrees)
+    if (distanceFromVenice > 0.5) {
+      console.error(`Coordinates (${position.lat}, ${position.lng}) are too far from Venice. Distance: ${distanceFromVenice.toFixed(4)} degrees`);
+      // Log additional information to help debug
+      console.error(`Expected coordinates should be near: ${this.bounds.centerLat}, ${this.bounds.centerLng}`);
+      // Return a safe default position at the center of Venice
       return new THREE.Vector3(0, height, 0);
     }
     
@@ -29,10 +54,15 @@ export class BuildingPositionManager {
     const x = (position.lng - this.bounds.centerLng) * this.bounds.scale;
     const z = -(position.lat - this.bounds.centerLat) * this.bounds.scale * this.bounds.latCorrectionFactor;
     
-    // Check for extreme values in the result
+    // Even after all our checks, if we still get extreme values, clamp them
+    // This is a last resort safety measure
     if (Math.abs(x) > 500 || Math.abs(z) > 500) {
-      console.warn(`Extreme position values calculated: (${x}, ${height}, ${z}). Clamping to reasonable range.`);
-      // Clamp to a reasonable range
+      console.error(`Extreme position values calculated despite validation: (${x}, ${height}, ${z}).`);
+      console.error(`Input coordinates: (${position.lat}, ${position.lng})`);
+      console.error(`Center coordinates: (${this.bounds.centerLat}, ${this.bounds.centerLng})`);
+      console.error(`Scale: ${this.bounds.scale}, Correction factor: ${this.bounds.latCorrectionFactor}`);
+      
+      // Clamp to a reasonable range as a last resort
       const clampedX = Math.max(-500, Math.min(500, x));
       const clampedZ = Math.max(-500, Math.min(500, z));
       return new THREE.Vector3(clampedX, height, clampedZ);
@@ -103,6 +133,86 @@ export class BuildingPositionManager {
    */
   public getBounds() {
     return { ...this.bounds };
+  }
+  
+  /**
+   * Validate and fix building position data
+   * @param building Building data to validate
+   * @returns Fixed building data
+   */
+  public validateAndFixBuildingData(building: any): any {
+    if (!building) return building;
+    
+    // Create a copy to avoid modifying the original
+    const fixedBuilding = { ...building };
+    
+    // Check if position exists
+    if (!fixedBuilding.position) {
+      console.error(`Building ${fixedBuilding.id} has no position data, setting default position`);
+      fixedBuilding.position = { lat: this.bounds.centerLat, lng: this.bounds.centerLng };
+      return fixedBuilding;
+    }
+    
+    // If position is a string, try to parse it
+    if (typeof fixedBuilding.position === 'string') {
+      try {
+        fixedBuilding.position = JSON.parse(fixedBuilding.position);
+      } catch (error) {
+        console.error(`Error parsing position string for building ${fixedBuilding.id}:`, error);
+        fixedBuilding.position = { lat: this.bounds.centerLat, lng: this.bounds.centerLng };
+        return fixedBuilding;
+      }
+    }
+    
+    // Check if we have lat/lng or x/z coordinates
+    if ('lat' in fixedBuilding.position && 'lng' in fixedBuilding.position) {
+      // Validate lat/lng values
+      const lat = parseFloat(fixedBuilding.position.lat.toString());
+      const lng = parseFloat(fixedBuilding.position.lng.toString());
+      
+      if (isNaN(lat) || isNaN(lng) || Math.abs(lat) > 90 || Math.abs(lng) > 180) {
+        console.error(`Building ${fixedBuilding.id} has invalid lat/lng values: ${lat}, ${lng}`);
+        fixedBuilding.position = { lat: this.bounds.centerLat, lng: this.bounds.centerLng };
+      } else {
+        // Check if coordinates are too far from Venice
+        const distanceFromVenice = Math.sqrt(
+          Math.pow(lat - this.bounds.centerLat, 2) + 
+          Math.pow(lng - this.bounds.centerLng, 2)
+        );
+        
+        if (distanceFromVenice > 0.5) {
+          console.error(`Building ${fixedBuilding.id} coordinates (${lat}, ${lng}) are too far from Venice`);
+          fixedBuilding.position = { lat: this.bounds.centerLat, lng: this.bounds.centerLng };
+        } else {
+          // Ensure values are numbers, not strings
+          fixedBuilding.position = { lat, lng };
+        }
+      }
+    } else if ('x' in fixedBuilding.position && 'z' in fixedBuilding.position) {
+      // Validate x/z values
+      const x = parseFloat(fixedBuilding.position.x.toString());
+      const z = parseFloat(fixedBuilding.position.z.toString());
+      
+      if (isNaN(x) || isNaN(z) || Math.abs(x) > 500 || Math.abs(z) > 500) {
+        console.error(`Building ${fixedBuilding.id} has invalid x/z values: ${x}, ${z}`);
+        // Convert center lat/lng to x/z
+        const centerX = 0;
+        const centerZ = 0;
+        fixedBuilding.position = { x: centerX, y: 5, z: centerZ };
+      } else {
+        // Ensure values are numbers, not strings
+        fixedBuilding.position = { 
+          x, 
+          y: fixedBuilding.position.y !== undefined ? parseFloat(fixedBuilding.position.y.toString()) : 5,
+          z 
+        };
+      }
+    } else {
+      console.error(`Building ${fixedBuilding.id} has unrecognized position format:`, fixedBuilding.position);
+      fixedBuilding.position = { lat: this.bounds.centerLat, lng: this.bounds.centerLng };
+    }
+    
+    return fixedBuilding;
   }
 }
 
