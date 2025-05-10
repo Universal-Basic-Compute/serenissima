@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { fetchCoatOfArmsImage } from '@/app/utils/coatOfArmsUtils';
 import path from 'path';
 import fs from 'fs/promises';
+import { Api } from 'pyairtable';
 
 // Cache the land owners data with a longer expiration
 let cachedData: any = null;
@@ -75,22 +76,31 @@ export async function GET(request: Request) {
     console.log('Fetching fresh land ownership data from backend...');
     
     try {
-      // Use a more efficient endpoint that returns minimal data
-      const apiBaseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000';
-      const response = await fetch(`${apiBaseUrl}/api/lands/basic`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        signal: AbortSignal.timeout(FETCH_TIMEOUT)
-      });
+      console.log('Fetching fresh land ownership data directly from Airtable...');
       
-      if (!response.ok) {
-        throw new Error(`Backend returned ${response.status}: ${response.statusText}`);
+      // Get Airtable credentials from environment variables
+      const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
+      const AIRTABLE_BASE_ID = process.env.AIRTABLE_BASE_ID;
+      const AIRTABLE_LANDS_TABLE = process.env.AIRTABLE_LANDS_TABLE || 'LANDS';
+      
+      if (!AIRTABLE_API_KEY || !AIRTABLE_BASE_ID) {
+        throw new Error('Airtable credentials not configured');
       }
       
-      const data = await response.json();
-      console.log(`Received ${data.length} land records from backend`);
+      // Initialize Airtable client
+      const airtable = new Api(AIRTABLE_API_KEY);
+      const landsTable = new airtable.base(AIRTABLE_BASE_ID).table(AIRTABLE_LANDS_TABLE);
+      
+      // Fetch all land records
+      const records = await landsTable.select().all();
+      
+      // Transform records to the expected format
+      const data = records.map(record => ({
+        id: record.fields.LandId || record.id,
+        owner: record.fields.User || record.fields.Wallet || null
+      }));
+      
+      console.log(`Retrieved ${data.length} land records directly from Airtable`);
       
       // Helper function to ensure coat of arms URLs use the production domain
       function ensureProductionUrl(url: string): string {
@@ -134,7 +144,7 @@ export async function GET(request: Request) {
       
       return NextResponse.json(cachedData, { headers });
     } catch (fetchError) {
-      console.error('Error fetching from backend:', fetchError);
+      console.error('Error fetching from Airtable:', fetchError);
       
       // If we have stale cache, return it rather than failing
       if (cachedData) {
