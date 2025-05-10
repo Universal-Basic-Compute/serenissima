@@ -172,6 +172,39 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
     console.log('Building data:', JSON.stringify(building, null, 2));
     console.log(`Rendering building ID: ${id}, Type: ${type}, Position:`, position);
     
+    // Add a large debug sphere at the same position
+    const sphereGeometry = new THREE.SphereGeometry(10, 32, 32); // Large 10-unit radius sphere
+    const sphereMaterial = new THREE.MeshBasicMaterial({ 
+      color: 0xff0000,  // Bright red
+      transparent: true,
+      opacity: 0.7
+    });
+    const debugSphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+
+    // Use the exact same position as the building
+    debugSphere.position.set(position.x, position.y + 15, position.z); // Position 15 units above the building
+    scene.add(debugSphere);
+    console.log(`Added debug sphere at position: ${JSON.stringify(debugSphere.position)}`);
+
+    // Store reference to the debug sphere
+    const debugId = `debug_sphere_${id}`;
+    buildingMeshesRef.current.set(debugId, debugSphere);
+    
+    // Add a reference sphere at origin (0,0,0)
+    const originSphereGeometry = new THREE.SphereGeometry(5, 32, 32);
+    const originSphereMaterial = new THREE.MeshBasicMaterial({ 
+      color: 0x00ff00,  // Bright green
+      transparent: true,
+      opacity: 0.7
+    });
+    const originSphere = new THREE.Mesh(originSphereGeometry, originSphereMaterial);
+    originSphere.position.set(0, 15, 0); // At origin, 15 units up
+    scene.add(originSphere);
+    console.log(`Added origin reference sphere at position: (0, 15, 0)`);
+
+    // Store reference
+    buildingMeshesRef.current.set('debug_sphere_origin', originSphere);
+    
     // Skip if we've already rendered this building
     if (buildingMeshesRef.current.has(id)) {
       console.log(`Building ${id} already rendered, skipping`);
