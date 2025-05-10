@@ -114,6 +114,9 @@ async function retryWithExponentialBackoff(fn, maxRetries = 5, initialDelay = 50
       if (error.response) {
         console.log(`Status: ${error.response.status}`);
         console.log(`Headers:`, error.response.headers);
+        
+        // Log the full response body
+        console.log(`Response data:`, JSON.stringify(error.response.data, null, 2));
       }
       
       await new Promise(resolve => setTimeout(resolve, delay));
