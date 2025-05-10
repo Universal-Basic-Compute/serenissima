@@ -586,6 +586,51 @@ export default class PolygonRenderer {
   }
   
   /**
+   * Ensure all buildings are visible in buildings view
+   */
+  public ensureBuildingsVisible() {
+    console.log('Ensuring buildings are visible');
+    
+    // Find all building objects in the scene
+    if (this.scene) {
+      this.scene.traverse(object => {
+        // Check if this is a building object
+        if (object instanceof THREE.Mesh && 
+            object.userData && 
+            (object.userData.isBuilding || 
+             object.userData.type === 'building' || 
+             (typeof object.userData.type === 'string' && object.userData.type.includes('building')))) {
+          
+          // Force visibility
+          object.visible = true;
+          
+          // Force material update
+          if (object.material) {
+            if (Array.isArray(object.material)) {
+              object.material.forEach(mat => {
+                if (mat) {
+                  mat.needsUpdate = true;
+                  mat.transparent = false;
+                  mat.opacity = 1.0;
+                }
+              });
+            } else {
+              object.material.needsUpdate = true;
+              object.material.transparent = false;
+              object.material.opacity = 1.0;
+            }
+          }
+          
+          console.log(`Made building visible: ${object.name || 'unnamed building'}`);
+        }
+      });
+    }
+    
+    // Force a render to apply changes
+    this.facade.forceRender();
+  }
+  
+  /**
    * Update selection state for polygons
    */
   public updateSelectionState(selectedPolygonId: string | null) {
@@ -634,6 +679,7 @@ export default class PolygonRenderer {
     
     const wasLandView = this.activeView === 'land';
     const isNowLandView = activeView === 'land';
+    const isBuildingsView = activeView === 'buildings';
     
     this.activeView = activeView;
     
@@ -652,6 +698,12 @@ export default class PolygonRenderer {
     
     // Ensure all polygons remain visible after view mode change
     setTimeout(() => this.ensurePolygonsVisible(), 100);
+    
+    // If switching to buildings view, make sure buildings are visible
+    if (isBuildingsView) {
+      console.log('Switching to buildings view, ensuring buildings are visible');
+      this.ensureBuildingsVisible();
+    }
     
     console.log(`View mode updated to ${activeView}`);
   }

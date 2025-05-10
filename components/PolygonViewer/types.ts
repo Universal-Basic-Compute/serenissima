@@ -1,6 +1,5 @@
 export type ViewMode = 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance';
-export type ActiveViewMode = 'buildings' | 'land' | 'markets'; // Add this new type for active views
-export type ActiveViewMode = 'buildings' | 'land' | 'markets'; // Add this new type for active views
+export type ActiveViewMode = 'buildings' | 'land' | 'markets'; // Type for active views
 
 export interface Coordinate {
   lat: number;

@@ -66,7 +66,7 @@ export default function SimplePage() {
   
   // UI state
   const [showInfo, setShowInfo] = useState(false);
-  // Define the view type to ensure consistency
+  // Define the view type to ensure consistency with our ActiveViewMode type
   type ViewType = 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance' | 'loans' | 'knowledge';
   const [activeView, setActiveView] = useState<ViewType>('land');
   const [show3DView, setShow3DView] = useState<boolean>(true);
@@ -110,14 +110,25 @@ export default function SimplePage() {
       }, 100);
     };
     
+    const handleShowBuildings = () => {
+      console.log('Received showBuildings event');
+      // Ensure buildings are visible
+      if (polygonRendererRef.current) {
+        console.log('Forcing buildings to be visible from event handler');
+        polygonRendererRef.current.ensureBuildingsVisible();
+      }
+    };
+    
     window.addEventListener('hide3DView', handleHide3DView);
     window.addEventListener('show3DView', handleShow3DView);
     window.addEventListener('buildingMenuClosed', handleBuildingMenuClosed);
+    window.addEventListener('showBuildings', handleShowBuildings);
     
     return () => {
       window.removeEventListener('hide3DView', handleHide3DView);
       window.removeEventListener('show3DView', handleShow3DView);
       window.removeEventListener('buildingMenuClosed', handleBuildingMenuClosed);
+      window.removeEventListener('showBuildings', handleShowBuildings);
     };
   }, []);
 

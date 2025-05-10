@@ -12,11 +12,19 @@ export default function ViewModeMenu({ activeView, setActiveView }: ViewModeMenu
   const handleViewModeChange = (view: ViewMode) => {
     setActiveView(view);
     // Emit event to notify other components about the view mode change
-    eventBus.emit(EventTypes.VIEW_MODE_CHANGED);
+    eventBus.emit(EventTypes.VIEW_MODE_CHANGED, { viewMode: view });
+    
+    // If switching to buildings view, dispatch a custom event to ensure buildings are visible
+    if (view === 'buildings') {
+      console.log('Switching to buildings view, dispatching event');
+      window.dispatchEvent(new CustomEvent('showBuildings'));
+    }
   };
   // Helper function to check if a view is disabled
   const isDisabled = (view: ViewMode): boolean => {
-    return view !== 'buildings' && view !== 'land' && view !== 'markets';
+    // Only these views are enabled
+    const enabledViews: ViewMode[] = ['buildings', 'land', 'markets'];
+    return !enabledViews.includes(view);
   };
 
   // Detailed descriptions for each view mode

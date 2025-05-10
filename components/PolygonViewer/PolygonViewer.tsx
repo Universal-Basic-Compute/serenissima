@@ -1349,6 +1349,24 @@ export default function PolygonViewer() {
           }
         }
         
+        // Special handling for buildings view
+        if (activeView === 'buildings') {
+          console.log('Switching to buildings view');
+          
+          // Ensure buildings are visible
+          if (polygonRendererRef.current) {
+            console.log('Forcing buildings to be visible');
+            polygonRendererRef.current.updateViewMode(activeView);
+            
+            // Call the new method to ensure buildings are visible
+            setTimeout(() => {
+              if (polygonRendererRef.current) {
+                polygonRendererRef.current.ensureBuildingsVisible();
+              }
+            }, 100);
+          }
+        }
+        
         // Update market panel visibility based on active view
         setMarketPanelVisible(activeView === 'markets');
         
