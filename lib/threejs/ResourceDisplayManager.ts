@@ -188,7 +188,7 @@ export class ResourceDisplayManager {
   private async loadResources(): Promise<void> {
     try {
       // Get the username instead of wallet address
-      const username = getUserName();
+      const username = getUsername();
       let queryParams = '';
       
       if (username) {
