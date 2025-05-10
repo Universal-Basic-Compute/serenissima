@@ -63,8 +63,7 @@ async function loadCitizensFromAirtable(): Promise<Citizen[]> {
               description: fields.Description,
               imagePrompt: fields.ImagePrompt,
               wealth: fields.Wealth,
-              createdAt: fields.CreatedAt,
-              imageUrl: fields.ImageUrl
+              createdAt: fields.CreatedAt
             });
           });
           
@@ -241,10 +240,10 @@ Create 10 unique Venetian citizens with historically accurate names, description
 6. Wealth - Approximate wealth in Ducats, appropriate to their social class
 
 DISTRIBUTION GUIDELINES:
-- Patricians: 10% of population, wealth range 5,000-50,000 ducats
-- Cittadini: 20% of population, wealth range 1,000-5,000 ducats
-- Popolani: 40% of population, wealth range 100-1,000 ducats
-- Laborers: 30% of population, wealth range 10-100 ducats
+- Patricians: Create 1, wealth range 5,000-50,000 ducats
+- Cittadini: Create 2, wealth range 1,000-5,000 ducats
+- Popolani: Create 4, wealth range 100-1,000 ducats
+- Laborers: Create 3, wealth range 10-100 ducats
 
 FORMAT:
 Return the data as a valid JSON array with 10 objects, each containing the fields listed above.`;
