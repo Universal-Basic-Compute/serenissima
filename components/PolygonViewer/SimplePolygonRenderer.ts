@@ -3047,6 +3047,26 @@ export default class SimplePolygonRenderer {
     const startPoint = this.measurementPoints[0];
     pathPoints.push(startPoint);
     
+    // Convert start and end to normalized coordinates for distance calculations
+    const startNormalized = normalizeCoordinates(
+      [start],
+      this.bounds.centerLat,
+      this.bounds.centerLng,
+      this.bounds.scale,
+      this.bounds.latCorrectionFactor
+    )[0];
+    
+    const endNormalized = normalizeCoordinates(
+      [end],
+      this.bounds.centerLat,
+      this.bounds.centerLng,
+      this.bounds.scale,
+      this.bounds.latCorrectionFactor
+    )[0];
+    
+    const startPos = new THREE.Vector3(startNormalized.x, 0, -startNormalized.y);
+    const endPos = new THREE.Vector3(endNormalized.x, 0, -endNormalized.y);
+    
     // For each polygon in the path, find the bridge points to the next polygon
     for (let i = 0; i < path.length - 1; i++) {
       const currentPolygonId = path[i];
@@ -3061,17 +3081,70 @@ export default class SimplePolygonRenderer {
         continue;
       }
       
-      // Find the bridge point connecting to the next polygon
-      const bridgePoint = currentPolygon.bridgePoints.find(bp => 
+      // Find all bridge points connecting to the next polygon
+      const bridgePoints = currentPolygon.bridgePoints.filter(bp => 
         bp.connection && bp.connection.targetPolygonId === nextPolygonId
       );
       
-      if (bridgePoint) {
-        console.log(`Found bridge point from ${currentPolygonId} to ${nextPolygonId}`);
+      if (bridgePoints.length > 0) {
+        console.log(`Found ${bridgePoints.length} bridge points from ${currentPolygonId} to ${nextPolygonId}`);
         
-        // Add the bridge point to the path
+        // If we have multiple bridge points, find the one that's closest to the direct path
+        let bestBridgePoint = bridgePoints[0];
+        let bestScore = Infinity;
+        
+        for (const bridgePoint of bridgePoints) {
+          // Convert bridge point to normalized coordinates
+          const edgeCoord = normalizeCoordinates(
+            [bridgePoint.edge],
+            this.bounds.centerLat,
+            this.bounds.centerLng,
+            this.bounds.scale,
+            this.bounds.latCorrectionFactor
+          )[0];
+          
+          const targetCoord = normalizeCoordinates(
+            [bridgePoint.connection.targetPoint],
+            this.bounds.centerLat,
+            this.bounds.centerLng,
+            this.bounds.scale,
+            this.bounds.latCorrectionFactor
+          )[0];
+          
+          // Create 3D points for the bridge
+          const bridgePos = new THREE.Vector3(edgeCoord.x, 0, -edgeCoord.y);
+          const targetPos = new THREE.Vector3(targetCoord.x, 0, -targetCoord.y);
+          
+          // Calculate how far this bridge is from the direct path
+          // First, calculate the midpoint of the bridge
+          const bridgeMidpoint = new THREE.Vector3().addVectors(bridgePos, targetPos).multiplyScalar(0.5);
+          
+          // Calculate distance from this midpoint to the direct line between start and end
+          const distanceToDirectPath = this.distanceFromPointToLine(bridgeMidpoint, startPos, endPos);
+          
+          // Calculate how much this bridge extends the total path length
+          const pathLengthWithBridge = 
+            startPos.distanceTo(bridgePos) + 
+            bridgePos.distanceTo(targetPos) + 
+            targetPos.distanceTo(endPos);
+          
+          const directPathLength = startPos.distanceTo(endPos);
+          const pathLengthRatio = pathLengthWithBridge / directPathLength;
+          
+          // Score is a combination of distance from direct path and path length extension
+          const score = distanceToDirectPath * pathLengthRatio;
+          
+          if (score < bestScore) {
+            bestScore = score;
+            bestBridgePoint = bridgePoint;
+          }
+        }
+        
+        console.log(`Selected best bridge point with score ${bestScore}`);
+        
+        // Add the best bridge point to the path
         const edgeCoord = normalizeCoordinates(
-          [bridgePoint.edge],
+          [bestBridgePoint.edge],
           this.bounds.centerLat,
           this.bounds.centerLng,
           this.bounds.scale,
@@ -3083,9 +3156,9 @@ export default class SimplePolygonRenderer {
         pathPoints.push(bridgePosition);
         
         // If there's a connection point, add it too
-        if (bridgePoint.connection && bridgePoint.connection.targetPoint) {
+        if (bestBridgePoint.connection && bestBridgePoint.connection.targetPoint) {
           const targetCoord = normalizeCoordinates(
-            [bridgePoint.connection.targetPoint],
+            [bestBridgePoint.connection.targetPoint],
             this.bounds.centerLat,
             this.bounds.centerLng,
             this.bounds.scale,
@@ -3177,6 +3250,31 @@ export default class SimplePolygonRenderer {
       // Store reference for cleanup
       this.pathVisualization.push(marker);
     }
+  }
+  
+  /**
+   * Calculate the distance from a point to a line segment
+   */
+  private distanceFromPointToLine(point: THREE.Vector3, lineStart: THREE.Vector3, lineEnd: THREE.Vector3): number {
+    // Create vectors
+    const line = new THREE.Vector3().subVectors(lineEnd, lineStart);
+    const lineLength = line.length();
+    const lineDirection = line.clone().normalize();
+    
+    // Vector from line start to point
+    const startToPoint = new THREE.Vector3().subVectors(point, lineStart);
+    
+    // Project startToPoint onto the line
+    const projection = startToPoint.dot(lineDirection);
+    
+    // Clamp projection to line segment
+    const clampedProjection = Math.max(0, Math.min(lineLength, projection));
+    
+    // Calculate the closest point on the line
+    const closestPoint = new THREE.Vector3().copy(lineStart).addScaledVector(lineDirection, clampedProjection);
+    
+    // Return the distance from the point to the closest point on the line
+    return point.distanceTo(closestPoint);
   }
   
   /**
