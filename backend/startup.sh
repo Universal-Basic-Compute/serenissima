@@ -116,28 +116,28 @@ else
     echo "Citizen job assignment cron job already exists. No changes made."
 fi
 
-# Add cron job for daily rent payments
-if ! grep -q "dailyrentpayments.py" "$TEMP_CRONTAB"; then
-    # Add the cron job to run at 5pm UTC daily
-    echo "0 17 * * * cd $REPO_PATH && python3 engine/dailyrentpayments.py >> $REPO_PATH/daily_rent_payments_cron.log 2>&1" >> "$TEMP_CRONTAB"
-    
-    # Install the new crontab
-    crontab "$TEMP_CRONTAB"
-    echo "Cron job installed successfully. Daily rent payments will run daily at 5pm UTC."
-else
-    echo "Daily rent payments cron job already exists. No changes made."
-fi
-
 # Add cron job for daily wage payments
 if ! grep -q "dailywages.py" "$TEMP_CRONTAB"; then
-    # Add the cron job to run at 6pm UTC daily
-    echo "0 18 * * * cd $REPO_PATH && python3 engine/dailywages.py >> $REPO_PATH/daily_wages_cron.log 2>&1" >> "$TEMP_CRONTAB"
+    # Add the cron job to run at 5pm UTC daily
+    echo "0 17 * * * cd $REPO_PATH && python3 engine/dailywages.py >> $REPO_PATH/daily_wages_cron.log 2>&1" >> "$TEMP_CRONTAB"
     
     # Install the new crontab
     crontab "$TEMP_CRONTAB"
-    echo "Cron job installed successfully. Daily wage payments will run daily at 6pm UTC."
+    echo "Cron job installed successfully. Daily wage payments will run daily at 5pm UTC."
 else
     echo "Daily wage payments cron job already exists. No changes made."
+fi
+
+# Add cron job for daily rent payments
+if ! grep -q "dailyrentpayments.py" "$TEMP_CRONTAB"; then
+    # Add the cron job to run at 6pm UTC daily
+    echo "0 18 * * * cd $REPO_PATH && python3 engine/dailyrentpayments.py >> $REPO_PATH/daily_rent_payments_cron.log 2>&1" >> "$TEMP_CRONTAB"
+    
+    # Install the new crontab
+    crontab "$TEMP_CRONTAB"
+    echo "Cron job installed successfully. Daily rent payments will run daily at 6pm UTC."
+else
+    echo "Daily rent payments cron job already exists. No changes made."
 fi
 
 # Add cron job for lease distribution
