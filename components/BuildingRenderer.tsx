@@ -257,6 +257,22 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
       }
     };
     
+    const handleForceRerender = async () => {
+      console.log('Force rerender buildings event received');
+      
+      // Clear existing buildings
+      for (const mesh of buildingMeshesRef.current.values()) {
+        scene.remove(mesh);
+      }
+      buildingMeshesRef.current.clear();
+      
+      // Fetch and render all buildings again
+      const buildingsData = await fetchBuildings();
+      renderBuildings(buildingsData);
+      
+      console.log(`Rerendered ${buildingsData.length} buildings`);
+    };
+    
     // Subscribe to events
     const buildingPlacedSubscription = eventBus.subscribe(
       EventTypes.BUILDING_PLACED,
@@ -268,10 +284,14 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
       handleBuildingRemoved
     );
     
+    // Add event listener for force rerender
+    window.addEventListener('forceRerenderBuildings', handleForceRerender);
+    
     return () => {
       // Unsubscribe from events
       buildingPlacedSubscription.unsubscribe();
       buildingRemovedSubscription.unsubscribe();
+      window.removeEventListener('forceRerenderBuildings', handleForceRerender);
     };
   }, [active, scene]);
   

@@ -566,6 +566,51 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
       
       <button
         onClick={() => {
+          console.log('Rerendering all buildings...');
+          
+          // First, dispatch an event to refresh buildings
+          eventBus.emit(EventTypes.BUILDING_PLACED, { refresh: true });
+          
+          // Then force a scene update if possible
+          if (scene) {
+            // Find the renderer
+            const renderer = scene.userData?.renderer;
+            if (renderer) {
+              console.log('Forcing renderer update');
+              renderer.render(scene, camera || (document.querySelector('canvas')?.__camera as THREE.PerspectiveCamera));
+            }
+            
+            // Log all buildings in the scene after refresh
+            console.log('Buildings in scene after refresh:');
+            scene.traverse((object) => {
+              if (object.userData && object.userData.buildingId) {
+                console.log(`- Building ${object.userData.buildingId}:`, object);
+              }
+            });
+          }
+          
+          // Also trigger the BuildingRenderer to recreate all buildings
+          if (typeof window !== 'undefined') {
+            console.log('Dispatching custom event to force building rerender');
+            window.dispatchEvent(new CustomEvent('forceRerenderBuildings'));
+          }
+          
+          // Call the onRefreshBuildings callback if provided
+          if (onRefreshBuildings) {
+            onRefreshBuildings();
+          }
+        }}
+        className="px-4 py-2 bg-pink-600 text-white rounded-md shadow-md hover:bg-pink-700 transition-colors flex items-center space-x-2"
+        title="Force rerender all buildings"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
+        </svg>
+        <span>Rerender Buildings</span>
+      </button>
+      
+      <button
+        onClick={() => {
           // Focus camera on the expected building position
           if (camera) {
             // Get the actual camera
