@@ -186,6 +186,18 @@ export async function GET(request: Request) {
       };
     }
 
+    // Define the Building interface for consistent typing
+    interface Building {
+      id: string;
+      type: string;
+      land_id: string;
+      variant: string;
+      position: any;
+      rotation: number;
+      owner: string;
+      created_at: string;
+    }
+
     // Transform Airtable records to our format
     const buildings = (records as AirtableRecord[]).map(record => {
       const fields = record.fields;
