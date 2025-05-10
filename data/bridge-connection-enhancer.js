@@ -175,8 +175,7 @@ Example format:
             messages: [
               { role: 'user', content: prompt }
             ],
-            system: "You are a helpful assistant that generates historically accurate bridge names for Renaissance Venice. Always respond with valid JSON.",
-            response_format: { type: "json" } // Changed from "json_object" to "json"
+            system: "You are a helpful assistant that generates historically accurate bridge names for Renaissance Venice. Always respond with valid JSON."
           },
           {
             headers: {
