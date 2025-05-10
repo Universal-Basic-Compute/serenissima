@@ -19,7 +19,7 @@ import sys
 import logging
 import argparse
 from typing import Dict, List, Optional, Any
-import airtable
+from pyairtable import Api, Table
 from dotenv import load_dotenv
 
 # Set up logging
@@ -52,23 +52,23 @@ def initialize_airtable():
         sys.exit(1)
     
     try:
-        # Return the base object instead of an Airtable instance
-        # The table-specific instances will be created when needed
-        return airtable.Airtable(base_id, api_key)
+        # Return a dictionary of table objects using pyairtable
+        return {
+            'citizens': Table(api_key, base_id, 'CITIZENS'),
+            'buildings': Table(api_key, base_id, 'BUILDINGS')
+        }
     except Exception as e:
         log.error(f"Failed to initialize Airtable: {e}")
         sys.exit(1)
 
-def get_homeless_citizens(at_client) -> List[Dict]:
+def get_homeless_citizens(tables) -> List[Dict]:
     """Fetch citizens without homes, sorted by wealth in descending order."""
     log.info("Fetching homeless citizens...")
     
     try:
-        # Create a table-specific instance
-        citizens_table = at_client.table('CITIZENS')
         # Get citizens without a Home field or with empty Home field
         formula = "OR({Home} = '', {Home} = BLANK())"
-        homeless_citizens = citizens_table.all(formula=formula)
+        homeless_citizens = tables['citizens'].all(formula=formula)
         
         # Sort by Wealth in descending order
         homeless_citizens.sort(key=lambda c: float(c['fields'].get('Wealth', 0) or 0), reverse=True)
@@ -79,16 +79,14 @@ def get_homeless_citizens(at_client) -> List[Dict]:
         log.error(f"Error fetching homeless citizens: {e}")
         return []
 
-def get_available_buildings(at_client, building_type: str) -> List[Dict]:
+def get_available_buildings(tables, building_type: str) -> List[Dict]:
     """Fetch available buildings of a specific type, sorted by rent in ascending order."""
     log.info(f"Fetching available buildings of type: {building_type}")
     
     try:
-        # Create a table-specific instance
-        buildings_table = at_client.table('BUILDINGS')
         # Get buildings of the specified type that are not already occupied
         formula = f"AND({{Type}} = '{building_type}', OR({{Occupant}} = '', {{Occupant}} = BLANK()))"
-        buildings = buildings_table.all(formula=formula)
+        buildings = tables['buildings'].all(formula=formula)
         
         # Sort by RentAmount in ascending order
         buildings.sort(key=lambda b: float(b['fields'].get('RentAmount', 0) or 0))
@@ -99,7 +97,7 @@ def get_available_buildings(at_client, building_type: str) -> List[Dict]:
         log.error(f"Error fetching buildings of type {building_type}: {e}")
         return []
 
-def assign_citizen_to_building(at_client, citizen: Dict, building: Dict) -> bool:
+def assign_citizen_to_building(tables, citizen: Dict, building: Dict) -> bool:
     """Assign a citizen to a building and update both records."""
     citizen_id = citizen['id']
     building_id = building['id']
@@ -110,14 +108,12 @@ def assign_citizen_to_building(at_client, citizen: Dict, building: Dict) -> bool
     
     try:
         # Update citizen record with new home
-        citizens_table = at_client.table('CITIZENS')
-        citizens_table.update(citizen_id, {
+        tables['citizens'].update(citizen_id, {
             'Home': building_id
         })
         
         # Update building record with new occupant
-        buildings_table = at_client.table('BUILDINGS')
-        buildings_table.update(building_id, {
+        tables['buildings'].update(building_id, {
             'Occupant': citizen_id
         })
         
@@ -127,7 +123,7 @@ def assign_citizen_to_building(at_client, citizen: Dict, building: Dict) -> bool
         log.error(f"Error assigning citizen to building: {e}")
         return False
 
-def find_suitable_building(at_client, citizen: Dict) -> Optional[Dict]:
+def find_suitable_building(tables, citizen: Dict) -> Optional[Dict]:
     """Find a suitable building for a citizen based on their social class."""
     social_class = citizen['fields'].get('SocialClass', '')
     citizen_name = f"{citizen['fields'].get('FirstName', '')} {citizen['fields'].get('LastName', '')}"
@@ -139,7 +135,7 @@ def find_suitable_building(at_client, citizen: Dict) -> Optional[Dict]:
     
     # Try each building type in order of preference
     for building_type in building_types:
-        buildings = get_available_buildings(at_client, building_type)
+        buildings = get_available_buildings(tables, building_type)
         if buildings:
             # Return the first (lowest rent) building
             return buildings[0]
@@ -149,7 +145,7 @@ def find_suitable_building(at_client, citizen: Dict) -> Optional[Dict]:
         log.info(f"No preferred buildings found for {citizen_name}, trying any available building")
         for building_type in BUILDING_PREFERENCES["ANY"]:
             if building_type not in building_types:  # Skip already checked types
-                buildings = get_available_buildings(at_client, building_type)
+                buildings = get_available_buildings(tables, building_type)
                 if buildings:
                     return buildings[0]
     
@@ -160,8 +156,8 @@ def house_homeless_citizens(dry_run: bool = False):
     """Main function to house homeless citizens."""
     log.info(f"Starting housing process (dry_run: {dry_run})")
     
-    at_client = initialize_airtable()
-    homeless_citizens = get_homeless_citizens(at_client)
+    tables = initialize_airtable()
+    homeless_citizens = get_homeless_citizens(tables)
     
     if not homeless_citizens:
         log.info("No homeless citizens found. Everyone is housed!")
@@ -174,7 +170,7 @@ def house_homeless_citizens(dry_run: bool = False):
         citizen_name = f"{citizen['fields'].get('FirstName', '')} {citizen['fields'].get('LastName', '')}"
         log.info(f"Processing citizen: {citizen_name}")
         
-        building = find_suitable_building(at_client, citizen)
+        building = find_suitable_building(tables, citizen)
         
         if building:
             building_name = building['fields'].get('Name', building['id'])
@@ -183,7 +179,7 @@ def house_homeless_citizens(dry_run: bool = False):
                 log.info(f"[DRY RUN] Would house {citizen_name} in {building_name}")
                 housed_count += 1
             else:
-                success = assign_citizen_to_building(at_client, citizen, building)
+                success = assign_citizen_to_building(tables, citizen, building)
                 if success:
                     housed_count += 1
                 else:
