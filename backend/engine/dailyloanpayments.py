@@ -170,6 +170,11 @@ def create_notification(tables, user: str, content: str, details: Dict) -> Optio
     """Create a notification for a user."""
     log.info(f"Creating notification for user {user}: {content}")
     
+    # Skip notification if user is empty or None
+    if not user:
+        log.warning(f"Cannot create notification: user is empty")
+        return None
+    
     try:
         now = datetime.datetime.now().isoformat()
         
@@ -234,22 +239,83 @@ def process_loan_payment(tables, loan: Dict, dry_run: bool = False) -> bool:
         log.warning(f"Lender {lender} not found, skipping payment")
         return False
     
+    # Handle case where borrower or lender is not found
+    if not borrower_record:
+        log.warning(f"Borrower {borrower} not found, skipping payment")
+        
+        # Still notify lender about the issue if lender exists
+        if lender_record:
+            create_notification(
+                tables,
+                lender,
+                f"Loan payment from {borrower} could not be processed: borrower account not found",
+                {
+                    "loan_id": loan_id,
+                    "loan_name": loan_name,
+                    "payment_amount": payment_amount,
+                    "remaining_balance": remaining_balance,
+                    "borrower": borrower,
+                    "event_type": "payment_error",
+                    "error_type": "borrower_not_found"
+                }
+            )
+        return False
+    
+    if not lender_record:
+        log.warning(f"Lender {lender} not found, skipping payment")
+        
+        # Still notify borrower about the issue
+        create_notification(
+            tables,
+            borrower,
+            f"Your loan payment of {payment_amount} COMPUTE could not be processed: lender account not found",
+            {
+                "loan_id": loan_id,
+                "loan_name": loan_name,
+                "payment_amount": payment_amount,
+                "remaining_balance": remaining_balance,
+                "lender": lender,
+                "event_type": "payment_error",
+                "error_type": "lender_not_found"
+            }
+        )
+        return False
+    
     # Check if borrower has enough compute
     borrower_compute = borrower_record['fields'].get('ComputeAmount', 0)
     if borrower_compute < payment_amount:
         log.warning(f"Borrower {borrower} has insufficient compute balance: {borrower_compute} < {payment_amount}")
         
-        # Create notification about insufficient funds
+        # Create notification about insufficient funds for borrower
         create_notification(
             tables,
             borrower,
-            f"Insufficient funds for loan payment of {payment_amount} COMPUTE",
+            f"Insufficient funds for loan payment of {payment_amount} COMPUTE. Please add funds to your account to avoid penalties.",
             {
                 "loan_id": loan_id,
                 "loan_name": loan_name,
                 "payment_amount": payment_amount,
                 "available_balance": borrower_compute,
-                "event_type": "payment_failed"
+                "remaining_balance": remaining_balance,
+                "event_type": "payment_failed",
+                "error_type": "insufficient_funds"
+            }
+        )
+        
+        # Also notify lender about the missed payment
+        create_notification(
+            tables,
+            lender,
+            f"Loan payment of {payment_amount} COMPUTE from {borrower} failed due to insufficient funds",
+            {
+                "loan_id": loan_id,
+                "loan_name": loan_name,
+                "payment_amount": payment_amount,
+                "borrower": borrower,
+                "borrower_balance": borrower_compute,
+                "remaining_balance": remaining_balance,
+                "event_type": "payment_failed",
+                "error_type": "insufficient_funds"
             }
         )
         
@@ -287,7 +353,9 @@ def process_loan_payment(tables, loan: Dict, dry_run: bool = False) -> bool:
     # For borrower
     borrower_notification_content = f"Loan payment of {payment_amount} COMPUTE processed"
     if is_final_payment:
-        borrower_notification_content += ". Your loan has been fully repaid!"
+        borrower_notification_content += ". Your loan has been fully repaid! Congratulations!"
+    else:
+        borrower_notification_content += f". Remaining balance: {new_balance} COMPUTE"
     
     create_notification(
         tables,
@@ -299,7 +367,8 @@ def process_loan_payment(tables, loan: Dict, dry_run: bool = False) -> bool:
             "payment_amount": payment_amount,
             "remaining_balance": new_balance,
             "is_final_payment": is_final_payment,
-            "event_type": "payment_processed"
+            "event_type": "payment_processed",
+            "lender": lender
         }
     )
     
@@ -307,6 +376,8 @@ def process_loan_payment(tables, loan: Dict, dry_run: bool = False) -> bool:
     lender_notification_content = f"Received loan payment of {payment_amount} COMPUTE from {borrower}"
     if is_final_payment:
         lender_notification_content += ". The loan has been fully repaid!"
+    else:
+        lender_notification_content += f". Remaining balance: {new_balance} COMPUTE"
     
     create_notification(
         tables,
