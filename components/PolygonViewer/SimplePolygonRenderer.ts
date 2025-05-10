@@ -745,21 +745,21 @@ export default class SimplePolygonRenderer {
     raycaster.params.Mesh.threshold = 0.1;
     
     // Find all land meshes in the scene
-    const landMeshes: THREE.Mesh[] = [];
+    const landMeshes: THREE.Mesh<THREE.BufferGeometry, THREE.Material | THREE.Material[]>[] = [];
     this.scene.traverse(object => {
       // Include all meshes except those we want to exclude
       if (object instanceof THREE.Mesh && 
           !object.userData.buildingId && 
           !object.userData.isWater &&
           !object.userData.isCoatOfArms) {
-        landMeshes.push(object);
+        landMeshes.push(object as THREE.Mesh<THREE.BufferGeometry, THREE.Material | THREE.Material[]>);
       }
     });
     
     console.log(`Found ${landMeshes.length} potential land meshes for ground level detection`);
     
     // Find intersections with land
-    const intersects = raycaster.intersectObjects(landMeshes, true); // true to check descendants
+    const intersects = raycaster.intersectObjects(landMeshes as THREE.Object3D<THREE.Object3DEventMap>[], true); // true to check descendants
     
     // Log intersection results for debugging
     if (intersects.length > 0) {
@@ -779,7 +779,7 @@ export default class SimplePolygonRenderer {
       largerRaycaster.set(rayOrigin, rayDirection);
       largerRaycaster.params.Mesh.threshold = 1.0; // Much larger threshold
       
-      const largerIntersects = largerRaycaster.intersectObjects(landMeshes, true);
+      const largerIntersects = largerRaycaster.intersectObjects(landMeshes as THREE.Object3D<THREE.Object3DEventMap>[], true);
       if (largerIntersects.length > 0) {
         console.log(`Found intersection with larger threshold at distance ${largerIntersects[0].distance}`);
         const groundPoint = largerIntersects[0].point.clone();
