@@ -751,16 +751,24 @@ export default function MapPage() {
         console.log('WaterPoints data received:', data);
         console.log(`Loaded ${points.length} existing waterpoints`);
         
-        setWaterPoints(points);
+        // Créer un ensemble des IDs des points actuels pour vérification rapide
+        const currentPointIds = new Set(points.map((point: any) => point.id));
         
         // Visualiser les WaterPoints sur la carte
         if (mapRef.current) {
-          // Supprimer les marqueurs existants
-          Object.values(waterPointMarkers).forEach(marker => marker.setMap(null));
-          const newMarkers: {[id: string]: google.maps.Marker} = {};
+          // Supprimer les marqueurs des points qui n'existent plus
+          Object.entries(waterPointMarkers).forEach(([id, marker]) => {
+            if (!currentPointIds.has(id)) {
+              // Ce point n'existe plus dans les données, supprimer son marqueur
+              marker.setMap(null);
+            }
+          });
           
           // Supprimer les lignes de connexion existantes
           waterPointConnections.forEach(line => line.setMap(null));
+          
+          // Créer de nouveaux objets pour stocker les marqueurs et connexions
+          const newMarkers: {[id: string]: google.maps.Marker} = {};
           const newConnections: google.maps.Polyline[] = [];
           
           // Créer des marqueurs pour chaque WaterPoint
@@ -770,42 +778,75 @@ export default function MapPage() {
               ? JSON.parse(point.position) 
               : point.position;
             
-            const marker = new google.maps.Marker({
-              position: new google.maps.LatLng(position.lat, position.lng),
-              map: mapRef.current,
-              icon: {
-                path: google.maps.SymbolPath.CIRCLE,
-                scale: 7,
-                fillColor: point.type === 'dock' ? '#FF8800' : '#0088FF',
-                fillOpacity: 1,
-                strokeWeight: 2,
-                strokeColor: '#FFFFFF'
-              },
-              title: point.id
-            });
+            // Vérifier si un marqueur existe déjà pour ce point
+            const existingMarker = waterPointMarkers[point.id];
             
-            // Ajouter un écouteur de clic pour sélectionner ce WaterPoint
-            marker.addListener('click', () => {
-              if (connectWaterPointMode && selectedWaterPoint && selectedWaterPoint.id !== point.id) {
-                // Créer une connexion entre les deux WaterPoints
-                createWaterPointConnection(selectedWaterPoint, point);
-              } else {
-                // Sélectionner ce WaterPoint
-                setSelectedWaterPoint(point);
-                
-                // Mettre à jour l'apparence du marqueur pour montrer qu'il est sélectionné
-                marker.setIcon({
+            if (existingMarker) {
+              // Mettre à jour la position du marqueur existant si nécessaire
+              const currentPos = existingMarker.getPosition();
+              const newPos = new google.maps.LatLng(position.lat, position.lng);
+              
+              if (currentPos?.lat() !== newPos.lat() || currentPos?.lng() !== newPos.lng()) {
+                existingMarker.setPosition(newPos);
+              }
+              
+              // Réutiliser le marqueur existant
+              newMarkers[point.id] = existingMarker;
+            } else {
+              // Créer un nouveau marqueur
+              const marker = new google.maps.Marker({
+                position: new google.maps.LatLng(position.lat, position.lng),
+                map: mapRef.current,
+                icon: {
                   path: google.maps.SymbolPath.CIRCLE,
-                  scale: 9,
-                  fillColor: '#FF0000',
+                  scale: 7,
+                  fillColor: point.type === 'dock' ? '#FF8800' : '#0088FF',
                   fillOpacity: 1,
                   strokeWeight: 2,
                   strokeColor: '#FFFFFF'
-                });
-              }
-            });
-            
-            newMarkers[point.id] = marker;
+                },
+                title: point.id
+              });
+              
+              // Ajouter un écouteur de clic pour sélectionner ce WaterPoint
+              marker.addListener('click', () => {
+                if (connectWaterPointMode && selectedWaterPoint && selectedWaterPoint.id !== point.id) {
+                  // Créer une connexion entre les deux WaterPoints
+                  createWaterPointConnection(selectedWaterPoint, point);
+                } else {
+                  // Sélectionner ce WaterPoint
+                  setSelectedWaterPoint(point);
+                  
+                  // Mettre à jour l'apparence du marqueur pour montrer qu'il est sélectionné
+                  marker.setIcon({
+                    path: google.maps.SymbolPath.CIRCLE,
+                    scale: 9,
+                    fillColor: '#FF0000',
+                    fillOpacity: 1,
+                    strokeWeight: 2,
+                    strokeColor: '#FFFFFF'
+                  });
+                  
+                  // Réinitialiser les autres marqueurs
+                  Object.entries(newMarkers).forEach(([id, m]) => {
+                    if (id !== point.id) {
+                      m.setIcon({
+                        path: google.maps.SymbolPath.CIRCLE,
+                        scale: 7,
+                        fillColor: m.get('type') === 'dock' ? '#FF8800' : '#0088FF',
+                        fillOpacity: 1,
+                        strokeWeight: 2,
+                        strokeColor: '#FFFFFF'
+                      });
+                    }
+                  });
+                }
+              });
+              
+              // Stocker le type dans les propriétés du marqueur
+              marker.set('type', point.type);
+              newMarkers[point.id] = marker;
+            }
           });
           
           // Créer des lignes pour les connexions
@@ -845,14 +886,18 @@ export default function MapPage() {
             });
           });
           
+          // Mettre à jour les états avec les nouveaux marqueurs et connexions
           setWaterPointMarkers(newMarkers);
           setWaterPointConnections(newConnections);
         }
+        
+        // Mettre à jour l'état des points
+        setWaterPoints(points);
       })
       .catch(error => {
         console.error('Error loading waterpoints:', error);
       });
-  }, [waterPointMarkers, waterPointConnections]);
+  }, [waterPointMarkers, waterPointConnections, connectWaterPointMode, selectedWaterPoint]);
   
   // Load WaterPoints when the map loads
   useEffect(() => {
