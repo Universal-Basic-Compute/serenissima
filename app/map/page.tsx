@@ -1366,6 +1366,258 @@ export default function MapPage() {
     });
   };
   
+  // Helper function to find the intersection of two line segments
+  const findLineIntersection = (x1, y1, x2, y2, x3, y3, x4, y4) => {
+    // Calculate the denominator
+    const denominator = ((y4 - y3) * (x2 - x1)) - ((x4 - x3) * (y2 - y1));
+    
+    // Lines are parallel if denominator is zero
+    if (denominator === 0) return null;
+    
+    // Calculate the numerators
+    const ua = (((x4 - x3) * (y1 - y3)) - ((y4 - y3) * (x1 - x3))) / denominator;
+    const ub = (((x2 - x1) * (y1 - y3)) - ((y2 - y1) * (x1 - x3))) / denominator;
+    
+    // Check if intersection is within both line segments
+    if (ua < 0 || ua > 1 || ub < 0 || ub > 1) return null;
+    
+    // Calculate the intersection point
+    const x = x1 + (ua * (x2 - x1));
+    const y = y1 + (ua * (y2 - y1));
+    
+    return { lat: y, lng: x };
+  };
+
+  // Add this function to create waterPoints algorithmically
+  const createWaterPointsAlgorithmically = () => {
+    if (!mapRef.current || !isGoogleLoaded || Object.keys(activeLandPolygons).length === 0) {
+      alert('Map not ready yet or no polygons loaded. Please try again in a moment.');
+      return;
+    }
+    
+    // Show loading indicator
+    const loadingIndicator = document.createElement('div');
+    loadingIndicator.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+    loadingIndicator.innerHTML = `
+      <div class="bg-white p-4 rounded-lg shadow-lg">
+        <div class="flex items-center space-x-3">
+          <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+          <p>Creating waterPoints algorithmically...</p>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(loadingIndicator);
+    
+    // Process polygons one by one to avoid overwhelming the browser
+    const polygonEntries = Object.entries(activeLandPolygons);
+    let processedCount = 0;
+    let createdCount = 0;
+    
+    const processNextPolygon = async (index) => {
+      if (index >= polygonEntries.length) {
+        // All polygons processed, remove loading indicator
+        document.body.removeChild(loadingIndicator);
+        
+        // Show completion message
+        alert(`Processing complete! Created ${createdCount} waterPoints from ${processedCount} polygon points.`);
+        return;
+      }
+      
+      const [polygonId, polygon] = polygonEntries[index];
+      
+      // Get polygon path
+      const path = polygon.getPath();
+      const pathLength = path.getLength();
+      
+      // Calculate polygon centroid
+      let centroidLat = 0;
+      let centroidLng = 0;
+      
+      for (let i = 0; i < pathLength; i++) {
+        const point = path.getAt(i);
+        centroidLat += point.lat();
+        centroidLng += point.lng();
+      }
+      
+      centroidLat /= pathLength;
+      centroidLng /= pathLength;
+      
+      const centroid = new google.maps.LatLng(centroidLat, centroidLng);
+      
+      // Process each point of the polygon
+      for (let i = 0; i < pathLength; i++) {
+        processedCount++;
+        
+        const point = path.getAt(i);
+        
+        // Create a line from the point through the centroid
+        const pointToCenter = {
+          lat: centroid.lat() - point.lat(),
+          lng: centroid.lng() - point.lng()
+        };
+        
+        // Extend this line to find intersections with other polygons
+        const extendedPoint = new google.maps.LatLng(
+          point.lat() - pointToCenter.lat * 2,
+          point.lng() - pointToCenter.lng * 2
+        );
+        
+        // Create a line between the point and the extended point
+        const line = new google.maps.Polyline({
+          path: [
+            { lat: point.lat(), lng: point.lng() },
+            { lat: extendedPoint.lat(), lng: extendedPoint.lng() }
+          ],
+          map: null // Don't display on map
+        });
+        
+        // Find closest intersection with another polygon
+        let closestIntersection = null;
+        let closestDistance = Infinity;
+        let intersectingPolygonId = null;
+        
+        for (const [otherPolygonId, otherPolygon] of Object.entries(activeLandPolygons)) {
+          if (otherPolygonId === polygonId) continue; // Skip self
+          
+          const otherPath = otherPolygon.getPath();
+          const otherPathLength = otherPath.getLength();
+          
+          // Check each edge of the other polygon for intersection
+          for (let j = 0; j < otherPathLength; j++) {
+            const start = otherPath.getAt(j);
+            const end = otherPath.getAt((j + 1) % otherPathLength);
+            
+            // Check if the line intersects this edge
+            const intersection = findLineIntersection(
+              point.lat(), point.lng(),
+              extendedPoint.lat(), extendedPoint.lng(),
+              start.lat(), start.lng(),
+              end.lat(), end.lng()
+            );
+            
+            if (intersection) {
+              // Calculate distance from original point to intersection
+              const distance = google.maps.geometry.spherical.computeDistanceBetween(
+                point,
+                new google.maps.LatLng(intersection.lat, intersection.lng)
+              );
+              
+              if (distance < closestDistance) {
+                closestDistance = distance;
+                closestIntersection = intersection;
+                intersectingPolygonId = otherPolygonId;
+              }
+            }
+          }
+        }
+        
+        // If we found an intersection, create a point halfway between
+        if (closestIntersection) {
+          const halfwayPoint = new google.maps.LatLng(
+            (point.lat() + closestIntersection.lat) / 2,
+            (point.lng() + closestIntersection.lng) / 2
+          );
+          
+          // Check if this point is in water (not in any polygon)
+          let isInWater = true;
+          
+          for (const otherPolygon of Object.values(activeLandPolygons)) {
+            if (google.maps.geometry.poly.containsLocation(halfwayPoint, otherPolygon)) {
+              isInWater = false;
+              break;
+            }
+          }
+          
+          // If in water, create a waterPoint
+          if (isInWater) {
+            // Check if too close to existing waterPoints
+            let isTooClose = false;
+            const MIN_DISTANCE = 10; // meters
+            
+            for (const point of waterPoints) {
+              const pointPos = typeof point.position === 'string' 
+                ? JSON.parse(point.position) 
+                : point.position;
+              
+              const distance = google.maps.geometry.spherical.computeDistanceBetween(
+                halfwayPoint,
+                new google.maps.LatLng(pointPos.lat, pointPos.lng)
+              );
+              
+              if (distance <= MIN_DISTANCE) {
+                isTooClose = true;
+                break;
+              }
+            }
+            
+            if (!isTooClose) {
+              // Create waterPoint
+              await new Promise(resolve => {
+                // Create the waterPoint
+                fetch('/api/waterpoint', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    position: {
+                      lat: halfwayPoint.lat(),
+                      lng: halfwayPoint.lng()
+                    },
+                    type: 'regular',
+                    connections: []
+                  })
+                })
+                .then(response => response.json())
+                .then(data => {
+                  if (data.success) {
+                    createdCount++;
+                    console.log(`Created waterPoint at ${halfwayPoint.lat()}, ${halfwayPoint.lng()}`);
+                    
+                    // Add to waterPoints array
+                    setWaterPoints(prev => [...prev, data.waterpoint]);
+                    
+                    // Create marker
+                    if (mapRef.current) {
+                      const marker = new google.maps.Marker({
+                        position: halfwayPoint,
+                        map: mapRef.current,
+                        icon: {
+                          path: google.maps.SymbolPath.CIRCLE,
+                          scale: 7,
+                          fillColor: '#0088FF',
+                          fillOpacity: 1,
+                          strokeWeight: 2,
+                          strokeColor: '#FFFFFF'
+                        },
+                        title: data.waterpoint.id
+                      });
+                      
+                      // Add to markers
+                      setWaterPointMarkers(prev => ({
+                        ...prev,
+                        [data.waterpoint.id]: marker
+                      }));
+                    }
+                  }
+                  resolve();
+                })
+                .catch(error => {
+                  console.error('Error creating waterPoint:', error);
+                  resolve();
+                });
+              });
+            }
+          }
+        }
+      }
+      
+      // Process next polygon with a small delay to avoid freezing the browser
+      setTimeout(() => processNextPolygon(index + 1), 100);
+    };
+    
+    // Start processing polygons
+    processNextPolygon(0);
+  };
+  
   // Handle WaterPoint mode
   const handleWaterPointMode = () => {
     // Si on désactive le mode, supprimer le marqueur d'aperçu
@@ -1604,6 +1856,17 @@ export default function MapPage() {
         </div>
       )}
       
+      {/* Algorithmic WaterPoint Creation Button */}
+      {isGoogleLoaded && (
+        <div className="absolute bottom-52 left-4 z-10">
+          <button
+            onClick={createWaterPointsAlgorithmically}
+            className="px-4 py-2 rounded shadow bg-purple-600 text-white hover:bg-purple-700 transition-colors"
+          >
+            Create WaterPoints Algorithmically
+          </button>
+        </div>
+      )}
       
       {/* WaterPoint Info Panel */}
       {selectedWaterPoint && (
