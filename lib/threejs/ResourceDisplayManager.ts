@@ -107,12 +107,12 @@ export class ResourceDisplayManager {
    */
   private checkResourceImagesDirectory(): void {
     // Check if the resource images directory exists
-    fetch('/images/resources/default.png')
+    fetch('/assets/icons/resources/default.png')
       .then(response => {
         if (!response.ok) {
           console.warn('Resource images directory may not exist or default.png is missing');
           // Log a more detailed warning to help developers
-          console.warn('Make sure you have created the directory /public/images/resources/ and added resource images');
+          console.warn('Make sure you have created the directory /public/assets/icons/resources/ and added resource images');
         } else {
           console.log('Resource images directory exists');
         }
@@ -767,7 +767,7 @@ export class ResourceDisplayManager {
       const tryLoadTexture = (paths: string[]) => {
         if (paths.length === 0) {
           console.warn(`Failed to load texture for resource type: ${resourceType}, using fallback`);
-          return loader.load('/images/resources/default.png');
+          return loader.load('/assets/icons/resources/default.png');
         }
         
         return loader.load(paths[0], 
@@ -786,12 +786,13 @@ export class ResourceDisplayManager {
         );
       };
       
-      // Try multiple possible paths for the resource image
+      // Try multiple possible paths for the resource image with the correct path first
       texture = tryLoadTexture([
+        `/assets/icons/resources/${normalizedType}.png`,
+        `/assets/icons/resources/${normalizedType}.jpg`,
+        `/assets/icons/resources/default.png`,
         `/images/resources/${normalizedType}.png`,
         `/images/resources/${normalizedType}.jpg`,
-        `/public/images/resources/${normalizedType}.png`,
-        `/public/images/resources/${normalizedType}.jpg`,
         `/images/resources/default.png`
       ]);
     }
