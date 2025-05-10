@@ -388,13 +388,11 @@ export default function MapPage() {
       const event = e as google.maps.MapMouseEvent;
       if (!event.latLng) return;
       
-      console.log('Map clicked in mode:', bridgeMode ? 'bridge' : waterPointMode ? 'waterpoint' : 'normal');
-      
-      // Vérifier si c'est un clic droit en utilisant la propriété domEvent
-      // Accéder à domEvent de manière plus sûre
-      const domEvent = (e as any).domEvent;
+      // Properly detect right clicks
+      const domEvent = e.domEvent as MouseEvent;
       const isRightClick = domEvent && domEvent.button === 2;
       
+      console.log('Map clicked in mode:', bridgeMode ? 'bridge' : waterPointMode ? 'waterpoint' : 'normal');
       console.log('Click type:', isRightClick ? 'right click' : 'left click');
       
       if (bridgeMode) {
@@ -510,8 +508,10 @@ export default function MapPage() {
       } else if (waterPointMode) {
         if (isRightClick) {
           console.log('Processing right click in waterpoint mode');
-          // Clic droit en mode waterpoint - chercher un waterpoint existant à proximité
+          // Find a waterpoint near the click location
           let targetPoint = null;
+          let minDistance = 10; // 10 meters threshold
+          
           for (const point of waterPoints) {
             const pointPos = typeof point.position === 'string' 
               ? JSON.parse(point.position) 
@@ -522,27 +522,27 @@ export default function MapPage() {
               lng: event.latLng.lng()
             };
             
-            // Calculer la distance entre le clic et le point
+            // Calculate distance between click and point
             const distance = google.maps.geometry.spherical.computeDistanceBetween(
               new google.maps.LatLng(clickPos.lat, clickPos.lng),
               new google.maps.LatLng(pointPos.lat, pointPos.lng)
             );
             
-            // Si le clic est assez proche d'un point (dans un rayon de 10 mètres)
-            if (distance < 10) {
+            // If this point is closer than our current closest and within threshold
+            if (distance < minDistance) {
               targetPoint = point;
-              break;
+              minDistance = distance;
             }
           }
           
-          // Si on a trouvé un point cible et qu'un point est déjà sélectionné
+          // If we found a target point and already have a selected point
           if (targetPoint && selectedWaterPoint && targetPoint.id !== selectedWaterPoint.id) {
             createWaterPointConnection(selectedWaterPoint, targetPoint);
           } else if (targetPoint) {
-            // Si on a trouvé un point mais qu'aucun n'est sélectionné, le sélectionner
+            // If we found a point but none is selected, select it
             setSelectedWaterPoint(targetPoint);
             
-            // Mettre à jour l'apparence du marqueur
+            // Update marker appearance
             const marker = waterPointMarkers[targetPoint.id];
             if (marker) {
               marker.setIcon({
@@ -554,9 +554,23 @@ export default function MapPage() {
                 strokeColor: '#FFFFFF'
               });
             }
+            
+            // Reset other markers
+            Object.entries(waterPointMarkers).forEach(([id, m]) => {
+              if (id !== targetPoint.id) {
+                m.setIcon({
+                  path: google.maps.SymbolPath.CIRCLE,
+                  scale: 7,
+                  fillColor: m.get('type') === 'dock' ? '#FF8800' : '#0088FF',
+                  fillOpacity: 1,
+                  strokeWeight: 2,
+                  strokeColor: '#FFFFFF'
+                });
+              }
+            });
           }
         } else {
-          // Clic gauche normal - créer un nouveau WaterPoint
+          // Left click - create a new WaterPoint
           createWaterPoint(event.latLng);
         }
       } else if (connectWaterPointMode && selectedWaterPoint) {
@@ -719,16 +733,27 @@ export default function MapPage() {
   // Add useEffect to prevent context menu on the page
   useEffect(() => {
     const handleContextMenu = (e: MouseEvent) => {
-      // Empêcher le menu contextuel par défaut uniquement en mode waterpoint
+      // Only prevent context menu in waterpoint mode
       if (waterPointMode) {
         e.preventDefault();
       }
     };
     
-    document.addEventListener('contextmenu', handleContextMenu);
+    // Add the event listener to the map container specifically
+    const mapContainer = document.querySelector('.map-container');
+    if (mapContainer) {
+      mapContainer.addEventListener('contextmenu', handleContextMenu);
+    } else {
+      // Fallback to document if map container not found
+      document.addEventListener('contextmenu', handleContextMenu);
+    }
     
     return () => {
-      document.removeEventListener('contextmenu', handleContextMenu);
+      if (mapContainer) {
+        mapContainer.removeEventListener('contextmenu', handleContextMenu);
+      } else {
+        document.removeEventListener('contextmenu', handleContextMenu);
+      }
     };
   }, [waterPointMode]);
   
@@ -1584,15 +1609,23 @@ export default function MapPage() {
       {/* Indicateur de statut pour les WaterPoints */}
       {waterPointMode && (
         <div className="absolute bottom-36 left-4 z-10 bg-white px-4 py-2 rounded shadow">
+          <p className="text-sm font-bold text-blue-600">
+            WaterPoint Mode Active
+          </p>
           <p className="text-sm">
             <span className="font-medium">WaterPoints:</span> {waterPoints.length}
           </p>
-          <p className="text-xs text-gray-500 mt-1">
-            <span className="font-medium">Left-click:</span> Add new WaterPoint
-          </p>
-          <p className="text-xs text-gray-500">
-            <span className="font-medium">Right-click:</span> Select or connect WaterPoints
-          </p>
+          <div className="mt-2 border-t border-gray-200 pt-1">
+            <p className="text-xs text-gray-700">
+              <span className="font-medium">Left-click:</span> Add new WaterPoint
+            </p>
+            <p className="text-xs text-gray-700">
+              <span className="font-medium">Right-click on point:</span> Select WaterPoint
+            </p>
+            <p className="text-xs text-gray-700">
+              <span className="font-medium">Right-click after selecting:</span> Connect points
+            </p>
+          </div>
         </div>
       )}
       
