@@ -113,7 +113,7 @@ Example format: "Ponte dei Sospiri (Bridge of Sighs) - Named for the sighs of pr
     const response = await axios.post(
       'https://api.anthropic.com/v1/messages',
       {
-        model: 'claude-3-opus-20240229',
+        model: 'claude-3-7-sonnet-latest',
         max_tokens: 300,
         messages: [
           { role: 'user', content: prompt }
@@ -145,7 +145,7 @@ Example format: "Ponte dei Sospiri (Bridge of Sighs) - Named for the sighs of pr
 async function enhanceBridgeConnections() {
   try {
     // Define the file path
-    const polygonFilePath = path.join(__dirname, 'polygon-1746057327626.json');
+    const polygonFilePath = path.join(__dirname, 'data', 'polygon-1746057327626.json');
     
     // Load polygon data
     const polygonData = await loadPolygonData(polygonFilePath);
