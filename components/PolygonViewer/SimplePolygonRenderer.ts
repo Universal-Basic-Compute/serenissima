@@ -1848,7 +1848,7 @@ export default class SimplePolygonRenderer {
   }
 
   // Helper method to find land ID from a mesh
-  private findLandIdFromObject(object: THREE.Object3D<THREE.Object3DEventMap>): string | null {
+  private findLandIdFromObject(object: THREE.Object3D): string | null {
     // First check if the object itself has the polygonId
     if (object.userData && object.userData.polygonId) {
       return object.userData.polygonId;
@@ -1894,9 +1894,8 @@ export default class SimplePolygonRenderer {
         }
         
         // Add glow effect by changing material - make the color change more subtle
-        const meshObject = object as THREE.Mesh;
-        if (meshObject.material) {
-          const material = meshObject.material as THREE.Material;
+        if (object.material) {
+          const material = object.material;
           
           if (material instanceof THREE.MeshBasicMaterial) {
             // Store original color if not already stored
@@ -1929,9 +1928,8 @@ export default class SimplePolygonRenderer {
         }
         
         // Restore original material properties
-        const meshObject = object as THREE.Mesh;
-        if (meshObject.material) {
-          const material = meshObject.material as THREE.Material;
+        if (object.material) {
+          const material = object.material;
           
           if (material instanceof THREE.MeshBasicMaterial && material.userData.originalColor) {
             material.color.copy(material.userData.originalColor);
@@ -3060,7 +3058,7 @@ export default class SimplePolygonRenderer {
   /**
    * Remove a building point marker
    */
-  private removeBuildingPointMarker(marker: THREE.Object3D<THREE.Object3DEventMap>): void {
+  private removeBuildingPointMarker(marker: THREE.Object3D): void {
     // Find the marker in the array
     const markerIndex = this.buildingPointMarkers.indexOf(marker);
     
