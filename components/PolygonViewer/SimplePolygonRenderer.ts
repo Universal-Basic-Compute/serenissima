@@ -1309,18 +1309,18 @@ export default class SimplePolygonRenderer {
           )[0];
           
           // Create a marker for the bridge point
-          const geometry = new THREE.CircleGeometry(0.4, 16);
+          const geometry = new THREE.CircleGeometry(0.6, 16); // Increased size from 0.4 to 0.6
           const material = new THREE.MeshBasicMaterial({
             color: 0xFF5500, // Orange color for bridge points
             side: THREE.DoubleSide,
             transparent: true,
-            opacity: 0.8
+            opacity: 1.0 // Increased opacity from 0.8 to 1.0
           });
           
           const marker = new THREE.Mesh(geometry, material);
-          marker.position.set(normalizedCoord.x, 0.5, -normalizedCoord.y); // Position higher above land
+          marker.position.set(normalizedCoord.x, 1.0, -normalizedCoord.y); // Increased height from 0.5 to 1.0
           marker.rotation.x = -Math.PI / 2; // Make it horizontal
-          marker.renderOrder = 20; // Higher render order to ensure it renders on top
+          marker.renderOrder = 30; // Increased from 20 to 30 to ensure it renders on top
           
           // Add metadata for tooltips
           marker.userData = {
@@ -1356,18 +1356,18 @@ export default class SimplePolygonRenderer {
           )[0];
           
           // Create a marker for the dock point (edge)
-          const edgeGeometry = new THREE.CircleGeometry(0.4, 16);
+          const edgeGeometry = new THREE.CircleGeometry(0.6, 16); // Increased size from 0.4 to 0.6
           const edgeMaterial = new THREE.MeshBasicMaterial({
             color: 0x00AAFF, // Blue color for dock points
             side: THREE.DoubleSide,
             transparent: true,
-            opacity: 0.8
+            opacity: 1.0 // Increased opacity from 0.8 to 1.0
           });
           
           const edgeMarker = new THREE.Mesh(edgeGeometry, edgeMaterial);
-          edgeMarker.position.set(edgeCoord.x, 0.5, -edgeCoord.y); // Position higher above land
+          edgeMarker.position.set(edgeCoord.x, 1.0, -edgeCoord.y); // Increased height from 0.5 to 1.0
           edgeMarker.rotation.x = -Math.PI / 2; // Make it horizontal
-          edgeMarker.renderOrder = 20; // Higher render order to ensure it renders on top
+          edgeMarker.renderOrder = 30; // Increased from 20 to 30 to ensure it renders on top
           
           // Add metadata for tooltips
           edgeMarker.userData = {
@@ -1382,36 +1382,36 @@ export default class SimplePolygonRenderer {
           
           // Create a line connecting edge to water
           const lineGeometry = new THREE.BufferGeometry().setFromPoints([
-            new THREE.Vector3(edgeCoord.x, 0.5, -edgeCoord.y),
-            new THREE.Vector3(waterCoord.x, 0.5, -waterCoord.y)
+            new THREE.Vector3(edgeCoord.x, 1.0, -edgeCoord.y), // Increased height from 0.5 to 1.0
+            new THREE.Vector3(waterCoord.x, 1.0, -waterCoord.y) // Increased height from 0.5 to 1.0
           ]);
           
           const lineMaterial = new THREE.LineBasicMaterial({
             color: 0x00AAFF,
             linewidth: 2,
             transparent: true,
-            opacity: 0.6
+            opacity: 0.8 // Increased opacity from 0.6 to 0.8
           });
           
           const line = new THREE.Line(lineGeometry, lineMaterial);
-          line.renderOrder = 19; // Below the markers but above land
+          line.renderOrder = 29; // Increased from 19 to 29 to ensure it renders above land
           
           this.scene.add(line);
           this.dockPointMarkers.push(line); // Add to dock markers for cleanup
           
           // Create a marker for the water point
-          const waterGeometry = new THREE.CircleGeometry(0.3, 16);
+          const waterGeometry = new THREE.CircleGeometry(0.5, 16); // Increased size from 0.3 to 0.5
           const waterMaterial = new THREE.MeshBasicMaterial({
             color: 0x0088CC, // Darker blue for water points
             side: THREE.DoubleSide,
             transparent: true,
-            opacity: 0.7
+            opacity: 1.0 // Increased opacity from 0.7 to 1.0
           });
           
           const waterMarker = new THREE.Mesh(waterGeometry, waterMaterial);
-          waterMarker.position.set(waterCoord.x, 0.5, -waterCoord.y);
+          waterMarker.position.set(waterCoord.x, 1.0, -waterCoord.y); // Increased height from 0.5 to 1.0
           waterMarker.rotation.x = -Math.PI / 2; // Make it horizontal
-          waterMarker.renderOrder = 20; // Higher render order to ensure it renders on top
+          waterMarker.renderOrder = 30; // Increased from 20 to 30 to ensure it renders on top
           
           // Add metadata for tooltips
           waterMarker.userData = {
