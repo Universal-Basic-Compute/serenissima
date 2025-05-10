@@ -119,9 +119,9 @@ def assign_citizen_to_business(tables, citizen: Dict, business: Dict) -> bool:
             'Work': business_id
         })
         
-        # Update business record with new worker and set status to active
+        # Update business record with status to active
+        # Note: Removed the 'Worker' field as it doesn't exist in the BUSINESSES table
         tables['businesses'].update(business_id, {
-            'Worker': citizen_id,
             'Status': 'active'
         })
         
