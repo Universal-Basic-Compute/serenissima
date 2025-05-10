@@ -128,5 +128,5 @@ export const EventTypes = {
   HIDE_TOOLTIP: 'hideTooltip',
   PATH_CALCULATED: 'pathCalculated',
   BRIDGE_SELECTED: 'bridgeSelected',
-  DOCK_SELECTED: 'dockSelected'
+  TRANSPORT_DOCK_SELECTED: 'transportDockSelected'
 };
