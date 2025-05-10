@@ -1,4 +1,6 @@
 import * as THREE from 'three';
+import { normalizeCoordinates } from '../../components/PolygonViewer/utils';
+import { Coordinate } from '../../components/PolygonViewer/types';
 
 /**
  * Service for managing building position transformations
@@ -50,24 +52,17 @@ export class BuildingPositionManager {
       return new THREE.Vector3(0, height, 0);
     }
     
-    // IMPORTANT: Use the same scale factor as the polygon renderer
-    // Instead of calculating based on Earth measurements, use the fixed scale
-    const scale = this.bounds.scale; // Use the scale from bounds (100000)
-    const latCorrectionFactor = this.bounds.latCorrectionFactor; // Use the correction factor from bounds (0.7)
+    // Use the same normalization function as the polygon renderer
+    const normalizedCoord = normalizeCoordinates(
+      [{ lat: position.lat, lng: position.lng }],
+      this.bounds.centerLat,
+      this.bounds.centerLng,
+      this.bounds.scale,
+      this.bounds.latCorrectionFactor
+    )[0];
     
-    // Calculate relative position from center
-    const x = (position.lng - this.bounds.centerLng) * scale;
-    const z = -(position.lat - this.bounds.centerLat) * scale * latCorrectionFactor;
-    
-    // Log the calculated position for debugging
-    if (Math.abs(x) > 500 || Math.abs(z) > 500) {
-      console.warn(`Large position values calculated: (${x.toFixed(2)}, ${height}, ${z.toFixed(2)})`);
-      console.warn(`Input coordinates: lat=${position.lat}, lng=${position.lng}`);
-      console.warn(`Using scale: ${scale.toFixed(2)}`);
-    }
-    
-    // Return the position without clamping
-    return new THREE.Vector3(x, height, z);
+    // Return the position with the specified height
+    return new THREE.Vector3(normalizedCoord.x, height, normalizedCoord.y);
   }
 
   /**
@@ -76,12 +71,9 @@ export class BuildingPositionManager {
    * @returns Object with lat and lng properties
    */
   public scenePositionToLatLng(position: THREE.Vector3): {lat: number, lng: number} {
-    // Use the same scale calculation as in latLngToScenePosition for consistency
-    const cosLat = Math.cos(this.bounds.centerLat * Math.PI / 180);
-    const scale = 111000 * cosLat; // meters per degree of longitude at this latitude
-    
-    const lat = this.bounds.centerLat + (position.z / -scale);
-    const lng = this.bounds.centerLng + (position.x / scale);
+    // Reverse the normalization process
+    const lng = this.bounds.centerLng + (position.x / this.bounds.scale);
+    const lat = this.bounds.centerLat - (position.z / (this.bounds.scale * this.bounds.latCorrectionFactor));
     return {lat, lng};
   }
 
