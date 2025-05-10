@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
-import { BufferGeometryUtils } from 'three/examples/jsm/utils/BufferGeometryUtils';
+import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils';
 import { BuildingData } from '../models/BuildingTypes';
 
 // Add type declaration for window.__threeContext
