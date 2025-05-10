@@ -40,37 +40,72 @@
       "edge": {
         "lat": 45.442672097915924,
         "lng": 12.335416516385056
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055950767",
+        "targetPointIndex": 3,
+        "targetPoint": {
+          "lat": 45.442732318631464,
+          "lng": 12.335427245221116
+        },
+        "distance": 6.7483496347815
       }
     },
     {
       "edge": {
         "lat": 45.44238604863922,
         "lng": 12.336231907925583
-      }
-    },
-    {
-      "edge": {
-        "lat": 45.44227689787503,
-        "lng": 12.336784442982651
-      }
-    },
-    {
-      "edge": {
-        "lat": 45.4415391837252,
-        "lng": 12.33629628094194
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055950767",
+        "targetPointIndex": 2,
+        "targetPoint": {
+          "lat": 45.44252719118279,
+          "lng": 12.336119255146958
+        },
+        "distance": 17.98766356992665
       }
     },
     {
       "edge": {
         "lat": 45.44183276423776,
         "lng": 12.335564037880875
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055995050",
+        "targetPointIndex": 7,
+        "targetPoint": {
+          "lat": 45.44173364832614,
+          "lng": 12.335661491475083
+        },
+        "distance": 13.389337288509088
       }
     },
     {
       "edge": {
         "lat": 45.44212634475033,
         "lng": 12.33483179481981
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055950767",
+        "targetPointIndex": 4,
+        "targetPoint": {
+          "lat": 45.442152691576155,
+          "lng": 12.33480497272966
+        },
+        "distance": 3.6002370170836095
       }
     }
-  ]
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.441881110307875,
+      "lng": 12.3355916640629
+    },
+    {
+      "lat": 45.4420153698075,
+      "lng": 12.336002360286445
+    }
+  ],
+  "id": "polygon-1746055962882"
 }
