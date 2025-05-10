@@ -94,24 +94,53 @@ def extract_coat_of_arms_urls(users: List[Dict]) -> Dict[str, str]:
     # Log the field names in the first user record to verify structure
     if users and len(users) > 0:
         log.info(f"First user record fields: {list(users[0].get('fields', {}).keys())}")
+        # Print the entire first record for debugging
+        log.info(f"First user record: {users[0]}")
+    
+    # Define all possible field names for coat of arms
+    possible_field_names = [
+        'CoatOfArmsImage', 
+        'coat_of_arms_image',
+        'coatOfArmsImage',
+        'coat_of_arms',
+        'coatOfArms',
+        'coat_of_arms_url',
+        'avatar',
+        'profile_image'
+    ]
     
     for user in users:
         fields = user.get('fields', {})
         username = fields.get('user_name')
         
-        # Use the correct field name: CoatOfArmsImage
-        coat_of_arms_url = fields.get('CoatOfArmsImage')
+        # If username is missing, try other possible field names
+        if not username:
+            username = fields.get('username') or fields.get('Username') or fields.get('name') or fields.get('Name')
+        
+        # If still no username, use wallet address or record ID
+        if not username:
+            username = fields.get('Wallet') or fields.get('wallet_address') or user.get('id', 'unknown')
+            log.info(f"Using wallet or ID as username: {username}")
+        
+        # Try all possible field names for coat of arms
+        coat_of_arms_url = None
+        for field_name in possible_field_names:
+            if field_name in fields and fields[field_name]:
+                coat_of_arms_url = fields[field_name]
+                log.info(f"Found coat of arms for user {username} in field '{field_name}': {coat_of_arms_url}")
+                break
         
         if username and coat_of_arms_url:
-            log.info(f"Found coat of arms for user {username}: {coat_of_arms_url}")
-            
             # Ensure the URL is absolute
             if not coat_of_arms_url.startswith(('http://', 'https://')):
                 coat_of_arms_url = f"{PRODUCTION_URL}{coat_of_arms_url if coat_of_arms_url.startswith('/') else '/' + coat_of_arms_url}"
             
             coat_of_arms_map[username] = coat_of_arms_url
+            log.info(f"Added coat of arms for {username}: {coat_of_arms_url}")
         elif username:
             log.info(f"User {username} has no coat of arms image")
+            # Log all fields for this user to help identify where the image might be
+            log.info(f"All fields for {username}: {fields}")
     
     log.info(f"Found {len(coat_of_arms_map)} users with coat of arms images")
     return coat_of_arms_map
