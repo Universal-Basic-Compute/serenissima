@@ -1108,12 +1108,23 @@ export default class SimplePolygonRenderer {
           console.log(`ID parts: ${idParts.join(', ')}`);
           
           if (idParts.length >= 3) {
-            const markerType = idParts[0]; // 'bridge' or 'dock'
+            let markerType, polygonId, pointIndex;
             
-            // Fix: The polygon ID is the combination of all parts except the first and last
-            // This handles IDs like 'bridge-polygon-1746057412398-4' correctly
-            const polygonId = idParts.slice(1, idParts.length - 1).join('-');
-            const pointIndex = parseInt(idParts[idParts.length - 1]);
+            // Handle different ID formats
+            if (idParts[0] === 'bridge') {
+              // Bridge format: 'bridge-polygon-1746057412398-4'
+              markerType = 'bridge';
+              polygonId = idParts.slice(1, idParts.length - 1).join('-');
+              pointIndex = parseInt(idParts[idParts.length - 1]);
+            } else if (idParts[0] === 'dock' && idParts[1] === 'edge') {
+              // Dock format: 'dock-edge-polygon-1746057412398-40'
+              markerType = 'dock';
+              polygonId = idParts.slice(2, idParts.length - 1).join('-');
+              pointIndex = parseInt(idParts[idParts.length - 1]);
+            } else {
+              console.warn(`Unknown marker type: ${idParts[0]}-${idParts[1]}`);
+              return;
+            }
             
             console.log(`Attempting to delete ${markerType} point ${pointIndex} from polygon ${polygonId}`);
             
