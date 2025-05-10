@@ -50,16 +50,14 @@ export class BuildingPositionManager {
       return new THREE.Vector3(0, height, 0);
     }
     
-    // FIXED: Use a more appropriate scale factor for Venice
-    // 1 degree of longitude at Venice's latitude is about 111km * cos(latitude)
-    // We want to scale to scene units where 1 unit is about 1 meter
-    // So we use a scale of 111000 * cos(latitude) meters per degree
-    const cosLat = Math.cos(this.bounds.centerLat * Math.PI / 180);
-    const scale = 111000 * cosLat; // meters per degree of longitude at this latitude
+    // IMPORTANT: Use the same scale factor as the polygon renderer
+    // Instead of calculating based on Earth measurements, use the fixed scale
+    const scale = this.bounds.scale; // Use the scale from bounds (100000)
+    const latCorrectionFactor = this.bounds.latCorrectionFactor; // Use the correction factor from bounds (0.7)
     
     // Calculate relative position from center
     const x = (position.lng - this.bounds.centerLng) * scale;
-    const z = -(position.lat - this.bounds.centerLat) * scale;
+    const z = -(position.lat - this.bounds.centerLat) * scale * latCorrectionFactor;
     
     // Even after all our checks, if we still get extreme values, clamp them
     // This is a last resort safety measure
@@ -67,7 +65,7 @@ export class BuildingPositionManager {
     if (Math.abs(x) > MAX_COORDINATE || Math.abs(z) > MAX_COORDINATE) {
       console.warn(`Large position values calculated: (${x.toFixed(2)}, ${height}, ${z.toFixed(2)})`);
       console.warn(`Input coordinates: lat=${position.lat}, lng=${position.lng}`);
-      console.warn(`Using scale: ${scale.toFixed(2)} (instead of ${this.bounds.scale})`);
+      console.warn(`Using scale: ${scale.toFixed(2)}`);
       
       // Clamp to a reasonable range as a last resort
       const clampedX = Math.max(-MAX_COORDINATE, Math.min(MAX_COORDINATE, x));
