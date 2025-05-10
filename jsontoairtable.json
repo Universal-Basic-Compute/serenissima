@@ -1,14 +1,4 @@
 {
-  "WATERPOINTS": [
-    {
-      "id": "waterpoint-a7870c04-501e-46f6-88dd-0cd0d7f262fe",
-      "position": "{\"lat\":28.878976649523942,\"lng\":28.87907897634914}",
-      "connections": "[]",
-      "depth": 1,
-      "type": "regular",
-      "createdAt": "2025-05-10T01:04:53.135Z"
-    }
-  ],
   "DECREES": [
     {
       "DecreeId": "decree-infrastructure-maintenance-001",
