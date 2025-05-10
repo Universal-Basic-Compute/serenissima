@@ -161,15 +161,15 @@ export class CitizenDisplayManager {
    * Subscribe to citizen-related events
    */
   private subscribeToEvents(): void {
-    // Listen for citizen added event
-    eventBus.subscribe(EventTypes.CITIZEN_ADDED, (data) => {
-      console.log('Citizen added event received:', data);
+    // Listen for citizens loaded event
+    eventBus.subscribe(EventTypes.CITIZENS_LOADED, (data) => {
+      console.log('Citizens loaded event received:', data);
       this.refreshCitizens();
     });
     
-    // Listen for citizen removed event
-    eventBus.subscribe(EventTypes.CITIZEN_REMOVED, (data) => {
-      console.log('Citizen removed event received:', data);
+    // Listen for citizen hover event
+    eventBus.subscribe(EventTypes.CITIZEN_HOVER, (data) => {
+      console.log('Citizen hover event received:', data);
       this.refreshCitizens();
     });
   }
