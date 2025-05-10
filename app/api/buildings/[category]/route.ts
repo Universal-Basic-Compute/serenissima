@@ -1,14 +1,15 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 
 export async function GET(
-  request: Request,
-  { params }: { params: { category: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ category: string }> }
 ) {
+  const { category } = await params;
   try {
     // Sanitize the category name to prevent directory traversal
-    const sanitizedCategory = params.category.replace(/[^a-zA-Z0-9_-]/g, '');
+    const sanitizedCategory = category.replace(/[^a-zA-Z0-9_-]/g, '');
     
     // Define the base directory for building data
     const baseDir = path.join(process.cwd(), 'data', 'buildings');
