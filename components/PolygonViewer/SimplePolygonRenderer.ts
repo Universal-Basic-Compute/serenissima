@@ -721,7 +721,7 @@ export default class SimplePolygonRenderer {
   public updateViewMode(activeView: string) {
     if (this.activeView === activeView) return;
     
-    console.log(`DEBUG: Changing view mode from ${this.activeView} to ${activeView}`);
+    console.log(`Changing view mode from ${this.activeView} to ${activeView}`);
     
     this.activeView = activeView;
     
@@ -733,7 +733,7 @@ export default class SimplePolygonRenderer {
       });
       
       // Hide bridge and dock points in land view
-      console.log(`DEBUG: Hiding ${this.bridgePointMarkers.length} bridge markers and ${this.dockPointMarkers.length} dock markers in land view`);
+      console.log(`Hiding ${this.bridgePointMarkers.length} bridge markers and ${this.dockPointMarkers.length} dock markers in land view`);
       this.bridgePointMarkers.forEach(marker => marker.visible = false);
       this.dockPointMarkers.forEach(marker => marker.visible = false);
     } else if (activeView === 'transport') {
@@ -743,20 +743,21 @@ export default class SimplePolygonRenderer {
       });
       
       // Create and show bridge and dock points
-      console.log(`DEBUG: Creating and showing bridge and dock points in transport view`);
+      console.log(`Creating and showing bridge and dock points in transport view`);
       this.createBridgeAndDockPoints();
       
-      console.log(`DEBUG: Setting visibility to true for ${this.bridgePointMarkers.length} bridge markers and ${this.dockPointMarkers.length} dock markers`);
+      // Explicitly set visibility to true for all markers
+      console.log(`Setting visibility to true for ${this.bridgePointMarkers.length} bridge markers and ${this.dockPointMarkers.length} dock markers`);
       this.bridgePointMarkers.forEach(marker => {
         marker.visible = true;
-        console.log(`DEBUG: Bridge marker visible: ${marker.visible}, position: ${marker.position.x}, ${marker.position.y}, ${marker.position.z}`);
+        console.log(`Bridge marker visible: ${marker.visible}, position: ${marker.position.x}, ${marker.position.y}, ${marker.position.z}`);
       });
       this.dockPointMarkers.forEach(marker => {
         marker.visible = true;
         if (marker instanceof THREE.Mesh) {
-          console.log(`DEBUG: Dock marker (Mesh) visible: ${marker.visible}, position: ${marker.position.x}, ${marker.position.y}, ${marker.position.z}`);
+          console.log(`Dock marker (Mesh) visible: ${marker.visible}, position: ${marker.position.x}, ${marker.position.y}, ${marker.position.z}`);
         } else if (marker instanceof THREE.Line) {
-          console.log(`DEBUG: Dock marker (Line) visible: ${marker.visible}`);
+          console.log(`Dock marker (Line) visible: ${marker.visible}`);
         }
       });
     } else {

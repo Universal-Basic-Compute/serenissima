@@ -412,21 +412,54 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
   
   // Update view mode when activeView changes
   useEffect(() => {
+    console.log(`SimpleViewer: activeView changed to ${activeView}`);
+    
     if (polygonRendererRef.current) {
+      console.log(`Updating polygon renderer view mode to ${activeView}`);
       polygonRendererRef.current.updateViewMode(activeView);
+    } else {
+      console.warn('polygonRendererRef.current is null, cannot update view mode');
     }
     
     // Show/hide income visualization based on view mode
     if (incomeRendererRef.current) {
+      console.log(`Setting income renderer visibility to ${activeView === 'land'}`);
       incomeRendererRef.current.setVisible(activeView === 'land');
+    } else {
+      console.warn('incomeRendererRef.current is null, cannot update visibility');
     }
     
     // If we're switching to buildings view, ensure the BuildingRenderer is active
     if (activeView === 'buildings') {
+      console.log('Dispatching event to refresh buildings');
       // Dispatch an event to refresh buildings
       eventBus.emit(EventTypes.BUILDING_PLACED, { refresh: true });
     }
-  }, [activeView]);
+    
+    // If we're switching to transport view, log additional information
+    if (activeView === 'transport') {
+      console.log('Switched to transport view - checking for bridge and dock points');
+      
+      // Check if we have any polygons with bridge or dock points
+      if (polygons && polygons.length > 0) {
+        let bridgePointCount = 0;
+        let dockPointCount = 0;
+        
+        polygons.forEach(polygon => {
+          if (polygon.bridgePoints && Array.isArray(polygon.bridgePoints)) {
+            bridgePointCount += polygon.bridgePoints.length;
+          }
+          if (polygon.dockPoints && Array.isArray(polygon.dockPoints)) {
+            dockPointCount += polygon.dockPoints.length;
+          }
+        });
+        
+        console.log(`Found ${bridgePointCount} bridge points and ${dockPointCount} dock points in ${polygons.length} polygons`);
+      } else {
+        console.warn('No polygons available to check for bridge/dock points');
+      }
+    }
+  }, [activeView, polygons]);
   
   
   // Add effect to listen for tooltip events
