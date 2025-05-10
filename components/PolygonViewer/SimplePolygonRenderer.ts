@@ -1322,50 +1322,20 @@ export default class SimplePolygonRenderer {
             // Get polygon ID and point index
             const polygonId = idParts.slice(2, idParts.length - 1).join('-');
             const pointIndex = parseInt(idParts[idParts.length - 1]);
-            
-            console.log(`Attempting to delete building point ${pointIndex} from polygon ${polygonId}`);
-            
-            // Find the polygon
-            const polygon = this.polygons.find(p => p.id === polygonId);
-            
-            if (polygon) {
-              console.log("Found polygon:", polygon.id);
-              
-              // Create a visual effect at the deletion point
-              this.createDeletionEffect(intersected.position.clone());
-              
-              // Remove the point from the polygon data
-              if (polygon.buildingPoints && polygon.buildingPoints.length > pointIndex) {
-                // Remove the building point
-                polygon.buildingPoints.splice(pointIndex, 1);
-                console.log(`Successfully removed building point ${pointIndex} from polygon ${polygonId}`);
-                
-                // Save the updated polygon data to the server
-                this.saveUpdatedPolygonData(polygon);
-                
-                // Refresh the building markers
-                this.clearBuildingPointMarkers();
-                this.createBuildingPoints();
-                
-                // Show a tooltip
-                eventBus.emit(EventTypes.SHOW_TOOLTIP, {
-                  type: 'delete',
-                  content: `Deleted building point`,
-                  screenX: event.clientX,
-                  screenY: event.clientY
-                });
-                
-                // Hide tooltip after a delay
-                setTimeout(() => {
-                  eventBus.emit(EventTypes.HIDE_TOOLTIP);
-                }, 2000);
-              } else {
-                console.warn(`Failed to delete point - index ${pointIndex} not found in building points array`);
-                console.log(`Building points length: ${polygon.buildingPoints?.length || 0}`);
-              }
-            } else {
-              console.warn(`Polygon ${polygonId} not found`);
-            }
+        
+            // Instead of deleting, just show a tooltip with building point information
+            eventBus.emit(EventTypes.SHOW_TOOLTIP, {
+              type: 'building-point',
+              polygonId: polygonId,
+              position: userData.position,
+              screenX: event.clientX,
+              screenY: event.clientY
+            });
+        
+            // Hide tooltip after a delay
+            setTimeout(() => {
+              eventBus.emit(EventTypes.HIDE_TOOLTIP);
+            }, 2000);
           }
           
           // Return early to prevent further processing
