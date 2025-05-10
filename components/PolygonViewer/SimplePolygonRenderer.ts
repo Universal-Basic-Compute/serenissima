@@ -1250,44 +1250,6 @@ export default class SimplePolygonRenderer {
           this.hoveredPointId = null;
           eventBus.emit(EventTypes.HIDE_TOOLTIP);
         }
-        
-        // Add measurement circle that follows the mouse when not hovering over a point
-        if (!this.hoveredPointId) {
-          // Cast ray to find intersection with land
-          const allLandMeshes = this.meshes.filter(mesh => mesh.visible);
-          const landIntersects = this.raycaster.intersectObjects(allLandMeshes);
-          
-          if (landIntersects.length > 0) {
-            const intersectionPoint = landIntersects[0].point;
-            
-            // Create or update the measurement circle
-            if (!this.measurementCircle) {
-              const geometry = new THREE.CircleGeometry(0.3, 32);
-              const material = new THREE.MeshBasicMaterial({
-                color: 0xFFFF00,
-                transparent: true,
-                opacity: 0.7,
-                side: THREE.DoubleSide
-              });
-              this.measurementCircle = new THREE.Mesh(geometry, material);
-              this.measurementCircle.rotation.x = -Math.PI / 2; // Make it flat
-              this.measurementCircle.renderOrder = 100;
-              this.scene.add(this.measurementCircle);
-            }
-            
-            // Position the circle at the intersection point, slightly above land
-            this.measurementCircle.position.set(
-              intersectionPoint.x,
-              intersectionPoint.y + 0.05,
-              intersectionPoint.z
-            );
-            this.measurementCircle.visible = true;
-          } else if (this.measurementCircle) {
-            this.measurementCircle.visible = false;
-          }
-        } else if (this.measurementCircle) {
-          this.measurementCircle.visible = false;
-        }
       } catch (error) {
         console.error('Error handling mouse move in transport view:', error);
         // Reset hover state on error
