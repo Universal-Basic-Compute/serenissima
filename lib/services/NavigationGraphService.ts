@@ -118,7 +118,7 @@ export class NavigationGraphService {
   }
   
   /**
-   * Find a path between two polygons that properly uses bridges
+   * Find a path between two polygons using a "closest bridge" algorithm
    * @param startPolygonId Starting polygon ID
    * @param endPolygonId Ending polygon ID
    * @returns Array of polygon IDs representing the path
@@ -138,40 +138,126 @@ export class NavigationGraphService {
       return [];
     }
     
-    // Build an adjacency list from the enhanced graph that specifically includes bridge connections
-    const adjacencyList: Record<string, string[]> = {};
+    // Path will store the sequence of polygon IDs
+    const path: string[] = [startPolygonId];
+    // Visited set to avoid cycles
+    const visited = new Set<string>([startPolygonId]);
+    // Current polygon ID
+    let currentPolygonId = startPolygonId;
     
-    // Initialize empty adjacency lists for all polygons
-    Object.keys(landGraph.enhanced).forEach(nodeId => {
-      if (nodeId.startsWith('polygon-')) {
-        adjacencyList[nodeId] = [];
+    // Maximum iterations to prevent infinite loops
+    const MAX_ITERATIONS = 100;
+    let iterations = 0;
+    
+    while (currentPolygonId !== endPolygonId && iterations < MAX_ITERATIONS) {
+      iterations++;
+      
+      // Get the current polygon data
+      const currentPolygonData = landGraph.enhanced[currentPolygonId];
+      if (!currentPolygonData) {
+        console.warn(`No data found for polygon ${currentPolygonId}`);
+        break;
       }
-    });
-    
-    // Add bridge connections to the adjacency list
-    Object.entries(landGraph.enhanced).forEach(([nodeId, nodeData]) => {
-      if (nodeId.startsWith('polygon-') && nodeData.bridges) {
-        // For each bridge from this polygon
-        nodeData.bridges.forEach((bridge: any) => {
-          const targetPolygonId = bridge.targetPolygonId;
-          
-          // Verify the target polygon exists
-          if (targetPolygonId && adjacencyList[targetPolygonId]) {
-            // Add bidirectional connection if not already present
-            if (!adjacencyList[nodeId].includes(targetPolygonId)) {
-              adjacencyList[nodeId].push(targetPolygonId);
-            }
-            
-            if (!adjacencyList[targetPolygonId].includes(nodeId)) {
-              adjacencyList[targetPolygonId].push(nodeId);
-            }
-          }
-        });
+      
+      // Get the destination polygon data
+      const destPolygonData = landGraph.enhanced[endPolygonId];
+      if (!destPolygonData) {
+        console.warn(`No data found for destination polygon ${endPolygonId}`);
+        break;
       }
-    });
+      
+      // Get the centroids of current and destination polygons
+      const currentCentroid = this.getPolygonCentroid(currentPolygonData);
+      const destCentroid = this.getPolygonCentroid(destPolygonData);
+      
+      if (!currentCentroid || !destCentroid) {
+        console.warn('Missing centroid data for polygons');
+        break;
+      }
+      
+      // Get all bridges from the current polygon
+      const bridges = this.getPolygonBridges(currentPolygonData);
+      if (!bridges || bridges.length === 0) {
+        console.log(`No bridges found for polygon ${currentPolygonId}`);
+        break;
+      }
+      
+      // Calculate direction vector from current centroid to destination centroid
+      const directionVector = {
+        lat: destCentroid.lat - currentCentroid.lat,
+        lng: destCentroid.lng - currentCentroid.lng
+      };
+      
+      // Filter bridges that are in the general direction of the destination (180° cone)
+      const directedBridges = bridges.filter(bridge => {
+        // Skip bridges to already visited polygons
+        if (visited.has(bridge.targetPolygonId)) {
+          return false;
+        }
+        
+        // Get the bridge edge point
+        const bridgePoint = bridge.edge;
+        
+        // Calculate vector from centroid to bridge
+        const bridgeVector = {
+          lat: bridgePoint.lat - currentCentroid.lat,
+          lng: bridgePoint.lng - currentCentroid.lng
+        };
+        
+        // Calculate dot product to determine if bridge is in the direction of destination
+        // For a 180° cone, the dot product should be positive
+        const dotProduct = (directionVector.lat * bridgeVector.lat) + 
+                           (directionVector.lng * bridgeVector.lng);
+        
+        return dotProduct > 0;
+      });
+      
+      // If no bridges in the right direction, try all unvisited bridges
+      const candidateBridges = directedBridges.length > 0 ? 
+        directedBridges : 
+        bridges.filter(bridge => !visited.has(bridge.targetPolygonId));
+      
+      if (candidateBridges.length === 0) {
+        console.log(`No unvisited bridges found for polygon ${currentPolygonId}`);
+        break;
+      }
+      
+      // Find the closest bridge to the destination
+      let closestBridge = candidateBridges[0];
+      let minDistance = Number.MAX_VALUE;
+      
+      candidateBridges.forEach(bridge => {
+        // Calculate distance from bridge to destination centroid
+        const distance = this.calculateDistance(
+          bridge.edge,
+          destCentroid
+        );
+        
+        if (distance < minDistance) {
+          minDistance = distance;
+          closestBridge = bridge;
+        }
+      });
+      
+      // Move to the next polygon
+      const nextPolygonId = closestBridge.targetPolygonId;
+      
+      // Add to path and mark as visited
+      path.push(nextPolygonId);
+      visited.add(nextPolygonId);
+      
+      // Update current polygon
+      currentPolygonId = nextPolygonId;
+    }
     
-    // Implement A* algorithm to find the shortest path
-    return this.findShortestPathAStar(adjacencyList, startPolygonId, endPolygonId);
+    // If we reached the maximum iterations without finding the destination
+    if (iterations >= MAX_ITERATIONS && currentPolygonId !== endPolygonId) {
+      console.warn(`Path finding exceeded maximum iterations (${MAX_ITERATIONS})`);
+      // Fall back to A* algorithm
+      return this.findShortestPathAStar(this.buildAdjacencyList(landGraph), startPolygonId, endPolygonId);
+    }
+    
+    return path;
   }
   
   /**
@@ -308,6 +394,89 @@ export class NavigationGraphService {
     return fallbackGraph;
   }
   
+  /**
+   * Get the centroid of a polygon from the enhanced graph data
+   */
+  private getPolygonCentroid(polygonData: any): {lat: number, lng: number} | null {
+    if (polygonData.centroid) {
+      return polygonData.centroid;
+    }
+    
+    // If no centroid in enhanced data, try to calculate from coordinates
+    if (polygonData.coordinates && polygonData.coordinates.length > 0) {
+      // Simple centroid calculation (average of all points)
+      const sumLat = polygonData.coordinates.reduce((sum: number, coord: any) => sum + coord.lat, 0);
+      const sumLng = polygonData.coordinates.reduce((sum: number, coord: any) => sum + coord.lng, 0);
+      
+      return {
+        lat: sumLat / polygonData.coordinates.length,
+        lng: sumLng / polygonData.coordinates.length
+      };
+    }
+    
+    return null;
+  }
+
+  /**
+   * Get all bridges from a polygon
+   */
+  private getPolygonBridges(polygonData: any): any[] {
+    if (!polygonData.bridges || !Array.isArray(polygonData.bridges)) {
+      return [];
+    }
+    
+    return polygonData.bridges.filter((bridge: any) => 
+      bridge.targetPolygonId && bridge.edge && bridge.connection
+    );
+  }
+
+  /**
+   * Calculate distance between two points
+   */
+  private calculateDistance(point1: {lat: number, lng: number}, point2: {lat: number, lng: number}): number {
+    const latDiff = point1.lat - point2.lat;
+    const lngDiff = point1.lng - point2.lng;
+    return Math.sqrt(latDiff * latDiff + lngDiff * lngDiff);
+  }
+
+  /**
+   * Build adjacency list from the enhanced graph for A* algorithm
+   */
+  private buildAdjacencyList(landGraph: NavigationGraph): Record<string, string[]> {
+    const adjacencyList: Record<string, string[]> = {};
+    
+    // Initialize empty adjacency lists for all polygons
+    Object.keys(landGraph.enhanced).forEach(nodeId => {
+      if (nodeId.startsWith('polygon-')) {
+        adjacencyList[nodeId] = [];
+      }
+    });
+    
+    // Add bridge connections to the adjacency list
+    Object.entries(landGraph.enhanced).forEach(([nodeId, nodeData]) => {
+      if (nodeId.startsWith('polygon-') && nodeData.bridges) {
+        // For each bridge from this polygon
+        nodeData.bridges.forEach((bridge: any) => {
+          const targetPolygonId = bridge.targetPolygonId;
+          
+          // Verify the target polygon exists
+          if (targetPolygonId && adjacencyList[targetPolygonId]) {
+            // Add bidirectional connection if not already present
+            if (!adjacencyList[nodeId].includes(targetPolygonId)) {
+              adjacencyList[nodeId].push(targetPolygonId);
+            }
+            
+            if (!adjacencyList[targetPolygonId].includes(nodeId)) {
+              adjacencyList[targetPolygonId].push(nodeId);
+            }
+          }
+        });
+      }
+    });
+    
+    return adjacencyList;
+  }
+
   // A* algorithm implementation
   private findShortestPathAStar(
     graph: Record<string, string[]>, 
