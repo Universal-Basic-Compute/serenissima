@@ -82,6 +82,74 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
     // Return a loading state instead of null
     return null;
   }
+  // Store scene in a ref to avoid undefined issues
+  const sceneRef = useRef<THREE.Scene | null>(null);
+  
+  // Add a state to track if the component is ready to render
+  const [isReady, setIsReady] = useState<boolean>(false);
+  
+  // Update the ref when scene changes or try to find the scene if not provided
+  useEffect(() => {
+    // Function to find the scene if not provided as a prop
+    const findScene = (): THREE.Scene | null => {
+      if (scene) return scene;
+      
+      // Try to get scene from window.__threeContext
+      if (typeof window !== 'undefined' && window.__threeContext && window.__threeContext.scene) {
+        console.log('BuildingRenderer: Found scene in window.__threeContext');
+        return window.__threeContext.scene;
+      }
+      
+      // Try to get scene from canvas element
+      if (typeof document !== 'undefined') {
+        const canvas = document.querySelector('canvas');
+        if (canvas && canvas.__scene) {
+          console.log('BuildingRenderer: Found scene in canvas.__scene');
+          return canvas.__scene;
+        }
+      }
+      
+      console.warn('BuildingRenderer: Could not find scene, will retry');
+      return null;
+    };
+    
+    // Try to find the scene
+    let foundScene = findScene();
+    
+    // If scene not found, set up a retry mechanism
+    if (!foundScene) {
+      console.log('BuildingRenderer: Scene not found, setting up retry mechanism');
+      
+      const retryInterval = setInterval(() => {
+        console.log('BuildingRenderer: Retrying to find scene...');
+        foundScene = findScene();
+        
+        if (foundScene) {
+          console.log('BuildingRenderer: Scene found on retry!');
+          clearInterval(retryInterval);
+          sceneRef.current = foundScene;
+          setIsReady(true);
+        }
+      }, 500); // Retry every 500ms
+      
+      // Clean up interval on component unmount
+      return () => {
+        clearInterval(retryInterval);
+      };
+    } else {
+      // Scene found on first try
+      sceneRef.current = foundScene;
+      setIsReady(true);
+      
+      console.log('BuildingRenderer: Scene ref updated, scene available');
+    }
+  }, [scene]);
+  // Early return if not ready
+  if (!isReady && !sceneRef.current) {
+    console.log('BuildingRenderer: Not ready, scene not available');
+    // Return a loading state instead of null
+    return null;
+  }
   
   const [buildings, setBuildings] = useState<BuildingData[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -917,7 +985,7 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
             renderer.dispose(mesh);
           } else {
             // Fallback if building data not found
-            scene.remove(mesh);
+            sceneRef.current.remove(mesh);
           }
           
           // Remove from map
