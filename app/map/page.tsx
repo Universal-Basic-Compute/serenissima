@@ -1552,7 +1552,7 @@ export default function MapPage() {
             
             if (!isTooClose) {
               // Create waterPoint
-              await new Promise(resolve => {
+              await new Promise<void>(resolve => {
                 // Create the waterPoint
                 fetch('/api/waterpoint', {
                   method: 'POST',
