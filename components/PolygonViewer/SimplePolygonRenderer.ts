@@ -2205,8 +2205,8 @@ export default class SimplePolygonRenderer {
           
           console.log(`Normalized coordinates for point ${index}:`, normalizedCoord);
           
-          // Create a cube for the building point instead of a sphere
-          const geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5); // Cube with 0.5 unit sides
+          // Create a smaller sphere for the building point (50% smaller than before)
+          const geometry = new THREE.SphereGeometry(0.25, 12, 12); // Sphere with 0.25 radius (50% of 0.5)
           
           const marker = new THREE.Mesh(geometry, buildingPointMaterial);
           marker.position.set(normalizedCoord.x, 0.2, -normalizedCoord.y); // Position slightly above land
