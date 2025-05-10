@@ -825,16 +825,16 @@ export default class SimplePolygonRenderer {
       Object.values(this.coatOfArmsSprites).forEach(sprite => {
         sprite.visible = false;
       });
-      
+    
       // IMPORTANT: Always recreate bridge and dock points when switching to transport view
       console.log(`Creating bridge and dock points for transport view`);
-      
+    
       // Clear existing markers first to avoid duplicates
       this.clearBridgeAndDockMarkers();
-      
+    
       // Create new markers - directly call createBridgeAndDockPoints without checking activeView inside
       this.forceCreateBridgeAndDockPoints();
-      
+    
       // Ensure all markers are visible
       this.bridgePointMarkers.forEach(marker => {
         marker.visible = true;
@@ -848,9 +848,16 @@ export default class SimplePolygonRenderer {
           marker.renderOrder = 2000;
         }
       });
-      
-      // Hide building points in transport view
-      this.buildingPointMarkers.forEach(marker => marker.visible = false);
+    
+      // CHANGE: Show building points in transport view
+      console.log('Creating building points for transport view');
+      this.createBuildingPoints();
+      this.buildingPointMarkers.forEach(marker => {
+        marker.visible = true;
+        marker.renderOrder = 2000; // High render order to ensure visibility
+      });
+    
+      console.log(`Created ${this.bridgePointMarkers.length} bridge markers, ${this.dockPointMarkers.length} dock markers, and ${this.buildingPointMarkers.length} building markers`);
       
       console.log(`Created ${this.bridgePointMarkers.length} bridge markers and ${this.dockPointMarkers.length} dock markers`);
     } else if (activeView === 'buildings') {
