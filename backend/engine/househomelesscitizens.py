@@ -18,6 +18,8 @@ import os
 import sys
 import logging
 import argparse
+import datetime
+import json
 from typing import Dict, List, Optional, Any
 from pyairtable import Api, Table
 from dotenv import load_dotenv
@@ -55,7 +57,8 @@ def initialize_airtable():
         # Return a dictionary of table objects using pyairtable
         return {
             'citizens': Table(api_key, base_id, 'CITIZENS'),
-            'buildings': Table(api_key, base_id, 'BUILDINGS')
+            'buildings': Table(api_key, base_id, 'BUILDINGS'),
+            'notifications': Table(api_key, base_id, 'NOTIFICATIONS')
         }
     except Exception as e:
         log.error(f"Failed to initialize Airtable: {e}")
@@ -116,6 +119,42 @@ def assign_citizen_to_building(tables, citizen: Dict, building: Dict) -> bool:
         tables['buildings'].update(building_id, {
             'Occupant': citizen_id
         })
+        
+        # Create a notification for the user
+        try:
+            # Check if we have a NOTIFICATIONS table in our tables dictionary
+            if 'notifications' not in tables:
+                # Initialize the NOTIFICATIONS table
+                api_key = os.environ.get('AIRTABLE_API_KEY')
+                base_id = os.environ.get('AIRTABLE_BASE_ID')
+                tables['notifications'] = Table(api_key, base_id, 'NOTIFICATIONS')
+                log.info("Initialized NOTIFICATIONS table")
+            
+            # Create notification content
+            content = f"{citizen_name} has moved into {building_name}"
+            details = {
+                "citizen_id": citizen_id,
+                "citizen_name": citizen_name,
+                "building_id": building_id,
+                "building_name": building_name,
+                "building_type": building['fields'].get('Type', ''),
+                "rent_amount": building['fields'].get('RentAmount', 0)
+            }
+            
+            # Create the notification record
+            tables['notifications'].create({
+                "Type": "new_occupant",
+                "Content": content,
+                "Details": json.dumps(details),
+                "CreatedAt": datetime.datetime.now().isoformat(),
+                "IsRead": False,
+                "RelatedUserId": citizen_id  # Associate with the citizen
+            })
+            
+            log.info(f"Created notification for {citizen_name}")
+        except Exception as notif_error:
+            log.error(f"Error creating notification: {notif_error}")
+            # Continue even if notification creation fails
         
         log.info(f"Successfully housed {citizen_name} in {building_name}")
         return True
