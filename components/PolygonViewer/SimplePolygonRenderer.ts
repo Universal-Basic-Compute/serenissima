@@ -333,6 +333,20 @@ export default class SimplePolygonRenderer {
     let polygonsWithCentroid = 0;
     let polygonsWithCoatOfArmsCenter = 0;
     
+    // Add more detailed logging for the first few polygons
+    const samplePolygons = this.polygons.slice(0, 3);
+    console.log('Sample polygon position properties:');
+    samplePolygons.forEach((polygon, index) => {
+      console.log(`Polygon ${index} (${polygon.id}):`, {
+        hasCenter: !!polygon.center,
+        center: polygon.center,
+        hasCentroid: !!polygon.centroid,
+        centroid: polygon.centroid,
+        hasCoatOfArmsCenter: !!polygon.coatOfArmsCenter,
+        coatOfArmsCenter: polygon.coatOfArmsCenter
+      });
+    });
+    
     this.polygons.forEach(polygon => {
       if (polygon.center) polygonsWithCenter++;
       if (polygon.centroid) polygonsWithCentroid++;
@@ -475,6 +489,16 @@ export default class SimplePolygonRenderer {
    * Create a circular coat of arms sprite
    */
   private createCircularCoatOfArms(polygon: any, coatOfArmsUrl: string) {
+    // Add detailed logging to check all properties
+    console.log(`Polygon ${polygon.id} properties:`, {
+      hasCoatOfArmsCenter: !!polygon.coatOfArmsCenter,
+      coatOfArmsCenter: polygon.coatOfArmsCenter,
+      hasCenter: !!polygon.center,
+      center: polygon.center,
+      hasCentroid: !!polygon.centroid,
+      centroid: polygon.centroid
+    });
+    
     // Check for all possible position properties, with fallbacks
     // First try coatOfArmsCenter (specific for coat of arms)
     // Then try center (general center)
@@ -486,7 +510,17 @@ export default class SimplePolygonRenderer {
       return;
     }
     
-    console.log(`Creating coat of arms for polygon ${polygon.id} at position:`, positionCoord);
+    // Log which property is being used
+    let positionSource = 'unknown';
+    if (polygon.coatOfArmsCenter && positionCoord === polygon.coatOfArmsCenter) {
+      positionSource = 'coatOfArmsCenter';
+    } else if (polygon.center && positionCoord === polygon.center) {
+      positionSource = 'center';
+    } else if (polygon.centroid && positionCoord === polygon.centroid) {
+      positionSource = 'centroid';
+    }
+    
+    console.log(`Creating coat of arms for polygon ${polygon.id} using ${positionSource} at position:`, positionCoord);
     
     // Convert position to 3D position
     const normalizedCoord = normalizeCoordinates(
