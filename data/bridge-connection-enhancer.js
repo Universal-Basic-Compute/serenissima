@@ -123,7 +123,7 @@ async function retryWithExponentialBackoff(fn, maxRetries = 5, initialDelay = 50
 
 
 // Generate multiple bridge names at once using Claude
-async function generateBridgeNames(count, existingNames = []) {
+async function generateBridgeNames(count, existingNames = [], landHistoricalName = '') {
   try {
     // Use more retries with longer delays
     return await retryWithExponentialBackoff(
@@ -131,11 +131,14 @@ async function generateBridgeNames(count, existingNames = []) {
         const prompt = `
 You are an expert on Renaissance Venice history and geography. I need historically accurate names for ${count} bridges in Venice.
 
+${landHistoricalName ? `These bridges are located in or near "${landHistoricalName}", a historical area in Venice.` : ''}
+
 Please generate ${count} historically plausible names for bridges. The names should:
 1. Follow Venetian naming conventions for bridges (Ponte di...)
 2. Reference landmarks, families, guilds, or historical events if possible
 3. Be in Italian
 4. Include a brief explanation of why each name would be appropriate
+${landHistoricalName ? `5. When appropriate, reference the location in "${landHistoricalName}"` : ''}
 
 For each bridge, provide:
 1. historicalName: The Italian name
@@ -240,18 +243,21 @@ Example format:
 }
 
 // Generate dock names using Claude API
-async function generateDockNames(count, existingNames = []) {
+async function generateDockNames(count, existingNames = [], landHistoricalName = '') {
   try {
     return await retryWithExponentialBackoff(
       async () => {
         const prompt = `
 You are an expert on Renaissance Venice history and geography. I need historically accurate names for ${count} docks or water landings in Venice.
 
+${landHistoricalName ? `These docks are located in or near "${landHistoricalName}", a historical area in Venice.` : ''}
+
 Please generate ${count} historically plausible names for docks. The names should:
 1. Follow Venetian naming conventions for docks (Riva di..., Fondamenta..., etc.)
 2. Reference landmarks, families, guilds, or historical events if possible
 3. Be in Italian
 4. Include a brief explanation of why each name would be appropriate
+${landHistoricalName ? `5. When appropriate, reference the location in "${landHistoricalName}"` : ''}
 
 For each dock, provide:
 1. historicalName: The Italian name
@@ -333,18 +339,21 @@ Respond with a JSON array containing objects with these three fields for each do
 }
 
 // Generate building descriptions using Claude API
-async function generateBuildingDescriptions(count, existingNames = []) {
+async function generateBuildingDescriptions(count, existingNames = [], landHistoricalName = '') {
   try {
     return await retryWithExponentialBackoff(
       async () => {
         const prompt = `
 You are an expert on Renaissance Venice history and architecture. I need historically accurate descriptions for ${count} buildings in Venice.
 
+${landHistoricalName ? `These buildings are located in or near "${landHistoricalName}", a historical area in Venice.` : ''}
+
 Please generate ${count} historically plausible building descriptions. The descriptions should:
 1. Include appropriate building types for Renaissance Venice (palazzo, bottega, chiesa, etc.)
 2. Reference local families, guilds, or historical events if possible
 3. Include names in Italian with English translations
 4. Provide a brief explanation of the building's historical significance or function
+${landHistoricalName ? `5. When appropriate, reference the location in "${landHistoricalName}"` : ''}
 
 For each building, provide:
 1. buildingType: The type of building (palazzo, bottega, chiesa, etc.)
@@ -461,7 +470,8 @@ async function enhancePolygonData() {
     
     // Load polygon data
     const polygonData = await loadPolygonData(polygonFilePath);
-    console.log(`Processing polygon: ${polygonData.historicalName || polygonData.englishName || file}`);
+    const landHistoricalName = polygonData.historicalName || polygonData.englishName || '';
+    console.log(`Processing polygon: ${landHistoricalName || file}`);
     
     // Count items based on mode
     let itemsCount = 0;
@@ -486,14 +496,14 @@ async function enhancePolygonData() {
     let generatedItems = [];
     
     if (mode === 'bridges') {
-      console.log(`Generating ${itemsCount} bridge names...`);
-      generatedItems = await generateBridgeNames(itemsCount, state.generatedNames.bridges);
+      console.log(`Generating ${itemsCount} bridge names for ${landHistoricalName}...`);
+      generatedItems = await generateBridgeNames(itemsCount, state.generatedNames.bridges, landHistoricalName);
     } else if (mode === 'docks') {
-      console.log(`Generating ${itemsCount} dock names...`);
-      generatedItems = await generateDockNames(itemsCount, state.generatedNames.docks);
+      console.log(`Generating ${itemsCount} dock names for ${landHistoricalName}...`);
+      generatedItems = await generateDockNames(itemsCount, state.generatedNames.docks, landHistoricalName);
     } else if (mode === 'buildings') {
-      console.log(`Generating ${itemsCount} building descriptions...`);
-      generatedItems = await generateBuildingDescriptions(itemsCount, state.generatedNames.buildings);
+      console.log(`Generating ${itemsCount} building descriptions for ${landHistoricalName}...`);
+      generatedItems = await generateBuildingDescriptions(itemsCount, state.generatedNames.buildings, landHistoricalName);
     } else {
       console.log(`Unknown mode: ${mode}. Valid modes are: bridges, docks, buildings`);
       return;
