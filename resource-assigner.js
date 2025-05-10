@@ -47,9 +47,21 @@ async function getAllResourceTypes() {
 
 // Function to get all polygon files
 function getPolygonFiles() {
-  const dataDir = process.cwd();
-  const files = fs.readdirSync(dataDir).filter(file => file.endsWith('.json'));
-  return files.map(file => path.join(dataDir, file));
+  // Look in the correct directory where polygon data is stored
+  const polygonsDir = path.join(process.cwd(), 'data/polygons');
+  
+  // Check if directory exists
+  if (!fs.existsSync(polygonsDir)) {
+    console.error(`Polygon directory not found: ${polygonsDir}`);
+    return [];
+  }
+  
+  const files = fs.readdirSync(polygonsDir)
+    .filter(file => file.endsWith('.json'))
+    .map(file => path.join(polygonsDir, file));
+  
+  console.log(`Found ${files.length} polygon files in ${polygonsDir}`);
+  return files;
 }
 
 // Function to add a resource to the API
