@@ -2790,6 +2790,25 @@ export default class SimplePolygonRenderer {
         return;
       }
       
+      // Try to use the pre-computed navigation graph if available
+      let navigationGraph: Record<string, string[]> | null = null;
+      
+      try {
+        // Check if we have the navigation graph in window
+        if (typeof window !== 'undefined' && (window as any).__navigationGraph) {
+          console.log('Using cached navigation graph from window object');
+          navigationGraph = (window as any).__navigationGraph.simple;
+        }
+      } catch (error) {
+        console.warn('Error accessing navigation graph:', error);
+      }
+      
+      // If we couldn't get the pre-computed graph, build it on the fly
+      if (!navigationGraph) {
+        console.log('Building navigation graph on the fly');
+        navigationGraph = this.buildNavigationGraph();
+      }
+      
       // Check if we need to use water navigation
       const needsWaterNavigation = this.needsWaterNavigation(startPolygon, endPolygon);
       
@@ -2799,8 +2818,9 @@ export default class SimplePolygonRenderer {
         this.findWaterPath(startPolygon, endPolygon, start, end);
       } else if (startPolygon && endPolygon) {
         console.log(`Finding land path from polygon ${startPolygon.id} to ${endPolygon.id}`);
+        
         // Find the shortest path through the land graph
-        const path = this.findShortestPath(startPolygon.id, endPolygon.id);
+        const path = this.findShortestPath(navigationGraph, startPolygon.id, endPolygon.id);
         
         if (!path || path.length === 0) {
           console.warn('No land path found between points, drawing direct path instead');
@@ -3070,43 +3090,9 @@ export default class SimplePolygonRenderer {
   }
   
   /**
-   * Get the navigation graph from the pre-computed data or build it on the fly
+   * Build a navigation graph on the fly
    */
-  private getNavigationGraph(): Record<string, string[]> {
-    // Try to load the pre-computed navigation graph
-    try {
-      // Check if we have the navigation graph in window
-      if (typeof window !== 'undefined' && (window as any).__navigationGraph) {
-        console.log('Using cached navigation graph from window object');
-        return (window as any).__navigationGraph.simple;
-      }
-      
-      // Try to fetch the navigation graph from the server
-      const fetchGraph = async () => {
-        try {
-          const response = await fetch('/data/navigation-graph.json');
-          if (response.ok) {
-            const data = await response.json();
-            // Cache it in window for future use
-            if (typeof window !== 'undefined') {
-              (window as any).__navigationGraph = data;
-            }
-            console.log('Loaded navigation graph from server');
-            return data.simple;
-          }
-        } catch (error) {
-          console.warn('Error loading navigation graph:', error);
-        }
-        return null;
-      };
-      
-      // Start the fetch but don't wait for it - we'll use the built graph for now
-      fetchGraph();
-    } catch (error) {
-      console.warn('Error accessing navigation graph:', error);
-    }
-    
-    // If we couldn't load the pre-computed graph, build it on the fly
+  private buildNavigationGraph(): Record<string, string[]> {
     console.log('Building navigation graph on the fly');
     const graph: Record<string, string[]> = {};
     
@@ -3304,10 +3290,9 @@ export default class SimplePolygonRenderer {
   
   /**
    * Find the shortest path between two nodes in a graph using A* algorithm
+   * This is now more of a pathfinder than just a shortest path calculator
    */
-  private findShortestPath(start: string, end: string): string[] {
-    // Get the navigation graph
-    const graph = this.getNavigationGraph();
+  private findShortestPath(graph: Record<string, string[]>, start: string, end: string): string[] {
     // If start and end are the same, return just that node
     if (start === end) {
       return [start];
@@ -3500,16 +3485,57 @@ export default class SimplePolygonRenderer {
           enhancedGraph[currentPolygonId] && 
           enhancedGraph[currentPolygonId].connections) {
         
-        // Find the connection to the next polygon
-        const connections = enhancedGraph[currentPolygonId].connections;
-        const connection = connections.find((c: any) => c.targetId === nextPolygonId);
+        // Find all connections to the next polygon
+        const connections = enhancedGraph[currentPolygonId].connections.filter(
+          (c: any) => c.targetId === nextPolygonId
+        );
         
-        if (connection) {
-          console.log(`Using pre-computed bridge connection from enhanced graph`);
+        if (connections && connections.length > 0) {
+          console.log(`Using pre-computed bridge connection from enhanced graph (${connections.length} available)`);
+          
+          // If multiple connections exist, find the best one
+          let bestConnection = connections[0];
+          let bestScore = Infinity;
+          
+          for (const connection of connections) {
+            // Calculate score based on distance from direct path
+            const sourcePoint = connection.sourcePoint;
+            const targetPoint = connection.targetPoint;
+            
+            // Convert to normalized coordinates
+            const sourceCoord = normalizeCoordinates(
+              [sourcePoint],
+              this.bounds.centerLat,
+              this.bounds.centerLng,
+              this.bounds.scale,
+              this.bounds.latCorrectionFactor
+            )[0];
+            
+            const targetCoord = normalizeCoordinates(
+              [targetPoint],
+              this.bounds.centerLat,
+              this.bounds.centerLng,
+              this.bounds.scale,
+              this.bounds.latCorrectionFactor
+            )[0];
+            
+            // Create 3D points
+            const sourcePos = new THREE.Vector3(sourceCoord.x, 0, -sourceCoord.y);
+            const targetPos = new THREE.Vector3(targetCoord.x, 0, -targetCoord.y);
+            
+            // Calculate score based on previous point
+            const prevPoint = pathPoints[pathPoints.length - 1];
+            const score = prevPoint.distanceTo(sourcePos);
+            
+            if (score < bestScore) {
+              bestScore = score;
+              bestConnection = connection;
+            }
+          }
           
           // Add the source point to the path
           const sourceCoord = normalizeCoordinates(
-            [connection.sourcePoint],
+            [bestConnection.sourcePoint],
             this.bounds.centerLat,
             this.bounds.centerLng,
             this.bounds.scale,
@@ -3521,7 +3547,7 @@ export default class SimplePolygonRenderer {
           
           // Add the target point to the path
           const targetCoord = normalizeCoordinates(
-            [connection.targetPoint],
+            [bestConnection.targetPoint],
             this.bounds.centerLat,
             this.bounds.centerLng,
             this.bounds.scale,
@@ -3539,6 +3565,9 @@ export default class SimplePolygonRenderer {
       const currentPolygon = this.polygons.find(p => p.id === currentPolygonId);
       if (!currentPolygon || !currentPolygon.bridgePoints) {
         console.warn(`Polygon ${currentPolygonId} not found or has no bridge points`);
+        
+        // Try to use centroids as waypoints
+        this.addCentroidWaypoints(currentPolygonId, nextPolygonId, pathPoints);
         continue;
       }
       
@@ -3570,33 +3599,12 @@ export default class SimplePolygonRenderer {
             this.bounds.latCorrectionFactor
           )[0];
           
-          const targetCoord = normalizeCoordinates(
-            [bridgePoint.connection.targetPoint],
-            this.bounds.centerLat,
-            this.bounds.centerLng,
-            this.bounds.scale,
-            this.bounds.latCorrectionFactor
-          )[0];
-          
-          // Create 3D points for the bridge
+          // Create 3D point for the bridge
           const bridgePos = new THREE.Vector3(edgeCoord.x, 0, -edgeCoord.y);
-          const targetPos = new THREE.Vector3(targetCoord.x, 0, -targetCoord.y);
           
-          // For the first segment, calculate distance from start to bridge
-          // For the last segment, calculate distance from bridge to end
-          // For middle segments, use the previous point to calculate distance
-          let score;
-          
-          if (i === 0) {
-            // First segment - distance from start to bridge
-            score = startPoint.distanceTo(bridgePos);
-          } else if (i === path.length - 2) {
-            // Last segment - distance from bridge to end
-            score = bridgePos.distanceTo(this.measurementPoints[1]);
-          } else {
-            // Middle segment - distance from previous point to bridge
-            score = pathPoints[pathPoints.length - 1].distanceTo(bridgePos);
-          }
+          // Calculate score based on previous point
+          const prevPoint = pathPoints[pathPoints.length - 1];
+          const score = prevPoint.distanceTo(bridgePos);
           
           console.log(`Bridge point score: ${score}`);
           
@@ -3643,37 +3651,8 @@ export default class SimplePolygonRenderer {
       } else {
         console.warn(`No bridge found between ${currentPolygonId} and ${nextPolygonId}`);
         
-        // If no bridge is found, try to find centroids of both polygons and add them as waypoints
-        const currentCentroid = currentPolygon.centroid;
-        const nextPolygon = this.polygons.find(p => p.id === nextPolygonId);
-        
-        if (currentCentroid && nextPolygon && nextPolygon.centroid) {
-          console.log(`Using centroids as waypoints between ${currentPolygonId} and ${nextPolygonId}`);
-          
-          // Add current polygon centroid
-          const currentCentroidCoord = normalizeCoordinates(
-            [currentCentroid],
-            this.bounds.centerLat,
-            this.bounds.centerLng,
-            this.bounds.scale,
-            this.bounds.latCorrectionFactor
-          )[0];
-          
-          const currentCentroidPosition = new THREE.Vector3(currentCentroidCoord.x, 0.15, -currentCentroidCoord.y);
-          pathPoints.push(currentCentroidPosition);
-          
-          // Add next polygon centroid
-          const nextCentroidCoord = normalizeCoordinates(
-            [nextPolygon.centroid],
-            this.bounds.centerLat,
-            this.bounds.centerLng,
-            this.bounds.scale,
-            this.bounds.latCorrectionFactor
-          )[0];
-          
-          const nextCentroidPosition = new THREE.Vector3(nextCentroidCoord.x, 0.15, -nextCentroidCoord.y);
-          pathPoints.push(nextCentroidPosition);
-        }
+        // Try to use centroids as waypoints
+        this.addCentroidWaypoints(currentPolygonId, nextPolygonId, pathPoints);
       }
     }
     
@@ -3777,3 +3756,41 @@ export default class SimplePolygonRenderer {
     this.pathVisualization = [];
   }
 }
+  /**
+   * Helper method to add centroid waypoints between polygons
+   */
+  private addCentroidWaypoints(currentPolygonId: string, nextPolygonId: string, pathPoints: THREE.Vector3[]): void {
+    // Find the polygons
+    const currentPolygon = this.polygons.find(p => p.id === currentPolygonId);
+    const nextPolygon = this.polygons.find(p => p.id === nextPolygonId);
+    
+    if (currentPolygon && currentPolygon.centroid && nextPolygon && nextPolygon.centroid) {
+      console.log(`Using centroids as waypoints between ${currentPolygonId} and ${nextPolygonId}`);
+      
+      // Add current polygon centroid
+      const currentCentroidCoord = normalizeCoordinates(
+        [currentPolygon.centroid],
+        this.bounds.centerLat,
+        this.bounds.centerLng,
+        this.bounds.scale,
+        this.bounds.latCorrectionFactor
+      )[0];
+      
+      const currentCentroidPosition = new THREE.Vector3(currentCentroidCoord.x, 0.15, -currentCentroidCoord.y);
+      pathPoints.push(currentCentroidPosition);
+      
+      // Add next polygon centroid
+      const nextCentroidCoord = normalizeCoordinates(
+        [nextPolygon.centroid],
+        this.bounds.centerLat,
+        this.bounds.centerLng,
+        this.bounds.scale,
+        this.bounds.latCorrectionFactor
+      )[0];
+      
+      const nextCentroidPosition = new THREE.Vector3(nextCentroidCoord.x, 0.15, -nextCentroidCoord.y);
+      pathPoints.push(nextCentroidPosition);
+    } else {
+      console.warn(`Could not find centroids for polygons ${currentPolygonId} and/or ${nextPolygonId}`);
+    }
+  }
