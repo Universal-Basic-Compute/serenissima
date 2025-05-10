@@ -54,7 +54,9 @@ export async function GET(request: Request) {
             return {
               id,
               coordinates: validCoordinates,
-              centroid: data.centroid || calculateCentroid(validCoordinates)
+              centroid: data.centroid || calculateCentroid(validCoordinates),
+              bridgePoints: data.bridgePoints || [],
+              dockPoints: data.dockPoints || []
             };
           }
           
@@ -63,6 +65,9 @@ export async function GET(request: Request) {
             id,
             coordinates: validCoordinates,
             centroid: data.centroid || calculateCentroid(validCoordinates),
+            // Include bridge and dock points if available
+            bridgePoints: data.bridgePoints || [],
+            dockPoints: data.dockPoints || [],
             // Include historical information if available
             historicalName: data.historicalName,
             englishName: data.englishName,
