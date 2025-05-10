@@ -1542,29 +1542,101 @@ export default class SimplePolygonRenderer {
             );
             
             if (prevSelected) {
-              // Reset scale
-              prevSelected.scale.set(1, 1, 1);
+              // Reset scale to original social class scale
+              const scaleMultiplier = this.getSocialClassScaleMultiplier(
+                prevSelected.userData.data.SocialClass
+              );
+              prevSelected.scale.set(scaleMultiplier, scaleMultiplier, 1);
             }
           }
           
           // Select new
           this.selectedCitizenId = citizenId;
           
-          // Scale up
-          intersected.scale.set(1.3, 1.3, 1.3);
+          // Scale up with animation
+          const originalScale = intersected.scale.x;
+          const targetScale = originalScale * 1.5;
           
-          // Emit selection event
-          eventBus.emit(EventTypes.CITIZEN_SELECTED as string, {
+          // Create a simple scale-up animation
+          const startTime = performance.now();
+          const duration = 300; // ms
+          
+          const animateScale = () => {
+            const currentTime = performance.now();
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            
+            // Ease-out function for smoother animation
+            const easeOutProgress = 1 - Math.pow(1 - progress, 3);
+            
+            const newScale = originalScale + (targetScale - originalScale) * easeOutProgress;
+            intersected.scale.set(newScale, newScale, 1);
+            
+            if (progress < 1) {
+              requestAnimationFrame(animateScale);
+            }
+          };
+          
+          // Start animation
+          animateScale();
+          
+          // Add a subtle pulse effect
+          intersected.userData.pulseAnimation = true;
+          
+          // Emit selection event with more detailed data
+          eventBus.emit(EventTypes.CITIZEN_SELECTED, {
             citizenId,
-            data: citizenData
+            data: citizenData,
+            position: intersected.position.clone(),
+            screenPosition: {
+              x: event.clientX,
+              y: event.clientY
+            }
           });
           
           // Also emit the show citizen details event
-          eventBus.emit(EventTypes.SHOW_CITIZEN_DETAILS as string, {
-            citizen: citizenData
+          eventBus.emit(EventTypes.SHOW_CITIZEN_DETAILS, {
+            citizen: citizenData,
+            position: intersected.position.clone(),
+            screenPosition: {
+              x: event.clientX,
+              y: event.clientY
+            }
           });
           
+          // Play a selection sound if available
+          if (typeof window !== 'undefined' && window.Audio) {
+            try {
+              const selectSound = new Audio('/sounds/citizen-select.mp3');
+              selectSound.volume = 0.3;
+              selectSound.play().catch(e => console.log('Could not play sound:', e));
+            } catch (e) {
+              console.log('Audio not supported:', e);
+            }
+          }
+          
           return;
+        }
+      } else {
+        // If clicking outside any citizen, deselect current selection
+        if (this.selectedCitizenId) {
+          const prevSelected = this.citizenMarkers.find(
+            marker => marker.userData && marker.userData.citizenId === this.selectedCitizenId
+          );
+          
+          if (prevSelected) {
+            // Reset scale to original social class scale
+            const scaleMultiplier = this.getSocialClassScaleMultiplier(
+              prevSelected.userData.data.SocialClass
+            );
+            prevSelected.scale.set(scaleMultiplier, scaleMultiplier, 1);
+            prevSelected.userData.pulseAnimation = false;
+          }
+          
+          this.selectedCitizenId = null;
+          
+          // Emit deselection event
+          eventBus.emit(EventTypes.CITIZEN_SELECTED, null);
         }
       }
     }
@@ -4711,9 +4783,31 @@ export default class SimplePolygonRenderer {
       }
       
       // Emit event that citizens data is loaded
-      eventBus.emit('citizens_loaded', { count: this.citizenData.length });
+      eventBus.emit(EventTypes.CITIZENS_LOADED, { 
+        count: this.citizenData.length,
+        citizens: this.citizenData
+      });
     } catch (error) {
       console.error('Error loading citizens data:', error);
+      // Show error notification
+      if (typeof window !== 'undefined') {
+        const errorNotification = document.createElement('div');
+        errorNotification.textContent = 'Failed to load citizens data';
+        errorNotification.style.position = 'fixed';
+        errorNotification.style.bottom = '20px';
+        errorNotification.style.right = '20px';
+        errorNotification.style.backgroundColor = 'rgba(220, 38, 38, 0.9)';
+        errorNotification.style.color = 'white';
+        errorNotification.style.padding = '10px 20px';
+        errorNotification.style.borderRadius = '4px';
+        errorNotification.style.zIndex = '9999';
+        
+        document.body.appendChild(errorNotification);
+        
+        setTimeout(() => {
+          document.body.removeChild(errorNotification);
+        }, 3000);
+      }
     }
   }
 
@@ -4755,22 +4849,43 @@ export default class SimplePolygonRenderer {
           return;
         }
         
-        // Draw citizen icon
+        // Draw citizen icon with improved styling
         ctx.beginPath();
         ctx.arc(size/2, size/2, size/2 - 4, 0, Math.PI * 2);
-        ctx.fillStyle = this.getSocialClassColor(citizen.SocialClass);
+        
+        // Create gradient fill based on social class
+        const baseColor = this.getSocialClassColor(citizen.SocialClass);
+        const gradient = ctx.createRadialGradient(
+          size/2, size/2 - 10, 0,
+          size/2, size/2, size/2 - 4
+        );
+        gradient.addColorStop(0, this.lightenColor(baseColor, 30));
+        gradient.addColorStop(1, baseColor);
+        ctx.fillStyle = gradient;
         ctx.fill();
         
-        // Add border
+        // Add border with glow effect
+        ctx.shadowColor = this.lightenColor(baseColor, 50);
+        ctx.shadowBlur = 10;
         ctx.strokeStyle = '#FFFFFF';
         ctx.lineWidth = 4;
         ctx.stroke();
         
-        // Add initials
+        // Reset shadow for text
+        ctx.shadowBlur = 0;
+        
+        // Add initials with improved styling
         ctx.font = 'bold 48px Arial';
         ctx.fillStyle = '#FFFFFF';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
+        
+        // Add text shadow for better readability
+        ctx.shadowColor = 'rgba(0,0,0,0.5)';
+        ctx.shadowBlur = 4;
+        ctx.shadowOffsetX = 2;
+        ctx.shadowOffsetY = 2;
+        
         ctx.fillText(`${citizen.FirstName.charAt(0)}${citizen.LastName.charAt(0)}`, size/2, size/2);
         
         // Create texture from canvas
@@ -4787,11 +4902,21 @@ export default class SimplePolygonRenderer {
         // Create sprite
         const sprite = new THREE.Sprite(spriteMaterial);
         
-        // Position sprite at building position, slightly elevated
-        sprite.position.set(buildingPosition.x, buildingPosition.y + 2, buildingPosition.z);
+        // Position sprite at building position, slightly elevated and with random offset
+        const randomOffset = new THREE.Vector3(
+          (Math.random() - 0.5) * 0.5,
+          0,
+          (Math.random() - 0.5) * 0.5
+        );
+        sprite.position.set(
+          buildingPosition.x + randomOffset.x, 
+          buildingPosition.y + 2, 
+          buildingPosition.z + randomOffset.z
+        );
         
-        // Scale sprite
-        sprite.scale.set(1, 1, 1);
+        // Scale sprite based on social class
+        const scaleMultiplier = this.getSocialClassScaleMultiplier(citizen.SocialClass);
+        sprite.scale.set(scaleMultiplier, scaleMultiplier, 1);
         
         // Add metadata
         sprite.userData = {
@@ -4813,6 +4938,80 @@ export default class SimplePolygonRenderer {
     });
     
     console.log(`Created ${this.citizenMarkers.length} citizen markers`);
+    
+    // Add floating animation to citizen markers
+    this.animateCitizenMarkers();
+  }
+  
+  /**
+   * Helper method to lighten a color
+   */
+  private lightenColor(color: string, percent: number): string {
+    // Convert hex to RGB
+    let r = parseInt(color.substring(1, 3), 16);
+    let g = parseInt(color.substring(3, 5), 16);
+    let b = parseInt(color.substring(5, 7), 16);
+    
+    // Lighten
+    r = Math.min(255, Math.floor(r + (255 - r) * (percent / 100)));
+    g = Math.min(255, Math.floor(g + (255 - g) * (percent / 100)));
+    b = Math.min(255, Math.floor(b + (255 - b) * (percent / 100)));
+    
+    // Convert back to hex
+    return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+  }
+  
+  /**
+   * Get scale multiplier based on social class
+   */
+  private getSocialClassScaleMultiplier(socialClass: string): number {
+    switch (socialClass.toLowerCase()) {
+      case 'nobili':
+        return 1.2; // Larger for nobility
+      case 'cittadini':
+        return 1.1; // Slightly larger for citizens
+      case 'popolani':
+        return 1.0; // Normal size for common people
+      case 'facchini':
+        return 0.9; // Smaller for laborers
+      default:
+        return 1.0;
+    }
+  }
+  
+  /**
+   * Add floating animation to citizen markers
+   */
+  private animateCitizenMarkers(): void {
+    // Store initial positions
+    this.citizenMarkers.forEach(marker => {
+      marker.userData.initialY = marker.position.y;
+      marker.userData.animationOffset = Math.random() * Math.PI * 2; // Random phase offset
+    });
+    
+    // Create animation function
+    const animate = () => {
+      const time = performance.now() * 0.001; // Convert to seconds
+      
+      this.citizenMarkers.forEach(marker => {
+        if (marker.userData.initialY) {
+          // Simple sine wave floating animation
+          const offset = Math.sin(time + marker.userData.animationOffset) * 0.2;
+          marker.position.y = marker.userData.initialY + offset;
+          
+          // Also add slight rotation
+          marker.rotation.z = Math.sin(time * 0.5 + marker.userData.animationOffset) * 0.1;
+        }
+      });
+      
+      // Continue animation if we still have citizen markers
+      if (this.citizenMarkers.length > 0) {
+        requestAnimationFrame(animate);
+      }
+    };
+    
+    // Start animation
+    animate();
   }
 
   /**
@@ -4874,15 +5073,15 @@ export default class SimplePolygonRenderer {
   private getSocialClassColor(socialClass: string): string {
     switch (socialClass.toLowerCase()) {
       case 'nobili':
-        return '#FFD700'; // Gold
+        return '#DAA520'; // Darker gold for better contrast
       case 'cittadini':
-        return '#4682B4'; // Steel Blue
+        return '#1E5799'; // Darker blue for better contrast
       case 'popolani':
         return '#8B4513'; // Saddle Brown
       case 'facchini':
-        return '#708090'; // Slate Gray
+        return '#556B2F'; // Darker green-gray for laborers
       default:
-        return '#C0C0C0'; // Silver (default)
+        return '#A0522D'; // Sienna (default)
     }
   }
 

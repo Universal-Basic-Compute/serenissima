@@ -120,5 +120,13 @@ export const EventTypes = {
   CITIZEN_SELECTED: 'citizenSelected',
   CITIZEN_HOVER: 'citizenHover',
   CITIZENS_LOADED: 'citizensLoaded',
-  SHOW_CITIZEN_DETAILS: 'showCitizenDetails'
+  SHOW_CITIZEN_DETAILS: 'showCitizenDetails',
+  CITIZEN_DETAILS_CLOSED: 'citizenDetailsClosed',
+  
+  // Transport events
+  SHOW_TOOLTIP: 'showTooltip',
+  HIDE_TOOLTIP: 'hideTooltip',
+  PATH_CALCULATED: 'pathCalculated',
+  BRIDGE_SELECTED: 'bridgeSelected',
+  DOCK_SELECTED: 'dockSelected'
 };

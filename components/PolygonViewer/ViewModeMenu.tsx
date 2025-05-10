@@ -117,14 +117,14 @@ export default function ViewModeMenu({ activeView, setActiveView }: ViewModeMenu
         <span className="text-[10px] mt-1">Buildings</span>
       </IconButton>
       
-      {/* Transport View - Now placed right after Buildings */}
+      {/* Transport View - Now enabled */}
       <IconButton 
-        onClick={() => {}}
-        active={false}
-        title={viewDescriptions.transport + " (Coming Soon)"}
+        onClick={() => activeView !== 'transport' ? handleViewModeChange('transport') : null}
+        active={activeView === 'transport'}
+        title={viewDescriptions.transport}
         activeColor="amber"
         compact={true}
-        disabled={true}
+        disabled={false}
       >
         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M4 10h16M8 14h8M4 18h16M9 6l-5 4 5 4M15 6l5 4-5 4"></path>

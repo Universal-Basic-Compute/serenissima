@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Citizen } from '@/components/PolygonViewer/types';
 
 interface CitizenDetailsPanelProps {
@@ -7,17 +7,66 @@ interface CitizenDetailsPanelProps {
 }
 
 const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onClose }) => {
+  const [isVisible, setIsVisible] = useState(false);
+  
+  useEffect(() => {
+    // Animate in when component mounts
+    setIsVisible(true);
+    
+    // Add escape key handler
+    const handleEscKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        handleClose();
+      }
+    };
+    
+    window.addEventListener('keydown', handleEscKey);
+    return () => {
+      window.removeEventListener('keydown', handleEscKey);
+    };
+  }, []);
+  
+  const handleClose = () => {
+    // Animate out before closing
+    setIsVisible(false);
+    setTimeout(() => {
+      onClose();
+    }, 300);
+  };
+  
   if (!citizen) return null;
   
+  // Determine social class color
+  const getSocialClassColor = (socialClass: string): string => {
+    switch (socialClass.toLowerCase()) {
+      case 'nobili':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-300'; // Gold
+      case 'cittadini':
+        return 'bg-blue-100 text-blue-800 border-blue-300'; // Blue
+      case 'popolani':
+        return 'bg-amber-100 text-amber-800 border-amber-300'; // Brown
+      case 'facchini':
+        return 'bg-gray-100 text-gray-800 border-gray-300'; // Gray
+      default:
+        return 'bg-amber-100 text-amber-800 border-amber-300'; // Default
+    }
+  };
+  
+  const socialClassStyle = getSocialClassColor(citizen.SocialClass);
+  
   return (
-    <div className="absolute top-20 right-4 bg-amber-50 border-2 border-amber-700 rounded-lg p-4 shadow-lg max-w-md z-20">
+    <div 
+      className={`fixed top-20 right-4 bg-amber-50 border-2 border-amber-700 rounded-lg p-4 shadow-lg max-w-md z-20 transition-all duration-300 ${
+        isVisible ? 'opacity-100 transform translate-x-0' : 'opacity-0 transform translate-x-10'
+      }`}
+    >
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-serif text-amber-800">
           {citizen.FirstName} {citizen.LastName}
         </h2>
         <button 
-          onClick={onClose}
-          className="text-amber-600 hover:text-amber-800"
+          onClick={handleClose}
+          className="text-amber-600 hover:text-amber-800 transition-colors"
           aria-label="Close"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -53,8 +102,10 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
         )}
         
         <div className="ml-4">
-          <div className="text-amber-800 font-medium">{citizen.SocialClass}</div>
-          <div className="text-amber-600 text-sm">Wealth: {citizen.Wealth || 'Unknown'}</div>
+          <div className={`px-2 py-1 rounded-full text-sm font-medium inline-block ${socialClassStyle}`}>
+            {citizen.SocialClass}
+          </div>
+          <div className="text-amber-600 text-sm mt-2">Wealth: {citizen.Wealth || 'Unknown'}</div>
           <div className="text-amber-600 text-sm">Needs Score: {citizen.NeedsCompletionScore.toFixed(2)}</div>
           <div className="text-amber-600 text-sm">Citizen ID: {citizen.CitizenId}</div>
         </div>
@@ -62,7 +113,7 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
       
       <div className="mb-4">
         <h3 className="text-lg font-serif text-amber-800 mb-2">About</h3>
-        <p className="text-amber-700">{citizen.Description || 'No description available.'}</p>
+        <p className="text-amber-700 italic">{citizen.Description || 'No description available.'}</p>
       </div>
       
       <div className="grid grid-cols-2 gap-4">
