@@ -516,6 +516,82 @@ def create_building_owner_summary(tables, building_owner: str, buildings_data: L
     
     create_notification(tables, building_owner, content, details)
 
+def test_telegram_connection():
+    """Test the Telegram connection"""
+    if not TELEGRAM_BOT_TOKEN or not MAIN_TELEGRAM_CHAT_ID:
+        log.warning("Telegram credentials not set, skipping connection test")
+        return False
+    
+    try:
+        # Try to get bot info first to verify the token
+        bot_info_url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/getMe"
+        bot_response = requests.get(bot_info_url)
+        
+        if not bot_response.ok:
+            log.error(f"Invalid bot token: {bot_response.status_code} {bot_response.text}")
+            return False
+        
+        bot_data = bot_response.json()
+        bot_username = bot_data.get("result", {}).get("username", "Unknown")
+        log.info(f"Connected to Telegram bot: @{bot_username}")
+        
+        # Now try to get chat info to verify the chat ID
+        chat_info_url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/getChat?chat_id={MAIN_TELEGRAM_CHAT_ID}"
+        chat_response = requests.get(chat_info_url)
+        
+        if not chat_response.ok:
+            log.error(f"Failed to get chat info: {chat_response.status_code} {chat_response.text}")
+            log.error("Make sure the bot is a member of the chat and has permission to send messages")
+            return False
+        
+        chat_data = chat_response.json()
+        chat_title = chat_data.get("result", {}).get("title", "Unknown")
+        log.info(f"Connected to Telegram chat: {chat_title} (ID: {MAIN_TELEGRAM_CHAT_ID})")
+        
+        return True
+    except Exception as e:
+        log.error(f"Error testing Telegram connection: {str(e)}")
+        return False
+
+def send_telegram_notification(message):
+    """Send a notification to the Telegram channel"""
+    if not TELEGRAM_BOT_TOKEN or not MAIN_TELEGRAM_CHAT_ID:
+        log.warning("Telegram credentials not set, skipping notification")
+        return False
+    
+    try:
+        # URL encode the message
+        encoded_message = quote(message)
+        # Remove HTML parse mode which might be causing issues
+        url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage?chat_id={MAIN_TELEGRAM_CHAT_ID}&text={encoded_message}"
+        
+        # Send the message
+        response = requests.get(url)
+        
+        if response.status_code == 200:
+            log.info("Telegram notification sent successfully")
+            return True
+        else:
+            # More detailed error logging
+            error_details = response.text
+            log.error(f"Failed to send Telegram notification: {response.status_code} {error_details}")
+            
+            # Check for specific error types
+            try:
+                error_json = response.json()
+                if error_json.get("error_code") == 400 and "chat not found" in error_json.get("description", "").lower():
+                    log.error(f"The chat ID {MAIN_TELEGRAM_CHAT_ID} was not found. Please verify the chat ID is correct and the bot is a member of the chat.")
+                elif error_json.get("error_code") == 401:
+                    log.error("Bot token is invalid. Please check your TELEGRAM_BOT_TOKEN.")
+            except:
+                # If we can't parse the JSON, just continue
+                pass
+                
+            return False
+    except Exception as e:
+        log.error(f"Error sending Telegram notification: {str(e)}")
+        return False
+
 def create_admin_summary(tables, lease_summary) -> None:
     """Create a summary notification for the admin."""
     try:
