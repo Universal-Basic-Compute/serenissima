@@ -251,15 +251,16 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
             const x = (lng - bounds.centerLng) * bounds.scale;
             const z = -(lat - bounds.centerLat) * bounds.scale * bounds.latCorrectionFactor;
             
+            // Log the conversion for debugging
+            console.log(`Converting lat/lng to Three.js coordinates for building ${building.id}:`);
+            console.log(`  Original lat/lng: ${lat}, ${lng}`);
+            console.log(`  Converted to x,z: ${x}, ${z}`);
+            
             position = {
               x: x, // Don't round or truncate these values
               y: position.y || 5, // Keep the existing y or use default
               z: z  // Don't round or truncate these values
             };
-            
-            console.log(`Converted lat/lng position for building ${building.id}:`, 
-              `From: lat=${lat}, lng=${lng}`,
-              `To: x=${position.x}, z=${position.z}`);
           } 
           // Regular x,y,z format - PRESERVE FULL PRECISION
           else {
@@ -281,6 +282,13 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
         parseFloat(position.y.toString()) || 5,
         parseFloat(position.z.toString())  // Ensure we're using the full floating point value
       );
+      
+      // Add more detailed logging
+      console.log(`Setting building ${building.id} position to:`, {
+        x: model.position.x,
+        y: model.position.y,
+        z: model.position.z
+      });
       
       // Add more detailed logging
       console.log(`Setting building ${building.id} position to:`, {
