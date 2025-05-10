@@ -352,6 +352,11 @@ def process_lease_payment(tables, land: Dict, building: Dict, dry_run: bool = Fa
     if building_owner_balance < lease_amount:
         log.warning(f"Building owner {building_owner} has insufficient funds: {building_owner_balance} < {lease_amount}")
         
+        # Get development ratio for this land
+        building_points_count = land['fields'].get('BuildingPointsCount', 0)
+        buildings_count = land['fields'].get('BuildingsCount', 0)
+        development_ratio = min(float(buildings_count) / float(building_points_count), 1.0) if building_points_count > 0 else 0
+        
         # Create notification about insufficient funds
         create_notification(
             tables,
@@ -365,6 +370,8 @@ def process_lease_payment(tables, land: Dict, building: Dict, dry_run: bool = Fa
                 "building_type": building_type,
                 "lease_amount": lease_amount,
                 "tax_amount": tax_amount,
+                "tax_rate": f"{tax_rate:.2%}",
+                "development_ratio": development_ratio,
                 "net_amount": net_amount,
                 "available_balance": building_owner_balance,
                 "event_type": "lease_payment_failed",
@@ -385,6 +392,8 @@ def process_lease_payment(tables, land: Dict, building: Dict, dry_run: bool = Fa
                 "building_type": building_type,
                 "lease_amount": lease_amount,
                 "tax_amount": tax_amount,
+                "tax_rate": f"{tax_rate:.2%}",
+                "development_ratio": development_ratio,
                 "net_amount": net_amount,
                 "building_owner": building_owner,
                 "event_type": "lease_payment_failed",
@@ -451,14 +460,23 @@ def create_land_owner_summary(tables, land_owner: str, land_name: str, buildings
     if not buildings_data:
         return
     
-    content = f"You received {int(total_amount)} ⚜️ Ducats in lease payments for your land {land_name} (after 20% republican tax)"
+    # Calculate average tax rate for this land
+    total_tax = sum(building.get("tax_amount", 0) for building in buildings_data)
+    total_lease = sum(building.get("lease_amount", 0) for building in buildings_data)
+    avg_tax_rate = (total_tax / total_lease) * 100 if total_lease > 0 else 0
+    
+    # Get development rate from the first building's data (should be the same for all buildings on this land)
+    development_rate = buildings_data[0].get("development_rate", 0) * 100 if buildings_data else 0
+    
+    content = f"You received {int(total_amount)} ⚜️ Ducats in lease payments for your land {land_name} (after {avg_tax_rate:.1f}% republican tax, development rate: {development_rate:.1f}%)"
     
     details = {
         "land_name": land_name,
         "total_amount": total_amount,
         "buildings_count": len(buildings_data),
         "buildings": buildings_data,
-        "tax_rate": "variable (20-50%)",
+        "tax_rate": f"{avg_tax_rate:.1f}%",
+        "development_rate": f"{development_rate:.1f}%",
         "event_type": "lease_payments_received"
     }
     
@@ -469,7 +487,15 @@ def create_building_owner_summary(tables, building_owner: str, buildings_data: L
     if not buildings_data:
         return
     
-    content = f"You paid {int(total_amount + total_tax)} ⚜️ Ducats in lease payments for your {len(buildings_data)} buildings ({int(total_amount)} to land owners, {int(total_tax)} in republican tax)"
+    # Calculate average tax rate
+    total_lease = total_amount + total_tax
+    avg_tax_rate = (total_tax / total_lease) * 100 if total_lease > 0 else 0
+    
+    # Calculate average development rate across all lands
+    development_rates = [building.get("development_rate", 0) * 100 for building in buildings_data if "development_rate" in building]
+    avg_development_rate = sum(development_rates) / len(development_rates) if development_rates else 0
+    
+    content = f"You paid {int(total_amount + total_tax)} ⚜️ Ducats in lease payments for your {len(buildings_data)} buildings ({int(total_amount)} to land owners, {int(total_tax)} in republican tax at {avg_tax_rate:.1f}% rate, avg development: {avg_development_rate:.1f}%)"
     
     details = {
         "total_amount": total_amount,
@@ -477,7 +503,8 @@ def create_building_owner_summary(tables, building_owner: str, buildings_data: L
         "total_paid": total_amount + total_tax,
         "buildings_count": len(buildings_data),
         "buildings": buildings_data,
-        "tax_rate": "variable (20-50%)",
+        "avg_tax_rate": f"{avg_tax_rate:.1f}%",
+        "avg_development_rate": f"{avg_development_rate:.1f}%",
         "event_type": "lease_payments_made"
     }
     
@@ -600,6 +627,11 @@ def distribute_leases(dry_run: bool = False):
                                 except (ValueError, TypeError):
                                     lease_amount = 0
                                 
+                                # Calculate development ratio for this land
+                                building_points_count = land['fields'].get('BuildingPointsCount', 0)
+                                buildings_count = land['fields'].get('BuildingsCount', 0)
+                                development_ratio = min(float(buildings_count) / float(building_points_count), 1.0) if building_points_count > 0 else 0
+                                
                                 land_buildings_data.append({
                                     "building_id": building_id,
                                     "building_name": building_name,
@@ -607,7 +639,9 @@ def distribute_leases(dry_run: bool = False):
                                     "building_owner": building_owner,
                                     "lease_amount": lease_amount,
                                     "net_amount": net_amount,
-                                    "tax_amount": tax_amount
+                                    "tax_amount": tax_amount,
+                                    "tax_rate": tax_rate,
+                                    "development_rate": development_ratio
                                 })
                                 
                                 # Add land data for building owner notification
@@ -621,7 +655,9 @@ def distribute_leases(dry_run: bool = False):
                                         "building_type": building_type,
                                         "lease_amount": lease_amount,
                                         "net_amount": net_amount,
-                                        "tax_amount": tax_amount
+                                        "tax_amount": tax_amount,
+                                        "tax_rate": tax_rate,
+                                        "development_rate": development_ratio
                                     })
                         else:
                             lease_summary["failed"] += 1
