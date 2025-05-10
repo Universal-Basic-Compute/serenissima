@@ -167,11 +167,11 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
     console.log(`Rendering building ID: ${id}, Type: ${type}, Position:`, position);
     
     // Add a large debug sphere at the same position
-    const sphereGeometry = new THREE.SphereGeometry(10, 32, 32); // Large 10-unit radius sphere
+    const sphereGeometry = new THREE.SphereGeometry(30, 32, 32); // Much larger 30-unit radius sphere
     const sphereMaterial = new THREE.MeshBasicMaterial({ 
-      color: 0xff0000,  // Bright red
+      color: 0xff00ff,  // Bright magenta for better visibility
       transparent: true,
-      opacity: 0.7
+      opacity: 0.9
     });
     const debugSphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
 
@@ -184,12 +184,31 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
     const debugId = `debug_sphere_${id}`;
     buildingMeshesRef.current.set(debugId, debugSphere);
     
+    // Add additional debug spheres at different heights with different colors
+    const debugSphere2 = new THREE.Mesh(
+      new THREE.SphereGeometry(25, 32, 32),
+      new THREE.MeshBasicMaterial({ color: 0x00ff00, transparent: true, opacity: 0.9 })
+    );
+    debugSphere2.position.set(position.x, position.y + 30, position.z); // 30 units above the building
+    scene.add(debugSphere2);
+    console.log(`Added second debug sphere at position: ${JSON.stringify(debugSphere2.position)}`);
+    buildingMeshesRef.current.set(`debug_sphere2_${id}`, debugSphere2);
+
+    const debugSphere3 = new THREE.Mesh(
+      new THREE.SphereGeometry(20, 32, 32),
+      new THREE.MeshBasicMaterial({ color: 0x0000ff, transparent: true, opacity: 0.9 })
+    );
+    debugSphere3.position.set(position.x, position.y + 45, position.z); // 45 units above the building
+    scene.add(debugSphere3);
+    console.log(`Added third debug sphere at position: ${JSON.stringify(debugSphere3.position)}`);
+    buildingMeshesRef.current.set(`debug_sphere3_${id}`, debugSphere3);
+    
     // Add a reference sphere at origin (0,0,0)
-    const originSphereGeometry = new THREE.SphereGeometry(5, 32, 32);
+    const originSphereGeometry = new THREE.SphereGeometry(15, 32, 32); // Larger sphere
     const originSphereMaterial = new THREE.MeshBasicMaterial({ 
       color: 0x00ff00,  // Bright green
       transparent: true,
-      opacity: 0.7
+      opacity: 0.9 // More visible
     });
     const originSphere = new THREE.Mesh(originSphereGeometry, originSphereMaterial);
     originSphere.position.set(0, 15, 0); // At origin, 15 units up
@@ -236,23 +255,23 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
             const box = new THREE.Box3().setFromObject(model);
             const size = box.getSize(new THREE.Vector3());
             
-            // Scale model to a reasonable size - reduce the scale to make buildings smaller
+            // Scale model to a reasonable size - increase the scale to make buildings larger
             const maxDimension = Math.max(size.x, size.y, size.z);
             if (maxDimension > 20) {
-              // Model is too large, scale it down
-              const scale = 0.5 / maxDimension; // Reduced scale factor
+              // Model is too large, scale it down but still keep it visible
+              const scale = 1.0 / maxDimension; // Increased scale factor
               model.scale.set(scale, scale, scale);
               console.log(`Model was too large (${maxDimension} units), scaled down by ${scale}`);
             } else if (maxDimension < 1) {
-              // Model is too small, scale it up
-              const scale = 0.5 / maxDimension; // Reduced scale factor
+              // Model is too small, scale it up significantly
+              const scale = 2.0 / maxDimension; // Increased scale factor
               model.scale.set(scale, scale, scale);
               console.log(`Model was too small (${maxDimension} units), scaled up by ${scale}`);
             } else {
-              // Apply a default scale to make buildings more visible but smaller
-              const scale = 0.1; // Significantly reduced from 0.5 to 0.1
+              // Apply a default scale to make buildings more visible and larger
+              const scale = 2.0; // Dramatically increased from 0.1 to 2.0
               model.scale.set(scale, scale, scale);
-              console.log(`Applied default scale of ${scale} to building`);
+              console.log(`Applied much larger scale of ${scale} to building`);
             }
             
             // Store the building ID in userData for later reference
@@ -322,15 +341,16 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
     fallbackMesh.position.set(position.x, 5.0, position.z); // Set Y to 5.0 units above water level
     fallbackMesh.rotation.y = rotation || 0;
     
-    // Make the fallback mesh smaller for better proportions
-    fallbackMesh.scale.set(0.5, 0.5, 0.5); // Reduced from 1 to 0.5
+    // Make the fallback mesh much larger for better visibility
+    fallbackMesh.scale.set(5.0, 5.0, 5.0); // Dramatically increased from 0.5 to 5.0
+    console.log(`Created much larger fallback mesh for building ${id}`);
     
     // Store the building ID in userData for later reference
     fallbackMesh.userData.buildingId = id;
     fallbackMesh.userData.buildingType = type;
     
     // Add a visible helper at the building position
-    const helperGeometry = new THREE.SphereGeometry(0.5, 16, 16);
+    const helperGeometry = new THREE.SphereGeometry(15, 16, 16); // Much larger helper
     const helperMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
     const helper = new THREE.Mesh(helperGeometry, helperMaterial);
     helper.position.set(position.x, 5.0, position.z);
