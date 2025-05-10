@@ -93,6 +93,17 @@ const ResourceDropdown: React.FC<ResourceDropdownProps> = ({ category, resources
     y: 0
   });
 
+  // Deduplicate resources by ID to prevent duplicates
+  const uniqueResources = React.useMemo(() => {
+    const resourceMap = new Map<string, Resource>();
+    resources.forEach(resource => {
+      if (!resourceMap.has(resource.id)) {
+        resourceMap.set(resource.id, resource);
+      }
+    });
+    return Array.from(resourceMap.values());
+  }, [resources]);
+
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -167,14 +178,25 @@ const ResourceDropdown: React.FC<ResourceDropdownProps> = ({ category, resources
 
   // Group resources by subcategory if enabled
   const groupedResources = () => {
-    if (!groupBySubcategory) return { '': resources };
+    if (!groupBySubcategory) return { '': uniqueResources };
     
-    return resources.reduce((groups, resource) => {
+    return uniqueResources.reduce((groups, resource) => {
       const subcategory = resource.subcategory || '';
       if (!groups[subcategory]) groups[subcategory] = [];
       groups[subcategory].push(resource);
       return groups;
     }, {} as Record<string, Resource[]>);
+  };
+
+  // Get proper icon path with fallback
+  const getIconPath = (iconName: string) => {
+    // Check if the icon path already starts with a slash or http
+    if (iconName.startsWith('/') || iconName.startsWith('http')) {
+      return iconName;
+    }
+    
+    // Otherwise, ensure it starts with a slash for public directory
+    return `/assets/icons/resources/${iconName}`;
   };
 
   return (
@@ -204,7 +226,7 @@ const ResourceDropdown: React.FC<ResourceDropdownProps> = ({ category, resources
             </div>
           </div>
           
-          {resources.length > 0 ? (
+          {uniqueResources.length > 0 ? (
             <div>
               {Object.entries(groupedResources()).map(([subcategory, subcategoryResources]) => (
                 <div key={subcategory || 'default'}>
@@ -227,14 +249,19 @@ const ResourceDropdown: React.FC<ResourceDropdownProps> = ({ category, resources
                           <div className="flex items-center space-x-2">
                             <div className="w-4 h-4 flex-shrink-0">
                               <img 
-                                src={resource.icon} 
+                                src={getIconPath(resource.icon)} 
                                 alt={resource.name} 
                                 className="w-4 h-4 object-contain"
                                 onError={(e) => {
                                   // Fallback if image doesn't exist - only set once
                                   if (!(e.target as HTMLImageElement).dataset.fallback) {
                                     (e.target as HTMLImageElement).dataset.fallback = "true";
-                                    (e.target as HTMLImageElement).src = `https://via.placeholder.com/16?text=${resource.name.charAt(0).toUpperCase()}`;
+                                    (e.target as HTMLImageElement).src = `/assets/icons/resources/default.png`;
+                                    // If that fails too, use a placeholder
+                                    (e.target as HTMLImageElement).onerror = () => {
+                                      (e.target as HTMLImageElement).src = `https://via.placeholder.com/16?text=${resource.name.charAt(0).toUpperCase()}`;
+                                      (e.target as HTMLImageElement).onerror = null; // Prevent infinite loop
+                                    };
                                   }
                                 }}
                               />
