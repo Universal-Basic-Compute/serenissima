@@ -1,6 +1,7 @@
 import React from 'react';
 import Image from 'next/image';
 import { FaTimes } from 'react-icons/fa'; // Import the X icon
+import HistoricalResources from './HistoricalResources';
 
 export interface KnowledgeRepositoryProps {
   onShowTechTree: () => void;
@@ -343,6 +344,9 @@ const KnowledgeRepository: React.FC<KnowledgeRepositoryProps> = ({
             </div>
           </div>
         </div>
+        
+        {/* Historical Resources Section */}
+        <HistoricalResources onSelectArticle={onSelectArticle} />
       </div>
     </div>
   );

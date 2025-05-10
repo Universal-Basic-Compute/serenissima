@@ -149,3 +149,167 @@ const HistoricalAccuracyArticle: React.FC<HistoricalAccuracyArticleProps> = ({ o
 };
 
 export default HistoricalAccuracyArticle;
+import React from 'react';
+import { FaTimes } from 'react-icons/fa';
+
+interface HistoricalAccuracyArticleProps {
+  onClose: () => void;
+}
+
+const HistoricalAccuracyArticle: React.FC<HistoricalAccuracyArticleProps> = ({ onClose }) => {
+  return (
+    <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 overflow-auto">
+      <div className="bg-amber-50 border-2 border-amber-700 rounded-lg p-6 max-w-4xl max-h-[90vh] overflow-y-auto">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-3xl font-serif text-amber-800">
+            Historical Accuracy in La Serenissima
+          </h2>
+          <button 
+            onClick={onClose}
+            className="text-amber-600 hover:text-amber-800 p-2"
+            aria-label="Close article"
+          >
+            <FaTimes size={24} />
+          </button>
+        </div>
+        
+        <div className="prose prose-amber max-w-none">
+          <p className="lead text-lg text-amber-900 mb-6 font-serif italic">
+            La Serenissima strives to balance historical authenticity with engaging gameplay. This article explores our approach to historical accuracy and the research that informs our recreation of Renaissance Venice.
+          </p>
+          
+          <h3 className="text-xl font-serif text-amber-800 mt-8 mb-4">Our Approach to Historical Accuracy</h3>
+          
+          <p>
+            When developing La Serenissima, we established a set of principles to guide our approach to historical accuracy:
+          </p>
+          
+          <ul className="list-disc pl-6 space-y-2 my-4">
+            <li><strong>Authentic Core Experience:</strong> The fundamental systems, structures, and aesthetics of Venice are represented accurately.</li>
+            <li><strong>Informed Abstraction:</strong> Where gameplay requires simplification, we make historically informed choices.</li>
+            <li><strong>Educational Value:</strong> Historical information is integrated into the experience to educate players about Renaissance Venice.</li>
+            <li><strong>Transparent Deviations:</strong> When we deviate from history for gameplay reasons, we acknowledge and explain these choices.</li>
+          </ul>
+          
+          <h3 className="text-xl font-serif text-amber-800 mt-8 mb-4">Geographic Accuracy</h3>
+          
+          <p>
+            The geography of La Serenissima is based on historical maps and records from the 16th century. We've recreated:
+          </p>
+          
+          <ul className="list-disc pl-6 space-y-2 my-4">
+            <li>The distinctive shape of the Venetian lagoon and its major islands</li>
+            <li>The Grand Canal's serpentine path through the city</li>
+            <li>The locations of major landmarks such as the Piazza San Marco, Rialto Bridge, and Arsenal</li>
+            <li>The six historic sestieri (districts) of Venice</li>
+          </ul>
+          
+          <p>
+            While we've maintained geographical accuracy in the layout, we've made some practical simplifications:
+          </p>
+          
+          <ul className="list-disc pl-6 space-y-2 my-4">
+            <li>Some smaller canals are omitted for navigational clarity</li>
+            <li>The scale is slightly compressed to improve gameplay pacing</li>
+            <li>Land parcels are somewhat regularized to facilitate the building system</li>
+          </ul>
+          
+          <h3 className="text-xl font-serif text-amber-800 mt-8 mb-4">Economic Systems</h3>
+          
+          <p>
+            The economic systems in La Serenissima are based on historical Venetian practices:
+          </p>
+          
+          <ul className="list-disc pl-6 space-y-2 my-4">
+            <li>The resource system reflects Venice's role as a trade intermediary between East and West</li>
+            <li>The closed economic loop mirrors Venice's careful management of wealth and resources</li>
+            <li>The banking system is inspired by the sophisticated financial instruments developed in Renaissance Venice</li>
+            <li>Land ownership and leasing systems reflect the complex property arrangements of historical Venice</li>
+          </ul>
+          
+          <p>
+            For gameplay purposes, we've made some economic simplifications:
+          </p>
+          
+          <ul className="list-disc pl-6 space-y-2 my-4">
+            <li>Production chains are streamlined compared to historical processes</li>
+            <li>The time scale of economic activities is compressed</li>
+            <li>The $COMPUTE token serves as an abstraction of the complex Venetian ducat system</li>
+          </ul>
+          
+          <h3 className="text-xl font-serif text-amber-800 mt-8 mb-4">Governance and Social Structure</h3>
+          
+          <p>
+            Venice's unique republican governance system is represented in La Serenissima:
+          </p>
+          
+          <ul className="list-disc pl-6 space-y-2 my-4">
+            <li>The Council of Ten's role in governance and decision-making</li>
+            <li>The patrician class system and its control over politics and trade</li>
+            <li>The complex web of guilds and their economic influence</li>
+            <li>The importance of family connections and alliances</li>
+          </ul>
+          
+          <p>
+            Some governance aspects are adapted for gameplay:
+          </p>
+          
+          <ul className="list-disc pl-6 space-y-2 my-4">
+            <li>Players can rise in status more rapidly than would have been historically possible</li>
+            <li>The decree system simplifies the complex legislative process of the Republic</li>
+            <li>Guild mechanics are streamlined to focus on gameplay impact</li>
+          </ul>
+          
+          <h3 className="text-xl font-serif text-amber-800 mt-8 mb-4">Architecture and Aesthetics</h3>
+          
+          <p>
+            The visual representation of Venice in La Serenissima draws from extensive architectural research:
+          </p>
+          
+          <ul className="list-disc pl-6 space-y-2 my-4">
+            <li>Building designs are based on surviving structures and historical documentation</li>
+            <li>The distinctive Venetian Gothic and Renaissance styles are faithfully reproduced</li>
+            <li>Materials, colors, and textures reflect the actual appearance of 16th century Venice</li>
+            <li>The unique Venetian approach to urban density and water integration is preserved</li>
+          </ul>
+          
+          <p>
+            Visual adaptations include:
+          </p>
+          
+          <ul className="list-disc pl-6 space-y-2 my-4">
+            <li>Some architectural details are simplified for performance reasons</li>
+            <li>Building footprints are somewhat regularized for the building system</li>
+            <li>Color palettes are slightly enhanced for visual clarity</li>
+          </ul>
+          
+          <h3 className="text-xl font-serif text-amber-800 mt-8 mb-4">Historical Research Sources</h3>
+          
+          <p>
+            Our recreation of Renaissance Venice is informed by a variety of historical sources:
+          </p>
+          
+          <ul className="list-disc pl-6 space-y-2 my-4">
+            <li>Contemporary maps and city views, including Jacopo de' Barbari's famous woodcut map of 1500</li>
+            <li>Archival records from the Venetian State Archives</li>
+            <li>Accounts by visitors and residents, including diplomatic reports and merchant correspondence</li>
+            <li>Modern historical scholarship on Venetian economy, society, and urban development</li>
+            <li>Archaeological and architectural studies of surviving structures</li>
+          </ul>
+          
+          <h3 className="text-xl font-serif text-amber-800 mt-8 mb-4">Conclusion</h3>
+          
+          <p>
+            La Serenissima represents our commitment to creating an experience that is both historically informed and engaging as a game. We believe that by grounding our systems in historical reality while making thoughtful adaptations for gameplay, we can offer players both an entertaining experience and a deeper understanding of one of history's most fascinating cities.
+          </p>
+          
+          <p>
+            As we continue to develop La Serenissima, we welcome feedback from players about the balance between historical accuracy and gameplay. Our goal is to create a living, breathing Venice that captures the essence of the historical city while providing meaningful agency to players.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default HistoricalAccuracyArticle;
