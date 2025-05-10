@@ -35,7 +35,12 @@ export const SceneReadyProvider: React.FC<SceneReadyProviderProps> = ({
     const handleSceneReady = (event: CustomEvent) => {
       const { scene, camera } = event.detail;
       setScene(scene);
-      setCamera(camera);
+      // Ensure camera is a PerspectiveCamera before setting it
+      if (camera instanceof THREE.PerspectiveCamera) {
+        setCamera(camera);
+      } else {
+        console.warn('SceneReadyProvider: Camera from event is not a PerspectiveCamera');
+      }
       setIsSceneReady(true);
       console.log('SceneReadyProvider: Received sceneReady event');
     };
@@ -62,7 +67,7 @@ export const SceneReadyProvider: React.FC<SceneReadyProviderProps> = ({
           setScene(canvas.__scene);
           // Ensure camera is a PerspectiveCamera before setting it
           if (canvas.__camera && canvas.__camera instanceof THREE.PerspectiveCamera) {
-            setCamera(canvas.__camera as THREE.PerspectiveCamera);
+            setCamera(canvas.__camera);
           } else {
             console.warn('SceneReadyProvider: Camera is not a PerspectiveCamera');
           }
