@@ -2768,7 +2768,7 @@ export default class SimplePolygonRenderer {
         
         // Check if buildings are in different polygons
         if (startBuildingInfo.polygonId !== endBuildingInfo.polygonId) {
-          // Try to find a path between the polygons
+          // Try to find a path between the polygons using bridge-by-bridge navigation
           const path = this.findShortestPath(startBuildingInfo.polygonId, endBuildingInfo.polygonId);
           
           if (path && path.length > 0) {
@@ -2812,7 +2812,7 @@ export default class SimplePolygonRenderer {
         const endPolygon = this.findPolygonContainingPoint(endLatLng);
         
         if (startPolygon && endPolygon) {
-          // Try to find a path
+          // Try to find a path using the bridge-by-bridge navigation
           const path = this.findShortestPath(startPolygon.id, endPolygon.id);
           
           if (path && path.length > 0) {
@@ -3544,8 +3544,8 @@ export default class SimplePolygonRenderer {
   }
   
   /**
-   * Find the shortest path between two nodes in a graph using A* algorithm
-   * This is now more of a pathfinder than just a shortest path calculator
+   * Find the shortest path between two nodes in a graph using a modified A* algorithm
+   * that navigates bridge by bridge through the correct polygons
    */
   private findShortestPath(start: string, end: string): string[] {
     console.log(`Finding shortest path from ${start} to ${end}`);
@@ -3555,6 +3555,102 @@ export default class SimplePolygonRenderer {
       console.log(`Start and end are the same (${start}), returning single-node path`);
       return [start];
     }
+    
+    // Initialize the path with the starting polygon
+    const path = [start];
+    let currentPolygonId = start;
+    
+    // Keep track of visited polygons to avoid cycles
+    const visitedPolygons = new Set<string>([start]);
+    
+    // Continue until we reach the end or can't proceed further
+    while (currentPolygonId !== end) {
+      console.log(`Current polygon: ${currentPolygonId}`);
+      
+      // Find the current polygon
+      const currentPolygon = this.polygons.find(p => p.id === currentPolygonId);
+      if (!currentPolygon) {
+        console.warn(`Polygon ${currentPolygonId} not found`);
+        break;
+      }
+      
+      // Get all bridge connections from the current polygon
+      const bridgeConnections: {
+        targetPolygonId: string;
+        score: number;
+      }[] = [];
+      
+      // Check if the polygon has bridge points
+      if (currentPolygon.bridgePoints && Array.isArray(currentPolygon.bridgePoints)) {
+        // Collect all possible bridge connections
+        currentPolygon.bridgePoints.forEach(bridgePoint => {
+          if (bridgePoint.connection && bridgePoint.connection.targetPolygonId) {
+            const targetPolygonId = bridgePoint.connection.targetPolygonId;
+            
+            // Skip if we've already visited this polygon
+            if (visitedPolygons.has(targetPolygonId)) {
+              return;
+            }
+            
+            // Find the target polygon
+            const targetPolygon = this.polygons.find(p => p.id === targetPolygonId);
+            if (!targetPolygon) {
+              console.warn(`Target polygon ${targetPolygonId} not found`);
+              return;
+            }
+            
+            // Calculate a score for this connection based on heuristic distance to the end
+            const score = this.heuristicDistance(targetPolygonId, end);
+            
+            bridgeConnections.push({
+              targetPolygonId,
+              score
+            });
+          }
+        });
+      }
+      
+      // If no valid bridge connections, we're stuck
+      if (bridgeConnections.length === 0) {
+        console.warn(`No valid bridge connections from ${currentPolygonId}`);
+        break;
+      }
+      
+      // Sort connections by score (lowest first)
+      bridgeConnections.sort((a, b) => a.score - b.score);
+      
+      // Choose the best connection
+      const bestConnection = bridgeConnections[0];
+      console.log(`Selected bridge to ${bestConnection.targetPolygonId} with score ${bestConnection.score}`);
+      
+      // Add the next polygon to the path
+      path.push(bestConnection.targetPolygonId);
+      visitedPolygons.add(bestConnection.targetPolygonId);
+      currentPolygonId = bestConnection.targetPolygonId;
+      
+      // Safety check to prevent infinite loops
+      if (path.length > 100) {
+        console.warn('Path finding exceeded maximum length, stopping');
+        break;
+      }
+    }
+    
+    // Check if we reached the destination
+    if (currentPolygonId === end) {
+      console.log(`Path found: ${path.join(' → ')}`);
+      return path;
+    }
+    
+    // If we couldn't reach the destination, try the original A* algorithm as fallback
+    console.log('Bridge-by-bridge navigation failed, falling back to A* algorithm');
+    return this.findShortestPathAStar(start, end);
+  }
+
+  /**
+   * Original A* implementation as a fallback
+   */
+  private findShortestPathAStar(start: string, end: string): string[] {
+    console.log(`Finding shortest path using A* from ${start} to ${end}`);
     
     // Build a graph from the polygon bridge connections
     const graph: Record<string, string[]> = {};
@@ -3592,9 +3688,6 @@ export default class SimplePolygonRenderer {
         console.log(`Polygon ${polygon.id} has no bridge points`);
       }
     });
-    
-    // Log the graph for debugging
-    console.log(`Graph built with ${Object.keys(graph).length} nodes`);
     
     // Priority queue for A* - stores nodes with their priority (f-score)
     const openSet: {id: string, fScore: number}[] = [];
@@ -3807,88 +3900,7 @@ export default class SimplePolygonRenderer {
       
       console.log(`Finding bridge between ${currentPolygonId} and ${nextPolygonId}`);
       
-      // Check if we have enhanced graph data for this connection
-      if (enhancedGraph && 
-          enhancedGraph[currentPolygonId] && 
-          enhancedGraph[currentPolygonId].connections) {
-        
-        // Find all connections to the next polygon
-        const connections = enhancedGraph[currentPolygonId].connections.filter(
-          (c: any) => c.targetId === nextPolygonId
-        );
-        
-        if (connections && connections.length > 0) {
-          console.log(`Using pre-computed bridge connection from enhanced graph (${connections.length} available)`);
-          
-          // If multiple connections exist, find the best one
-          let bestConnection = connections[0];
-          let bestScore = Infinity;
-          
-          for (const connection of connections) {
-            // Calculate score based on distance from direct path
-            const sourcePoint = connection.sourcePoint;
-            const targetPoint = connection.targetPoint;
-            
-            // Convert to normalized coordinates
-            const sourceCoord = normalizeCoordinates(
-              [sourcePoint],
-              this.bounds.centerLat,
-              this.bounds.centerLng,
-              this.bounds.scale,
-              this.bounds.latCorrectionFactor
-            )[0];
-            
-            const targetCoord = normalizeCoordinates(
-              [targetPoint],
-              this.bounds.centerLat,
-              this.bounds.centerLng,
-              this.bounds.scale,
-              this.bounds.latCorrectionFactor
-            )[0];
-            
-            // Create 3D points
-            const sourcePos = new THREE.Vector3(sourceCoord.x, 0, -sourceCoord.y);
-            const targetPos = new THREE.Vector3(targetCoord.x, 0, -targetCoord.y);
-            
-            // Calculate score based on previous point
-            const prevPoint = pathPoints[pathPoints.length - 1];
-            const score = prevPoint.distanceTo(sourcePos);
-            
-            if (score < bestScore) {
-              bestScore = score;
-              bestConnection = connection;
-            }
-          }
-          
-          // Add the source point to the path
-          const sourceCoord = normalizeCoordinates(
-            [bestConnection.sourcePoint],
-            this.bounds.centerLat,
-            this.bounds.centerLng,
-            this.bounds.scale,
-            this.bounds.latCorrectionFactor
-          )[0];
-          
-          const sourcePosition = new THREE.Vector3(sourceCoord.x, 0.15, -sourceCoord.y);
-          pathPoints.push(sourcePosition);
-          
-          // Add the target point to the path
-          const targetCoord = normalizeCoordinates(
-            [bestConnection.targetPoint],
-            this.bounds.centerLat,
-            this.bounds.centerLng,
-            this.bounds.scale,
-            this.bounds.latCorrectionFactor
-          )[0];
-          
-          const targetPosition = new THREE.Vector3(targetCoord.x, 0.15, -targetCoord.y);
-          pathPoints.push(targetPosition);
-          
-          continue; // Skip to the next segment
-        }
-      }
-      
-      // If we don't have enhanced graph data, fall back to the original method
+      // Find the current polygon
       const currentPolygon = this.polygons.find(p => p.id === currentPolygonId);
       if (!currentPolygon || !currentPolygon.bridgePoints) {
         console.warn(`Polygon ${currentPolygonId} not found or has no bridge points`);
