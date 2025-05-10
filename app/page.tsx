@@ -825,9 +825,9 @@ export default function SimplePage() {
           </ul>
         </div>
         
-        {/* Bottom section */}
+        {/* Bottom section with version number */}
         <div className="p-4 border-t border-gray-700 text-center">
-          <div className="text-xs text-gray-400">v0.1.0</div>
+          <div className="text-xs text-gray-400">La Serenissima v0.1.0</div>
         </div>
       </div>
       

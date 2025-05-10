@@ -40,10 +40,6 @@ export default function ViewModeMenu({ activeView, setActiveView }: ViewModeMenu
 
   return (
     <div className="absolute left-2 top-1/2 transform -translate-y-1/2 z-10 bg-amber-50 rounded-lg shadow-xl p-2 flex flex-col gap-2 border-2 border-amber-600">
-      <h3 className="text-amber-800 font-serif text-center text-xs font-semibold border-b border-amber-300 pb-1 px-1">
-        La Serenissima
-      </h3>
-      
       {/* Governance View - Disabled */}
       <IconButton 
         onClick={() => {}}
@@ -166,12 +162,6 @@ export default function ViewModeMenu({ activeView, setActiveView }: ViewModeMenu
         </svg>
         <span className="text-[10px] mt-1">Lands</span>
       </IconButton>
-      
-      <div className="mt-1 border-t border-amber-300 pt-1 flex justify-center">
-        <div className="text-amber-800 text-[9px] italic text-center">
-          Venezia
-        </div>
-      </div>
     </div>
   );
 }
