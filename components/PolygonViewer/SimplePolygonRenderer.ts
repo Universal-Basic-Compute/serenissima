@@ -1933,6 +1933,72 @@ export default class SimplePolygonRenderer {
     
     console.log(`Created ${this.bridgePointMarkers.length} bridge markers and ${this.dockPointMarkers.length} dock markers`);
     
+    // After creating the bridge point markers, add this code to create connection lines
+    this.polygons.forEach(polygon => {
+      // Skip if polygon has no bridge points
+      if (!polygon.bridgePoints || !Array.isArray(polygon.bridgePoints)) return;
+      
+      // Process each bridge point that has a connection
+      polygon.bridgePoints.forEach((point, index) => {
+        if (point.connection) {
+          try {
+            // Get the normalized coordinates for the source point
+            const sourceCoord = normalizeCoordinates(
+              [point.edge],
+              this.bounds.centerLat,
+              this.bounds.centerLng,
+              this.bounds.scale,
+              this.bounds.latCorrectionFactor
+            )[0];
+            
+            // Get the normalized coordinates for the target point
+            const targetCoord = normalizeCoordinates(
+              [point.connection.targetPoint],
+              this.bounds.centerLat,
+              this.bounds.centerLng,
+              this.bounds.scale,
+              this.bounds.latCorrectionFactor
+            )[0];
+            
+            // Create a line geometry connecting the two points
+            const lineGeometry = new THREE.BufferGeometry();
+            const vertices = new Float32Array([
+              sourceCoord.x, 0.35, -sourceCoord.y,  // Source point, slightly higher than the markers
+              targetCoord.x, 0.35, -targetCoord.y   // Target point
+            ]);
+            lineGeometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+            
+            // Create a thick, semi-transparent orange line material
+            const lineMaterial = new THREE.LineBasicMaterial({
+              color: 0xFF8800,     // Orange color
+              transparent: true,
+              opacity: 0.6,        // Semi-transparent
+              linewidth: 3         // Thicker line (note: linewidth may not work in WebGL)
+            });
+            
+            // Create the line and add to scene
+            const line = new THREE.Line(lineGeometry, lineMaterial);
+            line.renderOrder = 95; // Below the markers but above the land
+            
+            // Add metadata for identification
+            line.userData = {
+              id: `bridge-connection-${polygon.id}-${index}`,
+              type: 'bridge-connection',
+              sourcePolygonId: polygon.id,
+              targetPolygonId: point.connection.targetPolygonId
+            };
+            
+            this.scene.add(line);
+            this.bridgePointMarkers.push(line); // Add to the same array for cleanup
+            
+            console.log(`Created bridge connection line from ${polygon.id} to ${point.connection.targetPolygonId}`);
+          } catch (error) {
+            console.error(`Error creating bridge connection line for polygon ${polygon.id}:`, error);
+          }
+        }
+      });
+    });
+    
     // Force a scene update
     if (this.scene.userData && this.scene.userData.renderer) {
       this.scene.userData.renderer.render(this.scene, this.camera);
