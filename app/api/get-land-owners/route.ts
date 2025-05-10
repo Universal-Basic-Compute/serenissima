@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { fetchCoatOfArmsImage } from '@/app/utils/coatOfArmsUtils';
 import path from 'path';
 import fs from 'fs/promises';
-import { Api } from 'pyairtable';
+import Airtable from 'airtable';
 
 // Cache the land owners data with a longer expiration
 let cachedData: any = null;
@@ -88,11 +88,26 @@ export async function GET(request: Request) {
       }
       
       // Initialize Airtable client
-      const airtable = new Api(AIRTABLE_API_KEY);
-      const landsTable = new airtable.base(AIRTABLE_BASE_ID).table(AIRTABLE_LANDS_TABLE);
+      const base = new Airtable({apiKey: AIRTABLE_API_KEY}).base(AIRTABLE_BASE_ID);
+      const landsTable = base(AIRTABLE_LANDS_TABLE);
       
       // Fetch all land records
-      const records = await landsTable.select().all();
+      const records = await new Promise((resolve, reject) => {
+        const allRecords: any[] = [];
+        landsTable.select().eachPage(
+          function page(records, fetchNextPage) {
+            allRecords.push(...records);
+            fetchNextPage();
+          },
+          function done(err) {
+            if (err) {
+              reject(err);
+              return;
+            }
+            resolve(allRecords);
+          }
+        );
+      });
       
       // Transform records to the expected format
       const data = records.map(record => ({
