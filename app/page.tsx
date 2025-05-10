@@ -112,11 +112,11 @@ export default function SimplePage() {
     
     const handleShowBuildings = () => {
       console.log('Received showBuildings event');
-      // Ensure buildings are visible
-      if (polygonRendererRef.current) {
-        console.log('Forcing buildings to be visible from event handler');
-        polygonRendererRef.current.ensureBuildingsVisible();
-      }
+      // Remove the reference to polygonRendererRef since it doesn't exist in this component
+      console.log('Buildings should be visible now');
+      
+      // Instead, dispatch another event that the PolygonViewer component can listen for
+      window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
     };
     
     window.addEventListener('hide3DView', handleHide3DView);

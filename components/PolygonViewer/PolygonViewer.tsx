@@ -1290,6 +1290,22 @@ export default function PolygonViewer() {
     }
   }, [roadCreationActive]);
   
+  // Add listener for ensuring buildings are visible
+  useEffect(() => {
+    const handleEnsureBuildingsVisible = () => {
+      if (polygonRendererRef.current) {
+        console.log('Forcing buildings to be visible from event handler in PolygonViewer');
+        polygonRendererRef.current.ensureBuildingsVisible();
+      }
+    };
+    
+    window.addEventListener('ensureBuildingsVisible', handleEnsureBuildingsVisible);
+    
+    return () => {
+      window.removeEventListener('ensureBuildingsVisible', handleEnsureBuildingsVisible);
+    };
+  }, []);
+  
   
   // Add a separate effect to handle view mode changes
   useEffect(() => {
