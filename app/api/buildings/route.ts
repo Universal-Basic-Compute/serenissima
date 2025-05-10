@@ -146,27 +146,52 @@ export async function GET(request: Request) {
     const url = new URL(request.url);
     const type = url.searchParams.get('type');
     const limit = url.searchParams.get('limit') ? parseInt(url.searchParams.get('limit')) : 50; // Default to 50 buildings
-    const offset = url.searchParams.get('offset') ? parseInt(url.searchParams.get('offset')) : 0;
+    const offsetParam = url.searchParams.get('offset');
+    const offset = offsetParam ? parseInt(offsetParam) : 0;
     
     console.log('GET /api/buildings request received');
-    console.log('Query parameters:', { type, limit, offset });
+    console.log('Query parameters:', { type, limit, offset: offsetParam });
     
     // Fetch records from Airtable with pagination
     const records = await new Promise<any[]>((resolve, reject) => {
       const allRecords = [];
       
+      // For Airtable, offset should be a string token, not a number
+      // If it's a number, we'll treat it as a page number and fetch all records up to that point
+      const isNumericOffset = offset !== undefined && !isNaN(offset);
+      const pageSize = limit;
+      
+      // Create the select parameters
+      const selectParams: any = {
+        // Add filters if type is specified
+        filterByFormula: type ? `{Type} = '${type}'` : '',
+        view: 'Grid view',
+        maxRecords: isNumericOffset ? offset + limit : limit
+      };
+      
+      // Only add offset if it's a string token from Airtable
+      if (offset !== undefined && !isNumericOffset) {
+        selectParams.offset = offset;
+      }
+      
       base('Buildings')
-        .select({
-          // Add filters if type is specified
-          filterByFormula: type ? `{Type} = '${type}'` : '',
-          view: 'Grid view',
-          maxRecords: limit,
-          offset: offset
-        })
+        .select(selectParams)
         .eachPage(
           function page(records, fetchNextPage) {
             allRecords.push(...records);
-            fetchNextPage();
+            
+            // If we're using numeric offset, we need to check if we've fetched enough records
+            if (isNumericOffset && allRecords.length >= offset + limit) {
+              // We have enough records, don't fetch more
+              resolve(allRecords.slice(offset, offset + limit));
+            } else if (!isNumericOffset) {
+              // We're using Airtable's offset token, just add these records
+              allRecords.push(...records);
+              fetchNextPage();
+            } else {
+              // We need more records
+              fetchNextPage();
+            }
           },
           function done(err) {
             if (err) {
@@ -174,7 +199,17 @@ export async function GET(request: Request) {
               reject(err);
               return;
             }
-            resolve(allRecords);
+            
+            // If we get here with numeric offset, we didn't get enough records
+            if (isNumericOffset) {
+              // Return what we have, sliced appropriately
+              const startIndex = Math.min(offset, allRecords.length);
+              const endIndex = Math.min(startIndex + limit, allRecords.length);
+              resolve(allRecords.slice(startIndex, endIndex));
+            } else {
+              // We're using Airtable's offset token and reached the end
+              resolve(allRecords);
+            }
           }
         );
     });
