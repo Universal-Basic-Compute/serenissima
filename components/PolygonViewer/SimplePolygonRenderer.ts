@@ -1868,7 +1868,7 @@ export default class SimplePolygonRenderer {
             )[0];
             
             // Create a smaller sphere marker for bridge points
-            const geometry = new THREE.SphereGeometry(0.21, 12, 12); // Reduced from 0.3 (30% smaller)
+            const geometry = new THREE.SphereGeometry(0.15, 12, 12); // Make bridge circles even smaller
             
             const marker = new THREE.Mesh(geometry, bridgeMaterial);
             marker.position.set(normalizedCoord.x, 0.3, -normalizedCoord.y); // Lower position (was 0.5)
@@ -1972,12 +1972,31 @@ export default class SimplePolygonRenderer {
             const lineMaterial = new THREE.LineBasicMaterial({
               color: 0xFF8800,     // Orange color
               transparent: true,
-              opacity: 0.6,        // Semi-transparent
-              linewidth: 3         // Thicker line (note: linewidth may not work in WebGL)
+              opacity: 0.8,        // Less transparent for better visibility
+              linewidth: 5         // Even thicker line (note: linewidth may not work in WebGL)
             });
             
-            // Create the line and add to scene
-            const line = new THREE.Line(lineGeometry, lineMaterial);
+            // Create a path from the points
+            const path = new THREE.LineCurve3(
+              new THREE.Vector3(sourceCoord.x, 0.35, -sourceCoord.y),
+              new THREE.Vector3(targetCoord.x, 0.35, -targetCoord.y)
+            );
+
+            // Create a tube geometry along the path
+            const tubeGeometry = new THREE.TubeGeometry(
+              path,
+              1,    // tubularSegments - just 1 for a straight line
+              0.08, // radius - make this larger for thicker lines
+              8,    // radialSegments - more segments for smoother tube
+              false // closed
+            );
+
+            // Create the tube mesh
+            const line = new THREE.Mesh(tubeGeometry, new THREE.MeshBasicMaterial({
+              color: 0xFF8800,
+              transparent: true,
+              opacity: 0.8
+            }));
             line.renderOrder = 95; // Below the markers but above the land
             
             // Add metadata for identification
