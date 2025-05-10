@@ -3,12 +3,18 @@ import fs from 'fs';
 import path from 'path';
 import { NextRequest } from 'next/server';
 
+type Params = {
+  params: {
+    name: string;
+  }
+}
+
 export async function GET(
   request: NextRequest,
-  { params }: { params: { name: string } }
+  context: Params
 ) {
   try {
-    const buildingName = params.name;
+    const buildingName = context.params.name;
     
     // Sanitize the building name to prevent directory traversal
     const sanitizedName = buildingName.replace(/[^a-zA-Z0-9_-]/g, '');
