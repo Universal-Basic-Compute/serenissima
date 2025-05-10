@@ -133,6 +133,12 @@ export default class SimplePolygonRenderer {
         });
         console.log(`Regenerated ${this.buildingPointMarkers.length} building markers`);
       });
+      
+      // Add event listener for replacing building points with buildings
+      window.addEventListener('replaceBuildingPointsWithBuildings', () => {
+        console.log('Received replaceBuildingPointsWithBuildings event');
+        this.replaceBuildingPointsWithBuildings();
+      });
     }
     
     // Also try to get users from UserService
@@ -1843,6 +1849,11 @@ export default class SimplePolygonRenderer {
       window.removeEventListener('regenerateBuildingMarkers', () => {
         console.log('Removed regenerateBuildingMarkers event listener');
       });
+      
+      // Remove the replaceBuildingPointsWithBuildings event listener
+      window.removeEventListener('replaceBuildingPointsWithBuildings', () => {
+        console.log('Removed replaceBuildingPointsWithBuildings event listener');
+      });
     }
     
     // Dispose textures
@@ -2476,6 +2487,12 @@ export default class SimplePolygonRenderer {
     });
     
     console.log('Creating building points - END');
+    
+    // After creating building points, replace them with actual buildings
+    // Use setTimeout to ensure the building points are rendered first
+    setTimeout(() => {
+      this.replaceBuildingPointsWithBuildings();
+    }, 1000);
   }
   
   /**
@@ -2503,6 +2520,206 @@ export default class SimplePolygonRenderer {
     });
     
     console.log(`Made ${this.buildingPointMarkers.length} building points visible`);
+  }
+  
+  /**
+   * Replace building points with actual buildings by fetching them in batches
+   */
+  public async replaceBuildingPointsWithBuildings(): Promise<void> {
+    console.log('Starting to replace building points with actual buildings');
+    
+    // Only proceed if we have building points
+    if (this.buildingPointMarkers.length === 0) {
+      console.log('No building points to replace');
+      return;
+    }
+    
+    console.log(`Found ${this.buildingPointMarkers.length} building points to potentially replace`);
+    
+    // Create a map of building point positions for quick lookup
+    const buildingPointPositions = new Map<string, {
+      marker: THREE.Object3D,
+      position: THREE.Vector3,
+      latLng: {lat: number, lng: number}
+    }>();
+    
+    this.buildingPointMarkers.forEach(marker => {
+      if (marker instanceof THREE.Mesh && marker.userData && marker.userData.position) {
+        // Parse the position string which is in format "lat, lng"
+        const posStr = marker.userData.position;
+        const [latStr, lngStr] = posStr.split(',').map(s => s.trim());
+        const lat = parseFloat(latStr);
+        const lng = parseFloat(lngStr);
+        
+        if (!isNaN(lat) && !isNaN(lng)) {
+          const posKey = `${lat.toFixed(6)},${lng.toFixed(6)}`;
+          buildingPointPositions.set(posKey, {
+            marker,
+            position: marker.position.clone(),
+            latLng: {lat, lng}
+          });
+        }
+      }
+    });
+    
+    console.log(`Created position map with ${buildingPointPositions.size} entries`);
+    
+    // Fetch buildings in batches of 20
+    const batchSize = 20;
+    let offset = 0;
+    let hasMore = true;
+    
+    while (hasMore) {
+      try {
+        console.log(`Fetching buildings batch: offset=${offset}, limit=${batchSize}`);
+        
+        const response = await fetch(`/api/buildings?offset=${offset}&limit=${batchSize}`);
+        
+        if (!response.ok) {
+          throw new Error(`Failed to fetch buildings: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        const buildings = data.buildings || [];
+        
+        console.log(`Received ${buildings.length} buildings in batch`);
+        
+        // If we got fewer buildings than the batch size, we've reached the end
+        hasMore = buildings.length === batchSize;
+        
+        // Process each building
+        for (const building of buildings) {
+          // Skip buildings without position data
+          if (!building.position) continue;
+          
+          // Parse position if it's a string
+          let buildingPosition = building.position;
+          if (typeof buildingPosition === 'string') {
+            try {
+              buildingPosition = JSON.parse(buildingPosition);
+            } catch (error) {
+              console.error(`Error parsing building position for ${building.id}:`, error);
+              continue;
+            }
+          }
+          
+          // Skip buildings without lat/lng position
+          if (!buildingPosition.lat || !buildingPosition.lng) continue;
+          
+          // Create a position key for lookup
+          const posKey = `${parseFloat(buildingPosition.lat).toFixed(6)},${parseFloat(buildingPosition.lng).toFixed(6)}`;
+          
+          // Check if we have a building point at this position
+          if (buildingPointPositions.has(posKey)) {
+            console.log(`Found matching building point for building ${building.id} at position ${posKey}`);
+            
+            // Get the scene position and marker
+            const pointData = buildingPointPositions.get(posKey);
+            
+            // Create a building mesh at this position
+            await this.createBuildingMesh(building, pointData.position);
+            
+            // Remove the building point marker
+            this.removeBuildingPointMarker(pointData.marker);
+            
+            // Remove from the map to avoid duplicate processing
+            buildingPointPositions.delete(posKey);
+          }
+        }
+        
+        // Increment offset for next batch
+        offset += batchSize;
+        
+      } catch (error) {
+        console.error('Error fetching buildings batch:', error);
+        hasMore = false;
+      }
+    }
+    
+    console.log('Finished replacing building points with buildings');
+  }
+
+  /**
+   * Create a building mesh from building data
+   */
+  private async createBuildingMesh(building: any, position: THREE.Vector3): Promise<void> {
+    try {
+      // Create a simple building mesh based on building type
+      let geometry: THREE.BufferGeometry;
+      let material: THREE.Material;
+      
+      switch (building.type.toLowerCase()) {
+        case 'dock':
+          geometry = new THREE.BoxGeometry(2, 1, 3);
+          material = new THREE.MeshBasicMaterial({ color: 0x8B4513 });
+          break;
+        case 'market-stall':
+          geometry = new THREE.ConeGeometry(1.5, 2, 4);
+          material = new THREE.MeshBasicMaterial({ color: 0xFFD700 });
+          break;
+        case 'house':
+          geometry = new THREE.BoxGeometry(2, 3, 2);
+          material = new THREE.MeshBasicMaterial({ color: 0xA0522D });
+          break;
+        default:
+          geometry = new THREE.BoxGeometry(2, 2, 2);
+          material = new THREE.MeshBasicMaterial({ color: 0x808080 });
+      }
+      
+      const mesh = new THREE.Mesh(geometry, material);
+      
+      // Position the mesh
+      mesh.position.copy(position);
+      // Raise it slightly above the ground
+      mesh.position.y += 1;
+      
+      // Add metadata
+      mesh.userData = {
+        buildingId: building.id,
+        type: building.type,
+        variant: building.variant,
+        owner: building.owner || building.created_by,
+        position: building.position
+      };
+      
+      // Add to scene
+      this.scene.add(mesh);
+      
+      // Store in building markers for cleanup
+      this.buildingPointMarkers.push(mesh);
+      
+      console.log(`Created building mesh for ${building.id} at position:`, mesh.position);
+    } catch (error) {
+      console.error(`Error creating building mesh for ${building.id}:`, error);
+    }
+  }
+
+  /**
+   * Remove a building point marker
+   */
+  private removeBuildingPointMarker(marker: THREE.Object3D): void {
+    // Find the marker in the array
+    const markerIndex = this.buildingPointMarkers.indexOf(marker);
+    
+    if (markerIndex !== -1) {
+      // Remove from scene
+      this.scene.remove(marker);
+      
+      // Dispose of resources
+      if (marker instanceof THREE.Mesh) {
+        if (marker.geometry) marker.geometry.dispose();
+        if (marker.material instanceof THREE.Material) {
+          marker.material.dispose();
+        } else if (Array.isArray(marker.material)) {
+          marker.material.forEach(m => m.dispose());
+        }
+      }
+      
+      // Remove from array
+      this.buildingPointMarkers.splice(markerIndex, 1);
+      
+      console.log(`Removed building point marker`);
+    }
   }
 
   /**
