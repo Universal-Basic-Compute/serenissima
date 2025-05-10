@@ -61,7 +61,15 @@ async function generateDecree(input) {
     
     // Parse the JSON
     try {
-      const decree = JSON.parse(content);
+      // Remove markdown code block formatting if present
+      let jsonContent = content;
+      if (content.startsWith('```json')) {
+        jsonContent = content.replace(/```json\n|\n```/g, '');
+      } else if (content.startsWith('```')) {
+        jsonContent = content.replace(/```\n|\n```/g, '');
+      }
+      
+      const decree = JSON.parse(jsonContent);
       console.log('Successfully generated decree');
       return decree;
     } catch (parseError) {
