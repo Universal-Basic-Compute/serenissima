@@ -7,7 +7,7 @@ import TechTree from '../components/Knowledge/TechTree';
 import ProjectPresentation from '../components/Knowledge/ProjectPresentation';
 import ResourceTree from '../components/Knowledge/ResourceTree';
 import KnowledgeRepository from '../components/Knowledge/KnowledgeRepository';
-import { StrategiesArticle, BeginnersGuideArticle, EconomicSystemArticle, LandOwnerGuideArticle, DecreesGovernanceArticle, BuildingOwnersGuideArticle, BusinessOwnersGuideArticle } from '../components/Articles';
+import { StrategiesArticle, BeginnersGuideArticle, EconomicSystemArticle, LandOwnerGuideArticle, DecreesGovernanceArticle, BuildingOwnersGuideArticle, BusinessOwnersGuideArticle, HistoricalAccuracyArticle } from '../components/Articles';
 import CitizenDetailsPanel from '../components/UI/CitizenDetailsPanel';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
@@ -1358,6 +1358,10 @@ export default function SimplePage() {
       
       {selectedArticle === "business-owners-guide" && (
         <BusinessOwnersGuideArticle onClose={() => setSelectedArticle(null)} />
+      )}
+      
+      {selectedArticle === "historical-accuracy" && (
+        <HistoricalAccuracyArticle onClose={() => setSelectedArticle(null)} />
       )}
       
       {/* Citizen Details Panel */}
