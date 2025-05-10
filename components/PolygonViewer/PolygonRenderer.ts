@@ -618,8 +618,8 @@ export default class PolygonRenderer {
           }
           
           // Set the building position to a more appropriate height
-          // Lower the height from 5.0 to 0.5 to bring buildings closer to the land
-          object.position.y = 0.5; // Decreased from 5.0 to 0.5
+          // Lower the height to 0.5 to bring buildings closer to the land
+          object.position.y = 0.5;
           
           // Check if building is in camera view
           const cameraPosition = this.camera.position.clone();
@@ -660,7 +660,7 @@ export default class PolygonRenderer {
       });
       
       console.log(`Found ${buildingCount} buildings in the scene`);
-      console.log(`${buildingCount > 0 ? buildingCount : 'No'} out of ${buildingCount} buildings are visible in camera view ------> but I don't see any of them`);
+      console.log(`${buildingCount > 0 ? buildingCount : 'No'} out of ${buildingCount} buildings are visible in camera view`);
     }
     
     // Force a render to apply changes
