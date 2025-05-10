@@ -65,8 +65,11 @@ const CanalCreator: React.FC<CanalCreatorProps> = ({
       planeRef.current = plane;
       
       return () => {
-        if (canalFacadeRef.current && typeof canalFacadeRef.current.dispose === 'function') {
-          canalFacadeRef.current.dispose();
+        // Check if canalFacadeRef has a current value before trying to clean up
+        if (canalFacadeRef.current) {
+          // We'll handle cleanup by removing canals instead of calling dispose
+          const canalIds = canalFacadeRef.current.getCanalIds();
+          canalIds.forEach(id => canalFacadeRef.current?.removeCanal(id));
         }
         if (planeRef.current) {
           scene.remove(planeRef.current);
