@@ -154,6 +154,11 @@ def download_image(url_info: Tuple[str, str, str], dry_run: bool = False) -> Opt
         return {"username": username, "url": url, "local_path": str(filename), "success": True}
     
     try:
+        # Check if file already exists
+        if os.path.exists(filename):
+            log.info(f"File already exists for {username}, replacing it: {filename}")
+            # We'll continue and overwrite it
+        
         response = requests.get(url, timeout=30)
         response.raise_for_status()
         
