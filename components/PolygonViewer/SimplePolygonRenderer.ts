@@ -86,6 +86,9 @@ export default class SimplePolygonRenderer {
     this.raycaster = new THREE.Raycaster();
     this.mouse = new THREE.Vector2();
     
+    // Preload the navigation graph
+    this.preloadNavigationGraph();
+    
     // Process users data to extract coat of arms
     if (users) {
       Object.values(users).forEach((user: any) => {
@@ -2409,6 +2412,34 @@ export default class SimplePolygonRenderer {
     console.log('Creating building points - END');
   }
 
+  /**
+   * Preload the navigation graph from the server
+   */
+  private preloadNavigationGraph() {
+    // Only run in browser
+    if (typeof window === 'undefined') return;
+    
+    // Check if we already have the navigation graph
+    if ((window as any).__navigationGraph) return;
+    
+    // Fetch the navigation graph
+    fetch('/data/navigation-graph.json')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`Failed to fetch navigation graph: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        console.log('Preloaded navigation graph:', data.metadata);
+        // Store in window for future use
+        (window as any).__navigationGraph = data;
+      })
+      .catch(error => {
+        console.warn('Error preloading navigation graph:', error);
+      });
+  }
+  
   // Add this method to save the updated polygon data
   private saveUpdatedPolygonData(polygon: any) {
     console.log(`Saving updated polygon data for ${polygon.id}:`, {
@@ -2741,7 +2772,7 @@ export default class SimplePolygonRenderer {
       }
       
       // Find the shortest path through the graph
-      const path = this.findShortestPath(graph, startPolygon.id, endPolygon.id);
+      const path = this.findShortestPath(startPolygon.id, endPolygon.id);
       
       if (!path || path.length === 0) {
         console.warn('No path found between points, drawing direct path instead');
@@ -2762,9 +2793,44 @@ export default class SimplePolygonRenderer {
   }
   
   /**
-   * Build a navigation graph of polygons connected by bridges
+   * Get the navigation graph from the pre-computed data or build it on the fly
    */
-  private buildNavigationGraph(): Record<string, string[]> {
+  private getNavigationGraph(): Record<string, string[]> {
+    // Try to load the pre-computed navigation graph
+    try {
+      // Check if we have the navigation graph in window
+      if (typeof window !== 'undefined' && (window as any).__navigationGraph) {
+        console.log('Using cached navigation graph from window object');
+        return (window as any).__navigationGraph.simple;
+      }
+      
+      // Try to fetch the navigation graph from the server
+      const fetchGraph = async () => {
+        try {
+          const response = await fetch('/data/navigation-graph.json');
+          if (response.ok) {
+            const data = await response.json();
+            // Cache it in window for future use
+            if (typeof window !== 'undefined') {
+              (window as any).__navigationGraph = data;
+            }
+            console.log('Loaded navigation graph from server');
+            return data.simple;
+          }
+        } catch (error) {
+          console.warn('Error loading navigation graph:', error);
+        }
+        return null;
+      };
+      
+      // Start the fetch but don't wait for it - we'll use the built graph for now
+      fetchGraph();
+    } catch (error) {
+      console.warn('Error accessing navigation graph:', error);
+    }
+    
+    // If we couldn't load the pre-computed graph, build it on the fly
+    console.log('Building navigation graph on the fly');
     const graph: Record<string, string[]> = {};
     
     // Initialize graph with empty adjacency lists for all polygons
@@ -2962,7 +3028,9 @@ export default class SimplePolygonRenderer {
   /**
    * Find the shortest path between two nodes in a graph using A* algorithm
    */
-  private findShortestPath(graph: Record<string, string[]>, start: string, end: string): string[] {
+  private findShortestPath(start: string, end: string): string[] {
+    // Get the navigation graph
+    const graph = this.getNavigationGraph();
     // If start and end are the same, return just that node
     if (start === end) {
       return [start];
@@ -3132,6 +3200,17 @@ export default class SimplePolygonRenderer {
     const startPoint = this.measurementPoints[0];
     pathPoints.push(startPoint);
     
+    // Try to get the enhanced navigation graph
+    let enhancedGraph: any = null;
+    try {
+      if (typeof window !== 'undefined' && (window as any).__navigationGraph) {
+        enhancedGraph = (window as any).__navigationGraph.enhanced;
+        console.log('Using enhanced navigation graph for path visualization');
+      }
+    } catch (error) {
+      console.warn('Error accessing enhanced navigation graph:', error);
+    }
+    
     // For each segment of the path (polygon to polygon)
     for (let i = 0; i < path.length - 1; i++) {
       const currentPolygonId = path[i];
@@ -3139,7 +3218,47 @@ export default class SimplePolygonRenderer {
       
       console.log(`Finding bridge between ${currentPolygonId} and ${nextPolygonId}`);
       
-      // Find the current polygon
+      // Check if we have enhanced graph data for this connection
+      if (enhancedGraph && 
+          enhancedGraph[currentPolygonId] && 
+          enhancedGraph[currentPolygonId].connections) {
+        
+        // Find the connection to the next polygon
+        const connections = enhancedGraph[currentPolygonId].connections;
+        const connection = connections.find((c: any) => c.targetId === nextPolygonId);
+        
+        if (connection) {
+          console.log(`Using pre-computed bridge connection from enhanced graph`);
+          
+          // Add the source point to the path
+          const sourceCoord = normalizeCoordinates(
+            [connection.sourcePoint],
+            this.bounds.centerLat,
+            this.bounds.centerLng,
+            this.bounds.scale,
+            this.bounds.latCorrectionFactor
+          )[0];
+          
+          const sourcePosition = new THREE.Vector3(sourceCoord.x, 0.15, -sourceCoord.y);
+          pathPoints.push(sourcePosition);
+          
+          // Add the target point to the path
+          const targetCoord = normalizeCoordinates(
+            [connection.targetPoint],
+            this.bounds.centerLat,
+            this.bounds.centerLng,
+            this.bounds.scale,
+            this.bounds.latCorrectionFactor
+          )[0];
+          
+          const targetPosition = new THREE.Vector3(targetCoord.x, 0.15, -targetCoord.y);
+          pathPoints.push(targetPosition);
+          
+          continue; // Skip to the next segment
+        }
+      }
+      
+      // If we don't have enhanced graph data, fall back to the original method
       const currentPolygon = this.polygons.find(p => p.id === currentPolygonId);
       if (!currentPolygon || !currentPolygon.bridgePoints) {
         console.warn(`Polygon ${currentPolygonId} not found or has no bridge points`);
