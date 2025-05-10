@@ -1486,10 +1486,13 @@ export default function PolygonViewer() {
           if (sceneRef.current && sceneRef.current.scene && sceneRef.current.camera) {
             console.log('PolygonViewer: Attempting to initialize CitizenDisplayManager');
             
+            // Calculate bounds for polygons if not already done
+            const calculatedBounds = calculateBounds(polygons);
+            
             const citizenDisplayManager = new CitizenDisplayManager({
               scene: sceneRef.current.scene,
               camera: sceneRef.current.camera,
-              bounds: bounds
+              bounds: calculatedBounds
             });
             
             citizenDisplayManagerRef.current = citizenDisplayManager;
