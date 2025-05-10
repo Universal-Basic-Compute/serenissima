@@ -358,6 +358,82 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
       
       <button
         onClick={() => {
+          // Focus camera on all debug spheres
+          if (camera) {
+            // Get the actual camera
+            const actualCamera = camera || (document.querySelector('canvas')?.__camera as THREE.PerspectiveCamera);
+            
+            if (actualCamera && scene) {
+              console.log('Repositioning camera to view all debug spheres');
+              
+              // Find all debug spheres in the scene
+              const debugSpheres: THREE.Object3D[] = [];
+              scene.traverse((object) => {
+                if (object.userData && object.name && object.name.includes('debug_sphere')) {
+                  debugSpheres.push(object);
+                } else if (object instanceof THREE.Mesh && 
+                          object.geometry instanceof THREE.SphereGeometry) {
+                  // Also include any sphere geometries as they might be our debug spheres
+                  debugSpheres.push(object);
+                }
+              });
+              
+              console.log(`Found ${debugSpheres.length} debug spheres`);
+              
+              if (debugSpheres.length > 0) {
+                // Calculate the center and size of all debug spheres
+                const box = new THREE.Box3();
+                debugSpheres.forEach(sphere => {
+                  box.expandByObject(sphere);
+                });
+                
+                const center = new THREE.Vector3();
+                box.getCenter(center);
+                const size = new THREE.Vector3();
+                box.getSize(size);
+                
+                // Position camera to see all debug spheres
+                const maxDim = Math.max(size.x, size.y, size.z);
+                const distance = maxDim * 2; // Distance based on size
+                
+                // Position camera at an angle to see height differences
+                actualCamera.position.set(
+                  center.x + distance, 
+                  center.y + distance * 0.7, 
+                  center.z + distance
+                );
+                
+                // Look at the center
+                actualCamera.lookAt(center);
+                
+                // Update controls if available
+                const controls = actualCamera.userData?.controls;
+                if (controls && controls.target) {
+                  controls.target.copy(center);
+                  controls.update();
+                }
+                
+                console.log('Camera repositioned to view all debug spheres');
+                console.log('Camera position:', actualCamera.position);
+                console.log('Looking at:', center);
+              } else {
+                console.log('No debug spheres found');
+              }
+            }
+          }
+        }}
+        className="px-4 py-2 bg-purple-600 text-white rounded-md shadow-md hover:bg-purple-700 transition-colors flex items-center space-x-2"
+        title="Focus on Debug Spheres"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+          <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
+        </svg>
+        <span>Focus on Debug Spheres</span>
+      </button>
+      
+      <button
+        onClick={() => {
           // Focus camera on the expected building position
           if (camera) {
             // Get the actual camera
