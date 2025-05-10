@@ -17,16 +17,66 @@ export async function GET(request: Request) {
     
     console.log(`Loading resources${owner ? ` for owner: ${owner}` : ' (all)'}`);
     
-    const resources = await loadAllResources();
+    // Build filter formula for Airtable query
+    let filterFormula = '';
+    if (owner) {
+      filterFormula = `{Owner} = '${owner}'`;
+      console.log(`Filtering resources by owner: ${owner}`);
+    }
     
-    // Filter by owner if specified
-    const filteredResources = owner 
-      ? resources.filter(resource => resource.owner === owner)
-      : resources;
+    // Query Airtable directly
+    const records = await new Promise((resolve, reject) => {
+      const allRecords: any[] = [];
+      
+      base('RESOURCES')
+        .select({
+          filterByFormula: filterFormula || '',
+          view: 'Grid view'
+        })
+        .eachPage(
+          function page(records, fetchNextPage) {
+            records.forEach(record => {
+              allRecords.push(record);
+            });
+            fetchNextPage();
+          },
+          function done(err) {
+            if (err) {
+              console.error('Error fetching resources from Airtable:', err);
+              reject(err);
+              return;
+            }
+            resolve(allRecords);
+          }
+        );
+    });
     
-    console.log(`Returning ${filteredResources.length} resources`);
+    // Transform Airtable records to our resource format
+    const resources = (records as any[]).map(record => {
+      let position;
+      try {
+        position = JSON.parse(record.get('Position') || '{}');
+      } catch (e) {
+        console.warn(`Invalid position format for resource ${record.get('ResourceId')}:`, e);
+        position = {};
+      }
+      
+      return {
+        id: record.get('ResourceId'),
+        type: record.get('Type'),
+        name: record.get('Name'),
+        category: record.get('Category'),
+        position: position,
+        count: record.get('Count') || 1,
+        landId: record.get('LandId') || '',
+        owner: record.get('Owner') || 'system',
+        createdAt: record.get('CreatedAt') || new Date().toISOString()
+      };
+    });
     
-    return NextResponse.json(filteredResources);
+    console.log(`Returning ${resources.length} resources`);
+    
+    return NextResponse.json(resources);
   } catch (error) {
     console.error('Error loading resources:', error);
     return NextResponse.json(
