@@ -1327,7 +1327,7 @@ export default class SimplePolygonRenderer {
             document.body.style.cursor = 'pointer';
             
             // Emit hover event
-            eventBus.emit(EventTypes.CITIZEN_HOVER, {
+            eventBus.emit(EventTypes.CITIZEN_HOVER as string, {
               citizenId,
               data: intersected.userData.data
             });
@@ -1335,7 +1335,7 @@ export default class SimplePolygonRenderer {
         }
       } else {
         // No citizen hovered, emit null hover event
-        eventBus.emit(EventTypes.CITIZEN_HOVER, null);
+        eventBus.emit(EventTypes.CITIZEN_HOVER as string, null);
       }
       
       return;
@@ -1554,13 +1554,13 @@ export default class SimplePolygonRenderer {
           intersected.scale.set(1.3, 1.3, 1.3);
           
           // Emit selection event
-          eventBus.emit(EventTypes.CITIZEN_SELECTED, {
+          eventBus.emit(EventTypes.CITIZEN_SELECTED as string, {
             citizenId,
             data: citizenData
           });
           
           // Also emit the show citizen details event
-          eventBus.emit(EventTypes.SHOW_CITIZEN_DETAILS, {
+          eventBus.emit(EventTypes.SHOW_CITIZEN_DETAILS as string, {
             citizen: citizenData
           });
           
@@ -2859,7 +2859,7 @@ export default class SimplePolygonRenderer {
       console.log(`Attempting to load model from: ${modelPath}`);
       
       // Create a group to hold the model and any additional elements
-      const buildingGroup = new THREE.Group();
+      const buildingGroup = new THREE.Group() as THREE.Object3D;
       
       // Position the group
       buildingGroup.position.copy(position);
@@ -4711,7 +4711,7 @@ export default class SimplePolygonRenderer {
       }
       
       // Emit event that citizens data is loaded
-      eventBus.emit(EventTypes.CITIZENS_LOADED, { count: this.citizenData.length });
+      eventBus.emit(EventTypes.CITIZENS_LOADED as string, { count: this.citizenData.length });
     } catch (error) {
       console.error('Error loading citizens data:', error);
     }
