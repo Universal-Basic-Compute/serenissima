@@ -72,15 +72,24 @@ async function processJsonFile(filePath) {
         continue;
       }
       
-      console.log(`Processing ${items.length} items in collection: ${collectionName} -> ${tableName}`);
+      // Skip the first item in the collection (it's an example)
+      const itemsToProcess = items.slice(1);
+      
+      console.log(`Processing ${itemsToProcess.length} items in collection: ${collectionName} -> ${tableName} (skipped first item as example)`);
+      
+      // If there are no items to process after skipping the first one, continue to next collection
+      if (itemsToProcess.length === 0) {
+        console.log(`No items to process in collection: ${collectionName} after skipping example`);
+        continue;
+      }
       
       // Track successfully processed items
       const successfulItems = [];
       
       // Process items in batches to avoid Airtable API limits
       const BATCH_SIZE = 10;
-      for (let i = 0; i < items.length; i += BATCH_SIZE) {
-        const batch = items.slice(i, i + BATCH_SIZE);
+      for (let i = 0; i < itemsToProcess.length; i += BATCH_SIZE) {
+        const batch = itemsToProcess.slice(i, i + BATCH_SIZE);
         
         // Process each item in the batch
         const batchPromises = batch.map(async (item) => {
@@ -117,10 +126,14 @@ async function processJsonFile(filePath) {
       
       // Remove successful items from the collection
       if (successfulItems.length > 0) {
-        // Filter out successful items
-        jsonData[collectionName] = items.filter(item => 
-          !successfulItems.some(successItem => areItemsEqual(item, successItem))
-        );
+        // Filter out successful items, but keep the first item (example)
+        const firstItem = items[0];
+        jsonData[collectionName] = [
+          firstItem, // Keep the example item
+          ...items.slice(1).filter(item => 
+            !successfulItems.some(successItem => areItemsEqual(item, successItem))
+          )
+        ];
         hasChanges = true;
         
         console.log(`Removed ${successfulItems.length} successfully processed items from ${collectionName}`);
