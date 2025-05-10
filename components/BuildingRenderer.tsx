@@ -436,69 +436,19 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ active }) => {
     
     if (buildings.length === 0) {
       console.warn('No buildings found in the scene');
-      
-      // Create test buildings at known positions
-      const geometry = new THREE.BoxGeometry(5, 5, 5);
-      const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-      
-      // Create a test building at the origin
-      const testBuilding = new THREE.Mesh(geometry, material);
-      testBuilding.position.set(0, 5, 0);
-      testBuilding.userData = {
-        buildingId: 'test-building-origin',
-        type: 'test-building'
-      };
-      sceneRef.current.add(testBuilding);
-      
-      // Create another test building at a known position
-      const testBuilding2 = new THREE.Mesh(geometry.clone(), material.clone());
-      testBuilding2.position.set(10, 5, 10);
-      testBuilding2.userData = {
-        buildingId: 'test-building-10-10',
-        type: 'test-building'
-      };
-      sceneRef.current.add(testBuilding2);
-      
-      console.log('Added test buildings at origin and (10,5,10)');
-      
-      // Store references for later cleanup
-      buildingMeshesRef.current.set('test-building-origin', testBuilding);
-      buildingMeshesRef.current.set('test-building-10-10', testBuilding2);
-      
-      // Update buildings array with new test buildings
-      buildings.push(testBuilding, testBuilding2);
     }
     
-    // Create debug markers for each building
-    buildings.forEach((building) => {
-      // Remove any existing debug markers for this building
-      sceneRef.current.traverse((object) => {
-        if (object.userData && 
-            object.userData.isDebugMarker && 
-            object.userData.buildingId === building.userData.buildingId) {
-          sceneRef.current.remove(object);
-        }
-      });
-      
-      // Create a visible marker at the building position
-      const markerGeometry = new THREE.SphereGeometry(2, 16, 16);
-      const markerMaterial = new THREE.MeshBasicMaterial({ 
-        color: 0xff0000,
-        transparent: false
-      });
-      const marker = new THREE.Mesh(markerGeometry, markerMaterial);
-      marker.position.copy(building.position);
-      marker.position.y += 10; // Position above the building
-      marker.userData = {
-        isDebugMarker: true,
-        buildingId: building.userData.buildingId
-      };
-      sceneRef.current.add(marker);
-      console.log(`Added debug marker for building ${building.userData.buildingId} at position:`, marker.position);
+    // Remove any existing debug markers
+    sceneRef.current.traverse((object) => {
+      if (object.userData && object.userData.isDebugMarker) {
+        sceneRef.current.remove(object);
+      }
     });
     
-    // Focus camera on buildings
-    focusCameraOnBuildings();
+    // Focus camera on buildings if there are any
+    if (buildings.length > 0) {
+      focusCameraOnBuildings();
+    }
   }, [focusCameraOnBuildings]);
   
   /**
