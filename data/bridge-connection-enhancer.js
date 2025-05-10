@@ -144,8 +144,8 @@ Example format: "Ponte dei Sospiri (Bridge of Sighs) - Named for the sighs of pr
 // Process polygon data and enhance bridge connections
 async function enhanceBridgeConnections() {
   try {
-    // Define the directory path
-    const dataDir = path.join(__dirname, 'data');
+    // Define the directory path - use the current directory instead of a nested 'data' folder
+    const dataDir = __dirname;
     
     // Get all JSON files in the data directory
     const files = fs.readdirSync(dataDir).filter(file => file.endsWith('.json'));
