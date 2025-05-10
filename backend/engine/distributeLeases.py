@@ -75,7 +75,8 @@ def get_buildings_on_land(tables, land_id: str) -> List[Dict]:
     
     try:
         # Get buildings on this land that have a User field (owner) and a LeaseAmount
-        formula = f"AND({{Land}}='{land_id}', NOT(OR({{User}} = '', {{User}} = BLANK())), NOT(OR({{LeaseAmount}} = '', {{LeaseAmount}} = BLANK())))"
+        # Check for both Land and LandId fields to ensure we find all buildings
+        formula = f"AND(OR({{Land}}='{land_id}', {{LandId}}='{land_id}'), NOT(OR({{User}} = '', {{User}} = BLANK())), NOT(OR({{LeaseAmount}} = '', {{LeaseAmount}} = BLANK()))))"
         buildings = tables['buildings'].all(formula=formula)
         
         log.info(f"Found {len(buildings)} buildings with lease amounts on land {land_id}")
