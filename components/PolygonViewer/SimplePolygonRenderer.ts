@@ -2767,32 +2767,58 @@ export default class SimplePolygonRenderer {
   private buildNavigationGraph(): Record<string, string[]> {
     const graph: Record<string, string[]> = {};
     
-    // Initialize graph with empty adjacency lists
+    // Initialize graph with empty adjacency lists for all polygons
     this.polygons.forEach(polygon => {
       graph[polygon.id] = [];
     });
     
     // Add bridge connections to the graph
     this.polygons.forEach(polygon => {
-      if (polygon.bridgePoints) {
+      if (polygon.bridgePoints && Array.isArray(polygon.bridgePoints)) {
         polygon.bridgePoints.forEach(bridgePoint => {
           if (bridgePoint.connection && bridgePoint.connection.targetPolygonId) {
-            // Add bidirectional connection
-            graph[polygon.id].push(bridgePoint.connection.targetPolygonId);
+            const targetPolygonId = bridgePoint.connection.targetPolygonId;
             
-            // Ensure the target polygon exists in the graph
-            if (!graph[bridgePoint.connection.targetPolygonId]) {
-              graph[bridgePoint.connection.targetPolygonId] = [];
+            // Verify that the target polygon exists
+            const targetPolygon = this.polygons.find(p => p.id === targetPolygonId);
+            if (!targetPolygon) {
+              console.warn(`Bridge from ${polygon.id} points to non-existent polygon ${targetPolygonId}`);
+              return;
             }
             
-            // Add the reverse connection
-            graph[bridgePoint.connection.targetPolygonId].push(polygon.id);
+            // Add bidirectional connection if not already present
+            if (!graph[polygon.id].includes(targetPolygonId)) {
+              graph[polygon.id].push(targetPolygonId);
+            }
+            
+            // Ensure the target polygon exists in the graph
+            if (!graph[targetPolygonId]) {
+              graph[targetPolygonId] = [];
+            }
+            
+            // Add the reverse connection if not already present
+            if (!graph[targetPolygonId].includes(polygon.id)) {
+              graph[targetPolygonId].push(polygon.id);
+            }
           }
         });
       }
     });
     
+    // Log the graph for debugging
     console.log('Built navigation graph with', Object.keys(graph).length, 'nodes');
+    
+    // Log the number of connections for each node
+    let totalConnections = 0;
+    for (const nodeId in graph) {
+      const connections = graph[nodeId].length;
+      totalConnections += connections;
+      if (connections > 0) {
+        console.log(`Node ${nodeId} has ${connections} connections`);
+      }
+    }
+    console.log(`Total connections in graph: ${totalConnections}`);
+    
     return graph;
   }
   
@@ -2934,73 +2960,132 @@ export default class SimplePolygonRenderer {
   }
   
   /**
-   * Find the shortest path between two nodes in a graph using Dijkstra's algorithm
+   * Find the shortest path between two nodes in a graph using A* algorithm
    */
   private findShortestPath(graph: Record<string, string[]>, start: string, end: string): string[] {
-    // Initialize distances with infinity for all nodes except the start
-    const distances: Record<string, number> = {};
-    const previous: Record<string, string | null> = {};
-    const unvisited = new Set<string>();
-    
-    // Initialize all nodes
-    for (const node in graph) {
-      distances[node] = node === start ? 0 : Infinity;
-      previous[node] = null;
-      unvisited.add(node);
+    // If start and end are the same, return just that node
+    if (start === end) {
+      return [start];
     }
     
-    // Process nodes until we've visited all or found the end
-    while (unvisited.size > 0) {
-      // Find the unvisited node with the smallest distance
-      let current: string | null = null;
-      let smallestDistance = Infinity;
+    // Priority queue for A* - stores nodes with their priority (f-score)
+    const openSet: {id: string, fScore: number}[] = [];
+    
+    // Set of visited nodes
+    const closedSet = new Set<string>();
+    
+    // For each node, which node it can most efficiently be reached from
+    const cameFrom: Record<string, string | null> = {};
+    
+    // For each node, the cost of getting from the start node to that node
+    const gScore: Record<string, number> = {};
+    
+    // For each node, the total cost of getting from the start node to the goal by passing through that node
+    const fScore: Record<string, number> = {};
+    
+    // Initialize all nodes with infinity scores
+    for (const node in graph) {
+      gScore[node] = Infinity;
+      fScore[node] = Infinity;
+      cameFrom[node] = null;
+    }
+    
+    // The start node has zero distance from itself
+    gScore[start] = 0;
+    
+    // The start node's f-score is just the heuristic distance to the end
+    fScore[start] = this.heuristicDistance(start, end);
+    
+    // Add start node to the open set
+    openSet.push({id: start, fScore: fScore[start]});
+    
+    // While there are nodes to explore
+    while (openSet.length > 0) {
+      // Sort the open set by f-score (lowest first)
+      openSet.sort((a, b) => a.fScore - b.fScore);
       
-      for (const node of unvisited) {
-        if (distances[node] < smallestDistance) {
-          smallestDistance = distances[node];
-          current = node;
-        }
+      // Get the node with the lowest f-score
+      const current = openSet.shift()!.id;
+      
+      // If we've reached the end, reconstruct and return the path
+      if (current === end) {
+        return this.reconstructPath(cameFrom, current);
       }
       
-      // If we can't find a node or we've reached the end, break
-      if (current === null || current === end || smallestDistance === Infinity) {
-        break;
-      }
-      
-      // Remove current from unvisited
-      unvisited.delete(current);
+      // Mark current as visited
+      closedSet.add(current);
       
       // Check all neighbors of current
-      for (const neighbor of graph[current]) {
-        if (!unvisited.has(neighbor)) continue;
+      for (const neighbor of graph[current] || []) {
+        // Skip if we've already visited this neighbor
+        if (closedSet.has(neighbor)) continue;
         
-        // Calculate distance to neighbor through current
+        // Calculate tentative g-score (cost from start to neighbor through current)
         // For simplicity, we're using 1 as the distance between any connected nodes
-        const distance = distances[current] + 1;
+        const tentativeGScore = gScore[current] + 1;
         
-        // If this path is shorter, update the distance and previous node
-        if (distance < distances[neighbor]) {
-          distances[neighbor] = distance;
-          previous[neighbor] = current;
+        // Check if this neighbor is already in the open set
+        const neighborInOpenSet = openSet.find(node => node.id === neighbor);
+        
+        if (!neighborInOpenSet) {
+          // Discover a new node, add to open set
+          openSet.push({id: neighbor, fScore: Infinity});
+        } else if (tentativeGScore >= gScore[neighbor]) {
+          // This is not a better path to the neighbor
+          continue;
+        }
+        
+        // This path to neighbor is the best so far, record it
+        cameFrom[neighbor] = current;
+        gScore[neighbor] = tentativeGScore;
+        fScore[neighbor] = gScore[neighbor] + this.heuristicDistance(neighbor, end);
+        
+        // Update the f-score in the open set
+        const index = openSet.findIndex(node => node.id === neighbor);
+        if (index !== -1) {
+          openSet[index].fScore = fScore[neighbor];
         }
       }
     }
     
-    // Reconstruct the path
-    const path: string[] = [];
-    let current = end;
+    // If we get here, there's no path
+    return [];
+  }
+  
+  /**
+   * Calculate heuristic distance between two polygon IDs
+   * This is a simple estimate of the distance between two polygons
+   */
+  private heuristicDistance(polygonId1: string, polygonId2: string): number {
+    // Find the polygons
+    const polygon1 = this.polygons.find(p => p.id === polygonId1);
+    const polygon2 = this.polygons.find(p => p.id === polygonId2);
     
-    // If there's no path to the end, return empty array
-    if (previous[end] === null && end !== start) {
-      return [];
-    }
+    // If either polygon is not found, return a large value
+    if (!polygon1 || !polygon2) return 1000;
     
-    // Build the path by following the previous pointers
-    while (current !== null) {
+    // Use centroids for distance calculation
+    const centroid1 = polygon1.centroid;
+    const centroid2 = polygon2.centroid;
+    
+    // If either centroid is missing, return a default value
+    if (!centroid1 || !centroid2) return 10;
+    
+    // Calculate Euclidean distance between centroids
+    const latDiff = centroid1.lat - centroid2.lat;
+    const lngDiff = centroid1.lng - centroid2.lng;
+    return Math.sqrt(latDiff * latDiff + lngDiff * lngDiff);
+  }
+  
+  /**
+   * Reconstruct path from cameFrom map
+   */
+  private reconstructPath(cameFrom: Record<string, string | null>, current: string): string[] {
+    const path = [current];
+    while (cameFrom[current]) {
+      current = cameFrom[current]!;
       path.unshift(current);
-      current = previous[current] || null;
     }
-    
     return path;
   }
   
@@ -3032,13 +3117,13 @@ export default class SimplePolygonRenderer {
   }
   
   /**
-   * Visualize a path through multiple polygons
+   * Visualize a path through multiple polygons with improved bridge selection
    */
   private visualizePath(path: string[], start: {lat: number, lng: number}, end: {lat: number, lng: number}): void {
     // If path is empty, return
     if (path.length === 0) return;
     
-    console.log(`Visualizing path through ${path.length} polygons`);
+    console.log(`Visualizing path through ${path.length} polygons:`, path);
     
     // Create an array to store the path points
     const pathPoints: THREE.Vector3[] = [];
@@ -3047,27 +3132,7 @@ export default class SimplePolygonRenderer {
     const startPoint = this.measurementPoints[0];
     pathPoints.push(startPoint);
     
-    // Convert start and end to normalized coordinates for distance calculations
-    const startNormalized = normalizeCoordinates(
-      [start],
-      this.bounds.centerLat,
-      this.bounds.centerLng,
-      this.bounds.scale,
-      this.bounds.latCorrectionFactor
-    )[0];
-    
-    const endNormalized = normalizeCoordinates(
-      [end],
-      this.bounds.centerLat,
-      this.bounds.centerLng,
-      this.bounds.scale,
-      this.bounds.latCorrectionFactor
-    )[0];
-    
-    const startPos = new THREE.Vector3(startNormalized.x, 0, -startNormalized.y);
-    const endPos = new THREE.Vector3(endNormalized.x, 0, -endNormalized.y);
-    
-    // For each polygon in the path, find the bridge points to the next polygon
+    // For each segment of the path (polygon to polygon)
     for (let i = 0; i < path.length - 1; i++) {
       const currentPolygonId = path[i];
       const nextPolygonId = path[i + 1];
@@ -3121,26 +3186,23 @@ export default class SimplePolygonRenderer {
           const bridgePos = new THREE.Vector3(edgeCoord.x, 0, -edgeCoord.y);
           const targetPos = new THREE.Vector3(targetCoord.x, 0, -targetCoord.y);
           
-          // Calculate how far this bridge is from the direct path
-          // First, calculate the midpoint of the bridge
-          const bridgeMidpoint = new THREE.Vector3().addVectors(bridgePos, targetPos).multiplyScalar(0.5);
+          // For the first segment, calculate distance from start to bridge
+          // For the last segment, calculate distance from bridge to end
+          // For middle segments, use the previous point to calculate distance
+          let score;
           
-          // Calculate distance from this midpoint to the direct line between start and end
-          const distanceToDirectPath = this.distanceFromPointToLine(bridgeMidpoint, startPos, endPos);
+          if (i === 0) {
+            // First segment - distance from start to bridge
+            score = startPoint.distanceTo(bridgePos);
+          } else if (i === path.length - 2) {
+            // Last segment - distance from bridge to end
+            score = bridgePos.distanceTo(this.measurementPoints[1]);
+          } else {
+            // Middle segment - distance from previous point to bridge
+            score = pathPoints[pathPoints.length - 1].distanceTo(bridgePos);
+          }
           
-          // Calculate how much this bridge extends the total path length
-          const pathLengthWithBridge = 
-            startPos.distanceTo(bridgePos) + 
-            bridgePos.distanceTo(targetPos) + 
-            targetPos.distanceTo(endPos);
-          
-          const directPathLength = startPos.distanceTo(endPos);
-          const pathLengthRatio = pathLengthWithBridge / directPathLength;
-          
-          // Score is a combination of distance from direct path and path length extension
-          const score = distanceToDirectPath * pathLengthRatio;
-          
-          console.log(`Bridge point score: ${score}, distance to path: ${distanceToDirectPath}, length ratio: ${pathLengthRatio}`);
+          console.log(`Bridge point score: ${score}`);
           
           if (score < bestScore) {
             bestScore = score;
