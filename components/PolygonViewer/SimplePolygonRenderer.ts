@@ -1366,12 +1366,11 @@ export default class SimplePolygonRenderer {
         
           console.log(`Normalized coordinates for bridge point:`, normalizedCoord);
         
-          // Create a marker for the bridge point - CHANGED: Use larger, brighter spheres
+          // Create a marker for the bridge point - CHANGED: Use basic material instead of standard material
           const geometry = new THREE.SphereGeometry(0.3, 16, 16); // Increased size for better visibility
           const material = new THREE.MeshBasicMaterial({
             color: 0xFF5500, // Bright orange for bridge points
-            transparent: false, // No transparency for better visibility
-            opacity: 1.0
+            transparent: false // No transparency for better visibility
           });
         
           const marker = new THREE.Mesh(geometry, material);
