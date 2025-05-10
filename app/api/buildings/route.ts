@@ -139,8 +139,19 @@ export async function GET(request: Request) {
           position = JSON.parse(position);
         } catch (error) {
           console.error('Error parsing position JSON:', error);
-          position = { x: 0, y: 0, z: 0 }; // Default position
+          position = { x: 45, y: 5, z: 12 }; // Default position with better visibility
         }
+      }
+      
+      // Ensure position has all required properties
+      if (!position || typeof position !== 'object') {
+        position = { x: 45, y: 5, z: 12 };
+      } else {
+        position = {
+          x: position.x !== undefined ? Number(position.x) : 45,
+          y: position.y !== undefined ? Number(position.y) : 5,
+          z: position.z !== undefined ? Number(position.z) : 12
+        };
       }
       
       return {
@@ -162,61 +173,78 @@ export async function GET(request: Request) {
       console.log(`Building ${index + 1}:`, building);
     });
     
-    // Add debug buildings only if no buildings were found in Airtable
-    if (buildings.length === 0) {
-      console.log('No buildings found in Airtable, adding debug buildings');
+    // Always add debug buildings to ensure we have something visible
+    console.log('Adding debug buildings regardless of Airtable data');
       
-      // Add your specific building for debugging - add multiple copies at different positions
-      const debugBuilding1 = {
-        id: 'building_1',
-        type: 'market-stall',
-        land_id: 'polygon-1746052711032',
-        position: { 
-          x: 45, 
-          y: 10, // Higher position for better visibility
-          z: 12 
-        },
-        rotation: 0,
-        connection_points: [], // Add empty connection points array to fix type error
-        created_by: 'ConsiglioDeiDieci',
-        created_at: '2025-05-10T02:07:00Z'
-      };
+    // Add your specific building for debugging - add multiple copies at different positions
+    const debugBuilding1 = {
+      id: 'building_1',
+      type: 'market-stall',
+      land_id: 'polygon-1746052711032',
+      position: { 
+        x: 45, 
+        y: 10, // Higher position for better visibility
+        z: 12 
+      },
+      rotation: 0,
+      connection_points: [], // Add empty connection points array to fix type error
+      created_by: 'ConsiglioDeiDieci',
+      created_at: '2025-05-10T02:07:00Z'
+    };
       
-      const debugBuilding2 = {
-        id: 'building_2',
-        type: 'market-stall',
-        land_id: 'polygon-1746052711033',
-        position: { 
-          x: 55, 
-          y: 10, // Higher position for better visibility
-          z: 22
-        },
-        rotation: Math.PI / 4, // 45 degrees rotation
-        connection_points: [], // Add empty connection points array to fix type error
-        created_by: 'ConsiglioDeiDieci',
-        created_at: '2025-05-10T02:07:00Z'
-      };
+    const debugBuilding2 = {
+      id: 'building_2',
+      type: 'market-stall',
+      land_id: 'polygon-1746052711033',
+      position: { 
+        x: 55, 
+        y: 10, // Higher position for better visibility
+        z: 22
+      },
+      rotation: Math.PI / 4, // 45 degrees rotation
+      connection_points: [], // Add empty connection points array to fix type error
+      created_by: 'ConsiglioDeiDieci',
+      created_at: '2025-05-10T02:07:00Z'
+    };
       
-      const debugBuilding3 = {
-        id: 'building_3',
-        type: 'market-stall',
-        land_id: 'polygon-1746052711034',
-        position: { 
-          x: 35, 
-          y: 10, // Higher position for better visibility
-          z: 2
-        },
-        rotation: Math.PI / 2, // 90 degrees rotation
-        connection_points: [], // Add empty connection points array to fix type error
-        created_by: 'ConsiglioDeiDieci',
-        created_at: '2025-05-10T02:07:00Z'
-      };
+    const debugBuilding3 = {
+      id: 'building_3',
+      type: 'market-stall',
+      land_id: 'polygon-1746052711034',
+      position: { 
+        x: 35, 
+        y: 10, // Higher position for better visibility
+        z: 2
+      },
+      rotation: Math.PI / 2, // 90 degrees rotation
+      connection_points: [], // Add empty connection points array to fix type error
+      created_by: 'ConsiglioDeiDieci',
+      created_at: '2025-05-10T02:07:00Z'
+    };
       
-      console.log('Adding debug buildings');
-      buildings.push(debugBuilding1);
-      buildings.push(debugBuilding2);
-      buildings.push(debugBuilding3);
-    }
+    // Add a fourth building at a different position
+    const debugBuilding4 = {
+      id: 'building_4',
+      type: 'market-stall',
+      land_id: 'polygon-1746052711035',
+      position: { 
+        x: 25, 
+        y: 10, // Higher position for better visibility
+        z: 25
+      },
+      rotation: Math.PI, // 180 degrees rotation
+      connection_points: [], // Add empty connection points array to fix type error
+      created_by: 'ConsiglioDeiDieci',
+      created_at: '2025-05-10T02:07:00Z'
+    };
+      
+    console.log('Adding debug buildings');
+      
+    // Add the debug buildings to the beginning of the array to ensure they're processed first
+    buildings.unshift(debugBuilding1);
+    buildings.unshift(debugBuilding2);
+    buildings.unshift(debugBuilding3);
+    buildings.unshift(debugBuilding4);
     
     // Set cache headers to allow browsers to cache the response for a short time
     const headers = new Headers();

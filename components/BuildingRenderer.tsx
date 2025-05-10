@@ -83,12 +83,41 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
       // Load the building model
       const model = await loadBuildingModel(building.type, building.variant);
       
-      // Set position
+      // Parse position data properly
+      let position = { x: 0, y: 5, z: 0 }; // Default position with height=5
+      
+      // Handle different position formats
+      if (building.position) {
+        // If position is a string (JSON), parse it
+        if (typeof building.position === 'string') {
+          try {
+            position = JSON.parse(building.position);
+          } catch (error) {
+            console.error(`Error parsing position for building ${building.id}:`, error);
+          }
+        } 
+        // If position is already an object
+        else if (typeof building.position === 'object') {
+          // Ensure all coordinates are defined
+          position = {
+            x: building.position.x !== undefined ? Number(building.position.x) : 0,
+            y: building.position.y !== undefined ? Number(building.position.y) : 5, // Default height of 5
+            z: building.position.z !== undefined ? Number(building.position.z) : 0
+          };
+        }
+      }
+      
+      // Ensure position has a reasonable height to be visible
+      if (!position.y || position.y < 0.1) position.y = 5;
+      
+      // Set position with explicit values to avoid undefined
       model.position.set(
-        building.position.x,
-        building.position.y || 0,
-        building.position.z
+        Number(position.x) || 0,
+        Number(position.y) || 5,
+        Number(position.z) || 0
       );
+      
+      console.log(`Setting building ${building.id} position to:`, model.position);
       
       // Set rotation
       model.rotation.y = building.rotation || 0;
@@ -101,7 +130,8 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
         buildingId: building.id,
         type: building.type,
         landId: building.land_id,
-        owner: building.owner || building.created_by
+        owner: building.owner || building.created_by,
+        position: position // Store the parsed position for reference
       };
       
       // Add to scene
@@ -110,7 +140,7 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
       // Store reference for later cleanup
       buildingMeshesRef.current.set(building.id, model);
       
-      console.log(`Created building mesh for ${building.id} at position:`, building.position);
+      console.log(`Created building mesh for ${building.id} at position:`, model.position);
       
       return model;
     } catch (error) {
@@ -136,6 +166,35 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
       console.log(`Fetched ${data.buildings?.length || 0} buildings from API`);
       
       if (data.buildings && Array.isArray(data.buildings)) {
+        // Log each building for debugging
+        data.buildings.forEach((building: any, index: number) => {
+          console.log(`Building ${index + 1}:`, building);
+          console.log(`Position data:`, building.position);
+          
+          // Ensure position is properly formatted
+          if (typeof building.position === 'string') {
+            try {
+              building.position = JSON.parse(building.position);
+            } catch (error) {
+              console.error(`Error parsing position for building ${building.id}:`, error);
+              // Set a default position if parsing fails
+              building.position = { x: 45, y: 5, z: 12 };
+            }
+          } else if (!building.position || typeof building.position !== 'object') {
+            console.warn(`Building ${building.id} has invalid position, setting default`);
+            building.position = { x: 45, y: 5, z: 12 };
+          }
+          
+          // Ensure position has all required properties
+          if (building.position) {
+            building.position = {
+              x: building.position.x !== undefined ? Number(building.position.x) : 45,
+              y: building.position.y !== undefined ? Number(building.position.y) : 5,
+              z: building.position.z !== undefined ? Number(building.position.z) : 12
+            };
+          }
+        });
+        
         setBuildings(data.buildings);
         return data.buildings;
       } else {
