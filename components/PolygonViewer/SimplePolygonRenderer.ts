@@ -721,6 +721,8 @@ export default class SimplePolygonRenderer {
   public updateViewMode(activeView: string) {
     if (this.activeView === activeView) return;
     
+    console.log(`DEBUG: Changing view mode from ${this.activeView} to ${activeView}`);
+    
     this.activeView = activeView;
     
     // Update coat of arms sprites based on view mode
@@ -731,6 +733,7 @@ export default class SimplePolygonRenderer {
       });
       
       // Hide bridge and dock points in land view
+      console.log(`DEBUG: Hiding ${this.bridgePointMarkers.length} bridge markers and ${this.dockPointMarkers.length} dock markers in land view`);
       this.bridgePointMarkers.forEach(marker => marker.visible = false);
       this.dockPointMarkers.forEach(marker => marker.visible = false);
     } else if (activeView === 'transport') {
@@ -740,9 +743,22 @@ export default class SimplePolygonRenderer {
       });
       
       // Create and show bridge and dock points
+      console.log(`DEBUG: Creating and showing bridge and dock points in transport view`);
       this.createBridgeAndDockPoints();
-      this.bridgePointMarkers.forEach(marker => marker.visible = true);
-      this.dockPointMarkers.forEach(marker => marker.visible = true);
+      
+      console.log(`DEBUG: Setting visibility to true for ${this.bridgePointMarkers.length} bridge markers and ${this.dockPointMarkers.length} dock markers`);
+      this.bridgePointMarkers.forEach(marker => {
+        marker.visible = true;
+        console.log(`DEBUG: Bridge marker visible: ${marker.visible}, position: ${marker.position.x}, ${marker.position.y}, ${marker.position.z}`);
+      });
+      this.dockPointMarkers.forEach(marker => {
+        marker.visible = true;
+        if (marker instanceof THREE.Mesh) {
+          console.log(`DEBUG: Dock marker (Mesh) visible: ${marker.visible}, position: ${marker.position.x}, ${marker.position.y}, ${marker.position.z}`);
+        } else if (marker instanceof THREE.Line) {
+          console.log(`DEBUG: Dock marker (Line) visible: ${marker.visible}`);
+        }
+      });
     } else {
       // Hide coat of arms sprites and bridge/dock points in other views
       Object.values(this.coatOfArmsSprites).forEach(sprite => {
@@ -1261,6 +1277,33 @@ export default class SimplePolygonRenderer {
     
     console.log('Creating bridge and dock points for transport view');
     
+    // Add debug logging to see how many polygons have bridge/dock points
+    let polygonsWithBridgePoints = 0;
+    let polygonsWithDockPoints = 0;
+    let totalBridgePoints = 0;
+    let totalDockPoints = 0;
+    
+    // Debug: Log the total number of polygons
+    console.log(`DEBUG: Total polygons to check for bridge/dock points: ${this.polygons.length}`);
+    
+    // Check each polygon for bridge/dock points and count them
+    this.polygons.forEach(polygon => {
+      if (polygon.bridgePoints && Array.isArray(polygon.bridgePoints) && polygon.bridgePoints.length > 0) {
+        polygonsWithBridgePoints++;
+        totalBridgePoints += polygon.bridgePoints.length;
+        console.log(`DEBUG: Polygon ${polygon.id} has ${polygon.bridgePoints.length} bridge points`);
+      }
+      
+      if (polygon.dockPoints && Array.isArray(polygon.dockPoints) && polygon.dockPoints.length > 0) {
+        polygonsWithDockPoints++;
+        totalDockPoints += polygon.dockPoints.length;
+        console.log(`DEBUG: Polygon ${polygon.id} has ${polygon.dockPoints.length} dock points`);
+      }
+    });
+    
+    console.log(`DEBUG: Found ${polygonsWithBridgePoints} polygons with bridge points (${totalBridgePoints} total points)`);
+    console.log(`DEBUG: Found ${polygonsWithDockPoints} polygons with dock points (${totalDockPoints} total points)`);
+    
     // Clear any existing markers
     this.bridgePointMarkers.forEach(marker => {
       this.scene.remove(marker);
@@ -1300,6 +1343,9 @@ export default class SimplePolygonRenderer {
       // Process bridge points
       if (polygon.bridgePoints && Array.isArray(polygon.bridgePoints) && polygon.bridgePoints.length > 0) {
         polygon.bridgePoints.forEach((point, index) => {
+          console.log(`DEBUG: Creating bridge point marker for polygon ${polygon.id}, point ${index}`);
+          console.log(`DEBUG: Bridge point coordinates:`, point.edge);
+          
           const normalizedCoord = normalizeCoordinates(
             [point.edge],
             this.bounds.centerLat,
@@ -1307,6 +1353,8 @@ export default class SimplePolygonRenderer {
             this.bounds.scale,
             this.bounds.latCorrectionFactor
           )[0];
+          
+          console.log(`DEBUG: Normalized coordinates for bridge point:`, normalizedCoord);
           
           // Create a marker for the bridge point
           const geometry = new THREE.SphereGeometry(1.0, 16, 16); // Use sphere with radius 1.0
@@ -1319,6 +1367,8 @@ export default class SimplePolygonRenderer {
           const marker = new THREE.Mesh(geometry, material);
           marker.position.set(normalizedCoord.x, 5.0, -normalizedCoord.y); // Much higher position (from 1.0 to 5.0)
           marker.renderOrder = 1000; // Extremely high render order
+          
+          console.log(`DEBUG: Bridge marker position set to:`, marker.position);
           
           // Add metadata for tooltips
           marker.userData = {
@@ -1336,6 +1386,10 @@ export default class SimplePolygonRenderer {
       // Process dock points
       if (polygon.dockPoints && Array.isArray(polygon.dockPoints) && polygon.dockPoints.length > 0) {
         polygon.dockPoints.forEach((point, index) => {
+          console.log(`DEBUG: Creating dock point markers for polygon ${polygon.id}, point ${index}`);
+          console.log(`DEBUG: Dock edge point coordinates:`, point.edge);
+          console.log(`DEBUG: Dock water point coordinates:`, point.water);
+          
           // Create markers for both edge and water points
           const edgeCoord = normalizeCoordinates(
             [point.edge],
@@ -1352,6 +1406,9 @@ export default class SimplePolygonRenderer {
             this.bounds.scale,
             this.bounds.latCorrectionFactor
           )[0];
+          
+          console.log(`DEBUG: Normalized edge coordinates:`, edgeCoord);
+          console.log(`DEBUG: Normalized water coordinates:`, waterCoord);
           
           // Create a marker for the dock point (edge)
           const edgeGeometry = new THREE.SphereGeometry(1.0, 16, 16); // Use sphere with radius 1.0
@@ -1421,5 +1478,14 @@ export default class SimplePolygonRenderer {
     });
     
     console.log(`DEBUG: Created ${this.bridgePointMarkers.length} bridge markers and ${this.dockPointMarkers.length} dock markers as 3D spheres at height 5.0`);
+    console.log(`DEBUG: Bridge markers:`, this.bridgePointMarkers.map(m => m.position));
+    console.log(`DEBUG: First few dock markers:`, this.dockPointMarkers.slice(0, 5).map(m => {
+      if (m instanceof THREE.Mesh) {
+        return m.position;
+      } else if (m instanceof THREE.Line) {
+        return 'Line';
+      }
+      return 'Unknown';
+    }));
   }
 }
