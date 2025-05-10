@@ -48,6 +48,39 @@ export async function POST(request: Request) {
       );
     }
     
+    // Validate category
+    if (!data.category) {
+      // Try to determine category from type
+      const resourceType = data.type.toLowerCase();
+      
+      if (resourceType.includes('wood') || resourceType.includes('stone') || 
+          resourceType.includes('ore') || resourceType.includes('clay')) {
+        data.category = 'raw_materials';
+      } else if (resourceType.includes('food') || resourceType.includes('fish') || 
+                resourceType.includes('fruit') || resourceType.includes('grain')) {
+        data.category = 'food';
+      } else if (resourceType.includes('cloth') || resourceType.includes('fabric') || 
+                resourceType.includes('textile')) {
+        data.category = 'textiles';
+      } else if (resourceType.includes('spice') || resourceType.includes('pepper') || 
+                resourceType.includes('salt')) {
+        data.category = 'spices';
+      } else if (resourceType.includes('tool') || resourceType.includes('hammer') || 
+                resourceType.includes('saw')) {
+        data.category = 'tools';
+      } else if (resourceType.includes('brick') || resourceType.includes('timber') || 
+                resourceType.includes('nail')) {
+        data.category = 'building_materials';
+      } else if (resourceType.includes('gold') || resourceType.includes('silver') || 
+                resourceType.includes('gem') || resourceType.includes('silk')) {
+        data.category = 'luxury_goods';
+      } else {
+        data.category = 'unknown';
+      }
+      
+      console.log(`Assigned category ${data.category} to resource type ${data.type}`);
+    }
+    
     // Ensure position is properly formatted
     let position = data.position;
     

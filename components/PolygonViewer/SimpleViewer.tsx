@@ -535,7 +535,13 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
     
     // Update resource display active state
     if (resourceDisplayRef.current) {
-      resourceDisplayRef.current.setActive(activeView === 'resources');
+      const shouldBeActive = activeView === 'resources';
+      resourceDisplayRef.current.setActive(shouldBeActive);
+    
+      // If activating resources view, refresh resources
+      if (shouldBeActive && !resourceDisplayRef.current.isActive) {
+        resourceDisplayRef.current.refreshResources();
+      }
     }
     
     // If we're switching to buildings view, ensure the BuildingRenderer is active
@@ -832,9 +838,39 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
           <h3 className="text-lg font-serif mb-2">Resources</h3>
           <div className="text-sm space-y-1">
             <p>Hover over resource icons to see details</p>
+            <p>Click on resources to select them</p>
             <p>Resources are grouped by location</p>
             <p>Red badge shows number of resources at location</p>
             <p>Black badge shows resource quantity</p>
+          </div>
+          <div className="mt-3 pt-2 border-t border-gray-600">
+            <h4 className="text-sm font-bold mb-1">Resource Categories:</h4>
+            <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-xs">
+              <div className="flex items-center">
+                <div className="w-3 h-3 rounded-full bg-[#8B4513] mr-1"></div>
+                <span>Raw Materials</span>
+              </div>
+              <div className="flex items-center">
+                <div className="w-3 h-3 rounded-full bg-[#228B22] mr-1"></div>
+                <span>Food</span>
+              </div>
+              <div className="flex items-center">
+                <div className="w-3 h-3 rounded-full bg-[#B8860B] mr-1"></div>
+                <span>Crafted Goods</span>
+              </div>
+              <div className="flex items-center">
+                <div className="w-3 h-3 rounded-full bg-[#9932CC] mr-1"></div>
+                <span>Luxury Goods</span>
+              </div>
+              <div className="flex items-center">
+                <div className="w-3 h-3 rounded-full bg-[#708090] mr-1"></div>
+                <span>Building Materials</span>
+              </div>
+              <div className="flex items-center">
+                <div className="w-3 h-3 rounded-full bg-[#4682B4] mr-1"></div>
+                <span>Tools</span>
+              </div>
+            </div>
           </div>
         </div>
       )}

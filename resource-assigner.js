@@ -139,7 +139,7 @@ async function assignResourcesToPolygons() {
             id: `resource-${polygonId}-${i}`,
             type: randomResource.id,
             name: randomResource.name,
-            category: randomResource.category,
+            category: randomResource.category || determineCategory(randomResource.id),
             position: {
               lat: buildingPoint.lat,
               lng: buildingPoint.lng
@@ -149,6 +149,36 @@ async function assignResourcesToPolygons() {
             owner: 'ConsiglioDeiDieci',
             createdAt: new Date().toISOString()
           };
+          
+          // Helper function to determine category based on resource type
+          function determineCategory(type) {
+            const typeStr = type.toLowerCase();
+            
+            if (typeStr.includes('wood') || typeStr.includes('stone') || 
+                typeStr.includes('ore') || typeStr.includes('clay')) {
+              return 'raw_materials';
+            } else if (typeStr.includes('food') || typeStr.includes('fish') || 
+                      typeStr.includes('fruit') || typeStr.includes('grain')) {
+              return 'food';
+            } else if (typeStr.includes('cloth') || typeStr.includes('fabric') || 
+                      typeStr.includes('textile')) {
+              return 'textiles';
+            } else if (typeStr.includes('spice') || typeStr.includes('pepper') || 
+                      typeStr.includes('salt')) {
+              return 'spices';
+            } else if (typeStr.includes('tool') || typeStr.includes('hammer') || 
+                      typeStr.includes('saw')) {
+              return 'tools';
+            } else if (typeStr.includes('brick') || typeStr.includes('timber') || 
+                      typeStr.includes('nail')) {
+              return 'building_materials';
+            } else if (typeStr.includes('gold') || typeStr.includes('silver') || 
+                      typeStr.includes('gem') || typeStr.includes('silk')) {
+              return 'luxury_goods';
+            } else {
+              return 'unknown';
+            }
+          }
           
           try {
             // Add the resource to the API

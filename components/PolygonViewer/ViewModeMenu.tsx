@@ -73,14 +73,14 @@ export default function ViewModeMenu({ activeView, setActiveView }: ViewModeMenu
         <span className="text-[10px] mt-1">Markets</span>
       </IconButton>
       
-      {/* Resources View - Disabled */}
+      {/* Resources View - Now Enabled */}
       <IconButton 
-        onClick={() => {}}
-        active={false}
-        title={viewDescriptions.resources + " (Coming Soon)"}
+        onClick={() => activeView !== 'resources' ? handleViewModeChange('resources') : null}
+        active={activeView === 'resources'}
+        title={viewDescriptions.resources}
         activeColor="amber"
         compact={true}
-        disabled={true}
+        disabled={false}
       >
         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M19 5L5 19M5.5 6.5l3-3 2 2-3 3-2-2zM15.5 16.5l3-3 2 2-3 3-2-2z"></path>
