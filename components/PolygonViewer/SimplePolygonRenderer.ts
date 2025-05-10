@@ -1614,11 +1614,11 @@ export default class SimplePolygonRenderer {
             this.scene.add(edgeMarker);
             this.dockPointMarkers.push(edgeMarker);
             
-            // Create a line connecting edge to water
+            // Create a line connecting edge to water - update y coordinates to match new heights
             const lineGeometry = new THREE.BufferGeometry();
             const vertices = new Float32Array([
               edgeCoord.x, 0.5, -edgeCoord.y,
-              waterCoord.x, 0.5, -waterCoord.y
+              waterCoord.x, 0.3, -waterCoord.y  // Update this y-coordinate to match the water marker height
             ]);
             lineGeometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
             
@@ -1633,11 +1633,11 @@ export default class SimplePolygonRenderer {
             this.scene.add(line);
             this.dockPointMarkers.push(line);
             
-            // Create a marker for water points
-            const waterGeometry = new THREE.BoxGeometry(0.4, 0.4, 0.4);
+            // Create a marker for water points - using spheres instead of boxes
+            const waterGeometry = new THREE.SphereGeometry(0.3, 8, 8); // Smaller sphere with fewer segments for better performance
             
             const waterMarker = new THREE.Mesh(waterGeometry, dockWaterMaterial);
-            waterMarker.position.set(waterCoord.x, 0.5, -waterCoord.y); // Position closer to land level
+            waterMarker.position.set(waterCoord.x, 0.3, -waterCoord.y); // Position closer to land level (0.3 instead of 0.5)
             waterMarker.renderOrder = 2000; // Keep high render order
             
             // Add metadata for tooltips
