@@ -185,9 +185,8 @@ export async function GET(request: Request) {
               // We have enough records, don't fetch more
               resolve(allRecords.slice(offset, offset + limit));
             } else if (!isNumericOffset) {
-              // We're using Airtable's offset token, just add these records
-              allRecords.push(...records);
-              fetchNextPage();
+              // We're using Airtable's offset token, just return what we got
+              resolve(records);
             } else {
               // We need more records
               fetchNextPage();
