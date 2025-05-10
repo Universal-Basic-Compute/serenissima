@@ -2,7 +2,7 @@
  * Get the current user's username
  * @returns The username of the current user, or null if not logged in
  */
-export function getUserName(): string | null {
+export function getUsername(): string | null {
   // This is a placeholder implementation
   // Replace with your actual implementation to get the username
   // from your authentication system
