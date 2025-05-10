@@ -1309,18 +1309,18 @@ export default class SimplePolygonRenderer {
           )[0];
           
           // Create a marker for the bridge point
-          const geometry = new THREE.CircleGeometry(0.6, 16); // Increased size from 0.4 to 0.6
+          const geometry = new THREE.CircleGeometry(2.0, 16); // Much larger size (from 0.6 to 2.0)
           const material = new THREE.MeshBasicMaterial({
-            color: 0xFF5500, // Orange color for bridge points
+            color: 0xFF0000, // Bright red for maximum visibility
             side: THREE.DoubleSide,
-            transparent: true,
-            opacity: 1.0 // Increased opacity from 0.8 to 1.0
+            transparent: false, // No transparency
+            opacity: 1.0
           });
           
           const marker = new THREE.Mesh(geometry, material);
-          marker.position.set(normalizedCoord.x, 1.0, -normalizedCoord.y); // Increased height from 0.5 to 1.0
+          marker.position.set(normalizedCoord.x, 5.0, -normalizedCoord.y); // Much higher position (from 1.0 to 5.0)
           marker.rotation.x = -Math.PI / 2; // Make it horizontal
-          marker.renderOrder = 30; // Increased from 20 to 30 to ensure it renders on top
+          marker.renderOrder = 1000; // Extremely high render order
           
           // Add metadata for tooltips
           marker.userData = {
@@ -1356,18 +1356,18 @@ export default class SimplePolygonRenderer {
           )[0];
           
           // Create a marker for the dock point (edge)
-          const edgeGeometry = new THREE.CircleGeometry(0.6, 16); // Increased size from 0.4 to 0.6
+          const edgeGeometry = new THREE.CircleGeometry(2.0, 16); // Much larger
           const edgeMaterial = new THREE.MeshBasicMaterial({
-            color: 0x00AAFF, // Blue color for dock points
+            color: 0x00FF00, // Bright green for maximum visibility
             side: THREE.DoubleSide,
-            transparent: true,
-            opacity: 1.0 // Increased opacity from 0.8 to 1.0
+            transparent: false,
+            opacity: 1.0
           });
           
           const edgeMarker = new THREE.Mesh(edgeGeometry, edgeMaterial);
-          edgeMarker.position.set(edgeCoord.x, 1.0, -edgeCoord.y); // Increased height from 0.5 to 1.0
+          edgeMarker.position.set(edgeCoord.x, 5.0, -edgeCoord.y); // Much higher
           edgeMarker.rotation.x = -Math.PI / 2; // Make it horizontal
-          edgeMarker.renderOrder = 30; // Increased from 20 to 30 to ensure it renders on top
+          edgeMarker.renderOrder = 1000; // Extremely high render order
           
           // Add metadata for tooltips
           edgeMarker.userData = {
@@ -1382,36 +1382,35 @@ export default class SimplePolygonRenderer {
           
           // Create a line connecting edge to water
           const lineGeometry = new THREE.BufferGeometry().setFromPoints([
-            new THREE.Vector3(edgeCoord.x, 1.0, -edgeCoord.y), // Increased height from 0.5 to 1.0
-            new THREE.Vector3(waterCoord.x, 1.0, -waterCoord.y) // Increased height from 0.5 to 1.0
+            new THREE.Vector3(edgeCoord.x, 5.0, -edgeCoord.y), // Much higher
+            new THREE.Vector3(waterCoord.x, 5.0, -waterCoord.y) // Much higher
           ]);
           
           const lineMaterial = new THREE.LineBasicMaterial({
-            color: 0x00AAFF,
-            linewidth: 2,
-            transparent: true,
-            opacity: 0.8 // Increased opacity from 0.6 to 0.8
+            color: 0xFFFF00, // Bright yellow
+            linewidth: 5, // Much thicker line (from 2 to 5)
+            transparent: false
           });
           
           const line = new THREE.Line(lineGeometry, lineMaterial);
-          line.renderOrder = 29; // Increased from 19 to 29 to ensure it renders above land
+          line.renderOrder = 999; // Extremely high render order
           
           this.scene.add(line);
           this.dockPointMarkers.push(line); // Add to dock markers for cleanup
           
           // Create a marker for the water point
-          const waterGeometry = new THREE.CircleGeometry(0.5, 16); // Increased size from 0.3 to 0.5
+          const waterGeometry = new THREE.CircleGeometry(1.5, 16); // Much larger
           const waterMaterial = new THREE.MeshBasicMaterial({
-            color: 0x0088CC, // Darker blue for water points
+            color: 0x0000FF, // Bright blue
             side: THREE.DoubleSide,
-            transparent: true,
-            opacity: 1.0 // Increased opacity from 0.7 to 1.0
+            transparent: false,
+            opacity: 1.0
           });
           
           const waterMarker = new THREE.Mesh(waterGeometry, waterMaterial);
-          waterMarker.position.set(waterCoord.x, 1.0, -waterCoord.y); // Increased height from 0.5 to 1.0
+          waterMarker.position.set(waterCoord.x, 5.0, -waterCoord.y); // Much higher
           waterMarker.rotation.x = -Math.PI / 2; // Make it horizontal
-          waterMarker.renderOrder = 30; // Increased from 20 to 30 to ensure it renders on top
+          waterMarker.renderOrder = 1000; // Extremely high render order
           
           // Add metadata for tooltips
           waterMarker.userData = {
@@ -1427,6 +1426,6 @@ export default class SimplePolygonRenderer {
       }
     });
     
-    console.log(`Created ${this.bridgePointMarkers.length} bridge point markers and ${this.dockPointMarkers.length} dock point markers`);
+    console.log(`DEBUG: Created ${this.bridgePointMarkers.length} bridge markers and ${this.dockPointMarkers.length} dock markers at height 5.0 with size 2.0`);
   }
 }
