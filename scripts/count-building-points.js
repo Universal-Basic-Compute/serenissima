@@ -11,6 +11,8 @@
 
 require('dotenv').config();
 const Airtable = require('airtable');
+const fs = require('fs');
+const path = require('path');
 
 // Configure Airtable
 const base = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY }).base(process.env.AIRTABLE_BASE_ID);
@@ -57,6 +59,28 @@ function safeJsonParse(jsonString) {
 }
 
 /**
+ * Read polygon data from file
+ * @param {string} polygonId - The polygon ID
+ * @returns {Object|null} - The polygon data or null if not found
+ */
+function readPolygonData(polygonId) {
+  try {
+    const filePath = path.join(__dirname, '..', 'data', `${polygonId}.json`);
+    
+    if (!fs.existsSync(filePath)) {
+      log.warn(`Polygon file not found: ${filePath}`);
+      return null;
+    }
+    
+    const fileContent = fs.readFileSync(filePath, 'utf8');
+    return safeJsonParse(fileContent);
+  } catch (error) {
+    log.error(`Error reading polygon file: ${error.message}`);
+    return null;
+  }
+}
+
+/**
  * Process all lands and update building points count
  * @param {boolean} dryRun - Whether to run in dry-run mode (no updates)
  */
@@ -82,22 +106,34 @@ async function processLands(dryRun = false) {
       try {
         const landId = land.id;
         const landName = land.fields.HistoricalName || land.fields.EnglishName || land.fields.LandId || landId;
-        const polygonJson = land.fields.PolygonJSON;
+        const polygonId = land.fields.LandId;
         const currentCount = land.fields.BuildingPointsCount || 0;
         
-        // Skip if no polygon JSON
-        if (!polygonJson) {
-          log.warn(`Land ${landName} has no PolygonJSON, skipping`);
+        // Skip if no polygon ID
+        if (!polygonId) {
+          log.warn(`Land ${landName} has no LandId, skipping`);
           stats.failed++;
           continue;
         }
         
-        // Parse the polygon JSON
-        const polygonData = safeJsonParse(polygonJson);
+        // First try to get polygon data from PolygonJSON field
+        let polygonData = null;
+        if (land.fields.PolygonJSON) {
+          polygonData = safeJsonParse(land.fields.PolygonJSON);
+          if (polygonData) {
+            log.info(`Using PolygonJSON field for land ${landName}`);
+          }
+        }
+        
+        // If no polygon data from field, try to read from file
         if (!polygonData) {
-          log.warn(`Land ${landName} has invalid PolygonJSON, skipping`);
-          stats.failed++;
-          continue;
+          polygonData = readPolygonData(polygonId);
+          if (!polygonData) {
+            log.warn(`Land ${landName} (${polygonId}) has no polygon data, skipping`);
+            stats.failed++;
+            continue;
+          }
+          log.info(`Using polygon data file for land ${landName}`);
         }
         
         // Count building points
