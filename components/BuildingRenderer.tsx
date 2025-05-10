@@ -29,16 +29,27 @@ declare global {
 interface BuildingRendererProps {
   scene?: THREE.Scene;
   active: boolean;
+  sceneReady?: boolean; // New prop to explicitly indicate scene readiness
 }
 
-const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) => {
+const BuildingRenderer: React.FC<BuildingRendererProps> = ({ 
+  scene, 
+  active,
+  sceneReady = false // Default to false
+}) => {
   // Create a local scene if none is provided
   const [localScene, setLocalScene] = useState<THREE.Scene | null>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
   const [isReady, setIsReady] = useState<boolean>(false);
   
-  // Initialize scene on component mount
+  // Initialize scene on component mount or when sceneReady changes
   useEffect(() => {
+    // Don't proceed if sceneReady is false
+    if (!sceneReady) {
+      console.log('BuildingRenderer: Waiting for scene to be ready');
+      return;
+    }
+    
     // If a scene is provided via props, use it
     if (scene) {
       console.log('BuildingRenderer: Using provided scene');
@@ -71,21 +82,8 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
       }
     }
     
-    console.log('BuildingRenderer: No existing scene found, creating a new one');
-    
-    // Create a new scene
-    const newScene = new THREE.Scene();
-    sceneRef.current = newScene;
-    setLocalScene(newScene);
-    
-    // Make the scene available globally
-    if (typeof window !== 'undefined') {
-      window.__threeContext = window.__threeContext || {};
-      window.__threeContext.scene = newScene;
-    }
-    
-    setIsReady(true);
-  }, [scene]);
+    console.warn('BuildingRenderer: No scene found even though sceneReady is true');
+  }, [scene, sceneReady]);
   
   // Don't proceed if not ready
   if (!isReady || !sceneRef.current) {
