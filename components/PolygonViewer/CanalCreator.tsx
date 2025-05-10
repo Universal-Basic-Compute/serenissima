@@ -74,7 +74,9 @@ const CanalCreator: React.FC<CanalCreatorProps> = ({
         if (planeRef.current) {
           scene.remove(planeRef.current);
           planeRef.current.geometry.dispose();
-          planeRef.current.material.dispose();
+          if (planeRef.current.material instanceof THREE.Material) {
+            planeRef.current.material.dispose();
+          }
         }
         if (pathHelperRef.current) {
           scene.remove(pathHelperRef.current);
