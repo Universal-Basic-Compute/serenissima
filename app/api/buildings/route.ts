@@ -292,7 +292,7 @@ export async function GET(request: Request) {
         position = { 
           lat: 45.4371 + (Math.random() * 0.01 - 0.005), 
           lng: 12.3358 + (Math.random() * 0.01 - 0.005)
-        };
+        } as { lat: number; lng: number };
       } 
       // If position has x/y/z format but not lat/lng, convert to lat/lng
       else if ('x' in position && 'z' in position && !('lat' in position)) {
@@ -305,8 +305,10 @@ export async function GET(request: Request) {
         };
             
         // Reverse the conversion formula - this is the inverse of normalizeCoordinates
-        const lat = bounds.centerLat + (-(position.z as number) / bounds.scale / bounds.latCorrectionFactor);
-        const lng = bounds.centerLng + ((position.x as number) / bounds.scale);
+        const positionZ = position.z as number;
+        const positionX = position.x as number;
+        const lat = bounds.centerLat + (-(positionZ) / bounds.scale / bounds.latCorrectionFactor);
+        const lng = bounds.centerLng + ((positionX) / bounds.scale);
             
         position = {
           lat: parseFloat(lat.toFixed(10)),
