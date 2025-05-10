@@ -2,8 +2,10 @@ const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
 const dotenv = require('dotenv');
+const Airtable = require('airtable');
 
 dotenv.config();
+const base = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY }).base(process.env.AIRTABLE_BASE_ID);
 
 // Define citizen interface
 interface Citizen {
@@ -79,6 +81,35 @@ function enhanceImagePrompt(citizen: Citizen): string {
   return `${basePrompt} ${styleAddition}`;
 }
 
+// Update Airtable with image URL
+async function updateAirtableImageUrl(citizenId: string, imageUrl: string): Promise<boolean> {
+  try {
+    console.log(`Updating Airtable record for citizen ${citizenId} with image URL: ${imageUrl}`);
+    
+    // Find the record by CitizenId
+    const records = await base('CITIZENS').select({
+      filterByFormula: `{CitizenId} = '${citizenId}'`
+    }).firstPage();
+    
+    if (records.length === 0) {
+      console.error(`No Airtable record found for citizen ID: ${citizenId}`);
+      return false;
+    }
+    
+    // Update the record with the new image URL
+    const recordId = records[0].id;
+    await base('CITIZENS').update(recordId, {
+      ImageUrl: imageUrl
+    });
+    
+    console.log(`Successfully updated Airtable record for citizen ${citizenId}`);
+    return true;
+  } catch (error) {
+    console.error(`Error updating Airtable record for citizen ${citizenId}:`, error);
+    return false;
+  }
+}
+
 // Generate image using Ideogram API
 async function generateImage(prompt: string, citizenId: string): Promise<string | null> {
   try {
@@ -114,7 +145,13 @@ async function generateImage(prompt: string, citizenId: string): Promise<string 
     
     console.log(`Generated and saved image for citizen ${citizenId}`);
     
-    return `/images/citizens/${citizenId}.jpg`;
+    // Create the public URL path
+    const publicImageUrl = `/images/citizens/${citizenId}.jpg`;
+    
+    // Update the image URL in Airtable
+    await updateAirtableImageUrl(citizenId, publicImageUrl);
+    
+    return publicImageUrl;
   } catch (error) {
     console.error(`Error generating image for citizen ${citizenId}:`, error);
     return null;
