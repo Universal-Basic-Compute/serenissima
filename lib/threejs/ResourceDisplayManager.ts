@@ -283,14 +283,20 @@ export class ResourceDisplayManager {
       // Get the username from the utility function
       const username = getUsername();
       
-      // Always include the username parameter to filter by owner
-      // This ensures we only fetch resources owned by the current user
-      const queryParams = username ? `?owner=${encodeURIComponent(username)}` : '';
-
+      // If we don't have a username, don't fetch any resources
+      if (!username) {
+        console.log('No username available, not fetching resources');
+        this.resources = [];
+        return;
+      }
+      
+      // Include the username parameter to filter by owner
+      const queryParams = `?owner=${encodeURIComponent(username)}`;
+      
       // Use the correct API URL with query parameters
       const apiUrl = '/api/resources' + queryParams;
       
-      console.log(`Loading resources for owner: ${username || 'unknown'}`);
+      console.log(`Loading resources for owner: ${username}`);
       
       const response = await fetch(apiUrl, {
         method: 'GET',
@@ -318,7 +324,7 @@ export class ResourceDisplayManager {
         this.resources = [];
       }
       
-      console.log(`Loaded ${this.resources.length} resources for user ${username || 'unknown'}`);
+      console.log(`Loaded ${this.resources.length} resources for user ${username}`);
     } catch (error) {
       console.error('Error loading resources:', error);
       this.resources = [];
