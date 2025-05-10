@@ -240,10 +240,24 @@ export class CitizenDisplayManager {
   public forceVisibleCitizens(): void {
     console.log('CitizenDisplayManager: Forcing citizens to be visible');
     
-    // If we don't have any citizens, add debug citizens
+    // If we don't have any citizens, load them first
     if (this.citizens.length === 0) {
-      this.addDebugCitizensIfNeeded();
-      this.groupCitizensByLocation();
+      console.log('CitizenDisplayManager: No citizens loaded, loading from API first');
+      this.loadCitizens().then(() => {
+        console.log(`CitizenDisplayManager: Loaded ${this.citizens.length} citizens from API`);
+        this.addDebugCitizensIfNeeded();
+        this.groupCitizensByLocation();
+        this.createCitizenMarkers();
+        this.debugState();
+      }).catch(error => {
+        console.error('CitizenDisplayManager: Error loading citizens:', error);
+        // Still try to add debug citizens and create markers
+        this.addDebugCitizensIfNeeded();
+        this.groupCitizensByLocation();
+        this.createCitizenMarkers();
+        this.debugState();
+      });
+      return;
     }
     
     // If we don't have any citizen groups, something is wrong with the grouping
@@ -300,17 +314,15 @@ export class CitizenDisplayManager {
     
     if (active) {
       console.log('CitizenDisplayManager: Creating markers and adding event listeners');
+      
+      // Always refresh citizens when activating the view
+      console.log('CitizenDisplayManager: Refreshing citizens on activation');
+      this.refreshCitizens();
+      
       // Create markers and add event listeners
       this.createCitizenMarkers();
       window.addEventListener('mousemove', this.mouseMoveHandler);
       window.addEventListener('click', this.mouseClickHandler);
-      
-      // Check if we need to refresh citizens
-      const now = Date.now();
-      if (now - this.lastUpdateTime > this.updateInterval) {
-        console.log('CitizenDisplayManager: Refreshing citizens due to stale data');
-        this.refreshCitizens();
-      }
       
       // Debug the state
       this.debugState();
@@ -332,6 +344,8 @@ export class CitizenDisplayManager {
     try {
       // Use the correct API URL (Next.js API routes run on the same port as the app)
       const apiUrl = '/api/citizens';
+      
+      console.log('CitizenDisplayManager: Fetching citizens from API:', apiUrl);
       
       const response = await fetch(apiUrl, {
         method: 'GET',
@@ -360,6 +374,9 @@ export class CitizenDisplayManager {
       }
       
       console.log(`Loaded ${this.citizens.length} citizens`);
+      
+      // Emit event that citizens were loaded
+      eventBus.emit(EventTypes.CITIZENS_LOADED, { count: this.citizens.length });
     } catch (error) {
       console.error('Error loading citizens:', error);
       this.citizens = [];

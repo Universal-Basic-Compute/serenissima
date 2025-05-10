@@ -1350,7 +1350,7 @@ export default function PolygonViewer() {
     }
   }, [roadCreationActive]);
   
-  // Add listener for ensuring buildings are visible
+  // Add listener for ensuring buildings are visible and loading citizens
   useEffect(() => {
     const handleEnsureBuildingsVisible = () => {
       if (polygonRendererRef.current) {
@@ -1359,10 +1359,33 @@ export default function PolygonViewer() {
       }
     };
     
+    const handleLoadCitizens = () => {
+      console.log('PolygonViewer: Received loadCitizens event');
+      if (citizenDisplayManagerRef.current) {
+        console.log('PolygonViewer: Forcing citizen refresh from event handler');
+        citizenDisplayManagerRef.current.refreshCitizens();
+        
+        // Force citizens to be visible with multiple attempts
+        setTimeout(() => {
+          if (citizenDisplayManagerRef.current) {
+            citizenDisplayManagerRef.current.forceVisibleCitizens();
+          }
+        }, 500);
+        
+        setTimeout(() => {
+          if (citizenDisplayManagerRef.current) {
+            citizenDisplayManagerRef.current.forceVisibleCitizens();
+          }
+        }, 1500);
+      }
+    };
+    
     window.addEventListener('ensureBuildingsVisible', handleEnsureBuildingsVisible);
+    window.addEventListener('loadCitizens', handleLoadCitizens);
     
     return () => {
       window.removeEventListener('ensureBuildingsVisible', handleEnsureBuildingsVisible);
+      window.removeEventListener('loadCitizens', handleLoadCitizens);
     };
   }, []);
   
@@ -1472,12 +1495,27 @@ export default function PolygonViewer() {
             // Force a refresh of citizens when switching to this view
             citizenDisplayManagerRef.current.refreshCitizens();
             
-            // Force citizens to be visible
+            // Force citizens to be visible with multiple attempts to ensure they appear
             setTimeout(() => {
               if (citizenDisplayManagerRef.current) {
+                console.log('PolygonViewer: First attempt to force citizens visible');
                 citizenDisplayManagerRef.current.forceVisibleCitizens();
               }
             }, 500);
+            
+            setTimeout(() => {
+              if (citizenDisplayManagerRef.current) {
+                console.log('PolygonViewer: Second attempt to force citizens visible');
+                citizenDisplayManagerRef.current.forceVisibleCitizens();
+              }
+            }, 1500);
+            
+            setTimeout(() => {
+              if (citizenDisplayManagerRef.current) {
+                console.log('PolygonViewer: Third attempt to force citizens visible');
+                citizenDisplayManagerRef.current.forceVisibleCitizens();
+              }
+            }, 3000);
           }
         } else {
           console.warn('PolygonViewer: citizenDisplayManagerRef.current is null, cannot set active state');
