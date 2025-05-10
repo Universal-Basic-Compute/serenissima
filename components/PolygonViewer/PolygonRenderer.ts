@@ -586,13 +586,18 @@ export default class PolygonRenderer {
   }
   
   /**
-   * Ensure all buildings are visible in buildings view
+   * Ensure buildings are visible in buildings view
    */
   public ensureBuildingsVisible() {
     console.log('Ensuring buildings are visible');
     
     // Find all building objects in the scene
     if (this.scene) {
+      // Create a counter to track how many buildings we find
+      let buildingCount = 0;
+      
+      console.log('Checking if buildings are in camera view...');
+      
       this.scene.traverse(object => {
         // Check if this is a building object
         if (object instanceof THREE.Mesh && 
@@ -600,6 +605,8 @@ export default class PolygonRenderer {
             (object.userData.isBuilding || 
              object.userData.type === 'building' || 
              (typeof object.userData.type === 'string' && object.userData.type.includes('building')))) {
+          
+          buildingCount++;
           
           // Force visibility
           object.visible = true;
@@ -611,8 +618,26 @@ export default class PolygonRenderer {
           }
           
           // Set the building position to a more appropriate height
-          // Increase from 1.0 to 3.0 to ensure buildings are clearly visible above the land
-          object.position.y = 3.0; // Increased from 1.0 to 3.0
+          object.position.y = 3.0;
+          
+          // Check if building is in camera view
+          const cameraPosition = this.camera.position.clone();
+          const buildingPosition = object.position.clone();
+          const distance = cameraPosition.distanceTo(buildingPosition);
+          
+          // Get the bounding box
+          if (!object.geometry.boundingBox) {
+            object.geometry.computeBoundingBox();
+          }
+          
+          const boundingBox = object.geometry.boundingBox;
+          
+          // Log building visibility information
+          console.log(`Building ${object.name || object.userData.type || 'building_' + buildingCount}: ${distance < 100 ? 'VISIBLE' : 'NOT VISIBLE'}`);
+          console.log(`  Position: ${Math.round(object.position.x)}, ${Math.round(object.position.y)}, ${Math.round(object.position.z)}`);
+          if (boundingBox) {
+            console.log(`  Bounding box: min(${boundingBox.min.x}, ${boundingBox.min.y}, ${boundingBox.min.z}), max(${boundingBox.max.x}, ${boundingBox.max.y}, ${boundingBox.max.z})`);
+          }
           
           // Force material update
           if (object.material) {
@@ -630,10 +655,11 @@ export default class PolygonRenderer {
               object.material.opacity = 1.0;
             }
           }
-          
-          console.log(`Made building visible: ${object.name || 'unnamed building'} at position y=${object.position.y}`);
         }
       });
+      
+      console.log(`Found ${buildingCount} buildings in the scene`);
+      console.log(`${buildingCount > 0 ? buildingCount : 'No'} out of ${buildingCount} buildings are visible in camera view ------> but I don't see any of them`);
     }
     
     // Force a render to apply changes
