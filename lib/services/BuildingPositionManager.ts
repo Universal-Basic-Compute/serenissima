@@ -59,13 +59,18 @@ export class BuildingPositionManager {
     const MAX_COORDINATE = 500; // Maximum allowed coordinate value
     if (Math.abs(x) > MAX_COORDINATE || Math.abs(z) > MAX_COORDINATE) {
       console.error(`Extreme position values calculated despite validation: (${x}, ${height}, ${z}).`);
-      console.error(`Input coordinates: (${position.lat}, ${position.lng})`);
+      console.error(`Input coordinates: lat=${position.lat}, lng=${position.lng}`);
+      console.error(`Input type: lat=${typeof position.lat}, lng=${typeof position.lng}`);
+      console.error(`Input values: ${JSON.stringify(position)}`);
+      console.error(`Calculation: x = (${position.lng} - ${this.bounds.centerLng}) * ${this.bounds.scale}`);
+      console.error(`Calculation: z = -(${position.lat} - ${this.bounds.centerLat}) * ${this.bounds.scale} * ${this.bounds.latCorrectionFactor}`);
       console.error(`Center coordinates: (${this.bounds.centerLat}, ${this.bounds.centerLng})`);
       console.error(`Scale: ${this.bounds.scale}, Correction factor: ${this.bounds.latCorrectionFactor}`);
       
       // Clamp to a reasonable range as a last resort
       const clampedX = Math.max(-MAX_COORDINATE, Math.min(MAX_COORDINATE, x));
       const clampedZ = Math.max(-MAX_COORDINATE, Math.min(MAX_COORDINATE, z));
+      console.error(`Clamped position: (${clampedX}, ${height}, ${clampedZ})`);
       return new THREE.Vector3(clampedX, height, clampedZ);
     }
     
