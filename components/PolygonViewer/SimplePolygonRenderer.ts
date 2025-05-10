@@ -2861,25 +2861,6 @@ export default class SimplePolygonRenderer {
         return;
       }
       
-      // Try to use the pre-computed navigation graph if available
-      let navigationGraph: Record<string, string[]> | null = null;
-      
-      try {
-        // Check if we have the navigation graph in window
-        if (typeof window !== 'undefined' && (window as any).__navigationGraph) {
-          console.log('Using cached navigation graph from window object');
-          navigationGraph = (window as any).__navigationGraph.simple;
-        }
-      } catch (error) {
-        console.warn('Error accessing navigation graph:', error);
-      }
-      
-      // If we couldn't get the pre-computed graph, build it on the fly
-      if (!navigationGraph) {
-        console.log('Building navigation graph on the fly');
-        navigationGraph = this.buildNavigationGraph();
-      }
-      
       // Check if we need to use water navigation
       const needsWaterNavigation = this.needsWaterNavigation(startPolygon, endPolygon);
       
@@ -2891,7 +2872,7 @@ export default class SimplePolygonRenderer {
         console.log(`Finding land path from polygon ${startPolygon.id} to ${endPolygon.id}`);
         
         // Find the shortest path through the land graph
-        const path = this.findShortestPath(navigationGraph, startPolygon.id, endPolygon.id);
+        const path = this.findShortestPath(startPolygon.id, endPolygon.id);
         
         if (!path || path.length === 0) {
           console.warn('No land path found between points, drawing direct path instead');
