@@ -114,15 +114,28 @@ def get_land_owners(tables) -> Dict[str, str]:
         log.error(f"Error fetching land owners: {e}")
         return {}
 
-def create_notification(tables, user: str, building_type: str, building_name: str, land_name: str) -> None:
+def create_notification(tables, user: str, building_type: str, building_name: str, land_id: str) -> None:
     """Create a notification for a user about a building assignment."""
     try:
+        # Get the land's historical name if available
+        land_name = land_id  # Default to ID if name not found
+        try:
+            land_records = tables['lands'].all(formula=f"{{LandId}}='{land_id}'")
+            if land_records and 'HistoricalName' in land_records[0]['fields']:
+                land_name = land_records[0]['fields']['HistoricalName']
+            elif land_records and 'EnglishName' in land_records[0]['fields']:
+                land_name = land_records[0]['fields']['EnglishName']
+        except Exception as land_error:
+            log.warning(f"Error fetching land name: {land_error}")
+            # Continue with land_id as the name
+        
         # Create notification content
         content = f"You are now responsible for maintaining the {building_type} on your land {land_name}"
         details = {
             "decree": "Land Owner Infrastructure Maintenance Responsibility",
             "building_type": building_type,
             "building_name": building_name,
+            "land_id": land_id,
             "land_name": land_name,
             "event_type": "building_assignment"
         }
@@ -137,7 +150,7 @@ def create_notification(tables, user: str, building_type: str, building_name: st
             "User": user
         })
         
-        log.info(f"Created notification for user {user} about {building_type} assignment")
+        log.info(f"Created notification for user {user} about {building_type} assignment on land {land_name}")
     except Exception as e:
         log.error(f"Error creating notification: {e}")
 
@@ -217,7 +230,7 @@ def assign_buildings_to_land_owners(dry_run: bool = False):
                 log.info(f"Assigned building {building_id} ({building_type}) to {land_owner}")
                 
                 # Create a notification for the land owner
-                create_notification(tables, land_owner, building_type, building_name, land_name)
+                create_notification(tables, land_owner, building_type, building_name, land_id)
                 
                 assigned_count += 1
             except Exception as e:
