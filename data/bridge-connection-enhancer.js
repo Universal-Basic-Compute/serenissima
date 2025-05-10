@@ -20,10 +20,36 @@ async function loadState() {
   try {
     if (fs.existsSync(stateFilePath)) {
       const data = fs.readFileSync(stateFilePath, 'utf8');
-      return JSON.parse(data);
+      const loadedState = JSON.parse(data);
+      
+      // Check if we need to migrate from old format
+      if (Array.isArray(loadedState.processedPolygons)) {
+        console.log('Migrating state from old format to new format...');
+        // Create new state structure
+        return {
+          processedPolygons: {
+            bridges: loadedState.processedPolygons,
+            docks: [],
+            buildings: []
+          },
+          generatedNames: loadedState.generatedNames || {
+            bridges: [],
+            docks: [],
+            buildings: []
+          }
+        };
+      }
+      
+      return loadedState;
     }
+    
+    // Return default state
     return {
-      processedPolygons: [],
+      processedPolygons: {
+        bridges: [],
+        docks: [],
+        buildings: []
+      },
       generatedNames: {
         bridges: [],
         docks: [],
@@ -32,8 +58,13 @@ async function loadState() {
     };
   } catch (error) {
     console.error('Error loading state:', error);
+    // Return default state
     return {
-      processedPolygons: [],
+      processedPolygons: {
+        bridges: [],
+        docks: [],
+        buildings: []
+      },
       generatedNames: {
         bridges: [],
         docks: [],
@@ -457,9 +488,9 @@ async function enhancePolygonData() {
       const file = files[polygonIndex];
       const polygonFilePath = path.join(dataDir, file);
       
-      // Check if this polygon has already been processed
-      if (state.processedPolygons.includes(polygonFilePath)) {
-        console.log(`Polygon ${file} has already been processed. Skipping.`);
+      // Check if this polygon has already been processed for the current mode
+      if (state.processedPolygons[mode] && state.processedPolygons[mode].includes(polygonFilePath)) {
+        console.log(`Polygon ${file} has already been processed for ${mode} mode. Skipping.`);
         continue;
       }
       
@@ -614,8 +645,11 @@ async function enhancePolygonData() {
       await savePolygonData(polygonFilePath, polygonData);
       console.log(`Enhanced ${mode} data saved for ${polygonFilePath}`);
       
-      // Mark this polygon as processed
-      state.processedPolygons.push(polygonFilePath);
+      // Mark this polygon as processed for the current mode
+      if (!state.processedPolygons[mode]) {
+        state.processedPolygons[mode] = [];
+      }
+      state.processedPolygons[mode].push(polygonFilePath);
       await saveState(state);
       
       console.log(`Polygon ${file} processed successfully`);
