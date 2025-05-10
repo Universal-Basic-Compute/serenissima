@@ -164,6 +164,9 @@ export class BuildingCacheService {
     // Add metadata to the group to indicate this is a fallback model
     group.userData.isFallbackModel = true;
     
+    // Add metadata to the group to indicate this is a fallback model
+    group.userData.isFallbackModel = true;
+    
     // Add a label to identify the building type
     const canvas = document.createElement('canvas');
     canvas.width = 256;

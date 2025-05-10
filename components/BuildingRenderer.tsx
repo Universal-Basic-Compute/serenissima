@@ -131,6 +131,9 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
       // Store reference for later cleanup
       buildingMeshesRef.current.set(normalizedBuilding.id, mesh);
       
+      // Ensure the building is at ground level
+      mesh.position.y = 0;
+      
       console.log(`Created building mesh for ${normalizedBuilding.id} at position:`, mesh.position);
       
       return mesh;

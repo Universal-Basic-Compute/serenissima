@@ -93,6 +93,36 @@ class DefaultBuildingRenderer implements IBuildingRenderer {
         );
       }
       
+      // Check if this is a fallback model and we should skip rendering it
+      if (model.userData && model.userData.isFallbackModel) {
+        console.log(`Skipping rendering of fallback model for ${building.id} of type ${building.type}`);
+        
+        // Create an empty group instead of using the fallback model
+        const emptyGroup = new THREE.Group();
+        
+        // Copy the position
+        emptyGroup.position.copy(position);
+        emptyGroup.position.y = 0;
+        
+        // Set rotation
+        emptyGroup.rotation.y = building.rotation || 0;
+        
+        // Add metadata to the model
+        emptyGroup.userData = {
+          buildingId: building.id,
+          type: building.type,
+          landId: building.land_id,
+          owner: building.owner || building.created_by,
+          position: building.position,
+          isEmptyPlaceholder: true
+        };
+        
+        // Add to scene
+        this.options.scene.add(emptyGroup);
+        
+        return emptyGroup;
+      }
+      
       model.position.copy(position);
       // Set the y position to 0 to place at ground level
       model.position.y = 0;
@@ -261,6 +291,22 @@ class DockRenderer implements IBuildingRenderer {
         if (child.name && (child.name.includes('grid') || child.name.includes('Grid'))) {
           // Make the grid invisible
           child.visible = false;
+        }
+        
+        // Enable shadows and configure materials for lighting
+        if (child instanceof THREE.Mesh) {
+          child.castShadow = true;
+          child.receiveShadow = true;
+          
+          if (child.material instanceof THREE.MeshStandardMaterial) {
+            child.material.needsUpdate = true;
+            child.material.roughness = 0.7;
+            child.material.metalness = 0.3;
+            child.material.emissive.set(0x202020);
+            // Ensure materials are properly configured for shadows
+            child.material.transparent = false; // Disable transparency for better shadows
+            child.material.depthWrite = true;   // Ensure depth is written
+          }
         }
       });
       
