@@ -1363,12 +1363,12 @@ export default class SimplePolygonRenderer {
                 transparent: true,
                 opacity: 1.0
               });
-              
+            
               // Store the original material if not already stored
               if (!intersected.userData.originalMaterial) {
                 intersected.userData.originalMaterial = intersected.material;
               }
-              
+            
               // Apply the highlight material
               intersected.material = highlightMaterial;
             }
@@ -1386,8 +1386,8 @@ export default class SimplePolygonRenderer {
           // Reset previously hovered point
           const hoveredPoint = [...this.bridgePointMarkers, ...this.dockPointMarkers].find(
             marker => marker instanceof THREE.Mesh && marker.userData && marker.userData.id === this.hoveredPointId
-          ) as THREE.Mesh | undefined;
-        
+          );
+      
           if (hoveredPoint && hoveredPoint instanceof THREE.Mesh) {
             // Restore original material if available
             if (hoveredPoint.userData.originalMaterial) {
@@ -1397,7 +1397,7 @@ export default class SimplePolygonRenderer {
               // Fallback to creating a new material
               const isBridge = hoveredPoint.userData.type.startsWith('bridge');
               const isWater = hoveredPoint.userData.type === 'dock-water';
-            
+          
               hoveredPoint.material = new THREE.MeshBasicMaterial({
                 color: isBridge ? 0xFF5500 : (isWater ? 0x0088CC : 0x00AAFF),
                 transparent: false
@@ -1467,7 +1467,7 @@ export default class SimplePolygonRenderer {
         // Reset previously hovered point
         const hoveredPoint = this.buildingPointMarkers.find(
           marker => marker instanceof THREE.Mesh && marker.userData && marker.userData.id === this.hoveredPointId
-        ) as THREE.Mesh | undefined;
+        );
       
         if (hoveredPoint && hoveredPoint instanceof THREE.Mesh) {
           // Restore original material if available
@@ -3608,7 +3608,7 @@ export default class SimplePolygonRenderer {
     // Find the closest building point marker to this position
     let closestMarker: THREE.Object3D | null = null;
     let minDistance = 0.5; // Maximum distance to consider (0.5 units)
-    
+      
     for (const marker of this.buildingPointMarkers) {
       // Check both Mesh objects and other Object3D types (like Group)
       if (marker.userData && marker.userData.id) {
