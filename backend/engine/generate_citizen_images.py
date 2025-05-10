@@ -81,15 +81,15 @@ def enhance_image_prompt(citizen: Dict) -> str:
     style_addition = ''
     
     if social_class == 'Patrician':
-        style_addition = 'Renaissance portrait style with realistic details. 3/4 view portrait composition with Rembrandt lighting. Rich color palette with deep reds and gold tones. --ar 1:1'
+        style_addition = 'Renaissance portrait style with realistic details. 3/4 view portrait composition with Rembrandt lighting. Rich color palette with deep reds and gold tones. Include English title in the image. --ar 1:1'
     elif social_class == 'Cittadini':
-        style_addition = 'Renaissance portrait style with realistic details. 3/4 view portrait composition with warm Rembrandt lighting. Warm amber tones. --ar 1:1'
+        style_addition = 'Renaissance portrait style with realistic details. 3/4 view portrait composition with warm Rembrandt lighting. Warm amber tones. Include English title in the image. --ar 1:1'
     elif social_class == 'Popolani':
-        style_addition = 'Renaissance portrait style with realistic details. 3/4 view portrait composition with directional lighting. Muted earth tones. --ar 1:1'
+        style_addition = 'Renaissance portrait style with realistic details. 3/4 view portrait composition with directional lighting. Muted earth tones. Include English title in the image. --ar 1:1'
     elif social_class in ['Facchini', 'Laborer']:
-        style_addition = 'Renaissance portrait style with realistic details. 3/4 view portrait composition with natural lighting. Subdued color palette. --ar 1:1'
+        style_addition = 'Renaissance portrait style with realistic details. 3/4 view portrait composition with natural lighting. Subdued color palette. Include English title in the image. --ar 1:1'
     else:
-        style_addition = 'Renaissance portrait style with realistic details. 3/4 view portrait composition. --ar 1:1'
+        style_addition = 'Renaissance portrait style with realistic details. 3/4 view portrait composition. Include English title in the image. --ar 1:1'
     
     # Combine original prompt with style guidelines
     return f"{base_prompt} {style_addition}"
