@@ -160,13 +160,63 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
         onClick={() => {
           // Focus camera on the market stall building
           if (camera) {
-            camera.position.set(45, 20, 12);
-            // If controls exist, update the target
-            const controls = (camera as any).userData?.controls;
-            if (controls && controls.target) {
-              controls.target.set(45, 0, 12);
+            // Get the actual camera - either from props or from the canvas element
+            const actualCamera = camera || (document.querySelector('canvas')?.__camera as THREE.PerspectiveCamera);
+            
+            if (actualCamera) {
+              console.log('Repositioning camera to view market stall');
+              
+              // Set camera position to look at the market stall coordinates
+              actualCamera.position.set(45.42623684734749 + 20, 20, 12.33922034185465 + 20);
+              
+              // Get the orbit controls
+              const controls = actualCamera.userData?.controls;
+              if (controls && controls.target) {
+                // Set the target to the market stall position
+                controls.target.set(45.42623684734749, 0, 12.33922034185465);
+                controls.update();
+                console.log('Camera controls updated to target market stall');
+              } else {
+                // If we can't find controls on the camera, try to find them on the scene
+                const sceneControls = scene?.userData?.controls;
+                if (sceneControls) {
+                  sceneControls.target.set(45.42623684734749, 0, 12.33922034185465);
+                  sceneControls.update();
+                  console.log('Scene controls updated to target market stall');
+                } else {
+                  // Last resort - try to find controls on the document
+                  const canvasElement = document.querySelector('canvas');
+                  if (canvasElement) {
+                    const canvasControls = (canvasElement as any).__controls;
+                    if (canvasControls) {
+                      canvasControls.target.set(45.42623684734749, 0, 12.33922034185465);
+                      canvasControls.update();
+                      console.log('Canvas controls updated to target market stall');
+                    }
+                  }
+                }
+              }
+              
+              // Force a render update
+              if (scene) {
+                const renderer = scene.userData?.renderer;
+                if (renderer) {
+                  renderer.render(scene, actualCamera);
+                  console.log('Forced renderer update');
+                }
+              }
+              
+              console.log('Camera repositioned to:', actualCamera.position);
+              console.log('Looking at market stall position:', {
+                x: 45.42623684734749,
+                y: 0,
+                z: 12.33922034185465
+              });
+            } else {
+              console.warn('Could not find camera to reposition');
             }
-            console.log('Camera repositioned to view market stall');
+          } else {
+            console.warn('Camera not available for repositioning');
           }
         }}
         className="px-4 py-2 bg-blue-600 text-white rounded-md shadow-md hover:bg-blue-700 transition-colors flex items-center space-x-2"
