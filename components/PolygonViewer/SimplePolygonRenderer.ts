@@ -86,6 +86,22 @@ export default class SimplePolygonRenderer {
       });
     }
     
+    // Add event listener for regenerating building markers
+    if (typeof window !== 'undefined') {
+      window.addEventListener('regenerateBuildingMarkers', () => {
+        console.log('Received regenerateBuildingMarkers event');
+        // Clear existing building markers
+        this.clearBuildingPointMarkers();
+        // Create new building markers
+        this.createBuildingPoints();
+        // Force them to be visible
+        this.buildingPointMarkers.forEach(marker => {
+          marker.visible = true;
+        });
+        console.log(`Regenerated ${this.buildingPointMarkers.length} building markers`);
+      });
+    }
+    
     // Also try to get users from UserService
     try {
       const userService = getUserService();
@@ -1552,6 +1568,13 @@ export default class SimplePolygonRenderer {
     // Reset rendering flags
     this.hasRenderedCoatOfArms = false;
     this.isRenderingCoatOfArms = false;
+    
+    // Remove the regenerateBuildingMarkers event listener
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('regenerateBuildingMarkers', () => {
+        console.log('Removed regenerateBuildingMarkers event listener');
+      });
+    }
     
     // Dispose textures
     if (this.sandTexture) {
