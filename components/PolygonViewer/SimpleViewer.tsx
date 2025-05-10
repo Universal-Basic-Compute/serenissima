@@ -548,7 +548,7 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
       resourceDisplayRef.current.setActive(shouldBeActive);
     
       // If activating resources view, refresh resources
-      if (shouldBeActive && !resourceDisplayRef.current.isActive) {
+      if (shouldBeActive) {
         resourceDisplayRef.current.refreshResources();
       }
     }
