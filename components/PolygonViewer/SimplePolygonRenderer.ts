@@ -776,6 +776,8 @@ export default class SimplePolygonRenderer {
       
       console.log(`Created ${this.bridgePointMarkers.length} bridge markers and ${this.dockPointMarkers.length} dock markers`);
     } else if (activeView === 'buildings') {
+      console.log('Switching to buildings view - preparing to show building points');
+      
       // Hide coat of arms sprites in buildings view
       Object.values(this.coatOfArmsSprites).forEach(sprite => {
         sprite.visible = false;
@@ -786,10 +788,20 @@ export default class SimplePolygonRenderer {
       this.dockPointMarkers.forEach(marker => marker.visible = false);
       
       // Create and show building points
+      console.log('Calling createBuildingPoints() method');
       this.createBuildingPoints();
+      
+      console.log(`Setting visibility for ${this.buildingPointMarkers.length} building point markers`);
       this.buildingPointMarkers.forEach(marker => {
         marker.visible = true;
+        console.log('Set building point marker to visible');
       });
+      
+      // Force a scene update if possible
+      if (this.scene.userData && this.scene.userData.renderer) {
+        console.log('Forcing scene update');
+        this.scene.userData.renderer.render(this.scene, this.camera);
+      }
       
       console.log(`Created ${this.buildingPointMarkers.length} building point markers for buildings view`);
     } else {
@@ -1960,7 +1972,7 @@ export default class SimplePolygonRenderer {
    * Create building point markers for buildings view
    */
   public createBuildingPoints() {
-    console.log('Creating building points');
+    console.log('Creating building points - START');
     
     // Clear any existing markers first
     this.clearBuildingPointMarkers();
@@ -2001,8 +2013,12 @@ export default class SimplePolygonRenderer {
       // Skip if polygon has no building points
       if (!polygon.buildingPoints || !Array.isArray(polygon.buildingPoints) || polygon.buildingPoints.length === 0) return;
       
+      console.log(`Processing ${polygon.buildingPoints.length} building points for polygon ${polygon.id}`);
+      
       polygon.buildingPoints.forEach((point, index) => {
         try {
+          console.log(`Building point ${index} data:`, point);
+          
           const normalizedCoord = normalizeCoordinates(
             [point],
             this.bounds.centerLat,
@@ -2010,6 +2026,8 @@ export default class SimplePolygonRenderer {
             this.bounds.scale,
             this.bounds.latCorrectionFactor
           )[0];
+          
+          console.log(`Normalized coordinates for point ${index}:`, normalizedCoord);
           
           // Create a small sphere for the building point
           const geometry = new THREE.SphereGeometry(0.25, 12, 12); // Small size, smooth sphere
@@ -2037,6 +2055,14 @@ export default class SimplePolygonRenderer {
     });
     
     console.log(`Created ${this.buildingPointMarkers.length} building point markers`);
+    
+    // Make sure all markers are visible
+    this.buildingPointMarkers.forEach(marker => {
+      marker.visible = true;
+      console.log(`Set marker visibility to true`);
+    });
+    
+    console.log('Creating building points - END');
   }
 
   // Add this method to save the updated polygon data

@@ -166,6 +166,27 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
       .then(response => response.json())
       .then(data => {
         if (data.polygons) {
+          // Check for building points in the loaded polygons
+          let polygonsWithBuildingPoints = 0;
+          let totalBuildingPoints = 0;
+          
+          data.polygons.forEach(polygon => {
+            if (polygon.buildingPoints && Array.isArray(polygon.buildingPoints) && polygon.buildingPoints.length > 0) {
+              polygonsWithBuildingPoints++;
+              totalBuildingPoints += polygon.buildingPoints.length;
+            }
+          });
+          
+          console.log(`Loaded ${data.polygons.length} polygons`);
+          console.log(`Found ${polygonsWithBuildingPoints} polygons with building points (${totalBuildingPoints} total points)`);
+          
+          // Log a sample of the first polygon with building points for debugging
+          const samplePolygon = data.polygons.find(p => p.buildingPoints && p.buildingPoints.length > 0);
+          if (samplePolygon) {
+            console.log('Sample polygon with building points:', samplePolygon.id);
+            console.log('First building point:', samplePolygon.buildingPoints[0]);
+          }
+          
           setPolygons(data.polygons);
         }
         setLoading(false);
