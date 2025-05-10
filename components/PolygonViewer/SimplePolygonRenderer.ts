@@ -3942,6 +3942,40 @@ export default class SimplePolygonRenderer {
   }
   
   /**
+   * Add a bridge icon to visualize a bridge in the path
+   */
+  private addBridgeIcon(start: THREE.Vector3, end: THREE.Vector3): void {
+    // Calculate the midpoint between start and end
+    const midpoint = new THREE.Vector3().addVectors(start, end).multiplyScalar(0.5);
+    
+    // Calculate direction vector
+    const direction = new THREE.Vector3().subVectors(end, start).normalize();
+    
+    // Create a simple bridge shape
+    const bridgeGeometry = new THREE.BoxGeometry(0.5, 0.1, 0.2);
+    const bridgeMaterial = new THREE.MeshBasicMaterial({ 
+      color: 0xFFAA00, // Orange color for bridges
+      transparent: true,
+      opacity: 0.9
+    });
+    const bridge = new THREE.Mesh(bridgeGeometry, bridgeMaterial);
+    
+    // Position the bridge
+    bridge.position.copy(midpoint);
+    bridge.position.y += 0.2; // Raise slightly above the path
+    
+    // Orient the bridge along the path
+    const angle = Math.atan2(direction.z, direction.x);
+    bridge.rotation.y = -angle;
+    
+    // Add to scene
+    this.scene.add(bridge);
+    
+    // Store for cleanup
+    this.pathVisualization.push(bridge);
+  }
+  
+  /**
    * Build a navigation graph on the fly
    */
   private buildNavigationGraph(): Record<string, string[]> {
@@ -4553,7 +4587,7 @@ export default class SimplePolygonRenderer {
   }
   
   /**
-   * Visualize a path through multiple polygons with improved bridge selection
+   * Visualize a path through multiple polygons with improved bridge visualization
    */
   private visualizePath(path: string[], start: {lat: number, lng: number}, end: {lat: number, lng: number}): void {
     // If path is empty, return
@@ -4568,142 +4602,53 @@ export default class SimplePolygonRenderer {
     const startPoint = this.measurementPoints[0];
     pathPoints.push(startPoint);
     
-    // Try to get the enhanced navigation graph
-    let enhancedGraph: any = null;
-    try {
-      if (typeof window !== 'undefined' && (window as any).__navigationGraph) {
-        enhancedGraph = (window as any).__navigationGraph.enhanced;
-        console.log('Using enhanced navigation graph for path visualization');
-      }
-    } catch (error) {
-      console.warn('Error accessing enhanced navigation graph:', error);
-    }
+    // Get bridge information for the path using NavigationGraphService
+    const navigationGraphService = NavigationGraphService.getInstance();
+    const bridges = navigationGraphService.getBridgesForPath(path);
     
-    // For each segment of the path (polygon to polygon)
-    for (let i = 0; i < path.length - 1; i++) {
-      const currentPolygonId = path[i];
-      const nextPolygonId = path[i + 1];
-      
-      console.log(`Finding bridge between ${currentPolygonId} and ${nextPolygonId}`);
-      
-      // Find the current polygon
-      const currentPolygon = this.polygons.find(p => p.id === currentPolygonId);
-      if (!currentPolygon) {
-        console.warn(`Polygon ${currentPolygonId} not found`);
-        
-        // Try to use centroids as waypoints
-        this.addCentroidWaypoints(currentPolygonId, nextPolygonId, pathPoints);
-        continue;
-      }
-      
-      // Check if the polygon has bridge points
-      if (!currentPolygon.bridgePoints || !Array.isArray(currentPolygon.bridgePoints) || currentPolygon.bridgePoints.length === 0) {
-        console.warn(`Polygon ${currentPolygonId} has no bridge points`);
-        
-        // Try to use centroids as waypoints
-        this.addCentroidWaypoints(currentPolygonId, nextPolygonId, pathPoints);
-        continue;
-      }
-      
-      // Find all bridge points connecting to the next polygon
-      const bridgePoints = currentPolygon.bridgePoints.filter(bp => 
-        bp.connection && bp.connection.targetPolygonId === nextPolygonId
-      );
-      
-      if (bridgePoints.length > 0) {
-        console.log(`Found ${bridgePoints.length} bridge points from ${currentPolygonId} to ${nextPolygonId}`);
-        
-        // If we have multiple bridge points, find the one that's closest to the direct path
-        let bestBridgePoint = bridgePoints[0];
-        let bestScore = Infinity;
-        
-        for (const bridgePoint of bridgePoints) {
-          // Verify that this bridge actually connects to the next polygon in our path
-          if (bridgePoint.connection.targetPolygonId !== nextPolygonId) {
-            console.log(`Skipping bridge point that connects to ${bridgePoint.connection.targetPolygonId} instead of ${nextPolygonId}`);
-            continue;
-          }
-          
-          // Convert bridge point to normalized coordinates
-          const edgeCoord = normalizeCoordinates(
-            [bridgePoint.edge],
+    console.log(`Got ${bridges.length} bridges for path visualization`);
+    
+    // If we have bridges, use them to create waypoints
+    if (bridges.length > 0) {
+      // For each bridge in the path
+      bridges.forEach((bridge, index) => {
+        if (bridge.isVirtual) {
+          // For virtual bridges, use polygon centroids as waypoints
+          this.addCentroidWaypoints(bridge.fromPolygonId, bridge.toPolygonId, pathPoints);
+        } else if (bridge.sourcePoint && bridge.targetPoint) {
+          // For real bridges with defined points, add them to the path
+          // Add source bridge point
+          const sourceCoord = normalizeCoordinates(
+            [bridge.sourcePoint],
             this.bounds.centerLat,
             this.bounds.centerLng,
             this.bounds.scale,
             this.bounds.latCorrectionFactor
           )[0];
           
-          // Create 3D point for the bridge
-          const bridgePos = new THREE.Vector3(edgeCoord.x, 0, -edgeCoord.y);
+          const sourcePosition = new THREE.Vector3(sourceCoord.x, 0.15, -sourceCoord.y);
+          pathPoints.push(sourcePosition);
           
-          // Calculate score based on previous point
-          const prevPoint = pathPoints[pathPoints.length - 1];
-          const score = prevPoint.distanceTo(bridgePos);
+          // Add target bridge point
+          const targetCoord = normalizeCoordinates(
+            [bridge.targetPoint],
+            this.bounds.centerLat,
+            this.bounds.centerLng,
+            this.bounds.scale,
+            this.bounds.latCorrectionFactor
+          )[0];
           
-          console.log(`Bridge point score: ${score}`);
-          
-          if (score < bestScore) {
-            bestScore = score;
-            bestBridgePoint = bridgePoint;
-          }
+          const targetPosition = new THREE.Vector3(targetCoord.x, 0.15, -targetCoord.y);
+          pathPoints.push(targetPosition);
+        } else {
+          // Fallback if bridge points are missing
+          this.addCentroidWaypoints(bridge.fromPolygonId, bridge.toPolygonId, pathPoints);
         }
-        
-        console.log(`Selected best bridge point with score ${bestScore}`);
-        
-        // Add the best bridge point to the path
-        const edgeCoord = normalizeCoordinates(
-          [bestBridgePoint.edge],
-          this.bounds.centerLat,
-          this.bounds.centerLng,
-          this.bounds.scale,
-          this.bounds.latCorrectionFactor
-        )[0];
-        
-        // Create a 3D point for the bridge
-        const bridgePosition = new THREE.Vector3(edgeCoord.x, 0.15, -edgeCoord.y);
-        pathPoints.push(bridgePosition);
-        
-        // If there's a connection point, add it too
-        if (bestBridgePoint.connection && bestBridgePoint.connection.targetPoint) {
-          // Verify again that this connection goes to the next polygon
-          if (bestBridgePoint.connection.targetPolygonId === nextPolygonId) {
-            const targetCoord = normalizeCoordinates(
-              [bestBridgePoint.connection.targetPoint],
-              this.bounds.centerLat,
-              this.bounds.centerLng,
-              this.bounds.scale,
-              this.bounds.latCorrectionFactor
-            )[0];
-            
-            // Create a 3D point for the target
-            const targetPosition = new THREE.Vector3(targetCoord.x, 0.15, -targetCoord.y);
-            pathPoints.push(targetPosition);
-          } else {
-            console.warn(`Bridge connection target polygon ${bestBridgePoint.connection.targetPolygonId} doesn't match next polygon ${nextPolygonId}`);
-          }
-        }
-      } else {
-        console.warn(`No bridge found between ${currentPolygonId} and ${nextPolygonId}`);
-        
-        // Check if these polygons are adjacent (share a border)
-        const areAdjacent = this.arePolygonsAdjacent(currentPolygonId, nextPolygonId);
-        
-        if (areAdjacent) {
-          console.log(`Polygons ${currentPolygonId} and ${nextPolygonId} are adjacent, creating virtual bridge`);
-          
-          // Create a virtual bridge between the polygons using their closest points
-          const virtualBridgePoints = this.findClosestPointsBetweenPolygons(currentPolygonId, nextPolygonId);
-          
-          if (virtualBridgePoints) {
-            // Add the virtual bridge points to the path
-            pathPoints.push(virtualBridgePoints.point1);
-            pathPoints.push(virtualBridgePoints.point2);
-            continue;
-          }
-        }
-        
-        // If not adjacent or couldn't find closest points, use centroids as waypoints
-        this.addCentroidWaypoints(currentPolygonId, nextPolygonId, pathPoints);
+      });
+    } else {
+      // If no bridges found, fall back to using centroids
+      for (let i = 0; i < path.length - 1; i++) {
+        this.addCentroidWaypoints(path[i], path[i+1], pathPoints);
       }
     }
     
@@ -4750,6 +4695,19 @@ export default class SimplePolygonRenderer {
       
       // Store reference for cleanup
       this.pathVisualization.push(marker);
+    }
+    
+    // Add bridge icons at bridge points
+    if (bridges.length > 0) {
+      bridges.forEach((bridge, index) => {
+        if (!bridge.isVirtual && bridge.sourcePoint && bridge.targetPoint) {
+          // Create a visual indicator for the bridge
+          this.addBridgeIcon(
+            pathPoints[(index * 2) + 1], // Source bridge point
+            pathPoints[(index * 2) + 2]  // Target bridge point
+          );
+        }
+      });
     }
   }
   

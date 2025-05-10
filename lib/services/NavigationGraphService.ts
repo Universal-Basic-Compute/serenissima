@@ -202,16 +202,44 @@ export class NavigationGraphService {
         );
         
         if (connectingBridges.length > 0) {
-          // Add the first bridge (or you could implement logic to choose the best bridge)
+          // Add all connecting bridges between these polygons
+          connectingBridges.forEach(bridge => {
+            bridges.push({
+              fromPolygonId: currentPolygonId,
+              toPolygonId: nextPolygonId,
+              bridgeData: bridge,
+              // Include the actual bridge points for visualization
+              sourcePoint: bridge.edge,
+              targetPoint: bridge.connection?.targetPoint
+            });
+          });
+        } else {
+          // If no direct bridge found, check for indirect connections
+          // This handles cases where the navigation graph knows polygons are connected
+          // but doesn't have explicit bridge data
+          console.log(`No direct bridge found between ${currentPolygonId} and ${nextPolygonId}, checking for implicit connection`);
+          
+          // Add a virtual bridge connection based on polygon proximity
           bridges.push({
             fromPolygonId: currentPolygonId,
             toPolygonId: nextPolygonId,
-            bridgeData: connectingBridges[0]
+            isVirtual: true,
+            // We don't have actual bridge points, so this will need to be handled
+            // by the visualization code
           });
         }
+      } else {
+        // If no bridges defined at all, add a virtual connection
+        console.log(`No bridges defined for polygon ${currentPolygonId}, adding virtual connection`);
+        bridges.push({
+          fromPolygonId: currentPolygonId,
+          toPolygonId: nextPolygonId,
+          isVirtual: true
+        });
       }
     }
     
+    console.log(`Found ${bridges.length} bridges for path with ${path.length} polygons`);
     return bridges;
   }
   
