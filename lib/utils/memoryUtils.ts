@@ -81,7 +81,10 @@ export function disposeMaterial(material: THREE.Material): void {
     // Handle PBR specific maps
     if (material instanceof THREE.MeshStandardMaterial) {
       if (material.roughnessMap) material.roughnessMap.dispose();
-      if (material.metalnessMap) material.metalnessMap.dispose();
+      // Vérifier explicitement que c'est un MeshStandardMaterial avant d'accéder à metalnessMap
+      if ('metalnessMap' in material && material.metalnessMap) {
+        material.metalnessMap.dispose();
+      }
     }
     if (material.alphaMap) material.alphaMap.dispose();
     if (material.envMap) material.envMap.dispose();
@@ -92,15 +95,25 @@ export function disposeMaterial(material: THREE.Material): void {
 }
 
 /**
+ * Interface pour le type de performance.memory
+ */
+interface MemoryInfo {
+  jsHeapSizeLimit: number;
+  totalJSHeapSize: number;
+  usedJSHeapSize: number;
+}
+
+/**
  * Monitor memory usage and log warnings
  */
 export function startMemoryMonitoring(): () => void {
-  if (typeof performance === 'undefined' || !performance.memory) {
+  // Vérifier si performance.memory est disponible (uniquement dans Chrome)
+  if (typeof performance === 'undefined' || !(performance as any).memory) {
     console.warn('Memory monitoring not supported in this browser');
     return () => {}; // Return empty cleanup function
   }
   
-  const memoryInfo = performance.memory;
+  const memoryInfo = (performance as any).memory as MemoryInfo;
   const warningThreshold = memoryInfo.jsHeapSizeLimit * 0.7; // 70% of limit
   
   const checkMemory = () => {
