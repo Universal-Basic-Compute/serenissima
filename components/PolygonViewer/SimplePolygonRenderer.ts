@@ -1682,7 +1682,7 @@ export default class SimplePolygonRenderer {
             )[0];
             
             // Create a marker for the bridge point
-            const geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+            const geometry = new THREE.BoxGeometry(0.35, 0.35, 0.35); // Reduced from 0.5 (30% smaller)
             
             const marker = new THREE.Mesh(geometry, bridgeMaterial);
             marker.position.set(normalizedCoord.x, 1, -normalizedCoord.y);
@@ -1868,7 +1868,7 @@ export default class SimplePolygonRenderer {
             )[0];
             
             // Create a smaller sphere marker for bridge points
-            const geometry = new THREE.SphereGeometry(0.3, 12, 12); // Smaller size (was 0.5) and more segments for smoother spheres
+            const geometry = new THREE.SphereGeometry(0.21, 12, 12); // Reduced from 0.3 (30% smaller)
             
             const marker = new THREE.Mesh(geometry, bridgeMaterial);
             marker.position.set(normalizedCoord.x, 0.3, -normalizedCoord.y); // Lower position (was 0.5)
