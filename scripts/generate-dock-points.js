@@ -94,7 +94,16 @@ function extendLine(center, point, extensionDistance) {
 
 // Helper function to check if a point is inside any polygon
 function isPointInAnyPolygon(point, polygons) {
+  if (!polygons || !Array.isArray(polygons)) {
+    return false;
+  }
+  
   for (const polygon of polygons) {
+    // Skip invalid polygons
+    if (!polygon || !polygon.coordinates || !Array.isArray(polygon.coordinates) || polygon.coordinates.length < 3) {
+      continue;
+    }
+    
     if (isPointInPolygon(point, polygon.coordinates)) {
       return true;
     }
@@ -104,6 +113,11 @@ function isPointInAnyPolygon(point, polygons) {
 
 // Helper function to check if a point is inside a polygon
 function isPointInPolygon(point, polygon) {
+  // Check if polygon is valid
+  if (!polygon || !Array.isArray(polygon) || polygon.length < 3) {
+    return false; // Can't be inside an invalid polygon
+  }
+  
   let inside = false;
   for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
     const xi = polygon[i].lng;
