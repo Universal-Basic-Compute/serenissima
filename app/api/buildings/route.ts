@@ -279,7 +279,7 @@ export async function GET(request: Request) {
     console.log('Adding debug buildings regardless of Airtable data');
       
     // Add your specific building for debugging - add multiple copies at different positions
-    const debugBuilding1 = {
+    const debugBuilding1: Building = {
       id: 'building_1',
       type: 'market-stall',
       land_id: 'polygon-1746052711032',
@@ -288,12 +288,12 @@ export async function GET(request: Request) {
         lng: 12.3358
       },
       rotation: 0,
-      connection_points: [], // Add empty connection points array to fix type error
-      created_by: 'ConsiglioDeiDieci',
+      variant: 'model',
+      owner: 'ConsiglioDeiDieci',
       created_at: '2025-05-10T02:07:00Z'
     };
       
-    const debugBuilding2 = {
+    const debugBuilding2: Building = {
       id: 'building_2',
       type: 'market-stall',
       land_id: 'polygon-1746052711033',
@@ -302,12 +302,12 @@ export async function GET(request: Request) {
         lng: 12.3368
       },
       rotation: Math.PI / 4, // 45 degrees rotation
-      connection_points: [], // Add empty connection points array to fix type error
-      created_by: 'ConsiglioDeiDieci',
+      variant: 'model',
+      owner: 'ConsiglioDeiDieci',
       created_at: '2025-05-10T02:07:00Z'
     };
       
-    const debugBuilding3 = {
+    const debugBuilding3: Building = {
       id: 'building_3',
       type: 'market-stall',
       land_id: 'polygon-1746052711034',
@@ -316,13 +316,13 @@ export async function GET(request: Request) {
         lng: 12.3348
       },
       rotation: Math.PI / 2, // 90 degrees rotation
-      connection_points: [], // Add empty connection points array to fix type error
-      created_by: 'ConsiglioDeiDieci',
+      variant: 'model',
+      owner: 'ConsiglioDeiDieci',
       created_at: '2025-05-10T02:07:00Z'
     };
       
     // Add a fourth building at a different position
-    const debugBuilding4 = {
+    const debugBuilding4: Building = {
       id: 'building_4',
       type: 'market-stall',
       land_id: 'polygon-1746052711035',
@@ -331,15 +331,15 @@ export async function GET(request: Request) {
         lng: 12.3378
       },
       rotation: Math.PI, // 180 degrees rotation
-      connection_points: [], // Add empty connection points array to fix type error
-      created_by: 'ConsiglioDeiDieci',
+      variant: 'model',
+      owner: 'ConsiglioDeiDieci',
       created_at: '2025-05-10T02:07:00Z'
     };
       
     console.log('Adding debug buildings');
       
     // Add a fifth building with lat/lng coordinates instead of x/y/z
-    const debugBuilding5 = {
+    const debugBuilding5: Building = {
       id: 'building_5',
       type: 'house',
       land_id: 'polygon-1746052711036',
@@ -348,8 +348,8 @@ export async function GET(request: Request) {
         lng: 12.3362
       },
       rotation: 0,
-      connection_points: [],
-      created_by: 'ConsiglioDeiDieci',
+      variant: 'model',
+      owner: 'ConsiglioDeiDieci',
       created_at: '2025-05-10T02:07:00Z'
     };
     
