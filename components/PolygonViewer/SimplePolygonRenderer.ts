@@ -1470,7 +1470,7 @@ export default class SimplePolygonRenderer {
           marker => marker instanceof THREE.Mesh && marker.userData && marker.userData.id === this.hoveredPointId
         );
       
-        if (hoveredPoint && hoveredPoint instanceof THREE.Mesh<THREE.BufferGeometry, THREE.Material | THREE.Material[]>) {
+        if (hoveredPoint && hoveredPoint instanceof THREE.Mesh) {
           // Restore original material if available
           if (hoveredPoint.userData.originalMaterial) {
             hoveredPoint.material = hoveredPoint.userData.originalMaterial;
