@@ -228,7 +228,7 @@ export class ResourceDisplayManager {
         this.resources = [];
       }
       
-      console.log(`Loaded ${this.resources.length} resources${walletAddress ? ` for wallet ${walletAddress}` : ''}`);
+      console.log(`Loaded ${this.resources.length} resources${username ? ` for user ${username}` : ''}`);
       
       // Log a sample resource for debugging
       if (this.resources.length > 0) {
