@@ -408,7 +408,7 @@ export class CanalFacade {
       // For lower curvature values, we can reduce the curve's influence
       // by interpolating between the original points and the curve points
       if (curvature < 0.8) {
-        const originalPoints = [...positions];
+        const originalPoints = positions.slice();
         const curvePoints = curve.getPoints(positions.length * 10);
         
         // Create a custom set of points that blend between straight lines and curves
