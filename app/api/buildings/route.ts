@@ -155,6 +155,7 @@ export async function GET(request: Request) {
         z: 12 
       },
       rotation: 0,
+      connection_points: [], // Add empty connection points array to fix type error
       created_by: 'ConsiglioDeiDieci',
       created_at: '2025-05-10T02:07:00Z'
     };
@@ -169,6 +170,7 @@ export async function GET(request: Request) {
         z: 22
       },
       rotation: Math.PI / 4, // 45 degrees rotation
+      connection_points: [], // Add empty connection points array to fix type error
       created_by: 'ConsiglioDeiDieci',
       created_at: '2025-05-10T02:07:00Z'
     };
@@ -183,6 +185,7 @@ export async function GET(request: Request) {
         z: 2
       },
       rotation: Math.PI / 2, // 90 degrees rotation
+      connection_points: [], // Add empty connection points array to fix type error
       created_by: 'ConsiglioDeiDieci',
       created_at: '2025-05-10T02:07:00Z'
     };
