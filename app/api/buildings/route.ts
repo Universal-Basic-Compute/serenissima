@@ -145,7 +145,7 @@ export async function GET(request: Request) {
     console.log('Query parameters:', { type });
     
     // Fetch records from Airtable
-    const records = await new Promise((resolve, reject) => {
+    const records = await new Promise<any[]>((resolve, reject) => {
       const allRecords = [];
       
       base('Buildings')
