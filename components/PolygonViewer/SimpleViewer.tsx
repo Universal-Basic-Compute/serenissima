@@ -449,17 +449,29 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
       if (polygons && polygons.length > 0) {
         let bridgePointCount = 0;
         let dockPointCount = 0;
+        let polygonsWithBridgePoints = 0;
+        let polygonsWithDockPoints = 0;
         
         polygons.forEach(polygon => {
-          if (polygon.bridgePoints && Array.isArray(polygon.bridgePoints)) {
+          if (polygon.bridgePoints && Array.isArray(polygon.bridgePoints) && polygon.bridgePoints.length > 0) {
             bridgePointCount += polygon.bridgePoints.length;
+            polygonsWithBridgePoints++;
           }
-          if (polygon.dockPoints && Array.isArray(polygon.dockPoints)) {
+          if (polygon.dockPoints && Array.isArray(polygon.dockPoints) && polygon.dockPoints.length > 0) {
             dockPointCount += polygon.dockPoints.length;
+            polygonsWithDockPoints++;
           }
         });
         
-        console.log(`Found ${bridgePointCount} bridge points and ${dockPointCount} dock points in ${polygons.length} polygons`);
+        console.log(`Found ${bridgePointCount} bridge points in ${polygonsWithBridgePoints} polygons`);
+        console.log(`Found ${dockPointCount} dock points in ${polygonsWithDockPoints} polygons`);
+        
+        // Log a sample of the first polygon with dock points for debugging
+        const samplePolygon = polygons.find(p => p.dockPoints && p.dockPoints.length > 0);
+        if (samplePolygon) {
+          console.log('Sample polygon with dock points:', samplePolygon.id);
+          console.log('First dock point:', samplePolygon.dockPoints[0]);
+        }
       } else {
         console.warn('No polygons available to check for bridge/dock points');
       }
@@ -586,11 +598,15 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
         <div className="absolute bottom-4 right-4 bg-black/70 text-white p-3 rounded-lg shadow-lg">
           <h3 className="text-lg font-serif mb-2">Transport Points</h3>
           <div className="flex items-center mb-1">
-            <div className="w-4 h-4 rounded-full bg-[#00AAFF] mr-2"></div>
-            <span>Dock Points</span>
+            <div className="w-4 h-4 rounded-full bg-[#00FF00] mr-2"></div>
+            <span>Dock Edge Points</span>
+          </div>
+          <div className="flex items-center mb-1">
+            <div className="w-4 h-4 rounded-full bg-[#0000FF] mr-2"></div>
+            <span>Dock Water Points</span>
           </div>
           <div className="flex items-center">
-            <div className="w-4 h-4 rounded-full bg-[#FF5500] mr-2"></div>
+            <div className="w-4 h-4 rounded-full bg-[#FF0000] mr-2"></div>
             <span>Bridge Points</span>
           </div>
         </div>
