@@ -611,8 +611,8 @@ export default class PolygonRenderer {
           }
           
           // Set the building position to a more appropriate height
-          // Increase from 0.2 to 1.0 to ensure buildings are visible above the land
-          object.position.y = 1.0; // Increased from 0.2 to 1.0
+          // Increase from 1.0 to 3.0 to ensure buildings are clearly visible above the land
+          object.position.y = 3.0; // Increased from 1.0 to 3.0
           
           // Force material update
           if (object.material) {
