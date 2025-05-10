@@ -5,6 +5,22 @@ import { getUserService } from '../../lib/services/UserService';
 import { eventBus } from '@/lib/eventBus';
 import { EventTypes } from '@/lib/eventTypes';
 
+/**
+ * Define Polygon interface for type safety
+ */
+interface Polygon {
+  id: string;
+  coordinates: {lat: number, lng: number}[];
+  centroid?: {lat: number, lng: number};
+  bridgePoints?: any[];
+  dockPoints?: any[];
+  buildingPoints?: any[];
+  historicalName?: string;
+  englishName?: string;
+  owner?: string;
+  User?: string;
+}
+
 interface SimplePolygonRendererProps {
   scene: THREE.Scene;
   polygons: any[];
@@ -3285,22 +3301,6 @@ export default class SimplePolygonRenderer {
     return graph;
   }
   
-  /**
-   * Define Polygon interface for type safety
-   */
-  interface Polygon {
-    id: string;
-    coordinates: {lat: number, lng: number}[];
-    centroid?: {lat: number, lng: number};
-    bridgePoints?: any[];
-    dockPoints?: any[];
-    buildingPoints?: any[];
-    historicalName?: string;
-    englishName?: string;
-    owner?: string;
-    User?: string;
-  }
-
   /**
    * Find the polygon containing a point with improved detection
    */
