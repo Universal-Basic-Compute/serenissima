@@ -61,7 +61,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className }) => {
       const userToFetch = username || DEFAULT_USERNAME;
       
       const response = await fetch(
-        `${KINOS_BACKEND_BASE_URL}/notifications/${userToFetch}?since=${lastFetchTime}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/notifications?user=${userToFetch}&since=${lastFetchTime}`,
         {
           method: 'GET',
           headers: {
@@ -107,7 +107,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className }) => {
   const markNotificationsAsRead = async (notificationIds: string[]) => {
     try {
       const response = await fetch(
-        `${KINOS_BACKEND_BASE_URL}/notifications/mark-read`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/notifications/mark-read`,
         {
           method: 'POST',
           headers: {
