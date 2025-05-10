@@ -1,4 +1,4 @@
-import { fetchResources, ResourceNode } from '../resourceUtils';
+import { fetchResources, ResourceNode, fetchResourceCounts } from '../resourceUtils';
 
 export interface Resource {
   id: string;
@@ -218,5 +218,29 @@ export class ResourceService {
     console.log('Clearing ResourceService cache');
     this.resourcesCache = null;
     this.categoriesCache = null;
+  }
+  
+  /**
+   * Get resource counts for a specific owner
+   */
+  public async getResourceCounts(owner?: string): Promise<Resource[]> {
+    try {
+      const resourceCounts = await fetchResourceCounts(owner);
+      
+      // Convert to Resource objects
+      return resourceCounts.map(resource => ({
+        id: resource.id,
+        name: resource.name,
+        category: resource.category,
+        subcategory: resource.subcategory,
+        description: resource.description,
+        rarity: resource.rarity,
+        icon: resource.icon || 'default.png',
+        amount: resource.count
+      }));
+    } catch (error) {
+      console.error('Error getting resource counts:', error);
+      return [];
+    }
   }
 }

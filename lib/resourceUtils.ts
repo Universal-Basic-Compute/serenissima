@@ -38,6 +38,32 @@ export interface ResourceNode {
   // Add any other properties that might be in the resource files
 }
 
+// Add this function to fetch resource counts
+export async function fetchResourceCounts(owner?: string): Promise<any[]> {
+  try {
+    const url = new URL('/api/resources/counts', window.location.origin);
+    if (owner) {
+      url.searchParams.append('owner', owner);
+    }
+    
+    const response = await fetch(url.toString());
+    if (!response.ok) {
+      throw new Error(`Failed to fetch resource counts: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    
+    if (!data.success) {
+      throw new Error(data.error || 'Unknown error fetching resource counts');
+    }
+    
+    return data.resourceCounts;
+  } catch (error) {
+    console.error('Error fetching resource counts:', error);
+    return [];
+  }
+}
+
 // Extract input resources from a resource's production data
 export function extractInputResources(resource: ResourceNode): string[] {
   const inputs: string[] = [];

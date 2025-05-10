@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import ResourceDropdown from './ResourceDropdown';
 import { ResourceService, ResourceCategory } from '@/lib/services/ResourceService';
+import { getWalletAddress } from '@/lib/walletUtils';
 
 // Define the desired order of categories
 const CATEGORY_ORDER = ['raw_materials', 'processed_materials', 'finished_goods', 'utility_resources'];
@@ -10,7 +11,7 @@ const ResourceDropdowns: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   
-  // Create a memoized function to load resource categories
+  // Create a memoized function to load resource categories with counts
   const loadResourceCategories = useCallback(async () => {
     try {
       setLoading(true);
@@ -21,7 +22,41 @@ const ResourceDropdowns: React.FC = () => {
         resourceService.clearCache();
       }
       
-      const loadedCategories = await resourceService.getResourceCategories();
+      // Get the current wallet address
+      const walletAddress = getWalletAddress();
+      
+      // Get resource counts for the current user
+      const resources = await resourceService.getResourceCounts(walletAddress);
+      
+      // Group resources by category
+      const categoriesMap = new Map<string, ResourceCategory>();
+      
+      resources.forEach(resource => {
+        const category = resource.category || 'raw_materials';
+        
+        if (!categoriesMap.has(category)) {
+          // Format category name for display
+          const categoryName = category
+            .split('_')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ');
+          
+          categoriesMap.set(category, {
+            id: category,
+            name: categoryName,
+            resources: []
+          });
+        }
+        
+        // Add resource to its category
+        categoriesMap.get(category).resources.push(resource);
+      });
+      
+      // Convert map to array and sort resources within each category
+      const loadedCategories = Array.from(categoriesMap.values()).map(category => ({
+        ...category,
+        resources: category.resources.sort((a, b) => a.name.localeCompare(b.name))
+      }));
       
       // Filter out categories with no resources
       const nonEmptyCategories = loadedCategories.filter(category => 
