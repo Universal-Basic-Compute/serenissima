@@ -2971,6 +2971,22 @@ export default class SimplePolygonRenderer {
   }
   
   /**
+   * Define Polygon interface for type safety
+   */
+  interface Polygon {
+    id: string;
+    coordinates: {lat: number, lng: number}[];
+    centroid?: {lat: number, lng: number};
+    bridgePoints?: any[];
+    dockPoints?: any[];
+    buildingPoints?: any[];
+    historicalName?: string;
+    englishName?: string;
+    owner?: string;
+    User?: string;
+  }
+
+  /**
    * Determine if water navigation is needed between two polygons
    */
   private needsWaterNavigation(startPolygon: Polygon | null, endPolygon: Polygon | null): boolean {
@@ -3168,8 +3184,16 @@ export default class SimplePolygonRenderer {
       
       // Calculate distance to the dock edge (not water point)
       const distance = this.calculateDistanceInMeters(
-        { lat: point.lat, lng: point.lng },
-        { lat: dockData.edge.lat, lng: dockData.edge.lng }
+        new THREE.Vector3(
+          (point.lat - this.bounds.centerLat) * this.bounds.scale * this.bounds.latCorrectionFactor,
+          0,
+          -(point.lng - this.bounds.centerLng) * this.bounds.scale
+        ),
+        new THREE.Vector3(
+          (dockData.edge.lat - this.bounds.centerLat) * this.bounds.scale * this.bounds.latCorrectionFactor,
+          0,
+          -(dockData.edge.lng - this.bounds.centerLng) * this.bounds.scale
+        )
       );
       
       if (distance < minDistance) {
