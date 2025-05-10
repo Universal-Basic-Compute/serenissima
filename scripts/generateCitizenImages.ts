@@ -6,7 +6,8 @@ import Airtable from 'airtable';
 import FormData from 'form-data';
 
 dotenv.config();
-const base = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY }).base(process.env.AIRTABLE_BASE_ID);
+// Initialize Airtable base connection
+const airtableBase = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY }).base(process.env.AIRTABLE_BASE_ID || '');
 
 // Define citizen interface
 interface Citizen {
@@ -24,8 +25,7 @@ interface Citizen {
 // Ideogram API configuration
 const IDEOGRAM_API_KEY = process.env.IDEOGRAM_API_KEY;
 
-// Path to citizens data and image directory
-const CITIZENS_DATA_PATH = path.join(process.cwd(), 'data', 'citizens.json');
+// Path to image directory (we don't need CITIZENS_DATA_PATH in this file)
 const CITIZENS_IMAGE_DIR = path.join(process.cwd(), 'public', 'images', 'citizens');
 
 // Ensure the images directory exists
@@ -42,7 +42,7 @@ async function fetchCitizensNeedingImages(): Promise<Citizen[]> {
     
     // Fetch records from Airtable with pagination, filtering for records where ImageUrl is empty
     await new Promise((resolve, reject) => {
-      base('CITIZENS').select({
+      airtableBase('CITIZENS').select({
         filterByFormula: '{ImageUrl} = ""', // Only get records with empty ImageUrl
         // Optionally specify fields to retrieve
         fields: ['CitizenId', 'SocialClass', 'FirstName', 'LastName', 'Description', 'ImagePrompt', 'Wealth', 'CreatedAt']
@@ -120,7 +120,7 @@ async function updateAirtableImageUrl(citizenId: string, imageUrl: string): Prom
     console.log(`Updating Airtable record for citizen ${citizenId} with image URL: ${imageUrl}`);
     
     // Find the record by CitizenId
-    const records = await base('CITIZENS').select({
+    const records = await airtableBase('CITIZENS').select({
       filterByFormula: `{CitizenId} = '${citizenId}'`
     }).firstPage();
     
@@ -131,7 +131,7 @@ async function updateAirtableImageUrl(citizenId: string, imageUrl: string): Prom
     
     // Update the record with the new image URL
     const recordId = records[0].id;
-    await base('CITIZENS').update(recordId, {
+    await airtableBase('CITIZENS').update(recordId, {
       ImageUrl: imageUrl
     });
     
