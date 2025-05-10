@@ -674,11 +674,11 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
     // Create debug markers for each building
     buildings.forEach((building) => {
       // Remove any existing debug markers for this building
-      scene.traverse((object) => {
+      sceneRef.current.traverse((object) => {
         if (object.userData && 
             object.userData.isDebugMarker && 
             object.userData.buildingId === building.userData.buildingId) {
-          scene.remove(object);
+          sceneRef.current.remove(object);
         }
       });
       
