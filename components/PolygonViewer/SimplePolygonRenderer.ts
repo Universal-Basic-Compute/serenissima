@@ -2661,8 +2661,8 @@ export default class SimplePolygonRenderer {
       
       // Position the group
       buildingGroup.position.copy(position);
-      // Raise it higher above the ground - CHANGE HERE
-      buildingGroup.position.y += 5; // Changed from 0.1 to 5
+      // Position buildings closer to the ground
+      buildingGroup.position.y += 0.8; // Changed from 5 to 0.8
       
       try {
         // Load the GLB model
