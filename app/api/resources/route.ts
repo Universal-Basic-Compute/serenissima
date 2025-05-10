@@ -95,7 +95,9 @@ export async function GET(request: Request) {
     // Convert Map to array
     const resources = Array.from(resourceMap.values());
     
-    console.log(`Returning ${resources.length} unique resources (from ${records.length} total records)`);
+    // Type assertion for records to ensure TypeScript knows it's an array
+    const recordsArray = records as any[];
+    console.log(`Returning ${resources.length} unique resources (from ${recordsArray.length} total records)`);
     
     return NextResponse.json(resources);
   } catch (error) {
