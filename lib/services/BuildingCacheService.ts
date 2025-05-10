@@ -61,6 +61,9 @@ export class BuildingCacheService {
       return this.modelCache.get(cacheKey).clone();
     }
     
+    // Track failed paths to avoid repeated attempts
+    const failedPaths = new Set<string>();
+    
     // Define model paths with multiple fallback options
     const modelPaths = [
       `/assets/buildings/models/${type}/${variant}.glb`,  // Primary path with variant
@@ -71,6 +74,9 @@ export class BuildingCacheService {
     
     // Try each path in sequence until one works
     for (const modelPath of modelPaths) {
+      // Skip paths we've already tried and failed
+      if (failedPaths.has(modelPath)) continue;
+      
       try {
         console.log(`Attempting to load model from: ${modelPath}`);
         
@@ -85,13 +91,20 @@ export class BuildingCacheService {
         return model;
       } catch (error) {
         console.warn(`Failed to load model from ${modelPath}:`, error);
+        // Mark this path as failed
+        failedPaths.add(modelPath);
         // Continue to next path option
       }
     }
     
-    // If all paths fail, create a fallback cube model
+    // If all paths fail, create a fallback cube model and cache it
     console.error(`All model loading attempts failed for ${type}. Creating fallback.`);
-    return this.createFallbackModel(type);
+    const fallbackModel = this.createFallbackModel(type);
+    
+    // Cache the fallback model to prevent future loading attempts
+    this.modelCache.set(cacheKey, fallbackModel.clone());
+    
+    return fallbackModel;
   }
   
   /**
@@ -101,11 +114,22 @@ export class BuildingCacheService {
    */
   private loadGLTF(path: string): Promise<any> {
     return new Promise((resolve, reject) => {
+      // Create a timeout to abort the request if it takes too long
+      const timeoutId = setTimeout(() => {
+        reject(new Error(`Timeout loading model from ${path}`));
+      }, 5000); // 5 second timeout
+      
       this.gltfLoader.load(
         path,
-        resolve,
+        (gltf) => {
+          clearTimeout(timeoutId);
+          resolve(gltf);
+        },
         undefined,
-        reject
+        (error) => {
+          clearTimeout(timeoutId);
+          reject(error);
+        }
       );
     });
   }
