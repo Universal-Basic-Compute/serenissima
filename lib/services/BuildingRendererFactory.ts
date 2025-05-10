@@ -179,6 +179,8 @@ class DockRenderer implements IBuildingRenderer {
       }
       
       model.position.copy(position);
+      // Change the y position to 1.2
+      model.position.y = 1.2;
       
       // Set rotation
       model.rotation.y = building.rotation || 0;
@@ -191,6 +193,15 @@ class DockRenderer implements IBuildingRenderer {
         owner: building.owner || building.created_by,
         position: building.position
       };
+      
+      // Remove any grid objects from the model
+      model.traverse((child) => {
+        // Check if the object is a grid or has grid in its name
+        if (child.name && (child.name.includes('grid') || child.name.includes('Grid'))) {
+          // Make the grid invisible
+          child.visible = false;
+        }
+      });
       
       // Add connection points for docks
       if ((building as DockData).connectionPoints) {
@@ -310,6 +321,8 @@ class MarketStallRenderer implements IBuildingRenderer {
       }
       
       model.position.copy(position);
+      // Change the y position to 1.2
+      model.position.y = 1.2;
       
       // Set rotation
       model.rotation.y = building.rotation || 0;
@@ -322,6 +335,15 @@ class MarketStallRenderer implements IBuildingRenderer {
         owner: building.owner || building.created_by,
         position: building.position
       };
+      
+      // Remove any grid objects from the model
+      model.traverse((child) => {
+        // Check if the object is a grid or has grid in its name
+        if (child.name && (child.name.includes('grid') || child.name.includes('Grid'))) {
+          // Make the grid invisible
+          child.visible = false;
+        }
+      });
       
       // Add to scene
       this.options.scene.add(model);

@@ -2618,8 +2618,12 @@ export default class SimplePolygonRenderer {
             const pointData = buildingPointPositions.get(posKey);
             
             // Create a building mesh at this position
-            await this.createBuildingMesh(building, pointData.position);
-            
+            const mesh = await this.createBuildingMesh(building, pointData.position);
+            if (mesh) {
+              // Set the y position to 1.2
+              mesh.position.y = 1.2;
+            }
+      
             // Remove the building point marker
             this.removeBuildingPointMarker(pointData.marker);
             
@@ -2662,7 +2666,7 @@ export default class SimplePolygonRenderer {
       // Position the group
       buildingGroup.position.copy(position);
       // Position buildings closer to the ground
-      buildingGroup.position.y += 0.8; // Changed from 5 to 0.8
+      buildingGroup.position.y = 1.2; // Changed from 0.8 to 1.2
       
       try {
         // Load the GLB model

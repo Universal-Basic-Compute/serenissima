@@ -15,10 +15,10 @@ export class BuildingPositionManager {
   /**
    * Convert lat/lng coordinates to Three.js scene position
    * @param position Latitude and longitude coordinates
-   * @param height Optional height value (defaults to 5)
+   * @param height Optional height value (defaults to 1.2)
    * @returns THREE.Vector3 position in scene coordinates
    */
-  public latLngToScenePosition(position: {lat: number, lng: number}, height: number = 5): THREE.Vector3 {
+  public latLngToScenePosition(position: {lat: number, lng: number}, height: number = 1.2): THREE.Vector3 {
     // First, validate the input coordinates
     if (!position || typeof position.lat !== 'number' || typeof position.lng !== 'number' || 
         isNaN(position.lat) || isNaN(position.lng)) {
