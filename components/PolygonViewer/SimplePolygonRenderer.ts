@@ -13,186 +13,6 @@ interface SimplePolygonRendererProps {
     latCorrectionFactor: number;
   };
   sandColor?: number; // Add this line
-  /**
-   * Create bridge and dock point markers for transport view
-   */
-  private createBridgeAndDockPoints() {
-    // Only create markers if they don't exist yet or if we're in transport view
-    if ((this.bridgePointMarkers.length > 0 && this.dockPointMarkers.length > 0) || 
-        this.activeView !== 'transport') {
-      return;
-    }
-    
-    console.log('Creating bridge and dock points for transport view');
-    
-    // Clear any existing markers
-    this.bridgePointMarkers.forEach(marker => {
-      this.scene.remove(marker);
-      if (marker.geometry) marker.geometry.dispose();
-      if (marker.material instanceof THREE.Material) {
-        marker.material.dispose();
-      } else if (Array.isArray(marker.material)) {
-        marker.material.forEach(m => m.dispose());
-      }
-    });
-    
-    this.dockPointMarkers.forEach(marker => {
-      this.scene.remove(marker);
-      if (marker instanceof THREE.Mesh) {
-        if (marker.geometry) marker.geometry.dispose();
-        if (marker.material instanceof THREE.Material) {
-          marker.material.dispose();
-        } else if (Array.isArray(marker.material)) {
-          marker.material.forEach(m => m.dispose());
-        }
-      } else if (marker instanceof THREE.Line) {
-        if (marker.geometry) marker.geometry.dispose();
-        if (marker.material instanceof THREE.Material) {
-          marker.material.dispose();
-        }
-      }
-    });
-    
-    this.bridgePointMarkers = [];
-    this.dockPointMarkers = [];
-    
-    // Process each polygon
-    this.polygons.forEach(polygon => {
-      // Skip if polygon has no bridge or dock points
-      if (!polygon.bridgePoints && !polygon.dockPoints) return;
-      
-      // Process bridge points
-      if (polygon.bridgePoints && Array.isArray(polygon.bridgePoints) && polygon.bridgePoints.length > 0) {
-        polygon.bridgePoints.forEach((point, index) => {
-          const normalizedCoord = normalizeCoordinates(
-            [point.edge],
-            this.bounds.centerLat,
-            this.bounds.centerLng,
-            this.bounds.scale,
-            this.bounds.latCorrectionFactor
-          )[0];
-          
-          // Create a marker for the bridge point
-          const geometry = new THREE.CircleGeometry(0.3, 16);
-          const material = new THREE.MeshBasicMaterial({
-            color: 0xFF5500, // Orange color for bridge points
-            side: THREE.DoubleSide,
-            transparent: true,
-            opacity: 0.8
-          });
-          
-          const marker = new THREE.Mesh(geometry, material);
-          marker.position.set(normalizedCoord.x, 0.2, -normalizedCoord.y); // Position slightly above land
-          marker.rotation.x = -Math.PI / 2; // Make it horizontal
-          marker.renderOrder = 10; // Ensure it renders on top
-          
-          // Add metadata for tooltips
-          marker.userData = {
-            id: `bridge-${polygon.id}-${index}`,
-            type: 'bridge',
-            polygonId: polygon.id,
-            position: `${point.edge.lat.toFixed(6)}, ${point.edge.lng.toFixed(6)}`
-          };
-          
-          this.scene.add(marker);
-          this.bridgePointMarkers.push(marker);
-        });
-      }
-      
-      // Process dock points
-      if (polygon.dockPoints && Array.isArray(polygon.dockPoints) && polygon.dockPoints.length > 0) {
-        polygon.dockPoints.forEach((point, index) => {
-          // Create markers for both edge and water points
-          const edgeCoord = normalizeCoordinates(
-            [point.edge],
-            this.bounds.centerLat,
-            this.bounds.centerLng,
-            this.bounds.scale,
-            this.bounds.latCorrectionFactor
-          )[0];
-          
-          const waterCoord = normalizeCoordinates(
-            [point.water],
-            this.bounds.centerLat,
-            this.bounds.centerLng,
-            this.bounds.scale,
-            this.bounds.latCorrectionFactor
-          )[0];
-          
-          // Create a marker for the dock point (edge)
-          const edgeGeometry = new THREE.CircleGeometry(0.3, 16);
-          const edgeMaterial = new THREE.MeshBasicMaterial({
-            color: 0x00AAFF, // Blue color for dock points
-            side: THREE.DoubleSide,
-            transparent: true,
-            opacity: 0.8
-          });
-          
-          const edgeMarker = new THREE.Mesh(edgeGeometry, edgeMaterial);
-          edgeMarker.position.set(edgeCoord.x, 0.2, -edgeCoord.y); // Position slightly above land
-          edgeMarker.rotation.x = -Math.PI / 2; // Make it horizontal
-          edgeMarker.renderOrder = 10; // Ensure it renders on top
-          
-          // Add metadata for tooltips
-          edgeMarker.userData = {
-            id: `dock-edge-${polygon.id}-${index}`,
-            type: 'dock-edge',
-            polygonId: polygon.id,
-            position: `${point.edge.lat.toFixed(6)}, ${point.edge.lng.toFixed(6)}`
-          };
-          
-          this.scene.add(edgeMarker);
-          this.dockPointMarkers.push(edgeMarker);
-          
-          // Create a line connecting edge to water
-          const lineGeometry = new THREE.BufferGeometry().setFromPoints([
-            new THREE.Vector3(edgeCoord.x, 0.2, -edgeCoord.y),
-            new THREE.Vector3(waterCoord.x, 0.2, -waterCoord.y)
-          ]);
-          
-          const lineMaterial = new THREE.LineBasicMaterial({
-            color: 0x00AAFF,
-            linewidth: 2,
-            transparent: true,
-            opacity: 0.6
-          });
-          
-          const line = new THREE.Line(lineGeometry, lineMaterial);
-          line.renderOrder = 9; // Below the markers but above land
-          
-          this.scene.add(line);
-          this.dockPointMarkers.push(line); // Add to dock markers for cleanup
-          
-          // Create a marker for the water point
-          const waterGeometry = new THREE.CircleGeometry(0.2, 16);
-          const waterMaterial = new THREE.MeshBasicMaterial({
-            color: 0x0088CC, // Darker blue for water points
-            side: THREE.DoubleSide,
-            transparent: true,
-            opacity: 0.7
-          });
-          
-          const waterMarker = new THREE.Mesh(waterGeometry, waterMaterial);
-          waterMarker.position.set(waterCoord.x, 0.2, -waterCoord.y);
-          waterMarker.rotation.x = -Math.PI / 2; // Make it horizontal
-          waterMarker.renderOrder = 10; // Ensure it renders on top
-          
-          // Add metadata for tooltips
-          waterMarker.userData = {
-            id: `dock-water-${polygon.id}-${index}`,
-            type: 'dock-water',
-            polygonId: polygon.id,
-            position: `${point.water.lat.toFixed(6)}, ${point.water.lng.toFixed(6)}`
-          };
-          
-          this.scene.add(waterMarker);
-          this.dockPointMarkers.push(waterMarker);
-        });
-      }
-    });
-    
-    console.log(`Created ${this.bridgePointMarkers.length} bridge point markers and ${this.dockPointMarkers.length} dock point markers`);
-  }
 }
 
 export default class SimplePolygonRenderer {
@@ -1427,5 +1247,186 @@ export default class SimplePolygonRenderer {
     this.hoveredCoatOfArms = null;
     this.selectedCoatOfArms = null;
     document.body.style.cursor = 'default';
+  }
+  
+  /**
+   * Create bridge and dock point markers for transport view
+   */
+  private createBridgeAndDockPoints() {
+    // Only create markers if they don't exist yet or if we're in transport view
+    if ((this.bridgePointMarkers.length > 0 && this.dockPointMarkers.length > 0) || 
+        this.activeView !== 'transport') {
+      return;
+    }
+    
+    console.log('Creating bridge and dock points for transport view');
+    
+    // Clear any existing markers
+    this.bridgePointMarkers.forEach(marker => {
+      this.scene.remove(marker);
+      if (marker.geometry) marker.geometry.dispose();
+      if (marker.material instanceof THREE.Material) {
+        marker.material.dispose();
+      } else if (Array.isArray(marker.material)) {
+        marker.material.forEach(m => m.dispose());
+      }
+    });
+    
+    this.dockPointMarkers.forEach(marker => {
+      this.scene.remove(marker);
+      if (marker instanceof THREE.Mesh) {
+        if (marker.geometry) marker.geometry.dispose();
+        if (marker.material instanceof THREE.Material) {
+          marker.material.dispose();
+        } else if (Array.isArray(marker.material)) {
+          marker.material.forEach(m => m.dispose());
+        }
+      } else if (marker instanceof THREE.Line) {
+        if (marker.geometry) marker.geometry.dispose();
+        if (marker.material instanceof THREE.Material) {
+          marker.material.dispose();
+        }
+      }
+    });
+    
+    this.bridgePointMarkers = [];
+    this.dockPointMarkers = [];
+    
+    // Process each polygon
+    this.polygons.forEach(polygon => {
+      // Skip if polygon has no bridge or dock points
+      if (!polygon.bridgePoints && !polygon.dockPoints) return;
+      
+      // Process bridge points
+      if (polygon.bridgePoints && Array.isArray(polygon.bridgePoints) && polygon.bridgePoints.length > 0) {
+        polygon.bridgePoints.forEach((point, index) => {
+          const normalizedCoord = normalizeCoordinates(
+            [point.edge],
+            this.bounds.centerLat,
+            this.bounds.centerLng,
+            this.bounds.scale,
+            this.bounds.latCorrectionFactor
+          )[0];
+          
+          // Create a marker for the bridge point
+          const geometry = new THREE.CircleGeometry(0.3, 16);
+          const material = new THREE.MeshBasicMaterial({
+            color: 0xFF5500, // Orange color for bridge points
+            side: THREE.DoubleSide,
+            transparent: true,
+            opacity: 0.8
+          });
+          
+          const marker = new THREE.Mesh(geometry, material);
+          marker.position.set(normalizedCoord.x, 0.2, -normalizedCoord.y); // Position slightly above land
+          marker.rotation.x = -Math.PI / 2; // Make it horizontal
+          marker.renderOrder = 10; // Ensure it renders on top
+          
+          // Add metadata for tooltips
+          marker.userData = {
+            id: `bridge-${polygon.id}-${index}`,
+            type: 'bridge',
+            polygonId: polygon.id,
+            position: `${point.edge.lat.toFixed(6)}, ${point.edge.lng.toFixed(6)}`
+          };
+          
+          this.scene.add(marker);
+          this.bridgePointMarkers.push(marker);
+        });
+      }
+      
+      // Process dock points
+      if (polygon.dockPoints && Array.isArray(polygon.dockPoints) && polygon.dockPoints.length > 0) {
+        polygon.dockPoints.forEach((point, index) => {
+          // Create markers for both edge and water points
+          const edgeCoord = normalizeCoordinates(
+            [point.edge],
+            this.bounds.centerLat,
+            this.bounds.centerLng,
+            this.bounds.scale,
+            this.bounds.latCorrectionFactor
+          )[0];
+          
+          const waterCoord = normalizeCoordinates(
+            [point.water],
+            this.bounds.centerLat,
+            this.bounds.centerLng,
+            this.bounds.scale,
+            this.bounds.latCorrectionFactor
+          )[0];
+          
+          // Create a marker for the dock point (edge)
+          const edgeGeometry = new THREE.CircleGeometry(0.3, 16);
+          const edgeMaterial = new THREE.MeshBasicMaterial({
+            color: 0x00AAFF, // Blue color for dock points
+            side: THREE.DoubleSide,
+            transparent: true,
+            opacity: 0.8
+          });
+          
+          const edgeMarker = new THREE.Mesh(edgeGeometry, edgeMaterial);
+          edgeMarker.position.set(edgeCoord.x, 0.2, -edgeCoord.y); // Position slightly above land
+          edgeMarker.rotation.x = -Math.PI / 2; // Make it horizontal
+          edgeMarker.renderOrder = 10; // Ensure it renders on top
+          
+          // Add metadata for tooltips
+          edgeMarker.userData = {
+            id: `dock-edge-${polygon.id}-${index}`,
+            type: 'dock-edge',
+            polygonId: polygon.id,
+            position: `${point.edge.lat.toFixed(6)}, ${point.edge.lng.toFixed(6)}`
+          };
+          
+          this.scene.add(edgeMarker);
+          this.dockPointMarkers.push(edgeMarker);
+          
+          // Create a line connecting edge to water
+          const lineGeometry = new THREE.BufferGeometry().setFromPoints([
+            new THREE.Vector3(edgeCoord.x, 0.2, -edgeCoord.y),
+            new THREE.Vector3(waterCoord.x, 0.2, -waterCoord.y)
+          ]);
+          
+          const lineMaterial = new THREE.LineBasicMaterial({
+            color: 0x00AAFF,
+            linewidth: 2,
+            transparent: true,
+            opacity: 0.6
+          });
+          
+          const line = new THREE.Line(lineGeometry, lineMaterial);
+          line.renderOrder = 9; // Below the markers but above land
+          
+          this.scene.add(line);
+          this.dockPointMarkers.push(line); // Add to dock markers for cleanup
+          
+          // Create a marker for the water point
+          const waterGeometry = new THREE.CircleGeometry(0.2, 16);
+          const waterMaterial = new THREE.MeshBasicMaterial({
+            color: 0x0088CC, // Darker blue for water points
+            side: THREE.DoubleSide,
+            transparent: true,
+            opacity: 0.7
+          });
+          
+          const waterMarker = new THREE.Mesh(waterGeometry, waterMaterial);
+          waterMarker.position.set(waterCoord.x, 0.2, -waterCoord.y);
+          waterMarker.rotation.x = -Math.PI / 2; // Make it horizontal
+          waterMarker.renderOrder = 10; // Ensure it renders on top
+          
+          // Add metadata for tooltips
+          waterMarker.userData = {
+            id: `dock-water-${polygon.id}-${index}`,
+            type: 'dock-water',
+            polygonId: polygon.id,
+            position: `${point.water.lat.toFixed(6)}, ${point.water.lng.toFixed(6)}`
+          };
+          
+          this.scene.add(waterMarker);
+          this.dockPointMarkers.push(waterMarker);
+        });
+      }
+    });
+    
+    console.log(`Created ${this.bridgePointMarkers.length} bridge point markers and ${this.dockPointMarkers.length} dock point markers`);
   }
 }
