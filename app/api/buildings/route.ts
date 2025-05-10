@@ -231,6 +231,7 @@ export async function GET(request: Request) {
         Rotation?: number;
         User: string;
         CreatedAt: string;
+        [key: string]: any; // Allow for other fields
       };
     }
     
@@ -313,7 +314,7 @@ export async function GET(request: Request) {
         position = {
           lat: parseFloat(lat.toFixed(10)),
           lng: parseFloat(lng.toFixed(10))
-        };
+        } as { lat: number; lng: number };
             
         console.log(`[API] Converted x/y/z position to lat/lng for building ${fields.BuildingId || record.id}:`, position);
       }
@@ -322,7 +323,7 @@ export async function GET(request: Request) {
         position = {
           lat: parseFloat(position.lat.toString()),
           lng: parseFloat(position.lng.toString())
-        };
+        } as { lat: number; lng: number };
       }
       
       return {
