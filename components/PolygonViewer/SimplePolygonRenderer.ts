@@ -746,7 +746,7 @@ export default class SimplePolygonRenderer {
     raycaster.params.Mesh.threshold = 0.1;
     
     // Find all land meshes in the scene
-    const landMeshes: THREE.Mesh[] = [];
+    const landMeshes: THREE.Mesh<THREE.BufferGeometry, THREE.Material | THREE.Material[]>[] = [];
     this.scene.traverse(object => {
       // Include all meshes except those we want to exclude
       if (object instanceof THREE.Mesh && 
