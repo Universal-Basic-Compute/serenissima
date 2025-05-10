@@ -601,6 +601,9 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
         content = `Dock Edge Point\nPolygon: ${data.polygonId}\nPosition: ${data.position}`;
       } else if (data.type === 'dock-water') {
         content = `Dock Water Point\nPolygon: ${data.polygonId}\nPosition: ${data.position}`;
+      } else if (data.type === 'delete') {
+        // Handle the new delete tooltip type
+        content = data.content || 'Deleting transport point...';
       }
       
       setTooltip({

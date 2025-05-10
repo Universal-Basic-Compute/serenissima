@@ -1250,6 +1250,49 @@ export default class SimplePolygonRenderer {
       }
     });
     
+    // Add this new method to create a visual deletion effect
+    private createDeletionEffect(position: THREE.Vector3) {
+      console.log(`Creating deletion effect at position: ${position.x}, ${position.y}, ${position.z}`);
+      
+      // Create a sphere for the deletion effect
+      const geometry = new THREE.SphereGeometry(0.5, 8, 8);
+      const material = new THREE.MeshBasicMaterial({
+        color: 0xFF0000,
+        transparent: true,
+        opacity: 0.7
+      });
+      
+      const effect = new THREE.Mesh(geometry, material);
+      effect.position.copy(position);
+      effect.renderOrder = 3000; // Ensure it renders on top
+      
+      this.scene.add(effect);
+      
+      // Animate the effect
+      let scale = 1.0;
+      let opacity = 0.7;
+      
+      const animate = () => {
+        scale += 0.1;
+        opacity -= 0.05;
+        
+        effect.scale.set(scale, scale, scale);
+        (effect.material as THREE.MeshBasicMaterial).opacity = opacity;
+        
+        if (opacity > 0) {
+          requestAnimationFrame(animate);
+        } else {
+          // Remove the effect when animation is complete
+          this.scene.remove(effect);
+          geometry.dispose();
+          material.dispose();
+        }
+      };
+      
+      // Start animation
+      animate();
+    }
+    
     this.dockPointMarkers.forEach(marker => {
       this.scene.remove(marker);
       if (marker instanceof THREE.Mesh) {
@@ -1674,56 +1717,99 @@ export default class SimplePolygonRenderer {
   
   // Add this new method to handle right-click deletion of transport markers
   private handleRightClickInTransportView() {
+    console.log("Right-click detected in transport view - checking for markers to delete");
+    
     // Combine all markers for raycasting
     const allMarkers = [...this.bridgePointMarkers, ...this.dockPointMarkers].filter(
       obj => obj instanceof THREE.Mesh
     );
     
+    console.log(`Found ${allMarkers.length} potential markers for deletion`);
+    
     const intersects = this.raycaster.intersectObjects(allMarkers);
+    console.log(`Found ${intersects.length} intersections with markers`);
     
     if (intersects.length > 0) {
       const intersected = intersects[0].object;
       const userData = intersected.userData;
+      
+      console.log("Intersected object userData:", userData);
       
       if (userData && userData.id) {
         // Extract information from the marker ID
         // Format is typically: bridge-{polygonId}-{index} or dock-edge-{polygonId}-{index}
         const idParts = userData.id.split('-');
         
+        console.log(`Parsed ID parts: ${idParts.join(', ')}`);
+        
         if (idParts.length >= 3) {
           const markerType = idParts[0]; // 'bridge' or 'dock'
           const polygonId = idParts[1];
           const pointIndex = parseInt(idParts[2]);
           
+          console.log(`Attempting to delete ${markerType} point ${pointIndex} from polygon ${polygonId}`);
+          
           // Find the polygon
           const polygon = this.polygons.find(p => p.id === polygonId);
           
           if (polygon) {
+            // Create a visual effect at the deletion point
+            this.createDeletionEffect(intersected.position.clone());
+            
             // Remove the point from the polygon data
+            let deleted = false;
             if (markerType === 'bridge' && polygon.bridgePoints && polygon.bridgePoints.length > pointIndex) {
               // Remove the bridge point
               polygon.bridgePoints.splice(pointIndex, 1);
-              console.log(`Removed bridge point ${pointIndex} from polygon ${polygonId}`);
+              console.log(`Successfully removed bridge point ${pointIndex} from polygon ${polygonId}`);
+              deleted = true;
             } else if (markerType === 'dock' && polygon.dockPoints && polygon.dockPoints.length > pointIndex) {
               // Remove the dock point
               polygon.dockPoints.splice(pointIndex, 1);
-              console.log(`Removed dock point ${pointIndex} from polygon ${polygonId}`);
+              console.log(`Successfully removed dock point ${pointIndex} from polygon ${polygonId}`);
+              deleted = true;
             }
             
-            // Save the updated polygon data to the server
-            this.saveUpdatedPolygonData(polygon);
-            
-            // Refresh the transport markers
-            this.clearBridgeAndDockMarkers();
-            this.forceCreateBridgeAndDockPoints();
+            if (deleted) {
+              // Save the updated polygon data to the server
+              this.saveUpdatedPolygonData(polygon);
+              
+              // Refresh the transport markers
+              this.clearBridgeAndDockMarkers();
+              this.forceCreateBridgeAndDockPoints();
+              
+              // Show a tooltip
+              eventBus.emit(EventTypes.SHOW_TOOLTIP, {
+                type: 'delete',
+                content: `Deleted ${markerType} point`,
+                screenX: event.clientX,
+                screenY: event.clientY
+              });
+              
+              // Hide tooltip after a delay
+              setTimeout(() => {
+                eventBus.emit(EventTypes.HIDE_TOOLTIP);
+              }, 2000);
+            } else {
+              console.warn(`Failed to delete point - index ${pointIndex} not found in ${markerType} points array`);
+            }
+          } else {
+            console.warn(`Polygon ${polygonId} not found`);
           }
         }
       }
+    } else {
+      console.log("No transport markers found under the cursor");
     }
   }
 
   // Add this method to save the updated polygon data
   private saveUpdatedPolygonData(polygon: any) {
+    console.log(`Saving updated polygon data for ${polygon.id}:`, {
+      bridgePointsCount: polygon.bridgePoints?.length || 0,
+      dockPointsCount: polygon.dockPoints?.length || 0
+    });
+
     // Create a request to save the updated polygon data
     fetch(`/api/update-polygon`, {
       method: 'POST',
@@ -1743,10 +1829,54 @@ export default class SimplePolygonRenderer {
       return response.json();
     })
     .then(data => {
-      console.log('Successfully updated polygon data:', data);
+      console.log('%c Transport point deleted successfully! ', 
+        'background: #4CAF50; color: white; padding: 4px; border-radius: 4px;');
+      console.log('Server response:', data);
+      
+      // Display a temporary on-screen notification
+      const notification = document.createElement('div');
+      notification.textContent = 'Transport point deleted';
+      notification.style.position = 'fixed';
+      notification.style.bottom = '20px';
+      notification.style.right = '20px';
+      notification.style.backgroundColor = 'rgba(76, 175, 80, 0.9)';
+      notification.style.color = 'white';
+      notification.style.padding = '10px 20px';
+      notification.style.borderRadius = '4px';
+      notification.style.zIndex = '9999';
+      notification.style.fontFamily = 'Arial, sans-serif';
+      
+      document.body.appendChild(notification);
+      
+      // Remove the notification after 3 seconds
+      setTimeout(() => {
+        document.body.removeChild(notification);
+      }, 3000);
     })
     .catch(error => {
       console.error('Error updating polygon data:', error);
+      console.log('%c Error deleting transport point! ', 
+        'background: #F44336; color: white; padding: 4px; border-radius: 4px;');
+      
+      // Display an error notification
+      const notification = document.createElement('div');
+      notification.textContent = 'Error deleting transport point';
+      notification.style.position = 'fixed';
+      notification.style.bottom = '20px';
+      notification.style.right = '20px';
+      notification.style.backgroundColor = 'rgba(244, 67, 54, 0.9)';
+      notification.style.color = 'white';
+      notification.style.padding = '10px 20px';
+      notification.style.borderRadius = '4px';
+      notification.style.zIndex = '9999';
+      notification.style.fontFamily = 'Arial, sans-serif';
+      
+      document.body.appendChild(notification);
+      
+      // Remove the notification after 3 seconds
+      setTimeout(() => {
+        document.body.removeChild(notification);
+      }, 3000);
     });
   }
 }
