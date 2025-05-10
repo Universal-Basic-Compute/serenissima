@@ -417,6 +417,53 @@ class DockRenderer implements IBuildingRenderer {
   constructor(private options: BuildingRendererOptions) {}
   
   /**
+   * Find the ground level at a position using raycasting
+   */
+  private findGroundLevel(position: THREE.Vector3): THREE.Vector3 | null {
+    // Create a raycaster
+    const raycaster = new THREE.Raycaster();
+    
+    // Set the ray origin high above the position
+    const rayOrigin = new THREE.Vector3(position.x, 100, position.z);
+    
+    // Set the ray direction downward
+    const rayDirection = new THREE.Vector3(0, -1, 0);
+    rayDirection.normalize();
+    
+    // Set up the raycaster with increased precision
+    raycaster.set(rayOrigin, rayDirection);
+    
+    // Increase precision for mesh detection
+    raycaster.params.Mesh.threshold = 0.1;
+    
+    // Find all land meshes in the scene
+    const landMeshes: THREE.Object3D[] = [];
+    this.options.scene.traverse(object => {
+      // Include all meshes except those we want to exclude
+      if (object instanceof THREE.Mesh && 
+          !object.userData.buildingId && 
+          !object.userData.isWater &&
+          !object.userData.isCoatOfArms) {
+        landMeshes.push(object);
+      }
+    });
+    
+    // Find intersections with land
+    const intersects = raycaster.intersectObjects(landMeshes, true); // true to check descendants
+    
+    if (intersects.length > 0) {
+      // If we found an intersection, return the point with a small offset
+      const groundPoint = intersects[0].point.clone();
+      // Add a small offset to prevent z-fighting
+      groundPoint.y += 0.01;
+      return groundPoint;
+    }
+    
+    // If no intersection found, return null
+    return null;
+  }
+  
+  /**
    * Render a dock
    * @param building Dock data
    * @returns Promise resolving to THREE.Object3D
@@ -582,6 +629,53 @@ class DockRenderer implements IBuildingRenderer {
  */
 class MarketStallRenderer implements IBuildingRenderer {
   constructor(private options: BuildingRendererOptions) {}
+  
+  /**
+   * Find the ground level at a position using raycasting
+   */
+  private findGroundLevel(position: THREE.Vector3): THREE.Vector3 | null {
+    // Create a raycaster
+    const raycaster = new THREE.Raycaster();
+    
+    // Set the ray origin high above the position
+    const rayOrigin = new THREE.Vector3(position.x, 100, position.z);
+    
+    // Set the ray direction downward
+    const rayDirection = new THREE.Vector3(0, -1, 0);
+    rayDirection.normalize();
+    
+    // Set up the raycaster with increased precision
+    raycaster.set(rayOrigin, rayDirection);
+    
+    // Increase precision for mesh detection
+    raycaster.params.Mesh.threshold = 0.1;
+    
+    // Find all land meshes in the scene
+    const landMeshes: THREE.Object3D[] = [];
+    this.options.scene.traverse(object => {
+      // Include all meshes except those we want to exclude
+      if (object instanceof THREE.Mesh && 
+          !object.userData.buildingId && 
+          !object.userData.isWater &&
+          !object.userData.isCoatOfArms) {
+        landMeshes.push(object);
+      }
+    });
+    
+    // Find intersections with land
+    const intersects = raycaster.intersectObjects(landMeshes, true); // true to check descendants
+    
+    if (intersects.length > 0) {
+      // If we found an intersection, return the point with a small offset
+      const groundPoint = intersects[0].point.clone();
+      // Add a small offset to prevent z-fighting
+      groundPoint.y += 0.01;
+      return groundPoint;
+    }
+    
+    // If no intersection found, return null
+    return null;
+  }
   
   /**
    * Render a market stall
