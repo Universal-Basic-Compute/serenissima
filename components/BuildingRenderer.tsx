@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { eventBus } from '@/lib/eventBus';
 import { EventTypes } from '@/lib/eventTypes';
+import { normalizeCoordinates } from '@/components/PolygonViewer/utils';
 
 interface BuildingRendererProps {
   scene: THREE.Scene;
@@ -187,48 +188,48 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
             console.log(`[BuildingRenderer] Converting lat/lng for building ${building.id}: ${lat}, ${lng}`);
             
             // Define Venice center coordinates and scaling factors
-            const centerLat = 45.4371;
-            const centerLng = 12.3358;
-            const scale = 100000; // Scale factor to convert degrees to scene units
-            const latCorrectionFactor = 0.7; // Correction for latitude distortion
+            const bounds = {
+              centerLat: 45.4371,
+              centerLng: 12.3358,
+              scale: 100000,
+              latCorrectionFactor: 0.7
+            };
             
-            // Calculate the difference from center coordinates
-            const latDiff = lat - centerLat;
-            const lngDiff = lng - centerLng;
-            
-            // Convert to Three.js coordinates
-            // X corresponds to longitude (east-west)
-            // Z corresponds to latitude (north-south) but inverted (negative)
-            const x = lngDiff * scale;
-            const z = -latDiff * scale * latCorrectionFactor;
+            // Use the normalizeCoordinates function
+            const normalizedCoord = normalizeCoordinates(
+              [{ lat, lng }],
+              bounds.centerLat,
+              bounds.centerLng,
+              bounds.scale,
+              bounds.latCorrectionFactor
+            )[0];
             
             // Log the conversion for debugging
-            console.log(`[BuildingRenderer] Converted coordinates for ${building.id}: x=${x}, z=${z}`);
+            console.log(`[BuildingRenderer] Converted coordinates for ${building.id}: x=${normalizedCoord.x}, z=${-normalizedCoord.y}`);
             
             // Verify the conversion worked correctly
-            if (Math.abs(x) < 0.001 && Math.abs(z) < 0.001) {
+            if (Math.abs(normalizedCoord.x) < 0.001 && Math.abs(normalizedCoord.y) < 0.001) {
               console.warn(`[BuildingRenderer] WARNING: Building ${building.id} has near-zero position after conversion!`);
               console.warn(`[BuildingRenderer] Original lat/lng:`, building.position);
             }
             
             // Check if the position is close to the default position (45, 5, 12)
             // Use a more precise check with a smaller threshold
-            if (Math.abs(x - 45) < 1.0 && Math.abs(z - 12) < 1.0) {
+            if (Math.abs(normalizedCoord.x - 45) < 1.0 && Math.abs(-normalizedCoord.y - 12) < 1.0) {
               console.warn(`[BuildingRenderer] WARNING: Building ${building.id} has position near default (45,12) after conversion!`);
               console.warn(`[BuildingRenderer] Original lat/lng:`, building.position);
-              console.warn(`[BuildingRenderer] Converted position: x=${x}, z=${z}`);
+              console.warn(`[BuildingRenderer] Converted position: x=${normalizedCoord.x}, z=${-normalizedCoord.y}`);
               
               // Log additional information to help debug
               console.warn(`[BuildingRenderer] Calculation details:`);
-              console.warn(`  centerLat: ${centerLat}, centerLng: ${centerLng}`);
-              console.warn(`  latDiff: ${latDiff}, lngDiff: ${lngDiff}`);
-              console.warn(`  scale: ${scale}, latCorrectionFactor: ${latCorrectionFactor}`);
+              console.warn(`  centerLat: ${bounds.centerLat}, centerLng: ${bounds.centerLng}`);
+              console.warn(`  scale: ${bounds.scale}, latCorrectionFactor: ${bounds.latCorrectionFactor}`);
             }
             
             position = {
-              x: x,
+              x: normalizedCoord.x,
               y: position.y || 5, // Keep the existing y or use default
-              z: z
+              z: -normalizedCoord.y // Negate y to get z (since y in normalized is actually latitude)
             };
           } 
           // Regular x,y,z format - PRESERVE FULL PRECISION

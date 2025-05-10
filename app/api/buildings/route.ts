@@ -206,8 +206,8 @@ export async function GET(request: Request) {
           latCorrectionFactor: 0.7
         };
             
-        // Reverse the conversion formula
-        const lat = bounds.centerLat - (position.z / bounds.scale / bounds.latCorrectionFactor);
+        // Reverse the conversion formula - this is the inverse of normalizeCoordinates
+        const lat = bounds.centerLat + (-position.z / bounds.scale / bounds.latCorrectionFactor);
         const lng = bounds.centerLng + (position.x / bounds.scale);
             
         position = {

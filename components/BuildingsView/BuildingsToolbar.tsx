@@ -7,6 +7,7 @@ import { useBuildingMenu } from '@/hooks/useBuildingMenu';
 import { eventBus } from '@/lib/eventBus';
 import { EventTypes } from '@/lib/eventTypes';
 import { FaWater } from 'react-icons/fa';
+import { normalizeCoordinates } from '@/components/PolygonViewer/utils';
 
 interface BuildingsToolbarProps {
   scene?: THREE.Scene;
@@ -547,7 +548,7 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
             ];
             
             testPositions.forEach((pos, index) => {
-              // Convert lat/lng to Three.js coordinates
+              // Convert lat/lng to Three.js coordinates using the shared normalizeCoordinates function
               const bounds = {
                 centerLat: 45.4371,
                 centerLng: 12.3358,
@@ -555,8 +556,16 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
                 latCorrectionFactor: 0.7
               };
               
-              const x = (pos.lng - bounds.centerLng) * bounds.scale;
-              const z = -(pos.lat - bounds.centerLat) * bounds.scale * bounds.latCorrectionFactor;
+              const normalizedCoord = normalizeCoordinates(
+                [pos],
+                bounds.centerLat,
+                bounds.centerLng,
+                bounds.scale,
+                bounds.latCorrectionFactor
+              )[0];
+              
+              const x = normalizedCoord.x;
+              const z = -normalizedCoord.y;
               
               // Create marker
               const markerGeometry = new THREE.SphereGeometry(2, 16, 16);
