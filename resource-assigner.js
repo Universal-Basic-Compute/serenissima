@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const axios = require('axios'); // You'll need to install axios: npm install axios
 
 // Function to recursively read all resource files
 async function getAllResourceTypes() {
@@ -51,7 +52,31 @@ function getPolygonFiles() {
   return files.map(file => path.join(dataDir, file));
 }
 
-// Function to assign random resources to building points
+// Function to add a resource to the API
+async function addResourceToAPI(resource) {
+  try {
+    // Get the API base URL from environment or use default
+    const apiBaseUrl = process.env.API_BASE_URL || 'http://localhost:3000';
+    
+    // Make the API call to add the resource
+    const response = await axios.post(`${apiBaseUrl}/api/resources`, resource);
+    
+    if (response.status === 200) {
+      console.log(`Successfully added resource ${resource.id} to API`);
+      return response.data;
+    } else {
+      throw new Error(`API returned status ${response.status}: ${response.statusText}`);
+    }
+  } catch (error) {
+    console.error(`Error adding resource to API:`, error.message);
+    if (error.response) {
+      console.error(`Response data:`, error.response.data);
+    }
+    throw error;
+  }
+}
+
+// Function to assign random resources to building points via API
 async function assignResourcesToPolygons() {
   try {
     // Get all resource types
@@ -64,6 +89,11 @@ async function assignResourcesToPolygons() {
     // Get all polygon files
     const polygonFiles = getPolygonFiles();
     console.log(`Found ${polygonFiles.length} polygon files`);
+    
+    // Track statistics
+    let totalResourcesAdded = 0;
+    let totalBuildingPoints = 0;
+    let failedAdditions = 0;
     
     // Process each polygon
     for (const polygonFile of polygonFiles) {
@@ -78,12 +108,9 @@ async function assignResourcesToPolygons() {
           continue;
         }
         
-        console.log(`Processing polygon ${polygon.id || path.basename(polygonFile)} with ${polygon.buildingPoints.length} building points`);
-        
-        // Initialize resources array if it doesn't exist
-        if (!polygon.resources) {
-          polygon.resources = [];
-        }
+        const polygonId = polygon.id || path.basename(polygonFile, '.json');
+        console.log(`Processing polygon ${polygonId} with ${polygon.buildingPoints.length} building points`);
+        totalBuildingPoints += polygon.buildingPoints.length;
         
         // Assign a random resource to each building point
         for (let i = 0; i < polygon.buildingPoints.length; i++) {
@@ -95,9 +122,9 @@ async function assignResourcesToPolygons() {
           // Generate a random count between 1 and 5
           const randomCount = Math.floor(Math.random() * 5) + 1;
           
-          // Create a resource node at the building point
-          const resourceNode = {
-            id: `resource-${polygon.id || path.basename(polygonFile, '.json')}-${i}`,
+          // Create a resource object to send to the API
+          const resourceData = {
+            id: `resource-${polygonId}-${i}`,
             type: randomResource.id,
             name: randomResource.name,
             category: randomResource.category,
@@ -106,18 +133,29 @@ async function assignResourcesToPolygons() {
               lng: buildingPoint.lng
             },
             count: randomCount,
+            landId: polygonId,
+            owner: 'system',
             createdAt: new Date().toISOString()
           };
           
-          // Add the resource to the polygon
-          polygon.resources.push(resourceNode);
-          
-          console.log(`Added ${randomCount} ${randomResource.name} at building point ${i}`);
+          try {
+            // Add the resource to the API
+            await addResourceToAPI(resourceData);
+            totalResourcesAdded++;
+            console.log(`Added ${randomCount} ${randomResource.name} at building point ${i} via API`);
+          } catch (error) {
+            failedAdditions++;
+            console.error(`Failed to add resource at building point ${i}:`, error.message);
+            
+            // Add a small delay before continuing to avoid overwhelming the API
+            await new Promise(resolve => setTimeout(resolve, 1000));
+          }
         }
         
-        // Save the updated polygon data
-        fs.writeFileSync(polygonFile, JSON.stringify(polygon, null, 2), 'utf8');
-        console.log(`Updated polygon ${polygon.id || path.basename(polygonFile)} with ${polygon.resources.length} resources`);
+        console.log(`Completed processing polygon ${polygonId}`);
+        
+        // Add a delay between polygons to avoid overwhelming the API
+        await new Promise(resolve => setTimeout(resolve, 2000));
         
       } catch (error) {
         console.error(`Error processing polygon file ${polygonFile}:`, error);
@@ -125,6 +163,11 @@ async function assignResourcesToPolygons() {
     }
     
     console.log('Resource assignment complete!');
+    console.log(`Statistics:
+- Total building points processed: ${totalBuildingPoints}
+- Total resources added: ${totalResourcesAdded}
+- Failed additions: ${failedAdditions}
+- Success rate: ${((totalResourcesAdded / totalBuildingPoints) * 100).toFixed(2)}%`);
     
   } catch (error) {
     console.error('Error assigning resources:', error);
