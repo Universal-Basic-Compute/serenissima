@@ -198,6 +198,40 @@ def create_immigration_notification(tables, citizen: Dict, building: Dict) -> No
     except Exception as e:
         log.error(f"Error creating immigration notification: {e}")
 
+def create_admin_notification(tables, immigration_summary) -> None:
+    """Create a notification for the admin user about the immigration process."""
+    try:
+        # Create notification content with summary of all immigrants
+        content = f"Immigration report: {immigration_summary['total']} new citizens arrived in Venice"
+        
+        # Create detailed information about the immigrants by social class
+        details = {
+            "event_type": "immigration_summary",
+            "timestamp": datetime.datetime.now().isoformat(),
+            "total_immigrants": immigration_summary['total'],
+            "by_class": {
+                "Patrician": immigration_summary.get('Patrician', 0),
+                "Cittadini": immigration_summary.get('Cittadini', 0),
+                "Popolani": immigration_summary.get('Popolani', 0),
+                "Facchini": immigration_summary.get('Facchini', 0)
+            },
+            "message": f"New citizens have arrived in Venice seeking housing: {immigration_summary.get('Patrician', 0)} Patricians, {immigration_summary.get('Cittadini', 0)} Cittadini, {immigration_summary.get('Popolani', 0)} Popolani, and {immigration_summary.get('Facchini', 0)} Facchini."
+        }
+        
+        # Create the notification record
+        tables['notifications'].create({
+            "Type": "immigration_summary",
+            "Content": content,
+            "Details": json.dumps(details),
+            "CreatedAt": datetime.datetime.now().isoformat(),
+            "ReadAt": None,
+            "User": "NLR"  # Specific user to receive the notification
+        })
+        
+        log.info(f"Created admin notification for user NLR with immigration summary")
+    except Exception as e:
+        log.error(f"Error creating admin notification: {e}")
+
 def process_immigration(dry_run: bool = False):
     """Main function to process immigration."""
     log.info(f"Starting immigration process (dry_run: {dry_run})")
@@ -210,6 +244,13 @@ def process_immigration(dry_run: bool = False):
         return
     
     immigration_count = 0
+    # Track immigrants by social class
+    immigration_by_class = {
+        "Patrician": 0,
+        "Cittadini": 0,
+        "Popolani": 0,
+        "Facchini": 0
+    }
     
     for building in vacant_buildings:
         # 20% chance of immigration for each vacant building
@@ -227,6 +268,7 @@ def process_immigration(dry_run: bool = False):
         if dry_run:
             log.info(f"[DRY RUN] Would generate a new {social_class} citizen for building {building['id']}")
             immigration_count += 1
+            immigration_by_class[social_class] += 1
             continue
         
         # Generate a new citizen using our imported module
@@ -251,11 +293,48 @@ def process_immigration(dry_run: bool = False):
         create_immigration_notification(tables, citizen, building)
         
         immigration_count += 1
+        immigration_by_class[social_class] += 1
         
         # Add a delay to avoid rate limiting
         time.sleep(2)
     
     log.info(f"Immigration process complete. {immigration_count} new citizens immigrated to Venice.")
+    
+    # Create a summary of immigration by social class
+    immigration_summary = {
+        "total": immigration_count,
+        **immigration_by_class
+    }
+    
+    # Create a notification for the admin user with the immigration summary
+    if immigration_count > 0 and not dry_run:
+        create_admin_notification(tables, immigration_summary)
+        
+        # Run the househomelesscitizens.py script to house the new citizens
+        log.info("Running househomelesscitizens.py to house the new citizens...")
+        try:
+            # Change the path to use the correct location
+            # Use the current file's directory to determine the correct path
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+            househomeless_script = os.path.join(script_dir, "househomelesscitizens.py")
+            
+            # Check if the script exists before trying to run it
+            if os.path.exists(househomeless_script):
+                result = subprocess.run(
+                    ["python", househomeless_script],
+                    capture_output=True,
+                    text=True
+                )
+                
+                if result.returncode != 0:
+                    log.error(f"Error running househomelesscitizens.py: {result.stderr}")
+                else:
+                    log.info("Successfully ran househomelesscitizens.py")
+            else:
+                log.warning(f"Househomeless script not found at {househomeless_script}, skipping automatic housing")
+                log.info("New citizens will remain homeless until the next scheduled housing run")
+        except Exception as e:
+            log.error(f"Error running househomelesscitizens.py: {e}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Process immigration to Venice.")
