@@ -69,14 +69,19 @@ def get_all_lands(tables) -> List[Dict]:
         log.error(f"Error fetching lands: {e}")
         return []
 
-def get_buildings_on_land(tables, land_id: str) -> List[Dict]:
+def get_buildings_on_land(tables, land_id: str, land_record: Dict) -> List[Dict]:
     """Fetch all buildings on a specific land."""
-    log.info(f"Fetching buildings on land {land_id}...")
+    # Get the LandId from the land record
+    land_id_value = land_record['fields'].get('LandId', '')
+    if not land_id_value:
+        log.warning(f"Land {land_id} has no LandId field, skipping")
+        return []
+    
+    log.info(f"Fetching buildings on land {land_id} (LandId: {land_id_value})...")
     
     try:
-        # Get buildings on this land that have a User field (owner) and a LeaseAmount
-        # Use the correct field name "Land" to query buildings
-        formula = f"AND({{Land}}='{land_id}', NOT(OR({{User}} = '', {{User}} = BLANK())), NOT(OR({{LeaseAmount}} = '', {{LeaseAmount}} = BLANK())))"
+        # Use the LandId field to query buildings
+        formula = f"AND({{Land}}='{land_id_value}', NOT(OR({{User}} = '', {{User}} = BLANK())), NOT(OR({{LeaseAmount}} = '', {{LeaseAmount}} = BLANK())))"
         buildings = tables['buildings'].all(formula=formula)
         
         log.info(f"Found {len(buildings)} buildings with lease amounts on land {land_id}")
@@ -413,8 +418,8 @@ def distribute_leases(dry_run: bool = False):
             log.warning(f"Land {land_id} has no owner, skipping")
             continue
         
-        # Get buildings on this land
-        buildings = get_buildings_on_land(tables, land_id)
+        # Get buildings on this land, passing the land record
+        buildings = get_buildings_on_land(tables, land_id, land)
         
         if not buildings:
             log.info(f"No buildings with lease amounts found on land {land_id}")
