@@ -123,6 +123,18 @@
       "relationship": "required"
     }
   ],
+  "complements": [
+    {
+      "resourceId": "fish",
+      "context": "fish_preservation",
+      "relationship": "required"
+    },
+    {
+      "resourceId": "meat",
+      "context": "meat_preservation",
+      "relationship": "required"
+    }
+  ],
   "transportProperties": {
     "transportMethods": {
       "largeShip": {
