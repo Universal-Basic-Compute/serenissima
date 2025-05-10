@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import * as THREE from 'three';
-import { CanalFacade, CanalPoint } from '@/lib/threejs/CanalFacade';
+import { CanalFacade, CanalPoint, CanalOptions } from '@/lib/threejs/CanalFacade';
 import { FaTrash, FaInfoCircle, FaPlus } from 'react-icons/fa';
 
 interface CanalCreatorProps {
@@ -65,7 +65,7 @@ const CanalCreator: React.FC<CanalCreatorProps> = ({
       planeRef.current = plane;
       
       return () => {
-        if (canalFacadeRef.current) {
+        if (canalFacadeRef.current && typeof canalFacadeRef.current.dispose === 'function') {
           canalFacadeRef.current.dispose();
         }
         if (planeRef.current) {
@@ -104,7 +104,7 @@ const CanalCreator: React.FC<CanalCreatorProps> = ({
           depth,
           color: new THREE.Color(color).getHex(),
           opacity: 0.7, // More transparent for preview
-          curvature: curvature // Add curvature parameter
+          curvature // This property is now properly typed in CanalOptions
         }
       );
       
