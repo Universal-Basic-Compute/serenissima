@@ -3,6 +3,7 @@ import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUti
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { normalizeCoordinates, createPolygonShape } from './utils';
 import { getUserService } from '../../lib/services/UserService';
+import { NavigationGraphService } from '../../lib/services/NavigationGraphService';
 import { eventBus } from '@/lib/eventBus';
 import { EventTypes } from '@/lib/eventTypes';
 
@@ -3136,62 +3137,14 @@ export default class SimplePolygonRenderer {
     // Only run in browser
     if (typeof window === 'undefined') return;
     
-    // Check if we already have the navigation graph
-    if ((window as any).__navigationGraph) return;
-    
-    // Fetch the land navigation graph from our new API endpoint
-    fetch('/api/data/navigation-graph.json')
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(`Failed to fetch land navigation graph: ${response.status}`);
-        }
-        return response.json();
-      })
-      .then(data => {
-        console.log('Preloaded land navigation graph:', data.metadata);
-        // Store in window for future use
-        (window as any).__navigationGraph = data;
-        
-        // Now fetch the water navigation graph
-        return fetch('/api/data/water-navigation-graph.json')
-          .catch(error => {
-            console.warn('Error fetching water navigation graph:', error);
-            return null;
-          });
-      })
-      .then(response => {
-        if (response && response.ok) {
-          return response.json();
-        }
-        return null;
-      })
-      .then(waterData => {
-        if (waterData) {
-          console.log('Preloaded water navigation graph:', waterData.metadata);
-          // Store in window for future use
-          (window as any).__waterNavigationGraph = waterData;
-        }
+    // Use the NavigationGraphService to load the graphs
+    const navigationGraphService = NavigationGraphService.getInstance();
+    navigationGraphService.preloadNavigationGraphs()
+      .then(() => {
+        console.log('Navigation graphs preloaded successfully');
       })
       .catch(error => {
         console.warn('Error preloading navigation graphs:', error);
-        
-        // Create a minimal fallback navigation graph
-        console.log('Creating fallback navigation graph');
-        (window as any).__navigationGraph = {
-          metadata: { version: "fallback", nodeCount: 0, edgeCount: 0 },
-          nodes: {},
-          edges: {},
-          enhanced: {}
-        };
-        
-        // Also create a minimal fallback water navigation graph
-        (window as any).__waterNavigationGraph = {
-          metadata: { version: "fallback", nodeCount: 0, edgeCount: 0 },
-          nodes: {},
-          edges: {},
-          enhanced: {},
-          polygonToDocks: {}
-        };
       });
   }
   
@@ -3748,7 +3701,8 @@ export default class SimplePolygonRenderer {
       console.log('No land path found, checking for water navigation');
       
       // Check if both polygons have docks
-      const waterGraph = (window as any).__waterNavigationGraph;
+      const navigationGraphService = NavigationGraphService.getInstance();
+      const waterGraph = navigationGraphService.getWaterNavigationGraph();
       if (!waterGraph || !waterGraph.polygonToDocks) {
         console.warn('Water navigation graph not available');
         return false;
@@ -3775,9 +3729,10 @@ export default class SimplePolygonRenderer {
       return;
     }
     
-    // Get the water navigation graph
-    const waterGraph = (window as any).__waterNavigationGraph;
-    if (!waterGraph || !waterGraph.polygonToDocks || !waterGraph.enhanced) {
+    // Get the water navigation graph from the service
+    const navigationGraphService = NavigationGraphService.getInstance();
+    const waterGraph = navigationGraphService.getWaterNavigationGraph();
+    if (!waterGraph.polygonToDocks || !waterGraph.enhanced) {
       console.warn('Water navigation graph not available');
       this.drawDirectPath(this.measurementPoints[0], this.measurementPoints[1]);
       return;
