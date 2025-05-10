@@ -595,8 +595,9 @@ export default class PolygonRenderer {
     if (this.scene) {
       // Create a counter to track how many buildings we find
       let buildingCount = 0;
+      let visibleCount = 0;
       
-      console.log('Checking if buildings are in camera view...');
+      console.log('Camera position:', this.camera.position);
       
       this.scene.traverse(object => {
         // Check if this is a building object
@@ -611,20 +612,22 @@ export default class PolygonRenderer {
           // Force visibility
           object.visible = true;
           
-          // Adjust position to be at an appropriate height above the land
+          // Adjust position to be at a much higher height above the land
           // Store original position if not already stored
           if (!object.userData.originalY) {
             object.userData.originalY = object.position.y;
           }
           
-          // Set the building position to a more appropriate height
-          // Changed from 0.5 to 10 to make buildings float higher above the land
-          object.position.y = 10;
+          // Set the building position to a much higher height - try 30 instead of 10
+          object.position.y = 30; // Increased from 10 to 30
           
           // Check if building is in camera view
           const cameraPosition = this.camera.position.clone();
           const buildingPosition = object.position.clone();
           const distance = cameraPosition.distanceTo(buildingPosition);
+          const isVisible = distance < 100;
+          
+          if (isVisible) visibleCount++;
           
           // Get the bounding box
           if (!object.geometry.boundingBox) {
@@ -634,13 +637,14 @@ export default class PolygonRenderer {
           const boundingBox = object.geometry.boundingBox;
           
           // Log building visibility information
-          console.log(`Building ${object.name || object.userData.type || 'building_' + buildingCount}: ${distance < 100 ? 'VISIBLE' : 'NOT VISIBLE'}`);
+          console.log(`Building ${object.name || object.userData.type || 'building_' + buildingCount}: ${isVisible ? 'VISIBLE' : 'NOT VISIBLE'}`);
           console.log(`  Position: ${Math.round(object.position.x)}, ${Math.round(object.position.y)}, ${Math.round(object.position.z)}`);
+          console.log(`  Distance from camera: ${Math.round(distance)}`);
           if (boundingBox) {
             console.log(`  Bounding box: min(${boundingBox.min.x}, ${boundingBox.min.y}, ${boundingBox.min.z}), max(${boundingBox.max.x}, ${boundingBox.max.y}, ${boundingBox.max.z})`);
           }
           
-          // Force material update
+          // Force material update with bright colors for visibility
           if (object.material) {
             if (Array.isArray(object.material)) {
               object.material.forEach(mat => {
@@ -648,23 +652,59 @@ export default class PolygonRenderer {
                   mat.needsUpdate = true;
                   mat.transparent = false;
                   mat.opacity = 1.0;
+                  // Make materials brighter for visibility
+                  if (mat instanceof THREE.MeshBasicMaterial || mat instanceof THREE.MeshStandardMaterial) {
+                    mat.color.setRGB(1, 0.5, 0); // Bright orange
+                  }
                 }
               });
             } else {
               object.material.needsUpdate = true;
               object.material.transparent = false;
               object.material.opacity = 1.0;
+              // Make materials brighter for visibility
+              if (object.material instanceof THREE.MeshBasicMaterial || object.material instanceof THREE.MeshStandardMaterial) {
+                object.material.color.setRGB(1, 0.5, 0); // Bright orange
+              }
             }
           }
         }
       });
       
       console.log(`Found ${buildingCount} buildings in the scene`);
-      console.log(`${buildingCount > 0 ? buildingCount : 'No'} out of ${buildingCount} buildings are visible in camera view`);
+      console.log(`${visibleCount} out of ${buildingCount} buildings are visible in camera view`);
+      
+      // If no buildings found, create a test building
+      if (buildingCount === 0) {
+        console.log('No buildings found, creating a test building');
+        this.createTestBuilding();
+      }
     }
     
     // Force a render to apply changes
     this.facade.forceRender();
+  }
+  
+  // Add a method to create a test building
+  private createTestBuilding() {
+    // Create a simple cube as a test building
+    const geometry = new THREE.BoxGeometry(5, 5, 5);
+    const material = new THREE.MeshBasicMaterial({ color: 0xff0000 }); // Bright red
+    const cube = new THREE.Mesh(geometry, material);
+    
+    // Position it at the center of the scene, high above the ground
+    cube.position.set(0, 30, 0);
+    
+    // Add user data to identify it as a building
+    cube.userData = {
+      isBuilding: true,
+      type: 'building_test'
+    };
+    
+    // Add to scene
+    this.scene.add(cube);
+    
+    console.log('Test building created at position:', cube.position);
   }
   
   /**
