@@ -64,7 +64,17 @@
           "lat": 45.43629198976701,
           "lng": 12.32536909498353
         },
-        "distance": 10.714660018607074
+        "distance": 10.714660018607074,
+        "id": "869f1de6-4444-4d47-8d4e-311dc37bdf34",
+        "historicalName": "Ponte di San Sebastiano",
+        "englishName": "Bridge of Saint Sebastian",
+        "historicalDescription": "Named after the nearby Church of San Sebastiano, which was completed in the 16th century and houses important works by Paolo Veronese. The bridge would have been a key access point for parishioners attending the church in the Dorsoduro sestiere.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43627077813545,
+            "lng": 12.325307446288388
+          }
+        }
       }
     },
     {
@@ -79,7 +89,17 @@
           "lat": 45.43606111699075,
           "lng": 12.32597706236024
         },
-        "distance": 10.473038003363577
+        "distance": 10.473038003363577,
+        "id": "869f1de6-4444-4d47-8d4e-311dc37bdf34",
+        "historicalName": "Ponte dei Pittori",
+        "englishName": "Bridge of the Painters",
+        "historicalDescription": "Named for the many artists who lived and worked in this area of Dorsoduro during the Renaissance. The presence of the Church of San Sebastiano, decorated by Paolo Veronese, attracted numerous painters to this district during the 16th century.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43603363153741,
+            "lng": 12.32592256622247
+          }
+        }
       }
     },
     {
@@ -94,7 +114,17 @@
           "lat": 45.43583024421449,
           "lng": 12.326585029736949
         },
-        "distance": 10.533272384954207
+        "distance": 10.533272384954207,
+        "id": "869f1de6-4444-4d47-8d4e-311dc37bdf34",
+        "historicalName": "Ponte della Calcina",
+        "englishName": "Bridge of the Lime",
+        "historicalDescription": "Named after the lime kilns (calcina) that once operated in this area of Dorsoduro. The production of lime was essential for construction throughout Venice, and this material would have been transported via the canals near San Sebastiano.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43579648493938,
+            "lng": 12.326537686156552
+          }
+        }
       }
     },
     {
@@ -109,7 +139,17 @@
           "lat": 45.435506516586585,
           "lng": 12.32703027643342
         },
-        "distance": 8.162243435752108
+        "distance": 8.162243435752108,
+        "id": "869f1de6-4444-4d47-8d4e-311dc37bdf34",
+        "historicalName": "Ponte dei Basegò",
+        "englishName": "Bridge of the Basegò Family",
+        "historicalDescription": "Named after the Basegò family, a noble Venetian family who owned property near the Church of San Sebastiano in Dorsoduro during the Renaissance period. Many Venetian bridges were named after prominent families who lived in their vicinity.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43547275711781,
+            "lng": 12.327009754943173
+          }
+        }
       }
     },
     {
@@ -124,7 +164,17 @@
           "lat": 45.43475867766754,
           "lng": 12.325913415582699
         },
-        "distance": 12.374225837849371
+        "distance": 12.374225837849371,
+        "id": "6601d631-3e81-47c0-b97e-fe51fc4cc9a9",
+        "historicalName": "Ponte dei Incurabili",
+        "englishName": "Bridge of the Incurables",
+        "historicalDescription": "Named for its proximity to the Ospedale degli Incurabili (Hospital for Incurables), a Renaissance-era institution near San Sebastiano in Dorsoduro that treated patients with syphilis and other diseases considered incurable at the time. The hospital was also known for its musical education of orphaned girls.",
+        "location": {
+          "midpoint": {
+            "lat": 45.4347788725724,
+            "lng": 12.325987302358236
+          }
+        }
       }
     },
     {
@@ -139,38 +189,69 @@
           "lat": 45.43608396624497,
           "lng": 12.324332893302525
         },
-        "distance": 10.037351571870735
+        "distance": 10.037351571870735,
+        "id": "fb1b4d31-1110-4b59-9a3f-2a4b4c351d3e",
+        "historicalName": "Ponte dei Tintori di Lana",
+        "englishName": "Bridge of the Wool Dyers",
+        "historicalDescription": "Named after the wool dyers who operated workshops in this area of Dorsoduro during the Renaissance. The textile industry was vital to Venice's economy, and specific areas of the city were designated for different stages of production, including dyeing. This bridge would have connected workshops near the San Sebastiano area.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43604756515522,
+            "lng": 12.324370920841563
+          }
+        }
       }
     }
   ],
   "buildingPoints": [
     {
       "lat": 45.43523190729356,
-      "lng": 12.325372019602352
+      "lng": 12.325372019602352,
+      "streetName": "Calle dei Tintori di Seta",
+      "streetNameEnglish": "Street of the Silk Dyers",
+      "streetDescription": "Dorsoduro was known for textile workshops, especially those dyeing silk fabrics. Near San Sebastiano, several silk dyers operated workshops taking advantage of the nearby canals for water access essential to their craft. This name reflects the important craft guild presence in this area during the Renaissance."
     },
     {
       "lat": 45.43532938164237,
-      "lng": 12.326050878432557
+      "lng": 12.326050878432557,
+      "streetName": "Fondamenta San Basilio",
+      "streetNameEnglish": "Foundation of Saint Basil",
+      "streetDescription": "This waterside street would be named for the ancient church of San Basilio that once stood in Dorsoduro near the current location of San Sebastiano. Though the original church no longer exists, its memory was preserved in street names. Many Venetian fondamente (canal-side streets) were named after nearby religious buildings."
     },
     {
       "lat": 45.43527033474255,
-      "lng": 12.326847176614615
+      "lng": 12.326847176614615,
+      "streetName": "Rio Terà Foscarini",
+      "streetNameEnglish": "Filled Canal of the Foscarini",
+      "streetDescription": "Named after the noble Foscarini family who had a significant palazzo in this area of Dorsoduro. Rio Terà indicates a former canal that was filled in to create a street, common in Venice's urban development. The Foscarini were prominent patrons in this sestiere during the Renaissance."
     },
     {
       "lat": 45.435633859202966,
-      "lng": 12.3248317631772
+      "lng": 12.3248317631772,
+      "streetName": "Sottoportego del Veronese",
+      "streetNameEnglish": "Passageway of Veronese",
+      "streetDescription": "A covered passageway named in honor of Paolo Veronese, the famous painter who created numerous masterpieces for the Church of San Sebastiano between 1555 and 1570. His workshop would have been nearby, and he is buried in this church, making this a fitting tribute in the immediate vicinity."
     },
     {
       "lat": 45.435704099559324,
-      "lng": 12.325531972095815
+      "lng": 12.325531972095815,
+      "streetName": "Calle della Confraternita",
+      "streetNameEnglish": "Street of the Brotherhood",
+      "streetDescription": "This name references the Scuola di San Sebastiano, the confraternity associated with the church. These lay brotherhoods were vital to Venetian social and religious life, providing charitable services and commissioning artworks. The confraternity would have had its meeting halls near the church in Dorsoduro."
     },
     {
       "lat": 45.43576002743695,
-      "lng": 12.3259873325887
+      "lng": 12.3259873325887,
+      "streetName": "Ruga dei Corrazzeri",
+      "streetNameEnglish": "Street of the Armor Makers",
+      "streetDescription": "This commercial street would be named for the armor makers who had workshops in this area of Dorsoduro. 'Ruga' typically designated a street with shops. The nearby Giudecca canal provided good transportation for heavy materials, making this area practical for metalworking crafts including armor production for Venice's military and naval forces."
     },
     {
       "lat": 45.4360807656986,
-      "lng": 12.324915544142405
+      "lng": 12.324915544142405,
+      "streetName": "Campiello dei Martiri",
+      "streetNameEnglish": "Small Square of the Martyrs",
+      "streetDescription": "A small square named in reference to Saint Sebastian and other martyred saints depicted in the church. This name would be appropriate for a small campo near the church of San Sebastiano, reflecting the religious iconography that would have been familiar to Renaissance Venetians in this parish."
     }
   ],
   "id": "polygon-1745879420223"

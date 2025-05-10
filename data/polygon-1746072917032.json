@@ -68,7 +68,17 @@
           "lat": 45.43975587215613,
           "lng": 12.33186660513426
         },
-        "distance": 14.029796667991308
+        "distance": 14.029796667991308,
+        "id": "502ef527-2e50-43ab-8de8-e1674b4104b2",
+        "historicalName": "Ponte della Regina",
+        "englishName": "Bridge of the Queen",
+        "historicalDescription": "This bridge takes its name directly from the 'Calle de la Regina' (Street of the Queen) where it is located. The name likely commemorates Caterina Cornaro, the Queen of Cyprus who abdicated her throne and returned to Venice in 1489, where she was given significant honors by the Republic. Santa Maria Formosa was a prominent parish in Renaissance Venice, and this bridge would have connected important noble residences in the area.",
+        "location": {
+          "midpoint": {
+            "lat": 45.439818386076126,
+            "lng": 12.331854519019032
+          }
+        }
       }
     },
     {
@@ -83,7 +93,17 @@
           "lat": 45.43938323209763,
           "lng": 12.331492436976683
         },
-        "distance": 13.626674665073944
+        "distance": 13.626674665073944,
+        "id": "502ef527-2e50-43ab-8de8-e1674b4104b2",
+        "historicalName": "Ponte dei Bancherotti",
+        "englishName": "Bridge of the Money Changers",
+        "historicalDescription": "The area near Santa Maria Formosa was known for various commercial activities during the Renaissance. Small-scale money changers (bancherotti) would have set up their tables near this bridge to serve merchants and nobles in this central area. These money changers were distinct from the larger banking operations near Rialto, providing currency exchange services for the local community and visitors to nearby churches and palazzi.",
+        "location": {
+          "midpoint": {
+            "lat": 45.4394419842682,
+            "lng": 12.33151723123541
+          }
+        }
       }
     },
     {
@@ -98,22 +118,41 @@
           "lat": 45.439847024139524,
           "lng": 12.330833922314204
         },
-        "distance": 7.233397833257585
+        "distance": 7.233397833257585,
+        "id": "0c640191-804c-4d49-a8e6-dc1dfddf377f",
+        "historicalName": "Ponte dei Coroneri",
+        "englishName": "Bridge of the Rosary Makers",
+        "historicalDescription": "Venice was known for specialized craftsmen, and the 'coroneri' were artisans who made rosaries and prayer beads, items in high demand in deeply Catholic Renaissance Venice. This bridge near Santa Maria Formosa would have connected to workshops where these craftsmen created their devotional items, which were popular both with local parishioners attending the church of Santa Maria Formosa and with pilgrims and visitors to the city seeking religious mementos.",
+        "location": {
+          "midpoint": {
+            "lat": 45.439814622114234,
+            "lng": 12.330837961802388
+          }
+        }
       }
     }
   ],
   "buildingPoints": [
     {
       "lat": 45.43870438129174,
-      "lng": 12.330504291812062
+      "lng": 12.330504291812062,
+      "streetName": "Calle dei Stagneri Formosani",
+      "streetNameEnglish": "Street of the Tinsmiths of Formosa",
+      "streetDescription": "This name references the tinsmiths (stagneri) who had workshops near Santa Maria Formosa in the Renaissance period. The church plaza was a center of commercial activity, and metalworkers were among the artisans who established their businesses in the surrounding area. The 'Formosani' suffix connects these craftsmen specifically to the Santa Maria Formosa district."
     },
     {
       "lat": 45.43928678984584,
-      "lng": 12.331084386971606
+      "lng": 12.331084386971606,
+      "streetName": "Sottoportego della Dogaressa",
+      "streetNameEnglish": "Passageway of the Doge's Wife",
+      "streetDescription": "This name refers to a covered passageway near Calle de la Regina (Street of the Queen). The proximity of these royal-themed names is historically consistent, as the area near Santa Maria Formosa was home to several noble families connected to the Venetian government. The name suggests a passage that might have been used by the wife of a Doge when visiting the church or nearby palaces during ceremonial occasions."
     },
     {
       "lat": 45.43963395212712,
-      "lng": 12.331188614918116
+      "lng": 12.331188614918116,
+      "streetName": "Rio Terà dei Orafi",
+      "streetNameEnglish": "Filled Canal of the Goldsmiths",
+      "streetDescription": "A 'Rio Terà' is a filled-in canal that was converted to a street, common in Venice's urban development. This name suggests goldsmiths (orafi) once had workshops along this former canal near Santa Maria Formosa. The area was known for luxury crafts and the presence of wealthy patrons from nearby noble residences would have supported such high-value trades like goldsmithing, making this a historically plausible street name for the district."
     }
   ],
   "id": "polygon-1746072917032"

@@ -68,7 +68,17 @@
           "lat": 45.44395407304094,
           "lng": 12.332097525046652
         },
-        "distance": 6.347868270948544
+        "distance": 6.347868270948544,
+        "id": "f06e7b98-4526-4a59-91f4-d0286d78910f",
+        "historicalName": "Ponte dei Vendramin",
+        "englishName": "Bridge of the Vendramin",
+        "historicalDescription": "Named after the prominent Vendramin family who owned palaces along the Cannaregio canal. The family was famous for producing a Doge (Andrea Vendramin, 1476-1478) and building the magnificent Ca' Vendramin Calergi palace. This bridge would have connected their family properties in the Cannaregio district.",
+        "location": {
+          "midpoint": {
+            "lat": 45.44392613128103,
+            "lng": 12.33208921286491
+          }
+        }
       }
     },
     {
@@ -83,18 +93,34 @@
           "lat": 45.44292657052514,
           "lng": 12.33389996950466
         },
-        "distance": 7.614057709502803
+        "distance": 7.614057709502803,
+        "id": "f06e7b98-4526-4a59-91f4-d0286d78910f",
+        "historicalName": "Ponte dei Tessitori di Seta",
+        "englishName": "Bridge of the Silk Weavers",
+        "historicalDescription": "The Cannaregio district was known for its textile manufacturing workshops, with silk weaving being an important craft in Renaissance Venice. This bridge would have been crossed daily by skilled artisans heading to their workshops near the Fondamenta de Ca' Vendramin, reflecting Venice's significant silk industry which was vital to trade with the East.",
+        "location": {
+          "midpoint": {
+            "lat": 45.44292309284971,
+            "lng": 12.333851424167706
+          }
+        }
       }
     }
   ],
   "buildingPoints": [
     {
       "lat": 45.44314064521993,
-      "lng": 12.333112160169447
+      "lng": 12.333112160169447,
+      "streetName": "Calle dei Mercanti Fiamminghi",
+      "streetNameEnglish": "Street of the Flemish Merchants",
+      "streetDescription": "This name reflects the historical presence of Flemish merchants near Ca' Vendramin in Cannaregio during the Renaissance. Venice maintained strong trade relations with Flanders, and many Flemish traders established businesses in this northern district of Venice, known for its commercial activities and proximity to foreign merchant communities."
     },
     {
       "lat": 45.44349629700334,
-      "lng": 12.33240963827077
+      "lng": 12.33240963827077,
+      "streetName": "Sottoportego della Seta Colorata",
+      "streetNameEnglish": "Passageway of the Colored Silk",
+      "streetDescription": "This name references the silk dyeing workshops that historically operated in the Cannaregio district. Near the grand palaces like Ca' Vendramin, numerous artisanal workshops processed luxury textiles, particularly colored silks. The 'sottoportego' (covered passageway) would have connected various workshops and merchant houses involved in this prestigious trade that contributed significantly to Venice's economic prosperity."
     }
   ],
   "id": "polygon-1746055825280"

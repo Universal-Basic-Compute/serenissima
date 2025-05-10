@@ -1,40 +1,30 @@
 {
-  "totalErrors": 3,
+  "totalErrors": 2,
   "totalWarnings": 0,
   "exitCode": 1,
-  "timestamp": "2025-05-10T03:12:41.871Z",
+  "timestamp": "2025-05-10T07:23:31.853Z",
   "errors": [
     {
-      "filePath": "app/map/page.tsx",
-      "line": 1601,
-      "column": 19,
-      "code": "TS2794",
-      "message": "Expected 1 arguments, but got 0. Did you forget to include 'void' in your type argument to 'Promise'?",
+      "filePath": "components/BuildingRenderer.tsx",
+      "line": 3,
+      "column": 28,
+      "code": "TS2307",
+      "message": "Cannot find module 'three/examples/jsm/loaders/GLTFLoader' or its corresponding type declarations.",
       "type": "error"
     },
     {
-      "filePath": "app/map/page.tsx",
-      "line": 1605,
-      "column": 19,
-      "code": "TS2794",
-      "message": "Expected 1 arguments, but got 0. Did you forget to include 'void' in your type argument to 'Promise'?",
-      "type": "error"
-    },
-    {
-      "filePath": "components/PolygonViewer/CanalCreator.tsx",
-      "line": 74,
-      "column": 37,
-      "code": "TS2339",
-      "message": "Property 'dispose' does not exist on type 'Material | Material[]'.",
+      "filePath": "components/BuildingRenderer.tsx",
+      "line": 4,
+      "column": 22,
+      "code": "TS2307",
+      "message": "Cannot find module 'three/examples/jsm/loaders/GLTFLoader' or its corresponding type declarations.",
       "type": "error"
     }
   ],
-  "rawOutputLines": 5,
+  "rawOutputLines": 3,
   "firstFewLines": [
-    "app/map/page.tsx(1601,19): error TS2794: Expected 1 arguments, but got 0. Did you forget to include 'void' in your type argument to 'Promise'?\r",
-    "app/map/page.tsx(1605,19): error TS2794: Expected 1 arguments, but got 0. Did you forget to include 'void' in your type argument to 'Promise'?\r",
-    "components/PolygonViewer/CanalCreator.tsx(74,37): error TS2339: Property 'dispose' does not exist on type 'Material | Material[]'.\r",
-    "  Property 'dispose' does not exist on type 'Material[]'.\r"
+    "components/BuildingRenderer.tsx(3,28): error TS2307: Cannot find module 'three/examples/jsm/loaders/GLTFLoader' or its corresponding type declarations.\r",
+    "components/BuildingRenderer.tsx(4,22): error TS2307: Cannot find module 'three/examples/jsm/loaders/GLTFLoader' or its corresponding type declarations.\r"
   ],
   "compilerExitCode": 1
 }

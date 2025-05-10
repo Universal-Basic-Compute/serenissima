@@ -56,7 +56,17 @@
           "lat": 45.44496195603659,
           "lng": 12.327335538811676
         },
-        "distance": 11.427971426577532
+        "distance": 11.427971426577532,
+        "id": "df5e790a-8f2c-4d78-9882-45b2bead6740",
+        "historicalName": "Ponte della Sinagoga",
+        "englishName": "Bridge of the Synagogue",
+        "historicalDescription": "Named for its proximity to one of the main synagogues in the Ghetto Novo, established after Jews were confined to this area in 1516. This bridge would have been an important access point for the Jewish community connecting their place of worship with their residences.",
+        "location": {
+          "midpoint": {
+            "lat": 45.44498820494937,
+            "lng": 12.327272571817119
+          }
+        }
       }
     },
     {
@@ -71,7 +81,17 @@
           "lat": 45.4448114100772,
           "lng": 12.326659622139923
         },
-        "distance": 6.198271488534052
+        "distance": 6.198271488534052,
+        "id": "df5e790a-8f2c-4d78-9882-45b2bead6740",
+        "historicalName": "Ponte dei Ramieri",
+        "englishName": "Bridge of the Coppersmiths",
+        "historicalDescription": "This bridge references the copper craftsmen who had workshops near the Ghetto Novo. Jewish artisans were known for their metalworking skills, particularly in copper and bronze. This bridge would have connected their workshops with the main commercial areas of the ghetto.",
+        "location": {
+          "midpoint": {
+            "lat": 45.444834836322016,
+            "lng": 12.326681144729335
+          }
+        }
       }
     },
     {
@@ -86,14 +106,27 @@
           "lat": 45.44524046500234,
           "lng": 12.326380672402374
         },
-        "distance": 14.335963369211626
+        "distance": 14.335963369211626,
+        "id": "df5e790a-8f2c-4d78-9882-45b2bead6740",
+        "historicalName": "Ponte del Portello",
+        "englishName": "Bridge of the Small Gate",
+        "historicalDescription": "Historically accurate name referencing the small entrance gate to the Ghetto Novo that was locked at night to enforce curfew regulations on the Jewish residents. This bridge would have led to one of the controlled access points of the ghetto, established when the area was designated as the mandatory residence for Jews in 1516.",
+        "location": {
+          "midpoint": {
+            "lat": 45.44520085032575,
+            "lng": 12.326453156963069
+          }
+        }
       }
     }
   ],
   "buildingPoints": [
     {
       "lat": 45.44538737672899,
-      "lng": 12.326887449941127
+      "lng": 12.326887449941127,
+      "streetName": "Calle del Banco Rosso",
+      "streetNameEnglish": "Street of the Red Bank",
+      "streetDescription": "This street name refers to one of the pawnshops ('banco') that operated in the Ghetto Novo during the Renaissance. The Jewish community was permitted to operate money-lending businesses, and these banks were often identified by colors. The 'Banco Rosso' (Red Bank) was one of the prominent pawnshops that served Venetians who needed small loans, and where the Jewish moneylenders worked under strict regulations imposed by the Venetian Republic."
     }
   ],
   "id": "polygon-1746055579728"

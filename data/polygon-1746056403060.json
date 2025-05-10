@@ -76,7 +76,17 @@
           "lat": 45.43683172278401,
           "lng": 12.34283086841175
         },
-        "distance": 16.558312646521326
+        "distance": 16.558312646521326,
+        "id": "a605660b-0665-4806-b46c-5151e00710d2",
+        "historicalName": "Ponte del Pozzo Roverso",
+        "englishName": "Bridge of the Reversed Well",
+        "historicalDescription": "Named after the nearby Corte del Pozzo Roverso in San Marco, where a distinctive well with reversed architectural elements once stood. The well was a notable landmark for local residents during the Renaissance period.",
+        "location": {
+          "midpoint": {
+            "lat": 45.436858073540506,
+            "lng": 12.3427316266782
+          }
+        }
       }
     },
     {
@@ -91,7 +101,17 @@
           "lat": 45.4364251891945,
           "lng": 12.343125911403389
         },
-        "distance": 13.136483935590144
+        "distance": 13.136483935590144,
+        "id": "a605660b-0665-4806-b46c-5151e00710d2",
+        "historicalName": "Ponte dei Gioiellieri di San Marco",
+        "englishName": "Bridge of the San Marco Jewelers",
+        "historicalDescription": "This bridge was commonly used by jewelers whose workshops were located near the Corte del Pozzo Roverso area. San Marco was home to many fine jewelry artisans who served the Venetian nobility and wealthy merchants.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43644777517106,
+            "lng": 12.343048127341957
+          }
+        }
       }
     },
     {
@@ -106,7 +126,17 @@
           "lat": 45.43601865560499,
           "lng": 12.343420954395027
         },
-        "distance": 9.735557647252014
+        "distance": 9.735557647252014,
+        "id": "a605660b-0665-4806-b46c-5151e00710d2",
+        "historicalName": "Ponte della Vedova",
+        "englishName": "Bridge of the Widow",
+        "historicalDescription": "According to local tradition, this bridge near the Corte del Pozzo Roverso was named after a wealthy widow who financed its construction in the mid-16th century as a tribute to her late husband, a prominent San Marco merchant.",
+        "location": {
+          "midpoint": {
+            "lat": 45.436037476801616,
+            "lng": 12.343364628005714
+          }
+        }
       }
     },
     {
@@ -121,7 +151,17 @@
           "lat": 45.43588598884151,
           "lng": 12.341131382919976
         },
-        "distance": 6.566167784387617
+        "distance": 6.566167784387617,
+        "id": "c1d3e993-ce71-4099-8f67-6ec0f651a587",
+        "historicalName": "Ponte dei Marangoni",
+        "englishName": "Bridge of the Carpenters",
+        "historicalDescription": "Named for the carpenter's guild whose members had several workshops in this area of San Marco. These skilled craftsmen were essential to Venice's maritime and construction industries, and often traveled across this bridge to reach their worksites.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43590903342337,
+            "lng": 12.341157687498292
+          }
+        }
       }
     },
     {
@@ -136,7 +176,17 @@
           "lat": 45.43657725050863,
           "lng": 12.341104093046376
         },
-        "distance": 9.687469512711631
+        "distance": 9.687469512711631,
+        "id": "ec2f6156-1195-4ce7-9570-ae3b1fd1aeba",
+        "historicalName": "Ponte dei Bisanti",
+        "englishName": "Bridge of the Byzants",
+        "historicalDescription": "This bridge near Corte del Pozzo Roverso was named for the Byzantine gold coins (bisanti) that were frequently exchanged by merchants in this area, highlighting Venice's important trade connections with the Eastern Mediterranean.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43657085917907,
+            "lng": 12.341165500233611
+          }
+        }
       }
     },
     {
@@ -151,30 +201,55 @@
           "lat": 45.437072241074034,
           "lng": 12.341707590074726
         },
-        "distance": 3.5137431721378047
+        "distance": 3.5137431721378047,
+        "id": "ec2f6156-1195-4ce7-9570-ae3b1fd1aeba",
+        "historicalName": "Ponte dei Camerlenghi",
+        "englishName": "Bridge of the Treasurers",
+        "historicalDescription": "Named after the Venetian treasury officials (camerlenghi) who would use this route when traveling between their offices and the residential area near Corte del Pozzo Roverso. These officials were responsible for managing the Republic's finances during the Renaissance.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43707243709929,
+            "lng": 12.341730105231246
+          }
+        }
       }
     }
   ],
   "buildingPoints": [
     {
       "lat": 45.435891185802845,
-      "lng": 12.34268779873875
+      "lng": 12.34268779873875,
+      "streetName": "Calle dei Cambiavalute",
+      "streetNameEnglish": "Street of the Money Changers",
+      "streetDescription": "This name references the money changers who operated near San Marco, exchanging foreign currencies for Venetian ducats. Given the proximity to the commercial center of Venice, money changers would have been common in this area during the Renaissance period, serving merchants and visitors from across Europe and the Mediterranean."
     },
     {
       "lat": 45.43636029123372,
-      "lng": 12.341430170767959
+      "lng": 12.341430170767959,
+      "streetName": "Rio Terà del Pozzo Antico",
+      "streetNameEnglish": "Filled Canal of the Ancient Well",
+      "streetDescription": "This name draws from the 'Pozzo Roverso' (Reversed Well) mentioned in the court's name, but refers to an ancient well that would have been a significant landmark. Rio Terà indicates this was once a canal that was filled in, common in Venice's urban development. The well would have been essential for local water supply in the San Marco district."
     },
     {
       "lat": 45.436357176162176,
-      "lng": 12.342012129612145
+      "lng": 12.342012129612145,
+      "streetName": "Salizada dei Drappi d'Oro",
+      "streetNameEnglish": "Paved Street of the Golden Cloths",
+      "streetDescription": "This name refers to the luxurious gold-threaded fabrics that were sold and displayed by merchants near San Marco. The prestigious location near the heart of Venice would have been home to high-end textile merchants. 'Salizada' indicates this was one of the earlier paved streets in Venice, signifying its importance."
     },
     {
       "lat": 45.43639067789714,
-      "lng": 12.342712173497414
+      "lng": 12.342712173497414,
+      "streetName": "Sottoportego delle Maschere",
+      "streetNameEnglish": "Passageway of the Masks",
+      "streetDescription": "This covered passageway would reference Venice's famous tradition of mask-making and carnival celebrations. The San Marco area was central to festivities, and mask workshops would have been located nearby. Sottoportegos are the distinctive covered passages that run beneath buildings, connecting different areas of Venice."
     },
     {
       "lat": 45.436765432809025,
-      "lng": 12.341952471222918
+      "lng": 12.341952471222918,
+      "streetName": "Calle dei Orologi",
+      "streetNameEnglish": "Street of the Clockmakers",
+      "streetDescription": "This name references the clockmakers who may have had workshops in this area of San Marco, possibly connected to the maintenance of the famous Torre dell'Orologio (Clock Tower) in Piazza San Marco. Precision instrument makers and clockmakers were highly respected artisans in Renaissance Venice, serving the wealthy patrician families of the Republic."
     }
   ],
   "id": "polygon-1746056403060"

@@ -52,7 +52,17 @@
           "lat": 45.44385899686438,
           "lng": 12.330771108175473
         },
-        "distance": 12.859515723697177
+        "distance": 12.859515723697177,
+        "id": "924d5a7e-4125-4675-8d31-0b534d540b8e",
+        "historicalName": "Ponte dei Gatti",
+        "englishName": "Bridge of Cats",
+        "historicalDescription": "Named after the Fondamenta de le Gatte (Foundation of the Cats) in Dorsoduro, this bridge would have connected areas where cats were commonly kept to control Venice's rodent population. During the Renaissance, cats were especially valued in Venice for protecting grain stores and preventing plague, making this a historically appropriate name for a bridge in this area.",
+        "location": {
+          "midpoint": {
+            "lat": 45.443867972024975,
+            "lng": 12.330852526064543
+          }
+        }
       }
     },
     {
@@ -67,18 +77,34 @@
           "lat": 45.444427516062326,
           "lng": 12.330146493859283
         },
-        "distance": 9.067187698863142
+        "distance": 9.067187698863142,
+        "id": "5705fbb2-a546-4e59-8bc3-15d30b95c204",
+        "historicalName": "Ponte dei Ceramisti",
+        "englishName": "Bridge of the Ceramicists",
+        "historicalDescription": "Dorsoduro was known for its artisan workshops, and ceramicists were among the craftsmen who operated in this area during the Renaissance period. This bridge would likely have connected areas where ceramic artists had their botteghe (workshops), allowing them to transport their delicate wares across the canals to markets or shipping points.",
+        "location": {
+          "midpoint": {
+            "lat": 45.44439687239924,
+            "lng": 12.330184826211976
+          }
+        }
       }
     }
   ],
   "buildingPoints": [
     {
       "lat": 45.4441517022382,
-      "lng": 12.33141725057714
+      "lng": 12.33141725057714,
+      "streetName": "Calle dei Gattari",
+      "streetNameEnglish": "Street of the Cat Keepers",
+      "streetDescription": "This name reflects the historical connection to the nearby Fondamenta de le Gatte (Foundation of the Cats). In Renaissance Venice, certain families or individuals were known for keeping cats to control the rodent population, especially near canals and waterfront areas. The 'gattari' were people who specialized in raising or tending to cats, which were valued for protecting food stores and controlling disease-carrying pests in this part of Dorsoduro."
     },
     {
       "lat": 45.44444185590032,
-      "lng": 12.330684436344137
+      "lng": 12.330684436344137,
+      "streetName": "Rio Terà dei Barcaroli",
+      "streetNameEnglish": "Filled Canal of the Boatmen",
+      "streetDescription": "This name refers to a former canal that was filled in (Rio Terà) and the boatmen (barcaroli) who would have operated in this waterway near Fondamenta de le Gatte. Barcaroli were essential workers in Venice's transportation system, ferrying people and goods through the city's canals. This area in Dorsoduro would have been frequented by these boatmen due to its proximity to waterways, making this a historically appropriate name that honors a significant Venetian profession during the Renaissance period."
     }
   ],
   "id": "polygon-1746055751637"

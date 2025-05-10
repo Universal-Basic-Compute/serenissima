@@ -109,7 +109,7 @@
       "process": "meat_preservation",
       "chain": "Salt + Meat → Salting House → Salted Meat"
     }
-  },
+  ],
   "substitutes": [],
   "complements": [
     {

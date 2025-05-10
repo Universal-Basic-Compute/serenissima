@@ -52,7 +52,17 @@
           "lat": 45.44332009321292,
           "lng": 12.336051305851914
         },
-        "distance": 8.56351230600781
+        "distance": 8.56351230600781,
+        "id": "f38ecb79-c8fd-4cb2-b299-8e704e2f8305",
+        "historicalName": "Ponte dei Naviganti",
+        "englishName": "Bridge of Navigators",
+        "historicalDescription": "Named for the navigators and sailors who frequented this area of Cannaregio, which was close to the northern lagoon access points. Many sailors resided in the vicinity of Calle Corrente, making this name historically appropriate for the area.",
+        "location": {
+          "midpoint": {
+            "lat": 45.44328465147629,
+            "lng": 12.336029848179795
+          }
+        }
       }
     },
     {
@@ -67,7 +77,17 @@
           "lat": 45.44314758678921,
           "lng": 12.336653908810593
         },
-        "distance": 11.919081076268558
+        "distance": 11.919081076268558,
+        "id": "f38ecb79-c8fd-4cb2-b299-8e704e2f8305",
+        "historicalName": "Ponte della Corrente",
+        "englishName": "Bridge of the Current",
+        "historicalDescription": "Directly referencing Calle Corrente, this bridge would have been named after the strong water current in the adjacent canal. The name 'Corrente' (current) suggests the water flow was particularly notable at this location in Cannaregio.",
+        "location": {
+          "midpoint": {
+            "lat": 45.44309740390449,
+            "lng": 12.336627086720444
+          }
+        }
       }
     },
     {
@@ -82,7 +102,17 @@
           "lat": 45.44238604863922,
           "lng": 12.336231907925583
         },
-        "distance": 17.98766356992665
+        "distance": 17.98766356992665,
+        "id": "f0f19423-f9e3-4b42-84d2-44614691f2cd",
+        "historicalName": "Ponte dei Vinattieri",
+        "englishName": "Bridge of the Wine Merchants",
+        "historicalDescription": "Cannaregio was known for its numerous taverns and wine shops. This bridge would have been named for the wine merchants who transported their goods across this point to supply the local establishments in the Calle Corrente area.",
+        "location": {
+          "midpoint": {
+            "lat": 45.442456619911006,
+            "lng": 12.33617558153627
+          }
+        }
       }
     },
     {
@@ -97,7 +127,17 @@
           "lat": 45.442672097915924,
           "lng": 12.335416516385056
         },
-        "distance": 6.7483496347815
+        "distance": 6.7483496347815,
+        "id": "f0f19423-f9e3-4b42-84d2-44614691f2cd",
+        "historicalName": "Ponte dei Contini",
+        "englishName": "Bridge of the Contini",
+        "historicalDescription": "Named after the Contini family, a lesser-known but historically significant merchant family who likely owned property near Calle Corrente in Cannaregio during the Renaissance period. Many Venetian bridges were named after prominent local families.",
+        "location": {
+          "midpoint": {
+            "lat": 45.442702208273694,
+            "lng": 12.335421880803086
+          }
+        }
       }
     },
     {
@@ -112,7 +152,17 @@
           "lat": 45.44212634475033,
           "lng": 12.33483179481981
         },
-        "distance": 3.6002370170836095
+        "distance": 3.6002370170836095,
+        "id": "f0f19423-f9e3-4b42-84d2-44614691f2cd",
+        "historicalName": "Ponte di Santa Sofia",
+        "englishName": "Bridge of Saint Sophia",
+        "historicalDescription": "Named after a nearby church or shrine dedicated to Saint Sophia that would have existed in this part of Cannaregio. Religious dedications were common for Venetian bridges, especially when located near a religious building or site of worship.",
+        "location": {
+          "midpoint": {
+            "lat": 45.442139518163245,
+            "lng": 12.334818383774735
+          }
+        }
       }
     },
     {
@@ -127,26 +177,48 @@
           "lat": 45.4424199188976,
           "lng": 12.334245732150055
         },
-        "distance": 7.819338266789144
+        "distance": 7.819338266789144,
+        "id": "83bdc0b8-9c30-4a90-8636-cd60313a84d1",
+        "historicalName": "Ponte degli Ebrei",
+        "englishName": "Bridge of the Jews",
+        "historicalDescription": "Located near the historic Jewish Ghetto of Venice which was established in Cannaregio in 1516. This bridge would have connected parts of the Jewish quarter to the surrounding Christian neighborhoods, serving as an important crossing point for residents of the ghetto.",
+        "location": {
+          "midpoint": {
+            "lat": 45.44242744856059,
+            "lng": 12.334294682464577
+          }
+        }
       }
     }
   ],
   "buildingPoints": [
     {
       "lat": 45.44262763884398,
-      "lng": 12.33489012552039
+      "lng": 12.33489012552039,
+      "streetName": "Calle dei Merlettai",
+      "streetNameEnglish": "Street of the Lace Makers",
+      "streetDescription": "This street in Cannaregio was known for its lace making workshops in the 16th century. Venice was famous for its exquisite lace production, particularly from nearby Burano, and many skilled artisans established workshops in this area to be closer to wealthy clientele and merchants."
     },
     {
       "lat": 45.442622421062794,
-      "lng": 12.336279696439652
+      "lng": 12.336279696439652,
+      "streetName": "Fondamenta dei Sartori",
+      "streetNameEnglish": "Foundation of the Tailors",
+      "streetDescription": "Located perpendicular to Calle Corrente, this canal-side street was home to numerous tailoring workshops. The Sartori (tailors) guild was prominent in Renaissance Venice, crafting garments for nobles and merchants. This area of Cannaregio attracted textile-related trades due to its proximity to trading routes."
     },
     {
       "lat": 45.44260093494109,
-      "lng": 12.336802228166855
+      "lng": 12.336802228166855,
+      "streetName": "Rio Terà dei Sabbioneri",
+      "streetNameEnglish": "Filled Canal of the Sand Merchants",
+      "streetDescription": "This former canal was filled in during the 16th century and became a street. The sabbioneri were sand merchants who supplied sand for glass production and construction. Their presence in Cannaregio was strategic as they could easily transport sand from the northern lagoon to workshops and construction sites throughout the city."
     },
     {
       "lat": 45.44301372728706,
-      "lng": 12.335585739030112
+      "lng": 12.335585739030112,
+      "streetName": "Sottoportego della Madonna dei Naviganti",
+      "streetNameEnglish": "Passageway of the Madonna of Sailors",
+      "streetDescription": "This covered passageway near Calle Corrente featured a small shrine to the Madonna that protected sailors. Such devotional spaces were common in Renaissance Venice, particularly in Cannaregio where many mariners lived. Local sailors would often stop to pray before departing on voyages, leaving small votive offerings for safe passage."
     }
   ],
   "id": "polygon-1746055950767"

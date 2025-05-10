@@ -1,0 +1,504 @@
+[
+  {
+    "id": "ctz_m1qtv6r8uh9e9mec5ah5b",
+    "socialClass": "Popolani",
+    "firstName": "Isabella",
+    "lastName": "Trevisan",
+    "description": "A talented lace-maker whose intricate designs have caught the eye of several noble houses, though she struggles to maintain her independence in a male-dominated guild system.",
+    "imagePrompt": "Portrait of Isabella Trevisan, a determined 30-year-old lace-maker with nimble fingers and attentive brown eyes, wearing a modest olive-green dress with white linen collar and cuffs, seated by a window in her small workshop with bobbins, threads, and patterns spread before her, surrounded by samples of fine Venetian lace hanging from the walls.",
+    "wealth": 450,
+    "createdAt": "2025-05-10T11:46:30.859Z",
+    "imageUrl": "/images/citizens/ctz_m1qtv6r8uh9e9mec5ah5b.jpg"
+  },
+  {
+    "id": "ctz_t3k85sxlwrfy3m4gb91k",
+    "socialClass": "Popolani",
+    "firstName": "Giacomo",
+    "lastName": "Albrizzi",
+    "description": "A jovial tavern keeper whose establishment serves as a hub for gossip, illegal gambling, and the occasional clandestine political meeting disguised as drunken revelry.",
+    "imagePrompt": "Portrait of Giacomo Albrizzi, a barrel-chested 45-year-old tavern keeper with a ruddy complexion and an easy smile beneath his mustache, wearing a stained linen shirt and brown wool vest, standing behind his worn wooden bar polishing a glass, in a dimly lit tavern with low beamed ceilings, tables crowded with diverse patrons, and barrels of wine stacked against the wall.",
+    "wealth": 320,
+    "createdAt": "2025-05-10T11:46:30.859Z",
+    "imageUrl": "/images/citizens/ctz_t3k85sxlwrfy3m4gb91k.jpg"
+  },
+  {
+    "id": "ctz_txpliaxroleuknx2k79qd",
+    "socialClass": "Cittadini",
+    "firstName": "Bernardo",
+    "lastName": "Navagero",
+    "description": "A shrewd silk merchant who maintains a network of agents throughout the Levant, known for his meticulous record-keeping and ability to predict market fluctuations.",
+    "imagePrompt": "Portrait of Bernardo Navagero, a prosperous 45-year-old Venetian merchant with a round face and calculating eyes, wearing a well-made but not ostentatious dark blue wool coat with minimal embroidery and a simple black cap, seated at a desk with ledgers, silk samples, and a balance scale, in his counting house with shelves of account books visible behind him.",
+    "wealth": 3800,
+    "createdAt": "2025-05-10T11:46:30.859Z"
+  },
+  {
+    "id": "ctz_s54qxvd31qr9n0de98ar6g",
+    "socialClass": "Laborer",
+    "firstName": "Paolo",
+    "lastName": "Foscari",
+    "description": "A weathered gondolier with encyclopedic knowledge of Venice's waterways and the scandals of its noble families, who entertains his passengers with bawdy songs and improbable tales.",
+    "imagePrompt": "Portrait of Paolo Foscari, a sun-weathered 40-year-old gondolier with strong arms and a mischievous smile, wearing the traditional black pants and striped shirt of his profession, standing beside his gondola on a small canal, with the silhouette of San Marco visible in the distance and the warm glow of sunset casting long shadows across the water.",
+    "wealth": 65,
+    "createdAt": "2025-05-10T11:46:30.859Z"
+  },
+  {
+    "id": "ctz_9mpjx8ujut7t7guy6il7mo",
+    "socialClass": "Popolani",
+    "firstName": "Matteo",
+    "lastName": "Ziani",
+    "description": "A glassblower from Murano whose experimental techniques with colored glass have earned him both admiration and accusations of revealing trade secrets to foreigners.",
+    "imagePrompt": "Portrait of Matteo Ziani, a 35-year-old glassblower with muscular arms, a short beard, and intense focus in his eyes, wearing a simple linen shirt with rolled-up sleeves and a leather apron, working before a glowing furnace in his Murano workshop, surrounded by tools of his trade and shelves displaying fantastically colored glass pieces in various stages of completion.",
+    "wealth": 780,
+    "createdAt": "2025-05-10T11:46:30.859Z"
+  },
+  {
+    "id": "ctz_ohqhgzki2pirjsryowiqf",
+    "socialClass": "Cittadini",
+    "firstName": "Elena",
+    "lastName": "Barbarigo",
+    "description": "A respected midwife whose knowledge of herbal remedies borders on the suspicious, yet her discretion and success rate keep her in demand among women of all social classes.",
+    "imagePrompt": "Portrait of Elena Barbarigo, a composed 55-year-old midwife with observant eyes and hands worn smooth by decades of work, wearing a respectable dark blue dress with a white cap and collar, in her apothecary-like chamber filled with dried herbs hanging from the ceiling, jars of preparations on shelves, and a table set with clean linens and birthing tools, with afternoon light filtering through a small window.",
+    "wealth": 1200,
+    "createdAt": "2025-05-10T11:46:30.859Z"
+  },
+  {
+    "id": "ctz_9qd7fi3ljwg0yzug7f3z81k",
+    "socialClass": "Patrician",
+    "firstName": "Lorenzo",
+    "lastName": "Dandolo",
+    "description": "A calculating member of the Council of Ten whose family's declining fortunes have led him to forge political alliances through his daughters' marriages while maintaining a façade of traditional Venetian austerity.",
+    "imagePrompt": "Portrait of Lorenzo Dandolo, a stern 60-year-old patrician with a hawkish nose and penetrating gaze, wearing the traditional black toga-like vestment of Venetian nobility with subtle gold embroidery and a black cap, standing in the richly appointed but slightly faded grandeur of his family palazzo, with ancestral portraits lining the walls and a view of the Grand Canal visible through a Gothic window.",
+    "wealth": 15000,
+    "createdAt": "2025-05-10T11:46:30.859Z"
+  },
+  {
+    "id": "ctz_1tly09u594v5ng92kj8bo",
+    "socialClass": "Patrician",
+    "firstName": "Domenico",
+    "lastName": "Grimani",
+    "description": "A refined collector of antiquities and manuscripts with connections to the papal court, who uses his diplomatic finesse to navigate Venetian politics while secretly harboring sympathies for humanist reforms.",
+    "imagePrompt": "Portrait of Domenico Grimani, a 50-year-old Venetian patrician with a trim gray beard and intelligent eyes, wearing an expensive crimson silk robe with fur trim and a matching cap, standing in his study surrounded by classical statues, illuminated manuscripts, and maps, with light streaming through a mullioned window overlooking the Grand Canal.",
+    "wealth": 32000,
+    "createdAt": "2025-05-10T11:46:30.858Z"
+  },
+  {
+    "id": "ctz_m358p7ytxclh9ui3kvdmpt",
+    "socialClass": "Cittadini",
+    "firstName": "Caterina",
+    "lastName": "Baffo",
+    "description": "A widow who has shrewdly expanded her late husband's printing business, specializing in scientific texts and classical literature that attracts scholars from across Europe.",
+    "imagePrompt": "Portrait of Caterina Baffo, a confident 50-year-old woman with intelligent eyes and graying hair partially covered by a modest white cap, wearing a well-made dark green dress with tasteful gold embroidery at the bodice, standing in her printing workshop amid wooden presses, typesetting equipment, and stacks of freshly printed pages, with apprentices working in the background.",
+    "wealth": 2800,
+    "createdAt": "2025-05-10T11:46:30.859Z"
+  },
+  {
+    "id": "ctz_2227d0pjglj80w7a1nwgpx",
+    "socialClass": "Laborer",
+    "firstName": "Giulia",
+    "lastName": "Balbi",
+    "description": "A quick-witted market vendor who sells fish and gossip in equal measure, supporting three children through her tireless work and occasional petty smuggling.",
+    "imagePrompt": "Portrait of Giulia Balbi, a strong-armed 35-year-old fish vendor with weathered hands and a loud, infectious laugh, wearing a simple brown wool dress with a stained apron and a faded headscarf, standing behind her market stall piled with glistening fish on ice, surrounded by the bustle of the Rialto Market with shoppers haggling and boats unloading fresh catch in the background.",
+    "wealth": 40,
+    "createdAt": "2025-05-10T11:46:30.859Z"
+  },
+  {
+    "socialClass": "Patrician",
+    "firstName": "Marco",
+    "lastName": "Contarini",
+    "description": "A shrewd and calculating patrician who has expanded his family's wealth through risky yet profitable investments in the spice trade with Alexandria, known for his lavish parties that serve as venues for political maneuvering.",
+    "imagePrompt": "A dignified Venetian nobleman in his 50s with a trimmed gray beard, wearing an ornate crimson velvet robe with fur trim and golden embroidery, a black cappello hat, standing in a richly decorated salon with paintings and tapestries, large windows overlooking the Grand Canal, his expression confident and slightly cunning.",
+    "wealth": 32000,
+    "id": "ctz_pksgpph5vilphljxfgodb",
+    "createdAt": "2025-05-10T11:51:25.573Z"
+  },
+  {
+    "socialClass": "Cittadini",
+    "firstName": "Antonio",
+    "lastName": "Vendramin",
+    "description": "A successful glass merchant from Murano who has earned citizenship through his contributions to Venice's famous glass industry, possessing a keen eye for innovation and new techniques.",
+    "imagePrompt": "A well-dressed middle-aged man with intelligent eyes and delicate hands, wearing quality dark blue robes with minimal ornamentation, standing in his glass showroom filled with exquisite Murano glass creations of various colors, light streaming through the windows creating prismatic effects across the room.",
+    "wealth": 3800,
+    "id": "ctz_es7dle4bi1sz1jin1iceor",
+    "createdAt": "2025-05-10T11:51:25.574Z"
+  },
+  {
+    "socialClass": "Cittadini",
+    "firstName": "Beatrice",
+    "lastName": "Sanudo",
+    "description": "A wealthy widow who manages her late husband's silk importing business with remarkable acumen, respected for her charitable donations to the Church and orphanages.",
+    "imagePrompt": "An elegant woman in her 40s with a dignified bearing, wearing a rich dark green dress with silk brocade details and a modest pearl necklace, a white linen head covering, seated at a wooden desk with ledgers and silk samples, in a well-appointed merchant office with a view of the Rialto bridge.",
+    "wealth": 4200,
+    "id": "ctz_g9mesri2xsvdl00eail3d",
+    "createdAt": "2025-05-10T11:51:25.574Z"
+  },
+  {
+    "socialClass": "Popolani",
+    "firstName": "Francesco",
+    "lastName": "Rizzo",
+    "description": "A talkative and popular gondolier who knows all the city's gossip and shortcuts, famous for his singing voice that echoes through the canals at dusk.",
+    "imagePrompt": "A muscular, sun-tanned man in his 30s with a charming smile and weathered hands, wearing the traditional black and white striped shirt of gondoliers with simple dark trousers, standing beside his polished black gondola on a small canal, late afternoon light casting long shadows across the water and buildings.",
+    "wealth": 320,
+    "id": "ctz_n4dwj28930loldgqrbg3d",
+    "createdAt": "2025-05-10T11:51:25.574Z"
+  },
+  {
+    "socialClass": "Popolani",
+    "firstName": "Lucia",
+    "lastName": "Zanchi",
+    "description": "A skilled lacemaker from Burano known for her intricate patterns and steady hands, supporting three children through her craft since her husband's death at sea.",
+    "imagePrompt": "A focused woman in her mid-30s with calloused fingers and gentle eyes, wearing a simple brown dress with a white apron and linen headscarf, seated by a window in a modest home working on an intricate lace pattern, her tools and threads carefully arranged, with colorfully painted houses of Burano visible through the window.",
+    "wealth": 450,
+    "id": "ctz_fld0fplxpzrowstf0f0fr",
+    "createdAt": "2025-05-10T11:51:25.574Z"
+  },
+  {
+    "socialClass": "Popolani",
+    "firstName": "Stefano",
+    "lastName": "Bragadin",
+    "description": "A proud third-generation bookbinder with a small but respected shop near San Marco, known for his meticulous craftsmanship and secret techniques for creating water-resistant bindings.",
+    "imagePrompt": "A thin, detail-oriented man in his 40s with ink-stained fingers and spectacles, wearing a quality but well-worn brown tunic and leather apron, working in his cluttered bookbinding shop filled with tools, papers, leather pieces and completed volumes, warm lamplight illuminating his careful work.",
+    "wealth": 780,
+    "id": "ctz_724js6cangc0460olur524",
+    "createdAt": "2025-05-10T11:51:25.574Z"
+  },
+  {
+    "socialClass": "Popolani",
+    "firstName": "Maria",
+    "lastName": "Dolfin",
+    "description": "A quick-witted market vendor selling fruits and vegetables imported from the mainland, known for her fair prices and ability to secure the freshest produce through her extensive family connections.",
+    "imagePrompt": "A robust woman in her late 40s with a loud voice and expressive hands, wearing a simple blue dress with rolled-up sleeves and a practical headscarf, standing behind her colorful market stall piled high with seasonal fruits and vegetables, in the bustling Rialto market with shoppers and vendors visible in the background.",
+    "wealth": 590,
+    "id": "ctz_a54kt9g4k5ua6oezfvqd29",
+    "createdAt": "2025-05-10T11:51:25.574Z"
+  },
+  {
+    "socialClass": "Laborer",
+    "firstName": "Tommaso",
+    "lastName": "Rossi",
+    "description": "A hardworking shipyard laborer in the Arsenal who dreams of becoming a ship designer, spending his sparse free time studying shipbuilding techniques and mathematics.",
+    "imagePrompt": "A muscular young man in his 20s with callused hands and determined eyes, wearing simple, worn work clothes stained with pitch and sawdust, standing in the massive Arsenal shipyard surrounded by ships in various stages of construction, wooden beams, tools, and other laborers, his posture tired but his expression hopeful.",
+    "wealth": 85,
+    "id": "ctz_uhhcl8etdmig6e6a20gorc",
+    "createdAt": "2025-05-10T11:51:25.574Z"
+  },
+  {
+    "socialClass": "Laborer",
+    "firstName": "Agnese",
+    "lastName": "Venier",
+    "description": "A servant in a patrician household who has earned unusual trust from her employers due to her discretion and literacy, occasionally acting as a messenger for sensitive family matters.",
+    "imagePrompt": "A plain-looking woman in her 30s with observant eyes and a reserved demeanor, wearing a simple gray dress with white collar and apron, standing in a grand patrician home interior with marble floors, tapestries, and ornate furniture, carrying linens and appearing humble yet quietly dignified.",
+    "wealth": 60,
+    "id": "ctz_eme67ck4qab5kthkzqwps3",
+    "createdAt": "2025-05-10T11:51:25.574Z"
+  },
+  {
+    "socialClass": "Laborer",
+    "firstName": "Pietro",
+    "lastName": "Barozzi",
+    "description": "A weathered fisherman from the lagoon islands whose knowledge of tides and weather patterns is sought after by sailors, supplementing his meager income by guiding wealthy hunters to the best duck hunting spots.",
+    "imagePrompt": "An elderly man with leathery, sun-darkened skin and sharp blue eyes, wearing patched, simple clothing and a worn cap, standing beside his small wooden fishing boat on a misty lagoon shore, fishing nets and equipment visible, with the silhouette of Venice visible in the distance across the water at sunrise.",
+    "wealth": 45,
+    "id": "ctz_g3lsgq9yjdvp4kq0w1qxc",
+    "createdAt": "2025-05-10T11:51:25.574Z"
+  },
+  {
+    "socialClass": "Patrician",
+    "firstName": "Alvise",
+    "lastName": "Mocenigo",
+    "description": "A shrewd and calculating merchant-diplomat with extensive trading networks in Constantinople, who carefully balances his commercial interests with political aspirations in the Great Council.",
+    "imagePrompt": "A distinguished middle-aged Venetian nobleman with a trimmed dark beard streaked with gray, wearing a rich crimson velvet robe with fur trim and a matching cappello ducale hat, standing proudly on the deck of a merchant galley with the Rialto Bridge visible in the background, his expression confident and calculating, holding a scroll of trade agreements.",
+    "wealth": 32000,
+    "id": "ctz_sdhsz8hramnaeom9dqasxc",
+    "createdAt": "2025-05-10T11:51:59.457Z"
+  },
+  {
+    "socialClass": "Cittadini",
+    "firstName": "Niccolò",
+    "lastName": "Zen",
+    "description": "A respected physician whose innovative treatments have earned him patronage from several patrician families, though his progressive medical ideas occasionally bring him into conflict with more traditional practitioners.",
+    "imagePrompt": "A thoughtful man in his forties with intelligent eyes and a neatly trimmed beard, wearing a dark blue silk doublet with a scholar's robe over it, standing in his well-appointed study filled with medical texts, herbs, and anatomical drawings, holding a glass flask containing medicinal tincture, with a window behind him overlooking a Venetian canal.",
+    "wealth": 3800,
+    "id": "ctz_u0ukrx6gmkvf1ax2awqen",
+    "createdAt": "2025-05-10T11:51:59.457Z"
+  },
+  {
+    "socialClass": "Cittadini",
+    "firstName": "Cecilia",
+    "lastName": "Valier",
+    "description": "A wealthy widow who has skillfully managed her late husband's silk importing business, expanding it while navigating the male-dominated commercial world through clever partnerships and exceptional business acumen.",
+    "imagePrompt": "An elegant woman in her thirties with auburn hair partially visible beneath a white silk veil, wearing a rich emerald green gown with brocade sleeves and pearl adornments, standing in her counting house surrounded by ledgers and samples of luxurious silk fabrics, her expression confident and determined, with a view of merchant ships in the harbor through a window.",
+    "wealth": 4200,
+    "id": "ctz_5h6p9m46uv4dmh2nrgsh4h",
+    "createdAt": "2025-05-10T11:51:59.457Z"
+  },
+  {
+    "socialClass": "Popolani",
+    "firstName": "Bartolomeo",
+    "lastName": "Ferro",
+    "description": "A masterful glassblower from Murano whose distinctive colorful goblets are sought after by nobility throughout Europe, though his fiery temperament has earned him both admirers and detractors in the glassmakers' guild.",
+    "imagePrompt": "A muscular middle-aged man with burn-scarred hands and forearms, wearing a simple linen shirt with rolled-up sleeves and a leather apron, working intently at a glass furnace in his Murano workshop with half-completed glass pieces displayed on nearby shelves, his face illuminated by the orange glow of the furnace as he shapes molten glass with a blowpipe.",
+    "wealth": 850,
+    "id": "ctz_5vp9c5jwse1rohjcowc6h",
+    "createdAt": "2025-05-10T11:51:59.457Z"
+  },
+  {
+    "socialClass": "Popolani",
+    "firstName": "Faustina",
+    "lastName": "Ruzzini",
+    "description": "A talented lace-maker whose delicate designs incorporate innovative patterns inspired by Venetian architecture, supporting her three children through her craft while teaching a small group of dedicated apprentices.",
+    "imagePrompt": "A focused woman in her thirties with nimble fingers and keen eyes, wearing a modest blue wool dress with a white linen apron and simple cap, sitting by a window in her small but tidy workshop creating intricate lacework patterns, surrounded by bobbins, threads and samples of her completed work, with her youngest child playing quietly nearby.",
+    "wealth": 380,
+    "id": "ctz_kze5x1mb4ds91fzhbfwyj9",
+    "createdAt": "2025-05-10T11:51:59.457Z"
+  },
+  {
+    "socialClass": "Popolani",
+    "firstName": "Taddeo",
+    "lastName": "Crivelli",
+    "description": "A respected bookbinder and illuminator whose workshop produces exquisitely crafted volumes for the Venetian printing industry, combining traditional craftsmanship with a keen understanding of the new printing technologies.",
+    "imagePrompt": "A meticulous man in his fifties with reading spectacles and ink-stained fingers, wearing a brown woolen tunic and a craftsman's cap, working on binding a richly decorated manuscript in his organized workshop filled with papers, leather, gold leaf, and illumination supplies, surrounded by stacks of books in various stages of completion, with afternoon light streaming through a small window.",
+    "wealth": 620,
+    "id": "ctz_pg6e2u9bmnk1f5rs4rt1ps",
+    "createdAt": "2025-05-10T11:51:59.457Z"
+  },
+  {
+    "socialClass": "Popolani",
+    "firstName": "Orsolina",
+    "lastName": "Zanetti",
+    "description": "A shrewd apothecary who compounds medicines and cosmetics sold from her small shop near the Rialto, with a reputation for both effective remedies and discretion that makes her establishment popular with clients from all social classes.",
+    "imagePrompt": "A sharp-eyed woman in her forties with graying hair tied back under a practical linen cap, wearing a rust-colored wool dress with a simple necklace of amber beads, standing behind the counter of her apothecary shop filled with jars of herbs, minerals, and compounds, grinding ingredients with a mortar and pestle while keeping a watchful eye on customers browsing her wares.",
+    "wealth": 430,
+    "id": "ctz_3nkcn5qfbv759nrh2iqt05",
+    "createdAt": "2025-05-10T11:51:59.457Z"
+  },
+  {
+    "socialClass": "Laborer",
+    "firstName": "Matteo",
+    "lastName": "Busato",
+    "description": "A skilled gondolier known for his extraordinary knowledge of Venice's waterways and ability to navigate even in dense fog, whose witty commentary and discretion make him a favorite among both locals and visiting merchants.",
+    "imagePrompt": "A wiry, sun-weathered man in his thirties with strong arms and callused hands, wearing the traditional black garb of a gondolier with a straw hat, standing proudly at the stern of his well-maintained gondola on a narrow canal between tall Venetian buildings, expertly maneuvering through the waterway with his oar while exchanging greetings with passersby.",
+    "wealth": 90,
+    "id": "ctz_2w8de2riv09h8wuv4fwsm4",
+    "createdAt": "2025-05-10T11:51:59.457Z"
+  },
+  {
+    "socialClass": "Laborer",
+    "firstName": "Serafina",
+    "lastName": "Moretti",
+    "description": "A resilient washerwoman supporting her elderly mother and young daughter, who supplements her income by carrying messages between households, earning a reputation for reliability that has made her a trusted courier for sensitive communications.",
+    "imagePrompt": "A sturdy woman in her twenties with rough hands and a determined expression, wearing a simple brown wool dress with a faded blue apron and headscarf, carrying a large basket of laundry through a narrow Venetian alleyway lined with drying clothes hanging overhead, her young daughter trailing behind her as she exchanges quick words with neighbors along her route.",
+    "wealth": 45,
+    "id": "ctz_8rhfm56tmlqddexa4ysr",
+    "createdAt": "2025-05-10T11:51:59.457Z"
+  },
+  {
+    "socialClass": "Laborer",
+    "firstName": "Donato",
+    "lastName": "Fabbro",
+    "description": "A dockworker known for his remarkable strength and ability to organize fellow workers, who dreams of saving enough to buy a small boat and establish himself as an independent fisherman.",
+    "imagePrompt": "A powerfully built man in his early thirties with muscular arms and a weather-beaten face, wearing tattered trousers, a dirty linen shirt, and a red cloth tied around his neck, heaving cargo from a merchant ship at the bustling Venetian docks with sweat on his brow, surrounded by barrels, crates and fellow laborers, with trading vessels and the lagoon visible in the background.",
+    "wealth": 60,
+    "id": "ctz_6qaw42xgbquayls6bfmqbf",
+    "createdAt": "2025-05-10T11:51:59.457Z"
+  },
+  {
+    "socialClass": "Patrician",
+    "firstName": "Filippo",
+    "lastName": "Priuli",
+    "description": "A shrewd diplomat who maintains extensive commercial networks in Constantinople and Alexandria while quietly supporting Venetian artists and intellectuals.",
+    "imagePrompt": "A dignified Venetian nobleman in his 50s with a neatly trimmed salt-and-pepper beard, wearing an expensive crimson silk robe with fur trim and a black cappello ducale hat, standing in a richly appointed study with maps of Mediterranean trade routes, painted in the style of Tintoretto, 1570s Venice.",
+    "wealth": 32000,
+    "id": "ctz_che401s6g1emnpj0t7exad",
+    "createdAt": "2025-05-10T11:52:32.196Z"
+  },
+  {
+    "socialClass": "Cittadini",
+    "firstName": "Gabriele",
+    "lastName": "Memmo",
+    "description": "An ambitious glass merchant from Murano who has secured lucrative contracts with courts across Europe and dreams of one day being granted patrician status.",
+    "imagePrompt": "A confident middle-aged Venetian man with calculating eyes and a confident smile, wearing quality dark blue robes with tasteful gold trim befitting a wealthy merchant, examining a finely crafted glass goblet in his workshop, with Murano glass furnaces visible in the background, realistic Renaissance style, 1530s Venice.",
+    "wealth": 3800,
+    "id": "ctz_rxbjr75m3pxp47jxpn58",
+    "createdAt": "2025-05-10T11:52:32.196Z"
+  },
+  {
+    "socialClass": "Cittadini",
+    "firstName": "Bianca",
+    "lastName": "Tassini",
+    "description": "A respected midwife from a family of physicians who has gained fame for her herbal remedies and has attended births in many patrician households.",
+    "imagePrompt": "A wise-looking woman in her 40s with observant eyes and deft hands, wearing a high-quality modest dress of deep green with a white linen coif covering her hair, standing in her apothecary workshop surrounded by dried herbs, glass vials, and medical texts, painted in a warm Venetian palette, 1520s Venice.",
+    "wealth": 1700,
+    "id": "ctz_rybwrpq9zmz3njok8y3q",
+    "createdAt": "2025-05-10T11:52:32.196Z"
+  },
+  {
+    "socialClass": "Popolani",
+    "firstName": "Tiziano",
+    "lastName": "Bertucci",
+    "description": "A flamboyant mask-maker whose carnival creations are sought after by Venetians from all social classes, and who knows more secrets than he should from fitting masks to important faces.",
+    "imagePrompt": "A thin, animated man in his 30s with nimble fingers and expressive eyes, wearing a blue-and-yellow striped popolani outfit with a craftsman's apron, working on an ornate golden carnival mask in his small but colorful workshop filled with feathers, paints, and finished masks, early afternoon light streaming through the windows, realistic Renaissance style, 1550s Venice.",
+    "wealth": 750,
+    "id": "ctz_5hi3wxkeilwa8oi885jqhl",
+    "createdAt": "2025-05-10T11:52:32.196Z"
+  },
+  {
+    "socialClass": "Popolani",
+    "firstName": "Vittoria",
+    "lastName": "Zanatta",
+    "description": "A determined widow who has successfully taken over her husband's silk-weaving business and is known for her keen eye for emerging fashion trends among the nobility.",
+    "imagePrompt": "A capable woman in her late 30s with strong features and calloused hands, wearing a respectable rust-colored dress with a white collar and a simple gold wedding band she still wears, supervising workers at several looms in a silk workshop with bolts of richly colored fabrics visible, painted in the style of Carpaccio, 1510s Venice.",
+    "wealth": 580,
+    "id": "ctz_d7y75cgde2m1jirs1wsblv",
+    "createdAt": "2025-05-10T11:52:32.196Z"
+  },
+  {
+    "socialClass": "Popolani",
+    "firstName": "Jacopo",
+    "lastName": "Trevisan",
+    "description": "A gregarious tavern owner near the Rialto who has a talent for overhearing useful information and selling it to the right people, alongside his famous spiced wine.",
+    "imagePrompt": "A heavyset, jovial man in his 40s with a ruddy complexion and knowing eyes, wearing practical brown popolani clothes with a stained apron, standing behind the counter of his busy tavern near the Rialto Bridge with wine barrels stacked behind him and merchants engaged in animated conversation at the tables, early evening lighting, 1540s Venice.",
+    "wealth": 380,
+    "id": "ctz_svt4mzibj3gm67i5utydi",
+    "createdAt": "2025-05-10T11:52:32.196Z"
+  },
+  {
+    "socialClass": "Popolani",
+    "firstName": "Lucrezia",
+    "lastName": "Dardi",
+    "description": "A talented lace-maker from Burano whose intricate designs have caught the attention of several patrician ladies, positioning her craft for potential elevation in status and income.",
+    "imagePrompt": "A focused young woman in her 20s with delicate features and exceptional dexterity, wearing a modest but clean blue popolani dress with a white collar, working on an intricate lace pattern in a small, neat workshop on Burano island, with numerous bobbins and threads creating a complex pattern under her careful attention, morning light illuminating her work, painted in a detailed Renaissance style, 1560s Venice.",
+    "wealth": 180,
+    "id": "ctz_axpe2zcr2ibowuo28roos",
+    "createdAt": "2025-05-10T11:52:32.196Z"
+  },
+  {
+    "socialClass": "Laborer",
+    "firstName": "Orsetta",
+    "lastName": "Bosello",
+    "description": "A quick-witted laundress who serves several noble households and leverages her position to collect and spread gossip, occasionally selling valuable information to interested parties.",
+    "imagePrompt": "A thin, weathered woman in her 30s with sharp eyes and a knowing expression, wearing a simple, faded brown dress with rolled-up sleeves and a worn headscarf, carrying a large basket of laundry along a narrow Venetian canal, with washing lines visible between buildings above, harsh midday light, realistic style, 1540s Venice.",
+    "wealth": 65,
+    "id": "ctz_jz7sl7brzbndh1torsy9mk",
+    "createdAt": "2025-05-10T11:52:32.196Z"
+  },
+  {
+    "socialClass": "Laborer",
+    "firstName": "Bruno",
+    "lastName": "Fachini",
+    "description": "A sullen but reliable cargo porter who works the docks near the Arsenale, known for his exceptional strength and ability to find storage space for merchants' overflow goods—for a small fee.",
+    "imagePrompt": "A muscular, sun-darkened man in his 30s with a perpetual scowl and powerful arms, wearing tattered brown trousers, a sweat-stained loose shirt, and no shoes, carrying a heavy crate on his shoulder on a busy Venetian dock with ships being loaded in the background and the imposing walls of the Arsenale visible, harsh afternoon light, gritty realistic style, 1520s Venice.",
+    "wealth": 42,
+    "id": "ctz_nh24jfrkua8tgmpl3fka2f",
+    "createdAt": "2025-05-10T11:52:32.196Z"
+  },
+  {
+    "socialClass": "Laborer",
+    "firstName": "Zanetta",
+    "lastName": "Calderoni",
+    "description": "A tired but hopeful young servant girl who works for a cittadini family and dreams of learning to read while carefully saving every coin she can spare.",
+    "imagePrompt": "A small, thin girl of about 16 with tired eyes but a determined expression, wearing a plain, patched gray dress with a simple white apron, sweeping the courtyard of a comfortable cittadini household at dawn, her few possessions and a small hidden coin purse kept in a tiny attic room visible through an upper window, soft morning light, painted in a sympathetic Renaissance style, 1550s Venice.",
+    "wealth": 18,
+    "id": "ctz_6la9psub6a2eo7tmm6muon",
+    "createdAt": "2025-05-10T11:52:32.196Z"
+  },
+  {
+    "socialClass": "Patrician",
+    "firstName": "Marcantonio",
+    "lastName": "Giustinian",
+    "description": "A shrewd and calculating patrician with connections to the Levant trade, known for his collection of Eastern manuscripts and political scheming in the Council of Ten.",
+    "imagePrompt": "Portrait of Marcantonio Giustinian, a 50-year-old Venetian nobleman with a stern expression, thin grey beard, and piercing dark eyes, wearing an ornate black velvet robe with gold embroidery and a heavy gold chain of office, standing in his luxurious palazzo study surrounded by Eastern manuscripts, maps of trade routes, and symbols of his wealth and power against a dark red background.",
+    "wealth": 35000,
+    "id": "ctz_8r5dys1rmtgspxnun6bi5d",
+    "createdAt": "2025-05-10T11:53:07.758Z"
+  },
+  {
+    "socialClass": "Cittadini",
+    "firstName": "Ludovico",
+    "lastName": "Malipiero",
+    "description": "A successful spice merchant whose ships regularly return from Alexandria laden with precious cargo, known for his meticulous record-keeping and generous donations to his parish church.",
+    "imagePrompt": "Portrait of Ludovico Malipiero, a prosperous 45-year-old Venetian cittadino with a round face and confident posture, wearing rich burgundy robes with fur trim, standing at his counting house desk examining ledgers and exotic spice samples, with ships visible through the window behind him, surrounded by scales, ink pots, and commercial correspondence.",
+    "wealth": 3800,
+    "id": "ctz_5wcka7b1lym4vnewq2xa4h",
+    "createdAt": "2025-05-10T11:53:07.758Z"
+  },
+  {
+    "socialClass": "Cittadini",
+    "firstName": "Chiara",
+    "lastName": "Bembo",
+    "description": "The shrewd widow of a glassworks owner who has expanded the business since her husband's death, respected for her artistic eye and business acumen.",
+    "imagePrompt": "Portrait of Chiara Bembo, an elegant 40-year-old Venetian cittadina widow with knowing eyes and delicate features, wearing a modest but high-quality dark blue dress with silk sleeves and a white linen veil, standing in her Murano glassworks supervising artisans creating delicate glassware, with furnaces glowing in the background and samples of fine colored glass creations displayed around her.",
+    "wealth": 2500,
+    "id": "ctz_c66crnrv0yrb4czxtfewo",
+    "createdAt": "2025-05-10T11:53:07.758Z"
+  },
+  {
+    "socialClass": "Popolani",
+    "firstName": "Vincenzo",
+    "lastName": "Tagliapietra",
+    "description": "A master stonemason whose skilled hands have contributed to several prominent buildings in Venice, known for his perfectionism and occasional explosive temper.",
+    "imagePrompt": "Portrait of Vincenzo Tagliapietra, a muscular 38-year-old stonemason with weathered skin, strong hands, and determined expression, wearing a leather apron over simple but quality wool clothing, standing in his workshop surrounded by chisels, mallets, and partially completed stone carvings, with architectural plans spread out nearby and dust filling the air.",
+    "wealth": 800,
+    "id": "ctz_o7wfbqqpqpezbchhafy3np",
+    "createdAt": "2025-05-10T11:53:07.758Z"
+  },
+  {
+    "socialClass": "Popolani",
+    "firstName": "Dorotea",
+    "lastName": "Gastaldi",
+    "description": "A talented lace maker whose intricate patterns are sought after by noble ladies, supporting her three children through her craft after her husband was lost at sea.",
+    "imagePrompt": "Portrait of Dorotea Gastaldi, a 30-year-old Venetian woman with nimble fingers and tired but determined eyes, wearing a simple brown dress with a clean white apron and modest head covering, seated by a window with her lace-making equipment, several half-finished pieces of intricate Venetian lace visible, in a modest but tidy home with three young children playing nearby.",
+    "wealth": 350,
+    "id": "ctz_8y24ueyi9vm335f8ha2nko",
+    "createdAt": "2025-05-10T11:53:07.758Z"
+  },
+  {
+    "socialClass": "Popolani",
+    "firstName": "Raffaele",
+    "lastName": "Sartori",
+    "description": "A skilled tailor with a small but loyal clientele among the cittadini class, known for his ability to discreetly incorporate the latest foreign fashions into conservative Venetian styles.",
+    "imagePrompt": "Portrait of Raffaele Sartori, a thin 42-year-old tailor with precise movements and observant eyes, wearing a well-made but simple dark green tunic and cap, working in his small shop near the Rialto with scissors in hand, surrounded by bolts of fine fabric, pattern books, and partially completed garments, with measuring tools hanging on the wall and a view of a busy Venetian calle through the window.",
+    "wealth": 650,
+    "id": "ctz_4y3n5538hmxighouirxa8p",
+    "createdAt": "2025-05-10T11:53:07.758Z"
+  },
+  {
+    "socialClass": "Popolani",
+    "firstName": "Paola",
+    "lastName": "Cimenti",
+    "description": "A savvy tavern keeper whose establishment near the Arsenal is popular with shipbuilders and sailors, known for her strong arms, sharper wit, and ability to maintain order among rowdy patrons.",
+    "imagePrompt": "Portrait of Paola Cimenti, a robust 35-year-old tavern keeper with strong arms, flushed cheeks, and a commanding presence, wearing a practical rust-colored dress with rolled sleeves and a stained apron, standing behind her tavern counter with wine jugs and cups, in a crowded wood-paneled tavern filled with Arsenal workers and sailors, with maritime decorations and the warm glow of oil lamps illuminating the scene.",
+    "wealth": 420,
+    "id": "ctz_rf9gsd7ecel459uvcc0m9f",
+    "createdAt": "2025-05-10T11:53:07.758Z"
+  },
+  {
+    "socialClass": "Laborer",
+    "firstName": "Bortolo",
+    "lastName": "Fabbri",
+    "description": "A gondolier with twenty years of experience navigating Venice's waterways, known for his knowledge of city gossip and ability to sing beautifully for his passengers.",
+    "imagePrompt": "Portrait of Bortolo Fabbri, a sun-weathered 40-year-old gondolier with muscular arms and a weathered face, wearing the traditional black outfit of Venetian gondoliers with a straw hat, standing beside his gondola on a small canal, with his oar in hand and a knowing smile, against a backdrop of typical Venetian buildings with laundry hanging between them and the late afternoon sun casting long shadows across the water.",
+    "wealth": 85,
+    "id": "ctz_rgb92fcbwu4mibl8cp96j",
+    "createdAt": "2025-05-10T11:53:07.758Z"
+  },
+  {
+    "socialClass": "Laborer",
+    "firstName": "Zanetta",
+    "lastName": "Passarin",
+    "description": "A fishmonger's assistant with quick hands and a quicker tongue, known for her ability to haggle relentlessly and her dream of one day owning her own stall at the Rialto market.",
+    "imagePrompt": "Portrait of Zanetta Passarin, a thin 25-year-old woman with calloused hands and lively eyes, wearing a simple patched brown dress and faded headscarf, standing at a fish market stall in the Rialto market, surrounded by various fish on ice, scales, and shouting merchants, with her hands deftly cleaning fish while keeping track of customers and money, the bustling market crowd and canal visible in the background.",
+    "wealth": 40,
+    "id": "ctz_bqwobasd7ktccxazkt8m7s",
+    "createdAt": "2025-05-10T11:53:07.758Z"
+  },
+  {
+    "socialClass": "Laborer",
+    "firstName": "Tonio",
+    "lastName": "Scarparo",
+    "description": "A dock worker at the busy port of Venice who dreams of saving enough to learn shipbuilding, known for his extraordinary strength and quiet observation of the ships that come and go.",
+    "imagePrompt": "Portrait of Tonio Scarparo, a powerfully built 22-year-old dock worker with corded muscles and hopeful eyes, wearing torn and patched clothing with a simple cloth cap, carrying heavy cargo on his shoulder at the bustling Venetian docks, surrounded by ships being loaded and unloaded, merchants arguing over prices, sailors from distant lands, and the constant activity of Venice's maritime trade, with the lagoon stretching out behind him at sunset.",
+    "wealth": 25,
+    "id": "ctz_92hvavo183urjbzfb6k6gh",
+    "createdAt": "2025-05-10T11:53:07.758Z"
+  }
+]

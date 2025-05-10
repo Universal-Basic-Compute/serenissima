@@ -9,7 +9,6 @@ import { EventTypes } from '@/lib/eventTypes';
 import { FaWater } from 'react-icons/fa';
 import { normalizeCoordinates } from '@/components/PolygonViewer/utils';
 import { useSceneReady } from '@/lib/components/SceneReadyProvider';
-import { useSceneReady } from '@/lib/components/SceneReadyProvider';
 
 interface BuildingsToolbarProps {
   scene?: THREE.Scene;

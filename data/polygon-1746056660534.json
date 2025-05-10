@@ -75,7 +75,10 @@
       "water": {
         "lat": 45.43530338557924,
         "lng": 12.328849645575552
-      }
+      },
+      "historicalName": "Riva di San Moisè",
+      "englishName": "St. Moses Waterfront",
+      "historicalDescription": "Named after the nearby Church of San Moisè, this dock would have served visitors to this prominent church in the San Marco district. The church dates back to the 8th century and was an important religious landmark near Calle de le Lezze."
     },
     {
       "edge": {
@@ -85,7 +88,10 @@
       "water": {
         "lat": 45.434841202824096,
         "lng": 12.327574788643313
-      }
+      },
+      "historicalName": "Fondamenta Lezze",
+      "englishName": "Lezze Foundation",
+      "historicalDescription": "Named after the prominent Lezze family who had their residence along Calle de le Lezze. The Lezze were a noble Venetian family who contributed several important figures to the Republic's government during the Renaissance period."
     },
     {
       "edge": {
@@ -95,7 +101,10 @@
       "water": {
         "lat": 45.43443075566063,
         "lng": 12.327247299787139
-      }
+      },
+      "historicalName": "Riva dei Gioiellieri",
+      "englishName": "Jewelers' Landing",
+      "historicalDescription": "The San Marco area near Piazza San Marco was known for luxury trades. This dock would have served the jewelry workshops that existed in this affluent area, where artisans crafted pieces for wealthy Venetian nobles and foreign visitors."
     },
     {
       "edge": {
@@ -105,7 +114,10 @@
       "water": {
         "lat": 45.43350503211237,
         "lng": 12.327445764422302
-      }
+      },
+      "historicalName": "Fondamenta dei Maschereri",
+      "englishName": "Mask Makers' Foundation",
+      "historicalDescription": "The San Marco district housed many artisans who created masks for Venice's famous carnival celebrations. This dock would have been used by these craftsmen to receive materials and ship finished products, particularly significant given the area's proximity to the entertainment districts."
     },
     {
       "edge": {
@@ -115,7 +127,10 @@
       "water": {
         "lat": 45.43312863114404,
         "lng": 12.327601172469695
-      }
+      },
+      "historicalName": "Riva della Dogana Piccola",
+      "englishName": "Small Customs House Landing",
+      "historicalDescription": "This dock would have served as a secondary customs checkpoint for goods entering the wealthy San Marco district. While the main Dogana was located at the entrance to the Grand Canal, smaller customs stations existed throughout Venice to monitor and tax goods being transported within the city."
     }
   ],
   "bridgePoints": [
@@ -131,7 +146,17 @@
           "lat": 45.43286356322128,
           "lng": 12.328873774616328
         },
-        "distance": 5.25732514452172
+        "distance": 5.25732514452172,
+        "id": "323212d6-42f0-4f6c-b877-259577248310",
+        "historicalName": "Ponte dei Lezze",
+        "englishName": "Bridge of the Lezze",
+        "historicalDescription": "Named after the influential Lezze family who resided in this area during the Renaissance period. The Lezze were a noble Venetian family who held several important positions in the Republic's government. This bridge would have been named to honor their presence in the Contrada San Moisè.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43288524931161,
+            "lng": 12.328860363571254
+          }
+        }
       }
     },
     {
@@ -146,7 +171,17 @@
           "lat": 45.43330023937149,
           "lng": 12.32971867045602
         },
-        "distance": 8.913011171341928
+        "distance": 8.913011171341928,
+        "id": "bf2729c7-890c-43d1-9e74-98ef0623e0ac",
+        "historicalName": "Ponte di San Moisè",
+        "englishName": "Bridge of Saint Moses",
+        "historicalDescription": "Named after the nearby Church of San Moisè, one of the important religious landmarks in this sestiere. The church, dedicated to Moses, was a significant religious site in Renaissance Venice. This bridge would have served as an important connection point for parishioners traveling to the church in the Contrada San Moisè.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43330686758656,
+            "lng": 12.329662344066707
+          }
+        }
       }
     },
     {
@@ -161,54 +196,97 @@
           "lat": 45.434034296870124,
           "lng": 12.330383858291713
         },
-        "distance": 5.229726949894557
+        "distance": 5.229726949894557,
+        "id": "bf2729c7-890c-43d1-9e74-98ef0623e0ac",
+        "historicalName": "Ponte dei Orafi di San Marco",
+        "englishName": "Bridge of the Goldsmiths of Saint Mark",
+        "historicalDescription": "Named for the goldsmiths and jewelers who likely had workshops in this wealthy area near San Marco. The Sestiere di San Marco was known for luxury trades, and this bridge would have been crossed by craftsmen and wealthy patrons alike. Its proximity to the prestigious San Moisè district made it an important crossing for those dealing in precious metals and gems.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43402774969369,
+            "lng": 12.330351671783534
+          }
+        }
       }
     }
   ],
   "buildingPoints": [
     {
       "lat": 45.433396553935076,
-      "lng": 12.328154293447135
+      "lng": 12.328154293447135,
+      "streetName": "Calle dei Oresi di San Moisè",
+      "streetNameEnglish": "Street of the Goldsmiths of San Moisè",
+      "streetDescription": "Named after the goldsmiths who had their workshops in this area near the Church of San Moisè. This part of San Marco was known for luxury artisans who catered to the wealthy patricians of the district."
     },
     {
       "lat": 45.43333529306637,
-      "lng": 12.328852945713564
+      "lng": 12.328852945713564,
+      "streetName": "Ruga dei Mercanti da Costantinopoli",
+      "streetNameEnglish": "Row of Merchants from Constantinople",
+      "streetDescription": "This street would commemorate the Byzantine merchants who traded in Venice. The San Moisè area was close to Piazza San Marco and the Bacino, making it a logical place for foreign merchants to conduct business."
     },
     {
       "lat": 45.433424790405844,
-      "lng": 12.329317989022886
+      "lng": 12.329317989022886,
+      "streetName": "Rio Terà dei Lezze",
+      "streetNameEnglish": "Filled Canal of the Lezze Family",
+      "streetDescription": "Named after the noble Lezze family who had their palazzo in this contrada. Rio Terà indicates this was once a canal that was filled in, a common practice in Venice's urban development history."
     },
     {
       "lat": 45.43376328254717,
-      "lng": 12.32816088591352
+      "lng": 12.32816088591352,
+      "streetName": "Salizada dei Gioiellieri",
+      "streetNameEnglish": "Paved Street of the Jewelers",
+      "streetDescription": "A salizada (from 'selciato' meaning paved) was one of the first paved streets in Venice. This area near San Moisè was known for luxury trades including jewelry making for the patrician class."
     },
     {
       "lat": 45.4338368273669,
-      "lng": 12.32867591810268
+      "lng": 12.32867591810268,
+      "streetName": "Sottoportego del Ridotto",
+      "streetNameEnglish": "Passageway of the Gambling House",
+      "streetDescription": "The Ridotto, Venice's famous gambling house, was established in 1638 near San Moisè. This sottoportego (covered passageway) would have led toward or near this notorious establishment frequented by nobles and wealthy merchants."
     },
     {
       "lat": 45.43384983923431,
-      "lng": 12.32930290763258
+      "lng": 12.32930290763258,
+      "streetName": "Calle della Scuola di San Moisè",
+      "streetNameEnglish": "Street of the San Moisè Confraternity",
+      "streetDescription": "Named after the confraternity or scuola associated with the Church of San Moisè. These religious brotherhoods were important social and charitable institutions in Renaissance Venice."
     },
     {
       "lat": 45.43425594171941,
-      "lng": 12.328228628871312
+      "lng": 12.328228628871312,
+      "streetName": "Fondamenta dei Banchieri",
+      "streetNameEnglish": "Foundation of the Bankers",
+      "streetDescription": "This fondamenta (street alongside a canal) would reference the bankers who operated in this wealthy area near San Marco. San Moisè was home to many financial professionals due to its proximity to the commercial and political center of the city."
     },
     {
       "lat": 45.43423174728258,
-      "lng": 12.32889030075436
+      "lng": 12.32889030075436,
+      "streetName": "Campiello della Fenice Piccola",
+      "streetNameEnglish": "Small Square of the Little Phoenix",
+      "streetDescription": "While the famous Teatro La Fenice was built later, this name could refer to a smaller predecessor or to a tavern or shop with this emblem. The campiello (small square) would have been a gathering place in the San Moisè district."
     },
     {
       "lat": 45.43424234704456,
-      "lng": 12.329489736226906
+      "lng": 12.329489736226906,
+      "streetName": "Corte Priuli ai Leoncini",
+      "streetNameEnglish": "Priuli Court at the Little Lions",
+      "streetDescription": "Named after the Priuli family who were prominent Venetian nobles, with several family members serving as Doges. The 'leoncini' (little lions) likely referred to decorative elements or family emblems in the area near San Moisè."
     },
     {
       "lat": 45.43436818898617,
-      "lng": 12.329950176779125
+      "lng": 12.329950176779125,
+      "streetName": "Ramo delle Maschere",
+      "streetNameEnglish": "Branch of the Masks",
+      "streetDescription": "A small branch street (ramo) named after mask makers or mask sellers who would have operated in this area. Venice was famous for its carnival traditions, and San Moisè's proximity to San Marco made it an ideal location for this trade."
     },
     {
       "lat": 45.434659383326384,
-      "lng": 12.329427979610095
+      "lng": 12.329427979610095,
+      "streetName": "Calle del Cappello d'Oro",
+      "streetNameEnglish": "Street of the Golden Hat",
+      "streetDescription": "Named after a shop sign or noble family emblem in the area. The wealthy San Moisè district near the Grand Canal was home to many luxury shops and prestigious families who might use such symbols in their heraldry."
     }
   ],
   "id": "polygon-1746056660534"

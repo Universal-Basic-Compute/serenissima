@@ -83,7 +83,10 @@
       "water": {
         "lat": 45.44190960908787,
         "lng": 12.330567282456142
-      }
+      },
+      "historicalName": "Fondamenta San Stae",
+      "englishName": "St. Eustace's Foundation",
+      "historicalDescription": "Named after the nearby Church of San Stae (the Venetian name for Saint Eustace), this dock served as a key landing point for merchants and parishioners visiting the important religious site in the Santa Croce district. The church, built in the 17th century, was a significant landmark in the area, and the adjacent fondamenta would have been a bustling point for goods delivery and passenger transport along the Grand Canal in Renaissance Venice."
     }
   ],
   "bridgePoints": [
@@ -99,7 +102,17 @@
           "lat": 45.44085576315493,
           "lng": 12.331112872051753
         },
-        "distance": 5.342784267587234
+        "distance": 5.342784267587234,
+        "id": "7cc7de6d-bc51-482d-a03f-4087d1ae4c2b",
+        "historicalName": "Ponte di San Stae",
+        "englishName": "Bridge of Saint Eustachius",
+        "historicalDescription": "Named after the nearby Church of San Stae (dedicated to Saint Eustachius), one of the prominent landmarks in the Sestiere di Santa Croce. The bridge would have served as a crucial connection point for parishioners attending the church, which was built in the 17th century on foundations dating back to the 11th century.",
+        "location": {
+          "midpoint": {
+            "lat": 45.440874323696974,
+            "lng": 12.331091131996562
+          }
+        }
       }
     },
     {
@@ -114,7 +127,17 @@
           "lat": 45.44148463159815,
           "lng": 12.329415813112057
         },
-        "distance": 5.5156740495413645
+        "distance": 5.5156740495413645,
+        "id": "ce9a1514-ccf2-4997-82ca-028f8e62f2a3",
+        "historicalName": "Ponte dei Damaschi",
+        "englishName": "Bridge of the Damask Weavers",
+        "historicalDescription": "The Santa Croce area was known for textile production during the Renaissance, with several workshops specializing in damask fabrics. This bridge would have connected areas where damask weavers had their botteghe (workshops), representing the important silk and luxury textile industry that helped establish Venice's commercial prominence.",
+        "location": {
+          "midpoint": {
+            "lat": 45.44148650963014,
+            "lng": 12.329451060123585
+          }
+        }
       }
     },
     {
@@ -129,7 +152,17 @@
           "lat": 45.44099815063163,
           "lng": 12.32907249035815
         },
-        "distance": 4.551855651066608
+        "distance": 4.551855651066608,
+        "id": "ce9a1514-ccf2-4997-82ca-028f8e62f2a3",
+        "historicalName": "Ponte della Scuola di San Stae",
+        "englishName": "Bridge of the Confraternity of Saint Eustachius",
+        "historicalDescription": "Named after the religious confraternity (scuola) associated with the Church of San Stae. These confraternities were important social and religious organizations in Renaissance Venice, providing welfare services and organizing religious processions. Members would have used this bridge when gathering for meetings and ceremonies.",
+        "location": {
+          "midpoint": {
+            "lat": 45.44100238110212,
+            "lng": 12.329101031847141
+          }
+        }
       }
     },
     {
@@ -144,46 +177,83 @@
           "lat": 45.43977550837546,
           "lng": 12.329798589634455
         },
-        "distance": 5.8701609368656715
+        "distance": 5.8701609368656715,
+        "id": "7cc7de6d-bc51-482d-a03f-4087d1ae4c2b",
+        "historicalName": "Ponte dei Mocenigo",
+        "englishName": "Bridge of the Mocenigo Family",
+        "historicalDescription": "Named after the noble Mocenigo family who owned palaces in the area near Salizada San Stae. The Mocenigo were one of Venice's most distinguished patrician families, producing seven Doges between the 15th and 18th centuries. This bridge would have connected to properties owned by this influential family in the Santa Croce district.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43976436235776,
+            "lng": 12.329764488894963
+          }
+        }
       }
     }
   ],
   "buildingPoints": [
     {
       "lat": 45.439802487918634,
-      "lng": 12.329227370218344
+      "lng": 12.329227370218344,
+      "streetName": "Calle dei Tessitori di Seta",
+      "streetNameEnglish": "Street of the Silk Weavers",
+      "streetDescription": "This street name acknowledges the silk weaving craft that flourished in Santa Croce during the Renaissance. Silk weavers would have had workshops near San Stae, contributing to Venice's renowned textile industry."
     },
     {
       "lat": 45.440229377732386,
-      "lng": 12.3292597458798
+      "lng": 12.3292597458798,
+      "streetName": "Rio Terà dei Battioro",
+      "streetNameEnglish": "Filled Canal of the Goldbeaters",
+      "streetDescription": "This name references the goldbeaters who hammered gold into thin sheets for use in art and decoration. This filled canal would have connected to workshops where artisans produced gold leaf used in nearby churches, including the ornate San Stae church."
     },
     {
       "lat": 45.44016206074288,
-      "lng": 12.329845992418466
+      "lng": 12.329845992418466,
+      "streetName": "Salizada dei Mercanti di Rialto",
+      "streetNameEnglish": "Paved Street of the Rialto Merchants",
+      "streetDescription": "This paved pathway would have been used by merchants traveling between the commercial district of Rialto and the residential area of Santa Croce. The name recognizes the economic connection between San Stae and the nearby market hub."
     },
     {
       "lat": 45.44072461230063,
-      "lng": 12.329185114379827
+      "lng": 12.329185114379827,
+      "streetName": "Sottoportego del Traghetto",
+      "streetNameEnglish": "Passageway of the Ferry",
+      "streetDescription": "This covered passageway would have led to one of the traditional ferry crossing points on the Grand Canal near San Stae. Traghetti have been essential transportation across the Grand Canal since medieval times, connecting Santa Croce with San Marco."
     },
     {
       "lat": 45.440625273487676,
-      "lng": 12.329898174725471
+      "lng": 12.329898174725471,
+      "streetName": "Calle della Scuola di San Stae",
+      "streetNameEnglish": "Street of the School of Saint Eustace",
+      "streetDescription": "Named after the confraternity or 'scuola' associated with the Church of San Stae (Saint Eustace). These lay brotherhoods were important social and religious institutions in Renaissance Venice, providing charity and religious education."
     },
     {
       "lat": 45.44063848967281,
-      "lng": 12.330384269726522
+      "lng": 12.330384269726522,
+      "streetName": "Fondamenta dei Orafa",
+      "streetNameEnglish": "Foundation of the Goldsmiths",
+      "streetDescription": "This waterside walkway would have housed workshops of goldsmiths who crafted fine jewelry and ecclesiastical items. Their presence near San Stae would have served the wealthy families of the area and contributed to the decoration of local churches."
     },
     {
       "lat": 45.44107920765754,
-      "lng": 12.329677961673518
+      "lng": 12.329677961673518,
+      "streetName": "Campiello dei Mocenigo",
+      "streetNameEnglish": "Small Square of the Mocenigo Family",
+      "streetDescription": "Named after the prominent Mocenigo family who owned property in the Santa Croce district. The Mocenigo were a powerful patrician family that produced several Doges of Venice, and their influence would have extended to this area near San Stae."
     },
     {
       "lat": 45.44110667429332,
-      "lng": 12.330352901490365
+      "lng": 12.330352901490365,
+      "streetName": "Ruga dei Lanaioli",
+      "streetNameEnglish": "Row of the Wool Workers",
+      "streetDescription": "This street would have housed shops and workshops of wool workers, reflecting Santa Croce's importance in textile production. Wool processing was one of Venice's major industries, with many workshops located in this working-class district."
     },
     {
       "lat": 45.441190318699775,
-      "lng": 12.331156971095204
+      "lng": 12.331156971095204,
+      "streetName": "Corte della Munizion",
+      "streetNameEnglish": "Court of the Munitions",
+      "streetDescription": "This enclosed courtyard may have been used for storing munitions or military supplies, positioned in Santa Croce for easy transport via the Grand Canal. Its proximity to San Stae would have made it convenient for moving supplies to and from the Arsenal."
     }
   ],
   "id": "polygon-1746072788813"

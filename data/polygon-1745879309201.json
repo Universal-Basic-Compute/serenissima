@@ -60,30 +60,55 @@
           "lat": 45.43703991544564,
           "lng": 12.320953595451577
         },
-        "distance": 7.54712537505626
+        "distance": 7.54712537505626,
+        "id": "09c003b8-d375-4f31-b7d6-7dcb781e6b6b",
+        "historicalName": "Ponte delle Eremite",
+        "englishName": "Bridge of the Hermit Nuns",
+        "historicalDescription": "Named after the convent of the Eremite (Hermit Nuns) that was located in this area during the Renaissance period. The Eremite were a female religious order who followed strict rules of seclusion and prayer. The fondamenta (waterside walkway) takes its name from this same convent, and the bridge would have been a crucial access point to the religious complex.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43706296656311,
+            "lng": 12.32098909023531
+          }
+        }
       }
     }
   ],
   "buildingPoints": [
     {
       "lat": 45.43751386839582,
-      "lng": 12.320635510734297
+      "lng": 12.320635510734297,
+      "streetName": "Calle delle Monache Eremite",
+      "streetNameEnglish": "Street of the Hermit Nuns",
+      "streetDescription": "Named after the Augustinian hermit nuns who maintained a convent near the Fondamenta de le Eremite during the 15th-16th centuries. These secluded religious women were known for their strict observance of isolation and prayer."
     },
     {
       "lat": 45.438019666029355,
-      "lng": 12.320565406917131
+      "lng": 12.320565406917131,
+      "streetName": "Rio Terà del Chiostro",
+      "streetNameEnglish": "Filled Canal of the Cloister",
+      "streetDescription": "This street was originally a small canal that was filled in (rio terà) during the 16th century. It led to the cloister of the hermit nuns' convent, serving as an important access point for supplies and occasional visitors to the secluded religious community."
     },
     {
       "lat": 45.438070115514165,
-      "lng": 12.321188183958201
+      "lng": 12.321188183958201,
+      "streetName": "Sottoportego della Pergamena",
+      "streetNameEnglish": "Passageway of the Parchment",
+      "streetDescription": "This covered passageway references the manuscript production that took place in the convent near Fondamenta de le Eremite. The nuns were known to create religious manuscripts and prayer books, using pergamena (parchment) for important religious texts."
     },
     {
       "lat": 45.43842970544335,
-      "lng": 12.32053780113149
+      "lng": 12.32053780113149,
+      "streetName": "Calle dei Cordami Benedetti",
+      "streetNameEnglish": "Street of the Blessed Ropes",
+      "streetDescription": "Located near the waterfront where rope makers (cordai) would craft special cords that were blessed by the hermit nuns for use on Venetian ships. These blessed ropes were believed to provide protection during sea voyages and were highly valued by Venetian merchants and sailors."
     },
     {
       "lat": 45.43879720778024,
-      "lng": 12.320666908944801
+      "lng": 12.320666908944801,
+      "streetName": "Salizada dei Donà",
+      "streetNameEnglish": "Paved Street of the Donà Family",
+      "streetDescription": "Named after the noble Donà family who were patrons of the hermit nuns' convent in the 16th century. The Donà were a prominent Venetian patrician family who funded the paving of this street (hence 'salizada', meaning paved) and contributed significantly to the convent's maintenance and expansion."
     }
   ],
   "id": "polygon-1745879309201"

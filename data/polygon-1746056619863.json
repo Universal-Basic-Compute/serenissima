@@ -92,7 +92,17 @@
           "lat": 45.43563145654486,
           "lng": 12.33764826931064
         },
-        "distance": 6.882992137743214
+        "distance": 6.882992137743214,
+        "id": "70ecc00f-136d-415d-892d-06f41a7be553",
+        "historicalName": "Ponte dei Favri",
+        "englishName": "Bridge of the Blacksmiths",
+        "historicalDescription": "Named after the blacksmiths' workshops that were historically located along the Calle dei Favri in the San Marco district. 'Favri' is Venetian dialect for 'fabbri' (blacksmiths), and this bridge would have been an important crossing point for these artisans and their customers.",
+        "location": {
+          "midpoint": {
+            "lat": 45.435601503128,
+            "lng": 12.33765937244753
+          }
+        }
       }
     },
     {
@@ -107,7 +117,17 @@
           "lat": 45.43441558442412,
           "lng": 12.337645587101624
         },
-        "distance": 10.265038870982576
+        "distance": 10.265038870982576,
+        "id": "70ecc00f-136d-415d-892d-06f41a7be553",
+        "historicalName": "Ponte della Zecca",
+        "englishName": "Bridge of the Mint",
+        "historicalDescription": "This bridge takes its name from its proximity to the Venetian Mint (La Zecca), which was located near San Marco. The Zecca was vital to Venice's commercial power, producing the famous gold ducat and other coins that facilitated the Republic's extensive trading networks throughout the Mediterranean.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43445621203854,
+            "lng": 12.337676806806126
+          }
+        }
       }
     },
     {
@@ -122,26 +142,48 @@
           "lat": 45.43554084053162,
           "lng": 12.336738949720134
         },
-        "distance": 7.011259959085424
+        "distance": 7.011259959085424,
+        "id": "399f78f3-da91-418f-b68f-d7b7f8a11741",
+        "historicalName": "Ponte dei Consorti",
+        "englishName": "Bridge of the Consortiums",
+        "historicalDescription": "Named for the merchant consortiums that operated in this area of San Marco. These business alliances were common in Renaissance Venice, allowing merchants to share risks and profits in commercial ventures. This bridge would have been traversed daily by members of these commercial partnerships on their way to and from their offices.",
+        "location": {
+          "midpoint": {
+            "lat": 45.435537373763076,
+            "lng": 12.336783605836938
+          }
+        }
       }
     }
   ],
   "buildingPoints": [
     {
       "lat": 45.43475244157079,
-      "lng": 12.336675219544299
+      "lng": 12.336675219544299,
+      "streetName": "Calle dei Orologiai",
+      "streetNameEnglish": "Street of the Clockmakers",
+      "streetDescription": "This street name honors the clockmakers who historically had workshops near San Marco. Venice was known for its skilled clockmakers during the Renaissance, who crafted intricate timepieces for the nobility and wealthy merchants. Being close to Calle dei Favri (Blacksmiths' Street) in San Marco would make sense as these crafts often required similar metalworking skills and would cluster in the same neighborhood."
     },
     {
       "lat": 45.43466548339968,
-      "lng": 12.337312727556599
+      "lng": 12.337312727556599,
+      "streetName": "Salizada dei Mercanti di Rialto",
+      "streetNameEnglish": "Paved Street of the Rialto Merchants",
+      "streetDescription": "This elevated and paved street ('salizada' indicates it was raised above flood level) would have been used by merchants traveling between San Marco and the Rialto market, Venice's commercial heart. Many merchants had offices in the San Marco district but conducted business at Rialto. The proximity to Calle dei Favri would place this on a logical route between the political center of Venice (San Marco) and its commercial center."
     },
     {
       "lat": 45.43517821246773,
-      "lng": 12.33666094996229
+      "lng": 12.33666094996229,
+      "streetName": "Rio Terà dei Casselleri",
+      "streetNameEnglish": "Filled Canal of the Casket Makers",
+      "streetDescription": "This name indicates a former canal that was filled in ('rio terà') where casket makers once had their workshops. Casket makers (casselleri) crafted ornate boxes and caskets for jewelry and valuables for wealthy Venetian families. Their proximity to San Marco would be logical as their wealthy clientele lived and conducted business in this prestigious area of Venice, and they would have worked alongside other metal crafters like the 'favri' (blacksmiths)."
     },
     {
       "lat": 45.435210961770984,
-      "lng": 12.337370869621257
+      "lng": 12.337370869621257,
+      "streetName": "Sottoportego del Leone d'Oro",
+      "streetNameEnglish": "Passageway of the Golden Lion",
+      "streetDescription": "This covered passageway ('sottoportego') would likely have been named after a relief sculpture or sign depicting a golden lion (a symbol of Venice's patron saint, St. Mark) that adorned a nearby building. The San Marco district featured many such passageways connecting streets and small squares, often named after distinctive architectural features or nearby businesses. Its location near Calle dei Favri would place it in the heart of the San Marco district, possibly leading toward Piazza San Marco where the winged lion symbol was prominently displayed."
     }
   ],
   "id": "polygon-1746056619863"

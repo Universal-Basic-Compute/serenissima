@@ -92,7 +92,17 @@
           "lat": 45.441006295511606,
           "lng": 12.338821420292078
         },
-        "distance": 8.747409945327279
+        "distance": 8.747409945327279,
+        "id": "b90881b8-f29a-4481-bc4d-c1a81be8e68a",
+        "historicalName": "Ponte dei Orefici di Cannaregio",
+        "englishName": "Bridge of the Goldsmiths of Cannaregio",
+        "historicalDescription": "Named after the goldsmiths who had their workshops along the Ruga dei Oresi (Street of Goldsmiths) in Cannaregio. These artisans were renowned for their fine metalwork and jewelry crafting, serving wealthy Venetian nobility.",
+        "location": {
+          "midpoint": {
+            "lat": 45.4409677627853,
+            "lng": 12.338810164905794
+          }
+        }
       }
     },
     {
@@ -107,7 +117,17 @@
           "lat": 45.44085950291407,
           "lng": 12.33902526817721
         },
-        "distance": 8.988214314064082
+        "distance": 8.988214314064082,
+        "id": "b90881b8-f29a-4481-bc4d-c1a81be8e68a",
+        "historicalName": "Ponte della Corona d'Oro",
+        "englishName": "Bridge of the Golden Crown",
+        "historicalDescription": "This bridge took its name from a prominent goldsmith shop nearby that specialized in creating elaborate golden crowns and tiaras for Venetian ceremonies and notable families. It was a landmark in the Ruga dei Oresi area.",
+        "location": {
+          "midpoint": {
+            "lat": 45.44081908812605,
+            "lng": 12.339024741626986
+          }
+        }
       }
     },
     {
@@ -122,7 +142,17 @@
           "lat": 45.439638193128665,
           "lng": 12.339288080033128
         },
-        "distance": 8.050726510748522
+        "distance": 8.050726510748522,
+        "id": "d9bab0dc-7a49-4405-91aa-a82d9816fe95",
+        "historicalName": "Ponte dei Zecchini",
+        "englishName": "Bridge of the Ducats",
+        "historicalDescription": "Named after the Venetian gold coins (zecchini or ducats) that were frequently handled in this area where goldsmiths operated. The bridge served as a connection between the Mint and the goldsmith district in Cannaregio.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43967395109772,
+            "lng": 12.339280033406084
+          }
+        }
       }
     },
     {
@@ -137,7 +167,17 @@
           "lat": 45.43917710065463,
           "lng": 12.337826276120012
         },
-        "distance": 16.16267600344078
+        "distance": 16.16267600344078,
+        "id": "85b8f14e-785e-4e4a-a785-f3237dea2f52",
+        "historicalName": "Ponte delle Bilance",
+        "englishName": "Bridge of the Scales",
+        "historicalDescription": "Named for the precision scales used by goldsmiths in the Ruga dei Oresi to weigh precious metals and gems. The accuracy of these instruments was critical to the goldsmith trade and was regulated by Venetian authorities.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43917145469649,
+            "lng": 12.337929541167085
+          }
+        }
       }
     },
     {
@@ -158,7 +198,17 @@
           "lat": 45.43945752088126,
           "lng": 12.337131583985155
         },
-        "distance": 5.441004133280181
+        "distance": 5.441004133280181,
+        "id": "85b8f14e-785e-4e4a-a785-f3237dea2f52",
+        "historicalName": "Ponte dei Garzoni",
+        "englishName": "Bridge of the Apprentices",
+        "historicalDescription": "This bridge was named for the many apprentices who crossed it daily to reach the workshops of master goldsmiths in the Ruga dei Oresi. Young apprentices would spend years learning the craft before becoming full guild members.",
+        "location": {
+          "midpoint": {
+            "lat": 45.4394801049393,
+            "lng": 12.33714499503023
+          }
+        }
       }
     },
     {
@@ -173,7 +223,17 @@
           "lat": 45.43954032906646,
           "lng": 12.33700820237047
         },
-        "distance": 6.402402177538152
+        "distance": 6.402402177538152,
+        "id": "85b8f14e-785e-4e4a-a785-f3237dea2f52",
+        "historicalName": "Ponte della Filigrana",
+        "englishName": "Bridge of Filigree",
+        "historicalDescription": "Named after the delicate filigree technique that Venetian goldsmiths in Cannaregio were famous for. This intricate metalwork, consisting of twisted fine gold or silver wire, was a specialty of the artisans working in Ruga dei Oresi.",
+        "location": {
+          "midpoint": {
+            "lat": 45.439568559094766,
+            "lng": 12.337016248997514
+          }
+        }
       }
     },
     {
@@ -188,7 +248,17 @@
           "lat": 45.4395629130959,
           "lng": 12.336450302895372
         },
-        "distance": 4.185380536064431
+        "distance": 4.185380536064431,
+        "id": "85b8f14e-785e-4e4a-a785-f3237dea2f52",
+        "historicalName": "Ponte dei Memmo",
+        "englishName": "Bridge of the Memmo Family",
+        "historicalDescription": "Named after the noble Memmo family who were patrons of several goldsmith workshops in this area of Cannaregio. The family commissioned many masterpieces and helped establish the reputation of the Ruga dei Oresi as a center for fine metalwork.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43957796910848,
+            "lng": 12.336434209641283
+          }
+        }
       }
     },
     {
@@ -203,7 +273,17 @@
           "lat": 45.44015029774776,
           "lng": 12.335974415860154
         },
-        "distance": 8.23185008325214
+        "distance": 8.23185008325214,
+        "id": "951c4786-4a07-4b4d-9840-99ca5da53dae",
+        "historicalName": "Ponte dei Smalti",
+        "englishName": "Bridge of Enamels",
+        "historicalDescription": "This bridge was named for the enamel work that complemented many gold pieces created in the nearby workshops. Venetian goldsmiths in the Ruga dei Oresi were particularly skilled at combining vibrant enamels with precious metals to create distinctive jewelry.",
+        "location": {
+          "midpoint": {
+            "lat": 45.440125730434886,
+            "lng": 12.33601387591066
+          }
+        }
       }
     },
     {
@@ -218,38 +298,69 @@
           "lat": 45.440481525692476,
           "lng": 12.33831866653917
         },
-        "distance": 17.529051280061076
+        "distance": 17.529051280061076,
+        "id": "951c4786-4a07-4b4d-9840-99ca5da53dae",
+        "historicalName": "Ponte della Pietra Preziosa",
+        "englishName": "Bridge of the Precious Stone",
+        "historicalDescription": "Named for the gemstone merchants who would bring their wares to the goldsmiths of Ruga dei Oresi. This bridge served as an important connection point where jewelers would meet with gem traders to select stones for their creations.",
+        "location": {
+          "midpoint": {
+            "lat": 45.440404263228544,
+            "lng": 12.338296435782334
+          }
+        }
       }
     }
   ],
   "buildingPoints": [
     {
       "lat": 45.43934069064573,
-      "lng": 12.33824846150248
+      "lng": 12.33824846150248,
+      "streetName": "Calle dei Argentieri",
+      "streetNameEnglish": "Street of the Silversmiths",
+      "streetDescription": "Located near Ruga dei Oresi (Street of Goldsmiths), this calle was historically home to silversmiths who often worked in close proximity to goldsmiths in Cannaregio. These artisans were part of the same guild but specialized in different precious metals."
     },
     {
       "lat": 45.43975917521335,
-      "lng": 12.336154085833284
+      "lng": 12.336154085833284,
+      "streetName": "Sottoportego della Zecca",
+      "streetNameEnglish": "Passageway of the Mint",
+      "streetDescription": "This covered passageway led toward the direction of the Venetian Mint (Zecca). While the actual Mint was located in San Marco, this name indicates a path frequently used by workers who lived in Cannaregio and transported precious metals between the Oresi district and the Zecca."
     },
     {
       "lat": 45.43985752810615,
-      "lng": 12.33696061385093
+      "lng": 12.33696061385093,
+      "streetName": "Rio Terà dei Sabbioneri",
+      "streetNameEnglish": "Filled Canal of the Sand Merchants",
+      "streetDescription": "This former canal was filled in and converted to a street where sand merchants (sabbioneri) would sell their wares. Sand was an essential material for glassmaking and metalworking, both important crafts in the area around Ruga dei Oresi in Cannaregio."
     },
     {
       "lat": 45.4398317175816,
-      "lng": 12.337635857417283
+      "lng": 12.337635857417283,
+      "streetName": "Fondamenta Morosini",
+      "streetNameEnglish": "Morosini Foundation",
+      "streetDescription": "Named after the prominent Morosini family who owned property in this area of Cannaregio. The Morosini were an ancient noble Venetian family who produced several doges and had business interests in the jewelry and precious metals trade connected to the nearby Ruga dei Oresi."
     },
     {
       "lat": 45.43979672454739,
-      "lng": 12.338114740446546
+      "lng": 12.338114740446546,
+      "streetName": "Salizada dei Gioiellieri",
+      "streetNameEnglish": "Paved Street of the Jewelers",
+      "streetDescription": "This slightly wider, paved street (salizada) housed workshops of jewelers who set the gold pieces crafted by the oresi (goldsmiths) of the neighboring Ruga. It was one of the first streets in this area to be paved with stone, indicating its commercial importance in Renaissance Venice."
     },
     {
       "lat": 45.439751571286294,
-      "lng": 12.338822290487904
+      "lng": 12.338822290487904,
+      "streetName": "Campiello della Bilancia",
+      "streetNameEnglish": "Small Square of the Scale",
+      "streetDescription": "This small square was named after the official weighing scales kept there to verify the weight and purity of precious metals and jewels. Located close to Ruga dei Oresi, it was an important regulatory spot where the Guild of Goldsmiths would inspect and certify materials used by artisans in the area."
     },
     {
       "lat": 45.44028751561175,
-      "lng": 12.338847882429395
+      "lng": 12.338847882429395,
+      "streetName": "Ruga degli Intagliatori",
+      "streetNameEnglish": "Street of the Engravers",
+      "streetDescription": "Parallel to Ruga dei Oresi, this street housed workshops of skilled engravers who decorated gold and silver items produced by neighboring goldsmiths. These artisans specialized in delicate etchings and designs that adorned jewelry, religious objects, and fine metalwork popular among Venetian nobility."
     }
   ],
   "id": "polygon-1746056070563"

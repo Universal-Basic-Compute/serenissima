@@ -76,18 +76,34 @@
           "lat": 45.435751688525016,
           "lng": 12.349331394939375
         },
-        "distance": 5.91939062333372
+        "distance": 5.91939062333372,
+        "id": "b8d23b55-17bb-48bc-8ed1-78ed91fef194",
+        "historicalName": "Ponte dell'Anzolo",
+        "englishName": "Bridge of the Angel",
+        "historicalDescription": "Named after its proximity to Calle de l'Anzolo (Angel Street) in San Marco, where a stone relief of an angel was historically displayed. The area was significant for Renaissance Venetian nobility and merchants, and the bridge would have served as an important connection between palaces and commercial establishments in this affluent district.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43575545175668,
+            "lng": 12.349368945865583
+          }
+        }
       }
     }
   ],
   "buildingPoints": [
     {
       "lat": 45.435365988288524,
-      "lng": 12.349671898330278
+      "lng": 12.349671898330278,
+      "streetName": "Calle del Campanil di San Moisè",
+      "streetNameEnglish": "Street of the Bell Tower of Saint Moses",
+      "streetDescription": "This street would be named after the bell tower of the nearby San Moisè church, which was an important landmark in the San Marco district during the Renaissance. The church of San Moisè was one of the most prominent in the area, and streets were commonly named after nearby religious structures. Located near Calle de l'Anzolo, this name reflects the Venetian tradition of orienting streets by significant religious architecture."
     },
     {
       "lat": 45.436591963865055,
-      "lng": 12.350287236376307
+      "lng": 12.350287236376307,
+      "streetName": "Ruga dei Orafi di San Marco",
+      "streetNameEnglish": "Row of the Goldsmiths of Saint Mark",
+      "streetDescription": "This street name reflects the presence of goldsmiths' workshops in this wealthy area near St. Mark's Square. The San Marco district was known for its luxury crafts and high-end commerce, with goldsmiths being particularly prominent in the Renaissance period. 'Ruga' typically indicated a commercial street lined with shops of the same trade. The proximity to Calle de l'Anzolo would make this a logical location for such prestigious artisans who would serve the wealthy families and officials who lived in and frequented the area."
     }
   ],
   "id": "polygon-1746057029127"

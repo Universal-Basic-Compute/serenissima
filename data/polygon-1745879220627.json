@@ -48,7 +48,17 @@
           "lat": 45.43527559169335,
           "lng": 12.318953185275658
         },
-        "distance": 16.73734515064266
+        "distance": 16.73734515064266,
+        "id": "fa003fc4-32cc-49c8-b171-04c0da7ca136",
+        "historicalName": "Ponte dei Tintori di Seta",
+        "englishName": "Bridge of the Silk Dyers",
+        "historicalDescription": "Named after the silk dyeing workshops that operated in Cannaregio during the Renaissance. The Calle Sporca ('Dirty Street') likely got its name from the colored waste produced by these artisans that would stain the surrounding area. Venice was renowned for its silk industry, with specialized guilds for different processes.",
+        "location": {
+          "midpoint": {
+            "lat": 45.435212539486585,
+            "lng": 12.318894623712167
+          }
+        }
       }
     },
     {
@@ -63,18 +73,34 @@
           "lat": 45.435414870256906,
           "lng": 12.319663076594933
         },
-        "distance": 12.753716828429534
+        "distance": 12.753716828429534,
+        "id": "fa003fc4-32cc-49c8-b171-04c0da7ca136",
+        "historicalName": "Ponte dei Priuli",
+        "englishName": "Bridge of the Priuli",
+        "historicalDescription": "Named after the noble Priuli family who owned property in Cannaregio. The Priuli were one of Venice's most prestigious families who produced three Doges during the Renaissance period. Their influence in this working-class district would have been significant, possibly as patrons or property owners near Calle Sporca.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43536169957542,
+            "lng": 12.31963245470868
+          }
+        }
       }
     }
   ],
   "buildingPoints": [
     {
       "lat": 45.43473865431403,
-      "lng": 12.317913926970006
+      "lng": 12.317913926970006,
+      "streetName": "Sottoportego dei Tintori",
+      "streetNameEnglish": "Passageway of the Dyers",
+      "streetDescription": "This sottoportego (covered passageway) near Calle Sporca in Cannaregio would have been named after the dyers who operated in this district. Cannaregio was known for textile production in Renaissance Venice, with many workshops using the canal waters for dyeing fabrics. The tintori (dyers) formed an important guild that controlled the quality and processes of fabric coloration."
     },
     {
       "lat": 45.434824143811994,
-      "lng": 12.318670945656423
+      "lng": 12.318670945656423,
+      "streetName": "Calle dei Ebrei Vecchi",
+      "streetNameEnglish": "Street of the Old Jews",
+      "streetDescription": "Located in Cannaregio near Calle Sporca, this street name reflects the historical presence of Venice's Jewish community. Cannaregio contained the first Jewish Ghetto in Europe, established in 1516. 'Ebrei Vecchi' would refer to the original Jewish settlers or the older part of the Jewish quarter, distinguishing it from newer areas that developed as the community expanded within the confined ghetto."
     }
   ],
   "id": "polygon-1745879220627"

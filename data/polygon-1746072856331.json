@@ -120,7 +120,17 @@
           "lat": 45.43716973914819,
           "lng": 12.330791845196533
         },
-        "distance": 4.881159813323041
+        "distance": 4.881159813323041,
+        "id": "39a62b74-fde2-47c4-a598-2b5a445d2b21",
+        "historicalName": "Ponte dei Velutai",
+        "englishName": "Bridge of the Velvet Makers",
+        "historicalDescription": "Located in San Polo, this bridge was named after the velvet weavers' guild workshops that were concentrated in this area during the Renaissance. Velvet production was a prestigious textile craft in Venice, and many artisans in the San Polo district specialized in this luxury fabric that was exported throughout Europe.",
+        "location": {
+          "midpoint": {
+            "lat": 45.437158446654536,
+            "lng": 12.330765023106384
+          }
+        }
       }
     },
     {
@@ -135,42 +145,76 @@
           "lat": 45.43681214245454,
           "lng": 12.330904497975158
         },
-        "distance": 5.294394362611413
+        "distance": 5.294394362611413,
+        "id": "39a62b74-fde2-47c4-a598-2b5a445d2b21",
+        "historicalName": "Ponte della Marangona",
+        "englishName": "Bridge of the Carpenter's Bell",
+        "historicalDescription": "This bridge in San Polo takes its name from the 'Marangona', the largest bell in St. Mark's Campanile that would signal the beginning and end of the workday for carpenters and craftsmen. The area around this bridge in San Polo was home to many woodworkers and carpenters who contributed to Venice's shipbuilding and furniture-making industries.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43680461407824,
+            "lng": 12.33087231146698
+          }
+        }
       }
     }
   ],
   "buildingPoints": [
     {
       "lat": 45.436514508648635,
-      "lng": 12.329719436395054
+      "lng": 12.329719436395054,
+      "streetName": "Calle dei Mercanti di San Polo",
+      "streetNameEnglish": "Street of the Merchants of San Polo",
+      "streetDescription": "This calle would have been named after the merchants who conducted business in the San Polo district, which was a commercial hub near the Rialto market. Many merchant families established their businesses in this contrada during the Renaissance period."
     },
     {
       "lat": 45.43708167607411,
-      "lng": 12.32968677351004
+      "lng": 12.32968677351004,
+      "streetName": "Rio Terà dei Frari",
+      "streetNameEnglish": "Filled Canal of the Friars",
+      "streetDescription": "Named for its proximity to the Basilica di Santa Maria Gloriosa dei Frari, one of the most important churches in Venice. Rio Terà indicates this was once a canal that was filled in, creating a street that would have connected the neighborhood to this significant Franciscan church in San Polo."
     },
     {
       "lat": 45.43699811793944,
-      "lng": 12.33040671468677
+      "lng": 12.33040671468677,
+      "streetName": "Sottoportego dei Marangoni",
+      "streetNameEnglish": "Passageway of the Carpenters",
+      "streetDescription": "This covered passageway would have been associated with the guild of carpenters (marangoni) who were essential to Venice's shipbuilding industry. San Polo hosted several artisan workshops, and carpentry was a vital trade in the maritime republic."
     },
     {
       "lat": 45.4375032998409,
-      "lng": 12.329168661927296
+      "lng": 12.329168661927296,
+      "streetName": "Ruga dei Oresi di San Polo",
+      "streetNameEnglish": "Row of the Goldsmiths of San Polo",
+      "streetDescription": "This street would have been home to goldsmiths and jewelry makers. 'Ruga' typically designated commercial streets with specialized shops under arcades. The goldsmiths' guild was highly respected in Renaissance Venice, and they likely had workshops in this contrada."
     },
     {
       "lat": 45.43750106051819,
-      "lng": 12.329726880839882
+      "lng": 12.329726880839882,
+      "streetName": "Calle Pisani di San Polo",
+      "streetNameEnglish": "Pisani Family Street of San Polo",
+      "streetDescription": "Named after the noble Pisani family who likely owned property in this area. Many Venetian streets were named after prominent patrician families who built palazzi in the neighborhood. The Pisani were one of Venice's most influential families during the Renaissance."
     },
     {
       "lat": 45.43791456222895,
-      "lng": 12.329136934226803
+      "lng": 12.329136934226803,
+      "streetName": "Salizada dei Meloni",
+      "streetNameEnglish": "Paved Street of the Melons",
+      "streetDescription": "This 'salizada' (paved street) was likely named after melon vendors or a market area specializing in melons. San Polo's proximity to the Rialto market meant that many food vendors and specialty markets were spread throughout the contrada."
     },
     {
       "lat": 45.437985630538286,
-      "lng": 12.32965616596355
+      "lng": 12.32965616596355,
+      "streetName": "Fondamenta dei Traghettatori",
+      "streetNameEnglish": "Foundation of the Ferrymen",
+      "streetDescription": "This riverside street would have been named for the gondoliers who operated ferry crossings (traghetti) across the Grand Canal. San Polo, bordering the Grand Canal, would have had several such ferry points, essential for transportation in a city of islands."
     },
     {
       "lat": 45.43791336448906,
-      "lng": 12.330375078385961
+      "lng": 12.330375078385961,
+      "streetName": "Corte Mocenigo",
+      "streetNameEnglish": "Mocenigo Court",
+      "streetDescription": "A small courtyard named after the powerful Mocenigo family, who produced several Doges of Venice. The family likely owned property or a palazzo in the San Polo district, and the small court would have been part of or adjacent to their property."
     }
   ],
   "id": "polygon-1746072856331"

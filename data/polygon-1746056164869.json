@@ -64,15 +64,24 @@
   "buildingPoints": [
     {
       "lat": 45.43804615960169,
-      "lng": 12.339034698492929
+      "lng": 12.339034698492929,
+      "streetName": "Calle dei Mercanti da Levante",
+      "streetNameEnglish": "Street of the Levantine Merchants",
+      "streetDescription": "This narrow street near Malvasia Vecchia would have been frequented by merchants from the eastern Mediterranean, particularly Greek and Ottoman traders who were permitted to conduct business in Venice. The Republic maintained strong commercial ties with the Levant throughout the Renaissance period, and these merchants often had designated areas for their commerce in San Marco."
     },
     {
       "lat": 45.43849484660859,
-      "lng": 12.33845791833713
+      "lng": 12.33845791833713,
+      "streetName": "Rio Terà dei Sensali",
+      "streetNameEnglish": "Filled Canal of the Brokers",
+      "streetDescription": "This former canal, filled in during the 16th century expansions, would have been where brokers or 'sensali' operated. These official intermediaries were essential to Venetian commerce, facilitating trades between foreign merchants and local buyers. Their role was especially important in the San Marco district where much of the city's international trade was conducted, particularly near establishments like the malvasia (wine shop) where business deals were often negotiated."
     },
     {
       "lat": 45.43846226531001,
-      "lng": 12.33914165577209
+      "lng": 12.33914165577209,
+      "streetName": "Sottoportego della Malvasia",
+      "streetNameEnglish": "Passageway of the Wine Shop",
+      "streetDescription": "This covered passageway would have led to or passed beneath the famous malvasia (wine shop) that gave the main street its name. Malvasie were important establishments serving sweet wines from Greece and were often gathering places for merchants and nobles. This sottoportego would have connected the main thoroughfare to smaller courtyards or adjacent streets, creating the labyrinthine urban texture characteristic of Renaissance Venice."
     }
   ]
 }

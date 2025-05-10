@@ -79,7 +79,10 @@
       "water": {
         "lat": 45.42730503423257,
         "lng": 12.342060118848954
-      }
+      },
+      "historicalName": "Fondamenta dei Calderai",
+      "englishName": "Foundation of the Coppersmiths",
+      "historicalDescription": "Named after the coppersmiths who had workshops nearby, crafting essential items like pots and pans for Venetian households. This guild was particularly important near Santa Maria Formosa where many artisans worked."
     },
     {
       "edge": {
@@ -89,7 +92,10 @@
       "water": {
         "lat": 45.42684844079759,
         "lng": 12.341911060595049
-      }
+      },
+      "historicalName": "Riva dei Gioiellieri",
+      "englishName": "Bank of the Jewelers",
+      "historicalDescription": "This dock served the jewelers who had shops in the area around Santa Maria Formosa. Venice was famous for its fine jewelry craftsmanship during the Renaissance, and wealthy merchants would commission pieces from these artisans."
     },
     {
       "edge": {
@@ -99,7 +105,10 @@
       "water": {
         "lat": 45.42638791015582,
         "lng": 12.341761451177286
-      }
+      },
+      "historicalName": "Fondamenta della Madonna",
+      "englishName": "Foundation of the Madonna",
+      "historicalDescription": "Named for its proximity to the Church of Santa Maria Formosa, which houses important Madonna paintings. The dock would have been used by worshippers and clergy arriving by water to the church."
     },
     {
       "edge": {
@@ -109,7 +118,10 @@
       "water": {
         "lat": 45.42592291702794,
         "lng": 12.341609680344044
-      }
+      },
+      "historicalName": "Riva dei Formosini",
+      "englishName": "Bank of the Formosa People",
+      "historicalDescription": "Named after the residents of the Santa Maria Formosa parish who used this landing regularly. Local identity in Venice was strongly tied to one's parish, and this dock would have been a community gathering point."
     },
     {
       "edge": {
@@ -119,7 +131,10 @@
       "water": {
         "lat": 45.42545358876362,
         "lng": 12.341453463107316
-      }
+      },
+      "historicalName": "Fondamenta del Capitello",
+      "englishName": "Foundation of the Capital",
+      "historicalDescription": "Named after a decorative column capital or small shrine that once stood nearby. Such architectural elements often served as neighborhood landmarks in Renaissance Venice."
     },
     {
       "edge": {
@@ -129,7 +144,10 @@
       "water": {
         "lat": 45.42498121637606,
         "lng": 12.341290395197785
-      }
+      },
+      "historicalName": "Riva dei Barbieri",
+      "englishName": "Bank of the Barbers",
+      "historicalDescription": "During the Renaissance, barbers also served as surgeons and bloodletters. This dock was named for the barber shops that operated in the vicinity of Calle del Gran, providing essential services to Venetians."
     },
     {
       "edge": {
@@ -139,7 +157,10 @@
       "water": {
         "lat": 45.42453025005922,
         "lng": 12.340687450220736
-      }
+      },
+      "historicalName": "Fondamenta delle Spose",
+      "englishName": "Foundation of the Brides",
+      "historicalDescription": "This dock may have been used by wedding processions heading to Santa Maria Formosa. Venetian weddings often involved water processions of decorated gondolas carrying the bride to church."
     },
     {
       "edge": {
@@ -149,7 +170,10 @@
       "water": {
         "lat": 45.42407431875975,
         "lng": 12.340066593746773
-      }
+      },
+      "historicalName": "Riva dei Stampatori",
+      "englishName": "Bank of the Printers",
+      "historicalDescription": "Venice was an early center of printing in Europe. This dock likely served printers who had workshops near Santa Maria Formosa, where they produced books, pamphlets, and other printed materials."
     },
     {
       "edge": {
@@ -159,7 +183,10 @@
       "water": {
         "lat": 45.42362239795708,
         "lng": 12.339426120770453
-      }
+      },
+      "historicalName": "Fondamenta dei Balestrieri",
+      "englishName": "Foundation of the Crossbowmen",
+      "historicalDescription": "Named after the crossbowmen who practiced nearby. Venice maintained citizen militia units throughout its territories, and crossbowmen were an important part of Venice's military capabilities."
     },
     {
       "edge": {
@@ -169,7 +196,10 @@
       "water": {
         "lat": 45.423438929488896,
         "lng": 12.338771030286347
-      }
+      },
+      "historicalName": "Riva del Parroco",
+      "englishName": "Bank of the Parish Priest",
+      "historicalDescription": "This dock would have been used by the parish priest of Santa Maria Formosa. It might have had privileged status and been reserved for ecclesiastical use."
     },
     {
       "edge": {
@@ -179,7 +209,10 @@
       "water": {
         "lat": 45.42326335477267,
         "lng": 12.338108092737443
-      }
+      },
+      "historicalName": "Fondamenta degli Scrigni",
+      "englishName": "Foundation of the Coffers",
+      "historicalDescription": "Named for the money changers or treasurers who worked nearby. The area around Santa Maria Formosa had several banking establishments in Renaissance Venice."
     },
     {
       "edge": {
@@ -189,7 +222,10 @@
       "water": {
         "lat": 45.42309738127969,
         "lng": 12.337446106753783
-      }
+      },
+      "historicalName": "Riva dei Cesellatori",
+      "englishName": "Bank of the Metalworkers",
+      "historicalDescription": "This dock served artisans specialized in detailed metal engraving and chasing. These craftsmen were highly respected in Renaissance Venice for their decorative work on precious objects."
     },
     {
       "edge": {
@@ -199,7 +235,10 @@
       "water": {
         "lat": 45.422938850187656,
         "lng": 12.336792090682346
-      }
+      },
+      "historicalName": "Fondamenta dei Mocenigo",
+      "englishName": "Foundation of the Mocenigo",
+      "historicalDescription": "Named after the powerful Mocenigo family who had property in the area. The Mocenigos produced several doges (rulers) of Venice during the Renaissance period."
     },
     {
       "edge": {
@@ -209,7 +248,10 @@
       "water": {
         "lat": 45.42292947571976,
         "lng": 12.33598092094009
-      }
+      },
+      "historicalName": "Riva della Luna",
+      "englishName": "Bank of the Moon",
+      "historicalDescription": "Possibly named after a crescent-shaped bend in the canal, or after a building with a moon insignia nearby. Celestial imagery was common in Venetian naming conventions."
     },
     {
       "edge": {
@@ -219,7 +261,10 @@
       "water": {
         "lat": 45.42292394060871,
         "lng": 12.335181896785603
-      }
+      },
+      "historicalName": "Fondamenta delle Donzelle",
+      "englishName": "Foundation of the Maidens",
+      "historicalDescription": "This dock may have been near a convent or a house for unmarried women. Santa Maria Formosa area had several institutions that housed young women from noble families."
     },
     {
       "edge": {
@@ -229,7 +274,10 @@
       "water": {
         "lat": 45.42291874934129,
         "lng": 12.334394079157402
-      }
+      },
+      "historicalName": "Riva dei Strazzeri",
+      "englishName": "Bank of the Rag Dealers",
+      "historicalDescription": "Named for the merchants who dealt in second-hand clothing and textiles. These were important tradespeople in Renaissance Venice, where fabric and clothing were valuable commodities."
     },
     {
       "edge": {
@@ -239,7 +287,10 @@
       "water": {
         "lat": 45.4257826046374,
         "lng": 12.334681647165601
-      }
+      },
+      "historicalName": "Fondamenta dei Sensali",
+      "englishName": "Foundation of the Brokers",
+      "historicalDescription": "This dock served the many brokers who facilitated trade in Renaissance Venice. Near Santa Maria Formosa, these intermediaries would have arranged deals between merchants and buyers."
     },
     {
       "edge": {
@@ -249,7 +300,10 @@
       "water": {
         "lat": 45.42590118869244,
         "lng": 12.33550958750276
-      }
+      },
+      "historicalName": "Riva del Corno Ducale",
+      "englishName": "Bank of the Ducal Horn",
+      "historicalDescription": "Named after the ceremonial horn-shaped cap worn by the Doge of Venice. This might indicate a route used during official processions involving the Doge near the Santa Maria Formosa district."
     },
     {
       "edge": {
@@ -259,7 +313,10 @@
       "water": {
         "lat": 45.42618163674239,
         "lng": 12.336175808337892
-      }
+      },
+      "historicalName": "Fondamenta dei Spadai",
+      "englishName": "Foundation of the Sword Makers",
+      "historicalDescription": "This dock served the craftsmen who made and repaired swords and other bladed weapons. These artisans were essential in a maritime republic that needed to arm its ships and soldiers."
     },
     {
       "edge": {
@@ -269,7 +326,10 @@
       "water": {
         "lat": 45.42645460863497,
         "lng": 12.336893783899301
-      }
+      },
+      "historicalName": "Riva del Gran",
+      "englishName": "Bank of the Grain",
+      "historicalDescription": "Directly related to Calle del Gran, this dock would have been used for unloading grain shipments. Food security was a major concern for Venice, and grain storage facilities were distributed throughout the city."
     },
     {
       "edge": {
@@ -279,7 +339,10 @@
       "water": {
         "lat": 45.426690654342174,
         "lng": 12.33761822204981
-      }
+      },
+      "historicalName": "Fondamenta dei Cannaroli",
+      "englishName": "Foundation of the Reed Workers",
+      "historicalDescription": "Named after artisans who worked with reeds and canes to make baskets, fishing equipment, and household items. These craftsmen had workshops in the Santa Maria Formosa area."
     },
     {
       "edge": {
@@ -289,7 +352,10 @@
       "water": {
         "lat": 45.426905505317684,
         "lng": 12.338305346817595
-      }
+      },
+      "historicalName": "Riva dei Questori",
+      "englishName": "Bank of the Treasurers",
+      "historicalDescription": "Named for the Venetian officials responsible for public finance. This dock might have been used for official business related to tax collection or treasury functions near the Santa Maria Formosa district."
     },
     {
       "edge": {
@@ -299,7 +365,10 @@
       "water": {
         "lat": 45.42711787098364,
         "lng": 12.338962342796476
-      }
+      },
+      "historicalName": "Fondamenta dei Veluderi",
+      "englishName": "Foundation of the Velvet Makers",
+      "historicalDescription": "This dock served the specialized textile workers who produced luxury velvet fabrics. Venice was renowned for its fine textiles during the Renaissance, with velvet being particularly valuable."
     },
     {
       "edge": {
@@ -309,7 +378,10 @@
       "water": {
         "lat": 45.42733258711693,
         "lng": 12.339602991315827
-      }
+      },
+      "historicalName": "Riva della Pietà",
+      "englishName": "Bank of Mercy",
+      "historicalDescription": "Named after a nearby charitable institution. Venice had numerous organizations dedicated to caring for orphans, the poor, and the sick, some of which were located in the Santa Maria Formosa parish."
     },
     {
       "edge": {
@@ -319,7 +391,10 @@
       "water": {
         "lat": 45.427622844680485,
         "lng": 12.340165014634566
-      }
+      },
+      "historicalName": "Fondamenta dei Burattini",
+      "englishName": "Foundation of the Puppeteers",
+      "historicalDescription": "This dock was named for the puppeteers who performed in the area. Puppet shows were popular entertainment in Renaissance Venice, often featuring at festivals and public celebrations."
     },
     {
       "edge": {
@@ -329,7 +404,10 @@
       "water": {
         "lat": 45.42791445324321,
         "lng": 12.340724052385601
-      }
+      },
+      "historicalName": "Riva dei Cavalieri",
+      "englishName": "Bank of the Knights",
+      "historicalDescription": "This dock may have been associated with noble or knightly families living near Santa Maria Formosa, or perhaps with the Knights of Malta who had connections to Venice during the Renaissance period."
     }
   ],
   "bridgePoints": [
@@ -345,7 +423,17 @@
           "lat": 45.423469262321085,
           "lng": 12.333353403204441
         },
-        "distance": 8.447988618289507
+        "distance": 8.447988618289507,
+        "id": "7b28dbb7-9b18-48bb-bc82-aeceaea6cad4",
+        "historicalName": "Ponte dei Fornai",
+        "englishName": "Bridge of the Bakers",
+        "historicalDescription": "This bridge near Santa Maria Formosa was named after the bakery guild that operated several establishments in the area during the 15th and 16th centuries. The area was known for supplying bread to both local residents and passing merchants.",
+        "location": {
+          "midpoint": {
+            "lat": 45.423491852777715,
+            "lng": 12.333396916419952
+          }
+        }
       }
     },
     {
@@ -360,7 +448,17 @@
           "lat": 45.42395306650157,
           "lng": 12.333417776220799
         },
-        "distance": 10.096026630919615
+        "distance": 10.096026630919615,
+        "id": "7b28dbb7-9b18-48bb-bc82-aeceaea6cad4",
+        "historicalName": "Ponte della Formosa",
+        "englishName": "Bridge of Formosa",
+        "historicalDescription": "Named for its proximity to the Church of Santa Maria Formosa, one of the oldest in Venice, founded in the 7th century. The name 'Formosa' refers to the vision of the Virgin Mary as a 'beautiful' (formosa) matron that led to the church's construction.",
+        "location": {
+          "midpoint": {
+            "lat": 45.423965303156784,
+            "lng": 12.333480064899414
+          }
+        }
       }
     },
     {
@@ -375,7 +473,17 @@
           "lat": 45.424436870682044,
           "lng": 12.333482149237156
         },
-        "distance": 12.65975511205797
+        "distance": 12.65975511205797,
+        "id": "7b28dbb7-9b18-48bb-bc82-aeceaea6cad4",
+        "historicalName": "Ponte dei Granai",
+        "englishName": "Bridge of the Granaries",
+        "historicalDescription": "This bridge references the grain warehouses that existed in the area during the Renaissance period. The 'Calle del Gran' in the neighborhood's name likely refers to these granaries, which were vital to Venice's food supply and commerce.",
+        "location": {
+          "midpoint": {
+            "lat": 45.42443875353585,
+            "lng": 12.333563213378875
+          }
+        }
       }
     },
     {
@@ -390,242 +498,426 @@
           "lat": 45.42492067486252,
           "lng": 12.333546522253513
         },
-        "distance": 15.69670617280356
+        "distance": 15.69670617280356,
+        "id": "7b28dbb7-9b18-48bb-bc82-aeceaea6cad4",
+        "historicalName": "Ponte dei Grimani",
+        "englishName": "Bridge of the Grimani",
+        "historicalDescription": "Named after the noble Grimani family who owned a palazzo near Santa Maria Formosa. The Grimani were prominent in Venetian politics, producing doges, cardinals, and naval commanders during the Renaissance, and were important patrons in this parish.",
+        "location": {
+          "midpoint": {
+            "lat": 45.42491220391493,
+            "lng": 12.333646361858337
+          }
+        }
       }
     }
   ],
   "buildingPoints": [
     {
       "lat": 45.423397013455194,
-      "lng": 12.334630227001643
+      "lng": 12.334630227001643,
+      "streetName": "Ruga dei Orafi",
+      "streetNameEnglish": "Street of the Goldsmiths",
+      "streetDescription": "Named after the goldsmiths who had their workshops in this area near Santa Maria Formosa. Goldsmiths were an important guild in Renaissance Venice, creating luxury items for wealthy merchants."
     },
     {
       "lat": 45.42350246987206,
-      "lng": 12.335408973803066
+      "lng": 12.335408973803066,
+      "streetName": "Calle del Parangon",
+      "streetNameEnglish": "Street of the Comparison",
+      "streetDescription": "The term 'parangon' referred to a standard of quality or measurement used by merchants. This street near Santa Maria Formosa likely housed officials who verified weights and measures for the nearby market."
     },
     {
       "lat": 45.423563824512875,
-      "lng": 12.336093175924104
+      "lng": 12.336093175924104,
+      "streetName": "Sottoportego dei Miracoli",
+      "streetNameEnglish": "Underpass of Miracles",
+      "streetDescription": "Named after reported miraculous events or a small shrine with a revered icon that was believed to have healing powers, a common feature in Renaissance Venetian neighborhoods."
     },
     {
       "lat": 45.423489566203564,
-      "lng": 12.336692057844203
+      "lng": 12.336692057844203,
+      "streetName": "Fondamenta dei Cavalletti",
+      "streetNameEnglish": "Foundation of the Trestles",
+      "streetDescription": "Named after the wooden trestles used by artisans or merchants to display their goods near the canal in this area of Santa Maria Formosa parish."
     },
     {
       "lat": 45.423938530909055,
-      "lng": 12.334104214652099
+      "lng": 12.334104214652099,
+      "streetName": "Calle dei Bombardieri",
+      "streetNameEnglish": "Street of the Bombardiers",
+      "streetDescription": "Named for the artillery specialists who might have lived here or for proximity to an arsenal storage facility. Venice maintained a professional artillery corps for its navy and city defenses."
     },
     {
       "lat": 45.423848289463294,
-      "lng": 12.334672843622071
+      "lng": 12.334672843622071,
+      "streetName": "Rio Terà dei Biri",
+      "streetNameEnglish": "Filled Canal of the Biri",
+      "streetDescription": "A former canal that was filled in, likely named after the Biri family who were merchants in Renaissance Venice with connections to the Santa Maria Formosa area."
     },
     {
       "lat": 45.42396545875395,
-      "lng": 12.335442014660858
+      "lng": 12.335442014660858,
+      "streetName": "Calle della Mandola",
+      "streetNameEnglish": "Street of the Almond",
+      "streetDescription": "Possibly named after almond vendors or confectioners who specialized in almond-based sweets, which were popular luxury items in Renaissance Venice."
     },
     {
       "lat": 45.42398394164982,
-      "lng": 12.336052723328578
+      "lng": 12.336052723328578,
+      "streetName": "Salizada dei Consorti",
+      "streetNameEnglish": "Paved Street of the Consorti",
+      "streetDescription": "Named after the Consorti, a group of families who jointly funded the paving of this street with stone, making it a 'salizada' rather than an ordinary calle."
     },
     {
       "lat": 45.423906486426034,
-      "lng": 12.336666823458128
+      "lng": 12.336666823458128,
+      "streetName": "Campiello dei Squellini",
+      "streetNameEnglish": "Small Square of the Bell Makers",
+      "streetDescription": "A small square named after craftsmen who made small bells used for shops, homes, and churches in the vicinity of Santa Maria Formosa."
     },
     {
       "lat": 45.42393441483312,
-      "lng": 12.337226710088501
+      "lng": 12.337226710088501,
+      "streetName": "Calle dei Furlani",
+      "streetNameEnglish": "Street of the Friulians",
+      "streetDescription": "Named after people from Friuli who settled in this part of Venice, forming a small community. Regional communities often lived together in specific neighborhoods of Renaissance Venice."
     },
     {
       "lat": 45.42400934996815,
-      "lng": 12.337949441534397
+      "lng": 12.337949441534397,
+      "streetName": "Fondamenta della Malvasia Vecchia",
+      "streetNameEnglish": "Foundation of the Old Malvasia Wine Shop",
+      "streetDescription": "Named after an old tavern that specialized in selling Malvasia wine, a sweet wine from Greece that was popular in Venice during the Renaissance period."
     },
     {
       "lat": 45.42388747810754,
-      "lng": 12.33857357590104
+      "lng": 12.33857357590104,
+      "streetName": "Corte dei Favri",
+      "streetNameEnglish": "Court of the Smiths",
+      "streetDescription": "A small enclosed courtyard where blacksmiths and metal workers had their workshops, providing metal goods to the residents of Santa Maria Formosa."
     },
     {
       "lat": 45.42439032881847,
-      "lng": 12.334785934766376
+      "lng": 12.334785934766376,
+      "streetName": "Ramo della Vida",
+      "streetNameEnglish": "Branch of the Grapevine",
+      "streetDescription": "A small side street named either after a notable grapevine growing there or after a family named Vida who owned property on this street."
     },
     {
       "lat": 45.42441148089095,
-      "lng": 12.335428812799512
+      "lng": 12.335428812799512,
+      "streetName": "Calle dei Casselleri",
+      "streetNameEnglish": "Street of the Chest Makers",
+      "streetDescription": "Named after artisans who specialized in making wooden chests and caskets, important furnishings in Renaissance Venetian homes for storing valuables and textiles."
     },
     {
       "lat": 45.424311001390834,
-      "lng": 12.335869576754636
+      "lng": 12.335869576754636,
+      "streetName": "Sottoportego del Doge",
+      "streetNameEnglish": "Underpass of the Doge",
+      "streetDescription": "A covered passageway possibly used by a Doge (Venetian ruler) when visiting Santa Maria Formosa, or named after a property owned by a ducal family."
     },
     {
       "lat": 45.424410819064924,
-      "lng": 12.33657781074694
+      "lng": 12.33657781074694,
+      "streetName": "Calle del Paradiso Piccolo",
+      "streetNameEnglish": "Street of the Small Paradise",
+      "streetDescription": "Named after a small garden or particularly pleasant area near Santa Maria Formosa, or possibly after a family property described as a 'small paradise'."
     },
     {
       "lat": 45.42435609707468,
-      "lng": 12.337186194131567
+      "lng": 12.337186194131567,
+      "streetName": "Rio Terà delle Procuratie",
+      "streetNameEnglish": "Filled Canal of the Procurators",
+      "streetDescription": "A former canal that was filled in during expansion works, named after properties owned by the Procurators of St. Mark, important Venetian officials who managed charitable funds."
     },
     {
       "lat": 45.42438829140559,
-      "lng": 12.337809831422202
+      "lng": 12.337809831422202,
+      "streetName": "Calle dei Specchieri",
+      "streetNameEnglish": "Street of the Mirror Makers",
+      "streetDescription": "Named after craftsmen who produced the famous Venetian mirrors, a luxury export during the Renaissance. Venice was renowned for its glassmaking techniques."
     },
     {
       "lat": 45.4243655167107,
-      "lng": 12.338442859467044
+      "lng": 12.338442859467044,
+      "streetName": "Corte dei Bulgari",
+      "streetNameEnglish": "Court of the Bulgarians",
+      "streetDescription": "A courtyard named after Bulgarian merchants who had residences or warehouses here, reflecting Venice's status as a multicultural trading center during the Renaissance."
     },
     {
       "lat": 45.424409802749715,
-      "lng": 12.33910014165594
+      "lng": 12.33910014165594,
+      "streetName": "Fondamenta dei Coronelli",
+      "streetNameEnglish": "Foundation of the Coronelli",
+      "streetDescription": "Named after the Coronelli family, who might have been notable mapmakers or globe makers in this area near Santa Maria Formosa."
     },
     {
       "lat": 45.42491255771268,
-      "lng": 12.334623756873908
+      "lng": 12.334623756873908,
+      "streetName": "Salizada dei Greci",
+      "streetNameEnglish": "Paved Street of the Greeks",
+      "streetDescription": "A paved street near the Greek Orthodox community that settled around Santa Maria Formosa, representing the significant Greek presence in Renaissance Venice due to trade and migration from Byzantine territories."
     },
     {
       "lat": 45.424779924272464,
-      "lng": 12.335389812223603
+      "lng": 12.335389812223603,
+      "streetName": "Calle della Pietà Vecchia",
+      "streetNameEnglish": "Street of the Old Orphanage",
+      "streetDescription": "Named after a former location of the Pietà orphanage and music school, which was known for taking in abandoned children and providing them with musical education."
     },
     {
       "lat": 45.424847186241976,
-      "lng": 12.335880619865724
+      "lng": 12.335880619865724,
+      "streetName": "Sottoportego dei Mercanti da Levante",
+      "streetNameEnglish": "Underpass of the Levantine Merchants",
+      "streetDescription": "A covered passageway used by or named after merchants trading with the Eastern Mediterranean (Levant), reflecting Venice's important commercial ties with these regions."
     },
     {
       "lat": 45.42478958398969,
-      "lng": 12.336615543940225
+      "lng": 12.336615543940225,
+      "streetName": "Calle dei Remeri",
+      "streetNameEnglish": "Street of the Oar Makers",
+      "streetDescription": "Named after craftsmen who specialized in making oars for Venetian boats and gondolas, an essential craft in a city built on water and dependent on maritime transportation."
     },
     {
       "lat": 45.42474664724101,
-      "lng": 12.337197509556605
+      "lng": 12.337197509556605,
+      "streetName": "Campiello dei Tagliapietra",
+      "streetNameEnglish": "Small Square of the Stonemasons",
+      "streetDescription": "A small square where stonemasons had their workshops or gathered to receive commissions for work on the many stone buildings in Venice, including those around Santa Maria Formosa."
     },
     {
       "lat": 45.42476533031068,
-      "lng": 12.337982674457031
+      "lng": 12.337982674457031,
+      "streetName": "Calle del Dose Michiel",
+      "streetNameEnglish": "Street of Doge Michiel",
+      "streetDescription": "Named after one of the Doges from the powerful Michiel family who ruled Venice during different periods of the Republic's history, possibly one who had a connection to Santa Maria Formosa."
     },
     {
       "lat": 45.424762083419054,
-      "lng": 12.338523545898983
+      "lng": 12.338523545898983,
+      "streetName": "Ruga degli Albanesi",
+      "streetNameEnglish": "Street of the Albanians",
+      "streetDescription": "A commercial street where Albanian merchants or craftsmen had their businesses, representing another immigrant community in multicultural Renaissance Venice."
     },
     {
       "lat": 45.42482955371325,
-      "lng": 12.33905265294955
+      "lng": 12.33905265294955,
+      "streetName": "Fondamenta dei Scudi",
+      "streetNameEnglish": "Foundation of the Shields",
+      "streetDescription": "Named after shield makers or a location where military equipment was stored, reflecting Venice's need for defensive armaments for its naval and land forces."
     },
     {
       "lat": 45.42488753829197,
-      "lng": 12.339903441912593
+      "lng": 12.339903441912593,
+      "streetName": "Calle dei Pegolotti",
+      "streetNameEnglish": "Street of the Pitch Workers",
+      "streetDescription": "Named after workers who used pitch for caulking and waterproofing ships, an essential trade in Venice's maritime economy, with workshops likely located near this street."
     },
     {
       "lat": 45.4253588145257,
-      "lng": 12.334826151977968
+      "lng": 12.334826151977968,
+      "streetName": "Rio Terà Querini Stampalia",
+      "streetNameEnglish": "Filled Canal of Querini Stampalia",
+      "streetDescription": "A former canal filled to create a street, named after the noble Querini Stampalia family who had their palazzo near Santa Maria Formosa and were important patrons in Renaissance Venice."
     },
     {
       "lat": 45.42521362617671,
-      "lng": 12.335335873762023
+      "lng": 12.335335873762023,
+      "streetName": "Calle dei Bombaser",
+      "streetNameEnglish": "Street of the Cotton Dealers",
+      "streetDescription": "Named after merchants who specialized in selling cotton (bombaso in Venetian dialect), which was an important imported textile material in Renaissance Venice."
     },
     {
       "lat": 45.42536374000277,
-      "lng": 12.335922281593845
+      "lng": 12.335922281593845,
+      "streetName": "Corte della Sabbionera",
+      "streetNameEnglish": "Court of the Sand Dealer",
+      "streetDescription": "A courtyard named after a business that sold sand, which was used for various purposes including construction, glass-making, and as a cleaning abrasive in Renaissance Venice."
     },
     {
       "lat": 45.42523730802089,
-      "lng": 12.336604398676744
+      "lng": 12.336604398676744,
+      "streetName": "Sottoportego dei Traghettatori",
+      "streetNameEnglish": "Underpass of the Ferrymen",
+      "streetDescription": "A covered passageway named after or used by the gondoliers who operated ferry services across the canals near Santa Maria Formosa, an essential transportation service in Venice."
     },
     {
       "lat": 45.42522986039755,
-      "lng": 12.337295751380339
+      "lng": 12.337295751380339,
+      "streetName": "Calle dei Fiuberi",
+      "streetNameEnglish": "Street of the Buckle Makers",
+      "streetDescription": "Named after craftsmen who made buckles and clasps for clothing and accessories, representing the specialized luxury crafts that flourished in Renaissance Venice."
     },
     {
       "lat": 45.425250564663465,
-      "lng": 12.337797634972805
+      "lng": 12.337797634972805,
+      "streetName": "Salizada del Formager",
+      "streetNameEnglish": "Paved Street of the Cheese Seller",
+      "streetDescription": "A paved street named after a prominent cheese merchant's shop or family, indicating the presence of food markets near Santa Maria Formosa."
     },
     {
       "lat": 45.42530220406954,
-      "lng": 12.338577142441622
+      "lng": 12.338577142441622,
+      "streetName": "Fondamenta dei Drapieri",
+      "streetNameEnglish": "Foundation of the Drapers",
+      "streetDescription": "Named after cloth merchants who sold fine textiles, a key luxury commodity in Renaissance Venice's commercial economy."
     },
     {
       "lat": 45.42524303609165,
-      "lng": 12.339103040025039
+      "lng": 12.339103040025039,
+      "streetName": "Calle della Madonna di Loreto",
+      "streetNameEnglish": "Street of Our Lady of Loreto",
+      "streetDescription": "Named after a shrine or small chapel dedicated to the Virgin of Loreto, showing the devotional practices in Renaissance Venice and connections to wider Italian religious traditions."
     },
     {
       "lat": 45.425322970792465,
-      "lng": 12.339708915512361
+      "lng": 12.339708915512361,
+      "streetName": "Campiello dei Armeni",
+      "streetNameEnglish": "Small Square of the Armenians",
+      "streetDescription": "A small square where Armenian merchants or craftsmen gathered or lived, representing another of the foreign communities that contributed to Venice's multicultural character."
     },
     {
       "lat": 45.42532362579357,
-      "lng": 12.340490169070005
+      "lng": 12.340490169070005,
+      "streetName": "Calle dei Varoteri",
+      "streetNameEnglish": "Street of the Furriers",
+      "streetDescription": "Named after craftsmen who prepared and sold fur garments, which were luxury items signifying wealth and status in Renaissance Venice, especially during winter."
     },
     {
       "lat": 45.425666386399925,
-      "lng": 12.336617105097444
+      "lng": 12.336617105097444,
+      "streetName": "Rio Terà delle Erbe",
+      "streetNameEnglish": "Filled Canal of the Herbs",
+      "streetDescription": "A former canal filled to create a street, likely where herb sellers had their stalls, providing spices, medicinal herbs, and cooking ingredients to the residents near Santa Maria Formosa."
     },
     {
       "lat": 45.42575883399165,
-      "lng": 12.337242837829457
+      "lng": 12.337242837829457,
+      "streetName": "Calle dei Balestrieri",
+      "streetNameEnglish": "Street of the Crossbowmen",
+      "streetDescription": "Named after crossbow makers or members of Venice's crossbow corps who may have lived or trained in this area, representing the city's military organization."
     },
     {
       "lat": 45.425707638694234,
-      "lng": 12.33799073799087
+      "lng": 12.33799073799087,
+      "streetName": "Sottoportego della Fraterna",
+      "streetNameEnglish": "Underpass of the Brotherhood",
+      "streetDescription": "A covered passageway named after a religious confraternity based near Santa Maria Formosa, reflecting the important role these organizations played in Renaissance Venetian social and religious life."
     },
     {
       "lat": 45.425766050289006,
-      "lng": 12.338471840822152
+      "lng": 12.338471840822152,
+      "streetName": "Calle della Testa d'Oro",
+      "streetNameEnglish": "Street of the Golden Head",
+      "streetDescription": "Named after a shop sign that featured a golden head, possibly a pharmacy or apothecary which often used such distinctive signs in Renaissance Venice."
     },
     {
       "lat": 45.425787999240065,
-      "lng": 12.339222105490508
+      "lng": 12.339222105490508,
+      "streetName": "Corte dei Centopietre",
+      "streetNameEnglish": "Court of the Hundred Stones",
+      "streetDescription": "A courtyard named either for its distinctive paving using many stones or metaphorically referring to the many small businesses or workshops located there."
     },
     {
       "lat": 45.425675805198715,
-      "lng": 12.339926821979786
+      "lng": 12.339926821979786,
+      "streetName": "Fondamenta dei Vinanti",
+      "streetNameEnglish": "Foundation of the Wine Merchants",
+      "streetDescription": "Named after wine sellers who had their shops along this canal-side street, importing wines from mainland Italy and Greece to satisfy Venetian tastes."
     },
     {
       "lat": 45.42580069001419,
-      "lng": 12.340546259940814
+      "lng": 12.340546259940814,
+      "streetName": "Calle del Piovan",
+      "streetNameEnglish": "Street of the Parish Priest",
+      "streetDescription": "Named after the residence of the parish priest of Santa Maria Formosa, indicating the street's proximity to the parish church or rectory."
     },
     {
       "lat": 45.42620586089611,
-      "lng": 12.337836817303026
+      "lng": 12.337836817303026,
+      "streetName": "Ramo delle Campane",
+      "streetNameEnglish": "Branch of the Bells",
+      "streetDescription": "A small side street named either after bell foundries nearby or because it led toward the bell tower of Santa Maria Formosa or another nearby church."
     },
     {
       "lat": 45.42625887181648,
-      "lng": 12.338524776257742
+      "lng": 12.338524776257742,
+      "streetName": "Calle degli Armaioli",
+      "streetNameEnglish": "Street of the Armorers",
+      "streetDescription": "Named after craftsmen who made armor and weapons, an important industry in a maritime republic that needed to equip its naval forces and merchant vessels for protection."
     },
     {
       "lat": 45.42620625946387,
-      "lng": 12.33916111289998
+      "lng": 12.33916111289998,
+      "streetName": "Sottoportego dei Birri",
+      "streetNameEnglish": "Underpass of the Constables",
+      "streetDescription": "A covered passageway used by or named after the city police officers (birri) who maintained order in the Santa Maria Formosa district."
     },
     {
       "lat": 45.42619266763758,
-      "lng": 12.33979500257003
+      "lng": 12.33979500257003,
+      "streetName": "Calle dei Stagneri",
+      "streetNameEnglish": "Street of the Tinsmiths",
+      "streetDescription": "Named after craftsmen who worked with tin and other metals to create household items, reflecting the specialization of crafts in Renaissance Venice."
     },
     {
       "lat": 45.426263138097724,
-      "lng": 12.340538819898464
+      "lng": 12.340538819898464,
+      "streetName": "Salizada dei Borghesani",
+      "streetNameEnglish": "Paved Street of the Borghesani",
+      "streetDescription": "Named after the Borghesani family who likely paid for the paving of this street near Santa Maria Formosa, showing how wealthy families contributed to urban infrastructure."
     },
     {
       "lat": 45.42654300493068,
-      "lng": 12.339279061095066
+      "lng": 12.339279061095066,
+      "streetName": "Corte delle Candele",
+      "streetNameEnglish": "Court of the Candles",
+      "streetDescription": "A courtyard where candle makers had their workshops, producing essential items for home lighting and church ceremonies in Renaissance Venice."
     },
     {
       "lat": 45.42657760513173,
-      "lng": 12.339929330401299
+      "lng": 12.339929330401299,
+      "streetName": "Calle della Malvasia Nuova",
+      "streetNameEnglish": "Street of the New Malvasia Wine Shop",
+      "streetDescription": "Named after a newer tavern that specialized in Malvasia wine, possibly established after the original Malvasia tavern in the area became successful."
     },
     {
       "lat": 45.42660127099642,
-      "lng": 12.34055630182004
+      "lng": 12.34055630182004,
+      "streetName": "Fondamenta dei Pistori",
+      "streetNameEnglish": "Foundation of the Bakers",
+      "streetDescription": "Named after bakers who had their shops along this canal-side street, providing bread and baked goods to the residents of Santa Maria Formosa parish."
     },
     {
       "lat": 45.42664998537322,
-      "lng": 12.340996930705163
+      "lng": 12.340996930705163,
+      "streetName": "Calle del Dose Grimani",
+      "streetNameEnglish": "Street of Doge Grimani",
+      "streetDescription": "Named after one of the Doges from the Grimani family, likely Antonio Grimani (1521-1523) or Marino Grimani (1595-1605), who may have had connections to this area of Venice."
     },
     {
       "lat": 45.427067719771564,
-      "lng": 12.3404803141889
+      "lng": 12.3404803141889,
+      "streetName": "Campiello dei Calegheri",
+      "streetNameEnglish": "Small Square of the Shoemakers",
+      "streetDescription": "A small square where shoemakers had their workshops, representing one of the essential craft guilds in Renaissance Venice."
     },
     {
       "lat": 45.42703921680161,
-      "lng": 12.34115619236439
+      "lng": 12.34115619236439,
+      "streetName": "Calle dei Magazeni",
+      "streetNameEnglish": "Street of the Warehouses",
+      "streetDescription": "Named after storage warehouses located on this street near Santa Maria Formosa, where merchants kept their goods before distribution or sale."
     },
     {
       "lat": 45.42745210407933,
-      "lng": 12.341112218197772
+      "lng": 12.341112218197772,
+      "streetName": "Rio Terà di Santa Maria Formosa",
+      "streetNameEnglish": "Filled Canal of Santa Maria Formosa",
+      "streetDescription": "A former canal near the church of Santa Maria Formosa that was filled in to create additional land for development as the parish grew in importance and population."
     }
   ],
   "id": "polygon-1746052711032"

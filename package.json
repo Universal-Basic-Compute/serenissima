@@ -30,7 +30,7 @@
     "@solana/web3.js": "^1.98.2",
     "@types/date-fns": "^2.6.3",
     "airtable": "^0.12.2",
-    "axios": "^1.6.7",
+    "axios": "^1.9.0",
     "bs58": "^5.0.0",
     "d3": "^7.9.0",
     "date-fns": "^4.1.0",
@@ -45,6 +45,7 @@
     "react-markdown": "^10.1.0",
     "remark-gfm": "^4.0.1",
     "three": "^0.158.0",
+    "uuid": "^11.1.0",
     "zustand": "^5.0.3"
   },
   "devDependencies": {
