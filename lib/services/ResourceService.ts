@@ -91,21 +91,34 @@ export class ResourceService {
           return;
         }
         
+        // Ensure we have a valid resource ID
+        if (!resource.id) {
+          console.warn(`Resource without ID found, skipping:`, resource);
+          return;
+        }
+        
+        // Ensure we have a valid resource name
+        const name = resource.name || resource.id;
+        
         resourceMap.set(resource.id, {
           id: resource.id,
-          name: resource.name || resource.id, // Use ID as fallback for name
+          name: name,
           category: resource.category || 'raw_materials', // Default category
           subcategory: resource.subcategory || '',
           description: resource.description || resource.longDescription || '',
           rarity: resource.rarity || 'common',
           icon: resource.icon || 'default.png',
-          amount: resource.amount || 0 // Use provided amount or default to 0
+          amount: resource.amount || 0, // Use provided amount or default to 0
+          // Copy over any additional properties that might be useful
+          productionProperties: resource.productionProperties,
+          productionChainPosition: resource.productionChainPosition,
+          baseProperties: resource.baseProperties
         });
       });
       
       // Convert Map to array
       const processedResources = Array.from(resourceMap.values());
-      console.log(`Processed ${processedResources.length} unique resources`);
+      console.log(`Processed ${processedResources.length} unique resources from ${resources.length} total`);
       
       // Cache the resources
       this.resourcesCache = processedResources;

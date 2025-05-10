@@ -97,14 +97,28 @@ const ResourceDropdown: React.FC<ResourceDropdownProps> = ({ category, resources
   const uniqueResources = React.useMemo(() => {
     const resourceMap = new Map<string, Resource>();
     resources.forEach(resource => {
+      // Skip resources without a valid ID
+      if (!resource.id) {
+        console.warn(`Resource without ID found in category ${category}, skipping:`, resource);
+        return;
+      }
+      
       if (!resourceMap.has(resource.id)) {
         resourceMap.set(resource.id, resource);
       } else {
         console.warn(`Duplicate resource ID in ResourceDropdown: ${resource.id} - ${resource.name}`);
+        
+        // If the existing resource has less information than the duplicate,
+        // replace it with the more complete version
+        const existingResource = resourceMap.get(resource.id);
+        if (!existingResource.description && resource.description) {
+          console.log(`Replacing resource ${resource.id} with more complete version`);
+          resourceMap.set(resource.id, resource);
+        }
       }
     });
     return Array.from(resourceMap.values());
-  }, [resources]);
+  }, [resources, category]);
 
   // Log the number of resources before and after deduplication
   React.useEffect(() => {

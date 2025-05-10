@@ -71,6 +71,9 @@ export async function GET(request: Request) {
         position = {};
       }
       
+      // Get icon field or use default
+      const icon = record.get('Icon') || 'default.png';
+      
       resourceMap.set(resourceId, {
         id: resourceId,
         type: record.get('Type'),
@@ -83,8 +86,9 @@ export async function GET(request: Request) {
         owner: record.get('Owner') || 'system',
         createdAt: record.get('CreatedAt') || new Date().toISOString(),
         // Add a standardized icon field
-        icon: 'default.png', // Use default.png as the fallback icon
-        description: record.get('Description') || '' // Add description field
+        icon: icon, // Use the icon from Airtable or default
+        description: record.get('Description') || '', // Add description field
+        rarity: record.get('Rarity') || 'common' // Add rarity field
       });
     });
     
