@@ -3139,8 +3139,8 @@ export default class SimplePolygonRenderer {
     // Check if we already have the navigation graph
     if ((window as any).__navigationGraph) return;
     
-    // Fetch the land navigation graph
-    fetch('/data/navigation-graph.json')
+    // Fetch the land navigation graph from our new API endpoint
+    fetch('/api/data/navigation-graph.json')
       .then(response => {
         if (!response.ok) {
           throw new Error(`Failed to fetch land navigation graph: ${response.status}`);
@@ -3153,7 +3153,7 @@ export default class SimplePolygonRenderer {
         (window as any).__navigationGraph = data;
         
         // Now fetch the water navigation graph
-        return fetch('/data/water-navigation-graph.json')
+        return fetch('/api/data/water-navigation-graph.json')
           .catch(error => {
             console.warn('Error fetching water navigation graph:', error);
             return null;
@@ -3174,6 +3174,24 @@ export default class SimplePolygonRenderer {
       })
       .catch(error => {
         console.warn('Error preloading navigation graphs:', error);
+        
+        // Create a minimal fallback navigation graph
+        console.log('Creating fallback navigation graph');
+        (window as any).__navigationGraph = {
+          metadata: { version: "fallback", nodeCount: 0, edgeCount: 0 },
+          nodes: {},
+          edges: {},
+          enhanced: {}
+        };
+        
+        // Also create a minimal fallback water navigation graph
+        (window as any).__waterNavigationGraph = {
+          metadata: { version: "fallback", nodeCount: 0, edgeCount: 0 },
+          nodes: {},
+          edges: {},
+          enhanced: {},
+          polygonToDocks: {}
+        };
       });
   }
   
