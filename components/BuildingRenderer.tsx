@@ -544,14 +544,37 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ active }) => {
       ensureBuildingsVisible();
     };
     
+    const handleLoadCitizens = () => {
+      console.log('PolygonViewer: Received loadCitizens event');
+      if (citizenDisplayManagerRef.current) {
+        console.log('PolygonViewer: Forcing citizen refresh from event handler');
+        citizenDisplayManagerRef.current.refreshCitizens();
+        
+        // Force citizens to be visible with multiple attempts
+        setTimeout(() => {
+          if (citizenDisplayManagerRef.current) {
+            citizenDisplayManagerRef.current.forceVisibleCitizens();
+          }
+        }, 500);
+        
+        setTimeout(() => {
+          if (citizenDisplayManagerRef.current) {
+            citizenDisplayManagerRef.current.forceVisibleCitizens();
+          }
+        }, 1500);
+      }
+    };
+    
     window.addEventListener('fixBuildingPositions', handleFixPositions);
     window.addEventListener('focusOnBuildings', handleFocusOnBuildings);
     window.addEventListener('ensureBuildingsVisible', handleEnsureBuildingsVisible);
+    window.addEventListener('loadCitizens', handleLoadCitizens);
     
     return () => {
       window.removeEventListener('fixBuildingPositions', handleFixPositions);
       window.removeEventListener('focusOnBuildings', handleFocusOnBuildings);
       window.removeEventListener('ensureBuildingsVisible', handleEnsureBuildingsVisible);
+      window.removeEventListener('loadCitizens', handleLoadCitizens);
     };
   }, [focusCameraOnBuildings, ensureBuildingsVisible]);
   
