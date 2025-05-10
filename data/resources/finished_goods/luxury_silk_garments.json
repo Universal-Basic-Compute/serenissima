@@ -19,7 +19,7 @@
     "luxuryLevel": 8,
     "targetCustomers": [
       "nobility",
-      "patrician_families",
+      "nobili_families",
       "foreign_royalty",
       "wealthy_merchants"
     ],

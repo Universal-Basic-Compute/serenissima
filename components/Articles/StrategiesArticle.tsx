@@ -28,7 +28,7 @@ const StrategiesArticle: React.FC<StrategiesArticleProps> = ({ onClose }) => {
           </p>
           
           <p className="mb-4">
-            In Renaissance Venice, true power was rarely achieved through direct means. The most successful patricians understood that manipulation of people, systems, and perceptions was far more effective than brute economic force. This guide reveals the subtle arts of influence that transformed ordinary merchants into the power brokers of the Most Serene Republic.
+            In Renaissance Venice, true power was rarely achieved through direct means. The most successful nobili understood that manipulation of people, systems, and perceptions was far more effective than brute economic force. This guide reveals the subtle arts of influence that transformed ordinary merchants into the power brokers of the Most Serene Republic.
           </p>
           
           <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">

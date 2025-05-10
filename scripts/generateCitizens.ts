@@ -11,7 +11,7 @@ const airtableBase = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY }).base
 // Define citizen interface
 interface Citizen {
   id: string;
-  socialClass: 'Patrician' | 'Cittadini' | 'Popolani' | 'Laborer';
+  socialClass: 'Nobili' | 'Cittadini' | 'Popolani' | 'Laborer';
   firstName: string;
   lastName: string;
   description: string;
@@ -58,7 +58,7 @@ async function loadCitizensFromAirtable(): Promise<Citizen[]> {
             const fields = record.fields;
             citizens.push({
               id: fields.CitizenId?.toString() || record.id,
-              socialClass: fields.SocialClass as 'Patrician' | 'Cittadini' | 'Popolani' | 'Laborer',
+              socialClass: fields.SocialClass as 'Nobili' | 'Cittadini' | 'Popolani' | 'Laborer',
               firstName: fields.FirstName?.toString() || '',
               lastName: fields.LastName?.toString() || '',
               description: fields.Description?.toString() || '',
@@ -223,7 +223,7 @@ La Serenissima is a sophisticated economic simulation set in Renaissance Venice 
 - AI citizens who participate in the economy as consumers, workers, and entrepreneurs
 
 CITIZEN SOCIAL CLASSES:
-1. Patricians - The noble families who control Venice's government. Wealthy, politically powerful, and often involved in long-distance trade.
+1. Nobili - The noble families who control Venice's government. Wealthy, politically powerful, and often involved in long-distance trade.
 2. Cittadini - Wealthy non-noble citizens, including successful merchants, professionals, and high-ranking bureaucrats.
 3. Popolani - Common citizens including craftsmen, shopkeepers, and skilled workers.
 4. Laborers - Unskilled workers, servants, gondoliers, and the working poor.
@@ -233,15 +233,15 @@ ${existingNames.join(', ')}
 
 TASK:
 Create 10 unique Venetian citizens with historically accurate names, descriptions, and characteristics. For each citizen, provide:
-1. SocialClass - One of: Patrician, Cittadini, Popolani, or Laborer
+1. SocialClass - One of: Nobili, Cittadini, Popolani, or Laborer
 2. FirstName - Historically accurate Venetian first name
-3. LastName - Historically accurate Venetian family name (ensure patricians have notable Venetian noble family names)
+3. LastName - Historically accurate Venetian family name (ensure nobili have notable Venetian noble family names)
 4. Description - One sentence about personality, traits, and remarkable things about this person
 5. ImagePrompt - A detailed prompt for generating an image of this person, including physical appearance, clothing appropriate to their social class, and setting
 6. Wealth - Approximate wealth in Ducats, appropriate to their social class
 
 DISTRIBUTION GUIDELINES:
-- Patricians: Create 1, wealth range 5,000-50,000 ducats
+- Nobili: Create 1, wealth range 5,000-50,000 ducats
 - Cittadini: Create 2, wealth range 1,000-5,000 ducats
 - Popolani: Create 4, wealth range 100-1,000 ducats
 - Laborers: Create 3, wealth range 10-100 ducats
@@ -255,7 +255,7 @@ function generateUserPrompt(): string {
   return `Please generate 10 unique Venetian citizens for our game. 
   
 Each citizen should have these fields:
-- socialClass (Patrician, Cittadini, Popolani, or Laborer)
+- socialClass (Nobili, Cittadini, Popolani, or Laborer)
 - firstName (historically accurate Venetian name)
 - lastName (historically accurate Venetian family name)
 - description (one sentence about personality, traits, and remarkable things)
@@ -418,14 +418,14 @@ function validateCitizens(citizens: Citizen[]): void {
     if (citizen.wealth === undefined) issues.push(`Citizen ${index} missing wealth`);
     
     // Validate social class
-    if (citizen.socialClass && !['Patrician', 'Cittadini', 'Popolani', 'Laborer'].includes(citizen.socialClass)) {
+    if (citizen.socialClass && !['Nobili', 'Cittadini', 'Popolani', 'Laborer'].includes(citizen.socialClass)) {
       issues.push(`Citizen ${index} has invalid socialClass: ${citizen.socialClass}`);
     }
     
     // Validate wealth ranges
     if (citizen.wealth !== undefined) {
       const wealthRanges = {
-        'Patrician': [5000, 50000],
+        'Nobili': [5000, 50000],
         'Cittadini': [1000, 5000],
         'Popolani': [100, 1000],
         'Laborer': [10, 100]

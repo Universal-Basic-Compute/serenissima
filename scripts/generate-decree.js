@@ -28,7 +28,7 @@ async function generateDecree(input) {
     GOVERNANCE ARTICLE EXCERPTS:
     In La Serenissima, unlike traditional games where rules are fixed, the governance system itself is part of the gameplay. As players rise in wealth and status, they gain the ability to shape the very rules that govern the economic simulation.
     
-    The governance structure includes The Great Council (patrician nobility only), The Senate (handles economic matters), The Council of Ten (security and important matters), The Collegio (day-to-day administration), The Doge (elected leader), and Guild Leadership (industry regulation).
+    The governance structure includes The Great Council (nobili nobility only), The Senate (handles economic matters), The Council of Ten (security and important matters), The Collegio (day-to-day administration), The Doge (elected leader), and Guild Leadership (industry regulation).
     
     Decree types include Economic Decrees (tax adjustments, trade regulations, guild charters, price controls, citizen subsidies), Infrastructure Decrees (building permits, canal improvements, public works, district development), and Social Decrees (public celebrations, religious patronage, educational initiatives, public health measures).
     
@@ -44,7 +44,7 @@ async function generateDecree(input) {
     In Renaissance Venice, business partnerships are rarely just about commerce—they're about creating alliances, securing access to new resources, and consolidating influence. Form partnerships with players who control complementary assets or skills.
     
     STRATEGIES ARTICLE EXCERPTS:
-    In Renaissance Venice, true power was rarely achieved through direct means. The most successful patricians understood that manipulation of people, systems, and perceptions was far more effective than brute economic force.
+    In Renaissance Venice, true power was rarely achieved through direct means. The most successful nobili understood that manipulation of people, systems, and perceptions was far more effective than brute economic force.
     
     By strategically acquiring land that forms natural chokepoints, you can effectively blockade parts of Venice from ground transportation. This forces competitors to rely on more expensive water transportation, increasing their costs while your own goods flow freely.
     `;
@@ -74,7 +74,7 @@ async function generateDecree(input) {
         - Transportation networks (canals, bridges, roads) affect commerce
         
         GOVERNANCE STRUCTURE:
-        - The Great Council (patrician nobility only)
+        - The Great Council (nobili nobility only)
         - The Senate (handles economic matters)
         - The Council of Ten (security and important matters)
         - The Collegio (day-to-day administration)

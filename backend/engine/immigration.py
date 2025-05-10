@@ -40,7 +40,7 @@ load_dotenv()
 
 # Constants for building types and their corresponding social classes
 BUILDING_TO_SOCIAL_CLASS = {
-    "canal_house": "Patrician",
+    "canal_house": "Nobili",
     "merchant_s_house": "Cittadini",
     "artisan_s_house": "Popolani",
     "fisherman_s_cottage": "Facchini"  # Using Facchini as equivalent to Laborer
@@ -210,12 +210,12 @@ def create_admin_notification(tables, immigration_summary) -> None:
             "timestamp": datetime.datetime.now().isoformat(),
             "total_immigrants": immigration_summary['total'],
             "by_class": {
-                "Patrician": immigration_summary.get('Patrician', 0),
+                "Nobili": immigration_summary.get('Nobili', 0),
                 "Cittadini": immigration_summary.get('Cittadini', 0),
                 "Popolani": immigration_summary.get('Popolani', 0),
                 "Facchini": immigration_summary.get('Facchini', 0)
             },
-            "message": f"New citizens have arrived in Venice seeking housing: {immigration_summary.get('Patrician', 0)} Patricians, {immigration_summary.get('Cittadini', 0)} Cittadini, {immigration_summary.get('Popolani', 0)} Popolani, and {immigration_summary.get('Facchini', 0)} Facchini."
+            "message": f"New citizens have arrived in Venice seeking housing: {immigration_summary.get('Nobili', 0)} Nobili, {immigration_summary.get('Cittadini', 0)} Cittadini, {immigration_summary.get('Popolani', 0)} Popolani, and {immigration_summary.get('Facchini', 0)} Facchini."
         }
         
         # Create the notification record
@@ -246,7 +246,7 @@ def process_immigration(dry_run: bool = False):
     immigration_count = 0
     # Track immigrants by social class
     immigration_by_class = {
-        "Patrician": 0,
+        "Nobili": 0,
         "Cittadini": 0,
         "Popolani": 0,
         "Facchini": 0

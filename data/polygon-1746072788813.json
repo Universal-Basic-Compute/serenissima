@@ -181,7 +181,7 @@
         "id": "7cc7de6d-bc51-482d-a03f-4087d1ae4c2b",
         "historicalName": "Ponte dei Mocenigo",
         "englishName": "Bridge of the Mocenigo Family",
-        "historicalDescription": "Named after the noble Mocenigo family who owned palaces in the area near Salizada San Stae. The Mocenigo were one of Venice's most distinguished patrician families, producing seven Doges between the 15th and 18th centuries. This bridge would have connected to properties owned by this influential family in the Santa Croce district.",
+        "historicalDescription": "Named after the noble Mocenigo family who owned palaces in the area near Salizada San Stae. The Mocenigo were one of Venice's most distinguished nobili families, producing seven Doges between the 15th and 18th centuries. This bridge would have connected to properties owned by this influential family in the Santa Croce district.",
         "location": {
           "midpoint": {
             "lat": 45.43976436235776,
@@ -239,7 +239,7 @@
       "lng": 12.329677961673518,
       "streetName": "Campiello dei Mocenigo",
       "streetNameEnglish": "Small Square of the Mocenigo Family",
-      "streetDescription": "Named after the prominent Mocenigo family who owned property in the Santa Croce district. The Mocenigo were a powerful patrician family that produced several Doges of Venice, and their influence would have extended to this area near San Stae."
+      "streetDescription": "Named after the prominent Mocenigo family who owned property in the Santa Croce district. The Mocenigo were a powerful nobili family that produced several Doges of Venice, and their influence would have extended to this area near San Stae."
     },
     {
       "lat": 45.44110667429332,

@@ -6,7 +6,7 @@ This script:
 1. Fetches all citizens without homes
 2. Sorts them by wealth (descending)
 3. For each citizen, finds an appropriate building based on social class:
-   - Patrician: canal_house
+   - Nobili: canal_house
    - Cittadini: merchant_s_house
    - Popolani: artisan_s_house
    - Facchini: fisherman_s_cottage
@@ -36,7 +36,7 @@ load_dotenv()
 
 # Constants for building types by social class
 BUILDING_PREFERENCES = {
-    "Patrician": ["canal_house"],
+    "Nobili": ["canal_house"],
     "Cittadini": ["merchant_s_house"],
     "Popolani": ["artisan_s_house"],
     "Facchini": ["fisherman_s_cottage"],

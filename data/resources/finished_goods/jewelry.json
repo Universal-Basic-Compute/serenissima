@@ -20,7 +20,7 @@
     "targetCustomers": [
       "nobility",
       "wealthy_merchants",
-      "patrician_families",
+      "nobili_families",
       "foreign_elites"
     ],
     "fashionSensitivity": 0.6,

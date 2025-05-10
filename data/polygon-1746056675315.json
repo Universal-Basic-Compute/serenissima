@@ -46,7 +46,7 @@
       },
       "historicalName": "Fondamenta Giustinian",
       "englishName": "Giustinian's Foundation",
-      "historicalDescription": "Named after the prominent Giustinian family who owned property in this area of San Marco. The Giustinian were a patrician Venetian family who contributed several Doges to the Republic and maintained a significant presence in the San Marco district during the Renaissance period. This dock would have served their palazzo and the surrounding neighborhood."
+      "historicalDescription": "Named after the prominent Giustinian family who owned property in this area of San Marco. The Giustinian were a nobili Venetian family who contributed several Doges to the Republic and maintained a significant presence in the San Marco district during the Renaissance period. This dock would have served their palazzo and the surrounding neighborhood."
     }
   ],
   "bridgePoints": [
@@ -66,7 +66,7 @@
         "id": "f80b04b0-6d26-42b5-8f76-2b4017ee6353",
         "historicalName": "Ponte dei Giustinian",
         "englishName": "Bridge of the Giustinian",
-        "historicalDescription": "Named after the noble Giustinian family whose palazzo was located along Calle Giustinian in San Marco. The Giustinian were one of Venice's oldest patrician families, contributing several procurators and senators to the Republic from the 13th through 18th centuries. Their presence in this area would have made this bridge an important access point to their family properties.",
+        "historicalDescription": "Named after the noble Giustinian family whose palazzo was located along Calle Giustinian in San Marco. The Giustinian were one of Venice's oldest nobili families, contributing several procurators and senators to the Republic from the 13th through 18th centuries. Their presence in this area would have made this bridge an important access point to their family properties.",
         "location": {
           "midpoint": {
             "lat": 45.43288524931161,

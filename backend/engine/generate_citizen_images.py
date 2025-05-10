@@ -80,7 +80,7 @@ def enhance_image_prompt(citizen: Dict) -> str:
     
     style_addition = ''
     
-    if social_class == 'Patrician':
+    if social_class == 'Nobili':
         style_addition = 'Renaissance portrait style with realistic details. 3/4 view portrait composition with Rembrandt lighting. Rich color palette with deep reds and gold tones. Include English title in the image. --ar 1:1'
     elif social_class == 'Cittadini':
         style_addition = 'Renaissance portrait style with realistic details. 3/4 view portrait composition with warm Rembrandt lighting. Warm amber tones. Include English title in the image. --ar 1:1'

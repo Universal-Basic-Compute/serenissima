@@ -286,7 +286,7 @@
         "id": "15fe6123-32fb-41ed-94a1-f197d0266ffc",
         "historicalName": "Ponte dei Contarini",
         "englishName": "Bridge of the Contarini Family",
-        "historicalDescription": "Named after the noble Contarini family, one of Venice's most prominent patrician families who produced eight Doges between the 11th and 18th centuries. The Contarini likely owned property near Calle San Giacomo in Santa Croce, and it was common practice to name bridges after influential families who lived or owned palaces in the vicinity.",
+        "historicalDescription": "Named after the noble Contarini family, one of Venice's most prominent nobili families who produced eight Doges between the 11th and 18th centuries. The Contarini likely owned property near Calle San Giacomo in Santa Croce, and it was common practice to name bridges after influential families who lived or owned palaces in the vicinity.",
         "location": {
           "midpoint": {
             "lat": 45.423491852777715,
@@ -390,7 +390,7 @@
       "lng": 12.330570608001183,
       "streetName": "Fondamenta dei Bragadin",
       "streetNameEnglish": "Foundation of the Bragadin Family",
-      "streetDescription": "Named after the noble Bragadin family who owned property along this canal-side street. This patrician family had significant influence in the San Giacomo area of Santa Croce during the 15th and 16th centuries."
+      "streetDescription": "Named after the noble Bragadin family who owned property along this canal-side street. This nobili family had significant influence in the San Giacomo area of Santa Croce during the 15th and 16th centuries."
     },
     {
       "lat": 45.424069761849445,
@@ -495,7 +495,7 @@
       "lng": 12.332609113557771,
       "streetName": "Calle dei Oratori",
       "streetNameEnglish": "Street of the Oratories",
-      "streetDescription": "Named after small private chapels or prayer rooms that existed along this street. Several patrician families in the San Giacomo area maintained these oratories for private worship during the Renaissance period."
+      "streetDescription": "Named after small private chapels or prayer rooms that existed along this street. Several nobili families in the San Giacomo area maintained these oratories for private worship during the Renaissance period."
     },
     {
       "lat": 45.42535074217228,

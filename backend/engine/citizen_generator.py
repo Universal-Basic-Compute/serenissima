@@ -33,7 +33,7 @@ def generate_citizen(social_class: str) -> Optional[Dict[str, Any]]:
     """Generate a new citizen of the specified social class using Claude API.
     
     Args:
-        social_class: One of 'Patrician', 'Cittadini', 'Popolani', or 'Facchini'
+        social_class: One of 'Nobili', 'Cittadini', 'Popolani', or 'Facchini'
         
     Returns:
         A dictionary containing the citizen data, or None if generation failed
@@ -54,18 +54,18 @@ TASK:
 Create 1 unique Venetian citizen of the {social_class} social class with historically accurate name, description, and characteristics.
 
 SOCIAL CLASS INFORMATION:
-- Patrician: The noble families who control Venice's government. Wealthy, politically powerful, and often involved in long-distance trade.
+- Nobili: The noble families who control Venice's government. Wealthy, politically powerful, and often involved in long-distance trade.
 - Cittadini: Wealthy non-noble citizens, including successful merchants, professionals, and high-ranking bureaucrats.
 - Popolani: Common citizens including craftsmen, shopkeepers, and skilled workers.
 - Facchini: Unskilled workers, servants, gondoliers, and the working poor.
 
 For the citizen, provide:
 1. FirstName - Historically accurate Venetian first name
-2. LastName - Historically accurate Venetian family name (ensure patricians have notable Venetian noble family names)
+2. LastName - Historically accurate Venetian family name (ensure nobili have notable Venetian noble family names)
 3. Description - One sentence about personality, traits, and remarkable things about this person
 4. ImagePrompt - A detailed prompt for generating an image of this person, including physical appearance, clothing appropriate to their social class, and setting
 5. Wealth - Approximate wealth in Ducats, appropriate to their social class:
-   - Patrician: 5,000-50,000 ducats
+   - Nobili: 5,000-50,000 ducats
    - Cittadini: 1,000-5,000 ducats
    - Popolani: 100-1,000 ducats
    - Facchini: 10-100 ducats
@@ -155,7 +155,7 @@ if __name__ == "__main__":
     import argparse
     
     parser = argparse.ArgumentParser(description="Generate citizens for La Serenissima")
-    parser.add_argument("--patricians", type=int, default=0, help="Number of patricians to generate")
+    parser.add_argument("--nobili", type=int, default=0, help="Number of nobili to generate")
     parser.add_argument("--cittadini", type=int, default=0, help="Number of cittadini to generate")
     parser.add_argument("--popolani", type=int, default=0, help="Number of popolani to generate")
     parser.add_argument("--facchini", type=int, default=0, help="Number of facchini to generate")
@@ -164,7 +164,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     
     social_classes = {
-        "Patrician": args.patricians,
+        "Nobili": args.nobili,
         "Cittadini": args.cittadini,
         "Popolani": args.popolani,
         "Facchini": args.facchini

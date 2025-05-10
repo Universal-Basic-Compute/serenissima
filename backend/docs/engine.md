@@ -14,7 +14,7 @@ Every day at 8:00 AM UTC, the treasury redistribution system allocates funds fro
 
 1. The script calculates 10% of the ConsiglioDeiDieci's ComputeAmount to redistribute
 2. This amount is distributed to citizens based on social class:
-   - 40% to Patricians
+   - 40% to Nobili
    - 30% to Cittadini
    - 20% to Popolani
    - 10% to Facchini
@@ -52,7 +52,7 @@ Every day at 11:00 AM UTC, the immigration system checks for vacant housing buil
 2. For each vacant building, there is a 20% chance it will attract a new citizen
 3. When a building attracts a citizen, the system:
    - Generates a new citizen of the appropriate social class based on the building type:
-     - Canal houses attract Patricians
+     - Canal houses attract Nobili
      - Merchant houses attract Cittadini
      - Artisan houses attract Popolani
      - Fisherman cottages attract Facchini
@@ -89,7 +89,7 @@ At noon UTC each day, the housing assignment system finds homes for citizens who
 
 1. The script identifies all homeless citizens and sorts them by wealth (descending)
 2. For each citizen, it finds an appropriate building based on their social class:
-   - Patricians are assigned to canal houses
+   - Nobili are assigned to canal houses
    - Cittadini are assigned to merchant houses
    - Popolani are assigned to artisan houses
    - Facchini are assigned to fisherman cottages
@@ -110,12 +110,12 @@ Every day at 2:00 PM UTC, the housing mobility system simulates citizens looking
 
 1. The script checks all housed citizens
 2. Based on social class, it determines if they look for cheaper housing:
-   - Patrician: 10% chance
+   - Nobili: 10% chance
    - Cittadini: 20% chance
    - Popolani: 30% chance
    - Facchini: 40% chance
 3. If a citizen decides to look, the system finds available housing of the appropriate type with rent below a threshold:
-   - Patrician: 12% cheaper
+   - Nobili: 12% cheaper
    - Cittadini: 8% cheaper
    - Popolani: 6% cheaper
    - Facchini: 4% cheaper
@@ -136,12 +136,12 @@ Every day at 4:00 PM UTC, the work mobility system simulates citizens looking fo
 
 1. The script checks all employed citizens
 2. Based on social class, it determines if they look for better-paying jobs:
-   - Patrician: 5% chance
+   - Nobili: 5% chance
    - Cittadini: 10% chance
    - Popolani: 15% chance
    - Facchini: 20% chance
 3. If a citizen decides to look, the system finds available businesses with wages above a threshold:
-   - Patrician: 15% higher
+   - Nobili: 15% higher
    - Cittadini: 12% higher
    - Popolani: 10% higher
    - Facchini: 8% higher

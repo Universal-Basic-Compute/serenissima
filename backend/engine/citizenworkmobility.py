@@ -5,12 +5,12 @@ Citizen Work Mobility script for La Serenissima.
 This script:
 1. Checks all employed citizens
 2. Based on social class, determines if they look for better-paying jobs:
-   - Patrician: 5% chance
+   - Nobili: 5% chance
    - Cittadini: 10% chance
    - Popolani: 15% chance
    - Facchini: 20% chance
 3. If they decide to look, finds available businesses with wages above a threshold:
-   - Patrician: 15% higher
+   - Nobili: 15% higher
    - Cittadini: 12% higher
    - Popolani: 10% higher
    - Facchini: 8% higher
@@ -43,7 +43,7 @@ load_dotenv()
 
 # Constants for mobility chances by social class
 MOBILITY_CHANCE = {
-    "Patrician": 0.05,  # 5% chance
+    "Nobili": 0.05,  # 5% chance
     "Cittadini": 0.10,  # 10% chance
     "Popolani": 0.15,   # 15% chance
     "Facchini": 0.20    # 20% chance
@@ -51,7 +51,7 @@ MOBILITY_CHANCE = {
 
 # Constants for wage increase thresholds by social class
 WAGE_INCREASE_THRESHOLD = {
-    "Patrician": 0.15,  # 15% higher
+    "Nobili": 0.15,  # 15% higher
     "Cittadini": 0.12,  # 12% higher
     "Popolani": 0.10,  # 10% higher
     "Facchini": 0.08    # 8% higher
@@ -252,10 +252,10 @@ def create_admin_summary(tables, mobility_summary) -> None:
             "total_citizens_looking": mobility_summary['total_looking'],
             "total_citizens_moved": mobility_summary['total_moved'],
             "by_social_class": {
-                "Patrician": {
-                    "checked": mobility_summary['by_class'].get('Patrician', {}).get('checked', 0),
-                    "looking": mobility_summary['by_class'].get('Patrician', {}).get('looking', 0),
-                    "moved": mobility_summary['by_class'].get('Patrician', {}).get('moved', 0)
+                "Nobili": {
+                    "checked": mobility_summary['by_class'].get('Nobili', {}).get('checked', 0),
+                    "looking": mobility_summary['by_class'].get('Nobili', {}).get('looking', 0),
+                    "moved": mobility_summary['by_class'].get('Nobili', {}).get('moved', 0)
                 },
                 "Cittadini": {
                     "checked": mobility_summary['by_class'].get('Cittadini', {}).get('checked', 0),
@@ -319,7 +319,7 @@ def process_work_mobility(dry_run: bool = False):
         "total_moved": 0,
         "total_wage_increase": 0,
         "by_class": {
-            "Patrician": {"checked": 0, "looking": 0, "moved": 0},
+            "Nobili": {"checked": 0, "looking": 0, "moved": 0},
             "Cittadini": {"checked": 0, "looking": 0, "moved": 0},
             "Popolani": {"checked": 0, "looking": 0, "moved": 0},
             "Facchini": {"checked": 0, "looking": 0, "moved": 0}

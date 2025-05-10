@@ -149,7 +149,7 @@
         "id": "4884f45f-0656-4eb7-8018-31380afd8b2c",
         "historicalName": "Ponte dei Gioiellieri",
         "englishName": "Bridge of the Jewelers",
-        "historicalDescription": "This bridge was named after the skilled jewelers who had workshops in the vicinity during the 15th and 16th centuries. San Marco was known for its luxury trades, and this bridge connected areas where jewelry craftsmen would display and sell their precious wares to wealthy patricians and foreign merchants.",
+        "historicalDescription": "This bridge was named after the skilled jewelers who had workshops in the vicinity during the 15th and 16th centuries. San Marco was known for its luxury trades, and this bridge connected areas where jewelry craftsmen would display and sell their precious wares to wealthy nobili and foreign merchants.",
         "location": {
           "midpoint": {
             "lat": 45.440404263228544,
@@ -174,7 +174,7 @@
         "id": "4884f45f-0656-4eb7-8018-31380afd8b2c",
         "historicalName": "Ponte dei Mocenigo",
         "englishName": "Bridge of the Mocenigo Family",
-        "historicalDescription": "Named after the prominent Mocenigo family who owned property nearby in San Marco. The Mocenigo were one of Venice's most illustrious patrician families, producing seven Doges between the 15th and 18th centuries, and their palazzo would have been a landmark in this affluent area.",
+        "historicalDescription": "Named after the prominent Mocenigo family who owned property nearby in San Marco. The Mocenigo were one of Venice's most illustrious nobili families, producing seven Doges between the 15th and 18th centuries, and their palazzo would have been a landmark in this affluent area.",
         "location": {
           "midpoint": {
             "lat": 45.440125730434886,
@@ -378,7 +378,7 @@
       "lng": 12.336847595860592,
       "streetName": "Corte Falier",
       "streetNameEnglish": "Falier Court",
-      "streetDescription": "Named after the Falier family, a patrician Venetian family. Most famously, Marino Falier was a Doge who was executed for plotting a coup against the Republic in 1355."
+      "streetDescription": "Named after the Falier family, a nobili Venetian family. Most famously, Marino Falier was a Doge who was executed for plotting a coup against the Republic in 1355."
     },
     {
       "lat": 45.44088381385614,

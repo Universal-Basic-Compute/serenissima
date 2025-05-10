@@ -1,41 +1,10 @@
 {
-  "totalErrors": 3,
+  "totalErrors": 0,
   "totalWarnings": 0,
-  "exitCode": 2,
-  "timestamp": "2025-05-10T17:17:20.911Z",
-  "errors": [
-    {
-      "filePath": "components/PolygonViewer/SimplePolygonRenderer.ts",
-      "line": 1885,
-      "column": 37,
-      "code": "TS2848",
-      "message": "The right-hand side of an 'instanceof' expression must not be an instantiation expression.",
-      "type": "error"
-    },
-    {
-      "filePath": "components/PolygonViewer/SimplePolygonRenderer.ts",
-      "line": 3047,
-      "column": 40,
-      "code": "TS2345",
-      "message": "Argument of type 'Object3D<Object3DEventMap>' is not assignable to parameter of type 'Mesh<BufferGeometry<NormalBufferAttributes>, Material | Material[], Object3DEventMap>'.",
-      "type": "error"
-    },
-    {
-      "filePath": "components/PolygonViewer/SimplePolygonRenderer.ts",
-      "line": 3070,
-      "column": 59,
-      "code": "TS2345",
-      "message": "Argument of type 'Object3D<Object3DEventMap>' is not assignable to parameter of type 'Mesh<BufferGeometry<NormalBufferAttributes>, Material | Material[], Object3DEventMap>'.",
-      "type": "error"
-    }
-  ],
-  "rawOutputLines": 6,
-  "firstFewLines": [
-    "components/PolygonViewer/SimplePolygonRenderer.ts(1885,37): error TS2848: The right-hand side of an 'instanceof' expression must not be an instantiation expression.\r",
-    "components/PolygonViewer/SimplePolygonRenderer.ts(3047,40): error TS2345: Argument of type 'Object3D<Object3DEventMap>' is not assignable to parameter of type 'Mesh<BufferGeometry<NormalBufferAttributes>, Material | Material[], Object3DEventMap>'.\r",
-    "  Type 'Object3D<Object3DEventMap>' is missing the following properties from type 'Mesh<BufferGeometry<NormalBufferAttributes>, Material | Material[], Object3DEventMap>': isMesh, geometry, material, updateMorphTargets, getVertexPosition\r",
-    "components/PolygonViewer/SimplePolygonRenderer.ts(3070,59): error TS2345: Argument of type 'Object3D<Object3DEventMap>' is not assignable to parameter of type 'Mesh<BufferGeometry<NormalBufferAttributes>, Material | Material[], Object3DEventMap>'.\r",
-    "  Type 'Object3D<Object3DEventMap>' is missing the following properties from type 'Mesh<BufferGeometry<NormalBufferAttributes>, Material | Material[], Object3DEventMap>': isMesh, geometry, material, updateMorphTargets, getVertexPosition\r"
-  ],
-  "compilerExitCode": 2
+  "exitCode": 0,
+  "timestamp": "2025-05-10T23:10:35.563Z",
+  "errors": [],
+  "rawOutputLines": 1,
+  "firstFewLines": [],
+  "compilerExitCode": 0
 }

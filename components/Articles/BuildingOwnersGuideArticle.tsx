@@ -138,7 +138,7 @@ const BuildingOwnersGuideArticle: React.FC<BuildingOwnersGuideArticleProps> = ({
               </div>
               
               <div>
-                <h5 className="font-bold text-amber-900">Patrician Palaces</h5>
+                <h5 className="font-bold text-amber-900">Nobili Palaces</h5>
                 <p>
                   Luxurious residences for nobility and wealthy merchants. While expensive to construct, they significantly increase surrounding property values and serve as status symbols. Strategic ownership of palaces can open doors to political influence.
                 </p>
@@ -445,7 +445,7 @@ const BuildingOwnersGuideArticle: React.FC<BuildingOwnersGuideArticleProps> = ({
                 <h5 className="font-bold text-amber-900 mb-1">Social Class Mobility Patterns</h5>
                 <p className="text-sm">
                   Different social classes have different propensities to change housing:
-                  <br />• <span className="font-medium">Patricians</span> are the least likely to move, valuing stability and prestige
+                  <br />• <span className="font-medium">Nobili</span> are the least likely to move, valuing stability and prestige
                   <br />• <span className="font-medium">Cittadini</span> occasionally seek better value while maintaining status
                   <br />• <span className="font-medium">Popolani</span> regularly evaluate housing costs against their income
                   <br />• <span className="font-medium">Facchini</span> are the most price-sensitive and frequently seek cheaper options
@@ -456,7 +456,7 @@ const BuildingOwnersGuideArticle: React.FC<BuildingOwnersGuideArticleProps> = ({
                 <h5 className="font-bold text-amber-900 mb-1">Rent Sensitivity Thresholds</h5>
                 <p className="text-sm">
                   Citizens will only move if they find significantly cheaper housing:
-                  <br />• <span className="font-medium">Patricians</span> require the largest discount to consider moving
+                  <br />• <span className="font-medium">Nobili</span> require the largest discount to consider moving
                   <br />• <span className="font-medium">Cittadini</span> need a moderate discount to justify relocation
                   <br />• <span className="font-medium">Popolani</span> will move for a smaller but still meaningful discount
                   <br />• <span className="font-medium">Facchini</span> will relocate even for modest savings
@@ -626,7 +626,7 @@ const BuildingOwnersGuideArticle: React.FC<BuildingOwnersGuideArticleProps> = ({
                 <text x="400" y="155" fill="#7c2d12" fontFamily="serif" fontSize="14" textAnchor="middle">Trading House</text>
                 
                 <rect x="350" y="200" width="100" height="50" fill="#f59e0b" stroke="#b45309" strokeWidth="2" />
-                <text x="400" y="230" fill="#7c2d12" fontFamily="serif" fontSize="14" textAnchor="middle">Patrician Home</text>
+                <text x="400" y="230" fill="#7c2d12" fontFamily="serif" fontSize="14" textAnchor="middle">Nobili Home</text>
                 
                 {/* Flow arrows */}
                 <path d="M 100 100 L 100 125" stroke="#7c2d12" strokeWidth="2" markerEnd="url(#arrowhead)" />
@@ -696,7 +696,7 @@ const BuildingOwnersGuideArticle: React.FC<BuildingOwnersGuideArticleProps> = ({
               <div className="bg-amber-50 p-3 rounded border border-amber-200">
                 <h5 className="font-bold text-amber-900 mb-1">Luxury Ecosystems</h5>
                 <p className="text-sm">
-                  Developing complementary luxury properties—high-end shops, trading houses, and patrician residences—creates wealthy enclaves that become self-reinforcing. The presence of wealthy residents attracts luxury businesses, which in turn attract more wealthy residents.
+                  Developing complementary luxury properties—high-end shops, trading houses, and nobili residences—creates wealthy enclaves that become self-reinforcing. The presence of wealthy residents attracts luxury businesses, which in turn attract more wealthy residents.
                 </p>
               </div>
             </div>

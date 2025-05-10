@@ -5,7 +5,7 @@ Treasury Redistribution Script for La Serenissima.
 This script:
 1. Calculates 10% of the ComputeAmount from the ConsiglioDeiDieci treasury
 2. Redistributes this amount to all citizens based on social class:
-   - 40% to Patricians (nobili)
+   - 40% to Nobili (nobili)
    - 30% to Cittadini
    - 20% to Popolani
    - 10% to Facchini
@@ -40,7 +40,7 @@ load_dotenv()
 
 # Constants for redistribution percentages by social class
 REDISTRIBUTION_PERCENTAGES = {
-    "Patrician": 0.40,  # 40% to Patricians
+    "Nobili": 0.40,  # 40% to Nobili
     "Cittadini": 0.30,  # 30% to Cittadini
     "Popolani": 0.20,   # 20% to Popolani
     "Facchini": 0.10    # 10% to Facchini
@@ -245,10 +245,10 @@ def create_admin_summary(tables, redistribution_summary) -> None:
             "total_amount": redistribution_summary['total_amount'],
             "total_citizens": redistribution_summary['total_citizens'],
             "by_class": {
-                "Patrician": {
-                    "citizens": redistribution_summary['by_class']['Patrician']['citizens'],
-                    "amount": redistribution_summary['by_class']['Patrician']['amount'],
-                    "per_citizen": redistribution_summary['by_class']['Patrician']['per_citizen']
+                "Nobili": {
+                    "citizens": redistribution_summary['by_class']['Nobili']['citizens'],
+                    "amount": redistribution_summary['by_class']['Nobili']['amount'],
+                    "per_citizen": redistribution_summary['by_class']['Nobili']['per_citizen']
                 },
                 "Cittadini": {
                     "citizens": redistribution_summary['by_class']['Cittadini']['citizens'],
@@ -417,7 +417,7 @@ def redistribute_treasury(dry_run: bool = False):
         "total_amount": 0,
         "total_citizens": 0,
         "by_class": {
-            "Patrician": {"citizens": 0, "amount": 0, "per_citizen": per_citizen_amounts.get("Patrician", 0)},
+            "Nobili": {"citizens": 0, "amount": 0, "per_citizen": per_citizen_amounts.get("Nobili", 0)},
             "Cittadini": {"citizens": 0, "amount": 0, "per_citizen": per_citizen_amounts.get("Cittadini", 0)},
             "Popolani": {"citizens": 0, "amount": 0, "per_citizen": per_citizen_amounts.get("Popolani", 0)},
             "Facchini": {"citizens": 0, "amount": 0, "per_citizen": per_citizen_amounts.get("Facchini", 0)}
@@ -489,7 +489,7 @@ def redistribute_treasury(dry_run: bool = False):
             f"• {redistribution_summary['total_amount']} ⚜️ ducats distributed\n"
             f"• {redistribution_summary['total_citizens']} citizens received funds\n\n"
             "Distribution by social class:\n"
-            f"• Patricians: {redistribution_summary['by_class']['Patrician']['amount']} ⚜️ ducats to {redistribution_summary['by_class']['Patrician']['citizens']} citizens\n"
+            f"• Nobili: {redistribution_summary['by_class']['Nobili']['amount']} ⚜️ ducats to {redistribution_summary['by_class']['Nobili']['citizens']} citizens\n"
             f"• Cittadini: {redistribution_summary['by_class']['Cittadini']['amount']} ⚜️ ducats to {redistribution_summary['by_class']['Cittadini']['citizens']} citizens\n"
             f"• Popolani: {redistribution_summary['by_class']['Popolani']['amount']} ⚜️ ducats to {redistribution_summary['by_class']['Popolani']['citizens']} citizens\n"
             f"• Facchini: {redistribution_summary['by_class']['Facchini']['amount']} ⚜️ ducats to {redistribution_summary['by_class']['Facchini']['citizens']} citizens\n\n"

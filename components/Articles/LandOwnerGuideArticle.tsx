@@ -11,7 +11,7 @@ const LandOwnerGuideArticle: React.FC<LandOwnerGuideArticleProps> = ({ onClose }
       <div className="bg-amber-50 border-2 border-amber-700 rounded-lg p-6 max-w-4xl mx-auto my-20">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-3xl font-serif text-amber-800">
-            The Patrician's Guide to Land Ownership
+            The Nobili's Guide to Land Ownership
           </h2>
           <button 
             onClick={onClose}
@@ -878,7 +878,7 @@ const LandOwnerGuideArticle: React.FC<LandOwnerGuideArticleProps> = ({ onClose }
           <div className="mt-8 p-6 bg-amber-200 rounded-lg border border-amber-400">
             <h3 className="text-xl font-serif text-amber-800 mb-2">Conclusion: The Long Game</h3>
             <p className="mb-4">
-              Land ownership in Venice is not merely about collecting rent—it is about shaping the economic landscape of the Republic to your advantage. The most successful patrician families think in terms of decades, not days.
+              Land ownership in Venice is not merely about collecting rent—it is about shaping the economic landscape of the Republic to your advantage. The most successful nobili families think in terms of decades, not days.
             </p>
             <p className="mb-4">
               By strategically pricing your leases, controlling transportation networks, and forming the right alliances, you create an economic ecosystem that naturally funnels wealth toward your family. Each decision should serve your long-term vision for your dynasty's place in Venetian society.

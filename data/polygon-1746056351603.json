@@ -232,7 +232,7 @@
         "id": "8c6625e1-f9c3-4f1f-8981-788a625bbe67",
         "historicalName": "Ponte dei Marcello",
         "englishName": "Bridge of the Marcello Family",
-        "historicalDescription": "Named after the noble Marcello family who had a palazzo in this area during the Renaissance period. The Marcello were a patrician family that gave Venice several important doges and military leaders, and it was common to name bridges after prominent families who lived nearby.",
+        "historicalDescription": "Named after the noble Marcello family who had a palazzo in this area during the Renaissance period. The Marcello were a nobili family that gave Venice several important doges and military leaders, and it was common to name bridges after prominent families who lived nearby.",
         "location": {
           "midpoint": {
             "lat": 45.434571835170075,
@@ -301,7 +301,7 @@
       "lng": 12.33540054639049,
       "streetName": "Salizada dei Contarini",
       "streetNameEnglish": "Paved Street of the Contarini",
-      "streetDescription": "Named after the noble Contarini family who owned property in this area near San Luca. The Contarini were one of Venice's most distinguished patrician families, producing eight Doges between the 11th and 18th centuries. This salizada (one of the first paved streets) would have led to one of their family palaces."
+      "streetDescription": "Named after the noble Contarini family who owned property in this area near San Luca. The Contarini were one of Venice's most distinguished nobili families, producing eight Doges between the 11th and 18th centuries. This salizada (one of the first paved streets) would have led to one of their family palaces."
     },
     {
       "lat": 45.43595585211796,

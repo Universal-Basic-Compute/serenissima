@@ -12,7 +12,7 @@ const airtableBase = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY }).base
 // Define citizen interface
 interface Citizen {
   id: string;
-  socialClass: 'Patrician' | 'Cittadini' | 'Popolani' | 'Laborer';
+  socialClass: 'Nobili' | 'Cittadini' | 'Popolani' | 'Laborer';
   firstName: string;
   lastName: string;
   description: string;
@@ -53,7 +53,7 @@ async function fetchCitizensNeedingImages(): Promise<Citizen[]> {
             const fields = record.fields;
             citizens.push({
               id: fields.CitizenId as string || record.id,
-              socialClass: fields.SocialClass as 'Patrician' | 'Cittadini' | 'Popolani' | 'Laborer',
+              socialClass: fields.SocialClass as 'Nobili' | 'Cittadini' | 'Popolani' | 'Laborer',
               firstName: fields.FirstName as string,
               lastName: fields.LastName as string,
               description: fields.Description as string,
@@ -94,7 +94,7 @@ function enhanceImagePrompt(citizen: Citizen): string {
   let styleAddition = '';
   
   switch (citizen.socialClass) {
-    case 'Patrician':
+    case 'Nobili':
       styleAddition = 'Renaissance portrait style with realistic details. 3/4 view portrait composition with Rembrandt lighting. Rich color palette with deep reds and gold tones. --ar 1:1';
       break;
     case 'Cittadini':

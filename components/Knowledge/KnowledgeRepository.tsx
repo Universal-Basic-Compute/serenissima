@@ -214,7 +214,7 @@ const KnowledgeRepository: React.FC<KnowledgeRepositoryProps> = ({
                 />
               </div>
               <div className="p-6">
-                <h3 className="text-xl font-serif text-amber-800 mb-2">The Patrician's Guide to Land Ownership</h3>
+                <h3 className="text-xl font-serif text-amber-800 mb-2">The Nobili's Guide to Land Ownership</h3>
                 <p className="text-gray-600 mb-4">
                   Master the art of Venetian land management and strategic property control to build lasting wealth.
                 </p>

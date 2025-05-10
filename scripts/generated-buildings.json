@@ -587,7 +587,7 @@
     },
     {
       "id": "building-1746854798862-452",
-      "type": "patrician_palazzo",
+      "type": "nobili_palazzo",
       "land_id": "polygon-1745879086976",
       "variant": "model",
       "owner": "ConsiglioDeiDieci",
@@ -686,7 +686,7 @@
     },
     {
       "id": "building-1746854798862-4559",
-      "type": "patrician_palazzo",
+      "type": "nobili_palazzo",
       "land_id": "polygon-1745879117945",
       "variant": "model",
       "owner": "ConsiglioDeiDieci",
@@ -1856,7 +1856,7 @@
     },
     {
       "id": "building-1746854798863-3447",
-      "type": "patrician_palazzo",
+      "type": "nobili_palazzo",
       "land_id": "polygon-1745879238426",
       "variant": "model",
       "owner": "ConsiglioDeiDieci",
@@ -2648,7 +2648,7 @@
     },
     {
       "id": "building-1746854798863-9332",
-      "type": "patrician_palazzo",
+      "type": "nobili_palazzo",
       "land_id": "polygon-1745879404342",
       "variant": "model",
       "owner": "ConsiglioDeiDieci",
@@ -3494,7 +3494,7 @@
     },
     {
       "id": "building-1746854798864-6460",
-      "type": "patrician_palazzo",
+      "type": "nobili_palazzo",
       "land_id": "polygon-1745879581983",
       "variant": "model",
       "owner": "ConsiglioDeiDieci",
@@ -3854,7 +3854,7 @@
     },
     {
       "id": "building-1746854798864-3721",
-      "type": "patrician_palazzo",
+      "type": "nobili_palazzo",
       "land_id": "polygon-1746052711032",
       "variant": "model",
       "owner": "ConsiglioDeiDieci",
@@ -4124,7 +4124,7 @@
     },
     {
       "id": "building-1746854798864-8025",
-      "type": "patrician_palazzo",
+      "type": "nobili_palazzo",
       "land_id": "polygon-1746052711032",
       "variant": "model",
       "owner": "ConsiglioDeiDieci",
@@ -4331,7 +4331,7 @@
     },
     {
       "id": "building-1746854798864-2368",
-      "type": "patrician_palazzo",
+      "type": "nobili_palazzo",
       "land_id": "polygon-1746052735791",
       "variant": "model",
       "owner": "ConsiglioDeiDieci",
@@ -4466,7 +4466,7 @@
     },
     {
       "id": "building-1746854798864-909",
-      "type": "patrician_palazzo",
+      "type": "nobili_palazzo",
       "land_id": "polygon-1746052735791",
       "variant": "model",
       "owner": "ConsiglioDeiDieci",
@@ -4916,7 +4916,7 @@
     },
     {
       "id": "building-1746854798865-8165",
-      "type": "patrician_palazzo",
+      "type": "nobili_palazzo",
       "land_id": "polygon-1746052782991",
       "variant": "model",
       "owner": "ConsiglioDeiDieci",
@@ -5654,7 +5654,7 @@
     },
     {
       "id": "building-1746854798865-3240",
-      "type": "patrician_palazzo",
+      "type": "nobili_palazzo",
       "land_id": "polygon-1746055488132",
       "variant": "model",
       "owner": "ConsiglioDeiDieci",
@@ -6383,7 +6383,7 @@
     },
     {
       "id": "building-1746854798866-3195",
-      "type": "patrician_palazzo",
+      "type": "nobili_palazzo",
       "land_id": "polygon-1746055610394",
       "variant": "model",
       "owner": "ConsiglioDeiDieci",
@@ -7472,7 +7472,7 @@
     },
     {
       "id": "building-1746854798868-2544",
-      "type": "patrician_palazzo",
+      "type": "nobili_palazzo",
       "land_id": "polygon-1746055995050",
       "variant": "model",
       "owner": "ConsiglioDeiDieci",
@@ -7634,7 +7634,7 @@
     },
     {
       "id": "building-1746854798868-8459",
-      "type": "patrician_palazzo",
+      "type": "nobili_palazzo",
       "land_id": "polygon-1746056070563",
       "variant": "model",
       "owner": "ConsiglioDeiDieci",
@@ -7769,7 +7769,7 @@
     },
     {
       "id": "building-1746854798868-4570",
-      "type": "patrician_palazzo",
+      "type": "nobili_palazzo",
       "land_id": "polygon-1746056149790",
       "variant": "model",
       "owner": "ConsiglioDeiDieci",
@@ -9848,7 +9848,7 @@
     },
     {
       "id": "building-1746854798870-6934",
-      "type": "patrician_palazzo",
+      "type": "nobili_palazzo",
       "land_id": "polygon-1746056903912",
       "variant": "model",
       "owner": "ConsiglioDeiDieci",
@@ -10514,7 +10514,7 @@
     },
     {
       "id": "building-1746854798871-1337",
-      "type": "patrician_palazzo",
+      "type": "nobili_palazzo",
       "land_id": "polygon-1746057206136",
       "variant": "model",
       "owner": "ConsiglioDeiDieci",
@@ -13619,7 +13619,7 @@
     },
     {
       "id": "building-1746854798873-2219",
-      "type": "patrician_palazzo",
+      "type": "nobili_palazzo",
       "land_id": "polygon-1746072856331",
       "variant": "model",
       "owner": "ConsiglioDeiDieci",
@@ -13889,7 +13889,7 @@
     },
     {
       "id": "building-1746854798873-1158",
-      "type": "patrician_palazzo",
+      "type": "nobili_palazzo",
       "land_id": "polygon-1746072967949",
       "variant": "model",
       "owner": "ConsiglioDeiDieci",

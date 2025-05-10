@@ -114,7 +114,7 @@
         "id": "e5464c4c-71db-41c5-8b31-ddc794721f77",
         "historicalName": "Ponte degli Avvocati",
         "englishName": "Bridge of the Lawyers",
-        "historicalDescription": "Named after the lawyers who had their offices along Calle dei Avvocati in the San Marco district. During the Renaissance, Venice had a sophisticated legal system, and many advocates worked near the governmental buildings in this area to serve the patrician families and merchants requiring legal services.",
+        "historicalDescription": "Named after the lawyers who had their offices along Calle dei Avvocati in the San Marco district. During the Renaissance, Venice had a sophisticated legal system, and many advocates worked near the governmental buildings in this area to serve the nobili families and merchants requiring legal services.",
         "location": {
           "midpoint": {
             "lat": 45.435593298122384,
@@ -265,7 +265,7 @@
       "lng": 12.332121358159977,
       "streetName": "Calle dei Dandolo",
       "streetNameEnglish": "Street of the Dandolo",
-      "streetDescription": "Named after the prominent Dandolo family, which produced several doges and important political figures. This patrician family likely owned property near San Marco and may have employed or patronized the lawyers of Calle dei Avvocati."
+      "streetDescription": "Named after the prominent Dandolo family, which produced several doges and important political figures. This nobili family likely owned property near San Marco and may have employed or patronized the lawyers of Calle dei Avvocati."
     },
     {
       "lat": 45.4353087784076,

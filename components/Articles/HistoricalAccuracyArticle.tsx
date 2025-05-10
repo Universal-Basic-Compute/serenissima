@@ -96,7 +96,7 @@ const HistoricalAccuracyArticle: React.FC<HistoricalAccuracyArticleProps> = ({ o
                   Land Ownership and Development
                 </h4>
                 <p>
-                  In historical Venice, land ownership was concentrated among patrician families, religious institutions, and the state itself. Building development was a slow, multi-generational process constrained by space limitations on the islands.
+                  In historical Venice, land ownership was concentrated among nobili families, religious institutions, and the state itself. Building development was a slow, multi-generational process constrained by space limitations on the islands.
                 </p>
                 <p>
                   La Serenissima compresses this timeline dramatically:
@@ -126,7 +126,7 @@ const HistoricalAccuracyArticle: React.FC<HistoricalAccuracyArticleProps> = ({ o
                 Historical Venice had a rigid social hierarchy:
               </p>
               <ul className="list-disc pl-6 my-3 space-y-1">
-                <li><strong>Patricians</strong>: The noble families who controlled the government</li>
+                <li><strong>Nobili</strong>: The noble families who controlled the government</li>
                 <li><strong>Cittadini Originari</strong>: Wealthy non-nobles who held important bureaucratic positions</li>
                 <li><strong>Popolani</strong>: Common citizens including merchants, artisans, and workers</li>
                 <li><strong>Forestieri</strong>: Foreigners with limited rights</li>

@@ -111,7 +111,7 @@
         },
         "historicalName": "Ponte dei Saloni",
         "englishName": "Bridge of the Great Halls",
-        "historicalDescription": "Named after the Calle dei Saloni (Street of the Great Halls) where it is located. During the Renaissance, this area near Santa Maria Formosa contained several patrician palaces with impressive reception halls (saloni) used for gatherings of Venetian nobility."
+        "historicalDescription": "Named after the Calle dei Saloni (Street of the Great Halls) where it is located. During the Renaissance, this area near Santa Maria Formosa contained several nobili palaces with impressive reception halls (saloni) used for gatherings of Venetian nobility."
       }
     },
     {
@@ -181,7 +181,7 @@
         "id": "c97ef147-5762-453e-b22f-3fdc1a8c1396",
         "historicalName": "Ponte dei Querini",
         "englishName": "Bridge of the Querini Family",
-        "historicalDescription": "Named after the noble Querini family who had a palace near Santa Maria Formosa. The Querini were one of Venice's oldest patrician families, dating back to the foundation of the city, and were influential in the governance and commerce of Renaissance Venice.",
+        "historicalDescription": "Named after the noble Querini family who had a palace near Santa Maria Formosa. The Querini were one of Venice's oldest nobili families, dating back to the foundation of the city, and were influential in the governance and commerce of Renaissance Venice.",
         "location": {
           "midpoint": {
             "lat": 45.429984898721564,

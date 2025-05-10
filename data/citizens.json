@@ -63,21 +63,21 @@
   },
   {
     "id": "ctz_9qd7fi3ljwg0yzug7f3z81k",
-    "socialClass": "Patrician",
+    "socialClass": "Nobili",
     "firstName": "Lorenzo",
     "lastName": "Dandolo",
     "description": "A calculating member of the Council of Ten whose family's declining fortunes have led him to forge political alliances through his daughters' marriages while maintaining a façade of traditional Venetian austerity.",
-    "imagePrompt": "Portrait of Lorenzo Dandolo, a stern 60-year-old patrician with a hawkish nose and penetrating gaze, wearing the traditional black toga-like vestment of Venetian nobility with subtle gold embroidery and a black cap, standing in the richly appointed but slightly faded grandeur of his family palazzo, with ancestral portraits lining the walls and a view of the Grand Canal visible through a Gothic window.",
+    "imagePrompt": "Portrait of Lorenzo Dandolo, a stern 60-year-old nobili with a hawkish nose and penetrating gaze, wearing the traditional black toga-like vestment of Venetian nobility with subtle gold embroidery and a black cap, standing in the richly appointed but slightly faded grandeur of his family palazzo, with ancestral portraits lining the walls and a view of the Grand Canal visible through a Gothic window.",
     "wealth": 15000,
     "createdAt": "2025-05-10T11:46:30.859Z"
   },
   {
     "id": "ctz_1tly09u594v5ng92kj8bo",
-    "socialClass": "Patrician",
+    "socialClass": "Nobili",
     "firstName": "Domenico",
     "lastName": "Grimani",
     "description": "A refined collector of antiquities and manuscripts with connections to the papal court, who uses his diplomatic finesse to navigate Venetian politics while secretly harboring sympathies for humanist reforms.",
-    "imagePrompt": "Portrait of Domenico Grimani, a 50-year-old Venetian patrician with a trim gray beard and intelligent eyes, wearing an expensive crimson silk robe with fur trim and a matching cap, standing in his study surrounded by classical statues, illuminated manuscripts, and maps, with light streaming through a mullioned window overlooking the Grand Canal.",
+    "imagePrompt": "Portrait of Domenico Grimani, a 50-year-old Venetian nobili with a trim gray beard and intelligent eyes, wearing an expensive crimson silk robe with fur trim and a matching cap, standing in his study surrounded by classical statues, illuminated manuscripts, and maps, with light streaming through a mullioned window overlooking the Grand Canal.",
     "wealth": 32000,
     "createdAt": "2025-05-10T11:46:30.858Z"
   },
@@ -102,10 +102,10 @@
     "createdAt": "2025-05-10T11:46:30.859Z"
   },
   {
-    "socialClass": "Patrician",
+    "socialClass": "Nobili",
     "firstName": "Marco",
     "lastName": "Contarini",
-    "description": "A shrewd and calculating patrician who has expanded his family's wealth through risky yet profitable investments in the spice trade with Alexandria, known for his lavish parties that serve as venues for political maneuvering.",
+    "description": "A shrewd and calculating nobili who has expanded his family's wealth through risky yet profitable investments in the spice trade with Alexandria, known for his lavish parties that serve as venues for political maneuvering.",
     "imagePrompt": "A dignified Venetian nobleman in his 50s with a trimmed gray beard, wearing an ornate crimson velvet robe with fur trim and golden embroidery, a black cappello hat, standing in a richly decorated salon with paintings and tapestries, large windows overlooking the Grand Canal, his expression confident and slightly cunning.",
     "wealth": 32000,
     "id": "ctz_pksgpph5vilphljxfgodb",
@@ -185,8 +185,8 @@
     "socialClass": "Laborer",
     "firstName": "Agnese",
     "lastName": "Venier",
-    "description": "A servant in a patrician household who has earned unusual trust from her employers due to her discretion and literacy, occasionally acting as a messenger for sensitive family matters.",
-    "imagePrompt": "A plain-looking woman in her 30s with observant eyes and a reserved demeanor, wearing a simple gray dress with white collar and apron, standing in a grand patrician home interior with marble floors, tapestries, and ornate furniture, carrying linens and appearing humble yet quietly dignified.",
+    "description": "A servant in a nobili household who has earned unusual trust from her employers due to her discretion and literacy, occasionally acting as a messenger for sensitive family matters.",
+    "imagePrompt": "A plain-looking woman in her 30s with observant eyes and a reserved demeanor, wearing a simple gray dress with white collar and apron, standing in a grand nobili home interior with marble floors, tapestries, and ornate furniture, carrying linens and appearing humble yet quietly dignified.",
     "wealth": 60,
     "id": "ctz_eme67ck4qab5kthkzqwps3",
     "createdAt": "2025-05-10T11:51:25.574Z"
@@ -202,7 +202,7 @@
     "createdAt": "2025-05-10T11:51:25.574Z"
   },
   {
-    "socialClass": "Patrician",
+    "socialClass": "Nobili",
     "firstName": "Alvise",
     "lastName": "Mocenigo",
     "description": "A shrewd and calculating merchant-diplomat with extensive trading networks in Constantinople, who carefully balances his commercial interests with political aspirations in the Great Council.",
@@ -215,7 +215,7 @@
     "socialClass": "Cittadini",
     "firstName": "Niccolò",
     "lastName": "Zen",
-    "description": "A respected physician whose innovative treatments have earned him patronage from several patrician families, though his progressive medical ideas occasionally bring him into conflict with more traditional practitioners.",
+    "description": "A respected physician whose innovative treatments have earned him patronage from several nobili families, though his progressive medical ideas occasionally bring him into conflict with more traditional practitioners.",
     "imagePrompt": "A thoughtful man in his forties with intelligent eyes and a neatly trimmed beard, wearing a dark blue silk doublet with a scholar's robe over it, standing in his well-appointed study filled with medical texts, herbs, and anatomical drawings, holding a glass flask containing medicinal tincture, with a window behind him overlooking a Venetian canal.",
     "wealth": 3800,
     "id": "ctz_u0ukrx6gmkvf1ax2awqen",
@@ -302,7 +302,7 @@
     "createdAt": "2025-05-10T11:51:59.457Z"
   },
   {
-    "socialClass": "Patrician",
+    "socialClass": "Nobili",
     "firstName": "Filippo",
     "lastName": "Priuli",
     "description": "A shrewd diplomat who maintains extensive commercial networks in Constantinople and Alexandria while quietly supporting Venetian artists and intellectuals.",
@@ -315,7 +315,7 @@
     "socialClass": "Cittadini",
     "firstName": "Gabriele",
     "lastName": "Memmo",
-    "description": "An ambitious glass merchant from Murano who has secured lucrative contracts with courts across Europe and dreams of one day being granted patrician status.",
+    "description": "An ambitious glass merchant from Murano who has secured lucrative contracts with courts across Europe and dreams of one day being granted nobili status.",
     "imagePrompt": "A confident middle-aged Venetian man with calculating eyes and a confident smile, wearing quality dark blue robes with tasteful gold trim befitting a wealthy merchant, examining a finely crafted glass goblet in his workshop, with Murano glass furnaces visible in the background, realistic Renaissance style, 1530s Venice.",
     "wealth": 3800,
     "id": "ctz_rxbjr75m3pxp47jxpn58",
@@ -325,7 +325,7 @@
     "socialClass": "Cittadini",
     "firstName": "Bianca",
     "lastName": "Tassini",
-    "description": "A respected midwife from a family of physicians who has gained fame for her herbal remedies and has attended births in many patrician households.",
+    "description": "A respected midwife from a family of physicians who has gained fame for her herbal remedies and has attended births in many nobili households.",
     "imagePrompt": "A wise-looking woman in her 40s with observant eyes and deft hands, wearing a high-quality modest dress of deep green with a white linen coif covering her hair, standing in her apothecary workshop surrounded by dried herbs, glass vials, and medical texts, painted in a warm Venetian palette, 1520s Venice.",
     "wealth": 1700,
     "id": "ctz_rybwrpq9zmz3njok8y3q",
@@ -365,7 +365,7 @@
     "socialClass": "Popolani",
     "firstName": "Lucrezia",
     "lastName": "Dardi",
-    "description": "A talented lace-maker from Burano whose intricate designs have caught the attention of several patrician ladies, positioning her craft for potential elevation in status and income.",
+    "description": "A talented lace-maker from Burano whose intricate designs have caught the attention of several nobili ladies, positioning her craft for potential elevation in status and income.",
     "imagePrompt": "A focused young woman in her 20s with delicate features and exceptional dexterity, wearing a modest but clean blue popolani dress with a white collar, working on an intricate lace pattern in a small, neat workshop on Burano island, with numerous bobbins and threads creating a complex pattern under her careful attention, morning light illuminating her work, painted in a detailed Renaissance style, 1560s Venice.",
     "wealth": 180,
     "id": "ctz_axpe2zcr2ibowuo28roos",
@@ -402,10 +402,10 @@
     "createdAt": "2025-05-10T11:52:32.196Z"
   },
   {
-    "socialClass": "Patrician",
+    "socialClass": "Nobili",
     "firstName": "Marcantonio",
     "lastName": "Giustinian",
-    "description": "A shrewd and calculating patrician with connections to the Levant trade, known for his collection of Eastern manuscripts and political scheming in the Council of Ten.",
+    "description": "A shrewd and calculating nobili with connections to the Levant trade, known for his collection of Eastern manuscripts and political scheming in the Council of Ten.",
     "imagePrompt": "Portrait of Marcantonio Giustinian, a 50-year-old Venetian nobleman with a stern expression, thin grey beard, and piercing dark eyes, wearing an ornate black velvet robe with gold embroidery and a heavy gold chain of office, standing in his luxurious palazzo study surrounded by Eastern manuscripts, maps of trade routes, and symbols of his wealth and power against a dark red background.",
     "wealth": 35000,
     "id": "ctz_8r5dys1rmtgspxnun6bi5d",

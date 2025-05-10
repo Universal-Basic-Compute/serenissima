@@ -148,7 +148,7 @@
         "id": "ac9bf332-6786-4e98-a229-9eaebfceaa81",
         "historicalName": "Ponte dei Orafi",
         "englishName": "Bridge of the Goldsmiths",
-        "historicalDescription": "This bridge likely connected to an area where goldsmiths had their workshops near San Salvador. The San Marco district was known for its luxury crafts and the area around the church would have housed numerous artisans making religious objects and fine jewelry for the wealthy Venetian patricians.",
+        "historicalDescription": "This bridge likely connected to an area where goldsmiths had their workshops near San Salvador. The San Marco district was known for its luxury crafts and the area around the church would have housed numerous artisans making religious objects and fine jewelry for the wealthy Venetian nobili.",
         "location": {
           "midpoint": {
             "lat": 45.439646614765905,
@@ -263,7 +263,7 @@
       "lng": 12.339552378186893,
       "streetName": "Corte Memmo",
       "streetNameEnglish": "Memmo Court",
-      "streetDescription": "Named after the Memmo family, who were prominent Venetian nobles. Several patrician families had palaces in the San Marco district, and family names were commonly used for courtyards and streets near their residences."
+      "streetDescription": "Named after the Memmo family, who were prominent Venetian nobles. Several nobili families had palaces in the San Marco district, and family names were commonly used for courtyards and streets near their residences."
     },
     {
       "lat": 45.44182494766228,

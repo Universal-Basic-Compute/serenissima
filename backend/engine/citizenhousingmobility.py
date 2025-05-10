@@ -5,12 +5,12 @@ Citizen Housing Mobility script for La Serenissima.
 This script:
 1. Checks all housed citizens
 2. Based on social class, determines if they look for cheaper housing:
-   - Patrician: 10% chance
+   - Nobili: 10% chance
    - Cittadini: 20% chance
    - Popolani: 30% chance
    - Facchini: 40% chance
 3. If they decide to look, finds available housing of the appropriate type with rent below a threshold:
-   - Patrician: 12% cheaper
+   - Nobili: 12% cheaper
    - Cittadini: 8% cheaper
    - Popolani: 6% cheaper
    - Facchini: 4% cheaper
@@ -43,7 +43,7 @@ load_dotenv()
 
 # Constants for mobility chances by social class
 MOBILITY_CHANCE = {
-    "Patrician": 0.10,  # 10% chance
+    "Nobili": 0.10,  # 10% chance
     "Cittadini": 0.20,  # 20% chance
     "Popolani": 0.30,   # 30% chance
     "Facchini": 0.40    # 40% chance
@@ -51,7 +51,7 @@ MOBILITY_CHANCE = {
 
 # Constants for rent reduction thresholds by social class
 RENT_REDUCTION_THRESHOLD = {
-    "Patrician": 0.12,  # 12% cheaper
+    "Nobili": 0.12,  # 12% cheaper
     "Cittadini": 0.08,  # 8% cheaper
     "Popolani": 0.06,   # 6% cheaper
     "Facchini": 0.04    # 4% cheaper
@@ -59,7 +59,7 @@ RENT_REDUCTION_THRESHOLD = {
 
 # Constants for building types by social class (same as in househomelesscitizens.py)
 BUILDING_PREFERENCES = {
-    "Patrician": ["canal_house"],
+    "Nobili": ["canal_house"],
     "Cittadini": ["merchant_s_house"],
     "Popolani": ["artisan_s_house"],
     "Facchini": ["fisherman_s_cottage"]
@@ -245,10 +245,10 @@ def create_admin_summary(tables, mobility_summary) -> None:
             "total_citizens_looking": mobility_summary['total_looking'],
             "total_citizens_moved": mobility_summary['total_moved'],
             "by_social_class": {
-                "Patrician": {
-                    "checked": mobility_summary['by_class'].get('Patrician', {}).get('checked', 0),
-                    "looking": mobility_summary['by_class'].get('Patrician', {}).get('looking', 0),
-                    "moved": mobility_summary['by_class'].get('Patrician', {}).get('moved', 0)
+                "Nobili": {
+                    "checked": mobility_summary['by_class'].get('Nobili', {}).get('checked', 0),
+                    "looking": mobility_summary['by_class'].get('Nobili', {}).get('looking', 0),
+                    "moved": mobility_summary['by_class'].get('Nobili', {}).get('moved', 0)
                 },
                 "Cittadini": {
                     "checked": mobility_summary['by_class'].get('Cittadini', {}).get('checked', 0),
@@ -305,7 +305,7 @@ def process_housing_mobility(dry_run: bool = False):
         "total_moved": 0,
         "total_savings": 0,
         "by_class": {
-            "Patrician": {"checked": 0, "looking": 0, "moved": 0},
+            "Nobili": {"checked": 0, "looking": 0, "moved": 0},
             "Cittadini": {"checked": 0, "looking": 0, "moved": 0},
             "Popolani": {"checked": 0, "looking": 0, "moved": 0},
             "Facchini": {"checked": 0, "looking": 0, "moved": 0}

@@ -324,7 +324,7 @@
         "id": "9b4cdb76-44dd-4151-a0a9-72178c20abba",
         "historicalName": "Ponte dei Tiepolo",
         "englishName": "Bridge of the Tiepolo Family",
-        "historicalDescription": "Named after the prominent Tiepolo family who owned property in the San Polo district. This patrician family produced several doges and important political figures in Venetian history, and likely had a palazzo near this bridge in the 15th-16th centuries.",
+        "historicalDescription": "Named after the prominent Tiepolo family who owned property in the San Polo district. This nobili family produced several doges and important political figures in Venetian history, and likely had a palazzo near this bridge in the 15th-16th centuries.",
         "location": {
           "midpoint": {
             "lat": 45.44439687239924,
@@ -474,7 +474,7 @@
       "lng": 12.328131055553278,
       "streetName": "Calle dei Nani",
       "streetNameEnglish": "Street of the Nani Family",
-      "streetDescription": "Named after the noble Nani family who likely owned property in this area of San Polo. Patrician families often had streets named after them in the districts where they held influence or property."
+      "streetDescription": "Named after the noble Nani family who likely owned property in this area of San Polo. Nobili families often had streets named after them in the districts where they held influence or property."
     },
     {
       "lat": 45.443827259439615,
@@ -656,7 +656,7 @@
       "lng": 12.320326403648886,
       "streetName": "Calle dei Pisani",
       "streetNameEnglish": "Street of the Pisani Family",
-      "streetDescription": "Named after the noble Pisani family who owned property in this area of San Polo. Patrician families often invested in commercial ventures, including the lucrative grain and baking trades."
+      "streetDescription": "Named after the noble Pisani family who owned property in this area of San Polo. Nobili families often invested in commercial ventures, including the lucrative grain and baking trades."
     },
     {
       "lat": 45.44654606978502,

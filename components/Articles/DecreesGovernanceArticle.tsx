@@ -42,7 +42,7 @@ const DecreesGovernanceArticle: React.FC<DecreesGovernanceArticleProps> = ({ onC
               {/* The Great Council */}
               <rect x="200" y="70" width="300" height="60" fill="#f59e0b" stroke="#b45309" strokeWidth="2" rx="5" />
               <text x="350" y="105" fontFamily="serif" fontSize="20" fontWeight="bold" textAnchor="middle" fill="#7c2d12">The Great Council</text>
-              <text x="350" y="125" fontFamily="serif" fontSize="14" textAnchor="middle" fill="#7c2d12">Patrician nobility only</text>
+              <text x="350" y="125" fontFamily="serif" fontSize="14" textAnchor="middle" fill="#7c2d12">Nobili nobility only</text>
               
               {/* The Senate */}
               <rect x="250" y="160" width="200" height="50" fill="#fbbf24" stroke="#b45309" strokeWidth="2" rx="5" />

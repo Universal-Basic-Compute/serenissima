@@ -111,7 +111,7 @@
         "id": "d4af6ab2-d52e-4cee-84d2-25e78ed6fb1a",
         "historicalName": "Ponte dei Gioiellieri di San Moisè",
         "englishName": "Bridge of the Jewelers of San Moisè",
-        "historicalDescription": "Named after the jewelry craftsmen who had workshops near the Church of San Moisè during the Renaissance period. The Calle Larga San Moisè was known for luxury artisans, particularly jewelers who served the wealthy patrician families and foreign dignitaries.",
+        "historicalDescription": "Named after the jewelry craftsmen who had workshops near the Church of San Moisè during the Renaissance period. The Calle Larga San Moisè was known for luxury artisans, particularly jewelers who served the wealthy nobili families and foreign dignitaries.",
         "location": {
           "midpoint": {
             "lat": 45.43307649410637,
@@ -211,7 +211,7 @@
         "id": "b773c717-544c-485b-90e4-2396c9b162d8",
         "historicalName": "Ponte dei Vallaresso",
         "englishName": "Bridge of the Vallaresso Family",
-        "historicalDescription": "Named after the noble Vallaresso family who owned property in the San Moisè area during the Renaissance period. This patrician family contributed to Venetian civic life and governance, and like many noble families, had architectural elements and urban features named after them in districts where they held influence.",
+        "historicalDescription": "Named after the noble Vallaresso family who owned property in the San Moisè area during the Renaissance period. This nobili family contributed to Venetian civic life and governance, and like many noble families, had architectural elements and urban features named after them in districts where they held influence.",
         "location": {
           "midpoint": {
             "lat": 45.433498588362,
@@ -269,7 +269,7 @@
       "lng": 12.334703697044919,
       "streetName": "Fondamenta Barbarigo",
       "streetNameEnglish": "Barbarigo Foundation",
-      "streetDescription": "Named after the prominent Barbarigo family who had a palazzo in this area. The Barbarigo were one of Venice's patrician families who produced several Doges (elected leaders of Venice). A 'fondamenta' is a street running alongside a canal, suggesting this would have been a waterside path near the family's property in the San Moisè district."
+      "streetDescription": "Named after the prominent Barbarigo family who had a palazzo in this area. The Barbarigo were one of Venice's nobili families who produced several Doges (elected leaders of Venice). A 'fondamenta' is a street running alongside a canal, suggesting this would have been a waterside path near the family's property in the San Moisè district."
     },
     {
       "lat": 45.433386975264945,

@@ -315,7 +315,7 @@
       "lng": 12.325354853444043,
       "streetName": "Corte Morosini",
       "streetNameEnglish": "Morosini Court",
-      "streetDescription": "Named after the noble Morosini family who owned property in this area of Cannaregio. The Morosini were an ancient patrician family that gave Venice several doges and military commanders throughout its history."
+      "streetDescription": "Named after the noble Morosini family who owned property in this area of Cannaregio. The Morosini were an ancient nobili family that gave Venice several doges and military commanders throughout its history."
     },
     {
       "lat": 45.43930287132632,
@@ -399,7 +399,7 @@
       "lng": 12.322908262083471,
       "streetName": "Calle Priuli",
       "streetNameEnglish": "Priuli Street",
-      "streetDescription": "Named after the noble Priuli family who owned property in this area of Cannaregio. The Priuli were a prestigious Venetian patrician family that produced three doges and many other notable figures in Venetian history."
+      "streetDescription": "Named after the noble Priuli family who owned property in this area of Cannaregio. The Priuli were a prestigious Venetian nobili family that produced three doges and many other notable figures in Venetian history."
     }
   ],
   "id": "polygon-1745879385958"
