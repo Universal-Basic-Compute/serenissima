@@ -912,6 +912,26 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
           {console.warn('BuildingsToolbar: scene is not available, cannot render BuildingRenderer')}
         </div>
       )}
+      {showBuildingRenderer && !actualScene && (
+        <div className="hidden">
+          {console.warn('BuildingsToolbar: scene is not available, cannot render BuildingRenderer')}
+        </div>
+      )}
+      {showBuildingRenderer && !actualScene && (
+        <div className="hidden">
+          {console.warn('BuildingsToolbar: scene is not available, cannot render BuildingRenderer')}
+        </div>
+      )}
+      {showBuildingRenderer && !actualScene && (
+        <div className="hidden">
+          {console.warn('BuildingsToolbar: scene is not available, cannot render BuildingRenderer')}
+        </div>
+      )}
+      {showBuildingRenderer && !actualScene && (
+        <div className="hidden">
+          {console.warn('BuildingsToolbar: scene is not available, cannot render BuildingRenderer')}
+        </div>
+      )}
     </div>
   );
 };
