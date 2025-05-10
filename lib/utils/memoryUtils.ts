@@ -73,7 +73,10 @@ export function disposeMaterial(material: THREE.Material): void {
       if (material.normalMap) material.normalMap.dispose();
     }
     
-    if (material.displacementMap) material.displacementMap.dispose();
+    // Handle displacement map (only exists on certain material types)
+    if (material instanceof THREE.MeshStandardMaterial || material instanceof THREE.MeshPhongMaterial) {
+      if (material.displacementMap) material.displacementMap.dispose();
+    }
     
     // Handle PBR specific maps
     if (material instanceof THREE.MeshStandardMaterial) {
