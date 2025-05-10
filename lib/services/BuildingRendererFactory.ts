@@ -251,19 +251,6 @@ class DefaultBuildingRenderer implements IBuildingRenderer {
         return emptyGroup;
       }
       
-      // Set position
-      let position: THREE.Vector3;
-      
-      if ('lat' in building.position && 'lng' in building.position) {
-        position = this.options.positionManager.latLngToScenePosition(building.position);
-      } else {
-        position = new THREE.Vector3(
-          building.position.x,
-          building.position.y || 0, // Use 0 as default height
-          building.position.z
-        );
-      }
-      
       // Check if this is a fallback model and we should skip rendering it
       if (model.userData && model.userData.isFallbackModel) {
         console.log(`Skipping rendering of fallback model for ${building.id} of type ${building.type}`);
@@ -293,6 +280,8 @@ class DefaultBuildingRenderer implements IBuildingRenderer {
         
         return emptyGroup;
       }
+      
+      // Update position with ground level
       
       // Find the ground level at this position using raycasting
       const groundPosition = this.findGroundLevel(position);
