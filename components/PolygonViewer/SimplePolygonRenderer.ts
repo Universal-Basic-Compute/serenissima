@@ -2126,6 +2126,25 @@ export default class SimplePolygonRenderer {
   // This method is no longer needed as we've moved the functionality to handleMouseClick
 
   /**
+   * Force all building markers to be visible
+   */
+  public forceShowBuildingMarkers() {
+    console.log('Force showing building markers');
+    
+    // Make sure building points are created
+    if (this.buildingPointMarkers.length === 0) {
+      this.createBuildingPoints();
+    }
+    
+    // Ensure all building markers are visible
+    this.buildingPointMarkers.forEach(marker => {
+      marker.visible = true;
+    });
+    
+    console.log(`Made ${this.buildingPointMarkers.length} building markers visible`);
+  }
+  
+  /**
    * Create building point markers for buildings view
    */
   public createBuildingPoints() {
