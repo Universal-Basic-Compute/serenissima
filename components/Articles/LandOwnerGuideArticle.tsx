@@ -790,6 +790,16 @@ const LandOwnerGuideArticle: React.FC<LandOwnerGuideArticleProps> = ({ onClose }
             </p>
           </div>
           
+          <div className="bg-amber-50 p-3 rounded border border-amber-200 mt-4">
+            <h5 className="font-bold text-amber-900">The Vigesima: Land Lease Taxation</h5>
+            <p className="text-amber-800">
+              All land leases in Venice are subject to a 20% tax known as the <i>Vigesima</i> (literally "twentieth"). This tax is automatically collected by the Republic on all lease income, reducing your net revenue to 80% of the gross lease amount. When setting lease prices, remember to account for this tax to ensure your desired profit margin.
+            </p>
+            <p className="text-amber-800 mt-2">
+              The Vigesima funds essential public services and infrastructure, including canal maintenance, bridge repairs, and public security. While this tax is non-negotiable, strategic landowners can offset its impact through careful lease pricing and by taking advantage of occasional tax incentives for developing underdeveloped districts.
+            </p>
+          </div>
+          
           <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
             <h4 className="text-xl font-serif text-amber-800 mb-2">Infrastructure Investment</h4>
             
