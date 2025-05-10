@@ -594,106 +594,17 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
       
       <button
         onClick={() => {
-          console.log('Fixing building positions...');
+          console.log('Triggering building position fix...');
           
-          if (!scene) {
-            console.error('Scene not available');
-            return;
+          // Dispatch a custom event to trigger position fixing
+          window.dispatchEvent(new CustomEvent('fixBuildingPositions'));
+          
+          // Also force a refresh of buildings
+          if (onRefreshBuildings) {
+            onRefreshBuildings();
           }
-          
-          // Find all buildings in the scene
-          const buildings = [];
-          scene.traverse((object) => {
-            if (object.userData && object.userData.buildingId) {
-              buildings.push(object);
-            }
-          });
-          
-          console.log(`Found ${buildings.length} buildings in the scene`);
-          
-          if (buildings.length === 0) {
-            console.log('No buildings found in the scene. Trying to create debug buildings...');
-            
-            // Create some debug buildings at fixed positions
-            for (let i = 0; i < 5; i++) {
-              const geometry = new THREE.BoxGeometry(3, 3, 3);
-              const material = new THREE.MeshBasicMaterial({ 
-                color: 0xff0000 + (i * 0x003300),
-                wireframe: false
-              });
-              const debugBuilding = new THREE.Mesh(geometry, material);
-              
-              // Position in a line that should be visible
-              debugBuilding.position.set(i * 10, 5, 0);
-              debugBuilding.userData.buildingId = `debug-building-${i}`;
-              scene.add(debugBuilding);
-              console.log(`Created debug building ${i} at position:`, debugBuilding.position);
-            }
-            
-            return;
-          }
-          
-          // Process each building
-          buildings.forEach((building, index) => {
-            // Get the original position
-            const originalPosition = building.position.clone();
-            
-            // Check if the position uses lat/lng format
-            if (building.userData.position) {
-              const pos = building.userData.position;
-              if (typeof pos === 'string') {
-                try {
-                  const parsedPos = JSON.parse(pos);
-                  if (parsedPos.lat && parsedPos.lng) {
-                    console.log(`Building ${building.userData.buildingId} has lat/lng position:`, parsedPos);
-                    
-                    // Convert lat/lng to scene coordinates
-                    // This is a simplified conversion - adjust based on your scene's coordinate system
-                    const bounds = {
-                      centerLat: 45.4371,
-                      centerLng: 12.3358,
-                      scale: 100000,
-                      latCorrectionFactor: 0.7
-                    };
-                    
-                    const x = (parsedPos.lng - bounds.centerLng) * bounds.scale;
-                    const z = -(parsedPos.lat - bounds.centerLat) * bounds.scale * bounds.latCorrectionFactor;
-                    
-                    // Set the new position with increased height
-                    building.position.set(x, 5, z);
-                    console.log(`Converted position for ${building.userData.buildingId}:`, building.position);
-                  }
-                } catch (e) {
-                  console.error(`Error parsing position for building ${building.userData.buildingId}:`, e);
-                }
-              } else if (pos.x !== undefined && pos.z !== undefined) {
-                // Position is already in scene coordinates, just raise it up
-                building.position.y = 5;
-                console.log(`Raised building ${building.userData.buildingId} to y=5`);
-              }
-            } else {
-              // No position data, just raise it up
-              building.position.y = 5;
-              console.log(`Raised building ${building.userData.buildingId} to y=5`);
-            }
-            
-            // Increase the scale to make it more visible
-            building.scale.multiplyScalar(2);
-            
-            console.log(`Building ${index}: ${building.userData.buildingId}`);
-            console.log(`  Original position: ${originalPosition.x}, ${originalPosition.y}, ${originalPosition.z}`);
-            console.log(`  New position: ${building.position.x}, ${building.position.y}, ${building.position.z}`);
-            console.log(`  Scale: ${building.scale.x}, ${building.scale.y}, ${building.scale.z}`);
-          });
-          
-          // Force a scene update
-          if (scene.userData && scene.userData.renderer) {
-            scene.userData.renderer.render(scene, camera || (document.querySelector('canvas')?.__camera as THREE.PerspectiveCamera));
-          }
-          
-          console.log('Building positions fixed!');
         }}
-        className="px-4 py-2 bg-red-600 text-white rounded-md shadow-md hover:bg-red-700 transition-colors flex items-center space-x-2"
+        className="px-4 py-2 bg-green-600 text-white rounded-md shadow-md hover:bg-green-700 transition-colors flex items-center space-x-2"
         title="Fix building positions"
       >
         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">

@@ -20,8 +20,8 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
   const gltfLoader = useRef<GLTFLoader>(new GLTFLoader());
   
   // Function to verify and fix building positions
-  const verifyBuildingPositions = () => {
-    console.log('Verifying building positions...');
+  const verifyAndFixBuildingPositions = () => {
+    console.log('Verifying and fixing building positions...');
     
     // Find all buildings in the scene
     const buildings = [];
@@ -40,11 +40,18 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
       
       // Check if the position is at the default (0,0,0) or (45,5,12)
       const isDefaultPosition = 
-        (originalPosition.x === 0 && originalPosition.z === 0) ||
-        (originalPosition.x === 45 && originalPosition.z === 12);
+        (Math.abs(originalPosition.x) < 0.001 && Math.abs(originalPosition.z) < 0.001) ||
+        (Math.abs(originalPosition.x - 45) < 0.001 && Math.abs(originalPosition.z - 12) < 0.001);
       
-      if (isDefaultPosition && building.userData.position) {
-        console.log(`Building ${building.userData.buildingId} has default position, fixing...`);
+      // Check if position is extremely large (likely a conversion error)
+      const isInvalidPosition = 
+        Math.abs(originalPosition.x) > 1000 || 
+        Math.abs(originalPosition.z) > 1000 ||
+        isNaN(originalPosition.x) ||
+        isNaN(originalPosition.z);
+      
+      if ((isDefaultPosition || isInvalidPosition) && building.userData.position) {
+        console.log(`Building ${building.userData.buildingId} has problematic position, fixing...`);
         
         const pos = building.userData.position;
         
@@ -67,10 +74,15 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
           building.position.set(x, 5, z);
           console.log(`Fixed position for ${building.userData.buildingId}:`, building.position);
         }
+        else if (pos.x !== undefined && pos.z !== undefined) {
+          // Position is already in scene coordinates, just ensure it's set correctly
+          building.position.set(pos.x, pos.y || 5, pos.z);
+          console.log(`Reset position for ${building.userData.buildingId} using stored coordinates:`, building.position);
+        }
       }
     });
     
-    console.log('Building position verification complete');
+    console.log('Building position verification and fixing complete');
   };
 
   // Function to load a building model
@@ -82,81 +94,90 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
       return modelsCache.current.get(cacheKey).clone();
     }
     
-    // Define model paths for different building types
-    const modelPaths: Record<string, string> = {
-      'market-stall': '/models/buildings/market_stall.glb',
-      'public-dock': '/models/buildings/dock.glb',
-      'house': '/models/buildings/house.glb',
-      'warehouse': '/models/buildings/warehouse.glb',
-      'workshop': '/models/buildings/workshop.glb',
-      'church': '/models/buildings/church.glb',
-      'palace': '/models/buildings/palace.glb',
-      'bridge': '/models/buildings/bridge.glb',
-      'tower': '/models/buildings/tower.glb',
-      'default': '/models/buildings/default_building.glb'
-    };
+    // Define model paths with multiple fallback options
+    const modelPaths = [
+      `/assets/buildings/models/${type}/${variant}.glb`,  // Primary path with variant
+      `/assets/buildings/models/${type}/model.glb`,       // Fallback to default variant
+      `/models/buildings/${type}.glb`,                    // Legacy path
+      `/models/buildings/default_building.glb`            // Ultimate fallback
+    ];
     
-    // Get the model path, fallback to default if not found
-    const modelPath = modelPaths[type] || modelPaths.default;
-    
-    try {
-      // Load the model
-      const gltf = await new Promise<GLTF>((resolve, reject) => {
-        gltfLoader.current.load(
-          modelPath,
-          resolve,
-          undefined,
-          reject
-        );
-      });
-      
-      // Clone the model to avoid reference issues
-      const model = gltf.scene.clone();
-      
-      // Cache the model for future use
-      modelsCache.current.set(cacheKey, model.clone());
-      
-      return model;
-    } catch (error) {
-      console.error(`Error loading model for ${type}:`, error);
-      
-      // Create a more visible fallback cube model with a distinctive color
-      const geometry = new THREE.BoxGeometry(3, 3, 3); // Larger size for better visibility
-      const material = new THREE.MeshStandardMaterial({ 
-        color: 0xff00ff, // Bright magenta color to make it obvious
-        emissive: 0x440044, // Add some emissive glow
-        wireframe: false
-      });
-      const cube = new THREE.Mesh(geometry, material);
-      
-      // Add the cube to a group to match GLTF structure
-      const group = new THREE.Group();
-      group.add(cube);
-      
-      // Add a label to identify the building type
-      const canvas = document.createElement('canvas');
-      canvas.width = 256;
-      canvas.height = 128;
-      const ctx = canvas.getContext('2d');
-      if (ctx) {
-        ctx.fillStyle = 'black';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = 'white';
-        ctx.font = 'bold 24px Arial';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(type, canvas.width/2, canvas.height/2);
+    // Try each path in sequence until one works
+    for (const modelPath of modelPaths) {
+      try {
+        console.log(`Attempting to load model from: ${modelPath}`);
         
-        const texture = new THREE.CanvasTexture(canvas);
-        const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
-        const sprite = new THREE.Sprite(spriteMaterial);
-        sprite.position.set(0, 2, 0); // Position above the cube
-        sprite.scale.set(3, 1.5, 1);
-        group.add(sprite);
+        // Load the model
+        const gltf = await new Promise<GLTF>((resolve, reject) => {
+          gltfLoader.current.load(
+            modelPath,
+            resolve,
+            undefined,
+            reject
+          );
+        });
+        
+        // Clone the model to avoid reference issues
+        const model = gltf.scene.clone();
+        
+        // Cache the model for future use
+        modelsCache.current.set(cacheKey, model.clone());
+        
+        console.log(`Successfully loaded model from: ${modelPath}`);
+        return model;
+      } catch (error) {
+        console.warn(`Failed to load model from ${modelPath}:`, error);
+        // Continue to next path option
       }
-      
-      return group;
     }
+    
+    // If all paths fail, create a fallback cube model
+    console.error(`All model loading attempts failed for ${type}. Creating fallback.`);
+    
+    // Create a more visible fallback cube model with a distinctive color
+    const geometry = new THREE.BoxGeometry(3, 3, 3); // Larger size for better visibility
+    
+    // Generate a deterministic color based on building type
+    let hash = 0;
+    for (let i = 0; i < type.length; i++) {
+      hash = type.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const color = (hash & 0x00FFFFFF);
+    
+    const material = new THREE.MeshStandardMaterial({ 
+      color: color, 
+      emissive: 0x440044, // Add some emissive glow
+      wireframe: false
+    });
+    const cube = new THREE.Mesh(geometry, material);
+    
+    // Add the cube to a group to match GLTF structure
+    const group = new THREE.Group();
+    group.add(cube);
+    
+    // Add a label to identify the building type
+    const canvas = document.createElement('canvas');
+    canvas.width = 256;
+    canvas.height = 128;
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      ctx.fillStyle = 'black';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = 'white';
+      ctx.font = 'bold 24px Arial';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(type, canvas.width/2, canvas.height/2);
+      
+      const texture = new THREE.CanvasTexture(canvas);
+      const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
+      const sprite = new THREE.Sprite(spriteMaterial);
+      sprite.position.set(0, 2, 0); // Position above the cube
+      sprite.scale.set(3, 1.5, 1);
+      group.add(sprite);
+    }
+    
+    return group;
   };
   
   // Function to create a building mesh
@@ -168,21 +189,51 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
       // Parse position data properly
       let position = { x: 0, y: 5, z: 0 }; // Default position with height=5
       
+      console.log(`Processing position for building ${building.id}:`, building.position);
+      
       // Handle different position formats
       if (building.position) {
         // If position is a string (JSON), parse it
         if (typeof building.position === 'string') {
           try {
-            console.log(`[DEBUG] Building ${building.id}: Position is a string, attempting to parse:`, building.position);
-            position = JSON.parse(building.position);
-            console.log(`[DEBUG] Building ${building.id}: Parsed position:`, position);
+            console.log(`Building ${building.id}: Position is a string, attempting to parse:`, building.position);
+            const parsedPos = JSON.parse(building.position);
+            
+            // Check if parsed position has lat/lng format
+            if (parsedPos.lat !== undefined && parsedPos.lng !== undefined) {
+              // Convert lat/lng to Three.js coordinates
+              const bounds = {
+                centerLat: 45.4371,
+                centerLng: 12.3358,
+                scale: 100000,
+                latCorrectionFactor: 0.7
+              };
+              
+              const x = (parsedPos.lng - bounds.centerLng) * bounds.scale;
+              const z = -(parsedPos.lat - bounds.centerLat) * bounds.scale * bounds.latCorrectionFactor;
+              
+              position = { x, y: 5, z };
+              console.log(`Converted lat/lng position for ${building.id}:`, position);
+            } 
+            // Check if parsed position has x/z format
+            else if (parsedPos.x !== undefined && parsedPos.z !== undefined) {
+              position = {
+                x: parsedPos.x,
+                y: parsedPos.y || 5,
+                z: parsedPos.z
+              };
+              console.log(`Using parsed x/y/z position for ${building.id}:`, position);
+            }
+            else {
+              console.warn(`Building ${building.id}: Parsed position has unknown format:`, parsedPos);
+            }
           } catch (error) {
-            console.error(`[DEBUG] Building ${building.id}: Error parsing position:`, error);
+            console.error(`Building ${building.id}: Error parsing position:`, error);
           }
         } 
         // If position is already an object
         else if (typeof building.position === 'object') {
-          console.log(`[DEBUG] Building ${building.id}: Position is an object:`, building.position);
+          console.log(`Building ${building.id}: Position is an object:`, building.position);
           
           // Check if it's lat/lng format
           if (building.position.lat !== undefined && building.position.lng !== undefined) {
@@ -190,7 +241,7 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
             const lat = parseFloat(building.position.lat.toString());
             const lng = parseFloat(building.position.lng.toString());
             
-            console.log(`[DEBUG] Building ${building.id}: Converting lat/lng: ${lat}, ${lng}`);
+            console.log(`Building ${building.id}: Converting lat/lng: ${lat}, ${lng}`);
             
             // Define Venice center coordinates and scaling factors
             const bounds = {
@@ -200,91 +251,41 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
               latCorrectionFactor: 0.7
             };
             
-            console.log(`[DEBUG] Building ${building.id}: Using bounds:`, bounds);
+            // Calculate x and z directly
+            const x = (lng - bounds.centerLng) * bounds.scale;
+            const z = -(lat - bounds.centerLat) * bounds.scale * bounds.latCorrectionFactor;
             
-            // Use the normalizeCoordinates function
-            console.log(`[DEBUG] Building ${building.id}: Calling normalizeCoordinates with:`, [{ lat, lng }], bounds.centerLat, bounds.centerLng, bounds.scale, bounds.latCorrectionFactor);
-            
-            const normalizedCoord = normalizeCoordinates(
-              [{ lat, lng }],
-              bounds.centerLat,
-              bounds.centerLng,
-              bounds.scale,
-              bounds.latCorrectionFactor
-            )[0];
-            
-            console.log(`[DEBUG] Building ${building.id}: normalizeCoordinates returned:`, normalizedCoord);
-            
-            // Calculate the expected position manually to verify
-            const manualX = (lng - bounds.centerLng) * bounds.scale * bounds.latCorrectionFactor;
-            const manualY = (lat - bounds.centerLat) * bounds.scale;
-            console.log(`[DEBUG] Building ${building.id}: Manual calculation: x=${manualX}, y=${manualY}`);
-            
-            // Log the conversion for debugging
-            console.log(`[DEBUG] Building ${building.id}: Final converted coordinates: x=${normalizedCoord.x}, z=${-normalizedCoord.y}`);
-            
-            // Verify the conversion worked correctly
-            if (Math.abs(normalizedCoord.x) < 0.001 && Math.abs(normalizedCoord.y) < 0.001) {
-              console.warn(`[DEBUG] Building ${building.id}: WARNING: Near-zero position after conversion!`);
-              console.warn(`[DEBUG] Building ${building.id}: Original lat/lng:`, building.position);
-            }
-            
-            // Check if the position is close to the default position (45, 5, 12)
-            if (Math.abs(normalizedCoord.x - 45) < 1.0 && Math.abs(-normalizedCoord.y - 12) < 1.0) {
-              console.warn(`[DEBUG] Building ${building.id}: WARNING: Position near default (45,12) after conversion!`);
-              console.warn(`[DEBUG] Building ${building.id}: Original lat/lng:`, building.position);
-              console.warn(`[DEBUG] Building ${building.id}: Converted position: x=${normalizedCoord.x}, z=${-normalizedCoord.y}`);
-              
-              // Log additional information to help debug
-              console.warn(`[DEBUG] Building ${building.id}: Calculation details:`);
-              console.warn(`  centerLat: ${bounds.centerLat}, centerLng: ${bounds.centerLng}`);
-              console.warn(`  scale: ${bounds.scale}, latCorrectionFactor: ${bounds.latCorrectionFactor}`);
-              console.warn(`  lat diff: ${lat - bounds.centerLat}, lng diff: ${lng - bounds.centerLng}`);
-              console.warn(`  scaled lat diff: ${(lat - bounds.centerLat) * bounds.scale}`);
-              console.warn(`  scaled lng diff: ${(lng - bounds.centerLng) * bounds.scale}`);
-              console.warn(`  final x: ${(lng - bounds.centerLng) * bounds.scale * bounds.latCorrectionFactor}`);
-              console.warn(`  final y: ${(lat - bounds.centerLat) * bounds.scale}`);
-              console.warn(`  final z: ${-(lat - bounds.centerLat) * bounds.scale}`);
-            }
-            
-            position = {
-              x: normalizedCoord.x,
-              y: position.y || 5, // Keep the existing y or use default
-              z: -normalizedCoord.y // Negate y to get z (since y in normalized is actually latitude)
-            };
-            
-            console.log(`[DEBUG] Building ${building.id}: Final position object:`, position);
+            position = { x, y: 5, z };
+            console.log(`Building ${building.id}: Converted lat/lng to position:`, position);
           } 
-          // Regular x,y,z format - PRESERVE FULL PRECISION
-          else {
-            console.log(`[DEBUG] Building ${building.id}: Using x,y,z format:`, building.position);
+          // Check if it's x/z format
+          else if (building.position.x !== undefined && building.position.z !== undefined) {
             position = {
-              x: building.position.x !== undefined ? parseFloat(building.position.x.toString()) : 0,
+              x: parseFloat(building.position.x.toString()),
               y: building.position.y !== undefined ? parseFloat(building.position.y.toString()) : 5,
-              z: building.position.z !== undefined ? parseFloat(building.position.z.toString()) : 0
+              z: parseFloat(building.position.z.toString())
             };
-            console.log(`[DEBUG] Building ${building.id}: Parsed x,y,z position:`, position);
+            console.log(`Building ${building.id}: Using direct x/y/z position:`, position);
+          }
+          else {
+            console.warn(`Building ${building.id}: Position object has unknown format:`, building.position);
           }
         }
       }
       
       // Ensure position has a reasonable height to be visible
       if (!position.y || position.y < 0.1) {
-        console.log(`[DEBUG] Building ${building.id}: Setting default height (y=5) because current height is ${position.y}`);
+        console.log(`Building ${building.id}: Setting default height (y=5) because current height is ${position.y}`);
         position.y = 5;
       }
       
-      // Set position with explicit values to avoid undefined - PRESERVE FULL PRECISION
-      console.log(`[DEBUG] Building ${building.id}: Setting final position with values:`, {
-        x: parseFloat(position.x.toString()),
-        y: parseFloat(position.y.toString()) || 5,
-        z: parseFloat(position.z.toString())
-      });
+      // Set position with explicit values to avoid undefined
+      console.log(`Building ${building.id}: Setting final position:`, position);
       
       model.position.set(
-        parseFloat(position.x.toString()), // Ensure we're using the full floating point value
-        parseFloat(position.y.toString()) || 5,
-        parseFloat(position.z.toString())  // Ensure we're using the full floating point value
+        position.x,
+        position.y,
+        position.z
       );
       
       // Add more detailed logging with a distinctive prefix
@@ -425,7 +426,7 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
         
         // Add a delay to ensure buildings are loaded
         const timer = setTimeout(() => {
-          verifyBuildingPositions();
+          verifyAndFixBuildingPositions();
         }, 2000);
         
         return () => clearTimeout(timer);
@@ -440,6 +441,19 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
       buildingMeshesRef.current.clear();
     };
   }, [active, scene]);
+  
+  // Listen for the fixBuildingPositions event
+  useEffect(() => {
+    const handleFixPositions = () => {
+      verifyAndFixBuildingPositions();
+    };
+    
+    window.addEventListener('fixBuildingPositions', handleFixPositions);
+    
+    return () => {
+      window.removeEventListener('fixBuildingPositions', handleFixPositions);
+    };
+  }, [scene]);
   
   // Listen for building events
   useEffect(() => {
