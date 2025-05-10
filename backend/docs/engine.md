@@ -108,6 +108,32 @@ Every day at 2:00 PM UTC, the housing mobility system simulates citizens looking
 
 This process creates a dynamic housing market with citizens seeking better economic opportunities, simulating the mobility of Renaissance Venice's population.
 
+### Work Mobility (4:00 PM UTC)
+
+**Script**: `backend/engine/citizenworkmobility.py`
+
+Every day at 4:00 PM UTC, the work mobility system simulates citizens looking for better-paying jobs:
+
+1. The script checks all employed citizens
+2. Based on social class, it determines if they look for better-paying jobs:
+   - Patrician: 5% chance
+   - Cittadini: 10% chance
+   - Popolani: 15% chance
+   - Facchini: 20% chance
+3. If a citizen decides to look, the system finds available businesses with wages above a threshold:
+   - Patrician: 15% higher
+   - Cittadini: 12% higher
+   - Popolani: 10% higher
+   - Facchini: 8% higher
+4. Citizens are moved to better-paying jobs if found
+5. Notifications are sent to:
+   - The previous employer about the employee leaving
+   - The new employer about the employee joining
+   - The citizen about their new job and wage increase
+   - Administrators with a summary of all job changes
+
+This process creates a dynamic labor market with citizens seeking better economic opportunities, simulating the mobility of Renaissance Venice's workforce.
+
 ### Loan Payments (3:00 PM UTC)
 
 **Script**: `backend/engine/dailyloanpayments.py`
