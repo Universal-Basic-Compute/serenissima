@@ -201,9 +201,8 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
             type: 'market-stall',
             land_id: 'polygon-1746052711032',
             position: { 
-              x: 0, 
-              y: 0.1, 
-              z: 0 
+              lat: 45.4371, 
+              lng: 12.3358
             },
             rotation: 0,
             created_by: 'ConsiglioDeiDieci',
@@ -800,9 +799,8 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
             type: 'market-stall',
             land_id: 'polygon-1746052711032',
             position: { 
-              x: 45, // Use fixed coordinates that are definitely visible
-              y: 10, // Higher position to ensure visibility
-              z: 12 
+              lat: 45.4371, // Center of Venice
+              lng: 12.3358
             },
             rotation: 0,
             created_by: 'ConsiglioDeiDieci',

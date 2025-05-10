@@ -64,14 +64,40 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
     } catch (error) {
       console.error(`Error loading model for ${type}:`, error);
       
-      // Create a fallback cube model
-      const geometry = new THREE.BoxGeometry(2, 2, 2);
-      const material = new THREE.MeshStandardMaterial({ color: 0xff0000 });
+      // Create a more visible fallback cube model with a distinctive color
+      const geometry = new THREE.BoxGeometry(3, 3, 3); // Larger size for better visibility
+      const material = new THREE.MeshStandardMaterial({ 
+        color: 0xff00ff, // Bright magenta color to make it obvious
+        emissive: 0x440044, // Add some emissive glow
+        wireframe: false
+      });
       const cube = new THREE.Mesh(geometry, material);
       
       // Add the cube to a group to match GLTF structure
       const group = new THREE.Group();
       group.add(cube);
+      
+      // Add a label to identify the building type
+      const canvas = document.createElement('canvas');
+      canvas.width = 256;
+      canvas.height = 128;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.fillStyle = 'black';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = 'white';
+        ctx.font = 'bold 24px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(type, canvas.width/2, canvas.height/2);
+        
+        const texture = new THREE.CanvasTexture(canvas);
+        const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
+        const sprite = new THREE.Sprite(spriteMaterial);
+        sprite.position.set(0, 2, 0); // Position above the cube
+        sprite.scale.set(3, 1.5, 1);
+        group.add(sprite);
+      }
       
       return group;
     }
@@ -98,12 +124,38 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
         } 
         // If position is already an object
         else if (typeof building.position === 'object') {
-          // Ensure all coordinates are defined
-          position = {
-            x: building.position.x !== undefined ? Number(building.position.x) : 0,
-            y: building.position.y !== undefined ? Number(building.position.y) : 5, // Default height of 5
-            z: building.position.z !== undefined ? Number(building.position.z) : 0
-          };
+          // Check if it's lat/lng format
+          if (building.position.lat !== undefined && building.position.lng !== undefined) {
+            // Convert lat/lng to Three.js coordinates
+            const bounds = {
+              centerLat: 45.4371,
+              centerLng: 12.3358,
+              scale: 100000,
+              latCorrectionFactor: 0.7
+            };
+            
+            // Convert lat/lng to Three.js coordinates
+            const x = (building.position.lng - bounds.centerLng) * bounds.scale;
+            const z = -(building.position.lat - bounds.centerLat) * bounds.scale * bounds.latCorrectionFactor;
+            
+            position = {
+              x: x,
+              y: position.y || 5, // Keep the existing y or use default
+              z: z
+            };
+            
+            console.log(`Converted lat/lng position for building ${building.id}:`, 
+              `From: lat=${building.position.lat}, lng=${building.position.lng}`,
+              `To: x=${position.x}, z=${position.z}`);
+          } 
+          // Regular x,y,z format
+          else {
+            position = {
+              x: building.position.x !== undefined ? Number(building.position.x) : 0,
+              y: building.position.y !== undefined ? Number(building.position.y) : 5,
+              z: building.position.z !== undefined ? Number(building.position.z) : 0
+            };
+          }
         }
       }
       

@@ -182,9 +182,8 @@ export async function GET(request: Request) {
       type: 'market-stall',
       land_id: 'polygon-1746052711032',
       position: { 
-        x: 45, 
-        y: 10, // Higher position for better visibility
-        z: 12 
+        lat: 45.4371, 
+        lng: 12.3358
       },
       rotation: 0,
       connection_points: [], // Add empty connection points array to fix type error
@@ -197,9 +196,8 @@ export async function GET(request: Request) {
       type: 'market-stall',
       land_id: 'polygon-1746052711033',
       position: { 
-        x: 55, 
-        y: 10, // Higher position for better visibility
-        z: 22
+        lat: 45.4375, 
+        lng: 12.3368
       },
       rotation: Math.PI / 4, // 45 degrees rotation
       connection_points: [], // Add empty connection points array to fix type error
@@ -212,9 +210,8 @@ export async function GET(request: Request) {
       type: 'market-stall',
       land_id: 'polygon-1746052711034',
       position: { 
-        x: 35, 
-        y: 10, // Higher position for better visibility
-        z: 2
+        lat: 45.4365, 
+        lng: 12.3348
       },
       rotation: Math.PI / 2, // 90 degrees rotation
       connection_points: [], // Add empty connection points array to fix type error
@@ -228,9 +225,8 @@ export async function GET(request: Request) {
       type: 'market-stall',
       land_id: 'polygon-1746052711035',
       position: { 
-        x: 25, 
-        y: 10, // Higher position for better visibility
-        z: 25
+        lat: 45.4380, 
+        lng: 12.3378
       },
       rotation: Math.PI, // 180 degrees rotation
       connection_points: [], // Add empty connection points array to fix type error
