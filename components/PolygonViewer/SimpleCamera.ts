@@ -38,8 +38,9 @@ export default class SimpleCamera {
     };
     
     // Add a custom pan handler to maintain altitude during panning
-    const oldPanMethod = this.controls.pan;
-    this.controls.pan = (deltaX: number, deltaY: number) => {
+    // Use type assertion since 'pan' exists in implementation but not in type definition
+    const oldPanMethod = (this.controls as any).pan;
+    (this.controls as any).pan = (deltaX: number, deltaY: number) => {
       // Get the current camera position before panning
       const oldY = this.camera.position.y;
       
