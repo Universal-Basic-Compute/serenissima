@@ -290,7 +290,7 @@ def process_loan_payment(tables, loan: Dict, dry_run: bool = False) -> bool:
         create_notification(
             tables,
             borrower,
-            f"Insufficient funds for loan payment of {payment_amount} COMPUTE. Please add funds to your account to avoid penalties.",
+            f"Insufficient funds for loan payment of {payment_amount} ⚜️ Ducats. Please add funds to your account to avoid penalties.",
             {
                 "loan_id": loan_id,
                 "loan_name": loan_name,
@@ -306,7 +306,7 @@ def process_loan_payment(tables, loan: Dict, dry_run: bool = False) -> bool:
         create_notification(
             tables,
             lender,
-            f"Loan payment of {payment_amount} COMPUTE from {borrower} failed due to insufficient funds",
+            f"Loan payment of {payment_amount} ⚜️ Ducats from {borrower} failed due to insufficient funds",
             {
                 "loan_id": loan_id,
                 "loan_name": loan_name,
@@ -351,11 +351,11 @@ def process_loan_payment(tables, loan: Dict, dry_run: bool = False) -> bool:
     
     # 5. Create notifications
     # For borrower
-    borrower_notification_content = f"Loan payment of {payment_amount} COMPUTE processed"
+    borrower_notification_content = f"Loan payment of {payment_amount} ⚜️ Ducats processed"
     if is_final_payment:
         borrower_notification_content += ". Your loan has been fully repaid! Congratulations!"
     else:
-        borrower_notification_content += f". Remaining balance: {new_balance} COMPUTE"
+        borrower_notification_content += f". Remaining balance: {new_balance} ⚜️ Ducats"
     
     create_notification(
         tables,
@@ -373,11 +373,11 @@ def process_loan_payment(tables, loan: Dict, dry_run: bool = False) -> bool:
     )
     
     # For lender
-    lender_notification_content = f"Received loan payment of {payment_amount} COMPUTE from {borrower}"
+    lender_notification_content = f"Received loan payment of {payment_amount} ⚜️ Ducats from {borrower}"
     if is_final_payment:
         lender_notification_content += ". The loan has been fully repaid!"
     else:
-        lender_notification_content += f". Remaining balance: {new_balance} COMPUTE"
+        lender_notification_content += f". Remaining balance: {new_balance} ⚜️ Ducats"
     
     create_notification(
         tables,
@@ -400,7 +400,7 @@ def create_admin_summary(tables, payment_summary) -> None:
     """Create a summary notification for the admin."""
     try:
         # Create notification content
-        content = f"Daily loan payments processed: {payment_summary['successful']} successful, {payment_summary['failed']} failed"
+        content = f"Daily loan payments processed: {payment_summary['successful']} successful, {payment_summary['failed']} failed, total: {payment_summary['total_amount']} ⚜️ Ducats"
         
         # Create detailed information
         details = {
