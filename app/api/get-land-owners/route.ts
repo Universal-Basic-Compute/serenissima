@@ -76,7 +76,7 @@ export async function GET(request: Request) {
     
     try {
       // Use a more efficient endpoint that returns minimal data
-      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+      const apiBaseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000';
       const response = await fetch(`${apiBaseUrl}/api/lands/basic`, {
         method: 'GET',
         headers: {
