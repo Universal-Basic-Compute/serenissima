@@ -211,9 +211,18 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
               console.warn(`[BuildingRenderer] Original lat/lng:`, building.position);
             }
             
-            if (Math.abs(x - 45) < 0.1 && Math.abs(z - 12) < 0.1) {
-              console.warn(`[BuildingRenderer] WARNING: Building ${building.id} has default position (45,12) after conversion!`);
+            // Check if the position is close to the default position (45, 5, 12)
+            // Use a more precise check with a smaller threshold
+            if (Math.abs(x - 45) < 1.0 && Math.abs(z - 12) < 1.0) {
+              console.warn(`[BuildingRenderer] WARNING: Building ${building.id} has position near default (45,12) after conversion!`);
               console.warn(`[BuildingRenderer] Original lat/lng:`, building.position);
+              console.warn(`[BuildingRenderer] Converted position: x=${x}, z=${z}`);
+              
+              // Log additional information to help debug
+              console.warn(`[BuildingRenderer] Calculation details:`);
+              console.warn(`  centerLat: ${centerLat}, centerLng: ${centerLng}`);
+              console.warn(`  latDiff: ${latDiff}, lngDiff: ${lngDiff}`);
+              console.warn(`  scale: ${scale}, latCorrectionFactor: ${latCorrectionFactor}`);
             }
             
             position = {
