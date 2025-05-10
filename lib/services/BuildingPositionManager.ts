@@ -56,15 +56,16 @@ export class BuildingPositionManager {
     
     // Even after all our checks, if we still get extreme values, clamp them
     // This is a last resort safety measure
-    if (Math.abs(x) > 500 || Math.abs(z) > 500) {
+    const MAX_COORDINATE = 500; // Maximum allowed coordinate value
+    if (Math.abs(x) > MAX_COORDINATE || Math.abs(z) > MAX_COORDINATE) {
       console.error(`Extreme position values calculated despite validation: (${x}, ${height}, ${z}).`);
       console.error(`Input coordinates: (${position.lat}, ${position.lng})`);
       console.error(`Center coordinates: (${this.bounds.centerLat}, ${this.bounds.centerLng})`);
       console.error(`Scale: ${this.bounds.scale}, Correction factor: ${this.bounds.latCorrectionFactor}`);
       
       // Clamp to a reasonable range as a last resort
-      const clampedX = Math.max(-500, Math.min(500, x));
-      const clampedZ = Math.max(-500, Math.min(500, z));
+      const clampedX = Math.max(-MAX_COORDINATE, Math.min(MAX_COORDINATE, x));
+      const clampedZ = Math.max(-MAX_COORDINATE, Math.min(MAX_COORDINATE, z));
       return new THREE.Vector3(clampedX, height, clampedZ);
     }
     
