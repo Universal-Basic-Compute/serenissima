@@ -477,6 +477,51 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
         <span>Focus on Building Position</span>
       </button>
       
+      <button
+        onClick={() => {
+          // Focus camera on the expected building position
+          if (camera) {
+            // Get the actual camera
+            const actualCamera = camera || (document.querySelector('canvas')?.__camera as THREE.PerspectiveCamera);
+            
+            if (actualCamera) {
+              console.log('Repositioning camera to view expected building position');
+              
+              // Position camera to see the expected building location
+              actualCamera.position.set(55, 20, 22);
+              
+              // Look at the expected building position
+              const targetPosition = new THREE.Vector3(45, 10, 12);
+              actualCamera.lookAt(targetPosition);
+              
+              // Update controls if available
+              const controls = actualCamera.userData?.controls;
+              if (controls && controls.target) {
+                controls.target.copy(targetPosition);
+                controls.update();
+              } else {
+                // If we can't find controls on the camera, try to find them on the scene
+                const sceneControls = scene?.userData?.controls;
+                if (sceneControls) {
+                  sceneControls.target.copy(targetPosition);
+                  sceneControls.update();
+                }
+              }
+              
+              console.log('Camera repositioned to view expected building position');
+            }
+          }
+        }}
+        className="px-4 py-2 bg-yellow-600 text-white rounded-md shadow-md hover:bg-yellow-700 transition-colors flex items-center space-x-2"
+        title="Focus on expected building position"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+          <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
+        </svg>
+        <span>Focus on Building Position</span>
+      </button>
+      
       
       <button
         onClick={() => {
