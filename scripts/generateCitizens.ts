@@ -57,19 +57,35 @@ function saveCitizens(citizens: Citizen[]): void {
 // Save citizens to Airtable
 async function saveCitizensToAirtable(citizens: Citizen[]): Promise<void> {
   try {
-    console.log(`Saving ${citizens.length} citizens to Airtable...`);
+    console.log(`Attempting to save ${citizens.length} citizens to Airtable...`);
+    console.log(`Using Airtable base ID: ${process.env.AIRTABLE_BASE_ID}`);
+    
+    // Verify we have the API key (without showing it in logs)
+    if (!process.env.AIRTABLE_API_KEY) {
+      throw new Error('AIRTABLE_API_KEY environment variable is not set');
+    }
     
     // Prepare records for Airtable with capitalized field names
     const records = citizens.map(citizen => ({
       fields: {
-        CitizenId: citizen.id,
+        ID: citizen.id,
         SocialClass: citizen.socialClass,
         FirstName: citizen.firstName,
         LastName: citizen.lastName,
         Description: citizen.description,
         ImagePrompt: citizen.imagePrompt,
         Wealth: citizen.wealth,
-        CreatedAt: citizen.createdAt
+        CreatedAt: citizen.createdAt,
+        ImageUrl: citizen.imageUrl || ''
+      }
+    }));
+    
+    // Log the first record structure (without sensitive data)
+    console.log('Sample record structure:', JSON.stringify({
+      fields: {
+        ID: 'sample-id',
+        SocialClass: 'sample-class',
+        // other fields...
       }
     }));
     
@@ -79,27 +95,39 @@ async function saveCitizensToAirtable(citizens: Citizen[]): Promise<void> {
       chunks.push(records.slice(i, i + 10));
     }
     
-    // Process each chunk
-    for (const chunk of chunks) {
-      await new Promise((resolve, reject) => {
-        base('CITIZENS').create(chunk, (err: any, records: any) => {
-          if (err) {
-            console.error('Error saving to Airtable:', err);
-            reject(err);
-            return;
-          }
-          console.log(`Saved ${records.length} citizens to Airtable`);
-          resolve(records);
+    console.log(`Split into ${chunks.length} chunks for processing`);
+    
+    // Process each chunk with proper promise handling
+    for (let i = 0; i < chunks.length; i++) {
+      const chunk = chunks[i];
+      console.log(`Processing chunk ${i+1} of ${chunks.length} (${chunk.length} records)`);
+      
+      try {
+        await new Promise((resolve, reject) => {
+          base('CITIZENS').create(chunk, function(err: any, records: any) {
+            if (err) {
+              console.error('Error saving chunk to Airtable:', err);
+              reject(err);
+              return;
+            }
+            console.log(`Successfully saved chunk ${i+1} with ${records.length} citizens to Airtable`);
+            resolve(records);
+          });
         });
-      });
+      } catch (chunkError) {
+        console.error(`Error processing chunk ${i+1}:`, chunkError);
+        // Continue with next chunk instead of failing the entire operation
+        continue;
+      }
       
       // Add a small delay between chunks to avoid rate limiting
       await new Promise(resolve => setTimeout(resolve, 1000));
     }
     
-    console.log('Successfully saved all citizens to Airtable');
+    console.log('Successfully completed Airtable save operation');
   } catch (error) {
     console.error('Error in saveCitizensToAirtable:', error);
+    throw error; // Re-throw to allow the calling function to handle it
   }
 }
 
@@ -279,8 +307,15 @@ async function generateCitizens(batchCount: number = 1): Promise<void> {
     const allCitizens = [...existingCitizens, ...newCitizens];
     saveCitizens(allCitizens);
     
-    // Save new citizens to Airtable
-    await saveCitizensToAirtable(newCitizens);
+    // Save new citizens to Airtable with better error handling
+    try {
+      console.log('Starting Airtable save operation...');
+      await saveCitizensToAirtable(newCitizens);
+      console.log('Airtable save operation completed successfully');
+    } catch (airtableError) {
+      console.error('Failed to save citizens to Airtable:', airtableError);
+      console.log('Continuing with local file save only');
+    }
     
     console.log(`Successfully generated ${newCitizens.length} new citizens`);
     console.log(`Total citizens: ${allCitizens.length}`);
