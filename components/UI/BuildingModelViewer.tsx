@@ -187,11 +187,11 @@ const BuildingModelViewer: React.FC<BuildingModelViewerProps> = ({
           setIsLoading(false);
         },
         undefined,
-        (error) => {
+        (error: unknown) => {
           if (!isMountedRef.current) return;
           
           console.error('Error loading model:', error);
-          setError(`Failed to load model: ${error.message}`);
+          setError(`Failed to load model: ${error instanceof Error ? error.message : String(error)}`);
           setIsLoading(false);
           
           // Create fallback
