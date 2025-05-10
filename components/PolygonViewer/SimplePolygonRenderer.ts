@@ -1273,6 +1273,7 @@ export default class SimplePolygonRenderer {
     // Only create markers if they don't exist yet or if we're in transport view
     if ((this.bridgePointMarkers.length > 0 && this.dockPointMarkers.length > 0) || 
         this.activeView !== 'transport') {
+      console.log(`Skipping bridge/dock point creation: already created or not in transport view (activeView: ${this.activeView})`);
       return;
     }
     
@@ -1304,6 +1305,12 @@ export default class SimplePolygonRenderer {
     
     console.log(`Found ${polygonsWithBridgePoints} polygons with bridge points (${totalBridgePoints} total points)`);
     console.log(`Found ${polygonsWithDockPoints} polygons with dock points (${totalDockPoints} total points)`);
+    
+    // If no bridge or dock points found, log a warning
+    if (totalBridgePoints === 0 && totalDockPoints === 0) {
+      console.warn('No bridge or dock points found in any polygons. Transport view will be empty.');
+      return;
+    }
     
     // Clear any existing markers
     this.bridgePointMarkers.forEach(marker => {
