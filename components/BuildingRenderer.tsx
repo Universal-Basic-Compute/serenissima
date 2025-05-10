@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { GLTF } from 'three/examples/jsm/loaders/GLTFLoader';
 import { eventBus } from '@/lib/eventBus';
 import { EventTypes } from '@/lib/eventTypes';
