@@ -14,12 +14,6 @@ interface BuildingRendererProps {
 }
 
 const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) => {
-  // Add early return if scene is not available
-  if (!scene) {
-    console.warn('BuildingRenderer: scene is not provided or undefined');
-    return null; // Return null instead of rendering anything
-  }
-  
   // Add a ref to store the scene
   const sceneRef = useRef<THREE.Scene>(scene);
   
@@ -27,11 +21,6 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
   useEffect(() => {
     sceneRef.current = scene;
   }, [scene]);
-  // Add early return if scene is not available
-  if (!scene) {
-    console.warn('BuildingRenderer: scene is not provided or undefined');
-    return null; // Return null instead of rendering anything
-  }
   const [buildings, setBuildings] = useState<BuildingData[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -645,6 +634,15 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
     });
   };
 
+  /**
+   * Start memory monitoring to track and log memory usage
+   */
+  const startMemoryMonitoring = () => {
+    // Import the memory monitoring utility
+    const { startMemoryMonitoring: monitorMemory } = require('@/lib/utils/memoryUtils');
+    return monitorMemory();
+  };
+  
   // Initial load of buildings
   useEffect(() => {
     if (!active) return;
