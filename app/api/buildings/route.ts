@@ -87,16 +87,32 @@ export async function POST(request: Request) {
       });
     });
     
+    // Define the Airtable record type
+    interface AirtableRecord {
+      id: string;
+      fields: {
+        BuildingId: string;
+        Type: string;
+        Land: string;
+        Variant?: string;
+        Position: string;
+        Rotation?: number;
+        User: string;
+        CreatedAt: string;
+      };
+    }
+
     // Transform the Airtable record to our format
+    const typedRecord = record as AirtableRecord;
     const building = {
-      id: record.fields.BuildingId,
-      type: record.fields.Type,
-      land_id: record.fields.Land,
-      variant: record.fields.Variant || 'model',
-      position: JSON.parse(record.fields.Position), // Parse back to object
-      rotation: record.fields.Rotation || 0,
-      owner: record.fields.User,
-      created_at: record.fields.CreatedAt
+      id: typedRecord.fields.BuildingId,
+      type: typedRecord.fields.Type,
+      land_id: typedRecord.fields.Land,
+      variant: typedRecord.fields.Variant || 'model',
+      position: JSON.parse(typedRecord.fields.Position), // Parse back to object
+      rotation: typedRecord.fields.Rotation || 0,
+      owner: typedRecord.fields.User,
+      created_at: typedRecord.fields.CreatedAt
     };
     
     console.log('Successfully created building in Airtable:', building);
@@ -155,8 +171,23 @@ export async function GET(request: Request) {
         );
     });
     
+    // Define the Airtable record type
+    interface AirtableRecord {
+      id: string;
+      fields: {
+        BuildingId?: string;
+        Type: string;
+        Land: string;
+        Variant?: string;
+        Position: any;
+        Rotation?: number;
+        User: string;
+        CreatedAt: string;
+      };
+    }
+
     // Transform Airtable records to our format
-    const buildings = records.map(record => {
+    const buildings = (records as AirtableRecord[]).map(record => {
       const fields = record.fields;
       
       // Parse position JSON if it's a string
