@@ -359,7 +359,7 @@ export async function GET(request: Request) {
     // Add a fifth building with lat/lng coordinates instead of x/y/z
     const debugBuilding5: Building = {
       id: 'building_5',
-      type: 'house',
+      type: 'market-stall',
       land_id: 'polygon-1746052711036',
       position: { 
         lat: 45.4368, 
