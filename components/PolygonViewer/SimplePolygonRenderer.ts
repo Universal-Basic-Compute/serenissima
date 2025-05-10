@@ -1880,7 +1880,7 @@ export default class SimplePolygonRenderer {
 
   // Helper method to highlight/unhighlight a coat of arms
   private setCoatOfArmsHighlight(object: THREE.Object3D | null, highlight: boolean) {
-    if (object && object instanceof THREE.Mesh) {
+    if (object && object instanceof THREE.Mesh<THREE.BufferGeometry, THREE.Material | THREE.Material[]>) {
       // Store original scale if not already stored
       if (!object.userData.originalScale && highlight) {
         object.userData.originalScale = object.scale.clone();
