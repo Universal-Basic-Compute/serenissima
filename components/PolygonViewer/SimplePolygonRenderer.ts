@@ -1690,24 +1690,24 @@ export default class SimplePolygonRenderer {
       return;
     }
     
-    // Create materials with original properties (transparent, smaller)
+    // Create materials with increased transparency and softer colors
     const bridgeMaterial = new THREE.MeshBasicMaterial({
       color: 0xFF5500, // Orange-red for bridges
-      transparent: true, // Changed back to true
-      opacity: 0.8 // Reduced opacity
+      transparent: true,
+      opacity: 0.6 // More transparent (was 0.8)
     });
     
     // Create materials for dock points
     const dockEdgeMaterial = new THREE.MeshBasicMaterial({
       color: 0x00AAFF, // Light blue for dock edges
-      transparent: true, // Changed back to true
-      opacity: 0.8 // Reduced opacity
+      transparent: true,
+      opacity: 0.6 // More transparent (was 0.8)
     });
     
     const dockWaterMaterial = new THREE.MeshBasicMaterial({
       color: 0x0088CC, // Darker blue for dock water points
       transparent: true,
-      opacity: 0.8
+      opacity: 0.6 // More transparent (was 0.8)
     });
     
     // Process each polygon
@@ -1727,12 +1727,12 @@ export default class SimplePolygonRenderer {
               this.bounds.latCorrectionFactor
             )[0];
             
-            // Create a smaller marker for bridge points (back to original size)
-            const geometry = new THREE.SphereGeometry(0.5, 8, 8); // Changed back to sphere with smaller size
+            // Create a smaller sphere marker for bridge points
+            const geometry = new THREE.SphereGeometry(0.3, 12, 12); // Smaller size (was 0.5) and more segments for smoother spheres
             
             const marker = new THREE.Mesh(geometry, bridgeMaterial);
-            marker.position.set(normalizedCoord.x, 0.5, -normalizedCoord.y); // Lower position
-            marker.renderOrder = 100; // Lower render order
+            marker.position.set(normalizedCoord.x, 0.3, -normalizedCoord.y); // Lower position (was 0.5)
+            marker.renderOrder = 100;
             
             // Add metadata for tooltips
             marker.userData = {
@@ -1745,7 +1745,7 @@ export default class SimplePolygonRenderer {
             this.scene.add(marker);
             this.bridgePointMarkers.push(marker);
             
-            console.log(`Created bridge marker at position: ${normalizedCoord.x}, 0.5, ${-normalizedCoord.y}`);
+            console.log(`Created bridge marker at position: ${normalizedCoord.x}, 0.3, ${-normalizedCoord.y}`);
           } catch (error) {
             console.error(`Error creating bridge point for polygon ${polygon.id}:`, error);
           }
@@ -1766,11 +1766,11 @@ export default class SimplePolygonRenderer {
             )[0];
             
             // Create a smaller sphere marker for dock edge points
-            const edgeGeometry = new THREE.SphereGeometry(0.5, 8, 8); // Changed back to smaller size and fewer segments
+            const edgeGeometry = new THREE.SphereGeometry(0.3, 12, 12); // Smaller size (was 0.5) and more segments for smoother spheres
             
             const edgeMarker = new THREE.Mesh(edgeGeometry, dockEdgeMaterial);
-            edgeMarker.position.set(edgeCoord.x, 0.5, -edgeCoord.y); // Lower position
-            edgeMarker.renderOrder = 100; // Lower render order
+            edgeMarker.position.set(edgeCoord.x, 0.3, -edgeCoord.y); // Lower position (was 0.5)
+            edgeMarker.renderOrder = 100;
             
             // Add metadata for tooltips
             edgeMarker.userData = {
@@ -1783,7 +1783,7 @@ export default class SimplePolygonRenderer {
             this.scene.add(edgeMarker);
             this.dockPointMarkers.push(edgeMarker);
             
-            console.log(`Created dock marker at position: ${edgeCoord.x}, 0.5, ${-edgeCoord.y}`);
+            console.log(`Created dock marker at position: ${edgeCoord.x}, 0.3, ${-edgeCoord.y}`);
           } catch (error) {
             console.error(`Error creating dock point for polygon ${polygon.id}:`, error);
           }
