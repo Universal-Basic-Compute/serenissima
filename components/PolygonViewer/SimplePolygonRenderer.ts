@@ -2766,8 +2766,8 @@ export default class SimplePolygonRenderer {
       
       console.log(`Created building mesh for ${building.id} at position:`, buildingGroup.position);
       
-      // Scale down the building to make it 2x smaller
-      buildingGroup.scale.set(0.5, 0.5, 0.5);
+      // Scale down the building to make it 2.5x smaller (20% smaller than before)
+      buildingGroup.scale.set(0.4, 0.4, 0.4);
       
       return buildingGroup;
     } catch (error) {

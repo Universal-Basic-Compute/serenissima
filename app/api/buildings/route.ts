@@ -153,7 +153,7 @@ export async function GET(request: Request) {
           // Add filters if type is specified
           filterByFormula: type ? `{Type} = '${type}'` : '',
           view: 'Grid view',
-          maxRecords: 100
+          maxRecords: 1000 // Increased from 100 to allow more buildings to be loaded
         })
         .eachPage(
           function page(records, fetchNextPage) {

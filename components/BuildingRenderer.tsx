@@ -239,48 +239,70 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
   const renderBuildings = async (buildingsData: BuildingData[]) => {
     console.log(`Rendering ${buildingsData.length} buildings...`);
     
-    // Create a set of building IDs for tracking
-    const currentBuildingIds = new Set(buildingsData.map(b => b.id));
-    
-    // Remove buildings that are no longer in the data
-    for (const [id, mesh] of buildingMeshesRef.current.entries()) {
-      if (!currentBuildingIds.has(id)) {
-        console.log(`Removing building ${id} from scene`);
-        
-        // Use the renderer factory to dispose of the mesh
-        if (rendererFactoryRef.current) {
-          const building = buildingsData.find(b => b.id === id) || { type: 'unknown' } as BuildingData;
-          const renderer = rendererFactoryRef.current.getRenderer(building.type);
-          renderer.dispose(mesh);
-        } else {
-          // Fallback if factory not available
-          scene.remove(mesh);
+    try {
+      // Create a set of building IDs for tracking
+      const currentBuildingIds = new Set(buildingsData.map(b => b.id));
+      
+      // Remove buildings that are no longer in the data
+      for (const [id, mesh] of buildingMeshesRef.current.entries()) {
+        if (!currentBuildingIds.has(id)) {
+          console.log(`Removing building ${id} from scene`);
+          
+          // Use the renderer factory to dispose of the mesh
+          if (rendererFactoryRef.current) {
+            const building = buildingsData.find(b => b.id === id) || { type: 'unknown' } as BuildingData;
+            const renderer = rendererFactoryRef.current.getRenderer(building.type);
+            renderer.dispose(mesh);
+          } else {
+            // Fallback if factory not available
+            scene.remove(mesh);
+          }
+          
+          buildingMeshesRef.current.delete(id);
         }
-        
-        buildingMeshesRef.current.delete(id);
-      }
-    }
-    
-    // Create or update buildings
-    for (const building of buildingsData) {
-      // Check if building already exists
-      if (buildingMeshesRef.current.has(building.id)) {
-        // Update existing building if needed
-        const existingMesh = buildingMeshesRef.current.get(building.id);
-        
-        if (rendererFactoryRef.current) {
-          const renderer = rendererFactoryRef.current.getRenderer(building.type);
-          renderer.update(building, existingMesh);
-        }
-        
-        continue;
       }
       
-      // Create new building mesh
-      await createBuildingMesh(building);
+      // Add logging to track progress
+      let processedCount = 0;
+      
+      // Create or update buildings
+      for (const building of buildingsData) {
+        try {
+          // Check if building already exists
+          if (buildingMeshesRef.current.has(building.id)) {
+            // Update existing building if needed
+            const existingMesh = buildingMeshesRef.current.get(building.id);
+            
+            if (rendererFactoryRef.current) {
+              const renderer = rendererFactoryRef.current.getRenderer(building.type);
+              renderer.update(building, existingMesh);
+            }
+            
+            processedCount++;
+            if (processedCount % 10 === 0) {
+              console.log(`Processed ${processedCount}/${buildingsData.length} buildings`);
+            }
+            
+            continue;
+          }
+          
+          // Create new building mesh
+          await createBuildingMesh(building);
+          
+          processedCount++;
+          if (processedCount % 10 === 0) {
+            console.log(`Processed ${processedCount}/${buildingsData.length} buildings`);
+          }
+        } catch (buildingError) {
+          console.error(`Error processing building ${building.id}:`, buildingError);
+          // Continue with next building instead of stopping
+        }
+      }
+      
+      console.log(`Rendered ${processedCount}/${buildingsData.length} buildings successfully`);
+    } catch (error) {
+      console.error('Error in renderBuildings:', error);
     }
-    
-    console.log(`Rendered ${buildingsData.length} buildings`);
   };
   
   // Function to focus camera on buildings
