@@ -328,6 +328,19 @@ export default class SimplePolygonRenderer {
     console.log('Creating coat of arms sprites for land view');
     this.isRenderingCoatOfArms = true;
     
+    // Debug: Log the number of polygons with different position properties
+    let polygonsWithCenter = 0;
+    let polygonsWithCentroid = 0;
+    let polygonsWithCoatOfArmsCenter = 0;
+    
+    this.polygons.forEach(polygon => {
+      if (polygon.center) polygonsWithCenter++;
+      if (polygon.centroid) polygonsWithCentroid++;
+      if (polygon.coatOfArmsCenter) polygonsWithCoatOfArmsCenter++;
+    });
+    
+    console.log(`Position properties in polygons: center=${polygonsWithCenter}, centroid=${polygonsWithCentroid}, coatOfArmsCenter=${polygonsWithCoatOfArmsCenter}`);
+    
     // Remove any existing sprites first
     this.clearCoatOfArmsSprites();
     
@@ -396,18 +409,25 @@ export default class SimplePolygonRenderer {
     
     // Polygon statistics collected
     
-    // Process each polygon with an owner and centroid
+    // Process each polygon with an owner
     let createdCount = 0;
+    let skippedNoOwner = 0;
+    let skippedNoPosition = 0;
+    let skippedNoCoatOfArms = 0;
+    
     this.polygons.forEach(polygon => {
       // Check for both 'owner' and 'User' properties
       const ownerValue = polygon.owner || polygon.User;
     
       if (!ownerValue) {
+        skippedNoOwner++;
         return;
       }
     
-      if (!polygon.centroid) {
-        console.log(`Polygon ${polygon.id} has owner ${ownerValue} but no centroid`);
+      // Check if polygon has any valid position property
+      if (!polygon.coatOfArmsCenter && !polygon.center && !polygon.centroid) {
+        console.log(`Polygon ${polygon.id} has owner ${ownerValue} but no position property`);
+        skippedNoPosition++;
         return;
       }
     
@@ -417,6 +437,8 @@ export default class SimplePolygonRenderer {
       const coatOfArmsUrl = this.ownerCoatOfArmsMap[ownerValue];
       if (!coatOfArmsUrl) {
         // No coat of arms found for this owner
+        console.log(`No coat of arms found for owner ${ownerValue}`);
+        skippedNoCoatOfArms++;
         return;
       }
       
@@ -424,6 +446,8 @@ export default class SimplePolygonRenderer {
       this.createCircularCoatOfArms(polygon, coatOfArmsUrl);
       createdCount++;
     });
+    
+    console.log(`Coat of arms creation stats: created=${createdCount}, skipped (no owner)=${skippedNoOwner}, skipped (no position)=${skippedNoPosition}, skipped (no coat of arms)=${skippedNoCoatOfArms}`);
     
     this.hasRenderedCoatOfArms = true;
     this.isRenderingCoatOfArms = false;
@@ -451,12 +475,20 @@ export default class SimplePolygonRenderer {
    * Create a circular coat of arms sprite
    */
   private createCircularCoatOfArms(polygon: any, coatOfArmsUrl: string) {
-    if (!polygon.center) return;
+    // Check for all possible position properties, with fallbacks
+    // First try coatOfArmsCenter (specific for coat of arms)
+    // Then try center (general center)
+    // Finally fall back to centroid (calculated center)
+    const positionCoord = polygon.coatOfArmsCenter || polygon.center || polygon.centroid;
     
-    // Always use center for positioning
-    const positionCoord = polygon.center;
+    if (!positionCoord) {
+      console.warn(`No valid position found for coat of arms on polygon ${polygon.id}`);
+      return;
+    }
     
-    // Convert center to 3D position
+    console.log(`Creating coat of arms for polygon ${polygon.id} at position:`, positionCoord);
+    
+    // Convert position to 3D position
     const normalizedCoord = normalizeCoordinates(
       [positionCoord],
       this.bounds.centerLat,
