@@ -1,52 +1,20 @@
 {
-  "totalErrors": 23,
+  "totalErrors": 3,
   "totalWarnings": 0,
   "exitCode": 1,
-  "timestamp": "2025-05-10T12:35:40.090Z",
+  "timestamp": "2025-05-10T13:30:03.574Z",
   "errors": [
     {
-      "filePath": "app/page.tsx",
-      "line": 42,
-      "column": 5,
-      "code": "TS2717",
-      "message": "Subsequent property declarations must have the same type.  Property '__threeContext' must be of type '{ scene?: Scene; camera?: Camera; renderer?: WebGLRenderer; controls?: any; }', but here has type '{ scene: Scene; camera: PerspectiveCamera; renderer: WebGLRenderer; }'.",
-      "type": "error"
-    },
-    {
-      "filePath": "app/page.tsx",
-      "line": 54,
-      "column": 5,
-      "code": "TS2717",
-      "message": "Subsequent property declarations must have the same type.  Property '__camera' must be of type 'Camera', but here has type 'PerspectiveCamera'.",
-      "type": "error"
-    },
-    {
-      "filePath": "components/BuildingRenderer.tsx",
-      "line": 305,
-      "column": 35,
-      "code": "TS2339",
-      "message": "Property 'fov' does not exist on type 'Camera'.",
-      "type": "error"
-    },
-    {
-      "filePath": "components/BuildingsView/BuildingsToolbar.tsx",
-      "line": 905,
-      "column": 11,
-      "code": "TS2322",
-      "message": "Type 'void' is not assignable to type 'ReactNode'.",
-      "type": "error"
-    },
-    {
       "filePath": "components/PolygonViewer/SimplePolygonRenderer.ts",
-      "line": 2846,
+      "line": 3042,
       "column": 40,
       "code": "TS2345",
-      "message": "Argument of type 'Group<Object3DEventMap>' is not assignable to parameter of type 'Mesh<BufferGeometry<NormalBufferAttributes>, Material | Material[], Object3DEventMap>'.",
+      "message": "Argument of type 'Object3D<Object3DEventMap>' is not assignable to parameter of type 'Mesh<BufferGeometry<NormalBufferAttributes>, Material | Material[], Object3DEventMap>'.",
       "type": "error"
     },
     {
       "filePath": "components/PolygonViewer/SimplePolygonRenderer.ts",
-      "line": 2869,
+      "line": 3065,
       "column": 59,
       "code": "TS2345",
       "message": "Argument of type 'Object3D<Object3DEventMap>' is not assignable to parameter of type 'Mesh<BufferGeometry<NormalBufferAttributes>, Material | Material[], Object3DEventMap>'.",
@@ -59,143 +27,15 @@
       "code": "TS2345",
       "message": "Argument of type 'Camera' is not assignable to parameter of type 'SetStateAction<PerspectiveCamera>'.",
       "type": "error"
-    },
-    {
-      "filePath": "lib/services/BuildingCacheService.ts",
-      "line": 2,
-      "column": 28,
-      "code": "TS2307",
-      "message": "Cannot find module 'three/examples/jsm/loaders/GLTFLoader' or its corresponding type declarations.",
-      "type": "error"
-    },
-    {
-      "filePath": "lib/services/BuildingCacheService.ts",
-      "line": 3,
-      "column": 38,
-      "code": "TS2307",
-      "message": "Cannot find module 'three/examples/jsm/utils/BufferGeometryUtils' or its corresponding type declarations.",
-      "type": "error"
-    },
-    {
-      "filePath": "scripts/generateCitizenImages.ts",
-      "line": 55,
-      "column": 15,
-      "code": "TS2322",
-      "message": "Type 'string | number | true | Collaborator | readonly Collaborator[] | readonly string[] | readonly Attachment[]' is not assignable to type 'string'.",
-      "type": "error"
-    },
-    {
-      "filePath": "scripts/generateCitizenImages.ts",
-      "line": 57,
-      "column": 15,
-      "code": "TS2322",
-      "message": "Type 'string | number | boolean | Collaborator | readonly Collaborator[] | readonly string[] | readonly Attachment[]' is not assignable to type 'string'.",
-      "type": "error"
-    },
-    {
-      "filePath": "scripts/generateCitizenImages.ts",
-      "line": 58,
-      "column": 15,
-      "code": "TS2322",
-      "message": "Type 'string | number | boolean | Collaborator | readonly Collaborator[] | readonly string[] | readonly Attachment[]' is not assignable to type 'string'.",
-      "type": "error"
-    },
-    {
-      "filePath": "scripts/generateCitizenImages.ts",
-      "line": 59,
-      "column": 15,
-      "code": "TS2322",
-      "message": "Type 'string | number | boolean | Collaborator | readonly Collaborator[] | readonly string[] | readonly Attachment[]' is not assignable to type 'string'.",
-      "type": "error"
-    },
-    {
-      "filePath": "scripts/generateCitizenImages.ts",
-      "line": 60,
-      "column": 15,
-      "code": "TS2322",
-      "message": "Type 'string | number | boolean | Collaborator | readonly Collaborator[] | readonly string[] | readonly Attachment[]' is not assignable to type 'string'.",
-      "type": "error"
-    },
-    {
-      "filePath": "scripts/generateCitizenImages.ts",
-      "line": 61,
-      "column": 15,
-      "code": "TS2322",
-      "message": "Type 'string | number | boolean | Collaborator | readonly Collaborator[] | readonly string[] | readonly Attachment[]' is not assignable to type 'number'.",
-      "type": "error"
-    },
-    {
-      "filePath": "scripts/generateCitizenImages.ts",
-      "line": 62,
-      "column": 15,
-      "code": "TS2322",
-      "message": "Type 'string | number | boolean | Collaborator | readonly Collaborator[] | readonly string[] | readonly Attachment[]' is not assignable to type 'string'.",
-      "type": "error"
-    },
-    {
-      "filePath": "scripts/generateCitizens.ts",
-      "line": 60,
-      "column": 15,
-      "code": "TS2322",
-      "message": "Type 'string | number | true | Collaborator | readonly Collaborator[] | readonly string[] | readonly Attachment[]' is not assignable to type 'string'.",
-      "type": "error"
-    },
-    {
-      "filePath": "scripts/generateCitizens.ts",
-      "line": 62,
-      "column": 15,
-      "code": "TS2322",
-      "message": "Type 'string | number | boolean | Collaborator | readonly Collaborator[] | readonly string[] | readonly Attachment[]' is not assignable to type 'string'.",
-      "type": "error"
-    },
-    {
-      "filePath": "scripts/generateCitizens.ts",
-      "line": 63,
-      "column": 15,
-      "code": "TS2322",
-      "message": "Type 'string | number | boolean | Collaborator | readonly Collaborator[] | readonly string[] | readonly Attachment[]' is not assignable to type 'string'.",
-      "type": "error"
-    },
-    {
-      "filePath": "scripts/generateCitizens.ts",
-      "line": 64,
-      "column": 15,
-      "code": "TS2322",
-      "message": "Type 'string | number | boolean | Collaborator | readonly Collaborator[] | readonly string[] | readonly Attachment[]' is not assignable to type 'string'.",
-      "type": "error"
-    },
-    {
-      "filePath": "scripts/generateCitizens.ts",
-      "line": 65,
-      "column": 15,
-      "code": "TS2322",
-      "message": "Type 'string | number | boolean | Collaborator | readonly Collaborator[] | readonly string[] | readonly Attachment[]' is not assignable to type 'string'.",
-      "type": "error"
-    },
-    {
-      "filePath": "scripts/generateCitizens.ts",
-      "line": 66,
-      "column": 15,
-      "code": "TS2322",
-      "message": "Type 'string | number | boolean | Collaborator | readonly Collaborator[] | readonly string[] | readonly Attachment[]' is not assignable to type 'number'.",
-      "type": "error"
-    },
-    {
-      "filePath": "scripts/generateCitizens.ts",
-      "line": 67,
-      "column": 15,
-      "code": "TS2322",
-      "message": "Type 'string | number | boolean | Collaborator | readonly Collaborator[] | readonly string[] | readonly Attachment[]' is not assignable to type 'string'.",
-      "type": "error"
     }
   ],
-  "rawOutputLines": 41,
+  "rawOutputLines": 7,
   "firstFewLines": [
-    "app/page.tsx(42,5): error TS2717: Subsequent property declarations must have the same type.  Property '__threeContext' must be of type '{ scene?: Scene; camera?: Camera; renderer?: WebGLRenderer; controls?: any; }', but here has type '{ scene: Scene; camera: PerspectiveCamera; renderer: WebGLRenderer; }'.\r",
-    "app/page.tsx(54,5): error TS2717: Subsequent property declarations must have the same type.  Property '__camera' must be of type 'Camera', but here has type 'PerspectiveCamera'.\r",
-    "components/BuildingRenderer.tsx(305,35): error TS2339: Property 'fov' does not exist on type 'Camera'.\r",
-    "components/BuildingsView/BuildingsToolbar.tsx(905,11): error TS2322: Type 'void' is not assignable to type 'ReactNode'.\r",
-    "components/PolygonViewer/SimplePolygonRenderer.ts(2846,40): error TS2345: Argument of type 'Group<Object3DEventMap>' is not assignable to parameter of type 'Mesh<BufferGeometry<NormalBufferAttributes>, Material | Material[], Object3DEventMap>'.\r"
+    "components/PolygonViewer/SimplePolygonRenderer.ts(3042,40): error TS2345: Argument of type 'Object3D<Object3DEventMap>' is not assignable to parameter of type 'Mesh<BufferGeometry<NormalBufferAttributes>, Material | Material[], Object3DEventMap>'.\r",
+    "  Type 'Object3D<Object3DEventMap>' is missing the following properties from type 'Mesh<BufferGeometry<NormalBufferAttributes>, Material | Material[], Object3DEventMap>': isMesh, geometry, material, updateMorphTargets, getVertexPosition\r",
+    "components/PolygonViewer/SimplePolygonRenderer.ts(3065,59): error TS2345: Argument of type 'Object3D<Object3DEventMap>' is not assignable to parameter of type 'Mesh<BufferGeometry<NormalBufferAttributes>, Material | Material[], Object3DEventMap>'.\r",
+    "  Type 'Object3D<Object3DEventMap>' is missing the following properties from type 'Mesh<BufferGeometry<NormalBufferAttributes>, Material | Material[], Object3DEventMap>': isMesh, geometry, material, updateMorphTargets, getVertexPosition\r",
+    "lib/components/SceneReadyProvider.tsx(52,19): error TS2345: Argument of type 'Camera' is not assignable to parameter of type 'SetStateAction<PerspectiveCamera>'.\r"
   ],
   "compilerExitCode": 1
 }
