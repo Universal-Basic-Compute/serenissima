@@ -8,12 +8,35 @@ import buildingCacheService from '@/lib/services/BuildingCacheService';
 import buildingDataService from '@/lib/services/BuildingDataService';
 import { BuildingRendererFactory } from '@/lib/services/BuildingRendererFactory';
 
+// Add type declaration for window properties
+declare global {
+  interface Window {
+    __threeContext?: {
+      scene: THREE.Scene;
+      camera: THREE.PerspectiveCamera;
+      renderer: THREE.WebGLRenderer;
+    };
+  }
+  
+  // Add custom properties to HTMLCanvasElement
+  interface HTMLCanvasElement {
+    __scene?: THREE.Scene;
+    __camera?: THREE.PerspectiveCamera;
+    __renderer?: THREE.WebGLRenderer;
+  }
+}
+
 interface BuildingRendererProps {
   scene: THREE.Scene;
   active: boolean;
 }
 
 const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) => {
+  // Store scene in a ref to avoid undefined issues
+  const sceneRef = useRef<THREE.Scene | null>(null);
+  
+  // Add a state to track if the component is ready to render
+  const [isReady, setIsReady] = useState<boolean>(false);
   // Store scene in a ref to avoid undefined issues
   const sceneRef = useRef<THREE.Scene | null>(null);
   
@@ -77,6 +100,17 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
       console.log('BuildingRenderer: Scene ref updated, real scene available');
     }
   }, [scene]);
+  // Early return if not ready
+  if (!isReady) {
+    console.log('BuildingRenderer: Not ready yet, waiting for scene to be available');
+    // Return a loading state instead of null
+    return null;
+  }
+  
+  // Log warning if we're using a dummy scene
+  if (sceneRef.current && sceneRef.current.userData && sceneRef.current.userData.isDummyScene) {
+    console.warn('BuildingRenderer: Using dummy scene, buildings will not be visible until a real scene is available');
+  }
   // Early return if not ready
   if (!isReady) {
     console.log('BuildingRenderer: Not ready yet, waiting for scene to be available');
@@ -717,35 +751,7 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
     
     if (!sceneRef.current) {
       console.warn('BuildingRenderer: scene is not defined, cannot render buildings');
-      
-      // Set up a retry mechanism for loading buildings
-      const retryInterval = setInterval(() => {
-        console.log('BuildingRenderer: Retrying to load buildings...');
-        if (sceneRef.current) {
-          console.log('BuildingRenderer: Scene now available, loading buildings');
-          clearInterval(retryInterval);
-          
-          // Use the memory-efficient loading strategy
-          loadBuildingsEfficiently();
-          
-          // Start memory monitoring
-          const stopMemoryMonitoring = startMemoryMonitoring();
-          
-          // Add a delay to ensure buildings are loaded
-          const timer = setTimeout(() => {
-            if (sceneRef.current) {
-              verifyAndFixBuildingPositions();
-              // Focus camera on buildings after fixing positions
-              ensureBuildingsVisible();
-            }
-          }, 2000);
-        }
-      }, 1000); // Retry every second
-      
-      // Clean up interval on component unmount
-      return () => {
-        clearInterval(retryInterval);
-      };
+      return;
     }
     
     if (!rendererFactoryRef.current) {
