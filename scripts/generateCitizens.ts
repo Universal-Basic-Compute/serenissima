@@ -1,8 +1,8 @@
-const axios = require('axios');
-const fs = require('fs');
-const path = require('path');
-const dotenv = require('dotenv');
-const Airtable = require('airtable');
+import axios from 'axios';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as dotenv from 'dotenv';
+import Airtable from 'airtable';
 
 dotenv.config();
 const base = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY }).base(process.env.AIRTABLE_BASE_ID);
