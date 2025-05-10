@@ -55,13 +55,13 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
   const [isMobile, setIsMobile] = useState<boolean>(false);
 
   // Fetch notifications
-  const fetchNotifications = useCallback(async () => {
+  const fetchNotifications = useCallback(async (forceRefresh = false) => {
     // Skip fetching if the component isn't open to reduce unnecessary API calls
     if (!isOpen && !showNotifications) return;
     
-    // Add a timestamp check to prevent fetching too frequently
+    // Add a timestamp check to prevent fetching too frequently, but bypass if forceRefresh is true
     const now = Date.now();
-    if (now - lastFetchTime < 10000) { // Don't fetch more than once every 10 seconds
+    if (!forceRefresh && now - lastFetchTime < 10000) { // Don't fetch more than once every 10 seconds unless forced
       console.log('Skipping notification fetch - too soon since last fetch');
       return;
     }
@@ -560,7 +560,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
               onClick={() => {
                 setShowNotifications(true);
                 // Fetch latest notifications when switching to notifications view
-                fetchNotifications();
+                fetchNotifications(true);
               }}
               className={`flex-1 py-2 text-sm font-medium relative ${
                 showNotifications ? 'bg-amber-200 text-amber-800' : 'text-amber-700 hover:bg-amber-50'
@@ -590,7 +590,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
                   <div className="flex items-center">
                     {/* Add refresh button */}
                     <button 
-                      onClick={() => fetchNotifications()}
+                      onClick={() => fetchNotifications(true)}
                       className="mr-3 text-amber-600 hover:text-amber-800 flex items-center"
                       title="Refresh notifications"
                     >
