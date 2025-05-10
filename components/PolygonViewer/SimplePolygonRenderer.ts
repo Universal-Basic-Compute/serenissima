@@ -4711,7 +4711,7 @@ export default class SimplePolygonRenderer {
       }
       
       // Emit event that citizens data is loaded
-      eventBus.emit(EventTypes.CITIZENS_LOADED as string, { count: this.citizenData.length });
+      eventBus.emit('citizens_loaded', { count: this.citizenData.length });
     } catch (error) {
       console.error('Error loading citizens data:', error);
     }
