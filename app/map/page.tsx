@@ -395,6 +395,76 @@ export default function MapPage() {
       console.log('Map clicked in mode:', bridgeMode ? 'bridge' : waterPointMode ? 'waterpoint' : 'normal');
       console.log('Click type:', isRightClick ? 'right click' : 'left click');
       
+      // For right clicks, only handle waterpoint connections
+      if (isRightClick) {
+        if (waterPointMode) {
+          console.log('Processing right click in waterpoint mode');
+          // Find a waterpoint near the click location
+          let targetPoint = null;
+          let minDistance = 10; // 10 meters threshold
+          
+          for (const point of waterPoints) {
+            const pointPos = typeof point.position === 'string' 
+              ? JSON.parse(point.position) 
+              : point.position;
+            
+            const clickPos = {
+              lat: event.latLng.lat(),
+              lng: event.latLng.lng()
+            };
+            
+            // Calculate distance between click and point
+            const distance = google.maps.geometry.spherical.computeDistanceBetween(
+              new google.maps.LatLng(clickPos.lat, clickPos.lng),
+              new google.maps.LatLng(pointPos.lat, pointPos.lng)
+            );
+            
+            // If this point is closer than our current closest and within threshold
+            if (distance < minDistance) {
+              targetPoint = point;
+              minDistance = distance;
+            }
+          }
+          
+          // If we found a target point and already have a selected point
+          if (targetPoint && selectedWaterPoint && targetPoint.id !== selectedWaterPoint.id) {
+            createWaterPointConnection(selectedWaterPoint, targetPoint);
+          } else if (targetPoint) {
+            // If we found a point but none is selected, select it
+            setSelectedWaterPoint(targetPoint);
+            
+            // Update marker appearance
+            const marker = waterPointMarkers[targetPoint.id];
+            if (marker) {
+              marker.setIcon({
+                path: google.maps.SymbolPath.CIRCLE,
+                scale: 9,
+                fillColor: '#FF0000',
+                fillOpacity: 1,
+                strokeWeight: 2,
+                strokeColor: '#FFFFFF'
+              });
+            }
+            
+            // Reset other markers
+            Object.entries(waterPointMarkers).forEach(([id, m]) => {
+              if (id !== targetPoint.id) {
+                m.setIcon({
+                  path: google.maps.SymbolPath.CIRCLE,
+                  scale: 7,
+                  fillColor: m.get('type') === 'dock' ? '#FF8800' : '#0088FF',
+                  fillOpacity: 1,
+                  strokeWeight: 2,
+                  strokeColor: '#FFFFFF'
+                });
+              }
+            });
+          }
+        }
+        return; // Exit early for right clicks after handling waterpoint connections
+      }
+      
+      // Handle left clicks for other functionality
       if (bridgeMode) {
         // Find which polygon was clicked
         let clickedPolygonId = null;
@@ -506,73 +576,8 @@ export default function MapPage() {
           setBridgeStartLandId(null);
         }
       } else if (waterPointMode) {
-        if (isRightClick) {
-          console.log('Processing right click in waterpoint mode');
-          // Find a waterpoint near the click location
-          let targetPoint = null;
-          let minDistance = 10; // 10 meters threshold
-          
-          for (const point of waterPoints) {
-            const pointPos = typeof point.position === 'string' 
-              ? JSON.parse(point.position) 
-              : point.position;
-            
-            const clickPos = {
-              lat: event.latLng.lat(),
-              lng: event.latLng.lng()
-            };
-            
-            // Calculate distance between click and point
-            const distance = google.maps.geometry.spherical.computeDistanceBetween(
-              new google.maps.LatLng(clickPos.lat, clickPos.lng),
-              new google.maps.LatLng(pointPos.lat, pointPos.lng)
-            );
-            
-            // If this point is closer than our current closest and within threshold
-            if (distance < minDistance) {
-              targetPoint = point;
-              minDistance = distance;
-            }
-          }
-          
-          // If we found a target point and already have a selected point
-          if (targetPoint && selectedWaterPoint && targetPoint.id !== selectedWaterPoint.id) {
-            createWaterPointConnection(selectedWaterPoint, targetPoint);
-          } else if (targetPoint) {
-            // If we found a point but none is selected, select it
-            setSelectedWaterPoint(targetPoint);
-            
-            // Update marker appearance
-            const marker = waterPointMarkers[targetPoint.id];
-            if (marker) {
-              marker.setIcon({
-                path: google.maps.SymbolPath.CIRCLE,
-                scale: 9,
-                fillColor: '#FF0000',
-                fillOpacity: 1,
-                strokeWeight: 2,
-                strokeColor: '#FFFFFF'
-              });
-            }
-            
-            // Reset other markers
-            Object.entries(waterPointMarkers).forEach(([id, m]) => {
-              if (id !== targetPoint.id) {
-                m.setIcon({
-                  path: google.maps.SymbolPath.CIRCLE,
-                  scale: 7,
-                  fillColor: m.get('type') === 'dock' ? '#FF8800' : '#0088FF',
-                  fillOpacity: 1,
-                  strokeWeight: 2,
-                  strokeColor: '#FFFFFF'
-                });
-              }
-            });
-          }
-        } else {
-          // Left click - create a new WaterPoint
-          createWaterPoint(event.latLng);
-        }
+        // Left click - create a new WaterPoint
+        createWaterPoint(event.latLng);
       } else if (connectWaterPointMode && selectedWaterPoint) {
         // In connect mode, check if we clicked on another waterpoint
         let targetPoint = null;
@@ -1671,16 +1676,28 @@ export default function MapPage() {
             <span className="font-medium">WaterPoints:</span> {waterPoints.length}
           </p>
           <div className="mt-2 border-t border-gray-200 pt-1">
-            <p className="text-xs text-gray-700">
-              <span className="font-medium">Left-click:</span> Add new WaterPoint
+            <p className="text-xs text-gray-700 mb-1">
+              <span className="font-medium text-green-600">LEFT CLICK:</span> Add new WaterPoint
+            </p>
+            <p className="text-xs text-gray-700 mb-1">
+              <span className="font-medium text-red-600">RIGHT CLICK on point:</span> Select WaterPoint
             </p>
             <p className="text-xs text-gray-700">
-              <span className="font-medium">Right-click on point:</span> Select WaterPoint
-            </p>
-            <p className="text-xs text-gray-700">
-              <span className="font-medium">Right-click after selecting:</span> Connect points
+              <span className="font-medium text-red-600">RIGHT CLICK after selecting:</span> Connect points
             </p>
           </div>
+        </div>
+      )}
+      
+      {/* Visual indicator when a waterpoint is selected */}
+      {selectedWaterPoint && (
+        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-10 bg-red-500 text-white px-4 py-2 rounded shadow animate-pulse">
+          <p className="text-sm font-bold flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            WaterPoint Selected - Right Click on another point to connect
+          </p>
         </div>
       )}
       
