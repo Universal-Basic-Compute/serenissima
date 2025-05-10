@@ -604,6 +604,18 @@ export default class PolygonRenderer {
           // Force visibility
           object.visible = true;
           
+          // Adjust position to be closer to the land
+          // Lower the y-position to bring buildings closer to the land
+          if (object.position.y > 0.5) {
+            // Store original position if not already stored
+            if (!object.userData.originalY) {
+              object.userData.originalY = object.position.y;
+            }
+            
+            // Lower the building position to be closer to the land
+            object.position.y = 0.2; // Set a lower y value to bring buildings closer to land
+          }
+          
           // Force material update
           if (object.material) {
             if (Array.isArray(object.material)) {
@@ -621,7 +633,7 @@ export default class PolygonRenderer {
             }
           }
           
-          console.log(`Made building visible: ${object.name || 'unnamed building'}`);
+          console.log(`Made building visible: ${object.name || 'unnamed building'} at position y=${object.position.y}`);
         }
       });
     }
