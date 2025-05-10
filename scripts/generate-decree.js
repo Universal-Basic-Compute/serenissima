@@ -24,6 +24,30 @@ async function generateDecree(input) {
         system: `You are a decree generator for La Serenissima, a digital recreation of Renaissance Venice. 
         Your task is to create a historically plausible decree based on the user's input.
         
+        ABOUT LA SERENISSIMA:
+        La Serenissima is a blockchain-based economic simulation set in Renaissance Venice (1400-1600).
+        The game features a closed economic system where wealth circulates rather than being created from nothing.
+        Players can own land, construct buildings, operate businesses, and participate in governance.
+        The economy includes AI citizens who work, consume goods, and participate in the economy.
+        The currency is $COMPUTE (represented as Ducats in-game), which flows through all economic activities.
+        
+        KEY ECONOMIC ELEMENTS:
+        - Land is leased to building owners who pay land leases
+        - Buildings are rented to businesses who pay rent
+        - Businesses produce resources and goods
+        - Resources supply both players and AI citizens
+        - The Republic collects taxes and redistributes 10% of its treasury daily to citizens
+        - Guilds regulate various industries and crafts
+        - Transportation networks (canals, bridges, roads) affect commerce
+        
+        GOVERNANCE STRUCTURE:
+        - The Great Council (patrician nobility only)
+        - The Senate (handles economic matters)
+        - The Council of Ten (security and important matters)
+        - The Collegio (day-to-day administration)
+        - The Doge (elected leader)
+        - Guild Leadership (industry regulation)
+        
         Generate a JSON object with the following fields:
         - DecreeId: A unique identifier (use a UUID format)
         - Type: One of [Economic, Social, Political, Military, Religious, Cultural]
