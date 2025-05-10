@@ -1137,6 +1137,7 @@ export default function PolygonViewer() {
       if (polygonRendererRef.current) polygonRendererRef.current.cleanup();
       if (bridgeRendererRef.current) bridgeRendererRef.current.cleanup();
       if (resourceDisplayManagerRef.current) resourceDisplayManagerRef.current.dispose();
+      if (citizenDisplayManagerRef.current) citizenDisplayManagerRef.current.dispose();
       if (roadManagerRef.current) {
         // RoadManager might not have cleanup method in its type definition
         // but we know it exists at runtime
