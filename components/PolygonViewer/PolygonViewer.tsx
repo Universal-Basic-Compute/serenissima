@@ -19,6 +19,7 @@ import PolygonRenderer from './PolygonRenderer';
 import { WaterFacade } from '../../lib/threejs/WaterFacade';
 import { InteractionManager } from '../../lib/threejs/InteractionManager';
 import { ResourceDisplayManager } from '../../lib/threejs/ResourceDisplayManager';
+import { CitizenDisplayManager } from '../../lib/threejs/CitizenDisplayManager';
 import ViewModeMenu from './ViewModeMenu';
 import LandDetailsPanel from './LandDetailsPanel';
 import MarketPanel from './MarketPanel';
@@ -178,6 +179,7 @@ export default function PolygonViewer() {
   const interactionManagerRef = useRef<InteractionManager | null>(null);
   const bridgeRendererRef = useRef<BridgeRenderer | null>(null);
   const resourceDisplayManagerRef = useRef<ResourceDisplayManager | null>(null);
+  const citizenDisplayManagerRef = useRef<CitizenDisplayManager | null>(null);
 
   // Debug function to help understand what's happening with the polygons
   const debugPolygons = () => {
@@ -918,6 +920,31 @@ export default function PolygonViewer() {
       }
     };
     
+    // Step 6: Initialize citizen display manager
+    const initCitizenDisplayManager = () => {
+      if (sceneRef.current && sceneRef.current.scene && sceneRef.current.camera) {
+        const citizenDisplayManager = new CitizenDisplayManager({
+          scene: sceneRef.current.scene,
+          camera: sceneRef.current.camera,
+          bounds: bounds
+        });
+        
+        citizenDisplayManagerRef.current = citizenDisplayManager;
+        
+        // Initialize the citizen display
+        citizenDisplayManager.initialize().then(() => {
+          console.log('Citizen display manager initialized');
+          
+          // If we're already in citizens view, activate it
+          if (activeView === 'citizens') {
+            citizenDisplayManager.setActive(true);
+          }
+        }).catch(error => {
+          console.error('Failed to initialize citizen display manager:', error);
+        });
+      }
+    };
+    
     // Execute initialization in sequence with delays
     initPolygonRenderer(); // Start with polygons immediately
     
@@ -925,6 +952,7 @@ export default function PolygonViewer() {
     const interactionManagerTimer = setTimeout(initInteractionManager, 600);
     const bridgeRendererTimer = setTimeout(initBridgeRenderer, 700);
     const resourceDisplayManagerTimer = setTimeout(initResourceDisplayManager, 800);
+    const citizenDisplayManagerTimer = setTimeout(initCitizenDisplayManager, 900);
     
     // Add a delayed update for coat of arms
     const coatOfArmsTimer = setTimeout(() => {
@@ -1127,6 +1155,7 @@ export default function PolygonViewer() {
       clearTimeout(interactionManagerTimer);
       clearTimeout(bridgeRendererTimer);
       clearTimeout(resourceDisplayManagerTimer);
+      clearTimeout(citizenDisplayManagerTimer);
       clearTimeout(coatOfArmsTimer);
     
       // Clear references
@@ -1423,11 +1452,23 @@ export default function PolygonViewer() {
         if (resourceDisplayManagerRef.current) {
           // Only activate in resources view
           resourceDisplayManagerRef.current.setActive(activeView === 'resources');
-          
+        
           if (activeView === 'resources') {
             console.log('Switching to resources view, activating resource display');
             // Force a refresh of resources when switching to this view
             resourceDisplayManagerRef.current.refreshResources();
+          }
+        }
+      
+        // Handle citizens view
+        if (citizenDisplayManagerRef.current) {
+          // Only activate in citizens view
+          citizenDisplayManagerRef.current.setActive(activeView === 'citizens');
+        
+          if (activeView === 'citizens') {
+            console.log('Switching to citizens view, activating citizen display');
+            // Force a refresh of citizens when switching to this view
+            citizenDisplayManagerRef.current.refreshCitizens();
           }
         }
         
