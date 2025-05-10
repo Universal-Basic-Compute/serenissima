@@ -788,9 +788,13 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
             <div className="w-4 h-4 rounded-full bg-[#00AAFF] mr-2"></div>
             <span>Dock Points</span>
           </div>
-          <div className="flex items-center mb-3">
+          <div className="flex items-center mb-1">
             <div className="w-4 h-4 rounded-full bg-[#FF5500] mr-2"></div>
             <span>Bridge Points</span>
+          </div>
+          <div className="flex items-center mb-3">
+            <div className="w-4 h-4 rounded-full bg-[#FFFF00] mr-2"></div>
+            <span>Distance Measurement</span>
           </div>
           <button 
             onClick={debugTransportMarkers}
