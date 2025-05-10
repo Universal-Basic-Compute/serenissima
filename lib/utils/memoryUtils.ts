@@ -63,13 +63,16 @@ export function disposeMaterial(material: THREE.Material): void {
     if (material.aoMap) material.aoMap.dispose();
     
     // Handle emissiveMap based on material type
-    if ((material instanceof THREE.MeshStandardMaterial || 
-         material instanceof THREE.MeshPhongMaterial) && 
-        material.emissiveMap) {
-      material.emissiveMap.dispose();
+    if (material instanceof THREE.MeshStandardMaterial || material instanceof THREE.MeshPhongMaterial) {
+      if (material.emissiveMap) material.emissiveMap.dispose();
     }
-    if (material.bumpMap) material.bumpMap.dispose();
-    if (material.normalMap) material.normalMap.dispose();
+    
+    // Handle maps that exist on specific material types
+    if (material instanceof THREE.MeshStandardMaterial || material instanceof THREE.MeshPhongMaterial) {
+      if (material.bumpMap) material.bumpMap.dispose();
+      if (material.normalMap) material.normalMap.dispose();
+    }
+    
     if (material.displacementMap) material.displacementMap.dispose();
     
     // Handle PBR specific maps
