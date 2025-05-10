@@ -278,6 +278,9 @@ const DecreesGovernanceArticle: React.FC<DecreesGovernanceArticleProps> = ({ onC
                 <li>
                   <span className="font-bold">Price Controls:</span> Set minimum or maximum prices for essential goods, stabilizing markets or creating arbitrage opportunities.
                 </li>
+                <li>
+                  <span className="font-bold">Citizen Subsidies:</span> The Republic automatically distributes 10% of its treasury daily to citizens, representing grain subsidies and public investments. Decrees can influence how these funds are allocated among different districts or social classes.
+                </li>
               </ul>
               
               <div className="mt-4 bg-amber-50 p-3 rounded border border-amber-200">
