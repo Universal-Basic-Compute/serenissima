@@ -37,7 +37,7 @@ const KINOS_BACKEND_BASE_URL = 'https://api.kinos-engine.ai/v2';
 const BLUEPRINT = 'compagno';
 const DEFAULT_USERNAME = 'visitor'; // We'll use a default username for anonymous users
 
-const Compagno: React.FC<CompagnoProps> = ({ className }) => {
+const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
