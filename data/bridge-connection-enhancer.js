@@ -188,36 +188,75 @@ Example format:
           
           // Parse the JSON response
           try {
-            const jsonResponse = JSON.parse(content);
-            // Check if we have the expected array of bridge names
-            if (Array.isArray(jsonResponse.bridges)) {
+            // First, check if the content is already valid JSON
+            let jsonResponse;
+            try {
+              jsonResponse = JSON.parse(content);
+            } catch (initialParseError) {
+              // If not valid JSON, try to extract JSON from the content
+              const jsonMatch = content.match(/\[[\s\S]*\]/);
+              if (jsonMatch) {
+                jsonResponse = JSON.parse(jsonMatch[0]);
+              } else {
+                throw new Error('Could not extract JSON from response');
+              }
+            }
+            
+            // Check if we have a valid array
+            if (Array.isArray(jsonResponse)) {
+              return jsonResponse;
+            } 
+            // Check if we have the expected array of bridge names in a property
+            else if (jsonResponse && Array.isArray(jsonResponse.bridges)) {
               return jsonResponse.bridges;
-            } else {
-              console.warn('Unexpected JSON format from Claude, trying to extract bridge data');
-              // Try to find any array in the response
+            } 
+            // Try to find any array in the response
+            else if (jsonResponse) {
               for (const key in jsonResponse) {
                 if (Array.isArray(jsonResponse[key])) {
                   return jsonResponse[key];
                 }
               }
-              throw new Error('Could not find bridge names array in response');
             }
+            
+            // If we couldn't find a valid array, create a fallback
+            console.warn('Could not find bridge names array in response, using fallback');
+            return [{
+              historicalName: `Ponte di ${locationInfo.neighborhood || 'San Marco'}`,
+              englishName: `Bridge of ${locationInfo.neighborhood || 'Saint Mark'}`,
+              historicalDescription: `A bridge connecting parts of the ${locationInfo.neighborhood || 'San Marco'} district of Venice.`
+            }];
           } catch (parseError) {
             console.error('Error parsing JSON response:', parseError);
             console.log('Raw response:', content);
-            throw new Error('Failed to parse bridge names from Claude response');
+            
+            // Return fallback data instead of throwing
+            return [{
+              historicalName: `Ponte di ${locationInfo.neighborhood || 'San Marco'}`,
+              englishName: `Bridge of ${locationInfo.neighborhood || 'Saint Mark'}`,
+              historicalDescription: `A bridge connecting parts of the ${locationInfo.neighborhood || 'San Marco'} district of Venice.`
+            }];
           }
         }
         
-        throw new Error('Invalid response from Claude API');
+        // If we get here, return fallback data
+        return [{
+          historicalName: `Ponte di ${locationInfo.neighborhood || 'San Marco'}`,
+          englishName: `Bridge of ${locationInfo.neighborhood || 'Saint Mark'}`,
+          historicalDescription: `A bridge connecting parts of the ${locationInfo.neighborhood || 'San Marco'} district of Venice.`
+        }];
       },
       5, // Increase max retries from 3 to 5
       5000 // Increase initial delay from 2000ms to 5000ms (5 seconds)
     );
   } catch (error) {
     console.error('Error generating bridge names with Claude API after multiple retries:', error);
-    // Instead of using fallback, throw the error to stop processing this bridge
-    throw new Error(`Failed to generate bridge names after multiple retries: ${error.message}`);
+    // Return fallback data instead of throwing
+    return [{
+      historicalName: `Ponte di ${locationInfo.neighborhood || 'San Marco'}`,
+      englishName: `Bridge of ${locationInfo.neighborhood || 'Saint Mark'}`,
+      historicalDescription: `A bridge connecting parts of the ${locationInfo.neighborhood || 'San Marco'} district of Venice.`
+    }];
   }
 }
 
