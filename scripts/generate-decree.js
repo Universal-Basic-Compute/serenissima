@@ -145,6 +145,61 @@ function saveDecreeToJson(decree) {
   }
 }
 
+// Function to create notifications for all users about the new decree
+async function createDecreeNotifications(decree) {
+  console.log('Creating notifications for all users about the new decree...');
+  
+  try {
+    // Get Airtable configuration
+    const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
+    const AIRTABLE_BASE_ID = process.env.AIRTABLE_BASE_ID;
+    
+    if (!AIRTABLE_API_KEY || !AIRTABLE_BASE_ID) {
+      throw new Error('Airtable API key or base ID not configured');
+    }
+    
+    // Initialize Airtable
+    const Airtable = require('airtable');
+    const base = new Airtable({ apiKey: AIRTABLE_API_KEY }).base(AIRTABLE_BASE_ID);
+    
+    // Get all users from Airtable
+    const users = await base('USERS').select().all();
+    console.log(`Found ${users.length} users to notify`);
+    
+    // Create notification content
+    const notificationContent = `New Decree Proposed: ${decree.Title}`;
+    const notificationDetails = {
+      decreeId: decree.DecreeId,
+      type: decree.Type,
+      category: decree.Category,
+      subcategory: decree.Subcategory,
+      description: decree.Description.substring(0, 100) + (decree.Description.length > 100 ? '...' : '')
+    };
+    
+    // Create notifications for each user
+    const notificationPromises = users.map(user => {
+      return base('NOTIFICATIONS').create({
+        NotificationId: `decree-${decree.DecreeId}-user-${user.id}`,
+        Type: 'Decree',
+        User: [user.id], // Link to user record
+        Content: notificationContent,
+        Details: JSON.stringify(notificationDetails),
+        IsRead: false,
+        CreatedAt: new Date().toISOString()
+      });
+    });
+    
+    // Wait for all notifications to be created
+    await Promise.all(notificationPromises);
+    console.log(`Created ${users.length} notifications for the new decree`);
+    
+    return true;
+  } catch (error) {
+    console.error('Error creating decree notifications:', error);
+    return false;
+  }
+}
+
 // Main function
 async function main() {
   try {
@@ -163,7 +218,11 @@ async function main() {
     // Save the decree to jsontoairtable.json
     saveDecreeToJson(decree);
     
+    // Create notifications for all users
+    await createDecreeNotifications(decree);
+    
     console.log('\nDecree generated successfully and saved to jsontoairtable.json');
+    console.log('Notifications created for all users');
     console.log('\nTo push to Airtable, run:');
     console.log('node jsontoairtable.js jsontoairtable.json');
     
