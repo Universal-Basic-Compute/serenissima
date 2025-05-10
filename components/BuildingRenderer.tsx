@@ -180,43 +180,46 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
         else if (typeof building.position === 'object') {
           // Check if it's lat/lng format
           if (building.position.lat !== undefined && building.position.lng !== undefined) {
-            // Convert lat/lng to Three.js coordinates
-            const bounds = {
-              centerLat: 45.4371,
-              centerLng: 12.3358,
-              scale: 100000,
-              latCorrectionFactor: 0.7
-            };
-            
-            // Convert lat/lng to Three.js coordinates - PRESERVE FULL PRECISION
-            // Use parseFloat to ensure we're working with full floating point precision
+            // Get the lat/lng values with full precision
             const lat = parseFloat(building.position.lat.toString());
             const lng = parseFloat(building.position.lng.toString());
             
-            // Calculate the x and z coordinates with full precision
-            const x = (lng - bounds.centerLng) * bounds.scale;
-            const z = -(lat - bounds.centerLat) * bounds.scale * bounds.latCorrectionFactor;
+            console.log(`[BuildingRenderer] Converting lat/lng for building ${building.id}: ${lat}, ${lng}`);
             
-            // Log the conversion for debugging with distinctive prefix
-            console.log(`[BuildingRenderer] Converting lat/lng to Three.js coordinates for building ${building.id}:`);
-            console.log(`[BuildingRenderer] Original lat/lng: ${lat}, ${lng}`);
-            console.log(`[BuildingRenderer] Converted to x,z: ${x}, ${z}`);
+            // Define Venice center coordinates and scaling factors
+            const centerLat = 45.4371;
+            const centerLng = 12.3358;
+            const scale = 100000; // Scale factor to convert degrees to scene units
+            const latCorrectionFactor = 0.7; // Correction for latitude distortion
             
-            // Check if the conversion is working correctly
+            // Calculate the difference from center coordinates
+            const latDiff = lat - centerLat;
+            const lngDiff = lng - centerLng;
+            
+            // Convert to Three.js coordinates
+            // X corresponds to longitude (east-west)
+            // Z corresponds to latitude (north-south) but inverted (negative)
+            const x = lngDiff * scale;
+            const z = -latDiff * scale * latCorrectionFactor;
+            
+            // Log the conversion for debugging
+            console.log(`[BuildingRenderer] Converted coordinates for ${building.id}: x=${x}, z=${z}`);
+            
+            // Verify the conversion worked correctly
             if (Math.abs(x) < 0.001 && Math.abs(z) < 0.001) {
               console.warn(`[BuildingRenderer] WARNING: Building ${building.id} has near-zero position after conversion!`);
               console.warn(`[BuildingRenderer] Original lat/lng:`, building.position);
             }
             
             if (Math.abs(x - 45) < 0.1 && Math.abs(z - 12) < 0.1) {
-              console.warn(`[BuildingRenderer] WARNING: Building ${building.id} has default position after conversion!`);
+              console.warn(`[BuildingRenderer] WARNING: Building ${building.id} has default position (45,12) after conversion!`);
               console.warn(`[BuildingRenderer] Original lat/lng:`, building.position);
             }
             
             position = {
-              x: x, // Don't round or truncate these values
+              x: x,
               y: position.y || 5, // Keep the existing y or use default
-              z: z  // Don't round or truncate these values
+              z: z
             };
           } 
           // Regular x,y,z format - PRESERVE FULL PRECISION

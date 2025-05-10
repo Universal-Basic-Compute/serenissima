@@ -205,16 +205,16 @@ export async function GET(request: Request) {
           scale: 100000,
           latCorrectionFactor: 0.7
         };
-        
+            
         // Reverse the conversion formula
         const lat = bounds.centerLat - (position.z / bounds.scale / bounds.latCorrectionFactor);
         const lng = bounds.centerLng + (position.x / bounds.scale);
-        
+            
         position = {
           lat: parseFloat(lat.toFixed(10)),
           lng: parseFloat(lng.toFixed(10))
         };
-        
+            
         console.log(`[API] Converted x/y/z position to lat/lng for building ${fields.BuildingId || record.id}:`, position);
       }
       // Ensure lat/lng values are parsed as floats with full precision
