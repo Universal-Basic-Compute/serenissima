@@ -166,31 +166,51 @@ export async function GET(request: Request) {
           position = JSON.parse(position);
         } catch (error) {
           console.error('Error parsing position JSON:', error);
-          // Instead of using a default position, log the error and continue
           console.error('Original position string:', position);
-          position = { x: 0, y: 0, z: 0 }; // Use origin as fallback
+          
+          // Instead of using a default position, generate a random lat/lng position
+          // This ensures each building has unique coordinates
+          position = { 
+            lat: 45.4371 + (Math.random() * 0.01 - 0.005), // Random lat near Venice center
+            lng: 12.3358 + (Math.random() * 0.01 - 0.005)  // Random lng near Venice center
+          };
         }
       }
       
       // Ensure position has all required properties
       if (!position || typeof position !== 'object') {
-        position = { x: 0, y: 0, z: 0 }; // Use origin as fallback
+        // Generate a random lat/lng position instead of using default x/y/z
+        position = { 
+          lat: 45.4371 + (Math.random() * 0.01 - 0.005), 
+          lng: 12.3358 + (Math.random() * 0.01 - 0.005)
+        };
       } 
-      // Handle lat/lng format
+      // If position has x/y/z format but not lat/lng, convert to lat/lng
+      else if (position.x !== undefined && position.z !== undefined && position.lat === undefined) {
+        // Convert from Three.js coordinates back to lat/lng
+        const bounds = {
+          centerLat: 45.4371,
+          centerLng: 12.3358,
+          scale: 100000,
+          latCorrectionFactor: 0.7
+        };
+        
+        // Reverse the conversion formula
+        const lat = bounds.centerLat - (position.z / bounds.scale / bounds.latCorrectionFactor);
+        const lng = bounds.centerLng + (position.x / bounds.scale);
+        
+        position = {
+          lat: parseFloat(lat.toFixed(10)),
+          lng: parseFloat(lng.toFixed(10))
+        };
+        
+        console.log(`Converted x/y/z position to lat/lng: ${JSON.stringify(position)}`);
+      }
+      // Ensure lat/lng values are parsed as floats with full precision
       else if (position.lat !== undefined && position.lng !== undefined) {
-        // Keep lat/lng format intact - don't convert here
-        // The conversion will happen in the BuildingRenderer component
         position = {
           lat: parseFloat(position.lat.toString()),
           lng: parseFloat(position.lng.toString())
-        };
-      }
-      // Handle x/y/z format
-      else {
-        position = {
-          x: position.x !== undefined ? parseFloat(position.x.toString()) : 0,
-          y: position.y !== undefined ? parseFloat(position.y.toString()) : 0,
-          z: position.z !== undefined ? parseFloat(position.z.toString()) : 0
         };
       }
       
@@ -276,15 +296,14 @@ export async function GET(request: Request) {
       
     console.log('Adding debug buildings');
       
-    // Add a fifth building with explicit x/y/z coordinates
+    // Add a fifth building with lat/lng coordinates instead of x/y/z
     const debugBuilding5 = {
       id: 'building_5',
       type: 'house',
       land_id: 'polygon-1746052711036',
       position: { 
-        x: 10, 
-        y: 5, 
-        z: 10
+        lat: 45.4368, 
+        lng: 12.3362
       },
       rotation: 0,
       connection_points: [],
