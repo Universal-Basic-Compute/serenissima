@@ -83,12 +83,25 @@ def get_buildings_on_land(tables, land_id: str, land_record: Dict) -> List[Dict]
     log.info(f"Fetching buildings on land {land_id} (LandId: {land_id_value})...")
     
     try:
-        # Use the LandId field to query buildings
-        formula = f"AND({{Land}}='{land_id_value}', NOT(OR({{User}} = '', {{User}} = BLANK())), NOT(OR({{LeaseAmount}} = '', {{LeaseAmount}} = BLANK())))"
-        buildings = tables['buildings'].all(formula=formula)
+        # Use the LandId field to query buildings - improved formula with better error handling
+        formula = f"AND({{Land}}='{land_id_value}', NOT({{User}} = BLANK()))"
         
-        log.info(f"Found {len(buildings)} buildings with lease amounts on land {land_id}")
-        return buildings
+        # First try with the formula that requires LeaseAmount
+        try:
+            buildings = tables['buildings'].all(formula=formula + ", NOT({LeaseAmount} = BLANK())")
+            log.info(f"Found {len(buildings)} buildings with lease amounts on land {land_id}")
+            return buildings
+        except Exception as e:
+            log.warning(f"Error with specific formula, trying more general query: {e}")
+            
+            # If that fails, try a more general query
+            buildings = tables['buildings'].all(formula=formula)
+            
+            # Filter buildings with lease amounts manually
+            buildings_with_lease = [b for b in buildings if b['fields'].get('LeaseAmount')]
+            log.info(f"Found {len(buildings_with_lease)} buildings with lease amounts on land {land_id} (after filtering)")
+            return buildings_with_lease
+            
     except Exception as e:
         log.error(f"Error fetching buildings on land {land_id}: {e}")
         # Add more detailed error logging
@@ -100,6 +113,20 @@ def get_buildings_on_land(tables, land_id: str, land_record: Dict) -> List[Dict]
 def find_user_by_identifier(tables, identifier: str) -> Optional[Dict]:
     """Find a user by username or wallet address."""
     log.info(f"Looking up user: {identifier}")
+    
+    # Handle known special cases
+    if identifier == "ConsiglioDeiDieci":
+        # Try different variations of the name
+        variations = ["ConsiglioDeiDieci", "Consiglio Dei Dieci", "Consiglio dei Dieci"]
+        for variation in variations:
+            try:
+                formula = f"{{Username}}='{variation}'"
+                users = tables['users'].all(formula=formula)
+                if users:
+                    log.info(f"Found user by special case variation: {variation}")
+                    return users[0]
+            except Exception:
+                continue
     
     try:
         # First try to find by username
@@ -230,7 +257,14 @@ def process_lease_payment(tables, land: Dict, building: Dict, dry_run: bool = Fa
     building_name = building['fields'].get('Name', building_id)
     building_type = building['fields'].get('Type', 'unknown')
     building_owner = building['fields'].get('User', '')
-    lease_amount = float(building['fields'].get('LeaseAmount', 0))
+    
+    # Safely convert lease amount to float
+    try:
+        lease_amount_raw = building['fields'].get('LeaseAmount', 0)
+        lease_amount = float(lease_amount_raw) if lease_amount_raw else 0
+    except (ValueError, TypeError):
+        log.warning(f"Invalid lease amount for building {building_id}: {building['fields'].get('LeaseAmount')}, defaulting to 0")
+        lease_amount = 0
     
     log.info(f"Processing lease payment for building {building_name} on land {land_name}")
     log.info(f"  Building Owner: {building_owner}, Land Owner: {land_owner}")
@@ -452,130 +486,154 @@ def distribute_leases(dry_run: bool = False):
     """Main function to distribute lease payments from building owners to land owners."""
     log.info(f"Starting lease distribution process (dry_run: {dry_run})")
     
-    tables = initialize_airtable()
-    lands = get_all_lands(tables)
+    try:
+        tables = initialize_airtable()
+        lands = get_all_lands(tables)
+        
+        if not lands:
+            log.info("No lands with owners found. Lease distribution process complete.")
+            return
+        
+        # Track lease payment statistics
+        lease_summary = {
+            "successful": 0,
+            "failed": 0,
+            "total_amount": 0,
+            "total_tax": 0,  # Add tracking for total tax collected
+            "by_land_owner": defaultdict(float),      # Total received by each land owner
+            "by_building_owner": defaultdict(float),  # Total paid by each building owner
+            "by_building_owner_tax": defaultdict(float),  # Total tax paid by each building owner
+            "land_owner_buildings": defaultdict(list),  # Buildings data for each land owner
+            "building_owner_lands": defaultdict(list)   # Lands data for each building owner
+        }
+        
+        for land in lands:
+            try:
+                land_id = land['id']
+                land_name = land['fields'].get('HistoricalName', land['fields'].get('EnglishName', land_id))
+                land_owner = land['fields'].get('User', '')
+                
+                log.info(f"Processing land {land_name} (ID: {land_id}) owned by {land_owner}")
+                
+                # Skip if no owner
+                if not land_owner:
+                    log.warning(f"Land {land_id} has no owner, skipping")
+                    continue
+                
+                # Get buildings on this land, passing the land record
+                buildings = get_buildings_on_land(tables, land_id, land)
+                
+                if not buildings:
+                    log.info(f"No buildings with lease amounts found on land {land_id}")
+                    continue
+                
+                # Track lease payments for this land
+                land_total = 0
+                land_buildings_data = []
+                
+                for building in buildings:
+                    try:
+                        # Process the lease payment - now returns net amount and tax amount
+                        success, net_amount, tax_amount = process_lease_payment(tables, land, building, dry_run)
+                        
+                        if success:
+                            if net_amount > 0 or tax_amount > 0:  # Only count if actual payment was made
+                                lease_summary["successful"] += 1
+                                lease_summary["total_amount"] += net_amount
+                                lease_summary["total_tax"] += tax_amount
+                                lease_summary["by_land_owner"][land_owner] += net_amount
+                                
+                                # Get building owner safely
+                                building_owner = building['fields'].get('User', '')
+                                if building_owner:
+                                    lease_summary["by_building_owner"][building_owner] -= (net_amount + tax_amount)
+                                    lease_summary["by_building_owner_tax"][building_owner] += tax_amount
+                                
+                                land_total += net_amount
+                                
+                                # Add building data for land owner notification
+                                building_id = building['id']
+                                building_name = building['fields'].get('Name', building_id)
+                                building_type = building['fields'].get('Type', 'unknown')
+                                
+                                # Safely get lease amount
+                                try:
+                                    lease_amount = float(building['fields'].get('LeaseAmount', 0))
+                                except (ValueError, TypeError):
+                                    lease_amount = 0
+                                
+                                land_buildings_data.append({
+                                    "building_id": building_id,
+                                    "building_name": building_name,
+                                    "building_type": building_type,
+                                    "building_owner": building_owner,
+                                    "lease_amount": lease_amount,
+                                    "net_amount": net_amount,
+                                    "tax_amount": tax_amount
+                                })
+                                
+                                # Add land data for building owner notification
+                                if building_owner:
+                                    lease_summary["building_owner_lands"][building_owner].append({
+                                        "land_id": land_id,
+                                        "land_name": land_name,
+                                        "land_owner": land_owner,
+                                        "building_id": building_id,
+                                        "building_name": building_name,
+                                        "building_type": building_type,
+                                        "lease_amount": lease_amount,
+                                        "net_amount": net_amount,
+                                        "tax_amount": tax_amount
+                                    })
+                        else:
+                            lease_summary["failed"] += 1
+                    except Exception as building_error:
+                        log.error(f"Error processing building {building.get('id', 'unknown')}: {building_error}")
+                        lease_summary["failed"] += 1
+                
+                # Add buildings data for this land to the summary
+                if land_buildings_data:
+                    lease_summary["land_owner_buildings"][land_owner].extend(land_buildings_data)
+            except Exception as land_error:
+                log.error(f"Error processing land {land.get('id', 'unknown')}: {land_error}")
+                continue
     
-    if not lands:
-        log.info("No lands with owners found. Lease distribution process complete.")
-        return
-    
-    # Track lease payment statistics
-    lease_summary = {
-        "successful": 0,
-        "failed": 0,
-        "total_amount": 0,
-        "total_tax": 0,  # Add tracking for total tax collected
-        "by_land_owner": defaultdict(float),      # Total received by each land owner
-        "by_building_owner": defaultdict(float),  # Total paid by each building owner
-        "by_building_owner_tax": defaultdict(float),  # Total tax paid by each building owner
-        "land_owner_buildings": defaultdict(list),  # Buildings data for each land owner
-        "building_owner_lands": defaultdict(list)   # Lands data for each building owner
-    }
-    
-    for land in lands:
-        land_id = land['id']
-        land_name = land['fields'].get('HistoricalName', land['fields'].get('EnglishName', land_id))
-        land_owner = land['fields'].get('User', '')
+        log.info(f"Lease distribution process complete. Successful: {lease_summary['successful']}, Failed: {lease_summary['failed']}")
+        log.info(f"Total amount to land owners: {lease_summary['total_amount']}, Total tax collected: {lease_summary['total_tax']}")
         
-        log.info(f"Processing land {land_name} (ID: {land_id}) owned by {land_owner}")
-        
-        # Skip if no owner
-        if not land_owner:
-            log.warning(f"Land {land_id} has no owner, skipping")
-            continue
-        
-        # Get buildings on this land, passing the land record
-        buildings = get_buildings_on_land(tables, land_id, land)
-        
-        if not buildings:
-            log.info(f"No buildings with lease amounts found on land {land_id}")
-            continue
-        
-        # Track lease payments for this land
-        land_total = 0
-        land_buildings_data = []
-        
-        for building in buildings:
-            building_id = building['id']
-            building_name = building['fields'].get('Name', building_id)
-            building_type = building['fields'].get('Type', 'unknown')
-            building_owner = building['fields'].get('User', '')
-            lease_amount = float(building['fields'].get('LeaseAmount', 0))
-            
-            # Process the lease payment - now returns net amount and tax amount
-            success, net_amount, tax_amount = process_lease_payment(tables, land, building, dry_run)
-            
-            if success:
-                if net_amount > 0 or tax_amount > 0:  # Only count if actual payment was made
-                    lease_summary["successful"] += 1
-                    lease_summary["total_amount"] += net_amount
-                    lease_summary["total_tax"] += tax_amount
-                    lease_summary["by_land_owner"][land_owner] += net_amount
-                    lease_summary["by_building_owner"][building_owner] -= (net_amount + tax_amount)
-                    lease_summary["by_building_owner_tax"][building_owner] += tax_amount
-                    land_total += net_amount
+        # Create notifications for land owners
+        if not dry_run:
+            try:
+                for land_owner, buildings_data in lease_summary["land_owner_buildings"].items():
+                    total_received = lease_summary["by_land_owner"][land_owner]
+                    # Group buildings by land
+                    lands_data = {}
+                    for building in buildings_data:
+                        land_id = next((land['id'] for land in lands if land['fields'].get('User') == land_owner), None)
+                        if land_id:
+                            land_name = next((land['fields'].get('HistoricalName', land['fields'].get('EnglishName', land_id)) 
+                                            for land in lands if land['id'] == land_id), land_id)
+                            if land_name not in lands_data:
+                                lands_data[land_name] = {"buildings": [], "total": 0}
+                            lands_data[land_name]["buildings"].append(building)
+                            lands_data[land_name]["total"] += building.get("net_amount", 0)
                     
-                    # Add building data for land owner notification
-                    land_buildings_data.append({
-                        "building_id": building_id,
-                        "building_name": building_name,
-                        "building_type": building_type,
-                        "building_owner": building_owner,
-                        "lease_amount": lease_amount,
-                        "net_amount": net_amount,
-                        "tax_amount": tax_amount
-                    })
-                    
-                    # Add land data for building owner notification
-                    lease_summary["building_owner_lands"][building_owner].append({
-                        "land_id": land_id,
-                        "land_name": land_name,
-                        "land_owner": land_owner,
-                        "building_id": building_id,
-                        "building_name": building_name,
-                        "building_type": building_type,
-                        "lease_amount": lease_amount,
-                        "net_amount": net_amount,
-                        "tax_amount": tax_amount
-                    })
-            else:
-                lease_summary["failed"] += 1
-        
-        # Add buildings data for this land to the summary
-        if land_buildings_data:
-            lease_summary["land_owner_buildings"][land_owner].extend(land_buildings_data)
-    
-    log.info(f"Lease distribution process complete. Successful: {lease_summary['successful']}, Failed: {lease_summary['failed']}")
-    log.info(f"Total amount to land owners: {lease_summary['total_amount']}, Total tax collected: {lease_summary['total_tax']}")
-    
-    # Create notifications for land owners
-    if not dry_run:
-        for land_owner, buildings_data in lease_summary["land_owner_buildings"].items():
-            total_received = lease_summary["by_land_owner"][land_owner]
-            # Group buildings by land
-            lands_data = {}
-            for building in buildings_data:
-                land_id = next((land['id'] for land in lands if land['fields'].get('User') == land_owner), None)
-                if land_id:
-                    land_name = next((land['fields'].get('HistoricalName', land['fields'].get('EnglishName', land_id)) 
-                                     for land in lands if land['id'] == land_id), land_id)
-                    if land_name not in lands_data:
-                        lands_data[land_name] = {"buildings": [], "total": 0}
-                    lands_data[land_name]["buildings"].append(building)
-                    lands_data[land_name]["total"] += building["lease_amount"]
-            
-            # Create a notification for each land
-            for land_name, data in lands_data.items():
-                create_land_owner_summary(tables, land_owner, land_name, data["buildings"], data["total"])
-        
-        # Create notifications for building owners
-        for building_owner, lands_data in lease_summary["building_owner_lands"].items():
-            total_paid = -lease_summary["by_building_owner"][building_owner]
-            total_tax = lease_summary["by_building_owner_tax"][building_owner]
-            create_building_owner_summary(tables, building_owner, lands_data, total_paid - total_tax, total_tax)
-        
-        # Create admin summary notification
-        create_admin_summary(tables, lease_summary)
+                    # Create a notification for each land
+                    for land_name, data in lands_data.items():
+                        create_land_owner_summary(tables, land_owner, land_name, data["buildings"], data["total"])
+                
+                # Create notifications for building owners
+                for building_owner, lands_data in lease_summary["building_owner_lands"].items():
+                    total_paid = -lease_summary["by_building_owner"].get(building_owner, 0)
+                    total_tax = lease_summary["by_building_owner_tax"].get(building_owner, 0)
+                    create_building_owner_summary(tables, building_owner, lands_data, total_paid - total_tax, total_tax)
+                
+                # Create admin summary notification
+                create_admin_summary(tables, lease_summary)
+            except Exception as notification_error:
+                log.error(f"Error creating notifications: {notification_error}")
+    except Exception as e:
+        log.error(f"Error in lease distribution process: {e}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Distribute lease payments from building owners to land owners.")
