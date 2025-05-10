@@ -90,7 +90,7 @@ def get_buildings_on_land(tables, land_id: str, land_record: Dict) -> List[Dict]
         
         # First try with the formula that requires LeaseAmount
         try:
-            buildings = tables['buildings'].all(formula=formula + ", NOT({LeaseAmount} = BLANK())")
+            buildings = tables['buildings'].all(formula=f"AND({formula}, NOT({{LeaseAmount}} = BLANK()))")
             log.info(f"Found {len(buildings)} buildings with lease amounts on land {land_id}")
             return buildings
         except Exception as e:
