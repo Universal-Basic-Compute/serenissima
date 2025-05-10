@@ -1285,25 +1285,25 @@ export default class SimplePolygonRenderer {
     let totalDockPoints = 0;
     
     // Debug: Log the total number of polygons
-    console.log(`DEBUG: Total polygons to check for bridge/dock points: ${this.polygons.length}`);
+    console.log(`Total polygons to check for bridge/dock points: ${this.polygons.length}`);
     
     // Check each polygon for bridge/dock points and count them
     this.polygons.forEach(polygon => {
       if (polygon.bridgePoints && Array.isArray(polygon.bridgePoints) && polygon.bridgePoints.length > 0) {
         polygonsWithBridgePoints++;
         totalBridgePoints += polygon.bridgePoints.length;
-        console.log(`DEBUG: Polygon ${polygon.id} has ${polygon.bridgePoints.length} bridge points`);
+        console.log(`Polygon ${polygon.id} has ${polygon.bridgePoints.length} bridge points`);
       }
       
       if (polygon.dockPoints && Array.isArray(polygon.dockPoints) && polygon.dockPoints.length > 0) {
         polygonsWithDockPoints++;
         totalDockPoints += polygon.dockPoints.length;
-        console.log(`DEBUG: Polygon ${polygon.id} has ${polygon.dockPoints.length} dock points`);
+        console.log(`Polygon ${polygon.id} has ${polygon.dockPoints.length} dock points`);
       }
     });
     
-    console.log(`DEBUG: Found ${polygonsWithBridgePoints} polygons with bridge points (${totalBridgePoints} total points)`);
-    console.log(`DEBUG: Found ${polygonsWithDockPoints} polygons with dock points (${totalDockPoints} total points)`);
+    console.log(`Found ${polygonsWithBridgePoints} polygons with bridge points (${totalBridgePoints} total points)`);
+    console.log(`Found ${polygonsWithDockPoints} polygons with dock points (${totalDockPoints} total points)`);
     
     // Clear any existing markers
     this.bridgePointMarkers.forEach(marker => {
