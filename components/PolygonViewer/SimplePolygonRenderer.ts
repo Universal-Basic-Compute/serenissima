@@ -64,7 +64,7 @@ export default class SimplePolygonRenderer {
   // Properties for bridge, dock, and building points
   private bridgePointMarkers: THREE.Mesh[] = [];
   private dockPointMarkers: THREE.Object3D[] = [];
-  private buildingPointMarkers: THREE.Mesh[] = [];
+  private buildingPointMarkers: THREE.Object3D[] = [];
   private hoveredPointId: string | null = null;
   
   // Properties for distance measurement
@@ -1882,7 +1882,7 @@ export default class SimplePolygonRenderer {
 
   // Helper method to highlight/unhighlight a coat of arms
   private setCoatOfArmsHighlight(object: THREE.Object3D | null, highlight: boolean) {
-    if (object && object instanceof THREE.Mesh<THREE.BufferGeometry, THREE.Material | THREE.Material[]>) {
+    if (object && object instanceof THREE.Mesh) {
       // Store original scale if not already stored
       if (!object.userData.originalScale && highlight) {
         object.userData.originalScale = object.scale.clone();
