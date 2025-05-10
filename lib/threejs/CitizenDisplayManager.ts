@@ -212,25 +212,75 @@ export class CitizenDisplayManager {
    * Refresh citizens from the API
    */
   public async refreshCitizens(): Promise<void> {
+    console.log('CitizenDisplayManager: Refreshing citizens data');
+    
     // Update the last update time
     this.lastUpdateTime = Date.now();
     
-    // Load citizens
-    await this.loadCitizens();
-    
-    // Add debug citizens if needed
-    this.addDebugCitizensIfNeeded();
-    
-    // Group citizens by location
-    this.groupCitizensByLocation();
-    
-    // If active, recreate markers
-    if (this.isActive) {
-      this.removeAllMarkers();
-      this.createCitizenMarkers();
+    try {
+      // Use the correct API URL (Next.js API routes run on the same port as the app)
+      const apiUrl = '/api/citizens';
       
-      // Force citizens to be visible
-      this.forceVisibleCitizens();
+      console.log('CitizenDisplayManager: Fetching citizens from API:', apiUrl);
+      
+      const response = await fetch(apiUrl, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        cache: 'no-cache'
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`API returned error status ${response.status}: ${errorText}`);
+        throw new Error(`API error: ${response.status} ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      
+      // Ensure data is an array
+      if (Array.isArray(data)) {
+        this.citizens = data;
+      } else if (data && Array.isArray(data.citizens)) {
+        this.citizens = data.citizens;
+      } else {
+        console.warn('Unexpected API response format:', data);
+        this.citizens = [];
+      }
+      
+      console.log(`CitizenDisplayManager: Loaded ${this.citizens.length} citizens`);
+      
+      // Add debug citizens if needed
+      this.addDebugCitizensIfNeeded();
+      
+      // Group citizens by location
+      this.groupCitizensByLocation();
+      
+      // If active, recreate markers
+      if (this.isActive) {
+        this.removeAllMarkers();
+        this.createCitizenMarkers();
+        
+        // Force citizens to be visible
+        this.forceVisibleCitizens();
+      }
+      
+      // Emit event that citizens were loaded
+      eventBus.emit(EventTypes.CITIZENS_LOADED, { count: this.citizens.length });
+    } catch (error) {
+      console.error('CitizenDisplayManager: Error loading citizens:', error);
+      
+      // Still try to use any existing citizens data
+      this.addDebugCitizensIfNeeded();
+      this.groupCitizensByLocation();
+      
+      // If active, recreate markers with whatever data we have
+      if (this.isActive) {
+        this.removeAllMarkers();
+        this.createCitizenMarkers();
+        this.forceVisibleCitizens();
+      }
     }
   }
   
@@ -243,10 +293,8 @@ export class CitizenDisplayManager {
     // If we don't have any citizens, load them first
     if (this.citizens.length === 0) {
       console.log('CitizenDisplayManager: No citizens loaded, loading from API first');
-      this.loadCitizens().then(() => {
+      this.refreshCitizens().then(() => {
         console.log(`CitizenDisplayManager: Loaded ${this.citizens.length} citizens from API`);
-        this.addDebugCitizensIfNeeded();
-        this.groupCitizensByLocation();
         this.createCitizenMarkers();
         this.debugState();
       }).catch(error => {
