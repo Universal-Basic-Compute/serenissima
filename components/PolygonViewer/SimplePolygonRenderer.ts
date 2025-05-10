@@ -746,7 +746,7 @@ export default class SimplePolygonRenderer {
     raycaster.params.Mesh.threshold = 0.1;
     
     // Find all land meshes in the scene
-    const landMeshes: THREE.Mesh[] = [];
+    const landMeshes: THREE.Object3D[] = [];
     this.scene.traverse(object => {
       // Include all meshes except those we want to exclude
       if (object instanceof THREE.Mesh && 
@@ -780,7 +780,7 @@ export default class SimplePolygonRenderer {
       largerRaycaster.set(rayOrigin, rayDirection);
       largerRaycaster.params.Mesh.threshold = 1.0; // Much larger threshold
         
-      const largerIntersects = largerRaycaster.intersectObjects(landMeshes, true);
+      const largerIntersects = largerRaycaster.intersectObjects(landMeshes as THREE.Object3D[], true);
       if (largerIntersects.length > 0) {
         console.log(`Found intersection with larger threshold at distance ${largerIntersects[0].distance}`);
         const groundPoint = largerIntersects[0].point.clone();
