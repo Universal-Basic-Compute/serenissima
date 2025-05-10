@@ -1361,7 +1361,7 @@ export default class SimplePolygonRenderer {
             });
             
             const marker = new THREE.Mesh(geometry, material);
-            marker.position.set(normalizedCoord.x, 2.0, -normalizedCoord.y); // Position much higher
+            marker.position.set(normalizedCoord.x, 0.5, -normalizedCoord.y); // Position closer to water level (y=0)
             marker.renderOrder = 1000; // Ensure it renders on top of everything
             
             // Add metadata for tooltips
@@ -1409,7 +1409,7 @@ export default class SimplePolygonRenderer {
             });
             
             const edgeMarker = new THREE.Mesh(edgeGeometry, edgeMaterial);
-            edgeMarker.position.set(edgeCoord.x, 2.0, -edgeCoord.y); // Position much higher
+            edgeMarker.position.set(edgeCoord.x, 0.5, -edgeCoord.y); // Position closer to water level (y=0)
             edgeMarker.renderOrder = 1000; // Ensure it renders on top of everything
             
             // Add metadata for tooltips
@@ -1426,8 +1426,8 @@ export default class SimplePolygonRenderer {
             // Create a line connecting edge to water - MUCH thicker
             const lineGeometry = new THREE.BufferGeometry();
             const vertices = new Float32Array([
-              edgeCoord.x, 2.0, -edgeCoord.y,
-              waterCoord.x, 2.0, -waterCoord.y
+              edgeCoord.x, 0.5, -edgeCoord.y,
+              waterCoord.x, 0.5, -waterCoord.y
             ]);
             lineGeometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
             
@@ -1450,7 +1450,7 @@ export default class SimplePolygonRenderer {
             });
             
             const waterMarker = new THREE.Mesh(waterGeometry, waterMaterial);
-            waterMarker.position.set(waterCoord.x, 2.0, -waterCoord.y); // Position much higher
+            waterMarker.position.set(waterCoord.x, 0.5, -waterCoord.y); // Position closer to water level (y=0)
             waterMarker.renderOrder = 1000; // Ensure it renders on top of everything
             
             // Add metadata for tooltips
