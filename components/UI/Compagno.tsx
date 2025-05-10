@@ -526,12 +526,25 @@ const Compagno: React.FC<CompagnoProps> = ({ className }) => {
               <>
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-amber-800 font-serif text-lg">Notifications</h3>
-                  <button 
-                    onClick={() => setShowNotifications(false)}
-                    className="text-amber-600 hover:text-amber-800"
-                  >
-                    Return to Chat
-                  </button>
+                  <div className="flex items-center">
+                    {/* Add refresh button */}
+                    <button 
+                      onClick={() => fetchNotifications()}
+                      className="mr-3 text-amber-600 hover:text-amber-800 flex items-center"
+                      title="Refresh notifications"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                      </svg>
+                      <span className="text-sm">Refresh</span>
+                    </button>
+                    <button 
+                      onClick={() => setShowNotifications(false)}
+                      className="text-amber-600 hover:text-amber-800"
+                    >
+                      Return to Chat
+                    </button>
+                  </div>
                 </div>
                 
                 {notifications.length === 0 ? (
