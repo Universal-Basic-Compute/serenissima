@@ -10,7 +10,7 @@ export class BuildingPositionManager {
   private bounds = {
     centerLat: 45.4371,
     centerLng: 12.3358,
-    scale: 100000,
+    scale: 1000, // Reduced from 100000 to 1000
     latCorrectionFactor: 0.7
   };
 
@@ -61,7 +61,12 @@ export class BuildingPositionManager {
       this.bounds.latCorrectionFactor
     )[0];
     
-    // Return the position with the specified height
+    // Log the normalized coordinates for debugging
+    console.log(`Input coordinates: lat=${position.lat}, lng=${position.lng}`);
+    console.log(`Normalized coordinates: x=${normalizedCoord.x}, y=${normalizedCoord.y}`);
+    
+    // IMPORTANT: The normalizeCoordinates function returns {x, y} but we need {x, y, z} for THREE.Vector3
+    // The y value from normalizeCoordinates should be mapped to z in THREE.js (y is up in THREE.js)
     return new THREE.Vector3(normalizedCoord.x, height, normalizedCoord.y);
   }
 
