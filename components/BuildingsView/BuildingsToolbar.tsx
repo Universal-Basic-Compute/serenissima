@@ -167,6 +167,69 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
       
       <button
         onClick={() => {
+          if (!scene) {
+            console.error('Scene not available');
+            return;
+          }
+          
+          console.log('Creating debug building');
+          
+          // Create a visible box at a specific position
+          const geometry = new THREE.BoxGeometry(2, 2, 2);
+          const material = new THREE.MeshBasicMaterial({ 
+            color: 0xff0000,
+            wireframe: true
+          });
+          const debugBox = new THREE.Mesh(geometry, material);
+          debugBox.position.set(45.42623684734749, 5, 12.33922034185465);
+          scene.add(debugBox);
+          console.log('Added debug box at position:', debugBox.position);
+          
+          // Create a sphere to mark the position
+          const sphereGeometry = new THREE.SphereGeometry(1, 16, 16);
+          const sphereMaterial = new THREE.MeshBasicMaterial({ 
+            color: 0x00ff00
+          });
+          const debugSphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+          debugSphere.position.set(45.42623684734749, 7, 12.33922034185465);
+          scene.add(debugSphere);
+          console.log('Added debug sphere at position:', debugSphere.position);
+          
+          // Create the market stall data
+          const marketStallData = {
+            id: 'debug-market-stall',
+            type: 'market-stall',
+            land_id: 'polygon-1746052711032',
+            position: { 
+              x: 45.42623684734749, 
+              y: 5, 
+              z: 12.33922034185465 
+            },
+            rotation: 0,
+            created_by: 'ConsiglioDeiDieci',
+            created_at: new Date().toISOString()
+          };
+          
+          // Dispatch an event to add the building
+          eventBus.emit(EventTypes.BUILDING_PLACED, {
+            buildingId: marketStallData.id,
+            type: marketStallData.type,
+            data: marketStallData
+          });
+          
+          console.log('Debug building creation event dispatched');
+        }}
+        className="px-4 py-2 bg-purple-600 text-white rounded-md shadow-md hover:bg-purple-700 transition-colors flex items-center space-x-2"
+        title="Create Debug Building"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+        </svg>
+        <span>Create Debug Building</span>
+      </button>
+      
+      <button
+        onClick={() => {
           // Focus camera on the market stall building
           if (camera) {
             // Get the actual camera - either from props or from the canvas element

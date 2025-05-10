@@ -242,7 +242,7 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
     cameraControllerRef.current = cameraController;
     
     // Position camera to see the buildings
-    cameraController.camera.position.set(45, 50, 12); // Position camera to see the market stall
+    cameraController.camera.position.set(45, 20, 12); // Position camera to see the market stall
     cameraController.controls.target.set(45, 0, 12); // Look at the market stall position
     
     // IMPORTANT: Expose scene, camera, and polygons to window object

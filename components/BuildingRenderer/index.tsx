@@ -240,20 +240,24 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
             const maxDimension = Math.max(size.x, size.y, size.z);
             if (maxDimension > 20) {
               // Model is too large, scale it down
-              const scale = 2 / maxDimension; // Reduced from 10 to 2
+              const scale = 0.5 / maxDimension; // Reduced scale factor
               model.scale.set(scale, scale, scale);
               console.log(`Model was too large (${maxDimension} units), scaled down by ${scale}`);
             } else if (maxDimension < 1) {
               // Model is too small, scale it up
-              const scale = 2 / maxDimension; // Reduced from 5 to 2
+              const scale = 0.5 / maxDimension; // Reduced scale factor
               model.scale.set(scale, scale, scale);
               console.log(`Model was too small (${maxDimension} units), scaled up by ${scale}`);
             } else {
               // Apply a default scale to make buildings more visible but smaller
-              const scale = 0.5; // Reduced from 5.0 to 0.5
+              const scale = 0.1; // Significantly reduced from 0.5 to 0.1
               model.scale.set(scale, scale, scale);
               console.log(`Applied default scale of ${scale} to building`);
             }
+            
+            // Store the building ID in userData for later reference
+            model.userData.buildingId = id;
+            model.userData.buildingType = type;
             
             // Add a visible helper at the building position
             const helperGeometry = new THREE.SphereGeometry(0.5, 16, 16);
@@ -319,7 +323,11 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
     fallbackMesh.rotation.y = rotation || 0;
     
     // Make the fallback mesh smaller for better proportions
-    fallbackMesh.scale.set(1, 1, 1); // Reduced from 3 to 1
+    fallbackMesh.scale.set(0.5, 0.5, 0.5); // Reduced from 1 to 0.5
+    
+    // Store the building ID in userData for later reference
+    fallbackMesh.userData.buildingId = id;
+    fallbackMesh.userData.buildingType = type;
     
     // Add a visible helper at the building position
     const helperGeometry = new THREE.SphereGeometry(0.5, 16, 16);
