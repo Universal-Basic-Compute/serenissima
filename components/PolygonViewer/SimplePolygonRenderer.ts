@@ -1207,7 +1207,7 @@ export default class SimplePolygonRenderer {
         this.hoveredPointId = null;
         eventBus.emit(EventTypes.HIDE_TOOLTIP);
       }
-    } else if (this.activeView === 'buildings') {
+    } else if (this.activeView === 'buildings' || this.activeView === 'transport') {
       // Buildings view - handle building point hover
       const buildingPointMarkers = this.buildingPointMarkers.filter(
         obj => obj instanceof THREE.Mesh
@@ -1260,11 +1260,11 @@ export default class SimplePolygonRenderer {
             hoveredPoint.material = hoveredPoint.userData.originalMaterial;
             delete hoveredPoint.userData.originalMaterial;
           } else {
-            // Fallback to creating a new material
+            // Fallback to creating a new material - transparent white
             hoveredPoint.material = new THREE.MeshBasicMaterial({
               color: 0xFFFFFF, // White color for building points
               transparent: true,
-              opacity: 0.7
+              opacity: 0.6
             });
           }
         }
@@ -2358,11 +2358,11 @@ export default class SimplePolygonRenderer {
       return;
     }
     
-    // Create a material for building points - make more visible
+    // Create a material for building points - make them transparent white instead of bright red
     const buildingPointMaterial = new THREE.MeshBasicMaterial({
-      color: 0xFF0000, // Change from white to bright red for better visibility
+      color: 0xFFFFFF, // White color for building points
       transparent: true,
-      opacity: 0.9  // Increase opacity from 0.7 to 0.9
+      opacity: 0.6  // More transparent
     });
     
     // Process each polygon
@@ -2386,11 +2386,11 @@ export default class SimplePolygonRenderer {
           
           console.log(`Normalized coordinates for point ${index}:`, normalizedCoord);
           
-          // Create a larger sphere for better visibility
-          const geometry = new THREE.SphereGeometry(0.5, 12, 12); // Double the size from 0.25 to 0.5
+          // Create a sphere for better visibility
+          const geometry = new THREE.SphereGeometry(0.4, 12, 12); // Slightly smaller than 0.5
           
           const marker = new THREE.Mesh(geometry, buildingPointMaterial);
-          // CHANGE: Position at ground level (y=0.2) instead of y=5.0
+          // Position at ground level
           marker.position.set(normalizedCoord.x, 0.2, -normalizedCoord.y);
           marker.renderOrder = 100;
           
