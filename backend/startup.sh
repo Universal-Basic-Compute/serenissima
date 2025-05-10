@@ -58,12 +58,12 @@ echo "Made citizen_generator.py and generate_citizen_images.py executable"
 
 # Add cron job for immigration
 if ! grep -q "immigration.py" "$TEMP_CRONTAB"; then
-    # Add the cron job to run at 8am UTC daily
-    echo "0 8 * * * cd $REPO_PATH && python3 engine/immigration.py >> $REPO_PATH/immigration_cron.log 2>&1" >> "$TEMP_CRONTAB"
+    # Add the cron job to run at 11am UTC daily (changed from 8am)
+    echo "0 11 * * * cd $REPO_PATH && python3 engine/immigration.py >> $REPO_PATH/immigration_cron.log 2>&1" >> "$TEMP_CRONTAB"
     
     # Install the new crontab
     crontab "$TEMP_CRONTAB"
-    echo "Cron job installed successfully. Immigration will run daily at 8am UTC."
+    echo "Cron job installed successfully. Immigration will run daily at 11am UTC."
 else
     echo "Immigration cron job already exists. No changes made."
 fi
