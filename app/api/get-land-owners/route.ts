@@ -110,7 +110,7 @@ export async function GET(request: Request) {
       });
       
       // Transform records to the expected format
-      const data = records.map(record => ({
+      const data = (records as any[]).map(record => ({
         id: record.fields.LandId || record.id,
         owner: record.fields.User || record.fields.Wallet || null
       }));
