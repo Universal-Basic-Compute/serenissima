@@ -27,7 +27,10 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ active }) => {
   
   // Create renderer factory and citizen display manager
   const rendererFactoryRef = useRef<BuildingRendererFactory | null>(null);
-  const citizenDisplayManagerRef = useRef<any>(null);
+  const citizenDisplayManagerRef = useRef<{
+    refreshCitizens: () => void;
+    forceVisibleCitizens: () => void;
+  } | null>(null);
   
   // Initialize with the main scene
   useEffect(() => {
