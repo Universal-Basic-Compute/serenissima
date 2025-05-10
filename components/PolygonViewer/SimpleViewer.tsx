@@ -798,9 +798,16 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
             <div className="w-4 h-4 rounded-full bg-[#FF5500] mr-2"></div>
             <span>Bridge Points</span>
           </div>
+          <div className="flex items-center mb-1">
+            <div className="w-4 h-4 rounded-full bg-[#FFFFFF] mr-2"></div>
+            <span>Building Points</span>
+          </div>
           <div className="flex items-center mb-3">
             <div className="w-4 h-4 rounded-full bg-[#FFFF00] mr-2"></div>
             <span>Distance Measurement</span>
+          </div>
+          <div className="text-xs text-gray-300 mb-2">
+            Click on building points to measure distances between buildings
           </div>
           <button 
             onClick={debugTransportMarkers}

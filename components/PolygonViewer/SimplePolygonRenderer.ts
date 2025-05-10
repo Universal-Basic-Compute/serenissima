@@ -1394,104 +1394,96 @@ export default class SimplePolygonRenderer {
     if (this.activeView === 'transport') {
       console.log(`In transport view, checking for marker intersections`);
       
-      // Combine all markers for raycasting, including building points
-      const allMarkers = [...this.bridgePointMarkers, ...this.dockPointMarkers, ...this.buildingPointMarkers].filter(
+      // CHANGE: Prioritize building points for distance measurement in transport view
+      const buildingMarkers = this.buildingPointMarkers.filter(
         obj => obj instanceof THREE.Mesh
       );
       
-      console.log(`Found ${allMarkers.length} markers to check for intersection`);
+      console.log(`Found ${buildingMarkers.length} building markers to check for intersection`);
       
-      // Log positions of first few markers for debugging
-      allMarkers.slice(0, 3).forEach((marker, i) => {
-        console.log(`Marker ${i} position:`, marker.position);
-      });
+      // Check for intersection with building points first
+      const buildingIntersects = this.raycaster.intersectObjects(buildingMarkers);
       
-      const intersects = this.raycaster.intersectObjects(allMarkers);
-      
-      console.log(`Found ${intersects.length} intersections`);
-      
-      if (intersects.length > 0) {
-        const intersected = intersects[0].object;
+      if (buildingIntersects.length > 0) {
+        const intersected = buildingIntersects[0].object;
         const userData = intersected.userData;
         
-        console.log("Intersected object userData:", userData);
+        console.log("Intersected building point userData:", userData);
         
         if (userData && userData.id) {
-          // Extract information from the marker ID
-          // Format is typically: bridge-{polygonId}-{index} or dock-edge-{polygonId}-{index}
-          const idParts = userData.id.split('-');
+          // Add measurement point at the building point position
+          this.addMeasurementPoint(intersected.position.clone());
           
-          console.log(`ID parts: ${idParts.join(', ')}`);
+          // Show tooltip with building point information
+          eventBus.emit(EventTypes.SHOW_TOOLTIP, {
+            type: 'building-point',
+            polygonId: userData.polygonId,
+            position: userData.position,
+            screenX: event.clientX,
+            screenY: event.clientY
+          });
           
-          if (idParts.length >= 3) {
-            let markerType, polygonId, pointIndex;
-            
-            // Handle different ID formats
-            if (idParts[0] === 'bridge') {
-              // Bridge format: 'bridge-polygon-1746057412398-4'
-              markerType = 'bridge';
-              polygonId = idParts.slice(1, idParts.length - 1).join('-');
-              pointIndex = parseInt(idParts[idParts.length - 1]);
-            } else if (idParts[0] === 'dock' && idParts[1] === 'edge') {
-              // Dock format: 'dock-edge-polygon-1746057412398-40'
-              markerType = 'dock';
-              polygonId = idParts.slice(2, idParts.length - 1).join('-');
-              pointIndex = parseInt(idParts[idParts.length - 1]);
-            } else {
-              console.warn(`Unknown marker type: ${idParts[0]}-${idParts[1]}`);
-              return;
-            }
-            
-            console.log(`Clicked on ${markerType} point ${pointIndex} from polygon ${polygonId}`);
-            
-            // Find the polygon
-            const polygon = this.polygons.find(p => p.id === polygonId);
-            
-            if (polygon) {
-              console.log("Found polygon:", polygon.id);
-              
-              // Show a tooltip with information about the point
-              eventBus.emit(EventTypes.SHOW_TOOLTIP, {
-                type: userData.type,
-                polygonId: userData.polygonId,
-                position: userData.position,
-                screenX: event.clientX,
-                screenY: event.clientY
-              });
-              
-              // Hide tooltip after a delay
-              setTimeout(() => {
-                eventBus.emit(EventTypes.HIDE_TOOLTIP);
-              }, 3000);
-            } else {
-              console.warn(`Polygon ${polygonId} not found`);
-            }
-          }
-        } else {
-          console.warn("Intersected object has no ID in userData:", userData);
-        }
-        
-        // Return early to prevent further processing
-        return;
-      } else {
-        console.log("No intersections found with transport markers");
-        
-        // If no marker was clicked, check for land intersection for measurement
-        const allLandMeshes = this.meshes.filter(mesh => mesh.visible);
-        const landIntersects = this.raycaster.intersectObjects(allLandMeshes);
-        
-        if (landIntersects.length > 0) {
-          const intersectionPoint = landIntersects[0].point;
+          // Hide tooltip after a delay
+          setTimeout(() => {
+            eventBus.emit(EventTypes.HIDE_TOOLTIP);
+          }, 2000);
           
-          // Add measurement point
-          this.addMeasurementPoint(intersectionPoint);
           return;
         }
-        
-        // Debug: Log raycaster origin and direction
-        console.log("Raycaster origin:", this.raycaster.ray.origin);
-        console.log("Raycaster direction:", this.raycaster.ray.direction);
       }
+      
+      // If no building point was clicked, check for bridge and dock markers
+      const transportMarkers = [...this.bridgePointMarkers, ...this.dockPointMarkers].filter(
+        obj => obj instanceof THREE.Mesh
+      );
+      
+      console.log(`Found ${transportMarkers.length} transport markers to check for intersection`);
+      
+      const transportIntersects = this.raycaster.intersectObjects(transportMarkers);
+      
+      if (transportIntersects.length > 0) {
+        const intersected = transportIntersects[0].object;
+        const userData = intersected.userData;
+        
+        console.log("Intersected transport marker userData:", userData);
+        
+        if (userData && userData.id) {
+          // Add measurement point at the transport marker position
+          this.addMeasurementPoint(intersected.position.clone());
+          
+          // Show tooltip with transport marker information
+          eventBus.emit(EventTypes.SHOW_TOOLTIP, {
+            type: userData.type,
+            polygonId: userData.polygonId,
+            position: userData.position,
+            screenX: event.clientX,
+            screenY: event.clientY
+          });
+          
+          // Hide tooltip after a delay
+          setTimeout(() => {
+            eventBus.emit(EventTypes.HIDE_TOOLTIP);
+          }, 2000);
+          
+          return;
+        }
+      }
+      
+      // If no marker was clicked, check for land intersection for measurement
+      const allLandMeshes = this.meshes.filter(mesh => mesh.visible);
+      const landIntersects = this.raycaster.intersectObjects(allLandMeshes);
+      
+      if (landIntersects.length > 0) {
+        const intersectionPoint = landIntersects[0].point;
+        
+        // Add measurement point
+        this.addMeasurementPoint(intersectionPoint);
+        return;
+      }
+      
+      // Debug: Log raycaster origin and direction
+      console.log("Raycaster origin:", this.raycaster.ray.origin);
+      console.log("Raycaster direction:", this.raycaster.ray.direction);
     }
     
     // Handle building view clicks
@@ -2528,7 +2520,9 @@ export default class SimplePolygonRenderer {
       
       // Ensure consistent appearance
       if (marker instanceof THREE.Mesh && marker.material instanceof THREE.MeshBasicMaterial) {
-        marker.material.opacity = 0.4; // Match the opacity from createBuildingPoints
+        // Make building points more visible in transport view
+        marker.material.opacity = 0.8; // Increased from 0.4 for better visibility
+        marker.material.color.set(0xFFFFFF); // White color for building points
       }
     });
     
@@ -2784,55 +2778,105 @@ export default class SimplePolygonRenderer {
         lng: this.bounds.centerLng - (end.z / this.bounds.scale)
       };
       
-      // Find the polygons containing the start and end points
-      const startPolygon = this.findPolygonContainingPoint(startLatLng);
-      const endPolygon = this.findPolygonContainingPoint(endLatLng);
+      // Find the building points or polygons containing the start and end points
+      const startBuildingInfo = this.findBuildingPointInfo(start);
+      const endBuildingInfo = this.findBuildingPointInfo(end);
       
-      // Find the path between the polygons
-      let pathInfo = "No path found";
+      // Prepare path information text
+      let pathInfo = "";
       
-      if (startPolygon && endPolygon) {
-        // Try to find a path
-        const path = this.findShortestPath(startPolygon.id, endPolygon.id);
+      if (startBuildingInfo && endBuildingInfo) {
+        // Both points are building points
+        pathInfo = `From: ${startBuildingInfo.type || 'Building'} in ${startBuildingInfo.polygonName}\nTo: ${endBuildingInfo.type || 'Building'} in ${endBuildingInfo.polygonName}`;
         
-        if (path && path.length > 0) {
-          // Count bridges in the path
-          let bridgeCount = 0;
-          let pathPolygons = [];
+        // Check if buildings are in different polygons
+        if (startBuildingInfo.polygonId !== endBuildingInfo.polygonId) {
+          // Try to find a path between the polygons
+          const path = this.findShortestPath(startBuildingInfo.polygonId, endBuildingInfo.polygonId);
           
-          // Add the names of polygons in the path
-          for (let i = 0; i < path.length; i++) {
-            const polygon = this.polygons.find(p => p.id === path[i]);
-            if (polygon) {
-              const polygonName = polygon.historicalName || polygon.englishName || polygon.id;
-              pathPolygons.push(polygonName);
-              
-              // Count bridges between consecutive polygons
-              if (i < path.length - 1) {
-                const currentPolygon = polygon;
-                const nextPolygonId = path[i + 1];
+          if (path && path.length > 0) {
+            // Count bridges in the path
+            let bridgeCount = 0;
+            let pathPolygons = [];
+            
+            // Add the names of polygons in the path
+            for (let i = 0; i < path.length; i++) {
+              const polygon = this.polygons.find(p => p.id === path[i]);
+              if (polygon) {
+                const polygonName = polygon.historicalName || polygon.englishName || polygon.id;
+                pathPolygons.push(polygonName);
                 
-                // Check if there's a bridge between these polygons
-                if (currentPolygon.bridgePoints) {
-                  const bridgesTo = currentPolygon.bridgePoints.filter(bp => 
-                    bp.connection && bp.connection.targetPolygonId === nextPolygonId
-                  );
-                  bridgeCount += bridgesTo.length > 0 ? 1 : 0;
+                // Count bridges between consecutive polygons
+                if (i < path.length - 1) {
+                  const currentPolygon = polygon;
+                  const nextPolygonId = path[i + 1];
+                  
+                  // Check if there's a bridge between these polygons
+                  if (currentPolygon.bridgePoints) {
+                    const bridgesTo = currentPolygon.bridgePoints.filter(bp => 
+                      bp.connection && bp.connection.targetPolygonId === nextPolygonId
+                    );
+                    bridgeCount += bridgesTo.length > 0 ? 1 : 0;
+                  }
                 }
               }
             }
+            
+            pathInfo += `\nPath: ${pathPolygons.join(' → ')}\nBridges: ${bridgeCount}`;
           }
-          
-          pathInfo = `Path: ${pathPolygons.join(' → ')}\nBridges: ${bridgeCount}`;
-        } else {
-          pathInfo = `Direct path from ${startPolygon.historicalName || startPolygon.englishName || startPolygon.id} to ${endPolygon.historicalName || endPolygon.englishName || endPolygon.id}`;
         }
-      } else if (startPolygon) {
-        pathInfo = `From: ${startPolygon.historicalName || startPolygon.englishName || startPolygon.id}\nTo: (not on land)`;
-      } else if (endPolygon) {
-        pathInfo = `From: (not on land)\nTo: ${endPolygon.historicalName || endPolygon.englishName || endPolygon.id}`;
+      } else if (startBuildingInfo) {
+        pathInfo = `From: ${startBuildingInfo.type || 'Building'} in ${startBuildingInfo.polygonName}\nTo: (not a building point)`;
+      } else if (endBuildingInfo) {
+        pathInfo = `From: (not a building point)\nTo: ${endBuildingInfo.type || 'Building'} in ${endBuildingInfo.polygonName}`;
       } else {
-        pathInfo = "Path over water (no land)";
+        // Fall back to polygon-based path info
+        const startPolygon = this.findPolygonContainingPoint(startLatLng);
+        const endPolygon = this.findPolygonContainingPoint(endLatLng);
+        
+        if (startPolygon && endPolygon) {
+          // Try to find a path
+          const path = this.findShortestPath(startPolygon.id, endPolygon.id);
+          
+          if (path && path.length > 0) {
+            // Count bridges in the path
+            let bridgeCount = 0;
+            let pathPolygons = [];
+            
+            // Add the names of polygons in the path
+            for (let i = 0; i < path.length; i++) {
+              const polygon = this.polygons.find(p => p.id === path[i]);
+              if (polygon) {
+                const polygonName = polygon.historicalName || polygon.englishName || polygon.id;
+                pathPolygons.push(polygonName);
+                
+                // Count bridges between consecutive polygons
+                if (i < path.length - 1) {
+                  const currentPolygon = polygon;
+                  const nextPolygonId = path[i + 1];
+                  
+                  // Check if there's a bridge between these polygons
+                  if (currentPolygon.bridgePoints) {
+                    const bridgesTo = currentPolygon.bridgePoints.filter(bp => 
+                      bp.connection && bp.connection.targetPolygonId === nextPolygonId
+                    );
+                    bridgeCount += bridgesTo.length > 0 ? 1 : 0;
+                  }
+                }
+              }
+            }
+            
+            pathInfo = `Path: ${pathPolygons.join(' → ')}\nBridges: ${bridgeCount}`;
+          } else {
+            pathInfo = `Direct path from ${startPolygon.historicalName || startPolygon.englishName || startPolygon.id} to ${endPolygon.historicalName || endPolygon.englishName || endPolygon.id}`;
+          }
+        } else if (startPolygon) {
+          pathInfo = `From: ${startPolygon.historicalName || startPolygon.englishName || startPolygon.id}\nTo: (not on land)`;
+        } else if (endPolygon) {
+          pathInfo = `From: (not on land)\nTo: ${endPolygon.historicalName || endPolygon.englishName || endPolygon.id}`;
+        } else {
+          pathInfo = "Path over water (no land)";
+        }
       }
       
       // Create a text label to show the path information
@@ -2951,6 +2995,60 @@ export default class SimplePolygonRenderer {
     
     // Call the pathfinder service to find a path
     this.findPathBetweenPoints(startLatLng, endLatLng);
+  }
+  
+  /**
+   * Find information about a building point at a given position
+   */
+  private findBuildingPointInfo(position: THREE.Vector3): {
+    type?: string;
+    polygonId: string;
+    polygonName: string;
+  } | null {
+    // Find the closest building point marker to this position
+    let closestMarker = null;
+    let minDistance = 0.5; // Maximum distance to consider (0.5 units)
+    
+    for (const marker of this.buildingPointMarkers) {
+      if (marker instanceof THREE.Mesh && marker.userData && marker.userData.id) {
+        const distance = position.distanceTo(marker.position);
+        if (distance < minDistance) {
+          minDistance = distance;
+          closestMarker = marker;
+        }
+      }
+    }
+    
+    if (closestMarker) {
+      const userData = closestMarker.userData;
+      const polygonId = userData.polygonId;
+      const polygon = this.polygons.find(p => p.id === polygonId);
+      const polygonName = polygon 
+        ? (polygon.historicalName || polygon.englishName || polygon.id)
+        : polygonId;
+      
+      // Extract building type from userData.id if available
+      // Format is typically: building-point-{polygonId}-{index}
+      let type = 'Building';
+      if (userData.id && userData.id.startsWith('building-point-')) {
+        // Try to get a more specific type if available
+        if (userData.type) {
+          type = userData.type.replace(/-/g, ' ');
+          // Capitalize first letter of each word
+          type = type.split(' ')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ');
+        }
+      }
+      
+      return {
+        type,
+        polygonId,
+        polygonName
+      };
+    }
+    
+    return null;
   }
   
   /**
