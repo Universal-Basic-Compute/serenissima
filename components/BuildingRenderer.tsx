@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import * as THREE from 'three';
 import { eventBus } from '@/lib/eventBus';
 import { EventTypes } from '@/lib/eventTypes';
