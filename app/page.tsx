@@ -108,6 +108,11 @@ export default function SimplePage() {
       setTimeout(() => {
         window.dispatchEvent(new Event('resize'));
       }, 100);
+      
+      // Ensure buildings are visible after menu is closed
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
+      }, 500);
     };
     
     const handleShowBuildings = () => {
@@ -128,6 +133,11 @@ export default function SimplePage() {
     if (activeView === 'buildings') {
       console.log('Currently in buildings view, dispatching showBuildings event immediately');
       window.dispatchEvent(new CustomEvent('showBuildings'));
+      
+      // Also ensure buildings are visible with debug markers
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
+      }, 1000);
     }
     
     return () => {
@@ -545,6 +555,12 @@ export default function SimplePage() {
             __html: `
               // Force buildings to be visible immediately
               window.dispatchEvent(new CustomEvent('showBuildings'));
+              
+              // Also ensure buildings are visible with debug markers
+              setTimeout(() => {
+                console.log('Dispatching ensureBuildingsVisible event from inline script');
+                window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
+              }, 2000);
             `
           }} />
           
@@ -556,6 +572,11 @@ export default function SimplePage() {
             onRefreshBuildings={() => {
               // Refresh buildings by dispatching an event
               eventBus.emit(EventTypes.BUILDING_PLACED, { refresh: true });
+              
+              // Also ensure buildings are visible after refresh
+              setTimeout(() => {
+                window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
+              }, 1000);
             }}
           />
           
@@ -567,6 +588,11 @@ export default function SimplePage() {
               setActiveView('buildings');
               // Show the 3D view again
               setShow3DView(true);
+              
+              // Ensure buildings are visible after closing menu
+              setTimeout(() => {
+                window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
+              }, 500);
             }}
             onBuildingSelect={() => {
               // Hide the 3D view when a building is selected
@@ -575,6 +601,11 @@ export default function SimplePage() {
             onBuildingClose={() => {
               // Show the 3D view again when the building detail is closed
               setShow3DView(true);
+              
+              // Ensure buildings are visible after closing building detail
+              setTimeout(() => {
+                window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
+              }, 500);
             }}
           />
         </>

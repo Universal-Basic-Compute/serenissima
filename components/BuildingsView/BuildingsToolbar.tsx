@@ -545,6 +545,40 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
       
       <button
         onClick={() => {
+          console.log('Triggering ensureBuildingsVisible...');
+          window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
+          
+          // Also create some test buildings at known positions
+          if (scene) {
+            // Create a test building at the origin
+            const geometry = new THREE.BoxGeometry(5, 5, 5);
+            const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+            const testBuilding = new THREE.Mesh(geometry, material);
+            testBuilding.position.set(0, 5, 0);
+            testBuilding.userData.buildingId = 'test-building-origin';
+            scene.add(testBuilding);
+            
+            // Create another test building at a known position
+            const testBuilding2 = new THREE.Mesh(geometry.clone(), material.clone());
+            testBuilding2.position.set(10, 5, 10);
+            testBuilding2.userData.buildingId = 'test-building-10-10';
+            scene.add(testBuilding2);
+            
+            console.log('Added test buildings at origin and (10,5,10)');
+          }
+        }}
+        className="px-4 py-2 bg-red-600 text-white rounded-md shadow-md hover:bg-red-700 transition-colors flex items-center space-x-2"
+        title="Make buildings visible"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+          <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
+        </svg>
+        <span>Make Buildings Visible</span>
+      </button>
+      
+      <button
+        onClick={() => {
           // Check if buildings are in view
           if (scene && camera) {
             console.log('Checking if buildings are in camera view...');

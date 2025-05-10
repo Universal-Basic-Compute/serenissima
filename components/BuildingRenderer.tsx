@@ -284,7 +284,7 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
   };
   
   // Function to focus camera on buildings
-  const focusCameraOnBuildings = () => {
+  const focusCameraOnBuildings = useCallback(() => {
     if (!scene || buildingMeshesRef.current.size === 0) {
       console.log('Cannot focus on buildings: scene or buildings not available');
       return;
@@ -309,7 +309,9 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
     
     console.log('Building bounding box:', {
       center: center,
-      size: size
+      size: size,
+      min: boundingBox.min,
+      max: boundingBox.max
     });
     
     // Calculate the distance needed to view all buildings
@@ -345,7 +347,90 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
     } else {
       console.warn('Camera not found, cannot focus on buildings');
     }
-  };
+  }, [scene]);
+  
+  // Function to ensure buildings are visible
+  const ensureBuildingsVisible = useCallback(() => {
+    if (!scene) return;
+    
+    console.log('Ensuring buildings are visible...');
+    
+    // Find all buildings in the scene
+    const buildings: THREE.Object3D[] = [];
+    scene.traverse((object) => {
+      if (object.userData && object.userData.buildingId) {
+        buildings.push(object);
+      }
+    });
+    
+    console.log(`Found ${buildings.length} buildings in the scene`);
+    
+    if (buildings.length === 0) {
+      console.warn('No buildings found in the scene');
+      
+      // Create test buildings at known positions
+      const geometry = new THREE.BoxGeometry(5, 5, 5);
+      const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+      
+      // Create a test building at the origin
+      const testBuilding = new THREE.Mesh(geometry, material);
+      testBuilding.position.set(0, 5, 0);
+      testBuilding.userData = {
+        buildingId: 'test-building-origin',
+        type: 'test-building'
+      };
+      scene.add(testBuilding);
+      
+      // Create another test building at a known position
+      const testBuilding2 = new THREE.Mesh(geometry.clone(), material.clone());
+      testBuilding2.position.set(10, 5, 10);
+      testBuilding2.userData = {
+        buildingId: 'test-building-10-10',
+        type: 'test-building'
+      };
+      scene.add(testBuilding2);
+      
+      console.log('Added test buildings at origin and (10,5,10)');
+      
+      // Store references for later cleanup
+      buildingMeshesRef.current.set('test-building-origin', testBuilding);
+      buildingMeshesRef.current.set('test-building-10-10', testBuilding2);
+      
+      // Update buildings array with new test buildings
+      buildings.push(testBuilding, testBuilding2);
+    }
+    
+    // Create debug markers for each building
+    buildings.forEach((building) => {
+      // Remove any existing debug markers for this building
+      scene.traverse((object) => {
+        if (object.userData && 
+            object.userData.isDebugMarker && 
+            object.userData.buildingId === building.userData.buildingId) {
+          scene.remove(object);
+        }
+      });
+      
+      // Create a visible marker at the building position
+      const markerGeometry = new THREE.SphereGeometry(2, 16, 16);
+      const markerMaterial = new THREE.MeshBasicMaterial({ 
+        color: 0xff0000,
+        transparent: false
+      });
+      const marker = new THREE.Mesh(markerGeometry, markerMaterial);
+      marker.position.copy(building.position);
+      marker.position.y += 10; // Position above the building
+      marker.userData = {
+        isDebugMarker: true,
+        buildingId: building.userData.buildingId
+      };
+      scene.add(marker);
+      console.log(`Added debug marker for building ${building.userData.buildingId} at position:`, marker.position);
+    });
+    
+    // Focus camera on buildings
+    focusCameraOnBuildings();
+  }, [scene, focusCameraOnBuildings]);
   
   // Function to add debug markers for buildings
   const addDebugMarkers = () => {
@@ -406,7 +491,7 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
         const timer = setTimeout(() => {
           verifyAndFixBuildingPositions();
           // Focus camera on buildings after fixing positions
-          focusCameraOnBuildings();
+          ensureBuildingsVisible();
         }, 2000);
         
         return () => clearTimeout(timer);
@@ -430,7 +515,7 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
       
       buildingMeshesRef.current.clear();
     };
-  }, [active, scene]);
+  }, [active, scene, ensureBuildingsVisible]);
   
   // Listen for the fixBuildingPositions event and other custom events
   useEffect(() => {
@@ -446,16 +531,22 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
       addDebugMarkers();
     };
     
+    const handleEnsureBuildingsVisible = () => {
+      ensureBuildingsVisible();
+    };
+    
     window.addEventListener('fixBuildingPositions', handleFixPositions);
     window.addEventListener('focusOnBuildings', handleFocusOnBuildings);
     window.addEventListener('addDebugMarkers', handleAddDebugMarkers);
+    window.addEventListener('ensureBuildingsVisible', handleEnsureBuildingsVisible);
     
     return () => {
       window.removeEventListener('fixBuildingPositions', handleFixPositions);
       window.removeEventListener('focusOnBuildings', handleFocusOnBuildings);
       window.removeEventListener('addDebugMarkers', handleAddDebugMarkers);
+      window.removeEventListener('ensureBuildingsVisible', handleEnsureBuildingsVisible);
     };
-  }, [scene]);
+  }, [scene, focusCameraOnBuildings, ensureBuildingsVisible]);
   
   // Listen for building events
   useEffect(() => {
@@ -469,6 +560,12 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
         console.log('Refreshing all buildings...');
         const buildingsData = await fetchBuildings();
         renderBuildings(buildingsData);
+        
+        // Ensure buildings are visible after refresh
+        setTimeout(() => {
+          ensureBuildingsVisible();
+        }, 1000);
+        
         return;
       }
       
@@ -513,6 +610,11 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
           owner: normalizedBuilding.owner || normalizedBuilding.created_by,
           completionTime: Date.now()
         });
+        
+        // Ensure the new building is visible
+        setTimeout(() => {
+          ensureBuildingsVisible();
+        }, 500);
       }
     };
     

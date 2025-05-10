@@ -214,6 +214,67 @@ export class BuildingPositionManager {
     
     return fixedBuilding;
   }
+  
+  /**
+   * Ensure buildings are visible in the scene
+   * @param scene THREE.Scene containing buildings
+   */
+  public ensureBuildingsVisible(scene: THREE.Scene): void {
+    console.log('Ensuring buildings are visible...');
+    
+    // Find all buildings in the scene
+    const buildings: THREE.Object3D[] = [];
+    scene.traverse((object) => {
+      if (object.userData && object.userData.buildingId) {
+        buildings.push(object);
+      }
+    });
+    
+    console.log(`Found ${buildings.length} buildings in the scene`);
+    
+    if (buildings.length === 0) {
+      console.warn('No buildings found in the scene');
+      return;
+    }
+    
+    // Create debug markers for each building
+    buildings.forEach((building) => {
+      // Create a visible marker at the building position
+      const markerGeometry = new THREE.SphereGeometry(2, 16, 16);
+      const markerMaterial = new THREE.MeshBasicMaterial({ 
+        color: 0xff0000,
+        transparent: false
+      });
+      const marker = new THREE.Mesh(markerGeometry, markerMaterial);
+      marker.position.copy(building.position);
+      marker.position.y += 10; // Position above the building
+      marker.userData = {
+        isDebugMarker: true,
+        buildingId: building.userData.buildingId
+      };
+      scene.add(marker);
+      console.log(`Added debug marker for building ${building.userData.buildingId} at position:`, marker.position);
+    });
+    
+    // Create a bounding box for all buildings
+    const boundingBox = new THREE.Box3();
+    buildings.forEach(building => {
+      boundingBox.expandByObject(building);
+    });
+    
+    // Log the bounding box
+    const center = new THREE.Vector3();
+    boundingBox.getCenter(center);
+    const size = new THREE.Vector3();
+    boundingBox.getSize(size);
+    
+    console.log('Building bounding box:', {
+      center: center,
+      size: size,
+      min: boundingBox.min,
+      max: boundingBox.max
+    });
+  }
 }
 
 // Create a singleton instance
