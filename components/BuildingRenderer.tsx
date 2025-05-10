@@ -26,14 +26,14 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ active }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const buildingMeshesRef = useRef<Map<string, THREE.Object3D>>(new Map());
-  const [active, setActive] = useState<boolean>(false);
+  const [isActive, setIsActive] = useState<boolean>(active);
   
   // Create renderer factory
   const rendererFactoryRef = useRef<BuildingRendererFactory | null>(null);
   
   // Initialize the scene, camera, and renderer
   useEffect(() => {
-    if (!active || !canvasRef.current) return;
+    if (!isActive || !canvasRef.current) return;
     
     console.log('BuildingRenderer: Initializing standalone scene');
     
@@ -102,7 +102,7 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ active }) => {
     
     // Animation loop
     const animate = () => {
-      if (!active) return;
+      if (!isActive) return;
       
       requestAnimationFrame(animate);
       
@@ -160,7 +160,7 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ active }) => {
       
       stopMemoryMonitoring();
     };
-  }, [active]);
+  }, [isActive]);
   
   // Function to create a building mesh using the renderer factory
   const createBuildingMesh = async (building: BuildingData) => {
@@ -615,7 +615,7 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ active }) => {
   
   // Listen for building events
   useEffect(() => {
-    if (!active) return;
+    if (!isActive) return;
     
     // Double-check that we have a valid scene
     if (!sceneRef.current) {
@@ -773,38 +773,6 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ active }) => {
     };
   }, [active, buildings, ensureBuildingsVisible]);
   
-  return (
-    <div className="absolute inset-0 z-10 pointer-events-none">
-      <canvas 
-        ref={canvasRef} 
-        className="w-full h-full pointer-events-auto"
-        style={{ 
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          zIndex: 10,
-          opacity: 0.9 // Make it slightly transparent to see the main scene behind
-        }}
-      />
-      
-      {/* Loading indicator */}
-      {loading && (
-        <div className="absolute top-4 left-4 bg-black/70 text-white px-3 py-1 rounded">
-          Loading buildings...
-        </div>
-      )}
-      
-      {/* Error message */}
-      {error && (
-        <div className="absolute top-4 left-4 bg-red-600/90 text-white px-3 py-1 rounded">
-          Error: {error}
-        </div>
-      )}
-    </div>
-  );
-};
-
-export default BuildingRenderer;
   /**
    * Update building visibility based on camera distance
    */
@@ -866,4 +834,37 @@ export default BuildingRenderer;
     
     return null;
   };
+  
+  return (
+    <div className="absolute inset-0 z-10 pointer-events-none">
+      <canvas 
+        ref={canvasRef} 
+        className="w-full h-full pointer-events-auto"
+        style={{ 
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          zIndex: 10,
+          opacity: 0.9 // Make it slightly transparent to see the main scene behind
+        }}
+      />
+      
+      {/* Loading indicator */}
+      {loading && (
+        <div className="absolute top-4 left-4 bg-black/70 text-white px-3 py-1 rounded">
+          Loading buildings...
+        </div>
+      )}
+      
+      {/* Error message */}
+      {error && (
+        <div className="absolute top-4 left-4 bg-red-600/90 text-white px-3 py-1 rounded">
+          Error: {error}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default BuildingRenderer;
   
