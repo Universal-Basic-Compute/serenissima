@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { getWalletAddress } from '../walletUtils';
-import { getUserName } from '../userUtils';
+import { getUsername } from '../userUtils';
 import { getApiBaseUrl } from '../apiUtils';
 import { eventBus, EventTypes } from '../eventBus';
 
