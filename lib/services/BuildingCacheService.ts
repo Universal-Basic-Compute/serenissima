@@ -377,9 +377,34 @@ export class BuildingCacheService {
     // Increase precision for mesh detection
     raycaster.params.Mesh.threshold = 0.1;
     
+    // Since this.options.scene might not be available, we need to find the scene another way
+    // Try to get the scene from the global context
+    let scene: THREE.Scene | null = null;
+    
+    if (typeof window !== 'undefined') {
+      // Try to get scene from window.__threeContext
+      if (window.__threeContext && window.__threeContext.scene) {
+        scene = window.__threeContext.scene;
+      }
+      
+      // If not found, try to get from canvas element
+      if (!scene) {
+        const canvas = document.querySelector('canvas');
+        if (canvas && canvas.__scene) {
+          scene = canvas.__scene;
+        }
+      }
+    }
+    
+    // If we couldn't find a scene, return a default position
+    if (!scene) {
+      console.warn('No scene found for ground level detection, using default height');
+      return new THREE.Vector3(position.x, 0, position.z);
+    }
+    
     // Find all land meshes in the scene
     const landMeshes: THREE.Object3D[] = [];
-    this.options.scene.traverse(object => {
+    scene.traverse(object => {
       // Include all meshes except those we want to exclude
       if (object instanceof THREE.Mesh && 
           !object.userData.buildingId && 

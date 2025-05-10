@@ -19,6 +19,19 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
     console.warn('BuildingRenderer: scene is not provided or undefined');
     return null; // Return null instead of rendering anything
   }
+  
+  // Add a ref to store the scene
+  const sceneRef = useRef<THREE.Scene>(scene);
+  
+  // Update the ref when scene changes
+  useEffect(() => {
+    sceneRef.current = scene;
+  }, [scene]);
+  // Add early return if scene is not available
+  if (!scene) {
+    console.warn('BuildingRenderer: scene is not provided or undefined');
+    return null; // Return null instead of rendering anything
+  }
   const [buildings, setBuildings] = useState<BuildingData[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -29,14 +42,14 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
   
   // Initialize renderer factory
   useEffect(() => {
-    if (!scene) {
+    if (!sceneRef.current) {
       console.warn('BuildingRenderer: scene is not defined, cannot initialize renderer factory');
       return;
     }
     
     try {
       rendererFactoryRef.current = new BuildingRendererFactory({
-        scene,
+        scene: sceneRef.current,
         positionManager: buildingPositionManager,
         cacheService: buildingCacheService
       });
@@ -49,11 +62,11 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
     return () => {
       // No cleanup needed for factory
     };
-  }, [scene]);
+  }, [sceneRef.current]);
   
   // Function to verify and fix building positions
   const verifyAndFixBuildingPositions = () => {
-    if (!scene) {
+    if (!sceneRef.current) {
       console.warn('Cannot verify building positions: scene is not defined');
       return;
     }
@@ -62,7 +75,7 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
     
     // Find all buildings in the scene
     const buildings = [];
-    scene.traverse((object) => {
+    sceneRef.current.traverse((object) => {
       if (object.userData && object.userData.buildingId) {
         buildings.push(object);
       }
@@ -127,7 +140,7 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
   // Function to create a building mesh using the renderer factory
   const createBuildingMesh = async (building: BuildingData) => {
     try {
-      if (!scene) {
+      if (!sceneRef.current) {
         console.error('Cannot create building mesh: scene is not defined');
         return null;
       }
@@ -169,6 +182,11 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
   
   // Function to diagnose building positions
   const diagnoseBuildingPositions = (buildings: BuildingData[]): void => {
+    if (!sceneRef.current) {
+      console.warn('Cannot diagnose building positions: scene is not defined');
+      return;
+    }
+    
     console.log('Diagnosing building positions...');
     
     // Count buildings with different position formats
@@ -421,7 +439,7 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
   
   // Function to focus camera on buildings
   const focusCameraOnBuildings = useCallback(() => {
-    if (!scene) {
+    if (!sceneRef.current) {
       console.warn('Cannot focus on buildings: scene is not defined');
       return;
     }
@@ -492,7 +510,7 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
   
   // Function to ensure buildings are visible
   const ensureBuildingsVisible = useCallback(() => {
-    if (!scene) {
+    if (!sceneRef.current) {
       console.warn('Cannot ensure buildings are visible: scene is not defined');
       return;
     }
@@ -501,7 +519,7 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
     
     // Find all buildings in the scene
     const buildings: THREE.Object3D[] = [];
-    scene.traverse((object) => {
+    sceneRef.current.traverse((object) => {
       if (object.userData && object.userData.buildingId) {
         buildings.push(object);
       }
@@ -523,7 +541,7 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
         buildingId: 'test-building-origin',
         type: 'test-building'
       };
-      scene.add(testBuilding);
+      sceneRef.current.add(testBuilding);
       
       // Create another test building at a known position
       const testBuilding2 = new THREE.Mesh(geometry.clone(), material.clone());
@@ -532,7 +550,7 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
         buildingId: 'test-building-10-10',
         type: 'test-building'
       };
-      scene.add(testBuilding2);
+      sceneRef.current.add(testBuilding2);
       
       console.log('Added test buildings at origin and (10,5,10)');
       
@@ -568,7 +586,7 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
         isDebugMarker: true,
         buildingId: building.userData.buildingId
       };
-      scene.add(marker);
+      sceneRef.current.add(marker);
       console.log(`Added debug marker for building ${building.userData.buildingId} at position:`, marker.position);
     });
     
@@ -578,7 +596,7 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
   
   // Function to add debug markers for buildings
   const addDebugMarkers = () => {
-    if (!scene) {
+    if (!sceneRef.current) {
       console.warn('Cannot add debug markers: scene is not defined');
       return;
     }
@@ -586,9 +604,9 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
     console.log('Adding debug markers for buildings...');
     
     // Remove any existing debug markers
-    scene.traverse((object) => {
+    sceneRef.current.traverse((object) => {
       if (object.userData && object.userData.isDebugMarker) {
-        scene.remove(object);
+        sceneRef.current.remove(object);
         if (object instanceof THREE.Mesh) {
           if (object.geometry) object.geometry.dispose();
           if (object.material instanceof THREE.Material) {
@@ -621,7 +639,7 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
       };
       
       // Add to scene
-      scene.add(marker);
+      sceneRef.current.add(marker);
       
       console.log(`Added debug marker for building ${id} at position:`, marker.position);
     });
@@ -631,7 +649,7 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
   useEffect(() => {
     if (!active) return;
     
-    if (!scene) {
+    if (!sceneRef.current) {
       console.warn('BuildingRenderer: scene is not defined, cannot render buildings');
       return;
     }
@@ -651,7 +669,7 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
     
     // Add a delay to ensure buildings are loaded
     const timer = setTimeout(() => {
-      if (scene) { // Add additional check here
+      if (sceneRef.current) { // Add additional check here
         verifyAndFixBuildingPositions();
         // Focus camera on buildings after fixing positions
         ensureBuildingsVisible();
@@ -672,8 +690,8 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
       } else {
         // Fallback if factory not available
         for (const mesh of buildingMeshesRef.current.values()) {
-          if (scene) { // Add check for scene here
-            scene.remove(mesh);
+          if (sceneRef.current) { // Add check for scene here
+            sceneRef.current.remove(mesh);
           }
         }
       }
@@ -716,7 +734,7 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
   // Listen for building events
   useEffect(() => {
     if (!active) return;
-    if (!scene) {
+    if (!sceneRef.current) {
       console.warn('BuildingRenderer: scene is not defined, cannot listen for building events');
       return;
     }
@@ -916,7 +934,7 @@ export default BuildingRenderer;
    * Update building visibility based on camera distance
    */
   const updateBuildingVisibility = () => {
-    if (!scene) {
+    if (!sceneRef.current) {
       console.warn('Cannot update building visibility: scene is not defined');
       return;
     }
@@ -977,7 +995,7 @@ export default BuildingRenderer;
   // Add effect to update building visibility based on camera distance
   useEffect(() => {
     if (!active) return;
-    if (!scene) {
+    if (!sceneRef.current) {
       console.warn('BuildingRenderer: scene is not defined, cannot update building visibility');
       return;
     }
