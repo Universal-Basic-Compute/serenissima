@@ -3986,6 +3986,36 @@ export default class SimplePolygonRenderer {
       }
     });
     
+    // Add proximity-based connections for polygons that are close to each other
+    // This helps with navigation when bridge data is incomplete
+    this.polygons.forEach(polygon1 => {
+      if (!polygon1.centroid) return;
+      
+      this.polygons.forEach(polygon2 => {
+        // Skip self-connections and already connected polygons
+        if (polygon1.id === polygon2.id || 
+            !polygon2.centroid || 
+            graph[polygon1.id].includes(polygon2.id)) {
+          return;
+        }
+        
+        // Calculate distance between centroids
+        const distance = this.calculateDistanceBetweenPoints(
+          polygon1.centroid, 
+          polygon2.centroid
+        );
+        
+        // If polygons are close enough, add a connection
+        // The threshold is arbitrary and can be adjusted
+        const PROXIMITY_THRESHOLD = 0.005; // in degrees, roughly 500m
+        if (distance < PROXIMITY_THRESHOLD) {
+          // Add bidirectional connection
+          graph[polygon1.id].push(polygon2.id);
+          graph[polygon2.id].push(polygon1.id);
+        }
+      });
+    });
+    
     // Log the graph for debugging
     console.log('Built navigation graph with', Object.keys(graph).length, 'nodes');
     
@@ -4001,6 +4031,18 @@ export default class SimplePolygonRenderer {
     console.log(`Total connections in graph: ${totalConnections}`);
     
     return graph;
+  }
+  
+  /**
+   * Calculate distance between two points in degrees
+   */
+  private calculateDistanceBetweenPoints(
+    point1: {lat: number, lng: number}, 
+    point2: {lat: number, lng: number}
+  ): number {
+    const latDiff = point1.lat - point2.lat;
+    const lngDiff = point1.lng - point2.lng;
+    return Math.sqrt(latDiff * latDiff + lngDiff * lngDiff);
   }
   
   /**
@@ -4160,6 +4202,9 @@ export default class SimplePolygonRenderer {
     // Keep track of visited polygons to avoid cycles
     const visitedPolygons = new Set<string>([start]);
     
+    // Build a complete graph of all polygon connections for fallback navigation
+    const completeGraph = this.buildNavigationGraph();
+    
     // Continue until we reach the end or can't proceed further
     while (currentPolygonId !== end) {
       console.log(`Current polygon: ${currentPolygonId}`);
@@ -4207,10 +4252,38 @@ export default class SimplePolygonRenderer {
         });
       }
       
-      // If no valid bridge connections, we're stuck
+      // If no valid bridge connections, try to find an alternative path
       if (bridgeConnections.length === 0) {
-        console.warn(`No valid bridge connections from ${currentPolygonId}`);
-        break;
+        console.warn(`No valid bridge connections from ${currentPolygonId}, looking for alternatives`);
+        
+        // Look for any unvisited neighbors in the complete graph
+        const neighbors = completeGraph[currentPolygonId] || [];
+        const unvisitedNeighbors = neighbors.filter(neighbor => !visitedPolygons.has(neighbor));
+        
+        if (unvisitedNeighbors.length > 0) {
+          // Calculate scores for each unvisited neighbor
+          const scoredNeighbors = unvisitedNeighbors.map(neighborId => ({
+            targetPolygonId: neighborId,
+            score: this.heuristicDistance(neighborId, end)
+          }));
+          
+          // Sort by score
+          scoredNeighbors.sort((a, b) => a.score - b.score);
+          
+          // Choose the best alternative
+          const bestAlternative = scoredNeighbors[0];
+          console.log(`No bridge found, using alternative path to ${bestAlternative.targetPolygonId}`);
+          
+          // Add to path and continue
+          path.push(bestAlternative.targetPolygonId);
+          visitedPolygons.add(bestAlternative.targetPolygonId);
+          currentPolygonId = bestAlternative.targetPolygonId;
+          continue;
+        } else {
+          // If no alternatives, we're stuck
+          console.warn(`No alternative paths found from ${currentPolygonId}`);
+          break;
+        }
       }
       
       // Sort connections by score (lowest first)
@@ -4499,8 +4572,17 @@ export default class SimplePolygonRenderer {
       
       // Find the current polygon
       const currentPolygon = this.polygons.find(p => p.id === currentPolygonId);
-      if (!currentPolygon || !currentPolygon.bridgePoints) {
-        console.warn(`Polygon ${currentPolygonId} not found or has no bridge points`);
+      if (!currentPolygon) {
+        console.warn(`Polygon ${currentPolygonId} not found`);
+        
+        // Try to use centroids as waypoints
+        this.addCentroidWaypoints(currentPolygonId, nextPolygonId, pathPoints);
+        continue;
+      }
+      
+      // Check if the polygon has bridge points
+      if (!currentPolygon.bridgePoints || !Array.isArray(currentPolygon.bridgePoints) || currentPolygon.bridgePoints.length === 0) {
+        console.warn(`Polygon ${currentPolygonId} has no bridge points`);
         
         // Try to use centroids as waypoints
         this.addCentroidWaypoints(currentPolygonId, nextPolygonId, pathPoints);
@@ -4587,7 +4669,24 @@ export default class SimplePolygonRenderer {
       } else {
         console.warn(`No bridge found between ${currentPolygonId} and ${nextPolygonId}`);
         
-        // Try to use centroids as waypoints
+        // Check if these polygons are adjacent (share a border)
+        const areAdjacent = this.arePolygonsAdjacent(currentPolygonId, nextPolygonId);
+        
+        if (areAdjacent) {
+          console.log(`Polygons ${currentPolygonId} and ${nextPolygonId} are adjacent, creating virtual bridge`);
+          
+          // Create a virtual bridge between the polygons using their closest points
+          const virtualBridgePoints = this.findClosestPointsBetweenPolygons(currentPolygonId, nextPolygonId);
+          
+          if (virtualBridgePoints) {
+            // Add the virtual bridge points to the path
+            pathPoints.push(virtualBridgePoints.point1);
+            pathPoints.push(virtualBridgePoints.point2);
+            continue;
+          }
+        }
+        
+        // If not adjacent or couldn't find closest points, use centroids as waypoints
         this.addCentroidWaypoints(currentPolygonId, nextPolygonId, pathPoints);
       }
     }
@@ -4729,6 +4828,101 @@ export default class SimplePolygonRenderer {
     } else {
       console.warn(`Could not find centroids for polygons ${currentPolygonId} and/or ${nextPolygonId}`);
     }
+  }
+  
+  /**
+   * Check if two polygons are adjacent (share a border)
+   */
+  private arePolygonsAdjacent(polygon1Id: string, polygon2Id: string): boolean {
+    const polygon1 = this.polygons.find(p => p.id === polygon1Id);
+    const polygon2 = this.polygons.find(p => p.id === polygon2Id);
+    
+    if (!polygon1 || !polygon2 || !polygon1.coordinates || !polygon2.coordinates) {
+      return false;
+    }
+    
+    // Check if any edge of polygon1 is shared with any edge of polygon2
+    for (let i = 0; i < polygon1.coordinates.length; i++) {
+      const p1 = polygon1.coordinates[i];
+      const p2 = polygon1.coordinates[(i + 1) % polygon1.coordinates.length];
+      
+      for (let j = 0; j < polygon2.coordinates.length; j++) {
+        const q1 = polygon2.coordinates[j];
+        const q2 = polygon2.coordinates[(j + 1) % polygon2.coordinates.length];
+        
+        // Check if the edges are the same (in either direction)
+        if ((this.arePointsEqual(p1, q1) && this.arePointsEqual(p2, q2)) ||
+            (this.arePointsEqual(p1, q2) && this.arePointsEqual(p2, q1))) {
+          return true;
+        }
+      }
+    }
+    
+    return false;
+  }
+  
+  /**
+   * Check if two points are approximately equal
+   */
+  private arePointsEqual(p1: {lat: number, lng: number}, p2: {lat: number, lng: number}): boolean {
+    const EPSILON = 1e-8; // Small threshold for floating point comparison
+    return Math.abs(p1.lat - p2.lat) < EPSILON && Math.abs(p1.lng - p2.lng) < EPSILON;
+  }
+  
+  /**
+   * Find the closest points between two polygons
+   */
+  private findClosestPointsBetweenPolygons(polygon1Id: string, polygon2Id: string): {point1: THREE.Vector3, point2: THREE.Vector3} | null {
+    const polygon1 = this.polygons.find(p => p.id === polygon1Id);
+    const polygon2 = this.polygons.find(p => p.id === polygon2Id);
+    
+    if (!polygon1 || !polygon2 || !polygon1.coordinates || !polygon2.coordinates) {
+      return null;
+    }
+    
+    let minDistance = Infinity;
+    let closestPoint1: {lat: number, lng: number} | null = null;
+    let closestPoint2: {lat: number, lng: number} | null = null;
+    
+    // Check each pair of points from both polygons
+    for (const p1 of polygon1.coordinates) {
+      for (const p2 of polygon2.coordinates) {
+        const distance = this.calculateDistanceBetweenPoints(p1, p2);
+        
+        if (distance < minDistance) {
+          minDistance = distance;
+          closestPoint1 = p1;
+          closestPoint2 = p2;
+        }
+      }
+    }
+    
+    if (closestPoint1 && closestPoint2) {
+      // Convert to normalized coordinates
+      const normalizedPoint1 = normalizeCoordinates(
+        [closestPoint1],
+        this.bounds.centerLat,
+        this.bounds.centerLng,
+        this.bounds.scale,
+        this.bounds.latCorrectionFactor
+      )[0];
+      
+      const normalizedPoint2 = normalizeCoordinates(
+        [closestPoint2],
+        this.bounds.centerLat,
+        this.bounds.centerLng,
+        this.bounds.scale,
+        this.bounds.latCorrectionFactor
+      )[0];
+      
+      // Create 3D points
+      const point1 = new THREE.Vector3(normalizedPoint1.x, 0.15, -normalizedPoint1.y);
+      const point2 = new THREE.Vector3(normalizedPoint2.x, 0.15, -normalizedPoint2.y);
+      
+      return { point1, point2 };
+    }
+    
+    return null;
   }
 
   /**
