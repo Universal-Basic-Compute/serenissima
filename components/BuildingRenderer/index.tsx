@@ -120,19 +120,38 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
   
   // Function to normalize coordinates
   const normalizeCoordinates = (position: any): THREE.Vector3 => {
-    // Check if these are lat/lng coordinates
-    if (position.x > 40 && position.x < 50 && position.z > 10 && position.z < 20) {
+    // Make sure we have valid position data
+    if (!position) {
+      console.warn('Invalid position data:', position);
+      return new THREE.Vector3(0, 0, 0);
+    }
+    
+    // Log the incoming position for debugging
+    console.log('Normalizing position:', position);
+    
+    // Check if these are lat/lng coordinates (Venice is around 45.4, 12.3)
+    if (position.x >= 40 && position.x <= 50 && 
+        (position.z >= 10 && position.z <= 20 || 
+         (typeof position.lng === 'number' && position.lng >= 10 && position.lng <= 20))) {
+      
       // These appear to be Venice lat/lng coordinates
-      // Convert to a reasonable scene position
-      return new THREE.Vector3(
-        (position.x - 45) * 100, // Center around 45 degrees latitude
-        position.y,
-        (position.z - 12) * 100  // Center around 12 degrees longitude
+      // Get the z/longitude value from the appropriate property
+      const longitude = position.z || position.lng || 0;
+      
+      // Convert to scene coordinates - use a smaller scale factor for better visibility
+      const normalizedPosition = new THREE.Vector3(
+        (position.x - 45.4) * 50, // Center around Venice's latitude
+        position.y || 0,
+        (longitude - 12.3) * 50  // Center around Venice's longitude
       );
+      
+      console.log('Converted lat/lng coordinates to:', normalizedPosition);
+      return normalizedPosition;
     }
     
     // Return original position if not lat/lng
-    return new THREE.Vector3(position.x, position.y, position.z);
+    console.log('Using original coordinates:', position);
+    return new THREE.Vector3(position.x, position.y || 0, position.z);
   };
 
   // Function to render a building
@@ -175,12 +194,13 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
             
             // Position and rotate the model
             const normalizedPosition = normalizeCoordinates(position);
-            model.position.set(normalizedPosition.x, normalizedPosition.y, normalizedPosition.z);
+            
+            // Ensure the building is at ground level (y=0) with a small offset to prevent z-fighting
+            normalizedPosition.y = 0.1;
+            
+            model.position.copy(normalizedPosition);
             model.rotation.y = rotation || 0;
             console.log(`Positioned model at normalized position:`, normalizedPosition);
-            
-            // Add a small y-offset to ensure buildings appear above the land
-            model.position.y += 0.1; // Raise slightly above ground level
             
             // Calculate bounding box to properly scale the model
             const box = new THREE.Box3().setFromObject(model);
@@ -206,10 +226,10 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
             }
             
             // Add a visible helper at the building position
-            const helperGeometry = new THREE.SphereGeometry(1, 16, 16);
+            const helperGeometry = new THREE.SphereGeometry(0.5, 16, 16);
             const helperMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
             const helper = new THREE.Mesh(helperGeometry, helperMaterial);
-            helper.position.copy(model.position);
+            helper.position.copy(normalizedPosition);
             scene.add(helper);
             console.log(`Added position helper at ${JSON.stringify(helper.position)}`);
             
@@ -254,6 +274,8 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
   const createFallbackMesh = (id: string, type: string, position: any, rotation: number) => {
     if (!scene) return;
     
+    console.log(`Creating fallback mesh for building ${id} (${type})`);
+    
     // Create a fallback mesh
     const geometry = new THREE.BoxGeometry(2, 1, 2);
     // Use amber color for all buildings
@@ -264,17 +286,21 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
     
     // Position and rotate the fallback
     const normalizedPosition = normalizeCoordinates(position);
-    fallbackMesh.position.set(normalizedPosition.x, normalizedPosition.y + 0.5, normalizedPosition.z);
+    
+    // Ensure the building is at ground level (y=0) with a small offset to prevent z-fighting
+    normalizedPosition.y = 0.5; // Half the height of the box
+    
+    fallbackMesh.position.copy(normalizedPosition);
     fallbackMesh.rotation.y = rotation || 0;
     
     // Make the fallback mesh larger for visibility
     fallbackMesh.scale.set(3, 3, 3);
     
     // Add a visible helper at the building position
-    const helperGeometry = new THREE.SphereGeometry(1, 16, 16);
+    const helperGeometry = new THREE.SphereGeometry(0.5, 16, 16);
     const helperMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
     const helper = new THREE.Mesh(helperGeometry, helperMaterial);
-    helper.position.copy(fallbackMesh.position);
+    helper.position.copy(normalizedPosition);
     scene.add(helper);
     console.log(`Added position helper at ${JSON.stringify(helper.position)}`);
     
