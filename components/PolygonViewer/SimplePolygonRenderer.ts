@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils.js';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { normalizeCoordinates, createPolygonShape } from './utils';
 import { getUserService } from '../../lib/services/UserService';
 import { eventBus } from '@/lib/eventBus';
@@ -2644,335 +2645,104 @@ export default class SimplePolygonRenderer {
    */
   private async createBuildingMesh(building: any, position: THREE.Vector3): Promise<void> {
     try {
-      // Create a visually distinctive building mesh based on building type
-      let buildingGroup = new THREE.Group();
+      console.log(`Creating building mesh for ${building.id} of type ${building.type}`);
+      
+      // Create a loader for GLB files
+      const loader = new GLTFLoader();
+      
+      // Determine the path to the GLB file based on building type and variant
+      const variant = building.variant || 'model';
+      const modelPath = `/assets/buildings/models/${building.type}/${variant}.glb`;
+      
+      console.log(`Attempting to load model from: ${modelPath}`);
+      
+      // Create a group to hold the model and any additional elements
+      const buildingGroup = new THREE.Group();
       
       // Position the group
       buildingGroup.position.copy(position);
       // Raise it slightly above the ground
       buildingGroup.position.y += 0.1;
       
-      // Apply a random rotation for variety (unless it's a dock)
-      if (building.type.toLowerCase() !== 'dock') {
-        buildingGroup.rotation.y = building.rotation || Math.random() * Math.PI * 2;
-      }
-      
-      // Create different building types with more visual distinction
-      switch (building.type.toLowerCase()) {
-        case 'dock':
-          // Create a wooden dock extending into water
-          const dockBase = new THREE.Mesh(
-            new THREE.BoxGeometry(4, 0.5, 8),
-            new THREE.MeshStandardMaterial({ 
-              color: 0x8B4513,
-              roughness: 0.8,
-              metalness: 0.2
-            })
+      try {
+        // Load the GLB model
+        const gltf = await new Promise<any>((resolve, reject) => {
+          loader.load(
+            modelPath,
+            resolve,
+            undefined, // onProgress callback not needed
+            reject
           );
-          dockBase.position.y += 0.25;
-          
-          // Add posts at the corners
-          const postGeometry = new THREE.CylinderGeometry(0.3, 0.3, 1.5, 8);
-          const postMaterial = new THREE.MeshStandardMaterial({ 
-            color: 0x6B4423,
-            roughness: 0.9
+        });
+        
+        // Add the loaded model to the group
+        buildingGroup.add(gltf.scene);
+        
+        // Apply rotation
+        buildingGroup.rotation.y = building.rotation || 0;
+        
+        console.log(`Successfully loaded model for ${building.id} from ${modelPath}`);
+      } catch (modelError) {
+        console.warn(`Failed to load model from ${modelPath}:`, modelError);
+        
+        // Try a fallback path
+        const fallbackPath = `/models/buildings/${building.type}.glb`;
+        console.log(`Attempting to load from fallback path: ${fallbackPath}`);
+        
+        try {
+          const gltf = await new Promise<any>((resolve, reject) => {
+            loader.load(
+              fallbackPath,
+              resolve,
+              undefined,
+              reject
+            );
           });
           
-          const positions = [
-            [-1.8, 0.75, -3.8], [1.8, 0.75, -3.8],
-            [-1.8, 0.75, 0], [1.8, 0.75, 0],
-            [-1.8, 0.75, 3.8], [1.8, 0.75, 3.8]
-          ];
+          // Add the loaded model to the group
+          buildingGroup.add(gltf.scene);
           
-          positions.forEach(pos => {
-            const post = new THREE.Mesh(postGeometry, postMaterial);
-            post.position.set(pos[0], pos[1], pos[2]);
-            dockBase.add(post);
+          // Apply rotation
+          buildingGroup.rotation.y = building.rotation || 0;
+          
+          console.log(`Successfully loaded model from fallback path for ${building.id}`);
+        } catch (fallbackError) {
+          console.warn(`Failed to load model from fallback path:`, fallbackError);
+          
+          // Create a simple fallback cube if both model paths fail
+          console.log(`Creating fallback cube for ${building.id}`);
+          const geometry = new THREE.BoxGeometry(2, 2, 2);
+          const material = new THREE.MeshStandardMaterial({ 
+            color: 0x808080,
+            wireframe: true
           });
+          const cube = new THREE.Mesh(geometry, material);
           
-          buildingGroup.add(dockBase);
-          break;
-          
-        case 'market-stall':
-          // Create a colorful market stall with awning
-          const baseColor = new THREE.Color(0xFFD700);
-          // Randomize the color slightly
-          baseColor.r += (Math.random() - 0.5) * 0.2;
-          baseColor.g += (Math.random() - 0.5) * 0.2;
-          baseColor.b += (Math.random() - 0.5) * 0.1;
-          
-          // Base/table
-          const stallBase = new THREE.Mesh(
-            new THREE.BoxGeometry(3, 0.8, 2),
-            new THREE.MeshStandardMaterial({ 
-              color: 0xA0522D,
-              roughness: 0.7
-            })
-          );
-          stallBase.position.y += 0.4;
-          
-          // Awning/tent top
-          const awning = new THREE.Mesh(
-            new THREE.ConeGeometry(2.2, 2.5, 4),
-            new THREE.MeshStandardMaterial({ 
-              color: baseColor,
-              roughness: 0.6,
-              side: THREE.DoubleSide
-            })
-          );
-          awning.position.y += 2.5;
-          
-          // Add some goods on the table
-          const goodsGeometry = new THREE.BoxGeometry(0.6, 0.3, 0.6);
-          const goodsMaterials = [
-            new THREE.MeshStandardMaterial({ color: 0xE25822 }), // Orange (fruit)
-            new THREE.MeshStandardMaterial({ color: 0x228B22 }), // Green (vegetables)
-            new THREE.MeshStandardMaterial({ color: 0x8B0000 })  // Dark red (meat)
-          ];
-          
-          for (let i = 0; i < 5; i++) {
-            const goods = new THREE.Mesh(
-              goodsGeometry,
-              goodsMaterials[Math.floor(Math.random() * goodsMaterials.length)]
-            );
-            goods.position.set(
-              (Math.random() - 0.5) * 2,
-              0.95,
-              (Math.random() - 0.5) * 1.5
-            );
-            goods.rotation.y = Math.random() * Math.PI;
-            stallBase.add(goods);
+          // Add a label to identify the building type
+          const canvas = document.createElement('canvas');
+          canvas.width = 256;
+          canvas.height = 64;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.fillStyle = 'black';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 24px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(building.type, canvas.width/2, canvas.height/2);
+            
+            const texture = new THREE.CanvasTexture(canvas);
+            const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
+            const sprite = new THREE.Sprite(spriteMaterial);
+            sprite.position.set(0, 2, 0); // Position above the cube
+            sprite.scale.set(3, 0.75, 1);
+            buildingGroup.add(sprite);
           }
           
-          buildingGroup.add(stallBase);
-          buildingGroup.add(awning);
-          break;
-          
-        case 'house':
-          // Create a Venetian-style house with walls and roof
-          const wallColor = new THREE.Color(0xFAE3C6); // Cream color
-          // Randomize the wall color slightly for variety
-          wallColor.r += (Math.random() - 0.5) * 0.1;
-          wallColor.g += (Math.random() - 0.5) * 0.1;
-          wallColor.b += (Math.random() - 0.5) * 0.1;
-          
-          // Main building
-          const houseBase = new THREE.Mesh(
-            new THREE.BoxGeometry(4, 5, 4),
-            new THREE.MeshStandardMaterial({ 
-              color: wallColor,
-              roughness: 0.8
-            })
-          );
-          houseBase.position.y += 2.5;
-          
-          // Roof
-          const roof = new THREE.Mesh(
-            new THREE.ConeGeometry(3, 2, 4),
-            new THREE.MeshStandardMaterial({ 
-              color: 0xA52A2A, // Brown roof
-              roughness: 0.7
-            })
-          );
-          roof.position.y += 6;
-          roof.rotation.y = Math.PI / 4; // Rotate 45 degrees
-          
-          // Windows
-          const windowMaterial = new THREE.MeshStandardMaterial({
-            color: 0x87CEEB, // Sky blue
-            roughness: 0.3,
-            metalness: 0.5
-          });
-          
-          // Front windows
-          const frontWindow1 = new THREE.Mesh(
-            new THREE.PlaneGeometry(0.8, 1.2),
-            windowMaterial
-          );
-          frontWindow1.position.set(0, 3, 2.01);
-          
-          const frontWindow2 = new THREE.Mesh(
-            new THREE.PlaneGeometry(0.8, 1.2),
-            windowMaterial
-          );
-          frontWindow2.position.set(0, 1.5, 2.01);
-          
-          // Side windows
-          const sideWindow1 = new THREE.Mesh(
-            new THREE.PlaneGeometry(0.8, 1.2),
-            windowMaterial
-          );
-          sideWindow1.position.set(2.01, 3, 0);
-          sideWindow1.rotation.y = Math.PI / 2;
-          
-          const sideWindow2 = new THREE.Mesh(
-            new THREE.PlaneGeometry(0.8, 1.2),
-            windowMaterial
-          );
-          sideWindow2.position.set(-2.01, 3, 0);
-          sideWindow2.rotation.y = Math.PI / 2;
-          
-          // Door
-          const door = new THREE.Mesh(
-            new THREE.PlaneGeometry(1.2, 2),
-            new THREE.MeshStandardMaterial({ 
-              color: 0x8B4513, // Brown door
-              roughness: 0.9
-            })
-          );
-          door.position.set(1.5, 1, 2.01);
-          
-          buildingGroup.add(houseBase);
-          buildingGroup.add(roof);
-          buildingGroup.add(frontWindow1);
-          buildingGroup.add(frontWindow2);
-          buildingGroup.add(sideWindow1);
-          buildingGroup.add(sideWindow2);
-          buildingGroup.add(door);
-          break;
-          
-        case 'harbor_chain_tower':
-          // Create a defensive tower with chain mechanism
-          const towerBase = new THREE.Mesh(
-            new THREE.CylinderGeometry(2, 2.5, 8, 8),
-            new THREE.MeshStandardMaterial({ 
-              color: 0x808080, // Stone gray
-              roughness: 0.9
-            })
-          );
-          towerBase.position.y += 4;
-          
-          // Tower top
-          const towerTop = new THREE.Mesh(
-            new THREE.CylinderGeometry(2.2, 2, 1, 8),
-            new THREE.MeshStandardMaterial({ 
-              color: 0x707070, // Slightly darker gray
-              roughness: 0.8
-            })
-          );
-          towerTop.position.y += 8.5;
-          
-          // Chain mechanism (horizontal cylinder)
-          const chainMechanism = new THREE.Mesh(
-            new THREE.CylinderGeometry(0.8, 0.8, 4, 8),
-            new THREE.MeshStandardMaterial({ 
-              color: 0x8B4513, // Brown wood
-              roughness: 0.7
-            })
-          );
-          chainMechanism.position.y += 7;
-          chainMechanism.rotation.z = Math.PI / 2; // Rotate to horizontal
-          
-          buildingGroup.add(towerBase);
-          buildingGroup.add(towerTop);
-          buildingGroup.add(chainMechanism);
-          break;
-          
-        case 'dye_works':
-          // Create a dye works with colorful vats
-          const workshopBase = new THREE.Mesh(
-            new THREE.BoxGeometry(5, 3, 4),
-            new THREE.MeshStandardMaterial({ 
-              color: 0xD2B48C, // Tan
-              roughness: 0.8
-            })
-          );
-          workshopBase.position.y += 1.5;
-          
-          // Roof
-          const workshopRoof = new THREE.Mesh(
-            new THREE.BoxGeometry(5.5, 1, 4.5),
-            new THREE.MeshStandardMaterial({ 
-              color: 0x8B4513, // Brown
-              roughness: 0.7
-            })
-          );
-          workshopRoof.position.y += 3.5;
-          
-          // Dye vats (cylinders with different colors)
-          const vatColors = [0xE60000, 0x0000E6, 0xE6E600, 0x00E600, 0xE600E6];
-          const vatGeometry = new THREE.CylinderGeometry(0.6, 0.8, 1.2, 8);
-          
-          for (let i = 0; i < 5; i++) {
-            const vat = new THREE.Mesh(
-              vatGeometry,
-              new THREE.MeshStandardMaterial({ 
-                color: vatColors[i],
-                roughness: 0.5,
-                metalness: 0.1
-              })
-            );
-            vat.position.set(-2 + i, 0.6, 2.5);
-            buildingGroup.add(vat);
-          }
-          
-          buildingGroup.add(workshopBase);
-          buildingGroup.add(workshopRoof);
-          break;
-          
-        default:
-          // Generic building with random variations
-          const buildingHeight = 2 + Math.random() * 3;
-          const buildingWidth = 2 + Math.random() * 2;
-          const buildingDepth = 2 + Math.random() * 2;
-          
-          // Generate a semi-random color based on building id for consistency
-          const idHash = building.id.split('').reduce((a, b) => {
-            a = ((a << 5) - a) + b.charCodeAt(0);
-            return a & a;
-          }, 0);
-          
-          const hue = (Math.abs(idHash) % 360) / 360;
-          const color = new THREE.Color().setHSL(hue, 0.5, 0.6);
-          
-          const genericBuilding = new THREE.Mesh(
-            new THREE.BoxGeometry(buildingWidth, buildingHeight, buildingDepth),
-            new THREE.MeshStandardMaterial({ 
-              color: color,
-              roughness: 0.7
-            })
-          );
-          genericBuilding.position.y += buildingHeight / 2;
-          
-          // Add a simple roof
-          const roofHeight = 1 + Math.random();
-          const roof = new THREE.Mesh(
-            new THREE.ConeGeometry(Math.max(buildingWidth, buildingDepth) * 0.7, roofHeight, 4),
-            new THREE.MeshStandardMaterial({ 
-              color: 0x8B4513, // Brown roof
-              roughness: 0.8
-            })
-          );
-          roof.position.y += buildingHeight + roofHeight / 2;
-          roof.rotation.y = Math.PI / 4; // Rotate 45 degrees
-          
-          buildingGroup.add(genericBuilding);
-          buildingGroup.add(roof);
+          buildingGroup.add(cube);
+        }
       }
-      
-      // Scale the entire building group based on building type
-      let scale = 1.0;
-      switch (building.type.toLowerCase()) {
-        case 'dock':
-          scale = 0.8;
-          break;
-        case 'market-stall':
-          scale = 0.7;
-          break;
-        case 'house':
-          scale = 0.8;
-          break;
-        case 'harbor_chain_tower':
-          scale = 0.6;
-          break;
-        case 'dye_works':
-          scale = 0.7;
-          break;
-        default:
-          scale = 0.8;
-      }
-      
-      buildingGroup.scale.set(scale, scale, scale);
       
       // Add metadata
       buildingGroup.userData = {
