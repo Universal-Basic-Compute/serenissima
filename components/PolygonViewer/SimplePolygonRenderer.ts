@@ -1226,6 +1226,49 @@ export default class SimplePolygonRenderer {
     }
   }
 
+  // Add this new method to create a visual deletion effect
+  private createDeletionEffect(position: THREE.Vector3) {
+    console.log(`Creating deletion effect at position: ${position.x}, ${position.y}, ${position.z}`);
+    
+    // Create a sphere for the deletion effect
+    const geometry = new THREE.SphereGeometry(0.5, 8, 8);
+    const material = new THREE.MeshBasicMaterial({
+      color: 0xFF0000,
+      transparent: true,
+      opacity: 0.7
+    });
+    
+    const effect = new THREE.Mesh(geometry, material);
+    effect.position.copy(position);
+    effect.renderOrder = 3000; // Ensure it renders on top
+    
+    this.scene.add(effect);
+    
+    // Animate the effect
+    let scale = 1.0;
+    let opacity = 0.7;
+    
+    const animate = () => {
+      scale += 0.1;
+      opacity -= 0.05;
+      
+      effect.scale.set(scale, scale, scale);
+      (effect.material as THREE.MeshBasicMaterial).opacity = opacity;
+      
+      if (opacity > 0) {
+        requestAnimationFrame(animate);
+      } else {
+        // Remove the effect when animation is complete
+        this.scene.remove(effect);
+        geometry.dispose();
+        material.dispose();
+      }
+    };
+    
+    // Start animation
+    animate();
+  }
+
   public cleanup() {
     // Remove meshes from scene and dispose resources
     this.meshes.forEach(mesh => {
@@ -1250,49 +1293,6 @@ export default class SimplePolygonRenderer {
         marker.material.forEach(m => m.dispose());
       }
     });
-    
-    // Add this new method to create a visual deletion effect
-    private createDeletionEffect(position: THREE.Vector3) {
-      console.log(`Creating deletion effect at position: ${position.x}, ${position.y}, ${position.z}`);
-      
-      // Create a sphere for the deletion effect
-      const geometry = new THREE.SphereGeometry(0.5, 8, 8);
-      const material = new THREE.MeshBasicMaterial({
-        color: 0xFF0000,
-        transparent: true,
-        opacity: 0.7
-      });
-      
-      const effect = new THREE.Mesh(geometry, material);
-      effect.position.copy(position);
-      effect.renderOrder = 3000; // Ensure it renders on top
-      
-      this.scene.add(effect);
-      
-      // Animate the effect
-      let scale = 1.0;
-      let opacity = 0.7;
-      
-      const animate = () => {
-        scale += 0.1;
-        opacity -= 0.05;
-        
-        effect.scale.set(scale, scale, scale);
-        (effect.material as THREE.MeshBasicMaterial).opacity = opacity;
-        
-        if (opacity > 0) {
-          requestAnimationFrame(animate);
-        } else {
-          // Remove the effect when animation is complete
-          this.scene.remove(effect);
-          geometry.dispose();
-          material.dispose();
-        }
-      };
-      
-      // Start animation
-      animate();
-    }
     
     this.dockPointMarkers.forEach(marker => {
       this.scene.remove(marker);
