@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { getWalletAddress } from '../walletUtils';
+import { getUserName } from '../userUtils';
 import { getApiBaseUrl } from '../apiUtils';
 import { eventBus, EventTypes } from '../eventBus';
 
@@ -186,30 +187,33 @@ export class ResourceDisplayManager {
    */
   private async loadResources(): Promise<void> {
     try {
-      const walletAddress = getWalletAddress();
+      // Get the username instead of wallet address
+      const username = getUserName();
       let queryParams = '';
       
-      if (walletAddress) {
-        queryParams = `?owner=${walletAddress}`;
-        console.log(`Loading resources for wallet ${walletAddress}`);
+      if (username) {
+        queryParams = `?owner=${username}`;
+        console.log(`Loading resources for user ${username}`);
       } else {
-        console.log('No wallet address found, loading all resources');
+        console.log('No username found, loading all resources');
       }
 
-      // Use the API base URL from the environment, with a fallback to localhost:8000
-      // Make sure we're using port 8000, not 10000
-      const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      // Use the correct API URL (Next.js API routes run on the same port as the app)
+      const apiUrl = '/api/resources' + queryParams;
+      console.log(`Fetching resources from: ${apiUrl}`);
       
-      // Log the API base URL for debugging
-      console.log(`Using API base URL: ${apiBaseUrl}`);
-      
-      const url = `${apiBaseUrl}/api/resources${queryParams}`;
-      console.log(`Fetching resources from: ${url}`);
-      
-      const response = await fetch(url);
+      const response = await fetch(apiUrl, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        cache: 'no-cache'
+      });
       
       if (!response.ok) {
-        throw new Error(`Failed to fetch resources: ${response.status}`);
+        const errorText = await response.text();
+        console.error(`API returned error status ${response.status}: ${errorText}`);
+        throw new Error(`API error: ${response.status} ${response.statusText}`);
       }
       
       const data = await response.json();

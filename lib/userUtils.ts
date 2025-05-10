@@ -1,0 +1,18 @@
+/**
+ * Get the current user's username
+ * @returns The username of the current user, or null if not logged in
+ */
+export function getUserName(): string | null {
+  // This is a placeholder implementation
+  // Replace with your actual implementation to get the username
+  // from your authentication system
+  
+  // Example: Get from localStorage
+  try {
+    const user = JSON.parse(localStorage.getItem('user') || 'null');
+    return user ? user.username : null;
+  } catch (error) {
+    console.error('Error getting username:', error);
+    return null;
+  }
+}
