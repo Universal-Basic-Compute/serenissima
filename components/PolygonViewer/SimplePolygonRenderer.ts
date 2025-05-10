@@ -1552,11 +1552,11 @@ export default class SimplePolygonRenderer {
               this.bounds.latCorrectionFactor
             )[0];
             
-            // Create a normal-sized marker for bridge points
-            const geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+            // Create a smaller marker for bridge points
+            const geometry = new THREE.BoxGeometry(0.3, 0.3, 0.3);
             
             const marker = new THREE.Mesh(geometry, bridgeMaterial);
-            marker.position.set(normalizedCoord.x, 0.5, -normalizedCoord.y); // Position closer to land level
+            marker.position.set(normalizedCoord.x, 0.2, -normalizedCoord.y); // Position even closer to land level
             marker.renderOrder = 2000; // Keep high render order for visibility
             
             // Add metadata for tooltips
@@ -1596,11 +1596,11 @@ export default class SimplePolygonRenderer {
               this.bounds.latCorrectionFactor
             )[0];
             
-            // Create a normal-sized marker for dock edge points
-            const edgeGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+            // Create a smaller sphere marker for dock edge points
+            const edgeGeometry = new THREE.SphereGeometry(0.2, 8, 8);
             
             const edgeMarker = new THREE.Mesh(edgeGeometry, dockEdgeMaterial);
-            edgeMarker.position.set(edgeCoord.x, 0.5, -edgeCoord.y); // Position closer to land level
+            edgeMarker.position.set(edgeCoord.x, 0.2, -edgeCoord.y); // Position even closer to land level
             edgeMarker.renderOrder = 2000; // Keep high render order
             
             // Add metadata for tooltips
@@ -1614,42 +1614,7 @@ export default class SimplePolygonRenderer {
             this.scene.add(edgeMarker);
             this.dockPointMarkers.push(edgeMarker);
             
-            // Create a line connecting edge to water - update y coordinates to match new heights
-            const lineGeometry = new THREE.BufferGeometry();
-            const vertices = new Float32Array([
-              edgeCoord.x, 0.5, -edgeCoord.y,
-              waterCoord.x, 0.3, -waterCoord.y  // Update this y-coordinate to match the water marker height
-            ]);
-            lineGeometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
-            
-            const lineMaterial = new THREE.LineBasicMaterial({
-              color: 0x00CCFF, // Light cyan for connecting lines
-              linewidth: 2
-            });
-            
-            const line = new THREE.Line(lineGeometry, lineMaterial);
-            line.renderOrder = 1999; // High render order but below markers
-            
-            this.scene.add(line);
-            this.dockPointMarkers.push(line);
-            
-            // Create a marker for water points - using spheres instead of boxes
-            const waterGeometry = new THREE.SphereGeometry(0.3, 8, 8); // Smaller sphere with fewer segments for better performance
-            
-            const waterMarker = new THREE.Mesh(waterGeometry, dockWaterMaterial);
-            waterMarker.position.set(waterCoord.x, 0.3, -waterCoord.y); // Position closer to land level (0.3 instead of 0.5)
-            waterMarker.renderOrder = 2000; // Keep high render order
-            
-            // Add metadata for tooltips
-            waterMarker.userData = {
-              id: `dock-water-${polygon.id}-${index}`,
-              type: 'dock-water',
-              polygonId: polygon.id,
-              position: `${point.water.lat.toFixed(6)}, ${point.water.lng.toFixed(6)}`
-            };
-            
-            this.scene.add(waterMarker);
-            this.dockPointMarkers.push(waterMarker);
+            // No connecting lines or water markers - removed completely
           } catch (error) {
             console.error(`Error creating dock point for polygon ${polygon.id}:`, error);
           }
