@@ -89,17 +89,29 @@ def extract_coat_of_arms_urls(users: List[Dict]) -> Dict[str, str]:
     """Extract coat of arms URLs from user records"""
     coat_of_arms_map = {}
     
+    log.info(f"Examining {len(users)} users for coat of arms images")
+    
+    # Log the field names in the first user record to verify structure
+    if users and len(users) > 0:
+        log.info(f"First user record fields: {list(users[0].get('fields', {}).keys())}")
+    
     for user in users:
         fields = user.get('fields', {})
         username = fields.get('user_name')
-        coat_of_arms_url = fields.get('coat_of_arms_image')
+        
+        # Use the correct field name: CoatOfArmsImage
+        coat_of_arms_url = fields.get('CoatOfArmsImage')
         
         if username and coat_of_arms_url:
+            log.info(f"Found coat of arms for user {username}: {coat_of_arms_url}")
+            
             # Ensure the URL is absolute
             if not coat_of_arms_url.startswith(('http://', 'https://')):
                 coat_of_arms_url = f"{PRODUCTION_URL}{coat_of_arms_url if coat_of_arms_url.startswith('/') else '/' + coat_of_arms_url}"
             
             coat_of_arms_map[username] = coat_of_arms_url
+        elif username:
+            log.info(f"User {username} has no coat of arms image")
     
     log.info(f"Found {len(coat_of_arms_map)} users with coat of arms images")
     return coat_of_arms_map
