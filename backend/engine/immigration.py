@@ -127,9 +127,18 @@ def generate_citizen_image(citizen_id: str, image_prompt: str) -> bool:
                 "imagePrompt": image_prompt
             }, f)
         
+        # Check if the script exists before trying to run it
+        script_path = "scripts/generateCitizenImages.js"
+        if not os.path.exists(script_path):
+            # Try the TypeScript version if JavaScript version doesn't exist
+            script_path = "scripts/generateCitizenImages.ts"
+            if not os.path.exists(script_path):
+                log.warning(f"Citizen image generation script not found at {script_path}")
+                return False
+        
         # Call the Node.js script to generate the image
         result = subprocess.run(
-            ["node", "scripts/generateCitizenImages.js", "1", "--citizen-id", citizen_id],
+            ["node", script_path, "1", "--citizen-id", citizen_id],
             capture_output=True,
             text=True
         )
@@ -226,7 +235,7 @@ def process_immigration(dry_run: bool = False):
         # Generate an image for the citizen
         image_generated = generate_citizen_image(citizen["id"], citizen["ImagePrompt"])
         if not image_generated:
-            log.warning(f"Failed to generate image for citizen {citizen['id']}")
+            log.warning(f"Failed to generate image for citizen {citizen['id']}, continuing without image")
             # Continue anyway, as this is not critical
         
         # Create a notification about the new immigrant
