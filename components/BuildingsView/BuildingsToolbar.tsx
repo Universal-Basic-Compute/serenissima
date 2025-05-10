@@ -31,6 +31,16 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
 
   // Get scene with fallback
   const actualScene = scene || (typeof document !== 'undefined' ? document.querySelector('canvas')?.__scene as THREE.Scene : undefined);
+  
+  // Log scene availability for debugging
+  useEffect(() => {
+    console.log('BuildingsToolbar: Scene available:', !!actualScene);
+    
+    // If scene is not available, try to find it from global context
+    if (!actualScene && typeof window !== 'undefined' && window.__threeContext) {
+      console.log('BuildingsToolbar: Trying to get scene from window.__threeContext');
+    }
+  }, [actualScene]);
 
   // Use the building menu hook to access building data
   const { 

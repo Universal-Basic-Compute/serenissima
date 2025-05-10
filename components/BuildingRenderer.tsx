@@ -41,33 +41,46 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
         }
       }
       
-      // If we still don't have a scene, create a new one as a last resort
-      console.warn('BuildingRenderer: Could not find scene, creating a new one');
-      const newScene = new THREE.Scene();
-      
-      // Store the new scene in global context for other components to find
-      if (typeof window !== 'undefined') {
-        window.__threeContext = window.__threeContext || {};
-        window.__threeContext.scene = newScene;
-      }
-      
-      return newScene;
+      console.warn('BuildingRenderer: Could not find scene, will retry');
+      return null;
     };
     
     // Try to find the scene
-    const foundScene = findScene();
-    sceneRef.current = foundScene;
+    let foundScene = findScene();
     
-    // Set ready state based on whether we found a scene
-    setIsReady(!!foundScene);
-    
-    console.log('BuildingRenderer: Scene ref updated', foundScene ? 'scene available' : 'scene not available');
+    // If scene not found, set up a retry mechanism
+    if (!foundScene) {
+      console.log('BuildingRenderer: Scene not found, setting up retry mechanism');
+      
+      const retryInterval = setInterval(() => {
+        console.log('BuildingRenderer: Retrying to find scene...');
+        foundScene = findScene();
+        
+        if (foundScene) {
+          console.log('BuildingRenderer: Scene found on retry!');
+          clearInterval(retryInterval);
+          sceneRef.current = foundScene;
+          setIsReady(true);
+        }
+      }, 500); // Retry every 500ms
+      
+      // Clean up interval on component unmount
+      return () => {
+        clearInterval(retryInterval);
+      };
+    } else {
+      // Scene found on first try
+      sceneRef.current = foundScene;
+      setIsReady(true);
+      
+      console.log('BuildingRenderer: Scene ref updated, scene available');
+    }
   }, [scene]);
   // Early return if not ready
   if (!isReady && !sceneRef.current) {
     console.log('BuildingRenderer: Not ready, scene not available');
-    // Instead of returning null, we'll continue with initialization
-    // since we now have a fallback to create a scene if needed
+    // Return a loading state instead of null
+    return null;
   }
   
   const [buildings, setBuildings] = useState<BuildingData[]>([]);
@@ -698,7 +711,35 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
     
     if (!sceneRef.current) {
       console.warn('BuildingRenderer: scene is not defined, cannot render buildings');
-      return;
+      
+      // Set up a retry mechanism for loading buildings
+      const retryInterval = setInterval(() => {
+        console.log('BuildingRenderer: Retrying to load buildings...');
+        if (sceneRef.current) {
+          console.log('BuildingRenderer: Scene now available, loading buildings');
+          clearInterval(retryInterval);
+          
+          // Use the memory-efficient loading strategy
+          loadBuildingsEfficiently();
+          
+          // Start memory monitoring
+          const stopMemoryMonitoring = startMemoryMonitoring();
+          
+          // Add a delay to ensure buildings are loaded
+          const timer = setTimeout(() => {
+            if (sceneRef.current) {
+              verifyAndFixBuildingPositions();
+              // Focus camera on buildings after fixing positions
+              ensureBuildingsVisible();
+            }
+          }, 2000);
+        }
+      }, 1000); // Retry every second
+      
+      // Clean up interval on component unmount
+      return () => {
+        clearInterval(retryInterval);
+      };
     }
     
     if (!rendererFactoryRef.current) {
