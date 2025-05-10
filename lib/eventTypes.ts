@@ -36,6 +36,14 @@ export const EventTypes = {
   BUILDING_CONSTRUCTION_STARTED: 'buildingConstructionStarted',
   BUILDING_CONSTRUCTION_COMPLETED: 'buildingConstructionCompleted',
   BUILDING_INCOME_GENERATED: 'buildingIncomeGenerated',
+  BUILDING_DAMAGED: 'buildingDamaged',
+  BUILDING_REPAIRED: 'buildingRepaired',
+  BUILDING_UPGRADED: 'buildingUpgraded',
+  BUILDING_DEMOLISHED: 'buildingDemolished',
+  BUILDING_MAINTENANCE_DUE: 'buildingMaintenanceDue',
+  BUILDING_MAINTENANCE_PAID: 'buildingMaintenancePaid',
+  BUILDING_MAINTENANCE_MISSED: 'buildingMaintenanceMissed',
+  BUILDING_OWNERSHIP_CHANGED: 'buildingOwnershipChanged',
   
   // UI tooltip events
   SHOW_TOOLTIP: 'showTooltip',
