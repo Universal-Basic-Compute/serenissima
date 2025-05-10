@@ -78,18 +78,34 @@ export class ResourceService {
     
     try {
       const resources = await fetchResources();
+      console.log(`Fetched ${resources.length} resources from API`);
+      
+      // Create a Map to deduplicate resources by ID
+      const resourceMap = new Map<string, Resource>();
       
       // Process resources to ensure they have all required fields
-      const processedResources = resources.map(resource => ({
-        id: resource.id,
-        name: resource.name,
-        category: resource.category,
-        subcategory: resource.subcategory,
-        description: resource.description || resource.longDescription,
-        rarity: resource.rarity || 'common',
-        icon: resource.icon || 'default.png',
-        amount: 0 // Default amount
-      }));
+      resources.forEach(resource => {
+        // Skip if we already have this resource ID
+        if (resourceMap.has(resource.id)) {
+          console.warn(`Duplicate resource ID found: ${resource.id} - ${resource.name}`);
+          return;
+        }
+        
+        resourceMap.set(resource.id, {
+          id: resource.id,
+          name: resource.name || resource.id, // Use ID as fallback for name
+          category: resource.category || 'raw_materials', // Default category
+          subcategory: resource.subcategory || '',
+          description: resource.description || resource.longDescription || '',
+          rarity: resource.rarity || 'common',
+          icon: resource.icon || 'default.png',
+          amount: resource.amount || 0 // Use provided amount or default to 0
+        });
+      });
+      
+      // Convert Map to array
+      const processedResources = Array.from(resourceMap.values());
+      console.log(`Processed ${processedResources.length} unique resources`);
       
       // Cache the resources
       this.resourcesCache = processedResources;
@@ -116,10 +132,25 @@ export class ResourceService {
     const categoriesMap = new Map<string, Resource[]>();
     
     resources.forEach(resource => {
-      if (!categoriesMap.has(resource.category)) {
-        categoriesMap.set(resource.category, []);
+      // Ensure resource has a valid category
+      const category = resource.category || 'raw_materials';
+      
+      if (!categoriesMap.has(category)) {
+        categoriesMap.set(category, []);
       }
-      categoriesMap.get(resource.category)?.push(resource);
+      
+      // Add resource to its category
+      const categoryResources = categoriesMap.get(category);
+      
+      // Check if this resource is already in the category (by ID)
+      const existingResourceIndex = categoryResources.findIndex(r => r.id === resource.id);
+      
+      if (existingResourceIndex === -1) {
+        // Resource not in category yet, add it
+        categoryResources.push(resource);
+      } else {
+        console.warn(`Duplicate resource ID ${resource.id} in category ${category}`);
+      }
     });
     
     // Convert map to array of categories
@@ -139,6 +170,11 @@ export class ResourceService {
     
     // Sort categories alphabetically
     categories.sort((a, b) => a.name.localeCompare(b.name));
+    
+    // Log category statistics
+    categories.forEach(category => {
+      console.log(`Category ${category.id} has ${category.resources.length} resources`);
+    });
     
     // Cache the categories
     this.categoriesCache = categories;
@@ -166,6 +202,7 @@ export class ResourceService {
    * Clear the cache to force a reload of resources
    */
   public clearCache(): void {
+    console.log('Clearing ResourceService cache');
     this.resourcesCache = null;
     this.categoriesCache = null;
   }

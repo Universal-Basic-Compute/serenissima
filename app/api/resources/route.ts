@@ -52,29 +52,46 @@ export async function GET(request: Request) {
     });
     
     // Transform Airtable records to our resource format
-    const resources = (records as any[]).map(record => {
+    const resourceMap = new Map(); // Use a Map to deduplicate by ResourceId
+    
+    (records as any[]).forEach(record => {
+      const resourceId = record.get('ResourceId');
+      
+      // Skip if we've already processed this ResourceId
+      if (resourceMap.has(resourceId)) {
+        console.warn(`Duplicate ResourceId found in Airtable: ${resourceId}`);
+        return;
+      }
+      
       let position;
       try {
         position = JSON.parse(record.get('Position') || '{}');
       } catch (e) {
-        console.warn(`Invalid position format for resource ${record.get('ResourceId')}:`, e);
+        console.warn(`Invalid position format for resource ${resourceId}:`, e);
         position = {};
       }
       
-      return {
-        id: record.get('ResourceId'),
+      resourceMap.set(resourceId, {
+        id: resourceId,
         type: record.get('Type'),
-        name: record.get('Name'),
-        category: record.get('Category'),
+        name: record.get('Name') || record.get('Type'), // Use Type as fallback for Name
+        category: record.get('Category') || 'raw_materials', // Default category
+        subcategory: record.get('Subcategory') || '', // Add subcategory
         position: position,
         count: record.get('Count') || 1,
         landId: record.get('LandId') || '',
         owner: record.get('Owner') || 'system',
-        createdAt: record.get('CreatedAt') || new Date().toISOString()
-      };
+        createdAt: record.get('CreatedAt') || new Date().toISOString(),
+        // Add a standardized icon field
+        icon: 'default.png', // Use default.png as the fallback icon
+        description: record.get('Description') || '' // Add description field
+      });
     });
     
-    console.log(`Returning ${resources.length} resources`);
+    // Convert Map to array
+    const resources = Array.from(resourceMap.values());
+    
+    console.log(`Returning ${resources.length} unique resources (from ${records.length} total records)`);
     
     return NextResponse.json(resources);
   } catch (error) {

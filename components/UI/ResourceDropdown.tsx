@@ -99,10 +99,19 @@ const ResourceDropdown: React.FC<ResourceDropdownProps> = ({ category, resources
     resources.forEach(resource => {
       if (!resourceMap.has(resource.id)) {
         resourceMap.set(resource.id, resource);
+      } else {
+        console.warn(`Duplicate resource ID in ResourceDropdown: ${resource.id} - ${resource.name}`);
       }
     });
     return Array.from(resourceMap.values());
   }, [resources]);
+
+  // Log the number of resources before and after deduplication
+  React.useEffect(() => {
+    if (resources.length !== uniqueResources.length) {
+      console.warn(`Removed ${resources.length - uniqueResources.length} duplicate resources in category ${category}`);
+    }
+  }, [resources, uniqueResources, category]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
