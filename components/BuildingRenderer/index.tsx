@@ -41,6 +41,8 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
         loadedBuildings.forEach(building => {
           renderBuilding(building);
         });
+        
+        console.log(`Loaded and rendered ${loadedBuildings.length} buildings`);
       } catch (error) {
         console.error('Error loading buildings:', error);
       }
@@ -52,11 +54,30 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
     const handleBuildingPlaced = (data: any) => {
       console.log('Building placed event received:', data);
       
-      // Add the new building to our state
-      setBuildings(prevBuildings => [...prevBuildings, data.data]);
+      // If this is a refresh event, reload all buildings
+      if (data.refresh) {
+        console.log('Refreshing all buildings');
+        
+        // Clear existing buildings first
+        buildingMeshesRef.current.forEach((mesh, id) => {
+          if (mesh && scene.children.includes(mesh)) {
+            scene.remove(mesh);
+          }
+        });
+        buildingMeshesRef.current.clear();
+        
+        // Reload all buildings
+        loadBuildings();
+        return;
+      }
       
-      // Render the new building
-      renderBuilding(data.data);
+      // Add the new building to our state
+      if (data.data) {
+        setBuildings(prevBuildings => [...prevBuildings, data.data]);
+        
+        // Render the new building
+        renderBuilding(data.data);
+      }
     };
     
     // Subscribe to building placed events

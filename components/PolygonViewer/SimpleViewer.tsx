@@ -394,6 +394,12 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
     if (incomeRendererRef.current) {
       incomeRendererRef.current.setVisible(activeView === 'land');
     }
+    
+    // If we're switching to buildings view, ensure the BuildingRenderer is active
+    if (activeView === 'buildings') {
+      // Dispatch an event to refresh buildings
+      eventBus.emit(EventTypes.BUILDING_PLACED, { refresh: true });
+    }
   }, [activeView]);
   
   

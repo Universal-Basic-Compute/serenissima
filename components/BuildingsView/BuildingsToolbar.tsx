@@ -5,6 +5,7 @@ import BuildingRenderer from '@/components/BuildingRenderer';
 import PlaceableObjectManager from '@/lib/components/PlaceableObjectManager';
 import { useBuildingMenu } from '@/hooks/useBuildingMenu';
 import { eventBus } from '@/lib/eventBus';
+import { EventTypes } from '@/lib/eventTypes';
 import { FaWater } from 'react-icons/fa';
 
 interface BuildingsToolbarProps {
@@ -55,6 +56,30 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
       window.removeEventListener('activateBuildingPlacement', handleActivateBuildingPlacement as EventListener);
     };
   }, [loadBuildingCategories]);
+  
+  // Fetch buildings when the component mounts
+  useEffect(() => {
+    const fetchBuildings = async () => {
+      try {
+        console.log('Fetching buildings from: /api/buildings');
+        const response = await fetch('/api/buildings');
+        
+        if (response.ok) {
+          const data = await response.json();
+          console.log(`Loaded ${data.buildings?.length || 0} buildings`);
+          
+          // Dispatch an event to notify the BuildingRenderer to update
+          eventBus.emit(EventTypes.BUILDING_PLACED, { refresh: true });
+        } else {
+          console.warn(`Failed to fetch buildings: ${response.status}`);
+        }
+      } catch (error) {
+        console.error('Error fetching buildings:', error);
+      }
+    };
+    
+    fetchBuildings();
+  }, []);
 
   return (
     <div className="absolute bottom-4 left-4 z-20 flex flex-col space-y-2">

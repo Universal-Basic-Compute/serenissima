@@ -724,7 +724,11 @@ export default function SimplePage() {
             </li>
             <li>
               <button
-                onClick={() => setActiveView('buildings')}
+                onClick={() => {
+                  setActiveView('buildings');
+                  // Dispatch an event to refresh buildings
+                  eventBus.emit(EventTypes.BUILDING_PLACED, { refresh: true });
+                }}
                 className={`w-full flex items-center p-2 rounded-lg transition-colors ${
                   activeView === 'buildings' ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700'
                 }`}
