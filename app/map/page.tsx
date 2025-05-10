@@ -374,6 +374,40 @@ export default function MapPage() {
     }
   }, [waterPointMode, previewWaterPoint]);
 
+  // Add this function to provide visual feedback for right-clicks
+  const showRightClickFeedback = (position: google.maps.LatLng) => {
+    if (!mapRef.current) return;
+    
+    // Create a ripple effect
+    const ripple = new google.maps.Circle({
+      center: position,
+      radius: 5,
+      strokeColor: '#FF0000',
+      strokeOpacity: 0.8,
+      strokeWeight: 2,
+      fillColor: '#FF0000',
+      fillOpacity: 0.35,
+      map: mapRef.current,
+      zIndex: 1
+    });
+    
+    // Animate the ripple
+    let radius = 5;
+    const expandInterval = setInterval(() => {
+      radius += 2;
+      ripple.setRadius(radius);
+      ripple.setOptions({
+        strokeOpacity: 0.8 * (1 - radius / 30),
+        fillOpacity: 0.35 * (1 - radius / 30)
+      });
+      
+      if (radius >= 30) {
+        clearInterval(expandInterval);
+        ripple.setMap(null);
+      }
+    }, 20);
+  };
+  
   // Handle map load
   const onMapLoad = (map: google.maps.Map) => {
     console.log('Map loaded');
@@ -388,7 +422,7 @@ export default function MapPage() {
       const event = e as google.maps.MapMouseEvent;
       if (!event.latLng) return;
       
-      // Properly detect right clicks
+      // Get the DOM event to check for right click
       const domEvent = e.domEvent as MouseEvent;
       const isRightClick = domEvent && domEvent.button === 2;
       
@@ -611,53 +645,64 @@ export default function MapPage() {
       }
     });
     
-    // Ajouter un gestionnaire spécifique pour le clic droit
+    // Add a dedicated right-click handler to ensure we catch all right-clicks
     map.addListener('rightclick', (e: google.maps.MapMouseEvent) => {
-      console.log('Right click detected');
+      console.log('Right click detected directly');
       
-      // Empêcher le menu contextuel par défaut
+      // Prevent default context menu
       e.stop();
+      
+      if (!waterPointMode) return;
       
       const event = e as google.maps.MapMouseEvent;
       if (!event.latLng) return;
       
-      if (waterPointMode) {
-        console.log('Processing right click in waterpoint mode');
-        // Chercher un waterpoint existant à proximité
-        let targetPoint = null;
-        let minDistance = 10; // 10 meters threshold
+      // Find a waterpoint near the click location
+      let targetPoint = null;
+      let minDistance = 10; // 10 meters threshold
+      
+      for (const point of waterPoints) {
+        const pointPos = typeof point.position === 'string' 
+          ? JSON.parse(point.position) 
+          : point.position;
         
-        for (const point of waterPoints) {
-          const pointPos = typeof point.position === 'string' 
-            ? JSON.parse(point.position) 
-            : point.position;
-          
-          const clickPos = {
-            lat: event.latLng.lat(),
-            lng: event.latLng.lng()
-          };
-          
-          // Calculer la distance entre le clic et le point
-          const distance = google.maps.geometry.spherical.computeDistanceBetween(
-            new google.maps.LatLng(clickPos.lat, clickPos.lng),
-            new google.maps.LatLng(pointPos.lat, pointPos.lng)
-          );
-          
-          // If this point is closer than our current closest and within threshold
-          if (distance < minDistance) {
-            targetPoint = point;
-            minDistance = distance;
-          }
+        const clickPos = {
+          lat: event.latLng.lat(),
+          lng: event.latLng.lng()
+        };
+        
+        // Calculate distance between click and point
+        const distance = google.maps.geometry.spherical.computeDistanceBetween(
+          new google.maps.LatLng(clickPos.lat, clickPos.lng),
+          new google.maps.LatLng(pointPos.lat, pointPos.lng)
+        );
+        
+        // If this point is closer than our current closest and within threshold
+        if (distance < minDistance) {
+          targetPoint = point;
+          minDistance = distance;
         }
+      }
+      
+      // If we found a target point, show visual feedback
+      if (targetPoint) {
+        showRightClickFeedback(new google.maps.LatLng(
+          typeof targetPoint.position === 'string' 
+            ? JSON.parse(targetPoint.position).lat 
+            : targetPoint.position.lat,
+          typeof targetPoint.position === 'string' 
+            ? JSON.parse(targetPoint.position).lng 
+            : targetPoint.position.lng
+        ));
         
-        // Si on a trouvé un point cible et qu'un point est déjà sélectionné
-        if (targetPoint && selectedWaterPoint && targetPoint.id !== selectedWaterPoint.id) {
+        // If we found a target point and already have a selected point
+        if (selectedWaterPoint && targetPoint.id !== selectedWaterPoint.id) {
           createWaterPointConnection(selectedWaterPoint, targetPoint);
-        } else if (targetPoint) {
-          // Si on a trouvé un point mais qu'aucun n'est sélectionné, le sélectionner
+        } else {
+          // If we found a point but none is selected, select it
           setSelectedWaterPoint(targetPoint);
           
-          // Mettre à jour l'apparence du marqueur
+          // Update marker appearance
           const marker = waterPointMarkers[targetPoint.id];
           if (marker) {
             marker.setIcon({
@@ -754,27 +799,17 @@ export default function MapPage() {
   // Add useEffect to prevent context menu on the page
   useEffect(() => {
     const handleContextMenu = (e: MouseEvent) => {
-      // Only prevent context menu in waterpoint mode
+      // Only prevent default context menu behavior, but still allow our custom handler to run
       if (waterPointMode) {
         e.preventDefault();
       }
     };
     
-    // Add the event listener to the map container specifically
-    const mapContainer = document.querySelector('.map-container');
-    if (mapContainer) {
-      mapContainer.addEventListener('contextmenu', handleContextMenu);
-    } else {
-      // Fallback to document if map container not found
-      document.addEventListener('contextmenu', handleContextMenu);
-    }
+    // Add the event listener to the document
+    document.addEventListener('contextmenu', handleContextMenu);
     
     return () => {
-      if (mapContainer) {
-        mapContainer.removeEventListener('contextmenu', handleContextMenu);
-      } else {
-        document.removeEventListener('contextmenu', handleContextMenu);
-      }
+      document.removeEventListener('contextmenu', handleContextMenu);
     };
   }, [waterPointMode]);
   
