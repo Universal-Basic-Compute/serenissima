@@ -181,16 +181,16 @@ export async function GET(request: Request) {
         // Keep lat/lng format intact - don't convert here
         // The conversion will happen in the BuildingRenderer component
         position = {
-          lat: position.lat,
-          lng: position.lng
+          lat: parseFloat(position.lat.toString()),
+          lng: parseFloat(position.lng.toString())
         };
       }
       // Handle x/y/z format
       else {
         position = {
-          x: position.x !== undefined ? Number(position.x) : 0,
-          y: position.y !== undefined ? Number(position.y) : 0,
-          z: position.z !== undefined ? Number(position.z) : 0
+          x: position.x !== undefined ? parseFloat(position.x.toString()) : 0,
+          y: position.y !== undefined ? parseFloat(position.y.toString()) : 0,
+          z: position.z !== undefined ? parseFloat(position.z.toString()) : 0
         };
       }
       

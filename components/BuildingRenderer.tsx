@@ -189,8 +189,13 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
             };
             
             // Convert lat/lng to Three.js coordinates - PRESERVE FULL PRECISION
-            const x = (building.position.lng - bounds.centerLng) * bounds.scale;
-            const z = -(building.position.lat - bounds.centerLat) * bounds.scale * bounds.latCorrectionFactor;
+            // Use parseFloat to ensure we're working with full floating point precision
+            const lat = parseFloat(building.position.lat.toString());
+            const lng = parseFloat(building.position.lng.toString());
+            
+            // Calculate the x and z coordinates with full precision
+            const x = (lng - bounds.centerLng) * bounds.scale;
+            const z = -(lat - bounds.centerLat) * bounds.scale * bounds.latCorrectionFactor;
             
             position = {
               x: x, // Don't round or truncate these values
@@ -199,15 +204,15 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
             };
             
             console.log(`Converted lat/lng position for building ${building.id}:`, 
-              `From: lat=${building.position.lat}, lng=${building.position.lng}`,
+              `From: lat=${lat}, lng=${lng}`,
               `To: x=${position.x}, z=${position.z}`);
           } 
           // Regular x,y,z format - PRESERVE FULL PRECISION
           else {
             position = {
-              x: building.position.x !== undefined ? Number(building.position.x) : 0,
-              y: building.position.y !== undefined ? Number(building.position.y) : 5,
-              z: building.position.z !== undefined ? Number(building.position.z) : 0
+              x: building.position.x !== undefined ? parseFloat(building.position.x.toString()) : 0,
+              y: building.position.y !== undefined ? parseFloat(building.position.y.toString()) : 5,
+              z: building.position.z !== undefined ? parseFloat(building.position.z.toString()) : 0
             };
           }
         }
@@ -218,9 +223,9 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
       
       // Set position with explicit values to avoid undefined - PRESERVE FULL PRECISION
       model.position.set(
-        Number(position.x), // Don't use || 0 which can truncate 0.x values
-        Number(position.y) || 5,
-        Number(position.z)  // Don't use || 0 which can truncate 0.x values
+        parseFloat(position.x.toString()), // Ensure we're using the full floating point value
+        parseFloat(position.y.toString()) || 5,
+        parseFloat(position.z.toString())  // Ensure we're using the full floating point value
       );
       
       // Add more detailed logging
