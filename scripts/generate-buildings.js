@@ -125,7 +125,7 @@ async function saveBuildingsToAirtable(buildings) {
       // Create records in Airtable
       const records = batch.map(building => ({
         fields: {
-          Id: building.id,
+          BuildingId: building.id,  // Changed from "Id" to "BuildingId"
           Type: building.type,
           Land: building.land_id,
           Variant: building.variant,
