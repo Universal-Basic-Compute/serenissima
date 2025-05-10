@@ -3755,7 +3755,7 @@ export default class SimplePolygonRenderer {
     
     this.pathVisualization = [];
   }
-}
+  
   /**
    * Helper method to add centroid waypoints between polygons
    */
@@ -3794,3 +3794,4 @@ export default class SimplePolygonRenderer {
       console.warn(`Could not find centroids for polygons ${currentPolygonId} and/or ${nextPolygonId}`);
     }
   }
+}
