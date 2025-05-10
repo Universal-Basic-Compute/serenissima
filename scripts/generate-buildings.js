@@ -21,33 +21,44 @@ async function getBuildingTypesAndVariants() {
     }
 
     const buildingTypes = [];
-    const files = fs.readdirSync(BUILDINGS_DIR);
     
-    for (const file of files) {
-      // Skip index.json as it's a metadata file, not a building type
-      if (file === 'index.json') {
-        console.log('Skipping index.json metadata file');
-        continue;
-      }
+    // Function to recursively search for building type files
+    function searchBuildingTypes(dir) {
+      const items = fs.readdirSync(dir);
       
-      if (file.endsWith('.json')) {
-        const filePath = path.join(BUILDINGS_DIR, file);
-        const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+      for (const item of items) {
+        const fullPath = path.join(dir, item);
+        const stat = fs.statSync(fullPath);
         
-        // Extract building type from filename, removing the .json extension
-        const type = file.replace('.json', '');
-        
-        // Extract variants if available
-        let variants = ['model']; // Default variant
-        if (data.variants && Array.isArray(data.variants) && data.variants.length > 0) {
-          variants = data.variants.map(v => v.id || v.name || 'model');
+        if (stat.isDirectory()) {
+          // Recursively search subdirectories
+          searchBuildingTypes(fullPath);
+        } else if (item.endsWith('.json') && item !== 'index.json') {
+          try {
+            const data = JSON.parse(fs.readFileSync(fullPath, 'utf8'));
+            
+            // Extract building type from filename, removing the .json extension
+            const type = item.replace('.json', '');
+            
+            // Extract variants if available
+            let variants = ['model']; // Default variant
+            if (data.variants && Array.isArray(data.variants) && data.variants.length > 0) {
+              variants = data.variants.map(v => v.id || v.name || 'model');
+            }
+            
+            buildingTypes.push({ type, variants });
+            console.log(`Found building type: ${type} with variants: ${variants.join(', ')}`);
+          } catch (error) {
+            console.warn(`Error parsing building type file ${fullPath}:`, error);
+          }
         }
-        
-        buildingTypes.push({ type, variants });
       }
     }
     
-    // If no building types were found (only index.json exists), throw an error
+    // Start the recursive search
+    searchBuildingTypes(BUILDINGS_DIR);
+    
+    // If no building types were found, throw an error
     if (buildingTypes.length === 0) {
       throw new Error('No building type files found. Cannot proceed without building types.');
     }
