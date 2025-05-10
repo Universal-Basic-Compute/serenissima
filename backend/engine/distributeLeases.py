@@ -632,6 +632,9 @@ def distribute_leases(dry_run: bool = False):
                                 buildings_count = land['fields'].get('BuildingsCount', 0)
                                 development_ratio = min(float(buildings_count) / float(building_points_count), 1.0) if building_points_count > 0 else 0
                                 
+                                # Calculate tax rate for this land
+                                calculated_tax_rate = calculate_tax_rate(land)
+                                
                                 land_buildings_data.append({
                                     "building_id": building_id,
                                     "building_name": building_name,
@@ -640,7 +643,7 @@ def distribute_leases(dry_run: bool = False):
                                     "lease_amount": lease_amount,
                                     "net_amount": net_amount,
                                     "tax_amount": tax_amount,
-                                    "tax_rate": tax_rate,
+                                    "tax_rate": calculated_tax_rate,
                                     "development_rate": development_ratio
                                 })
                                 
@@ -656,7 +659,7 @@ def distribute_leases(dry_run: bool = False):
                                         "lease_amount": lease_amount,
                                         "net_amount": net_amount,
                                         "tax_amount": tax_amount,
-                                        "tax_rate": tax_rate,
+                                        "tax_rate": calculated_tax_rate,
                                         "development_rate": development_ratio
                                     })
                         else:
