@@ -1386,8 +1386,8 @@ export default class SimplePolygonRenderer {
           // Reset previously hovered point
           const hoveredPoint = [...this.bridgePointMarkers, ...this.dockPointMarkers].find(
             marker => marker instanceof THREE.Mesh && marker.userData && marker.userData.id === this.hoveredPointId
-          );
-          
+          ) as THREE.Mesh | undefined;
+        
           if (hoveredPoint && hoveredPoint instanceof THREE.Mesh) {
             // Restore original material if available
             if (hoveredPoint.userData.originalMaterial) {
@@ -1397,7 +1397,7 @@ export default class SimplePolygonRenderer {
               // Fallback to creating a new material
               const isBridge = hoveredPoint.userData.type.startsWith('bridge');
               const isWater = hoveredPoint.userData.type === 'dock-water';
-              
+            
               hoveredPoint.material = new THREE.MeshBasicMaterial({
                 color: isBridge ? 0xFF5500 : (isWater ? 0x0088CC : 0x00AAFF),
                 transparent: false
@@ -1467,8 +1467,8 @@ export default class SimplePolygonRenderer {
         // Reset previously hovered point
         const hoveredPoint = this.buildingPointMarkers.find(
           marker => marker instanceof THREE.Mesh && marker.userData && marker.userData.id === this.hoveredPointId
-        );
-        
+        ) as THREE.Mesh | undefined;
+      
         if (hoveredPoint && hoveredPoint instanceof THREE.Mesh) {
           // Restore original material if available
           if (hoveredPoint.userData.originalMaterial) {
