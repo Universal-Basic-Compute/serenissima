@@ -59,18 +59,18 @@ async function saveCitizensToAirtable(citizens: Citizen[]): Promise<void> {
   try {
     console.log(`Saving ${citizens.length} citizens to Airtable...`);
     
-    // Prepare records for Airtable
+    // Prepare records for Airtable with capitalized field names
     const records = citizens.map(citizen => ({
       fields: {
-        id: citizen.id,
-        socialClass: citizen.socialClass,
-        firstName: citizen.firstName,
-        lastName: citizen.lastName,
-        description: citizen.description,
-        imagePrompt: citizen.imagePrompt,
-        wealth: citizen.wealth,
-        createdAt: citizen.createdAt,
-        imageUrl: citizen.imageUrl || ''
+        ID: citizen.id,
+        SocialClass: citizen.socialClass,
+        FirstName: citizen.firstName,
+        LastName: citizen.lastName,
+        Description: citizen.description,
+        ImagePrompt: citizen.imagePrompt,
+        Wealth: citizen.wealth,
+        CreatedAt: citizen.createdAt,
+        ImageUrl: citizen.imageUrl || ''
       }
     }));
     
