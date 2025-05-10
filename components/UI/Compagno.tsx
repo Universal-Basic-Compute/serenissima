@@ -173,8 +173,8 @@ const Compagno: React.FC<CompagnoProps> = ({ className }) => {
       setUnreadCount(prev => Math.max(0, prev - notificationIds.length));
       
       // Call the callback if provided
-      if (props.onNotificationsRead) {
-        props.onNotificationsRead(notificationIds);
+      if (onNotificationsRead) {
+        onNotificationsRead(notificationIds);
       }
     } catch (error) {
       console.error('Error marking notifications as read:', error);
