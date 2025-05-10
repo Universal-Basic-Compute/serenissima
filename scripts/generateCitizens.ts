@@ -357,14 +357,36 @@ async function generateCitizens(batchCount: number = 1): Promise<void> {
     
     let newCitizens: Citizen[] = [];
     
+    let allCitizens = [...existingCitizens];
+    
     for (let i = 0; i < batchCount; i++) {
       console.log(`Generating batch ${i + 1} of ${batchCount}...`);
       
       // Use executeWithBackoff for the entire batch generation process
-      const batchCitizens = await executeWithBackoff(() => generateCitizensWithClaude([...existingCitizens, ...newCitizens]));
+      const batchCitizens = await executeWithBackoff(() => generateCitizensWithClaude([...allCitizens]));
       
+      // Validate new citizens in this batch
+      validateCitizens(batchCitizens);
+      
+      // Add batch citizens to our tracking arrays
       newCitizens = [...newCitizens, ...batchCitizens];
+      allCitizens = [...allCitizens, ...batchCitizens];
+      
       console.log(`Generated ${batchCitizens.length} citizens in batch ${i + 1}`);
+      
+      // Save this batch to Airtable immediately
+      try {
+        console.log(`Saving batch ${i + 1} to Airtable...`);
+        await saveCitizensToAirtable(batchCitizens);
+        console.log(`Successfully saved batch ${i + 1} to Airtable`);
+      } catch (airtableError) {
+        console.error(`Failed to save batch ${i + 1} to Airtable:`, airtableError);
+        console.log('Continuing with local file save only for this batch');
+      }
+      
+      // Save all citizens to local file after each batch
+      saveCitizens(allCitizens);
+      console.log(`Saved all ${allCitizens.length} citizens to local file after batch ${i + 1}`);
       
       // Add a delay between batches with some randomization to avoid predictable patterns
       if (i < batchCount - 1) {
@@ -374,24 +396,7 @@ async function generateCitizens(batchCount: number = 1): Promise<void> {
       }
     }
     
-    // Validate new citizens
-    validateCitizens(newCitizens);
-    
-    // Add new citizens to existing ones and save
-    const allCitizens = [...existingCitizens, ...newCitizens];
-    saveCitizens(allCitizens);
-    
-    // Save new citizens to Airtable with better error handling
-    try {
-      console.log('Starting Airtable save operation...');
-      await saveCitizensToAirtable(newCitizens);
-      console.log('Airtable save operation completed successfully');
-    } catch (airtableError) {
-      console.error('Failed to save citizens to Airtable:', airtableError);
-      console.log('Continuing with local file save only');
-    }
-    
-    console.log(`Successfully generated ${newCitizens.length} new citizens`);
+    console.log(`Successfully generated ${newCitizens.length} new citizens across ${batchCount} batches`);
     console.log(`Total citizens: ${allCitizens.length}`);
     
   } catch (error) {
