@@ -72,8 +72,7 @@ export class ResourceDisplayManager {
     this.mouseMoveHandler = this.handleMouseMove.bind(this);
     this.mouseClickHandler = this.handleMouseClick.bind(this);
     
-    // Log the bounds for debugging
-    console.log('ResourceDisplayManager initialized with bounds:', this.bounds);
+    // Initialize with the provided bounds
   }
 
   /**
@@ -134,8 +133,6 @@ export class ResourceDisplayManager {
    * Refresh resources from the API
    */
   public async refreshResources(): Promise<void> {
-    console.log('Refreshing resources');
-    
     // Update the last update time
     this.lastUpdateTime = Date.now();
     
@@ -158,7 +155,6 @@ export class ResourceDisplayManager {
   public setActive(active: boolean): void {
     if (this.isActive === active) return;
     
-    console.log(`Setting ResourceDisplayManager active: ${active}`);
     this.isActive = active;
     
     if (active) {
@@ -193,14 +189,10 @@ export class ResourceDisplayManager {
       
       if (username) {
         queryParams = `?owner=${username}`;
-        console.log(`Loading resources for user ${username}`);
-      } else {
-        console.log('No username found, loading all resources');
       }
 
       // Use the correct API URL (Next.js API routes run on the same port as the app)
       const apiUrl = '/api/resources' + queryParams;
-      console.log(`Fetching resources from: ${apiUrl}`);
       
       const response = await fetch(apiUrl, {
         method: 'GET',
@@ -228,12 +220,7 @@ export class ResourceDisplayManager {
         this.resources = [];
       }
       
-      console.log(`Loaded ${this.resources.length} resources${username ? ` for user ${username}` : ''}`);
-      
-      // Log a sample resource for debugging
-      if (this.resources.length > 0) {
-        console.log('Sample resource:', this.resources[0]);
-      }
+      console.log(`Loaded ${this.resources.length} resources`);
     } catch (error) {
       console.error('Error loading resources:', error);
       this.resources = [];
@@ -287,15 +274,6 @@ export class ResourceDisplayManager {
       });
     });
     
-    console.log(`Grouped resources into ${this.resourceGroups.size} locations`);
-    
-    // Log the first group for debugging
-    if (this.resourceGroups.size > 0) {
-      const firstKey = Array.from(this.resourceGroups.keys())[0];
-      const firstGroup = this.resourceGroups.get(firstKey);
-      console.log(`Sample group at ${firstKey} has ${firstGroup?.length} resources:`, 
-        firstGroup?.map(r => `${r.type} (${r.count || 1})`).join(', '));
-    }
   }
 
   /**
@@ -304,8 +282,6 @@ export class ResourceDisplayManager {
   private createResourceMarkers(): void {
     // Remove existing markers first
     this.removeAllMarkers();
-    
-    console.log(`Creating markers for ${this.resourceGroups.size} resource groups`);
     
     // Create a marker for each resource group
     this.resourceGroups.forEach((resources, locationKey) => {
@@ -859,7 +835,7 @@ export class ResourceDisplayManager {
    * Show detailed information about a resource
    */
   private showResourceDetails(resource: any): void {
-    console.log('Showing details for resource:', resource);
+    console.log('Resource details:', resource.id);
     
     // Create a custom event with resource details
     const event = new CustomEvent('showResourceDetails', {
