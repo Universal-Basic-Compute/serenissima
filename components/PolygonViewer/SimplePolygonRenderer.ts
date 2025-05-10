@@ -1848,7 +1848,7 @@ export default class SimplePolygonRenderer {
   }
 
   // Helper method to find land ID from a mesh
-  private findLandIdFromObject(object: THREE.Object3D): string | null {
+  private findLandIdFromObject(object: THREE.Object3D<THREE.Object3DEventMap>): string | null {
     // First check if the object itself has the polygonId
     if (object.userData && object.userData.polygonId) {
       return object.userData.polygonId;
@@ -3060,7 +3060,7 @@ export default class SimplePolygonRenderer {
   /**
    * Remove a building point marker
    */
-  private removeBuildingPointMarker(marker: THREE.Object3D): void {
+  private removeBuildingPointMarker(marker: THREE.Object3D<THREE.Object3DEventMap>): void {
     // Find the marker in the array
     const markerIndex = this.buildingPointMarkers.indexOf(marker);
     
@@ -4783,7 +4783,7 @@ export default class SimplePolygonRenderer {
       }
       
       // Emit event that citizens data is loaded
-      eventBus.emit(EventTypes.CITIZENS_LOADED, { 
+      eventBus.emit('CITIZENS_LOADED', { 
         count: this.citizenData.length,
         citizens: this.citizenData
       });
