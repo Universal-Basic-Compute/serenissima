@@ -76,9 +76,24 @@ def get_available_businesses(tables) -> List[Dict]:
     log.info("Fetching available businesses...")
     
     try:
-        # Get businesses without a Worker field or with empty Worker field
-        formula = "OR({Worker} = '', {Worker} = BLANK())"
-        available_businesses = tables['businesses'].all(formula=formula)
+        # First, get all businesses
+        all_businesses = tables['businesses'].all()
+        log.info(f"Fetched {len(all_businesses)} total businesses")
+        
+        # Then, get all citizens with jobs
+        employed_citizens = tables['citizens'].all(formula="NOT(OR({Work} = '', {Work} = BLANK()))")
+        log.info(f"Found {len(employed_citizens)} employed citizens")
+        
+        # Extract the business IDs that are already taken
+        taken_business_ids = set()
+        for citizen in employed_citizens:
+            if 'Work' in citizen['fields'] and citizen['fields']['Work']:
+                taken_business_ids.add(citizen['fields']['Work'])
+        
+        log.info(f"Found {len(taken_business_ids)} businesses that are already taken")
+        
+        # Filter out businesses that are already taken
+        available_businesses = [b for b in all_businesses if b['id'] not in taken_business_ids]
         
         # Sort by Wages in descending order
         available_businesses.sort(key=lambda b: float(b['fields'].get('Wages', 0) or 0), reverse=True)
