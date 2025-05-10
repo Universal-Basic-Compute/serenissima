@@ -66,11 +66,14 @@ export async function POST(request: Request) {
       position: position
     }, null, 2));
     
+    // Normalize the building type (preserve apostrophes)
+    const normalizedType = data.type.toLowerCase().replace(/\s+/g, '-');
+    
     // Create a record in Airtable - ensure position is stored as a string
     const record = await new Promise((resolve, reject) => {
       base('Buildings').create({
         BuildingId: data.id || `building-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
-        Type: data.type,
+        Type: normalizedType,
         Land: data.land_id,
         Variant: data.variant || 'model',
         Position: JSON.stringify(position), // Always stringify to ensure consistent format

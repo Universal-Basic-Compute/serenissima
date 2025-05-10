@@ -28,7 +28,8 @@ export async function POST(request: Request) {
       const buildingId = `building_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
       
       // Normalize the building type
-      const normalizedType = buildingData.type.toLowerCase().replace(/'/g, '').replace(/\s+/g, '-');
+      const normalizedType = buildingData.type.toLowerCase().replace(/\s+/g, '-');
+      // Don't remove apostrophes from the type name
       
       // Create the building object
       const building = {
