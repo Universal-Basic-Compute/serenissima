@@ -43,6 +43,24 @@ Every day at 11:00 AM UTC, the immigration system checks for vacant housing buil
 
 The immigration process helps maintain population balance in the city and ensures that vacant properties have a chance to be occupied, creating a dynamic housing market.
 
+### Job Assignment (10:00 AM UTC)
+
+**Script**: `backend/engine/citizensgetjobs.py`
+
+Every day at 10:00 AM UTC, the job assignment system finds employment for citizens without jobs:
+
+1. The script identifies all citizens without jobs (Work field is empty)
+2. Citizens are sorted by wealth in descending order (wealthier citizens get first pick of jobs)
+3. For each citizen, the system finds an available business (not already taken by another worker)
+4. Citizens are assigned to businesses with the highest wages
+5. When a citizen is assigned to a business:
+   - The citizen record is updated with their new job
+   - The business record is updated with its new worker and set to active status
+   - A notification is created for the business owner about their new employee
+6. The system tracks job assignment statistics and sends a summary notification to administrators
+
+This process ensures that citizens find employment based on their wealth and status, creating a stratified labor market similar to historical Venice.
+
 ### Housing Assignment (12:00 PM UTC)
 
 **Script**: `backend/engine/househomelesscitizens.py`
@@ -124,6 +142,29 @@ Every afternoon at 4:00 PM UTC, the income distribution system allocates income 
 5. Notifications are sent to land owners about their income
 
 This process simulates the economic activity of Venice, with land ownership providing passive income to players and tax revenue to the government.
+
+### Rent Payments (5:00 PM UTC)
+
+**Script**: `backend/engine/dailyrentpayments.py`
+
+Every day at 5:00 PM UTC, the rent payment system processes two types of rent payments:
+
+1. Housing rent payments:
+   - For each building with an occupant, the system transfers the RentAmount from the citizen to the building owner
+   - If the citizen has insufficient funds, notifications are sent to both parties about the missed payment
+
+2. Business rent payments:
+   - For each business with a building, the system transfers the RentAmount from the business owner to the building owner
+   - This only occurs if the business owner is different from the building owner
+
+3. For all successful payments:
+   - Transaction records are created
+   - Notifications are sent to both the payer and recipient
+   - Building owners receive summaries of all rent collected from their properties
+
+4. An admin notification is created with statistics about all rent payments processed
+
+This process simulates the rental economy of Venice, with citizens paying rent for housing and businesses paying rent for commercial spaces.
 
 ## Technical Implementation
 
