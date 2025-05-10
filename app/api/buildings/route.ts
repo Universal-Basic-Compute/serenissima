@@ -27,26 +27,53 @@ export async function POST(request: Request) {
       );
     }
     
-    if (!data.position || typeof data.position !== 'object' || 
-        typeof data.position.x !== 'number' || 
-        typeof data.position.z !== 'number') {
+    // Ensure position is properly formatted
+    let position = data.position;
+    
+    // If position is missing, return an error
+    if (!position) {
       return NextResponse.json(
-        { success: false, error: 'Valid position with x and z coordinates is required' },
+        { success: false, error: 'Position is required' },
+        { status: 400 }
+      );
+    }
+    
+    // If position is a string, try to parse it
+    if (typeof position === 'string') {
+      try {
+        position = JSON.parse(position);
+      } catch (error) {
+        return NextResponse.json(
+          { success: false, error: 'Invalid position format - could not parse JSON string' },
+          { status: 400 }
+        );
+      }
+    }
+    
+    // Validate that position has required properties
+    if (typeof position !== 'object' || 
+        (position.lat === undefined && position.x === undefined) || 
+        (position.lng === undefined && position.z === undefined)) {
+      return NextResponse.json(
+        { success: false, error: 'Position must have either lat/lng or x/y/z coordinates' },
         { status: 400 }
       );
     }
     
     // Log the received data for debugging
-    console.log('Creating building with data:', JSON.stringify(data, null, 2));
+    console.log('Creating building with data:', JSON.stringify({
+      ...data,
+      position: position
+    }, null, 2));
     
-    // Create a record in Airtable
+    // Create a record in Airtable - ensure position is stored as a string
     const record = await new Promise((resolve, reject) => {
       base('Buildings').create({
         BuildingId: data.id || `building-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
         Type: data.type,
         Land: data.land_id,
         Variant: data.variant || 'model',
-        Position: JSON.stringify(data.position),
+        Position: JSON.stringify(position), // Always stringify to ensure consistent format
         Rotation: data.rotation || 0,
         User: data.owner || data.created_by || 'system',
         CreatedAt: data.created_at || new Date().toISOString()
@@ -66,7 +93,7 @@ export async function POST(request: Request) {
       type: record.fields.Type,
       land_id: record.fields.Land,
       variant: record.fields.Variant || 'model',
-      position: JSON.parse(record.fields.Position),
+      position: JSON.parse(record.fields.Position), // Parse back to object
       rotation: record.fields.Rotation || 0,
       owner: record.fields.User,
       created_at: record.fields.CreatedAt
@@ -139,18 +166,31 @@ export async function GET(request: Request) {
           position = JSON.parse(position);
         } catch (error) {
           console.error('Error parsing position JSON:', error);
-          position = { x: 45, y: 5, z: 12 }; // Default position with better visibility
+          // Instead of using a default position, log the error and continue
+          console.error('Original position string:', position);
+          position = { x: 0, y: 0, z: 0 }; // Use origin as fallback
         }
       }
       
       // Ensure position has all required properties
       if (!position || typeof position !== 'object') {
-        position = { x: 45, y: 5, z: 12 };
-      } else {
+        position = { x: 0, y: 0, z: 0 }; // Use origin as fallback
+      } 
+      // Handle lat/lng format
+      else if (position.lat !== undefined && position.lng !== undefined) {
+        // Keep lat/lng format intact - don't convert here
+        // The conversion will happen in the BuildingRenderer component
         position = {
-          x: position.x !== undefined ? Number(position.x) : 45,
-          y: position.y !== undefined ? Number(position.y) : 5,
-          z: position.z !== undefined ? Number(position.z) : 12
+          lat: position.lat,
+          lng: position.lng
+        };
+      }
+      // Handle x/y/z format
+      else {
+        position = {
+          x: position.x !== undefined ? Number(position.x) : 0,
+          y: position.y !== undefined ? Number(position.y) : 0,
+          z: position.z !== undefined ? Number(position.z) : 0
         };
       }
       
@@ -236,11 +276,28 @@ export async function GET(request: Request) {
       
     console.log('Adding debug buildings');
       
+    // Add a fifth building with explicit x/y/z coordinates
+    const debugBuilding5 = {
+      id: 'building_5',
+      type: 'house',
+      land_id: 'polygon-1746052711036',
+      position: { 
+        x: 10, 
+        y: 5, 
+        z: 10
+      },
+      rotation: 0,
+      connection_points: [],
+      created_by: 'ConsiglioDeiDieci',
+      created_at: '2025-05-10T02:07:00Z'
+    };
+    
     // Add the debug buildings to the beginning of the array to ensure they're processed first
     buildings.unshift(debugBuilding1);
     buildings.unshift(debugBuilding2);
     buildings.unshift(debugBuilding3);
     buildings.unshift(debugBuilding4);
+    buildings.unshift(debugBuilding5);
     
     // Set cache headers to allow browsers to cache the response for a short time
     const headers = new Headers();
