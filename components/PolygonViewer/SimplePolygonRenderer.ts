@@ -1976,11 +1976,27 @@ export default class SimplePolygonRenderer {
               linewidth: 5         // Even thicker line (note: linewidth may not work in WebGL)
             });
             
-            // Create a path from the points
-            const path = new THREE.LineCurve3(
-              new THREE.Vector3(sourceCoord.x, 0.35, -sourceCoord.y),
-              new THREE.Vector3(targetCoord.x, 0.35, -targetCoord.y)
+            // Create a path from the points, but extend it 20% on each side
+            const direction = new THREE.Vector3().subVectors(
+              new THREE.Vector3(targetCoord.x, 0, -targetCoord.y),
+              new THREE.Vector3(sourceCoord.x, 0, -sourceCoord.y)
+            ).normalize();
+
+            // Calculate the extended points (20% longer on each side)
+            const extensionLength = direction.length() * 0.2;
+            const startPoint = new THREE.Vector3(
+              sourceCoord.x - direction.x * extensionLength,
+              0.15, // Lower position (was 0.35) to be closer to the ground
+              -sourceCoord.y - direction.z * extensionLength
             );
+            const endPoint = new THREE.Vector3(
+              targetCoord.x + direction.x * extensionLength,
+              0.15, // Lower position (was 0.35) to be closer to the ground
+              -targetCoord.y + direction.z * extensionLength
+            );
+
+            // Create the path with extended points
+            const path = new THREE.LineCurve3(startPoint, endPoint);
 
             // Create a tube geometry along the path
             const tubeGeometry = new THREE.TubeGeometry(
