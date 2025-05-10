@@ -1,4 +1,6 @@
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { BuildingData, DockData } from '../models/BuildingTypes';
 import buildingPositionManager from './BuildingPositionManager';
 import buildingCacheService from './BuildingCacheService';
@@ -25,7 +27,28 @@ export interface IBuildingRenderer {
  * Default building renderer implementation
  */
 class DefaultBuildingRenderer implements IBuildingRenderer {
-  constructor(private options: BuildingRendererOptions) {}
+  private gltfLoader: GLTFLoader;
+  
+  constructor(private options: BuildingRendererOptions) {
+    this.gltfLoader = new GLTFLoader();
+  }
+  
+  /**
+   * Get the path to a building model
+   * @param buildingType Type of building
+   * @param variant Model variant
+   * @returns Path to the model file
+   */
+  private getModelPath(buildingType: string, variant: string = 'model'): string {
+    // Normalize building type to handle any case or format issues
+    const normalizedType = buildingType.toLowerCase().trim().replace(/\s+/g, '-');
+    
+    // Add logging to debug model paths
+    const modelPath = `/models/buildings/${normalizedType}/${variant}.glb`;
+    console.log(`Model path for ${buildingType}/${variant}: ${modelPath}`);
+    
+    return modelPath;
+  }
   
   /**
    * Create a simplified version of the building for distant viewing
@@ -93,19 +116,101 @@ class DefaultBuildingRenderer implements IBuildingRenderer {
   }
 
   /**
-   * Get building color based on type - to delete
+   * Get building color based on type
    */
   private getBuildingColorByType(type: string): number {
-    switch(type) {
+    switch(type.toLowerCase()) {
       case 'market-stall':
-        return 0xA52A2A; // Brown
+        return 0xf5a442; // Orange
       case 'dock':
-        return 0x8B4513; // SaddleBrown
+        return 0x4287f5; // Blue
       case 'house':
-        return 0xCD853F; // Peru
+        return 0x42f54e; // Green
+      case 'workshop':
+        return 0xf54242; // Red
+      case 'warehouse':
+        return 0x8c42f5; // Purple
+      case 'tavern':
+        return 0xf5d442; // Yellow
+      case 'church':
+        return 0xf5f5f5; // White
+      case 'palace':
+        return 0xf542a7; // Pink
       default:
-        return 0xD2B48C; // Tan
+        return 0xD2B48C; // Tan (default)
     }
+  }
+  
+  /**
+   * Create a colored box model as a fallback
+   */
+  private createColoredBoxModel(building: BuildingData, position: THREE.Vector3): THREE.Object3D {
+    // Create a group to hold our objects
+    const group = new THREE.Group();
+    
+    // Create a box with a color based on building type
+    const geometry = new THREE.BoxGeometry(2, 2, 2);
+    const color = this.getBuildingColorByType(building.type);
+    const material = new THREE.MeshStandardMaterial({ 
+      color: color,
+      roughness: 0.7,
+      metalness: 0.2
+    });
+    
+    const box = new THREE.Mesh(geometry, material);
+    box.castShadow = true;
+    box.receiveShadow = true;
+    
+    // Add the box to the group
+    group.add(box);
+    
+    // Create a text label to show the building type
+    const canvas = document.createElement('canvas');
+    canvas.width = 256;
+    canvas.height = 64;
+    const context = canvas.getContext('2d');
+    
+    if (context) {
+      context.fillStyle = 'rgba(0, 0, 0, 0.8)';
+      context.fillRect(0, 0, 256, 64);
+      context.font = 'bold 24px Arial';
+      context.fillStyle = 'white';
+      context.textAlign = 'center';
+      context.textBaseline = 'middle';
+      context.fillText(building.type, 128, 32);
+      
+      const texture = new THREE.CanvasTexture(canvas);
+      const labelMaterial = new THREE.SpriteMaterial({ 
+        map: texture,
+        transparent: true
+      });
+      
+      const label = new THREE.Sprite(labelMaterial);
+      label.position.set(0, 2, 0);
+      label.scale.set(2, 0.5, 1);
+      
+      // Add the label to the group
+      group.add(label);
+    }
+    
+    // Position the group
+    group.position.copy(position);
+    group.rotation.y = building.rotation || 0;
+    
+    // Add metadata
+    group.userData = {
+      buildingId: building.id,
+      type: building.type,
+      landId: building.land_id,
+      owner: building.owner || building.created_by,
+      position: building.position,
+      isFallbackModel: true
+    };
+    
+    // Add to scene
+    this.options.scene.add(group);
+    
+    return group;
   }
   
   /**
@@ -182,6 +287,8 @@ class DefaultBuildingRenderer implements IBuildingRenderer {
    */
   public async render(building: BuildingData): Promise<THREE.Object3D> {
     try {
+      console.log(`Rendering building ${building.id} of type ${building.type}`);
+      
       // Get camera position to determine distance
       const camera = this.getCameraFromScene();
       
@@ -207,15 +314,35 @@ class DefaultBuildingRenderer implements IBuildingRenderer {
         return this.createLowDetailModel(building);
       }
       
-      // Load the building model
-      const model = await this.options.cacheService.getBuildingModel(building.type, building.variant);
-      
-      // Check if this is a fallback model and we should skip rendering it
-      if (model.userData && model.userData.isFallbackModel) {
-        console.log(`Skipping rendering of fallback model for ${building.id} of type ${building.type}`);
+      // Try to load the actual GLB model
+      try {
+        const modelPath = this.getModelPath(building.type, building.variant || 'model');
+        console.log(`Attempting to load model from: ${modelPath}`);
         
-        // Create an empty group instead of using the fallback model
-        const emptyGroup = new THREE.Group();
+        // Create a low detail model to show while loading
+        const tempModel = this.createLowDetailModel(building);
+        this.options.scene.add(tempModel);
+        
+        // Load the GLB model
+        const gltf = await new Promise<GLTF>((resolve, reject) => {
+          this.gltfLoader.load(
+            modelPath,
+            resolve,
+            (xhr) => {
+              console.log(`${building.id} model ${Math.round(xhr.loaded / xhr.total * 100)}% loaded`);
+            },
+            (error) => {
+              console.error(`Error loading model for ${building.id}:`, error);
+              reject(error);
+            }
+          );
+        });
+        
+        // Remove the temporary model
+        this.options.scene.remove(tempModel);
+        
+        // Get the model from the GLTF scene
+        const model = gltf.scene;
         
         // Find the ground level at this position using raycasting
         const groundPosition = this.findGroundLevel(position);
@@ -229,115 +356,48 @@ class DefaultBuildingRenderer implements IBuildingRenderer {
           position.y = 0;
         }
         
-        // Copy the position
-        emptyGroup.position.copy(position);
-        
-        // Set rotation
-        emptyGroup.rotation.y = building.rotation || 0;
+        // Set position and rotation
+        model.position.copy(position);
+        model.rotation.y = building.rotation || 0;
         
         // Add metadata to the model
-        emptyGroup.userData = {
+        model.userData = {
           buildingId: building.id,
           type: building.type,
           landId: building.land_id,
           owner: building.owner || building.created_by,
-          position: building.position,
-          isEmptyPlaceholder: true
+          position: building.position
         };
         
-        // Add to scene
-        this.options.scene.add(emptyGroup);
-        
-        return emptyGroup;
-      }
-      
-      // Check if this is a fallback model and we should skip rendering it
-      if (model.userData && model.userData.isFallbackModel) {
-        console.log(`Skipping rendering of fallback model for ${building.id} of type ${building.type}`);
-        
-        // Create an empty group instead of using the fallback model
-        const emptyGroup = new THREE.Group();
-        
-        // Copy the position
-        emptyGroup.position.copy(position);
-        emptyGroup.position.y = 0;
-        
-        // Set rotation
-        emptyGroup.rotation.y = building.rotation || 0;
-        
-        // Add metadata to the model
-        emptyGroup.userData = {
-          buildingId: building.id,
-          type: building.type,
-          landId: building.land_id,
-          owner: building.owner || building.created_by,
-          position: building.position,
-          isEmptyPlaceholder: true
-        };
-        
-        // Add to scene
-        this.options.scene.add(emptyGroup);
-        
-        return emptyGroup;
-      }
-      
-      // Update position with ground level
-      
-      // Find the ground level at this position using raycasting
-      const groundPosition = this.findGroundLevel(position);
-      if (groundPosition) {
-        // Use the detected ground height
-        console.log(`Found ground at height ${groundPosition.y} for building ${building.id}`);
-        position.y = groundPosition.y;
-      } else {
-        // Fallback to default ground level if detection fails
-        console.log(`No ground found for building ${building.id}, using default height (0)`);
-        position.y = 0;
-      }
-      
-      model.position.copy(position);
-      
-      // Set rotation
-      model.rotation.y = building.rotation || 0;
-      
-      // Add metadata to the model
-      model.userData = {
-        buildingId: building.id,
-        type: building.type,
-        landId: building.land_id,
-        owner: building.owner || building.created_by,
-        position: building.position
-      };
-      
-      // Remove any grid objects from the model
-      model.traverse((child) => {
-        // Check if the object is a grid or has grid in its name
-        if (child.name && (child.name.includes('grid') || child.name.includes('Grid'))) {
-          // Make the grid invisible
-          child.visible = false;
-        }
-        
-        // Enable shadows and configure materials for lighting
-        if (child instanceof THREE.Mesh) {
-          child.castShadow = true;
-          child.receiveShadow = true;
-          
-          if (child.material instanceof THREE.MeshStandardMaterial) {
-            child.material.needsUpdate = true;
-            child.material.roughness = 0.7;
-            child.material.metalness = 0.3;
-            child.material.emissive.set(0x202020);
-            // Ensure materials are properly configured for shadows
-            child.material.transparent = false; // Disable transparency for better shadows
-            child.material.depthWrite = true;   // Ensure depth is written
+        // Configure model for better rendering
+        model.traverse((child) => {
+          if (child instanceof THREE.Mesh) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+            
+            if (child.material instanceof THREE.MeshStandardMaterial) {
+              child.material.needsUpdate = true;
+              child.material.roughness = 0.7;
+              child.material.metalness = 0.3;
+              child.material.emissive.set(0x202020);
+              // Ensure materials are properly configured for shadows
+              child.material.transparent = false; // Disable transparency for better shadows
+              child.material.depthWrite = true;   // Ensure depth is written
+            }
           }
-        }
-      });
-      
-      // Add to scene
-      this.options.scene.add(model);
-      
-      return model;
+        });
+        
+        // Add to scene
+        this.options.scene.add(model);
+        
+        console.log(`Successfully loaded and added model for building ${building.id}`);
+        return model;
+      } catch (error) {
+        console.error(`Failed to load GLB model for ${building.id}, using colored box instead:`, error);
+        
+        // If GLB loading fails, create a colored box with a label
+        return this.createColoredBoxModel(building, position);
+      }
     } catch (error) {
       console.error(`Error rendering building ${building.id}:`, error);
       throw error;
