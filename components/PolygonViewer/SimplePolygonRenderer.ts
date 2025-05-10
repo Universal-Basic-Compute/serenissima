@@ -1046,7 +1046,7 @@ export default class SimplePolygonRenderer {
 
   // Handle mouse clicks for selection
   public handleMouseClick(event: MouseEvent, container: HTMLElement) {
-    if (!this.camera || this.activeView !== 'land') return;
+    if (!this.camera) return;
     
     // Calculate mouse position in normalized device coordinates (-1 to +1)
     const rect = container.getBoundingClientRect();
@@ -1057,6 +1057,15 @@ export default class SimplePolygonRenderer {
     this.raycaster.setFromCamera(this.mouse, this.camera);
     this.raycaster.params.Line.threshold = 0.1; // Increase line detection threshold
     this.raycaster.params.Points.threshold = 0.1; // Increase point detection threshold
+    
+    // Check if this is a right-click and we're in transport view
+    if (event.button === 2 && this.activeView === 'transport') {
+      // Handle right-click in transport view - delete markers
+      this.handleRightClickInTransportView();
+      return;
+    }
+    
+    if (this.activeView !== 'land') return;
     
     // Find intersections with coat of arms sprites
     const coatOfArmsObjects = Object.values(this.coatOfArmsSprites);
@@ -1521,13 +1530,15 @@ export default class SimplePolygonRenderer {
     // Create materials with nicer colors
     const bridgeMaterial = new THREE.MeshBasicMaterial({
       color: 0xFF5500, // Orange-red for bridges
-      transparent: false
+      transparent: true,
+      opacity: 0.5 // Set to 50% transparency
     });
     
     // Create materials for dock points
     const dockEdgeMaterial = new THREE.MeshBasicMaterial({
       color: 0x00AAFF, // Light blue for dock edges
-      transparent: false
+      transparent: true,
+      opacity: 0.5 // Set to 50% transparency
     });
     
     const dockWaterMaterial = new THREE.MeshBasicMaterial({
@@ -1657,5 +1668,83 @@ export default class SimplePolygonRenderer {
       }
     });
     this.dockPointMarkers = [];
+  }
+  
+  // Add this new method to handle right-click deletion of transport markers
+  private handleRightClickInTransportView() {
+    // Combine all markers for raycasting
+    const allMarkers = [...this.bridgePointMarkers, ...this.dockPointMarkers].filter(
+      obj => obj instanceof THREE.Mesh
+    );
+    
+    const intersects = this.raycaster.intersectObjects(allMarkers);
+    
+    if (intersects.length > 0) {
+      const intersected = intersects[0].object;
+      const userData = intersected.userData;
+      
+      if (userData && userData.id) {
+        // Extract information from the marker ID
+        // Format is typically: bridge-{polygonId}-{index} or dock-edge-{polygonId}-{index}
+        const idParts = userData.id.split('-');
+        
+        if (idParts.length >= 3) {
+          const markerType = idParts[0]; // 'bridge' or 'dock'
+          const polygonId = idParts[1];
+          const pointIndex = parseInt(idParts[2]);
+          
+          // Find the polygon
+          const polygon = this.polygons.find(p => p.id === polygonId);
+          
+          if (polygon) {
+            // Remove the point from the polygon data
+            if (markerType === 'bridge' && polygon.bridgePoints && polygon.bridgePoints.length > pointIndex) {
+              // Remove the bridge point
+              polygon.bridgePoints.splice(pointIndex, 1);
+              console.log(`Removed bridge point ${pointIndex} from polygon ${polygonId}`);
+            } else if (markerType === 'dock' && polygon.dockPoints && polygon.dockPoints.length > pointIndex) {
+              // Remove the dock point
+              polygon.dockPoints.splice(pointIndex, 1);
+              console.log(`Removed dock point ${pointIndex} from polygon ${polygonId}`);
+            }
+            
+            // Save the updated polygon data to the server
+            this.saveUpdatedPolygonData(polygon);
+            
+            // Refresh the transport markers
+            this.clearBridgeAndDockMarkers();
+            this.forceCreateBridgeAndDockPoints();
+          }
+        }
+      }
+    }
+  }
+
+  // Add this method to save the updated polygon data
+  private saveUpdatedPolygonData(polygon: any) {
+    // Create a request to save the updated polygon data
+    fetch(`/api/update-polygon`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        id: polygon.id,
+        bridgePoints: polygon.bridgePoints,
+        dockPoints: polygon.dockPoints
+      }),
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`Failed to update polygon: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then(data => {
+      console.log('Successfully updated polygon data:', data);
+    })
+    .catch(error => {
+      console.error('Error updating polygon data:', error);
+    });
   }
 }

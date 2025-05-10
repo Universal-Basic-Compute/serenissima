@@ -221,9 +221,16 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
       canvas.addEventListener('mousemove', handleMouseMove);
       canvas.addEventListener('click', handleMouseClick);
       
+      // Add context menu prevention for right-click functionality
+      canvas.addEventListener('contextmenu', (e) => {
+        // Prevent the context menu from appearing when right-clicking
+        e.preventDefault();
+      });
+      
       return () => {
         canvas.removeEventListener('mousemove', handleMouseMove);
         canvas.removeEventListener('click', handleMouseClick);
+        canvas.removeEventListener('contextmenu', e => e.preventDefault());
       };
     }
   }, []);
