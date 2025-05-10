@@ -14,14 +14,52 @@ interface BuildingRendererProps {
 }
 
 const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) => {
-  // Add a ref to store the scene
-  const sceneRef = useRef<THREE.Scene>(scene);
+  // Store scene in a ref to avoid undefined issues
+  const sceneRef = useRef<THREE.Scene | null>(null);
   
-  // Update the ref when scene changes
+  // Add a state to track if the component is ready to render
+  const [isReady, setIsReady] = useState<boolean>(false);
+  
+  // Update the ref when scene changes or try to find the scene if not provided
   useEffect(() => {
-    sceneRef.current = scene;
-    console.log('BuildingRenderer: scene ref updated', sceneRef.current ? 'scene available' : 'scene not available');
+    // Function to find the scene if not provided as a prop
+    const findScene = (): THREE.Scene | null => {
+      if (scene) return scene;
+      
+      // Try to get scene from window.__threeContext
+      if (typeof window !== 'undefined' && window.__threeContext && window.__threeContext.scene) {
+        console.log('BuildingRenderer: Found scene in window.__threeContext');
+        return window.__threeContext.scene;
+      }
+      
+      // Try to get scene from canvas element
+      if (typeof document !== 'undefined') {
+        const canvas = document.querySelector('canvas');
+        if (canvas && canvas.__scene) {
+          console.log('BuildingRenderer: Found scene in canvas.__scene');
+          return canvas.__scene;
+        }
+      }
+      
+      console.warn('BuildingRenderer: Could not find scene');
+      return null;
+    };
+    
+    // Try to find the scene
+    const foundScene = findScene();
+    sceneRef.current = foundScene;
+    
+    // Set ready state based on whether we found a scene
+    setIsReady(!!foundScene);
+    
+    console.log('BuildingRenderer: Scene ref updated', foundScene ? 'scene available' : 'scene not available');
   }, [scene]);
+  // Early return if not ready
+  if (!isReady && !sceneRef.current) {
+    console.log('BuildingRenderer: Not ready, scene not available');
+    return null;
+  }
+  
   const [buildings, setBuildings] = useState<BuildingData[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
