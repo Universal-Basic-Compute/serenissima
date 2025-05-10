@@ -37,11 +37,6 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
   
   // Add a state to track if the component is ready to render
   const [isReady, setIsReady] = useState<boolean>(false);
-  // Store scene in a ref to avoid undefined issues
-  const sceneRef = useRef<THREE.Scene | null>(null);
-  
-  // Add a state to track if the component is ready to render
-  const [isReady, setIsReady] = useState<boolean>(false);
   // Update the ref when scene changes or try to find the scene if not provided
   useEffect(() => {
     // Function to find the scene if not provided as a prop
@@ -100,17 +95,6 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
       console.log('BuildingRenderer: Scene ref updated, real scene available');
     }
   }, [scene]);
-  // Early return if not ready
-  if (!isReady) {
-    console.log('BuildingRenderer: Not ready yet, waiting for scene to be available');
-    // Return a loading state instead of null
-    return null;
-  }
-  
-  // Log warning if we're using a dummy scene
-  if (sceneRef.current && sceneRef.current.userData && sceneRef.current.userData.isDummyScene) {
-    console.warn('BuildingRenderer: Using dummy scene, buildings will not be visible until a real scene is available');
-  }
   // Early return if not ready
   if (!isReady) {
     console.log('BuildingRenderer: Not ready yet, waiting for scene to be available');
