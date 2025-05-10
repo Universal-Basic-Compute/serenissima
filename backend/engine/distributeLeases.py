@@ -763,10 +763,9 @@ def distribute_leases(dry_run: bool = False):
                 try:
                     if land_total > 0:
                         log.info(f"{'[DRY RUN] Would update' if dry_run else 'Updating'} LastIncome for land {land_id} to {land_total}")
-                        if not dry_run:
-                            tables['lands'].update(land_id, {
-                                "LastIncome": land_total
-                            })
+                        tables['lands'].update(land_id, {
+                            "LastIncome": land_total
+                        })
                 except Exception as update_error:
                     log.error(f"Error updating LastIncome for land {land_id}: {update_error}")
                 
