@@ -2499,11 +2499,11 @@ export default class SimplePolygonRenderer {
       return;
     }
     
-    // Create a material for building points - make them more visible
+    // Create a material for building points - make them more transparent and smaller
     const buildingPointMaterial = new THREE.MeshBasicMaterial({
       color: 0xFFFFFF, // White color for building points
       transparent: true,
-      opacity: 0.8  // Increased from 0.4 for better visibility
+      opacity: 0.4  // Reduced from 0.8 to 0.4 for more transparency
     });
     
     // Process each polygon
@@ -2528,7 +2528,7 @@ export default class SimplePolygonRenderer {
           console.log(`Normalized coordinates for point ${index}:`, normalizedCoord);
           
           // Create a smaller sphere for better visibility
-          const geometry = new THREE.SphereGeometry(0.25, 12, 12); // Smaller size (changed from 0.4)
+          const geometry = new THREE.SphereGeometry(0.15, 12, 12); // Reduced from 0.25 to 0.15 for smaller size
           
           const marker = new THREE.Mesh(geometry, buildingPointMaterial);
           // Position closer to the ground level
@@ -2588,8 +2588,8 @@ export default class SimplePolygonRenderer {
       
       // Ensure consistent appearance
       if (marker instanceof THREE.Mesh && marker.material instanceof THREE.MeshBasicMaterial) {
-        // Make building points more visible in transport view
-        marker.material.opacity = 0.8; // Increased from 0.4 for better visibility
+        // Make building points more transparent in transport view
+        marker.material.opacity = 0.4; // Reduced from 0.8 to 0.4 for more transparency
         marker.material.color.set(0xFFFFFF); // White color for building points
       }
     });
