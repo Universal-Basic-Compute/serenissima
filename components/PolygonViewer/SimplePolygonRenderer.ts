@@ -2653,12 +2653,74 @@ export default class SimplePolygonRenderer {
       // Calculate distance in meters
       const distance = this.calculateDistanceInMeters(start, end);
       
-      // Create a text label to show the distance
+      // Convert 3D points back to lat/lng
+      const startLatLng = {
+        lat: this.bounds.centerLat + (start.x / this.bounds.scale) / this.bounds.latCorrectionFactor,
+        lng: this.bounds.centerLng - (start.z / this.bounds.scale)
+      };
+      
+      const endLatLng = {
+        lat: this.bounds.centerLat + (end.x / this.bounds.scale) / this.bounds.latCorrectionFactor,
+        lng: this.bounds.centerLng - (end.z / this.bounds.scale)
+      };
+      
+      // Find the polygons containing the start and end points
+      const startPolygon = this.findPolygonContainingPoint(startLatLng);
+      const endPolygon = this.findPolygonContainingPoint(endLatLng);
+      
+      // Find the path between the polygons
+      let pathInfo = "No path found";
+      
+      if (startPolygon && endPolygon) {
+        // Try to find a path
+        const path = this.findShortestPath(startPolygon.id, endPolygon.id);
+        
+        if (path && path.length > 0) {
+          // Count bridges in the path
+          let bridgeCount = 0;
+          let pathPolygons = [];
+          
+          // Add the names of polygons in the path
+          for (let i = 0; i < path.length; i++) {
+            const polygon = this.polygons.find(p => p.id === path[i]);
+            if (polygon) {
+              const polygonName = polygon.historicalName || polygon.englishName || polygon.id;
+              pathPolygons.push(polygonName);
+              
+              // Count bridges between consecutive polygons
+              if (i < path.length - 1) {
+                const currentPolygon = polygon;
+                const nextPolygonId = path[i + 1];
+                
+                // Check if there's a bridge between these polygons
+                if (currentPolygon.bridgePoints) {
+                  const bridgesTo = currentPolygon.bridgePoints.filter(bp => 
+                    bp.connection && bp.connection.targetPolygonId === nextPolygonId
+                  );
+                  bridgeCount += bridgesTo.length > 0 ? 1 : 0;
+                }
+              }
+            }
+          }
+          
+          pathInfo = `Path: ${pathPolygons.join(' → ')}\nBridges: ${bridgeCount}`;
+        } else {
+          pathInfo = `Direct path from ${startPolygon.historicalName || startPolygon.englishName || startPolygon.id} to ${endPolygon.historicalName || endPolygon.englishName || endPolygon.id}`;
+        }
+      } else if (startPolygon) {
+        pathInfo = `From: ${startPolygon.historicalName || startPolygon.englishName || startPolygon.id}\nTo: (not on land)`;
+      } else if (endPolygon) {
+        pathInfo = `From: (not on land)\nTo: ${endPolygon.historicalName || endPolygon.englishName || endPolygon.id}`;
+      } else {
+        pathInfo = "Path over water (no land)";
+      }
+      
+      // Create a text label to show the path information
       const canvas = document.createElement('canvas');
       const context = canvas.getContext('2d');
       if (context) {
-        canvas.width = 256;
-        canvas.height = 64;
+        canvas.width = 512;
+        canvas.height = 256;
         
         // Draw background
         context.fillStyle = 'rgba(0, 0, 0, 0.7)';
@@ -2669,12 +2731,21 @@ export default class SimplePolygonRenderer {
         context.lineWidth = 2;
         context.strokeRect(2, 2, canvas.width - 4, canvas.height - 4);
         
-        // Draw text
-        context.font = 'bold 24px Arial';
+        // Draw distance text
+        context.font = 'bold 20px Arial';
         context.fillStyle = '#FFFFFF';
         context.textAlign = 'center';
-        context.textBaseline = 'middle';
-        context.fillText(`${distance.toFixed(1)} meters`, canvas.width / 2, canvas.height / 2);
+        context.textBaseline = 'top';
+        context.fillText(`${distance.toFixed(1)} meters`, canvas.width / 2, 10);
+        
+        // Draw path information
+        context.font = '16px Arial';
+        const pathLines = pathInfo.split('\n');
+        let y = 40;
+        pathLines.forEach(line => {
+          context.fillText(line, canvas.width / 2, y);
+          y += 24;
+        });
         
         // Create texture from canvas
         const texture = new THREE.CanvasTexture(canvas);
@@ -2700,9 +2771,9 @@ export default class SimplePolygonRenderer {
         if (this.camera) {
           const distance = this.camera.position.distanceTo(midpoint);
           const scale = Math.max(1, distance / 10); // Scale up as camera gets further away
-          this.measurementLabel.scale.set(scale, scale * 0.25, 1); // Make height 1/4 of width
+          this.measurementLabel.scale.set(scale, scale * 0.5, 1); // Make height 1/2 of width
         } else {
-          this.measurementLabel.scale.set(2, 0.5, 1);
+          this.measurementLabel.scale.set(2, 1, 1);
         }
         
         this.measurementLabel.renderOrder = 101;
