@@ -30,8 +30,8 @@ BASE_TAX_RATE = 0.20
 MAX_TAX_RATE = 0.50
 
 # Get Telegram credentials
-TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
-MAIN_TELEGRAM_CHAT_ID = os.environ.get("MAIN_TELEGRAM_CHAT_ID")
+TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN')
+MAIN_TELEGRAM_CHAT_ID = os.environ.get('MAIN_TELEGRAM_CHAT_ID')
 
 # Set up logging
 logging.basicConfig(
