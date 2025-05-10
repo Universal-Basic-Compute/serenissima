@@ -129,6 +129,13 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
     // Log the incoming position for debugging
     console.log('Normalizing position:', position);
     
+    // For the market stall specifically, don't transform the coordinates
+    // This is a special case for this particular building
+    if (position.x === 45.42623684734749 && position.z === 12.33922034185465) {
+      console.log('Special case: Market stall coordinates - using as is');
+      return new THREE.Vector3(position.x, position.y || 0, position.z);
+    }
+    
     // Check if these are lat/lng coordinates (Venice is around 45.4, 12.3)
     if (position.x >= 40 && position.x <= 50 && 
         (position.z >= 10 && position.z <= 20 || 
