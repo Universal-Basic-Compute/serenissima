@@ -199,6 +199,7 @@ async function generateDockPoints() {
       
       // For each potential dock point, check if it can be a valid dock
       const dockPoints = [];
+      const bridgePoints = [];
       
       for (const point of potentialDockPoints) {
         // Extend the line from centroid through point by 20 meters
@@ -211,20 +212,26 @@ async function generateDockPoints() {
             edge: point,
             water: extendedPoint
           });
+        } else {
+          // The extended point is not in water, save as bridge point instead
+          bridgePoints.push({
+            edge: point
+          });
         }
       }
       
-      console.log(`Polygon ${file}: Created ${dockPoints.length} valid dock points`);
+      console.log(`Polygon ${file}: Created ${dockPoints.length} valid dock points and ${bridgePoints.length} bridge points`);
       totalDockPoints += dockPoints.length;
       
-      // Update the polygon data with dock points
+      // Update the polygon data with both dock points and bridge points
       data.dockPoints = dockPoints;
+      data.bridgePoints = bridgePoints;
       
       // Write the updated data back to the file
       fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
     }
     
-    console.log(`Completed! Generated ${totalDockPoints} dock points across all polygons.`);
+    console.log(`Completed! Generated ${totalDockPoints} dock points and bridge points across all polygons.`);
   } catch (error) {
     console.error('Error generating dock points:', error);
   }
