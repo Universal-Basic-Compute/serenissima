@@ -81,8 +81,14 @@ export class ResourceDisplayManager {
   public async initialize(): Promise<void> {
     console.log('Initializing ResourceDisplayManager');
     
+    // Check resource images directory
+    this.checkResourceImagesDirectory();
+    
     // Load resources
     await this.loadResources();
+    
+    // Add debug resources if needed
+    this.addDebugResourcesIfNeeded();
     
     // Group resources by location
     this.groupResourcesByLocation();
@@ -94,6 +100,97 @@ export class ResourceDisplayManager {
     this.subscribeToEvents();
     
     console.log(`Initialized with ${this.resources.length} resources in ${this.resourceGroups.size} groups`);
+  }
+  
+  /**
+   * Check if the resource images directory exists
+   */
+  private checkResourceImagesDirectory(): void {
+    // Check if the resource images directory exists
+    fetch('/images/resources/default.png')
+      .then(response => {
+        if (!response.ok) {
+          console.warn('Resource images directory may not exist or default.png is missing');
+          // Log a more detailed warning to help developers
+          console.warn('Make sure you have created the directory /public/images/resources/ and added resource images');
+        } else {
+          console.log('Resource images directory exists');
+        }
+      })
+      .catch(error => {
+        console.error('Error checking resource images directory:', error);
+      });
+  }
+  
+  /**
+   * Add debug resources if none are loaded
+   */
+  private addDebugResourcesIfNeeded(): void {
+    // Only add debug resources if we have none
+    if (this.resources.length === 0) {
+      console.log('No resources loaded, adding debug resources');
+      
+      // Add some debug resources at different locations in Venice
+      const debugResources = [
+        {
+          id: 'debug-resource-1',
+          type: 'wood',
+          name: 'Wood',
+          category: 'raw_materials',
+          position: { lat: 45.4371, lng: 12.3358 },
+          count: 5,
+          owner: 'system',
+          landId: 'polygon-1',
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: 'debug-resource-2',
+          type: 'stone',
+          name: 'Stone',
+          category: 'raw_materials',
+          position: { lat: 45.4375, lng: 12.3368 },
+          count: 10,
+          owner: 'system',
+          landId: 'polygon-2',
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: 'debug-resource-3',
+          type: 'fish',
+          name: 'Fish',
+          category: 'food',
+          position: { lat: 45.4365, lng: 12.3348 },
+          count: 8,
+          owner: 'system',
+          landId: 'polygon-3',
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: 'debug-resource-4',
+          type: 'cloth',
+          name: 'Cloth',
+          category: 'textiles',
+          position: { lat: 45.4380, lng: 12.3378 },
+          count: 3,
+          owner: 'system',
+          landId: 'polygon-4',
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: 'debug-resource-5',
+          type: 'spice',
+          name: 'Spices',
+          category: 'spices',
+          position: { lat: 45.4368, lng: 12.3362 },
+          count: 7,
+          owner: 'system',
+          landId: 'polygon-5',
+          createdAt: new Date().toISOString()
+        }
+      ];
+      
+      this.resources = debugResources;
+    }
   }
   
   /**
@@ -647,27 +744,49 @@ export class ResourceDisplayManager {
    * Create a sprite for a resource icon
    */
   private createResourceSprite(resourceType: string): THREE.Sprite {
+    // Normalize resource type to match image filenames
+    const normalizedType = resourceType.toLowerCase()
+      .replace(/\s+/g, '-')  // Replace spaces with hyphens
+      .replace(/[^a-z0-9-]/g, ''); // Remove special characters
+    
     // Try to get from cache first
-    let texture = this.textureCache.get(resourceType);
+    let texture = this.textureCache.get(normalizedType);
     
     if (!texture) {
       // Load the texture
       const loader = new THREE.TextureLoader();
-      texture = loader.load(`/images/resources/${resourceType}.png`, 
-        // Success callback
-        (loadedTexture) => {
-          this.textureCache.set(resourceType, loadedTexture);
-        },
-        // Progress callback
-        undefined,
-        // Error callback
-        () => {
+      
+      // Try multiple paths to find the resource image
+      const tryLoadTexture = (paths: string[]) => {
+        if (paths.length === 0) {
           console.warn(`Failed to load texture for resource type: ${resourceType}, using fallback`);
-          // Use a fallback texture
-          texture = loader.load('/images/resources/default.png');
-          this.textureCache.set(resourceType, texture);
+          return loader.load('/images/resources/default.png');
         }
-      );
+        
+        return loader.load(paths[0], 
+          // Success callback
+          (loadedTexture) => {
+            this.textureCache.set(normalizedType, loadedTexture);
+          },
+          // Progress callback
+          undefined,
+          // Error callback
+          () => {
+            console.warn(`Failed to load texture from ${paths[0]}, trying next path...`);
+            // Try the next path
+            texture = tryLoadTexture(paths.slice(1));
+          }
+        );
+      };
+      
+      // Try multiple possible paths for the resource image
+      texture = tryLoadTexture([
+        `/images/resources/${normalizedType}.png`,
+        `/images/resources/${normalizedType}.jpg`,
+        `/public/images/resources/${normalizedType}.png`,
+        `/public/images/resources/${normalizedType}.jpg`,
+        `/images/resources/default.png`
+      ]);
     }
     
     const material = new THREE.SpriteMaterial({ 

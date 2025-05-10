@@ -18,6 +18,7 @@ import SceneSetup from './SceneSetup';
 import PolygonRenderer from './PolygonRenderer';
 import { WaterFacade } from '../../lib/threejs/WaterFacade';
 import { InteractionManager } from '../../lib/threejs/InteractionManager';
+import { ResourceDisplayManager } from '../../lib/threejs/ResourceDisplayManager';
 import ViewModeMenu from './ViewModeMenu';
 import LandDetailsPanel from './LandDetailsPanel';
 import MarketPanel from './MarketPanel';
@@ -176,6 +177,7 @@ export default function PolygonViewer() {
   const polygonRendererRef = useRef<PolygonRenderer | null>(null);
   const interactionManagerRef = useRef<InteractionManager | null>(null);
   const bridgeRendererRef = useRef<BridgeRenderer | null>(null);
+  const resourceDisplayManagerRef = useRef<ResourceDisplayManager | null>(null);
 
   // Debug function to help understand what's happening with the polygons
   const debugPolygons = () => {
@@ -891,12 +893,38 @@ export default function PolygonViewer() {
       bridgeRendererRef.current = bridgeRenderer;
     };
     
+    // Step 5: Initialize resource display manager
+    const initResourceDisplayManager = () => {
+      if (sceneRef.current && sceneRef.current.scene && sceneRef.current.camera) {
+        const resourceDisplayManager = new ResourceDisplayManager({
+          scene: sceneRef.current.scene,
+          camera: sceneRef.current.camera,
+          bounds: bounds
+        });
+        
+        resourceDisplayManagerRef.current = resourceDisplayManager;
+        
+        // Initialize the resource display
+        resourceDisplayManager.initialize().then(() => {
+          console.log('Resource display manager initialized');
+          
+          // If we're already in resources view, activate it
+          if (activeView === 'resources') {
+            resourceDisplayManager.setActive(true);
+          }
+        }).catch(error => {
+          console.error('Failed to initialize resource display manager:', error);
+        });
+      }
+    };
+    
     // Execute initialization in sequence with delays
     initPolygonRenderer(); // Start with polygons immediately
     
     // Schedule the rest with increasing delays
     const interactionManagerTimer = setTimeout(initInteractionManager, 600);
     const bridgeRendererTimer = setTimeout(initBridgeRenderer, 700);
+    const resourceDisplayManagerTimer = setTimeout(initResourceDisplayManager, 800);
     
     // Add a delayed update for coat of arms
     const coatOfArmsTimer = setTimeout(() => {
@@ -1080,6 +1108,7 @@ export default function PolygonViewer() {
       if (interactionManagerRef.current) interactionManagerRef.current.cleanup();
       if (polygonRendererRef.current) polygonRendererRef.current.cleanup();
       if (bridgeRendererRef.current) bridgeRendererRef.current.cleanup();
+      if (resourceDisplayManagerRef.current) resourceDisplayManagerRef.current.dispose();
       if (roadManagerRef.current) {
         // RoadManager might not have cleanup method in its type definition
         // but we know it exists at runtime
@@ -1097,6 +1126,7 @@ export default function PolygonViewer() {
       // Clear all timers
       clearTimeout(interactionManagerTimer);
       clearTimeout(bridgeRendererTimer);
+      clearTimeout(resourceDisplayManagerTimer);
       clearTimeout(coatOfArmsTimer);
     
       // Clear references
@@ -1104,6 +1134,7 @@ export default function PolygonViewer() {
       polygonRendererRef.current = null;
       interactionManagerRef.current = null;
       bridgeRendererRef.current = null;
+      resourceDisplayManagerRef.current = null;
     };
   }, [polygons, loading, bridges, ownerCoatOfArmsMap, users, setHoveredPolygonId, handleContextLost, handlePolygonAdded, handlePolygonDeleted]); // Removed activeView, highQuality, selectedPolygonId from dependencies
   
@@ -1385,6 +1416,18 @@ export default function PolygonViewer() {
                 polygonRendererRef.current.ensureBuildingsVisible();
               }
             }, 100);
+          }
+        }
+        
+        // Handle resources view
+        if (resourceDisplayManagerRef.current) {
+          // Only activate in resources view
+          resourceDisplayManagerRef.current.setActive(activeView === 'resources');
+          
+          if (activeView === 'resources') {
+            console.log('Switching to resources view, activating resource display');
+            // Force a refresh of resources when switching to this view
+            resourceDisplayManagerRef.current.refreshResources();
           }
         }
         
