@@ -134,21 +134,21 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
               latCorrectionFactor: 0.7
             };
             
-            // Convert lat/lng to Three.js coordinates
+            // Convert lat/lng to Three.js coordinates - PRESERVE FULL PRECISION
             const x = (building.position.lng - bounds.centerLng) * bounds.scale;
             const z = -(building.position.lat - bounds.centerLat) * bounds.scale * bounds.latCorrectionFactor;
             
             position = {
-              x: x,
+              x: x, // Don't round or truncate these values
               y: position.y || 5, // Keep the existing y or use default
-              z: z
+              z: z  // Don't round or truncate these values
             };
             
             console.log(`Converted lat/lng position for building ${building.id}:`, 
               `From: lat=${building.position.lat}, lng=${building.position.lng}`,
               `To: x=${position.x}, z=${position.z}`);
           } 
-          // Regular x,y,z format
+          // Regular x,y,z format - PRESERVE FULL PRECISION
           else {
             position = {
               x: building.position.x !== undefined ? Number(building.position.x) : 0,
@@ -162,14 +162,19 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
       // Ensure position has a reasonable height to be visible
       if (!position.y || position.y < 0.1) position.y = 5;
       
-      // Set position with explicit values to avoid undefined
+      // Set position with explicit values to avoid undefined - PRESERVE FULL PRECISION
       model.position.set(
-        Number(position.x) || 0,
+        Number(position.x), // Don't use || 0 which can truncate 0.x values
         Number(position.y) || 5,
-        Number(position.z) || 0
+        Number(position.z)  // Don't use || 0 which can truncate 0.x values
       );
       
-      console.log(`Setting building ${building.id} position to:`, model.position);
+      // Add more detailed logging
+      console.log(`Setting building ${building.id} position to:`, {
+        x: model.position.x,
+        y: model.position.y,
+        z: model.position.z
+      });
       
       // Set rotation
       model.rotation.y = building.rotation || 0;
