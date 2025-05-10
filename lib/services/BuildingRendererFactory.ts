@@ -73,6 +73,19 @@ class DefaultBuildingRenderer implements IBuildingRenderer {
           // Make the grid invisible
           child.visible = false;
         }
+        
+        // Enable shadows and configure materials for lighting
+        if (child instanceof THREE.Mesh) {
+          child.castShadow = true;
+          child.receiveShadow = true;
+          
+          if (child.material instanceof THREE.MeshStandardMaterial) {
+            child.material.needsUpdate = true;
+            child.material.roughness = 0.7;
+            child.material.metalness = 0.3;
+            child.material.emissive.set(0x202020);
+          }
+        }
       });
       
       // Add to scene

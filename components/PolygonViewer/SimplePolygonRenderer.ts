@@ -107,8 +107,8 @@ export default class SimplePolygonRenderer {
     // Preload the navigation graph
     this.preloadNavigationGraph();
     
-    // Preload the navigation graph
-    this.preloadNavigationGraph();
+    // Setup lights for the scene
+    this.setupLights();
     
     // Process users data to extract coat of arms
     if (users) {
@@ -2681,10 +2681,31 @@ export default class SimplePolygonRenderer {
         
         // Add the loaded model to the group
         buildingGroup.add(gltf.scene);
-        
+      
         // Apply rotation
         buildingGroup.rotation.y = building.rotation || 0;
-        
+      
+        // Ensure materials are properly configured for lighting
+        buildingGroup.traverse((child) => {
+          if (child instanceof THREE.Mesh) {
+            // Enable shadows
+            child.castShadow = true;
+            child.receiveShadow = true;
+          
+            // If using MeshStandardMaterial, ensure it has proper settings
+            if (child.material instanceof THREE.MeshStandardMaterial) {
+              child.material.needsUpdate = true;
+            
+              // Adjust material properties for better visibility
+              child.material.roughness = 0.7;  // Less shiny
+              child.material.metalness = 0.3;  // Slightly metallic
+            
+              // Add some emissive color to ensure minimal visibility even without lights
+              child.material.emissive.set(0x202020);  // Very subtle glow
+            }
+          }
+        });
+      
         console.log(`Successfully loaded model for ${building.id} from ${modelPath}`);
       } catch (modelError) {
         console.warn(`Failed to load model from ${modelPath}:`, modelError);
@@ -2783,6 +2804,40 @@ export default class SimplePolygonRenderer {
     }
   }
 
+  /**
+   * Setup lights for the scene
+   */
+  private setupLights(): void {
+    console.log('Setting up lights for the scene');
+    
+    // Add ambient light for overall illumination
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+    this.scene.add(ambientLight);
+    
+    // Add directional light (like sunlight)
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    directionalLight.position.set(50, 100, 50);
+    directionalLight.castShadow = true;
+    
+    // Improve shadow quality
+    directionalLight.shadow.mapSize.width = 2048;
+    directionalLight.shadow.mapSize.height = 2048;
+    directionalLight.shadow.camera.near = 0.5;
+    directionalLight.shadow.camera.far = 500;
+    directionalLight.shadow.camera.left = -100;
+    directionalLight.shadow.camera.right = 100;
+    directionalLight.shadow.camera.top = 100;
+    directionalLight.shadow.camera.bottom = -100;
+    
+    this.scene.add(directionalLight);
+    
+    // Add a hemisphere light for better ambient lighting from sky/ground
+    const hemisphereLight = new THREE.HemisphereLight(0xddeeff, 0x806040, 0.5);
+    this.scene.add(hemisphereLight);
+    
+    console.log('Lights added to scene');
+  }
+  
   /**
    * Preload the navigation graph from the server
    */
