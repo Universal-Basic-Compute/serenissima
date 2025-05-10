@@ -706,14 +706,19 @@ export default class PolygonRenderer {
       this.createOwnerIndicators();
     }
     
+    // If switching to buildings view, make sure buildings are visible IMMEDIATELY
+    if (isBuildingsView) {
+      console.log('Switching to buildings view, ensuring buildings are visible IMMEDIATELY');
+      this.ensureBuildingsVisible();
+      
+      // Dispatch an event to notify other components that buildings should be visible
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('showBuildings'));
+      }
+    }
+    
     // Ensure all polygons remain visible after view mode change
     setTimeout(() => this.ensurePolygonsVisible(), 100);
-    
-    // If switching to buildings view, make sure buildings are visible
-    if (isBuildingsView) {
-      console.log('Switching to buildings view, ensuring buildings are visible');
-      this.ensureBuildingsVisible();
-    }
     
     console.log(`View mode updated to ${activeView}`);
   }

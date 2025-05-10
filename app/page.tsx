@@ -124,13 +124,19 @@ export default function SimplePage() {
     window.addEventListener('buildingMenuClosed', handleBuildingMenuClosed);
     window.addEventListener('showBuildings', handleShowBuildings);
     
+    // Dispatch showBuildings event immediately if we're in buildings view
+    if (activeView === 'buildings') {
+      console.log('Currently in buildings view, dispatching showBuildings event immediately');
+      window.dispatchEvent(new CustomEvent('showBuildings'));
+    }
+    
     return () => {
       window.removeEventListener('hide3DView', handleHide3DView);
       window.removeEventListener('show3DView', handleShow3DView);
       window.removeEventListener('buildingMenuClosed', handleBuildingMenuClosed);
       window.removeEventListener('showBuildings', handleShowBuildings);
     };
-  }, []);
+  }, [activeView]);
 
   // Handle URL changes to show appropriate panels
   useEffect(() => {
@@ -534,6 +540,15 @@ export default function SimplePage() {
       {/* Buildings Toolbar - only visible in buildings view */}
       {activeView === 'buildings' && (
         <>
+          {/* First ensure buildings are visible */}
+          <script dangerouslySetInnerHTML={{
+            __html: `
+              // Force buildings to be visible immediately
+              window.dispatchEvent(new CustomEvent('showBuildings'));
+            `
+          }} />
+          
+          {/* Then show the toolbar */}
           <BuildingsToolbar 
             scene={document.querySelector('canvas')?.__scene}
             camera={document.querySelector('canvas')?.__camera as THREE.PerspectiveCamera}
@@ -543,6 +558,8 @@ export default function SimplePage() {
               eventBus.emit(EventTypes.BUILDING_PLACED, { refresh: true });
             }}
           />
+          
+          {/* Finally show the building menu */}
           <BuildingMenu 
             visible={true} 
             onClose={() => {
