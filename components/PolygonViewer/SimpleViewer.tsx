@@ -9,6 +9,8 @@ import { IncomePolygonRenderer } from '../../lib/threejs/IncomePolygonRenderer';
 import { calculateBounds } from './utils';
 import { getApiBaseUrl } from '@/lib/apiUtils';
 import LandDetailsPanel from './LandDetailsPanel'; // Import the existing panel
+import { eventBus } from '@/lib/eventBus';
+import { EventTypes } from '@/lib/eventTypes';
 
 export default function SimpleViewer({ qualityMode = 'high', activeView = 'land' }: {
   qualityMode: 'high' | 'performance';
