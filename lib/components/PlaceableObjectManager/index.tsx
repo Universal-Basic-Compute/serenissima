@@ -403,7 +403,7 @@ const PlaceableObjectManager: React.FC<PlaceableObjectProps> = ({
         land_id: landId,
         position: {
           x: previewPosition.x,
-          y: previewPosition.y,
+          y: 5.0, // Set Y to 5 units above water level
           z: previewPosition.z
         },
         rotation: rotation,

@@ -151,7 +151,7 @@ export async function GET(request: Request) {
       land_id: 'polygon-1746052711032',
       position: { 
         x: 45.42623684734749, 
-        y: 0, 
+        y: 5, // Set Y to 5 units above water level
         z: 12.33922034185465 
       },
       rotation: 0,
@@ -165,7 +165,7 @@ export async function GET(request: Request) {
       land_id: 'polygon-1746052711033',
       position: { 
         x: 45.42623684734749 + 10, 
-        y: 0, 
+        y: 5, // Set Y to 5 units above water level
         z: 12.33922034185465 + 10
       },
       rotation: Math.PI / 4, // 45 degrees rotation
@@ -179,7 +179,7 @@ export async function GET(request: Request) {
       land_id: 'polygon-1746052711034',
       position: { 
         x: 45.42623684734749 - 10, 
-        y: 0, 
+        y: 5, // Set Y to 5 units above water level
         z: 12.33922034185465 - 10
       },
       rotation: Math.PI / 2, // 90 degrees rotation

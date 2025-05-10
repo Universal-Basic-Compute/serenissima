@@ -227,44 +227,30 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
             const model = gltf.scene;
             
             // Position and rotate the model
-            const normalizedPosition = normalizeCoordinates(position);
-      
-            // Ensure the building is at ground level (y=0) with a small offset to prevent z-fighting
-            normalizedPosition.y = 0.1;
-      
-            model.position.copy(normalizedPosition);
+            // Use the exact position values but RAISE the Y coordinate to place above water
+            model.position.set(position.x, 5.0, position.z); // Set Y to 5.0 units above water level
             model.rotation.y = rotation || 0;
-            console.log(`Positioned model at normalized position:`, normalizedPosition);
-      
-            // Add a debug marker at the exact position
-            const markerGeometry = new THREE.SphereGeometry(0.5, 16, 16);
-            const markerMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-            const marker = new THREE.Mesh(markerGeometry, markerMaterial);
-            marker.position.copy(normalizedPosition);
-            marker.position.y += 5; // Position above the building for visibility
-            scene.add(marker);
-            console.log(`Added position marker at ${JSON.stringify(marker.position)}`);
+            console.log(`Positioned model at position: x=${position.x}, y=5.0, z=${position.z}`);
             
             // Calculate bounding box to properly scale the model
             const box = new THREE.Box3().setFromObject(model);
             const size = box.getSize(new THREE.Vector3());
-      
-            // Scale model to a reasonable size if it's too large or too small
+            
+            // Scale model to a reasonable size - reduce the scale to make buildings smaller
             const maxDimension = Math.max(size.x, size.y, size.z);
             if (maxDimension > 20) {
               // Model is too large, scale it down
-              const scale = 10 / maxDimension;
+              const scale = 2 / maxDimension; // Reduced from 10 to 2
               model.scale.set(scale, scale, scale);
               console.log(`Model was too large (${maxDimension} units), scaled down by ${scale}`);
             } else if (maxDimension < 1) {
               // Model is too small, scale it up
-              const scale = 5 / maxDimension;
+              const scale = 2 / maxDimension; // Reduced from 5 to 2
               model.scale.set(scale, scale, scale);
               console.log(`Model was too small (${maxDimension} units), scaled up by ${scale}`);
             } else {
-              // Apply a default scale to make buildings more visible
-              // Increased from 2.0 to 5.0 for better visibility
-              const scale = 5.0;
+              // Apply a default scale to make buildings more visible but smaller
+              const scale = 0.5; // Reduced from 5.0 to 0.5
               model.scale.set(scale, scale, scale);
               console.log(`Applied default scale of ${scale} to building`);
             }
@@ -273,7 +259,7 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
             const helperGeometry = new THREE.SphereGeometry(0.5, 16, 16);
             const helperMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
             const helper = new THREE.Mesh(helperGeometry, helperMaterial);
-            helper.position.copy(normalizedPosition);
+            helper.position.set(position.x, 5.0, position.z);
             scene.add(helper);
             console.log(`Added position helper at ${JSON.stringify(helper.position)}`);
             
@@ -328,23 +314,18 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
     });
     const fallbackMesh = new THREE.Mesh(geometry, material);
     
-    // Position and rotate the fallback
-    const normalizedPosition = normalizeCoordinates(position);
-    
-    // Ensure the building is at ground level (y=0) with a small offset to prevent z-fighting
-    normalizedPosition.y = 0.5; // Half the height of the box
-    
-    fallbackMesh.position.copy(normalizedPosition);
+    // Position and rotate the fallback - raise the Y position
+    fallbackMesh.position.set(position.x, 5.0, position.z); // Set Y to 5.0 units above water level
     fallbackMesh.rotation.y = rotation || 0;
     
-    // Make the fallback mesh larger for visibility
-    fallbackMesh.scale.set(3, 3, 3);
+    // Make the fallback mesh smaller for better proportions
+    fallbackMesh.scale.set(1, 1, 1); // Reduced from 3 to 1
     
     // Add a visible helper at the building position
     const helperGeometry = new THREE.SphereGeometry(0.5, 16, 16);
     const helperMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
     const helper = new THREE.Mesh(helperGeometry, helperMaterial);
-    helper.position.copy(normalizedPosition);
+    helper.position.set(position.x, 5.0, position.z);
     scene.add(helper);
     console.log(`Added position helper at ${JSON.stringify(helper.position)}`);
     
@@ -354,7 +335,7 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
     // Store reference
     buildingMeshesRef.current.set(id, fallbackMesh);
     
-    console.log(`Created fallback mesh for building ${id} at normalized position:`, normalizedPosition);
+    console.log(`Created fallback mesh for building ${id} at position: x=${position.x}, y=5.0, z=${position.z}`);
   };
   
   // This component doesn't render any UI

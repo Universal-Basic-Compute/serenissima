@@ -183,14 +183,14 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
               const controls = actualCamera.userData?.controls;
               if (controls && controls.target) {
                 // Set the target to the market stall position
-                controls.target.set(45.42623684734749, 0, 12.33922034185465);
+                controls.target.set(45.42623684734749, 5, 12.33922034185465);
                 controls.update();
                 console.log('Camera controls updated to target market stall');
               } else {
                 // If we can't find controls on the camera, try to find them on the scene
                 const sceneControls = scene?.userData?.controls;
                 if (sceneControls) {
-                  sceneControls.target.set(45.42623684734749, 0, 12.33922034185465);
+                  sceneControls.target.set(45.42623684734749, 5, 12.33922034185465);
                   sceneControls.update();
                   console.log('Scene controls updated to target market stall');
                 } else {
@@ -199,7 +199,7 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
                   if (canvasElement) {
                     const canvasControls = (canvasElement as any).__controls;
                     if (canvasControls) {
-                      canvasControls.target.set(45.42623684734749, 0, 12.33922034185465);
+                      canvasControls.target.set(45.42623684734749, 5, 12.33922034185465);
                       canvasControls.update();
                       console.log('Canvas controls updated to target market stall');
                     }
@@ -219,7 +219,7 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
               console.log('Camera repositioned to:', actualCamera.position);
               console.log('Looking at market stall position:', {
                 x: 45.42623684734749,
-                y: 0,
+                y: 5,
                 z: 12.33922034185465
               });
             } else {
@@ -237,6 +237,60 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
           <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
         </svg>
         <span>Focus on Market Stall</span>
+      </button>
+      
+      <button
+        onClick={() => {
+          // Focus camera on all buildings
+          if (camera) {
+            // Get the actual camera
+            const actualCamera = camera || (document.querySelector('canvas')?.__camera as THREE.PerspectiveCamera);
+            
+            if (actualCamera) {
+              console.log('Repositioning camera to view all buildings');
+              
+              // Find all buildings in the scene
+              const buildings: THREE.Object3D[] = [];
+              scene?.traverse((object) => {
+                if (object.userData && object.userData.buildingId) {
+                  buildings.push(object);
+                }
+              });
+              
+              // If no buildings found, use the market stall position
+              if (buildings.length === 0) {
+                actualCamera.position.set(45.42623684734749 + 10, 15, 12.33922034185465 + 10);
+                actualCamera.lookAt(45.42623684734749, 5, 12.33922034185465);
+              } else {
+                // Calculate the center of all buildings
+                const center = new THREE.Vector3();
+                buildings.forEach(building => {
+                  center.add(building.position);
+                });
+                center.divideScalar(buildings.length);
+                
+                // Position camera to see all buildings
+                actualCamera.position.set(center.x + 20, 20, center.z + 20);
+                actualCamera.lookAt(center);
+              }
+              
+              // Update controls if available
+              const controls = actualCamera.userData?.controls;
+              if (controls) {
+                controls.update();
+              }
+              
+              console.log('Camera repositioned to view buildings');
+            }
+          }
+        }}
+        className="px-4 py-2 bg-green-600 text-white rounded-md shadow-md hover:bg-green-700 transition-colors flex items-center space-x-2"
+        title="Focus on all buildings"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+        </svg>
+        <span>View All Buildings</span>
       </button>
       
       
@@ -258,6 +312,48 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
           <path fillRule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4zm3 1h6v4H7V5zm8 8v-4H7v4h8z" clipRule="evenodd" />
         </svg>
         <span>Browse Buildings</span>
+      </button>
+      
+      <button
+        onClick={() => {
+          if (!scene) {
+            console.error('Scene not available');
+            return;
+          }
+          
+          console.log('Creating market stall directly');
+          
+          // Create the market stall data
+          const marketStallData = {
+            id: 'market-stall-direct',
+            type: 'market-stall',
+            land_id: 'polygon-1746052711032',
+            position: { 
+              x: 45.42623684734749, 
+              y: 5, // Set Y to 5 units above water level
+              z: 12.33922034185465 
+            },
+            rotation: 0,
+            created_by: 'ConsiglioDeiDieci',
+            created_at: new Date().toISOString()
+          };
+          
+          // Dispatch an event to add the building
+          eventBus.emit(EventTypes.BUILDING_PLACED, {
+            buildingId: marketStallData.id,
+            type: marketStallData.type,
+            data: marketStallData
+          });
+          
+          console.log('Market stall creation event dispatched');
+        }}
+        className="px-4 py-2 bg-green-600 text-white rounded-md shadow-md hover:bg-green-700 transition-colors flex items-center space-x-2"
+        title="Create Market Stall"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+        </svg>
+        <span>Create Market Stall</span>
       </button>
       
       
