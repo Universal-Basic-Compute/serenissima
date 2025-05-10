@@ -4,11 +4,14 @@ import path from 'path';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { path: string[] } }
+  { params }: { params: Promise<{ path: string[] }> }
 ) {
   try {
+    // Await the params Promise to get the actual params object
+    const resolvedParams = await params;
+    
     // Get the path from the URL
-    const filePath = params.path.join('/');
+    const filePath = resolvedParams.path.join('/');
     
     // Construct the full path to the file
     const fullPath = path.join(process.cwd(), 'public', 'coat-of-arms', filePath);
