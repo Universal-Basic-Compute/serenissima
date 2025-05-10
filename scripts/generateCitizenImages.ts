@@ -32,24 +32,56 @@ if (!fs.existsSync(CITIZENS_IMAGE_DIR)) {
   fs.mkdirSync(CITIZENS_IMAGE_DIR, { recursive: true });
 }
 
-// Load citizens data
-function loadCitizens(): Citizen[] {
+// Fetch citizens from Airtable that need images
+async function fetchCitizensNeedingImages(): Promise<Citizen[]> {
   try {
-    const data = fs.readFileSync(CITIZENS_DATA_PATH, 'utf8');
-    return JSON.parse(data);
+    console.log('Fetching citizens from Airtable that need images...');
+    
+    const citizens: Citizen[] = [];
+    
+    // Fetch records from Airtable with pagination, filtering for records where ImageUrl is empty
+    await new Promise((resolve, reject) => {
+      base('CITIZENS').select({
+        filterByFormula: '{ImageUrl} = ""', // Only get records with empty ImageUrl
+        // Optionally specify fields to retrieve
+        fields: ['CitizenId', 'SocialClass', 'FirstName', 'LastName', 'Description', 'ImagePrompt', 'Wealth', 'CreatedAt']
+      }).eachPage(
+        function page(records, fetchNextPage) {
+          // Process each page of records
+          records.forEach(record => {
+            const fields = record.fields;
+            citizens.push({
+              id: fields.CitizenId || record.id,
+              socialClass: fields.SocialClass as 'Patrician' | 'Cittadini' | 'Popolani' | 'Laborer',
+              firstName: fields.FirstName,
+              lastName: fields.LastName,
+              description: fields.Description,
+              imagePrompt: fields.ImagePrompt,
+              wealth: fields.Wealth,
+              createdAt: fields.CreatedAt
+            });
+          });
+          
+          // Get the next page of records
+          fetchNextPage();
+        },
+        function done(err) {
+          if (err) {
+            console.error('Error fetching citizens from Airtable:', err);
+            reject(err);
+            return;
+          }
+          
+          console.log(`Successfully fetched ${citizens.length} citizens needing images from Airtable`);
+          resolve(citizens);
+        }
+      );
+    });
+    
+    return citizens;
   } catch (error) {
-    console.error('Error loading citizens data:', error);
-    return [];
-  }
-}
-
-// Save updated citizens data
-function saveCitizens(citizens: Citizen[]): void {
-  try {
-    fs.writeFileSync(CITIZENS_DATA_PATH, JSON.stringify(citizens, null, 2));
-    console.log(`Saved updated citizens data to ${CITIZENS_DATA_PATH}`);
-  } catch (error) {
-    console.error('Error saving citizens data:', error);
+    console.error('Error in fetchCitizensNeedingImages:', error);
+    return []; // Return empty array on error
   }
 }
 
@@ -160,18 +192,21 @@ async function generateImage(prompt: string, citizenId: string): Promise<string 
 
 // Main function to generate images for all citizens
 async function generateCitizenImages(limit: number = 0): Promise<void> {
-  const citizens = loadCitizens();
+  // Fetch citizens from Airtable that need images
+  const citizens = await fetchCitizensNeedingImages();
+  
+  if (citizens.length === 0) {
+    console.log('No citizens found that need images. Exiting.');
+    return;
+  }
+  
+  console.log(`Found ${citizens.length} citizens that need images`);
+  
   let updatedCount = 0;
   let processedCount = 0;
   
   for (let i = 0; i < citizens.length; i++) {
     const citizen = citizens[i];
-    
-    // Skip if citizen already has an image
-    if (citizen.imageUrl) {
-      console.log(`Citizen ${citizen.id} already has an image, skipping...`);
-      continue;
-    }
     
     // Stop if we've reached the limit (if specified)
     if (limit > 0 && processedCount >= limit) {
@@ -188,12 +223,7 @@ async function generateCitizenImages(limit: number = 0): Promise<void> {
     const imageUrl = await generateImage(enhancedPrompt, citizen.id);
     
     if (imageUrl) {
-      // Update citizen with image URL
-      citizens[i].imageUrl = imageUrl;
       updatedCount++;
-      
-      // Save after each successful generation to avoid losing progress
-      saveCitizens(citizens);
     }
     
     processedCount++;
