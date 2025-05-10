@@ -369,33 +369,32 @@ Respond with a JSON array containing objects with these three fields for each do
   }
 }
 
-// Generate building descriptions using Claude API
-async function generateBuildingDescriptions(count, existingNames = [], landHistoricalName = '') {
+// Generate street names using Claude API
+async function generateStreetNames(count, existingNames = [], landHistoricalName = '') {
   try {
     return await retryWithExponentialBackoff(
       async () => {
         const prompt = `
-You are an expert on Renaissance Venice history and architecture. I need historically accurate descriptions for ${count} buildings in Venice.
+You are an expert on Renaissance Venice history and geography. I need historically accurate names for ${count} streets or calli in Venice.
 
-${landHistoricalName ? `These buildings are located in or near "${landHistoricalName}", a historical area in Venice.` : ''}
+${landHistoricalName ? `These streets are located in or near "${landHistoricalName}", a historical area in Venice.` : ''}
 
-Please generate ${count} historically plausible building descriptions. The descriptions should:
-1. Include appropriate building types for Renaissance Venice (palazzo, bottega, chiesa, etc.)
-2. Reference local families, guilds, or historical events if possible
-3. Include names in Italian with English translations
-4. Provide a brief explanation of the building's historical significance or function
+Please generate ${count} historically plausible names for streets. The names should:
+1. Follow Venetian naming conventions for streets (Calle, Rio Terà, Salizada, Ruga, etc.)
+2. Reference local landmarks, families, guilds, trades, or historical events
+3. Be in Italian
+4. Include a brief explanation of why each name would be appropriate
 ${landHistoricalName ? `5. When appropriate, reference the location in "${landHistoricalName}"` : ''}
 
-For each building, provide:
-1. buildingType: The type of building (palazzo, bottega, chiesa, etc.)
-2. historicalName: The Italian name
-3. englishName: The English translation
-4. historicalDescription: A brief explanation of the historical significance or function
+For each street, provide:
+1. historicalName: The Italian name (including the type like "Calle", "Rio Terà", etc.)
+2. englishName: The English translation
+3. historicalDescription: A brief explanation of the historical significance or origin of the name
 
-Respond with a JSON array containing objects with these four fields for each building.
+Respond with a JSON array containing objects with these three fields for each street.
 `;
 
-        const systemPrompt = `You are a helpful assistant that generates historically accurate building descriptions for Renaissance Venice. Always respond with valid JSON. IMPORTANT: Do not duplicate any of these existing building names: ${JSON.stringify(existingNames)}`;
+        const systemPrompt = `You are a helpful assistant that generates historically accurate street names for Renaissance Venice. Always respond with valid JSON. IMPORTANT: Do not duplicate any of these existing street names: ${JSON.stringify(existingNames)}`;
 
         const response = await axios.post(
           'https://api.anthropic.com/v1/messages',
@@ -437,8 +436,8 @@ Respond with a JSON array containing objects with these four fields for each bui
             // Check if we have a valid array
             if (Array.isArray(jsonResponse)) {
               return jsonResponse;
-            } else if (jsonResponse && Array.isArray(jsonResponse.buildings)) {
-              return jsonResponse.buildings;
+            } else if (jsonResponse && Array.isArray(jsonResponse.streets)) {
+              return jsonResponse.streets;
             } else if (jsonResponse) {
               for (const key in jsonResponse) {
                 if (Array.isArray(jsonResponse[key])) {
@@ -447,7 +446,7 @@ Respond with a JSON array containing objects with these four fields for each bui
               }
             }
             
-            throw new Error('Could not find building descriptions array in response');
+            throw new Error('Could not find street names array in response');
           } catch (parseError) {
             console.error('Error parsing JSON response:', parseError);
             console.log('Raw response:', content);
@@ -461,7 +460,7 @@ Respond with a JSON array containing objects with these four fields for each bui
       5000
     );
   } catch (error) {
-    console.error('Error generating building descriptions with Claude API after multiple retries:', error);
+    console.error('Error generating street names with Claude API after multiple retries:', error);
     throw error;
   }
 }
@@ -531,8 +530,8 @@ async function enhancePolygonData() {
         console.log(`Generating ${itemsCount} dock names for ${landHistoricalName}...`);
         generatedItems = await generateDockNames(itemsCount, state.generatedNames.docks, landHistoricalName);
       } else if (mode === 'buildings') {
-        console.log(`Generating ${itemsCount} building descriptions for ${landHistoricalName}...`);
-        generatedItems = await generateBuildingDescriptions(itemsCount, state.generatedNames.buildings, landHistoricalName);
+        console.log(`Generating ${itemsCount} street names for ${landHistoricalName}...`);
+        generatedItems = await generateStreetNames(itemsCount, state.generatedNames.buildings, landHistoricalName);
       } else {
         console.log(`Unknown mode: ${mode}. Valid modes are: bridges, docks, buildings`);
         return;
@@ -624,22 +623,21 @@ async function enhancePolygonData() {
           }
         }
       } else if (mode === 'buildings' && polygonData.buildingPoints && polygonData.buildingPoints.length > 0) {
-        // Assign building descriptions to building points
+        // Assign street names to building points
         for (let i = 0; i < polygonData.buildingPoints.length; i++) {
           const buildingPoint = polygonData.buildingPoints[i];
           
           if (itemIndex < generatedItems.length) {
-            const buildingDesc = generatedItems[itemIndex++];
+            const streetName = generatedItems[itemIndex++];
             
-            // Add name and description to building point
-            buildingPoint.buildingType = buildingDesc.buildingType;
-            buildingPoint.historicalName = buildingDesc.historicalName;
-            buildingPoint.englishName = buildingDesc.englishName;
-            buildingPoint.historicalDescription = buildingDesc.historicalDescription;
+            // Add street name and description to building point
+            buildingPoint.streetName = streetName.historicalName;
+            buildingPoint.streetNameEnglish = streetName.englishName;
+            buildingPoint.streetDescription = streetName.historicalDescription;
             
-            console.log(`Assigned building description: "${buildingDesc.historicalName}" (${buildingDesc.englishName})`);
+            console.log(`Assigned street name: "${streetName.historicalName}" (${streetName.englishName})`);
           } else {
-            console.warn(`Ran out of building descriptions for polygon ${polygonData.id}`);
+            console.warn(`Ran out of street names for polygon ${polygonData.id}`);
           }
         }
       }
