@@ -390,10 +390,10 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
       scene,
       camera: cameraController.camera,
       bounds: {
-        centerLat: bounds.center?.lat || 45.4371, // Default to Venice coordinates if undefined
-        centerLng: bounds.center?.lng || 12.3326,
-        scale: bounds.width ? bounds.width / 0.01 : 1000, // Convert width to approximate scale or use default
-        latCorrectionFactor: 1.0
+        centerLat: bounds.centerLat || 45.4371, // Default to Venice coordinates if undefined
+        centerLng: bounds.centerLng || 12.3326,
+        scale: bounds.scale || 1000, // Use the existing scale or default
+        latCorrectionFactor: bounds.latCorrectionFactor || 1.0
       }
     });
     
