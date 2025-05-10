@@ -4687,7 +4687,7 @@ export default class SimplePolygonRenderer {
       console.warn(`Could not find centroids for polygons ${currentPolygonId} and/or ${nextPolygonId}`);
     }
   }
-}
+
   /**
    * Load citizen data from the API
    */
@@ -4906,3 +4906,4 @@ export default class SimplePolygonRenderer {
     this.hoveredCitizenId = null;
     this.selectedCitizenId = null;
   }
+}
