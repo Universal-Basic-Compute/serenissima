@@ -885,8 +885,12 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
       
       
       {/* Always render the BuildingRenderer to show existing buildings */}
-      {showBuildingRenderer && actualScene && (
+      {showBuildingRenderer && actualScene ? (
         <BuildingRenderer scene={actualScene} active={true} />
+      ) : (
+        <div className="hidden">
+          {console.warn('BuildingsToolbar: scene is not available, cannot render BuildingRenderer')}
+        </div>
       )}
       {showBuildingRenderer && !actualScene && (
         <div className="hidden">

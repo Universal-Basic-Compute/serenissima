@@ -29,11 +29,17 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
       return;
     }
     
-    rendererFactoryRef.current = new BuildingRendererFactory({
-      scene,
-      positionManager: buildingPositionManager,
-      cacheService: buildingCacheService
-    });
+    try {
+      rendererFactoryRef.current = new BuildingRendererFactory({
+        scene,
+        positionManager: buildingPositionManager,
+        cacheService: buildingCacheService
+      });
+      
+      console.log('BuildingRenderer: renderer factory initialized successfully');
+    } catch (error) {
+      console.error('BuildingRenderer: error initializing renderer factory:', error);
+    }
     
     return () => {
       // No cleanup needed for factory
@@ -640,9 +646,11 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
     
     // Add a delay to ensure buildings are loaded
     const timer = setTimeout(() => {
-      verifyAndFixBuildingPositions();
-      // Focus camera on buildings after fixing positions
-      ensureBuildingsVisible();
+      if (scene) { // Add additional check here
+        verifyAndFixBuildingPositions();
+        // Focus camera on buildings after fixing positions
+        ensureBuildingsVisible();
+      }
     }, 2000);
     
     return () => {
