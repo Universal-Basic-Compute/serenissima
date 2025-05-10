@@ -2880,6 +2880,18 @@ export default class SimplePolygonRenderer {
         } else if (Array.isArray(marker.material)) {
           marker.material.forEach(m => m.dispose());
         }
+      } else if (marker instanceof THREE.Group) {
+        // Handle Group objects by traversing their children
+        marker.traverse((child) => {
+          if (child instanceof THREE.Mesh) {
+            if (child.geometry) child.geometry.dispose();
+            if (child.material instanceof THREE.Material) {
+              child.material.dispose();
+            } else if (Array.isArray(child.material)) {
+              child.material.forEach(m => m.dispose());
+            }
+          }
+        });
       }
       
       // Remove from array
@@ -3400,11 +3412,12 @@ export default class SimplePolygonRenderer {
     polygonName: string;
   } | null {
     // Find the closest building point marker to this position
-    let closestMarker = null;
+    let closestMarker: THREE.Object3D | null = null;
     let minDistance = 0.5; // Maximum distance to consider (0.5 units)
     
     for (const marker of this.buildingPointMarkers) {
-      if (marker instanceof THREE.Mesh && marker.userData && marker.userData.id) {
+      // Check both Mesh objects and other Object3D types (like Group)
+      if (marker.userData && marker.userData.id) {
         const distance = position.distanceTo(marker.position);
         if (distance < minDistance) {
           minDistance = distance;
