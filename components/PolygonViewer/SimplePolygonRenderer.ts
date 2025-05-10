@@ -2661,8 +2661,8 @@ export default class SimplePolygonRenderer {
       
       // Position the group
       buildingGroup.position.copy(position);
-      // Raise it slightly above the ground
-      buildingGroup.position.y += 0.1;
+      // Raise it higher above the ground - CHANGE HERE
+      buildingGroup.position.y += 5; // Changed from 0.1 to 5
       
       try {
         // Load the GLB model
@@ -2718,27 +2718,7 @@ export default class SimplePolygonRenderer {
           });
           const cube = new THREE.Mesh(geometry, material);
           
-          // Add a label to identify the building type
-          const canvas = document.createElement('canvas');
-          canvas.width = 256;
-          canvas.height = 64;
-          const ctx = canvas.getContext('2d');
-          if (ctx) {
-            ctx.fillStyle = 'black';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = 'white';
-            ctx.font = 'bold 24px Arial';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(building.type, canvas.width/2, canvas.height/2);
-            
-            const texture = new THREE.CanvasTexture(canvas);
-            const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
-            const sprite = new THREE.Sprite(spriteMaterial);
-            sprite.position.set(0, 2, 0); // Position above the cube
-            sprite.scale.set(3, 0.75, 1);
-            buildingGroup.add(sprite);
-          }
+          // Label removed to keep buildings clean
           
           buildingGroup.add(cube);
         }
