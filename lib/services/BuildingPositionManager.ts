@@ -83,8 +83,12 @@ export class BuildingPositionManager {
    * @returns Object with lat and lng properties
    */
   public scenePositionToLatLng(position: THREE.Vector3): {lat: number, lng: number} {
-    const lat = this.bounds.centerLat + (position.z / -this.bounds.scale / this.bounds.latCorrectionFactor);
-    const lng = this.bounds.centerLng + (position.x / this.bounds.scale);
+    // Use the same scale calculation as in latLngToScenePosition for consistency
+    const cosLat = Math.cos(this.bounds.centerLat * Math.PI / 180);
+    const scale = 111000 * cosLat; // meters per degree of longitude at this latitude
+    
+    const lat = this.bounds.centerLat + (position.z / -scale);
+    const lng = this.bounds.centerLng + (position.x / scale);
     return {lat, lng};
   }
 
