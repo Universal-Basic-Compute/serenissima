@@ -90,7 +90,7 @@ async function getLocationInfo(lat, lng) {
 }
 
 // Function for exponential backoff retry logic
-async function retryWithExponentialBackoff(fn, maxRetries = 3, initialDelay = 2000) {
+async function retryWithExponentialBackoff(fn, maxRetries = 5, initialDelay = 5000) {
   let retries = 0;
   
   while (retries < maxRetries) {
@@ -99,8 +99,8 @@ async function retryWithExponentialBackoff(fn, maxRetries = 3, initialDelay = 20
     } catch (error) {
       retries++;
       
-      // If we've used all retries or this isn't a rate limit error, throw
-      if (retries >= maxRetries || (error.response && error.response.status !== 429)) {
+      // If we've used all retries, throw
+      if (retries >= maxRetries) {
         throw error;
       }
       
@@ -108,58 +108,28 @@ async function retryWithExponentialBackoff(fn, maxRetries = 3, initialDelay = 20
       const retryAfter = error.response?.headers?.['retry-after'];
       const delay = retryAfter ? parseInt(retryAfter) * 1000 : initialDelay * Math.pow(2, retries);
       
-      console.log(`Rate limited. Retrying after ${delay/1000} seconds (retry ${retries}/${maxRetries})...`);
+      console.log(`Rate limited or error occurred. Retry ${retries}/${maxRetries} after ${delay/1000} seconds...`);
+      console.log(`Error details: ${error.message}`);
+      
+      if (error.response) {
+        console.log(`Status: ${error.response.status}`);
+        console.log(`Headers:`, error.response.headers);
+      }
+      
       await new Promise(resolve => setTimeout(resolve, delay));
+      console.log(`Retrying now...`);
     }
   }
 }
 
-// Generate a fallback bridge name
-function generateFallbackBridgeName(locationInfo) {
-  // List of common Venetian bridge name elements
-  const prefixes = ['Ponte dei', 'Ponte delle', 'Ponte del', 'Ponte della', 'Ponte di'];
-  const descriptors = [
-    'Mercanti (Merchants)', 
-    'Sospiri (Sighs)', 
-    'Pescatori (Fishermen)', 
-    'Gondolieri (Gondoliers)',
-    'Artigiani (Artisans)',
-    'Pittori (Painters)',
-    'Scultori (Sculptors)',
-    'Vetrai (Glassmakers)',
-    'Merletti (Lacemakers)',
-    'Maschere (Masks)',
-    'Leoni (Lions)',
-    'Angeli (Angels)',
-    'Santi (Saints)',
-    'Miracoli (Miracles)',
-    'Stelle (Stars)'
-  ];
-  
-  // Select random elements
-  const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
-  const descriptor = descriptors[Math.floor(Math.random() * descriptors.length)];
-  
-  // Generate explanation
-  const explanations = [
-    `A common name for smaller bridges in Venice.`,
-    `Named after a guild that likely operated in this area.`,
-    `A traditional name reflecting Venetian culture.`,
-    `Named for a feature or activity common in this area.`,
-    `A typical Venetian bridge name reflecting local character.`
-  ];
-  
-  const explanation = explanations[Math.floor(Math.random() * explanations.length)];
-  
-  return `${prefix} ${descriptor} - ${explanation}`;
-}
 
 // Generate a bridge name using Claude
 async function generateBridgeName(locationInfo) {
   try {
-    // Try to use Claude API with retry logic
-    return await retryWithExponentialBackoff(async () => {
-      const prompt = `
+    // Use more retries with longer delays
+    return await retryWithExponentialBackoff(
+      async () => {
+        const prompt = `
 You are an expert on Renaissance Venice history and geography. I need a historically accurate name for a bridge in Venice.
 
 Location information:
@@ -177,35 +147,37 @@ Respond with ONLY the bridge name in Italian, followed by the English translatio
 Example format: "Ponte dei Sospiri (Bridge of Sighs) - Named for the sighs of prisoners being led to their cells."
 `;
 
-      const response = await axios.post(
-        'https://api.anthropic.com/v1/messages',
-        {
-          model: 'claude-3-7-sonnet-latest',
-          max_tokens: 300,
-          messages: [
-            { role: 'user', content: prompt }
-          ]
-        },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': ANTHROPIC_API_KEY,
-            'anthropic-version': '2023-06-01'
+        const response = await axios.post(
+          'https://api.anthropic.com/v1/messages',
+          {
+            model: 'claude-3-7-sonnet-latest',
+            max_tokens: 300,
+            messages: [
+              { role: 'user', content: prompt }
+            ]
+          },
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              'x-api-key': ANTHROPIC_API_KEY,
+              'anthropic-version': '2023-06-01'
+            }
           }
-        }
-      );
+        );
 
-      if (response.data && response.data.content) {
-        // Extract just the bridge name and explanation
-        const bridgeNameResponse = response.data.content[0].text.trim();
-        return bridgeNameResponse;
-      }
-      
-      throw new Error('Invalid response from Claude API');
-    });
+        if (response.data && response.data.content) {
+          return response.data.content[0].text.trim();
+        }
+        
+        throw new Error('Invalid response from Claude API');
+      },
+      5, // Increase max retries from 3 to 5
+      5000 // Increase initial delay from 2000ms to 5000ms (5 seconds)
+    );
   } catch (error) {
-    console.warn('Error generating bridge name with Claude API, using fallback:', error.message);
-    return generateFallbackBridgeName(locationInfo);
+    console.error('Error generating bridge name with Claude API after multiple retries:', error);
+    // Instead of using fallback, throw the error to stop processing this bridge
+    throw new Error(`Failed to generate bridge name after multiple retries: ${error.message}`);
   }
 }
 
@@ -274,41 +246,48 @@ async function enhanceBridgeConnections() {
         processedCount++;
         console.log(`Processing connection ${processedCount}/${connectionMap.size}: ${connectionKey}`);
         
-        // Find the bridge point for this connection
-        const bridgePoint = polygonData.bridgePoints.find(bp => 
-          bp.connection && bp.connection.id === connectionId
-        );
-        
-        if (!bridgePoint) {
-          console.warn(`Could not find bridge point for connection ${connectionKey}`);
+        try {
+          // Find the bridge point for this connection
+          const bridgePoint = polygonData.bridgePoints.find(bp => 
+            bp.connection && bp.connection.id === connectionId
+          );
+          
+          if (!bridgePoint) {
+            console.warn(`Could not find bridge point for connection ${connectionKey}`);
+            continue;
+          }
+          
+          // Calculate midpoint between the edge and target point
+          const edgePoint = bridgePoint.edge;
+          const targetPoint = bridgePoint.connection.targetPoint;
+          
+          const midLat = (edgePoint.lat + targetPoint.lat) / 2;
+          const midLng = (edgePoint.lng + targetPoint.lng) / 2;
+          
+          // Get location information for the midpoint
+          console.log(`Getting location info for ${midLat}, ${midLng}...`);
+          const locationInfo = await getLocationInfo(midLat, midLng);
+          
+          // Generate a bridge name
+          console.log(`Generating bridge name for location: ${locationInfo.formattedAddress}...`);
+          const bridgeName = await generateBridgeName(locationInfo);
+          
+          // Update the connection with the name and location info
+          bridgePoint.connection.name = bridgeName;
+          bridgePoint.connection.location = {
+            midpoint: { lat: midLat, lng: midLng },
+            locationInfo: locationInfo
+          };
+          
+          // Add a longer delay between API calls to avoid rate limiting
+          console.log(`Waiting 10 seconds before processing next connection...`);
+          await new Promise(resolve => setTimeout(resolve, 10000)); // Increased from 5s to 10s
+        } catch (error) {
+          console.error(`Error processing connection ${connectionKey}:`, error);
+          console.log('Skipping this connection and continuing with the next one...');
+          // Continue with the next connection instead of stopping the entire process
           continue;
         }
-        
-        // Calculate midpoint between the edge and target point
-        const edgePoint = bridgePoint.edge;
-        const targetPoint = bridgePoint.connection.targetPoint;
-        
-        const midLat = (edgePoint.lat + targetPoint.lat) / 2;
-        const midLng = (edgePoint.lng + targetPoint.lng) / 2;
-        
-        // Get location information for the midpoint
-        console.log(`Getting location info for ${midLat}, ${midLng}...`);
-        const locationInfo = await getLocationInfo(midLat, midLng);
-        
-        // Generate a bridge name
-        console.log(`Generating bridge name for location: ${locationInfo.formattedAddress}...`);
-        const bridgeName = await generateBridgeName(locationInfo);
-        
-        // Update the connection with the name and location info
-        bridgePoint.connection.name = bridgeName;
-        bridgePoint.connection.location = {
-          midpoint: { lat: midLat, lng: midLng },
-          locationInfo: locationInfo
-        };
-        
-        // Add a longer delay between API calls to avoid rate limiting
-        console.log(`Waiting 5 seconds before processing next connection...`);
-        await new Promise(resolve => setTimeout(resolve, 5000));
       }
       
       // Save the enhanced data
