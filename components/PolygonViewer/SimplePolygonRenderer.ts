@@ -749,11 +749,21 @@ export default class SimplePolygonRenderer {
       this.clearBridgeAndDockMarkers();
       
       // Create new markers - directly call createBridgeAndDockPoints without checking activeView inside
-      this.createBridgeAndDockPoints();
+      this.forceCreateBridgeAndDockPoints();
       
       // Ensure all markers are visible
-      this.bridgePointMarkers.forEach(marker => marker.visible = true);
-      this.dockPointMarkers.forEach(marker => marker.visible = true);
+      this.bridgePointMarkers.forEach(marker => {
+        marker.visible = true;
+        // Set a very high render order to ensure visibility
+        marker.renderOrder = 2000;
+      });
+      this.dockPointMarkers.forEach(marker => {
+        marker.visible = true;
+        // Set a very high render order to ensure visibility
+        if (marker instanceof THREE.Mesh || marker instanceof THREE.Line) {
+          marker.renderOrder = 2000;
+        }
+      });
       
       console.log(`Created ${this.bridgePointMarkers.length} bridge markers and ${this.dockPointMarkers.length} dock markers`);
     } else {
@@ -1469,8 +1479,9 @@ export default class SimplePolygonRenderer {
   
   /**
    * Add a new method that forces creation of bridge and dock points without checking activeView
+   * This method is public so it can be called from outside the class
    */
-  private forceCreateBridgeAndDockPoints() {
+  public forceCreateBridgeAndDockPoints() {
     console.log('FORCE Creating bridge and dock points for transport view');
     
     // Add debug logging to see how many polygons have bridge/dock points

@@ -321,17 +321,6 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
       incomeRendererRef.current = incomeRenderer;
     }
     
-    // Create income renderer if in land view
-    if (activeView === 'land') {
-      console.log('Creating income renderer for land view');
-      const incomeRenderer = new IncomePolygonRenderer({
-        scene,
-        polygons,
-        bounds
-      });
-      incomeRendererRef.current = incomeRenderer;
-    }
-    
     // Add ambient light
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
     scene.add(ambientLight);
@@ -377,6 +366,15 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
     };
     
     window.addEventListener('resize', handleResize);
+    
+    // IMPORTANT: Create transport markers at the end of initialization
+    // This ensures they're not removed by other operations
+    setTimeout(() => {
+      if (activeView === 'transport' && polygonRendererRef.current) {
+        console.log('Creating transport markers after initialization');
+        polygonRendererRef.current.forceCreateBridgeAndDockPoints();
+      }
+    }, 1000); // Delay by 1 second to ensure everything else is loaded
     
     // Cleanup
     return () => {
@@ -574,8 +572,8 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
       if (polygonRendererRef.current) {
         console.log("Attempting to force create transport markers...");
         
-        // Access the createBridgeAndDockPoints method
-        polygonRendererRef.current.createBridgeAndDockPoints();
+        // Use the public forceCreateBridgeAndDockPoints method
+        polygonRendererRef.current.forceCreateBridgeAndDockPoints();
       }
     }
     

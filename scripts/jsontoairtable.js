@@ -216,6 +216,58 @@ function mapFields(item, collectionName) {
 }
 
 /**
+ * Process water point connections to ensure they're properly formatted
+ * @param {Array} waterPoints - Array of water points
+ * @param {Array} connections - Array of connections
+ * @returns {Array} - Processed water points with connections
+ */
+function processWaterPointConnections(waterPoints, connections) {
+  // Create a map of water points by ID for quick lookup
+  const waterPointsMap = {};
+  waterPoints.forEach(wp => {
+    waterPointsMap[wp.id] = wp;
+  });
+  
+  // Process each connection
+  connections.forEach(connection => {
+    // Find the source water point
+    const sourceWaterPoint = waterPointsMap[connection.sourceId];
+    if (sourceWaterPoint) {
+      // Initialize connections array if it doesn't exist
+      if (!sourceWaterPoint.connections) {
+        sourceWaterPoint.connections = [];
+      } else if (typeof sourceWaterPoint.connections === 'string') {
+        // Parse connections if they're stored as a string
+        try {
+          sourceWaterPoint.connections = JSON.parse(sourceWaterPoint.connections);
+        } catch (error) {
+          console.warn(`Invalid connections JSON for water point ${sourceWaterPoint.id}:`, error.message);
+          sourceWaterPoint.connections = [];
+        }
+      }
+      
+      // Add the connection if it doesn't already exist
+      const connectionExists = sourceWaterPoint.connections.some(
+        conn => conn.targetId === connection.targetId
+      );
+      
+      if (!connectionExists) {
+        sourceWaterPoint.connections.push({
+          targetId: connection.targetId,
+          width: connection.width,
+          depth: connection.depth
+        });
+      }
+      
+      // Convert connections back to string for storage
+      sourceWaterPoint.connections = JSON.stringify(sourceWaterPoint.connections);
+    }
+  });
+  
+  return waterPoints;
+}
+
+/**
  * Create a record in Airtable
  * @param {string} tableName - The Airtable table name
  * @param {Object} data - The data to insert
@@ -232,6 +284,18 @@ async function createAirtableRecord(tableName, data) {
         console.warn(`Invalid transferPoints JSON for ${tableName} record:`, error.message);
         // Set to empty array string if invalid
         data.transferPoints = '[]';
+      }
+    }
+    
+    // Process connections field for water points
+    if (tableName === 'WaterPoints' && data.connections && typeof data.connections === 'string') {
+      try {
+        // Parse the connections string to ensure it's valid
+        JSON.parse(data.connections);
+      } catch (error) {
+        console.warn(`Invalid connections JSON for WaterPoint record:`, error.message);
+        // Set to empty array string if invalid
+        data.connections = '[]';
       }
     }
     
