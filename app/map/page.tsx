@@ -620,6 +620,8 @@ export default function MapPage() {
         console.log('Processing right click in waterpoint mode');
         // Chercher un waterpoint existant à proximité
         let targetPoint = null;
+        let minDistance = 10; // 10 meters threshold
+        
         for (const point of waterPoints) {
           const pointPos = typeof point.position === 'string' 
             ? JSON.parse(point.position) 
@@ -636,10 +638,10 @@ export default function MapPage() {
             new google.maps.LatLng(pointPos.lat, pointPos.lng)
           );
           
-          // Si le clic est assez proche d'un point (dans un rayon de 10 mètres)
-          if (distance < 10) {
+          // If this point is closer than our current closest and within threshold
+          if (distance < minDistance) {
             targetPoint = point;
-            break;
+            minDistance = distance;
           }
         }
         
@@ -662,6 +664,20 @@ export default function MapPage() {
               strokeColor: '#FFFFFF'
             });
           }
+          
+          // Reset other markers
+          Object.entries(waterPointMarkers).forEach(([id, m]) => {
+            if (id !== targetPoint.id) {
+              m.setIcon({
+                path: google.maps.SymbolPath.CIRCLE,
+                scale: 7,
+                fillColor: m.get('type') === 'dock' ? '#FF8800' : '#0088FF',
+                fillOpacity: 1,
+                strokeWeight: 2,
+                strokeColor: '#FFFFFF'
+              });
+            }
+          });
         }
       }
     });
@@ -934,13 +950,19 @@ export default function MapPage() {
   
   // Function to create a new WaterPoint
   const createWaterPoint = (position: google.maps.LatLng, type: string = 'regular') => {
-    // Vérifier si le point est trop proche d'un point existant
-    const MIN_DISTANCE = 10; // Distance minimale en mètres
+    // Validate that we have a valid position
+    if (!position) {
+      console.error('Invalid position for waterpoint creation');
+      return;
+    }
+
+    // Check if the point is too close to an existing point
+    const MIN_DISTANCE = 10; // Minimum distance in meters
     let isTooClose = false;
     let closestPoint = null;
     let closestDistance = Infinity;
     
-    // Parcourir tous les points existants pour vérifier la distance
+    // Check distance to all existing points
     for (const point of waterPoints) {
       const pointPos = typeof point.position === 'string' 
         ? JSON.parse(point.position) 
@@ -951,28 +973,28 @@ export default function MapPage() {
         new google.maps.LatLng(pointPos.lat, pointPos.lng)
       );
       
-      // Mettre à jour le point le plus proche
+      // Update closest point info
       if (distance < closestDistance) {
         closestDistance = distance;
         closestPoint = point;
       }
       
-      // Vérifier si la distance est inférieure au minimum
+      // Check if too close
       if (distance <= MIN_DISTANCE) {
         isTooClose = true;
         break;
       }
     }
     
-    // Si le point est trop proche, afficher un message d'erreur
+    // If too close, show error message
     if (isTooClose) {
-      // Supprimer le marqueur d'aperçu s'il existe
+      // Remove preview marker if it exists
       if (previewWaterPoint) {
         previewWaterPoint.setMap(null);
         setPreviewWaterPoint(null);
       }
       
-      // Afficher un message d'erreur
+      // Show error message
       const errorMessage = document.createElement('div');
       errorMessage.className = 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg z-50';
       errorMessage.innerHTML = `
@@ -985,7 +1007,7 @@ export default function MapPage() {
       `;
       document.body.appendChild(errorMessage);
       
-      // Supprimer le message après 3 secondes
+      // Remove message after 3 seconds
       setTimeout(() => {
         document.body.removeChild(errorMessage);
       }, 3000);
@@ -993,13 +1015,13 @@ export default function MapPage() {
       return;
     }
     
-    // Supprimer le marqueur d'aperçu s'il existe
+    // Remove preview marker if it exists
     if (previewWaterPoint) {
       previewWaterPoint.setMap(null);
       setPreviewWaterPoint(null);
     }
     
-    // Ajouter un indicateur visuel temporaire avant la réponse de l'API
+    // Create temporary marker to show loading state
     const tempMarker = new google.maps.Marker({
       position: position,
       map: mapRef.current,
@@ -1007,13 +1029,14 @@ export default function MapPage() {
         path: google.maps.SymbolPath.CIRCLE,
         scale: 7,
         fillColor: type === 'dock' ? '#FF8800' : '#0088FF',
-        fillOpacity: 0.5, // Semi-transparent pour indiquer qu'il est en cours de création
+        fillOpacity: 0.5, // Semi-transparent to indicate it's being created
         strokeWeight: 2,
         strokeColor: '#FFFFFF'
       },
       title: 'Creating WaterPoint...'
     });
     
+    // Prepare waterpoint data
     const waterPoint = {
       position: {
         lat: position.lat(),
@@ -1023,20 +1046,26 @@ export default function MapPage() {
       connections: []
     };
     
+    // Send API request
     fetch('/api/waterpoint', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(waterPoint)
     })
-    .then(response => response.json())
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    })
     .then(data => {
       if (data.success) {
         console.log('WaterPoint created:', data.waterpoint);
         
-        // Supprimer le marqueur temporaire
+        // Remove temporary marker
         tempMarker.setMap(null);
         
-        // Créer le marqueur définitif
+        // Create permanent marker
         if (mapRef.current) {
           const marker = new google.maps.Marker({
             position: position,
@@ -1045,24 +1074,24 @@ export default function MapPage() {
               path: google.maps.SymbolPath.CIRCLE,
               scale: 7,
               fillColor: type === 'dock' ? '#FF8800' : '#0088FF',
-              fillOpacity: 1, // Opacité complète pour le marqueur définitif
+              fillOpacity: 1, // Full opacity for permanent marker
               strokeWeight: 2,
               strokeColor: '#FFFFFF'
             },
             title: data.waterpoint.id,
-            animation: google.maps.Animation.DROP // Ajouter une animation de chute
+            animation: google.maps.Animation.DROP
           });
           
-          // Ajouter un écouteur de clic pour sélectionner ce WaterPoint
+          // Add click listener
           marker.addListener('click', () => {
             if (connectWaterPointMode && selectedWaterPoint && selectedWaterPoint.id !== data.waterpoint.id) {
-              // Créer une connexion entre les deux WaterPoints
+              // Create connection between points
               createWaterPointConnection(selectedWaterPoint, data.waterpoint);
             } else {
-              // Sélectionner ce WaterPoint
+              // Select this point
               setSelectedWaterPoint(data.waterpoint);
               
-              // Mettre à jour l'apparence du marqueur pour montrer qu'il est sélectionné
+              // Update marker appearance
               marker.setIcon({
                 path: google.maps.SymbolPath.CIRCLE,
                 scale: 9,
@@ -1072,7 +1101,7 @@ export default function MapPage() {
                 strokeColor: '#FFFFFF'
               });
               
-              // Réinitialiser les autres marqueurs
+              // Reset other markers
               Object.entries(waterPointMarkers).forEach(([id, m]) => {
                 if (id !== data.waterpoint.id) {
                   m.setIcon({
@@ -1088,46 +1117,64 @@ export default function MapPage() {
             }
           });
           
-          // Stocker le type dans les propriétés du marqueur pour référence future
+          // Store type in marker properties
           marker.set('type', type);
           
-          // Ajouter le marqueur à l'état
+          // Add marker to state
           setWaterPointMarkers(prev => ({
             ...prev,
             [data.waterpoint.id]: marker
           }));
           
-          // Ajouter le waterpoint à l'état local
+          // Add waterpoint to state
           setWaterPoints(prev => [...prev, data.waterpoint]);
           
-          // Afficher une notification de succès
+          // Show success notification
           setCreationSuccess({id: data.waterpoint.id, position: position});
           
-          // Masquer la notification après 3 secondes
+          // Hide notification after 3 seconds
           setTimeout(() => {
             setCreationSuccess(null);
           }, 3000);
         }
-        
-        // Afficher un message de confirmation dans la console
-        console.log(`WaterPoint created with ID: ${data.waterpoint.id}`);
       } else {
-        // En cas d'erreur, supprimer le marqueur temporaire
+        // Remove temporary marker on error
         tempMarker.setMap(null);
         console.error('Failed to create WaterPoint:', data.error);
-        alert('Failed to create WaterPoint');
+        alert('Failed to create WaterPoint: ' + (data.error || 'Unknown error'));
       }
     })
     .catch(error => {
-      // En cas d'erreur, supprimer le marqueur temporaire
+      // Remove temporary marker on error
       tempMarker.setMap(null);
       console.error('Error creating WaterPoint:', error);
-      alert('Error creating WaterPoint');
+      alert('Error creating WaterPoint: ' + error.message);
     });
   };
   
   // Function to create a connection between two WaterPoints
   const createWaterPointConnection = (sourcePoint: any, targetPoint: any) => {
+    // Validate source and target points
+    if (!sourcePoint || !targetPoint) {
+      console.error('Invalid source or target point for connection');
+      alert('Cannot create connection: Invalid source or target point');
+      return;
+    }
+    
+    // Check if connection already exists
+    const sourceConnections = typeof sourcePoint.connections === 'string' 
+      ? JSON.parse(sourcePoint.connections) 
+      : (sourcePoint.connections || []);
+    
+    const connectionExists = sourceConnections.some((conn: any) => 
+      conn.targetId === targetPoint.id
+    );
+    
+    if (connectionExists) {
+      alert('Connection already exists between these points');
+      return;
+    }
+
     // Show loading indicator
     const loadingIndicator = document.createElement('div');
     loadingIndicator.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
@@ -1140,13 +1187,6 @@ export default function MapPage() {
       </div>
     `;
     document.body.appendChild(loadingIndicator);
-    
-    // Créer la connexion dans le WaterPoint source
-    const connection = {
-      targetId: targetPoint.id,
-      width: 3, // Largeur par défaut en mètres
-      depth: 1  // Profondeur par défaut en mètres
-    };
     
     // Create a unique connection ID
     const connectionId = `connection-${Date.now()}-${sourcePoint.id}-${targetPoint.id}`;
@@ -1164,7 +1204,12 @@ export default function MapPage() {
         createdAt: new Date().toISOString()
       })
     })
-    .then(response => response.json())
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    })
     .then(connectionData => {
       console.log('Connection record created:', connectionData);
       
@@ -1183,12 +1228,17 @@ export default function MapPage() {
         })
       });
     })
-    .then(response => response.json())
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    })
     .then(data => {
       if (data.success) {
         console.log('Connection added to source WaterPoint:', data.waterpoint);
         
-        // Créer la connexion inverse dans le WaterPoint cible
+        // Create the reverse connection in the target WaterPoint
         return fetch('/api/waterpoint', {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
@@ -1206,7 +1256,12 @@ export default function MapPage() {
         throw new Error('Failed to add connection to source WaterPoint');
       }
     })
-    .then(response => response.json())
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    })
     .then(data => {
       if (data.success) {
         console.log('Connection added to target WaterPoint:', data.waterpoint);
@@ -1240,10 +1295,10 @@ export default function MapPage() {
           setWaterPointConnections(prev => [...prev, line]);
         }
         
-        // Recharger les WaterPoints pour afficher la nouvelle connexion
+        // Reload WaterPoints to show the new connection
         loadWaterPoints();
         
-        // Réinitialiser le mode de connexion
+        // Reset connection mode
         setConnectWaterPointMode(false);
         setSelectedWaterPoint(null);
         
@@ -1277,7 +1332,7 @@ export default function MapPage() {
         document.body.removeChild(loadingIndicator);
       }
       console.error('Error creating WaterPoint connection:', error);
-      alert('Error creating canal connection');
+      alert('Error creating canal connection: ' + error.message);
     });
   };
   
