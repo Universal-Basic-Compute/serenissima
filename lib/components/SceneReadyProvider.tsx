@@ -1,10 +1,11 @@
-import React, { useState, useEffect, createContext, useContext } from 'react';
+import React, { useState, useEffect, createContext, useContext, useCallback } from 'react';
 import * as THREE from 'three';
 
 interface SceneReadyContextType {
   isSceneReady: boolean;
   scene: THREE.Scene | null;
   camera: THREE.PerspectiveCamera | null;
+  setSceneReady?: (scene: THREE.Scene, camera: THREE.PerspectiveCamera) => void;
 }
 
 const SceneReadyContext = createContext<SceneReadyContextType>({
@@ -89,8 +90,24 @@ export const SceneReadyProvider: React.FC<SceneReadyProviderProps> = ({
     };
   }, [maxAttempts, checkInterval]);
 
+  // Add a method to manually set scene readiness
+  const setSceneReadyManually = useCallback((scene: THREE.Scene, camera: THREE.PerspectiveCamera) => {
+    setScene(scene);
+    setCamera(camera);
+    setIsSceneReady(true);
+    console.log('SceneReadyProvider: Scene manually set as ready');
+  }, []);
+  
+  // Expose this method through context
+  const contextValue = {
+    isSceneReady,
+    scene,
+    camera,
+    setSceneReady: setSceneReadyManually
+  };
+  
   return (
-    <SceneReadyContext.Provider value={{ isSceneReady, scene, camera }}>
+    <SceneReadyContext.Provider value={contextValue}>
       {children}
     </SceneReadyContext.Provider>
   );

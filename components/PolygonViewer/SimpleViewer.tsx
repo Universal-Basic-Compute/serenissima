@@ -330,6 +330,15 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
       
       // Store polygon data on window
       window.__polygonData = polygons;
+      
+      // IMPORTANT: Dispatch a custom event to signal that the scene is ready
+      window.dispatchEvent(new CustomEvent('sceneReady', {
+        detail: {
+          scene,
+          camera: cameraController.camera
+        }
+      }));
+      console.log('SimpleViewer: Dispatched sceneReady event');
     }
     
     // Force refresh buildings when the component mounts

@@ -7,6 +7,7 @@ import buildingPositionManager from '@/lib/services/BuildingPositionManager';
 import buildingCacheService from '@/lib/services/BuildingCacheService';
 import buildingDataService from '@/lib/services/BuildingDataService';
 import { BuildingRendererFactory } from '@/lib/services/BuildingRendererFactory';
+import { useSceneReady } from '@/lib/components/SceneReadyProvider';
 
 // Add type declaration for window properties
 declare global {
@@ -29,70 +30,81 @@ declare global {
 interface BuildingRendererProps {
   scene?: THREE.Scene;
   active: boolean;
-  sceneReady?: boolean; // New prop to explicitly indicate scene readiness
+  sceneReady?: boolean; // Prop to explicitly indicate scene readiness
 }
 
 const BuildingRenderer: React.FC<BuildingRendererProps> = ({ 
-  scene, 
+  scene: providedScene, 
   active,
   sceneReady = false // Default to false
 }) => {
-  // Create a local scene if none is provided
-  const [localScene, setLocalScene] = useState<THREE.Scene | null>(null);
-  const sceneRef = useRef<THREE.Scene | null>(null);
-  const [isReady, setIsReady] = useState<boolean>(false);
+  // Use the SceneReadyProvider hook to get scene readiness state
+  const { isSceneReady, scene: contextScene, camera: contextCamera } = useSceneReady();
   
-  // Initialize scene on component mount or when sceneReady changes
+  // Determine actual scene readiness by combining props and context
+  const actualSceneReady = sceneReady || isSceneReady;
+  
+  // Use scene from props or context, with fallback to window/canvas references
+  const [resolvedScene, setResolvedScene] = useState<THREE.Scene | null>(null);
+  const sceneRef = useRef<THREE.Scene | null>(null);
+  const [isInitialized, setIsInitialized] = useState<boolean>(false);
+  
+  // Initialize scene when component mounts or when scene readiness changes
   useEffect(() => {
-    // Don't proceed if sceneReady is false
-    if (!sceneReady) {
+    if (!active) return;
+    
+    // Don't proceed if scene is not ready
+    if (!actualSceneReady) {
       console.log('BuildingRenderer: Waiting for scene to be ready');
       return;
     }
     
-    // If a scene is provided via props, use it
-    if (scene) {
-      console.log('BuildingRenderer: Using provided scene');
-      sceneRef.current = scene;
-      setLocalScene(scene);
-      setIsReady(true);
-      return;
-    }
+    console.log('BuildingRenderer: Scene is ready, initializing...');
     
-    console.log('BuildingRenderer: No scene provided, searching for existing scene');
+    // Resolve scene in this priority order:
+    // 1. Provided via props
+    // 2. Available from SceneReadyContext
+    // 3. From window.__threeContext
+    // 4. From canvas element
     
-    // Try to get scene from window.__threeContext
-    if (typeof window !== 'undefined' && window.__threeContext && window.__threeContext.scene) {
-      console.log('BuildingRenderer: Found scene in window.__threeContext');
-      sceneRef.current = window.__threeContext.scene;
-      setLocalScene(window.__threeContext.scene);
-      setIsReady(true);
-      return;
-    }
+    let sceneToUse: THREE.Scene | null = null;
     
-    // Try to get scene from canvas element
-    if (typeof document !== 'undefined') {
+    if (providedScene) {
+      console.log('BuildingRenderer: Using scene provided via props');
+      sceneToUse = providedScene;
+    } else if (contextScene) {
+      console.log('BuildingRenderer: Using scene from SceneReadyContext');
+      sceneToUse = contextScene;
+    } else if (typeof window !== 'undefined' && window.__threeContext && window.__threeContext.scene) {
+      console.log('BuildingRenderer: Using scene from window.__threeContext');
+      sceneToUse = window.__threeContext.scene;
+    } else if (typeof document !== 'undefined') {
       const canvas = document.querySelector('canvas');
       if (canvas && canvas.__scene) {
-        console.log('BuildingRenderer: Found scene in canvas.__scene');
-        sceneRef.current = canvas.__scene;
-        setLocalScene(canvas.__scene);
-        setIsReady(true);
-        return;
+        console.log('BuildingRenderer: Using scene from canvas.__scene');
+        sceneToUse = canvas.__scene;
       }
     }
     
-    console.warn('BuildingRenderer: No scene found even though sceneReady is true');
-  }, [scene, sceneReady]);
+    if (!sceneToUse) {
+      console.error('BuildingRenderer: Could not resolve a valid scene');
+      return;
+    }
+    
+    // Store the resolved scene
+    sceneRef.current = sceneToUse;
+    setResolvedScene(sceneToUse);
+    setIsInitialized(true);
+    
+    console.log('BuildingRenderer: Successfully initialized with scene', sceneToUse);
+    
+  }, [providedScene, contextScene, actualSceneReady, active]);
   
-  // Don't proceed if not ready
-  if (!isReady || !sceneRef.current) {
-    console.log('BuildingRenderer: Not ready yet');
+  // Don't proceed if not initialized
+  if (!isInitialized || !sceneRef.current) {
+    console.log('BuildingRenderer: Not initialized yet');
     return null;
   }
-  
-  // Log the scene we're using
-  console.log('BuildingRenderer: Ready with scene', sceneRef.current);
   
   const [buildings, setBuildings] = useState<BuildingData[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -102,29 +114,64 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
   // Create renderer factory
   const rendererFactoryRef = useRef<BuildingRendererFactory | null>(null);
   
-  // Initialize renderer factory
+  // Initialize renderer factory and load buildings only after scene is resolved
   useEffect(() => {
-    if (!sceneRef.current) {
-      console.warn('BuildingRenderer: scene is not defined, cannot initialize renderer factory');
+    if (!active || !isInitialized || !resolvedScene) {
       return;
     }
     
+    console.log('BuildingRenderer: Scene is resolved, initializing renderer factory');
+    
     try {
       rendererFactoryRef.current = new BuildingRendererFactory({
-        scene: sceneRef.current,
+        scene: resolvedScene,
         positionManager: buildingPositionManager,
         cacheService: buildingCacheService
       });
       
       console.log('BuildingRenderer: renderer factory initialized successfully');
+      
+      // Load buildings efficiently after factory is initialized
+      loadBuildingsEfficiently();
+      
+      // Start memory monitoring
+      const stopMemoryMonitoring = startMemoryMonitoring();
+      
+      // Add a delay to ensure buildings are loaded
+      const timer = setTimeout(() => {
+        if (resolvedScene) {
+          verifyAndFixBuildingPositions();
+          // Focus camera on buildings after fixing positions
+          ensureBuildingsVisible();
+        }
+      }, 2000);
+      
+      return () => {
+        clearTimeout(timer);
+        stopMemoryMonitoring();
+        
+        // Cleanup buildings when component unmounts
+        if (rendererFactoryRef.current) {
+          for (const [id, mesh] of buildingMeshesRef.current.entries()) {
+            const building = buildings.find(b => b.id === id) || { type: 'unknown' } as BuildingData;
+            const renderer = rendererFactoryRef.current.getRenderer(building.type);
+            renderer.dispose(mesh);
+          }
+        } else {
+          // Fallback if factory not available
+          for (const mesh of buildingMeshesRef.current.values()) {
+            if (resolvedScene) {
+              resolvedScene.remove(mesh);
+            }
+          }
+        }
+        
+        buildingMeshesRef.current.clear();
+      };
     } catch (error) {
       console.error('BuildingRenderer: error initializing renderer factory:', error);
     }
-    
-    return () => {
-      // No cleanup needed for factory
-    };
-  }, [sceneRef.current]);
+  }, [active, isInitialized, resolvedScene]);
   
   // Function to verify and fix building positions
   const verifyAndFixBuildingPositions = () => {
@@ -716,61 +763,7 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
     return monitorMemory();
   };
   
-  // Initial load of buildings
-  useEffect(() => {
-    if (!active) return;
-    
-    // Double-check that we have a valid scene
-    if (!sceneRef.current) {
-      console.error('BuildingRenderer: scene is still not defined, cannot render buildings');
-      return;
-    }
-    
-    if (!rendererFactoryRef.current) {
-      console.warn('BuildingRenderer: renderer factory is not initialized');
-      return;
-    }
-    
-    console.log('BuildingRenderer is active, loading buildings...');
-    
-    // Use the memory-efficient loading strategy
-    loadBuildingsEfficiently();
-    
-    // Start memory monitoring
-    const stopMemoryMonitoring = startMemoryMonitoring();
-    
-    // Add a delay to ensure buildings are loaded
-    const timer = setTimeout(() => {
-      if (sceneRef.current) { // Add additional check here
-        verifyAndFixBuildingPositions();
-        // Focus camera on buildings after fixing positions
-        ensureBuildingsVisible();
-      }
-    }, 2000);
-    
-    return () => {
-      clearTimeout(timer);
-      stopMemoryMonitoring();
-      
-      // Cleanup buildings when component unmounts
-      if (rendererFactoryRef.current) {
-        for (const [id, mesh] of buildingMeshesRef.current.entries()) {
-          const building = buildings.find(b => b.id === id) || { type: 'unknown' } as BuildingData;
-          const renderer = rendererFactoryRef.current.getRenderer(building.type);
-          renderer.dispose(mesh);
-        }
-      } else {
-        // Fallback if factory not available
-        for (const mesh of buildingMeshesRef.current.values()) {
-          if (sceneRef.current) { // Add check for scene here
-            sceneRef.current.remove(mesh);
-          }
-        }
-      }
-      
-      buildingMeshesRef.current.clear();
-    };
-  }, [active, sceneRef.current, ensureBuildingsVisible]);
+  // The initial load of buildings is now handled in the renderer factory initialization effect
   
   // Listen for the fixBuildingPositions event and other custom events
   useEffect(() => {
