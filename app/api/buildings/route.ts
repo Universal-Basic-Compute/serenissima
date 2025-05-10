@@ -153,7 +153,7 @@ export async function GET(request: Request) {
     console.log('Query parameters:', { type, limit, offset: offsetParam });
     
     // Fetch records from Airtable with pagination
-    const records = await new Promise<any[]>((resolve, reject) => {
+    const records = await new Promise<Airtable.Records<Airtable.FieldSet>>((resolve, reject) => {
       const allRecords = [];
       
       // For Airtable, offset should be a string token, not a number
@@ -227,6 +227,9 @@ export async function GET(request: Request) {
         CreatedAt: string;
       };
     }
+    
+    // Ensure records is properly typed
+    const typedRecords = records as unknown as Airtable.Record<Airtable.FieldSet>[];
 
     // Define the Building interface for consistent typing
     interface Building {
@@ -241,7 +244,7 @@ export async function GET(request: Request) {
     }
 
     // Transform Airtable records to our format
-    const buildings = (records as AirtableRecord[]).map(record => {
+    const buildings = typedRecords.map(record => {
       const fields = record.fields;
       
       // Parse position JSON if it's a string
