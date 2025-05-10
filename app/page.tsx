@@ -8,6 +8,7 @@ import ProjectPresentation from '../components/Knowledge/ProjectPresentation';
 import ResourceTree from '../components/Knowledge/ResourceTree';
 import KnowledgeRepository from '../components/Knowledge/KnowledgeRepository';
 import { StrategiesArticle, BeginnersGuideArticle, EconomicSystemArticle, LandOwnerGuideArticle, DecreesGovernanceArticle, BuildingOwnersGuideArticle, BusinessOwnersGuideArticle } from '../components/Articles';
+import CitizenDetailsPanel from '../components/UI/CitizenDetailsPanel';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { clearLandOwnershipCaches } from '@/lib/cacheUtils';
@@ -68,9 +69,10 @@ export default function SimplePage() {
   // UI state
   const [showInfo, setShowInfo] = useState(false);
   // Define the view type to ensure consistency with our ActiveViewMode type
-  type ViewType = 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance' | 'loans' | 'knowledge';
+  type ViewType = 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance' | 'loans' | 'knowledge' | 'citizens';
   const [activeView, setActiveView] = useState<ViewType>('land');
   const [show3DView, setShow3DView] = useState<boolean>(true);
+  const [selectedCitizen, setSelectedCitizen] = useState<any>(null);
   
   // Panel visibility state
   const [showGovernancePanel, setShowGovernancePanel] = useState<boolean>(false);
@@ -125,10 +127,18 @@ export default function SimplePage() {
       window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
     };
     
+    const handleShowCitizenDetails = (data: any) => {
+      console.log('Show citizen details:', data.citizen);
+      setSelectedCitizen(data.citizen);
+    };
+    
     window.addEventListener('hide3DView', handleHide3DView);
     window.addEventListener('show3DView', handleShow3DView);
     window.addEventListener('buildingMenuClosed', handleBuildingMenuClosed);
     window.addEventListener('showBuildings', handleShowBuildings);
+    
+    // Subscribe to citizen details event
+    const subscription = eventBus.subscribe(EventTypes.SHOW_CITIZEN_DETAILS, handleShowCitizenDetails);
     
     // Dispatch showBuildings event immediately if we're in buildings view
     if (activeView === 'buildings') {
@@ -146,6 +156,7 @@ export default function SimplePage() {
       window.removeEventListener('show3DView', handleShow3DView);
       window.removeEventListener('buildingMenuClosed', handleBuildingMenuClosed);
       window.removeEventListener('showBuildings', handleShowBuildings);
+      subscription.unsubscribe();
     };
   }, [activeView]);
 
@@ -1315,6 +1326,14 @@ export default function SimplePage() {
       
       {selectedArticle === "business-owners-guide" && (
         <BusinessOwnersGuideArticle onClose={() => setSelectedArticle(null)} />
+      )}
+      
+      {/* Citizen Details Panel */}
+      {selectedCitizen && (
+        <CitizenDetailsPanel 
+          citizen={selectedCitizen} 
+          onClose={() => setSelectedCitizen(null)} 
+        />
       )}
       
       {/* Land Purchase Confirmation Modal */}

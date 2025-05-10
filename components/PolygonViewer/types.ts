@@ -1,5 +1,5 @@
-export type ViewMode = 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance';
-export type ActiveViewMode = 'buildings' | 'land' | 'markets'; // Type for active views
+export type ViewMode = 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance' | 'citizens';
+export type ActiveViewMode = 'buildings' | 'land' | 'markets' | 'citizens'; // Type for active views
 
 export interface Coordinate {
   lat: number;
@@ -20,6 +20,21 @@ export interface Polygon {
   areaInSquareMeters?: number; // Add area field
   coatOfArmsImage?: string; // Add coat of arms image URL
   simulatedIncome?: number; // Add this property for income-based coloring
+}
+
+// Add Citizen interface
+export interface Citizen {
+  CitizenId: string;
+  SocialClass: string;
+  FirstName: string;
+  LastName: string;
+  Description: string;
+  ImageUrl?: string;
+  Wealth: string;
+  Home: string; // Building ID
+  Work?: string; // Business ID
+  NeedsCompletionScore: number;
+  CreatedAt: string;
 }
 
 // Add this to the existing types

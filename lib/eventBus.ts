@@ -115,5 +115,10 @@ export const EventTypes = {
   // Loan events
   LOAN_PAYMENT_MADE: 'loanPaymentMade',
   LOAN_APPLIED: 'loanApplied',
-  LOAN_PAID_OFF: 'loanPaidOff'
+  LOAN_PAID_OFF: 'loanPaidOff',
+  // Citizen events
+  CITIZEN_SELECTED: 'citizenSelected',
+  CITIZEN_HOVER: 'citizenHover',
+  CITIZENS_LOADED: 'citizensLoaded',
+  SHOW_CITIZEN_DETAILS: 'showCitizenDetails'
 };

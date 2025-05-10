@@ -23,7 +23,7 @@ export default function ViewModeMenu({ activeView, setActiveView }: ViewModeMenu
   // Helper function to check if a view is disabled
   const isDisabled = (view: ViewMode): boolean => {
     // Only these views are enabled
-    const enabledViews: ViewMode[] = ['buildings', 'land', 'markets'];
+    const enabledViews: ViewMode[] = ['buildings', 'land', 'markets', 'citizens'];
     return !enabledViews.includes(view);
   };
 
@@ -34,7 +34,8 @@ export default function ViewModeMenu({ activeView, setActiveView }: ViewModeMenu
     'resources': 'Survey natural resources, production centers, and material wealth of La Serenissima',
     'transport': 'Navigate the network of canals, bridges, and maritime routes that connect the Republic',
     'buildings': 'Explore the architectural marvels, palaces, and structures of Venezia in detail',
-    'land': 'View land ownership, property boundaries, and territorial divisions of the Republic'
+    'land': 'View land ownership, property boundaries, and territorial divisions of the Republic',
+    'citizens': 'Meet the citizens of Venice, see where they live and work, and learn about their lives'
   };
 
   return (
@@ -71,6 +72,22 @@ export default function ViewModeMenu({ activeView, setActiveView }: ViewModeMenu
           <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
         </svg>
         <span className="text-[10px] mt-1">Markets</span>
+      </IconButton>
+      
+      {/* Citizens View */}
+      <IconButton 
+        onClick={() => activeView !== 'citizens' ? handleViewModeChange('citizens') : null}
+        active={activeView === 'citizens'}
+        title={viewDescriptions.citizens}
+        activeColor="amber"
+        compact={true}
+        disabled={false}
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+        <span className="text-[10px] mt-1">Citizens</span>
       </IconButton>
       
       {/* Resources View - Now Enabled */}

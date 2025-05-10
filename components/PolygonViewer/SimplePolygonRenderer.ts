@@ -76,6 +76,12 @@ export default class SimplePolygonRenderer {
   // Properties for path visualization
   private pathVisualization: THREE.Object3D[] = [];
   
+  // Properties for citizens view
+  private citizenMarkers: THREE.Object3D[] = [];
+  private citizenData: any[] = [];
+  private hoveredCitizenId: string | null = null;
+  private selectedCitizenId: string | null = null;
+  
   constructor({ 
     scene, 
     polygons, 
@@ -968,6 +974,11 @@ export default class SimplePolygonRenderer {
       this.measurementPoints = [];
     }
     
+    // Clear citizen markers when switching away from citizens view
+    if (this.activeView === 'citizens' && activeView !== 'citizens') {
+      this.clearCitizenMarkers();
+    }
+    
     this.activeView = activeView;
     
     // Update coat of arms sprites based on view mode
@@ -1061,6 +1072,25 @@ export default class SimplePolygonRenderer {
       }
       
       console.log(`Created ${this.buildingPointMarkers.length} building point markers for buildings view`);
+    } else if (activeView === 'citizens') {
+      // Hide coat of arms sprites in citizens view
+      Object.values(this.coatOfArmsSprites).forEach(sprite => {
+        sprite.visible = false;
+      });
+      
+      // Hide bridge and dock points in citizens view
+      this.bridgePointMarkers.forEach(marker => marker.visible = false);
+      this.dockPointMarkers.forEach(marker => marker.visible = false);
+      
+      // Hide building points in citizens view
+      this.buildingPointMarkers.forEach(marker => marker.visible = false);
+      
+      // Load citizen data if not already loaded
+      if (this.citizenData.length === 0) {
+        this.loadCitizens();
+      } else {
+        this.createCitizenMarkers();
+      }
     } else {
       // Hide coat of arms sprites, bridge/dock points, and building points in other views
       Object.values(this.coatOfArmsSprites).forEach(sprite => {
@@ -1262,6 +1292,53 @@ export default class SimplePolygonRenderer {
           document.body.style.cursor = 'pointer';
         }
       }
+    } else if (this.activeView === 'citizens') {
+      // Citizens view - handle citizen hover
+      // Find intersections with citizen markers
+      const intersects = this.raycaster.intersectObjects(this.citizenMarkers);
+      
+      // Reset hover state
+      if (this.hoveredCitizenId && this.hoveredCitizenId !== this.selectedCitizenId) {
+        const prevHovered = this.citizenMarkers.find(
+          marker => marker.userData && marker.userData.citizenId === this.hoveredCitizenId
+        );
+        
+        if (prevHovered) {
+          // Reset scale
+          prevHovered.scale.set(1, 1, 1);
+        }
+        
+        this.hoveredCitizenId = null;
+        document.body.style.cursor = 'default';
+      }
+      
+      // Set new hover state if found
+      if (intersects.length > 0) {
+        const intersected = intersects[0].object;
+        if (intersected.userData && intersected.userData.type === 'citizen') {
+          const citizenId = intersected.userData.citizenId;
+          
+          if (citizenId && citizenId !== this.selectedCitizenId) {
+            this.hoveredCitizenId = citizenId;
+            
+            // Scale up slightly
+            intersected.scale.set(1.2, 1.2, 1.2);
+            
+            document.body.style.cursor = 'pointer';
+            
+            // Emit hover event
+            eventBus.emit(EventTypes.CITIZEN_HOVER, {
+              citizenId,
+              data: intersected.userData.data
+            });
+          }
+        }
+      } else {
+        // No citizen hovered, emit null hover event
+        eventBus.emit(EventTypes.CITIZEN_HOVER, null);
+      }
+      
+      return;
     } else if (this.activeView === 'transport') {
       try {
         // Transport view - handle bridge and dock point hover
@@ -1447,8 +1524,52 @@ export default class SimplePolygonRenderer {
     this.raycaster.params.Line.threshold = 0.1; // Increase line detection threshold
     this.raycaster.params.Points.threshold = 0.1; // Increase point detection threshold
     
+    // Handle citizens view clicks
+    if (this.activeView === 'citizens') {
+      // Find intersections with citizen markers
+      const intersects = this.raycaster.intersectObjects(this.citizenMarkers);
+      
+      if (intersects.length > 0) {
+        const intersected = intersects[0].object;
+        if (intersected.userData && intersected.userData.type === 'citizen') {
+          const citizenId = intersected.userData.citizenId;
+          const citizenData = intersected.userData.data;
+          
+          // Deselect previous selection
+          if (this.selectedCitizenId) {
+            const prevSelected = this.citizenMarkers.find(
+              marker => marker.userData && marker.userData.citizenId === this.selectedCitizenId
+            );
+            
+            if (prevSelected) {
+              // Reset scale
+              prevSelected.scale.set(1, 1, 1);
+            }
+          }
+          
+          // Select new
+          this.selectedCitizenId = citizenId;
+          
+          // Scale up
+          intersected.scale.set(1.3, 1.3, 1.3);
+          
+          // Emit selection event
+          eventBus.emit(EventTypes.CITIZEN_SELECTED, {
+            citizenId,
+            data: citizenData
+          });
+          
+          // Also emit the show citizen details event
+          eventBus.emit(EventTypes.SHOW_CITIZEN_DETAILS, {
+            citizen: citizenData
+          });
+          
+          return;
+        }
+      }
+    }
     // Handle transport view clicks
-    if (this.activeView === 'transport') {
+    else if (this.activeView === 'transport') {
       console.log(`In transport view, checking for marker intersections`);
       
       // CHANGE: Prioritize building points for distance measurement in transport view
@@ -1847,6 +1968,9 @@ export default class SimplePolygonRenderer {
     
     // Clean up building point markers
     this.clearBuildingPointMarkers();
+    
+    // Clean up citizen markers
+    this.clearCitizenMarkers();
     
     // Clean up measurement objects
     this.measurementMarkers.forEach(marker => {
@@ -4564,3 +4688,221 @@ export default class SimplePolygonRenderer {
     }
   }
 }
+  /**
+   * Load citizen data from the API
+   */
+  public async loadCitizens(): Promise<void> {
+    try {
+      console.log('Loading citizens data...');
+      const response = await fetch('/api/citizens');
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch citizens: ${response.status} ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      this.citizenData = data;
+      
+      console.log(`Loaded ${this.citizenData.length} citizens`);
+      
+      // If we're in citizens view, create the markers
+      if (this.activeView === 'citizens') {
+        this.createCitizenMarkers();
+      }
+      
+      // Emit event that citizens data is loaded
+      eventBus.emit(EventTypes.CITIZENS_LOADED, { count: this.citizenData.length });
+    } catch (error) {
+      console.error('Error loading citizens data:', error);
+    }
+  }
+
+  /**
+   * Create citizen markers on the map
+   */
+  private createCitizenMarkers(): void {
+    // Clear existing markers first
+    this.clearCitizenMarkers();
+    
+    console.log(`Creating markers for ${this.citizenData.length} citizens`);
+    
+    // Process each citizen
+    this.citizenData.forEach(citizen => {
+      try {
+        // Skip citizens without a home building
+        if (!citizen.Home) {
+          console.warn(`Citizen ${citizen.CitizenId} has no home building`);
+          return;
+        }
+        
+        // Find the building position
+        const buildingPosition = this.findBuildingPosition(citizen.Home);
+        
+        if (!buildingPosition) {
+          console.warn(`Could not find position for building ${citizen.Home}`);
+          return;
+        }
+        
+        // Create a circular sprite for the citizen
+        const canvas = document.createElement('canvas');
+        const size = 128;
+        canvas.width = size;
+        canvas.height = size;
+        
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          console.warn('Could not get canvas context');
+          return;
+        }
+        
+        // Draw citizen icon
+        ctx.beginPath();
+        ctx.arc(size/2, size/2, size/2 - 4, 0, Math.PI * 2);
+        ctx.fillStyle = this.getSocialClassColor(citizen.SocialClass);
+        ctx.fill();
+        
+        // Add border
+        ctx.strokeStyle = '#FFFFFF';
+        ctx.lineWidth = 4;
+        ctx.stroke();
+        
+        // Add initials
+        ctx.font = 'bold 48px Arial';
+        ctx.fillStyle = '#FFFFFF';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(`${citizen.FirstName.charAt(0)}${citizen.LastName.charAt(0)}`, size/2, size/2);
+        
+        // Create texture from canvas
+        const texture = new THREE.CanvasTexture(canvas);
+        
+        // Create sprite material
+        const spriteMaterial = new THREE.SpriteMaterial({
+          map: texture,
+          transparent: true,
+          depthTest: true,
+          depthWrite: false
+        });
+        
+        // Create sprite
+        const sprite = new THREE.Sprite(spriteMaterial);
+        
+        // Position sprite at building position, slightly elevated
+        sprite.position.set(buildingPosition.x, buildingPosition.y + 2, buildingPosition.z);
+        
+        // Scale sprite
+        sprite.scale.set(1, 1, 1);
+        
+        // Add metadata
+        sprite.userData = {
+          type: 'citizen',
+          citizenId: citizen.CitizenId,
+          data: citizen
+        };
+        
+        // Add to scene
+        this.scene.add(sprite);
+        
+        // Store reference
+        this.citizenMarkers.push(sprite);
+        
+        console.log(`Created marker for citizen ${citizen.CitizenId} at position ${buildingPosition.x}, ${buildingPosition.y}, ${buildingPosition.z}`);
+      } catch (error) {
+        console.error(`Error creating marker for citizen ${citizen.CitizenId}:`, error);
+      }
+    });
+    
+    console.log(`Created ${this.citizenMarkers.length} citizen markers`);
+  }
+
+  /**
+   * Find building position by ID
+   */
+  private findBuildingPosition(buildingId: string): THREE.Vector3 | null {
+    // First try to find the building in the building point markers
+    for (const marker of this.buildingPointMarkers) {
+      if (marker.userData && marker.userData.id === buildingId) {
+        return marker.position.clone();
+      }
+    }
+    
+    // If not found, try to find in the polygons (assuming buildings are placed on polygons)
+    for (const polygon of this.polygons) {
+      if (polygon.buildingPoints && Array.isArray(polygon.buildingPoints)) {
+        for (let i = 0; i < polygon.buildingPoints.length; i++) {
+          const buildingPoint = polygon.buildingPoints[i];
+          // Check if this building point has the ID we're looking for
+          if (buildingPoint.id === buildingId || buildingPoint.buildingId === buildingId) {
+            // Convert to normalized coordinates
+            const normalizedCoord = normalizeCoordinates(
+              [buildingPoint],
+              this.bounds.centerLat,
+              this.bounds.centerLng,
+              this.bounds.scale,
+              this.bounds.latCorrectionFactor
+            )[0];
+            
+            return new THREE.Vector3(normalizedCoord.x, 0.2, -normalizedCoord.y);
+          }
+        }
+      }
+    }
+    
+    // If still not found, use a random position on a random polygon as fallback
+    if (this.polygons.length > 0) {
+      const randomPolygon = this.polygons[Math.floor(Math.random() * this.polygons.length)];
+      if (randomPolygon.centroid) {
+        const normalizedCoord = normalizeCoordinates(
+          [randomPolygon.centroid],
+          this.bounds.centerLat,
+          this.bounds.centerLng,
+          this.bounds.scale,
+          this.bounds.latCorrectionFactor
+        )[0];
+        
+        return new THREE.Vector3(normalizedCoord.x, 0.2, -normalizedCoord.y);
+      }
+    }
+    
+    // If all else fails, return null
+    return null;
+  }
+
+  /**
+   * Get color based on social class
+   */
+  private getSocialClassColor(socialClass: string): string {
+    switch (socialClass.toLowerCase()) {
+      case 'noble':
+        return '#FFD700'; // Gold
+      case 'merchant':
+        return '#4682B4'; // Steel Blue
+      case 'artisan':
+        return '#8B4513'; // Saddle Brown
+      case 'commoner':
+        return '#556B2F'; // Dark Olive Green
+      case 'servant':
+        return '#708090'; // Slate Gray
+      default:
+        return '#C0C0C0'; // Silver (default)
+    }
+  }
+
+  /**
+   * Clear citizen markers
+   */
+  private clearCitizenMarkers(): void {
+    this.citizenMarkers.forEach(marker => {
+      this.scene.remove(marker);
+      if (marker instanceof THREE.Sprite && marker.material) {
+        if (marker.material instanceof THREE.SpriteMaterial && marker.material.map) {
+          marker.material.map.dispose();
+        }
+        marker.material.dispose();
+      }
+    });
+    
+    this.citizenMarkers = [];
+    this.hoveredCitizenId = null;
+    this.selectedCitizenId = null;
+  }
