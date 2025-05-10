@@ -29,18 +29,61 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
   const [showCanalCreator, setShowCanalCreator] = useState(false);
   const [selectedVariant, setSelectedVariant] = useState<string>('model');
 
-  // Get scene with fallback
-  const actualScene = scene || (typeof document !== 'undefined' ? document.querySelector('canvas')?.__scene as THREE.Scene : undefined);
+  // Get scene with improved fallback mechanism
+  const [actualScene, setActualScene] = useState<THREE.Scene | undefined>(scene);
   
-  // Log scene availability for debugging
+  // Log scene availability for debugging and try to find it if not available
   useEffect(() => {
-    console.log('BuildingsToolbar: Scene available:', !!actualScene);
+    console.log('BuildingsToolbar: Scene available from props:', !!scene);
     
-    // If scene is not available, try to find it from global context
-    if (!actualScene && typeof window !== 'undefined' && window.__threeContext) {
-      console.log('BuildingsToolbar: Trying to get scene from window.__threeContext');
+    if (scene) {
+      setActualScene(scene);
+      return;
     }
-  }, [actualScene]);
+    
+    // Function to find scene from various sources
+    const findScene = (): THREE.Scene | undefined => {
+      // Try to get from canvas element
+      if (typeof document !== 'undefined') {
+        const canvas = document.querySelector('canvas');
+        if (canvas && canvas.__scene) {
+          console.log('BuildingsToolbar: Found scene in canvas.__scene');
+          return canvas.__scene as THREE.Scene;
+        }
+      }
+      
+      // Try to get from global context
+      if (typeof window !== 'undefined' && window.__threeContext && window.__threeContext.scene) {
+        console.log('BuildingsToolbar: Found scene in window.__threeContext');
+        return window.__threeContext.scene;
+      }
+      
+      return undefined;
+    };
+    
+    // Try to find scene immediately
+    const foundScene = findScene();
+    if (foundScene) {
+      setActualScene(foundScene);
+      console.log('BuildingsToolbar: Scene found and set');
+    } else {
+      console.log('BuildingsToolbar: Scene not found, setting up retry mechanism');
+      
+      // Set up retry mechanism
+      const retryInterval = setInterval(() => {
+        console.log('BuildingsToolbar: Retrying to find scene...');
+        const retryScene = findScene();
+        if (retryScene) {
+          console.log('BuildingsToolbar: Scene found on retry!');
+          setActualScene(retryScene);
+          clearInterval(retryInterval);
+        }
+      }, 500);
+      
+      // Clean up interval on unmount
+      return () => clearInterval(retryInterval);
+    }
+  }, [scene]);
 
   // Use the building menu hook to access building data
   const { 
@@ -897,7 +940,7 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
       {/* Always render the BuildingRenderer to show existing buildings */}
       {showBuildingRenderer ? (
         <BuildingRenderer 
-          scene={actualScene || (typeof window !== 'undefined' && window.__threeContext?.scene)} 
+          scene={actualScene} 
           active={true} 
         />
       ) : (

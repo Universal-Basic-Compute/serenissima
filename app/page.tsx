@@ -544,7 +544,46 @@ export default function SimplePage() {
     <div className="relative w-full h-screen">
       {/* Main 3D Viewer (should be first in the DOM for proper layering) */}
       {show3DView && (
-        <SimpleViewer qualityMode={qualityMode} activeView={activeView as 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance'} />
+        <>
+          <SimpleViewer qualityMode={qualityMode} activeView={activeView as 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance'} />
+          
+          {/* Add script to ensure scene is globally available */}
+          <script dangerouslySetInnerHTML={{
+            __html: `
+              // Function to make scene globally available
+              const makeSceneGlobal = () => {
+                if (typeof document !== 'undefined') {
+                  const canvas = document.querySelector('canvas');
+                  if (canvas && canvas.__scene && canvas.__camera) {
+                    // Make scene and camera available globally
+                    window.__threeContext = window.__threeContext || {};
+                    window.__threeContext.scene = canvas.__scene;
+                    window.__threeContext.camera = canvas.__camera;
+                    console.log('Made scene and camera available globally from canvas');
+                    return true;
+                  }
+                }
+                return false;
+              };
+              
+              // Try immediately
+              if (!makeSceneGlobal()) {
+                // If not found, retry a few times
+                let attempts = 0;
+                const maxAttempts = 20;
+                const interval = setInterval(() => {
+                  attempts++;
+                  if (makeSceneGlobal() || attempts >= maxAttempts) {
+                    clearInterval(interval);
+                    if (attempts >= maxAttempts) {
+                      console.warn('Failed to make scene globally available after ' + maxAttempts + ' attempts');
+                    }
+                  }
+                }, 250);
+              }
+            `
+          }} />
+        </>
       )}
       
       {/* Buildings Toolbar - only visible in buildings view */}

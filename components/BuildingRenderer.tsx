@@ -19,7 +19,6 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
   
   // Add a state to track if the component is ready to render
   const [isReady, setIsReady] = useState<boolean>(false);
-  
   // Update the ref when scene changes or try to find the scene if not provided
   useEffect(() => {
     // Function to find the scene if not provided as a prop
@@ -41,25 +40,29 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
         }
       }
       
-      console.warn('BuildingRenderer: Could not find scene, will retry');
-      return null;
+      // If no scene found, create a dummy scene as a fallback
+      console.warn('BuildingRenderer: Could not find scene, creating a dummy scene');
+      const dummyScene = new THREE.Scene();
+      dummyScene.userData.isDummyScene = true;
+      return dummyScene;
     };
     
     // Try to find the scene
     let foundScene = findScene();
+    sceneRef.current = foundScene;
     
-    // If scene not found, set up a retry mechanism
-    if (!foundScene) {
-      console.log('BuildingRenderer: Scene not found, setting up retry mechanism');
+    // If we got a dummy scene, set up a retry mechanism to find a real scene
+    if (foundScene.userData && foundScene.userData.isDummyScene) {
+      console.log('BuildingRenderer: Using dummy scene, setting up retry mechanism');
       
       const retryInterval = setInterval(() => {
-        console.log('BuildingRenderer: Retrying to find scene...');
-        foundScene = findScene();
+        console.log('BuildingRenderer: Retrying to find real scene...');
+        const realScene = findScene();
         
-        if (foundScene) {
-          console.log('BuildingRenderer: Scene found on retry!');
+        if (realScene && !realScene.userData.isDummyScene) {
+          console.log('BuildingRenderer: Real scene found on retry!');
           clearInterval(retryInterval);
-          sceneRef.current = foundScene;
+          sceneRef.current = realScene;
           setIsReady(true);
         }
       }, 500); // Retry every 500ms
@@ -69,18 +72,21 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
         clearInterval(retryInterval);
       };
     } else {
-      // Scene found on first try
-      sceneRef.current = foundScene;
+      // Real scene found on first try
       setIsReady(true);
-      
-      console.log('BuildingRenderer: Scene ref updated, scene available');
+      console.log('BuildingRenderer: Scene ref updated, real scene available');
     }
   }, [scene]);
   // Early return if not ready
-  if (!isReady && !sceneRef.current) {
-    console.log('BuildingRenderer: Not ready, scene not available');
+  if (!isReady) {
+    console.log('BuildingRenderer: Not ready yet, waiting for scene to be available');
     // Return a loading state instead of null
     return null;
+  }
+  
+  // Log warning if we're using a dummy scene
+  if (sceneRef.current && sceneRef.current.userData && sceneRef.current.userData.isDummyScene) {
+    console.warn('BuildingRenderer: Using dummy scene, buildings will not be visible until a real scene is available');
   }
   
   const [buildings, setBuildings] = useState<BuildingData[]>([]);
