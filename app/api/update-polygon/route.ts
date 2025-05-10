@@ -34,7 +34,7 @@ export async function POST(request: Request) {
     }
     
     // Save the updated data
-    serverUtils.writeJsonToFile(filePath, existingData);
+    serverUtils.saveJsonToFile(filePath, existingData);
     
     return NextResponse.json({ success: true });
   } catch (error) {
