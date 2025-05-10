@@ -53,6 +53,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
   const [showNotifications, setShowNotifications] = useState<boolean>(false);
   const [lastFetchTime, setLastFetchTime] = useState<number>(Date.now());
   const [isMobile, setIsMobile] = useState<boolean>(false);
+  const fetchIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Fetch notifications
   const fetchNotifications = useCallback(async (forceRefresh = false) => {
@@ -241,18 +242,33 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
   useEffect(() => {
     // Only fetch notifications when the component is open or when notifications panel is shown
     if (isOpen || showNotifications) {
+      // Clear any existing interval first to prevent duplicates
+      if (fetchIntervalRef.current) {
+        clearInterval(fetchIntervalRef.current);
+        fetchIntervalRef.current = null;
+      }
+      
       // Fetch notifications immediately when component becomes visible
       fetchNotifications();
       
       // Set up polling every 5 minutes (300000 ms)
-      const intervalId = setInterval(() => {
+      fetchIntervalRef.current = setInterval(() => {
         fetchNotifications();
       }, 300000);
       
       // Clean up interval on unmount or when component is hidden
       return () => {
-        clearInterval(intervalId);
+        if (fetchIntervalRef.current) {
+          clearInterval(fetchIntervalRef.current);
+          fetchIntervalRef.current = null;
+        }
       };
+    } else {
+      // Clear interval when component is hidden
+      if (fetchIntervalRef.current) {
+        clearInterval(fetchIntervalRef.current);
+        fetchIntervalRef.current = null;
+      }
     }
   }, [fetchNotifications, isOpen, showNotifications]); // Add isOpen and showNotifications as dependencies
 
