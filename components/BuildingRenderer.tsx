@@ -15,7 +15,7 @@ interface BuildingRendererProps {
 const BuildingRenderer: React.FC<BuildingRendererProps> = ({ active }) => {
   // Create refs for scene and camera
   const sceneRef = useRef<THREE.Scene | null>(null);
-  const cameraRef = useRef<THREE.Camera | null>(null);
+  const cameraRef = useRef<THREE.Camera | THREE.PerspectiveCamera | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   
   // State for buildings and loading status
@@ -338,7 +338,8 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ active }) => {
     
     // Calculate the distance needed to view all buildings
     const maxDim = Math.max(size.x, size.y, size.z);
-    const fov = cameraRef.current.fov;
+    // Check if camera is PerspectiveCamera which has fov property
+    const fov = (cameraRef.current as THREE.PerspectiveCamera).fov || 75; // Default to 75 if not available
     const cameraDistance = maxDim / (2 * Math.tan((fov * Math.PI) / 360));
     
     // Position camera at a good viewing angle
