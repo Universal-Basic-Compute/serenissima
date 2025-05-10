@@ -37,6 +37,49 @@ class DefaultBuildingRenderer implements IBuildingRenderer {
       // Load the building model
       const model = await this.options.cacheService.getBuildingModel(building.type, building.variant);
       
+      // Check if this is a fallback model and we should skip rendering it
+      if (model.userData && model.userData.isFallbackModel) {
+        console.log(`Skipping rendering of fallback model for ${building.id} of type ${building.type}`);
+        
+        // Create an empty group instead of using the fallback model
+        const emptyGroup = new THREE.Group();
+        
+        // Set position
+        let position: THREE.Vector3;
+        
+        if ('lat' in building.position && 'lng' in building.position) {
+          position = this.options.positionManager.latLngToScenePosition(building.position);
+        } else {
+          position = new THREE.Vector3(
+            building.position.x,
+            building.position.y || 0, // Use 0 as default height
+            building.position.z
+          );
+        }
+        
+        // Copy the position
+        emptyGroup.position.copy(position);
+        emptyGroup.position.y = 0;
+        
+        // Set rotation
+        emptyGroup.rotation.y = building.rotation || 0;
+        
+        // Add metadata to the model
+        emptyGroup.userData = {
+          buildingId: building.id,
+          type: building.type,
+          landId: building.land_id,
+          owner: building.owner || building.created_by,
+          position: building.position,
+          isEmptyPlaceholder: true
+        };
+        
+        // Add to scene
+        this.options.scene.add(emptyGroup);
+        
+        return emptyGroup;
+      }
+      
       // Set position
       let position: THREE.Vector3;
       

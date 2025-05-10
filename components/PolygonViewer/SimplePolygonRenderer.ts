@@ -2671,6 +2671,8 @@ export default class SimplePolygonRenderer {
       // Position buildings at ground level
       buildingGroup.position.y = 0;
       
+      let modelLoaded = false;
+      
       try {
         // Load the GLB model
         const gltf = await new Promise<any>((resolve, reject) => {
@@ -2710,6 +2712,7 @@ export default class SimplePolygonRenderer {
         });
       
         console.log(`Successfully loaded model for ${building.id} from ${modelPath}`);
+        modelLoaded = true;
       } catch (modelError) {
         console.warn(`Failed to load model from ${modelPath}:`, modelError);
         
@@ -2734,45 +2737,43 @@ export default class SimplePolygonRenderer {
           buildingGroup.rotation.y = building.rotation || 0;
           
           console.log(`Successfully loaded model from fallback path for ${building.id}`);
+          modelLoaded = true;
         } catch (fallbackError) {
           console.warn(`Failed to load model from fallback path:`, fallbackError);
           
-          // Create a simple fallback cube if both model paths fail
-          console.log(`Creating fallback cube for ${building.id}`);
-          const geometry = new THREE.BoxGeometry(2, 2, 2);
-          const material = new THREE.MeshStandardMaterial({ 
-            color: 0x808080,
-            wireframe: true
-          });
-          const cube = new THREE.Mesh(geometry, material);
-          
-          // Label removed to keep buildings clean
-          
-          buildingGroup.add(cube);
+          // Don't create a fallback cube, just log the error
+          console.log(`No model available for ${building.id}, skipping visual representation`);
+          // We'll return the empty group without any visible mesh
         }
       }
       
-      // Add metadata
-      buildingGroup.userData = {
-        buildingId: building.id,
-        type: building.type,
-        variant: building.variant,
-        owner: building.owner || building.created_by,
-        position: building.position
-      };
-      
-      // Add to scene
-      this.scene.add(buildingGroup);
-      
-      // Store in building markers for cleanup
-      this.buildingPointMarkers.push(buildingGroup);
-      
-      console.log(`Created building mesh for ${building.id} at position:`, buildingGroup.position);
-      
-      // Scale down the building to make it 2.5x smaller (20% smaller than before)
-      buildingGroup.scale.set(0.4, 0.4, 0.4);
-      
-      return buildingGroup;
+      // Only add metadata and add to scene if we have a model or we want to keep the placeholder
+      if (modelLoaded) {
+        // Add metadata
+        buildingGroup.userData = {
+          buildingId: building.id,
+          type: building.type,
+          variant: building.variant,
+          owner: building.owner || building.created_by,
+          position: building.position
+        };
+        
+        // Add to scene
+        this.scene.add(buildingGroup);
+        
+        // Store in building markers for cleanup
+        this.buildingPointMarkers.push(buildingGroup);
+        
+        console.log(`Created building mesh for ${building.id} at position:`, buildingGroup.position);
+        
+        // Scale down the building to make it 2.5x smaller (20% smaller than before)
+        buildingGroup.scale.set(0.4, 0.4, 0.4);
+        
+        return buildingGroup;
+      } else {
+        // Return null to indicate no visual representation was created
+        return null;
+      }
     } catch (error) {
       console.error(`Error creating building mesh for ${building.id}:`, error);
       return null;
