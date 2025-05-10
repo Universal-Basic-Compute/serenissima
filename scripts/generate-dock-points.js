@@ -3,7 +3,7 @@ const path = require('path');
 
 // Helper function to ensure directories exist
 function ensureDirectoriesExist() {
-  const polygonsDir = path.join(__dirname, '../data/polygons');
+  const polygonsDir = path.join(__dirname, '../data');
   
   if (!fs.existsSync(path.join(__dirname, '../data'))) {
     fs.mkdirSync(path.join(__dirname, '../data'));
