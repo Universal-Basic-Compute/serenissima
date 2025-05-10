@@ -566,9 +566,9 @@ export default function SimplePage() {
           
           {/* Then show the toolbar */}
           <BuildingsToolbar 
-            scene={document.querySelector('canvas')?.__scene}
-            camera={document.querySelector('canvas')?.__camera as THREE.PerspectiveCamera}
-            polygons={window.__polygonData || []}
+            scene={typeof document !== 'undefined' ? document.querySelector('canvas')?.__scene : undefined}
+            camera={typeof document !== 'undefined' ? document.querySelector('canvas')?.__camera as THREE.PerspectiveCamera : undefined}
+            polygons={typeof window !== 'undefined' ? window.__polygonData || [] : []}
             onRefreshBuildings={() => {
               // Refresh buildings by dispatching an event
               eventBus.emit(EventTypes.BUILDING_PLACED, { refresh: true });

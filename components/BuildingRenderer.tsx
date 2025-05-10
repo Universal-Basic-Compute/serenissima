@@ -24,13 +24,16 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
   
   // Initialize renderer factory
   useEffect(() => {
-    if (scene) {
-      rendererFactoryRef.current = new BuildingRendererFactory({
-        scene,
-        positionManager: buildingPositionManager,
-        cacheService: buildingCacheService
-      });
+    if (!scene) {
+      console.warn('BuildingRenderer: scene is not defined, cannot initialize renderer factory');
+      return;
     }
+    
+    rendererFactoryRef.current = new BuildingRendererFactory({
+      scene,
+      positionManager: buildingPositionManager,
+      cacheService: buildingCacheService
+    });
     
     return () => {
       // No cleanup needed for factory
@@ -39,6 +42,11 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
   
   // Function to verify and fix building positions
   const verifyAndFixBuildingPositions = () => {
+    if (!scene) {
+      console.warn('Cannot verify building positions: scene is not defined');
+      return;
+    }
+    
     console.log('Verifying and fixing building positions...');
     
     // Find all buildings in the scene
@@ -108,6 +116,11 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
   // Function to create a building mesh using the renderer factory
   const createBuildingMesh = async (building: BuildingData) => {
     try {
+      if (!scene) {
+        console.error('Cannot create building mesh: scene is not defined');
+        return null;
+      }
+      
       if (!rendererFactoryRef.current) {
         console.error('Renderer factory not initialized');
         return null;
@@ -397,8 +410,13 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
   
   // Function to focus camera on buildings
   const focusCameraOnBuildings = useCallback(() => {
-    if (!scene || buildingMeshesRef.current.size === 0) {
-      console.log('Cannot focus on buildings: scene or buildings not available');
+    if (!scene) {
+      console.warn('Cannot focus on buildings: scene is not defined');
+      return;
+    }
+    
+    if (buildingMeshesRef.current.size === 0) {
+      console.log('Cannot focus on buildings: no buildings available');
       return;
     }
     
@@ -463,7 +481,10 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
   
   // Function to ensure buildings are visible
   const ensureBuildingsVisible = useCallback(() => {
-    if (!scene) return;
+    if (!scene) {
+      console.warn('Cannot ensure buildings are visible: scene is not defined');
+      return;
+    }
     
     console.log('Ensuring buildings are visible...');
     
@@ -546,7 +567,10 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
   
   // Function to add debug markers for buildings
   const addDebugMarkers = () => {
-    if (!scene) return;
+    if (!scene) {
+      console.warn('Cannot add debug markers: scene is not defined');
+      return;
+    }
     
     console.log('Adding debug markers for buildings...');
     
@@ -594,43 +618,55 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
 
   // Initial load of buildings
   useEffect(() => {
-    if (active && scene && rendererFactoryRef.current) {
-      console.log('BuildingRenderer is active, loading buildings...');
+    if (!active) return;
+    
+    if (!scene) {
+      console.warn('BuildingRenderer: scene is not defined, cannot render buildings');
+      return;
+    }
+    
+    if (!rendererFactoryRef.current) {
+      console.warn('BuildingRenderer: renderer factory is not initialized');
+      return;
+    }
+    
+    console.log('BuildingRenderer is active, loading buildings...');
+    
+    // Use the memory-efficient loading strategy
+    loadBuildingsEfficiently();
+    
+    // Start memory monitoring
+    const stopMemoryMonitoring = startMemoryMonitoring();
+    
+    // Add a delay to ensure buildings are loaded
+    const timer = setTimeout(() => {
+      verifyAndFixBuildingPositions();
+      // Focus camera on buildings after fixing positions
+      ensureBuildingsVisible();
+    }, 2000);
+    
+    return () => {
+      clearTimeout(timer);
+      stopMemoryMonitoring();
       
-      // Use the memory-efficient loading strategy
-      loadBuildingsEfficiently();
-      
-      // Start memory monitoring
-      const stopMemoryMonitoring = startMemoryMonitoring();
-      
-      // Add a delay to ensure buildings are loaded
-      const timer = setTimeout(() => {
-        verifyAndFixBuildingPositions();
-        // Focus camera on buildings after fixing positions
-        ensureBuildingsVisible();
-      }, 2000);
-      
-      return () => {
-        clearTimeout(timer);
-        stopMemoryMonitoring();
-        
-        // Cleanup buildings when component unmounts
-        if (rendererFactoryRef.current) {
-          for (const [id, mesh] of buildingMeshesRef.current.entries()) {
-            const building = buildings.find(b => b.id === id) || { type: 'unknown' } as BuildingData;
-            const renderer = rendererFactoryRef.current.getRenderer(building.type);
-            renderer.dispose(mesh);
-          }
-        } else {
-          // Fallback if factory not available
-          for (const mesh of buildingMeshesRef.current.values()) {
+      // Cleanup buildings when component unmounts
+      if (rendererFactoryRef.current) {
+        for (const [id, mesh] of buildingMeshesRef.current.entries()) {
+          const building = buildings.find(b => b.id === id) || { type: 'unknown' } as BuildingData;
+          const renderer = rendererFactoryRef.current.getRenderer(building.type);
+          renderer.dispose(mesh);
+        }
+      } else {
+        // Fallback if factory not available
+        for (const mesh of buildingMeshesRef.current.values()) {
+          if (scene) { // Add check for scene here
             scene.remove(mesh);
           }
         }
-        
-        buildingMeshesRef.current.clear();
-      };
-    }
+      }
+      
+      buildingMeshesRef.current.clear();
+    };
   }, [active, scene, ensureBuildingsVisible]);
   
   // Listen for the fixBuildingPositions event and other custom events
@@ -666,7 +702,15 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
   
   // Listen for building events
   useEffect(() => {
-    if (!active || !scene || !rendererFactoryRef.current) return;
+    if (!active) return;
+    if (!scene) {
+      console.warn('BuildingRenderer: scene is not defined, cannot listen for building events');
+      return;
+    }
+    if (!rendererFactoryRef.current) {
+      console.warn('BuildingRenderer: renderer factory is not initialized');
+      return;
+    }
     
     const handleBuildingPlaced = async (data: any) => {
       console.log('Building placed event received:', data);
@@ -916,7 +960,11 @@ export default BuildingRenderer;
   
   // Add effect to update building visibility based on camera distance
   useEffect(() => {
-    if (!scene || !active) return;
+    if (!active) return;
+    if (!scene) {
+      console.warn('BuildingRenderer: scene is not defined, cannot update building visibility');
+      return;
+    }
     
     // Function to update building visibility
     const updateVisibility = () => {

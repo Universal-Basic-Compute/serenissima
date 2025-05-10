@@ -30,7 +30,7 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
   const [selectedVariant, setSelectedVariant] = useState<string>('model');
 
   // Get scene with fallback
-  const actualScene = scene || (document.querySelector('canvas')?.__scene as THREE.Scene);
+  const actualScene = scene || (typeof document !== 'undefined' ? document.querySelector('canvas')?.__scene as THREE.Scene : undefined);
 
   // Use the building menu hook to access building data
   const { 
@@ -887,6 +887,11 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
       {/* Always render the BuildingRenderer to show existing buildings */}
       {showBuildingRenderer && actualScene && (
         <BuildingRenderer scene={actualScene} active={true} />
+      )}
+      {showBuildingRenderer && !actualScene && (
+        <div className="hidden">
+          {console.warn('BuildingsToolbar: scene is not available, cannot render BuildingRenderer')}
+        </div>
       )}
     </div>
   );
