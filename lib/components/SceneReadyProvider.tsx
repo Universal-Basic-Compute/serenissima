@@ -1,6 +1,21 @@
 import React, { useState, useEffect, createContext, useContext, useCallback } from 'react';
 import * as THREE from 'three';
 
+// Add type declarations for global window properties
+declare global {
+  interface Window {
+    __threeContext?: {
+      scene: THREE.Scene;
+      camera: THREE.Camera;
+    };
+  }
+  
+  interface HTMLCanvasElement {
+    __scene?: THREE.Scene;
+    __camera?: THREE.Camera;
+  }
+}
+
 interface SceneReadyContextType {
   isSceneReady: boolean;
   scene: THREE.Scene | null;
@@ -54,7 +69,12 @@ export const SceneReadyProvider: React.FC<SceneReadyProviderProps> = ({
       // Try to get scene from window.__threeContext
       if (typeof window !== 'undefined' && window.__threeContext && window.__threeContext.scene) {
         setScene(window.__threeContext.scene);
-        setCamera(window.__threeContext.camera);
+        // Ensure camera is a PerspectiveCamera before setting it
+        if (window.__threeContext.camera && window.__threeContext.camera instanceof THREE.PerspectiveCamera) {
+          setCamera(window.__threeContext.camera);
+        } else {
+          console.warn('SceneReadyProvider: Camera from window.__threeContext is not a PerspectiveCamera');
+        }
         setIsSceneReady(true);
         console.log('SceneReadyProvider: Scene found in window.__threeContext');
         return true;
