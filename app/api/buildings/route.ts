@@ -215,14 +215,7 @@ export async function GET(request: Request) {
           lng: parseFloat(lng.toFixed(10))
         };
         
-        console.log(`Converted x/y/z position to lat/lng: ${JSON.stringify(position)}`);
-      }
-      // Ensure lat/lng values are parsed as floats with full precision
-      else if (position.lat !== undefined && position.lng !== undefined) {
-        position = {
-          lat: parseFloat(position.lat.toString()),
-          lng: parseFloat(position.lng.toString())
-        };
+        console.log(`[API] Converted x/y/z position to lat/lng for building ${fields.BuildingId || record.id}:`, position);
       }
       // Ensure lat/lng values are parsed as floats with full precision
       else if (position.lat !== undefined && position.lng !== undefined) {
