@@ -175,7 +175,7 @@ Example format:
           'https://api.anthropic.com/v1/messages',
           {
             model: 'claude-3-7-sonnet-latest',
-            max_tokens: 1000, // Increased token limit for multiple bridge names
+            max_tokens: 64000, // Increased token limit for multiple bridge names
             messages: [
               { role: 'user', content: prompt }
             ],
@@ -281,7 +281,7 @@ Respond with a JSON array containing objects with these three fields for each do
           'https://api.anthropic.com/v1/messages',
           {
             model: 'claude-3-7-sonnet-latest',
-            max_tokens: 1000,
+            max_tokens: 64000,
             messages: [
               { role: 'user', content: prompt }
             ],
@@ -378,7 +378,7 @@ Respond with a JSON array containing objects with these four fields for each bui
           'https://api.anthropic.com/v1/messages',
           {
             model: 'claude-3-7-sonnet-latest',
-            max_tokens: 1000,
+            max_tokens: 64000,
             messages: [
               { role: 'user', content: prompt }
             ],
