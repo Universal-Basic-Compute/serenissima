@@ -58,8 +58,8 @@ async function fetchCitizensNeedingImages(): Promise<Citizen[]> {
               lastName: fields.LastName as string,
               description: fields.Description as string,
               imagePrompt: fields.ImagePrompt as string,
-              wealth: fields.Wealth as number,
-              createdAt: fields.CreatedAt as string
+              wealth: Number(fields.Wealth) || 0,
+              createdAt: String(fields.CreatedAt) || new Date().toISOString()
             });
           });
           
