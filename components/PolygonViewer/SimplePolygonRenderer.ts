@@ -1050,27 +1050,11 @@ export default class SimplePolygonRenderer {
   public handleMouseClick(event: MouseEvent, container: HTMLElement) {
     if (!this.camera) return;
     
-    // Check if this is a right-click and we're in transport view
+    // Check if this is a right-click
     if (event.button === 2) {
-      console.log("%c Right-click detected! Button:", "background: #ff0000; color: white; padding: 4px;", event.button);
-      console.log("Active view:", this.activeView);
-      
-      if (this.activeView === 'transport') {
-        console.log("Calling handleRightClickInTransportView");
-        // Calculate mouse position in normalized device coordinates (-1 to +1)
-        const rect = container.getBoundingClientRect();
-        this.mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-        this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-        
-        // Update the raycaster with increased precision
-        this.raycaster.setFromCamera(this.mouse, this.camera);
-        this.raycaster.params.Line.threshold = 0.1; // Increase line detection threshold
-        this.raycaster.params.Points.threshold = 0.1; // Increase point detection threshold
-        
-        // Pass the event to the handler
-        this.handleRightClickInTransportView(event);
-        return;
-      }
+      // Just prevent the context menu
+      event.preventDefault();
+      return;
     }
     
     // Calculate mouse position in normalized device coordinates (-1 to +1)
@@ -1083,6 +1067,79 @@ export default class SimplePolygonRenderer {
     this.raycaster.params.Line.threshold = 0.1; // Increase line detection threshold
     this.raycaster.params.Points.threshold = 0.1; // Increase point detection threshold
     
+    // Handle transport view clicks
+    if (this.activeView === 'transport') {
+      // Combine all markers for raycasting
+      const allMarkers = [...this.bridgePointMarkers, ...this.dockPointMarkers].filter(
+        obj => obj instanceof THREE.Mesh
+      );
+      
+      const intersects = this.raycaster.intersectObjects(allMarkers);
+      
+      if (intersects.length > 0) {
+        const intersected = intersects[0].object;
+        const userData = intersected.userData;
+        
+        if (userData && userData.id) {
+          // Extract information from the marker ID
+          // Format is typically: bridge-{polygonId}-{index} or dock-edge-{polygonId}-{index}
+          const idParts = userData.id.split('-');
+          
+          if (idParts.length >= 3) {
+            const markerType = idParts[0]; // 'bridge' or 'dock'
+            const polygonId = idParts[1];
+            const pointIndex = parseInt(idParts[2]);
+            
+            // Find the polygon
+            const polygon = this.polygons.find(p => p.id === polygonId);
+            
+            if (polygon) {
+              // Create a visual effect at the deletion point
+              this.createDeletionEffect(intersected.position.clone());
+              
+              // Remove the point from the polygon data
+              let deleted = false;
+              if (markerType === 'bridge' && polygon.bridgePoints && polygon.bridgePoints.length > pointIndex) {
+                // Remove the bridge point
+                polygon.bridgePoints.splice(pointIndex, 1);
+                deleted = true;
+              } else if (markerType === 'dock' && polygon.dockPoints && polygon.dockPoints.length > pointIndex) {
+                // Remove the dock point
+                polygon.dockPoints.splice(pointIndex, 1);
+                deleted = true;
+              }
+              
+              if (deleted) {
+                // Save the updated polygon data to the server
+                this.saveUpdatedPolygonData(polygon);
+                
+                // Refresh the transport markers
+                this.clearBridgeAndDockMarkers();
+                this.forceCreateBridgeAndDockPoints();
+                
+                // Show a tooltip
+                eventBus.emit(EventTypes.SHOW_TOOLTIP, {
+                  type: 'delete',
+                  content: `Deleted ${markerType} point`,
+                  screenX: event.clientX,
+                  screenY: event.clientY
+                });
+                
+                // Hide tooltip after a delay
+                setTimeout(() => {
+                  eventBus.emit(EventTypes.HIDE_TOOLTIP);
+                }, 2000);
+              }
+            }
+          }
+        }
+        
+        // Return early to prevent further processing
+        return;
+      }
+    }
+    
+    // Only handle land view clicks if not in transport view
     if (this.activeView !== 'land') return;
     
     // Find intersections with coat of arms sprites
@@ -1731,124 +1788,7 @@ export default class SimplePolygonRenderer {
     this.dockPointMarkers = [];
   }
   
-  // Add this new method to handle right-click deletion of transport markers
-  private handleRightClickInTransportView(event: MouseEvent) {
-    console.log("%c Right-click detected in transport view", "background: #ff5500; color: white; padding: 4px; border-radius: 4px;");
-    console.log("Mouse position:", event.clientX, event.clientY);
-    console.log("Raycaster:", this.raycaster);
-    
-    // Combine all markers for raycasting
-    const allMarkers = [...this.bridgePointMarkers, ...this.dockPointMarkers].filter(
-      obj => obj instanceof THREE.Mesh
-    );
-    
-    console.log(`Found ${allMarkers.length} potential markers for deletion`);
-    console.log("First few markers:", allMarkers.slice(0, 3));
-    
-    // Debug raycaster state
-    console.log("Raycaster origin:", this.raycaster.ray.origin);
-    console.log("Raycaster direction:", this.raycaster.ray.direction);
-    
-    const intersects = this.raycaster.intersectObjects(allMarkers);
-    console.log(`Found ${intersects.length} intersections with markers`);
-    
-    if (intersects.length > 0) {
-      const intersected = intersects[0].object;
-      const userData = intersected.userData;
-      
-      console.log("Intersected object:", intersected);
-      console.log("Intersected object userData:", userData);
-      
-      if (userData && userData.id) {
-        // Extract information from the marker ID
-        // Format is typically: bridge-{polygonId}-{index} or dock-edge-{polygonId}-{index}
-        const idParts = userData.id.split('-');
-        
-        console.log(`Parsed ID parts: ${idParts.join(', ')}`);
-        
-        if (idParts.length >= 3) {
-          const markerType = idParts[0]; // 'bridge' or 'dock'
-          const polygonId = idParts[1];
-          const pointIndex = parseInt(idParts[2]);
-          
-          console.log(`Attempting to delete ${markerType} point ${pointIndex} from polygon ${polygonId}`);
-          
-          // Find the polygon
-          const polygon = this.polygons.find(p => p.id === polygonId);
-          
-          if (polygon) {
-            console.log("Found polygon:", polygon);
-            console.log("Polygon bridge points:", polygon.bridgePoints);
-            console.log("Polygon dock points:", polygon.dockPoints);
-            
-            // Create a visual effect at the deletion point
-            this.createDeletionEffect(intersected.position.clone());
-            
-            // Remove the point from the polygon data
-            let deleted = false;
-            if (markerType === 'bridge' && polygon.bridgePoints && polygon.bridgePoints.length > pointIndex) {
-              // Remove the bridge point
-              polygon.bridgePoints.splice(pointIndex, 1);
-              console.log(`Successfully removed bridge point ${pointIndex} from polygon ${polygonId}`);
-              deleted = true;
-            } else if (markerType === 'dock' && polygon.dockPoints && polygon.dockPoints.length > pointIndex) {
-              // Remove the dock point
-              polygon.dockPoints.splice(pointIndex, 1);
-              console.log(`Successfully removed dock point ${pointIndex} from polygon ${polygonId}`);
-              deleted = true;
-            } else {
-              console.warn(`Failed to delete point - index ${pointIndex} not found in ${markerType} points array`);
-              console.log(`Bridge points length: ${polygon.bridgePoints?.length || 0}`);
-              console.log(`Dock points length: ${polygon.dockPoints?.length || 0}`);
-            }
-            
-            if (deleted) {
-              // Save the updated polygon data to the server
-              this.saveUpdatedPolygonData(polygon);
-              
-              // Refresh the transport markers
-              this.clearBridgeAndDockMarkers();
-              this.forceCreateBridgeAndDockPoints();
-              
-              // Show a tooltip
-              eventBus.emit(EventTypes.SHOW_TOOLTIP, {
-                type: 'delete',
-                content: `Deleted ${markerType} point`,
-                screenX: event.clientX,
-                screenY: event.clientY
-              });
-              
-              // Hide tooltip after a delay
-              setTimeout(() => {
-                eventBus.emit(EventTypes.HIDE_TOOLTIP);
-              }, 2000);
-            }
-          } else {
-            console.warn(`Polygon ${polygonId} not found`);
-          }
-        }
-      } else {
-        console.warn("Intersected object has no ID in userData:", userData);
-      }
-    } else {
-      console.log("No transport markers found under the cursor");
-      
-      // Debug: Show all marker positions
-      console.log("All bridge marker positions:");
-      this.bridgePointMarkers.forEach((marker, i) => {
-        if (i < 10) { // Limit to first 10 to avoid console spam
-          console.log(`  Bridge ${i}: ${marker.position.x.toFixed(2)}, ${marker.position.y.toFixed(2)}, ${marker.position.z.toFixed(2)}`);
-        }
-      });
-      
-      console.log("All dock marker positions:");
-      this.dockPointMarkers.forEach((marker, i) => {
-        if (i < 10 && marker instanceof THREE.Mesh) { // Limit to first 10 to avoid console spam
-          console.log(`  Dock ${i}: ${marker.position.x.toFixed(2)}, ${marker.position.y.toFixed(2)}, ${marker.position.z.toFixed(2)}`);
-        }
-      });
-    }
-  }
+  // This method is no longer needed as we've moved the functionality to handleMouseClick
 
   // Add this method to save the updated polygon data
   private saveUpdatedPolygonData(polygon: any) {
