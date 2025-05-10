@@ -76,13 +76,17 @@ def get_buildings_on_land(tables, land_id: str) -> List[Dict]:
     try:
         # Get buildings on this land that have a User field (owner) and a LeaseAmount
         # Use the correct field name "Land" to query buildings
-        formula = f"AND({{Land}}='{land_id}', NOT(OR({{User}} = '', {{User}} = BLANK())), NOT(OR({{LeaseAmount}} = '', {{LeaseAmount}} = BLANK()))))"
+        formula = f"AND({{Land}}='{land_id}', NOT(OR({{User}} = '', {{User}} = BLANK())), NOT(OR({{LeaseAmount}} = '', {{LeaseAmount}} = BLANK())))"
         buildings = tables['buildings'].all(formula=formula)
         
         log.info(f"Found {len(buildings)} buildings with lease amounts on land {land_id}")
         return buildings
     except Exception as e:
         log.error(f"Error fetching buildings on land {land_id}: {e}")
+        # Add more detailed error logging
+        if hasattr(e, 'response') and e.response:
+            log.error(f"Response status: {e.response.status_code}")
+            log.error(f"Response content: {e.response.text}")
         return []
 
 def find_user_by_identifier(tables, identifier: str) -> Optional[Dict]:
