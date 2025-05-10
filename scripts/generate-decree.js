@@ -209,7 +209,7 @@ async function sendTelegramNotification(decree) {
     }
     
     // Create the message text
-    const messageText = `🔰 *NEW DECREE PROPOSED* 🔰\n\n` +
+    const messageText = `🔰 *NEW DECREE* 🔰\n\n` +
       `*${decree.Title}*\n\n` +
       `*Type:* ${decree.Type}\n` +
       `*Category:* ${decree.Category} - ${decree.Subcategory}\n\n` +
