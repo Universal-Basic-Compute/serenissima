@@ -156,6 +156,29 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
         <span>Debug Buildings</span>
       </button>
       
+      <button
+        onClick={() => {
+          // Focus camera on the market stall building
+          if (camera) {
+            camera.position.set(45, 20, 12);
+            // If controls exist, update the target
+            const controls = (camera as any).userData?.controls;
+            if (controls && controls.target) {
+              controls.target.set(45, 0, 12);
+            }
+            console.log('Camera repositioned to view market stall');
+          }
+        }}
+        className="px-4 py-2 bg-blue-600 text-white rounded-md shadow-md hover:bg-blue-700 transition-colors flex items-center space-x-2"
+        title="Focus on market stall"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+          <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
+        </svg>
+        <span>Focus on Market Stall</span>
+      </button>
+      
       
       <button
         onClick={() => {
