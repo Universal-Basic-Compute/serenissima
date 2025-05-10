@@ -1,0 +1,205 @@
+#!/usr/bin/env python3
+"""
+sync_coatofarms.py - Synchronize coat of arms images from production server to local development environment
+
+This script:
+1. Connects to the Airtable database to get all users
+2. For each user with a coat of arms image, downloads the image from the production server
+3. Saves the images to the local public/coat-of-arms/ folder
+4. Creates a mapping file for quick reference
+
+Usage:
+    python sync_coatofarms.py [--dry-run]
+
+Options:
+    --dry-run    Show what would be downloaded without actually downloading
+"""
+
+import os
+import sys
+import json
+import argparse
+import requests
+import logging
+from pathlib import Path
+from urllib.parse import urlparse
+from concurrent.futures import ThreadPoolExecutor
+from typing import Dict, List, Optional, Tuple
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler(),
+        logging.FileHandler('sync_coatofarms.log')
+    ]
+)
+log = logging.getLogger('sync_coatofarms')
+
+# Constants
+PRODUCTION_URL = "https://serenissima.ai"
+LOCAL_STORAGE_PATH = Path("public/coat-of-arms")
+MAPPING_FILE = LOCAL_STORAGE_PATH / "mapping.json"
+MAX_WORKERS = 5  # Number of concurrent downloads
+
+try:
+    from pyairtable import Api
+    from pyairtable.formulas import match
+except ImportError:
+    log.error("pyairtable package is required. Install it with: pip install pyairtable")
+    sys.exit(1)
+
+def get_airtable_api():
+    """Initialize and return the Airtable API client"""
+    api_key = os.environ.get("AIRTABLE_API_KEY")
+    if not api_key:
+        log.error("AIRTABLE_API_KEY environment variable is not set")
+        sys.exit(1)
+    
+    return Api(api_key)
+
+def get_users_from_airtable(api) -> List[Dict]:
+    """Fetch all users from Airtable"""
+    base_id = os.environ.get("AIRTABLE_BASE_ID")
+    if not base_id:
+        log.error("AIRTABLE_BASE_ID environment variable is not set")
+        sys.exit(1)
+    
+    table_name = "USERS"
+    
+    try:
+        table = api.table(base_id, table_name)
+        users = table.all()
+        log.info(f"Retrieved {len(users)} users from Airtable")
+        return users
+    except Exception as e:
+        log.error(f"Error fetching users from Airtable: {e}")
+        sys.exit(1)
+
+def extract_coat_of_arms_urls(users: List[Dict]) -> Dict[str, str]:
+    """Extract coat of arms URLs from user records"""
+    coat_of_arms_map = {}
+    
+    for user in users:
+        fields = user.get('fields', {})
+        username = fields.get('user_name')
+        coat_of_arms_url = fields.get('coat_of_arms_image')
+        
+        if username and coat_of_arms_url:
+            # Ensure the URL is absolute
+            if not coat_of_arms_url.startswith(('http://', 'https://')):
+                coat_of_arms_url = f"{PRODUCTION_URL}{coat_of_arms_url if coat_of_arms_url.startswith('/') else '/' + coat_of_arms_url}"
+            
+            coat_of_arms_map[username] = coat_of_arms_url
+    
+    log.info(f"Found {len(coat_of_arms_map)} users with coat of arms images")
+    return coat_of_arms_map
+
+def download_image(url_info: Tuple[str, str, str], dry_run: bool = False) -> Optional[Dict]:
+    """Download an image from a URL and save it locally"""
+    username, url, filename = url_info
+    
+    if dry_run:
+        log.info(f"[DRY RUN] Would download {url} for user {username} to {filename}")
+        return {"username": username, "url": url, "local_path": str(filename), "success": True}
+    
+    try:
+        response = requests.get(url, timeout=30)
+        response.raise_for_status()
+        
+        with open(filename, 'wb') as f:
+            f.write(response.content)
+        
+        log.info(f"Downloaded {url} for user {username} to {filename}")
+        return {"username": username, "url": url, "local_path": str(filename), "success": True}
+    
+    except Exception as e:
+        log.error(f"Error downloading {url} for user {username}: {e}")
+        return {"username": username, "url": url, "error": str(e), "success": False}
+
+def sync_coat_of_arms(dry_run: bool = False):
+    """Main function to synchronize coat of arms images"""
+    # Create the local storage directory if it doesn't exist
+    LOCAL_STORAGE_PATH.mkdir(parents=True, exist_ok=True)
+    
+    # Get Airtable API client
+    api = get_airtable_api()
+    
+    # Get users from Airtable
+    users = get_users_from_airtable(api)
+    
+    # Extract coat of arms URLs
+    coat_of_arms_map = extract_coat_of_arms_urls(users)
+    
+    # Prepare download tasks
+    download_tasks = []
+    mapping = {}
+    
+    for username, url in coat_of_arms_map.items():
+        # Parse the URL to get the filename
+        parsed_url = urlparse(url)
+        path = parsed_url.path
+        original_filename = os.path.basename(path)
+        
+        # Create a filename that includes the username for better organization
+        # Use the original extension if available
+        ext = os.path.splitext(original_filename)[1] or '.png'
+        safe_username = username.replace(' ', '_').lower()
+        filename = LOCAL_STORAGE_PATH / f"{safe_username}{ext}"
+        
+        # Add to download tasks
+        download_tasks.append((username, url, filename))
+        
+        # Add to mapping
+        mapping[username] = {
+            "production_url": url,
+            "local_path": f"/coat-of-arms/{filename.name}"
+        }
+    
+    # Download images in parallel
+    results = []
+    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+        future_to_url = {
+            executor.submit(download_image, task, dry_run): task[0]
+            for task in download_tasks
+        }
+        
+        for future in future_to_url:
+            result = future.result()
+            if result:
+                results.append(result)
+    
+    # Save mapping file
+    if not dry_run:
+        with open(MAPPING_FILE, 'w') as f:
+            json.dump(mapping, f, indent=2)
+        log.info(f"Saved mapping file to {MAPPING_FILE}")
+    
+    # Print summary
+    successful = sum(1 for r in results if r.get('success', False))
+    failed = len(results) - successful
+    
+    log.info(f"Summary: {successful} images downloaded successfully, {failed} failed")
+    
+    if failed > 0:
+        log.warning("Some downloads failed. Check the log for details.")
+    
+    return results
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Synchronize coat of arms images from production to local development")
+    parser.add_argument("--dry-run", action="store_true", help="Show what would be downloaded without actually downloading")
+    args = parser.parse_args()
+    
+    log.info(f"Starting coat of arms synchronization {'(DRY RUN)' if args.dry_run else ''}")
+    
+    try:
+        results = sync_coat_of_arms(args.dry_run)
+        log.info("Coat of arms synchronization completed")
+    except KeyboardInterrupt:
+        log.info("Synchronization interrupted by user")
+        sys.exit(1)
+    except Exception as e:
+        log.error(f"Synchronization failed: {e}")
+        sys.exit(1)

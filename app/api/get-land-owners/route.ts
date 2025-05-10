@@ -1,10 +1,41 @@
 import { NextResponse } from 'next/server';
+import { fetchCoatOfArmsImage } from '@/app/utils/coatOfArmsUtils';
+import path from 'path';
+import fs from 'fs/promises';
 
 // Cache the land owners data with a longer expiration
 let cachedData: any = null;
 let cacheTimestamp: number = 0;
 const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes in milliseconds
 const FETCH_TIMEOUT = 15000; // Reduce timeout to 15 seconds
+
+// Path to the mapping file created by sync_coatofarms.py
+const MAPPING_FILE_PATH = path.join(process.cwd(), 'public', 'coat-of-arms', 'mapping.json');
+
+// Cache for the mapping data
+let coatOfArmsMapping: Record<string, { production_url: string, local_path: string }> | null = null;
+
+// Function to load the mapping file
+async function loadMappingFile() {
+  try {
+    // Check if the file exists
+    try {
+      await fs.access(MAPPING_FILE_PATH);
+    } catch (error) {
+      console.warn(`Coat of arms mapping file not found: ${MAPPING_FILE_PATH}`);
+      return null;
+    }
+    
+    // Read and parse the mapping file
+    const data = await fs.readFile(MAPPING_FILE_PATH, 'utf8');
+    const mapping = JSON.parse(data);
+    console.log(`Loaded coat of arms mapping with ${Object.keys(mapping).length} entries`);
+    return mapping;
+  } catch (error) {
+    console.warn(`Could not load coat of arms mapping file: ${error instanceof Error ? error.message : String(error)}`);
+    return null;
+  }
+}
 
 export async function GET(request: Request) {
   try {
@@ -28,6 +59,11 @@ export async function GET(request: Request) {
         status: 304,
         headers
       });
+    }
+    
+    // Load the coat of arms mapping if not already loaded
+    if (coatOfArmsMapping === null) {
+      coatOfArmsMapping = await loadMappingFile();
     }
     
     // Check if we have valid cached data
@@ -55,6 +91,22 @@ export async function GET(request: Request) {
       
       const data = await response.json();
       console.log(`Received ${data.length} land records from backend`);
+      
+      // Process the data to use local coat of arms images if available
+      if (coatOfArmsMapping && Array.isArray(data)) {
+        for (const land of data) {
+          if (land.owner && land.coat_of_arms_image) {
+            // Check if we have a local version of this coat of arms
+            const ownerMapping = coatOfArmsMapping[land.owner];
+            if (ownerMapping) {
+              // Replace with local path
+              land.coat_of_arms_image = ownerMapping.local_path;
+              land._coat_of_arms_source = 'local';
+            }
+          }
+        }
+        console.log('Processed land data with local coat of arms mappings');
+      }
       
       // Update the cache
       cachedData = { success: true, lands: data };

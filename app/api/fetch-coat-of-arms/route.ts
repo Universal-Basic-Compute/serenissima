@@ -1,7 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { writeFile, mkdir } from 'fs/promises';
+import { writeFile, mkdir, readFile, access } from 'fs/promises';
+import { constants } from 'fs';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
+
+// Path to the mapping file created by sync_coatofarms.py
+const MAPPING_FILE_PATH = path.join(process.cwd(), 'public', 'coat-of-arms', 'mapping.json');
+
+// Cache for the mapping data
+let coatOfArmsMapping: Record<string, { production_url: string, local_path: string }> | null = null;
+
+// Function to load the mapping file
+async function loadMappingFile() {
+  try {
+    // Check if the file exists
+    await access(MAPPING_FILE_PATH, constants.R_OK);
+    
+    // Read and parse the mapping file
+    const data = await readFile(MAPPING_FILE_PATH, 'utf8');
+    coatOfArmsMapping = JSON.parse(data);
+    console.log(`Loaded coat of arms mapping with ${Object.keys(coatOfArmsMapping).length} entries`);
+  } catch (error) {
+    console.warn(`Could not load coat of arms mapping file: ${error instanceof Error ? error.message : String(error)}`);
+    coatOfArmsMapping = null;
+  }
+}
+
+// Load the mapping file on startup
+loadMappingFile().catch(console.error);
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,7 +37,26 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No image URL provided' }, { status: 400 });
     }
     
-    // Fetch the image from the external URL
+    // Check if we have a local version of this image
+    if (coatOfArmsMapping) {
+      // Try to find the image URL in our mapping
+      const entry = Object.values(coatOfArmsMapping).find(item => 
+        item.production_url === imageUrl || 
+        imageUrl.endsWith(item.local_path)
+      );
+      
+      if (entry) {
+        console.log(`Found local coat of arms image: ${entry.local_path}`);
+        return NextResponse.json({ 
+          success: true, 
+          image_url: entry.local_path,
+          source: 'local'
+        });
+      }
+    }
+    
+    // If no local version found, fetch from the external URL
+    console.log(`Fetching coat of arms from external URL: ${imageUrl}`);
     const response = await fetch(imageUrl, {
       headers: {
         // You might need to add headers to mimic a browser request
@@ -50,7 +95,8 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json({ 
       success: true, 
-      image_url: publicPath
+      image_url: publicPath,
+      source: 'remote'
     });
   } catch (error) {
     console.error('Error fetching coat of arms:', error);
