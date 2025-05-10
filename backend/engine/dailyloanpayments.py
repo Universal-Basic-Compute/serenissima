@@ -76,9 +76,9 @@ def find_user_by_identifier(tables, identifier: str) -> Optional[Dict]:
     log.info(f"Looking up user: {identifier}")
     
     # Handle known misspellings
-    if identifier == "ConsiglioDeiDeici":
+    if identifier == "ConsiglioDeiDieci":
         identifier = "ConsiglioDeiDieci"
-        log.info(f"Corrected misspelled identifier from ConsiglioDeiDeici to {identifier}")
+        log.info(f"Corrected misspelled identifier from ConsiglioDeiDieci to {identifier}")
     
     try:
         # First try to find by username
