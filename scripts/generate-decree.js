@@ -178,7 +178,7 @@ async function createDecreeNotifications(decree) {
         User: user.id, // Use user ID directly instead of array
         Content: notificationContent,
         Details: JSON.stringify(notificationDetails),
-        IsRead: false,
+        ReadAt: null,
         CreatedAt: new Date().toISOString()
       });
     });
