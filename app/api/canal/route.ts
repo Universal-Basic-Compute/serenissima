@@ -4,6 +4,37 @@ import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import { exec } from 'child_process';
 
+// Helper function to calculate canal length
+function calculateCanalLength(points: any[]): number {
+  if (!points || points.length < 2) return 0;
+  
+  let totalLength = 0;
+  
+  for (let i = 0; i < points.length - 1; i++) {
+    const p1 = points[i].position || points[i];
+    const p2 = points[i + 1].position || points[i + 1];
+    
+    // Extract coordinates, handling different possible formats
+    const x1 = p1.x || p1.lng || 0;
+    const y1 = p1.y || p1.lat || 0;
+    const z1 = p1.z || 0;
+    
+    const x2 = p2.x || p2.lng || 0;
+    const y2 = p2.y || p2.lat || 0;
+    const z2 = p2.z || 0;
+    
+    // Calculate Euclidean distance between points
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    const dz = z2 - z1;
+    
+    const segmentLength = Math.sqrt(dx * dx + dy * dy + dz * dz);
+    totalLength += segmentLength;
+  }
+  
+  return totalLength;
+}
+
 // Define the data directory
 const dataDir = path.join(process.cwd(), 'data', 'canals');
 
@@ -88,7 +119,7 @@ export async function POST(request: Request) {
     // Generate a unique ID if not provided
     const canalId = body.id || `canal-${uuidv4()}`;
     
-    // Create the new canal
+    // Create the new canal with improved properties
     const newCanal = {
       id: canalId,
       points: body.points,
@@ -100,7 +131,14 @@ export async function POST(request: Request) {
       // Store which points are transfer points
       transferPointIndices: body.points
         .map((point: any, index: number) => point.isTransferPoint ? index : null)
-        .filter((index: number | null) => index !== null)
+        .filter((index: number | null) => index !== null),
+      // Add metadata for better organization
+      metadata: {
+        pointCount: body.points.length,
+        totalLength: calculateCanalLength(body.points),
+        isCurved: (body.curvature || 0.5) > 0,
+        hasTransferPoints: body.points.some((p: any) => p.isTransferPoint)
+      }
     };
     
     // Add the new canal to the data

@@ -103,19 +103,25 @@ export class CanalFacade {
     // Merge default options with provided options
     const mergedOptions = { ...this.defaultOptions, ...options };
 
-    // Create a curve from the points
-    const curve = this.createCurveFromPoints(points);
+    // Create a curve from the points with curvature parameter
+    const curve = this.createCurveFromPoints(points, mergedOptions.curvature);
+    
+    // Calculate segments based on points and curvature
+    const curveSegments = Math.max(
+      points.length * 10,
+      Math.floor(20 + (points.length - 2) * 10 * (mergedOptions.curvature || 0.5))
+    );
     
     // Create the road geometry
     const geometry = new THREE.TubeGeometry(
       curve,
-      points.length * 10, // Segments along the curve
+      curveSegments, // More segments for smoother curves
       mergedOptions.width! / 2, // Radius
       mergedOptions.segments!, // Radial segments
       false // Closed
     );
 
-    // Create water material
+    // Create water material with improved appearance
     const material = new THREE.MeshStandardMaterial({
       color: mergedOptions.color,
       transparent: true,
@@ -144,6 +150,23 @@ export class CanalFacade {
         }
       });
     }
+    
+    // Also create markers for points marked as transfer points
+    points.forEach((point, index) => {
+      if (point.isTransferPoint) {
+        const transferPoint = {
+          id: `transfer-point-${id}-${index}`,
+          position: point.position,
+          connectedRoadIds: [id],
+          createdAt: new Date().toISOString()
+        };
+        
+        const marker = this.createTransferPointMarker(transferPoint, id);
+        if (marker) {
+          transferPointMarkers.push(marker);
+        }
+      }
+    });
     
     // Store the canal
     this.canals.set(id, {
@@ -356,12 +379,76 @@ export class CanalFacade {
    * @param points Array of points
    * @returns THREE.Curve
    */
-  private createCurveFromPoints(points: CanalPoint[]): THREE.Curve<THREE.Vector3> {
+  private createCurveFromPoints(points: CanalPoint[], curvature: number = 0.5): THREE.Curve<THREE.Vector3> {
     // Extract Vector3 positions from points
     const positions = points.map(p => p.position);
     
-    // Create a catmull-rom spline curve
-    return new THREE.CatmullRomCurve3(positions, false, 'centripetal');
+    if (curvature <= 0) {
+      // For straight lines, use a LineCurve3 for each segment and combine them
+      if (positions.length === 2) {
+        return new THREE.LineCurve3(positions[0], positions[1]);
+      } else {
+        // Create a custom curve that combines multiple line segments
+        return new THREE.CurvePath<THREE.Vector3>().add(
+          ...Array.from({ length: positions.length - 1 }, (_, i) => 
+            new THREE.LineCurve3(positions[i], positions[i + 1])
+          )
+        );
+      }
+    } else if (curvature >= 1) {
+      // Maximum curvature - use catmull-rom with 'chordal' tension
+      return new THREE.CatmullRomCurve3(positions, false, 'chordal');
+    } else {
+      // Intermediate curvature - use catmull-rom with 'centripetal' tension
+      // and adjust the number of points based on curvature
+      const curve = new THREE.CatmullRomCurve3(positions, false, 'centripetal');
+      
+      // For lower curvature values, we can reduce the curve's influence
+      // by interpolating between the original points and the curve points
+      if (curvature < 0.8) {
+        const originalPoints = [...positions];
+        const curvePoints = curve.getPoints(positions.length * 10);
+        
+        // Create a custom set of points that blend between straight lines and curves
+        const blendedPoints: THREE.Vector3[] = [];
+        
+        // For each original segment, blend between straight and curved
+        for (let i = 0; i < originalPoints.length - 1; i++) {
+          const start = originalPoints[i];
+          const end = originalPoints[i + 1];
+          
+          // Add the start point
+          blendedPoints.push(start.clone());
+          
+          // Find curve points that fall within this segment
+          const segmentStart = i * 10;
+          const segmentEnd = (i + 1) * 10;
+          
+          // Add intermediate points with blending
+          for (let j = segmentStart + 1; j < segmentEnd; j++) {
+            if (j < curvePoints.length) {
+              const curvePoint = curvePoints[j];
+              const straightPoint = new THREE.Vector3().lerpVectors(start, end, (j - segmentStart) / 10);
+              
+              // Blend between straight and curved based on curvature value
+              const blendedPoint = new THREE.Vector3().lerpVectors(
+                straightPoint, curvePoint, curvature
+              );
+              
+              blendedPoints.push(blendedPoint);
+            }
+          }
+        }
+        
+        // Add the final point
+        blendedPoints.push(originalPoints[originalPoints.length - 1].clone());
+        
+        // Create a new curve from the blended points
+        return new THREE.CatmullRomCurve3(blendedPoints, false, 'centripetal');
+      }
+      
+      return curve;
+    }
   }
 
   /**

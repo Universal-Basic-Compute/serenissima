@@ -3,12 +3,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { CanalFacade, CanalPoint } from '@/lib/threejs/CanalFacade';
+import { FaTrash, FaInfoCircle, FaPlus } from 'react-icons/fa';
 
 interface CanalCreatorProps {
   scene: THREE.Scene;
   camera: THREE.PerspectiveCamera;
   active: boolean;
-  onComplete: (roadId: string, points: CanalPoint[]) => void;
+  onComplete: (roadId: string, points: CanalPoint[], transferPointsData?: any[]) => void;
   onCancel: () => void;
 }
 
@@ -23,18 +24,24 @@ const CanalCreator: React.FC<CanalCreatorProps> = ({
   useEffect(() => {
     console.log('CanalCreator component active state:', active);
   }, [active]);
+  
+  // State for canal properties
   const [points, setPoints] = useState<CanalPoint[]>([]);
-  const [width, setWidth] = useState<number>(2);
+  const [width, setWidth] = useState<number>(3);
   const [depth, setDepth] = useState<number>(1);
   const [color, setColor] = useState<string>('#3366ff');
+  const [curvature, setCurvature] = useState<number>(0.5);
   const [previewRoadId, setPreviewRoadId] = useState<string | null>(null);
   const [previewPoint, setPreviewPoint] = useState<THREE.Vector3 | null>(null);
   const [transferPoints, setTransferPoints] = useState<boolean[]>([]);
+  const [showHelp, setShowHelp] = useState<boolean>(false);
   
+  // Refs for Three.js objects
   const canalFacadeRef = useRef<CanalFacade | null>(null);
   const raycasterRef = useRef<THREE.Raycaster>(new THREE.Raycaster());
   const mouseRef = useRef<THREE.Vector2>(new THREE.Vector2());
   const planeRef = useRef<THREE.Mesh | null>(null);
+  const pathHelperRef = useRef<THREE.Line | null>(null);
   
   // Initialize canal facade
   useEffect(() => {
@@ -66,6 +73,15 @@ const CanalCreator: React.FC<CanalCreatorProps> = ({
           planeRef.current.geometry.dispose();
           planeRef.current.material.dispose();
         }
+        if (pathHelperRef.current) {
+          scene.remove(pathHelperRef.current);
+          pathHelperRef.current.geometry.dispose();
+          if (pathHelperRef.current.material instanceof THREE.Material) {
+            pathHelperRef.current.material.dispose();
+          } else if (Array.isArray(pathHelperRef.current.material)) {
+            pathHelperRef.current.material.forEach(m => m.dispose());
+          }
+        }
       };
     }
   }, [scene, camera]);
@@ -87,13 +103,14 @@ const CanalCreator: React.FC<CanalCreatorProps> = ({
           width,
           depth,
           color: new THREE.Color(color).getHex(),
-          opacity: 0.7 // More transparent for preview
+          opacity: 0.7, // More transparent for preview
+          curvature: curvature // Add curvature parameter
         }
       );
       
       setPreviewRoadId(roadId);
     }
-  }, [active, points, width, depth, color]);
+  }, [active, points, width, depth, color, curvature]);
   
   // Clean up preview when component unmounts or becomes inactive
   useEffect(() => {
@@ -103,6 +120,75 @@ const CanalCreator: React.FC<CanalCreatorProps> = ({
       }
     };
   }, [previewRoadId]);
+  
+  // Create and update path helper line
+  useEffect(() => {
+    if (!active || !scene || points.length < 1) {
+      // Remove existing path helper if it exists
+      if (pathHelperRef.current) {
+        scene.remove(pathHelperRef.current);
+        pathHelperRef.current = null;
+      }
+      return;
+    }
+    
+    // Create points for the path helper
+    const pathPoints = points.map(p => p.position);
+    
+    // Add preview point if it exists
+    if (previewPoint) {
+      pathPoints.push(previewPoint);
+    }
+    
+    // Create or update path helper
+    if (pathPoints.length >= 2) {
+      // Create geometry for the path
+      const geometry = new THREE.BufferGeometry().setFromPoints(pathPoints);
+      
+      // Create or update the line
+      if (pathHelperRef.current) {
+        // Update existing line
+        scene.remove(pathHelperRef.current);
+        pathHelperRef.current.geometry.dispose();
+        
+        const material = new THREE.LineBasicMaterial({
+          color: new THREE.Color(color).getHex(),
+          linewidth: 2,
+          opacity: 0.7,
+          transparent: true,
+          depthTest: false
+        });
+        
+        pathHelperRef.current = new THREE.Line(geometry, material);
+        pathHelperRef.current.position.y += 0.2; // Position above water
+        scene.add(pathHelperRef.current);
+      } else {
+        // Create new line
+        const material = new THREE.LineBasicMaterial({
+          color: new THREE.Color(color).getHex(),
+          linewidth: 2,
+          opacity: 0.7,
+          transparent: true,
+          depthTest: false
+        });
+        
+        pathHelperRef.current = new THREE.Line(geometry, material);
+        pathHelperRef.current.position.y += 0.2; // Position above water
+        scene.add(pathHelperRef.current);
+      }
+    }
+    
+    return () => {
+      if (pathHelperRef.current) {
+        scene.remove(pathHelperRef.current);
+        pathHelperRef.current.geometry.dispose();
+        if (pathHelperRef.current.material instanceof THREE.Material) {
+          pathHelperRef.current.material.dispose();
+        }
+        pathHelperRef.current = null;
+      }
+    };
+  }, [active, scene, points, previewPoint, color]);
   
   // Add a useEffect to create and update the preview circle
   useEffect(() => {
@@ -186,24 +272,6 @@ const CanalCreator: React.FC<CanalCreatorProps> = ({
         intersectionPoint.y,
         intersectionPoint.z
       ));
-      
-      // Update the last point in the preview if we have at least one point
-      if (points.length > 0 && previewRoadId && canalFacadeRef.current) {
-        const updatedPoints = [...points.slice(0, -1), {
-          position: new THREE.Vector3(
-            intersectionPoint.x,
-            intersectionPoint.y,
-            intersectionPoint.z
-          ),
-          width,
-          depth
-        }];
-        
-        canalFacadeRef.current.updateCanal(
-          previewRoadId,
-          updatedPoints
-        );
-      }
     }
   };
   
@@ -288,29 +356,76 @@ const CanalCreator: React.FC<CanalCreatorProps> = ({
   const handleRemoveLastPoint = () => {
     if (points.length > 0) {
       setPoints(prevPoints => prevPoints.slice(0, -1));
+      setTransferPoints(prev => prev.slice(0, -1));
     }
+  };
+  
+  // Handle removing a specific point
+  const handleRemovePoint = (index: number) => {
+    setPoints(prevPoints => prevPoints.filter((_, i) => i !== index));
+    setTransferPoints(prev => prev.filter((_, i) => i !== index));
+  };
+  
+  // Toggle transfer point status
+  const toggleTransferPoint = (index: number) => {
+    setTransferPoints(prev => {
+      const newTransferPoints = [...prev];
+      newTransferPoints[index] = !newTransferPoints[index];
+      
+      // Also update the point in the points array
+      setPoints(prevPoints => {
+        const newPoints = [...prevPoints];
+        newPoints[index] = {
+          ...newPoints[index],
+          isTransferPoint: newTransferPoints[index]
+        };
+        return newPoints;
+      });
+      
+      return newTransferPoints;
+    });
   };
   
   if (!active) return null;
   
   return (
-    <div className="absolute top-20 left-20 right-4 z-10 bg-black/70 text-white p-4 rounded-lg">
-      <h3 className="text-xl font-serif mb-4">Create Canal</h3>
+    <div className="absolute top-20 left-20 right-4 z-10 bg-black/70 text-white p-4 rounded-lg max-h-[80vh] overflow-y-auto">
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-xl font-serif">Create Canal</h3>
+        <button
+          onClick={() => setShowHelp(!showHelp)}
+          className="p-2 text-amber-400 hover:text-amber-300 transition-colors"
+          title="Show help"
+        >
+          <FaInfoCircle />
+        </button>
+      </div>
+      
+      {showHelp && (
+        <div className="mb-4 bg-amber-900/30 p-3 rounded border border-amber-700/50 text-sm">
+          <h4 className="font-medium text-amber-300 mb-2">Creating Realistic Canals</h4>
+          <ul className="list-disc pl-5 space-y-1 text-amber-100">
+            <li>Click on the map to add points along your canal path</li>
+            <li>Add multiple points to create curved, realistic canals</li>
+            <li>Hold <kbd className="px-1.5 py-0.5 bg-gray-700 rounded text-xs">Shift</kbd> while clicking to mark a point as a transfer point</li>
+            <li>Adjust the curvature slider to make your canal more natural</li>
+            <li>You can remove individual points from the point list below</li>
+          </ul>
+        </div>
+      )}
       
       <div className="mb-4">
-        <p className="text-sm mb-2">
-          Click on the map to place points for your canal. Add at least 2 points.
-        </p>
-        <div className="flex flex-wrap gap-4 mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <div className="flex flex-col">
             <label className="text-sm mb-1">Width</label>
             <input
               type="range"
               min="0.5"
               max="10"
+              step="0.5"
               value={width}
               onChange={(e) => setWidth(Number(e.target.value))}
-              className="w-32"
+              className="w-full"
             />
             <span className="text-xs mt-1">{width} meters</span>
           </div>
@@ -324,31 +439,113 @@ const CanalCreator: React.FC<CanalCreatorProps> = ({
               step="0.1"
               value={depth}
               onChange={(e) => setDepth(Number(e.target.value))}
-              className="w-32"
+              className="w-full"
             />
             <span className="text-xs mt-1">{depth} meters</span>
           </div>
           
           <div className="flex flex-col">
-            <label className="text-sm mb-1">Color</label>
+            <label className="text-sm mb-1">Curvature</label>
             <input
-              type="color"
-              value={color}
-              onChange={(e) => setColor(e.target.value)}
-              className="w-32 h-8"
+              type="range"
+              min="0"
+              max="1"
+              step="0.05"
+              value={curvature}
+              onChange={(e) => setCurvature(Number(e.target.value))}
+              className="w-full"
             />
+            <span className="text-xs mt-1">
+              {curvature === 0 ? 'Straight lines' : 
+               curvature < 0.3 ? 'Slight curves' :
+               curvature < 0.7 ? 'Natural curves' : 'Pronounced curves'}
+            </span>
+          </div>
+          
+          <div className="flex flex-col">
+            <label className="text-sm mb-1">Color</label>
+            <div className="flex items-center space-x-2">
+              <input
+                type="color"
+                value={color}
+                onChange={(e) => setColor(e.target.value)}
+                className="w-10 h-8"
+              />
+              <select 
+                className="flex-1 bg-gray-800 border border-gray-600 rounded px-2 py-1 text-sm"
+                onChange={(e) => setColor(e.target.value)}
+                value={color}
+              >
+                <option value="#3366ff">Canal Blue</option>
+                <option value="#0088cc">Deep Water</option>
+                <option value="#66aaff">Light Blue</option>
+                <option value="#006633">Venetian Green</option>
+                <option value="#004466">Navy Blue</option>
+              </select>
+            </div>
           </div>
         </div>
         
-        <div className="flex items-center gap-2 text-sm">
-          <span>Points: {points.length}</span>
-          {points.length > 0 && (
-            <button
-              onClick={handleRemoveLastPoint}
-              className="px-2 py-1 bg-red-600 hover:bg-red-700 rounded text-xs"
-            >
-              Remove Last Point
-            </button>
+        {/* Points list with ability to remove individual points */}
+        <div className="mt-4">
+          <div className="flex justify-between items-center mb-2">
+            <h4 className="text-sm font-medium">Canal Points ({points.length})</h4>
+            {points.length > 0 && (
+              <button
+                onClick={handleRemoveLastPoint}
+                className="px-2 py-1 bg-red-600 hover:bg-red-700 rounded text-xs flex items-center"
+              >
+                <FaTrash className="mr-1" size={10} />
+                Remove Last
+              </button>
+            )}
+          </div>
+          
+          {points.length > 0 ? (
+            <div className="max-h-40 overflow-y-auto bg-black/30 rounded border border-gray-700 p-1">
+              {points.map((point, index) => (
+                <div 
+                  key={index} 
+                  className={`flex justify-between items-center p-1.5 text-xs mb-1 rounded ${
+                    transferPoints[index] ? 'bg-amber-900/40 border border-amber-700/50' : 'bg-gray-800/60'
+                  }`}
+                >
+                  <div className="flex items-center">
+                    <span className="font-mono bg-gray-700 px-1.5 rounded mr-2">
+                      {index + 1}
+                    </span>
+                    <span className="text-gray-300">
+                      {point.position.x.toFixed(1)}, {point.position.z.toFixed(1)}
+                    </span>
+                    {transferPoints[index] && (
+                      <span className="ml-2 text-amber-400 text-xs">Transfer Point</span>
+                    )}
+                  </div>
+                  <div className="flex space-x-1">
+                    <button
+                      onClick={() => toggleTransferPoint(index)}
+                      className={`p-1 rounded ${
+                        transferPoints[index] ? 'bg-amber-600 hover:bg-amber-700' : 'bg-gray-600 hover:bg-gray-700'
+                      }`}
+                      title={transferPoints[index] ? "Remove transfer point" : "Mark as transfer point"}
+                    >
+                      <FaPlus size={10} className={transferPoints[index] ? "rotate-45" : ""} />
+                    </button>
+                    <button
+                      onClick={() => handleRemovePoint(index)}
+                      className="p-1 bg-red-600 hover:bg-red-700 rounded"
+                      title="Remove point"
+                    >
+                      <FaTrash size={10} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-3 text-gray-400 text-sm italic bg-black/30 rounded border border-gray-700">
+              Click on the map to add canal points
+            </div>
           )}
         </div>
       </div>
