@@ -31,16 +31,92 @@ if (!fs.existsSync(path.dirname(CITIZENS_DATA_PATH))) {
   fs.mkdirSync(path.dirname(CITIZENS_DATA_PATH), { recursive: true });
 }
 
-// Load existing citizens or create empty array
-function loadExistingCitizens(): Citizen[] {
+// Load citizens from Airtable
+async function loadCitizensFromAirtable(): Promise<Citizen[]> {
   try {
+    console.log('Loading existing citizens from Airtable...');
+    
+    // Verify we have the API key (without showing it in logs)
+    if (!process.env.AIRTABLE_API_KEY) {
+      throw new Error('AIRTABLE_API_KEY environment variable is not set');
+    }
+    
+    const citizens: Citizen[] = [];
+    
+    // Fetch records from Airtable with pagination
+    await new Promise((resolve, reject) => {
+      base('CITIZENS').select({
+        // Optionally specify fields to retrieve
+        // fields: ['CitizenId', 'SocialClass', 'FirstName', 'LastName', 'Description', 'ImagePrompt', 'Wealth', 'CreatedAt'],
+        // Optionally specify a view
+        // view: "Grid view"
+      }).eachPage(
+        function page(records, fetchNextPage) {
+          // Process each page of records
+          records.forEach(record => {
+            const fields = record.fields;
+            citizens.push({
+              id: fields.CitizenId || record.id,
+              socialClass: fields.SocialClass as 'Patrician' | 'Cittadini' | 'Popolani' | 'Laborer',
+              firstName: fields.FirstName,
+              lastName: fields.LastName,
+              description: fields.Description,
+              imagePrompt: fields.ImagePrompt,
+              wealth: fields.Wealth,
+              createdAt: fields.CreatedAt,
+              imageUrl: fields.ImageUrl
+            });
+          });
+          
+          // Get the next page of records
+          fetchNextPage();
+        },
+        function done(err) {
+          if (err) {
+            console.error('Error loading citizens from Airtable:', err);
+            reject(err);
+            return;
+          }
+          
+          console.log(`Successfully loaded ${citizens.length} citizens from Airtable`);
+          resolve(citizens);
+        }
+      );
+    });
+    
+    return citizens;
+  } catch (error) {
+    console.error('Error in loadCitizensFromAirtable:', error);
+    // Return empty array on error, so we can fall back to local file
+    return [];
+  }
+}
+
+// Load existing citizens or create empty array
+async function loadExistingCitizens(): Promise<Citizen[]> {
+  try {
+    // First try to load from Airtable
+    const airtableCitizens = await loadCitizensFromAirtable();
+    
+    if (airtableCitizens.length > 0) {
+      console.log(`Loaded ${airtableCitizens.length} citizens from Airtable`);
+      return airtableCitizens;
+    }
+    
+    // Fall back to local file if Airtable loading failed or returned empty
+    console.log('No citizens found in Airtable or error occurred, falling back to local file...');
+    
     if (fs.existsSync(CITIZENS_DATA_PATH)) {
       const data = fs.readFileSync(CITIZENS_DATA_PATH, 'utf8');
-      return JSON.parse(data);
+      const localCitizens = JSON.parse(data);
+      console.log(`Loaded ${localCitizens.length} citizens from local file`);
+      return localCitizens;
     }
   } catch (error) {
     console.error('Error loading existing citizens:', error);
   }
+  
+  console.log('No existing citizens found, starting fresh');
   return [];
 }
 
@@ -277,7 +353,7 @@ function generateUniqueId(): string {
 // Main function to generate citizens
 async function generateCitizens(batchCount: number = 1): Promise<void> {
   try {
-    const existingCitizens = loadExistingCitizens();
+    const existingCitizens = await loadExistingCitizens();
     console.log(`Loaded ${existingCitizens.length} existing citizens`);
     
     let newCitizens: Citizen[] = [];
