@@ -50,27 +50,29 @@ export class BuildingPositionManager {
       return new THREE.Vector3(0, height, 0);
     }
     
+    // FIXED: Use a more appropriate scale factor for Venice
+    // 1 degree of longitude at Venice's latitude is about 111km * cos(latitude)
+    // We want to scale to scene units where 1 unit is about 1 meter
+    // So we use a scale of 111000 * cos(latitude) meters per degree
+    const cosLat = Math.cos(this.bounds.centerLat * Math.PI / 180);
+    const scale = 111000 * cosLat; // meters per degree of longitude at this latitude
+    
     // Calculate relative position from center
-    const x = (position.lng - this.bounds.centerLng) * this.bounds.scale;
-    const z = -(position.lat - this.bounds.centerLat) * this.bounds.scale * this.bounds.latCorrectionFactor;
+    const x = (position.lng - this.bounds.centerLng) * scale;
+    const z = -(position.lat - this.bounds.centerLat) * scale;
     
     // Even after all our checks, if we still get extreme values, clamp them
     // This is a last resort safety measure
     const MAX_COORDINATE = 500; // Maximum allowed coordinate value
     if (Math.abs(x) > MAX_COORDINATE || Math.abs(z) > MAX_COORDINATE) {
-      console.error(`Extreme position values calculated despite validation: (${x}, ${height}, ${z}).`);
-      console.error(`Input coordinates: lat=${position.lat}, lng=${position.lng}`);
-      console.error(`Input type: lat=${typeof position.lat}, lng=${typeof position.lng}`);
-      console.error(`Input values: ${JSON.stringify(position)}`);
-      console.error(`Calculation: x = (${position.lng} - ${this.bounds.centerLng}) * ${this.bounds.scale}`);
-      console.error(`Calculation: z = -(${position.lat} - ${this.bounds.centerLat}) * ${this.bounds.scale} * ${this.bounds.latCorrectionFactor}`);
-      console.error(`Center coordinates: (${this.bounds.centerLat}, ${this.bounds.centerLng})`);
-      console.error(`Scale: ${this.bounds.scale}, Correction factor: ${this.bounds.latCorrectionFactor}`);
+      console.warn(`Large position values calculated: (${x.toFixed(2)}, ${height}, ${z.toFixed(2)})`);
+      console.warn(`Input coordinates: lat=${position.lat}, lng=${position.lng}`);
+      console.warn(`Using scale: ${scale.toFixed(2)} (instead of ${this.bounds.scale})`);
       
       // Clamp to a reasonable range as a last resort
       const clampedX = Math.max(-MAX_COORDINATE, Math.min(MAX_COORDINATE, x));
       const clampedZ = Math.max(-MAX_COORDINATE, Math.min(MAX_COORDINATE, z));
-      console.error(`Clamped position: (${clampedX}, ${height}, ${clampedZ})`);
+      console.warn(`Clamped position: (${clampedX.toFixed(2)}, ${height}, ${clampedZ.toFixed(2)})`);
       return new THREE.Vector3(clampedX, height, clampedZ);
     }
     
