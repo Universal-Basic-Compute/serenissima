@@ -819,6 +819,12 @@ export default class SimplePolygonRenderer {
         this.scene.userData.renderer.render(this.scene, this.camera);
       }
       
+      // Dispatch an event to ensure building markers remain visible
+      if (typeof window !== 'undefined') {
+        console.log('Dispatching ensureBuildingsVisible event');
+        window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
+      }
+      
       console.log(`Created ${this.buildingPointMarkers.length} building point markers for buildings view`);
     } else {
       // Hide coat of arms sprites, bridge/dock points, and building points in other views

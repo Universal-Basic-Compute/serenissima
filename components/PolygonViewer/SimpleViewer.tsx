@@ -424,6 +424,16 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
         console.log('Creating transport markers after initialization');
         polygonRendererRef.current.forceCreateBridgeAndDockPoints();
       }
+      
+      // Also ensure building markers are visible if in buildings view
+      if (activeView === 'buildings' && polygonRendererRef.current) {
+        console.log('Ensuring building markers are visible after initialization');
+        polygonRendererRef.current.createBuildingPoints();
+        polygonRendererRef.current.forceShowBuildingMarkers();
+        
+        // Force a scene update
+        renderer.render(scene, cameraController.camera);
+      }
     }, 1000); // Delay by 1 second to ensure everything else is loaded
     
     // Cleanup
@@ -524,6 +534,27 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
         console.warn('No polygons available to check for bridge/dock points');
       }
     }
+    
+    // Add a handler for ensuring building markers are visible
+    const handleEnsureBuildingsVisible = () => {
+      console.log('Received ensureBuildingsVisible event');
+      if (polygonRendererRef.current && activeView === 'buildings') {
+        // Force building markers to be visible
+        polygonRendererRef.current.forceShowBuildingMarkers();
+        console.log('Forced building markers to be visible');
+      }
+    };
+    
+    window.addEventListener('ensureBuildingsVisible', handleEnsureBuildingsVisible);
+    
+    // If we're in buildings view, dispatch the event immediately
+    if (activeView === 'buildings') {
+      window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
+    }
+    
+    return () => {
+      window.removeEventListener('ensureBuildingsVisible', handleEnsureBuildingsVisible);
+    };
   }, [activeView, polygons]);
   
   
@@ -644,6 +675,8 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
         content = `Dock Edge Point\nPolygon: ${data.polygonId}\nPosition: ${data.position}`;
       } else if (data.type === 'dock-water') {
         content = `Dock Water Point\nPolygon: ${data.polygonId}\nPosition: ${data.position}`;
+      } else if (data.type === 'building-point') {
+        content = `Building Point\nPolygon: ${data.polygonId}\nPosition: ${data.position}`;
       } else if (data.type === 'delete') {
         // Handle the new delete tooltip type
         content = data.content || 'Deleting transport point...';
