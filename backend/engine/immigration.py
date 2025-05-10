@@ -116,7 +116,7 @@ def save_citizen_to_airtable(tables, citizen: Dict) -> Optional[Dict]:
         return None
 
 def generate_citizen_image(citizen_id: str, image_prompt: str) -> bool:
-    """Generate an image for the citizen using the generateCitizenImages.ts script."""
+    """Generate an image for the citizen using the generate_citizen_images.py script."""
     log.info(f"Generating image for citizen {citizen_id}")
     
     try:
@@ -127,28 +127,37 @@ def generate_citizen_image(citizen_id: str, image_prompt: str) -> bool:
                 "imagePrompt": image_prompt
             }, f)
         
-        # Check if the script exists before trying to run it
-        script_path = "scripts/generateCitizenImages.js"
-        if not os.path.exists(script_path):
-            # Try the TypeScript version if JavaScript version doesn't exist
-            script_path = "scripts/generateCitizenImages.ts"
-            if not os.path.exists(script_path):
-                log.warning(f"Citizen image generation script not found at {script_path}")
+        # Import the generate_citizen_images module
+        try:
+            # First try to import directly
+            sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+            from generate_citizen_images import process_specific_citizen, initialize_airtable
+            
+            # Initialize Airtable
+            tables = initialize_airtable()
+            
+            # Process the citizen
+            success = process_specific_citizen(tables, citizen_id, image_prompt)
+            
+            log.info(f"Generated image for citizen {citizen_id} with result: {success}")
+            return success
+        except ImportError:
+            # Fall back to subprocess if import fails
+            log.info("Falling back to subprocess for image generation")
+            
+            # Call the Python script to generate the image
+            result = subprocess.run(
+                ["python", "engine/generate_citizen_images.py", "--citizen-id", citizen_id],
+                capture_output=True,
+                text=True
+            )
+            
+            if result.returncode != 0:
+                log.error(f"Error generating citizen image: {result.stderr}")
                 return False
-        
-        # Call the Node.js script to generate the image
-        result = subprocess.run(
-            ["node", script_path, "1", "--citizen-id", citizen_id],
-            capture_output=True,
-            text=True
-        )
-        
-        if result.returncode != 0:
-            log.error(f"Error generating citizen image: {result.stderr}")
-            return False
-        
-        log.info(f"Successfully generated image for citizen {citizen_id}")
-        return True
+            
+            log.info(f"Successfully generated image for citizen {citizen_id}")
+            return True
     except Exception as e:
         log.error(f"Error generating citizen image: {e}")
         return False

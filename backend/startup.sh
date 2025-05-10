@@ -51,9 +51,10 @@ else
     echo "Housing homeless citizens cron job already exists. No changes made."
 fi
 
-# Make citizen generator executable
+# Make citizen generator and image generator executable
 chmod +x engine/citizen_generator.py
-echo "Made citizen_generator.py executable"
+chmod +x engine/generate_citizen_images.py
+echo "Made citizen_generator.py and generate_citizen_images.py executable"
 
 # Add cron job for immigration
 if ! grep -q "immigration.py" "$TEMP_CRONTAB"; then
