@@ -1304,7 +1304,7 @@ export default class SimplePolygonRenderer {
           marker => marker.userData && marker.userData.citizenId === this.hoveredCitizenId
         );
         
-        if (prevHovered && prevHovered instanceof THREE.Mesh<THREE.BufferGeometry, THREE.Material | THREE.Material[]>) {
+        if (prevHovered) {
           // Reset scale
           prevHovered.scale.set(1, 1, 1);
         }
@@ -1318,15 +1318,17 @@ export default class SimplePolygonRenderer {
         const intersected = intersects[0].object;
         if (intersected.userData && intersected.userData.type === 'citizen') {
           const citizenId = intersected.userData.citizenId;
-          
+        
           if (citizenId && citizenId !== this.selectedCitizenId) {
             this.hoveredCitizenId = citizenId;
-            
+          
             // Scale up slightly
-            intersected.scale.set(1.2, 1.2, 1.2);
-            
+            if (intersected instanceof THREE.Object3D) {
+              intersected.scale.set(1.2, 1.2, 1.2);
+            }
+          
             document.body.style.cursor = 'pointer';
-            
+          
             // Emit hover event
             eventBus.emit('CITIZEN_HOVER', {
               citizenId,
@@ -1348,7 +1350,7 @@ export default class SimplePolygonRenderer {
           obj => obj instanceof THREE.Mesh
         );
         
-        const intersects = this.raycaster.intersectObjects(allMarkers);
+        const intersects = this.raycaster.intersectObjects(allMarkers as THREE.Object3D[]);
         
         if (intersects.length > 0) {
           const intersected = intersects[0].object;
@@ -1880,7 +1882,7 @@ export default class SimplePolygonRenderer {
 
   // Helper method to highlight/unhighlight a coat of arms
   private setCoatOfArmsHighlight(object: THREE.Object3D | null, highlight: boolean) {
-    if (object && object instanceof THREE.Mesh<THREE.BufferGeometry, THREE.Material | THREE.Material[]>) {
+    if (object && object instanceof THREE.Mesh) {
       // Store original scale if not already stored
       if (!object.userData.originalScale && highlight) {
         object.userData.originalScale = object.scale.clone();
