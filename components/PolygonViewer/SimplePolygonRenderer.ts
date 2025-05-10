@@ -12,6 +12,7 @@ interface Polygon {
   id: string;
   coordinates: {lat: number, lng: number}[];
   centroid?: {lat: number, lng: number};
+  center?: {lat: number, lng: number}; // Added center property
   bridgePoints?: any[];
   dockPoints?: any[];
   buildingPoints?: any[];
