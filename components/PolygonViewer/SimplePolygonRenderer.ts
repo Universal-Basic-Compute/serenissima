@@ -760,7 +760,7 @@ export default class SimplePolygonRenderer {
     console.log(`Found ${landMeshes.length} potential land meshes for ground level detection`);
     
     // Find intersections with land
-    const intersects = raycaster.intersectObjects(landMeshes as THREE.Object3D[], true); // true to check descendants
+    const intersects = raycaster.intersectObjects(landMeshes, true); // true to check descendants
     
     // Log intersection results for debugging
     if (intersects.length > 0) {
@@ -1390,8 +1390,8 @@ export default class SimplePolygonRenderer {
           const hoveredPoint = [...this.bridgePointMarkers, ...this.dockPointMarkers].find(
             marker => marker instanceof THREE.Mesh && marker.userData && marker.userData.id === this.hoveredPointId
           );
-      
-          if (hoveredPoint && hoveredPoint instanceof THREE.Mesh<THREE.BufferGeometry, THREE.Material | THREE.Material[]>) {
+  
+          if (hoveredPoint && hoveredPoint instanceof THREE.Mesh) {
             // Restore original material if available
             if (hoveredPoint.userData.originalMaterial) {
               hoveredPoint.material = hoveredPoint.userData.originalMaterial;
@@ -1537,13 +1537,13 @@ export default class SimplePolygonRenderer {
         if (intersected.userData && intersected.userData.type === 'citizen') {
           const citizenId = intersected.userData.citizenId;
           const citizenData = intersected.userData.data;
-          
+        
           // Deselect previous selection
           if (this.selectedCitizenId) {
             const prevSelected = this.citizenMarkers.find(
               marker => marker.userData && marker.userData.citizenId === this.selectedCitizenId
             );
-            
+          
             if (prevSelected) {
               // Reset scale to original social class scale
               const scaleMultiplier = this.getSocialClassScaleMultiplier(
