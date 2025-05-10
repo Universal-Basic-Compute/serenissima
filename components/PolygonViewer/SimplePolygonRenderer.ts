@@ -451,12 +451,12 @@ export default class SimplePolygonRenderer {
    * Create a circular coat of arms sprite
    */
   private createCircularCoatOfArms(polygon: any, coatOfArmsUrl: string) {
-    if (!polygon.centroid) return;
+    if (!polygon.center) return;
     
-    // Always use centroid for positioning
-    const positionCoord = polygon.centroid;
+    // Always use center for positioning
+    const positionCoord = polygon.center;
     
-    // Convert centroid to 3D position
+    // Convert center to 3D position
     const normalizedCoord = normalizeCoordinates(
       [positionCoord],
       this.bounds.centerLat,
