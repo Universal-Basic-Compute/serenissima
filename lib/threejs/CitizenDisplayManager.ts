@@ -57,6 +57,9 @@ export class CitizenDisplayManager {
   public async initialize(): Promise<void> {
     console.log('Initializing CitizenDisplayManager');
     
+    // Check citizen images directory
+    this.checkCitizenImagesDirectory();
+    
     // Load citizens
     await this.loadCitizens();
     
@@ -73,6 +76,25 @@ export class CitizenDisplayManager {
     this.subscribeToEvents();
     
     console.log(`Initialized with ${this.citizens.length} citizens in ${this.citizenGroups.size} groups`);
+  }
+  
+  /**
+   * Check if the citizen images directory exists
+   */
+  private checkCitizenImagesDirectory(): void {
+    // Check if the citizen images directory exists
+    fetch('/images/citizens/default.png')
+      .then(response => {
+        if (!response.ok) {
+          console.warn('Citizen images directory may not exist or default.png is missing');
+          console.warn('Make sure you have created the directory /public/images/citizens/ and added citizen images');
+        } else {
+          console.log('Citizen images directory exists');
+        }
+      })
+      .catch(error => {
+        console.error('Error checking citizen images directory:', error);
+      });
   }
   
   /**
