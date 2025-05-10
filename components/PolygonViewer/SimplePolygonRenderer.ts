@@ -2445,11 +2445,11 @@ export default class SimplePolygonRenderer {
       return;
     }
     
-    // Create a material for building points - make them transparent white instead of bright red
+    // Create a material for building points - make them more transparent and a different color
     const buildingPointMaterial = new THREE.MeshBasicMaterial({
       color: 0xFFFFFF, // White color for building points
       transparent: true,
-      opacity: 0.6  // More transparent
+      opacity: 0.4  // More transparent (changed from 0.6)
     });
     
     // Process each polygon
@@ -2473,12 +2473,12 @@ export default class SimplePolygonRenderer {
           
           console.log(`Normalized coordinates for point ${index}:`, normalizedCoord);
           
-          // Create a sphere for better visibility
-          const geometry = new THREE.SphereGeometry(0.4, 12, 12); // Slightly smaller than 0.5
+          // Create a smaller sphere for better visibility
+          const geometry = new THREE.SphereGeometry(0.25, 12, 12); // Smaller size (changed from 0.4)
           
           const marker = new THREE.Mesh(geometry, buildingPointMaterial);
-          // Position at ground level
-          marker.position.set(normalizedCoord.x, 0.2, -normalizedCoord.y);
+          // Position closer to the ground level
+          marker.position.set(normalizedCoord.x, 0.05, -normalizedCoord.y);
           marker.renderOrder = 100;
           
           // Add metadata for tooltips
@@ -2492,7 +2492,7 @@ export default class SimplePolygonRenderer {
           this.scene.add(marker);
           this.buildingPointMarkers.push(marker);
           
-          console.log(`Created building point marker at position: ${normalizedCoord.x}, 0.2, ${-normalizedCoord.y}`);
+          console.log(`Created building point marker at position: ${normalizedCoord.x}, 0.05, ${-normalizedCoord.y}`);
         } catch (error) {
           console.error(`Error creating building point for polygon ${polygon.id}:`, error);
         }
@@ -2525,6 +2525,11 @@ export default class SimplePolygonRenderer {
     this.buildingPointMarkers.forEach(marker => {
       marker.visible = true;
       marker.renderOrder = 2000; // High render order to ensure visibility
+      
+      // Ensure consistent appearance
+      if (marker instanceof THREE.Mesh && marker.material instanceof THREE.MeshBasicMaterial) {
+        marker.material.opacity = 0.4; // Match the opacity from createBuildingPoints
+      }
     });
     
     console.log(`Made ${this.buildingPointMarkers.length} building points visible`);
