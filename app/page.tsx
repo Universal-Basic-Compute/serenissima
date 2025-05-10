@@ -41,9 +41,10 @@ declare global {
     dispatchEvent(event: Event): boolean;
     __polygonData?: any[];
     __threeContext?: {
-      scene: THREE.Scene;
-      camera: THREE.PerspectiveCamera;
-      renderer: THREE.WebGLRenderer;
+      scene?: THREE.Scene;
+      camera?: THREE.Camera;
+      renderer?: THREE.WebGLRenderer;
+      controls?: any;
     };
     __isClientNavigation?: boolean;
     __directNavigation?: boolean;
@@ -52,7 +53,7 @@ declare global {
   // Add custom properties to HTMLCanvasElement
   interface HTMLCanvasElement {
     __scene?: THREE.Scene;
-    __camera?: THREE.PerspectiveCamera;
+    __camera?: THREE.Camera;
     __renderer?: THREE.WebGLRenderer;
   }
 }
