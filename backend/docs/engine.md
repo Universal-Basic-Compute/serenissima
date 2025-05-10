@@ -6,6 +6,26 @@ This document explains the automated processes that occur daily in the La Sereni
 
 The game engine runs several automated processes at scheduled times throughout the day to simulate the living economy of Renaissance Venice. These processes occur without requiring player intervention.
 
+### Treasury Redistribution (8:00 AM UTC)
+
+**Script**: `backend/engine/treasuryRedistribution.py`
+
+Every day at 8:00 AM UTC, the treasury redistribution system allocates funds from the Consiglio dei Dieci to citizens:
+
+1. The script calculates 10% of the ConsiglioDeiDieci's ComputeAmount to redistribute
+2. This amount is distributed to citizens based on social class:
+   - 40% to Patricians
+   - 30% to Cittadini
+   - 20% to Popolani
+   - 10% to Facchini
+3. Within each social class, the funds are distributed equally among all citizens
+4. Transaction records are created for all payments
+5. Notifications are sent to:
+   - Each citizen receiving funds
+   - Administrators with statistics about the redistribution
+
+This process simulates the Republic's welfare system, providing a basic income to citizens while maintaining the social hierarchy of Renaissance Venice.
+
 ### Lease Distribution (9:00 AM UTC)
 
 **Script**: `backend/engine/distributeLeases.py`

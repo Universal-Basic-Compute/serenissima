@@ -140,6 +140,18 @@ else
     echo "Daily rent payments cron job already exists. No changes made."
 fi
 
+# Add cron job for treasury redistribution
+if ! grep -q "treasuryRedistribution.py" "$TEMP_CRONTAB"; then
+    # Add the cron job to run at 8am UTC daily
+    echo "0 8 * * * cd $REPO_PATH && python3 engine/treasuryRedistribution.py >> $REPO_PATH/treasury_redistribution_cron.log 2>&1" >> "$TEMP_CRONTAB"
+    
+    # Install the new crontab
+    crontab "$TEMP_CRONTAB"
+    echo "Cron job installed successfully. Treasury redistribution will run daily at 8am UTC."
+else
+    echo "Treasury redistribution cron job already exists. No changes made."
+fi
+
 # Add cron job for lease distribution
 if ! grep -q "distributeLeases.py" "$TEMP_CRONTAB"; then
     # Add the cron job to run at 9am UTC daily
