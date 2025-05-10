@@ -24,13 +24,17 @@ export async function POST(request: Request) {
       );
     }
     
-    // Update the bridge and dock points
+    // Update the bridge, dock, and building points
     if (data.bridgePoints !== undefined) {
       existingData.bridgePoints = data.bridgePoints;
     }
     
     if (data.dockPoints !== undefined) {
       existingData.dockPoints = data.dockPoints;
+    }
+    
+    if (data.buildingPoints !== undefined) {
+      existingData.buildingPoints = data.buildingPoints;
     }
     
     // Save the updated data

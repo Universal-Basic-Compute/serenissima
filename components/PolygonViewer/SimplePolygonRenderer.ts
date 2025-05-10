@@ -1313,7 +1313,95 @@ export default class SimplePolygonRenderer {
       }
     }
     
-    // Only handle land view clicks if not in transport view
+    // Handle building view clicks
+    if (this.activeView === 'buildings') {
+      console.log(`In buildings view, checking for marker intersections`);
+      
+      // Get all building markers for raycasting
+      const buildingMarkers = this.buildingPointMarkers.filter(
+        obj => obj instanceof THREE.Mesh
+      );
+      
+      console.log(`Found ${buildingMarkers.length} building markers to check for intersection`);
+      
+      const intersects = this.raycaster.intersectObjects(buildingMarkers);
+      
+      console.log(`Found ${intersects.length} intersections`);
+      
+      if (intersects.length > 0) {
+        const intersected = intersects[0].object;
+        const userData = intersected.userData;
+        
+        console.log("Intersected object userData:", userData);
+        
+        if (userData && userData.id) {
+          // Extract information from the marker ID
+          // Format is typically: building-point-{polygonId}-{index}
+          const idParts = userData.id.split('-');
+          
+          console.log(`ID parts: ${idParts.join(', ')}`);
+          
+          if (idParts.length >= 4 && idParts[0] === 'building' && idParts[1] === 'point') {
+            // Get polygon ID and point index
+            const polygonId = idParts.slice(2, idParts.length - 1).join('-');
+            const pointIndex = parseInt(idParts[idParts.length - 1]);
+            
+            console.log(`Attempting to delete building point ${pointIndex} from polygon ${polygonId}`);
+            
+            // Find the polygon
+            const polygon = this.polygons.find(p => p.id === polygonId);
+            
+            if (polygon) {
+              console.log("Found polygon:", polygon.id);
+              
+              // Create a visual effect at the deletion point
+              this.createDeletionEffect(intersected.position.clone());
+              
+              // Remove the point from the polygon data
+              if (polygon.buildingPoints && polygon.buildingPoints.length > pointIndex) {
+                // Remove the building point
+                polygon.buildingPoints.splice(pointIndex, 1);
+                console.log(`Successfully removed building point ${pointIndex} from polygon ${polygonId}`);
+                
+                // Save the updated polygon data to the server
+                this.saveUpdatedPolygonData(polygon);
+                
+                // Refresh the building markers
+                this.clearBuildingPointMarkers();
+                this.createBuildingPoints();
+                
+                // Show a tooltip
+                eventBus.emit(EventTypes.SHOW_TOOLTIP, {
+                  type: 'delete',
+                  content: `Deleted building point`,
+                  screenX: event.clientX,
+                  screenY: event.clientY
+                });
+                
+                // Hide tooltip after a delay
+                setTimeout(() => {
+                  eventBus.emit(EventTypes.HIDE_TOOLTIP);
+                }, 2000);
+              } else {
+                console.warn(`Failed to delete point - index ${pointIndex} not found in building points array`);
+                console.log(`Building points length: ${polygon.buildingPoints?.length || 0}`);
+              }
+            } else {
+              console.warn(`Polygon ${polygonId} not found`);
+            }
+          }
+          
+          // Return early to prevent further processing
+          return;
+        } else {
+          console.warn("Intersected object has no ID in userData:", userData);
+        }
+      } else {
+        console.log("No intersections found with building markers");
+      }
+    }
+    
+    // Only handle land view clicks if not in transport or buildings view
     if (this.activeView !== 'land') return;
     
     // Find intersections with coat of arms sprites
@@ -2193,12 +2281,14 @@ export default class SimplePolygonRenderer {
   private saveUpdatedPolygonData(polygon: any) {
     console.log(`Saving updated polygon data for ${polygon.id}:`, {
       bridgePointsCount: polygon.bridgePoints?.length || 0,
-      dockPointsCount: polygon.dockPoints?.length || 0
+      dockPointsCount: polygon.dockPoints?.length || 0,
+      buildingPointsCount: polygon.buildingPoints?.length || 0
     });
     console.log("Full polygon data being sent:", JSON.stringify({
       id: polygon.id,
       bridgePoints: polygon.bridgePoints,
-      dockPoints: polygon.dockPoints
+      dockPoints: polygon.dockPoints,
+      buildingPoints: polygon.buildingPoints
     }, null, 2));
 
     // Create a request to save the updated polygon data
@@ -2210,7 +2300,8 @@ export default class SimplePolygonRenderer {
       body: JSON.stringify({
         id: polygon.id,
         bridgePoints: polygon.bridgePoints,
-        dockPoints: polygon.dockPoints
+        dockPoints: polygon.dockPoints,
+        buildingPoints: polygon.buildingPoints
       }),
     })
     .then(response => {
@@ -2221,13 +2312,13 @@ export default class SimplePolygonRenderer {
       return response.json();
     })
     .then(data => {
-      console.log('%c Transport point deleted successfully! ', 
+      console.log('%c Building point deleted successfully! ', 
         'background: #4CAF50; color: white; padding: 4px; border-radius: 4px;');
       console.log('Server response:', data);
       
       // Display a temporary on-screen notification
       const notification = document.createElement('div');
-      notification.textContent = 'Transport point deleted';
+      notification.textContent = 'Building point deleted';
       notification.style.position = 'fixed';
       notification.style.bottom = '20px';
       notification.style.right = '20px';
@@ -2247,12 +2338,12 @@ export default class SimplePolygonRenderer {
     })
     .catch(error => {
       console.error('Error updating polygon data:', error);
-      console.log('%c Error deleting transport point! ', 
+      console.log('%c Error deleting building point! ', 
         'background: #F44336; color: white; padding: 4px; border-radius: 4px;');
       
       // Display an error notification
       const notification = document.createElement('div');
-      notification.textContent = 'Error deleting transport point';
+      notification.textContent = 'Error deleting building point';
       notification.style.position = 'fixed';
       notification.style.bottom = '20px';
       notification.style.right = '20px';
