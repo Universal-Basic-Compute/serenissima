@@ -3,6 +3,15 @@ import { getWalletAddress } from '../walletUtils';
 import { getApiBaseUrl } from '../apiUtils';
 import { eventBus, EventTypes } from '../eventBus';
 
+// Add missing event types
+declare module '../eventBus' {
+  interface EventTypes {
+    RESOURCE_ADDED: string;
+    RESOURCE_REMOVED: string;
+    SHOW_RESOURCE_DETAILS: string;
+  }
+}
+
 export interface ResourceDisplayOptions {
   scene: THREE.Scene;
   camera: THREE.PerspectiveCamera;
