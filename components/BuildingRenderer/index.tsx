@@ -129,30 +129,40 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
     // Log the incoming position for debugging
     console.log('Normalizing position:', position);
     
-    // For the market stall specifically, don't transform the coordinates
-    // This is a special case for this particular building
-    if (position.x === 45.42623684734749 && position.z === 12.33922034185465) {
-      console.log('Special case: Market stall coordinates - using as is');
-      return new THREE.Vector3(position.x, position.y || 0, position.z);
-    }
-    
     // Check if these are lat/lng coordinates (Venice is around 45.4, 12.3)
     if (position.x >= 40 && position.x <= 50 && 
         (position.z >= 10 && position.z <= 20 || 
          (typeof position.lng === 'number' && position.lng >= 10 && position.lng <= 20))) {
       
       // These appear to be Venice lat/lng coordinates
-      // Get the z/longitude value from the appropriate property
-      const longitude = position.z || position.lng || 0;
+      // We need to transform them to Three.js world coordinates
       
-      // Return the coordinates directly without transformation for lat/lng coordinates
-      // This ensures buildings appear at their exact specified positions
-      return new THREE.Vector3(position.x, position.y || 0, position.z);
+      // Get the bounds from the scene if available
+      const canvas = document.querySelector('canvas');
+      const bounds = canvas?.__scene?.userData?.bounds;
+      
+      if (bounds) {
+        // Use the same transformation as in SimplePolygonRenderer
+        const normalizedX = (position.x - bounds.centerLat) * bounds.scale;
+        const normalizedZ = -(position.z - bounds.centerLng) * bounds.scale * bounds.latCorrectionFactor;
+        
+        console.log('Transformed lat/lng coordinates to world coordinates:', {
+          x: normalizedX,
+          y: position.y || 0.1, // Slightly above ground
+          z: normalizedZ
+        });
+        
+        return new THREE.Vector3(normalizedX, position.y || 0.1, normalizedZ);
+      }
+      
+      // If bounds not available, use a simple offset to place near origin
+      console.log('No bounds available, using simple offset for lat/lng coordinates');
+      return new THREE.Vector3(0, position.y || 0.1, 0);
     }
     
-    // Return original position if not lat/lng
-    console.log('Using original coordinates:', position);
-    return new THREE.Vector3(position.x, position.y || 0, position.z);
+    // For coordinates that are already in world space, use them directly
+    console.log('Using original coordinates (assumed to be world coordinates):', position);
+    return new THREE.Vector3(position.x, position.y || 0.1, position.z);
   };
 
   // Function to render a building
@@ -246,10 +256,11 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
             const model = gltf.scene;
             
             // Position and rotate the model
-            // Use the exact position values but place slightly above the ground
-            model.position.set(position.x, 0.1, position.z); // Set Y to 0.1 to place slightly above ground
+            // Use the normalized position values and place slightly above the ground
+            const normalizedPosition = normalizeCoordinates(position);
+            model.position.copy(normalizedPosition);
             model.rotation.y = rotation || 0;
-            console.log(`Positioned model slightly above ground level: x=${position.x}, y=0.1, z=${position.z}`);
+            console.log(`Positioned model at normalized coordinates: x=${normalizedPosition.x}, y=${normalizedPosition.y}, z=${normalizedPosition.z}`);
             
             // Calculate bounding box to properly scale the model
             const box = new THREE.Box3().setFromObject(model);
@@ -338,7 +349,8 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
     const fallbackMesh = new THREE.Mesh(geometry, material);
     
     // Position and rotate the fallback - place slightly above the ground
-    fallbackMesh.position.set(position.x, 0.1, position.z); // Set Y to 0.1 to place slightly above ground
+    const normalizedPosition = normalizeCoordinates(position);
+    fallbackMesh.position.copy(normalizedPosition);
     fallbackMesh.rotation.y = rotation || 0;
     
     // Make the fallback mesh much larger for better visibility

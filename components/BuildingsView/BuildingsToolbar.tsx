@@ -174,14 +174,14 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
           
           console.log('Creating debug building');
           
-          // Create a visible box at a specific position
+          // Create a visible box at the origin
           const geometry = new THREE.BoxGeometry(2, 2, 2);
           const material = new THREE.MeshBasicMaterial({ 
             color: 0xff0000,
             wireframe: true
           });
           const debugBox = new THREE.Mesh(geometry, material);
-          debugBox.position.set(45.42623684734749, 5, 12.33922034185465);
+          debugBox.position.set(0, 0.1, 0);
           scene.add(debugBox);
           console.log('Added debug box at position:', debugBox.position);
           
@@ -191,7 +191,7 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
             color: 0x00ff00
           });
           const debugSphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
-          debugSphere.position.set(45.42623684734749, 7, 12.33922034185465);
+          debugSphere.position.set(0, 2, 0);
           scene.add(debugSphere);
           console.log('Added debug sphere at position:', debugSphere.position);
           
@@ -201,9 +201,9 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
             type: 'market-stall',
             land_id: 'polygon-1746052711032',
             position: { 
-              x: 45.42623684734749, 
-              y: 5, 
-              z: 12.33922034185465 
+              x: 0, 
+              y: 0.1, 
+              z: 0 
             },
             rotation: 0,
             created_by: 'ConsiglioDeiDieci',
@@ -238,22 +238,22 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
             if (actualCamera) {
               console.log('Repositioning camera to view market stall');
               
-              // Set camera position to look at the market stall coordinates
-              // Position camera closer to the market stall
-              actualCamera.position.set(45.42623684734749 + 10, 10, 12.33922034185465 + 10);
+              // Set camera position to look at the origin (where market stall should be)
+              // Position camera at a good viewing angle
+              actualCamera.position.set(10, 10, 10);
               
               // Get the orbit controls
               const controls = actualCamera.userData?.controls;
               if (controls && controls.target) {
-                // Set the target to the market stall position
-                controls.target.set(45.42623684734749, 5, 12.33922034185465);
+                // Set the target to the origin
+                controls.target.set(0, 0, 0);
                 controls.update();
                 console.log('Camera controls updated to target market stall');
               } else {
                 // If we can't find controls on the camera, try to find them on the scene
                 const sceneControls = scene?.userData?.controls;
                 if (sceneControls) {
-                  sceneControls.target.set(45.42623684734749, 5, 12.33922034185465);
+                  sceneControls.target.set(0, 0, 0);
                   sceneControls.update();
                   console.log('Scene controls updated to target market stall');
                 } else {
@@ -262,7 +262,7 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
                   if (canvasElement) {
                     const canvasControls = (canvasElement as any).__controls;
                     if (canvasControls) {
-                      canvasControls.target.set(45.42623684734749, 5, 12.33922034185465);
+                      canvasControls.target.set(0, 0, 0);
                       canvasControls.update();
                       console.log('Canvas controls updated to target market stall');
                     }
@@ -281,9 +281,9 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
               
               console.log('Camera repositioned to:', actualCamera.position);
               console.log('Looking at market stall position:', {
-                x: 45.42623684734749,
-                y: 5,
-                z: 12.33922034185465
+                x: 0,
+                y: 0,
+                z: 0
               });
             } else {
               console.warn('Could not find camera to reposition');
@@ -322,8 +322,8 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
               
               // If no buildings found, use the market stall position
               if (buildings.length === 0) {
-                actualCamera.position.set(45.42623684734749 + 10, 15, 12.33922034185465 + 10);
-                actualCamera.lookAt(45.42623684734749, 5, 12.33922034185465);
+                actualCamera.position.set(10, 15, 10);
+                actualCamera.lookAt(0, 0, 0);
               } else {
                 // Calculate the center of all buildings
                 const center = new THREE.Vector3();
@@ -392,9 +392,9 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
             type: 'market-stall',
             land_id: 'polygon-1746052711032',
             position: { 
-              x: 45.42623684734749, 
-              y: 5, // Set Y to 5 units above water level
-              z: 12.33922034185465 
+              x: 0, // Use world coordinates (0,0,0) for origin
+              y: 0.1, // Slightly above ground
+              z: 0 
             },
             rotation: 0,
             created_by: 'ConsiglioDeiDieci',
