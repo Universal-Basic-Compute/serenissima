@@ -16,14 +16,8 @@ async function getBuildingTypesAndVariants() {
     // Check if buildings directory exists
     if (!fs.existsSync(BUILDINGS_DIR)) {
       console.warn(`Buildings directory not found at ${BUILDINGS_DIR}`);
-      // Create a default set of building types
-      return [
-        { type: 'market-stall', variants: ['model'] },
-        { type: 'house', variants: ['small', 'medium', 'large'] },
-        { type: 'workshop', variants: ['carpenter', 'blacksmith', 'tailor'] },
-        { type: 'warehouse', variants: ['small', 'medium', 'large'] },
-        { type: 'church', variants: ['small', 'medium', 'large'] }
-      ];
+      // Return an error instead of creating default building types
+      throw new Error('Buildings directory not found. Cannot proceed without building types.');
     }
 
     const buildingTypes = [];
@@ -53,23 +47,16 @@ async function getBuildingTypesAndVariants() {
       }
     }
     
-    // If no building types were found (only index.json exists), use default types
+    // If no building types were found (only index.json exists), throw an error
     if (buildingTypes.length === 0) {
-      console.warn('No building type files found, using default types');
-      return [
-        { type: 'market-stall', variants: ['model'] },
-        { type: 'house', variants: ['small', 'medium', 'large'] },
-        { type: 'workshop', variants: ['carpenter', 'blacksmith', 'tailor'] },
-        { type: 'warehouse', variants: ['small', 'medium', 'large'] },
-        { type: 'church', variants: ['small', 'medium', 'large'] }
-      ];
+      throw new Error('No building type files found. Cannot proceed without building types.');
     }
     
     console.log(`Found ${buildingTypes.length} building types`);
     return buildingTypes;
   } catch (error) {
     console.error('Error getting building types:', error);
-    return [];
+    throw error; // Re-throw the error to be handled by the caller
   }
 }
 
@@ -182,9 +169,7 @@ async function main() {
   try {
     // Get building types and variants
     const buildingTypes = await getBuildingTypesAndVariants();
-    if (buildingTypes.length === 0) {
-      throw new Error('No building types found');
-    }
+    // No need to check length here as getBuildingTypesAndVariants now throws an error if no types found
     
     // Get polygons with building points
     const polygons = await getPolygonsWithBuildingPoints();
