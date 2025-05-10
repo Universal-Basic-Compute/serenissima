@@ -433,6 +433,62 @@ const BuildingOwnersGuideArticle: React.FC<BuildingOwnersGuideArticleProps> = ({
             </div>
           </div>
           
+          <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
+            <h4 className="text-xl font-serif text-amber-800 mb-2">Citizen Housing Mobility</h4>
+            
+            <p className="mb-3">
+              Understanding how citizens make housing decisions is crucial for maintaining stable rental income:
+            </p>
+            
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="bg-amber-50 p-3 rounded border border-amber-200">
+                <h5 className="font-bold text-amber-900 mb-1">Social Class Mobility Patterns</h5>
+                <p className="text-sm">
+                  Different social classes have different propensities to change housing:
+                  <br />• <span className="font-medium">Patricians</span> are the least likely to move, valuing stability and prestige
+                  <br />• <span className="font-medium">Cittadini</span> occasionally seek better value while maintaining status
+                  <br />• <span className="font-medium">Popolani</span> regularly evaluate housing costs against their income
+                  <br />• <span className="font-medium">Facchini</span> are the most price-sensitive and frequently seek cheaper options
+                </p>
+              </div>
+              
+              <div className="bg-amber-50 p-3 rounded border border-amber-200">
+                <h5 className="font-bold text-amber-900 mb-1">Rent Sensitivity Thresholds</h5>
+                <p className="text-sm">
+                  Citizens will only move if they find significantly cheaper housing:
+                  <br />• <span className="font-medium">Patricians</span> require the largest discount to consider moving
+                  <br />• <span className="font-medium">Cittadini</span> need a moderate discount to justify relocation
+                  <br />• <span className="font-medium">Popolani</span> will move for a smaller but still meaningful discount
+                  <br />• <span className="font-medium">Facchini</span> will relocate even for modest savings
+                </p>
+              </div>
+              
+              <div className="bg-amber-50 p-3 rounded border border-amber-200">
+                <h5 className="font-bold text-amber-900 mb-1">Wealth-Based Prioritization</h5>
+                <p className="text-sm">
+                  When multiple citizens are seeking housing, those with lower wealth are prioritized in finding affordable options. This creates a natural sorting mechanism where the poorest citizens find the cheapest appropriate housing first, while wealthier citizens have more options but face more competition for premium properties.
+                </p>
+              </div>
+              
+              <div className="bg-amber-50 p-3 rounded border border-amber-200">
+                <h5 className="font-bold text-amber-900 mb-1">Strategic Pricing Implications</h5>
+                <p className="text-sm">
+                  This mobility system has important implications for your rental strategy:
+                  <br />• Setting rents too high increases vacancy risk as tenants find cheaper alternatives
+                  <br />• Modest discounts below market rate can attract and retain tenants from higher-priced properties
+                  <br />• Premium properties must justify their cost through location, amenities, or prestige
+                  <br />• Different pricing strategies work for different social classes and building types
+                </p>
+              </div>
+            </div>
+            
+            <div className="mt-4 bg-amber-50 p-3 rounded border border-amber-200">
+              <p className="italic text-amber-800">
+                <span className="font-bold">Strategic Insight:</span> The most profitable strategy is often to price slightly below competitors targeting the same social class. This keeps your properties fully occupied while properties with higher rents experience more vacancies and tenant turnover.
+              </p>
+            </div>
+          </div>
+          
           <h3 className="text-2xl font-serif text-amber-700 mb-4">Maximizing Building Income</h3>
           
           <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
