@@ -60,15 +60,15 @@ const Compagno: React.FC<CompagnoProps> = ({ className }) => {
       // Get the current username or use default
       const userToFetch = username || DEFAULT_USERNAME;
       
-      // Use a more reliable API URL structure
-      const apiUrl = `${process.env.NEXT_PUBLIC_API_URL || ''}/api/notifications`;
+      // Use the local API endpoint
+      const apiUrl = `/api/notifications`;
       
       console.log(`Fetching notifications from: ${apiUrl}`);
       
       const response = await fetch(
         apiUrl,
         {
-          method: 'POST', // Change to POST to avoid URL parameter issues
+          method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
@@ -138,7 +138,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className }) => {
   // Mark notifications as read
   const markNotificationsAsRead = async (notificationIds: string[]) => {
     try {
-      const apiUrl = `${process.env.NEXT_PUBLIC_API_URL || ''}/api/notifications/mark-read`;
+      const apiUrl = `/api/notifications/mark-read`;
       
       console.log(`Marking notifications as read at: ${apiUrl}`);
       
