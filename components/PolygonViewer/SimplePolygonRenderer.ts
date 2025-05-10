@@ -2440,7 +2440,9 @@ export default class SimplePolygonRenderer {
             
             console.log(`Created bridge marker at position: ${normalizedCoord.x}, 0.2, ${-normalizedCoord.y}`);
           } catch (error) {
-            console.error(`Error creating bridge point for polygon ${polygon.id}:`, error);
+            if (error instanceof Error) {
+              console.error(`Error creating bridge point for polygon ${polygon.id}:`, error);
+            }
           }
         });
       }
@@ -2479,7 +2481,9 @@ export default class SimplePolygonRenderer {
             
             console.log(`Created dock marker at position: ${edgeCoord.x}, 0.2, ${-edgeCoord.y}`);
           } catch (error) {
-            console.error(`Error creating dock point for polygon ${polygon.id}:`, error);
+            if (error instanceof Error) {
+              console.error(`Error creating dock point for polygon ${polygon.id}:`, error);
+            }
           }
         });
       }
