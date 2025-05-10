@@ -66,8 +66,10 @@ export async function POST(request: Request) {
       position: position
     }, null, 2));
     
-    // Normalize the building type (preserve apostrophes)
-    const normalizedType = data.type.toLowerCase().replace(/\s+/g, '-');
+    // Normalize the building type
+    const normalizedType = data.type.toLowerCase()
+      .replace(/'/g, '-') // Replace apostrophes with hyphens
+      .replace(/\s+/g, '-'); // Replace spaces with hyphens
     
     // Create a record in Airtable - ensure position is stored as a string
     const record = await new Promise((resolve, reject) => {
