@@ -3363,11 +3363,54 @@ export default class SimplePolygonRenderer {
    * Find the shortest path between two nodes in a graph using A* algorithm
    * This is now more of a pathfinder than just a shortest path calculator
    */
-  private findShortestPath(graph: Record<string, string[]>, start: string, end: string): string[] {
+  private findShortestPath(start: string, end: string): string[] {
+    console.log(`Finding shortest path from ${start} to ${end}`);
+    
     // If start and end are the same, return just that node
     if (start === end) {
+      console.log(`Start and end are the same (${start}), returning single-node path`);
       return [start];
     }
+    
+    // Build a graph from the polygon bridge connections
+    const graph: Record<string, string[]> = {};
+    
+    // Initialize the graph with empty adjacency lists
+    this.polygons.forEach(polygon => {
+      graph[polygon.id] = [];
+    });
+    
+    // Add bridge connections to the graph
+    console.log(`Building graph from polygon bridge connections`);
+    this.polygons.forEach(polygon => {
+      if (polygon.bridgePoints && Array.isArray(polygon.bridgePoints)) {
+        console.log(`Processing ${polygon.bridgePoints.length} bridge points for polygon ${polygon.id}`);
+        
+        polygon.bridgePoints.forEach((bridgePoint, index) => {
+          if (bridgePoint.connection && bridgePoint.connection.targetPolygonId) {
+            const targetPolygonId = bridgePoint.connection.targetPolygonId;
+            
+            // Verify that the target polygon exists
+            const targetPolygon = this.polygons.find(p => p.id === targetPolygonId);
+            if (!targetPolygon) {
+              console.warn(`Bridge from ${polygon.id} points to non-existent polygon ${targetPolygonId}`);
+              return;
+            }
+            
+            // Add connection if not already present
+            if (!graph[polygon.id].includes(targetPolygonId)) {
+              graph[polygon.id].push(targetPolygonId);
+              console.log(`Added connection: ${polygon.id} → ${targetPolygonId}`);
+            }
+          }
+        });
+      } else {
+        console.log(`Polygon ${polygon.id} has no bridge points`);
+      }
+    });
+    
+    // Log the graph for debugging
+    console.log(`Graph built with ${Object.keys(graph).length} nodes`);
     
     // Priority queue for A* - stores nodes with their priority (f-score)
     const openSet: {id: string, fScore: number}[] = [];
@@ -3399,6 +3442,7 @@ export default class SimplePolygonRenderer {
     
     // Add start node to the open set
     openSet.push({id: start, fScore: fScore[start]});
+    console.log(`Starting A* search with initial node ${start}, fScore: ${fScore[start]}`);
     
     // While there are nodes to explore
     while (openSet.length > 0) {
@@ -3407,32 +3451,46 @@ export default class SimplePolygonRenderer {
       
       // Get the node with the lowest f-score
       const current = openSet.shift()!.id;
+      console.log(`Exploring node ${current} with gScore: ${gScore[current]}, fScore: ${fScore[current]}`);
       
       // If we've reached the end, reconstruct and return the path
       if (current === end) {
-        return this.reconstructPath(cameFrom, current);
+        console.log(`Reached destination ${end}, reconstructing path`);
+        const path = this.reconstructPath(cameFrom, current);
+        console.log(`Path found: ${path.join(' → ')}`);
+        return path;
       }
       
       // Mark current as visited
       closedSet.add(current);
+      console.log(`Added ${current} to closed set`);
       
       // Check all neighbors of current
-      for (const neighbor of graph[current] || []) {
+      const neighbors = graph[current] || [];
+      console.log(`Node ${current} has ${neighbors.length} neighbors: ${neighbors.join(', ')}`);
+      
+      for (const neighbor of neighbors) {
         // Skip if we've already visited this neighbor
-        if (closedSet.has(neighbor)) continue;
+        if (closedSet.has(neighbor)) {
+          console.log(`Skipping neighbor ${neighbor} as it's already in closed set`);
+          continue;
+        }
         
         // Calculate tentative g-score (cost from start to neighbor through current)
         // For simplicity, we're using 1 as the distance between any connected nodes
         const tentativeGScore = gScore[current] + 1;
+        console.log(`Tentative gScore for ${neighbor} via ${current}: ${tentativeGScore}`);
         
         // Check if this neighbor is already in the open set
         const neighborInOpenSet = openSet.find(node => node.id === neighbor);
         
         if (!neighborInOpenSet) {
           // Discover a new node, add to open set
+          console.log(`Adding new node ${neighbor} to open set`);
           openSet.push({id: neighbor, fScore: Infinity});
         } else if (tentativeGScore >= gScore[neighbor]) {
           // This is not a better path to the neighbor
+          console.log(`Path to ${neighbor} via ${current} is not better than existing path`);
           continue;
         }
         
@@ -3440,6 +3498,7 @@ export default class SimplePolygonRenderer {
         cameFrom[neighbor] = current;
         gScore[neighbor] = tentativeGScore;
         fScore[neighbor] = gScore[neighbor] + this.heuristicDistance(neighbor, end);
+        console.log(`Updated path to ${neighbor}: gScore=${gScore[neighbor]}, fScore=${fScore[neighbor]}, cameFrom=${current}`);
         
         // Update the f-score in the open set
         const index = openSet.findIndex(node => node.id === neighbor);
@@ -3450,6 +3509,7 @@ export default class SimplePolygonRenderer {
     }
     
     // If we get here, there's no path
+    console.log(`No path found from ${start} to ${end}`);
     return [];
   }
   
@@ -3463,19 +3523,27 @@ export default class SimplePolygonRenderer {
     const polygon2 = this.polygons.find(p => p.id === polygonId2);
     
     // If either polygon is not found, return a large value
-    if (!polygon1 || !polygon2) return 1000;
+    if (!polygon1 || !polygon2) {
+      console.log(`Heuristic: One or both polygons not found (${polygonId1}, ${polygonId2}), returning 1000`);
+      return 1000;
+    }
     
     // Use centroids for distance calculation
     const centroid1 = polygon1.centroid;
     const centroid2 = polygon2.centroid;
     
     // If either centroid is missing, return a default value
-    if (!centroid1 || !centroid2) return 10;
+    if (!centroid1 || !centroid2) {
+      console.log(`Heuristic: One or both centroids missing for (${polygonId1}, ${polygonId2}), returning 10`);
+      return 10;
+    }
     
     // Calculate Euclidean distance between centroids
     const latDiff = centroid1.lat - centroid2.lat;
     const lngDiff = centroid1.lng - centroid2.lng;
-    return Math.sqrt(latDiff * latDiff + lngDiff * lngDiff);
+    const distance = Math.sqrt(latDiff * latDiff + lngDiff * lngDiff);
+    console.log(`Heuristic distance from ${polygonId1} to ${polygonId2}: ${distance.toFixed(6)}`);
+    return distance;
   }
   
   /**
@@ -3483,10 +3551,14 @@ export default class SimplePolygonRenderer {
    */
   private reconstructPath(cameFrom: Record<string, string | null>, current: string): string[] {
     const path = [current];
+    console.log(`Reconstructing path, starting from ${current}`);
+    
     while (cameFrom[current]) {
       current = cameFrom[current]!;
+      console.log(`Adding ${current} to path`);
       path.unshift(current);
     }
+    
     return path;
   }
   
@@ -3524,7 +3596,7 @@ export default class SimplePolygonRenderer {
     // If path is empty, return
     if (path.length === 0) return;
     
-    console.log(`Visualizing path through ${path.length} polygons:`, path);
+    console.log(`Visualizing path through ${path.length} polygons: ${path.join(' → ')}`);
     
     // Create an array to store the path points
     const pathPoints: THREE.Vector3[] = [];
