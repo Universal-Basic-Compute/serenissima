@@ -99,7 +99,7 @@ export default function MapPage() {
   }, []);
 
   // Functions to interact with the backend
-  const storeWalletInAirtable = async (walletAddress: string) => {
+  const storeWalletInAirtable = async (walletAddress: string): Promise<any> => {
     try {
       const response = await fetch(`${getApiBaseUrl()}/api/wallet`, {
         method: 'POST',
@@ -124,7 +124,7 @@ export default function MapPage() {
     }
   };
 
-  const investCompute = async (walletAddress: string, amount: number) => {
+  const investCompute = async (walletAddress: string, amount: number): Promise<any> => {
     try {
       const response = await fetch(`${getApiBaseUrl()}/api/invest-compute`, {
         method: 'POST',
