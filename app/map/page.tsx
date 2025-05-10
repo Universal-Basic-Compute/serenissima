@@ -600,79 +600,10 @@ export default function MapPage() {
       const event = e as google.maps.MapMouseEvent;
       if (!event.latLng) return;
       
-      // Find a waterpoint near the click location
-      let targetPoint = null;
-      let minDistance = 10; // 10 meters threshold
+      // Create a new waterpoint at the clicked location
+      createWaterPoint(event.latLng);
       
-      for (const point of waterPoints) {
-        const pointPos = typeof point.position === 'string' 
-          ? JSON.parse(point.position) 
-          : point.position;
-        
-        const clickPos = {
-          lat: event.latLng.lat(),
-          lng: event.latLng.lng()
-        };
-        
-        // Calculate distance between click and point
-        const distance = google.maps.geometry.spherical.computeDistanceBetween(
-          new google.maps.LatLng(clickPos.lat, clickPos.lng),
-          new google.maps.LatLng(pointPos.lat, pointPos.lng)
-        );
-        
-        // If this point is closer than our current closest and within threshold
-        if (distance < minDistance) {
-          targetPoint = point;
-          minDistance = distance;
-        }
-      }
-      
-      // If we found a target point, show visual feedback
-      if (targetPoint) {
-        showRightClickFeedback(new google.maps.LatLng(
-          typeof targetPoint.position === 'string' 
-            ? JSON.parse(targetPoint.position).lat 
-            : targetPoint.position.lat,
-          typeof targetPoint.position === 'string' 
-            ? JSON.parse(targetPoint.position).lng 
-            : targetPoint.position.lng
-        ));
-        
-        // If we found a target point and already have a selected point
-        if (selectedWaterPoint && targetPoint.id !== selectedWaterPoint.id) {
-          createWaterPointConnection(selectedWaterPoint, targetPoint);
-        } else {
-          // If we found a point but none is selected, select it
-          setSelectedWaterPoint(targetPoint);
-          
-          // Update marker appearance
-          const marker = waterPointMarkers[targetPoint.id];
-          if (marker) {
-            marker.setIcon({
-              path: google.maps.SymbolPath.CIRCLE,
-              scale: 9,
-              fillColor: '#FF0000',
-              fillOpacity: 1,
-              strokeWeight: 2,
-              strokeColor: '#FFFFFF'
-            });
-          }
-          
-          // Reset other markers
-          Object.entries(waterPointMarkers).forEach(([id, m]) => {
-            if (id !== targetPoint.id) {
-              m.setIcon({
-                path: google.maps.SymbolPath.CIRCLE,
-                scale: 7,
-                fillColor: m.get('type') === 'dock' ? '#FF8800' : '#0088FF',
-                fillOpacity: 1,
-                strokeWeight: 2,
-                strokeColor: '#FFFFFF'
-              });
-            }
-          });
-        }
-      }
+      // The connection will be handled automatically in the createWaterPoint function
     });
     
     // Add this debug message
