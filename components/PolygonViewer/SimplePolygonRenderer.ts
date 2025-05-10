@@ -2810,8 +2810,8 @@ export default class SimplePolygonRenderer {
       }
     }
     
-    // If no exact match, try with a small buffer (to handle points that are very close to the edge)
-    const BUFFER_DISTANCE = 0.0001; // Small buffer distance in degrees
+    // If no exact match, try with a larger buffer (increased from 0.0001 to 0.001)
+    const BUFFER_DISTANCE = 0.001; // Increased buffer distance in degrees (about 100 meters)
     for (const polygon of this.polygons) {
       if (this.isPointNearPolygon(point, polygon.coordinates, BUFFER_DISTANCE)) {
         console.log(`Point is near polygon ${polygon.id} (within buffer)`);
@@ -2832,8 +2832,13 @@ export default class SimplePolygonRenderer {
     }
     
     if (nearestPolygon) {
-      console.log(`No polygon contains point, using nearest polygon ${nearestPolygon.id} at distance ${minDistance}`);
-      return nearestPolygon;
+      // Accept the nearest polygon if it's within a reasonable distance (0.01 degrees, about 1km)
+      if (minDistance <= 0.01) {
+        console.log(`No polygon contains point, using nearest polygon ${nearestPolygon.id} at distance ${minDistance}`);
+        return nearestPolygon;
+      } else {
+        console.warn(`Nearest polygon ${nearestPolygon.id} is too far (${minDistance} degrees)`);
+      }
     }
     
     console.warn(`No polygon found for point: ${point.lat}, ${point.lng}`);
@@ -2857,6 +2862,7 @@ export default class SimplePolygonRenderer {
       // Check distance to this edge
       const distance = this.getDistanceToLineSegment(point, edge1, edge2);
       if (distance < buffer) {
+        console.log(`Point is near edge between (${edge1.lat}, ${edge1.lng}) and (${edge2.lat}, ${edge2.lng}), distance: ${distance}`);
         return true;
       }
     }
@@ -3032,6 +3038,8 @@ export default class SimplePolygonRenderer {
     // If path is empty, return
     if (path.length === 0) return;
     
+    console.log(`Visualizing path through ${path.length} polygons`);
+    
     // Create an array to store the path points
     const pathPoints: THREE.Vector3[] = [];
     
@@ -3044,9 +3052,14 @@ export default class SimplePolygonRenderer {
       const currentPolygonId = path[i];
       const nextPolygonId = path[i + 1];
       
+      console.log(`Finding bridge between ${currentPolygonId} and ${nextPolygonId}`);
+      
       // Find the current polygon
       const currentPolygon = this.polygons.find(p => p.id === currentPolygonId);
-      if (!currentPolygon || !currentPolygon.bridgePoints) continue;
+      if (!currentPolygon || !currentPolygon.bridgePoints) {
+        console.warn(`Polygon ${currentPolygonId} not found or has no bridge points`);
+        continue;
+      }
       
       // Find the bridge point connecting to the next polygon
       const bridgePoint = currentPolygon.bridgePoints.find(bp => 
@@ -3054,6 +3067,8 @@ export default class SimplePolygonRenderer {
       );
       
       if (bridgePoint) {
+        console.log(`Found bridge point from ${currentPolygonId} to ${nextPolygonId}`);
+        
         // Add the bridge point to the path
         const edgeCoord = normalizeCoordinates(
           [bridgePoint.edge],
@@ -3081,12 +3096,48 @@ export default class SimplePolygonRenderer {
           const targetPosition = new THREE.Vector3(targetCoord.x, 0.15, -targetCoord.y);
           pathPoints.push(targetPosition);
         }
+      } else {
+        console.warn(`No bridge found between ${currentPolygonId} and ${nextPolygonId}`);
+        
+        // If no bridge is found, try to find centroids of both polygons and add them as waypoints
+        const currentCentroid = currentPolygon.centroid;
+        const nextPolygon = this.polygons.find(p => p.id === nextPolygonId);
+        
+        if (currentCentroid && nextPolygon && nextPolygon.centroid) {
+          console.log(`Using centroids as waypoints between ${currentPolygonId} and ${nextPolygonId}`);
+          
+          // Add current polygon centroid
+          const currentCentroidCoord = normalizeCoordinates(
+            [currentCentroid],
+            this.bounds.centerLat,
+            this.bounds.centerLng,
+            this.bounds.scale,
+            this.bounds.latCorrectionFactor
+          )[0];
+          
+          const currentCentroidPosition = new THREE.Vector3(currentCentroidCoord.x, 0.15, -currentCentroidCoord.y);
+          pathPoints.push(currentCentroidPosition);
+          
+          // Add next polygon centroid
+          const nextCentroidCoord = normalizeCoordinates(
+            [nextPolygon.centroid],
+            this.bounds.centerLat,
+            this.bounds.centerLng,
+            this.bounds.scale,
+            this.bounds.latCorrectionFactor
+          )[0];
+          
+          const nextCentroidPosition = new THREE.Vector3(nextCentroidCoord.x, 0.15, -nextCentroidCoord.y);
+          pathPoints.push(nextCentroidPosition);
+        }
       }
     }
     
     // Add the end point
     const endPoint = this.measurementPoints[1];
     pathPoints.push(endPoint);
+    
+    console.log(`Path has ${pathPoints.length} points`);
     
     // Create a smooth curve through the points
     const curve = new THREE.CatmullRomCurve3(pathPoints);
