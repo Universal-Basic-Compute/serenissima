@@ -1463,13 +1463,56 @@ export default function PolygonViewer() {
       
         // Handle citizens view
         if (citizenDisplayManagerRef.current) {
+          console.log(`PolygonViewer: Setting CitizenDisplayManager active state to ${activeView === 'citizens'}`);
           // Only activate in citizens view
           citizenDisplayManagerRef.current.setActive(activeView === 'citizens');
         
           if (activeView === 'citizens') {
-            console.log('Switching to citizens view, activating citizen display');
+            console.log('PolygonViewer: Switching to citizens view, activating citizen display');
             // Force a refresh of citizens when switching to this view
             citizenDisplayManagerRef.current.refreshCitizens();
+            
+            // Force citizens to be visible
+            setTimeout(() => {
+              if (citizenDisplayManagerRef.current) {
+                citizenDisplayManagerRef.current.forceVisibleCitizens();
+              }
+            }, 500);
+          }
+        } else {
+          console.warn('PolygonViewer: citizenDisplayManagerRef.current is null, cannot set active state');
+          
+          // Try to initialize it if it's null
+          if (sceneRef.current && sceneRef.current.scene && sceneRef.current.camera) {
+            console.log('PolygonViewer: Attempting to initialize CitizenDisplayManager');
+            
+            const citizenDisplayManager = new CitizenDisplayManager({
+              scene: sceneRef.current.scene,
+              camera: sceneRef.current.camera,
+              bounds: bounds
+            });
+            
+            citizenDisplayManagerRef.current = citizenDisplayManager;
+            
+            // Initialize the citizen display
+            citizenDisplayManager.initialize().then(() => {
+              console.log('PolygonViewer: CitizenDisplayManager initialized successfully');
+              
+              // If we're in citizens view, activate it
+              if (activeView === 'citizens') {
+                console.log('PolygonViewer: In citizens view, activating CitizenDisplayManager');
+                citizenDisplayManager.setActive(true);
+                
+                // Force citizens to be visible
+                setTimeout(() => {
+                  if (citizenDisplayManagerRef.current) {
+                    citizenDisplayManagerRef.current.forceVisibleCitizens();
+                  }
+                }, 500);
+              }
+            }).catch(error => {
+              console.error('PolygonViewer: Failed to initialize CitizenDisplayManager:', error);
+            });
           }
         }
         

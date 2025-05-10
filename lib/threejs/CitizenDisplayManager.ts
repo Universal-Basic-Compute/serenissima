@@ -172,6 +172,18 @@ export class CitizenDisplayManager {
       console.log('Citizen hover event received:', data);
       this.refreshCitizens();
     });
+    
+    // Listen for citizen added event
+    eventBus.subscribe('CITIZEN_ADDED', (data) => {
+      console.log('Citizen added event received:', data);
+      this.refreshCitizens();
+    });
+    
+    // Listen for citizen removed event
+    eventBus.subscribe('CITIZEN_REMOVED', (data) => {
+      console.log('Citizen removed event received:', data);
+      this.refreshCitizens();
+    });
   }
   
   /**
@@ -184,6 +196,9 @@ export class CitizenDisplayManager {
     // Load citizens
     await this.loadCitizens();
     
+    // Add debug citizens if needed
+    this.addDebugCitizensIfNeeded();
+    
     // Group citizens by location
     this.groupCitizensByLocation();
     
@@ -191,7 +206,64 @@ export class CitizenDisplayManager {
     if (this.isActive) {
       this.removeAllMarkers();
       this.createCitizenMarkers();
+      
+      // Force citizens to be visible
+      this.forceVisibleCitizens();
     }
+  }
+  
+  /**
+   * Force citizens to be visible at specific positions
+   */
+  public forceVisibleCitizens(): void {
+    console.log('CitizenDisplayManager: Forcing citizens to be visible');
+    
+    // If we don't have any citizens, add debug citizens
+    if (this.citizens.length === 0) {
+      this.addDebugCitizensIfNeeded();
+      this.groupCitizensByLocation();
+    }
+    
+    // If we don't have any citizen groups, something is wrong with the grouping
+    if (this.citizenGroups.size === 0) {
+      console.warn('CitizenDisplayManager: No citizen groups after grouping, creating manual groups');
+      
+      // Create manual groups from citizens
+      this.citizens.forEach(citizen => {
+        if (!citizen.position) {
+          console.warn(`CitizenDisplayManager: Citizen ${citizen.id} has no position, skipping`);
+          return;
+        }
+        
+        // Normalize position to lat/lng format
+        let lat, lng;
+        if (typeof citizen.position === 'object') {
+          lat = citizen.position.lat !== undefined ? citizen.position.lat : citizen.position.x;
+          lng = citizen.position.lng !== undefined ? citizen.position.lng : citizen.position.z;
+        } else {
+          console.warn(`CitizenDisplayManager: Citizen ${citizen.id} has invalid position format:`, citizen.position);
+          return;
+        }
+        
+        // Create a location key
+        const locationKey = `${parseFloat(lat).toFixed(5)}_${parseFloat(lng).toFixed(5)}`;
+        
+        if (!this.citizenGroups.has(locationKey)) {
+          this.citizenGroups.set(locationKey, []);
+        }
+        
+        this.citizenGroups.get(locationKey)?.push({
+          ...citizen,
+          position: { lat, lng }
+        });
+      });
+    }
+    
+    // Create markers for all groups
+    this.createCitizenMarkers();
+    
+    // Debug the state
+    this.debugState();
   }
 
   /**
@@ -200,9 +272,12 @@ export class CitizenDisplayManager {
   public setActive(active: boolean): void {
     if (this.isActive === active) return;
     
+    console.log(`CitizenDisplayManager: Setting active to ${active}`);
+    
     this.isActive = active;
     
     if (active) {
+      console.log('CitizenDisplayManager: Creating markers and adding event listeners');
       // Create markers and add event listeners
       this.createCitizenMarkers();
       window.addEventListener('mousemove', this.mouseMoveHandler);
@@ -211,9 +286,14 @@ export class CitizenDisplayManager {
       // Check if we need to refresh citizens
       const now = Date.now();
       if (now - this.lastUpdateTime > this.updateInterval) {
+        console.log('CitizenDisplayManager: Refreshing citizens due to stale data');
         this.refreshCitizens();
       }
+      
+      // Debug the state
+      this.debugState();
     } else {
+      console.log('CitizenDisplayManager: Removing markers and event listeners');
       // Remove markers and event listeners
       this.removeAllMarkers();
       window.removeEventListener('mousemove', this.mouseMoveHandler);
@@ -495,8 +575,8 @@ export class CitizenDisplayManager {
       // Try multiple paths to find the citizen image
       const tryLoadTexture = (paths: string[]) => {
         if (paths.length === 0) {
-          console.warn(`Failed to load texture for citizen image: ${imageUrl}, using fallback`);
-          return loader.load('/images/citizens/default.png');
+          console.warn(`Failed to load texture for citizen image: ${imageUrl}, using generated default`);
+          return this.createDefaultCitizenTexture();
         }
         
         return loader.load(paths[0], 
@@ -529,6 +609,54 @@ export class CitizenDisplayManager {
     });
     
     return new THREE.Sprite(material);
+  }
+  
+  /**
+   * Create a default citizen texture when image loading fails
+   */
+  private createDefaultCitizenTexture(): THREE.Texture {
+    // Create a canvas for the default citizen image
+    const canvas = document.createElement('canvas');
+    const size = 128;
+    canvas.width = size;
+    canvas.height = size;
+    
+    const context = canvas.getContext('2d');
+    if (!context) {
+      // Fallback if context creation fails
+      return new THREE.Texture();
+    }
+    
+    // Draw a simple face icon
+    context.fillStyle = '#4b70e2'; // Blue background
+    context.beginPath();
+    context.arc(size/2, size/2, size/2 - 4, 0, Math.PI * 2);
+    context.fill();
+    
+    // Draw a white border
+    context.strokeStyle = '#FFFFFF';
+    context.lineWidth = 4;
+    context.stroke();
+    
+    // Draw a simple face
+    context.fillStyle = '#FFFFFF';
+    
+    // Eyes
+    context.beginPath();
+    context.arc(size/3, size/2.5, size/10, 0, Math.PI * 2);
+    context.arc(size*2/3, size/2.5, size/10, 0, Math.PI * 2);
+    context.fill();
+    
+    // Smile
+    context.beginPath();
+    context.arc(size/2, size/2, size/3, 0.2, Math.PI - 0.2);
+    context.lineWidth = 6;
+    context.stroke();
+    
+    // Create a texture from the canvas
+    const texture = new THREE.CanvasTexture(canvas);
+    
+    return texture;
   }
 
   /**
@@ -817,6 +945,42 @@ export class CitizenDisplayManager {
     eventBus.emit(EventTypes.SHOW_CITIZEN_DETAILS, {
       citizen: citizen
     });
+  }
+  
+  /**
+   * Debug the current state of the CitizenDisplayManager
+   */
+  private debugState(): void {
+    console.log('CitizenDisplayManager Debug State:');
+    console.log(`- isActive: ${this.isActive}`);
+    console.log(`- citizens loaded: ${this.citizens.length}`);
+    console.log(`- citizen groups: ${this.citizenGroups.size}`);
+    console.log(`- markers created: ${this.markers.length}`);
+    console.log(`- hoveredGroup: ${this.hoveredGroup}`);
+    console.log(`- selectedGroup: ${this.selectedGroup}`);
+    
+    // Log the first few citizens for debugging
+    if (this.citizens.length > 0) {
+      console.log('Sample citizens:');
+      this.citizens.slice(0, 3).forEach((citizen, index) => {
+        console.log(`Citizen ${index + 1}:`, {
+          id: citizen.id,
+          name: citizen.name,
+          position: citizen.position
+        });
+      });
+    }
+    
+    // Log the scene hierarchy
+    console.log('Scene hierarchy:');
+    let markerCount = 0;
+    this.scene.traverse((object) => {
+      if (object.userData && object.userData.type === 'citizen-group') {
+        markerCount++;
+        console.log(`- Citizen group: ${object.name}, position: ${object.position.x}, ${object.position.y}, ${object.position.z}`);
+      }
+    });
+    console.log(`Total citizen groups in scene: ${markerCount}`);
   }
 
   /**

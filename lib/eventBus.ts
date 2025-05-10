@@ -122,11 +122,18 @@ export const EventTypes = {
   CITIZENS_LOADED: 'citizensLoaded',
   SHOW_CITIZEN_DETAILS: 'showCitizenDetails',
   CITIZEN_DETAILS_CLOSED: 'citizenDetailsClosed',
+  CITIZEN_ADDED: 'citizenAdded',
+  CITIZEN_REMOVED: 'citizenRemoved',
   
   // Transport events
   SHOW_TOOLTIP: 'showTooltip',
   HIDE_TOOLTIP: 'hideTooltip',
   PATH_CALCULATED: 'pathCalculated',
   BRIDGE_SELECTED: 'bridgeSelected',
-  TRANSPORT_DOCK_SELECTED: 'transportDockSelected'
+  TRANSPORT_DOCK_SELECTED: 'transportDockSelected',
+  
+  // Resource events
+  RESOURCE_ADDED: 'resourceAdded',
+  RESOURCE_REMOVED: 'resourceRemoved',
+  SHOW_RESOURCE_DETAILS: 'showResourceDetails'
 };
