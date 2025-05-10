@@ -88,6 +88,8 @@ export default function SimplePage() {
       setActiveView('loans');
     } else if (pathname === '/knowledge' || showKnowledgePanel) {
       setActiveView('knowledge');
+    } else if (pathname === '/citizens') {
+      setActiveView('citizens');
     }
   }, [pathname, showGovernancePanel, showKnowledgePanel, showLoansPanel]);
   
@@ -173,6 +175,8 @@ export default function SimplePage() {
     } else if (pathname === '/knowledge') {
       setShowKnowledgePanel(true);
       setActiveView('knowledge');
+    } else if (pathname === '/citizens') {
+      setActiveView('citizens');
     }
     
     // Set up a popstate event listener to handle browser back/forward buttons
@@ -193,6 +197,11 @@ export default function SimplePage() {
         setShowKnowledgePanel(true);
         setShowLoansPanel(false);
         setActiveView('knowledge');
+      } else if (path === '/citizens') {
+        setShowGovernancePanel(false);
+        setShowKnowledgePanel(false);
+        setShowLoansPanel(false);
+        setActiveView('citizens');
       } else if (path === '/') {
         setShowGovernancePanel(false);
         setShowKnowledgePanel(false);
@@ -718,6 +727,28 @@ export default function SimplePage() {
                 title="Governance"
               >
                 <FaLandmark className="mx-auto h-5 w-5" />
+              </button>
+            </li>
+            <li>
+              <button
+                onClick={() => {
+                  setShowGovernancePanel(false);
+                  setShowKnowledgePanel(false);
+                  setShowLoansPanel(false);
+                  setActiveView('citizens');
+                  // Update URL without page navigation using replaceState
+                  window.history.replaceState(null, '', '/citizens');
+                  window.__isClientNavigation = true;
+                }}
+                className={`w-full flex items-center p-2 rounded-lg transition-colors ${
+                  activeView === 'citizens' ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700'
+                }`}
+                title="Citizens"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
               </button>
             </li>
             <li>
