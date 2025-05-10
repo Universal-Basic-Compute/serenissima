@@ -480,6 +480,12 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
     if (polygonRendererRef.current) {
       console.log(`Updating polygon renderer view mode to ${activeView}`);
       polygonRendererRef.current.updateViewMode(activeView);
+      
+      // Force building points to be visible in transport view
+      if (activeView === 'transport') {
+        console.log('Forcing building points to be visible in transport view');
+        polygonRendererRef.current.forceBuildingPointsVisible();
+      }
     } else {
       console.warn('polygonRendererRef.current is null, cannot update view mode');
     }

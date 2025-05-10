@@ -932,15 +932,19 @@ export default class SimplePolygonRenderer {
         }
       });
     
-      // CHANGE: Show building points in transport view using the same logic as transport markers
+      // IMPORTANT: Always recreate building points in transport view too
       console.log('Creating building points for transport view');
+      // Clear existing building markers first
+      this.clearBuildingPointMarkers();
+      // Create new building markers
       this.createBuildingPoints();
+      // Force them to be visible with high render order
       this.buildingPointMarkers.forEach(marker => {
         marker.visible = true;
         marker.renderOrder = 2000; // High render order to ensure visibility
       });
     
-      console.log(`Created ${this.bridgePointMarkers.length} bridge markers, ${this.dockPointMarkers.length} dock markers, and ${this.buildingPointMarkers.length} building markers`);
+      console.log(`Created ${this.bridgePointMarkers.length} bridge markers, ${this.dockPointMarkers.length} dock markers, and ${this.buildingPointMarkers.length} building markers for transport view`);
     } else if (activeView === 'buildings') {
       console.log('Switching to buildings view - preparing to show building points');
       
@@ -1390,8 +1394,8 @@ export default class SimplePolygonRenderer {
     if (this.activeView === 'transport') {
       console.log(`In transport view, checking for marker intersections`);
       
-      // Combine all markers for raycasting
-      const allMarkers = [...this.bridgePointMarkers, ...this.dockPointMarkers].filter(
+      // Combine all markers for raycasting, including building points
+      const allMarkers = [...this.bridgePointMarkers, ...this.dockPointMarkers, ...this.buildingPointMarkers].filter(
         obj => obj instanceof THREE.Mesh
       );
       
@@ -2504,6 +2508,26 @@ export default class SimplePolygonRenderer {
     });
     
     console.log('Creating building points - END');
+  }
+  
+  /**
+   * Force building points to be visible in transport view
+   */
+  public forceBuildingPointsVisible() {
+    console.log('Forcing building points to be visible');
+    
+    // If no building points exist, create them
+    if (this.buildingPointMarkers.length === 0) {
+      this.createBuildingPoints();
+    }
+    
+    // Make all building points visible with high render order
+    this.buildingPointMarkers.forEach(marker => {
+      marker.visible = true;
+      marker.renderOrder = 2000; // High render order to ensure visibility
+    });
+    
+    console.log(`Made ${this.buildingPointMarkers.length} building points visible`);
   }
 
   /**
