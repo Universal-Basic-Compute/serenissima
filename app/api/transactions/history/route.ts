@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
     
     try {
       // Build the appropriate endpoint based on parameters
-      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+      const apiBaseUrl = process.env.NEXT_PUBLIC_BACKEND_BASE_URL || 'http://localhost:10000';
       let endpoint = `${apiBaseUrl}/api/transactions`;
       
       if (assetId) {

@@ -72,7 +72,7 @@ async function putLandsOnSale() {
           const price = Math.round(data.areaInSquareMeters * PRICE_PER_SQUARE_METER);
           
           // Check if this land already has a transaction
-          const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+          const apiBaseUrl = process.env.NEXT_PUBLIC_BACKEND_BASE_URL || 'http://localhost:10000';
           const checkResponse = await axios.get(
             `${apiBaseUrl}/api/transaction/land/${id}`,
             { validateStatus: status => true } // Don't throw on 404

@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
     
     try {
       // Get active listings from the backend
-      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
       const response = await fetch(`${apiBaseUrl}/api/transactions`, {
         method: 'GET',
         headers: {

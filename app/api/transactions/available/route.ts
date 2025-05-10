@@ -57,7 +57,7 @@ export async function GET() {
   try {
     // First try to fetch from the backend API
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'}/api/transactions/available`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/transactions/available`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

@@ -68,7 +68,7 @@ function getPolygonFiles() {
 async function addResourceToAPI(resource) {
   try {
     // Get the API base URL from environment or use default
-    const apiBaseUrl = process.env.API_BASE_URL || 'http://localhost:3000';
+    const apiBaseUrl = process.env.BACKEND_BASE_URL || 'http://localhost:3000';
     
     // Make the API call to add the resource
     const response = await axios.post(`${apiBaseUrl}/api/resources`, resource);

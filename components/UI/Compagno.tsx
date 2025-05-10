@@ -22,7 +22,7 @@ interface PaginationInfo {
   has_more: boolean;
 }
 
-const KINOS_API_BASE_URL = 'https://api.kinos-engine.ai/v2';
+const KINOS_BACKEND_BASE_URL = 'https://api.kinos-engine.ai/v2';
 const BLUEPRINT = 'compagno';
 const DEFAULT_USERNAME = 'visitor'; // We'll use a default username for anonymous users
 
@@ -72,7 +72,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className }) => {
     setIsLoadingHistory(true);
     try {
       const response = await fetch(
-        `${KINOS_API_BASE_URL}/blueprints/${BLUEPRINT}/kins/${username}/messages?limit=25&offset=${offset}`,
+        `${KINOS_BACKEND_BASE_URL}/blueprints/${BLUEPRINT}/kins/${username}/messages?limit=25&offset=${offset}`,
         {
           method: 'GET',
           headers: {
@@ -137,7 +137,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className }) => {
     
     try {
       const response = await fetch(
-        `${KINOS_API_BASE_URL}/blueprints/${BLUEPRINT}/kins/${username}/messages`,
+        `${KINOS_BACKEND_BASE_URL}/blueprints/${BLUEPRINT}/kins/${username}/messages`,
         {
           method: 'POST',
           headers: {

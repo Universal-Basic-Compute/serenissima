@@ -5,7 +5,7 @@ export async function GET() {
     console.log('Fetching all users data from backend...');
     
     // Fetch all users data from the backend
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'}/api/users`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/users`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

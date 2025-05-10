@@ -21,7 +21,7 @@ export async function POST(request: Request) {
     
     // Try to update via the backend API
     try {
-      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
       const response = await fetch(`${apiBaseUrl}/api/land`, {
         method: 'POST',
         headers: {

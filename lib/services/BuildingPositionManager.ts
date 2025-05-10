@@ -10,7 +10,7 @@ export class BuildingPositionManager {
   private bounds = {
     centerLat: 45.4371,
     centerLng: 12.3358,
-    scale: 700, // Changed from 2000 to 700
+    scale: 1000, // Changed from 2000 to 1000
     latCorrectionFactor: 0.7
   };
 

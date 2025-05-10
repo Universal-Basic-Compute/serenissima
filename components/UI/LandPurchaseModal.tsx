@@ -337,7 +337,7 @@ const LandPurchaseModal: React.FC<LandPurchaseModalProps> = ({
         // Try the direct backend API as a fallback
         try {
           console.log('Falling back to direct backend API call');
-          const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+          const apiBaseUrl = process.env.NEXT_PUBLIC_BACKEND_BASE_URL || 'http://localhost:10000';
           const directResponse = await fetch(`${apiBaseUrl}/api/transaction/${transaction.id}/execute`, {
             method: 'POST',
             headers: {

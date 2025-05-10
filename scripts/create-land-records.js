@@ -63,7 +63,7 @@ async function createLandRecords() {
           }
           
           // Check if this land record already exists in Airtable
-          const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+          const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
           const checkResponse = await axios.get(
             `${apiBaseUrl}/api/land/${id}`,
             { validateStatus: status => true } // Don't throw on 404
