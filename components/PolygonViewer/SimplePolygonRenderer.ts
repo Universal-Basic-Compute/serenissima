@@ -1250,7 +1250,7 @@ export default class SimplePolygonRenderer {
               return;
             }
             
-            console.log(`Attempting to delete ${markerType} point ${pointIndex} from polygon ${polygonId}`);
+            console.log(`Clicked on ${markerType} point ${pointIndex} from polygon ${polygonId}`);
             
             // Find the polygon
             const polygon = this.polygons.find(p => p.id === polygonId);
@@ -1258,48 +1258,19 @@ export default class SimplePolygonRenderer {
             if (polygon) {
               console.log("Found polygon:", polygon.id);
               
-              // Create a visual effect at the deletion point
-              this.createDeletionEffect(intersected.position.clone());
+              // Show a tooltip with information about the point
+              eventBus.emit(EventTypes.SHOW_TOOLTIP, {
+                type: userData.type,
+                polygonId: userData.polygonId,
+                position: userData.position,
+                screenX: event.clientX,
+                screenY: event.clientY
+              });
               
-              // Remove the point from the polygon data
-              let deleted = false;
-              if (markerType === 'bridge' && polygon.bridgePoints && polygon.bridgePoints.length > pointIndex) {
-                // Remove the bridge point
-                polygon.bridgePoints.splice(pointIndex, 1);
-                console.log(`Successfully removed bridge point ${pointIndex} from polygon ${polygonId}`);
-                deleted = true;
-              } else if (markerType === 'dock' && polygon.dockPoints && polygon.dockPoints.length > pointIndex) {
-                // Remove the dock point
-                polygon.dockPoints.splice(pointIndex, 1);
-                console.log(`Successfully removed dock point ${pointIndex} from polygon ${polygonId}`);
-                deleted = true;
-              } else {
-                console.warn(`Failed to delete point - index ${pointIndex} not found in ${markerType} points array`);
-                console.log(`Bridge points length: ${polygon.bridgePoints?.length || 0}`);
-                console.log(`Dock points length: ${polygon.dockPoints?.length || 0}`);
-              }
-              
-              if (deleted) {
-                // Save the updated polygon data to the server
-                this.saveUpdatedPolygonData(polygon);
-                
-                // Refresh the transport markers
-                this.clearBridgeAndDockMarkers();
-                this.forceCreateBridgeAndDockPoints();
-                
-                // Show a tooltip
-                eventBus.emit(EventTypes.SHOW_TOOLTIP, {
-                  type: 'delete',
-                  content: `Deleted ${markerType} point`,
-                  screenX: event.clientX,
-                  screenY: event.clientY
-                });
-                
-                // Hide tooltip after a delay
-                setTimeout(() => {
-                  eventBus.emit(EventTypes.HIDE_TOOLTIP);
-                }, 2000);
-              }
+              // Hide tooltip after a delay
+              setTimeout(() => {
+                eventBus.emit(EventTypes.HIDE_TOOLTIP);
+              }, 3000);
             } else {
               console.warn(`Polygon ${polygonId} not found`);
             }
