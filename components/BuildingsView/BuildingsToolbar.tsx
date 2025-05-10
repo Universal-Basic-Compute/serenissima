@@ -495,6 +495,96 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
       
       <button
         onClick={() => {
+          console.log('Checking building positions...');
+          
+          if (!scene) {
+            console.error('Scene not available');
+            return;
+          }
+          
+          // Find all buildings in the scene
+          const buildings = [];
+          scene.traverse((object) => {
+            if (object.userData && object.userData.buildingId) {
+              buildings.push(object);
+            }
+          });
+          
+          console.log(`Found ${buildings.length} buildings in the scene`);
+          
+          // Log each building's position
+          buildings.forEach((building, index) => {
+            console.log(`Building ${index}: ${building.userData.buildingId}`);
+            console.log(`  Position: ${building.position.x}, ${building.position.y}, ${building.position.z}`);
+            console.log(`  Type: ${building.userData.type}`);
+            console.log(`  Land ID: ${building.userData.landId}`);
+            
+            // Add a visible marker at each building position
+            const markerGeometry = new THREE.SphereGeometry(1, 16, 16);
+            const markerMaterial = new THREE.MeshBasicMaterial({ 
+              color: 0xff0000,
+              transparent: true,
+              opacity: 0.7
+            });
+            const marker = new THREE.Mesh(markerGeometry, markerMaterial);
+            marker.position.copy(building.position);
+            marker.position.y += 5; // Position above the building
+            marker.userData.id = `marker-${building.userData.buildingId}`;
+            scene.add(marker);
+            console.log(`  Added marker at position: ${marker.position.x}, ${marker.position.y}, ${marker.position.z}`);
+          });
+          
+          // If no buildings found, create some test markers at expected positions
+          if (buildings.length === 0) {
+            console.log('No buildings found, creating test markers at expected positions');
+            
+            // Create markers at positions where buildings should be
+            const testPositions = [
+              // Convert a few lat/lng coordinates from the database to Three.js coordinates
+              { lat: 45.43003055172295, lng: 12.334953915713706 }, // public_dock
+              { lat: 45.4303915139355, lng: 12.334878695899736 },  // harbor_chain_tower
+              { lat: 45.43046224860791, lng: 12.335395042644379 }  // dye_works
+            ];
+            
+            testPositions.forEach((pos, index) => {
+              // Convert lat/lng to Three.js coordinates
+              const bounds = {
+                centerLat: 45.4371,
+                centerLng: 12.3358,
+                scale: 100000,
+                latCorrectionFactor: 0.7
+              };
+              
+              const x = (pos.lng - bounds.centerLng) * bounds.scale;
+              const z = -(pos.lat - bounds.centerLat) * bounds.scale * bounds.latCorrectionFactor;
+              
+              // Create marker
+              const markerGeometry = new THREE.SphereGeometry(2, 16, 16);
+              const markerMaterial = new THREE.MeshBasicMaterial({ 
+                color: 0x00ff00,
+                transparent: false
+              });
+              const marker = new THREE.Mesh(markerGeometry, markerMaterial);
+              marker.position.set(x, 10, z); // Position at y=10 to be visible
+              marker.userData.id = `test-marker-${index}`;
+              scene.add(marker);
+              console.log(`Created test marker ${index} at position: ${marker.position.x}, ${marker.position.y}, ${marker.position.z}`);
+              console.log(`  From lat/lng: ${pos.lat}, ${pos.lng}`);
+            });
+          }
+        }}
+        className="px-4 py-2 bg-blue-600 text-white rounded-md shadow-md hover:bg-blue-700 transition-colors flex items-center space-x-2"
+        title="Check building positions"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+          <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
+        </svg>
+        <span>Check Building Positions</span>
+      </button>
+      
+      <button
+        onClick={() => {
           console.log('Fixing building positions...');
           
           if (!scene) {
