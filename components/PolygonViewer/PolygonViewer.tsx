@@ -349,7 +349,8 @@ export default function PolygonViewer() {
   
   // Add this useEffect to ensure coat of arms are updated when users data changes
   useEffect(() => {
-    if (polygonRendererRef.current && users && Object.keys(users).length > 0) {
+    // Only update coat of arms in land view
+    if (activeView === 'land' && polygonRendererRef.current && users && Object.keys(users).length > 0) {
       console.log('Updating coat of arms from users data in PolygonViewer:', users);
       
       // Create a map of username to coat of arms URL
@@ -394,11 +395,9 @@ export default function PolygonViewer() {
       }
       
       // Force an update of the view mode to trigger sprite creation
-      if (activeView === 'land') {
-        polygonRendererRef.current.updateViewMode(activeView);
-        // Force an update of coat of arms sprites
-        polygonRendererRef.current.updateCoatOfArmsSprites();
-      }
+      polygonRendererRef.current.updateViewMode(activeView);
+      // Force an update of coat of arms sprites
+      polygonRendererRef.current.updateCoatOfArmsSprites();
     }
   }, [users, activeView]); // Depend on users and activeView
   
@@ -1235,7 +1234,6 @@ export default function PolygonViewer() {
     if (activeView === 'land' && polygonRendererRef.current) {
       console.log('Land view active, updating coat of arms sprites');
       
-      
       // Schedule multiple updates to ensure everything is visible
       // First immediate update
       polygonRendererRef.current.updateCoatOfArmsSprites();
@@ -1271,6 +1269,7 @@ export default function PolygonViewer() {
         clearTimeout(thirdTimer);
       };
     }
+    // If not in land view, don't schedule any coat of arms updates
   }, [activeView]);
   
   // Effect to show/hide the building menu based on activeView
@@ -1316,12 +1315,12 @@ export default function PolygonViewer() {
       if (sceneRef.current) {
         console.log(`Updating view mode to ${activeView}`);
         
-        // Load land owners when switching to land view
+        // Load land owners and update coat of arms ONLY when switching to land view
         if (activeView === 'land') {
           console.log('Switching to land view, loading land owners and coat of arms');
           loadLandOwners();
           
-          // Force an update of coat of arms
+          // Force an update of coat of arms ONLY in land view
           if (polygonRendererRef.current) {
             console.log('Forcing coat of arms update for land view');
             polygonRendererRef.current.updateViewMode(activeView);
@@ -1363,6 +1362,12 @@ export default function PolygonViewer() {
               }
             }
           }
+        } else {
+          // For non-land views, we should NOT update coat of arms
+          // Just update the view mode without coat of arms updates
+          if (polygonRendererRef.current) {
+            polygonRendererRef.current.updateViewMode(activeView);
+          }
         }
         
         // Special handling for buildings view
@@ -1385,12 +1390,6 @@ export default function PolygonViewer() {
         
         // Update market panel visibility based on active view
         setMarketPanelVisible(activeView === 'markets');
-        
-        
-        // Update polygon renderer
-        if (polygonRendererRef.current) {
-          polygonRendererRef.current.updateViewMode(activeView);
-        }
         
         // Update interaction manager
         if (interactionManagerRef.current) {
