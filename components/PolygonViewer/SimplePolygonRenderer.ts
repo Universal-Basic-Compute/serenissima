@@ -760,7 +760,7 @@ export default class SimplePolygonRenderer {
     console.log(`Found ${landMeshes.length} potential land meshes for ground level detection`);
     
     // Find intersections with land
-    const intersects = raycaster.intersectObjects(landMeshes, true); // true to check descendants
+    const intersects = raycaster.intersectObjects(landMeshes as THREE.Object3D[], true); // true to check descendants
     
     // Log intersection results for debugging
     if (intersects.length > 0) {
@@ -1800,7 +1800,7 @@ export default class SimplePolygonRenderer {
     
     // Find intersections with coat of arms sprites
     const coatOfArmsObjects = Object.values(this.coatOfArmsSprites);
-    const intersects = this.raycaster.intersectObjects(coatOfArmsObjects, true); // Add true to check descendants
+    const intersects = this.raycaster.intersectObjects(coatOfArmsObjects as THREE.Object3D[], true); // Add true to check descendants
     
     // Handle selection
     if (intersects.length > 0) {
