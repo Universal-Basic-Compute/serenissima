@@ -372,6 +372,22 @@ const EconomicSystemArticle: React.FC<EconomicSystemArticleProps> = ({ onClose }
               </p>
             </div>
             
+            <div className="mb-4">
+              <h5 className="font-bold text-amber-900 mb-2">Citizen Subsidies</h5>
+              <p>
+                The Republic reinvests 10% of its total treasury daily back into its citizens through direct transfers of Ducats. This represents:
+              </p>
+              <ul className="list-disc pl-5 space-y-1 mt-2">
+                <li><span className="font-medium">Grain Subsidies</span>: Ensuring basic food security for all citizens</li>
+                <li><span className="font-medium">Public Investments</span>: Funding for community improvements and services</li>
+                <li><span className="font-medium">Economic Stimulus</span>: Regular injections of currency to maintain economic activity</li>
+                <li><span className="font-medium">Social Stability</span>: Reducing inequality to prevent unrest and maintain Venice's famous stability</li>
+              </ul>
+              <p className="mt-2">
+                This redistribution mechanism ensures that wealth circulates throughout the economy rather than becoming concentrated, maintaining the social harmony that was crucial to Venice's long-term success.
+              </p>
+            </div>
+            
             <div>
               <h5 className="font-bold text-amber-900 mb-2">Tax Strategies</h5>
               <p>
