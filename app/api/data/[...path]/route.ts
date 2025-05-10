@@ -1,14 +1,16 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { promises as fs } from 'fs';
 import path from 'path';
 
 export async function GET(
-  request: Request,
-  { params }: { params: { path: string[] } }
+  request: NextRequest,
+  { params }: { params: Promise<{ path: string[] }> }
 ) {
+  // Await the params Promise to get the actual params object
+  const { path: pathSegments } = await params;
   try {
     // Get the file path from the URL parameters
-    const filePath = params.path.join('/');
+    const filePath = pathSegments.join('/');
     console.log(`Serving file from data directory: ${filePath}`);
     
     // Construct the absolute path to the file
