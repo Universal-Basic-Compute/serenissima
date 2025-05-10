@@ -145,7 +145,7 @@ export async function GET(request: Request) {
   try {
     const url = new URL(request.url);
     const type = url.searchParams.get('type');
-    const limit = url.searchParams.get('limit') ? parseInt(url.searchParams.get('limit')) : 50; // Default to 50 buildings
+    const limit = url.searchParams.get('limit') ? parseInt(url.searchParams.get('limit')) : 100; // Default to 100 buildings
     const offsetParam = url.searchParams.get('offset');
     const offset = offsetParam ? parseInt(offsetParam) : 0;
     
