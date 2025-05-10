@@ -1330,12 +1330,20 @@ export default class PolygonRenderer {
         )[0];
         
         // Performance optimization: Use fewer segments for circle geometry
-        const circleGeometry = new THREE.CircleGeometry(0.25, 8); // Reduced from 16 to 8 segments
+        const circleGeometry = new THREE.CircleGeometry(0.2, 8); // Reduced from 0.25 to 0.2 (20% smaller)
+      
+        // Reduce brightness by using a darker color
+        let colorObj = new THREE.Color(circleColor);
+        // Reduce brightness by 20%
+        colorObj.r *= 0.8;
+        colorObj.g *= 0.8;
+        colorObj.b *= 0.8;
+      
         const circleMaterial = new THREE.MeshBasicMaterial({
-          color: circleColor,
+          color: colorObj,
           side: THREE.DoubleSide,
           transparent: true,
-          opacity: 0.8,
+          opacity: 0.7, // Reduced from 0.8 to 0.7
           depthWrite: false
         });
         
@@ -1381,11 +1389,18 @@ export default class PolygonRenderer {
           }
           
           // Create a simple dot as fallback with minimal segments
-          const geometry = new THREE.CircleGeometry(0.2, 6); // Reduced from 8 to 6 segments
+          const geometry = new THREE.CircleGeometry(0.16, 6); // Reduced from 0.2 to 0.16 (20% smaller)
+          
+          // Reduce brightness of fallback circles too
+          let fallbackColorObj = new THREE.Color(fallbackColor);
+          fallbackColorObj.r *= 0.8;
+          fallbackColorObj.g *= 0.8;
+          fallbackColorObj.b *= 0.8;
+          
           const material = new THREE.MeshBasicMaterial({ 
-            color: fallbackColor,
+            color: fallbackColorObj,
             transparent: true,
-            opacity: 0.7,
+            opacity: 0.6, // Reduced from 0.7 to 0.6
             side: THREE.DoubleSide,
             depthTest: false // Disable depth testing for fallback circles too
           });
