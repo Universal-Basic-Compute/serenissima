@@ -45,14 +45,14 @@ class DefaultBuildingRenderer implements IBuildingRenderer {
       } else {
         position = new THREE.Vector3(
           building.position.x,
-          building.position.y || 5,
+          building.position.y || 0, // Use 0 as default height
           building.position.z
         );
       }
       
       model.position.copy(position);
-      // Change the y position to 1.2
-      model.position.y = 1.2;
+      // Set the y position to 0 to place at ground level
+      model.position.y = 0;
       
       // Set rotation
       model.rotation.y = building.rotation || 0;
@@ -84,6 +84,9 @@ class DefaultBuildingRenderer implements IBuildingRenderer {
             child.material.roughness = 0.7;
             child.material.metalness = 0.3;
             child.material.emissive.set(0x202020);
+            // Ensure materials are properly configured for shadows
+            child.material.transparent = false; // Disable transparency for better shadows
+            child.material.depthWrite = true;   // Ensure depth is written
           }
         }
       });

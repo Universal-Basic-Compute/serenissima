@@ -295,6 +295,9 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
     });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
+    // Enable shadows
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap; // Softer shadows
     rendererRef.current = renderer;
     
     // Calculate bounds for all polygons (still needed for water size)
@@ -378,6 +381,16 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
     // Add directional light
     const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
     directionalLight.position.set(1, 1, 1);
+    // Enable shadows from the directional light
+    directionalLight.castShadow = true;
+    directionalLight.shadow.mapSize.width = 2048;
+    directionalLight.shadow.mapSize.height = 2048;
+    directionalLight.shadow.camera.near = 0.5;
+    directionalLight.shadow.camera.far = 500;
+    directionalLight.shadow.camera.left = -100;
+    directionalLight.shadow.camera.right = 100;
+    directionalLight.shadow.camera.top = 100;
+    directionalLight.shadow.camera.bottom = -100;
     scene.add(directionalLight);
     
     // Animation loop

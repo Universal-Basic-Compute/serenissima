@@ -318,6 +318,9 @@ export default class SimplePolygonRenderer {
     
         // Position the land exactly at water level
         mesh.position.y = 0; // Change from -5.005 to 0
+        
+        // Enable shadows for land
+        mesh.receiveShadow = true;
     
         // No need for render order or polygon offset when there's clear physical separation
         
@@ -2665,8 +2668,8 @@ export default class SimplePolygonRenderer {
       
       // Position the group
       buildingGroup.position.copy(position);
-      // Position buildings closer to the ground
-      buildingGroup.position.y = 1.2; // Changed from 0.8 to 1.2
+      // Position buildings at ground level
+      buildingGroup.position.y = 0;
       
       try {
         // Load the GLB model
