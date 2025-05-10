@@ -6,6 +6,7 @@ import SimpleCamera from './SimpleCamera';
 import { WaterFacade as SimpleWater, WaterQualityLevel } from '../../lib/threejs/WaterFacade';
 import SimplePolygonRenderer from './SimplePolygonRenderer';
 import { IncomePolygonRenderer } from '../../lib/threejs/IncomePolygonRenderer';
+import { ResourceDisplayManager } from '../../lib/threejs/ResourceDisplayManager';
 import { calculateBounds } from './utils';
 import { getApiBaseUrl } from '@/lib/apiUtils';
 import LandDetailsPanel from './LandDetailsPanel'; // Import the existing panel
@@ -28,6 +29,7 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
   const waterRef = useRef<SimpleWater | null>(null);
   const polygonRendererRef = useRef<SimplePolygonRenderer | null>(null);
   const incomeRendererRef = useRef<IncomePolygonRenderer | null>(null);
+  const resourceDisplayRef = useRef<ResourceDisplayManager | null>(null);
   
   // State for land selection and details panel
   const [selectedPolygonId, setSelectedPolygonId] = useState<string | null>(null);
@@ -374,6 +376,25 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
       incomeRendererRef.current = incomeRenderer;
     }
     
+    // Create resource display manager
+    const resourceDisplay = new ResourceDisplayManager({
+      scene,
+      camera: cameraController.camera,
+      bounds
+    });
+    
+    // Initialize the resource display
+    resourceDisplay.initialize().then(() => {
+      console.log('Resource display initialized');
+      
+      // Set active if we're in resources view
+      if (activeView === 'resources') {
+        resourceDisplay.setActive(true);
+      }
+    });
+    
+    resourceDisplayRef.current = resourceDisplay;
+    
     // Add ambient light
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
     scene.add(ambientLight);
@@ -455,6 +476,7 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
       
       if (polygonRendererRef.current) polygonRendererRef.current.cleanup();
       if (incomeRendererRef.current) incomeRendererRef.current.cleanup();
+      if (resourceDisplayRef.current) resourceDisplayRef.current.dispose();
       if (waterRef.current) waterRef.current.dispose();
       if (cameraController) cameraController.cleanup();
       if (renderer) renderer.dispose();
@@ -509,6 +531,11 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
       incomeRendererRef.current.setVisible(activeView === 'land');
     } else {
       console.warn('incomeRendererRef.current is null, cannot update visibility');
+    }
+    
+    // Update resource display active state
+    if (resourceDisplayRef.current) {
+      resourceDisplayRef.current.setActive(activeView === 'resources');
     }
     
     // If we're switching to buildings view, ensure the BuildingRenderer is active
@@ -798,6 +825,19 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
         polygons={polygons}
         landOwners={landOwners}
       />
+      
+      {/* Resources View Legend */}
+      {activeView === 'resources' && (
+        <div className="absolute bottom-4 right-4 bg-black/70 text-white p-3 rounded-lg shadow-lg">
+          <h3 className="text-lg font-serif mb-2">Resources</h3>
+          <div className="text-sm space-y-1">
+            <p>Hover over resource icons to see details</p>
+            <p>Resources are grouped by location</p>
+            <p>Red badge shows number of resources at location</p>
+            <p>Black badge shows resource quantity</p>
+          </div>
+        </div>
+      )}
       
       {/* Transport View Legend */}
       {activeView === 'transport' && (
