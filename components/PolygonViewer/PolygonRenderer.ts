@@ -618,8 +618,8 @@ export default class PolygonRenderer {
           }
           
           // Set the building position to a more appropriate height
-          // Increase from 3.0 to 5.0 to ensure buildings are clearly visible above the land
-          object.position.y = 5.0; // Increased from 3.0 to 5.0
+          // Lower the height from 5.0 to 0.5 to bring buildings closer to the land
+          object.position.y = 0.5; // Decreased from 5.0 to 0.5
           
           // Check if building is in camera view
           const cameraPosition = this.camera.position.clone();
