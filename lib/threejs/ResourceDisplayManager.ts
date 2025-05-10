@@ -185,8 +185,9 @@ export class ResourceDisplayManager {
         console.log('No wallet address found, loading all resources');
       }
 
-      const apiBaseUrl = getApiBaseUrl();
-      const url = `${apiBaseUrl}/api/resources${queryParams}`;
+      // Always use the production URL for resources
+      const productionUrl = 'https://serenissima.ai';
+      const url = `${productionUrl}/api/resources${queryParams}`;
       console.log(`Fetching resources from: ${url}`);
       
       const response = await fetch(url);
