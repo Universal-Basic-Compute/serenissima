@@ -272,6 +272,9 @@ async function enhanceBridgeConnections() {
           console.log(`Generating bridge name for location: ${locationInfo.formattedAddress}...`);
           const bridgeName = await generateBridgeName(locationInfo);
           
+          // Log the chosen bridge name
+          console.log(`Generated bridge name: "${bridgeName}"`);
+          
           // Update the connection with the name and location info
           bridgePoint.connection.name = bridgeName;
           bridgePoint.connection.location = {
@@ -279,9 +282,9 @@ async function enhanceBridgeConnections() {
             locationInfo: locationInfo
           };
           
-          // Add a longer delay between API calls to avoid rate limiting
-          console.log(`Waiting 10 seconds before processing next connection...`);
-          await new Promise(resolve => setTimeout(resolve, 10000)); // Increased from 5s to 10s
+          // Add a shorter delay between API calls
+          console.log(`Waiting 2 seconds before processing next connection...`);
+          await new Promise(resolve => setTimeout(resolve, 2000)); // Reduced from 10s to 2s
         } catch (error) {
           console.error(`Error processing connection ${connectionKey}:`, error);
           console.log('Skipping this connection and continuing with the next one...');
