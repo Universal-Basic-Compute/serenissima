@@ -390,9 +390,12 @@ export default function MapPage() {
       
       console.log('Map clicked in mode:', bridgeMode ? 'bridge' : waterPointMode ? 'waterpoint' : 'normal');
       
-      // Vérifier si c'est un clic droit (e.domEvent contient l'événement DOM original)
-      const isDomEvent = e.hasOwnProperty('domEvent');
-      const isRightClick = isDomEvent && (e as any).domEvent && (e as any).domEvent.button === 2;
+      // Vérifier si c'est un clic droit en utilisant la propriété domEvent
+      // Accéder à domEvent de manière plus sûre
+      const domEvent = (e as any).domEvent;
+      const isRightClick = domEvent && domEvent.button === 2;
+      
+      console.log('Click type:', isRightClick ? 'right click' : 'left click');
       
       if (bridgeMode) {
         // Find which polygon was clicked
@@ -506,6 +509,7 @@ export default function MapPage() {
         }
       } else if (waterPointMode) {
         if (isRightClick) {
+          console.log('Processing right click in waterpoint mode');
           // Clic droit en mode waterpoint - chercher un waterpoint existant à proximité
           let targetPoint = null;
           for (const point of waterPoints) {
@@ -588,10 +592,64 @@ export default function MapPage() {
       }
     });
     
-    // Empêcher l'apparition du menu contextuel du navigateur
+    // Ajouter un gestionnaire spécifique pour le clic droit
     map.addListener('rightclick', (e: google.maps.MapMouseEvent) => {
+      console.log('Right click detected');
+      
       // Empêcher le menu contextuel par défaut
       e.stop();
+      
+      const event = e as google.maps.MapMouseEvent;
+      if (!event.latLng) return;
+      
+      if (waterPointMode) {
+        console.log('Processing right click in waterpoint mode');
+        // Chercher un waterpoint existant à proximité
+        let targetPoint = null;
+        for (const point of waterPoints) {
+          const pointPos = typeof point.position === 'string' 
+            ? JSON.parse(point.position) 
+            : point.position;
+          
+          const clickPos = {
+            lat: event.latLng.lat(),
+            lng: event.latLng.lng()
+          };
+          
+          // Calculer la distance entre le clic et le point
+          const distance = google.maps.geometry.spherical.computeDistanceBetween(
+            new google.maps.LatLng(clickPos.lat, clickPos.lng),
+            new google.maps.LatLng(pointPos.lat, pointPos.lng)
+          );
+          
+          // Si le clic est assez proche d'un point (dans un rayon de 10 mètres)
+          if (distance < 10) {
+            targetPoint = point;
+            break;
+          }
+        }
+        
+        // Si on a trouvé un point cible et qu'un point est déjà sélectionné
+        if (targetPoint && selectedWaterPoint && targetPoint.id !== selectedWaterPoint.id) {
+          createWaterPointConnection(selectedWaterPoint, targetPoint);
+        } else if (targetPoint) {
+          // Si on a trouvé un point mais qu'aucun n'est sélectionné, le sélectionner
+          setSelectedWaterPoint(targetPoint);
+          
+          // Mettre à jour l'apparence du marqueur
+          const marker = waterPointMarkers[targetPoint.id];
+          if (marker) {
+            marker.setIcon({
+              path: google.maps.SymbolPath.CIRCLE,
+              scale: 9,
+              fillColor: '#FF0000',
+              fillOpacity: 1,
+              strokeWeight: 2,
+              strokeColor: '#FFFFFF'
+            });
+          }
+        }
+      }
     });
     
     // Add this debug message
@@ -806,6 +864,65 @@ export default function MapPage() {
   
   // Function to create a new WaterPoint
   const createWaterPoint = (position: google.maps.LatLng, type: string = 'regular') => {
+    // Vérifier si le point est trop proche d'un point existant
+    const MIN_DISTANCE = 10; // Distance minimale en mètres
+    let isTooClose = false;
+    let closestPoint = null;
+    let closestDistance = Infinity;
+    
+    // Parcourir tous les points existants pour vérifier la distance
+    for (const point of waterPoints) {
+      const pointPos = typeof point.position === 'string' 
+        ? JSON.parse(point.position) 
+        : point.position;
+      
+      const distance = google.maps.geometry.spherical.computeDistanceBetween(
+        position,
+        new google.maps.LatLng(pointPos.lat, pointPos.lng)
+      );
+      
+      // Mettre à jour le point le plus proche
+      if (distance < closestDistance) {
+        closestDistance = distance;
+        closestPoint = point;
+      }
+      
+      // Vérifier si la distance est inférieure au minimum
+      if (distance <= MIN_DISTANCE) {
+        isTooClose = true;
+        break;
+      }
+    }
+    
+    // Si le point est trop proche, afficher un message d'erreur
+    if (isTooClose) {
+      // Supprimer le marqueur d'aperçu s'il existe
+      if (previewWaterPoint) {
+        previewWaterPoint.setMap(null);
+        setPreviewWaterPoint(null);
+      }
+      
+      // Afficher un message d'erreur
+      const errorMessage = document.createElement('div');
+      errorMessage.className = 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg z-50';
+      errorMessage.innerHTML = `
+        <div class="flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          <span>Cannot create WaterPoint: Too close to an existing point (${Math.round(closestDistance)}m)</span>
+        </div>
+      `;
+      document.body.appendChild(errorMessage);
+      
+      // Supprimer le message après 3 secondes
+      setTimeout(() => {
+        document.body.removeChild(errorMessage);
+      }, 3000);
+      
+      return;
+    }
+    
     // Supprimer le marqueur d'aperçu s'il existe
     if (previewWaterPoint) {
       previewWaterPoint.setMap(null);
@@ -1198,8 +1315,11 @@ export default function MapPage() {
       mapRef.current.setOptions({
         draggableCursor: 'crosshair'
       });
+      
+      // Charger les WaterPoints existants au démarrage
+      loadWaterPoints();
     }
-  }, [mapRef.current]);
+  }, [mapRef.current, waterPointMode, loadWaterPoints]);
 
   // Create drawing manager options with client-side safety
   const [drawingManagerOptions, setDrawingManagerOptions] = useState<any>({
