@@ -820,9 +820,6 @@ export default class SimplePolygonRenderer {
     
       // Hide building points in land view
       this.buildingPointMarkers.forEach(marker => marker.visible = false);
-      
-      // Hide building points in land view
-      this.buildingPointMarkers.forEach(marker => marker.visible = false);
     } else if (activeView === 'transport') {
       // Hide coat of arms sprites in transport view
       Object.values(this.coatOfArmsSprites).forEach(sprite => {
@@ -852,7 +849,7 @@ export default class SimplePolygonRenderer {
         }
       });
     
-      // CHANGE: Show building points in transport view
+      // CHANGE: Show building points in transport view using the same logic as transport markers
       console.log('Creating building points for transport view');
       this.createBuildingPoints();
       this.buildingPointMarkers.forEach(marker => {
@@ -861,8 +858,6 @@ export default class SimplePolygonRenderer {
       });
     
       console.log(`Created ${this.bridgePointMarkers.length} bridge markers, ${this.dockPointMarkers.length} dock markers, and ${this.buildingPointMarkers.length} building markers`);
-      
-      console.log(`Created ${this.bridgePointMarkers.length} bridge markers and ${this.dockPointMarkers.length} dock markers`);
     } else if (activeView === 'buildings') {
       console.log('Switching to buildings view - preparing to show building points');
       
@@ -2090,7 +2085,8 @@ export default class SimplePolygonRenderer {
             const geometry = new THREE.SphereGeometry(0.3, 12, 12); // Same size as dock points
             
             const marker = new THREE.Mesh(geometry, bridgeMaterial);
-            marker.position.set(normalizedCoord.x, 5.0, -normalizedCoord.y); // Higher position for visibility
+            // CHANGE: Position at ground level (y=0.2) instead of y=5.0
+            marker.position.set(normalizedCoord.x, 0.2, -normalizedCoord.y);
             marker.renderOrder = 100;
             
             // Add metadata for tooltips
@@ -2104,7 +2100,7 @@ export default class SimplePolygonRenderer {
             this.scene.add(marker);
             this.bridgePointMarkers.push(marker);
             
-            console.log(`Created bridge marker at position: ${normalizedCoord.x}, 0.3, ${-normalizedCoord.y}`);
+            console.log(`Created bridge marker at position: ${normalizedCoord.x}, 0.2, ${-normalizedCoord.y}`);
           } catch (error) {
             console.error(`Error creating bridge point for polygon ${polygon.id}:`, error);
           }
@@ -2128,7 +2124,8 @@ export default class SimplePolygonRenderer {
             const edgeGeometry = new THREE.SphereGeometry(0.3, 12, 12); // Smaller size (was 0.5) and more segments for smoother spheres
             
             const edgeMarker = new THREE.Mesh(edgeGeometry, dockEdgeMaterial);
-            edgeMarker.position.set(edgeCoord.x, 5.0, -edgeCoord.y); // Higher position for visibility
+            // CHANGE: Position at ground level (y=0.2) instead of y=5.0
+            edgeMarker.position.set(edgeCoord.x, 0.2, -edgeCoord.y);
             edgeMarker.renderOrder = 100;
             
             // Add metadata for tooltips
@@ -2142,7 +2139,7 @@ export default class SimplePolygonRenderer {
             this.scene.add(edgeMarker);
             this.dockPointMarkers.push(edgeMarker);
             
-            console.log(`Created dock marker at position: ${edgeCoord.x}, 0.3, ${-edgeCoord.y}`);
+            console.log(`Created dock marker at position: ${edgeCoord.x}, 0.2, ${-edgeCoord.y}`);
           } catch (error) {
             console.error(`Error creating dock point for polygon ${polygon.id}:`, error);
           }
@@ -2182,8 +2179,8 @@ export default class SimplePolygonRenderer {
             // Create a line geometry connecting the two points
             const lineGeometry = new THREE.BufferGeometry();
             const vertices = new Float32Array([
-              sourceCoord.x, 0.35, -sourceCoord.y,  // Source point, slightly higher than the markers
-              targetCoord.x, 0.35, -targetCoord.y   // Target point
+              sourceCoord.x, 0.15, -sourceCoord.y,  // Source point, slightly higher than the markers
+              targetCoord.x, 0.15, -targetCoord.y   // Target point
             ]);
             lineGeometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
             
@@ -2393,8 +2390,8 @@ export default class SimplePolygonRenderer {
           const geometry = new THREE.SphereGeometry(0.5, 12, 12); // Double the size from 0.25 to 0.5
           
           const marker = new THREE.Mesh(geometry, buildingPointMaterial);
-          // Position much higher above land (from 0.2 to 5.0)
-          marker.position.set(normalizedCoord.x, 5.0, -normalizedCoord.y); // Position higher above land
+          // CHANGE: Position at ground level (y=0.2) instead of y=5.0
+          marker.position.set(normalizedCoord.x, 0.2, -normalizedCoord.y);
           marker.renderOrder = 100;
           
           // Add metadata for tooltips
@@ -2408,7 +2405,7 @@ export default class SimplePolygonRenderer {
           this.scene.add(marker);
           this.buildingPointMarkers.push(marker);
           
-          console.log(`Created building point marker at position: ${normalizedCoord.x}, 5.0, ${-normalizedCoord.y}`);
+          console.log(`Created building point marker at position: ${normalizedCoord.x}, 0.2, ${-normalizedCoord.y}`);
         } catch (error) {
           console.error(`Error creating building point for polygon ${polygon.id}:`, error);
         }
