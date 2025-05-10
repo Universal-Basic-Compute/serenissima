@@ -146,7 +146,7 @@ async function assignResourcesToPolygons() {
             },
             count: randomCount,
             landId: polygonId,
-            owner: 'system',
+            owner: 'ConsiglioDeiDieci',
             createdAt: new Date().toISOString()
           };
           
