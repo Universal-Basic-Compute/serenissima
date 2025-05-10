@@ -219,44 +219,27 @@ Example format:
               }
             }
             
-            // If we couldn't find a valid array, create a fallback
-            console.warn('Could not find bridge names array in response, using fallback');
-            return [{
-              historicalName: `Ponte di ${locationInfo.neighborhood || 'San Marco'}`,
-              englishName: `Bridge of ${locationInfo.neighborhood || 'Saint Mark'}`,
-              historicalDescription: `A bridge connecting parts of the ${locationInfo.neighborhood || 'San Marco'} district of Venice.`
-            }];
+            // If we couldn't find a valid array, throw an error instead of returning fallback
+            throw new Error('Could not find bridge names array in response');
           } catch (parseError) {
             console.error('Error parsing JSON response:', parseError);
             console.log('Raw response:', content);
             
-            // Return fallback data instead of throwing
-            return [{
-              historicalName: `Ponte di ${locationInfo.neighborhood || 'San Marco'}`,
-              englishName: `Bridge of ${locationInfo.neighborhood || 'Saint Mark'}`,
-              historicalDescription: `A bridge connecting parts of the ${locationInfo.neighborhood || 'San Marco'} district of Venice.`
-            }];
+            // Throw the error instead of returning fallback data
+            throw parseError;
           }
         }
         
-        // If we get here, return fallback data
-        return [{
-          historicalName: `Ponte di ${locationInfo.neighborhood || 'San Marco'}`,
-          englishName: `Bridge of ${locationInfo.neighborhood || 'Saint Mark'}`,
-          historicalDescription: `A bridge connecting parts of the ${locationInfo.neighborhood || 'San Marco'} district of Venice.`
-        }];
+        // If we get here, throw an error instead of returning fallback data
+        throw new Error('Invalid or missing response from Claude API');
       },
       5, // Increase max retries from 3 to 5
       5000 // Increase initial delay from 2000ms to 5000ms (5 seconds)
     );
   } catch (error) {
     console.error('Error generating bridge names with Claude API after multiple retries:', error);
-    // Return fallback data instead of throwing
-    return [{
-      historicalName: `Ponte di ${locationInfo.neighborhood || 'San Marco'}`,
-      englishName: `Bridge of ${locationInfo.neighborhood || 'Saint Mark'}`,
-      historicalDescription: `A bridge connecting parts of the ${locationInfo.neighborhood || 'San Marco'} district of Venice.`
-    }];
+    // Throw the error instead of returning fallback data
+    throw error;
   }
 }
 
