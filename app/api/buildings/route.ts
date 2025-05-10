@@ -213,6 +213,13 @@ export async function GET(request: Request) {
           lng: parseFloat(position.lng.toString())
         };
       }
+      // Ensure lat/lng values are parsed as floats with full precision
+      else if (position.lat !== undefined && position.lng !== undefined) {
+        position = {
+          lat: parseFloat(position.lat.toString()),
+          lng: parseFloat(position.lng.toString())
+        };
+      }
       
       return {
         id: fields.BuildingId || record.id,

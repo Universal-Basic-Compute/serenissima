@@ -71,6 +71,60 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
     console.log('Building position verification complete');
   };
 
+  // Function to verify and fix building positions
+  const verifyBuildingPositions = () => {
+    console.log('Verifying building positions...');
+    
+    // Find all buildings in the scene
+    const buildings = [];
+    scene.traverse((object) => {
+      if (object.userData && object.userData.buildingId) {
+        buildings.push(object);
+      }
+    });
+    
+    console.log(`Found ${buildings.length} buildings to verify`);
+    
+    // Check each building's position
+    buildings.forEach((building) => {
+      // Get the original position
+      const originalPosition = building.position.clone();
+      
+      // Check if the position is at the default (0,0,0) or (45,5,12)
+      const isDefaultPosition = 
+        (originalPosition.x === 0 && originalPosition.z === 0) ||
+        (originalPosition.x === 45 && originalPosition.z === 12);
+      
+      if (isDefaultPosition && building.userData.position) {
+        console.log(`Building ${building.userData.buildingId} has default position, fixing...`);
+        
+        const pos = building.userData.position;
+        
+        // Check if position has lat/lng format
+        if (pos.lat !== undefined && pos.lng !== undefined) {
+          console.log(`Building ${building.userData.buildingId} has lat/lng position:`, pos);
+          
+          // Convert lat/lng to Three.js coordinates
+          const bounds = {
+            centerLat: 45.4371,
+            centerLng: 12.3358,
+            scale: 100000,
+            latCorrectionFactor: 0.7
+          };
+          
+          const x = (pos.lng - bounds.centerLng) * bounds.scale;
+          const z = -(pos.lat - bounds.centerLat) * bounds.scale * bounds.latCorrectionFactor;
+          
+          // Set the new position with increased height
+          building.position.set(x, 5, z);
+          console.log(`Fixed position for ${building.userData.buildingId}:`, building.position);
+        }
+      }
+    });
+    
+    console.log('Building position verification complete');
+  };
+
   // Function to load a building model
   const loadBuildingModel = async (type: string, variant: string = 'model') => {
     const cacheKey = `${type}-${variant}`;
