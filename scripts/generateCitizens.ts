@@ -113,53 +113,81 @@ Please ensure the distribution roughly follows the guidelines in the system prom
 Return ONLY a valid JSON array with no additional text.`;
 }
 
+// Utility function for exponential backoff
+async function executeWithBackoff(fn: () => Promise<any>, maxRetries: number = 5): Promise<any> {
+  let retries = 0;
+  
+  while (true) {
+    try {
+      return await fn();
+    } catch (error) {
+      retries++;
+      
+      if (retries > maxRetries) {
+        console.error(`Failed after ${maxRetries} retries:`, error);
+        throw error;
+      }
+      
+      // Calculate exponential backoff time with jitter
+      const baseWaitTime = Math.pow(2, retries) * 1000; // 2^retries seconds
+      const jitter = Math.random() * 0.5 + 0.75; // Random between 0.75 and 1.25
+      const waitTime = baseWaitTime * jitter;
+      
+      console.warn(`Attempt ${retries} failed. Retrying in ${Math.round(waitTime/1000)} seconds...`);
+      await new Promise(resolve => setTimeout(resolve, waitTime));
+    }
+  }
+}
+
 // Call Claude API to generate citizens
 async function generateCitizensWithClaude(existingCitizens: Citizen[]): Promise<Citizen[]> {
-  try {
-    const response = await axios.post(
-      CLAUDE_API_URL,
-      {
-        model: "claude-3-7-sonnet-latest",
-        max_tokens: 4000,
-        system: generateSystemPrompt(existingCitizens),
-        messages: [
-          {
-            role: "user",
-            content: generateUserPrompt()
+  return executeWithBackoff(async () => {
+    try {
+      const response = await axios.post(
+        CLAUDE_API_URL,
+        {
+          model: "claude-3-7-sonnet-latest",
+          max_tokens: 4000,
+          system: generateSystemPrompt(existingCitizens),
+          messages: [
+            {
+              role: "user",
+              content: generateUserPrompt()
+            }
+          ]
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': CLAUDE_API_KEY,
+            'anthropic-version': '2023-06-01'
           }
-        ]
-      },
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': CLAUDE_API_KEY,
-          'anthropic-version': '2023-06-01'
         }
-      }
-    );
+      );
 
-    // Extract the JSON from Claude's response
-    const content = response.data.content[0].text;
-    const jsonMatch = content.match(/\[[\s\S]*\]/);
-    
-    if (!jsonMatch) {
-      throw new Error('Could not extract JSON from Claude response');
+      // Extract the JSON from Claude's response
+      const content = response.data.content[0].text;
+      const jsonMatch = content.match(/\[[\s\S]*\]/);
+      
+      if (!jsonMatch) {
+        throw new Error('Could not extract JSON from Claude response');
+      }
+      
+      const jsonString = jsonMatch[0];
+      const newCitizens: Citizen[] = JSON.parse(jsonString);
+      
+      // Add IDs and creation timestamp
+      return newCitizens.map(citizen => ({
+        ...citizen,
+        id: generateUniqueId(),
+        createdAt: new Date().toISOString()
+      }));
+      
+    } catch (error) {
+      console.error('Error generating citizens with Claude:', error);
+      throw error;
     }
-    
-    const jsonString = jsonMatch[0];
-    const newCitizens: Citizen[] = JSON.parse(jsonString);
-    
-    // Add IDs and creation timestamp
-    return newCitizens.map(citizen => ({
-      ...citizen,
-      id: generateUniqueId(),
-      createdAt: new Date().toISOString()
-    }));
-    
-  } catch (error) {
-    console.error('Error generating citizens with Claude:', error);
-    throw error;
-  }
+  });
 }
 
 // Generate a unique ID for each citizen
@@ -178,13 +206,18 @@ async function generateCitizens(batchCount: number = 1): Promise<void> {
     
     for (let i = 0; i < batchCount; i++) {
       console.log(`Generating batch ${i + 1} of ${batchCount}...`);
-      const batchCitizens = await generateCitizensWithClaude([...existingCitizens, ...newCitizens]);
+      
+      // Use executeWithBackoff for the entire batch generation process
+      const batchCitizens = await executeWithBackoff(() => generateCitizensWithClaude([...existingCitizens, ...newCitizens]));
+      
       newCitizens = [...newCitizens, ...batchCitizens];
       console.log(`Generated ${batchCitizens.length} citizens in batch ${i + 1}`);
       
-      // Optional: Add a delay between batches to avoid API rate limits
+      // Add a delay between batches with some randomization to avoid predictable patterns
       if (i < batchCount - 1) {
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        const delay = 2000 + Math.random() * 1000;
+        console.log(`Waiting ${Math.round(delay/1000)} seconds before next batch...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
       }
     }
     
