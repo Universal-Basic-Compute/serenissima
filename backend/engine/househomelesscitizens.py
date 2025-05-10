@@ -191,6 +191,40 @@ def find_suitable_building(tables, citizen: Dict) -> Optional[Dict]:
     log.warning(f"No suitable building found for {citizen_name}")
     return None
 
+def create_admin_notification(tables, housing_summary) -> None:
+    """Create a notification for the admin user about the housing process."""
+    try:
+        # Create notification content with summary of all housed citizens
+        content = f"Housing report: {housing_summary['total']} citizens housed"
+        
+        # Create detailed information about the housed citizens by building type
+        details = {
+            "event_type": "housing_summary",
+            "timestamp": datetime.datetime.now().isoformat(),
+            "total_housed": housing_summary['total'],
+            "by_building_type": {
+                "canal_house": housing_summary.get('canal_house', 0),
+                "merchant_s_house": housing_summary.get('merchant_s_house', 0),
+                "artisan_s_house": housing_summary.get('artisan_s_house', 0),
+                "fisherman_s_cottage": housing_summary.get('fisherman_s_cottage', 0)
+            },
+            "message": f"Housing process complete. {housing_summary['total']} citizens were housed: {housing_summary.get('canal_house', 0)} in canal houses, {housing_summary.get('merchant_s_house', 0)} in merchant houses, {housing_summary.get('artisan_s_house', 0)} in artisan houses, and {housing_summary.get('fisherman_s_cottage', 0)} in fisherman cottages."
+        }
+        
+        # Create the notification record
+        tables['notifications'].create({
+            "Type": "housing_summary",
+            "Content": content,
+            "Details": json.dumps(details),
+            "CreatedAt": datetime.datetime.now().isoformat(),
+            "ReadAt": None,
+            "User": "NLR"  # Specific user to receive the notification
+        })
+        
+        log.info(f"Created admin notification for user NLR with housing summary")
+    except Exception as e:
+        log.error(f"Error creating admin notification: {e}")
+
 def house_homeless_citizens(dry_run: bool = False):
     """Main function to house homeless citizens."""
     log.info(f"Starting housing process (dry_run: {dry_run})")
@@ -205,6 +239,14 @@ def house_homeless_citizens(dry_run: bool = False):
     housed_count = 0
     failed_count = 0
     
+    # Track housing by building type
+    housing_by_type = {
+        "canal_house": 0,
+        "merchant_s_house": 0,
+        "artisan_s_house": 0,
+        "fisherman_s_cottage": 0
+    }
+    
     for citizen in homeless_citizens:
         citizen_name = f"{citizen['fields'].get('FirstName', '')} {citizen['fields'].get('LastName', '')}"
         log.info(f"Processing citizen: {citizen_name}")
@@ -213,14 +255,21 @@ def house_homeless_citizens(dry_run: bool = False):
         
         if building:
             building_name = building['fields'].get('Name', building['id'])
+            building_type = building['fields'].get('Type', 'unknown')
             
             if dry_run:
                 log.info(f"[DRY RUN] Would house {citizen_name} in {building_name}")
                 housed_count += 1
+                # Track housing by building type
+                if building_type in housing_by_type:
+                    housing_by_type[building_type] += 1
             else:
                 success = assign_citizen_to_building(tables, citizen, building)
                 if success:
                     housed_count += 1
+                    # Track housing by building type
+                    if building_type in housing_by_type:
+                        housing_by_type[building_type] += 1
                 else:
                     failed_count += 1
         else:
@@ -228,6 +277,16 @@ def house_homeless_citizens(dry_run: bool = False):
             failed_count += 1
     
     log.info(f"Housing process complete. Housed: {housed_count}, Failed: {failed_count}")
+    
+    # Create a summary of housing by building type
+    housing_summary = {
+        "total": housed_count,
+        **housing_by_type
+    }
+    
+    # Create a notification for the admin user with the housing summary
+    if housed_count > 0 and not dry_run:
+        create_admin_notification(tables, housing_summary)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="House homeless citizens in appropriate buildings.")
