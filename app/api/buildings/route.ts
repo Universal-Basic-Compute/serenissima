@@ -144,8 +144,8 @@ export async function GET(request: Request) {
       console.log(`Building ${index + 1}:`, building);
     });
     
-    // Add your specific building for debugging
-    const debugBuilding = {
+    // Add your specific building for debugging - add multiple copies at different positions
+    const debugBuilding1 = {
       id: 'building_1',
       type: 'market-stall',
       land_id: 'polygon-1746052711032',
@@ -159,8 +159,38 @@ export async function GET(request: Request) {
       created_at: '2025-05-10T02:07:00Z'
     };
     
-    console.log('Adding debug building:', debugBuilding);
-    buildings.push(debugBuilding);
+    const debugBuilding2 = {
+      id: 'building_2',
+      type: 'market-stall',
+      land_id: 'polygon-1746052711033',
+      position: { 
+        x: 45.42623684734749 + 10, 
+        y: 0, 
+        z: 12.33922034185465 + 10
+      },
+      rotation: Math.PI / 4, // 45 degrees rotation
+      created_by: 'ConsiglioDeiDieci',
+      created_at: '2025-05-10T02:07:00Z'
+    };
+    
+    const debugBuilding3 = {
+      id: 'building_3',
+      type: 'market-stall',
+      land_id: 'polygon-1746052711034',
+      position: { 
+        x: 45.42623684734749 - 10, 
+        y: 0, 
+        z: 12.33922034185465 - 10
+      },
+      rotation: Math.PI / 2, // 90 degrees rotation
+      created_by: 'ConsiglioDeiDieci',
+      created_at: '2025-05-10T02:07:00Z'
+    };
+    
+    console.log('Adding debug buildings');
+    buildings.push(debugBuilding1);
+    buildings.push(debugBuilding2);
+    buildings.push(debugBuilding3);
     
     return NextResponse.json({ buildings });
   } catch (error) {

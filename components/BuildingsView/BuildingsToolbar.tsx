@@ -145,6 +145,15 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
             testBuilding.userData.buildingId = 'test-building';
             scene.add(testBuilding);
             console.log('Test building added:', testBuilding);
+            
+            // Add a visible marker at the market stall position
+            const markerGeometry = new THREE.SphereGeometry(1, 16, 16);
+            const markerMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+            const marker = new THREE.Mesh(markerGeometry, markerMaterial);
+            marker.position.set(45.42623684734749, 10, 12.33922034185465);
+            marker.userData.id = 'market-stall-marker';
+            scene.add(marker);
+            console.log('Market stall position marker added:', marker);
           }
         }}
         className="px-4 py-2 bg-red-600 text-white rounded-md shadow-md hover:bg-red-700 transition-colors flex items-center space-x-2"
@@ -167,7 +176,8 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
               console.log('Repositioning camera to view market stall');
               
               // Set camera position to look at the market stall coordinates
-              actualCamera.position.set(45.42623684734749 + 20, 20, 12.33922034185465 + 20);
+              // Position camera closer to the market stall
+              actualCamera.position.set(45.42623684734749 + 10, 10, 12.33922034185465 + 10);
               
               // Get the orbit controls
               const controls = actualCamera.userData?.controls;

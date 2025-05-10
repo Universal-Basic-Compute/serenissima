@@ -145,15 +145,9 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
       // Get the z/longitude value from the appropriate property
       const longitude = position.z || position.lng || 0;
       
-      // Convert to scene coordinates - use a smaller scale factor for better visibility
-      const normalizedPosition = new THREE.Vector3(
-        (position.x - 45.4) * 50, // Center around Venice's latitude
-        position.y || 0,
-        (longitude - 12.3) * 50  // Center around Venice's longitude
-      );
-      
-      console.log('Converted lat/lng coordinates to:', normalizedPosition);
-      return normalizedPosition;
+      // Return the coordinates directly without transformation for lat/lng coordinates
+      // This ensures buildings appear at their exact specified positions
+      return new THREE.Vector3(position.x, position.y || 0, position.z);
     }
     
     // Return original position if not lat/lng
@@ -234,18 +228,27 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
             
             // Position and rotate the model
             const normalizedPosition = normalizeCoordinates(position);
-            
+      
             // Ensure the building is at ground level (y=0) with a small offset to prevent z-fighting
             normalizedPosition.y = 0.1;
-            
+      
             model.position.copy(normalizedPosition);
             model.rotation.y = rotation || 0;
             console.log(`Positioned model at normalized position:`, normalizedPosition);
+      
+            // Add a debug marker at the exact position
+            const markerGeometry = new THREE.SphereGeometry(0.5, 16, 16);
+            const markerMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+            const marker = new THREE.Mesh(markerGeometry, markerMaterial);
+            marker.position.copy(normalizedPosition);
+            marker.position.y += 5; // Position above the building for visibility
+            scene.add(marker);
+            console.log(`Added position marker at ${JSON.stringify(marker.position)}`);
             
             // Calculate bounding box to properly scale the model
             const box = new THREE.Box3().setFromObject(model);
             const size = box.getSize(new THREE.Vector3());
-            
+      
             // Scale model to a reasonable size if it's too large or too small
             const maxDimension = Math.max(size.x, size.y, size.z);
             if (maxDimension > 20) {
@@ -260,7 +263,8 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
               console.log(`Model was too small (${maxDimension} units), scaled up by ${scale}`);
             } else {
               // Apply a default scale to make buildings more visible
-              const scale = 2.0;
+              // Increased from 2.0 to 5.0 for better visibility
+              const scale = 5.0;
               model.scale.set(scale, scale, scale);
               console.log(`Applied default scale of ${scale} to building`);
             }
