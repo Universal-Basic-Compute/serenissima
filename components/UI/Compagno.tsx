@@ -37,6 +37,25 @@ const Compagno: React.FC<CompagnoProps> = ({ className }) => {
   const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
   const [playingMessageId, setPlayingMessageId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [isMobile, setIsMobile] = useState<boolean>(false);
+
+  // Check if device is mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768); // Common breakpoint for mobile devices
+    };
+    
+    // Check on initial load
+    checkMobile();
+    
+    // Add event listener for window resize
+    window.addEventListener('resize', checkMobile);
+    
+    // Clean up
+    return () => {
+      window.removeEventListener('resize', checkMobile);
+    };
+  }, []);
 
   // Fetch user information if available
   useEffect(() => {
@@ -252,6 +271,11 @@ const Compagno: React.FC<CompagnoProps> = ({ className }) => {
       alert('Failed to generate speech. Please try again.');
     }
   };
+
+  // Return null if on mobile
+  if (isMobile) {
+    return null;
+  }
 
   return (
     <div className={`fixed bottom-4 right-4 z-50 ${className}`}>
