@@ -31,6 +31,7 @@ export interface CanalOptions {
   waveHeight?: number;
   waveFrequency?: number;
   transferPoints?: TransferPoint[];
+  curvature?: number;
 }
 
 /**
@@ -41,6 +42,7 @@ export class CanalFacade {
   private scene: THREE.Scene;
   private camera: THREE.PerspectiveCamera;
   private waterLevel: number;
+  private debug: boolean = false;
   private canals: Map<string, {
     mesh: THREE.Mesh;
     points: CanalPoint[];
@@ -389,11 +391,11 @@ export class CanalFacade {
         return new THREE.LineCurve3(positions[0], positions[1]);
       } else {
         // Create a custom curve that combines multiple line segments
-        return new THREE.CurvePath<THREE.Vector3>().add(
-          ...Array.from({ length: positions.length - 1 }, (_, i) => 
-            new THREE.LineCurve3(positions[i], positions[i + 1])
-          )
-        );
+        const curvePath = new THREE.CurvePath<THREE.Vector3>();
+        for (let i = 0; i < positions.length - 1; i++) {
+          curvePath.add(new THREE.LineCurve3(positions[i], positions[i + 1]));
+        }
+        return curvePath;
       }
     } else if (curvature >= 1) {
       // Maximum curvature - use catmull-rom with 'chordal' tension
