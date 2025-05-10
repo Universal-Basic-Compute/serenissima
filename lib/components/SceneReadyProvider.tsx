@@ -60,7 +60,11 @@ export const SceneReadyProvider: React.FC<SceneReadyProviderProps> = ({
         const canvas = document.querySelector('canvas');
         if (canvas && canvas.__scene) {
           setScene(canvas.__scene);
-          setCamera(canvas.__camera as THREE.PerspectiveCamera);
+          if (canvas.__camera instanceof THREE.PerspectiveCamera) {
+            setCamera(canvas.__camera);
+          } else {
+            console.warn('SceneReadyProvider: Camera is not a PerspectiveCamera');
+          }
           setIsSceneReady(true);
           console.log('SceneReadyProvider: Scene found in canvas.__scene');
           return true;
