@@ -2636,11 +2636,27 @@ export default class SimplePolygonRenderer {
   private clearBuildingPointMarkers() {
     this.buildingPointMarkers.forEach(marker => {
       this.scene.remove(marker);
-      if (marker.geometry) marker.geometry.dispose();
-      if (marker.material instanceof THREE.Material) {
-        marker.material.dispose();
-      } else if (Array.isArray(marker.material)) {
-        marker.material.forEach(m => m.dispose());
+      
+      // Check if marker is a Mesh before accessing geometry and material
+      if (marker instanceof THREE.Mesh) {
+        if (marker.geometry) marker.geometry.dispose();
+        if (marker.material instanceof THREE.Material) {
+          marker.material.dispose();
+        } else if (Array.isArray(marker.material)) {
+          marker.material.forEach(m => m.dispose());
+        }
+      } else if (marker instanceof THREE.Group) {
+        // Handle Group objects by traversing their children
+        marker.traverse((child) => {
+          if (child instanceof THREE.Mesh) {
+            if (child.geometry) child.geometry.dispose();
+            if (child.material instanceof THREE.Material) {
+              child.material.dispose();
+            } else if (Array.isArray(child.material)) {
+              child.material.forEach(m => m.dispose());
+            }
+          }
+        });
       }
     });
     this.buildingPointMarkers = [];
