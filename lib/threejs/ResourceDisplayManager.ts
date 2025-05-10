@@ -478,21 +478,23 @@ export class ResourceDisplayManager {
     container.name = 'base-marker';
     container.userData = { isResourceMarker: true };
     
-    // Create a sprite for the resource icon
-    const sprite = this.createResourceSprite(primaryResource.type);
-    sprite.scale.set(1.5, 1.5, 1); // Slightly smaller than before
-    container.add(sprite);
-    
-    // Add a circular background for better visibility
+    // Add a circular background for better visibility FIRST
     const backgroundSprite = this.createCircularBackground(primaryResource.category);
     backgroundSprite.scale.set(1.8, 1.8, 1); // Slightly larger than the icon
     backgroundSprite.renderOrder = 999; // Render behind the icon
     container.add(backgroundSprite);
     
+    // Create a sprite for the resource icon SECOND (so it renders on top)
+    const sprite = this.createResourceSprite(primaryResource.type);
+    sprite.scale.set(1.5, 1.5, 1); // Slightly smaller than before
+    sprite.renderOrder = 1000; // Ensure it renders on top of the background
+    container.add(sprite);
+    
     // If there are multiple resources, add a count indicator
     if (resources.length > 1) {
       const countIndicator = this.createCountIndicator(resources.length);
       countIndicator.position.set(0.7, 0.7, 0.1);
+      countIndicator.renderOrder = 1001; // Ensure it renders on top of everything
       container.add(countIndicator);
     }
     
@@ -501,6 +503,7 @@ export class ResourceDisplayManager {
     if (totalCount > 1) {
       const amountIndicator = this.createAmountIndicator(totalCount);
       amountIndicator.position.set(-0.7, -0.7, 0.1);
+      amountIndicator.renderOrder = 1001; // Ensure it renders on top of everything
       container.add(amountIndicator);
     }
     
@@ -586,27 +589,30 @@ export class ResourceDisplayManager {
         resource: resource
       };
       
-      // Create a sprite for the resource icon
-      const sprite = this.createResourceSprite(resource.type);
-      sprite.scale.set(1.2, 1.2, 1); // Slightly smaller than before
-      container.add(sprite);
-      
-      // Add a circular background for better visibility
+      // Add a circular background for better visibility FIRST
       const backgroundSprite = this.createCircularBackground(resource.category);
       backgroundSprite.scale.set(1.5, 1.5, 1); // Slightly larger than the icon
       backgroundSprite.renderOrder = 999; // Render behind the icon
       container.add(backgroundSprite);
       
+      // Create a sprite for the resource icon SECOND
+      const sprite = this.createResourceSprite(resource.type);
+      sprite.scale.set(1.2, 1.2, 1); // Slightly smaller than before
+      sprite.renderOrder = 1000; // Ensure it renders on top of the background
+      container.add(sprite);
+      
       // Add a count indicator if needed
       if (resource.count && resource.count > 1) {
         const countIndicator = this.createAmountIndicator(resource.count);
         countIndicator.position.set(0, -0.7, 0.1);
+        countIndicator.renderOrder = 1001; // Ensure it renders on top of everything
         container.add(countIndicator);
       }
       
       // Add resource name (shorter version for hover state)
       const nameIndicator = this.createTextSprite(resource.name || resource.type, true);
       nameIndicator.position.set(0, 0.7, 0.1);
+      nameIndicator.renderOrder = 1001; // Ensure it renders on top of everything
       container.add(nameIndicator);
       
       group.add(container);
@@ -630,6 +636,7 @@ export class ResourceDisplayManager {
     
     // Create a background panel
     const backgroundPanel = this.createBackgroundPanel(resources.length);
+    backgroundPanel.renderOrder = 990; // Ensure it's behind everything
     group.add(backgroundPanel);
     
     // Create a sprite for each resource in the group
@@ -659,27 +666,30 @@ export class ResourceDisplayManager {
         resource: resource
       };
       
-      // Create a sprite for the resource icon
-      const sprite = this.createResourceSprite(resource.type);
-      sprite.scale.set(1.5, 1.5, 1);
-      container.add(sprite);
-      
-      // Add a circular background for better visibility
+      // Add a circular background for better visibility FIRST
       const backgroundSprite = this.createCircularBackground(resource.category);
       backgroundSprite.scale.set(1.8, 1.8, 1);
       backgroundSprite.renderOrder = 999;
       container.add(backgroundSprite);
       
+      // Create a sprite for the resource icon SECOND
+      const sprite = this.createResourceSprite(resource.type);
+      sprite.scale.set(1.5, 1.5, 1);
+      sprite.renderOrder = 1000; // Ensure it renders on top of the background
+      container.add(sprite);
+      
       // Add a count indicator if needed
       if (resource.count && resource.count > 1) {
         const countIndicator = this.createAmountIndicator(resource.count);
         countIndicator.position.set(0, -0.9, 0.1);
+        countIndicator.renderOrder = 1001; // Ensure it renders on top of everything
         container.add(countIndicator);
       }
       
       // Add resource name (full version for selected state)
       const nameIndicator = this.createTextSprite(resource.name || resource.type, false);
       nameIndicator.position.set(0, 0.9, 0.1);
+      nameIndicator.renderOrder = 1001; // Ensure it renders on top of everything
       container.add(nameIndicator);
       
       // Add category indicator
@@ -689,6 +699,7 @@ export class ResourceDisplayManager {
         0.7
       );
       categoryIndicator.position.set(0, 1.3, 0.1);
+      categoryIndicator.renderOrder = 1001; // Ensure it renders on top of everything
       container.add(categoryIndicator);
       
       group.add(container);
@@ -697,6 +708,7 @@ export class ResourceDisplayManager {
     // Add a title for the location
     const locationTitle = this.createTextSprite(`Resources (${resources.length})`, false, 1.2);
     locationTitle.position.set(0, 3, 0);
+    locationTitle.renderOrder = 1001; // Ensure it renders on top of everything
     group.add(locationTitle);
   }
   
