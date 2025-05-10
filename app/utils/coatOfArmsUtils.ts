@@ -91,6 +91,17 @@ export async function fetchCoatOfArmsImage(imageUrl: string): Promise<string> {
     throw new Error('Please provide a coat of arms image URL');
   }
   
+  // If the URL is relative, prepend the production URL
+  if (imageUrl.startsWith('/')) {
+    const productionUrl = 'https://serenissima.ai';
+    imageUrl = `${productionUrl}${imageUrl}`;
+    console.log('Using production URL for coat of arms:', imageUrl);
+  } else if (!imageUrl.startsWith('http')) {
+    const productionUrl = 'https://serenissima.ai';
+    imageUrl = `${productionUrl}/${imageUrl}`;
+    console.log('Using production URL for coat of arms:', imageUrl);
+  }
+  
   try {
     const response = await fetch(`/api/fetch-coat-of-arms`, {
       method: 'POST',

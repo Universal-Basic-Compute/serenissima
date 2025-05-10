@@ -92,10 +92,30 @@ export async function GET(request: Request) {
       const data = await response.json();
       console.log(`Received ${data.length} land records from backend`);
       
+      // Helper function to ensure coat of arms URLs use the production domain
+      function ensureProductionUrl(url: string): string {
+        if (!url) return url;
+        
+        // If the URL is relative, prepend the production URL
+        if (url.startsWith('/')) {
+          return `https://serenissima.ai${url}`;
+        }
+        
+        // If the URL doesn't start with http, assume it's relative
+        if (!url.startsWith('http')) {
+          return `https://serenissima.ai/${url}`;
+        }
+        
+        return url;
+      }
+      
       // Process the data to use local coat of arms images if available
       if (coatOfArmsMapping && Array.isArray(data)) {
         for (const land of data) {
           if (land.owner && land.coat_of_arms_image) {
+            // Ensure the URL uses the production domain if it's relative
+            land.coat_of_arms_image = ensureProductionUrl(land.coat_of_arms_image);
+            
             // Check if we have a local version of this coat of arms
             const ownerMapping = coatOfArmsMapping[land.owner];
             if (ownerMapping) {

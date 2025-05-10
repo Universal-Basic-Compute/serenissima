@@ -1198,6 +1198,25 @@ export default class PolygonRenderer {
   }
   
   /**
+   * Ensure coat of arms URL uses the production domain
+   */
+  private ensureProductionUrl(url: string): string {
+    if (!url) return url;
+    
+    // If the URL is relative, prepend the production URL
+    if (url.startsWith('/')) {
+      return `https://serenissima.ai${url}`;
+    }
+    
+    // If the URL doesn't start with http, assume it's relative
+    if (!url.startsWith('http')) {
+      return `https://serenissima.ai/${url}`;
+    }
+    
+    return url;
+  }
+
+  /**
    * Update coat of arms for owners
    */
   public updateOwnerCoatOfArms(ownerCoatOfArmsMap: Record<string, string>) {
@@ -1208,11 +1227,17 @@ export default class PolygonRenderer {
     
     console.log('updateOwnerCoatOfArms called with data:', ownerCoatOfArmsMap);
     
+    // Process URLs to ensure they use the production domain
+    const processedMap: Record<string, string> = {};
+    Object.entries(ownerCoatOfArmsMap).forEach(([owner, url]) => {
+      processedMap[owner] = this.ensureProductionUrl(url);
+    });
+    
     // Update the coat of arms map
-    this.ownerCoatOfArmsMap = { ...this.ownerCoatOfArmsMap, ...ownerCoatOfArmsMap };
+    this.ownerCoatOfArmsMap = { ...this.ownerCoatOfArmsMap, ...processedMap };
     
     // Update the users data with coat of arms information
-    Object.entries(ownerCoatOfArmsMap).forEach(([owner, url]) => {
+    Object.entries(processedMap).forEach(([owner, url]) => {
       if (this.users[owner]) {
         this.users[owner].coat_of_arms_image = url;
       } else {
