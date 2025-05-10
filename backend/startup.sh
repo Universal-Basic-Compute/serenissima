@@ -29,12 +29,12 @@ crontab -l > "$TEMP_CRONTAB" 2>/dev/null || echo "# Income distribution cron job
 
 # Check if the cron job already exists
 if ! grep -q "distributeIncome.py" "$TEMP_CRONTAB"; then
-    # Add the cron job to run at 4pm UTC daily
-    echo "0 16 * * * cd $REPO_PATH && python3 distributeIncome.py >> $REPO_PATH/income_distribution_cron.log 2>&1" >> "$TEMP_CRONTAB"
+    # Add the cron job to run at 12pm UTC daily (changed from 4pm)
+    echo "0 12 * * * cd $REPO_PATH && python3 distributeIncome.py >> $REPO_PATH/income_distribution_cron.log 2>&1" >> "$TEMP_CRONTAB"
     
     # Install the new crontab
     crontab "$TEMP_CRONTAB"
-    echo "Cron job installed successfully. Income distribution will run daily at 4pm UTC."
+    echo "Cron job installed successfully. Income distribution will run daily at 12pm UTC."
 else
     echo "Cron job already exists. No changes made."
 fi
