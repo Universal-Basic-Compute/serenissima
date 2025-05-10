@@ -48,6 +48,32 @@ At noon UTC each day, the housing assignment system finds homes for citizens who
 
 This process ensures that citizens find appropriate housing based on their social class and wealth, creating a stratified society similar to historical Venice.
 
+### Housing Mobility (2:00 PM UTC)
+
+**Script**: `backend/engine/citizenhousingmobility.py`
+
+Every day at 2:00 PM UTC, the housing mobility system simulates citizens looking for more affordable housing:
+
+1. The script checks all housed citizens
+2. Based on social class, it determines if they look for cheaper housing:
+   - Patrician: 10% chance
+   - Cittadini: 20% chance
+   - Popolani: 30% chance
+   - Facchini: 40% chance
+3. If a citizen decides to look, the system finds available housing of the appropriate type with rent below a threshold:
+   - Patrician: 12% cheaper
+   - Cittadini: 8% cheaper
+   - Popolani: 6% cheaper
+   - Facchini: 4% cheaper
+4. Citizens are moved to cheaper housing if found
+5. Notifications are sent to:
+   - The previous landlord about the tenant moving out
+   - The new landlord about the tenant moving in
+   - The citizen about their new home and rent savings
+   - Administrators with a summary of all housing changes
+
+This process creates a dynamic housing market with citizens seeking better economic opportunities, simulating the mobility of Renaissance Venice's population.
+
 ### Loan Payments (3:00 PM UTC)
 
 **Script**: `backend/engine/dailyloanpayments.py`

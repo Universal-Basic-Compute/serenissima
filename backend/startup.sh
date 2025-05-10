@@ -92,6 +92,18 @@ else
     echo "Daily loan payments cron job already exists. No changes made."
 fi
 
+# Add cron job for citizen housing mobility
+if ! grep -q "citizenhousingmobility.py" "$TEMP_CRONTAB"; then
+    # Add the cron job to run at 2pm UTC daily
+    echo "0 14 * * * cd $REPO_PATH && python3 engine/citizenhousingmobility.py >> $REPO_PATH/housing_mobility_cron.log 2>&1" >> "$TEMP_CRONTAB"
+    
+    # Install the new crontab
+    crontab "$TEMP_CRONTAB"
+    echo "Cron job installed successfully. Citizen housing mobility will run daily at 2pm UTC."
+else
+    echo "Citizen housing mobility cron job already exists. No changes made."
+fi
+
 # Clean up
 rm "$TEMP_CRONTAB"
 
