@@ -1051,8 +1051,8 @@ export default class SimplePolygonRenderer {
     
     // Update the raycaster with increased precision
     this.raycaster.setFromCamera(this.mouse, this.camera);
-    this.raycaster.params.Line.threshold = 0.1; // Increase line detection threshold
-    this.raycaster.params.Points.threshold = 0.1; // Increase point detection threshold
+    this.raycaster.params.Line.threshold = 0.2; // Increase line detection threshold
+    this.raycaster.params.Points.threshold = 0.2; // Increase point detection threshold
     
     if (this.activeView === 'land') {
       // Land view - handle coat of arms hover
@@ -2125,7 +2125,7 @@ export default class SimplePolygonRenderer {
             const edgeGeometry = new THREE.SphereGeometry(0.3, 12, 12); // Smaller size (was 0.5) and more segments for smoother spheres
             
             const edgeMarker = new THREE.Mesh(edgeGeometry, dockEdgeMaterial);
-            edgeMarker.position.set(edgeCoord.x, 0.3, -edgeCoord.y); // Lower position (was 0.5)
+            edgeMarker.position.set(edgeCoord.x, 5.0, -edgeCoord.y); // Higher position for visibility
             edgeMarker.renderOrder = 100;
             
             // Add metadata for tooltips
@@ -2358,11 +2358,11 @@ export default class SimplePolygonRenderer {
       return;
     }
     
-    // Create a material for building points
+    // Create a material for building points - make more visible
     const buildingPointMaterial = new THREE.MeshBasicMaterial({
-      color: 0xFFFFFF, // White color for building points
+      color: 0xFF0000, // Change from white to bright red for better visibility
       transparent: true,
-      opacity: 0.7
+      opacity: 0.9  // Increase opacity from 0.7 to 0.9
     });
     
     // Process each polygon
@@ -2386,11 +2386,12 @@ export default class SimplePolygonRenderer {
           
           console.log(`Normalized coordinates for point ${index}:`, normalizedCoord);
           
-          // Create a smaller sphere for the building point (50% smaller than before)
-          const geometry = new THREE.SphereGeometry(0.25, 12, 12); // Sphere with 0.25 radius (50% of 0.5)
+          // Create a larger sphere for better visibility
+          const geometry = new THREE.SphereGeometry(0.5, 12, 12); // Double the size from 0.25 to 0.5
           
           const marker = new THREE.Mesh(geometry, buildingPointMaterial);
-          marker.position.set(normalizedCoord.x, 0.2, -normalizedCoord.y); // Position slightly above land
+          // Position much higher above land (from 0.2 to 5.0)
+          marker.position.set(normalizedCoord.x, 5.0, -normalizedCoord.y); // Position higher above land
           marker.renderOrder = 100;
           
           // Add metadata for tooltips
@@ -2404,7 +2405,7 @@ export default class SimplePolygonRenderer {
           this.scene.add(marker);
           this.buildingPointMarkers.push(marker);
           
-          console.log(`Created building point marker at position: ${normalizedCoord.x}, 0.2, ${-normalizedCoord.y}`);
+          console.log(`Created building point marker at position: ${normalizedCoord.x}, 5.0, ${-normalizedCoord.y}`);
         } catch (error) {
           console.error(`Error creating building point for polygon ${polygon.id}:`, error);
         }
