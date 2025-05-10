@@ -4195,32 +4195,68 @@ export default class SimplePolygonRenderer {
       return [start];
     }
     
-    // Initialize the path with the starting polygon
-    const path = [start];
-    let currentPolygonId = start;
-    
-    // Keep track of visited polygons to avoid cycles
-    const visitedPolygons = new Set<string>([start]);
-    
-    // Build a complete graph of all polygon connections for fallback navigation
+    // Build a complete graph of all polygon connections for navigation
     const completeGraph = this.buildNavigationGraph();
     
-    // Continue until we reach the end or can't proceed further
-    while (currentPolygonId !== end) {
-      console.log(`Current polygon: ${currentPolygonId}`);
+    // Use a proper A* implementation with priority queue
+    // Priority queue for A* - stores nodes with their priority (f-score)
+    const openSet: {id: string, fScore: number}[] = [];
+    
+    // Set of visited nodes
+    const closedSet = new Set<string>();
+    
+    // For each node, which node it can most efficiently be reached from
+    const cameFrom: Record<string, string | null> = {};
+    
+    // For each node, the cost of getting from the start node to that node
+    const gScore: Record<string, number> = {};
+    
+    // For each node, the total cost of getting from the start node to the goal by passing through that node
+    const fScore: Record<string, number> = {};
+    
+    // Initialize all nodes with infinity scores
+    for (const node in completeGraph) {
+      gScore[node] = Infinity;
+      fScore[node] = Infinity;
+      cameFrom[node] = null;
+    }
+    
+    // The start node has zero distance from itself
+    gScore[start] = 0;
+    
+    // The start node's f-score is just the heuristic distance to the end
+    fScore[start] = this.heuristicDistance(start, end);
+    
+    // Add start node to the open set
+    openSet.push({id: start, fScore: fScore[start]});
+    
+    // While there are nodes to explore
+    while (openSet.length > 0) {
+      // Sort the open set by f-score (lowest first)
+      openSet.sort((a, b) => a.fScore - b.fScore);
+      
+      // Get the node with the lowest f-score
+      const current = openSet.shift()!.id;
+      console.log(`Exploring node ${current} with fScore: ${fScore[current]}`);
+      
+      // If we've reached the end, reconstruct and return the path
+      if (current === end) {
+        console.log(`Reached destination ${end}, reconstructing path`);
+        return this.reconstructPath(cameFrom, current);
+      }
+      
+      // Mark current as visited
+      closedSet.add(current);
       
       // Find the current polygon
-      const currentPolygon = this.polygons.find(p => p.id === currentPolygonId);
+      const currentPolygon = this.polygons.find(p => p.id === current);
       if (!currentPolygon) {
-        console.warn(`Polygon ${currentPolygonId} not found`);
-        break;
+        console.warn(`Polygon ${current} not found`);
+        continue;
       }
       
       // Get all bridge connections from the current polygon
-      const bridgeConnections: {
-        targetPolygonId: string;
-        score: number;
-      }[] = [];
+      let neighbors: string[] = [];
       
       // Check if the polygon has bridge points
       if (currentPolygon.bridgePoints && Array.isArray(currentPolygon.bridgePoints)) {
@@ -4230,7 +4266,7 @@ export default class SimplePolygonRenderer {
             const targetPolygonId = bridgePoint.connection.targetPolygonId;
             
             // Skip if we've already visited this polygon
-            if (visitedPolygons.has(targetPolygonId)) {
+            if (closedSet.has(targetPolygonId)) {
               return;
             }
             
@@ -4241,79 +4277,59 @@ export default class SimplePolygonRenderer {
               return;
             }
             
-            // Calculate a score for this connection based on heuristic distance to the end
-            const score = this.heuristicDistance(targetPolygonId, end);
-            
-            bridgeConnections.push({
-              targetPolygonId,
-              score
-            });
+            // Add to neighbors if not already included
+            if (!neighbors.includes(targetPolygonId)) {
+              neighbors.push(targetPolygonId);
+            }
           }
         });
       }
       
-      // If no valid bridge connections, try to find an alternative path
-      if (bridgeConnections.length === 0) {
-        console.warn(`No valid bridge connections from ${currentPolygonId}, looking for alternatives`);
+      // If no valid bridge connections, use the complete graph for alternatives
+      if (neighbors.length === 0) {
+        console.log(`No bridge connections from ${current}, using graph connections`);
+        neighbors = (completeGraph[current] || []).filter(n => !closedSet.has(n));
+      }
+      
+      console.log(`Node ${current} has ${neighbors.length} neighbors: ${neighbors.join(', ')}`);
+      
+      // Process each neighbor
+      for (const neighbor of neighbors) {
+        // Calculate tentative g-score (cost from start to neighbor through current)
+        // For simplicity, we're using 1 as the distance between any connected nodes
+        const tentativeGScore = gScore[current] + 1;
+        console.log(`Tentative gScore for ${neighbor} via ${current}: ${tentativeGScore}`);
         
-        // Look for any unvisited neighbors in the complete graph
-        const neighbors = completeGraph[currentPolygonId] || [];
-        const unvisitedNeighbors = neighbors.filter(neighbor => !visitedPolygons.has(neighbor));
+        // Check if this neighbor is already in the open set
+        const neighborInOpenSet = openSet.find(node => node.id === neighbor);
         
-        if (unvisitedNeighbors.length > 0) {
-          // Calculate scores for each unvisited neighbor
-          const scoredNeighbors = unvisitedNeighbors.map(neighborId => ({
-            targetPolygonId: neighborId,
-            score: this.heuristicDistance(neighborId, end)
-          }));
-          
-          // Sort by score
-          scoredNeighbors.sort((a, b) => a.score - b.score);
-          
-          // Choose the best alternative
-          const bestAlternative = scoredNeighbors[0];
-          console.log(`No bridge found, using alternative path to ${bestAlternative.targetPolygonId}`);
-          
-          // Add to path and continue
-          path.push(bestAlternative.targetPolygonId);
-          visitedPolygons.add(bestAlternative.targetPolygonId);
-          currentPolygonId = bestAlternative.targetPolygonId;
+        if (!neighborInOpenSet) {
+          // Discover a new node, add to open set
+          console.log(`Adding new node ${neighbor} to open set`);
+          openSet.push({id: neighbor, fScore: Infinity});
+        } else if (tentativeGScore >= gScore[neighbor]) {
+          // This is not a better path to the neighbor
+          console.log(`Path to ${neighbor} via ${current} is not better than existing path`);
           continue;
-        } else {
-          // If no alternatives, we're stuck
-          console.warn(`No alternative paths found from ${currentPolygonId}`);
-          break;
+        }
+        
+        // This path to neighbor is the best so far, record it
+        cameFrom[neighbor] = current;
+        gScore[neighbor] = tentativeGScore;
+        fScore[neighbor] = gScore[neighbor] + this.heuristicDistance(neighbor, end);
+        console.log(`Updated path to ${neighbor}: gScore=${gScore[neighbor]}, fScore=${fScore[neighbor]}, cameFrom=${current}`);
+        
+        // Update the f-score in the open set
+        const index = openSet.findIndex(node => node.id === neighbor);
+        if (index !== -1) {
+          openSet[index].fScore = fScore[neighbor];
         }
       }
-      
-      // Sort connections by score (lowest first)
-      bridgeConnections.sort((a, b) => a.score - b.score);
-      
-      // Choose the best connection
-      const bestConnection = bridgeConnections[0];
-      console.log(`Selected bridge to ${bestConnection.targetPolygonId} with score ${bestConnection.score}`);
-      
-      // Add the next polygon to the path
-      path.push(bestConnection.targetPolygonId);
-      visitedPolygons.add(bestConnection.targetPolygonId);
-      currentPolygonId = bestConnection.targetPolygonId;
-      
-      // Safety check to prevent infinite loops
-      if (path.length > 100) {
-        console.warn('Path finding exceeded maximum length, stopping');
-        break;
-      }
     }
     
-    // Check if we reached the destination
-    if (currentPolygonId === end) {
-      console.log(`Path found: ${path.join(' → ')}`);
-      return path;
-    }
-    
-    // If we couldn't reach the destination, try the original A* algorithm as fallback
-    console.log('Bridge-by-bridge navigation failed, falling back to A* algorithm');
-    return this.findShortestPathAStar(start, end);
+    // If we get here, there's no path
+    console.log(`No path found from ${start} to ${end}`);
+    return [];
   }
 
   /**
