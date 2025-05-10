@@ -27,85 +27,74 @@ declare global {
 }
 
 interface BuildingRendererProps {
-  scene: THREE.Scene;
+  scene?: THREE.Scene;
   active: boolean;
 }
 
 const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) => {
-  // Store scene in a ref to avoid undefined issues
+  // Create a local scene if none is provided
+  const [localScene, setLocalScene] = useState<THREE.Scene | null>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
-  
-  // Add a state to track if the component is ready to render
   const [isReady, setIsReady] = useState<boolean>(false);
-  // Update the ref when scene changes or try to find the scene if not provided
+  
+  // Initialize scene on component mount
   useEffect(() => {
-    // Function to find the scene if not provided as a prop
-    const findScene = (): THREE.Scene | null => {
-      if (scene) return scene;
-      
-      // Try to get scene from window.__threeContext
-      if (typeof window !== 'undefined' && window.__threeContext && window.__threeContext.scene) {
-        console.log('BuildingRenderer: Found scene in window.__threeContext');
-        return window.__threeContext.scene;
-      }
-      
-      // Try to get scene from canvas element
-      if (typeof document !== 'undefined') {
-        const canvas = document.querySelector('canvas');
-        if (canvas && canvas.__scene) {
-          console.log('BuildingRenderer: Found scene in canvas.__scene');
-          return canvas.__scene;
-        }
-      }
-      
-      // If no scene found, create a dummy scene as a fallback
-      console.warn('BuildingRenderer: Could not find scene, creating a dummy scene');
-      const dummyScene = new THREE.Scene();
-      dummyScene.userData.isDummyScene = true;
-      return dummyScene;
-    };
-    
-    // Try to find the scene
-    let foundScene = findScene();
-    sceneRef.current = foundScene;
-    
-    // If we got a dummy scene, set up a retry mechanism to find a real scene
-    if (foundScene.userData && foundScene.userData.isDummyScene) {
-      console.log('BuildingRenderer: Using dummy scene, setting up retry mechanism');
-      
-      const retryInterval = setInterval(() => {
-        console.log('BuildingRenderer: Retrying to find real scene...');
-        const realScene = findScene();
-        
-        if (realScene && !realScene.userData.isDummyScene) {
-          console.log('BuildingRenderer: Real scene found on retry!');
-          clearInterval(retryInterval);
-          sceneRef.current = realScene;
-          setIsReady(true);
-        }
-      }, 500); // Retry every 500ms
-      
-      // Clean up interval on component unmount
-      return () => {
-        clearInterval(retryInterval);
-      };
-    } else {
-      // Real scene found on first try
+    // If a scene is provided via props, use it
+    if (scene) {
+      console.log('BuildingRenderer: Using provided scene');
+      sceneRef.current = scene;
+      setLocalScene(scene);
       setIsReady(true);
-      console.log('BuildingRenderer: Scene ref updated, real scene available');
+      return;
     }
+    
+    console.log('BuildingRenderer: No scene provided, searching for existing scene');
+    
+    // Try to get scene from window.__threeContext
+    if (typeof window !== 'undefined' && window.__threeContext && window.__threeContext.scene) {
+      console.log('BuildingRenderer: Found scene in window.__threeContext');
+      sceneRef.current = window.__threeContext.scene;
+      setLocalScene(window.__threeContext.scene);
+      setIsReady(true);
+      return;
+    }
+    
+    // Try to get scene from canvas element
+    if (typeof document !== 'undefined') {
+      const canvas = document.querySelector('canvas');
+      if (canvas && canvas.__scene) {
+        console.log('BuildingRenderer: Found scene in canvas.__scene');
+        sceneRef.current = canvas.__scene;
+        setLocalScene(canvas.__scene);
+        setIsReady(true);
+        return;
+      }
+    }
+    
+    console.log('BuildingRenderer: No existing scene found, creating a new one');
+    
+    // Create a new scene
+    const newScene = new THREE.Scene();
+    sceneRef.current = newScene;
+    setLocalScene(newScene);
+    
+    // Make the scene available globally
+    if (typeof window !== 'undefined') {
+      window.__threeContext = window.__threeContext || {};
+      window.__threeContext.scene = newScene;
+    }
+    
+    setIsReady(true);
   }, [scene]);
-  // Early return if not ready
-  if (!isReady) {
-    console.log('BuildingRenderer: Not ready yet, waiting for scene to be available');
-    // Return a loading state instead of null
+  
+  // Don't proceed if not ready
+  if (!isReady || !sceneRef.current) {
+    console.log('BuildingRenderer: Not ready yet');
     return null;
   }
   
-  // Log warning if we're using a dummy scene
-  if (sceneRef.current && sceneRef.current.userData && sceneRef.current.userData.isDummyScene) {
-    console.warn('BuildingRenderer: Using dummy scene, buildings will not be visible until a real scene is available');
-  }
+  // Log the scene we're using
+  console.log('BuildingRenderer: Ready with scene', sceneRef.current);
   
   const [buildings, setBuildings] = useState<BuildingData[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -733,8 +722,9 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
   useEffect(() => {
     if (!active) return;
     
+    // Double-check that we have a valid scene
     if (!sceneRef.current) {
-      console.warn('BuildingRenderer: scene is not defined, cannot render buildings');
+      console.error('BuildingRenderer: scene is still not defined, cannot render buildings');
       return;
     }
     
@@ -818,10 +808,13 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
   // Listen for building events
   useEffect(() => {
     if (!active) return;
+    
+    // Double-check that we have a valid scene
     if (!sceneRef.current) {
-      console.warn('BuildingRenderer: scene is not defined, cannot listen for building events');
+      console.error('BuildingRenderer: scene is still not defined, cannot listen for building events');
       return;
     }
+    
     if (!rendererFactoryRef.current) {
       console.warn('BuildingRenderer: renderer factory is not initialized');
       return;

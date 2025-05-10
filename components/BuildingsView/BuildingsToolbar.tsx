@@ -940,7 +940,7 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
       {/* Always render the BuildingRenderer to show existing buildings */}
       {showBuildingRenderer ? (
         <BuildingRenderer 
-          scene={actualScene || (typeof window !== 'undefined' && window.__threeContext?.scene)} 
+          scene={actualScene} 
           active={true} 
         />
       ) : (
