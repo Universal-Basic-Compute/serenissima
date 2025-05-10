@@ -51,6 +51,18 @@ else
     echo "Housing homeless citizens cron job already exists. No changes made."
 fi
 
+# Add cron job for immigration
+if ! grep -q "immigration.py" "$TEMP_CRONTAB"; then
+    # Add the cron job to run at 8am UTC daily
+    echo "0 8 * * * cd $REPO_PATH && python3 engine/immigration.py >> $REPO_PATH/immigration_cron.log 2>&1" >> "$TEMP_CRONTAB"
+    
+    # Install the new crontab
+    crontab "$TEMP_CRONTAB"
+    echo "Cron job installed successfully. Immigration will run daily at 8am UTC."
+else
+    echo "Immigration cron job already exists. No changes made."
+fi
+
 # Clean up
 rm "$TEMP_CRONTAB"
 
