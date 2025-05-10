@@ -221,7 +221,13 @@ export async function GET(request: Request) {
         Type: string;
         Land: string;
         Variant?: string;
-        Position: any;
+        Position: string | {
+          lat?: number;
+          lng?: number;
+          x?: number;
+          y?: number;
+          z?: number;
+        };
         Rotation?: number;
         User: string;
         CreatedAt: string;
@@ -248,14 +254,18 @@ export async function GET(request: Request) {
       const fields = record.fields;
       
       // Parse position JSON if it's a string
-      let position = fields.Position;
-      if (typeof position === 'string') {
+      let position: { lat?: number; lng?: number; x?: number; y?: number; z?: number; } = 
+        typeof fields.Position === 'string' 
+          ? {} 
+          : fields.Position as { lat?: number; lng?: number; x?: number; y?: number; z?: number; };
+          
+      if (typeof fields.Position === 'string') {
         try {
-          position = JSON.parse(position);
+          position = JSON.parse(fields.Position);
           console.log(`[API] Building ${fields.BuildingId || record.id} parsed position:`, position);
         } catch (error) {
           console.error('[API] Error parsing position JSON:', error);
-          console.error('[API] Original position string:', position);
+          console.error('[API] Original position string:', fields.Position);
           
           // Instead of using a default position, generate a random lat/lng position
           // This ensures each building has unique coordinates
@@ -269,7 +279,7 @@ export async function GET(request: Request) {
       
       // Check if position has lat/lng format
       if (position && typeof position === 'object') {
-        if (position.lat !== undefined && position.lng !== undefined) {
+        if ('lat' in position && 'lng' in position) {
           console.log(`[API] Building ${fields.BuildingId || record.id} has lat/lng position:`, position);
         } else {
           console.warn(`[API] Building ${fields.BuildingId || record.id} does NOT have lat/lng position:`, position);
@@ -285,7 +295,7 @@ export async function GET(request: Request) {
         };
       } 
       // If position has x/y/z format but not lat/lng, convert to lat/lng
-      else if (position.x !== undefined && position.z !== undefined && position.lat === undefined) {
+      else if ('x' in position && 'z' in position && !('lat' in position)) {
         // Convert from Three.js coordinates back to lat/lng
         const bounds = {
           centerLat: 45.4371,
@@ -295,8 +305,8 @@ export async function GET(request: Request) {
         };
             
         // Reverse the conversion formula - this is the inverse of normalizeCoordinates
-        const lat = bounds.centerLat + (-position.z / bounds.scale / bounds.latCorrectionFactor);
-        const lng = bounds.centerLng + (position.x / bounds.scale);
+        const lat = bounds.centerLat + (-(position.z as number) / bounds.scale / bounds.latCorrectionFactor);
+        const lng = bounds.centerLng + ((position.x as number) / bounds.scale);
             
         position = {
           lat: parseFloat(lat.toFixed(10)),
@@ -306,7 +316,7 @@ export async function GET(request: Request) {
         console.log(`[API] Converted x/y/z position to lat/lng for building ${fields.BuildingId || record.id}:`, position);
       }
       // Ensure lat/lng values are parsed as floats with full precision
-      else if (position.lat !== undefined && position.lng !== undefined) {
+      else if ('lat' in position && 'lng' in position) {
         position = {
           lat: parseFloat(position.lat.toString()),
           lng: parseFloat(position.lng.toString())
