@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { eventBus } from '@/lib/eventBus';
 import { EventTypes } from '@/lib/eventTypes';
 import { BuildingData } from '@/lib/models/BuildingTypes';
@@ -26,6 +26,7 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ active }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const buildingMeshesRef = useRef<Map<string, THREE.Object3D>>(new Map());
+  const [active, setActive] = useState<boolean>(false);
   
   // Create renderer factory
   const rendererFactoryRef = useRef<BuildingRendererFactory | null>(null);
@@ -866,37 +867,3 @@ export default BuildingRenderer;
     return null;
   };
   
-  // Add effect to update building visibility based on camera distance
-  useEffect(() => {
-    if (!active) return;
-    if (!sceneRef.current) {
-      console.warn('BuildingRenderer: scene is not defined, cannot update building visibility');
-      return;
-    }
-    
-    // Function to update building visibility
-    const updateVisibility = () => {
-      updateBuildingVisibility();
-    };
-    
-    // Set up an interval to update visibility
-    const intervalId = setInterval(updateVisibility, 1000);
-    
-    // Also update on camera move
-    const handleCameraMove = () => {
-      updateBuildingVisibility();
-    };
-    
-    // Try to get controls
-    const camera = getCamera();
-    if (camera && camera.userData && camera.userData.controls) {
-      camera.userData.controls.addEventListener('change', handleCameraMove);
-    }
-    
-    return () => {
-      clearInterval(intervalId);
-      if (camera && camera.userData && camera.userData.controls) {
-        camera.userData.controls.removeEventListener('change', handleCameraMove);
-      }
-    };
-  }, [scene, active]);
