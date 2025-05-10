@@ -1327,7 +1327,7 @@ export default class SimplePolygonRenderer {
             document.body.style.cursor = 'pointer';
             
             // Emit hover event
-            eventBus.emit(EventTypes.CITIZEN_HOVER as string, {
+            eventBus.emit('CITIZEN_HOVER', {
               citizenId,
               data: intersected.userData.data
             });
@@ -1335,7 +1335,7 @@ export default class SimplePolygonRenderer {
         }
       } else {
         // No citizen hovered, emit null hover event
-        eventBus.emit(EventTypes.CITIZEN_HOVER as string, null);
+        eventBus.emit('CITIZEN_HOVER', null);
       }
       
       return;
@@ -1584,7 +1584,7 @@ export default class SimplePolygonRenderer {
           intersected.userData.pulseAnimation = true;
           
           // Emit selection event with more detailed data
-          eventBus.emit(EventTypes.CITIZEN_SELECTED, {
+          eventBus.emit('CITIZEN_SELECTED', {
             citizenId,
             data: citizenData,
             position: intersected.position.clone(),
@@ -1595,7 +1595,7 @@ export default class SimplePolygonRenderer {
           });
           
           // Also emit the show citizen details event
-          eventBus.emit(EventTypes.SHOW_CITIZEN_DETAILS, {
+          eventBus.emit('SHOW_CITIZEN_DETAILS', {
             citizen: citizenData,
             position: intersected.position.clone(),
             screenPosition: {
@@ -1636,7 +1636,7 @@ export default class SimplePolygonRenderer {
           this.selectedCitizenId = null;
           
           // Emit deselection event
-          eventBus.emit(EventTypes.CITIZEN_SELECTED, null);
+          eventBus.emit('CITIZEN_SELECTED', null);
         }
       }
     }
