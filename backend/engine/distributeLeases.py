@@ -22,8 +22,10 @@ from collections import defaultdict
 from pyairtable import Api, Table
 from dotenv import load_dotenv
 
-# Tax rate for lease payments (20%)
-REPUBLICAN_TAX_RATE = 0.20
+# Base tax rate for lease payments (20%)
+BASE_TAX_RATE = 0.20
+# Maximum tax rate for undeveloped land (50%)
+MAX_TAX_RATE = 0.50
 
 # Set up logging
 logging.basicConfig(
@@ -247,6 +249,39 @@ def create_notification(tables, user: str, content: str, details: Dict) -> Optio
         log.error(f"Error creating notification for user {user}: {e}")
         return None
 
+def calculate_tax_rate(land: Dict) -> float:
+    """Calculate the tax rate based on land development.
+    
+    The tax rate varies from 20% to 50% based on the ratio of actual buildings
+    to building points on the land. More developed land (higher ratio) gets a lower tax rate.
+    """
+    # Get building points count
+    building_points_count = land['fields'].get('BuildingPointsCount', 0)
+    if not building_points_count or building_points_count <= 0:
+        # If no building points data, use maximum tax rate
+        return MAX_TAX_RATE
+    
+    # Get actual buildings count (if available)
+    buildings_count = land['fields'].get('BuildingsCount', 0)
+    if not buildings_count:
+        # Try to estimate from other fields if available
+        buildings_count = 1  # Default to at least 1 building
+    
+    # Calculate development ratio (buildings / building points)
+    # Capped at 1.0 to ensure ratio doesn't exceed 100%
+    development_ratio = min(float(buildings_count) / float(building_points_count), 1.0)
+    
+    # Calculate tax rate: scales from MAX_TAX_RATE to BASE_TAX_RATE as development increases
+    tax_rate = MAX_TAX_RATE - (development_ratio * (MAX_TAX_RATE - BASE_TAX_RATE))
+    
+    # Ensure tax rate stays within bounds
+    tax_rate = max(BASE_TAX_RATE, min(tax_rate, MAX_TAX_RATE))
+    
+    log.info(f"Land development: {buildings_count}/{building_points_count} buildings = {development_ratio:.2f} ratio")
+    log.info(f"Calculated tax rate: {tax_rate:.2%}")
+    
+    return tax_rate
+
 def process_lease_payment(tables, land: Dict, building: Dict, dry_run: bool = False) -> Tuple[bool, float, float]:
     """Process a lease payment from a building owner to a land owner."""
     land_id = land['id']
@@ -280,12 +315,15 @@ def process_lease_payment(tables, land: Dict, building: Dict, dry_run: bool = Fa
         log.info(f"Building owner and land owner are the same ({building_owner}), skipping payment")
         return True, 0, 0  # Return True but 0 amount as this is not an error
     
-    # Calculate tax amount (20% of lease amount)
-    tax_amount = lease_amount * REPUBLICAN_TAX_RATE
+    # Calculate variable tax rate based on land development
+    tax_rate = calculate_tax_rate(land)
+    
+    # Calculate tax amount based on variable tax rate
+    tax_amount = lease_amount * tax_rate
     # Calculate net amount after tax
     net_amount = lease_amount - tax_amount
     
-    log.info(f"Lease amount: {lease_amount}, Tax (20%): {tax_amount}, Net to land owner: {net_amount}")
+    log.info(f"Lease amount: {lease_amount}, Tax ({tax_rate:.2%}): {tax_amount}, Net to land owner: {net_amount}")
     
     if dry_run:
         log.info(f"[DRY RUN] Would transfer {net_amount} ⚜️ Ducats from {building_owner} to {land_owner}")
@@ -370,13 +408,13 @@ def process_lease_payment(tables, land: Dict, building: Dict, dry_run: bool = Fa
     create_transaction_record(tables, building_owner, land_owner, net_amount, land_id, building_id)
     
     # 5. Create transaction record for tax payment
-    create_tax_transaction_record(tables, building_owner, "ConsiglioDeiDieci", tax_amount, land_id, building_id)
+    create_tax_transaction_record(tables, building_owner, "ConsiglioDeiDieci", tax_amount, land_id, building_id, tax_rate)
     
     log.info(f"Successfully processed lease payment: {net_amount} to {land_owner}, {tax_amount} tax to ConsiglioDeiDieci")
     
     return True, net_amount, tax_amount
 
-def create_tax_transaction_record(tables, from_user: str, to_user: str, amount: float, land_id: str, building_id: str) -> Optional[Dict]:
+def create_tax_transaction_record(tables, from_user: str, to_user: str, amount: float, land_id: str, building_id: str, tax_rate: float) -> Optional[Dict]:
     """Create a transaction record for a lease tax payment."""
     log.info(f"Creating tax transaction record: {from_user} -> {to_user}, amount: {amount}")
     
@@ -397,7 +435,7 @@ def create_tax_transaction_record(tables, from_user: str, to_user: str, amount: 
                 "land_id": land_id,
                 "building_id": building_id,
                 "payment_type": "lease_tax",
-                "tax_rate": f"{REPUBLICAN_TAX_RATE * 100}%",
+                "tax_rate": f"{tax_rate * 100:.2f}%",
                 "payment_date": now
             })
         })
@@ -420,7 +458,7 @@ def create_land_owner_summary(tables, land_owner: str, land_name: str, buildings
         "total_amount": total_amount,
         "buildings_count": len(buildings_data),
         "buildings": buildings_data,
-        "tax_rate": f"{REPUBLICAN_TAX_RATE * 100}%",
+        "tax_rate": "variable (20-50%)",
         "event_type": "lease_payments_received"
     }
     
@@ -439,7 +477,7 @@ def create_building_owner_summary(tables, building_owner: str, buildings_data: L
         "total_paid": total_amount + total_tax,
         "buildings_count": len(buildings_data),
         "buildings": buildings_data,
-        "tax_rate": f"{REPUBLICAN_TAX_RATE * 100}%",
+        "tax_rate": "variable (20-50%)",
         "event_type": "lease_payments_made"
     }
     
@@ -463,7 +501,7 @@ def create_admin_summary(tables, lease_summary) -> None:
             "failed_payments": lease_summary['failed'],
             "total_amount": lease_summary['total_amount'],
             "total_tax": lease_summary['total_tax'],
-            "tax_rate": f"{REPUBLICAN_TAX_RATE * 100}%",
+            "tax_rate": "variable (20-50%)",
             "top_gainers": [{"owner": owner, "amount": amount} for owner, amount in top_gainers],
             "top_losers": [{"owner": owner, "amount": -amount} for owner, amount in top_losers]
         }
