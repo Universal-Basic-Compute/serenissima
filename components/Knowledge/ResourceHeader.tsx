@@ -7,7 +7,7 @@ interface ResourceHeaderProps {
 
 const ResourceHeader: React.FC<ResourceHeaderProps> = ({ onClose }) => {
   return (
-    <div className="flex justify-between items-center p-4 border-b border-amber-700">
+    <div className="flex justify-between items-center p-4">
       <h2 className="text-3xl font-serif text-amber-500 px-4">
         Resource Encyclopedia of Venice
       </h2>
