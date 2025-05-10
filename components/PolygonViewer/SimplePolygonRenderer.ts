@@ -55,6 +55,9 @@ export default class SimplePolygonRenderer {
   private measurementLabel: THREE.Sprite | null = null;
   private measurementCircle: THREE.Mesh | null = null;
   
+  // Properties for path visualization
+  private pathVisualization: THREE.Object3D[] = [];
+  
   constructor({ 
     scene, 
     polygons, 
@@ -1741,6 +1744,25 @@ export default class SimplePolygonRenderer {
     
     this.measurementPoints = [];
     
+    // Clean up path visualization
+    this.pathVisualization.forEach(object => {
+      this.scene.remove(object);
+      if (object instanceof THREE.Mesh) {
+        if (object.geometry) object.geometry.dispose();
+        if (object.material instanceof THREE.Material) {
+          object.material.dispose();
+        } else if (Array.isArray(object.material)) {
+          object.material.forEach(m => m.dispose());
+        }
+      } else if (object instanceof THREE.Line) {
+        if (object.geometry) object.geometry.dispose();
+        if (object.material instanceof THREE.Material) {
+          object.material.dispose();
+        }
+      }
+    });
+    this.pathVisualization = [];
+    
     this.bridgePointMarkers = [];
     this.dockPointMarkers = [];
     this.buildingPointMarkers = [];
@@ -2498,6 +2520,9 @@ export default class SimplePolygonRenderer {
     // If we have two points, create or update the line and distance label
     if (this.measurementPoints.length === 2) {
       this.updateMeasurementLine();
+      
+      // Calculate path between points
+      this.calculatePath();
     }
     
     // If we have more than two points, remove the oldest point and marker
@@ -2516,6 +2541,9 @@ export default class SimplePolygonRenderer {
       
       // Update the line with the new points
       this.updateMeasurementLine();
+      
+      // Recalculate path
+      this.calculatePath();
     }
   }
 
@@ -2650,5 +2678,374 @@ export default class SimplePolygonRenderer {
       Math.sin(dLon/2) * Math.sin(dLon/2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     return R * c;
+  }
+  
+  /**
+   * Calculate path between measurement points
+   */
+  private calculatePath(): void {
+    // Only calculate path if we have exactly 2 measurement points
+    if (this.measurementPoints.length !== 2) return;
+    
+    // Get the start and end points
+    const start = this.measurementPoints[0];
+    const end = this.measurementPoints[1];
+    
+    // Convert 3D points back to lat/lng
+    const startLatLng = {
+      lat: this.bounds.centerLat + (start.x / this.bounds.scale) / this.bounds.latCorrectionFactor,
+      lng: this.bounds.centerLng - (start.z / this.bounds.scale)
+    };
+    
+    const endLatLng = {
+      lat: this.bounds.centerLat + (end.x / this.bounds.scale) / this.bounds.latCorrectionFactor,
+      lng: this.bounds.centerLng - (end.z / this.bounds.scale)
+    };
+    
+    // Call the pathfinder service to find a path
+    this.findPathBetweenPoints(startLatLng, endLatLng);
+  }
+  
+  /**
+   * Find a path between two points using bridges and staying on land
+   */
+  private async findPathBetweenPoints(start: {lat: number, lng: number}, end: {lat: number, lng: number}): Promise<void> {
+    console.log('Finding path between points:', start, end);
+    
+    // Remove any existing path visualization
+    this.clearPathVisualization();
+    
+    try {
+      // Create a graph of polygons and bridges
+      const graph = this.buildNavigationGraph();
+      
+      // Find the polygons containing the start and end points
+      const startPolygon = this.findPolygonContainingPoint(start);
+      const endPolygon = this.findPolygonContainingPoint(end);
+      
+      if (!startPolygon || !endPolygon) {
+        console.warn('Start or end point is not on land');
+        return;
+      }
+      
+      console.log(`Start point in polygon ${startPolygon.id}, end point in polygon ${endPolygon.id}`);
+      
+      // If start and end are in the same polygon, draw a direct path
+      if (startPolygon.id === endPolygon.id) {
+        this.drawDirectPath(this.measurementPoints[0], this.measurementPoints[1]);
+        return;
+      }
+      
+      // Find the shortest path through the graph
+      const path = this.findShortestPath(graph, startPolygon.id, endPolygon.id);
+      
+      if (!path || path.length === 0) {
+        console.warn('No path found between points');
+        return;
+      }
+      
+      console.log('Path found:', path);
+      
+      // Visualize the path
+      this.visualizePath(path, start, end);
+      
+    } catch (error) {
+      console.error('Error finding path:', error);
+    }
+  }
+  
+  /**
+   * Build a navigation graph of polygons connected by bridges
+   */
+  private buildNavigationGraph(): Record<string, string[]> {
+    const graph: Record<string, string[]> = {};
+    
+    // Initialize graph with empty adjacency lists
+    this.polygons.forEach(polygon => {
+      graph[polygon.id] = [];
+    });
+    
+    // Add bridge connections to the graph
+    this.polygons.forEach(polygon => {
+      if (polygon.bridgePoints) {
+        polygon.bridgePoints.forEach(bridgePoint => {
+          if (bridgePoint.connection && bridgePoint.connection.targetPolygonId) {
+            // Add bidirectional connection
+            graph[polygon.id].push(bridgePoint.connection.targetPolygonId);
+            
+            // Ensure the target polygon exists in the graph
+            if (!graph[bridgePoint.connection.targetPolygonId]) {
+              graph[bridgePoint.connection.targetPolygonId] = [];
+            }
+            
+            // Add the reverse connection
+            graph[bridgePoint.connection.targetPolygonId].push(polygon.id);
+          }
+        });
+      }
+    });
+    
+    console.log('Built navigation graph with', Object.keys(graph).length, 'nodes');
+    return graph;
+  }
+  
+  /**
+   * Find the polygon containing a point
+   */
+  private findPolygonContainingPoint(point: {lat: number, lng: number}): Polygon | null {
+    for (const polygon of this.polygons) {
+      if (this.isPointInPolygon(point, polygon.coordinates)) {
+        return polygon;
+      }
+    }
+    return null;
+  }
+  
+  /**
+   * Check if a point is inside a polygon
+   */
+  private isPointInPolygon(point: {lat: number, lng: number}, polygon: {lat: number, lng: number}[]): boolean {
+    // Ray casting algorithm
+    let inside = false;
+    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+      const xi = polygon[i].lng, yi = polygon[i].lat;
+      const xj = polygon[j].lng, yj = polygon[j].lat;
+      
+      const intersect = ((yi > point.lat) !== (yj > point.lat))
+          && (point.lng < (xj - xi) * (point.lat - yi) / (yj - yi) + xi);
+      if (intersect) inside = !inside;
+    }
+    
+    return inside;
+  }
+  
+  /**
+   * Find the shortest path between two nodes in a graph using Dijkstra's algorithm
+   */
+  private findShortestPath(graph: Record<string, string[]>, start: string, end: string): string[] {
+    // Initialize distances with infinity for all nodes except the start
+    const distances: Record<string, number> = {};
+    const previous: Record<string, string | null> = {};
+    const unvisited = new Set<string>();
+    
+    // Initialize all nodes
+    for (const node in graph) {
+      distances[node] = node === start ? 0 : Infinity;
+      previous[node] = null;
+      unvisited.add(node);
+    }
+    
+    // Process nodes until we've visited all or found the end
+    while (unvisited.size > 0) {
+      // Find the unvisited node with the smallest distance
+      let current: string | null = null;
+      let smallestDistance = Infinity;
+      
+      for (const node of unvisited) {
+        if (distances[node] < smallestDistance) {
+          smallestDistance = distances[node];
+          current = node;
+        }
+      }
+      
+      // If we can't find a node or we've reached the end, break
+      if (current === null || current === end || smallestDistance === Infinity) {
+        break;
+      }
+      
+      // Remove current from unvisited
+      unvisited.delete(current);
+      
+      // Check all neighbors of current
+      for (const neighbor of graph[current]) {
+        if (!unvisited.has(neighbor)) continue;
+        
+        // Calculate distance to neighbor through current
+        // For simplicity, we're using 1 as the distance between any connected nodes
+        const distance = distances[current] + 1;
+        
+        // If this path is shorter, update the distance and previous node
+        if (distance < distances[neighbor]) {
+          distances[neighbor] = distance;
+          previous[neighbor] = current;
+        }
+      }
+    }
+    
+    // Reconstruct the path
+    const path: string[] = [];
+    let current = end;
+    
+    // If there's no path to the end, return empty array
+    if (previous[end] === null && end !== start) {
+      return [];
+    }
+    
+    // Build the path by following the previous pointers
+    while (current !== null) {
+      path.unshift(current);
+      current = previous[current] || null;
+    }
+    
+    return path;
+  }
+  
+  /**
+   * Draw a direct path between two points
+   */
+  private drawDirectPath(start: THREE.Vector3, end: THREE.Vector3): void {
+    // Create line geometry
+    const lineGeometry = new THREE.BufferGeometry();
+    const vertices = new Float32Array([
+      start.x, start.y + 0.15, start.z,
+      end.x, end.y + 0.15, end.z
+    ]);
+    lineGeometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+    
+    // Create line material
+    const lineMaterial = new THREE.LineBasicMaterial({
+      color: 0x00FF00, // Green color for direct path
+      linewidth: 3
+    });
+    
+    // Create line
+    const pathLine = new THREE.Line(lineGeometry, lineMaterial);
+    pathLine.renderOrder = 101;
+    this.scene.add(pathLine);
+    
+    // Store reference for cleanup
+    this.pathVisualization.push(pathLine);
+  }
+  
+  /**
+   * Visualize a path through multiple polygons
+   */
+  private visualizePath(path: string[], start: {lat: number, lng: number}, end: {lat: number, lng: number}): void {
+    // If path is empty, return
+    if (path.length === 0) return;
+    
+    // Create an array to store the path points
+    const pathPoints: THREE.Vector3[] = [];
+    
+    // Add the start point
+    const startPoint = this.measurementPoints[0];
+    pathPoints.push(startPoint);
+    
+    // For each polygon in the path, find the bridge points to the next polygon
+    for (let i = 0; i < path.length - 1; i++) {
+      const currentPolygonId = path[i];
+      const nextPolygonId = path[i + 1];
+      
+      // Find the current polygon
+      const currentPolygon = this.polygons.find(p => p.id === currentPolygonId);
+      if (!currentPolygon || !currentPolygon.bridgePoints) continue;
+      
+      // Find the bridge point connecting to the next polygon
+      const bridgePoint = currentPolygon.bridgePoints.find(bp => 
+        bp.connection && bp.connection.targetPolygonId === nextPolygonId
+      );
+      
+      if (bridgePoint) {
+        // Add the bridge point to the path
+        const edgeCoord = normalizeCoordinates(
+          [bridgePoint.edge],
+          this.bounds.centerLat,
+          this.bounds.centerLng,
+          this.bounds.scale,
+          this.bounds.latCorrectionFactor
+        )[0];
+        
+        // Create a 3D point for the bridge
+        const bridgePosition = new THREE.Vector3(edgeCoord.x, 0.15, -edgeCoord.y);
+        pathPoints.push(bridgePosition);
+        
+        // If there's a connection point, add it too
+        if (bridgePoint.connection && bridgePoint.connection.targetPoint) {
+          const targetCoord = normalizeCoordinates(
+            [bridgePoint.connection.targetPoint],
+            this.bounds.centerLat,
+            this.bounds.centerLng,
+            this.bounds.scale,
+            this.bounds.latCorrectionFactor
+          )[0];
+          
+          // Create a 3D point for the target
+          const targetPosition = new THREE.Vector3(targetCoord.x, 0.15, -targetCoord.y);
+          pathPoints.push(targetPosition);
+        }
+      }
+    }
+    
+    // Add the end point
+    const endPoint = this.measurementPoints[1];
+    pathPoints.push(endPoint);
+    
+    // Create a smooth curve through the points
+    const curve = new THREE.CatmullRomCurve3(pathPoints);
+    const points = curve.getPoints(50 * pathPoints.length); // More points for smoother curve
+    
+    // Create line geometry
+    const lineGeometry = new THREE.BufferGeometry().setFromPoints(points);
+    
+    // Create line material
+    const lineMaterial = new THREE.LineBasicMaterial({
+      color: 0x00AAFF, // Blue color for path
+      linewidth: 3
+    });
+    
+    // Create line
+    const pathLine = new THREE.Line(lineGeometry, lineMaterial);
+    pathLine.renderOrder = 101;
+    this.scene.add(pathLine);
+    
+    // Store reference for cleanup
+    this.pathVisualization.push(pathLine);
+    
+    // Add markers at bridge points
+    for (let i = 1; i < pathPoints.length - 1; i++) {
+      const geometry = new THREE.SphereGeometry(0.2, 16, 16);
+      const material = new THREE.MeshBasicMaterial({
+        color: 0xFFAA00, // Orange color for bridge points
+        transparent: true,
+        opacity: 0.8
+      });
+      
+      const marker = new THREE.Mesh(geometry, material);
+      marker.position.copy(pathPoints[i]);
+      marker.renderOrder = 102;
+      this.scene.add(marker);
+      
+      // Store reference for cleanup
+      this.pathVisualization.push(marker);
+    }
+  }
+  
+  /**
+   * Clear path visualization
+   */
+  private clearPathVisualization(): void {
+    // Remove any existing path visualization
+    if (!this.pathVisualization) {
+      this.pathVisualization = [];
+    }
+    
+    this.pathVisualization.forEach(object => {
+      this.scene.remove(object);
+      if (object instanceof THREE.Mesh) {
+        if (object.geometry) object.geometry.dispose();
+        if (object.material instanceof THREE.Material) {
+          object.material.dispose();
+        } else if (Array.isArray(object.material)) {
+          object.material.forEach(m => m.dispose());
+        }
+      } else if (object instanceof THREE.Line) {
+        if (object.geometry) object.geometry.dispose();
+        if (object.material instanceof THREE.Material) {
+          object.material.dispose();
+        }
+      }
+    });
+    
+    this.pathVisualization = [];
   }
 }
