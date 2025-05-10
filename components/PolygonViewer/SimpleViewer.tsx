@@ -389,7 +389,12 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
     const resourceDisplay = new ResourceDisplayManager({
       scene,
       camera: cameraController.camera,
-      bounds
+      bounds: {
+        centerLat: bounds.center.lat,
+        centerLng: bounds.center.lng,
+        scale: bounds.width / 0.01, // Convert width to approximate scale
+        latCorrectionFactor: 1.0
+      }
     });
     
     // Initialize the resource display

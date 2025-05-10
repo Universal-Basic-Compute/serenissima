@@ -16,10 +16,13 @@ export interface ResourceDisplayOptions {
   scene: THREE.Scene;
   camera: THREE.PerspectiveCamera;
   bounds: {
-    centerLat: number;
-    centerLng: number;
-    scale: number;
-    latCorrectionFactor: number;
+    centerLat?: number;
+    centerLng?: number;
+    scale?: number;
+    latCorrectionFactor?: number;
+    center?: { lat: number, lng: number };
+    width?: number;
+    height?: number;
   };
 }
 
@@ -55,13 +58,21 @@ export class ResourceDisplayManager {
   constructor(options: ResourceDisplayOptions) {
     this.scene = options.scene;
     this.camera = options.camera;
-    this.bounds = options.bounds;
+    this.bounds = options.bounds || {
+      centerLat: 45.4371,
+      centerLng: 12.3326,
+      scale: 1000,
+      latCorrectionFactor: 1.0
+    };
     this.raycaster = new THREE.Raycaster();
     this.mouse = new THREE.Vector2();
 
     // Create event handlers
     this.mouseMoveHandler = this.handleMouseMove.bind(this);
     this.mouseClickHandler = this.handleMouseClick.bind(this);
+    
+    // Log the bounds for debugging
+    console.log('ResourceDisplayManager initialized with bounds:', this.bounds);
   }
 
   /**
@@ -862,8 +873,27 @@ export class ResourceDisplayManager {
    */
   private latLngToScenePosition(lat: number, lng: number): THREE.Vector3 {
     // Calculate position relative to center
-    const x = (lng - this.bounds.centerLng) * this.bounds.scale;
-    const z = -(lat - this.bounds.centerLat) * this.bounds.scale * this.bounds.latCorrectionFactor;
+    let x, z;
+    
+    // Handle both bounds formats
+    if (this.bounds.centerLat !== undefined && this.bounds.centerLng !== undefined && this.bounds.scale !== undefined) {
+      // Original format
+      const latCorrectionFactor = this.bounds.latCorrectionFactor || 1.0;
+      x = (lng - this.bounds.centerLng) * this.bounds.scale;
+      z = -(lat - this.bounds.centerLat) * this.bounds.scale * latCorrectionFactor;
+    } else if (this.bounds.center && this.bounds.width !== undefined) {
+      // Alternative format from SimplePolygonRenderer
+      const centerLat = this.bounds.center.lat || 0;
+      const centerLng = this.bounds.center.lng || 0;
+      const scale = this.bounds.width ? this.bounds.width / 0.01 : 1000; // Approximate scale from width
+      x = (lng - centerLng) * scale;
+      z = -(lat - centerLat) * scale;
+    } else {
+      // Fallback to default values
+      console.warn('Invalid bounds format, using default values');
+      x = lng * 1000;
+      z = -lat * 1000;
+    }
     
     // Set y position slightly above the ground
     const y = 1.5;
