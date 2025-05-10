@@ -1309,17 +1309,15 @@ export default class SimplePolygonRenderer {
           )[0];
           
           // Create a marker for the bridge point
-          const geometry = new THREE.CircleGeometry(2.0, 16); // Much larger size (from 0.6 to 2.0)
+          const geometry = new THREE.SphereGeometry(1.0, 16, 16); // Use sphere with radius 1.0
           const material = new THREE.MeshBasicMaterial({
             color: 0xFF0000, // Bright red for maximum visibility
-            side: THREE.DoubleSide,
             transparent: false, // No transparency
             opacity: 1.0
           });
           
           const marker = new THREE.Mesh(geometry, material);
           marker.position.set(normalizedCoord.x, 5.0, -normalizedCoord.y); // Much higher position (from 1.0 to 5.0)
-          marker.rotation.x = -Math.PI / 2; // Make it horizontal
           marker.renderOrder = 1000; // Extremely high render order
           
           // Add metadata for tooltips
@@ -1356,17 +1354,15 @@ export default class SimplePolygonRenderer {
           )[0];
           
           // Create a marker for the dock point (edge)
-          const edgeGeometry = new THREE.CircleGeometry(2.0, 16); // Much larger
+          const edgeGeometry = new THREE.SphereGeometry(1.0, 16, 16); // Use sphere with radius 1.0
           const edgeMaterial = new THREE.MeshBasicMaterial({
             color: 0x00FF00, // Bright green for maximum visibility
-            side: THREE.DoubleSide,
             transparent: false,
             opacity: 1.0
           });
           
           const edgeMarker = new THREE.Mesh(edgeGeometry, edgeMaterial);
           edgeMarker.position.set(edgeCoord.x, 5.0, -edgeCoord.y); // Much higher
-          edgeMarker.rotation.x = -Math.PI / 2; // Make it horizontal
           edgeMarker.renderOrder = 1000; // Extremely high render order
           
           // Add metadata for tooltips
@@ -1399,17 +1395,15 @@ export default class SimplePolygonRenderer {
           this.dockPointMarkers.push(line); // Add to dock markers for cleanup
           
           // Create a marker for the water point
-          const waterGeometry = new THREE.CircleGeometry(1.5, 16); // Much larger
+          const waterGeometry = new THREE.SphereGeometry(0.8, 16, 16); // Use sphere with radius 0.8
           const waterMaterial = new THREE.MeshBasicMaterial({
             color: 0x0000FF, // Bright blue
-            side: THREE.DoubleSide,
             transparent: false,
             opacity: 1.0
           });
           
           const waterMarker = new THREE.Mesh(waterGeometry, waterMaterial);
           waterMarker.position.set(waterCoord.x, 5.0, -waterCoord.y); // Much higher
-          waterMarker.rotation.x = -Math.PI / 2; // Make it horizontal
           waterMarker.renderOrder = 1000; // Extremely high render order
           
           // Add metadata for tooltips
@@ -1426,6 +1420,6 @@ export default class SimplePolygonRenderer {
       }
     });
     
-    console.log(`DEBUG: Created ${this.bridgePointMarkers.length} bridge markers and ${this.dockPointMarkers.length} dock markers at height 5.0 with size 2.0`);
+    console.log(`DEBUG: Created ${this.bridgePointMarkers.length} bridge markers and ${this.dockPointMarkers.length} dock markers as 3D spheres at height 5.0`);
   }
 }
