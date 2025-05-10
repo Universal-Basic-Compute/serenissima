@@ -2160,8 +2160,8 @@ async def apply_for_loan(loan_application: dict):
                 
                 # Create a new loan record instead of updating the template
                 new_loan = {
-                    "Name": f"Official Loan - {borrower}",
-                    "Borrower": borrower,
+                    "Name": f"Official Loan - {borrower_username}",
+                    "Borrower": borrower_username,
                     "Lender": lender,
                     "Status": "active",  # Set to active immediately
                     "Type": "official",  # Mark as an official loan
