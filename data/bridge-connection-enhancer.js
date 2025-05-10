@@ -172,7 +172,8 @@ Example format:
             messages: [
               { role: 'user', content: prompt }
             ],
-            response_format: { type: "json_object" } // Request JSON format
+            system: "You are a helpful assistant that generates historically accurate bridge names for Renaissance Venice. Always respond with valid JSON.",
+            response_format: { type: "json" } // Changed from "json_object" to "json"
           },
           {
             headers: {
