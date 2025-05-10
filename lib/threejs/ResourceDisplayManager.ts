@@ -280,16 +280,17 @@ export class ResourceDisplayManager {
    */
   private async loadResources(): Promise<void> {
     try {
-      // Get the username instead of wallet address
+      // Get the username from the utility function
       const username = getUsername();
-      let queryParams = '';
       
-      if (username) {
-        queryParams = `?owner=${username}`;
-      }
+      // Always include the username parameter to filter by owner
+      // This ensures we only fetch resources owned by the current user
+      const queryParams = username ? `?owner=${encodeURIComponent(username)}` : '';
 
-      // Use the correct API URL (Next.js API routes run on the same port as the app)
+      // Use the correct API URL with query parameters
       const apiUrl = '/api/resources' + queryParams;
+      
+      console.log(`Loading resources for owner: ${username || 'unknown'}`);
       
       const response = await fetch(apiUrl, {
         method: 'GET',
@@ -317,7 +318,7 @@ export class ResourceDisplayManager {
         this.resources = [];
       }
       
-      console.log(`Loaded ${this.resources.length} resources`);
+      console.log(`Loaded ${this.resources.length} resources for user ${username || 'unknown'}`);
     } catch (error) {
       console.error('Error loading resources:', error);
       this.resources = [];
