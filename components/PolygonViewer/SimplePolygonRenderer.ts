@@ -1351,9 +1351,9 @@ export default class SimplePolygonRenderer {
       // Process bridge points
       if (polygon.bridgePoints && Array.isArray(polygon.bridgePoints) && polygon.bridgePoints.length > 0) {
         polygon.bridgePoints.forEach((point, index) => {
-          console.log(`DEBUG: Creating bridge point marker for polygon ${polygon.id}, point ${index}`);
-          console.log(`DEBUG: Bridge point coordinates:`, point.edge);
-          
+          console.log(`Creating bridge point marker for polygon ${polygon.id}, point ${index}`);
+          console.log(`Bridge point coordinates:`, point.edge);
+        
           const normalizedCoord = normalizeCoordinates(
             [point.edge],
             this.bounds.centerLat,
@@ -1361,9 +1361,9 @@ export default class SimplePolygonRenderer {
             this.bounds.scale,
             this.bounds.latCorrectionFactor
           )[0];
-          
-          console.log(`DEBUG: Normalized coordinates for bridge point:`, normalizedCoord);
-          
+        
+          console.log(`Normalized coordinates for bridge point:`, normalizedCoord);
+        
           // Create a marker for the bridge point
           const geometry = new THREE.SphereGeometry(1.0, 16, 16); // Use sphere with radius 1.0
           const material = new THREE.MeshBasicMaterial({
@@ -1371,13 +1371,13 @@ export default class SimplePolygonRenderer {
             transparent: false, // No transparency
             opacity: 1.0
           });
-          
+        
           const marker = new THREE.Mesh(geometry, material);
           marker.position.set(normalizedCoord.x, 5.0, -normalizedCoord.y); // Much higher position (from 1.0 to 5.0)
           marker.renderOrder = 1000; // Extremely high render order
-          
-          console.log(`DEBUG: Bridge marker position set to:`, marker.position);
-          
+        
+          console.log(`Bridge marker position set to:`, marker.position);
+        
           // Add metadata for tooltips
           marker.userData = {
             id: `bridge-${polygon.id}-${index}`,
@@ -1385,7 +1385,7 @@ export default class SimplePolygonRenderer {
             polygonId: polygon.id,
             position: `${point.edge.lat.toFixed(6)}, ${point.edge.lng.toFixed(6)}`
           };
-          
+        
           this.scene.add(marker);
           this.bridgePointMarkers.push(marker);
         });
@@ -1394,10 +1394,10 @@ export default class SimplePolygonRenderer {
       // Process dock points
       if (polygon.dockPoints && Array.isArray(polygon.dockPoints) && polygon.dockPoints.length > 0) {
         polygon.dockPoints.forEach((point, index) => {
-          console.log(`DEBUG: Creating dock point markers for polygon ${polygon.id}, point ${index}`);
-          console.log(`DEBUG: Dock edge point coordinates:`, point.edge);
-          console.log(`DEBUG: Dock water point coordinates:`, point.water);
-          
+          console.log(`Creating dock point markers for polygon ${polygon.id}, point ${index}`);
+          console.log(`Dock edge point coordinates:`, point.edge);
+          console.log(`Dock water point coordinates:`, point.water);
+        
           // Create markers for both edge and water points
           const edgeCoord = normalizeCoordinates(
             [point.edge],
@@ -1406,7 +1406,7 @@ export default class SimplePolygonRenderer {
             this.bounds.scale,
             this.bounds.latCorrectionFactor
           )[0];
-          
+        
           const waterCoord = normalizeCoordinates(
             [point.water],
             this.bounds.centerLat,
@@ -1414,10 +1414,10 @@ export default class SimplePolygonRenderer {
             this.bounds.scale,
             this.bounds.latCorrectionFactor
           )[0];
-          
-          console.log(`DEBUG: Normalized edge coordinates:`, edgeCoord);
-          console.log(`DEBUG: Normalized water coordinates:`, waterCoord);
-          
+        
+          console.log(`Normalized edge coordinates:`, edgeCoord);
+          console.log(`Normalized water coordinates:`, waterCoord);
+        
           // Create a marker for the dock point (edge)
           const edgeGeometry = new THREE.SphereGeometry(1.0, 16, 16); // Use sphere with radius 1.0
           const edgeMaterial = new THREE.MeshBasicMaterial({
@@ -1425,11 +1425,11 @@ export default class SimplePolygonRenderer {
             transparent: false,
             opacity: 1.0
           });
-          
+        
           const edgeMarker = new THREE.Mesh(edgeGeometry, edgeMaterial);
           edgeMarker.position.set(edgeCoord.x, 5.0, -edgeCoord.y); // Much higher
           edgeMarker.renderOrder = 1000; // Extremely high render order
-          
+        
           // Add metadata for tooltips
           edgeMarker.userData = {
             id: `dock-edge-${polygon.id}-${index}`,
@@ -1437,28 +1437,28 @@ export default class SimplePolygonRenderer {
             polygonId: polygon.id,
             position: `${point.edge.lat.toFixed(6)}, ${point.edge.lng.toFixed(6)}`
           };
-          
+        
           this.scene.add(edgeMarker);
           this.dockPointMarkers.push(edgeMarker);
-          
+        
           // Create a line connecting edge to water
           const lineGeometry = new THREE.BufferGeometry().setFromPoints([
             new THREE.Vector3(edgeCoord.x, 5.0, -edgeCoord.y), // Much higher
             new THREE.Vector3(waterCoord.x, 5.0, -waterCoord.y) // Much higher
           ]);
-          
+        
           const lineMaterial = new THREE.LineBasicMaterial({
             color: 0xFFFF00, // Bright yellow
             linewidth: 5, // Much thicker line (from 2 to 5)
             transparent: false
           });
-          
+        
           const line = new THREE.Line(lineGeometry, lineMaterial);
           line.renderOrder = 999; // Extremely high render order
-          
+        
           this.scene.add(line);
           this.dockPointMarkers.push(line); // Add to dock markers for cleanup
-          
+        
           // Create a marker for the water point
           const waterGeometry = new THREE.SphereGeometry(0.8, 16, 16); // Use sphere with radius 0.8
           const waterMaterial = new THREE.MeshBasicMaterial({
@@ -1466,11 +1466,11 @@ export default class SimplePolygonRenderer {
             transparent: false,
             opacity: 1.0
           });
-          
+        
           const waterMarker = new THREE.Mesh(waterGeometry, waterMaterial);
           waterMarker.position.set(waterCoord.x, 5.0, -waterCoord.y); // Much higher
           waterMarker.renderOrder = 1000; // Extremely high render order
-          
+        
           // Add metadata for tooltips
           waterMarker.userData = {
             id: `dock-water-${polygon.id}-${index}`,
@@ -1478,7 +1478,7 @@ export default class SimplePolygonRenderer {
             polygonId: polygon.id,
             position: `${point.water.lat.toFixed(6)}, ${point.water.lng.toFixed(6)}`
           };
-          
+        
           this.scene.add(waterMarker);
           this.dockPointMarkers.push(waterMarker);
         });
