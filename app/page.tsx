@@ -554,66 +554,64 @@ export default function SimplePage() {
       
       {/* Buildings Toolbar - only visible in buildings view */}
       {activeView === 'buildings' && (
-        <SceneReadyProvider>
-          <>
-            {/* First ensure buildings are visible */}
-            <script dangerouslySetInnerHTML={{
-              __html: `
-                // Force buildings to be visible immediately
-                window.dispatchEvent(new CustomEvent('showBuildings'));
-                
-                // Also ensure buildings are visible with debug markers
-                setTimeout(() => {
-                  console.log('Dispatching ensureBuildingsVisible event from inline script');
-                  window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
-                }, 2000);
-              `
-            }} />
-            
-            {/* Then show the toolbar */}
-            <BuildingsToolbar 
-              polygons={typeof window !== 'undefined' ? window.__polygonData || [] : []}
-              onRefreshBuildings={() => {
-                // Refresh buildings by dispatching an event
-                eventBus.emit(EventTypes.BUILDING_PLACED, { refresh: true });
-                
-                // Also ensure buildings are visible after refresh
-                setTimeout(() => {
-                  window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
-                }, 1000);
-              }}
-            />
-            
-            {/* Finally show the building menu */}
-            <BuildingMenu 
-              visible={true} 
-              onClose={() => {
-                // Keep the buildings view active, just close the menu
-                setActiveView('buildings');
-                // Show the 3D view again
-                setShow3DView(true);
-                
-                // Ensure buildings are visible after closing menu
-                setTimeout(() => {
-                  window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
-                }, 500);
-              }}
-              onBuildingSelect={() => {
-                // Hide the 3D view when a building is selected
-                setShow3DView(false);
-              }}
-              onBuildingClose={() => {
-                // Show the 3D view again when the building detail is closed
-                setShow3DView(true);
-                
-                // Ensure buildings are visible after closing building detail
-                setTimeout(() => {
-                  window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
-                }, 500);
-              }}
-            />
-          </>
-        </SceneReadyProvider>
+        <>
+          {/* First ensure buildings are visible */}
+          <script dangerouslySetInnerHTML={{
+            __html: `
+              // Force buildings to be visible immediately
+              window.dispatchEvent(new CustomEvent('showBuildings'));
+              
+              // Also ensure buildings are visible with debug markers
+              setTimeout(() => {
+                console.log('Dispatching ensureBuildingsVisible event from inline script');
+                window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
+              }, 2000);
+            `
+          }} />
+          
+          {/* Then show the toolbar */}
+          <BuildingsToolbar 
+            polygons={typeof window !== 'undefined' ? window.__polygonData || [] : []}
+            onRefreshBuildings={() => {
+              // Refresh buildings by dispatching an event
+              eventBus.emit(EventTypes.BUILDING_PLACED, { refresh: true });
+              
+              // Also ensure buildings are visible after refresh
+              setTimeout(() => {
+                window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
+              }, 1000);
+            }}
+          />
+          
+          {/* Building menu */}
+          <BuildingMenu 
+            visible={true} 
+            onClose={() => {
+              // Keep the buildings view active, just close the menu
+              setActiveView('buildings');
+              // Show the 3D view again
+              setShow3DView(true);
+              
+              // Ensure buildings are visible after closing menu
+              setTimeout(() => {
+                window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
+              }, 500);
+            }}
+            onBuildingSelect={() => {
+              // Hide the 3D view when a building is selected
+              setShow3DView(false);
+            }}
+            onBuildingClose={() => {
+              // Show the 3D view again when the building detail is closed
+              setShow3DView(true);
+              
+              // Ensure buildings are visible after closing building detail
+              setTimeout(() => {
+                window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
+              }, 500);
+            }}
+          />
+        </>
       )}
       
       {/* Governance Panel */}

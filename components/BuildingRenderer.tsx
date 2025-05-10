@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import * as THREE from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { eventBus } from '@/lib/eventBus';
 import { EventTypes } from '@/lib/eventTypes';
 import { BuildingData } from '@/lib/models/BuildingTypes';
@@ -7,105 +8,20 @@ import buildingPositionManager from '@/lib/services/BuildingPositionManager';
 import buildingCacheService from '@/lib/services/BuildingCacheService';
 import buildingDataService from '@/lib/services/BuildingDataService';
 import { BuildingRendererFactory } from '@/lib/services/BuildingRendererFactory';
-import { useSceneReady } from '@/lib/components/SceneReadyProvider';
-
-// Add type declaration for window properties
-declare global {
-  interface Window {
-    __threeContext?: {
-      scene: THREE.Scene;
-      camera: THREE.PerspectiveCamera;
-      renderer: THREE.WebGLRenderer;
-    };
-  }
-  
-  // Add custom properties to HTMLCanvasElement
-  interface HTMLCanvasElement {
-    __scene?: THREE.Scene;
-    __camera?: THREE.PerspectiveCamera;
-    __renderer?: THREE.WebGLRenderer;
-  }
-}
 
 interface BuildingRendererProps {
-  scene?: THREE.Scene;
   active: boolean;
-  sceneReady?: boolean; // Prop to explicitly indicate scene readiness
 }
 
-const BuildingRenderer: React.FC<BuildingRendererProps> = ({ 
-  scene: providedScene, 
-  active,
-  sceneReady = false // Default to false
-}) => {
-  // Use the SceneReadyProvider hook to get scene readiness state
-  const { isSceneReady, scene: contextScene, camera: contextCamera } = useSceneReady();
-  
-  // Determine actual scene readiness by combining props and context
-  const actualSceneReady = sceneReady || isSceneReady;
-  
-  // Use scene from props or context, with fallback to window/canvas references
-  const [resolvedScene, setResolvedScene] = useState<THREE.Scene | null>(null);
+const BuildingRenderer: React.FC<BuildingRendererProps> = ({ active }) => {
+  // Create refs for canvas, scene, camera, renderer, and controls
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
-  const [isInitialized, setIsInitialized] = useState<boolean>(false);
+  const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
+  const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
+  const controlsRef = useRef<OrbitControls | null>(null);
   
-  // Initialize scene when component mounts or when scene readiness changes
-  useEffect(() => {
-    if (!active) return;
-    
-    // Don't proceed if scene is not ready
-    if (!actualSceneReady) {
-      console.log('BuildingRenderer: Waiting for scene to be ready');
-      return;
-    }
-    
-    console.log('BuildingRenderer: Scene is ready, initializing...');
-    
-    // Resolve scene in this priority order:
-    // 1. Provided via props
-    // 2. Available from SceneReadyContext
-    // 3. From window.__threeContext
-    // 4. From canvas element
-    
-    let sceneToUse: THREE.Scene | null = null;
-    
-    if (providedScene) {
-      console.log('BuildingRenderer: Using scene provided via props');
-      sceneToUse = providedScene;
-    } else if (contextScene) {
-      console.log('BuildingRenderer: Using scene from SceneReadyContext');
-      sceneToUse = contextScene;
-    } else if (typeof window !== 'undefined' && window.__threeContext && window.__threeContext.scene) {
-      console.log('BuildingRenderer: Using scene from window.__threeContext');
-      sceneToUse = window.__threeContext.scene;
-    } else if (typeof document !== 'undefined') {
-      const canvas = document.querySelector('canvas');
-      if (canvas && canvas.__scene) {
-        console.log('BuildingRenderer: Using scene from canvas.__scene');
-        sceneToUse = canvas.__scene;
-      }
-    }
-    
-    if (!sceneToUse) {
-      console.error('BuildingRenderer: Could not resolve a valid scene');
-      return;
-    }
-    
-    // Store the resolved scene
-    sceneRef.current = sceneToUse;
-    setResolvedScene(sceneToUse);
-    setIsInitialized(true);
-    
-    console.log('BuildingRenderer: Successfully initialized with scene', sceneToUse);
-    
-  }, [providedScene, contextScene, actualSceneReady, active]);
-  
-  // Don't proceed if not initialized
-  if (!isInitialized || !sceneRef.current) {
-    console.log('BuildingRenderer: Not initialized yet');
-    return null;
-  }
-  
+  // State for buildings and loading status
   const [buildings, setBuildings] = useState<BuildingData[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -114,137 +30,136 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
   // Create renderer factory
   const rendererFactoryRef = useRef<BuildingRendererFactory | null>(null);
   
-  // Initialize renderer factory and load buildings only after scene is resolved
+  // Initialize the scene, camera, and renderer
   useEffect(() => {
-    if (!active || !isInitialized || !resolvedScene) {
-      return;
-    }
+    if (!active || !canvasRef.current) return;
     
-    console.log('BuildingRenderer: Scene is resolved, initializing renderer factory');
+    console.log('BuildingRenderer: Initializing standalone scene');
     
-    try {
-      rendererFactoryRef.current = new BuildingRendererFactory({
-        scene: resolvedScene,
-        positionManager: buildingPositionManager,
-        cacheService: buildingCacheService
-      });
-      
-      console.log('BuildingRenderer: renderer factory initialized successfully');
-      
-      // Load buildings efficiently after factory is initialized
-      loadBuildingsEfficiently();
-      
-      // Start memory monitoring
-      const stopMemoryMonitoring = startMemoryMonitoring();
-      
-      // Add a delay to ensure buildings are loaded
-      const timer = setTimeout(() => {
-        if (resolvedScene) {
-          verifyAndFixBuildingPositions();
-          // Focus camera on buildings after fixing positions
-          ensureBuildingsVisible();
-        }
-      }, 2000);
-      
-      return () => {
-        clearTimeout(timer);
-        stopMemoryMonitoring();
-        
-        // Cleanup buildings when component unmounts
-        if (rendererFactoryRef.current) {
-          for (const [id, mesh] of buildingMeshesRef.current.entries()) {
-            const building = buildings.find(b => b.id === id) || { type: 'unknown' } as BuildingData;
-            const renderer = rendererFactoryRef.current.getRenderer(building.type);
-            renderer.dispose(mesh);
-          }
-        } else {
-          // Fallback if factory not available
-          for (const mesh of buildingMeshesRef.current.values()) {
-            if (resolvedScene) {
-              resolvedScene.remove(mesh);
-            }
-          }
-        }
-        
-        buildingMeshesRef.current.clear();
-      };
-    } catch (error) {
-      console.error('BuildingRenderer: error initializing renderer factory:', error);
-    }
-  }, [active, isInitialized, resolvedScene]);
-  
-  // Function to verify and fix building positions
-  const verifyAndFixBuildingPositions = () => {
-    if (!sceneRef.current) {
-      console.warn('Cannot verify building positions: scene is not defined');
-      return;
-    }
+    // Create scene
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x87CEEB); // Light sky blue
+    sceneRef.current = scene;
     
-    console.log('Verifying and fixing building positions...');
+    // Create camera
+    const camera = new THREE.PerspectiveCamera(
+      60, // Field of view
+      window.innerWidth / window.innerHeight, // Aspect ratio
+      1, // Near clipping plane
+      500 // Far clipping plane
+    );
+    camera.position.set(45, 20, 12); // Position camera
+    cameraRef.current = camera;
     
-    // Find all buildings in the scene
-    const buildings = [];
-    sceneRef.current.traverse((object) => {
-      if (object.userData && object.userData.buildingId) {
-        buildings.push(object);
-      }
+    // Create renderer
+    const renderer = new THREE.WebGLRenderer({ 
+      canvas: canvasRef.current,
+      antialias: true,
+      logarithmicDepthBuffer: true
+    });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    rendererRef.current = renderer;
+    
+    // Create controls
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.target.set(45, 0, 12);
+    controls.update();
+    controlsRef.current = controls;
+    
+    // Add lights
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+    scene.add(ambientLight);
+    
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    directionalLight.position.set(1, 1, 1);
+    directionalLight.castShadow = true;
+    directionalLight.shadow.mapSize.width = 2048;
+    directionalLight.shadow.mapSize.height = 2048;
+    scene.add(directionalLight);
+    
+    // Create a ground plane for reference
+    const groundGeometry = new THREE.PlaneGeometry(200, 200);
+    const groundMaterial = new THREE.MeshStandardMaterial({ 
+      color: 0xfff0c0,
+      roughness: 0.8,
+      metalness: 0.1
+    });
+    const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+    ground.rotation.x = -Math.PI / 2;
+    ground.receiveShadow = true;
+    scene.add(ground);
+    
+    // Initialize renderer factory
+    rendererFactoryRef.current = new BuildingRendererFactory({
+      scene: scene,
+      positionManager: buildingPositionManager,
+      cacheService: buildingCacheService
     });
     
-    console.log(`Found ${buildings.length} buildings to verify`);
-    
-    // Check each building's position
-    buildings.forEach((building) => {
-      // Get the original position
-      const originalPosition = building.position.clone();
+    // Animation loop
+    const animate = () => {
+      if (!active) return;
       
-      // Check if the position is at the default (0,0,0) or (45,5,12)
-      const isDefaultPosition = 
-        (Math.abs(originalPosition.x) < 0.001 && Math.abs(originalPosition.z) < 0.001) ||
-        (Math.abs(originalPosition.x - 45) < 0.001 && Math.abs(originalPosition.z - 12) < 0.001);
+      requestAnimationFrame(animate);
       
-      // Check if position is extremely large (likely a conversion error)
-      const isInvalidPosition = 
-        Math.abs(originalPosition.x) > 1000 || 
-        Math.abs(originalPosition.z) > 1000 ||
-        isNaN(originalPosition.x) ||
-        isNaN(originalPosition.z);
-      
-      if ((isDefaultPosition || isInvalidPosition) && building.userData.position) {
-        console.log(`Building ${building.userData.buildingId} has problematic position, fixing...`);
-        
-        const pos = building.userData.position;
-        
-        // Use the position manager to get the correct position
-        let newPosition: THREE.Vector3;
-        
-        if (pos.lat !== undefined && pos.lng !== undefined) {
-          console.log(`Building ${building.userData.buildingId} has lat/lng position:`, pos);
-          newPosition = buildingPositionManager.latLngToScenePosition({
-            lat: parseFloat(pos.lat.toString()),
-            lng: parseFloat(pos.lng.toString())
-          });
-        }
-        else if (pos.x !== undefined && pos.z !== undefined) {
-          // Position is already in scene coordinates, just ensure it's set correctly
-          newPosition = new THREE.Vector3(
-            parseFloat(pos.x.toString()),
-            pos.y !== undefined ? parseFloat(pos.y.toString()) : 5,
-            parseFloat(pos.z.toString())
-          );
-        }
-        else {
-          // Default position
-          newPosition = new THREE.Vector3(45, 5, 12);
-        }
-        
-        // Set the new position
-        building.position.copy(newPosition);
-        console.log(`Fixed position for ${building.userData.buildingId}:`, building.position);
+      if (controlsRef.current) {
+        controlsRef.current.update();
       }
-    });
+      
+      if (rendererRef.current && sceneRef.current && cameraRef.current) {
+        rendererRef.current.render(sceneRef.current, cameraRef.current);
+      }
+    };
     
-    console.log('Building position verification and fixing complete');
-  };
+    animate();
+    
+    // Handle window resize
+    const handleResize = () => {
+      if (!cameraRef.current || !rendererRef.current) return;
+      
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      
+      cameraRef.current.aspect = width / height;
+      cameraRef.current.updateProjectionMatrix();
+      
+      rendererRef.current.setSize(width, height);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    
+    // Load buildings
+    loadBuildingsEfficiently();
+    
+    // Start memory monitoring
+    const stopMemoryMonitoring = startMemoryMonitoring();
+    
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      
+      if (controlsRef.current) {
+        controlsRef.current.dispose();
+      }
+      
+      if (rendererRef.current) {
+        rendererRef.current.dispose();
+      }
+      
+      // Clean up buildings
+      if (rendererFactoryRef.current) {
+        for (const [id, mesh] of buildingMeshesRef.current.entries()) {
+          const building = buildings.find(b => b.id === id) || { type: 'unknown' } as BuildingData;
+          const renderer = rendererFactoryRef.current.getRenderer(building.type);
+          renderer.dispose(mesh);
+        }
+      }
+      
+      stopMemoryMonitoring();
+    };
+  }, [active]);
   
   // Function to create a building mesh using the renderer factory
   const createBuildingMesh = async (building: BuildingData) => {
@@ -268,17 +183,8 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
       // Render the building
       const mesh = await renderer.render(normalizedBuilding);
       
-      // Check if this is an empty placeholder (failed to load model)
-      if (mesh.userData && mesh.userData.isEmptyPlaceholder) {
-        console.log(`Building ${normalizedBuilding.id} is using an empty placeholder due to model loading failure`);
-        // We still store the reference for cleanup, but the mesh won't be visible
-      }
-      
       // Store reference for later cleanup
       buildingMeshesRef.current.set(normalizedBuilding.id, mesh);
-      
-      // Ensure the building is at ground level
-      mesh.position.y = 0;
       
       console.log(`Created building mesh for ${normalizedBuilding.id} at position:`, mesh.position);
       
@@ -289,85 +195,6 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
     }
   };
   
-  // Function to diagnose building positions
-  const diagnoseBuildingPositions = (buildings: BuildingData[]): void => {
-    if (!sceneRef.current) {
-      console.warn('Cannot diagnose building positions: scene is not defined');
-      return;
-    }
-    
-    console.log('Diagnosing building positions...');
-    
-    // Count buildings with different position formats
-    let latLngCount = 0;
-    let xzCount = 0;
-    let invalidCount = 0;
-    let extremeCount = 0;
-    
-    buildings.forEach((building, index) => {
-      console.log(`Building ${index + 1} (${building.id}):`);
-      console.log(`  Type: ${building.type}`);
-      
-      if (!building.position) {
-        console.error(`  No position data!`);
-        invalidCount++;
-        return;
-      }
-      
-      if ('lat' in building.position && 'lng' in building.position) {
-        latLngCount++;
-        const lat = parseFloat(building.position.lat.toString());
-        const lng = parseFloat(building.position.lng.toString());
-        
-        console.log(`  Position (lat/lng): ${lat}, ${lng}`);
-        
-        // Check for extreme values
-        if (isNaN(lat) || isNaN(lng) || Math.abs(lat) > 90 || Math.abs(lng) > 180) {
-          console.error(`  Invalid lat/lng values!`);
-          invalidCount++;
-        }
-        
-        // Check distance from Venice center
-        const centerLat = 45.4371;
-        const centerLng = 12.3358;
-        const distanceFromVenice = Math.sqrt(
-          Math.pow(lat - centerLat, 2) + 
-          Math.pow(lng - centerLng, 2)
-        );
-        
-        console.log(`  Distance from Venice center: ${distanceFromVenice.toFixed(4)} degrees`);
-        
-        if (distanceFromVenice > 0.5) {
-          console.error(`  Coordinates too far from Venice!`);
-          extremeCount++;
-        }
-      } else if ('x' in building.position && 'z' in building.position) {
-        xzCount++;
-        const x = parseFloat(building.position.x.toString());
-        const z = parseFloat(building.position.z.toString());
-        const y = building.position.y !== undefined ? parseFloat(building.position.y.toString()) : 5;
-        
-        console.log(`  Position (x/y/z): ${x}, ${y}, ${z}`);
-        
-        // Check for extreme values
-        if (isNaN(x) || isNaN(z) || Math.abs(x) > 500 || Math.abs(z) > 500) {
-          console.error(`  Extreme x/z values!`);
-          extremeCount++;
-        }
-      } else {
-        console.error(`  Unrecognized position format:`, building.position);
-        invalidCount++;
-      }
-    });
-    
-    console.log('Position diagnosis summary:');
-    console.log(`  Total buildings: ${buildings.length}`);
-    console.log(`  Buildings with lat/lng positions: ${latLngCount}`);
-    console.log(`  Buildings with x/z positions: ${xzCount}`);
-    console.log(`  Buildings with invalid positions: ${invalidCount}`);
-    console.log(`  Buildings with extreme positions: ${extremeCount}`);
-  };
-
   /**
    * Load buildings in a memory-efficient way
    */
@@ -398,7 +225,7 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
       setLoading(false);
     }
   };
-
+  
   /**
    * Fetch a batch of buildings
    */
@@ -417,7 +244,7 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
       return [];
     }
   };
-
+  
   /**
    * Load remaining buildings in the background
    */
@@ -461,7 +288,7 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
     
     console.log(`Finished loading all buildings (total: ${offset})`);
   };
-  
+
   /**
    * Render buildings in batches to avoid memory spikes
    */
@@ -482,9 +309,9 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
             const building = buildingsData.find(b => b.id === id) || { type: 'unknown' } as BuildingData;
             const renderer = rendererFactoryRef.current.getRenderer(building.type);
             renderer.dispose(mesh);
-          } else {
+          } else if (sceneRef.current) {
             // Fallback if factory not available
-            scene.remove(mesh);
+            sceneRef.current.remove(mesh);
           }
           
           buildingMeshesRef.current.delete(id);
@@ -517,39 +344,10 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
     }
   };
   
-  /**
-   * Process a batch of buildings
-   */
-  const processBuildingBatch = async (buildings: BuildingData[]) => {
-    // Process each building in the batch
-    for (const building of buildings) {
-      try {
-        // Check if building already exists
-        if (buildingMeshesRef.current.has(building.id)) {
-          // Update existing building if needed
-          const existingMesh = buildingMeshesRef.current.get(building.id);
-          
-          if (rendererFactoryRef.current) {
-            const renderer = rendererFactoryRef.current.getRenderer(building.type);
-            renderer.update(building, existingMesh);
-          }
-          
-          continue;
-        }
-        
-        // Create new building mesh
-        await createBuildingMesh(building);
-      } catch (buildingError) {
-        console.error(`Error processing building ${building.id}:`, buildingError);
-        // Continue with next building instead of stopping
-      }
-    }
-  };
-  
   // Function to focus camera on buildings
   const focusCameraOnBuildings = useCallback(() => {
-    if (!sceneRef.current) {
-      console.warn('Cannot focus on buildings: scene is not defined');
+    if (!sceneRef.current || !cameraRef.current || !controlsRef.current) {
+      console.warn('Cannot focus on buildings: scene, camera, or controls not defined');
       return;
     }
     
@@ -584,38 +382,57 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
     
     // Calculate the distance needed to view all buildings
     const maxDim = Math.max(size.x, size.y, size.z);
-    const fov = 60; // Default FOV if camera not available
+    const fov = cameraRef.current.fov;
     const cameraDistance = maxDim / (2 * Math.tan((fov * Math.PI) / 360));
     
-    // Find the camera
-    const camera = document.querySelector('canvas')?.__camera as THREE.PerspectiveCamera;
+    // Position camera at a good viewing angle
+    cameraRef.current.position.set(
+      center.x + cameraDistance,
+      center.y + cameraDistance * 0.5,
+      center.z + cameraDistance
+    );
     
-    if (camera) {
-      // Position camera at a good viewing angle
-      camera.position.set(
-        center.x + cameraDistance,
-        center.y + cameraDistance * 0.5,
-        center.z + cameraDistance
-      );
-      
-      // Look at the center of all buildings
-      camera.lookAt(center);
-      
-      // Update controls if available
-      const controls = camera.userData?.controls;
-      if (controls && controls.target) {
-        controls.target.copy(center);
-        controls.update();
+    // Look at the center of all buildings
+    cameraRef.current.lookAt(center);
+    
+    // Update controls target
+    controlsRef.current.target.copy(center);
+    controlsRef.current.update();
+    
+    console.log('Camera repositioned to view all buildings:', {
+      position: cameraRef.current.position,
+      lookingAt: center
+    });
+  }, []);
+  
+  /**
+   * Process a batch of buildings
+   */
+  const processBuildingBatch = async (buildings: BuildingData[]) => {
+    // Process each building in the batch
+    for (const building of buildings) {
+      try {
+        // Check if building already exists
+        if (buildingMeshesRef.current.has(building.id)) {
+          // Update existing building if needed
+          const existingMesh = buildingMeshesRef.current.get(building.id);
+          
+          if (rendererFactoryRef.current) {
+            const renderer = rendererFactoryRef.current.getRenderer(building.type);
+            renderer.update(building, existingMesh);
+          }
+          
+          continue;
+        }
+        
+        // Create new building mesh
+        await createBuildingMesh(building);
+      } catch (buildingError) {
+        console.error(`Error processing building ${building.id}:`, buildingError);
+        // Continue with next building instead of stopping
       }
-      
-      console.log('Camera repositioned to view all buildings:', {
-        position: camera.position,
-        lookingAt: center
-      });
-    } else {
-      console.warn('Camera not found, cannot focus on buildings');
     }
-  }, [scene]);
+  };
   
   // Function to ensure buildings are visible
   const ensureBuildingsVisible = useCallback(() => {
@@ -701,59 +518,8 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
     
     // Focus camera on buildings
     focusCameraOnBuildings();
-  }, [scene, focusCameraOnBuildings]);
+  }, [focusCameraOnBuildings]);
   
-  // Function to add debug markers for buildings
-  const addDebugMarkers = () => {
-    if (!sceneRef.current) {
-      console.warn('Cannot add debug markers: scene is not defined');
-      return;
-    }
-    
-    console.log('Adding debug markers for buildings...');
-    
-    // Remove any existing debug markers
-    sceneRef.current.traverse((object) => {
-      if (object.userData && object.userData.isDebugMarker) {
-        sceneRef.current.remove(object);
-        if (object instanceof THREE.Mesh) {
-          if (object.geometry) object.geometry.dispose();
-          if (object.material instanceof THREE.Material) {
-            object.material.dispose();
-          } else if (Array.isArray(object.material)) {
-            object.material.forEach(m => m.dispose());
-          }
-        }
-      }
-    });
-    
-    // Add a marker for each building
-    buildingMeshesRef.current.forEach((mesh, id) => {
-      const markerGeometry = new THREE.SphereGeometry(2, 16, 16);
-      const markerMaterial = new THREE.MeshBasicMaterial({ 
-        color: 0xff0000,
-        transparent: true,
-        opacity: 0.7
-      });
-      const marker = new THREE.Mesh(markerGeometry, markerMaterial);
-      
-      // Position the marker above the building
-      marker.position.copy(mesh.position);
-      marker.position.y += 10;
-      
-      // Add metadata
-      marker.userData = {
-        isDebugMarker: true,
-        buildingId: id
-      };
-      
-      // Add to scene
-      sceneRef.current.add(marker);
-      
-      console.log(`Added debug marker for building ${id} at position:`, marker.position);
-    });
-  };
-
   /**
    * Start memory monitoring to track and log memory usage
    */
@@ -763,20 +529,72 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
     return monitorMemory();
   };
   
-  // The initial load of buildings is now handled in the renderer factory initialization effect
-  
-  // Listen for the fixBuildingPositions event and other custom events
+  // Listen for custom events
   useEffect(() => {
     const handleFixPositions = () => {
-      verifyAndFixBuildingPositions();
+      // Verify and fix building positions
+      if (sceneRef.current) {
+        console.log('Verifying and fixing building positions...');
+        
+        // Find all buildings in the scene
+        sceneRef.current.traverse((object) => {
+          if (object.userData && object.userData.buildingId) {
+            // Get the original position
+            const originalPosition = object.position.clone();
+            
+            // Check if the position is at the default (0,0,0) or (45,5,12)
+            const isDefaultPosition = 
+              (Math.abs(originalPosition.x) < 0.001 && Math.abs(originalPosition.z) < 0.001) ||
+              (Math.abs(originalPosition.x - 45) < 0.001 && Math.abs(originalPosition.z - 12) < 0.001);
+            
+            // Check if position is extremely large (likely a conversion error)
+            const isInvalidPosition = 
+              Math.abs(originalPosition.x) > 1000 || 
+              Math.abs(originalPosition.z) > 1000 ||
+              isNaN(originalPosition.x) ||
+              isNaN(originalPosition.z);
+            
+            if ((isDefaultPosition || isInvalidPosition) && object.userData.position) {
+              console.log(`Building ${object.userData.buildingId} has problematic position, fixing...`);
+              
+              const pos = object.userData.position;
+              
+              // Use the position manager to get the correct position
+              let newPosition: THREE.Vector3;
+              
+              if (pos.lat !== undefined && pos.lng !== undefined) {
+                console.log(`Building ${object.userData.buildingId} has lat/lng position:`, pos);
+                newPosition = buildingPositionManager.latLngToScenePosition({
+                  lat: parseFloat(pos.lat.toString()),
+                  lng: parseFloat(pos.lng.toString())
+                });
+              }
+              else if (pos.x !== undefined && pos.z !== undefined) {
+                // Position is already in scene coordinates, just ensure it's set correctly
+                newPosition = new THREE.Vector3(
+                  parseFloat(pos.x.toString()),
+                  pos.y !== undefined ? parseFloat(pos.y.toString()) : 5,
+                  parseFloat(pos.z.toString())
+                );
+              }
+              else {
+                // Default position
+                newPosition = new THREE.Vector3(45, 5, 12);
+              }
+              
+              // Set the new position
+              object.position.copy(newPosition);
+              console.log(`Fixed position for ${object.userData.buildingId}:`, object.position);
+            }
+          }
+        });
+        
+        console.log('Building position verification and fixing complete');
+      }
     };
     
     const handleFocusOnBuildings = () => {
       focusCameraOnBuildings();
-    };
-    
-    const handleAddDebugMarkers = () => {
-      addDebugMarkers();
     };
     
     const handleEnsureBuildingsVisible = () => {
@@ -785,16 +603,14 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
     
     window.addEventListener('fixBuildingPositions', handleFixPositions);
     window.addEventListener('focusOnBuildings', handleFocusOnBuildings);
-    window.addEventListener('addDebugMarkers', handleAddDebugMarkers);
     window.addEventListener('ensureBuildingsVisible', handleEnsureBuildingsVisible);
     
     return () => {
       window.removeEventListener('fixBuildingPositions', handleFixPositions);
       window.removeEventListener('focusOnBuildings', handleFocusOnBuildings);
-      window.removeEventListener('addDebugMarkers', handleAddDebugMarkers);
       window.removeEventListener('ensureBuildingsVisible', handleEnsureBuildingsVisible);
     };
-  }, [sceneRef.current, focusCameraOnBuildings, ensureBuildingsVisible]);
+  }, [focusCameraOnBuildings, ensureBuildingsVisible]);
   
   // Listen for building events
   useEffect(() => {
@@ -889,13 +705,13 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
           // Find the building data
           const building = buildings.find(b => b.id === data.buildingId);
           
-          if (building) {
+          if (building && rendererFactoryRef.current) {
             // Get the appropriate renderer
             const renderer = rendererFactoryRef.current.getRenderer(building.type);
             
             // Dispose of the mesh
             renderer.dispose(mesh);
-          } else {
+          } else if (sceneRef.current) {
             // Fallback if building data not found
             sceneRef.current.remove(mesh);
           }
@@ -915,56 +731,6 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
       }
     };
     
-    const handleBuildingUpdated = (data: any) => {
-      console.log('Building updated event received:', data);
-      
-      if (data.buildingId && data.updates) {
-        // Get the mesh
-        const mesh = buildingMeshesRef.current.get(data.buildingId);
-        
-        if (mesh) {
-          // Find the building data
-          const building = buildings.find(b => b.id === data.buildingId);
-          
-          if (building) {
-            // Apply updates to building data
-            const updatedBuilding = {
-              ...building,
-              ...data.updates
-            };
-            
-            // Get the appropriate renderer
-            const renderer = rendererFactoryRef.current.getRenderer(updatedBuilding.type);
-            
-            // Update the mesh
-            renderer.update(updatedBuilding, mesh);
-            
-            // Update buildings state
-            setBuildings(prev => 
-              prev.map(b => b.id === data.buildingId ? updatedBuilding : b)
-            );
-          }
-        }
-      }
-    };
-    
-    const handleForceRerender = async () => {
-      console.log('Force rerender buildings event received');
-      
-      // Clear existing buildings
-      for (const [id, mesh] of buildingMeshesRef.current.entries()) {
-        const building = buildings.find(b => b.id === id) || { type: 'unknown' } as BuildingData;
-        const renderer = rendererFactoryRef.current.getRenderer(building.type);
-        renderer.dispose(mesh);
-      }
-      buildingMeshesRef.current.clear();
-      
-      // Use the memory-efficient loading strategy
-      loadBuildingsEfficiently();
-      
-      console.log('Started rerendering buildings efficiently');
-    };
-    
     // Subscribe to events
     const buildingPlacedSubscription = eventBus.subscribe(
       EventTypes.BUILDING_PLACED,
@@ -976,25 +742,65 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
       handleBuildingRemoved
     );
     
-    const buildingUpdatedSubscription = eventBus.subscribe(
-      EventTypes.BUILDING_UPDATED,
-      handleBuildingUpdated
-    );
-    
     // Add event listener for force rerender
+    const handleForceRerender = async () => {
+      console.log('Force rerender buildings event received');
+      
+      // Clear existing buildings
+      for (const [id, mesh] of buildingMeshesRef.current.entries()) {
+        if (rendererFactoryRef.current) {
+          const building = buildings.find(b => b.id === id) || { type: 'unknown' } as BuildingData;
+          const renderer = rendererFactoryRef.current.getRenderer(building.type);
+          renderer.dispose(mesh);
+        }
+      }
+      buildingMeshesRef.current.clear();
+      
+      // Use the memory-efficient loading strategy
+      loadBuildingsEfficiently();
+      
+      console.log('Started rerendering buildings efficiently');
+    };
+    
     window.addEventListener('forceRerenderBuildings', handleForceRerender);
     
     return () => {
       // Unsubscribe from events
       buildingPlacedSubscription.unsubscribe();
       buildingRemovedSubscription.unsubscribe();
-      buildingUpdatedSubscription.unsubscribe();
       window.removeEventListener('forceRerenderBuildings', handleForceRerender);
     };
-  }, [active, scene, buildings]);
+  }, [active, buildings, ensureBuildingsVisible]);
   
-  // This component doesn't render anything visible
-  return null;
+  return (
+    <div className="absolute inset-0 z-10 pointer-events-none">
+      <canvas 
+        ref={canvasRef} 
+        className="w-full h-full pointer-events-auto"
+        style={{ 
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          zIndex: 10,
+          opacity: 0.9 // Make it slightly transparent to see the main scene behind
+        }}
+      />
+      
+      {/* Loading indicator */}
+      {loading && (
+        <div className="absolute top-4 left-4 bg-black/70 text-white px-3 py-1 rounded">
+          Loading buildings...
+        </div>
+      )}
+      
+      {/* Error message */}
+      {error && (
+        <div className="absolute top-4 left-4 bg-red-600/90 text-white px-3 py-1 rounded">
+          Error: {error}
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default BuildingRenderer;
