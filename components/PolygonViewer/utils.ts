@@ -11,11 +11,43 @@ export function normalizeCoordinates(
   scale: number,
   latCorrectionFactor: number
 ): { x: number; y: number }[] {
-  return coordinates.map(coord => ({
-    // Apply latitude correction factor to longitude values
-    x: (coord.lng - centerLng) * scale * latCorrectionFactor,
-    y: (coord.lat - centerLat) * scale
-  }));
+  console.log('[DEBUG] normalizeCoordinates called with:', {
+    coordinates,
+    centerLat,
+    centerLng,
+    scale,
+    latCorrectionFactor
+  });
+  
+  const result = coordinates.map(coord => {
+    // Calculate intermediate values for debugging
+    const lngDiff = coord.lng - centerLng;
+    const latDiff = coord.lat - centerLat;
+    const scaledLngDiff = lngDiff * scale;
+    const scaledLatDiff = latDiff * scale;
+    const finalX = scaledLngDiff * latCorrectionFactor;
+    const finalY = scaledLatDiff;
+    
+    console.log('[DEBUG] normalizeCoordinates calculation for coordinate:', {
+      original: coord,
+      lngDiff,
+      latDiff,
+      scaledLngDiff,
+      scaledLatDiff,
+      finalX,
+      finalY,
+      withLatCorrection: finalX
+    });
+    
+    return {
+      // Apply latitude correction factor to longitude values
+      x: finalX,
+      y: finalY
+    };
+  });
+  
+  console.log('[DEBUG] normalizeCoordinates returning:', result);
+  return result;
 }
 
 /**

@@ -172,20 +172,24 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
         // If position is a string (JSON), parse it
         if (typeof building.position === 'string') {
           try {
+            console.log(`[DEBUG] Building ${building.id}: Position is a string, attempting to parse:`, building.position);
             position = JSON.parse(building.position);
+            console.log(`[DEBUG] Building ${building.id}: Parsed position:`, position);
           } catch (error) {
-            console.error(`Error parsing position for building ${building.id}:`, error);
+            console.error(`[DEBUG] Building ${building.id}: Error parsing position:`, error);
           }
         } 
         // If position is already an object
         else if (typeof building.position === 'object') {
+          console.log(`[DEBUG] Building ${building.id}: Position is an object:`, building.position);
+          
           // Check if it's lat/lng format
           if (building.position.lat !== undefined && building.position.lng !== undefined) {
             // Get the lat/lng values with full precision
             const lat = parseFloat(building.position.lat.toString());
             const lng = parseFloat(building.position.lng.toString());
             
-            console.log(`[BuildingRenderer] Converting lat/lng for building ${building.id}: ${lat}, ${lng}`);
+            console.log(`[DEBUG] Building ${building.id}: Converting lat/lng: ${lat}, ${lng}`);
             
             // Define Venice center coordinates and scaling factors
             const bounds = {
@@ -195,7 +199,11 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
               latCorrectionFactor: 0.7
             };
             
+            console.log(`[DEBUG] Building ${building.id}: Using bounds:`, bounds);
+            
             // Use the normalizeCoordinates function
+            console.log(`[DEBUG] Building ${building.id}: Calling normalizeCoordinates with:`, [{ lat, lng }], bounds.centerLat, bounds.centerLng, bounds.scale, bounds.latCorrectionFactor);
+            
             const normalizedCoord = normalizeCoordinates(
               [{ lat, lng }],
               bounds.centerLat,
@@ -204,26 +212,38 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
               bounds.latCorrectionFactor
             )[0];
             
+            console.log(`[DEBUG] Building ${building.id}: normalizeCoordinates returned:`, normalizedCoord);
+            
+            // Calculate the expected position manually to verify
+            const manualX = (lng - bounds.centerLng) * bounds.scale * bounds.latCorrectionFactor;
+            const manualY = (lat - bounds.centerLat) * bounds.scale;
+            console.log(`[DEBUG] Building ${building.id}: Manual calculation: x=${manualX}, y=${manualY}`);
+            
             // Log the conversion for debugging
-            console.log(`[BuildingRenderer] Converted coordinates for ${building.id}: x=${normalizedCoord.x}, z=${-normalizedCoord.y}`);
+            console.log(`[DEBUG] Building ${building.id}: Final converted coordinates: x=${normalizedCoord.x}, z=${-normalizedCoord.y}`);
             
             // Verify the conversion worked correctly
             if (Math.abs(normalizedCoord.x) < 0.001 && Math.abs(normalizedCoord.y) < 0.001) {
-              console.warn(`[BuildingRenderer] WARNING: Building ${building.id} has near-zero position after conversion!`);
-              console.warn(`[BuildingRenderer] Original lat/lng:`, building.position);
+              console.warn(`[DEBUG] Building ${building.id}: WARNING: Near-zero position after conversion!`);
+              console.warn(`[DEBUG] Building ${building.id}: Original lat/lng:`, building.position);
             }
             
             // Check if the position is close to the default position (45, 5, 12)
-            // Use a more precise check with a smaller threshold
             if (Math.abs(normalizedCoord.x - 45) < 1.0 && Math.abs(-normalizedCoord.y - 12) < 1.0) {
-              console.warn(`[BuildingRenderer] WARNING: Building ${building.id} has position near default (45,12) after conversion!`);
-              console.warn(`[BuildingRenderer] Original lat/lng:`, building.position);
-              console.warn(`[BuildingRenderer] Converted position: x=${normalizedCoord.x}, z=${-normalizedCoord.y}`);
+              console.warn(`[DEBUG] Building ${building.id}: WARNING: Position near default (45,12) after conversion!`);
+              console.warn(`[DEBUG] Building ${building.id}: Original lat/lng:`, building.position);
+              console.warn(`[DEBUG] Building ${building.id}: Converted position: x=${normalizedCoord.x}, z=${-normalizedCoord.y}`);
               
               // Log additional information to help debug
-              console.warn(`[BuildingRenderer] Calculation details:`);
+              console.warn(`[DEBUG] Building ${building.id}: Calculation details:`);
               console.warn(`  centerLat: ${bounds.centerLat}, centerLng: ${bounds.centerLng}`);
               console.warn(`  scale: ${bounds.scale}, latCorrectionFactor: ${bounds.latCorrectionFactor}`);
+              console.warn(`  lat diff: ${lat - bounds.centerLat}, lng diff: ${lng - bounds.centerLng}`);
+              console.warn(`  scaled lat diff: ${(lat - bounds.centerLat) * bounds.scale}`);
+              console.warn(`  scaled lng diff: ${(lng - bounds.centerLng) * bounds.scale}`);
+              console.warn(`  final x: ${(lng - bounds.centerLng) * bounds.scale * bounds.latCorrectionFactor}`);
+              console.warn(`  final y: ${(lat - bounds.centerLat) * bounds.scale}`);
+              console.warn(`  final z: ${-(lat - bounds.centerLat) * bounds.scale}`);
             }
             
             position = {
@@ -231,22 +251,35 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
               y: position.y || 5, // Keep the existing y or use default
               z: -normalizedCoord.y // Negate y to get z (since y in normalized is actually latitude)
             };
+            
+            console.log(`[DEBUG] Building ${building.id}: Final position object:`, position);
           } 
           // Regular x,y,z format - PRESERVE FULL PRECISION
           else {
+            console.log(`[DEBUG] Building ${building.id}: Using x,y,z format:`, building.position);
             position = {
               x: building.position.x !== undefined ? parseFloat(building.position.x.toString()) : 0,
               y: building.position.y !== undefined ? parseFloat(building.position.y.toString()) : 5,
               z: building.position.z !== undefined ? parseFloat(building.position.z.toString()) : 0
             };
+            console.log(`[DEBUG] Building ${building.id}: Parsed x,y,z position:`, position);
           }
         }
       }
       
       // Ensure position has a reasonable height to be visible
-      if (!position.y || position.y < 0.1) position.y = 5;
+      if (!position.y || position.y < 0.1) {
+        console.log(`[DEBUG] Building ${building.id}: Setting default height (y=5) because current height is ${position.y}`);
+        position.y = 5;
+      }
       
       // Set position with explicit values to avoid undefined - PRESERVE FULL PRECISION
+      console.log(`[DEBUG] Building ${building.id}: Setting final position with values:`, {
+        x: parseFloat(position.x.toString()),
+        y: parseFloat(position.y.toString()) || 5,
+        z: parseFloat(position.z.toString())
+      });
+      
       model.position.set(
         parseFloat(position.x.toString()), // Ensure we're using the full floating point value
         parseFloat(position.y.toString()) || 5,
