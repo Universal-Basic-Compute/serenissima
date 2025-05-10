@@ -780,7 +780,7 @@ export default class SimplePolygonRenderer {
       largerRaycaster.set(rayOrigin, rayDirection);
       largerRaycaster.params.Mesh.threshold = 1.0; // Much larger threshold
         
-      const largerIntersects = largerRaycaster.intersectObjects(landMeshes as THREE.Object3D[], true);
+      const largerIntersects = largerRaycaster.intersectObjects(landMeshes, true);
       if (largerIntersects.length > 0) {
         console.log(`Found intersection with larger threshold at distance ${largerIntersects[0].distance}`);
         const groundPoint = largerIntersects[0].point.clone();
