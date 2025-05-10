@@ -25,8 +25,9 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ active }) => {
   const buildingMeshesRef = useRef<Map<string, THREE.Object3D>>(new Map());
   const [isActive, setIsActive] = useState<boolean>(active);
   
-  // Create renderer factory
+  // Create renderer factory and citizen display manager
   const rendererFactoryRef = useRef<BuildingRendererFactory | null>(null);
+  const citizenDisplayManagerRef = useRef<any>(null);
   
   // Initialize with the main scene
   useEffect(() => {
