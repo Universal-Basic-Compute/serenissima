@@ -817,6 +817,9 @@ export default class SimplePolygonRenderer {
       console.log(`Hiding ${this.bridgePointMarkers.length} bridge markers and ${this.dockPointMarkers.length} dock markers in land view`);
       this.bridgePointMarkers.forEach(marker => marker.visible = false);
       this.dockPointMarkers.forEach(marker => marker.visible = false);
+    
+      // Hide building points in land view
+      this.buildingPointMarkers.forEach(marker => marker.visible = false);
       
       // Hide building points in land view
       this.buildingPointMarkers.forEach(marker => marker.visible = false);
