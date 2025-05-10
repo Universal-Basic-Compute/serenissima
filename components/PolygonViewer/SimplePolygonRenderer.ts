@@ -1391,7 +1391,7 @@ export default class SimplePolygonRenderer {
             marker => marker instanceof THREE.Mesh && marker.userData && marker.userData.id === this.hoveredPointId
           );
       
-          if (hoveredPoint && hoveredPoint instanceof THREE.Mesh) {
+          if (hoveredPoint && hoveredPoint instanceof THREE.Mesh<THREE.BufferGeometry, THREE.Material | THREE.Material[]>) {
             // Restore original material if available
             if (hoveredPoint.userData.originalMaterial) {
               hoveredPoint.material = hoveredPoint.userData.originalMaterial;
@@ -1882,7 +1882,7 @@ export default class SimplePolygonRenderer {
 
   // Helper method to highlight/unhighlight a coat of arms
   private setCoatOfArmsHighlight(object: THREE.Object3D | null, highlight: boolean) {
-    if (object && object instanceof THREE.Mesh) {
+    if (object && object instanceof THREE.Mesh<THREE.BufferGeometry, THREE.Material | THREE.Material[]>) {
       // Store original scale if not already stored
       if (!object.userData.originalScale && highlight) {
         object.userData.originalScale = object.scale.clone();
