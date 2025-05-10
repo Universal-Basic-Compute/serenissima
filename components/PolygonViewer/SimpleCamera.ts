@@ -37,6 +37,19 @@ export default class SimpleCamera {
       RIGHT: THREE.MOUSE.PAN // Right click pans
     };
     
+    // Add a custom pan handler to maintain altitude during panning
+    const oldPanMethod = this.controls.pan;
+    this.controls.pan = (deltaX: number, deltaY: number) => {
+      // Get the current camera position before panning
+      const oldY = this.camera.position.y;
+      
+      // Call the original pan method
+      oldPanMethod.call(this.controls, deltaX, deltaY);
+      
+      // Restore the original y-coordinate to maintain altitude
+      this.camera.position.y = oldY;
+    };
+    
     // Set initial target
     this.controls.target.set(0, 0, 0);
     this.controls.update();
