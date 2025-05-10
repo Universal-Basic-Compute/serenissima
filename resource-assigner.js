@@ -47,12 +47,12 @@ async function getAllResourceTypes() {
 
 // Function to get all polygon files
 function getPolygonFiles() {
-  // Look in the correct directory where polygon data is stored
-  const polygonsDir = path.join(process.cwd(), 'data/polygons');
+  // Look directly in the data directory where polygon data is stored
+  const polygonsDir = path.join(process.cwd(), 'data');
   
   // Check if directory exists
   if (!fs.existsSync(polygonsDir)) {
-    console.error(`Polygon directory not found: ${polygonsDir}`);
+    console.error(`Data directory not found: ${polygonsDir}`);
     return [];
   }
   
