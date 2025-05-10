@@ -56,6 +56,16 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
 
   // Fetch notifications
   const fetchNotifications = useCallback(async () => {
+    // Skip fetching if the component isn't open to reduce unnecessary API calls
+    if (!isOpen && !showNotifications) return;
+    
+    // Add a timestamp check to prevent fetching too frequently
+    const now = Date.now();
+    if (now - lastFetchTime < 10000) { // Don't fetch more than once every 10 seconds
+      console.log('Skipping notification fetch - too soon since last fetch');
+      return;
+    }
+    
     try {
       // Get the current username or use default
       const userToFetch = username || DEFAULT_USERNAME;
@@ -106,7 +116,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
       }
       
       // Update last fetch time
-      setLastFetchTime(Date.now());
+      setLastFetchTime(now);
     } catch (error) {
       console.error('Error fetching notifications:', error);
       // Add fallback behavior - create some dummy notifications for testing
@@ -133,7 +143,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
         setUnreadCount(dummyNotifications.length);
       }
     }
-  }, [username, lastFetchTime, notifications.length]);
+  }, [username, lastFetchTime, notifications.length, isOpen, showNotifications]);
 
   // Mark notifications as read
   const markNotificationsAsRead = async (notificationIds: string[]) => {
@@ -229,19 +239,22 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
 
   // Set up notification polling
   useEffect(() => {
-    // Fetch notifications immediately on mount
-    fetchNotifications();
-    
-    // Set up polling every 5 minutes (300000 ms)
-    const intervalId = setInterval(() => {
+    // Only fetch notifications when the component is open or when notifications panel is shown
+    if (isOpen || showNotifications) {
+      // Fetch notifications immediately when component becomes visible
       fetchNotifications();
-    }, 300000);
-    
-    // Clean up interval on unmount
-    return () => {
-      clearInterval(intervalId);
-    };
-  }, [fetchNotifications]);
+      
+      // Set up polling every 5 minutes (300000 ms)
+      const intervalId = setInterval(() => {
+        fetchNotifications();
+      }, 300000);
+      
+      // Clean up interval on unmount or when component is hidden
+      return () => {
+        clearInterval(intervalId);
+      };
+    }
+  }, [fetchNotifications, isOpen, showNotifications]); // Add isOpen and showNotifications as dependencies
 
   // Load message history when chat is opened
   useEffect(() => {
