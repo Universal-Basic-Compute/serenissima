@@ -130,13 +130,13 @@ const PlaceableObjectManager: React.FC<PlaceableObjectProps> = ({
           // Add the model to the scene
           model.visible = false;
           actualScene.add(model);
-          previewMeshRef.current = model;
+          previewMeshRef.current = model as unknown as THREE.Mesh;
             
           console.log(`Successfully loaded building model for ${objectData.name}`);
         },
         undefined,
         (error) => {
-          console.error(`Error loading building model: ${error.message}`);
+          console.error(`Error loading building model: ${error instanceof Error ? error.message : String(error)}`);
           // Keep using the simple box preview if model loading fails
         }
       );
@@ -287,18 +287,20 @@ const PlaceableObjectManager: React.FC<PlaceableObjectProps> = ({
           }
         } else {
           // If it's a GLTF model, traverse and dispose all materials
-          previewMeshRef.current.traverse((child) => {
-            if (child instanceof THREE.Mesh) {
-              if (child.geometry) child.geometry.dispose();
-              if (child.material) {
-                if (Array.isArray(child.material)) {
-                  child.material.forEach(material => material.dispose());
-                } else {
-                  child.material.dispose();
+          if ('traverse' in previewMeshRef.current) {
+            (previewMeshRef.current as THREE.Object3D).traverse((child) => {
+              if (child instanceof THREE.Mesh) {
+                if (child.geometry) child.geometry.dispose();
+                if (child.material) {
+                  if (Array.isArray(child.material)) {
+                    child.material.forEach(material => material.dispose());
+                  } else {
+                    child.material.dispose();
+                  }
                 }
               }
-            }
-          });
+            });
+          }
         }
       
         previewMeshRef.current = null;
@@ -442,7 +444,8 @@ const PlaceableObjectManager: React.FC<PlaceableObjectProps> = ({
       // Emit appropriate event
       if (type === 'dock') {
         console.log('PlaceableObjectManager: Emitting DOCK_PLACED event');
-        eventBus.emit(EventTypes.DOCK_PLACED, {
+        // Use string literal as EventTypes may not have DOCK_PLACED defined yet
+        eventBus.emit('DOCK_PLACED', {
           dockId: createdBuilding.id,
           type: 'dock',
           data: createdBuilding
