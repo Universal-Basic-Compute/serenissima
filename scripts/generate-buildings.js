@@ -30,11 +30,17 @@ async function getBuildingTypesAndVariants() {
     const files = fs.readdirSync(BUILDINGS_DIR);
     
     for (const file of files) {
+      // Skip index.json as it's a metadata file, not a building type
+      if (file === 'index.json') {
+        console.log('Skipping index.json metadata file');
+        continue;
+      }
+      
       if (file.endsWith('.json')) {
         const filePath = path.join(BUILDINGS_DIR, file);
         const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
         
-        // Extract building type from filename
+        // Extract building type from filename, removing the .json extension
         const type = file.replace('.json', '');
         
         // Extract variants if available
@@ -45,6 +51,18 @@ async function getBuildingTypesAndVariants() {
         
         buildingTypes.push({ type, variants });
       }
+    }
+    
+    // If no building types were found (only index.json exists), use default types
+    if (buildingTypes.length === 0) {
+      console.warn('No building type files found, using default types');
+      return [
+        { type: 'market-stall', variants: ['model'] },
+        { type: 'house', variants: ['small', 'medium', 'large'] },
+        { type: 'workshop', variants: ['carpenter', 'blacksmith', 'tailor'] },
+        { type: 'warehouse', variants: ['small', 'medium', 'large'] },
+        { type: 'church', variants: ['small', 'medium', 'large'] }
+      ];
     }
     
     console.log(`Found ${buildingTypes.length} building types`);
