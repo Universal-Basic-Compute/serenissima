@@ -89,6 +89,9 @@ export default class SimplePolygonRenderer {
     // Preload the navigation graph
     this.preloadNavigationGraph();
     
+    // Preload the navigation graph
+    this.preloadNavigationGraph();
+    
     // Process users data to extract coat of arms
     if (users) {
       Object.values(users).forEach((user: any) => {
