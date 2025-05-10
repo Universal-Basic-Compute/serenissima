@@ -217,36 +217,105 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
     console.log(`  Buildings with extreme positions: ${extremeCount}`);
   };
 
-  // Function to fetch buildings from API
-  const fetchBuildings = async () => {
+  /**
+   * Load buildings in a memory-efficient way
+   */
+  const loadBuildingsEfficiently = async () => {
     try {
       setLoading(true);
       setError(null);
       
-      console.log('Fetching buildings from API...');
+      console.log('Loading buildings efficiently...');
       
-      // Use the building data service to get buildings
-      const buildingsData = await buildingDataService.getBuildings();
+      // First, load a small batch of buildings to show something quickly
+      const initialBatch = await fetchBuildingBatch(0, 20);
+      console.log(`Loaded initial batch of ${initialBatch.length} buildings`);
       
-      console.log(`Fetched ${buildingsData.length} buildings from API`);
+      // Update state with initial buildings
+      setBuildings(initialBatch);
       
-      // Run diagnostics on the building data
-      diagnoseBuildingPositions(buildingsData);
+      // Render the initial batch
+      await renderBuildingsInBatches(initialBatch);
       
-      setBuildings(buildingsData);
-      return buildingsData;
+      // Then load more buildings in the background
+      loadRemainingBuildingsInBackground(initialBatch.length);
+      
     } catch (error) {
-      console.error('Error fetching buildings:', error);
+      console.error('Error loading buildings:', error);
       setError(error.message || 'Failed to fetch buildings');
-      return [];
     } finally {
       setLoading(false);
     }
   };
+
+  /**
+   * Fetch a batch of buildings
+   */
+  const fetchBuildingBatch = async (offset: number, limit: number): Promise<BuildingData[]> => {
+    try {
+      const response = await fetch(`/api/buildings?offset=${offset}&limit=${limit}`);
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch buildings: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return data.buildings || [];
+    } catch (error) {
+      console.error(`Error fetching buildings batch (offset=${offset}, limit=${limit}):`, error);
+      return [];
+    }
+  };
+
+  /**
+   * Load remaining buildings in the background
+   */
+  const loadRemainingBuildingsInBackground = async (initialCount: number): Promise<void> => {
+    const BATCH_SIZE = 20;
+    let offset = initialCount;
+    let hasMore = true;
+    
+    while (hasMore) {
+      try {
+        // Fetch the next batch
+        const batch = await fetchBuildingBatch(offset, BATCH_SIZE);
+        
+        // If we got fewer buildings than requested, we've reached the end
+        if (batch.length < BATCH_SIZE) {
+          hasMore = false;
+        }
+        
+        if (batch.length > 0) {
+          console.log(`Loaded additional batch of ${batch.length} buildings`);
+          
+          // Update state with new buildings
+          setBuildings(prev => [...prev, ...batch]);
+          
+          // Render this batch
+          await renderBuildingsInBatches(batch);
+          
+          // Update offset for next batch
+          offset += batch.length;
+          
+          // Wait a bit to allow UI to update and garbage collection to run
+          await new Promise(resolve => setTimeout(resolve, 200));
+        } else {
+          hasMore = false;
+        }
+      } catch (error) {
+        console.error('Error loading additional buildings:', error);
+        hasMore = false;
+      }
+    }
+    
+    console.log(`Finished loading all buildings (total: ${offset})`);
+  };
   
-  // Function to render buildings
-  const renderBuildings = async (buildingsData: BuildingData[]) => {
-    console.log(`Rendering ${buildingsData.length} buildings...`);
+  /**
+   * Render buildings in batches to avoid memory spikes
+   */
+  const renderBuildingsInBatches = async (buildingsData: BuildingData[]) => {
+    console.log(`Rendering ${buildingsData.length} buildings in batches...`);
     
     try {
       // Create a set of building IDs for tracking
@@ -271,46 +340,58 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
         }
       }
       
-      // Add logging to track progress
-      let processedCount = 0;
+      // Process buildings in batches of 10
+      const BATCH_SIZE = 10;
+      const totalBatches = Math.ceil(buildingsData.length / BATCH_SIZE);
       
-      // Create or update buildings
-      for (const building of buildingsData) {
-        try {
-          // Check if building already exists
-          if (buildingMeshesRef.current.has(building.id)) {
-            // Update existing building if needed
-            const existingMesh = buildingMeshesRef.current.get(building.id);
-            
-            if (rendererFactoryRef.current) {
-              const renderer = rendererFactoryRef.current.getRenderer(building.type);
-              renderer.update(building, existingMesh);
-            }
-            
-            processedCount++;
-            if (processedCount % 10 === 0) {
-              console.log(`Processed ${processedCount}/${buildingsData.length} buildings`);
-            }
-            
-            continue;
-          }
-          
-          // Create new building mesh
-          await createBuildingMesh(building);
-          
-          processedCount++;
-          if (processedCount % 10 === 0) {
-            console.log(`Processed ${processedCount}/${buildingsData.length} buildings`);
-          }
-        } catch (buildingError) {
-          console.error(`Error processing building ${building.id}:`, buildingError);
-          // Continue with next building instead of stopping
+      for (let batchIndex = 0; batchIndex < totalBatches; batchIndex++) {
+        const start = batchIndex * BATCH_SIZE;
+        const end = Math.min(start + BATCH_SIZE, buildingsData.length);
+        const batch = buildingsData.slice(start, end);
+        
+        console.log(`Processing batch ${batchIndex + 1}/${totalBatches} (${batch.length} buildings)`);
+        
+        // Process this batch
+        await processBuildingBatch(batch);
+        
+        // Wait a short time to allow the UI to update and garbage collection to run
+        if (batchIndex < totalBatches - 1) {
+          await new Promise(resolve => setTimeout(resolve, 50));
         }
       }
       
-      console.log(`Rendered ${processedCount}/${buildingsData.length} buildings successfully`);
+      console.log(`Finished rendering all ${buildingsData.length} buildings`);
     } catch (error) {
       console.error('Error in renderBuildings:', error);
+    }
+  };
+  
+  /**
+   * Process a batch of buildings
+   */
+  const processBuildingBatch = async (buildings: BuildingData[]) => {
+    // Process each building in the batch
+    for (const building of buildings) {
+      try {
+        // Check if building already exists
+        if (buildingMeshesRef.current.has(building.id)) {
+          // Update existing building if needed
+          const existingMesh = buildingMeshesRef.current.get(building.id);
+          
+          if (rendererFactoryRef.current) {
+            const renderer = rendererFactoryRef.current.getRenderer(building.type);
+            renderer.update(building, existingMesh);
+          }
+          
+          continue;
+        }
+        
+        // Create new building mesh
+        await createBuildingMesh(building);
+      } catch (buildingError) {
+        console.error(`Error processing building ${building.id}:`, buildingError);
+        // Continue with next building instead of stopping
+      }
     }
   };
   
@@ -515,37 +596,41 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
   useEffect(() => {
     if (active && scene && rendererFactoryRef.current) {
       console.log('BuildingRenderer is active, loading buildings...');
-      fetchBuildings().then(buildingsData => {
-        renderBuildings(buildingsData);
-        
-        // Add a delay to ensure buildings are loaded
-        const timer = setTimeout(() => {
-          verifyAndFixBuildingPositions();
-          // Focus camera on buildings after fixing positions
-          ensureBuildingsVisible();
-        }, 2000);
-        
-        return () => clearTimeout(timer);
-      });
-    }
-    
-    return () => {
-      // Cleanup buildings when component unmounts
-      if (rendererFactoryRef.current) {
-        for (const [id, mesh] of buildingMeshesRef.current.entries()) {
-          const building = buildings.find(b => b.id === id) || { type: 'unknown' } as BuildingData;
-          const renderer = rendererFactoryRef.current.getRenderer(building.type);
-          renderer.dispose(mesh);
-        }
-      } else {
-        // Fallback if factory not available
-        for (const mesh of buildingMeshesRef.current.values()) {
-          scene.remove(mesh);
-        }
-      }
       
-      buildingMeshesRef.current.clear();
-    };
+      // Use the memory-efficient loading strategy
+      loadBuildingsEfficiently();
+      
+      // Start memory monitoring
+      const stopMemoryMonitoring = startMemoryMonitoring();
+      
+      // Add a delay to ensure buildings are loaded
+      const timer = setTimeout(() => {
+        verifyAndFixBuildingPositions();
+        // Focus camera on buildings after fixing positions
+        ensureBuildingsVisible();
+      }, 2000);
+      
+      return () => {
+        clearTimeout(timer);
+        stopMemoryMonitoring();
+        
+        // Cleanup buildings when component unmounts
+        if (rendererFactoryRef.current) {
+          for (const [id, mesh] of buildingMeshesRef.current.entries()) {
+            const building = buildings.find(b => b.id === id) || { type: 'unknown' } as BuildingData;
+            const renderer = rendererFactoryRef.current.getRenderer(building.type);
+            renderer.dispose(mesh);
+          }
+        } else {
+          // Fallback if factory not available
+          for (const mesh of buildingMeshesRef.current.values()) {
+            scene.remove(mesh);
+          }
+        }
+        
+        buildingMeshesRef.current.clear();
+      };
+    }
   }, [active, scene, ensureBuildingsVisible]);
   
   // Listen for the fixBuildingPositions event and other custom events
@@ -589,8 +674,9 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
       if (data.refresh) {
         // Refresh all buildings
         console.log('Refreshing all buildings...');
-        const buildingsData = await fetchBuildings();
-        renderBuildings(buildingsData);
+        
+        // Use the memory-efficient loading strategy
+        loadBuildingsEfficiently();
         
         // Ensure buildings are visible after refresh
         setTimeout(() => {
@@ -730,11 +816,10 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
       }
       buildingMeshesRef.current.clear();
       
-      // Fetch and render all buildings again
-      const buildingsData = await fetchBuildings();
-      renderBuildings(buildingsData);
+      // Use the memory-efficient loading strategy
+      loadBuildingsEfficiently();
       
-      console.log(`Rerendered ${buildingsData.length} buildings`);
+      console.log('Started rerendering buildings efficiently');
     };
     
     // Subscribe to events
@@ -770,3 +855,92 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
 };
 
 export default BuildingRenderer;
+  /**
+   * Update building visibility based on camera distance
+   */
+  const updateBuildingVisibility = () => {
+    if (!scene) return;
+    
+    // Get camera
+    const camera = getCamera();
+    if (!camera) return;
+    
+    // Get camera position
+    const cameraPosition = camera.position.clone();
+    
+    // Update visibility for each building
+    buildingMeshesRef.current.forEach((mesh, id) => {
+      const distance = cameraPosition.distanceTo(mesh.position);
+      
+      // Hide buildings that are too far away
+      if (distance > 100) {
+        mesh.visible = false;
+      } else {
+        mesh.visible = true;
+        
+        // For buildings at medium distance, use low detail version
+        if (distance > 50 && !mesh.userData.isLowDetail) {
+          // Check if we already have a low detail version
+          const lowDetailId = `${id}-low`;
+          const lowDetailMesh = buildingMeshesRef.current.get(lowDetailId);
+          
+          if (lowDetailMesh) {
+            // Show low detail, hide high detail
+            lowDetailMesh.visible = true;
+            mesh.visible = false;
+          }
+        }
+      }
+    });
+  };
+
+  /**
+   * Get camera from scene
+   */
+  const getCamera = (): THREE.Camera | null => {
+    if (typeof window === 'undefined') return null;
+    
+    // Try to get camera from window.__threeContext
+    if (window.__threeContext && window.__threeContext.camera) {
+      return window.__threeContext.camera;
+    }
+    
+    // Try to get camera from canvas element
+    const canvas = document.querySelector('canvas');
+    if (canvas && canvas.__camera) {
+      return canvas.__camera;
+    }
+    
+    return null;
+  };
+  
+  // Add effect to update building visibility based on camera distance
+  useEffect(() => {
+    if (!scene || !active) return;
+    
+    // Function to update building visibility
+    const updateVisibility = () => {
+      updateBuildingVisibility();
+    };
+    
+    // Set up an interval to update visibility
+    const intervalId = setInterval(updateVisibility, 1000);
+    
+    // Also update on camera move
+    const handleCameraMove = () => {
+      updateBuildingVisibility();
+    };
+    
+    // Try to get controls
+    const camera = getCamera();
+    if (camera && camera.userData && camera.userData.controls) {
+      camera.userData.controls.addEventListener('change', handleCameraMove);
+    }
+    
+    return () => {
+      clearInterval(intervalId);
+      if (camera && camera.userData && camera.userData.controls) {
+        camera.userData.controls.removeEventListener('change', handleCameraMove);
+      }
+    };
+  }, [scene, active]);

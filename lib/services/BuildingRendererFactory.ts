@@ -10,6 +10,86 @@ interface BuildingRendererOptions {
   scene: THREE.Scene;
   positionManager: typeof buildingPositionManager;
   cacheService: typeof buildingCacheService;
+  /**
+   * Create a simplified version of the building for distant viewing
+   */
+  private createLowDetailModel(building: BuildingData): THREE.Object3D {
+    // Create a simple box geometry instead of loading the full model
+    const size = this.getBuildingSizeByType(building.type);
+    const geometry = new THREE.BoxGeometry(size.width, size.height, size.depth);
+    const material = new THREE.MeshBasicMaterial({ 
+      color: this.getBuildingColorByType(building.type),
+      transparent: true,
+      opacity: 0.8
+    });
+    
+    const model = new THREE.Mesh(geometry, material);
+    
+    // Set position
+    let position: THREE.Vector3;
+    if ('lat' in building.position && 'lng' in building.position) {
+      position = this.options.positionManager.latLngToScenePosition(building.position);
+    } else {
+      position = new THREE.Vector3(
+        building.position.x,
+        building.position.y || 0,
+        building.position.z
+      );
+    }
+    
+    // Find the ground level at this position
+    const groundPosition = this.findGroundLevel(position);
+    if (groundPosition) {
+      position.y = groundPosition.y;
+    }
+    
+    model.position.copy(position);
+    model.rotation.y = building.rotation || 0;
+    
+    // Add metadata
+    model.userData = {
+      buildingId: building.id,
+      type: building.type,
+      landId: building.land_id,
+      owner: building.owner || building.created_by,
+      position: building.position,
+      isLowDetail: true
+    };
+    
+    return model;
+  }
+
+  /**
+   * Get approximate building size based on type
+   */
+  private getBuildingSizeByType(type: string): {width: number, height: number, depth: number} {
+    switch(type) {
+      case 'market-stall':
+        return {width: 2, height: 2, depth: 2};
+      case 'dock':
+        return {width: 4, height: 1, depth: 4};
+      case 'house':
+        return {width: 3, height: 4, depth: 3};
+      default:
+        return {width: 2.5, height: 3, depth: 2.5};
+    }
+  }
+
+  /**
+   * Get building color based on type
+   */
+  private getBuildingColorByType(type: string): number {
+    switch(type) {
+      case 'market-stall':
+        return 0xA52A2A; // Brown
+      case 'dock':
+        return 0x8B4513; // SaddleBrown
+      case 'house':
+        return 0xCD853F; // Peru
+      default:
+        return 0xD2B48C; // Tan
+    }
+  }
 }
 
 /**
@@ -34,6 +114,31 @@ class DefaultBuildingRenderer implements IBuildingRenderer {
    */
   public async render(building: BuildingData): Promise<THREE.Object3D> {
     try {
+      // Get camera position to determine distance
+      const camera = this.getCameraFromScene();
+      
+      // Calculate building position
+      let position: THREE.Vector3;
+      
+      if ('lat' in building.position && 'lng' in building.position) {
+        position = this.options.positionManager.latLngToScenePosition(building.position);
+      } else {
+        position = new THREE.Vector3(
+          building.position.x,
+          building.position.y || 0,
+          building.position.z
+        );
+      }
+      
+      // Calculate distance to camera
+      const distanceToCamera = camera ? 
+        camera.position.distanceTo(position) : 0;
+      
+      // Use low detail model for distant buildings (more than 50 units away)
+      if (distanceToCamera > 50) {
+        return this.createLowDetailModel(building);
+      }
+      
       // Load the building model
       const model = await this.options.cacheService.getBuildingModel(building.type, building.variant);
       
@@ -43,19 +148,6 @@ class DefaultBuildingRenderer implements IBuildingRenderer {
         
         // Create an empty group instead of using the fallback model
         const emptyGroup = new THREE.Group();
-        
-        // Set position
-        let position: THREE.Vector3;
-        
-        if ('lat' in building.position && 'lng' in building.position) {
-          position = this.options.positionManager.latLngToScenePosition(building.position);
-        } else {
-          position = new THREE.Vector3(
-            building.position.x,
-            building.position.y || 0, // Use 0 as default height
-            building.position.z
-          );
-        }
         
         // Find the ground level at this position using raycasting
         const groundPosition = this.findGroundLevel(position);

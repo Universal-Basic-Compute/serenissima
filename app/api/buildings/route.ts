@@ -140,11 +140,13 @@ export async function GET(request: Request) {
   try {
     const url = new URL(request.url);
     const type = url.searchParams.get('type');
+    const limit = url.searchParams.get('limit') ? parseInt(url.searchParams.get('limit')) : 50; // Default to 50 buildings
+    const offset = url.searchParams.get('offset') ? parseInt(url.searchParams.get('offset')) : 0;
     
     console.log('GET /api/buildings request received');
-    console.log('Query parameters:', { type });
+    console.log('Query parameters:', { type, limit, offset });
     
-    // Fetch records from Airtable
+    // Fetch records from Airtable with pagination
     const records = await new Promise<any[]>((resolve, reject) => {
       const allRecords = [];
       
@@ -153,7 +155,8 @@ export async function GET(request: Request) {
           // Add filters if type is specified
           filterByFormula: type ? `{Type} = '${type}'` : '',
           view: 'Grid view',
-          maxRecords: 1000 // Increased from 100 to allow more buildings to be loaded
+          maxRecords: limit,
+          offset: offset
         })
         .eachPage(
           function page(records, fetchNextPage) {

@@ -84,11 +84,14 @@ export class BuildingCacheService {
         const gltf = await this.loadGLTF(modelPath);
         const model = gltf.scene.clone();
         
+        // Simplify the model to reduce polygon count
+        const simplifiedModel = this.simplifyModel(model);
+        
         // Cache the model for future use
-        this.modelCache.set(cacheKey, model.clone());
+        this.modelCache.set(cacheKey, simplifiedModel.clone());
         
         console.log(`Successfully loaded model from: ${modelPath}`);
-        return model;
+        return simplifiedModel;
       } catch (error) {
         console.warn(`Failed to load model from ${modelPath}:`, error);
         // Mark this path as failed
@@ -105,6 +108,91 @@ export class BuildingCacheService {
     this.modelCache.set(cacheKey, fallbackModel.clone());
     
     return fallbackModel;
+  }
+  
+  /**
+   * Simplify a model to reduce polygon count
+   */
+  private simplifyModel(model: THREE.Object3D): THREE.Object3D {
+    // Clone the model to avoid modifying the original
+    const simplified = model.clone();
+    
+    // Traverse all meshes and simplify their geometries
+    simplified.traverse(object => {
+      if (object instanceof THREE.Mesh) {
+        // Skip if already simplified
+        if (object.userData.simplified) return;
+        
+        // Simplify geometry if it has too many vertices
+        if (object.geometry instanceof THREE.BufferGeometry) {
+          const geometry = object.geometry;
+          const vertexCount = geometry.attributes.position.count;
+          
+          if (vertexCount > 500) {
+            try {
+              // Use THREE.BufferGeometryUtils.mergeVertices to simplify
+              // This reduces duplicate vertices
+              const simplified = BufferGeometryUtils.mergeVertices(geometry);
+              
+              // If we have too many vertices, decimate further
+              if (simplified.attributes.position.count > 200) {
+                // Create a simpler geometry based on bounding box
+                const bbox = new THREE.Box3().setFromObject(object);
+                const size = new THREE.Vector3();
+                bbox.getSize(size);
+                
+                // Replace with a box geometry
+                const boxGeometry = new THREE.BoxGeometry(
+                  size.x, size.y, size.z
+                );
+                
+                object.geometry.dispose();
+                object.geometry = boxGeometry;
+              } else {
+                object.geometry.dispose();
+                object.geometry = simplified;
+              }
+              
+              object.userData.simplified = true;
+            } catch (error) {
+              console.warn('Error simplifying geometry:', error);
+            }
+          }
+        }
+        
+        // Simplify materials
+        if (object.material) {
+          if (Array.isArray(object.material)) {
+            // Combine multiple materials into one
+            const material = new THREE.MeshBasicMaterial({
+              color: 0xCCCCCC,
+              transparent: false
+            });
+            
+            // Dispose old materials
+            object.material.forEach(m => m.dispose());
+            
+            // Set new material
+            object.material = material;
+          } else if (object.material.map) {
+            // Replace textured materials with simple colored materials
+            const color = object.material.color ? object.material.color.getHex() : 0xCCCCCC;
+            const newMaterial = new THREE.MeshBasicMaterial({
+              color: color,
+              transparent: false
+            });
+            
+            // Dispose old material
+            object.material.dispose();
+            
+            // Set new material
+            object.material = newMaterial;
+          }
+        }
+      }
+    });
+    
+    return simplified;
   }
   
   /**
@@ -336,6 +424,26 @@ export class BuildingCacheService {
       console.log(`No ground found, returning default height (0)`);
       return new THREE.Vector3(position.x, 0, position.z);
     }
+  }
+  
+  /**
+   * Get camera from scene
+   */
+  private getCameraFromScene(): THREE.Camera | null {
+    if (typeof window === 'undefined') return null;
+    
+    // Try to get camera from window.__threeContext
+    if (window.__threeContext && window.__threeContext.camera) {
+      return window.__threeContext.camera;
+    }
+    
+    // Try to get camera from canvas element
+    const canvas = document.querySelector('canvas');
+    if (canvas && canvas.__camera) {
+      return canvas.__camera;
+    }
+    
+    return null;
   }
   
   /**
