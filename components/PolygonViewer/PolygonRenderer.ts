@@ -590,14 +590,15 @@ export default class PolygonRenderer {
    */
   public ensureBuildingsVisible() {
     console.log('Ensuring buildings are visible');
+    console.log('Camera position:', this.camera.position);
+    console.log('Camera rotation:', this.camera.rotation);
+    console.log('Camera looking at:', new THREE.Vector3(0, 0, -1).applyQuaternion(this.camera.quaternion));
     
     // Find all building objects in the scene
     if (this.scene) {
       // Create a counter to track how many buildings we find
       let buildingCount = 0;
       let visibleCount = 0;
-      
-      console.log('Camera position:', this.camera.position);
       
       this.scene.traverse(object => {
         // Check if this is a building object
@@ -618,14 +619,21 @@ export default class PolygonRenderer {
             object.userData.originalY = object.position.y;
           }
           
-          // Set the building position to a much higher height - try 30 instead of 10
-          object.position.y = 30; // Increased from 10 to 30
+          // Set the building position to a much higher height
+          object.position.y = 30; // Increased to 30 for better visibility
+          
+          // Increase the scale of the building to make it more visible
+          if (!object.userData.originalScale) {
+            object.userData.originalScale = object.scale.clone();
+            // Increase scale by 50%
+            object.scale.multiplyScalar(1.5);
+          }
           
           // Check if building is in camera view
           const cameraPosition = this.camera.position.clone();
           const buildingPosition = object.position.clone();
           const distance = cameraPosition.distanceTo(buildingPosition);
-          const isVisible = distance < 100;
+          const isVisible = distance < 200; // Increased from 100 to 200
           
           if (isVisible) visibleCount++;
           
@@ -654,7 +662,8 @@ export default class PolygonRenderer {
                   mat.opacity = 1.0;
                   // Make materials brighter for visibility
                   if (mat instanceof THREE.MeshBasicMaterial || mat instanceof THREE.MeshStandardMaterial) {
-                    mat.color.setRGB(1, 0.5, 0); // Bright orange
+                    mat.color.setRGB(1, 0, 0); // Bright red for maximum visibility
+                    mat.emissive = new THREE.Color(0.5, 0, 0); // Add emissive for glow effect
                   }
                 }
               });
@@ -664,7 +673,8 @@ export default class PolygonRenderer {
               object.material.opacity = 1.0;
               // Make materials brighter for visibility
               if (object.material instanceof THREE.MeshBasicMaterial || object.material instanceof THREE.MeshStandardMaterial) {
-                object.material.color.setRGB(1, 0.5, 0); // Bright orange
+                object.material.color.setRGB(1, 0, 0); // Bright red for maximum visibility
+                object.material.emissive = new THREE.Color(0.5, 0, 0); // Add emissive for glow effect
               }
             }
           }
@@ -679,6 +689,32 @@ export default class PolygonRenderer {
         console.log('No buildings found, creating a test building');
         this.createTestBuilding();
       }
+      
+      // Move camera to see buildings if none are visible
+      if (visibleCount === 0 && buildingCount > 0) {
+        console.log('No buildings visible, adjusting camera position');
+        // Try to position camera to see buildings
+        if (this.camera) {
+          // Store original camera position
+          const originalPosition = this.camera.position.clone();
+          
+          // Move camera to a position where it can see buildings
+          this.camera.position.set(50, 50, 50);
+          this.camera.lookAt(45, 10, 12); // Look at the first building
+          
+          console.log('Adjusted camera position to:', this.camera.position);
+          
+          // Force a render to apply changes
+          this.facade.forceRender();
+          
+          // Restore original camera position after a delay
+          setTimeout(() => {
+            this.camera.position.copy(originalPosition);
+            console.log('Restored camera position to:', this.camera.position);
+            this.facade.forceRender();
+          }, 5000); // 5 seconds
+        }
+      }
     }
     
     // Force a render to apply changes
@@ -688,7 +724,7 @@ export default class PolygonRenderer {
   // Add a method to create a test building
   private createTestBuilding() {
     // Create a simple cube as a test building
-    const geometry = new THREE.BoxGeometry(5, 5, 5);
+    const geometry = new THREE.BoxGeometry(10, 10, 10); // Larger size
     const material = new THREE.MeshBasicMaterial({ color: 0xff0000 }); // Bright red
     const cube = new THREE.Mesh(geometry, material);
     
