@@ -218,19 +218,41 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
   useEffect(() => {
     const canvas = canvasRef.current;
     if (canvas) {
-      canvas.addEventListener('mousemove', handleMouseMove);
-      canvas.addEventListener('click', handleMouseClick);
+      console.log("Setting up mouse event listeners on canvas");
       
-      // Add context menu prevention for right-click functionality
-      canvas.addEventListener('contextmenu', (e) => {
+      // Define the handlers with debug logging
+      const handleMouseMoveWithDebug = (event: MouseEvent) => {
+        // console.log("Mouse move event detected"); // Uncomment if needed
+        if (polygonRendererRef.current && canvasRef.current) {
+          polygonRendererRef.current.handleMouseMove(event, canvasRef.current);
+        }
+      };
+      
+      const handleMouseClickWithDebug = (event: MouseEvent) => {
+        console.log(`Mouse click event detected: button=${event.button}, clientX=${event.clientX}, clientY=${event.clientY}`);
+        if (polygonRendererRef.current && canvasRef.current) {
+          polygonRendererRef.current.handleMouseClick(event, canvasRef.current);
+        }
+      };
+      
+      const handleContextMenuWithDebug = (e: MouseEvent) => {
+        console.log("Context menu event prevented");
         // Prevent the context menu from appearing when right-clicking
         e.preventDefault();
-      });
+      };
+      
+      // Add the event listeners
+      canvas.addEventListener('mousemove', handleMouseMoveWithDebug);
+      canvas.addEventListener('click', handleMouseClickWithDebug);
+      canvas.addEventListener('contextmenu', handleContextMenuWithDebug);
+      
+      console.log("All mouse event listeners attached to canvas");
       
       return () => {
-        canvas.removeEventListener('mousemove', handleMouseMove);
-        canvas.removeEventListener('click', handleMouseClick);
-        canvas.removeEventListener('contextmenu', e => e.preventDefault());
+        console.log("Removing mouse event listeners from canvas");
+        canvas.removeEventListener('mousemove', handleMouseMoveWithDebug);
+        canvas.removeEventListener('click', handleMouseClickWithDebug);
+        canvas.removeEventListener('contextmenu', handleContextMenuWithDebug);
       };
     }
   }, []);

@@ -1048,11 +1048,16 @@ export default class SimplePolygonRenderer {
 
   // Handle mouse clicks for selection
   public handleMouseClick(event: MouseEvent, container: HTMLElement) {
-    if (!this.camera) return;
+    if (!this.camera) {
+      console.log("Click detected but no camera available");
+      return;
+    }
+    
+    console.log(`Mouse click detected: button=${event.button}, clientX=${event.clientX}, clientY=${event.clientY}`);
     
     // Check if this is a right-click
     if (event.button === 2) {
-      // Just prevent the context menu
+      console.log("Right-click detected, preventing default behavior");
       event.preventDefault();
       return;
     }
@@ -1062,6 +1067,8 @@ export default class SimplePolygonRenderer {
     this.mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
     this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
     
+    console.log(`Normalized mouse coordinates: x=${this.mouse.x.toFixed(4)}, y=${this.mouse.y.toFixed(4)}`);
+    
     // Update the raycaster with increased precision
     this.raycaster.setFromCamera(this.mouse, this.camera);
     this.raycaster.params.Line.threshold = 0.1; // Increase line detection threshold
@@ -1069,31 +1076,50 @@ export default class SimplePolygonRenderer {
     
     // Handle transport view clicks
     if (this.activeView === 'transport') {
+      console.log(`In transport view, checking for marker intersections`);
+      
       // Combine all markers for raycasting
       const allMarkers = [...this.bridgePointMarkers, ...this.dockPointMarkers].filter(
         obj => obj instanceof THREE.Mesh
       );
       
+      console.log(`Found ${allMarkers.length} markers to check for intersection`);
+      
+      // Log positions of first few markers for debugging
+      allMarkers.slice(0, 3).forEach((marker, i) => {
+        console.log(`Marker ${i} position:`, marker.position);
+      });
+      
       const intersects = this.raycaster.intersectObjects(allMarkers);
+      
+      console.log(`Found ${intersects.length} intersections`);
       
       if (intersects.length > 0) {
         const intersected = intersects[0].object;
         const userData = intersected.userData;
+        
+        console.log("Intersected object userData:", userData);
         
         if (userData && userData.id) {
           // Extract information from the marker ID
           // Format is typically: bridge-{polygonId}-{index} or dock-edge-{polygonId}-{index}
           const idParts = userData.id.split('-');
           
+          console.log(`ID parts: ${idParts.join(', ')}`);
+          
           if (idParts.length >= 3) {
             const markerType = idParts[0]; // 'bridge' or 'dock'
             const polygonId = idParts[1];
             const pointIndex = parseInt(idParts[2]);
             
+            console.log(`Attempting to delete ${markerType} point ${pointIndex} from polygon ${polygonId}`);
+            
             // Find the polygon
             const polygon = this.polygons.find(p => p.id === polygonId);
             
             if (polygon) {
+              console.log("Found polygon:", polygon.id);
+              
               // Create a visual effect at the deletion point
               this.createDeletionEffect(intersected.position.clone());
               
@@ -1102,11 +1128,17 @@ export default class SimplePolygonRenderer {
               if (markerType === 'bridge' && polygon.bridgePoints && polygon.bridgePoints.length > pointIndex) {
                 // Remove the bridge point
                 polygon.bridgePoints.splice(pointIndex, 1);
+                console.log(`Successfully removed bridge point ${pointIndex} from polygon ${polygonId}`);
                 deleted = true;
               } else if (markerType === 'dock' && polygon.dockPoints && polygon.dockPoints.length > pointIndex) {
                 // Remove the dock point
                 polygon.dockPoints.splice(pointIndex, 1);
+                console.log(`Successfully removed dock point ${pointIndex} from polygon ${polygonId}`);
                 deleted = true;
+              } else {
+                console.warn(`Failed to delete point - index ${pointIndex} not found in ${markerType} points array`);
+                console.log(`Bridge points length: ${polygon.bridgePoints?.length || 0}`);
+                console.log(`Dock points length: ${polygon.dockPoints?.length || 0}`);
               }
               
               if (deleted) {
@@ -1130,12 +1162,22 @@ export default class SimplePolygonRenderer {
                   eventBus.emit(EventTypes.HIDE_TOOLTIP);
                 }, 2000);
               }
+            } else {
+              console.warn(`Polygon ${polygonId} not found`);
             }
           }
+        } else {
+          console.warn("Intersected object has no ID in userData:", userData);
         }
         
         // Return early to prevent further processing
         return;
+      } else {
+        console.log("No intersections found with transport markers");
+        
+        // Debug: Log raycaster origin and direction
+        console.log("Raycaster origin:", this.raycaster.ray.origin);
+        console.log("Raycaster direction:", this.raycaster.ray.direction);
       }
     }
     
@@ -1645,23 +1687,24 @@ export default class SimplePolygonRenderer {
       return;
     }
     
-    // Create materials with nicer colors
+    // Create materials with improved visibility
     const bridgeMaterial = new THREE.MeshBasicMaterial({
       color: 0xFF5500, // Orange-red for bridges
-      transparent: true,
-      opacity: 0.5 // Set to 50% transparency
+      transparent: false, // Changed to false for better visibility
+      opacity: 1.0 // Full opacity
     });
     
     // Create materials for dock points
     const dockEdgeMaterial = new THREE.MeshBasicMaterial({
       color: 0x00AAFF, // Light blue for dock edges
-      transparent: true,
-      opacity: 0.5 // Set to 50% transparency
+      transparent: false, // Changed to false for better visibility
+      opacity: 1.0 // Full opacity
     });
     
     const dockWaterMaterial = new THREE.MeshBasicMaterial({
       color: 0x0088CC, // Darker blue for dock water points
-      transparent: false
+      transparent: false,
+      opacity: 1.0
     });
     
     // Process each polygon
@@ -1681,12 +1724,12 @@ export default class SimplePolygonRenderer {
               this.bounds.latCorrectionFactor
             )[0];
             
-            // Create a smaller marker for bridge points
-            const geometry = new THREE.BoxGeometry(0.3, 0.3, 0.3);
+            // Create a larger marker for bridge points
+            const geometry = new THREE.BoxGeometry(1.0, 1.0, 1.0); // Increased size
             
             const marker = new THREE.Mesh(geometry, bridgeMaterial);
-            marker.position.set(normalizedCoord.x, 0.2, -normalizedCoord.y); // Position even closer to land level
-            marker.renderOrder = 2000; // Keep high render order for visibility
+            marker.position.set(normalizedCoord.x, 1.0, -normalizedCoord.y); // Higher position
+            marker.renderOrder = 3000; // Very high render order
             
             // Add metadata for tooltips
             marker.userData = {
@@ -1698,6 +1741,8 @@ export default class SimplePolygonRenderer {
             
             this.scene.add(marker);
             this.bridgePointMarkers.push(marker);
+            
+            console.log(`Created bridge marker at position: ${normalizedCoord.x}, 1.0, ${-normalizedCoord.y}`);
           } catch (error) {
             console.error(`Error creating bridge point for polygon ${polygon.id}:`, error);
           }
@@ -1717,20 +1762,12 @@ export default class SimplePolygonRenderer {
               this.bounds.latCorrectionFactor
             )[0];
             
-            const waterCoord = normalizeCoordinates(
-              [point.water],
-              this.bounds.centerLat,
-              this.bounds.centerLng,
-              this.bounds.scale,
-              this.bounds.latCorrectionFactor
-            )[0];
-            
-            // Create a smaller sphere marker for dock edge points
-            const edgeGeometry = new THREE.SphereGeometry(0.2, 8, 8);
+            // Create a larger sphere marker for dock edge points
+            const edgeGeometry = new THREE.SphereGeometry(0.8, 16, 16); // Increased size and segments
             
             const edgeMarker = new THREE.Mesh(edgeGeometry, dockEdgeMaterial);
-            edgeMarker.position.set(edgeCoord.x, 0.2, -edgeCoord.y); // Position even closer to land level
-            edgeMarker.renderOrder = 2000; // Keep high render order
+            edgeMarker.position.set(edgeCoord.x, 1.0, -edgeCoord.y); // Higher position
+            edgeMarker.renderOrder = 3000; // Very high render order
             
             // Add metadata for tooltips
             edgeMarker.userData = {
@@ -1743,7 +1780,7 @@ export default class SimplePolygonRenderer {
             this.scene.add(edgeMarker);
             this.dockPointMarkers.push(edgeMarker);
             
-            // No connecting lines or water markers - removed completely
+            console.log(`Created dock marker at position: ${edgeCoord.x}, 1.0, ${-edgeCoord.y}`);
           } catch (error) {
             console.error(`Error creating dock point for polygon ${polygon.id}:`, error);
           }
@@ -1752,6 +1789,11 @@ export default class SimplePolygonRenderer {
     });
     
     console.log(`Created ${this.bridgePointMarkers.length} bridge markers and ${this.dockPointMarkers.length} dock markers`);
+    
+    // Force a scene update
+    if (this.scene.userData && this.scene.userData.renderer) {
+      this.scene.userData.renderer.render(this.scene, this.camera);
+    }
   }
 
   // Add a helper method to clear markers
