@@ -1304,7 +1304,7 @@ export default class SimplePolygonRenderer {
           marker => marker.userData && marker.userData.citizenId === this.hoveredCitizenId
         );
         
-        if (prevHovered) {
+        if (prevHovered && prevHovered instanceof THREE.Mesh<THREE.BufferGeometry, THREE.Material | THREE.Material[]>) {
           // Reset scale
           prevHovered.scale.set(1, 1, 1);
         }
