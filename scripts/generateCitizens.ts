@@ -119,7 +119,7 @@ async function generateCitizensWithClaude(existingCitizens: Citizen[]): Promise<
     const response = await axios.post(
       CLAUDE_API_URL,
       {
-        model: "claude-3-sonnet-20240229",
+        model: "claude-3-7-sonnet-latest",
         max_tokens: 4000,
         system: generateSystemPrompt(existingCitizens),
         messages: [
