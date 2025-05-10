@@ -863,20 +863,21 @@ export class ResourceDisplayManager {
     // Handle both bounds formats
     if (this.bounds.centerLat !== undefined && this.bounds.centerLng !== undefined && this.bounds.scale !== undefined) {
       // Original format
-      const latCorrectionFactor = this.bounds.latCorrectionFactor || 1.0;
-      x = (lng - this.bounds.centerLng) * this.bounds.scale;
-      z = -(lat - this.bounds.centerLat) * this.bounds.scale * latCorrectionFactor;
+      const latCorrectionFactor = this.bounds.latCorrectionFactor || 0.7; // Default to 0.7 if not specified
+      x = (lng - this.bounds.centerLng) * this.bounds.scale * latCorrectionFactor; // Apply correction to longitude
+      z = -(lat - this.bounds.centerLat) * this.bounds.scale;
     } else if (this.bounds.center && this.bounds.width !== undefined) {
       // Alternative format from SimplePolygonRenderer
       const centerLat = this.bounds.center.lat || 0;
       const centerLng = this.bounds.center.lng || 0;
       const scale = this.bounds.width ? this.bounds.width / 0.01 : 1000; // Approximate scale from width
-      x = (lng - centerLng) * scale;
+      const latCorrectionFactor = 0.7; // Use standard correction factor
+      x = (lng - centerLng) * scale * latCorrectionFactor; // Apply correction to longitude
       z = -(lat - centerLat) * scale;
     } else {
       // Fallback to default values
       console.warn('Invalid bounds format, using default values');
-      x = lng * 1000;
+      x = lng * 1000 * 0.7; // Apply correction factor to longitude
       z = -lat * 1000;
     }
     
