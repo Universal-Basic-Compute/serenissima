@@ -29,6 +29,7 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
   const [selectedBuildingType, setSelectedBuildingType] = useState<string>('');
   const [showCanalCreator, setShowCanalCreator] = useState(false);
   const [selectedVariant, setSelectedVariant] = useState<string>('model');
+  const [buildings, setBuildings] = useState<any[]>([]);
 
   // Use the scene ready hook instead of trying to find the scene directly
   const { isSceneReady, scene: readyScene, camera: readyCamera } = useSceneReady();
@@ -75,6 +76,11 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
         if (response.ok) {
           const data = await response.json();
           console.log(`BuildingsToolbar: Loaded ${data.buildings?.length || 0} buildings`);
+          
+          // Store buildings in state
+          if (data.buildings) {
+            setBuildings(data.buildings);
+          }
           
           // Log each building for debugging
           if (data.buildings && data.buildings.length > 0) {
@@ -471,7 +477,7 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
           }
           
           // If no buildings found, create some test markers at expected positions
-          if (buildings.length === 0) {
+          if (!buildings || buildings.length === 0) {
             console.log('No buildings found, creating test markers at expected positions');
             
             // Create markers at positions where buildings should be
