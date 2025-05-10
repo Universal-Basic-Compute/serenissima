@@ -2087,7 +2087,7 @@ export default class SimplePolygonRenderer {
             const geometry = new THREE.SphereGeometry(0.3, 12, 12); // Same size as dock points
             
             const marker = new THREE.Mesh(geometry, bridgeMaterial);
-            marker.position.set(normalizedCoord.x, 0.3, -normalizedCoord.y); // Lower position (was 0.5)
+            marker.position.set(normalizedCoord.x, 5.0, -normalizedCoord.y); // Higher position for visibility
             marker.renderOrder = 100;
             
             // Add metadata for tooltips
