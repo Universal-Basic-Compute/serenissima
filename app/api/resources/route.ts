@@ -9,14 +9,32 @@ const baseId = process.env.AIRTABLE_BASE_ID;
 // Initialize Airtable base
 const base = new Airtable({ apiKey }).base(baseId);
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    // Get URL parameters
+    const { searchParams } = new URL(request.url);
+    const owner = searchParams.get('owner');
+    
+    console.log(`Loading resources${owner ? ` for owner: ${owner}` : ' (all)'}`);
+    
     const resources = await loadAllResources();
-    return NextResponse.json(resources);
+    
+    // Filter by owner if specified
+    const filteredResources = owner 
+      ? resources.filter(resource => resource.owner === owner)
+      : resources;
+    
+    console.log(`Returning ${filteredResources.length} resources`);
+    
+    return NextResponse.json(filteredResources);
   } catch (error) {
     console.error('Error loading resources:', error);
     return NextResponse.json(
-      { error: 'Failed to load resources' },
+      { 
+        success: false, 
+        error: 'Failed to load resources',
+        details: error instanceof Error ? error.message : String(error)
+      },
       { status: 500 }
     );
   }
