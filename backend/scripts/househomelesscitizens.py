@@ -52,8 +52,9 @@ def initialize_airtable():
         sys.exit(1)
     
     try:
-        # Create the Airtable client with the correct parameter format
-        return airtable.Airtable(base_id, api_key=api_key)
+        # Return the base object instead of an Airtable instance
+        # The table-specific instances will be created when needed
+        return airtable.Airtable(base_id, api_key)
     except Exception as e:
         log.error(f"Failed to initialize Airtable: {e}")
         sys.exit(1)
@@ -63,6 +64,7 @@ def get_homeless_citizens(at_client) -> List[Dict]:
     log.info("Fetching homeless citizens...")
     
     try:
+        # Create a table-specific instance
         citizens_table = at_client.table('CITIZENS')
         # Get citizens without a Home field or with empty Home field
         formula = "OR({Home} = '', {Home} = BLANK())"
@@ -82,6 +84,7 @@ def get_available_buildings(at_client, building_type: str) -> List[Dict]:
     log.info(f"Fetching available buildings of type: {building_type}")
     
     try:
+        # Create a table-specific instance
         buildings_table = at_client.table('BUILDINGS')
         # Get buildings of the specified type that are not already occupied
         formula = f"AND({{Type}} = '{building_type}', OR({{Occupant}} = '', {{Occupant}} = BLANK()))"
