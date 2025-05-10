@@ -10,7 +10,6 @@ const args = process.argv.slice(2);
 const mode = args[0] || 'bridges'; // Default to bridges if no argument provided
 
 // Load environment variables
-const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY;
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 
 // Load the polygon data
@@ -39,59 +38,6 @@ async function savePolygonData(filePath, data) {
   }
 }
 
-// Get location information from Google Maps
-async function getLocationInfo(lat, lng) {
-  try {
-    const response = await axios.get(
-      `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${GOOGLE_MAPS_API_KEY}`
-    );
-    
-    if (response.data.status === 'OK' && response.data.results.length > 0) {
-      // Extract useful information from the response
-      const addressComponents = response.data.results[0].address_components;
-      const formattedAddress = response.data.results[0].formatted_address;
-      
-      // Try to find neighborhood, locality, or other relevant components
-      let neighborhood = '';
-      let locality = '';
-      let area = '';
-      
-      for (const component of addressComponents) {
-        if (component.types.includes('neighborhood')) {
-          neighborhood = component.long_name;
-        } else if (component.types.includes('locality')) {
-          locality = component.long_name;
-        } else if (component.types.includes('sublocality')) {
-          area = component.long_name;
-        }
-      }
-      
-      return {
-        formattedAddress,
-        neighborhood: neighborhood || 'Unknown',
-        locality: locality || 'Venice',
-        area: area || 'Unknown',
-        fullResponse: response.data
-      };
-    }
-    
-    return {
-      formattedAddress: 'Unknown location',
-      neighborhood: 'Unknown',
-      locality: 'Venice',
-      area: 'Unknown'
-    };
-  } catch (error) {
-    console.error('Error getting location info from Google Maps:', error);
-    return {
-      formattedAddress: 'Error retrieving location',
-      neighborhood: 'Unknown',
-      locality: 'Venice',
-      area: 'Unknown',
-      error: error.message
-    };
-  }
-}
 
 // Function for exponential backoff retry logic
 async function retryWithExponentialBackoff(fn, maxRetries = 5, initialDelay = 5000) {
@@ -131,7 +77,7 @@ async function retryWithExponentialBackoff(fn, maxRetries = 5, initialDelay = 50
 
 
 // Generate multiple bridge names at once using Claude
-async function generateBridgeNames(locationInfo, count) {
+async function generateBridgeNames(count) {
   try {
     // Use more retries with longer delays
     return await retryWithExponentialBackoff(
@@ -139,14 +85,9 @@ async function generateBridgeNames(locationInfo, count) {
         const prompt = `
 You are an expert on Renaissance Venice history and geography. I need historically accurate names for ${count} bridges in Venice.
 
-Location information:
-- Neighborhood: ${locationInfo.neighborhood}
-- Area: ${locationInfo.area}
-- Address: ${locationInfo.formattedAddress}
-
-Please generate ${count} historically plausible names for bridges at this location. The names should:
+Please generate ${count} historically plausible names for bridges. The names should:
 1. Follow Venetian naming conventions for bridges (Ponte di...)
-2. Reference nearby landmarks, families, guilds, or historical events if possible
+2. Reference landmarks, families, guilds, or historical events if possible
 3. Be in Italian
 4. Include a brief explanation of why each name would be appropriate
 
@@ -251,21 +192,16 @@ Example format:
 }
 
 // Generate dock names using Claude API
-async function generateDockNames(locationInfo, count) {
+async function generateDockNames(count) {
   try {
     return await retryWithExponentialBackoff(
       async () => {
         const prompt = `
 You are an expert on Renaissance Venice history and geography. I need historically accurate names for ${count} docks or water landings in Venice.
 
-Location information:
-- Neighborhood: ${locationInfo.neighborhood}
-- Area: ${locationInfo.area}
-- Address: ${locationInfo.formattedAddress}
-
-Please generate ${count} historically plausible names for docks at this location. The names should:
+Please generate ${count} historically plausible names for docks. The names should:
 1. Follow Venetian naming conventions for docks (Riva di..., Fondamenta..., etc.)
-2. Reference nearby landmarks, families, guilds, or historical events if possible
+2. Reference landmarks, families, guilds, or historical events if possible
 3. Be in Italian
 4. Include a brief explanation of why each name would be appropriate
 
@@ -347,19 +283,14 @@ Respond with a JSON array containing objects with these three fields for each do
 }
 
 // Generate building descriptions using Claude API
-async function generateBuildingDescriptions(locationInfo, count) {
+async function generateBuildingDescriptions(count) {
   try {
     return await retryWithExponentialBackoff(
       async () => {
         const prompt = `
 You are an expert on Renaissance Venice history and architecture. I need historically accurate descriptions for ${count} buildings in Venice.
 
-Location information:
-- Neighborhood: ${locationInfo.neighborhood}
-- Area: ${locationInfo.area}
-- Address: ${locationInfo.formattedAddress}
-
-Please generate ${count} historically plausible building descriptions for this location. The descriptions should:
+Please generate ${count} historically plausible building descriptions. The descriptions should:
 1. Include appropriate building types for Renaissance Venice (palazzo, bottega, chiesa, etc.)
 2. Reference local families, guilds, or historical events if possible
 3. Include names in Italian with English translations
@@ -484,19 +415,9 @@ async function processBridgePoints(polygonData, polygonFilePath, file) {
     }
   }
   
-  // Get location information for the polygon's center point
-  const centerPoint = polygonData.center || polygonData.centroid;
-  if (!centerPoint) {
-    console.warn(`No center or centroid found for polygon ${polygonData.id}, skipping location info.`);
-    return;
-  }
-  
-  console.log(`Getting location info for polygon center: ${centerPoint.lat}, ${centerPoint.lng}...`);
-  const locationInfo = await getLocationInfo(centerPoint.lat, centerPoint.lng);
-  
   // Generate bridge names for all bridge points at once
-  console.log(`Generating ${bridgePointsCount} bridge names for location: ${locationInfo.formattedAddress}...`);
-  const bridgeNames = await generateBridgeNames(locationInfo, bridgePointsCount);
+  console.log(`Generating ${bridgePointsCount} bridge names...`);
+  const bridgeNames = await generateBridgeNames(bridgePointsCount);
   
   console.log(`Generated ${bridgeNames.length} bridge names`);
   
@@ -525,8 +446,7 @@ async function processBridgePoints(polygonData, polygonFilePath, file) {
       bridgePoint.connection.englishName = bridgeName.englishName;
       bridgePoint.connection.historicalDescription = bridgeName.historicalDescription;
       bridgePoint.connection.location = {
-        midpoint: { lat: midLat, lng: midLng },
-        locationInfo: locationInfo
+        midpoint: { lat: midLat, lng: midLng }
       };
       
       console.log(`Assigned bridge name: "${bridgeName.historicalName}" (${bridgeName.englishName})`);
@@ -551,19 +471,9 @@ async function processDockPoints(polygonData, polygonFilePath) {
   const dockPointsCount = polygonData.dockPoints.length;
   console.log(`Found ${dockPointsCount} dock points to process.`);
   
-  // Get location information for the polygon's center point
-  const centerPoint = polygonData.center || polygonData.centroid;
-  if (!centerPoint) {
-    console.warn(`No center or centroid found for polygon ${polygonData.id}, skipping location info.`);
-    return;
-  }
-  
-  console.log(`Getting location info for polygon center: ${centerPoint.lat}, ${centerPoint.lng}...`);
-  const locationInfo = await getLocationInfo(centerPoint.lat, centerPoint.lng);
-  
   // Generate dock names for all dock points at once
-  console.log(`Generating ${dockPointsCount} dock names for location: ${locationInfo.formattedAddress}...`);
-  const dockNames = await generateDockNames(locationInfo, dockPointsCount);
+  console.log(`Generating ${dockPointsCount} dock names...`);
+  const dockNames = await generateDockNames(dockPointsCount);
   
   console.log(`Generated ${dockNames.length} dock names`);
   
@@ -576,7 +486,6 @@ async function processDockPoints(polygonData, polygonFilePath) {
     dockPoint.historicalName = dockName.historicalName;
     dockPoint.englishName = dockName.englishName;
     dockPoint.historicalDescription = dockName.historicalDescription;
-    dockPoint.locationInfo = locationInfo;
     
     console.log(`Assigned dock name: "${dockName.historicalName}" (${dockName.englishName})`);
   }
@@ -597,19 +506,9 @@ async function processBuildingPoints(polygonData, polygonFilePath) {
   const buildingPointsCount = polygonData.buildingPoints.length;
   console.log(`Found ${buildingPointsCount} building points to process.`);
   
-  // Get location information for the polygon's center point
-  const centerPoint = polygonData.center || polygonData.centroid;
-  if (!centerPoint) {
-    console.warn(`No center or centroid found for polygon ${polygonData.id}, skipping location info.`);
-    return;
-  }
-  
-  console.log(`Getting location info for polygon center: ${centerPoint.lat}, ${centerPoint.lng}...`);
-  const locationInfo = await getLocationInfo(centerPoint.lat, centerPoint.lng);
-  
   // Generate building descriptions for all building points at once
-  console.log(`Generating ${buildingPointsCount} building descriptions for location: ${locationInfo.formattedAddress}...`);
-  const buildingDescriptions = await generateBuildingDescriptions(locationInfo, buildingPointsCount);
+  console.log(`Generating ${buildingPointsCount} building descriptions...`);
+  const buildingDescriptions = await generateBuildingDescriptions(buildingPointsCount);
   
   console.log(`Generated ${buildingDescriptions.length} building descriptions`);
   
@@ -623,7 +522,6 @@ async function processBuildingPoints(polygonData, polygonFilePath) {
     buildingPoint.historicalName = buildingDesc.historicalName;
     buildingPoint.englishName = buildingDesc.englishName;
     buildingPoint.historicalDescription = buildingDesc.historicalDescription;
-    buildingPoint.locationInfo = locationInfo;
     
     console.log(`Assigned building description: "${buildingDesc.historicalName}" (${buildingDesc.englishName})`);
   }
