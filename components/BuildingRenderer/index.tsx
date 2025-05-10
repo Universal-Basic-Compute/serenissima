@@ -132,34 +132,40 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
     console.log(`Rendering building ID: ${id}, Type: ${type}, Position:`, position);
     
     // Add a large debug sphere at the same position
-    const sphereGeometry = new THREE.SphereGeometry(5, 32, 32); // Smaller but still visible sphere
+    const sphereGeometry = new THREE.SphereGeometry(10, 32, 32); // Increase size to 10
     const sphereMaterial = new THREE.MeshBasicMaterial({ 
       color: 0xff00ff,  // Bright magenta for better visibility
-      transparent: false, // Make fully opaque
-      opacity: 1.0
+      transparent: true, // Make it transparent
+      opacity: 0.7,      // Semi-transparent
+      wireframe: true    // Add wireframe to see through it
     });
     const debugSphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
 
-    // Use the exact position from the building data
-    debugSphere.position.set(position.x, position.y || 10, position.z);
+    // Position it higher above the building for better visibility
+    debugSphere.position.set(position.x, position.y + 20 || 30, position.z);
     scene.add(debugSphere);
-    console.log(`Added debug sphere at position:`, debugSphere.position);
+    console.log(`Added debug sphere at position: x=${debugSphere.position.x}, y=${debugSphere.position.y}, z=${debugSphere.position.z}`);
+
+    // Give it a name for easier identification
+    debugSphere.name = `debug_sphere_${id}`;
 
     // Store reference to the debug sphere
     const debugId = `debug_sphere_${id}`;
     buildingMeshesRef.current.set(debugId, debugSphere);
     
     // Add a reference sphere at origin (0,0,0)
-    const originSphereGeometry = new THREE.SphereGeometry(5, 32, 32);
+    const originSphereGeometry = new THREE.SphereGeometry(10, 32, 32); // Larger sphere
     const originSphereMaterial = new THREE.MeshBasicMaterial({ 
       color: 0x00ff00,  // Bright green
-      transparent: false,
-      opacity: 1.0
+      transparent: true,
+      opacity: 0.7,
+      wireframe: true    // Add wireframe to see through it
     });
     const originSphere = new THREE.Mesh(originSphereGeometry, originSphereMaterial);
-    originSphere.position.set(0, 10, 0); // At origin, 10 units up
+    originSphere.position.set(0, 30, 0); // At origin, 30 units up for better visibility
+    originSphere.name = 'debug_sphere_origin'; // Give it a name
     scene.add(originSphere);
-    console.log(`Added origin reference sphere at position: (0, 10, 0)`);
+    console.log(`Added origin reference sphere at position: (0, 30, 0)`);
 
     // Store reference
     buildingMeshesRef.current.set('debug_sphere_origin', originSphere);
@@ -253,13 +259,29 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
     // Use bright red for better visibility
     const material = new THREE.MeshBasicMaterial({ 
       color: 0xff0000,
-      wireframe: false
+      wireframe: true, // Use wireframe for better visibility
+      transparent: true,
+      opacity: 0.8
     });
     const fallbackMesh = new THREE.Mesh(geometry, material);
     
     // Use the exact position from the data
     fallbackMesh.position.set(position.x, position.y || 10, position.z);
     fallbackMesh.rotation.y = rotation || 0;
+    
+    // Also add a debug sphere for the fallback mesh
+    const sphereGeometry = new THREE.SphereGeometry(12, 32, 32);
+    const sphereMaterial = new THREE.MeshBasicMaterial({ 
+      color: 0xff0000,  // Red for fallback
+      transparent: true,
+      opacity: 0.7,
+      wireframe: true
+    });
+    const debugSphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+    debugSphere.position.set(position.x, position.y + 20 || 30, position.z);
+    debugSphere.name = `debug_sphere_fallback_${id}`;
+    scene.add(debugSphere);
+    console.log(`Added fallback debug sphere at position: x=${debugSphere.position.x}, y=${debugSphere.position.y}, z=${debugSphere.position.z}`);
     
     // Store the building ID in userData for later reference
     fallbackMesh.userData.buildingId = id;
