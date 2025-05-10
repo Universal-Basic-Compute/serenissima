@@ -242,6 +242,8 @@ export class BuildingPositionManager {
     // Create a bounding box for all buildings
     const boundingBox = new THREE.Box3();
     buildings.forEach(building => {
+      // Skip if building position is not defined
+      if (!building.position) return;
       boundingBox.expandByObject(building);
     });
     
@@ -257,6 +259,55 @@ export class BuildingPositionManager {
       min: boundingBox.min,
       max: boundingBox.max
     });
+    
+    // Add debug markers at the corners of the bounding box if needed
+    if (process.env.NODE_ENV === 'development') {
+      this.addDebugMarkers(scene, boundingBox);
+    }
+  }
+  
+  /**
+   * Add debug markers at the corners of a bounding box
+   * @param scene THREE.Scene to add markers to
+   * @param boundingBox THREE.Box3 bounding box
+   */
+  private addDebugMarkers(scene: THREE.Scene, boundingBox: THREE.Box3): void {
+    // Create a material for the markers
+    const markerMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+    
+    // Create a small sphere geometry for the markers
+    const markerGeometry = new THREE.SphereGeometry(0.5, 8, 8);
+    
+    // Create markers at each corner of the bounding box
+    const corners = [
+      new THREE.Vector3(boundingBox.min.x, boundingBox.min.y, boundingBox.min.z),
+      new THREE.Vector3(boundingBox.min.x, boundingBox.min.y, boundingBox.max.z),
+      new THREE.Vector3(boundingBox.min.x, boundingBox.max.y, boundingBox.min.z),
+      new THREE.Vector3(boundingBox.min.x, boundingBox.max.y, boundingBox.max.z),
+      new THREE.Vector3(boundingBox.max.x, boundingBox.min.y, boundingBox.min.z),
+      new THREE.Vector3(boundingBox.max.x, boundingBox.min.y, boundingBox.max.z),
+      new THREE.Vector3(boundingBox.max.x, boundingBox.max.y, boundingBox.min.z),
+      new THREE.Vector3(boundingBox.max.x, boundingBox.max.y, boundingBox.max.z)
+    ];
+    
+    // Add a marker at each corner
+    corners.forEach(position => {
+      const marker = new THREE.Mesh(markerGeometry, markerMaterial);
+      marker.position.copy(position);
+      marker.userData.isDebugMarker = true;
+      scene.add(marker);
+    });
+    
+    // Add a marker at the center
+    const center = new THREE.Vector3();
+    boundingBox.getCenter(center);
+    const centerMarker = new THREE.Mesh(
+      new THREE.SphereGeometry(0.7, 16, 16),
+      new THREE.MeshBasicMaterial({ color: 0x00ff00 })
+    );
+    centerMarker.position.copy(center);
+    centerMarker.userData.isDebugMarker = true;
+    scene.add(centerMarker);
   }
 }
 

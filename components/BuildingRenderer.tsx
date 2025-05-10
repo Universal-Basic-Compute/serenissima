@@ -319,8 +319,19 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ active }) => {
     
     // Add all building meshes to the bounding box
     buildingMeshesRef.current.forEach((mesh) => {
+      // Skip if mesh position is not defined
+      if (!mesh.position) {
+        console.warn('Building mesh has no position:', mesh);
+        return;
+      }
       boundingBox.expandByObject(mesh);
     });
+    
+    // Check if bounding box is valid (not empty)
+    if (boundingBox.isEmpty()) {
+      console.warn('Building bounding box is empty, cannot focus camera');
+      return;
+    }
     
     // Get the center and size of the bounding box
     const center = new THREE.Vector3();
@@ -722,6 +733,9 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ active }) => {
     
     // Update visibility for each building
     buildingMeshesRef.current.forEach((mesh, id) => {
+      // Skip if mesh position is not defined
+      if (!mesh.position) return;
+      
       const distance = cameraPosition.distanceTo(mesh.position);
       
       // Hide buildings that are too far away

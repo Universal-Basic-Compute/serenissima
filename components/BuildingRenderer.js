@@ -44,7 +44,8 @@ const BuildingRenderer = ({ active }) => {
       1, // Near clipping plane
       500 // Far clipping plane
     );
-    camera.position.set(45, 20, 12); // Position camera
+    // Position camera to match the main scene camera position
+    camera.position.set(45, 20, 12);
     cameraRef.current = camera;
     
     // Create renderer
@@ -61,6 +62,7 @@ const BuildingRenderer = ({ active }) => {
     
     // Create controls
     const controls = new OrbitControls(camera, renderer.domElement);
+    // Set target to match the main scene camera target
     controls.target.set(45, 0, 12);
     controls.update();
     controlsRef.current = controls;
@@ -177,6 +179,9 @@ const BuildingRenderer = ({ active }) => {
     
     // Update visibility for each building
     buildingMeshesRef.current.forEach((mesh, id) => {
+      // Skip if mesh position is not defined
+      if (!mesh.position) return;
+      
       const distance = cameraPosition.distanceTo(mesh.position);
       
       // Hide buildings that are too far away
