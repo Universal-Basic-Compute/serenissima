@@ -122,6 +122,12 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
       // Render the building
       const mesh = await renderer.render(normalizedBuilding);
       
+      // Check if this is an empty placeholder (failed to load model)
+      if (mesh.userData && mesh.userData.isEmptyPlaceholder) {
+        console.log(`Building ${normalizedBuilding.id} is using an empty placeholder due to model loading failure`);
+        // We still store the reference for cleanup, but the mesh won't be visible
+      }
+      
       // Store reference for later cleanup
       buildingMeshesRef.current.set(normalizedBuilding.id, mesh);
       
