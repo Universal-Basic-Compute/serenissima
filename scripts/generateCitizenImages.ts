@@ -52,14 +52,14 @@ async function fetchCitizensNeedingImages(): Promise<Citizen[]> {
           records.forEach(record => {
             const fields = record.fields;
             citizens.push({
-              id: fields.CitizenId || record.id,
+              id: fields.CitizenId as string || record.id,
               socialClass: fields.SocialClass as 'Patrician' | 'Cittadini' | 'Popolani' | 'Laborer',
-              firstName: fields.FirstName,
-              lastName: fields.LastName,
-              description: fields.Description,
-              imagePrompt: fields.ImagePrompt,
-              wealth: fields.Wealth,
-              createdAt: fields.CreatedAt
+              firstName: fields.FirstName as string,
+              lastName: fields.LastName as string,
+              description: fields.Description as string,
+              imagePrompt: fields.ImagePrompt as string,
+              wealth: fields.Wealth as number,
+              createdAt: fields.CreatedAt as string
             });
           });
           
