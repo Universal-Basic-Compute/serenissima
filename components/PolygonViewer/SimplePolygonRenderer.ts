@@ -977,7 +977,7 @@ export default class SimplePolygonRenderer {
         if (userData && userData.id && userData.id !== this.hoveredPointId) {
           this.hoveredPointId = userData.id;
           
-          // Highlight the hovered point
+          // Highlight the hovered point - CHANGED: Use MeshBasicMaterial consistently
           (intersected as THREE.Mesh).material = new THREE.MeshBasicMaterial({
             color: userData.type.startsWith('bridge') ? 0xFF8800 : 0x00CCFF, // Brighter color
             side: THREE.DoubleSide,
@@ -1005,6 +1005,7 @@ export default class SimplePolygonRenderer {
           const isBridge = hoveredPoint.userData.type.startsWith('bridge');
           const isWater = hoveredPoint.userData.type === 'dock-water';
           
+          // Reset to original color - CHANGED: Use MeshBasicMaterial consistently
           hoveredPoint.material = new THREE.MeshBasicMaterial({
             color: isBridge ? 0xFF5500 : (isWater ? 0x0088CC : 0x00AAFF),
             side: THREE.DoubleSide,
@@ -1419,12 +1420,11 @@ export default class SimplePolygonRenderer {
           console.log(`Normalized edge coordinates:`, edgeCoord);
           console.log(`Normalized water coordinates:`, waterCoord);
         
-          // Create a marker for the dock point (edge) - CHANGED: Use larger, brighter spheres
+          // Create a marker for the dock point (edge) - CHANGED: Use basic material instead of standard material
           const edgeGeometry = new THREE.SphereGeometry(0.3, 16, 16); // Increased size for better visibility
           const edgeMaterial = new THREE.MeshBasicMaterial({
             color: 0x00AAFF, // Bright blue for dock edge points
-            transparent: false, // No transparency for better visibility
-            opacity: 1.0
+            transparent: false // No transparency for better visibility
           });
         
           const edgeMarker = new THREE.Mesh(edgeGeometry, edgeMaterial);
@@ -1442,7 +1442,7 @@ export default class SimplePolygonRenderer {
           this.scene.add(edgeMarker);
           this.dockPointMarkers.push(edgeMarker);
         
-          // Create a line connecting edge to water - CHANGED: Make line thicker and brighter
+          // Create a line connecting edge to water - CHANGED: Use basic material instead of standard material
           const lineGeometry = new THREE.BufferGeometry().setFromPoints([
             new THREE.Vector3(edgeCoord.x, 0.5, -edgeCoord.y), // Positioned above water
             new THREE.Vector3(waterCoord.x, 0.5, -waterCoord.y) // Positioned above water
@@ -1450,8 +1450,7 @@ export default class SimplePolygonRenderer {
         
           const lineMaterial = new THREE.LineBasicMaterial({
             color: 0x00CCFF, // Bright cyan for connecting lines
-            linewidth: 3, // Thicker line (note: linewidth may not work in WebGL)
-            transparent: false
+            linewidth: 3 // Thicker line (note: linewidth may not work in WebGL)
           });
         
           const line = new THREE.Line(lineGeometry, lineMaterial);
@@ -1460,12 +1459,11 @@ export default class SimplePolygonRenderer {
           this.scene.add(line);
           this.dockPointMarkers.push(line); // Add to dock markers for cleanup
         
-          // Create a marker for the water point - CHANGED: Use larger, brighter spheres
+          // Create a marker for the water point - CHANGED: Use basic material instead of standard material
           const waterGeometry = new THREE.SphereGeometry(0.25, 16, 16); // Slightly smaller than edge point
           const waterMaterial = new THREE.MeshBasicMaterial({
             color: 0x0088CC, // Darker blue for water points
-            transparent: false, // No transparency for better visibility
-            opacity: 1.0
+            transparent: false // No transparency for better visibility
           });
         
           const waterMarker = new THREE.Mesh(waterGeometry, waterMaterial);
