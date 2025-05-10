@@ -343,17 +343,22 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
     
     // Animation loop
     const animate = () => {
-      requestAnimationFrame(animate);
-      
-      if (cameraController) {
-        cameraController.update();
+      try {
+        requestAnimationFrame(animate);
+        
+        if (cameraController) {
+          cameraController.update();
+        }
+        
+        if (waterRef.current) {
+          waterRef.current.update();
+        }
+        
+        renderer.render(scene, cameraController.camera);
+      } catch (error) {
+        console.error('Error in animation loop:', error);
+        // Don't rethrow to keep animation going
       }
-      
-      if (waterRef.current) {
-        waterRef.current.update();
-      }
-      
-      renderer.render(scene, cameraController.camera);
     };
     
     animate();
