@@ -249,23 +249,11 @@ export class BuildingPositionManager {
       return;
     }
     
-    // Create debug markers for each building
-    buildings.forEach((building) => {
-      // Create a visible marker at the building position
-      const markerGeometry = new THREE.SphereGeometry(2, 16, 16);
-      const markerMaterial = new THREE.MeshBasicMaterial({ 
-        color: 0xff0000,
-        transparent: false
-      });
-      const marker = new THREE.Mesh(markerGeometry, markerMaterial);
-      marker.position.copy(building.position);
-      marker.position.y += 10; // Position above the building
-      marker.userData = {
-        isDebugMarker: true,
-        buildingId: building.userData.buildingId
-      };
-      scene.add(marker);
-      console.log(`Added debug marker for building ${building.userData.buildingId} at position:`, marker.position);
+    // Remove existing debug markers first
+    scene.traverse((object) => {
+      if (object.userData && object.userData.isDebugMarker) {
+        scene.remove(object);
+      }
     });
     
     // Create a bounding box for all buildings
