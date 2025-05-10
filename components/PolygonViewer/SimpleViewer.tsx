@@ -812,15 +812,15 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
         <div className="absolute bottom-4 right-4 bg-black/70 text-white p-3 rounded-lg shadow-lg">
           <h3 className="text-lg font-serif mb-2">Transport Points</h3>
           <div className="flex items-center mb-1">
-            <div className="w-4 h-4 rounded-full bg-[#00FF00] mr-2"></div>
+            <div className="w-4 h-4 rounded-full bg-[#00AAFF] mr-2"></div>
             <span>Dock Edge Points</span>
           </div>
           <div className="flex items-center mb-1">
-            <div className="w-4 h-4 rounded-full bg-[#0000FF] mr-2"></div>
+            <div className="w-4 h-4 rounded-full bg-[#0088CC] mr-2"></div>
             <span>Dock Water Points</span>
           </div>
           <div className="flex items-center mb-3">
-            <div className="w-4 h-4 rounded-full bg-[#FF0000] mr-2"></div>
+            <div className="w-4 h-4 rounded-full bg-[#FF5500] mr-2"></div>
             <span>Bridge Points</span>
           </div>
           <button 
