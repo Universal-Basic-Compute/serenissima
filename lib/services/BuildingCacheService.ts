@@ -9,6 +9,8 @@ declare global {
     __threeContext?: {
       scene?: THREE.Scene;
       camera?: THREE.Camera;
+      renderer?: THREE.WebGLRenderer;
+      controls?: any;
     };
   }
   
