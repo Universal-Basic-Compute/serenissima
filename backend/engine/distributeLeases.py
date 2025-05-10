@@ -656,7 +656,8 @@ def distribute_leases(dry_run: bool = False):
             "by_building_owner": defaultdict(float),  # Total paid by each building owner
             "by_building_owner_tax": defaultdict(float),  # Total tax paid by each building owner
             "land_owner_buildings": defaultdict(list),  # Buildings data for each land owner
-            "building_owner_lands": defaultdict(list)   # Lands data for each building owner
+            "building_owner_lands": defaultdict(list),   # Lands data for each building owner
+            "land_income": {}  # Track income per land
         }
         
         for land in lands:
@@ -754,6 +755,20 @@ def distribute_leases(dry_run: bool = False):
                     except Exception as building_error:
                         log.error(f"Error processing building {building.get('id', 'unknown')}: {building_error}")
                         lease_summary["failed"] += 1
+                
+                # Track the total income for this land
+                lease_summary["land_income"][land_id] = land_total
+                
+                # Update the LastIncome field in the LANDS table, even in dry-run mode
+                try:
+                    if land_total > 0:
+                        log.info(f"{'[DRY RUN] Would update' if dry_run else 'Updating'} LastIncome for land {land_id} to {land_total}")
+                        if not dry_run:
+                            tables['lands'].update(land_id, {
+                                "LastIncome": land_total
+                            })
+                except Exception as update_error:
+                    log.error(f"Error updating LastIncome for land {land_id}: {update_error}")
                 
                 # Add buildings data for this land to the summary
                 if land_buildings_data:
