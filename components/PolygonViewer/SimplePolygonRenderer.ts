@@ -2702,6 +2702,8 @@ export default class SimplePolygonRenderer {
       lng: this.bounds.centerLng - (end.z / this.bounds.scale)
     };
     
+    console.log(`Calculating path from (${startLatLng.lat}, ${startLatLng.lng}) to (${endLatLng.lat}, ${endLatLng.lng})`);
+    
     // Call the pathfinder service to find a path
     this.findPathBetweenPoints(startLatLng, endLatLng);
   }
@@ -2724,7 +2726,8 @@ export default class SimplePolygonRenderer {
       const endPolygon = this.findPolygonContainingPoint(end);
       
       if (!startPolygon || !endPolygon) {
-        console.warn('Start or end point is not on land');
+        console.warn('Start or end point is not on land, drawing direct path instead');
+        this.drawDirectPath(this.measurementPoints[0], this.measurementPoints[1]);
         return;
       }
       
@@ -2732,6 +2735,7 @@ export default class SimplePolygonRenderer {
       
       // If start and end are in the same polygon, draw a direct path
       if (startPolygon.id === endPolygon.id) {
+        console.log('Start and end points are in the same polygon, drawing direct path');
         this.drawDirectPath(this.measurementPoints[0], this.measurementPoints[1]);
         return;
       }
@@ -2740,7 +2744,8 @@ export default class SimplePolygonRenderer {
       const path = this.findShortestPath(graph, startPolygon.id, endPolygon.id);
       
       if (!path || path.length === 0) {
-        console.warn('No path found between points');
+        console.warn('No path found between points, drawing direct path instead');
+        this.drawDirectPath(this.measurementPoints[0], this.measurementPoints[1]);
         return;
       }
       
@@ -2751,6 +2756,8 @@ export default class SimplePolygonRenderer {
       
     } catch (error) {
       console.error('Error finding path:', error);
+      // Fallback to direct path in case of error
+      this.drawDirectPath(this.measurementPoints[0], this.measurementPoints[1]);
     }
   }
   
@@ -2790,15 +2797,116 @@ export default class SimplePolygonRenderer {
   }
   
   /**
-   * Find the polygon containing a point
+   * Find the polygon containing a point with improved detection
    */
   private findPolygonContainingPoint(point: {lat: number, lng: number}): Polygon | null {
+    console.log(`Finding polygon containing point: ${point.lat}, ${point.lng}`);
+    
+    // First try exact containment
     for (const polygon of this.polygons) {
       if (this.isPointInPolygon(point, polygon.coordinates)) {
+        console.log(`Point is inside polygon ${polygon.id}`);
         return polygon;
       }
     }
+    
+    // If no exact match, try with a small buffer (to handle points that are very close to the edge)
+    const BUFFER_DISTANCE = 0.0001; // Small buffer distance in degrees
+    for (const polygon of this.polygons) {
+      if (this.isPointNearPolygon(point, polygon.coordinates, BUFFER_DISTANCE)) {
+        console.log(`Point is near polygon ${polygon.id} (within buffer)`);
+        return polygon;
+      }
+    }
+    
+    // If still no match, find the nearest polygon
+    let nearestPolygon: Polygon | null = null;
+    let minDistance = Number.MAX_VALUE;
+    
+    for (const polygon of this.polygons) {
+      const distance = this.getDistanceToPolygon(point, polygon.coordinates);
+      if (distance < minDistance) {
+        minDistance = distance;
+        nearestPolygon = polygon;
+      }
+    }
+    
+    if (nearestPolygon) {
+      console.log(`No polygon contains point, using nearest polygon ${nearestPolygon.id} at distance ${minDistance}`);
+      return nearestPolygon;
+    }
+    
+    console.warn(`No polygon found for point: ${point.lat}, ${point.lng}`);
     return null;
+  }
+  
+  /**
+   * Check if a point is near a polygon (within buffer distance)
+   */
+  private isPointNearPolygon(point: {lat: number, lng: number}, polygon: {lat: number, lng: number}[], buffer: number): boolean {
+    // First check if point is inside the polygon
+    if (this.isPointInPolygon(point, polygon)) {
+      return true;
+    }
+    
+    // If not inside, check if it's near any edge
+    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+      const edge1 = polygon[i];
+      const edge2 = polygon[j];
+      
+      // Check distance to this edge
+      const distance = this.getDistanceToLineSegment(point, edge1, edge2);
+      if (distance < buffer) {
+        return true;
+      }
+    }
+    
+    return false;
+  }
+  
+  /**
+   * Calculate distance from point to polygon
+   */
+  private getDistanceToPolygon(point: {lat: number, lng: number}, polygon: {lat: number, lng: number}[]): number {
+    let minDistance = Number.MAX_VALUE;
+    
+    // Check distance to each edge
+    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+      const distance = this.getDistanceToLineSegment(point, polygon[i], polygon[j]);
+      minDistance = Math.min(minDistance, distance);
+    }
+    
+    return minDistance;
+  }
+  
+  /**
+   * Calculate distance from point to line segment
+   */
+  private getDistanceToLineSegment(point: {lat: number, lng: number}, lineStart: {lat: number, lng: number}, lineEnd: {lat: number, lng: number}): number {
+    const x = point.lng;
+    const y = point.lat;
+    const x1 = lineStart.lng;
+    const y1 = lineStart.lat;
+    const x2 = lineEnd.lng;
+    const y2 = lineEnd.lat;
+    
+    // Calculate the squared length of the line segment
+    const lengthSquared = (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1);
+    
+    // If the line segment is actually a point, just return the distance to that point
+    if (lengthSquared === 0) {
+      return Math.sqrt((x - x1) * (x - x1) + (y - y1) * (y - y1));
+    }
+    
+    // Calculate the projection of the point onto the line
+    const t = Math.max(0, Math.min(1, ((x - x1) * (x2 - x1) + (y - y1) * (y2 - y1)) / lengthSquared));
+    
+    // Calculate the closest point on the line segment
+    const projectionX = x1 + t * (x2 - x1);
+    const projectionY = y1 + t * (y2 - y1);
+    
+    // Return the distance to the closest point
+    return Math.sqrt((x - projectionX) * (x - projectionX) + (y - projectionY) * (y - projectionY));
   }
   
   /**
