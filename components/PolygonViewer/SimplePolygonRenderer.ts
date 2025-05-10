@@ -2425,21 +2425,41 @@ export default class SimplePolygonRenderer {
     // Check if we already have the navigation graph
     if ((window as any).__navigationGraph) return;
     
-    // Fetch the navigation graph
+    // Fetch the land navigation graph
     fetch('/data/navigation-graph.json')
       .then(response => {
         if (!response.ok) {
-          throw new Error(`Failed to fetch navigation graph: ${response.status}`);
+          throw new Error(`Failed to fetch land navigation graph: ${response.status}`);
         }
         return response.json();
       })
       .then(data => {
-        console.log('Preloaded navigation graph:', data.metadata);
+        console.log('Preloaded land navigation graph:', data.metadata);
         // Store in window for future use
         (window as any).__navigationGraph = data;
+        
+        // Now fetch the water navigation graph
+        return fetch('/data/water-navigation-graph.json')
+          .catch(error => {
+            console.warn('Error fetching water navigation graph:', error);
+            return null;
+          });
+      })
+      .then(response => {
+        if (response && response.ok) {
+          return response.json();
+        }
+        return null;
+      })
+      .then(waterData => {
+        if (waterData) {
+          console.log('Preloaded water navigation graph:', waterData.metadata);
+          // Store in window for future use
+          (window as any).__waterNavigationGraph = waterData;
+        }
       })
       .catch(error => {
-        console.warn('Error preloading navigation graph:', error);
+        console.warn('Error preloading navigation graphs:', error);
       });
   }
   
@@ -2743,7 +2763,7 @@ export default class SimplePolygonRenderer {
   }
   
   /**
-   * Find a path between two points using bridges and staying on land
+   * Find a path between two points using bridges and docks
    */
   private async findPathBetweenPoints(start: {lat: number, lng: number}, end: {lat: number, lng: number}): Promise<void> {
     console.log('Finding path between points:', start, end);
@@ -2752,47 +2772,301 @@ export default class SimplePolygonRenderer {
     this.clearPathVisualization();
     
     try {
-      // Create a graph of polygons and bridges
-      const graph = this.buildNavigationGraph();
-      
       // Find the polygons containing the start and end points
       const startPolygon = this.findPolygonContainingPoint(start);
       const endPolygon = this.findPolygonContainingPoint(end);
       
-      if (!startPolygon || !endPolygon) {
-        console.warn('Start or end point is not on land, drawing direct path instead');
+      // If both points are not on land, draw a direct path
+      if (!startPolygon && !endPolygon) {
+        console.warn('Both start and end points are not on land, drawing direct path');
         this.drawDirectPath(this.measurementPoints[0], this.measurementPoints[1]);
         return;
       }
       
-      console.log(`Start point in polygon ${startPolygon.id}, end point in polygon ${endPolygon.id}`);
-      
       // If start and end are in the same polygon, draw a direct path
-      if (startPolygon.id === endPolygon.id) {
+      if (startPolygon && endPolygon && startPolygon.id === endPolygon.id) {
         console.log('Start and end points are in the same polygon, drawing direct path');
         this.drawDirectPath(this.measurementPoints[0], this.measurementPoints[1]);
         return;
       }
       
-      // Find the shortest path through the graph
-      const path = this.findShortestPath(startPolygon.id, endPolygon.id);
+      // Check if we need to use water navigation
+      const needsWaterNavigation = this.needsWaterNavigation(startPolygon, endPolygon);
       
-      if (!path || path.length === 0) {
-        console.warn('No path found between points, drawing direct path instead');
+      if (needsWaterNavigation) {
+        console.log('Path requires water navigation');
+        // Find path using water navigation
+        this.findWaterPath(startPolygon, endPolygon, start, end);
+      } else if (startPolygon && endPolygon) {
+        console.log(`Finding land path from polygon ${startPolygon.id} to ${endPolygon.id}`);
+        // Find the shortest path through the land graph
+        const path = this.findShortestPath(startPolygon.id, endPolygon.id);
+        
+        if (!path || path.length === 0) {
+          console.warn('No land path found between points, drawing direct path instead');
+          this.drawDirectPath(this.measurementPoints[0], this.measurementPoints[1]);
+          return;
+        }
+        
+        console.log('Land path found:', path);
+        
+        // Visualize the land path
+        this.visualizePath(path, start, end);
+      } else {
+        // One point is on land, one is not - draw direct path
+        console.warn('One point is on land, one is not, drawing direct path');
         this.drawDirectPath(this.measurementPoints[0], this.measurementPoints[1]);
-        return;
       }
-      
-      console.log('Path found:', path);
-      
-      // Visualize the path
-      this.visualizePath(path, start, end);
-      
     } catch (error) {
       console.error('Error finding path:', error);
       // Fallback to direct path in case of error
       this.drawDirectPath(this.measurementPoints[0], this.measurementPoints[1]);
     }
+  }
+  
+  /**
+   * Determine if water navigation is needed between two polygons
+   */
+  private needsWaterNavigation(startPolygon: Polygon | null, endPolygon: Polygon | null): boolean {
+    // If either polygon is null, we can't determine if water navigation is needed
+    if (!startPolygon || !endPolygon) return false;
+    
+    // Check if there's a land path between the polygons
+    const landPath = this.findShortestPath(startPolygon.id, endPolygon.id);
+    
+    // If there's no land path, we need water navigation
+    if (!landPath || landPath.length === 0) {
+      console.log('No land path found, checking for water navigation');
+      
+      // Check if both polygons have docks
+      const waterGraph = (window as any).__waterNavigationGraph;
+      if (!waterGraph || !waterGraph.polygonToDocks) {
+        console.warn('Water navigation graph not available');
+        return false;
+      }
+      
+      const startDocks = waterGraph.polygonToDocks[startPolygon.id];
+      const endDocks = waterGraph.polygonToDocks[endPolygon.id];
+      
+      // If both polygons have docks, water navigation is possible
+      return !!(startDocks && startDocks.length > 0 && endDocks && endDocks.length > 0);
+    }
+    
+    return false;
+  }
+  
+  /**
+   * Find a path using water navigation
+   */
+  private findWaterPath(startPolygon: Polygon | null, endPolygon: Polygon | null, 
+                        startPoint: {lat: number, lng: number}, endPoint: {lat: number, lng: number}): void {
+    if (!startPolygon || !endPolygon) {
+      console.warn('Cannot find water path without valid polygons');
+      this.drawDirectPath(this.measurementPoints[0], this.measurementPoints[1]);
+      return;
+    }
+    
+    // Get the water navigation graph
+    const waterGraph = (window as any).__waterNavigationGraph;
+    if (!waterGraph || !waterGraph.polygonToDocks || !waterGraph.enhanced) {
+      console.warn('Water navigation graph not available');
+      this.drawDirectPath(this.measurementPoints[0], this.measurementPoints[1]);
+      return;
+    }
+    
+    // Get docks for start and end polygons
+    const startDocks = waterGraph.polygonToDocks[startPolygon.id];
+    const endDocks = waterGraph.polygonToDocks[endPolygon.id];
+    
+    if (!startDocks || startDocks.length === 0 || !endDocks || endDocks.length === 0) {
+      console.warn('One or both polygons do not have docks');
+      this.drawDirectPath(this.measurementPoints[0], this.measurementPoints[1]);
+      return;
+    }
+    
+    console.log(`Found ${startDocks.length} docks in start polygon and ${endDocks.length} docks in end polygon`);
+    
+    // Find the best dock in each polygon (closest to the start/end points)
+    const bestStartDock = this.findBestDock(startDocks, startPoint, waterGraph.enhanced);
+    const bestEndDock = this.findBestDock(endDocks, endPoint, waterGraph.enhanced);
+    
+    if (!bestStartDock || !bestEndDock) {
+      console.warn('Could not find suitable docks');
+      this.drawDirectPath(this.measurementPoints[0], this.measurementPoints[1]);
+      return;
+    }
+    
+    console.log(`Using dock ${bestStartDock.id} to ${bestEndDock.id}`);
+    
+    // Create path points
+    const pathPoints: THREE.Vector3[] = [];
+    
+    // Add start point
+    pathPoints.push(this.measurementPoints[0]);
+    
+    // Add start dock edge point
+    const startDockEdgeCoord = normalizeCoordinates(
+      [bestStartDock.edge],
+      this.bounds.centerLat,
+      this.bounds.centerLng,
+      this.bounds.scale,
+      this.bounds.latCorrectionFactor
+    )[0];
+    
+    pathPoints.push(new THREE.Vector3(startDockEdgeCoord.x, 0.15, -startDockEdgeCoord.y));
+    
+    // Add start dock water point
+    const startDockWaterCoord = normalizeCoordinates(
+      [bestStartDock.position],
+      this.bounds.centerLat,
+      this.bounds.centerLng,
+      this.bounds.scale,
+      this.bounds.latCorrectionFactor
+    )[0];
+    
+    pathPoints.push(new THREE.Vector3(startDockWaterCoord.x, 0.15, -startDockWaterCoord.y));
+    
+    // Add end dock water point
+    const endDockWaterCoord = normalizeCoordinates(
+      [bestEndDock.position],
+      this.bounds.centerLat,
+      this.bounds.centerLng,
+      this.bounds.scale,
+      this.bounds.latCorrectionFactor
+    )[0];
+    
+    pathPoints.push(new THREE.Vector3(endDockWaterCoord.x, 0.15, -endDockWaterCoord.y));
+    
+    // Add end dock edge point
+    const endDockEdgeCoord = normalizeCoordinates(
+      [bestEndDock.edge],
+      this.bounds.centerLat,
+      this.bounds.centerLng,
+      this.bounds.scale,
+      this.bounds.latCorrectionFactor
+    )[0];
+    
+    pathPoints.push(new THREE.Vector3(endDockEdgeCoord.x, 0.15, -endDockEdgeCoord.y));
+    
+    // Add end point
+    pathPoints.push(this.measurementPoints[1]);
+    
+    // Create a smooth curve through the points
+    const curve = new THREE.CatmullRomCurve3(pathPoints);
+    const points = curve.getPoints(50 * pathPoints.length); // More points for smoother curve
+    
+    // Create line geometry
+    const lineGeometry = new THREE.BufferGeometry().setFromPoints(points);
+    
+    // Create line material - use blue for water paths
+    const lineMaterial = new THREE.LineBasicMaterial({
+      color: 0x0088FF, // Blue color for water path
+      linewidth: 3
+    });
+    
+    // Create line
+    const pathLine = new THREE.Line(lineGeometry, lineMaterial);
+    pathLine.renderOrder = 101;
+    this.scene.add(pathLine);
+    
+    // Store reference for cleanup
+    this.pathVisualization.push(pathLine);
+    
+    // Add markers at dock points
+    for (let i = 1; i < pathPoints.length - 1; i++) {
+      const geometry = new THREE.SphereGeometry(0.2, 16, 16);
+      const material = new THREE.MeshBasicMaterial({
+        color: 0x00AAFF, // Light blue color for dock points
+        transparent: true,
+        opacity: 0.8
+      });
+      
+      const marker = new THREE.Mesh(geometry, material);
+      marker.position.copy(pathPoints[i]);
+      marker.renderOrder = 102;
+      this.scene.add(marker);
+      
+      // Store reference for cleanup
+      this.pathVisualization.push(marker);
+    }
+    
+    // Add boat icon at the middle of the water path
+    this.addBoatIcon(pathPoints[2], pathPoints[3]);
+  }
+  
+  /**
+   * Find the best dock in a polygon for a given point
+   */
+  private findBestDock(dockIds: string[], point: {lat: number, lng: number}, 
+                       enhancedGraph: any): {id: string, position: any, edge: any} | null {
+    if (!dockIds || dockIds.length === 0) return null;
+    
+    // If there's only one dock, use it
+    if (dockIds.length === 1) {
+      const dockId = dockIds[0];
+      const dockData = enhancedGraph[dockId];
+      return {
+        id: dockId,
+        position: dockData.position,
+        edge: dockData.edge
+      };
+    }
+    
+    // Find the dock closest to the point
+    let bestDock = null;
+    let minDistance = Infinity;
+    
+    dockIds.forEach(dockId => {
+      const dockData = enhancedGraph[dockId];
+      if (!dockData) return;
+      
+      // Calculate distance to the dock edge (not water point)
+      const distance = this.calculateDistanceInMeters(
+        { lat: point.lat, lng: point.lng },
+        { lat: dockData.edge.lat, lng: dockData.edge.lng }
+      );
+      
+      if (distance < minDistance) {
+        minDistance = distance;
+        bestDock = {
+          id: dockId,
+          position: dockData.position,
+          edge: dockData.edge
+        };
+      }
+    });
+    
+    return bestDock;
+  }
+  
+  /**
+   * Add a boat icon to the path
+   */
+  private addBoatIcon(start: THREE.Vector3, end: THREE.Vector3): void {
+    // Calculate the midpoint between start and end
+    const midpoint = new THREE.Vector3().addVectors(start, end).multiplyScalar(0.5);
+    
+    // Calculate direction vector
+    const direction = new THREE.Vector3().subVectors(end, start).normalize();
+    
+    // Create a simple boat shape
+    const boatGeometry = new THREE.BoxGeometry(0.4, 0.1, 0.2);
+    const boatMaterial = new THREE.MeshBasicMaterial({ color: 0xFFFFFF });
+    const boat = new THREE.Mesh(boatGeometry, boatMaterial);
+    
+    // Position the boat
+    boat.position.copy(midpoint);
+    boat.position.y += 0.1; // Raise slightly above water
+    
+    // Orient the boat along the path
+    const angle = Math.atan2(direction.z, direction.x);
+    boat.rotation.y = -angle;
+    
+    // Add to scene
+    this.scene.add(boat);
+    
+    // Store for cleanup
+    this.pathVisualization.push(boat);
   }
   
   /**

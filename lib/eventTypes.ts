@@ -28,6 +28,7 @@ export const EventTypes = {
   OWNER_COLORS_UPDATED: 'ownerColorsUpdated',
   OWNER_COAT_OF_ARMS_UPDATED: 'ownerCoatOfArmsUpdated',
   POLYGON_OWNER_UPDATED: 'polygonOwnerUpdated',
+  WATER_NAVIGATION_UPDATED: 'waterNavigationUpdated',
   
   // Building-specific events
   BUILDING_SELECTED: 'buildingSelected',

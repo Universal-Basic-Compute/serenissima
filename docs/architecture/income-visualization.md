@@ -6,6 +6,7 @@ The income visualization system in La Serenissima follows a layered architecture
 2. **Visualization Layer**: Implemented by `IncomePolygonRenderer`
 3. **Color Calculation**: Handled by utility functions in `colorUtils.ts`
 4. **Event-Based Updates**: Using the application's event bus system
+5. **Navigation Integration**: Connected with land and water navigation systems
 
 This architecture ensures that income data management is decoupled from its visualization, making the system more maintainable and extensible.
 

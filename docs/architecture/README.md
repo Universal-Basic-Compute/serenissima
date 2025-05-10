@@ -23,6 +23,7 @@ The application is organized into the following layers:
 5. **3D Rendering**: Three.js integration and rendering logic
 6. **Blockchain Integration**: Wallet connection and token management
 7. **Economic Simulation**: Land value and rent calculation systems
+8. **Navigation Systems**: Land and water transportation networks
 
 ## Directory Structure
 
