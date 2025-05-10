@@ -17,6 +17,8 @@ import logging
 import argparse
 import json
 import datetime
+import requests
+from urllib.parse import quote
 from typing import Dict, List, Optional, Any, Tuple
 from collections import defaultdict
 from pyairtable import Api, Table
@@ -26,6 +28,10 @@ from dotenv import load_dotenv
 BASE_TAX_RATE = 0.20
 # Maximum tax rate for undeveloped land (50%)
 MAX_TAX_RATE = 0.50
+
+# Get Telegram credentials
+TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
+MAIN_TELEGRAM_CHAT_ID = os.environ.get("MAIN_TELEGRAM_CHAT_ID")
 
 # Set up logging
 logging.basicConfig(
@@ -551,6 +557,11 @@ def distribute_leases(dry_run: bool = False):
     """Main function to distribute lease payments from building owners to land owners."""
     log.info(f"Starting lease distribution process (dry_run: {dry_run})")
     
+    # Test Telegram connection
+    telegram_connected = test_telegram_connection()
+    if not telegram_connected:
+        log.warning("Telegram connection test failed, notifications may not be delivered")
+    
     try:
         tables = initialize_airtable()
         lands = get_all_lands(tables)
@@ -707,6 +718,30 @@ def distribute_leases(dry_run: bool = False):
                 
                 # Create admin summary notification
                 create_admin_summary(tables, lease_summary)
+                
+                # Send Telegram notification
+                if lease_summary["successful"] > 0:
+                    # Calculate average payment
+                    avg_payment = lease_summary["total_amount"] / lease_summary["successful"] if lease_summary["successful"] > 0 else 0
+                    
+                    notification_message = (
+                        "🏛️ Daily Lease Distribution Complete 🏛️\n\n"
+                        "The Vigesima Variabilis tax has been collected on all lease payments.\n\n"
+                        f"• {lease_summary['successful']} lease payments processed\n"
+                        f"• {int(lease_summary['total_amount']):,} ⚜️ ducats to land owners\n"
+                        f"• {int(lease_summary['total_tax']):,} ⚜️ ducats in tax revenue\n"
+                        f"• {int(avg_payment):,} ⚜️ ducats per lease on average\n\n"
+                        "Visit https://serenissima.ai to check your properties."
+                    )
+                    
+                    # Try to send notification but continue even if it fails
+                    try:
+                        notification_sent = send_telegram_notification(notification_message)
+                        if not notification_sent:
+                            log.warning("Telegram notification could not be sent, but lease distribution completed successfully")
+                    except Exception as e:
+                        log.error(f"Error in Telegram notification process: {str(e)}")
+                        log.warning("Continuing despite Telegram notification failure")
             except Exception as notification_error:
                 log.error(f"Error creating notifications: {notification_error}")
     except Exception as e:
