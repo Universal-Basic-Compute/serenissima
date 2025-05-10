@@ -52,7 +52,8 @@ def initialize_airtable():
         sys.exit(1)
     
     try:
-        return airtable.Airtable(api_key, base_id)
+        # Create the Airtable client with the correct parameter format
+        return airtable.Airtable(base_id, api_key)  # Swap the order: base_id first, then api_key
     except Exception as e:
         log.error(f"Failed to initialize Airtable: {e}")
         sys.exit(1)
