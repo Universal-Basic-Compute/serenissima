@@ -862,6 +862,114 @@ export default function MapPage() {
     }
   }, [mapRef.current, isGoogleLoaded, loadWaterPoints]);
   
+  // Add this function to handle adding connection points
+  const addConnectionPoint = (position: google.maps.LatLng, waterPoint: any) => {
+    if (!mapRef.current || !position || !waterPoint) return;
+    
+    // Create a marker for the connection point
+    const marker = new google.maps.Marker({
+      position: position,
+      map: mapRef.current,
+      icon: {
+        path: google.maps.SymbolPath.CIRCLE,
+        scale: 5, // Smaller than waterpoints
+        fillColor: '#FFA500', // Orange for connection points
+        fillOpacity: 0.7,
+        strokeWeight: 1,
+        strokeColor: '#FFFFFF'
+      },
+      title: 'Connection Point'
+    });
+    
+    // Get the current connection points for this waterpoint
+    const connectionPoints = waterPoint.connectionPoints || [];
+    
+    // Add the new point
+    const newPoint = {
+      lat: position.lat(),
+      lng: position.lng()
+    };
+    
+    // Update the waterpoint with the new connection point
+    const updatedConnectionPoints = [...connectionPoints, newPoint];
+    
+    // Update the waterpoint in the database
+    fetch('/api/waterpoint', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id: waterPoint.id,
+        connectionPoints: updatedConnectionPoints
+      })
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then(data => {
+      if (data.success) {
+        console.log('Connection point added:', newPoint);
+        
+        // Update the waterpoint in state
+        setWaterPoints(prev => 
+          prev.map(wp => 
+            wp.id === waterPoint.id 
+              ? { ...wp, connectionPoints: updatedConnectionPoints } 
+              : wp
+          )
+        );
+        
+        // If there are at least 2 connection points, draw a line between them
+        if (updatedConnectionPoints.length >= 2) {
+          // Create a path from all connection points
+          const path = updatedConnectionPoints.map(point => 
+            new google.maps.LatLng(point.lat, point.lng)
+          );
+          
+          // Create or update the polyline
+          const connectionLine = new google.maps.Polyline({
+            path: path,
+            geodesic: true,
+            strokeColor: '#FFA500', // Orange for connection lines
+            strokeOpacity: 0.7,
+            strokeWeight: 2,
+            map: mapRef.current
+          });
+          
+          // Add to connections array
+          setWaterPointConnections(prev => [...prev, connectionLine]);
+        }
+        
+        // Show success notification
+        const successMessage = document.createElement('div');
+        successMessage.className = 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50';
+        successMessage.innerHTML = `
+          <div class="flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            <span>Connection point added</span>
+          </div>
+        `;
+        document.body.appendChild(successMessage);
+        
+        // Remove message after 2 seconds
+        setTimeout(() => {
+          document.body.removeChild(successMessage);
+        }, 2000);
+      } else {
+        console.error('Failed to add connection point:', data.error);
+        alert('Failed to add connection point: ' + (data.error || 'Unknown error'));
+      }
+    })
+    .catch(error => {
+      console.error('Error adding connection point:', error);
+      alert('Error adding connection point: ' + error.message);
+    });
+  };
+
   // Function to create a new WaterPoint
   const createWaterPoint = (position: google.maps.LatLng, type: string = 'regular') => {
     // Validate that we have a valid position
