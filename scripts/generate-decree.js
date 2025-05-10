@@ -195,6 +195,51 @@ async function createDecreeNotifications(decree) {
   }
 }
 
+// Function to send a Telegram notification with the decree
+async function sendTelegramNotification(decree) {
+  console.log('Sending Telegram notification about the new decree...');
+  
+  try {
+    // Get Telegram configuration
+    const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+    const TELEGRAM_CHAT_ID = "-1002585507870"; // The chat ID you specified
+    
+    if (!TELEGRAM_BOT_TOKEN) {
+      throw new Error('TELEGRAM_BOT_TOKEN environment variable is not set');
+    }
+    
+    // Create the message text
+    const messageText = `🔰 *NEW DECREE PROPOSED* 🔰\n\n` +
+      `*${decree.Title}*\n\n` +
+      `*Type:* ${decree.Type}\n` +
+      `*Category:* ${decree.Category} - ${decree.Subcategory}\n\n` +
+      `*Description:*\n${decree.Description}\n\n` +
+      `*Rationale:*\n${decree.Rationale}\n\n` +
+      `*Proposed by:* ${decree.Proposer}\n\n` +
+      `"${decree.FlavorText}"`;
+    
+    // Send the message via Telegram API
+    const response = await axios.post(
+      `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,
+      {
+        chat_id: TELEGRAM_CHAT_ID,
+        text: messageText,
+        parse_mode: 'Markdown'
+      }
+    );
+    
+    if (response.data.ok) {
+      console.log('Telegram notification sent successfully');
+      return true;
+    } else {
+      throw new Error(`Telegram API error: ${response.data.description}`);
+    }
+  } catch (error) {
+    console.error('Error sending Telegram notification:', error);
+    return false;
+  }
+}
+
 // Main function
 async function main() {
   try {
@@ -216,8 +261,12 @@ async function main() {
     // Create notifications for all users
     await createDecreeNotifications(decree);
     
+    // Send Telegram notification
+    await sendTelegramNotification(decree);
+    
     console.log('\nDecree generated successfully and pushed to Airtable');
     console.log('Notifications created for all users');
+    console.log('Telegram notification sent to chat');
     console.log(`Airtable Record ID: ${recordId}`);
     
   } catch (error) {
