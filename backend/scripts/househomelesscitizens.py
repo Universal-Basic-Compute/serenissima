@@ -52,7 +52,7 @@ def initialize_airtable():
         sys.exit(1)
     
     try:
-        return airtable.Airtable(base_id, api_key)
+        return airtable.Airtable(api_key, base_id)
     except Exception as e:
         log.error(f"Failed to initialize Airtable: {e}")
         sys.exit(1)
