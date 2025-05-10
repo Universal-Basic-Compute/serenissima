@@ -29,12 +29,12 @@ crontab -l > "$TEMP_CRONTAB" 2>/dev/null || echo "# Income distribution cron job
 
 # Check if the cron job already exists
 if ! grep -q "distributeIncome.py" "$TEMP_CRONTAB"; then
-    # Add the cron job to run at 12pm UTC daily (changed from 4pm)
+    # Add the cron job to run at 4pm UTC daily
     echo "0 16 * * * cd $REPO_PATH && python3 distributeIncome.py >> $REPO_PATH/income_distribution_cron.log 2>&1" >> "$TEMP_CRONTAB"
     
     # Install the new crontab
     crontab "$TEMP_CRONTAB"
-    echo "Cron job installed successfully. Income distribution will run daily at 12pm UTC."
+    echo "Cron job installed successfully. Income distribution will run daily at 4pm UTC."
 else
     echo "Cron job already exists. No changes made."
 fi
@@ -58,7 +58,7 @@ echo "Made citizen_generator.py and generate_citizen_images.py executable"
 
 # Add cron job for immigration
 if ! grep -q "immigration.py" "$TEMP_CRONTAB"; then
-    # Add the cron job to run at 11am UTC daily (changed from 8am)
+    # Add the cron job to run at 11am UTC daily
     echo "0 11 * * * cd $REPO_PATH && python3 engine/immigration.py >> $REPO_PATH/immigration_cron.log 2>&1" >> "$TEMP_CRONTAB"
     
     # Install the new crontab
@@ -82,12 +82,12 @@ fi
 
 # Add cron job for daily loan payments
 if ! grep -q "dailyloanpayments.py" "$TEMP_CRONTAB"; then
-    # Add the cron job to run at 10am UTC daily
-    echo "0 10 * * * cd $REPO_PATH && python3 engine/dailyloanpayments.py >> $REPO_PATH/daily_loan_payments_cron.log 2>&1" >> "$TEMP_CRONTAB"
+    # Add the cron job to run at 3pm UTC daily
+    echo "0 15 * * * cd $REPO_PATH && python3 engine/dailyloanpayments.py >> $REPO_PATH/daily_loan_payments_cron.log 2>&1" >> "$TEMP_CRONTAB"
     
     # Install the new crontab
     crontab "$TEMP_CRONTAB"
-    echo "Cron job installed successfully. Daily loan payments will run daily at 10am UTC."
+    echo "Cron job installed successfully. Daily loan payments will run daily at 3pm UTC."
 else
     echo "Daily loan payments cron job already exists. No changes made."
 fi
