@@ -5,7 +5,8 @@ import * as dotenv from 'dotenv';
 import Airtable from 'airtable';
 
 dotenv.config();
-const base = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY }).base(process.env.AIRTABLE_BASE_ID);
+// Initialize Airtable base
+const airtableBase = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY }).base(process.env.AIRTABLE_BASE_ID);
 
 // Define citizen interface
 interface Citizen {
@@ -24,11 +25,11 @@ const CLAUDE_API_KEY = process.env.CLAUDE_API_KEY;
 const CLAUDE_API_URL = 'https://api.anthropic.com/v1/messages';
 
 // Path to store citizens data
-const CITIZENS_DATA_PATH = path.join(process.cwd(), 'data', 'citizens.json');
+const citizensDataPath = path.join(process.cwd(), 'data', 'citizens.json');
 
 // Ensure the data directory exists
-if (!fs.existsSync(path.dirname(CITIZENS_DATA_PATH))) {
-  fs.mkdirSync(path.dirname(CITIZENS_DATA_PATH), { recursive: true });
+if (!fs.existsSync(path.dirname(citizensDataPath))) {
+  fs.mkdirSync(path.dirname(citizensDataPath), { recursive: true });
 }
 
 // Load citizens from Airtable
@@ -45,7 +46,7 @@ async function loadCitizensFromAirtable(): Promise<Citizen[]> {
     
     // Fetch records from Airtable with pagination
     await new Promise((resolve, reject) => {
-      base('CITIZENS').select({
+      airtableBase('CITIZENS').select({
         // Optionally specify fields to retrieve
         // fields: ['CitizenId', 'SocialClass', 'FirstName', 'LastName', 'Description', 'ImagePrompt', 'Wealth', 'CreatedAt'],
         // Optionally specify a view
@@ -105,8 +106,8 @@ async function loadExistingCitizens(): Promise<Citizen[]> {
     // Fall back to local file if Airtable loading failed or returned empty
     console.log('No citizens found in Airtable or error occurred, falling back to local file...');
     
-    if (fs.existsSync(CITIZENS_DATA_PATH)) {
-      const data = fs.readFileSync(CITIZENS_DATA_PATH, 'utf8');
+    if (fs.existsSync(citizensDataPath)) {
+      const data = fs.readFileSync(citizensDataPath, 'utf8');
       const localCitizens = JSON.parse(data);
       console.log(`Loaded ${localCitizens.length} citizens from local file`);
       return localCitizens;
@@ -122,8 +123,8 @@ async function loadExistingCitizens(): Promise<Citizen[]> {
 // Save citizens to file
 function saveCitizens(citizens: Citizen[]): void {
   try {
-    fs.writeFileSync(CITIZENS_DATA_PATH, JSON.stringify(citizens, null, 2));
-    console.log(`Saved ${citizens.length} citizens to ${CITIZENS_DATA_PATH}`);
+    fs.writeFileSync(citizensDataPath, JSON.stringify(citizens, null, 2));
+    console.log(`Saved ${citizens.length} citizens to ${citizensDataPath}`);
   } catch (error) {
     console.error('Error saving citizens:', error);
   }
@@ -178,7 +179,7 @@ async function saveCitizensToAirtable(citizens: Citizen[]): Promise<void> {
       
       try {
         await new Promise((resolve, reject) => {
-          base('CITIZENS').create(chunk, function(err: any, records: any) {
+          airtableBase('CITIZENS').create(chunk, function(err: any, records: any) {
             if (err) {
               console.error('Error saving chunk to Airtable:', err);
               reject(err);
