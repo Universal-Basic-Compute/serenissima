@@ -751,34 +751,46 @@ export class ResourceDisplayManager {
 
   /**
    * Create a text sprite
+   * @param text The text to display
+   * @param compact Whether to use a compact style (for hover state)
+   * @param scale Scale factor for the sprite (default: 1.0)
    */
-  private createTextSprite(text: string): THREE.Sprite {
+  private createTextSprite(text: string, compact: boolean = false, scale: number = 1.0): THREE.Sprite {
     // Create a canvas to draw the text
     const canvas = document.createElement('canvas');
-    canvas.width = 256;
-    canvas.height = 64;
-    const context = canvas.getContext('2d');
+    const width = compact ? 192 : 256;
+    const height = compact ? 48 : 64;
+    canvas.width = width;
+    canvas.height = height;
     
-    if (context) {
-      // Draw a rounded rectangle background
-      context.fillStyle = 'rgba(0, 0, 0, 0.7)';
-      this.roundRect(context, 0, 0, 256, 64, 16);
-      context.fill();
-      
-      // Draw the text
-      context.fillStyle = '#ffffff';
-      context.font = '24px Arial';
-      context.textAlign = 'center';
-      context.textBaseline = 'middle';
-      
-      // Truncate text if too long
-      let displayText = text;
-      if (text.length > 20) {
-        displayText = text.substring(0, 17) + '...';
-      }
-      
-      context.fillText(displayText, 128, 32);
+    const context = canvas.getContext('2d');
+    if (!context) return new THREE.Sprite(new THREE.SpriteMaterial());
+    
+    // Draw a rounded rectangle background
+    context.fillStyle = 'rgba(0, 0, 0, 0.7)';
+    this.roundRect(context, 0, 0, width, height, 16);
+    context.fill();
+    
+    // Add a border
+    context.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+    context.lineWidth = 2;
+    this.roundRect(context, 1, 1, width - 2, height - 2, 15);
+    context.stroke();
+    
+    // Draw the text
+    context.fillStyle = '#ffffff';
+    context.font = compact ? '18px Arial' : '24px Arial';
+    context.textAlign = 'center';
+    context.textBaseline = 'middle';
+    
+    // Truncate text if too long
+    let displayText = text;
+    const maxLength = compact ? 15 : 20;
+    if (text.length > maxLength) {
+      displayText = text.substring(0, maxLength - 3) + '...';
     }
+    
+    context.fillText(displayText, width / 2, height / 2);
     
     // Create a texture from the canvas
     const texture = new THREE.CanvasTexture(canvas);
@@ -789,7 +801,8 @@ export class ResourceDisplayManager {
     });
     
     const sprite = new THREE.Sprite(material);
-    sprite.scale.set(2, 0.5, 1);
+    const aspectRatio = width / height;
+    sprite.scale.set(2 * scale * aspectRatio, 0.5 * scale * aspectRatio, 1);
     
     return sprite;
   }
