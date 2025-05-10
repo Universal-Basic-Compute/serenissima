@@ -902,7 +902,10 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
         />
       ) : (
         <div className="hidden">
-          {console.warn('BuildingsToolbar: BuildingRenderer is not shown')}
+          {(() => {
+            console.warn('BuildingsToolbar: BuildingRenderer is not shown');
+            return null;
+          })()}
         </div>
       )}
     </div>
