@@ -8,6 +8,33 @@ Decrees are official proclamations issued by the Venetian government (the Consig
 
 ## Active Decrees
 
+### The Vigesima: Land Lease Taxation
+
+**Implementation**: `backend/engine/distributeLeases.py`  
+**Schedule**: Daily at 9:00 AM UTC (as part of lease distribution)
+
+This decree establishes a 20% tax known as the Vigesima on all land lease payments.
+
+#### Process:
+
+1. When lease payments are processed daily:
+   - 80% of the lease amount goes to the land owner
+   - 20% is collected as tax and transferred to the ConsiglioDeiDieci treasury
+
+2. The tax is automatically calculated and collected during the lease distribution process.
+
+3. Both land owners and building owners receive notifications that include information about the tax.
+
+4. A summary notification is sent to administrators with statistics about lease payments and tax collection.
+
+#### Economic Impact:
+
+The Vigesima tax:
+- Provides a steady revenue stream for the Republic's treasury
+- Funds essential public services and infrastructure
+- Influences land lease pricing strategies, as landowners must account for the tax when setting rates
+- Creates economic incentives for efficient land use and development
+
 ### Land Owner Infrastructure Maintenance Responsibility
 
 **Implementation**: `backend/engine/decrees/affectpublicbuildingstolandowners.py`  
