@@ -25,6 +25,9 @@ from typing import Dict, List, Optional, Any
 from pyairtable import Api, Table
 from dotenv import load_dotenv
 
+# Import our citizen generator module
+from citizen_generator import generate_citizen
+
 # Set up logging
 logging.basicConfig(
     level=logging.INFO,
@@ -88,96 +91,6 @@ def get_vacant_housing_buildings(tables) -> List[Dict]:
     except Exception as e:
         log.error(f"Error fetching vacant housing buildings: {e}")
         return []
-
-def generate_citizen(social_class: str) -> Dict:
-    """Generate a new citizen of the specified social class using Claude API."""
-    log.info(f"Generating a new citizen of social class: {social_class}")
-    
-    # Get Claude API key from environment
-    claude_api_key = os.environ.get('CLAUDE_API_KEY')
-    if not claude_api_key:
-        log.error("CLAUDE_API_KEY environment variable is not set")
-        return None
-    
-    try:
-        import requests
-        
-        # Create a system prompt for Claude
-        system_prompt = f"""You are a historical expert on Renaissance Venice (1400-1600) helping to create a citizen for a historically accurate economic simulation game called La Serenissima.
-
-TASK:
-Create 1 unique Venetian citizen of the {social_class} social class with historically accurate name, description, and characteristics.
-
-SOCIAL CLASS INFORMATION:
-- Patrician: The noble families who control Venice's government. Wealthy, politically powerful, and often involved in long-distance trade.
-- Cittadini: Wealthy non-noble citizens, including successful merchants, professionals, and high-ranking bureaucrats.
-- Popolani: Common citizens including craftsmen, shopkeepers, and skilled workers.
-- Facchini: Unskilled workers, servants, gondoliers, and the working poor.
-
-For the citizen, provide:
-1. FirstName - Historically accurate Venetian first name
-2. LastName - Historically accurate Venetian family name (ensure patricians have notable Venetian noble family names)
-3. Description - One sentence about personality, traits, and remarkable things about this person
-4. ImagePrompt - A detailed prompt for generating an image of this person, including physical appearance, clothing appropriate to their social class, and setting
-5. Wealth - Approximate wealth in Ducats, appropriate to their social class:
-   - Patrician: 5,000-50,000 ducats
-   - Cittadini: 1,000-5,000 ducats
-   - Popolani: 100-1,000 ducats
-   - Facchini: 10-100 ducats
-
-FORMAT:
-Return the data as a valid JSON object with the fields listed above.
-"""
-
-        user_prompt = f"Please create a single citizen of the {social_class} social class for our game. Return ONLY a valid JSON object with no additional text."
-        
-        # Call Claude API
-        response = requests.post(
-            "https://api.anthropic.com/v1/messages",
-            headers={
-                "Content-Type": "application/json",
-                "x-api-key": claude_api_key,
-                "anthropic-version": "2023-06-01"
-            },
-            json={
-                "model": "claude-3-7-sonnet-latest",
-                "max_tokens": 1000,
-                "system": system_prompt,
-                "messages": [
-                    {
-                        "role": "user",
-                        "content": user_prompt
-                    }
-                ]
-            }
-        )
-        
-        if response.status_code != 200:
-            log.error(f"Error from Claude API: {response.status_code} {response.text}")
-            return None
-        
-        # Extract the JSON from Claude's response
-        content = response.json()["content"][0]["text"]
-        
-        # Find the JSON object in the response
-        import re
-        json_match = re.search(r'({[\s\S]*})', content)
-        if not json_match:
-            log.error(f"Could not extract JSON from Claude response: {content}")
-            return None
-        
-        citizen_data = json.loads(json_match.group(1))
-        
-        # Add required fields
-        citizen_data["SocialClass"] = social_class
-        citizen_data["id"] = f"ctz_{int(time.time())}_{random.randint(1000, 9999)}"
-        citizen_data["CreatedAt"] = datetime.datetime.now().isoformat()
-        
-        log.info(f"Successfully generated citizen: {citizen_data['FirstName']} {citizen_data['LastName']}")
-        return citizen_data
-    except Exception as e:
-        log.error(f"Error generating citizen: {e}")
-        return None
 
 def save_citizen_to_airtable(tables, citizen: Dict) -> Optional[Dict]:
     """Save a citizen to Airtable."""
@@ -298,7 +211,7 @@ def process_immigration(dry_run: bool = False):
             immigration_count += 1
             continue
         
-        # Generate a new citizen
+        # Generate a new citizen using our imported module
         citizen = generate_citizen(social_class)
         if not citizen:
             log.warning(f"Failed to generate citizen for building {building['id']}")
@@ -347,10 +260,19 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Process immigration to Venice.")
     parser.add_argument("--dry-run", action="store_true", help="Run without making changes")
     parser.add_argument("--verbose", action="store_true", help="Enable verbose logging")
+    parser.add_argument("--force-rate", type=float, help="Force a specific immigration rate (0.0-1.0)")
     
     args = parser.parse_args()
     
     if args.verbose:
         logging.getLogger().setLevel(logging.DEBUG)
+    
+    # Override immigration chance if specified
+    if args.force_rate is not None:
+        if 0.0 <= args.force_rate <= 1.0:
+            IMMIGRATION_CHANCE = args.force_rate
+            log.info(f"Immigration chance set to {IMMIGRATION_CHANCE}")
+        else:
+            log.warning(f"Invalid immigration rate {args.force_rate}, must be between 0.0 and 1.0")
     
     process_immigration(dry_run=args.dry_run)
