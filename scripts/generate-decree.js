@@ -27,7 +27,7 @@ async function generateDecree(input) {
         Generate a JSON object with the following fields:
         - DecreeId: A unique identifier (use a UUID format)
         - Type: One of [Economic, Social, Political, Military, Religious, Cultural]
-        - Title: A formal title for the decree in Renaissance Venetian style
+        - Title: A formal title for the decree in English (not Italian)
         - Description: A detailed description of what the decree does
         - Rationale: The official reasoning behind the decree
         - Status: Always "Under Review"
@@ -39,7 +39,8 @@ async function generateDecree(input) {
         - Notes: Any additional implementation notes or considerations
         
         Make sure the decree is historically plausible for Renaissance Venice (1400-1600).
-        The output should be valid JSON only, with no additional text or explanation.`,
+        The output should be valid JSON only, with no additional text or explanation.
+        Important: The Title must be in English, not Italian.`,
         messages: [
           {
             role: 'user',
