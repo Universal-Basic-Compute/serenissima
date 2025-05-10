@@ -1277,9 +1277,8 @@ export default class SimplePolygonRenderer {
             const highlightMaterial = new THREE.MeshBasicMaterial({
               color: 0xFFFF00, // Bright yellow highlight
               transparent: true,
-              opacity: 1.0,
-              emissive: 0xFFFF00,
-              emissiveIntensity: 0.5
+              opacity: 1.0
+              // MeshBasicMaterial doesn't support emissive properties
             });
             
             // Store the original material if not already stored

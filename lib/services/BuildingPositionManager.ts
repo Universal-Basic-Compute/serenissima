@@ -19,8 +19,25 @@ export class BuildingPositionManager {
    * @returns THREE.Vector3 position in scene coordinates
    */
   public latLngToScenePosition(position: {lat: number, lng: number}, height: number = 5): THREE.Vector3 {
+    // Check for extreme values that might indicate an error
+    if (Math.abs(position.lat) > 90 || Math.abs(position.lng) > 180) {
+      console.warn(`Invalid lat/lng values detected: ${position.lat}, ${position.lng}. Using default position.`);
+      return new THREE.Vector3(0, height, 0);
+    }
+    
+    // Calculate relative position from center
     const x = (position.lng - this.bounds.centerLng) * this.bounds.scale;
     const z = -(position.lat - this.bounds.centerLat) * this.bounds.scale * this.bounds.latCorrectionFactor;
+    
+    // Check for extreme values in the result
+    if (Math.abs(x) > 500 || Math.abs(z) > 500) {
+      console.warn(`Extreme position values calculated: (${x}, ${height}, ${z}). Clamping to reasonable range.`);
+      // Clamp to a reasonable range
+      const clampedX = Math.max(-500, Math.min(500, x));
+      const clampedZ = Math.max(-500, Math.min(500, z));
+      return new THREE.Vector3(clampedX, height, clampedZ);
+    }
+    
     return new THREE.Vector3(x, height, z);
   }
 

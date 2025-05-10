@@ -212,6 +212,118 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
     console.log(`Rendered ${buildingsData.length} buildings`);
   };
   
+  // Function to focus camera on buildings
+  const focusCameraOnBuildings = () => {
+    if (!scene || buildingMeshesRef.current.size === 0) {
+      console.log('Cannot focus on buildings: scene or buildings not available');
+      return;
+    }
+    
+    console.log('Focusing camera on buildings...');
+    
+    // Create a bounding box that encompasses all buildings
+    const boundingBox = new THREE.Box3();
+    
+    // Add all building meshes to the bounding box
+    buildingMeshesRef.current.forEach((mesh) => {
+      boundingBox.expandByObject(mesh);
+    });
+    
+    // Get the center and size of the bounding box
+    const center = new THREE.Vector3();
+    boundingBox.getCenter(center);
+    
+    const size = new THREE.Vector3();
+    boundingBox.getSize(size);
+    
+    console.log('Building bounding box:', {
+      center: center,
+      size: size
+    });
+    
+    // Calculate the distance needed to view all buildings
+    const maxDim = Math.max(size.x, size.y, size.z);
+    const fov = 60; // Default FOV if camera not available
+    const cameraDistance = maxDim / (2 * Math.tan((fov * Math.PI) / 360));
+    
+    // Find the camera
+    const camera = document.querySelector('canvas')?.__camera as THREE.PerspectiveCamera;
+    
+    if (camera) {
+      // Position camera at a good viewing angle
+      camera.position.set(
+        center.x + cameraDistance,
+        center.y + cameraDistance * 0.5,
+        center.z + cameraDistance
+      );
+      
+      // Look at the center of all buildings
+      camera.lookAt(center);
+      
+      // Update controls if available
+      const controls = camera.userData?.controls;
+      if (controls && controls.target) {
+        controls.target.copy(center);
+        controls.update();
+      }
+      
+      console.log('Camera repositioned to view all buildings:', {
+        position: camera.position,
+        lookingAt: center
+      });
+    } else {
+      console.warn('Camera not found, cannot focus on buildings');
+    }
+  };
+  
+  // Function to add debug markers for buildings
+  const addDebugMarkers = () => {
+    if (!scene) return;
+    
+    console.log('Adding debug markers for buildings...');
+    
+    // Remove any existing debug markers
+    scene.traverse((object) => {
+      if (object.userData && object.userData.isDebugMarker) {
+        scene.remove(object);
+        if (object instanceof THREE.Mesh) {
+          if (object.geometry) object.geometry.dispose();
+          if (object.material instanceof THREE.Material) {
+            object.material.dispose();
+          } else if (Array.isArray(object.material)) {
+            object.material.forEach(m => m.dispose());
+          }
+        }
+      }
+    });
+    
+    // Add a marker for each building
+    buildingMeshesRef.current.forEach((mesh, id) => {
+      const markerGeometry = new THREE.SphereGeometry(2, 16, 16);
+      const markerMaterial = new THREE.MeshBasicMaterial({ 
+        color: 0xff0000,
+        transparent: true,
+        opacity: 0.7
+      });
+      const marker = new THREE.Mesh(markerGeometry, markerMaterial);
+      
+      // Position the marker above the building
+      marker.position.copy(mesh.position);
+      marker.position.y += 10;
+      
+      // Add metadata
+      marker.userData = {
+        isDebugMarker: true,
+        buildingId: id
+      };
+      
+      // Add to scene
+      scene.add(marker);
+      
+      console.log(`Added debug marker for building ${id} at position:`, marker.position);
+    });
+  };
+
   // Initial load of buildings
   useEffect(() => {
     if (active && scene && rendererFactoryRef.current) {
@@ -222,6 +334,8 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
         // Add a delay to ensure buildings are loaded
         const timer = setTimeout(() => {
           verifyAndFixBuildingPositions();
+          // Focus camera on buildings after fixing positions
+          focusCameraOnBuildings();
         }, 2000);
         
         return () => clearTimeout(timer);
@@ -247,16 +361,28 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
     };
   }, [active, scene]);
   
-  // Listen for the fixBuildingPositions event
+  // Listen for the fixBuildingPositions event and other custom events
   useEffect(() => {
     const handleFixPositions = () => {
       verifyAndFixBuildingPositions();
     };
     
+    const handleFocusOnBuildings = () => {
+      focusCameraOnBuildings();
+    };
+    
+    const handleAddDebugMarkers = () => {
+      addDebugMarkers();
+    };
+    
     window.addEventListener('fixBuildingPositions', handleFixPositions);
+    window.addEventListener('focusOnBuildings', handleFocusOnBuildings);
+    window.addEventListener('addDebugMarkers', handleAddDebugMarkers);
     
     return () => {
       window.removeEventListener('fixBuildingPositions', handleFixPositions);
+      window.removeEventListener('focusOnBuildings', handleFocusOnBuildings);
+      window.removeEventListener('addDebugMarkers', handleAddDebugMarkers);
     };
   }, [scene]);
   

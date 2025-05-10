@@ -304,47 +304,10 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
       
       <button
         onClick={() => {
-          // Focus camera on all buildings
-          if (camera) {
-            // Get the actual camera
-            const actualCamera = camera || (document.querySelector('canvas')?.__camera as THREE.PerspectiveCamera);
-            
-            if (actualCamera) {
-              console.log('Repositioning camera to view all buildings');
-              
-              // Find all buildings in the scene
-              const buildings: THREE.Object3D[] = [];
-              scene?.traverse((object) => {
-                if (object.userData && object.userData.buildingId) {
-                  buildings.push(object);
-                }
-              });
-              
-              // If no buildings found, use the market stall position
-              if (buildings.length === 0) {
-                actualCamera.position.set(10, 15, 10);
-                actualCamera.lookAt(0, 0, 0);
-              } else {
-                // Calculate the center of all buildings
-                const center = new THREE.Vector3();
-                buildings.forEach(building => {
-                  center.add(building.position);
-                });
-                center.divideScalar(buildings.length);
-                
-                // Position camera to see all buildings
-                actualCamera.position.set(center.x + 20, 20, center.z + 20);
-                actualCamera.lookAt(center);
-              }
-              
-              // Update controls if available
-              const controls = actualCamera.userData?.controls;
-              if (controls) {
-                controls.update();
-              }
-              
-              console.log('Camera repositioned to view buildings');
-            }
+          // Dispatch event to focus on all buildings
+          if (typeof window !== 'undefined') {
+            console.log('Dispatching focusOnBuildings event');
+            window.dispatchEvent(new CustomEvent('focusOnBuildings'));
           }
         }}
         className="px-4 py-2 bg-green-600 text-white rounded-md shadow-md hover:bg-green-700 transition-colors flex items-center space-x-2"
@@ -496,44 +459,11 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
       
       <button
         onClick={() => {
-          console.log('Checking building positions...');
-          
-          if (!scene) {
-            console.error('Scene not available');
-            return;
+          // Dispatch event to add debug markers for all buildings
+          if (typeof window !== 'undefined') {
+            console.log('Dispatching addDebugMarkers event');
+            window.dispatchEvent(new CustomEvent('addDebugMarkers'));
           }
-          
-          // Find all buildings in the scene
-          const buildings = [];
-          scene.traverse((object) => {
-            if (object.userData && object.userData.buildingId) {
-              buildings.push(object);
-            }
-          });
-          
-          console.log(`Found ${buildings.length} buildings in the scene`);
-          
-          // Log each building's position
-          buildings.forEach((building, index) => {
-            console.log(`Building ${index}: ${building.userData.buildingId}`);
-            console.log(`  Position: ${building.position.x}, ${building.position.y}, ${building.position.z}`);
-            console.log(`  Type: ${building.userData.type}`);
-            console.log(`  Land ID: ${building.userData.landId}`);
-            
-            // Add a visible marker at each building position
-            const markerGeometry = new THREE.SphereGeometry(1, 16, 16);
-            const markerMaterial = new THREE.MeshBasicMaterial({ 
-              color: 0xff0000,
-              transparent: true,
-              opacity: 0.7
-            });
-            const marker = new THREE.Mesh(markerGeometry, markerMaterial);
-            marker.position.copy(building.position);
-            marker.position.y += 5; // Position above the building
-            marker.userData.id = `marker-${building.userData.buildingId}`;
-            scene.add(marker);
-            console.log(`  Added marker at position: ${marker.position.x}, ${marker.position.y}, ${marker.position.z}`);
-          });
           
           // If no buildings found, create some test markers at expected positions
           if (buildings.length === 0) {
