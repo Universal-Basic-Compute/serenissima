@@ -147,8 +147,8 @@ def assign_citizen_to_building(tables, citizen: Dict, building: Dict) -> bool:
                 "Content": content,
                 "Details": json.dumps(details),
                 "CreatedAt": datetime.datetime.now().isoformat(),
-                "IsRead": False,
-                "RelatedUserId": citizen_id  # Associate with the citizen
+                "ReadAt": None,  # Changed from IsRead: False to ReadAt: None
+                "User": citizen_id  # Changed from RelatedUserId to User
             })
             
             log.info(f"Created notification for {citizen_name}")
