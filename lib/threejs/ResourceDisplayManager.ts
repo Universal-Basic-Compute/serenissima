@@ -196,8 +196,13 @@ export class ResourceDisplayManager {
         console.log('No wallet address found, loading all resources');
       }
 
-      // Use the API base URL from the environment
+      // Use the API base URL from the environment, with a fallback to localhost:8000
+      // Make sure we're using port 8000, not 10000
       const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+      
+      // Log the API base URL for debugging
+      console.log(`Using API base URL: ${apiBaseUrl}`);
+      
       const url = `${apiBaseUrl}/api/resources${queryParams}`;
       console.log(`Fetching resources from: ${url}`);
       
