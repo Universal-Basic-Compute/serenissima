@@ -48,6 +48,24 @@ At noon UTC each day, the housing assignment system finds homes for citizens who
 
 This process ensures that citizens find appropriate housing based on their social class and wealth, creating a stratified society similar to historical Venice.
 
+### Loan Payments (3:00 PM UTC)
+
+**Script**: `backend/engine/dailyloanpayments.py`
+
+Every day at 3:00 PM UTC, the loan payment system processes payments for all active loans:
+
+1. The script identifies all active loans in the system
+2. For each active loan:
+   - It deducts the daily payment amount from the borrower's compute balance
+   - It adds the payment amount to the lender's compute balance
+   - It updates the loan's remaining balance
+   - It marks the loan as "paid" if the remaining balance reaches zero
+3. Transaction records are created for all payments
+4. Notifications are sent to borrowers and lenders about the payments
+5. If a borrower has insufficient funds, a notification is sent about the missed payment
+
+This process simulates the banking system of Renaissance Venice, with regular loan payments ensuring the flow of capital between citizens and institutions.
+
 ### Income Distribution (4:00 PM UTC)
 
 **Script**: `backend/distributeIncome.py`
