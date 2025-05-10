@@ -192,6 +192,23 @@ Every day at 5:00 PM UTC, the rent payment system processes two types of rent pa
 
 This process simulates the rental economy of Venice, with citizens paying rent for housing and businesses paying rent for commercial spaces.
 
+### Wage Payments (6:00 PM UTC)
+
+**Script**: `backend/engine/dailywages.py`
+
+Every day at 6:00 PM UTC, the wage payment system processes payments from business owners to their employees:
+
+1. The script identifies all citizens with jobs (Work field is not empty)
+2. For each citizen, it retrieves their workplace (business) details
+3. It transfers the Wages amount from the business owner to the citizen
+4. When a wage payment is processed:
+   - The business owner's compute balance is reduced by the wage amount
+   - The citizen's wealth is increased by the wage amount
+   - A transaction record is created documenting the payment
+5. An admin notification is created with statistics about all wage payments processed
+
+This process simulates the labor economy of Venice, with business owners paying wages to their workers on a daily basis. The wealth accumulated by citizens affects their ability to pay rent and potentially move to better housing.
+
 ## Technical Implementation
 
 These automated processes are scheduled using cron jobs set up in the `backend/startup.sh` script. Each process runs independently and handles its own error logging and recovery.
