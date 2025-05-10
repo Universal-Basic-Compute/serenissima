@@ -1,10 +1,21 @@
-import { useState, useRef, useEffect } from 'react';
-import { FaTimes, FaChevronDown, FaSpinner, FaVolumeUp, FaVolumeMute } from 'react-icons/fa';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { FaTimes, FaChevronDown, FaSpinner, FaVolumeUp, FaVolumeMute, FaBell } from 'react-icons/fa';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
+interface Notification {
+  notificationId: string;
+  type: string;
+  user: string;
+  content: string;
+  details?: any;
+  createdAt: string;
+  readAt: string | null;
+}
+
 interface CompagnoProps {
   className?: string;
+  onNotificationsRead?: (notificationIds: string[]) => void;
 }
 
 interface Message {
@@ -37,7 +48,102 @@ const Compagno: React.FC<CompagnoProps> = ({ className }) => {
   const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
   const [playingMessageId, setPlayingMessageId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [unreadCount, setUnreadCount] = useState<number>(0);
+  const [showNotifications, setShowNotifications] = useState<boolean>(false);
+  const [lastFetchTime, setLastFetchTime] = useState<number>(Date.now());
   const [isMobile, setIsMobile] = useState<boolean>(false);
+
+  // Fetch notifications
+  const fetchNotifications = useCallback(async () => {
+    try {
+      // Get the current username or use default
+      const userToFetch = username || DEFAULT_USERNAME;
+      
+      const response = await fetch(
+        `${KINOS_BACKEND_BASE_URL}/notifications/${userToFetch}?since=${lastFetchTime}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch notifications: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      if (data.notifications && Array.isArray(data.notifications)) {
+        // Add new notifications to the existing ones
+        setNotifications(prev => {
+          // Combine existing and new notifications, removing duplicates by ID
+          const combined = [...prev];
+          data.notifications.forEach((newNotif: Notification) => {
+            const existingIndex = combined.findIndex(n => n.notificationId === newNotif.notificationId);
+            if (existingIndex >= 0) {
+              combined[existingIndex] = newNotif; // Update existing
+            } else {
+              combined.push(newNotif); // Add new
+            }
+          });
+          return combined;
+        });
+        
+        // Update unread count
+        setUnreadCount(data.notifications.filter((n: Notification) => n.readAt === null).length);
+      }
+      
+      // Update last fetch time
+      setLastFetchTime(Date.now());
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+    }
+  }, [username, lastFetchTime]);
+
+  // Mark notifications as read
+  const markNotificationsAsRead = async (notificationIds: string[]) => {
+    try {
+      const response = await fetch(
+        `${KINOS_BACKEND_BASE_URL}/notifications/mark-read`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            user: username,
+            notificationIds
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to mark notifications as read: ${response.status}`);
+      }
+
+      // Update local state
+      setNotifications(prev => 
+        prev.map(notif => 
+          notificationIds.includes(notif.notificationId) 
+            ? { ...notif, readAt: new Date().toISOString() } 
+            : notif
+        )
+      );
+      
+      // Update unread count
+      setUnreadCount(prev => Math.max(0, prev - notificationIds.length));
+      
+      // Call the callback if provided
+      if (props.onNotificationsRead) {
+        props.onNotificationsRead(notificationIds);
+      }
+    } catch (error) {
+      console.error('Error marking notifications as read:', error);
+    }
+  };
 
   // Check if device is mobile
   useEffect(() => {
@@ -72,6 +178,22 @@ const Compagno: React.FC<CompagnoProps> = ({ className }) => {
       }
     }
   }, []);
+
+  // Set up notification polling
+  useEffect(() => {
+    // Fetch notifications immediately on mount
+    fetchNotifications();
+    
+    // Set up polling every 5 minutes (300000 ms)
+    const intervalId = setInterval(() => {
+      fetchNotifications();
+    }, 300000);
+    
+    // Clean up interval on unmount
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [fetchNotifications]);
 
   // Load message history when chat is opened
   useEffect(() => {
@@ -299,6 +421,13 @@ const Compagno: React.FC<CompagnoProps> = ({ className }) => {
               }}
             />
             <div className="hidden text-2xl font-serif">C</div>
+            
+            {/* Notification badge */}
+            {unreadCount > 0 && (
+              <div className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold animate-pulse">
+                {unreadCount}
+              </div>
+            )}
           </div>
         </button>
       )}
@@ -324,6 +453,19 @@ const Compagno: React.FC<CompagnoProps> = ({ className }) => {
                 <div className="hidden text-xl font-serif">C</div>
               </div>
               <h3 className="font-serif">Compagno</h3>
+              
+              {/* Notification indicator */}
+              {unreadCount > 0 && (
+                <button 
+                  onClick={() => setShowNotifications(!showNotifications)}
+                  className="ml-3 relative"
+                >
+                  <FaBell className="h-5 w-5" />
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs">
+                    {unreadCount}
+                  </span>
+                </button>
+              )}
             </div>
             <div className="flex items-center">
               <button 
@@ -343,6 +485,35 @@ const Compagno: React.FC<CompagnoProps> = ({ className }) => {
             </div>
           </div>
           
+          {/* Navigation tabs */}
+          <div className="bg-amber-100 border-b border-amber-200 flex">
+            <button
+              onClick={() => setShowNotifications(false)}
+              className={`flex-1 py-2 text-sm font-medium ${
+                !showNotifications ? 'bg-amber-200 text-amber-800' : 'text-amber-700 hover:bg-amber-50'
+              }`}
+            >
+              Chat
+            </button>
+            <button
+              onClick={() => {
+                setShowNotifications(true);
+                // Fetch latest notifications when switching to notifications view
+                fetchNotifications();
+              }}
+              className={`flex-1 py-2 text-sm font-medium relative ${
+                showNotifications ? 'bg-amber-200 text-amber-800' : 'text-amber-700 hover:bg-amber-50'
+              }`}
+            >
+              Notifications
+              {unreadCount > 0 && (
+                <span className="absolute top-1 right-2 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs">
+                  {unreadCount}
+                </span>
+              )}
+            </button>
+          </div>
+          
           {/* Messages area */}
           <div className="flex-1 overflow-y-auto p-3 bg-amber-50 bg-opacity-80" 
             style={{
@@ -350,101 +521,168 @@ const Compagno: React.FC<CompagnoProps> = ({ className }) => {
               backgroundRepeat: 'repeat'
             }}
           >
-            {/* Load more button */}
-            {pagination && pagination.has_more && (
-              <div className="text-center mb-4">
-                <button
-                  onClick={loadMoreMessages}
-                  disabled={isLoadingHistory}
-                  className="px-3 py-1 text-sm bg-amber-100 hover:bg-amber-200 text-amber-800 rounded-full border border-amber-200 transition-colors"
-                >
-                  {isLoadingHistory ? (
-                    <span className="flex items-center justify-center">
-                      <FaSpinner className="animate-spin mr-2" />
-                      Loading...
-                    </span>
-                  ) : (
-                    'Load earlier messages'
-                  )}
-                </button>
-              </div>
-            )}
-            
-            {/* Loading indicator for initial load */}
-            {isLoadingHistory && messages.length === 0 && (
-              <div className="flex justify-center items-center h-32">
-                <FaSpinner className="animate-spin text-amber-600 text-2xl" />
-              </div>
-            )}
-            
-            {/* Messages */}
-            {messages.map((message, index) => (
-              <div 
-                key={message.id || `msg-${index}`} 
-                className={`mb-3 ${
-                  message.role === 'user' 
-                    ? 'text-right' 
-                    : 'text-left'
-                }`}
-              >
-                <div 
-                  className={`inline-block p-3 rounded-lg max-w-[80%] ${
-                    message.role === 'user'
-                      ? 'user-bubble rounded-br-none'
-                      : 'assistant-bubble rounded-bl-none'
-                  }`}
-                >
-                  <div className="markdown-content">
-                    <ReactMarkdown 
-                      remarkPlugins={[remarkGfm]}
-                      components={{
-                        // Customize how certain markdown elements are rendered
-                        a: ({node, ...props}) => <a {...props} className="text-amber-700 underline hover:text-amber-500" target="_blank" rel="noopener noreferrer" />,
-                        code: ({node, ...props}) => <code {...props} className="bg-amber-50 px-1 py-0.5 rounded text-sm font-mono" />,
-                        pre: ({node, ...props}) => <pre {...props} className="bg-amber-50 p-2 rounded my-2 overflow-x-auto text-sm font-mono" />,
-                        ul: ({node, ...props}) => <ul {...props} className="list-disc pl-5 my-1" />,
-                        ol: ({node, ...props}) => <ol {...props} className="list-decimal pl-5 my-1" />,
-                        li: ({node, ...props}) => <li {...props} className="my-0.5" />,
-                        blockquote: ({node, ...props}) => <blockquote {...props} className="border-l-4 border-amber-300 pl-3 italic my-2" />,
-                        h1: ({node, ...props}) => <h1 {...props} className="text-lg font-bold my-2" />,
-                        h2: ({node, ...props}) => <h2 {...props} className="text-md font-bold my-2" />,
-                        h3: ({node, ...props}) => <h3 {...props} className="text-sm font-bold my-1" />,
-                        p: ({node, ...props}) => <p {...props} className="my-1" />
-                      }}
-                    >
-                      {message.content}
-                    </ReactMarkdown>
+            {/* Show notifications if in notification view */}
+            {showNotifications ? (
+              <>
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-amber-800 font-serif text-lg">Notifications</h3>
+                  <button 
+                    onClick={() => setShowNotifications(false)}
+                    className="text-amber-600 hover:text-amber-800"
+                  >
+                    Return to Chat
+                  </button>
+                </div>
+                
+                {notifications.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500 italic">
+                    No notifications to display
                   </div>
-                  
-                  {/* Only show voice button for assistant messages */}
-                  {message.role === 'assistant' && (
+                ) : (
+                  <>
+                    {notifications.map((notification) => (
+                      <div 
+                        key={notification.notificationId} 
+                        className={`mb-3 p-3 rounded-lg border ${
+                          notification.readAt ? 'border-gray-200 bg-white' : 'border-amber-300 bg-amber-50 notification-unread'
+                        }`}
+                        onClick={() => {
+                          if (!notification.readAt) {
+                            markNotificationsAsRead([notification.notificationId]);
+                          }
+                        }}
+                      >
+                        <div className="flex justify-between items-start">
+                          <div className="font-medium text-amber-800">
+                            {notification.type}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {new Date(notification.createdAt).toLocaleString()}
+                          </div>
+                        </div>
+                        <div className="mt-1">{notification.content}</div>
+                        {!notification.readAt && (
+                          <div className="mt-2 text-xs text-amber-600">
+                            Click to mark as read
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                    
+                    {/* Mark all as read button */}
+                    {notifications.some(n => !n.readAt) && (
+                      <button
+                        onClick={() => markNotificationsAsRead(
+                          notifications.filter(n => !n.readAt).map(n => n.notificationId)
+                        )}
+                        className="mt-2 w-full py-2 bg-amber-100 hover:bg-amber-200 text-amber-800 rounded text-sm transition-colors"
+                      >
+                        Mark all as read
+                      </button>
+                    )}
+                  </>
+                )}
+              </>
+            ) : (
+              // Original messages content
+              <>
+                {/* Load more button */}
+                {pagination && pagination.has_more && (
+                  <div className="text-center mb-4">
                     <button
-                      onClick={() => handleTextToSpeech(message)}
-                      className="mt-1 text-amber-700 hover:text-amber-500 transition-colors float-right voice-button"
-                      aria-label={playingMessageId === message.id ? "Stop speaking" : "Speak message"}
+                      onClick={loadMoreMessages}
+                      disabled={isLoadingHistory}
+                      className="px-3 py-1 text-sm bg-amber-100 hover:bg-amber-200 text-amber-800 rounded-full border border-amber-200 transition-colors"
                     >
-                      {playingMessageId === message.id ? (
-                        <FaVolumeMute className="w-4 h-4" />
+                      {isLoadingHistory ? (
+                        <span className="flex items-center justify-center">
+                          <FaSpinner className="animate-spin mr-2" />
+                          Loading...
+                        </span>
                       ) : (
-                        <FaVolumeUp className="w-4 h-4" />
+                        'Load earlier messages'
                       )}
                     </button>
-                  )}
-                </div>
-              </div>
-            ))}
-            
-            {/* Typing indicator */}
-            {isTyping && (
-              <div className="text-left mb-3">
-                <div className="inline-block p-3 rounded-lg max-w-[80%] typing-indicator rounded-bl-none">
-                  <div className="flex space-x-2">
-                    <div className="typing-dot animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                    <div className="typing-dot animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                    <div className="typing-dot animate-bounce" style={{ animationDelay: '300ms' }}></div>
                   </div>
-                </div>
-              </div>
+                )}
+                
+                {/* Loading indicator for initial load */}
+                {isLoadingHistory && messages.length === 0 && (
+                  <div className="flex justify-center items-center h-32">
+                    <FaSpinner className="animate-spin text-amber-600 text-2xl" />
+                  </div>
+                )}
+                
+                {/* Messages */}
+                {messages.map((message, index) => (
+                  <div 
+                    key={message.id || `msg-${index}`} 
+                    className={`mb-3 ${
+                      message.role === 'user' 
+                        ? 'text-right' 
+                        : 'text-left'
+                    }`}
+                  >
+                    <div 
+                      className={`inline-block p-3 rounded-lg max-w-[80%] ${
+                        message.role === 'user'
+                          ? 'user-bubble rounded-br-none'
+                          : 'assistant-bubble rounded-bl-none'
+                      }`}
+                    >
+                      <div className="markdown-content">
+                        <ReactMarkdown 
+                          remarkPlugins={[remarkGfm]}
+                          components={{
+                            // Customize how certain markdown elements are rendered
+                            a: ({node, ...props}) => <a {...props} className="text-amber-700 underline hover:text-amber-500" target="_blank" rel="noopener noreferrer" />,
+                            code: ({node, ...props}) => <code {...props} className="bg-amber-50 px-1 py-0.5 rounded text-sm font-mono" />,
+                            pre: ({node, ...props}) => <pre {...props} className="bg-amber-50 p-2 rounded my-2 overflow-x-auto text-sm font-mono" />,
+                            ul: ({node, ...props}) => <ul {...props} className="list-disc pl-5 my-1" />,
+                            ol: ({node, ...props}) => <ol {...props} className="list-decimal pl-5 my-1" />,
+                            li: ({node, ...props}) => <li {...props} className="my-0.5" />,
+                            blockquote: ({node, ...props}) => <blockquote {...props} className="border-l-4 border-amber-300 pl-3 italic my-2" />,
+                            h1: ({node, ...props}) => <h1 {...props} className="text-lg font-bold my-2" />,
+                            h2: ({node, ...props}) => <h2 {...props} className="text-md font-bold my-2" />,
+                            h3: ({node, ...props}) => <h3 {...props} className="text-sm font-bold my-1" />,
+                            p: ({node, ...props}) => <p {...props} className="my-1" />
+                          }}
+                        >
+                          {message.content}
+                        </ReactMarkdown>
+                      </div>
+                      
+                      {/* Only show voice button for assistant messages */}
+                      {message.role === 'assistant' && (
+                        <button
+                          onClick={() => handleTextToSpeech(message)}
+                          className="mt-1 text-amber-700 hover:text-amber-500 transition-colors float-right voice-button"
+                          aria-label={playingMessageId === message.id ? "Stop speaking" : "Speak message"}
+                        >
+                          {playingMessageId === message.id ? (
+                            <FaVolumeMute className="w-4 h-4" />
+                          ) : (
+                            <FaVolumeUp className="w-4 h-4" />
+                          )}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+                
+                {/* Typing indicator */}
+                {isTyping && (
+                  <div className="text-left mb-3">
+                    <div className="inline-block p-3 rounded-lg max-w-[80%] typing-indicator rounded-bl-none">
+                      <div className="flex space-x-2">
+                        <div className="typing-dot animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                        <div className="typing-dot animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                        <div className="typing-dot animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
             
             <div ref={messagesEndRef} />

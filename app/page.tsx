@@ -1288,6 +1288,20 @@ export default function SimplePage() {
       .animate-fade-out {
         animation: fadeOut 3s forwards;
       }
+  
+      /* Add notification-specific styles */
+      .notification-unread {
+        border-left: 3px solid #f59e0b;
+      }
+  
+      @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+        100% { transform: scale(1); }
+      }
+      .animate-pulse {
+        animation: pulse 2s infinite;
+      }
     `}</style>
       <BackgroundMusic />
       
