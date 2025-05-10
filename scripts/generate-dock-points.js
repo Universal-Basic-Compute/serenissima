@@ -1,6 +1,23 @@
 const fs = require('fs');
 const path = require('path');
 
+// Helper function to ensure directories exist
+function ensureDirectoriesExist() {
+  const polygonsDir = path.join(__dirname, '../data/polygons');
+  
+  if (!fs.existsSync(path.join(__dirname, '../data'))) {
+    fs.mkdirSync(path.join(__dirname, '../data'));
+    console.log('Created data directory');
+  }
+  
+  if (!fs.existsSync(polygonsDir)) {
+    fs.mkdirSync(polygonsDir);
+    console.log('Created polygons directory');
+  }
+  
+  return polygonsDir;
+}
+
 // Helper function to calculate distance between two points in meters
 function calculateDistance(point1, point2) {
   const R = 6371000; // Earth's radius in meters
@@ -104,9 +121,33 @@ function isPointInPolygon(point, polygon) {
 // Main function to generate dock points
 async function generateDockPoints() {
   try {
-    // Read all polygon files
-    const polygonsDir = path.join(__dirname, '../data/polygons');
+    // Ensure directories exist before proceeding
+    const polygonsDir = ensureDirectoriesExist();
+    
+    // Check if there are any polygon files
     const files = fs.readdirSync(polygonsDir).filter(file => file.endsWith('.json'));
+    
+    if (files.length === 0) {
+      console.log('No polygon files found. Creating a sample polygon for testing...');
+      
+      // Create a sample polygon file for testing
+      const samplePolygon = {
+        id: 'sample-polygon-1',
+        coordinates: [
+          { lat: 45.4371, lng: 12.3345 },
+          { lat: 45.4375, lng: 12.3355 },
+          { lat: 45.4365, lng: 12.3365 },
+          { lat: 45.4361, lng: 12.3350 }
+        ]
+      };
+      
+      fs.writeFileSync(
+        path.join(polygonsDir, 'sample-polygon-1.json'), 
+        JSON.stringify(samplePolygon, null, 2)
+      );
+      
+      console.log('Created a sample polygon file for testing');
+    }
     
     console.log(`Found ${files.length} polygon files`);
     
