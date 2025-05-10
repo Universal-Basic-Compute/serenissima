@@ -2,6 +2,8 @@ import * as THREE from 'three';
 import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { normalizeCoordinates, createPolygonShape } from './utils';
 import { getUserService } from '../../lib/services/UserService';
+import { eventBus } from '@/lib/eventBus';
+import { EventTypes } from '@/lib/eventTypes';
 
 interface SimplePolygonRendererProps {
   scene: THREE.Scene;
