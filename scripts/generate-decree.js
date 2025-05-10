@@ -87,61 +87,45 @@ async function generateDecree(input) {
   }
 }
 
-// Function to save decree to jsontoairtable.json
-function saveDecreeToJson(decree) {
-  console.log('Saving decree to jsontoairtable.json...');
-  
-  const filePath = path.join(__dirname, '..', 'jsontoairtable.json');
+// Function to push decree directly to Airtable
+async function pushDecreeToAirtable(decree) {
+  console.log('Pushing decree directly to Airtable...');
   
   try {
-    // Read the existing file
-    let jsonData = { DECREES: [] };
-    if (fs.existsSync(filePath)) {
-      const fileContent = fs.readFileSync(filePath, 'utf8');
-      jsonData = JSON.parse(fileContent);
-      
-      // Ensure DECREES array exists
-      if (!jsonData.DECREES) {
-        jsonData.DECREES = [];
-      }
+    // Get Airtable configuration
+    const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
+    const AIRTABLE_BASE_ID = process.env.AIRTABLE_BASE_ID;
+    
+    if (!AIRTABLE_API_KEY || !AIRTABLE_BASE_ID) {
+      throw new Error('Airtable API key or base ID not configured');
     }
     
-    // Add the new decree to the beginning of the array (after the example item)
-    if (jsonData.DECREES.length > 0) {
-      // Keep the first item (example) and add the new decree after it
-      jsonData.DECREES = [
-        jsonData.DECREES[0],
-        decree,
-        ...jsonData.DECREES.slice(1)
-      ];
-    } else {
-      // If there are no items, add an example item first
-      const exampleDecree = {
-        DecreeId: "example-decree-id",
-        Type: "Economic",
-        Title: "Example Decree (DO NOT SYNC)",
-        Description: "This is an example decree. It will not be synced to Airtable.",
-        Rationale: "This serves as a template for the decree structure.",
-        Status: "Example",
-        Category: "Example",
-        Subcategory: "Template",
-        Proposer: "System",
-        FlavorText: "Examples illuminate the path forward.",
-        HistoricalInspiration: "None - this is just an example.",
-        Notes: "This first item is always skipped during synchronization."
-      };
-      
-      jsonData.DECREES = [exampleDecree, decree];
-    }
+    // Initialize Airtable
+    const Airtable = require('airtable');
+    const base = new Airtable({ apiKey: AIRTABLE_API_KEY }).base(AIRTABLE_BASE_ID);
     
-    // Write the updated data back to the file
-    fs.writeFileSync(filePath, JSON.stringify(jsonData, null, 2), 'utf8');
-    console.log('Decree saved successfully');
+    // Create the decree record in Airtable
+    const record = await base('DECREES').create({
+      DecreeId: decree.DecreeId,
+      Type: decree.Type,
+      Title: decree.Title,
+      Description: decree.Description,
+      Rationale: decree.Rationale,
+      Status: decree.Status,
+      Category: decree.Category,
+      Subcategory: decree.Subcategory,
+      Proposer: decree.Proposer,
+      FlavorText: decree.FlavorText,
+      HistoricalInspiration: decree.HistoricalInspiration,
+      Notes: decree.Notes,
+      CreatedAt: new Date().toISOString()
+    });
     
-    return true;
+    console.log(`Successfully created decree in Airtable with ID: ${record.id}`);
+    return record.id;
   } catch (error) {
-    console.error('Error saving decree to JSON file:', error);
-    throw error;
+    console.error('Error pushing decree to Airtable:', error);
+    throw new Error('Failed to push decree to Airtable');
   }
 }
 
@@ -215,16 +199,15 @@ async function main() {
     // Generate the decree
     const decree = await generateDecree(userInput);
     
-    // Save the decree to jsontoairtable.json
-    saveDecreeToJson(decree);
+    // Push the decree directly to Airtable
+    const recordId = await pushDecreeToAirtable(decree);
     
     // Create notifications for all users
     await createDecreeNotifications(decree);
     
-    console.log('\nDecree generated successfully and saved to jsontoairtable.json');
+    console.log('\nDecree generated successfully and pushed to Airtable');
     console.log('Notifications created for all users');
-    console.log('\nTo push to Airtable, run:');
-    console.log('node jsontoairtable.js jsontoairtable.json');
+    console.log(`Airtable Record ID: ${recordId}`);
     
   } catch (error) {
     console.error('Error in decree generation process:', error);
