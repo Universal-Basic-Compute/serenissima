@@ -122,6 +122,17 @@ const ResourceDetailsModal: React.FC<ResourceDetailsModalProps> = ({ resource, o
     console.log('Inputs:', getInputs());
     console.log('Outputs:', getOutputs());
   }, [extendedResource]);
+  
+  // Helper function to get proper icon path with fallback
+  const getIconPath = (iconName: string) => {
+    // Check if the icon path already starts with a slash or http
+    if (iconName.startsWith('/') || iconName.startsWith('http')) {
+      return iconName;
+    }
+    
+    // Otherwise, ensure it starts with a slash for public directory
+    return `/assets/icons/resources/${iconName}`;
+  };
 
   // Helper function to get inputs from different possible structures
   const getInputs = () => {
@@ -209,14 +220,19 @@ const ResourceDetailsModal: React.FC<ResourceDetailsModalProps> = ({ resource, o
           <div className="flex items-center mb-6">
             <div className="w-24 h-24 bg-white rounded-lg overflow-hidden flex items-center justify-center mr-4 border-2 border-amber-600">
               <img 
-                src={resource.icon} 
+                src={getIconPath(resource.icon)} 
                 alt={resource.name}
                 className="w-20 h-20 object-contain"
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
                   if (!target.dataset.fallback) {
                     target.dataset.fallback = 'true';
-                    target.src = "/assets/resources/icons/default.png";
+                    target.src = "/assets/icons/resources/default.png";
+                    // If that fails too, use a placeholder
+                    target.onerror = () => {
+                      target.src = `https://via.placeholder.com/80?text=${resource.name.charAt(0).toUpperCase()}`;
+                      target.onerror = null; // Prevent infinite loop
+                    };
                   }
                 }}
               />

@@ -87,7 +87,7 @@ export class ResourceService {
         subcategory: resource.subcategory,
         description: resource.description || resource.longDescription,
         rarity: resource.rarity || 'common',
-        icon: resource.icon || `/images/resources/${resource.id}.png`,
+        icon: resource.icon || 'default.png',
         amount: 0 // Default amount
       }));
       
