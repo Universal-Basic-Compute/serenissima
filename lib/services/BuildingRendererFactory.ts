@@ -51,6 +51,8 @@ class DefaultBuildingRenderer implements IBuildingRenderer {
       }
       
       model.position.copy(position);
+      // Change the y position to 1.2
+      model.position.y = 1.2;
       
       // Set rotation
       model.rotation.y = building.rotation || 0;
