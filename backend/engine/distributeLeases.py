@@ -22,6 +22,9 @@ from collections import defaultdict
 from pyairtable import Api, Table
 from dotenv import load_dotenv
 
+# Tax rate for lease payments (20%)
+REPUBLICAN_TAX_RATE = 0.20
+
 # Set up logging
 logging.basicConfig(
     level=logging.INFO,
@@ -217,7 +220,7 @@ def create_notification(tables, user: str, content: str, details: Dict) -> Optio
         log.error(f"Error creating notification for user {user}: {e}")
         return None
 
-def process_lease_payment(tables, land: Dict, building: Dict, dry_run: bool = False) -> Tuple[bool, float]:
+def process_lease_payment(tables, land: Dict, building: Dict, dry_run: bool = False) -> Tuple[bool, float, float]:
     """Process a lease payment from a building owner to a land owner."""
     land_id = land['id']
     land_name = land['fields'].get('HistoricalName', land['fields'].get('EnglishName', land_id))
@@ -236,28 +239,41 @@ def process_lease_payment(tables, land: Dict, building: Dict, dry_run: bool = Fa
     # Skip if any required field is missing
     if not land_owner or not building_owner or lease_amount <= 0:
         log.warning(f"Missing required fields for lease payment, skipping")
-        return False, 0
+        return False, 0, 0
     
     # Skip if building owner and land owner are the same
     if building_owner == land_owner:
         log.info(f"Building owner and land owner are the same ({building_owner}), skipping payment")
-        return True, 0  # Return True but 0 amount as this is not an error
+        return True, 0, 0  # Return True but 0 amount as this is not an error
+    
+    # Calculate tax amount (20% of lease amount)
+    tax_amount = lease_amount * REPUBLICAN_TAX_RATE
+    # Calculate net amount after tax
+    net_amount = lease_amount - tax_amount
+    
+    log.info(f"Lease amount: {lease_amount}, Tax (20%): {tax_amount}, Net to land owner: {net_amount}")
     
     if dry_run:
-        log.info(f"[DRY RUN] Would transfer {lease_amount} ⚜️ Ducats from {building_owner} to {land_owner}")
-        return True, lease_amount
+        log.info(f"[DRY RUN] Would transfer {net_amount} ⚜️ Ducats from {building_owner} to {land_owner}")
+        log.info(f"[DRY RUN] Would transfer {tax_amount} ⚜️ Ducats from {building_owner} to ConsiglioDeiDieci (tax)")
+        return True, net_amount, tax_amount
     
     # Find user records
     building_owner_record = find_user_by_identifier(tables, building_owner)
     land_owner_record = find_user_by_identifier(tables, land_owner)
+    consiglio_record = find_user_by_identifier(tables, "ConsiglioDeiDieci")
     
     if not building_owner_record:
         log.warning(f"Building owner {building_owner} not found, skipping payment")
-        return False, 0
+        return False, 0, 0
     
     if not land_owner_record:
         log.warning(f"Land owner {land_owner} not found, skipping payment")
-        return False, 0
+        return False, 0, 0
+    
+    if not consiglio_record:
+        log.warning(f"ConsiglioDeiDieci not found, skipping tax collection")
+        return False, 0, 0
     
     # Check if building owner has enough funds
     building_owner_balance = building_owner_record['fields'].get('ComputeAmount', 0)
@@ -276,6 +292,8 @@ def process_lease_payment(tables, land: Dict, building: Dict, dry_run: bool = Fa
                 "building_name": building_name,
                 "building_type": building_type,
                 "lease_amount": lease_amount,
+                "tax_amount": tax_amount,
+                "net_amount": net_amount,
                 "available_balance": building_owner_balance,
                 "event_type": "lease_payment_failed",
                 "error_type": "insufficient_funds"
@@ -286,7 +304,7 @@ def process_lease_payment(tables, land: Dict, building: Dict, dry_run: bool = Fa
         create_notification(
             tables,
             land_owner,
-            f"Missed lease payment of {int(lease_amount)} ⚜️ Ducats from {building_owner} for building {building_name} on your land {land_name}",
+            f"Missed lease payment of {int(net_amount)} ⚜️ Ducats from {building_owner} for building {building_name} on your land {land_name}",
             {
                 "land_id": land_id,
                 "land_name": land_name,
@@ -294,56 +312,100 @@ def process_lease_payment(tables, land: Dict, building: Dict, dry_run: bool = Fa
                 "building_name": building_name,
                 "building_type": building_type,
                 "lease_amount": lease_amount,
+                "tax_amount": tax_amount,
+                "net_amount": net_amount,
                 "building_owner": building_owner,
                 "event_type": "lease_payment_failed",
                 "error_type": "insufficient_funds"
             }
         )
         
-        return False, 0
+        return False, 0, 0
     
     # Process the payment
-    # 1. Deduct from building owner
+    # 1. Deduct full amount from building owner
     update_compute_balance(tables, building_owner_record['id'], lease_amount, "subtract")
     
-    # 2. Add to land owner
-    update_compute_balance(tables, land_owner_record['id'], lease_amount, "add")
+    # 2. Add net amount to land owner
+    update_compute_balance(tables, land_owner_record['id'], net_amount, "add")
     
-    # 3. Create transaction record
-    create_transaction_record(tables, building_owner, land_owner, lease_amount, land_id, building_id)
+    # 3. Add tax amount to ConsiglioDeiDieci
+    update_compute_balance(tables, consiglio_record['id'], tax_amount, "add")
     
-    log.info(f"Successfully processed lease payment of {lease_amount} from {building_owner} to {land_owner}")
+    # 4. Create transaction record for land owner payment
+    create_transaction_record(tables, building_owner, land_owner, net_amount, land_id, building_id)
     
-    return True, lease_amount
+    # 5. Create transaction record for tax payment
+    create_tax_transaction_record(tables, building_owner, "ConsiglioDeiDieci", tax_amount, land_id, building_id)
+    
+    log.info(f"Successfully processed lease payment: {net_amount} to {land_owner}, {tax_amount} tax to ConsiglioDeiDieci")
+    
+    return True, net_amount, tax_amount
+
+def create_tax_transaction_record(tables, from_user: str, to_user: str, amount: float, land_id: str, building_id: str) -> Optional[Dict]:
+    """Create a transaction record for a lease tax payment."""
+    log.info(f"Creating tax transaction record: {from_user} -> {to_user}, amount: {amount}")
+    
+    try:
+        now = datetime.datetime.now().isoformat()
+        
+        # Create the transaction record
+        transaction = tables['transactions'].create({
+            "Type": "lease_tax",
+            "AssetId": f"tax_{land_id}_{building_id}",
+            "Seller": from_user,  # Building owner is the seller (paying)
+            "Buyer": to_user,     # ConsiglioDeiDieci is the buyer (receiving)
+            "Price": amount,
+            "CreatedAt": now,
+            "UpdatedAt": now,
+            "ExecutedAt": now,
+            "Notes": json.dumps({
+                "land_id": land_id,
+                "building_id": building_id,
+                "payment_type": "lease_tax",
+                "tax_rate": f"{REPUBLICAN_TAX_RATE * 100}%",
+                "payment_date": now
+            })
+        })
+        
+        log.info(f"Created tax transaction record: {transaction['id']}")
+        return transaction
+    except Exception as e:
+        log.error(f"Error creating tax transaction record: {e}")
+        return None
 
 def create_land_owner_summary(tables, land_owner: str, land_name: str, buildings_data: List[Dict], total_amount: float) -> None:
     """Create a summary notification for a land owner about all lease payments received."""
     if not buildings_data:
         return
     
-    content = f"You received {int(total_amount)} ⚜️ Ducats in lease payments for your land {land_name}"
+    content = f"You received {int(total_amount)} ⚜️ Ducats in lease payments for your land {land_name} (after 20% republican tax)"
     
     details = {
         "land_name": land_name,
         "total_amount": total_amount,
         "buildings_count": len(buildings_data),
         "buildings": buildings_data,
+        "tax_rate": f"{REPUBLICAN_TAX_RATE * 100}%",
         "event_type": "lease_payments_received"
     }
     
     create_notification(tables, land_owner, content, details)
 
-def create_building_owner_summary(tables, building_owner: str, buildings_data: List[Dict], total_amount: float) -> None:
+def create_building_owner_summary(tables, building_owner: str, buildings_data: List[Dict], total_amount: float, total_tax: float) -> None:
     """Create a summary notification for a building owner about all lease payments made."""
     if not buildings_data:
         return
     
-    content = f"You paid {int(total_amount)} ⚜️ Ducats in lease payments for your {len(buildings_data)} buildings"
+    content = f"You paid {int(total_amount + total_tax)} ⚜️ Ducats in lease payments for your {len(buildings_data)} buildings ({int(total_amount)} to land owners, {int(total_tax)} in republican tax)"
     
     details = {
         "total_amount": total_amount,
+        "total_tax": total_tax,
+        "total_paid": total_amount + total_tax,
         "buildings_count": len(buildings_data),
         "buildings": buildings_data,
+        "tax_rate": f"{REPUBLICAN_TAX_RATE * 100}%",
         "event_type": "lease_payments_made"
     }
     
@@ -353,7 +415,7 @@ def create_admin_summary(tables, lease_summary) -> None:
     """Create a summary notification for the admin."""
     try:
         # Create notification content
-        content = f"Lease distribution complete: {lease_summary['successful']} payments processed, total: {int(lease_summary['total_amount'])} ⚜️ Ducats"
+        content = f"Lease distribution complete: {lease_summary['successful']} payments processed, total: {int(lease_summary['total_amount'])} ⚜️ Ducats to land owners, {int(lease_summary['total_tax'])} ⚜️ Ducats in tax revenue"
         
         # Get top gainers and losers
         top_gainers = sorted(lease_summary['by_land_owner'].items(), key=lambda x: x[1], reverse=True)[:5]
@@ -366,6 +428,8 @@ def create_admin_summary(tables, lease_summary) -> None:
             "successful_payments": lease_summary['successful'],
             "failed_payments": lease_summary['failed'],
             "total_amount": lease_summary['total_amount'],
+            "total_tax": lease_summary['total_tax'],
+            "tax_rate": f"{REPUBLICAN_TAX_RATE * 100}%",
             "top_gainers": [{"owner": owner, "amount": amount} for owner, amount in top_gainers],
             "top_losers": [{"owner": owner, "amount": -amount} for owner, amount in top_losers]
         }
@@ -400,8 +464,10 @@ def distribute_leases(dry_run: bool = False):
         "successful": 0,
         "failed": 0,
         "total_amount": 0,
+        "total_tax": 0,  # Add tracking for total tax collected
         "by_land_owner": defaultdict(float),      # Total received by each land owner
         "by_building_owner": defaultdict(float),  # Total paid by each building owner
+        "by_building_owner_tax": defaultdict(float),  # Total tax paid by each building owner
         "land_owner_buildings": defaultdict(list),  # Buildings data for each land owner
         "building_owner_lands": defaultdict(list)   # Lands data for each building owner
     }
@@ -436,16 +502,18 @@ def distribute_leases(dry_run: bool = False):
             building_owner = building['fields'].get('User', '')
             lease_amount = float(building['fields'].get('LeaseAmount', 0))
             
-            # Process the lease payment
-            success, amount_paid = process_lease_payment(tables, land, building, dry_run)
+            # Process the lease payment - now returns net amount and tax amount
+            success, net_amount, tax_amount = process_lease_payment(tables, land, building, dry_run)
             
             if success:
-                if amount_paid > 0:  # Only count if actual payment was made (not when owner is the same)
+                if net_amount > 0 or tax_amount > 0:  # Only count if actual payment was made
                     lease_summary["successful"] += 1
-                    lease_summary["total_amount"] += amount_paid
-                    lease_summary["by_land_owner"][land_owner] += amount_paid
-                    lease_summary["by_building_owner"][building_owner] -= amount_paid
-                    land_total += amount_paid
+                    lease_summary["total_amount"] += net_amount
+                    lease_summary["total_tax"] += tax_amount
+                    lease_summary["by_land_owner"][land_owner] += net_amount
+                    lease_summary["by_building_owner"][building_owner] -= (net_amount + tax_amount)
+                    lease_summary["by_building_owner_tax"][building_owner] += tax_amount
+                    land_total += net_amount
                     
                     # Add building data for land owner notification
                     land_buildings_data.append({
@@ -453,7 +521,9 @@ def distribute_leases(dry_run: bool = False):
                         "building_name": building_name,
                         "building_type": building_type,
                         "building_owner": building_owner,
-                        "lease_amount": amount_paid
+                        "lease_amount": lease_amount,
+                        "net_amount": net_amount,
+                        "tax_amount": tax_amount
                     })
                     
                     # Add land data for building owner notification
@@ -464,7 +534,9 @@ def distribute_leases(dry_run: bool = False):
                         "building_id": building_id,
                         "building_name": building_name,
                         "building_type": building_type,
-                        "lease_amount": amount_paid
+                        "lease_amount": lease_amount,
+                        "net_amount": net_amount,
+                        "tax_amount": tax_amount
                     })
             else:
                 lease_summary["failed"] += 1
@@ -474,7 +546,7 @@ def distribute_leases(dry_run: bool = False):
             lease_summary["land_owner_buildings"][land_owner].extend(land_buildings_data)
     
     log.info(f"Lease distribution process complete. Successful: {lease_summary['successful']}, Failed: {lease_summary['failed']}")
-    log.info(f"Total amount processed: {lease_summary['total_amount']}")
+    log.info(f"Total amount to land owners: {lease_summary['total_amount']}, Total tax collected: {lease_summary['total_tax']}")
     
     # Create notifications for land owners
     if not dry_run:
@@ -499,7 +571,8 @@ def distribute_leases(dry_run: bool = False):
         # Create notifications for building owners
         for building_owner, lands_data in lease_summary["building_owner_lands"].items():
             total_paid = -lease_summary["by_building_owner"][building_owner]
-            create_building_owner_summary(tables, building_owner, lands_data, total_paid)
+            total_tax = lease_summary["by_building_owner_tax"][building_owner]
+            create_building_owner_summary(tables, building_owner, lands_data, total_paid - total_tax, total_tax)
         
         # Create admin summary notification
         create_admin_summary(tables, lease_summary)
