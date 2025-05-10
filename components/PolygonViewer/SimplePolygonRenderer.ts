@@ -2971,22 +2971,6 @@ export default class SimplePolygonRenderer {
   }
   
   /**
-   * Define Polygon interface for type safety
-   */
-  interface Polygon {
-    id: string;
-    coordinates: {lat: number, lng: number}[];
-    centroid?: {lat: number, lng: number};
-    bridgePoints?: any[];
-    dockPoints?: any[];
-    buildingPoints?: any[];
-    historicalName?: string;
-    englishName?: string;
-    owner?: string;
-    User?: string;
-  }
-
-  /**
    * Determine if water navigation is needed between two polygons
    */
   private needsWaterNavigation(startPolygon: Polygon | null, endPolygon: Polygon | null): boolean {
@@ -3301,6 +3285,22 @@ export default class SimplePolygonRenderer {
     return graph;
   }
   
+  /**
+   * Define Polygon interface for type safety
+   */
+  interface Polygon {
+    id: string;
+    coordinates: {lat: number, lng: number}[];
+    centroid?: {lat: number, lng: number};
+    bridgePoints?: any[];
+    dockPoints?: any[];
+    buildingPoints?: any[];
+    historicalName?: string;
+    englishName?: string;
+    owner?: string;
+    User?: string;
+  }
+
   /**
    * Find the polygon containing a point with improved detection
    */
