@@ -704,7 +704,7 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
       
       buildingMeshesRef.current.clear();
     };
-  }, [active, scene, ensureBuildingsVisible]);
+  }, [active, sceneRef.current, ensureBuildingsVisible]);
   
   // Listen for the fixBuildingPositions event and other custom events
   useEffect(() => {
