@@ -33,6 +33,19 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
   const [selectedPolygonId, setSelectedPolygonId] = useState<string | null>(null);
   const [landOwners, setLandOwners] = useState<Record<string, string>>({});
   
+  // State for tooltips
+  const [tooltip, setTooltip] = useState<{
+    visible: boolean;
+    content: string;
+    x: number;
+    y: number;
+  }>({
+    visible: false,
+    content: '',
+    x: 0,
+    y: 0
+  });
+  
   // Define loadUsers as a reusable function
   const loadUsers = useCallback(async () => {
     try {
@@ -409,6 +422,47 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
   }, [activeView]);
   
   
+  // Add effect to listen for tooltip events
+  useEffect(() => {
+    const handleShowTooltip = (data: any) => {
+      let content = '';
+      
+      if (data.type === 'bridge') {
+        content = `Bridge Point\nPolygon: ${data.polygonId}\nPosition: ${data.position}`;
+      } else if (data.type === 'dock-edge') {
+        content = `Dock Edge Point\nPolygon: ${data.polygonId}\nPosition: ${data.position}`;
+      } else if (data.type === 'dock-water') {
+        content = `Dock Water Point\nPolygon: ${data.polygonId}\nPosition: ${data.position}`;
+      }
+      
+      setTooltip({
+        visible: true,
+        content,
+        x: data.screenX,
+        y: data.screenY
+      });
+    };
+    
+    const handleHideTooltip = () => {
+      setTooltip(prev => ({ ...prev, visible: false }));
+    };
+    
+    const tooltipShowSubscription = eventBus.subscribe(
+      EventTypes.SHOW_TOOLTIP,
+      handleShowTooltip
+    );
+    
+    const tooltipHideSubscription = eventBus.subscribe(
+      EventTypes.HIDE_TOOLTIP,
+      handleHideTooltip
+    );
+    
+    return () => {
+      tooltipShowSubscription.unsubscribe();
+      tooltipHideSubscription.unsubscribe();
+    };
+  }, []);
+  
   // Add effect to update coat of arms when user data changes
   useEffect(() => {
     const handleUserProfileUpdated = (event: CustomEvent) => {
@@ -482,6 +536,34 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
         landOwners={landOwners}
       />
       
+      {/* Transport View Legend */}
+      {activeView === 'transport' && (
+        <div className="absolute bottom-4 right-4 bg-black/70 text-white p-3 rounded-lg shadow-lg">
+          <h3 className="text-lg font-serif mb-2">Transport Points</h3>
+          <div className="flex items-center mb-1">
+            <div className="w-4 h-4 rounded-full bg-[#00AAFF] mr-2"></div>
+            <span>Dock Points</span>
+          </div>
+          <div className="flex items-center">
+            <div className="w-4 h-4 rounded-full bg-[#FF5500] mr-2"></div>
+            <span>Bridge Points</span>
+          </div>
+        </div>
+      )}
+      
+      {/* Tooltip */}
+      {tooltip.visible && (
+        <div 
+          className="absolute bg-black/80 text-white p-2 rounded text-sm pointer-events-none whitespace-pre-line"
+          style={{
+            left: tooltip.x + 10,
+            top: tooltip.y + 10,
+            zIndex: 1000
+          }}
+        >
+          {tooltip.content}
+        </div>
+      )}
     </div>
   );
 }

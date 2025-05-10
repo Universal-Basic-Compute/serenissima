@@ -34,5 +34,9 @@ export const EventTypes = {
   BUILDING_HOVER: 'buildingHover',
   BUILDING_CONSTRUCTION_STARTED: 'buildingConstructionStarted',
   BUILDING_CONSTRUCTION_COMPLETED: 'buildingConstructionCompleted',
-  BUILDING_INCOME_GENERATED: 'buildingIncomeGenerated'
+  BUILDING_INCOME_GENERATED: 'buildingIncomeGenerated',
+  
+  // UI tooltip events
+  SHOW_TOOLTIP: 'showTooltip',
+  HIDE_TOOLTIP: 'hideTooltip'
 };

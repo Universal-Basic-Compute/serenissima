@@ -13,6 +13,186 @@ interface SimplePolygonRendererProps {
     latCorrectionFactor: number;
   };
   sandColor?: number; // Add this line
+  /**
+   * Create bridge and dock point markers for transport view
+   */
+  private createBridgeAndDockPoints() {
+    // Only create markers if they don't exist yet or if we're in transport view
+    if ((this.bridgePointMarkers.length > 0 && this.dockPointMarkers.length > 0) || 
+        this.activeView !== 'transport') {
+      return;
+    }
+    
+    console.log('Creating bridge and dock points for transport view');
+    
+    // Clear any existing markers
+    this.bridgePointMarkers.forEach(marker => {
+      this.scene.remove(marker);
+      if (marker.geometry) marker.geometry.dispose();
+      if (marker.material instanceof THREE.Material) {
+        marker.material.dispose();
+      } else if (Array.isArray(marker.material)) {
+        marker.material.forEach(m => m.dispose());
+      }
+    });
+    
+    this.dockPointMarkers.forEach(marker => {
+      this.scene.remove(marker);
+      if (marker instanceof THREE.Mesh) {
+        if (marker.geometry) marker.geometry.dispose();
+        if (marker.material instanceof THREE.Material) {
+          marker.material.dispose();
+        } else if (Array.isArray(marker.material)) {
+          marker.material.forEach(m => m.dispose());
+        }
+      } else if (marker instanceof THREE.Line) {
+        if (marker.geometry) marker.geometry.dispose();
+        if (marker.material instanceof THREE.Material) {
+          marker.material.dispose();
+        }
+      }
+    });
+    
+    this.bridgePointMarkers = [];
+    this.dockPointMarkers = [];
+    
+    // Process each polygon
+    this.polygons.forEach(polygon => {
+      // Skip if polygon has no bridge or dock points
+      if (!polygon.bridgePoints && !polygon.dockPoints) return;
+      
+      // Process bridge points
+      if (polygon.bridgePoints && Array.isArray(polygon.bridgePoints) && polygon.bridgePoints.length > 0) {
+        polygon.bridgePoints.forEach((point, index) => {
+          const normalizedCoord = normalizeCoordinates(
+            [point.edge],
+            this.bounds.centerLat,
+            this.bounds.centerLng,
+            this.bounds.scale,
+            this.bounds.latCorrectionFactor
+          )[0];
+          
+          // Create a marker for the bridge point
+          const geometry = new THREE.CircleGeometry(0.3, 16);
+          const material = new THREE.MeshBasicMaterial({
+            color: 0xFF5500, // Orange color for bridge points
+            side: THREE.DoubleSide,
+            transparent: true,
+            opacity: 0.8
+          });
+          
+          const marker = new THREE.Mesh(geometry, material);
+          marker.position.set(normalizedCoord.x, 0.2, -normalizedCoord.y); // Position slightly above land
+          marker.rotation.x = -Math.PI / 2; // Make it horizontal
+          marker.renderOrder = 10; // Ensure it renders on top
+          
+          // Add metadata for tooltips
+          marker.userData = {
+            id: `bridge-${polygon.id}-${index}`,
+            type: 'bridge',
+            polygonId: polygon.id,
+            position: `${point.edge.lat.toFixed(6)}, ${point.edge.lng.toFixed(6)}`
+          };
+          
+          this.scene.add(marker);
+          this.bridgePointMarkers.push(marker);
+        });
+      }
+      
+      // Process dock points
+      if (polygon.dockPoints && Array.isArray(polygon.dockPoints) && polygon.dockPoints.length > 0) {
+        polygon.dockPoints.forEach((point, index) => {
+          // Create markers for both edge and water points
+          const edgeCoord = normalizeCoordinates(
+            [point.edge],
+            this.bounds.centerLat,
+            this.bounds.centerLng,
+            this.bounds.scale,
+            this.bounds.latCorrectionFactor
+          )[0];
+          
+          const waterCoord = normalizeCoordinates(
+            [point.water],
+            this.bounds.centerLat,
+            this.bounds.centerLng,
+            this.bounds.scale,
+            this.bounds.latCorrectionFactor
+          )[0];
+          
+          // Create a marker for the dock point (edge)
+          const edgeGeometry = new THREE.CircleGeometry(0.3, 16);
+          const edgeMaterial = new THREE.MeshBasicMaterial({
+            color: 0x00AAFF, // Blue color for dock points
+            side: THREE.DoubleSide,
+            transparent: true,
+            opacity: 0.8
+          });
+          
+          const edgeMarker = new THREE.Mesh(edgeGeometry, edgeMaterial);
+          edgeMarker.position.set(edgeCoord.x, 0.2, -edgeCoord.y); // Position slightly above land
+          edgeMarker.rotation.x = -Math.PI / 2; // Make it horizontal
+          edgeMarker.renderOrder = 10; // Ensure it renders on top
+          
+          // Add metadata for tooltips
+          edgeMarker.userData = {
+            id: `dock-edge-${polygon.id}-${index}`,
+            type: 'dock-edge',
+            polygonId: polygon.id,
+            position: `${point.edge.lat.toFixed(6)}, ${point.edge.lng.toFixed(6)}`
+          };
+          
+          this.scene.add(edgeMarker);
+          this.dockPointMarkers.push(edgeMarker);
+          
+          // Create a line connecting edge to water
+          const lineGeometry = new THREE.BufferGeometry().setFromPoints([
+            new THREE.Vector3(edgeCoord.x, 0.2, -edgeCoord.y),
+            new THREE.Vector3(waterCoord.x, 0.2, -waterCoord.y)
+          ]);
+          
+          const lineMaterial = new THREE.LineBasicMaterial({
+            color: 0x00AAFF,
+            linewidth: 2,
+            transparent: true,
+            opacity: 0.6
+          });
+          
+          const line = new THREE.Line(lineGeometry, lineMaterial);
+          line.renderOrder = 9; // Below the markers but above land
+          
+          this.scene.add(line);
+          this.dockPointMarkers.push(line); // Add to dock markers for cleanup
+          
+          // Create a marker for the water point
+          const waterGeometry = new THREE.CircleGeometry(0.2, 16);
+          const waterMaterial = new THREE.MeshBasicMaterial({
+            color: 0x0088CC, // Darker blue for water points
+            side: THREE.DoubleSide,
+            transparent: true,
+            opacity: 0.7
+          });
+          
+          const waterMarker = new THREE.Mesh(waterGeometry, waterMaterial);
+          waterMarker.position.set(waterCoord.x, 0.2, -waterCoord.y);
+          waterMarker.rotation.x = -Math.PI / 2; // Make it horizontal
+          waterMarker.renderOrder = 10; // Ensure it renders on top
+          
+          // Add metadata for tooltips
+          waterMarker.userData = {
+            id: `dock-water-${polygon.id}-${index}`,
+            type: 'dock-water',
+            polygonId: polygon.id,
+            position: `${point.water.lat.toFixed(6)}, ${point.water.lng.toFixed(6)}`
+          };
+          
+          this.scene.add(waterMarker);
+          this.dockPointMarkers.push(waterMarker);
+        });
+      }
+    });
+    
+    console.log(`Created ${this.bridgePointMarkers.length} bridge point markers and ${this.dockPointMarkers.length} dock point markers`);
+  }
 }
 
 export default class SimplePolygonRenderer {
@@ -39,6 +219,11 @@ export default class SimplePolygonRenderer {
   private hoveredCoatOfArms: string | null = null;
   private selectedCoatOfArms: string | null = null;
   private onLandSelected: ((landId: string) => void) | null = null;
+  
+  // Properties for bridge and dock points
+  private bridgePointMarkers: THREE.Mesh[] = [];
+  private dockPointMarkers: THREE.Object3D[] = [];
+  private hoveredPointId: string | null = null;
   
   constructor({ 
     scene, 
@@ -720,20 +905,31 @@ export default class SimplePolygonRenderer {
     
     // Update coat of arms sprites based on view mode
     if (activeView === 'land') {
-      // Don't automatically create coat of arms when switching to land view
-      // Instead, we'll only create them when we have owner data
-      // The createCoatOfArmsSprites method will be called by fetchAndApplyLandOwners
-      // or when updateCoatOfArms is called with new data
-      
-      // Just make existing ones visible if they exist
+      // Make coat of arms visible
       Object.values(this.coatOfArmsSprites).forEach(sprite => {
         sprite.visible = true;
       });
-    } else {
-      // Hide coat of arms sprites if not in land view
+      
+      // Hide bridge and dock points in land view
+      this.bridgePointMarkers.forEach(marker => marker.visible = false);
+      this.dockPointMarkers.forEach(marker => marker.visible = false);
+    } else if (activeView === 'transport') {
+      // Hide coat of arms sprites in transport view
       Object.values(this.coatOfArmsSprites).forEach(sprite => {
         sprite.visible = false;
       });
+      
+      // Create and show bridge and dock points
+      this.createBridgeAndDockPoints();
+      this.bridgePointMarkers.forEach(marker => marker.visible = true);
+      this.dockPointMarkers.forEach(marker => marker.visible = true);
+    } else {
+      // Hide coat of arms sprites and bridge/dock points in other views
+      Object.values(this.coatOfArmsSprites).forEach(sprite => {
+        sprite.visible = false;
+      });
+      this.bridgePointMarkers.forEach(marker => marker.visible = false);
+      this.dockPointMarkers.forEach(marker => marker.visible = false);
       this.hasRenderedCoatOfArms = false;
     }
   }
@@ -873,7 +1069,7 @@ export default class SimplePolygonRenderer {
 
   // Handle mouse movement for hover effects
   public handleMouseMove(event: MouseEvent, container: HTMLElement) {
-    if (!this.camera || this.activeView !== 'land') return;
+    if (!this.camera) return;
     
     // Calculate mouse position in normalized device coordinates (-1 to +1)
     const rect = container.getBoundingClientRect();
@@ -885,44 +1081,102 @@ export default class SimplePolygonRenderer {
     this.raycaster.params.Line.threshold = 0.1; // Increase line detection threshold
     this.raycaster.params.Points.threshold = 0.1; // Increase point detection threshold
     
-    // Find intersections with coat of arms sprites
-    const coatOfArmsObjects = Object.values(this.coatOfArmsSprites);
-    const intersects = this.raycaster.intersectObjects(coatOfArmsObjects, true); // Add true to check descendants
-    
-    // Reset hover state
-    if (this.hoveredCoatOfArms && this.hoveredCoatOfArms !== this.selectedCoatOfArms) {
-      const prevHovered = this.coatOfArmsSprites[this.hoveredCoatOfArms];
-      if (prevHovered) {
-        this.setCoatOfArmsHighlight(prevHovered, false);
-      }
-      this.hoveredCoatOfArms = null;
-      document.body.style.cursor = 'default';
-    }
-    
-    // Set new hover state if found
-    if (intersects.length > 0) {
-      // Find the land ID from the intersected object or its ancestors
-      let landId = null;
-      let currentObj: THREE.Object3D | null = intersects[0].object;
+    if (this.activeView === 'land') {
+      // Land view - handle coat of arms hover
+      // Find intersections with coat of arms sprites
+      const coatOfArmsObjects = Object.values(this.coatOfArmsSprites);
+      const intersects = this.raycaster.intersectObjects(coatOfArmsObjects, true); // Add true to check descendants
       
-      // Traverse up the parent chain to find the object with polygonId
-      while (currentObj && !landId) {
-        if (currentObj.userData && currentObj.userData.polygonId) {
-          landId = currentObj.userData.polygonId;
+      // Reset hover state
+      if (this.hoveredCoatOfArms && this.hoveredCoatOfArms !== this.selectedCoatOfArms) {
+        const prevHovered = this.coatOfArmsSprites[this.hoveredCoatOfArms];
+        if (prevHovered) {
+          this.setCoatOfArmsHighlight(prevHovered, false);
         }
-        currentObj = currentObj.parent;
+        this.hoveredCoatOfArms = null;
+        document.body.style.cursor = 'default';
       }
       
-      // If no polygonId found in the hierarchy, try the direct lookup method
-      if (!landId) {
-        landId = this.findLandIdFromObject(intersects[0].object);
+      // Set new hover state if found
+      if (intersects.length > 0) {
+        // Find the land ID from the intersected object or its ancestors
+        let landId = null;
+        let currentObj: THREE.Object3D | null = intersects[0].object;
+        
+        // Traverse up the parent chain to find the object with polygonId
+        while (currentObj && !landId) {
+          if (currentObj.userData && currentObj.userData.polygonId) {
+            landId = currentObj.userData.polygonId;
+          }
+          currentObj = currentObj.parent;
+        }
+        
+        // If no polygonId found in the hierarchy, try the direct lookup method
+        if (!landId) {
+          landId = this.findLandIdFromObject(intersects[0].object);
+        }
+        
+        if (landId && landId !== this.selectedCoatOfArms) {
+          this.hoveredCoatOfArms = landId;
+          const hovered = this.coatOfArmsSprites[landId];
+          this.setCoatOfArmsHighlight(hovered, true);
+          document.body.style.cursor = 'pointer';
+        }
       }
+    } else if (this.activeView === 'transport') {
+      // Transport view - handle bridge and dock point hover
+      // Combine all markers for raycasting (excluding lines)
+      const allMarkers = [...this.bridgePointMarkers, ...this.dockPointMarkers].filter(
+        obj => obj instanceof THREE.Mesh
+      );
       
-      if (landId && landId !== this.selectedCoatOfArms) {
-        this.hoveredCoatOfArms = landId;
-        const hovered = this.coatOfArmsSprites[landId];
-        this.setCoatOfArmsHighlight(hovered, true);
-        document.body.style.cursor = 'pointer';
+      const intersects = this.raycaster.intersectObjects(allMarkers);
+      
+      if (intersects.length > 0) {
+        const intersected = intersects[0].object;
+        const userData = intersected.userData;
+        
+        if (userData && userData.id && userData.id !== this.hoveredPointId) {
+          this.hoveredPointId = userData.id;
+          
+          // Highlight the hovered point
+          (intersected as THREE.Mesh).material = new THREE.MeshBasicMaterial({
+            color: userData.type.startsWith('bridge') ? 0xFF8800 : 0x00CCFF, // Brighter color
+            side: THREE.DoubleSide,
+            transparent: true,
+            opacity: 1.0 // Full opacity for highlight
+          });
+          
+          // Show tooltip
+          eventBus.emit(EventTypes.SHOW_TOOLTIP, {
+            type: userData.type,
+            polygonId: userData.polygonId,
+            position: userData.position,
+            screenX: event.clientX,
+            screenY: event.clientY
+          });
+        }
+      } else if (this.hoveredPointId) {
+        // Reset previously hovered point
+        const hoveredPoint = [...this.bridgePointMarkers, ...this.dockPointMarkers].find(
+          marker => marker instanceof THREE.Mesh && marker.userData && marker.userData.id === this.hoveredPointId
+        );
+        
+        if (hoveredPoint && hoveredPoint instanceof THREE.Mesh) {
+          // Reset to original color
+          const isBridge = hoveredPoint.userData.type.startsWith('bridge');
+          const isWater = hoveredPoint.userData.type === 'dock-water';
+          
+          hoveredPoint.material = new THREE.MeshBasicMaterial({
+            color: isBridge ? 0xFF5500 : (isWater ? 0x0088CC : 0x00AAFF),
+            side: THREE.DoubleSide,
+            transparent: true,
+            opacity: isWater ? 0.7 : 0.8
+          });
+        }
+        
+        this.hoveredPointId = null;
+        eventBus.emit(EventTypes.HIDE_TOOLTIP);
       }
     }
   }
@@ -1110,6 +1364,38 @@ export default class SimplePolygonRenderer {
     
     // Clear coat of arms sprites
     this.clearCoatOfArmsSprites();
+    
+    // Clean up bridge and dock point markers
+    this.bridgePointMarkers.forEach(marker => {
+      this.scene.remove(marker);
+      if (marker.geometry) marker.geometry.dispose();
+      if (marker.material instanceof THREE.Material) {
+        marker.material.dispose();
+      } else if (Array.isArray(marker.material)) {
+        marker.material.forEach(m => m.dispose());
+      }
+    });
+    
+    this.dockPointMarkers.forEach(marker => {
+      this.scene.remove(marker);
+      if (marker instanceof THREE.Mesh) {
+        if (marker.geometry) marker.geometry.dispose();
+        if (marker.material instanceof THREE.Material) {
+          marker.material.dispose();
+        } else if (Array.isArray(marker.material)) {
+          marker.material.forEach(m => m.dispose());
+        }
+      } else if (marker instanceof THREE.Line) {
+        if (marker.geometry) marker.geometry.dispose();
+        if (marker.material instanceof THREE.Material) {
+          marker.material.dispose();
+        }
+      }
+    });
+    
+    this.bridgePointMarkers = [];
+    this.dockPointMarkers = [];
+    this.hoveredPointId = null;
     
     // Reset rendering flags
     this.hasRenderedCoatOfArms = false;
