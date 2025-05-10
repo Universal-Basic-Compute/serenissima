@@ -268,6 +268,52 @@ export class BuildingCacheService {
   }
   
   /**
+   * Find the ground level at a position using raycasting
+   * @param position Position to check
+   * @returns Ground position or null if not found
+   */
+  private findGroundLevel(position: THREE.Vector3): THREE.Vector3 | null {
+    // Create a raycaster
+    const raycaster = new THREE.Raycaster();
+    
+    // Set the ray origin high above the position
+    const rayOrigin = new THREE.Vector3(position.x, 100, position.z);
+    
+    // Set the ray direction downward
+    const rayDirection = new THREE.Vector3(0, -1, 0);
+    rayDirection.normalize();
+    
+    // Set up the raycaster
+    raycaster.set(rayOrigin, rayDirection);
+    
+    // Find all land meshes in the scene
+    const landMeshes: THREE.Mesh[] = [];
+    this.options.scene.traverse(object => {
+      // Only consider meshes that are land (not water, not other buildings)
+      if (object instanceof THREE.Mesh && 
+          !object.userData.buildingId && 
+          !object.userData.isWater &&
+          !object.userData.isCoatOfArms) {
+        landMeshes.push(object);
+      }
+    });
+    
+    // Find intersections with land
+    const intersects = raycaster.intersectObjects(landMeshes, false);
+    
+    // If we found an intersection, return the point with a small offset
+    if (intersects.length > 0) {
+      const groundPoint = intersects[0].point.clone();
+      // Add a small offset to prevent z-fighting
+      groundPoint.y += 0.01;
+      return groundPoint;
+    }
+    
+    // No intersection found
+    return null;
+  }
+  
+  /**
    * Dispose of a material and its textures
    * @param material THREE.Material to dispose
    */

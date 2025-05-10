@@ -2668,8 +2668,16 @@ export default class SimplePolygonRenderer {
       
       // Position the group
       buildingGroup.position.copy(position);
-      // Position buildings at ground level
-      buildingGroup.position.y = 0;
+      
+      // Find the ground level at this position using raycasting
+      const groundPosition = this.findGroundLevel(position);
+      if (groundPosition) {
+        // Use the detected ground height
+        buildingGroup.position.y = groundPosition.y;
+      } else {
+        // Fallback to default ground level if detection fails
+        buildingGroup.position.y = 0;
+      }
       
       let modelLoaded = false;
       

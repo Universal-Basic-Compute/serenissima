@@ -57,9 +57,18 @@ class DefaultBuildingRenderer implements IBuildingRenderer {
           );
         }
         
+        // Find the ground level at this position using raycasting
+        const groundPosition = this.findGroundLevel(position);
+        if (groundPosition) {
+          // Use the detected ground height
+          position.y = groundPosition.y;
+        } else {
+          // Fallback to default ground level if detection fails
+          position.y = 0;
+        }
+        
         // Copy the position
         emptyGroup.position.copy(position);
-        emptyGroup.position.y = 0;
         
         // Set rotation
         emptyGroup.rotation.y = building.rotation || 0;
@@ -123,9 +132,17 @@ class DefaultBuildingRenderer implements IBuildingRenderer {
         return emptyGroup;
       }
       
+      // Find the ground level at this position using raycasting
+      const groundPosition = this.findGroundLevel(position);
+      if (groundPosition) {
+        // Use the detected ground height
+        position.y = groundPosition.y;
+      } else {
+        // Fallback to default ground level if detection fails
+        position.y = 0;
+      }
+      
       model.position.copy(position);
-      // Set the y position to 0 to place at ground level
-      model.position.y = 0;
       
       // Set rotation
       model.rotation.y = building.rotation || 0;
@@ -269,9 +286,18 @@ class DockRenderer implements IBuildingRenderer {
         );
       }
       
+      // For docks, we want them slightly above water level
+      // Find the water level at this position using raycasting
+      const groundPosition = this.findGroundLevel(position);
+      if (groundPosition) {
+        // Use the detected ground height plus a small offset for docks
+        position.y = groundPosition.y + 0.2;
+      } else {
+        // Fallback to default water level if detection fails
+        position.y = 0.2; // Water level is typically at y=0
+      }
+      
       model.position.copy(position);
-      // Change the y position to 1.2
-      model.position.y = 1.2;
       
       // Set rotation
       model.rotation.y = building.rotation || 0;
@@ -427,9 +453,17 @@ class MarketStallRenderer implements IBuildingRenderer {
         );
       }
       
+      // Find the ground level at this position using raycasting
+      const groundPosition = this.findGroundLevel(position);
+      if (groundPosition) {
+        // Use the detected ground height plus a small offset for market stalls
+        position.y = groundPosition.y + 0.05;
+      } else {
+        // Fallback to default height if detection fails
+        position.y = 0.05;
+      }
+      
       model.position.copy(position);
-      // Change the y position to 1.2
-      model.position.y = 1.2;
       
       // Set rotation
       model.rotation.y = building.rotation || 0;
