@@ -14,9 +14,10 @@ export default class SimpleCamera {
       500 // Far clipping plane (decreased from 1000 to reduce depth range)
     );
     
-    // Position camera for better view of the land and water - more zoomed in
-    this.camera.position.set(0, 40, 35); // Increased height for better viewing angle
-    this.camera.lookAt(0, 0, 0); // Looking at the origin where everything is positioned
+    // Position camera for a better view of Venice - centered and less tilted
+    // Venice coordinates are approximately centered at (0, 0, 0) in our scene
+    this.camera.position.set(0, 30, 40); // Higher up and further back for less tilt
+    this.camera.lookAt(0, 0, 0); // Looking at the center of Venice
     
     // Create controls
     this.controls = new OrbitControls(this.camera, domElement);
@@ -24,8 +25,8 @@ export default class SimpleCamera {
     // Configure controls with improved settings
     this.controls.enableDamping = true;
     this.controls.dampingFactor = 0.05;
-    this.controls.minPolarAngle = 0.1; // Allow more downward angle to see water
-    this.controls.maxPolarAngle = Math.PI / 2.2; // Increased to allow more top-down view
+    this.controls.minPolarAngle = 0.2; // Increased minimum angle to prevent extreme top-down view
+    this.controls.maxPolarAngle = Math.PI / 2.5; // Decreased maximum angle for less tilt
     this.controls.minDistance = 3; // Reduced from 4 to allow closer zoom
     this.controls.maxDistance = 50; // Reduced from 60 to keep focus on the map
     this.controls.screenSpacePanning = true; // Enable screen space panning
@@ -51,7 +52,7 @@ export default class SimpleCamera {
       this.camera.position.y = oldY;
     };
     
-    // Set initial target
+    // Set initial target to the center of Venice
     this.controls.target.set(0, 0, 0);
     this.controls.update();
   }
