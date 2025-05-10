@@ -20,7 +20,6 @@ interface Citizen {
 
 // Ideogram API configuration
 const IDEOGRAM_API_KEY = process.env.IDEOGRAM_API_KEY;
-const IDEOGRAM_API_URL = 'https://api.ideogram.ai/api/v1/generation';
 
 // Path to citizens data and image directory
 const CITIZENS_DATA_PATH = path.join(process.cwd(), 'data', 'citizens.json');
@@ -85,23 +84,28 @@ async function generateImage(prompt: string, citizenId: string): Promise<string 
   try {
     console.log(`Sending prompt to Ideogram API: ${prompt.substring(0, 100)}...`);
     
+    // Create form data for multipart request
+    const FormData = require('form-data');
+    const form = new FormData();
+    
+    // Add required parameters
+    form.append('prompt', prompt);
+    form.append('style_type', 'REALISTIC');
+    form.append('rendering_speed', 'DEFAULT');
+    
     const response = await axios.post(
-      IDEOGRAM_API_URL,
-      {
-        prompt: prompt,
-        style: 'renaissance',
-        aspect_ratio: '1:1'
-      },
+      'https://api.ideogram.ai/v1/ideogram-v3/generate',
+      form,
       {
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${IDEOGRAM_API_KEY}`
+          ...form.getHeaders(),
+          'Api-Key': IDEOGRAM_API_KEY
         }
       }
     );
     
     // Extract image URL from response
-    const imageUrl = response.data.output.image_url;
+    const imageUrl = response.data.data[0].url;
     
     // Download the image
     const imageResponse = await axios.get(imageUrl, { responseType: 'arraybuffer' });
