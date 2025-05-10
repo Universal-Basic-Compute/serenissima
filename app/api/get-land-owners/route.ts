@@ -109,11 +109,20 @@ export async function GET(request: Request) {
         );
       });
       
+      // Define the land data interface
+      interface LandData {
+        id: string;
+        owner: string | null;
+        coat_of_arms_image?: string;
+        _coat_of_arms_source?: string;
+      }
+
       // Transform records to the expected format
       const data = (records as any[]).map(record => ({
         id: record.fields.LandId || record.id,
-        owner: record.fields.User || record.fields.Wallet || null
-      }));
+        owner: record.fields.User || record.fields.Wallet || null,
+        coat_of_arms_image: record.fields.CoatOfArmsImage || null
+      } as LandData));
       
       console.log(`Retrieved ${data.length} land records directly from Airtable`);
       
@@ -136,7 +145,7 @@ export async function GET(request: Request) {
       
       // Process the data to use local coat of arms images if available
       if (coatOfArmsMapping && Array.isArray(data)) {
-        for (const land of data) {
+        for (const land of data as LandData[]) {
           if (land.owner && land.coat_of_arms_image) {
             // Ensure the URL uses the production domain if it's relative
             land.coat_of_arms_image = ensureProductionUrl(land.coat_of_arms_image);
