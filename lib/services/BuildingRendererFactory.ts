@@ -64,6 +64,15 @@ class DefaultBuildingRenderer implements IBuildingRenderer {
         position: building.position
       };
       
+      // Remove any grid objects from the model
+      model.traverse((child) => {
+        // Check if the object is a grid or has grid in its name
+        if (child.name && (child.name.includes('grid') || child.name.includes('Grid'))) {
+          // Make the grid invisible
+          child.visible = false;
+        }
+      });
+      
       // Add to scene
       this.options.scene.add(model);
       

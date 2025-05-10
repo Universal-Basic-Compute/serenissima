@@ -2643,7 +2643,7 @@ export default class SimplePolygonRenderer {
   /**
    * Create a building mesh from building data
    */
-  private async createBuildingMesh(building: any, position: THREE.Vector3): Promise<void> {
+  private async createBuildingMesh(building: any, position: THREE.Vector3): Promise<THREE.Object3D | null> {
     try {
       console.log(`Creating building mesh for ${building.id} of type ${building.type}`);
       
@@ -2740,8 +2740,14 @@ export default class SimplePolygonRenderer {
       this.buildingPointMarkers.push(buildingGroup);
       
       console.log(`Created building mesh for ${building.id} at position:`, buildingGroup.position);
+      
+      // Scale down the building to make it 2x smaller
+      buildingGroup.scale.set(0.5, 0.5, 0.5);
+      
+      return buildingGroup;
     } catch (error) {
       console.error(`Error creating building mesh for ${building.id}:`, error);
+      return null;
     }
   }
 

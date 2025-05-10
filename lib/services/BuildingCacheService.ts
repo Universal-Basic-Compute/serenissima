@@ -141,7 +141,7 @@ export class BuildingCacheService {
    */
   private createFallbackModel(type: string): THREE.Object3D {
     // Create a more visible fallback cube model with a distinctive color
-    const geometry = new THREE.BoxGeometry(3, 3, 3); // Larger size for better visibility
+    const geometry = new THREE.BoxGeometry(1.5, 1.5, 1.5); // Smaller size (was 3)
     
     // Generate a deterministic color based on building type
     let hash = 0;
