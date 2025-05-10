@@ -177,11 +177,14 @@ def assign_buildings_to_land_owners(dry_run: bool = False):
         building_id = building['id']
         building_type = building['fields'].get('Type', 'unknown')
         building_name = building['fields'].get('Name', building_id)
-        land_id = building['fields'].get('land_id')
+        
+        # Check for both 'Land' and 'land_id' fields
+        land_id = building['fields'].get('Land') or building['fields'].get('land_id')
+        
         current_user = building['fields'].get('User')
         
         if not land_id:
-            log.warning(f"Building {building_id} ({building_type}) has no land_id, skipping")
+            log.warning(f"Building {building_id} ({building_type}) has no Land field, skipping")
             failed_count += 1
             continue
         
