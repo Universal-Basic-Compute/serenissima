@@ -486,13 +486,13 @@ def redistribute_treasury(dry_run: bool = False):
         notification_message = (
             "🏛️ Treasury Redistribution Complete 🏛️\n\n"
             "The Council of Ten has distributed funds to the citizens of Venice.\n\n"
-            f"• {redistribution_summary['total_amount']:,} ⚜️ ducats distributed\n"
+            f"• {redistribution_summary['total_amount']} ⚜️ ducats distributed\n"
             f"• {redistribution_summary['total_citizens']} citizens received funds\n\n"
             "Distribution by social class:\n"
-            f"• Patricians: {redistribution_summary['by_class']['Patrician']['amount']:,} ⚜️ ducats to {redistribution_summary['by_class']['Patrician']['citizens']} citizens\n"
-            f"• Cittadini: {redistribution_summary['by_class']['Cittadini']['amount']:,} ⚜️ ducats to {redistribution_summary['by_class']['Cittadini']['citizens']} citizens\n"
-            f"• Popolani: {redistribution_summary['by_class']['Popolani']['amount']:,} ⚜️ ducats to {redistribution_summary['by_class']['Popolani']['citizens']} citizens\n"
-            f"• Facchini: {redistribution_summary['by_class']['Facchini']['amount']:,} ⚜️ ducats to {redistribution_summary['by_class']['Facchini']['citizens']} citizens\n\n"
+            f"• Patricians: {redistribution_summary['by_class']['Patrician']['amount']} ⚜️ ducats to {redistribution_summary['by_class']['Patrician']['citizens']} citizens\n"
+            f"• Cittadini: {redistribution_summary['by_class']['Cittadini']['amount']} ⚜️ ducats to {redistribution_summary['by_class']['Cittadini']['citizens']} citizens\n"
+            f"• Popolani: {redistribution_summary['by_class']['Popolani']['amount']} ⚜️ ducats to {redistribution_summary['by_class']['Popolani']['citizens']} citizens\n"
+            f"• Facchini: {redistribution_summary['by_class']['Facchini']['amount']} ⚜️ ducats to {redistribution_summary['by_class']['Facchini']['citizens']} citizens\n\n"
             "Visit https://serenissima.ai to check your citizens."
         )
         
