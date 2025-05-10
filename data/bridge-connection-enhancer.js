@@ -123,38 +123,56 @@ async function retryWithExponentialBackoff(fn, maxRetries = 5, initialDelay = 50
 }
 
 
-// Generate a bridge name using Claude
-async function generateBridgeName(locationInfo) {
+// Generate multiple bridge names at once using Claude
+async function generateBridgeNames(locationInfo, count) {
   try {
     // Use more retries with longer delays
     return await retryWithExponentialBackoff(
       async () => {
         const prompt = `
-You are an expert on Renaissance Venice history and geography. I need a historically accurate name for a bridge in Venice.
+You are an expert on Renaissance Venice history and geography. I need historically accurate names for ${count} bridges in Venice.
 
 Location information:
 - Neighborhood: ${locationInfo.neighborhood}
 - Area: ${locationInfo.area}
 - Address: ${locationInfo.formattedAddress}
 
-Please generate a historically plausible name for a bridge at this location. The name should:
+Please generate ${count} historically plausible names for bridges at this location. The names should:
 1. Follow Venetian naming conventions for bridges (Ponte di...)
 2. Reference nearby landmarks, families, guilds, or historical events if possible
 3. Be in Italian
-4. Include a brief explanation of why this name would be appropriate
+4. Include a brief explanation of why each name would be appropriate
 
-Respond with ONLY the bridge name in Italian, followed by the English translation in parentheses, and then a brief explanation.
-Example format: "Ponte dei Sospiri (Bridge of Sighs) - Named for the sighs of prisoners being led to their cells."
+For each bridge, provide:
+1. historicalName: The Italian name
+2. englishName: The English translation
+3. historicalDescription: A brief explanation of the historical significance
+
+Respond with a JSON array containing objects with these three fields for each bridge.
+Example format:
+[
+  {
+    "historicalName": "Ponte dei Sospiri",
+    "englishName": "Bridge of Sighs",
+    "historicalDescription": "Named for the sighs of prisoners being led to their cells in the adjacent prison."
+  },
+  {
+    "historicalName": "Ponte dei Mercanti",
+    "englishName": "Bridge of Merchants",
+    "historicalDescription": "Named for the merchants who would cross this bridge to reach the market square."
+  }
+]
 `;
 
         const response = await axios.post(
           'https://api.anthropic.com/v1/messages',
           {
             model: 'claude-3-7-sonnet-latest',
-            max_tokens: 300,
+            max_tokens: 1000, // Increased token limit for multiple bridge names
             messages: [
               { role: 'user', content: prompt }
-            ]
+            ],
+            response_format: { type: "json_object" } // Request JSON format
           },
           {
             headers: {
@@ -166,7 +184,29 @@ Example format: "Ponte dei Sospiri (Bridge of Sighs) - Named for the sighs of pr
         );
 
         if (response.data && response.data.content) {
-          return response.data.content[0].text.trim();
+          const content = response.data.content[0].text.trim();
+          
+          // Parse the JSON response
+          try {
+            const jsonResponse = JSON.parse(content);
+            // Check if we have the expected array of bridge names
+            if (Array.isArray(jsonResponse.bridges)) {
+              return jsonResponse.bridges;
+            } else {
+              console.warn('Unexpected JSON format from Claude, trying to extract bridge data');
+              // Try to find any array in the response
+              for (const key in jsonResponse) {
+                if (Array.isArray(jsonResponse[key])) {
+                  return jsonResponse[key];
+                }
+              }
+              throw new Error('Could not find bridge names array in response');
+            }
+          } catch (parseError) {
+            console.error('Error parsing JSON response:', parseError);
+            console.log('Raw response:', content);
+            throw new Error('Failed to parse bridge names from Claude response');
+          }
         }
         
         throw new Error('Invalid response from Claude API');
@@ -175,9 +215,9 @@ Example format: "Ponte dei Sospiri (Bridge of Sighs) - Named for the sighs of pr
       5000 // Increase initial delay from 2000ms to 5000ms (5 seconds)
     );
   } catch (error) {
-    console.error('Error generating bridge name with Claude API after multiple retries:', error);
+    console.error('Error generating bridge names with Claude API after multiple retries:', error);
     // Instead of using fallback, throw the error to stop processing this bridge
-    throw new Error(`Failed to generate bridge name after multiple retries: ${error.message}`);
+    throw new Error(`Failed to generate bridge names after multiple retries: ${error.message}`);
   }
 }
 
@@ -206,12 +246,13 @@ async function enhanceBridgeConnections() {
         continue;
       }
       
-      console.log(`Found ${polygonData.bridgePoints.length} bridge points to process.`);
+      const bridgePointsCount = polygonData.bridgePoints.length;
+      console.log(`Found ${bridgePointsCount} bridge points to process.`);
       
       // Create a map to track connection IDs
       const connectionMap = new Map();
       
-      // Process each bridge point
+      // First pass: Assign connection IDs
       for (let i = 0; i < polygonData.bridgePoints.length; i++) {
         const bridgePoint = polygonData.bridgePoints[i];
         
@@ -238,58 +279,54 @@ async function enhanceBridgeConnections() {
         }
       }
       
-      // Second pass: Get location info and generate bridge names
-      console.log(`Processing ${connectionMap.size} unique connections...`);
-      let processedCount = 0;
+      // Get location information for the polygon's center point
+      const centerPoint = polygonData.center || polygonData.centroid;
+      if (!centerPoint) {
+        console.warn(`No center or centroid found for polygon ${polygonData.id}, skipping location info.`);
+        continue;
+      }
       
-      for (const [connectionKey, connectionId] of connectionMap.entries()) {
-        processedCount++;
-        console.log(`Processing connection ${processedCount}/${connectionMap.size}: ${connectionKey}`);
+      console.log(`Getting location info for polygon center: ${centerPoint.lat}, ${centerPoint.lng}...`);
+      const locationInfo = await getLocationInfo(centerPoint.lat, centerPoint.lng);
+      
+      // Generate bridge names for all bridge points at once
+      console.log(`Generating ${bridgePointsCount} bridge names for location: ${locationInfo.formattedAddress}...`);
+      const bridgeNames = await generateBridgeNames(locationInfo, bridgePointsCount);
+      
+      console.log(`Generated ${bridgeNames.length} bridge names`);
+      
+      // Second pass: Assign bridge names to connections
+      let nameIndex = 0;
+      for (let i = 0; i < polygonData.bridgePoints.length; i++) {
+        const bridgePoint = polygonData.bridgePoints[i];
         
-        try {
-          // Find the bridge point for this connection
-          const bridgePoint = polygonData.bridgePoints.find(bp => 
-            bp.connection && bp.connection.id === connectionId
-          );
-          
-          if (!bridgePoint) {
-            console.warn(`Could not find bridge point for connection ${connectionKey}`);
-            continue;
-          }
+        // Skip if there's no connection
+        if (!bridgePoint.connection) {
+          continue;
+        }
+        
+        // Assign the next bridge name if available
+        if (nameIndex < bridgeNames.length) {
+          const bridgeName = bridgeNames[nameIndex++];
           
           // Calculate midpoint between the edge and target point
           const edgePoint = bridgePoint.edge;
           const targetPoint = bridgePoint.connection.targetPoint;
-          
           const midLat = (edgePoint.lat + targetPoint.lat) / 2;
           const midLng = (edgePoint.lng + targetPoint.lng) / 2;
           
-          // Get location information for the midpoint
-          console.log(`Getting location info for ${midLat}, ${midLng}...`);
-          const locationInfo = await getLocationInfo(midLat, midLng);
-          
-          // Generate a bridge name
-          console.log(`Generating bridge name for location: ${locationInfo.formattedAddress}...`);
-          const bridgeName = await generateBridgeName(locationInfo);
-          
-          // Log the chosen bridge name
-          console.log(`Generated bridge name: "${bridgeName}"`);
-          
           // Update the connection with the name and location info
-          bridgePoint.connection.name = bridgeName;
+          bridgePoint.connection.historicalName = bridgeName.historicalName;
+          bridgePoint.connection.englishName = bridgeName.englishName;
+          bridgePoint.connection.historicalDescription = bridgeName.historicalDescription;
           bridgePoint.connection.location = {
             midpoint: { lat: midLat, lng: midLng },
             locationInfo: locationInfo
           };
           
-          // Add a shorter delay between API calls
-          console.log(`Waiting 2 seconds before processing next connection...`);
-          await new Promise(resolve => setTimeout(resolve, 2000)); // Reduced from 10s to 2s
-        } catch (error) {
-          console.error(`Error processing connection ${connectionKey}:`, error);
-          console.log('Skipping this connection and continuing with the next one...');
-          // Continue with the next connection instead of stopping the entire process
-          continue;
+          console.log(`Assigned bridge name: "${bridgeName.historicalName}" (${bridgeName.englishName})`);
+        } else {
+          console.warn(`Ran out of bridge names for polygon ${polygonData.id}`);
         }
       }
       
