@@ -1,6 +1,22 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+import { BufferGeometryUtils } from 'three/examples/jsm/utils/BufferGeometryUtils';
 import { BuildingData } from '../models/BuildingTypes';
+
+// Add type declaration for window.__threeContext
+declare global {
+  interface Window {
+    __threeContext?: {
+      scene?: THREE.Scene;
+      camera?: THREE.Camera;
+    };
+  }
+  
+  interface HTMLCanvasElement {
+    __scene?: THREE.Scene;
+    __camera?: THREE.Camera;
+  }
+}
 
 /**
  * Service for caching building data and models
@@ -130,7 +146,7 @@ export class BuildingCacheService {
           
           if (vertexCount > 500) {
             try {
-              // Use THREE.BufferGeometryUtils.mergeVertices to simplify
+              // Use BufferGeometryUtils.mergeVertices to simplify
               // This reduces duplicate vertices
               const simplified = BufferGeometryUtils.mergeVertices(geometry);
               
