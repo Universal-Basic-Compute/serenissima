@@ -16,6 +16,39 @@ async function generateDecree(input) {
   console.log('Generating decree based on input...');
   
   try {
+    // Load article content for context
+    const articleContext = `
+    ECONOMIC SYSTEM ARTICLE EXCERPTS:
+    La Serenissima features a sophisticated economic simulation based on historical Venetian commerce. It operates as a zero-sum economy where wealth must be captured rather than created from nothing. Every ducat in circulation represents real value within the system.
+    
+    Value flows through a continuous cycle: Land is leased to Building owners, who rent space to Businesses, which produce Resources, which supply Citizens and Players. Money flows in the opposite direction: Business owners pay rent to Building owners, who pay land leases to Land owners, and all pay taxes to the Republic—completing the economic loop.
+    
+    The Republic reinvests 10% of its total treasury daily back into its citizens through direct transfers of Ducats. This represents grain subsidies, public investments, economic stimulus, and social stability measures.
+    
+    GOVERNANCE ARTICLE EXCERPTS:
+    In La Serenissima, unlike traditional games where rules are fixed, the governance system itself is part of the gameplay. As players rise in wealth and status, they gain the ability to shape the very rules that govern the economic simulation.
+    
+    The governance structure includes The Great Council (patrician nobility only), The Senate (handles economic matters), The Council of Ten (security and important matters), The Collegio (day-to-day administration), The Doge (elected leader), and Guild Leadership (industry regulation).
+    
+    Decree types include Economic Decrees (tax adjustments, trade regulations, guild charters, price controls, citizen subsidies), Infrastructure Decrees (building permits, canal improvements, public works, district development), and Social Decrees (public celebrations, religious patronage, educational initiatives, public health measures).
+    
+    LAND OWNERSHIP ARTICLE EXCERPTS:
+    Land in Venice is not merely property—it is power. The closed economic system of La Serenissima means that wealth must be captured rather than created from nothing. As a landowner, you stand at the beginning of the economic cycle.
+    
+    All land leases in Venice are subject to a 20% tax known as the Vigesima (literally "twentieth"). This tax is automatically collected by the Republic on all lease income, reducing your net revenue to 80% of the gross lease amount.
+    
+    BUILDING OWNERSHIP ARTICLE EXCERPTS:
+    Buildings are the nexus where all economic activity converges. They provide space for businesses to operate and generate wealth, house citizens who provide labor and consume resources, create value from land through development, generate ongoing income through rents and fees, and serve as physical manifestations of wealth and status.
+    
+    BUSINESS OWNERSHIP ARTICLE EXCERPTS:
+    In Renaissance Venice, business partnerships are rarely just about commerce—they're about creating alliances, securing access to new resources, and consolidating influence. Form partnerships with players who control complementary assets or skills.
+    
+    STRATEGIES ARTICLE EXCERPTS:
+    In Renaissance Venice, true power was rarely achieved through direct means. The most successful patricians understood that manipulation of people, systems, and perceptions was far more effective than brute economic force.
+    
+    By strategically acquiring land that forms natural chokepoints, you can effectively blockade parts of Venice from ground transportation. This forces competitors to rely on more expensive water transportation, increasing their costs while your own goods flow freely.
+    `;
+
     const response = await axios.post(
       'https://api.anthropic.com/v1/messages',
       {
@@ -47,6 +80,8 @@ async function generateDecree(input) {
         - The Collegio (day-to-day administration)
         - The Doge (elected leader)
         - Guild Leadership (industry regulation)
+        
+        ${articleContext}
         
         Generate a JSON object with the following fields:
         - DecreeId: A unique identifier (use a UUID format)
