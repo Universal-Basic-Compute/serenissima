@@ -2107,6 +2107,20 @@ async def apply_for_loan(loan_application: dict):
     if not loan_application.get("principalAmount") or loan_application.get("principalAmount") <= 0:
         raise HTTPException(status_code=400, detail="Principal amount must be greater than 0")
     
+    # Convert wallet address to username if needed
+    borrower = loan_application.get("borrower")
+    borrower_username = borrower
+    
+    # Check if borrower is a wallet address and convert to username if needed
+    if borrower and (borrower.startswith("0x") or len(borrower) > 30):
+        # Look up the username for this wallet
+        borrower_records = users_table.all(formula=f"{{Wallet}}='{borrower}'")
+        if borrower_records:
+            borrower_username = borrower_records[0]["fields"].get("Username", borrower)
+            print(f"Converted borrower wallet {borrower} to username {borrower_username}")
+        else:
+            print(f"Could not find username for wallet {borrower}, using wallet as username")
+    
     try:
         # If loanId is provided, get the loan details
         loan_id = loan_application.get("loanId")
@@ -2172,7 +2186,7 @@ async def apply_for_loan(loan_application: dict):
                     # Find borrower record
                     borrower_records = users_table.all(formula=f"{{Wallet}}='{borrower}'")
                     if not borrower_records:
-                        borrower_records = users_table.all(formula=f"{{Username}}='{borrower}'")
+                        borrower_records = users_table.all(formula=f"{{Username}}='{borrower_username}'")
                     
                     if borrower_records:
                         borrower_record = borrower_records[0]
@@ -2251,8 +2265,8 @@ async def apply_for_loan(loan_application: dict):
             if loan_record["fields"].get("Status") == "template":
                 # Create a new loan record
                 new_loan = {
-                    "Name": f"Loan Application - {loan_application.get('borrower')}",
-                    "Borrower": loan_application.get("borrower"),
+                    "Name": f"Loan Application - {borrower_username}",
+                    "Borrower": borrower_username,
                     "Lender": loan_record["fields"].get("Lender", "Treasury"),
                     "Status": "pending",
                     "Type": "official",  # Mark as an official loan
@@ -2293,7 +2307,7 @@ async def apply_for_loan(loan_application: dict):
             else:
                 # For non-template loans, update the existing loan record
                 updated_record = loans_table.update(loan_id, {
-                    "Borrower": loan_application.get("borrower"),
+                    "Borrower": borrower_username,
                     "Status": "pending",
                     "PrincipalAmount": principal,
                     "RemainingBalance": principal,
@@ -2328,8 +2342,8 @@ async def apply_for_loan(loan_application: dict):
             
             # Create the loan record
             record = loans_table.create({
-                "Name": f"Loan Application - {loan_application.get('borrower')}",
-                "Borrower": loan_application.get("borrower"),
+                "Name": f"Loan Application - {borrower_username}",
+                "Borrower": borrower_username,
                 "Status": "pending",
                 "Type": "custom",  # Mark as a custom loan
                 "PrincipalAmount": loan_application.get("principalAmount"),
