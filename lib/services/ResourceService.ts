@@ -234,8 +234,10 @@ export class ResourceService {
    * Get resource counts for a specific owner
    */
   public async getResourceCounts(owner?: string): Promise<Resource[]> {
+    console.log(`%c[ResourceService] Getting resource counts for owner: ${owner || 'none'}`, 'color: #22c55e; font-weight: bold;');
     try {
       const resourceCounts = await fetchResourceCounts(owner);
+      console.log(`%c[ResourceService] Received ${resourceCounts.length} resource counts`, 'color: #22c55e; font-weight: bold;');
       
       // Convert to Resource objects
       return resourceCounts.map(resource => ({
@@ -249,7 +251,7 @@ export class ResourceService {
         amount: resource.count
       }));
     } catch (error) {
-      console.error('Error getting resource counts:', error);
+      console.log(`%c[ResourceService] ERROR getting resource counts:`, 'color: #ef4444; font-weight: bold;', error);
       return [];
     }
   }

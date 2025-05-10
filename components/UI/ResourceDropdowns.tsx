@@ -6,27 +6,43 @@ import { getWalletAddress } from '@/lib/walletUtils';
 // Define the desired order of categories
 const CATEGORY_ORDER = ['raw_materials', 'processed_materials', 'finished_goods', 'utility_resources'];
 
+// Add a styled console log function
+const logInfo = (message: string, data?: any) => {
+  console.log(`%c[ResourceDropdowns] ${message}`, 'color: #22c55e; font-weight: bold;', data || '');
+};
+
+const logError = (message: string, error?: any) => {
+  console.log(`%c[ResourceDropdowns] ERROR: ${message}`, 'color: #ef4444; font-weight: bold;', error || '');
+};
+
 const ResourceDropdowns: React.FC = () => {
+  logInfo('Component rendering');
+  
   const [categories, setCategories] = useState<ResourceCategory[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   
   // Create a memoized function to load resource categories with counts
   const loadResourceCategories = useCallback(async () => {
+    logInfo('Loading resource categories...');
     try {
       setLoading(true);
       const resourceService = ResourceService.getInstance();
       
       // Clear the cache to force a fresh load if we've had errors
       if (error) {
+        logInfo('Clearing cache due to previous error');
         resourceService.clearCache();
       }
       
       // Get the current wallet address
       const walletAddress = getWalletAddress();
+      logInfo('Current wallet address:', walletAddress);
       
       // Get resource counts for the current user
+      logInfo('Fetching resource counts');
       const resources = await resourceService.getResourceCounts(walletAddress);
+      logInfo(`Received ${resources.length} resources`);
       
       // Group resources by category
       const categoriesMap = new Map<string, ResourceCategory>();
@@ -65,7 +81,7 @@ const ResourceDropdowns: React.FC = () => {
       
       // Log category statistics
       nonEmptyCategories.forEach(category => {
-        console.log(`Category ${category.id} has ${category.resources.length} resources after filtering`);
+        logInfo(`Category ${category.id} has ${category.resources.length} resources after filtering`);
       });
       
       // Sort categories according to the predefined order
@@ -86,10 +102,11 @@ const ResourceDropdowns: React.FC = () => {
         return a.name.localeCompare(b.name);
       });
       
+      logInfo(`Setting ${sortedCategories.length} categories`);
       setCategories(sortedCategories);
       setError(null);
     } catch (err) {
-      console.error('Error loading resource categories:', err);
+      logError('Error loading resource categories:', err);
       setError('Failed to load resources');
     } finally {
       setLoading(false);
@@ -98,22 +115,33 @@ const ResourceDropdowns: React.FC = () => {
   
   useEffect(() => {
     // Load resource categories on component mount
+    logInfo('Component mounted, loading categories');
     loadResourceCategories();
     
     // Refresh periodically (every 30 seconds)
-    const intervalId = setInterval(loadResourceCategories, 30000);
+    logInfo('Setting up refresh interval');
+    const intervalId = setInterval(() => {
+      logInfo('Refreshing categories (interval)');
+      loadResourceCategories();
+    }, 30000);
     
-    return () => clearInterval(intervalId);
+    return () => {
+      logInfo('Component unmounting, clearing interval');
+      clearInterval(intervalId);
+    };
   }, [loadResourceCategories]);
   
   if (loading && categories.length === 0) {
+    logInfo('Rendering loading state');
     return <div className="text-amber-300 text-sm">Loading resources...</div>;
   }
   
   if (error && categories.length === 0) {
+    logError('Rendering error state:', error);
     return <div className="text-red-400 text-sm">Error: {error}</div>;
   }
   
+  logInfo(`Rendering ${categories.length} resource categories`);
   return (
     <div className="flex flex-wrap gap-2 relative z-30">
       {categories.map(category => (

@@ -40,13 +40,16 @@ export interface ResourceNode {
 
 // Add this function to fetch resource counts
 export async function fetchResourceCounts(owner?: string): Promise<any[]> {
+  console.log(`%c[resourceUtils] Fetching resource counts for owner: ${owner || 'none'}`, 'color: #22c55e; font-weight: bold;');
   try {
     const url = new URL('/api/resources/counts', window.location.origin);
     if (owner) {
       url.searchParams.append('owner', owner);
     }
     
+    console.log(`%c[resourceUtils] Fetching from URL: ${url.toString()}`, 'color: #22c55e; font-weight: bold;');
     const response = await fetch(url.toString());
+    
     if (!response.ok) {
       throw new Error(`Failed to fetch resource counts: ${response.status}`);
     }
@@ -57,9 +60,10 @@ export async function fetchResourceCounts(owner?: string): Promise<any[]> {
       throw new Error(data.error || 'Unknown error fetching resource counts');
     }
     
+    console.log(`%c[resourceUtils] Received ${data.resourceCounts.length} resource counts`, 'color: #22c55e; font-weight: bold;');
     return data.resourceCounts;
   } catch (error) {
-    console.error('Error fetching resource counts:', error);
+    console.log(`%c[resourceUtils] ERROR fetching resource counts:`, 'color: #ef4444; font-weight: bold;', error);
     return [];
   }
 }
