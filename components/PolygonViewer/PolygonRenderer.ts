@@ -977,34 +977,36 @@ export default class PolygonRenderer {
    * Update colors for all polygons based on owner
    */
   public updatePolygonOwnerColors() {
+    // Only update polygon owner colors in land view
+    if (this.activeView !== 'land') {
+      return;
+    }
+    
     console.log('Updating polygon colors based on owner data');
     
-    // Only update if we're in land view
-    if (this.activeView === 'land') {
-      // Update overlay polygons with owner-based colors
-      this.overlayPolygons.forEach((mesh, polygonId) => {
-        try {
-          // Find the polygon in our data
-          const polygon = this.polygons.find(p => p.id === polygonId);
-          if (!polygon || !polygon.owner) return;
+    // Update overlay polygons with owner-based colors
+    this.overlayPolygons.forEach((mesh, polygonId) => {
+      try {
+        // Find the polygon in our data
+        const polygon = this.polygons.find(p => p.id === polygonId);
+        if (!polygon || !polygon.owner) return;
+        
+        // Get color for this owner
+        const ownerColor = this.getOwnerColor(polygon.owner);
+        
+        if (ownerColor && mesh.material instanceof THREE.MeshBasicMaterial) {
+          // Update the color based on owner
+          const color = new THREE.Color(ownerColor);
+          mesh.material.color.copy(color);
+          mesh.material.needsUpdate = true;
           
-          // Get color for this owner
-          const ownerColor = this.getOwnerColor(polygon.owner);
-          
-          if (ownerColor && mesh.material instanceof THREE.MeshBasicMaterial) {
-            // Update the color based on owner
-            const color = new THREE.Color(ownerColor);
-            mesh.material.color.copy(color);
-            mesh.material.needsUpdate = true;
-            
-            // Store the original color for hover/selection effects
-            mesh.userData.originalColor = color.clone();
-          }
-        } catch (error) {
-          console.error(`Error updating color for polygon ${polygonId}:`, error);
+          // Store the original color for hover/selection effects
+          mesh.userData.originalColor = color.clone();
         }
-      });
-    }
+      } catch (error) {
+        console.error(`Error updating color for polygon ${polygonId}:`, error);
+      }
+    });
   }
 
   /**
@@ -1088,9 +1090,12 @@ export default class PolygonRenderer {
    * This is now just an alias for createOwnerIndicators
    */
   public updateCoatOfArmsSprites() {
-    if (this.activeView === 'land') {
-      this.createOwnerIndicators();
+    // Only update coat of arms sprites in land view
+    if (this.activeView !== 'land') {
+      return;
     }
+    
+    this.createOwnerIndicators();
   }
 
   // Helper method to create a flat texture on the land for a polygon - disabled
