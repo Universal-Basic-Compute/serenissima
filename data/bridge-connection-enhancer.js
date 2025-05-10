@@ -374,162 +374,8 @@ Respond with a JSON array containing objects with these four fields for each bui
   }
 }
 
-// Process bridge points (existing functionality)
-async function processBridgePoints(polygonData, polygonFilePath, file) {
-  // Check if the polygon has bridge points
-  if (!polygonData.bridgePoints || !Array.isArray(polygonData.bridgePoints) || polygonData.bridgePoints.length === 0) {
-    console.log('No bridge points found in the polygon data, skipping.');
-    return;
-  }
-  
-  const bridgePointsCount = polygonData.bridgePoints.length;
-  console.log(`Found ${bridgePointsCount} bridge points to process.`);
-  
-  // Create a map to track connection IDs
-  const connectionMap = new Map();
-  
-  // First pass: Assign connection IDs
-  for (let i = 0; i < polygonData.bridgePoints.length; i++) {
-    const bridgePoint = polygonData.bridgePoints[i];
-    
-    // Skip if there's no connection
-    if (!bridgePoint.connection) {
-      console.log(`Bridge point ${i} has no connection, skipping.`);
-      continue;
-    }
-    
-    // Create a unique key for this connection pair
-    const sourcePolygonId = polygonData.id || file.replace('.json', '');
-    const targetPolygonId = bridgePoint.connection.targetPolygonId;
-    const connectionKey = [sourcePolygonId, targetPolygonId].sort().join('_');
-    
-    // Check if we've already assigned an ID to this connection
-    if (connectionMap.has(connectionKey)) {
-      // Use the existing ID
-      bridgePoint.connection.id = connectionMap.get(connectionKey);
-    } else {
-      // Generate a new ID
-      const connectionId = uuidv4();
-      bridgePoint.connection.id = connectionId;
-      connectionMap.set(connectionKey, connectionId);
-    }
-  }
-  
-  // Generate bridge names for all bridge points at once
-  console.log(`Generating ${bridgePointsCount} bridge names...`);
-  const bridgeNames = await generateBridgeNames(bridgePointsCount);
-  
-  console.log(`Generated ${bridgeNames.length} bridge names`);
-  
-  // Second pass: Assign bridge names to connections
-  let nameIndex = 0;
-  for (let i = 0; i < polygonData.bridgePoints.length; i++) {
-    const bridgePoint = polygonData.bridgePoints[i];
-    
-    // Skip if there's no connection
-    if (!bridgePoint.connection) {
-      continue;
-    }
-    
-    // Assign the next bridge name if available
-    if (nameIndex < bridgeNames.length) {
-      const bridgeName = bridgeNames[nameIndex++];
-      
-      // Calculate midpoint between the edge and target point
-      const edgePoint = bridgePoint.edge;
-      const targetPoint = bridgePoint.connection.targetPoint;
-      const midLat = (edgePoint.lat + targetPoint.lat) / 2;
-      const midLng = (edgePoint.lng + targetPoint.lng) / 2;
-      
-      // Update the connection with the name and location info
-      bridgePoint.connection.historicalName = bridgeName.historicalName;
-      bridgePoint.connection.englishName = bridgeName.englishName;
-      bridgePoint.connection.historicalDescription = bridgeName.historicalDescription;
-      bridgePoint.connection.location = {
-        midpoint: { lat: midLat, lng: midLng }
-      };
-      
-      console.log(`Assigned bridge name: "${bridgeName.historicalName}" (${bridgeName.englishName})`);
-    } else {
-      console.warn(`Ran out of bridge names for polygon ${polygonData.id}`);
-    }
-  }
-  
-  // Save the enhanced data
-  await savePolygonData(polygonFilePath, polygonData);
-  console.log(`Enhanced bridge data saved for ${polygonFilePath}`);
-}
-
-// New function to process dock points
-async function processDockPoints(polygonData, polygonFilePath) {
-  // Check if the polygon has dock points
-  if (!polygonData.dockPoints || !Array.isArray(polygonData.dockPoints) || polygonData.dockPoints.length === 0) {
-    console.log('No dock points found in the polygon data, skipping.');
-    return;
-  }
-  
-  const dockPointsCount = polygonData.dockPoints.length;
-  console.log(`Found ${dockPointsCount} dock points to process.`);
-  
-  // Generate dock names for all dock points at once
-  console.log(`Generating ${dockPointsCount} dock names...`);
-  const dockNames = await generateDockNames(dockPointsCount);
-  
-  console.log(`Generated ${dockNames.length} dock names`);
-  
-  // Assign dock names to dock points
-  for (let i = 0; i < Math.min(polygonData.dockPoints.length, dockNames.length); i++) {
-    const dockPoint = polygonData.dockPoints[i];
-    const dockName = dockNames[i];
-    
-    // Add name and description to dock point
-    dockPoint.historicalName = dockName.historicalName;
-    dockPoint.englishName = dockName.englishName;
-    dockPoint.historicalDescription = dockName.historicalDescription;
-    
-    console.log(`Assigned dock name: "${dockName.historicalName}" (${dockName.englishName})`);
-  }
-  
-  // Save the enhanced data
-  await savePolygonData(polygonFilePath, polygonData);
-  console.log(`Enhanced dock data saved for ${polygonFilePath}`);
-}
-
-// New function to process building points
-async function processBuildingPoints(polygonData, polygonFilePath) {
-  // Check if the polygon has building points
-  if (!polygonData.buildingPoints || !Array.isArray(polygonData.buildingPoints) || polygonData.buildingPoints.length === 0) {
-    console.log('No building points found in the polygon data, skipping.');
-    return;
-  }
-  
-  const buildingPointsCount = polygonData.buildingPoints.length;
-  console.log(`Found ${buildingPointsCount} building points to process.`);
-  
-  // Generate building descriptions for all building points at once
-  console.log(`Generating ${buildingPointsCount} building descriptions...`);
-  const buildingDescriptions = await generateBuildingDescriptions(buildingPointsCount);
-  
-  console.log(`Generated ${buildingDescriptions.length} building descriptions`);
-  
-  // Assign building descriptions to building points
-  for (let i = 0; i < Math.min(polygonData.buildingPoints.length, buildingDescriptions.length); i++) {
-    const buildingPoint = polygonData.buildingPoints[i];
-    const buildingDesc = buildingDescriptions[i];
-    
-    // Add name and description to building point
-    buildingPoint.buildingType = buildingDesc.buildingType;
-    buildingPoint.historicalName = buildingDesc.historicalName;
-    buildingPoint.englishName = buildingDesc.englishName;
-    buildingPoint.historicalDescription = buildingDesc.historicalDescription;
-    
-    console.log(`Assigned building description: "${buildingDesc.historicalName}" (${buildingDesc.englishName})`);
-  }
-  
-  // Save the enhanced data
-  await savePolygonData(polygonFilePath, polygonData);
-  console.log(`Enhanced building data saved for ${polygonFilePath}`);
-}
+// The individual processing functions have been removed as their functionality
+// is now integrated into the main enhancePolygonData function
 
 // Modify the main function to handle different modes
 async function enhancePolygonData() {
@@ -542,29 +388,160 @@ async function enhancePolygonData() {
     console.log(`Found ${files.length} JSON files in the data directory.`);
     console.log(`Running in ${mode} mode.`);
     
-    // Process each file
+    // First, collect all polygons and count the total items needed
+    const allPolygons = [];
+    let totalItemsCount = 0;
+    
     for (const file of files) {
       const polygonFilePath = path.join(dataDir, file);
-      console.log(`Processing file: ${file}`);
       
       // Load polygon data
       const polygonData = await loadPolygonData(polygonFilePath);
       console.log(`Loaded polygon data for: ${polygonData.historicalName || polygonData.englishName || file}`);
       
-      // Process based on mode
-      if (mode === 'bridges') {
-        await processBridgePoints(polygonData, polygonFilePath, file);
-      } else if (mode === 'docks') {
-        await processDockPoints(polygonData, polygonFilePath);
-      } else if (mode === 'buildings') {
-        await processBuildingPoints(polygonData, polygonFilePath);
-      } else {
-        console.log(`Unknown mode: ${mode}. Valid modes are: bridges, docks, buildings`);
-        return;
+      // Add file path for later saving
+      polygonData._filePath = polygonFilePath;
+      
+      // Count items based on mode
+      if (mode === 'bridges' && polygonData.bridgePoints && Array.isArray(polygonData.bridgePoints)) {
+        totalItemsCount += polygonData.bridgePoints.filter(point => point.connection).length;
+      } else if (mode === 'docks' && polygonData.dockPoints && Array.isArray(polygonData.dockPoints)) {
+        totalItemsCount += polygonData.dockPoints.length;
+      } else if (mode === 'buildings' && polygonData.buildingPoints && Array.isArray(polygonData.buildingPoints)) {
+        totalItemsCount += polygonData.buildingPoints.length;
       }
       
-      // Add a delay between files to avoid overwhelming the API
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      allPolygons.push(polygonData);
+    }
+    
+    console.log(`Total ${mode} to generate names/descriptions for: ${totalItemsCount}`);
+    
+    if (totalItemsCount === 0) {
+      console.log(`No ${mode} found in any polygon files.`);
+      return;
+    }
+    
+    // Generate all names/descriptions in a single API call
+    let allGeneratedItems = [];
+    
+    if (mode === 'bridges') {
+      console.log(`Generating ${totalItemsCount} bridge names in a single API call...`);
+      allGeneratedItems = await generateBridgeNames(totalItemsCount);
+    } else if (mode === 'docks') {
+      console.log(`Generating ${totalItemsCount} dock names in a single API call...`);
+      allGeneratedItems = await generateDockNames(totalItemsCount);
+    } else if (mode === 'buildings') {
+      console.log(`Generating ${totalItemsCount} building descriptions in a single API call...`);
+      allGeneratedItems = await generateBuildingDescriptions(totalItemsCount);
+    } else {
+      console.log(`Unknown mode: ${mode}. Valid modes are: bridges, docks, buildings`);
+      return;
+    }
+    
+    console.log(`Generated ${allGeneratedItems.length} items successfully`);
+    
+    // Now distribute the generated items back to the polygons and save them
+    let itemIndex = 0;
+    
+    for (const polygonData of allPolygons) {
+      const polygonFilePath = polygonData._filePath;
+      delete polygonData._filePath; // Remove the temporary file path property
+      
+      if (mode === 'bridges' && polygonData.bridgePoints && polygonData.bridgePoints.length > 0) {
+        // Create a map to track connection IDs
+        const connectionMap = new Map();
+        
+        // First pass: Assign connection IDs
+        for (let i = 0; i < polygonData.bridgePoints.length; i++) {
+          const bridgePoint = polygonData.bridgePoints[i];
+          
+          // Skip if there's no connection
+          if (!bridgePoint.connection) {
+            console.log(`Bridge point ${i} has no connection, skipping.`);
+            continue;
+          }
+          
+          // Create a unique key for this connection pair
+          const sourcePolygonId = polygonData.id || path.basename(polygonFilePath, '.json');
+          const targetPolygonId = bridgePoint.connection.targetPolygonId;
+          const connectionKey = [sourcePolygonId, targetPolygonId].sort().join('_');
+          
+          // Check if we've already assigned an ID to this connection
+          if (connectionMap.has(connectionKey)) {
+            // Use the existing ID
+            bridgePoint.connection.id = connectionMap.get(connectionKey);
+          } else {
+            // Generate a new ID
+            const connectionId = uuidv4();
+            bridgePoint.connection.id = connectionId;
+            connectionMap.set(connectionKey, connectionId);
+          }
+          
+          // Assign the next bridge name if available
+          if (itemIndex < allGeneratedItems.length) {
+            const bridgeName = allGeneratedItems[itemIndex++];
+            
+            // Calculate midpoint between the edge and target point
+            const edgePoint = bridgePoint.edge;
+            const targetPoint = bridgePoint.connection.targetPoint;
+            const midLat = (edgePoint.lat + targetPoint.lat) / 2;
+            const midLng = (edgePoint.lng + targetPoint.lng) / 2;
+            
+            // Update the connection with the name and location info
+            bridgePoint.connection.historicalName = bridgeName.historicalName;
+            bridgePoint.connection.englishName = bridgeName.englishName;
+            bridgePoint.connection.historicalDescription = bridgeName.historicalDescription;
+            bridgePoint.connection.location = {
+              midpoint: { lat: midLat, lng: midLng }
+            };
+            
+            console.log(`Assigned bridge name: "${bridgeName.historicalName}" (${bridgeName.englishName})`);
+          } else {
+            console.warn(`Ran out of bridge names for polygon ${polygonData.id}`);
+          }
+        }
+      } else if (mode === 'docks' && polygonData.dockPoints && polygonData.dockPoints.length > 0) {
+        // Assign dock names to dock points
+        for (let i = 0; i < polygonData.dockPoints.length; i++) {
+          const dockPoint = polygonData.dockPoints[i];
+          
+          if (itemIndex < allGeneratedItems.length) {
+            const dockName = allGeneratedItems[itemIndex++];
+            
+            // Add name and description to dock point
+            dockPoint.historicalName = dockName.historicalName;
+            dockPoint.englishName = dockName.englishName;
+            dockPoint.historicalDescription = dockName.historicalDescription;
+            
+            console.log(`Assigned dock name: "${dockName.historicalName}" (${dockName.englishName})`);
+          } else {
+            console.warn(`Ran out of dock names for polygon ${polygonData.id}`);
+          }
+        }
+      } else if (mode === 'buildings' && polygonData.buildingPoints && polygonData.buildingPoints.length > 0) {
+        // Assign building descriptions to building points
+        for (let i = 0; i < polygonData.buildingPoints.length; i++) {
+          const buildingPoint = polygonData.buildingPoints[i];
+          
+          if (itemIndex < allGeneratedItems.length) {
+            const buildingDesc = allGeneratedItems[itemIndex++];
+            
+            // Add name and description to building point
+            buildingPoint.buildingType = buildingDesc.buildingType;
+            buildingPoint.historicalName = buildingDesc.historicalName;
+            buildingPoint.englishName = buildingDesc.englishName;
+            buildingPoint.historicalDescription = buildingDesc.historicalDescription;
+            
+            console.log(`Assigned building description: "${buildingDesc.historicalName}" (${buildingDesc.englishName})`);
+          } else {
+            console.warn(`Ran out of building descriptions for polygon ${polygonData.id}`);
+          }
+        }
+      }
+      
+      // Save the enhanced data
+      await savePolygonData(polygonFilePath, polygonData);
+      console.log(`Enhanced ${mode} data saved for ${polygonFilePath}`);
     }
     
     console.log(`${mode} enhancement completed successfully for all files`);
