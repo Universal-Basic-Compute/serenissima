@@ -4873,15 +4873,13 @@ export default class SimplePolygonRenderer {
    */
   private getSocialClassColor(socialClass: string): string {
     switch (socialClass.toLowerCase()) {
-      case 'noble':
+      case 'nobili':
         return '#FFD700'; // Gold
-      case 'merchant':
+      case 'cittadini':
         return '#4682B4'; // Steel Blue
-      case 'artisan':
+      case 'popolani':
         return '#8B4513'; // Saddle Brown
-      case 'commoner':
-        return '#556B2F'; // Dark Olive Green
-      case 'servant':
+      case 'facchini':
         return '#708090'; // Slate Gray
       default:
         return '#C0C0C0'; // Silver (default)

@@ -3,11 +3,11 @@ import { NextResponse } from 'next/server';
 export async function GET() {
   try {
     // In a real application, you would fetch this data from your database
-    // This is just example data
+    // This is just example data with historically accurate Venetian social classes
     const citizens = [
       {
         CitizenId: "cit-001",
-        SocialClass: "Noble",
+        SocialClass: "Nobili",
         FirstName: "Marco",
         LastName: "Contarini",
         Description: "A wealthy patrician from one of Venice's oldest families. Marco serves on the Council of Ten and has significant investments in the spice trade.",
@@ -20,7 +20,7 @@ export async function GET() {
       },
       {
         CitizenId: "cit-002",
-        SocialClass: "Merchant",
+        SocialClass: "Cittadini",
         FirstName: "Giovanni",
         LastName: "Bellini",
         Description: "A successful merchant who trades primarily in silk and glass. His family has been in the trade for three generations.",
@@ -33,7 +33,7 @@ export async function GET() {
       },
       {
         CitizenId: "cit-003",
-        SocialClass: "Artisan",
+        SocialClass: "Popolani",
         FirstName: "Lucia",
         LastName: "Venier",
         Description: "A skilled glassmaker from Murano. Her delicate glass beads and figurines are sought after by nobles throughout Europe.",
@@ -46,7 +46,7 @@ export async function GET() {
       },
       {
         CitizenId: "cit-004",
-        SocialClass: "Commoner",
+        SocialClass: "Popolani",
         FirstName: "Antonio",
         LastName: "Rizzo",
         Description: "A fisherman who supplies fresh catch to the Rialto Market. He comes from a long line of Venetian fishermen.",
@@ -59,7 +59,7 @@ export async function GET() {
       },
       {
         CitizenId: "cit-005",
-        SocialClass: "Servant",
+        SocialClass: "Facchini",
         FirstName: "Maria",
         LastName: "Foscari",
         Description: "A household servant in the employ of the Contarini family. She manages the domestic staff and oversees the daily operations of the household.",
