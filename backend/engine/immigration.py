@@ -191,7 +191,7 @@ def create_immigration_notification(tables, citizen: Dict, building: Dict) -> No
             "Details": json.dumps(details),
             "CreatedAt": datetime.datetime.now().isoformat(),
             "ReadAt": None,
-            "User": "system"  # System notification
+            "User": "NLR"  # Admin notification
         })
         
         log.info(f"Created immigration notification for {citizen_name}")

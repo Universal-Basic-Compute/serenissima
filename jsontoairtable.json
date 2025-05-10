@@ -1,18 +1,3 @@
 {
-  "DECREES": [
-    {
-      "DecreeId": "decree-infrastructure-maintenance-001",
-      "Type": "Regulation",
-      "Title": "Land Owner Infrastructure Maintenance Responsibility",
-      "Description": "All land owners are henceforth responsible for the maintenance and upkeep of public infrastructure buildings situated on their lands. This includes bridges, public docks, canal maintenance offices, cisterns, and public wells. Failure to maintain these structures in good repair shall result in fines and potential forfeiture of land ownership privileges.",
-      "Rationale": "To ensure the continued functionality and safety of vital public infrastructure while distributing maintenance costs more equitably across the Republic.",
-      "Status": "Active",
-      "Category": "Infrastructure",
-      "Subcategory": "Maintenance",
-      "Proposer": "Council of Ten",
-      "FlavorText": "As the Most Serene Republic expands, so too must the responsibilities of its citizens. The Council of Ten has determined that the burden of maintaining our great city's infrastructure shall fall upon those who benefit most directly from it.",
-      "HistoricalInspiration": "In Renaissance Venice, property owners were often required to maintain public infrastructure adjacent to their properties, including bridges, wells, and canal embankments.",
-      "Notes": "Affected buildings: bridge, public_dock, canal_maintenance_office, cistern, public_well"
-    }
-  ]
+  "DECREES": []
 }
