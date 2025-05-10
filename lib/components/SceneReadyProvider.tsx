@@ -5,8 +5,10 @@ import * as THREE from 'three';
 declare global {
   interface Window {
     __threeContext?: {
-      scene: THREE.Scene;
-      camera: THREE.Camera;
+      scene?: THREE.Scene;
+      camera?: THREE.Camera;
+      renderer?: THREE.WebGLRenderer;
+      controls?: any;
     };
   }
   
