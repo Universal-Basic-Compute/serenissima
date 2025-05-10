@@ -1956,7 +1956,7 @@ export default class SimplePolygonRenderer {
             )[0];
             
             // Create a smaller sphere marker for bridge points
-            const geometry = new THREE.SphereGeometry(0.15, 12, 12); // Make bridge circles even smaller
+            const geometry = new THREE.SphereGeometry(0.3, 12, 12); // Same size as dock points
             
             const marker = new THREE.Mesh(geometry, bridgeMaterial);
             marker.position.set(normalizedCoord.x, 0.3, -normalizedCoord.y); // Lower position (was 0.5)
@@ -2070,17 +2070,15 @@ export default class SimplePolygonRenderer {
               new THREE.Vector3(sourceCoord.x, 0, -sourceCoord.y)
             ).normalize();
 
-            // Calculate the extended points (20% longer on each side)
-            const extensionLength = direction.length() * 0.2;
             const startPoint = new THREE.Vector3(
-              sourceCoord.x - direction.x * extensionLength,
-              0.15, // Lower position (was 0.35) to be closer to the ground
-              -sourceCoord.y - direction.z * extensionLength
+              sourceCoord.x,
+              0.15, // Keep the lower position to be closer to the ground
+              -sourceCoord.y
             );
             const endPoint = new THREE.Vector3(
-              targetCoord.x + direction.x * extensionLength,
-              0.15, // Lower position (was 0.35) to be closer to the ground
-              -targetCoord.y + direction.z * extensionLength
+              targetCoord.x,
+              0.15, // Keep the lower position to be closer to the ground
+              -targetCoord.y
             );
 
             // Create the path with extended points
