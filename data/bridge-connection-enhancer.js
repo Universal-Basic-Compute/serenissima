@@ -144,96 +144,113 @@ Example format: "Ponte dei Sospiri (Bridge of Sighs) - Named for the sighs of pr
 // Process polygon data and enhance bridge connections
 async function enhanceBridgeConnections() {
   try {
-    // Define the file path
-    const polygonFilePath = path.join(__dirname, 'data', 'polygon-1746057327626.json');
+    // Define the directory path
+    const dataDir = path.join(__dirname, 'data');
     
-    // Load polygon data
-    const polygonData = await loadPolygonData(polygonFilePath);
-    console.log(`Loaded polygon data for: ${polygonData.historicalName || polygonData.englishName}`);
+    // Get all JSON files in the data directory
+    const files = fs.readdirSync(dataDir).filter(file => file.endsWith('.json'));
+    console.log(`Found ${files.length} JSON files in the data directory.`);
     
-    // Check if the polygon has bridge points
-    if (!polygonData.bridgePoints || !Array.isArray(polygonData.bridgePoints)) {
-      console.log('No bridge points found in the polygon data.');
-      return;
-    }
-    
-    // Create a map to track connection IDs
-    const connectionMap = new Map();
-    
-    // Process each bridge point
-    for (let i = 0; i < polygonData.bridgePoints.length; i++) {
-      const bridgePoint = polygonData.bridgePoints[i];
+    // Process each file
+    for (const file of files) {
+      const polygonFilePath = path.join(dataDir, file);
+      console.log(`Processing file: ${file}`);
       
-      // Skip if there's no connection
-      if (!bridgePoint.connection) {
-        console.log(`Bridge point ${i} has no connection, skipping.`);
+      // Load polygon data
+      const polygonData = await loadPolygonData(polygonFilePath);
+      console.log(`Loaded polygon data for: ${polygonData.historicalName || polygonData.englishName || file}`);
+      
+      // Check if the polygon has bridge points
+      if (!polygonData.bridgePoints || !Array.isArray(polygonData.bridgePoints) || polygonData.bridgePoints.length === 0) {
+        console.log('No bridge points found in the polygon data, skipping.');
         continue;
       }
       
-      // Create a unique key for this connection pair
-      const sourcePolygonId = polygonData.id || 'polygon-1746057327626'; // Use the current polygon ID
-      const targetPolygonId = bridgePoint.connection.targetPolygonId;
-      const connectionKey = [sourcePolygonId, targetPolygonId].sort().join('_');
+      console.log(`Found ${polygonData.bridgePoints.length} bridge points to process.`);
       
-      // Check if we've already assigned an ID to this connection
-      if (connectionMap.has(connectionKey)) {
-        // Use the existing ID
-        bridgePoint.connection.id = connectionMap.get(connectionKey);
-      } else {
-        // Generate a new ID
-        const connectionId = uuidv4();
-        bridgePoint.connection.id = connectionId;
-        connectionMap.set(connectionKey, connectionId);
-      }
-    }
-    
-    // Second pass: Get location info and generate bridge names
-    console.log(`Processing ${connectionMap.size} unique connections...`);
-    let processedCount = 0;
-    
-    for (const [connectionKey, connectionId] of connectionMap.entries()) {
-      processedCount++;
-      console.log(`Processing connection ${processedCount}/${connectionMap.size}: ${connectionKey}`);
+      // Create a map to track connection IDs
+      const connectionMap = new Map();
       
-      // Find the bridge point for this connection
-      const bridgePoint = polygonData.bridgePoints.find(bp => 
-        bp.connection && bp.connection.id === connectionId
-      );
-      
-      if (!bridgePoint) {
-        console.warn(`Could not find bridge point for connection ${connectionKey}`);
-        continue;
+      // Process each bridge point
+      for (let i = 0; i < polygonData.bridgePoints.length; i++) {
+        const bridgePoint = polygonData.bridgePoints[i];
+        
+        // Skip if there's no connection
+        if (!bridgePoint.connection) {
+          console.log(`Bridge point ${i} has no connection, skipping.`);
+          continue;
+        }
+        
+        // Create a unique key for this connection pair
+        const sourcePolygonId = polygonData.id || file.replace('.json', '');
+        const targetPolygonId = bridgePoint.connection.targetPolygonId;
+        const connectionKey = [sourcePolygonId, targetPolygonId].sort().join('_');
+        
+        // Check if we've already assigned an ID to this connection
+        if (connectionMap.has(connectionKey)) {
+          // Use the existing ID
+          bridgePoint.connection.id = connectionMap.get(connectionKey);
+        } else {
+          // Generate a new ID
+          const connectionId = uuidv4();
+          bridgePoint.connection.id = connectionId;
+          connectionMap.set(connectionKey, connectionId);
+        }
       }
       
-      // Calculate midpoint between the edge and target point
-      const edgePoint = bridgePoint.edge;
-      const targetPoint = bridgePoint.connection.targetPoint;
+      // Second pass: Get location info and generate bridge names
+      console.log(`Processing ${connectionMap.size} unique connections...`);
+      let processedCount = 0;
       
-      const midLat = (edgePoint.lat + targetPoint.lat) / 2;
-      const midLng = (edgePoint.lng + targetPoint.lng) / 2;
+      for (const [connectionKey, connectionId] of connectionMap.entries()) {
+        processedCount++;
+        console.log(`Processing connection ${processedCount}/${connectionMap.size}: ${connectionKey}`);
+        
+        // Find the bridge point for this connection
+        const bridgePoint = polygonData.bridgePoints.find(bp => 
+          bp.connection && bp.connection.id === connectionId
+        );
+        
+        if (!bridgePoint) {
+          console.warn(`Could not find bridge point for connection ${connectionKey}`);
+          continue;
+        }
+        
+        // Calculate midpoint between the edge and target point
+        const edgePoint = bridgePoint.edge;
+        const targetPoint = bridgePoint.connection.targetPoint;
+        
+        const midLat = (edgePoint.lat + targetPoint.lat) / 2;
+        const midLng = (edgePoint.lng + targetPoint.lng) / 2;
+        
+        // Get location information for the midpoint
+        console.log(`Getting location info for ${midLat}, ${midLng}...`);
+        const locationInfo = await getLocationInfo(midLat, midLng);
+        
+        // Generate a bridge name
+        console.log(`Generating bridge name for location: ${locationInfo.formattedAddress}...`);
+        const bridgeName = await generateBridgeName(locationInfo);
+        
+        // Update the connection with the name and location info
+        bridgePoint.connection.name = bridgeName;
+        bridgePoint.connection.location = {
+          midpoint: { lat: midLat, lng: midLng },
+          locationInfo: locationInfo
+        };
+        
+        // Add a small delay to avoid rate limiting
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
       
-      // Get location information for the midpoint
-      console.log(`Getting location info for ${midLat}, ${midLng}...`);
-      const locationInfo = await getLocationInfo(midLat, midLng);
+      // Save the enhanced data
+      await savePolygonData(polygonFilePath, polygonData);
+      console.log(`Enhanced data saved for ${file}`);
       
-      // Generate a bridge name
-      console.log(`Generating bridge name for location: ${locationInfo.formattedAddress}...`);
-      const bridgeName = await generateBridgeName(locationInfo);
-      
-      // Update the connection with the name and location info
-      bridgePoint.connection.name = bridgeName;
-      bridgePoint.connection.location = {
-        midpoint: { lat: midLat, lng: midLng },
-        locationInfo: locationInfo
-      };
-      
-      // Add a small delay to avoid rate limiting
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Add a delay between files to avoid overwhelming the API
+      await new Promise(resolve => setTimeout(resolve, 2000));
     }
     
-    // Save the enhanced data
-    await savePolygonData(polygonFilePath, polygonData);
-    console.log('Bridge connection enhancement completed successfully');
+    console.log('Bridge connection enhancement completed successfully for all files');
     
   } catch (error) {
     console.error('Error enhancing bridge connections:', error);
