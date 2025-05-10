@@ -61,9 +61,11 @@ class DefaultBuildingRenderer implements IBuildingRenderer {
         const groundPosition = this.findGroundLevel(position);
         if (groundPosition) {
           // Use the detected ground height
+          console.log(`Found ground at height ${groundPosition.y} for building ${building.id}`);
           position.y = groundPosition.y;
         } else {
           // Fallback to default ground level if detection fails
+          console.log(`No ground found for building ${building.id}, using default height (0)`);
           position.y = 0;
         }
         
@@ -136,9 +138,11 @@ class DefaultBuildingRenderer implements IBuildingRenderer {
       const groundPosition = this.findGroundLevel(position);
       if (groundPosition) {
         // Use the detected ground height
+        console.log(`Found ground at height ${groundPosition.y} for building ${building.id}`);
         position.y = groundPosition.y;
       } else {
         // Fallback to default ground level if detection fails
+        console.log(`No ground found for building ${building.id}, using default height (0)`);
         position.y = 0;
       }
       

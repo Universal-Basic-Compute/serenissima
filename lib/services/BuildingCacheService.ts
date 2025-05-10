@@ -268,7 +268,7 @@ export class BuildingCacheService {
   }
   
   /**
-   * Find the ground level at a position using raycasting
+   * Find the ground level at a position using raycasting with improved mesh detection
    * @param position Position to check
    * @returns Ground position or null if not found
    */
@@ -283,13 +283,16 @@ export class BuildingCacheService {
     const rayDirection = new THREE.Vector3(0, -1, 0);
     rayDirection.normalize();
     
-    // Set up the raycaster
+    // Set up the raycaster with increased precision
     raycaster.set(rayOrigin, rayDirection);
     
+    // Increase precision for mesh detection
+    raycaster.params.Mesh.threshold = 0.1;
+    
     // Find all land meshes in the scene
-    const landMeshes: THREE.Mesh[] = [];
+    const landMeshes: THREE.Object3D[] = [];
     this.options.scene.traverse(object => {
-      // Only consider meshes that are land (not water, not other buildings)
+      // Include all meshes except those we want to exclude
       if (object instanceof THREE.Mesh && 
           !object.userData.buildingId && 
           !object.userData.isWater &&
@@ -298,19 +301,41 @@ export class BuildingCacheService {
       }
     });
     
-    // Find intersections with land
-    const intersects = raycaster.intersectObjects(landMeshes, false);
+    console.log(`Found ${landMeshes.length} potential land meshes for ground level detection`);
     
-    // If we found an intersection, return the point with a small offset
+    // Find intersections with land
+    const intersects = raycaster.intersectObjects(landMeshes, true); // true to check descendants
+    
+    // Log intersection results for debugging
     if (intersects.length > 0) {
+      console.log(`Found ${intersects.length} intersections for position (${position.x}, ${position.y}, ${position.z})`);
+      console.log(`First intersection at distance ${intersects[0].distance}, point: (${intersects[0].point.x}, ${intersects[0].point.y}, ${intersects[0].point.z})`);
+      
+      // If we found an intersection, return the point with a small offset
       const groundPoint = intersects[0].point.clone();
       // Add a small offset to prevent z-fighting
       groundPoint.y += 0.01;
       return groundPoint;
+    } else {
+      console.log(`No ground intersections found for position (${position.x}, ${position.y}, ${position.z})`);
+      
+      // If no intersection found, try with a larger ray
+      const largerRaycaster = new THREE.Raycaster();
+      largerRaycaster.set(rayOrigin, rayDirection);
+      largerRaycaster.params.Mesh.threshold = 1.0; // Much larger threshold
+      
+      const largerIntersects = largerRaycaster.intersectObjects(landMeshes, true);
+      if (largerIntersects.length > 0) {
+        console.log(`Found intersection with larger threshold at distance ${largerIntersects[0].distance}`);
+        const groundPoint = largerIntersects[0].point.clone();
+        groundPoint.y += 0.01;
+        return groundPoint;
+      }
+      
+      // No intersection found even with larger threshold
+      console.log(`No ground found, returning default height (0)`);
+      return new THREE.Vector3(position.x, 0, position.z);
     }
-    
-    // No intersection found
-    return null;
   }
   
   /**
