@@ -3094,6 +3094,12 @@ export default class SimplePolygonRenderer {
         let bestScore = Infinity;
         
         for (const bridgePoint of bridgePoints) {
+          // Verify that this bridge actually connects to the next polygon in our path
+          if (bridgePoint.connection.targetPolygonId !== nextPolygonId) {
+            console.log(`Skipping bridge point that connects to ${bridgePoint.connection.targetPolygonId} instead of ${nextPolygonId}`);
+            continue;
+          }
+          
           // Convert bridge point to normalized coordinates
           const edgeCoord = normalizeCoordinates(
             [bridgePoint.edge],
@@ -3134,6 +3140,8 @@ export default class SimplePolygonRenderer {
           // Score is a combination of distance from direct path and path length extension
           const score = distanceToDirectPath * pathLengthRatio;
           
+          console.log(`Bridge point score: ${score}, distance to path: ${distanceToDirectPath}, length ratio: ${pathLengthRatio}`);
+          
           if (score < bestScore) {
             bestScore = score;
             bestBridgePoint = bridgePoint;
@@ -3157,17 +3165,22 @@ export default class SimplePolygonRenderer {
         
         // If there's a connection point, add it too
         if (bestBridgePoint.connection && bestBridgePoint.connection.targetPoint) {
-          const targetCoord = normalizeCoordinates(
-            [bestBridgePoint.connection.targetPoint],
-            this.bounds.centerLat,
-            this.bounds.centerLng,
-            this.bounds.scale,
-            this.bounds.latCorrectionFactor
-          )[0];
-          
-          // Create a 3D point for the target
-          const targetPosition = new THREE.Vector3(targetCoord.x, 0.15, -targetCoord.y);
-          pathPoints.push(targetPosition);
+          // Verify again that this connection goes to the next polygon
+          if (bestBridgePoint.connection.targetPolygonId === nextPolygonId) {
+            const targetCoord = normalizeCoordinates(
+              [bestBridgePoint.connection.targetPoint],
+              this.bounds.centerLat,
+              this.bounds.centerLng,
+              this.bounds.scale,
+              this.bounds.latCorrectionFactor
+            )[0];
+            
+            // Create a 3D point for the target
+            const targetPosition = new THREE.Vector3(targetCoord.x, 0.15, -targetCoord.y);
+            pathPoints.push(targetPosition);
+          } else {
+            console.warn(`Bridge connection target polygon ${bestBridgePoint.connection.targetPolygonId} doesn't match next polygon ${nextPolygonId}`);
+          }
         }
       } else {
         console.warn(`No bridge found between ${currentPolygonId} and ${nextPolygonId}`);
