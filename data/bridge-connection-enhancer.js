@@ -513,7 +513,10 @@ async function enhancePolygonData() {
       
       if (itemsCount === 0) {
         console.log(`No ${mode} found in polygon ${file}. Marking as processed and skipping.`);
-        state.processedPolygons.push(polygonFilePath);
+        if (!state.processedPolygons[mode]) {
+          state.processedPolygons[mode] = [];
+        }
+        state.processedPolygons[mode].push(polygonFilePath);
         await saveState(state);
         continue;
       }
