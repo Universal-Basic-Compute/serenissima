@@ -22,13 +22,6 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
     sceneRef.current = scene;
     console.log('BuildingRenderer: scene ref updated', sceneRef.current ? 'scene available' : 'scene not available');
   }, [scene]);
-  // Add a ref to store the scene
-  const sceneRef = useRef<THREE.Scene>(scene);
-  
-  // Update the ref when scene changes
-  useEffect(() => {
-    sceneRef.current = scene;
-  }, [scene]);
   const [buildings, setBuildings] = useState<BuildingData[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
