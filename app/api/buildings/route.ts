@@ -164,9 +164,10 @@ export async function GET(request: Request) {
       if (typeof position === 'string') {
         try {
           position = JSON.parse(position);
+          console.log(`[API] Building ${fields.BuildingId || record.id} parsed position:`, position);
         } catch (error) {
-          console.error('Error parsing position JSON:', error);
-          console.error('Original position string:', position);
+          console.error('[API] Error parsing position JSON:', error);
+          console.error('[API] Original position string:', position);
           
           // Instead of using a default position, generate a random lat/lng position
           // This ensures each building has unique coordinates
@@ -174,6 +175,16 @@ export async function GET(request: Request) {
             lat: 45.4371 + (Math.random() * 0.01 - 0.005), // Random lat near Venice center
             lng: 12.3358 + (Math.random() * 0.01 - 0.005)  // Random lng near Venice center
           };
+          console.log(`[API] Generated random position for ${fields.BuildingId || record.id}:`, position);
+        }
+      }
+      
+      // Check if position has lat/lng format
+      if (position && typeof position === 'object') {
+        if (position.lat !== undefined && position.lng !== undefined) {
+          console.log(`[API] Building ${fields.BuildingId || record.id} has lat/lng position:`, position);
+        } else {
+          console.warn(`[API] Building ${fields.BuildingId || record.id} does NOT have lat/lng position:`, position);
         }
       }
       

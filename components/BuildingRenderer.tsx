@@ -197,10 +197,21 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
             const x = (lng - bounds.centerLng) * bounds.scale;
             const z = -(lat - bounds.centerLat) * bounds.scale * bounds.latCorrectionFactor;
             
-            // Log the conversion for debugging
-            console.log(`Converting lat/lng to Three.js coordinates for building ${building.id}:`);
-            console.log(`  Original lat/lng: ${lat}, ${lng}`);
-            console.log(`  Converted to x,z: ${x}, ${z}`);
+            // Log the conversion for debugging with distinctive prefix
+            console.log(`[BuildingRenderer] Converting lat/lng to Three.js coordinates for building ${building.id}:`);
+            console.log(`[BuildingRenderer] Original lat/lng: ${lat}, ${lng}`);
+            console.log(`[BuildingRenderer] Converted to x,z: ${x}, ${z}`);
+            
+            // Check if the conversion is working correctly
+            if (Math.abs(x) < 0.001 && Math.abs(z) < 0.001) {
+              console.warn(`[BuildingRenderer] WARNING: Building ${building.id} has near-zero position after conversion!`);
+              console.warn(`[BuildingRenderer] Original lat/lng:`, building.position);
+            }
+            
+            if (Math.abs(x - 45) < 0.1 && Math.abs(z - 12) < 0.1) {
+              console.warn(`[BuildingRenderer] WARNING: Building ${building.id} has default position after conversion!`);
+              console.warn(`[BuildingRenderer] Original lat/lng:`, building.position);
+            }
             
             position = {
               x: x, // Don't round or truncate these values
@@ -229,15 +240,8 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
         parseFloat(position.z.toString())  // Ensure we're using the full floating point value
       );
       
-      // Add more detailed logging
-      console.log(`Setting building ${building.id} position to:`, {
-        x: model.position.x,
-        y: model.position.y,
-        z: model.position.z
-      });
-      
-      // Add more detailed logging
-      console.log(`Setting building ${building.id} position to:`, {
+      // Add more detailed logging with a distinctive prefix
+      console.log(`[BuildingRenderer] Setting building ${building.id} position to:`, {
         x: model.position.x,
         y: model.position.y,
         z: model.position.z
