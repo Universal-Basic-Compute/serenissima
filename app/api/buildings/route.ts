@@ -1,54 +1,12 @@
 import { NextResponse } from 'next/server';
+import Airtable from 'airtable';
 
-// Mock implementation since we don't have the actual Airtable utils
-const airtableUtils = {
-  createBuilding: async (buildingData: any) => {
-    // In a real implementation, this would create a record in Airtable
-    console.log('Creating building in Airtable:', buildingData);
-    
-    // Return a mock response
-    return {
-      id: `building_${Date.now()}`,
-      type: buildingData.type,
-      land_id: buildingData.land_id,
-      position: buildingData.position,
-      rotation: buildingData.rotation || 0,
-      connection_points: buildingData.connection_points || [],
-      created_by: buildingData.created_by,
-      created_at: new Date().toISOString()
-    };
-  },
-  
-  getBuildings: async (type?: string | null) => {
-    // In a real implementation, this would fetch records from Airtable
-    console.log('Fetching buildings from Airtable, type filter:', type);
-    
-    // Return mock data
-    const buildings = [
-      {
-        id: 'building_1',
-        type: 'public-dock',
-        land_id: 'land_1',
-        position: { x: 100, y: 0, z: 100 },
-        rotation: 0,
-        connection_points: [
-          { x: 90, y: 0, z: 100 },
-          { x: 105, y: 0, z: 95 },
-          { x: 105, y: 0, z: 105 }
-        ],
-        created_by: 'ConsiglioDeiDieci',
-        created_at: '2023-01-01T00:00:00Z'
-      }
-    ];
-    
-    // Filter by type if specified
-    if (type) {
-      return buildings.filter(b => b.type === type);
-    }
-    
-    return buildings;
-  }
-};
+// Configure Airtable
+const apiKey = process.env.AIRTABLE_API_KEY;
+const baseId = process.env.AIRTABLE_BASE_ID;
+
+// Initialize Airtable base
+const base = new Airtable({ apiKey }).base(baseId);
 
 export async function POST(request: Request) {
   try {
@@ -81,32 +39,40 @@ export async function POST(request: Request) {
     // Log the received data for debugging
     console.log('Creating building with data:', JSON.stringify(data, null, 2));
     
-    // Create a unique ID for the building
-    const buildingId = `building_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+    // Create a record in Airtable
+    const record = await new Promise((resolve, reject) => {
+      base('Buildings').create({
+        BuildingId: data.id || `building-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
+        Type: data.type,
+        Land: data.land_id,
+        Variant: data.variant || 'model',
+        Position: JSON.stringify(data.position),
+        Rotation: data.rotation || 0,
+        User: data.owner || data.created_by || 'system',
+        CreatedAt: data.created_at || new Date().toISOString()
+      }, function(err, record) {
+        if (err) {
+          console.error('Error creating record in Airtable:', err);
+          reject(err);
+          return;
+        }
+        resolve(record);
+      });
+    });
     
-    // Normalize the building type (remove apostrophes, replace spaces with hyphens)
-    const normalizedType = data.type.toLowerCase().replace(/'/g, '').replace(/\s+/g, '-');
-    
-    // Create the building object
+    // Transform the Airtable record to our format
     const building = {
-      id: buildingId,
-      type: normalizedType,
-      variant: data.variant || 'model',
-      land_id: data.land_id,
-      position: {
-        x: data.position.x,
-        y: data.position.y || 0,
-        z: data.position.z
-      },
-      rotation: data.rotation || 0,
-      connection_points: data.connection_points || [],
-      created_by: data.created_by || 'system',
-      created_at: new Date().toISOString()
+      id: record.fields.BuildingId,
+      type: record.fields.Type,
+      land_id: record.fields.Land,
+      variant: record.fields.Variant || 'model',
+      position: JSON.parse(record.fields.Position),
+      rotation: record.fields.Rotation || 0,
+      owner: record.fields.User,
+      created_at: record.fields.CreatedAt
     };
     
-    // In a real implementation, this would save to Airtable or another database
-    // For now, we'll just log it and return success
-    console.log('Successfully created building:', JSON.stringify(building, null, 2));
+    console.log('Successfully created building in Airtable:', building);
     
     // Return the created building with success flag
     return NextResponse.json({ 
@@ -135,67 +101,131 @@ export async function GET(request: Request) {
     console.log('GET /api/buildings request received');
     console.log('Query parameters:', { type });
     
-    // Get buildings from Airtable
-    const buildings = await airtableUtils.getBuildings(type);
-    console.log(`Retrieved ${buildings.length} buildings from database`);
+    // Fetch records from Airtable
+    const records = await new Promise((resolve, reject) => {
+      const allRecords = [];
+      
+      base('Buildings')
+        .select({
+          // Add filters if type is specified
+          filterByFormula: type ? `{Type} = '${type}'` : '',
+          view: 'Grid view',
+          maxRecords: 100
+        })
+        .eachPage(
+          function page(records, fetchNextPage) {
+            allRecords.push(...records);
+            fetchNextPage();
+          },
+          function done(err) {
+            if (err) {
+              console.error('Error fetching from Airtable:', err);
+              reject(err);
+              return;
+            }
+            resolve(allRecords);
+          }
+        );
+    });
+    
+    // Transform Airtable records to our format
+    const buildings = records.map(record => {
+      const fields = record.fields;
+      
+      // Parse position JSON if it's a string
+      let position = fields.Position;
+      if (typeof position === 'string') {
+        try {
+          position = JSON.parse(position);
+        } catch (error) {
+          console.error('Error parsing position JSON:', error);
+          position = { x: 0, y: 0, z: 0 }; // Default position
+        }
+      }
+      
+      return {
+        id: fields.BuildingId || record.id,
+        type: fields.Type,
+        land_id: fields.Land,
+        variant: fields.Variant || 'model',
+        position: position,
+        rotation: fields.Rotation || 0,
+        owner: fields.User,
+        created_at: fields.CreatedAt
+      };
+    });
+    
+    console.log(`Retrieved ${buildings.length} buildings from Airtable`);
     
     // Log each building for debugging
     buildings.forEach((building, index) => {
       console.log(`Building ${index + 1}:`, building);
     });
     
-    // Add your specific building for debugging - add multiple copies at different positions
-    const debugBuilding1 = {
-      id: 'building_1',
-      type: 'market-stall',
-      land_id: 'polygon-1746052711032',
-      position: { 
-        x: 45, 
-        y: 10, // Higher position for better visibility
-        z: 12 
-      },
-      rotation: 0,
-      connection_points: [], // Add empty connection points array to fix type error
-      created_by: 'ConsiglioDeiDieci',
-      created_at: '2025-05-10T02:07:00Z'
-    };
+    // Add debug buildings only if no buildings were found in Airtable
+    if (buildings.length === 0) {
+      console.log('No buildings found in Airtable, adding debug buildings');
+      
+      // Add your specific building for debugging - add multiple copies at different positions
+      const debugBuilding1 = {
+        id: 'building_1',
+        type: 'market-stall',
+        land_id: 'polygon-1746052711032',
+        position: { 
+          x: 45, 
+          y: 10, // Higher position for better visibility
+          z: 12 
+        },
+        rotation: 0,
+        connection_points: [], // Add empty connection points array to fix type error
+        created_by: 'ConsiglioDeiDieci',
+        created_at: '2025-05-10T02:07:00Z'
+      };
+      
+      const debugBuilding2 = {
+        id: 'building_2',
+        type: 'market-stall',
+        land_id: 'polygon-1746052711033',
+        position: { 
+          x: 55, 
+          y: 10, // Higher position for better visibility
+          z: 22
+        },
+        rotation: Math.PI / 4, // 45 degrees rotation
+        connection_points: [], // Add empty connection points array to fix type error
+        created_by: 'ConsiglioDeiDieci',
+        created_at: '2025-05-10T02:07:00Z'
+      };
+      
+      const debugBuilding3 = {
+        id: 'building_3',
+        type: 'market-stall',
+        land_id: 'polygon-1746052711034',
+        position: { 
+          x: 35, 
+          y: 10, // Higher position for better visibility
+          z: 2
+        },
+        rotation: Math.PI / 2, // 90 degrees rotation
+        connection_points: [], // Add empty connection points array to fix type error
+        created_by: 'ConsiglioDeiDieci',
+        created_at: '2025-05-10T02:07:00Z'
+      };
+      
+      console.log('Adding debug buildings');
+      buildings.push(debugBuilding1);
+      buildings.push(debugBuilding2);
+      buildings.push(debugBuilding3);
+    }
     
-    const debugBuilding2 = {
-      id: 'building_2',
-      type: 'market-stall',
-      land_id: 'polygon-1746052711033',
-      position: { 
-        x: 55, 
-        y: 10, // Higher position for better visibility
-        z: 22
-      },
-      rotation: Math.PI / 4, // 45 degrees rotation
-      connection_points: [], // Add empty connection points array to fix type error
-      created_by: 'ConsiglioDeiDieci',
-      created_at: '2025-05-10T02:07:00Z'
-    };
+    // Set cache headers to allow browsers to cache the response for a short time
+    const headers = new Headers();
+    headers.set('Cache-Control', 'public, max-age=60'); // Cache for 1 minute
     
-    const debugBuilding3 = {
-      id: 'building_3',
-      type: 'market-stall',
-      land_id: 'polygon-1746052711034',
-      position: { 
-        x: 35, 
-        y: 10, // Higher position for better visibility
-        z: 2
-      },
-      rotation: Math.PI / 2, // 90 degrees rotation
-      connection_points: [], // Add empty connection points array to fix type error
-      created_by: 'ConsiglioDeiDieci',
-      created_at: '2025-05-10T02:07:00Z'
-    };
-    
-    console.log('Adding debug buildings');
-    buildings.push(debugBuilding1);
-    buildings.push(debugBuilding2);
-    buildings.push(debugBuilding3);
-    
-    return NextResponse.json({ buildings });
+    return new NextResponse(JSON.stringify({ buildings }), {
+      status: 200,
+      headers
+    });
   } catch (error) {
     console.error('Error fetching buildings:', error);
     console.error('Stack trace:', error.stack);
