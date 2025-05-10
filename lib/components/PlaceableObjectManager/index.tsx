@@ -92,7 +92,9 @@ const PlaceableObjectManager: React.FC<PlaceableObjectProps> = ({
     // If this is a building with a name, try to load the actual model
     if (type === 'building' && objectData.name) {
       // Fix the model path - ensure it uses the correct format for the path
-      const modelPath = `/assets/buildings/models/${objectData.name.toLowerCase().replace(/\s+/g, '-')}/${objectData.variant || 'model'}.glb`;
+      // Normalize the building name (remove apostrophes, replace spaces with hyphens)
+      const normalizedName = objectData.name.toLowerCase().replace(/'/g, '').replace(/\s+/g, '-');
+      const modelPath = `/assets/buildings/models/${normalizedName}/${objectData.variant || 'model'}.glb`;
         
       console.log(`Attempting to load building model from: ${modelPath}`);
         
@@ -394,7 +396,9 @@ const PlaceableObjectManager: React.FC<PlaceableObjectProps> = ({
       
       // Prepare the building data
       const buildingData = {
-        type: type === 'building' ? objectData.name?.toLowerCase().replace(/\s+/g, '-') : type,
+        type: type === 'building' 
+          ? objectData.name?.toLowerCase().replace(/'/g, '').replace(/\s+/g, '-') 
+          : type,
         variant: objectData.variant || 'model',
         land_id: landId,
         position: {

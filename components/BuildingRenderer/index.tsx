@@ -110,7 +110,10 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
     console.log('Rendering building:', building);
     
     // Ensure type is a string and properly formatted
-    const buildingType = typeof type === 'string' ? type.toLowerCase().replace(/\s+/g, '-') : 'unknown';
+    // Normalize the building type (remove apostrophes, replace spaces with hyphens)
+    const buildingType = typeof type === 'string' 
+      ? type.toLowerCase().replace(/'/g, '').replace(/\s+/g, '-') 
+      : 'unknown';
     
     // Construct the path to the model
     const modelPath = `/assets/buildings/models/${buildingType}/${variant}.glb`;
