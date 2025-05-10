@@ -1309,12 +1309,15 @@ export default class SimplePolygonRenderer {
         if (userData && userData.id && userData.id !== this.hoveredPointId) {
           this.hoveredPointId = userData.id;
           
-          // Highlight the hovered point
+          // Highlight the hovered point with enhanced effect
           if (intersected instanceof THREE.Mesh) {
+            // Create a more prominent highlight effect
             const highlightMaterial = new THREE.MeshBasicMaterial({
-              color: 0xFFFF00, // Yellow highlight
+              color: 0xFFFF00, // Bright yellow highlight
               transparent: true,
-              opacity: 1.0
+              opacity: 1.0,
+              emissive: 0xFFFF00,
+              emissiveIntensity: 0.5
             });
             
             // Store the original material if not already stored
@@ -1324,6 +1327,12 @@ export default class SimplePolygonRenderer {
             
             // Apply the highlight material
             intersected.material = highlightMaterial;
+            
+            // Scale up the building point slightly for better visibility
+            intersected.scale.set(1.5, 1.5, 1.5);
+            
+            // Increase render order to ensure it's visible
+            intersected.renderOrder = 2500;
           }
           
           // Show tooltip
@@ -1354,6 +1363,12 @@ export default class SimplePolygonRenderer {
               opacity: 0.6
             });
           }
+          
+          // Reset scale back to normal
+          hoveredPoint.scale.set(1.0, 1.0, 1.0);
+          
+          // Reset render order
+          hoveredPoint.renderOrder = 2000;
         }
         
         this.hoveredPointId = null;
@@ -2437,11 +2452,11 @@ export default class SimplePolygonRenderer {
       return;
     }
     
-    // Create a material for building points - make them more transparent and a different color
+    // Create a material for building points - make them more visible
     const buildingPointMaterial = new THREE.MeshBasicMaterial({
       color: 0xFFFFFF, // White color for building points
       transparent: true,
-      opacity: 0.4  // More transparent (changed from 0.6)
+      opacity: 0.8  // Increased from 0.4 for better visibility
     });
     
     // Process each polygon
