@@ -147,7 +147,7 @@ const GovernancePanel: React.FC<GovernancePanelProps> = ({ onClose, standalone =
   }, [governanceTab]);
 
   return (
-    <div className={`${standalone ? 'fixed inset-0 bg-black/80 z-50' : 'absolute top-20 left-20 right-4 bottom-4 bg-black/30'} rounded-lg p-4 overflow-auto`}>
+    <div className={`${standalone ? 'fixed inset-0 bg-black/80 z-50' : 'absolute top-20 left-20 right-4 bottom-4 bg-black/30 z-40'} rounded-lg p-4 overflow-auto`}>
       <div className="bg-amber-50 border-2 border-amber-700 rounded-lg p-6 max-w-6xl mx-auto">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-3xl font-serif text-amber-800">
