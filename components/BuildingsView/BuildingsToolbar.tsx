@@ -61,20 +61,33 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
   useEffect(() => {
     const fetchBuildings = async () => {
       try {
-        console.log('Fetching buildings from: /api/buildings');
+        console.log('BuildingsToolbar: Fetching buildings from: /api/buildings');
         const response = await fetch('/api/buildings');
+        
+        console.log('BuildingsToolbar: API response status:', response.status);
         
         if (response.ok) {
           const data = await response.json();
-          console.log(`Loaded ${data.buildings?.length || 0} buildings`);
+          console.log(`BuildingsToolbar: Loaded ${data.buildings?.length || 0} buildings`);
+          
+          // Log each building for debugging
+          if (data.buildings && data.buildings.length > 0) {
+            data.buildings.forEach((building: any, index: number) => {
+              console.log(`BuildingsToolbar: Building ${index + 1}:`, building);
+            });
+          } else {
+            console.warn('BuildingsToolbar: No buildings returned from API');
+          }
           
           // Dispatch an event to notify the BuildingRenderer to update
+          console.log('BuildingsToolbar: Dispatching BUILDING_PLACED event with refresh=true');
           eventBus.emit(EventTypes.BUILDING_PLACED, { refresh: true });
         } else {
-          console.warn(`Failed to fetch buildings: ${response.status}`);
+          console.warn(`BuildingsToolbar: Failed to fetch buildings: ${response.status}`);
         }
       } catch (error) {
-        console.error('Error fetching buildings:', error);
+        console.error('BuildingsToolbar: Error fetching buildings:', error);
+        console.error('BuildingsToolbar: Stack trace:', error.stack);
       }
     };
     
@@ -96,6 +109,51 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
           <path fillRule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clipRule="evenodd" />
         </svg>
         <span>Create Road</span>
+      </button>
+      
+      {/* Add debug button */}
+      <button
+        onClick={() => {
+          console.log('Debug button clicked');
+          console.log('Current scene:', scene);
+          console.log('Current camera:', camera);
+          console.log('Current polygons:', polygons);
+          
+          // Force refresh buildings
+          if (onRefreshBuildings) {
+            console.log('Forcing refresh of buildings');
+            onRefreshBuildings();
+          }
+          
+          // Log all buildings in the scene
+          if (scene) {
+            console.log('Buildings in scene:');
+            scene.traverse((object) => {
+              if (object.userData && object.userData.buildingId) {
+                console.log(`- Building ${object.userData.buildingId}:`, object);
+              }
+            });
+          }
+          
+          // Add a test building directly to the scene
+          if (scene) {
+            console.log('Adding test building to scene');
+            const geometry = new THREE.BoxGeometry(5, 5, 5);
+            const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+            const testBuilding = new THREE.Mesh(geometry, material);
+            testBuilding.position.set(45.42623684734749, 5, 12.33922034185465);
+            testBuilding.userData.buildingId = 'test-building';
+            scene.add(testBuilding);
+            console.log('Test building added:', testBuilding);
+          }
+        }}
+        className="px-4 py-2 bg-red-600 text-white rounded-md shadow-md hover:bg-red-700 transition-colors flex items-center space-x-2"
+        title="Debug buildings"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+        </svg>
+        <span>Debug Buildings</span>
       </button>
       
       

@@ -410,9 +410,10 @@ const PlaceableObjectManager: React.FC<PlaceableObjectProps> = ({
         created_by: walletAddress
       };
       
-      console.log('Placing building with data:', buildingData);
+      console.log('PlaceableObjectManager: Placing building with data:', JSON.stringify(buildingData, null, 2));
       
       // Send the building data to the server
+      console.log('PlaceableObjectManager: Sending POST request to /api/buildings');
       const response = await fetch('/api/buildings', {
         method: 'POST',
         headers: {
@@ -421,11 +422,14 @@ const PlaceableObjectManager: React.FC<PlaceableObjectProps> = ({
         body: JSON.stringify(buildingData),
       });
       
+      console.log('PlaceableObjectManager: API response status:', response.status);
+      
       if (!response.ok) {
         throw new Error(`Failed to create building: ${response.status} ${response.statusText}`);
       }
       
       const responseData = await response.json();
+      console.log('PlaceableObjectManager: API response data:', responseData);
       
       if (!responseData.success || !responseData.building) {
         throw new Error('Invalid response from server');
@@ -433,16 +437,18 @@ const PlaceableObjectManager: React.FC<PlaceableObjectProps> = ({
       
       const createdBuilding = responseData.building;
       
-      console.log(`${type} created:`, createdBuilding);
+      console.log(`PlaceableObjectManager: ${type} created:`, createdBuilding);
       
       // Emit appropriate event
       if (type === 'dock') {
+        console.log('PlaceableObjectManager: Emitting DOCK_PLACED event');
         eventBus.emit(EventTypes.DOCK_PLACED, {
           dockId: createdBuilding.id,
           type: 'dock',
           data: createdBuilding
         });
       } else {
+        console.log('PlaceableObjectManager: Emitting BUILDING_PLACED event');
         eventBus.emit(EventTypes.BUILDING_PLACED, {
           buildingId: createdBuilding.id,
           type: type === 'building' ? objectData.name : type,
@@ -452,9 +458,11 @@ const PlaceableObjectManager: React.FC<PlaceableObjectProps> = ({
       }
       
       // Call onComplete callback
+      console.log('PlaceableObjectManager: Calling onComplete callback');
       onComplete(createdBuilding);
     } catch (error) {
-      console.error(`Error creating ${type}:`, error);
+      console.error(`PlaceableObjectManager: Error creating ${type}:`, error);
+      console.error('PlaceableObjectManager: Stack trace:', error.stack);
       alert(`Failed to create ${type}: ${error instanceof Error ? error.message : String(error)}`);
     }
   };

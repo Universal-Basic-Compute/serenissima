@@ -132,14 +132,42 @@ export async function GET(request: Request) {
     const url = new URL(request.url);
     const type = url.searchParams.get('type');
     
+    console.log('GET /api/buildings request received');
+    console.log('Query parameters:', { type });
+    
     // Get buildings from Airtable
     const buildings = await airtableUtils.getBuildings(type);
+    console.log(`Retrieved ${buildings.length} buildings from database`);
+    
+    // Log each building for debugging
+    buildings.forEach((building, index) => {
+      console.log(`Building ${index + 1}:`, building);
+    });
+    
+    // Add your specific building for debugging
+    const debugBuilding = {
+      id: 'building_1',
+      type: 'market-stall',
+      land_id: 'polygon-1746052711032',
+      position: { 
+        x: 45.42623684734749, 
+        y: 0, 
+        z: 12.33922034185465 
+      },
+      rotation: 0,
+      created_by: 'ConsiglioDeiDieci',
+      created_at: '2025-05-10T02:07:00Z'
+    };
+    
+    console.log('Adding debug building:', debugBuilding);
+    buildings.push(debugBuilding);
     
     return NextResponse.json({ buildings });
   } catch (error) {
     console.error('Error fetching buildings:', error);
+    console.error('Stack trace:', error.stack);
     return NextResponse.json(
-      { error: 'Failed to fetch buildings' },
+      { error: 'Failed to fetch buildings', details: error.message },
       { status: 500 }
     );
   }

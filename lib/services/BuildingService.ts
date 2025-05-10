@@ -166,11 +166,13 @@ export class BuildingService {
       
       const response = await fetch(url);
       
+      console.log('Buildings API response status:', response.status);
+      
       if (!response.ok) {
         console.warn(`Failed to fetch buildings: ${response.status}. Using fallback data.`);
         
         // Return mock data as fallback - using market-stall instead of public-dock
-        return [
+        const fallbackData = [
           {
             id: 'building_1',
             type: 'market-stall',
@@ -181,12 +183,28 @@ export class BuildingService {
             created_at: '2023-01-01T00:00:00Z'
           }
         ];
+        
+        console.log('Using fallback building data:', fallbackData);
+        return fallbackData;
       }
       
       const data = await response.json();
+      console.log('Buildings API response data:', data);
+      console.log(`Received ${data.buildings?.length || 0} buildings from API`);
+      
+      if (data.buildings && data.buildings.length > 0) {
+        // Log each building for debugging
+        data.buildings.forEach((building: any, index: number) => {
+          console.log(`Building ${index + 1}:`, building);
+        });
+      } else {
+        console.warn('No buildings returned from API');
+      }
+      
       return data.buildings || [];
     } catch (error) {
       console.error('Error fetching buildings:', error);
+      console.error('Stack trace:', error.stack);
       
       // Return empty array instead of throwing to prevent UI errors
       return [];

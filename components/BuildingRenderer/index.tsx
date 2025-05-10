@@ -124,11 +124,16 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
     
     const { id, type, position, rotation, variant = 'model' } = building;
     
-    // Skip if we've already rendered this building
-    if (buildingMeshesRef.current.has(id)) return;
+    // Enhanced logging
+    console.log('=== BUILDING RENDER ATTEMPT ===');
+    console.log('Building data:', JSON.stringify(building, null, 2));
+    console.log(`Rendering building ID: ${id}, Type: ${type}, Position:`, position);
     
-    // Log the building data for debugging
-    console.log('Rendering building:', building);
+    // Skip if we've already rendered this building
+    if (buildingMeshesRef.current.has(id)) {
+      console.log(`Building ${id} already rendered, skipping`);
+      return;
+    }
     
     // Ensure type is a string and properly formatted
     // Normalize the building type (remove apostrophes, replace spaces with hyphens)
@@ -148,11 +153,13 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
         modelPath,
         (gltf) => {
           try {
+            console.log(`Successfully loaded model for building ${id}`);
             const model = gltf.scene;
             
             // Position and rotate the model
             model.position.set(position.x, position.y, position.z);
             model.rotation.y = rotation || 0;
+            console.log(`Positioned model at:`, model.position);
             
             // Calculate bounding box to properly scale the model
             const box = new THREE.Box3().setFromObject(model);
@@ -174,11 +181,12 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
             
             // Add to scene
             scene.add(model);
+            console.log(`Added model to scene for building ${id}`);
             
             // Store reference
             buildingMeshesRef.current.set(id, model);
             
-            console.log(`Building ${id} (${type}) rendered at position:`, position);
+            console.log(`Building ${id} (${type}) successfully rendered at position:`, position);
           } catch (modelError) {
             console.error(`Error processing model for building ${id}:`, modelError);
             createFallbackMesh(id, type, position, rotation);
@@ -192,11 +200,13 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
         (error) => {
           // Error handling
           console.error(`Error loading building ${id} (${type}):`, error);
+          console.error(`Model path that failed: ${modelPath}`);
           createFallbackMesh(id, type, position, rotation);
         }
       );
     } catch (error) {
       console.error(`Error initiating model load for building ${id}:`, error);
+      console.error(`Stack trace:`, error.stack);
       createFallbackMesh(id, type, position, rotation);
     }
   };
