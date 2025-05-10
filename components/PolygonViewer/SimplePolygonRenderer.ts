@@ -1063,7 +1063,8 @@ export default class SimplePolygonRenderer {
     // Check if this is a right-click and we're in transport view
     if (event.button === 2 && this.activeView === 'transport') {
       // Handle right-click in transport view - delete markers
-      this.handleRightClickInTransportView();
+      // Pass the event to the handler
+      this.handleRightClickInTransportView(event);
       return;
     }
     
@@ -1716,7 +1717,7 @@ export default class SimplePolygonRenderer {
   }
   
   // Add this new method to handle right-click deletion of transport markers
-  private handleRightClickInTransportView() {
+  private handleRightClickInTransportView(event: MouseEvent) {
     console.log("Right-click detected in transport view - checking for markers to delete");
     
     // Combine all markers for raycasting
