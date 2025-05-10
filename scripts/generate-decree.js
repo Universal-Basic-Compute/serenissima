@@ -61,9 +61,14 @@ async function generateDecree(input) {
     
     // Parse the JSON
     try {
-      // Remove markdown code block formatting if present
+      // Extract JSON content more reliably by finding the first { and last }
       let jsonContent = content;
-      if (content.startsWith('```json')) {
+      const startIndex = content.indexOf('{');
+      const endIndex = content.lastIndexOf('}');
+      
+      if (startIndex !== -1 && endIndex !== -1 && endIndex > startIndex) {
+        jsonContent = content.substring(startIndex, endIndex + 1);
+      } else if (content.startsWith('```json')) {
         jsonContent = content.replace(/```json\n|\n```/g, '');
       } else if (content.startsWith('```')) {
         jsonContent = content.replace(/```\n|\n```/g, '');
@@ -150,6 +155,11 @@ async function createDecreeNotifications(decree) {
     const users = await base('USERS').select().all();
     console.log(`Found ${users.length} users to notify`);
     
+    // Log sample user record to understand structure
+    if (users.length > 0) {
+      console.log('Sample user record structure:', JSON.stringify(users[0], null, 2));
+    }
+    
     // Create notification content
     const notificationContent = `New Decree Proposed: ${decree.Title}`;
     const notificationDetails = {
@@ -165,7 +175,7 @@ async function createDecreeNotifications(decree) {
       return base('NOTIFICATIONS').create({
         NotificationId: `decree-${decree.DecreeId}-user-${user.id}`,
         Type: 'Decree',
-        User: [user.id], // Link to user record
+        User: user.id, // Use user ID directly instead of array
         Content: notificationContent,
         Details: JSON.stringify(notificationDetails),
         IsRead: false,
