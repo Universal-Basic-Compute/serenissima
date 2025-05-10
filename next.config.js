@@ -12,7 +12,16 @@ const nextConfig = {
   onDemandEntries: {
     maxInactiveAge: 25 * 1000,
     pagesBufferLength: 2,
-  }
+  },
+  // Add rewrites for coat of arms images
+  async rewrites() {
+    return [
+      {
+        source: '/coat-of-arms/:path*',
+        destination: '/api/coat-of-arms/:path*',
+      },
+    ];
+  },
 }
 
 module.exports = nextConfig
