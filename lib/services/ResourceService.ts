@@ -1,4 +1,14 @@
-import { fetchResources, ResourceNode, fetchResourceCounts } from '../resourceUtils';
+import { fetchResources, fetchResourceCounts } from '../resourceUtils';
+import type { ResourceNode } from '../resourceUtils';
+
+// Extend the ResourceNode type to include the properties we need
+interface ExtendedResourceNode extends ResourceNode {
+  amount?: number;
+  productionProperties?: any;
+  productionChainPosition?: any;
+  longDescription?: string;
+  baseProperties?: any;
+}
 
 export interface Resource {
   id: string;
@@ -84,7 +94,7 @@ export class ResourceService {
       const resourceMap = new Map<string, Resource>();
       
       // Process resources to ensure they have all required fields
-      resources.forEach(resource => {
+      resources.forEach((resource: ExtendedResourceNode) => {
         // Skip if we already have this resource ID
         if (resourceMap.has(resource.id)) {
           console.warn(`Duplicate resource ID found: ${resource.id} - ${resource.name}`);
