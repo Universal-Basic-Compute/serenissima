@@ -266,9 +266,45 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ active }) => {
   
   // Function to focus camera on buildings
   const focusCameraOnBuildings = useCallback(() => {
+    // Check if scene and camera are available, if not try to get them
     if (!sceneRef.current || !cameraRef.current) {
-      console.warn('Cannot focus on buildings: scene or camera not defined');
-      return;
+      console.warn('Scene or camera not available, attempting to get them...');
+      
+      // Try to get from window.__threeContext
+      if (typeof window !== 'undefined' && window.__threeContext) {
+        if (!sceneRef.current && window.__threeContext.scene) {
+          sceneRef.current = window.__threeContext.scene;
+        }
+        if (!cameraRef.current && window.__threeContext.camera) {
+          cameraRef.current = window.__threeContext.camera;
+        }
+      }
+      
+      // Try to get from canvas element
+      if (!sceneRef.current || !cameraRef.current) {
+        const canvas = document.querySelector('canvas');
+        if (canvas) {
+          if (!sceneRef.current && canvas.__scene) {
+            sceneRef.current = canvas.__scene;
+          }
+          if (!cameraRef.current && canvas.__camera) {
+            cameraRef.current = canvas.__camera;
+          }
+        }
+      }
+      
+      // If still not available, schedule a retry
+      if (!sceneRef.current || !cameraRef.current) {
+        console.error('Cannot focus on buildings: scene or camera not available');
+        
+        // Schedule a retry after a short delay
+        setTimeout(() => {
+          console.log('Retrying focusCameraOnBuildings...');
+          focusCameraOnBuildings();
+        }, 1000);
+        
+        return;
+      }
     }
     
     if (buildingMeshesRef.current.size === 0) {
@@ -358,9 +394,32 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ active }) => {
   
   // Function to ensure buildings are visible
   const ensureBuildingsVisible = useCallback(() => {
+    // Check if scene is available, if not try to get it
     if (!sceneRef.current) {
-      console.warn('Cannot ensure buildings are visible: scene is not defined');
-      return;
+      console.warn('Scene not available, attempting to get it...');
+      
+      // Try to get scene from window.__threeContext
+      if (typeof window !== 'undefined' && window.__threeContext && window.__threeContext.scene) {
+        sceneRef.current = window.__threeContext.scene;
+        console.log('Retrieved scene from window.__threeContext');
+      } else {
+        // Try to get from canvas element
+        const canvas = document.querySelector('canvas');
+        if (canvas && canvas.__scene) {
+          sceneRef.current = canvas.__scene;
+          console.log('Retrieved scene from canvas element');
+        } else {
+          console.error('Cannot ensure buildings are visible: scene is not available');
+          
+          // Schedule a retry after a short delay
+          setTimeout(() => {
+            console.log('Retrying ensureBuildingsVisible...');
+            ensureBuildingsVisible();
+          }, 1000);
+          
+          return;
+        }
+      }
     }
     
     console.log('Ensuring buildings are visible...');
