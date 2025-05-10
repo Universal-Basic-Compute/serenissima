@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { GLTF } from 'three/examples/jsm/loaders/GLTFLoader';
 import { eventBus } from '@/lib/eventBus';
 import { EventTypes } from '@/lib/eventTypes';
 import { normalizeCoordinates } from '@/components/PolygonViewer/utils';
@@ -100,7 +101,7 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ scene, active }) =>
     
     try {
       // Load the model
-      const gltf = await new Promise<THREE.GLTF>((resolve, reject) => {
+      const gltf = await new Promise<GLTF>((resolve, reject) => {
         gltfLoader.current.load(
           modelPath,
           resolve,
