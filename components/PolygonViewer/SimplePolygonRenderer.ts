@@ -1109,8 +1109,11 @@ export default class SimplePolygonRenderer {
           
           if (idParts.length >= 3) {
             const markerType = idParts[0]; // 'bridge' or 'dock'
-            const polygonId = idParts[1];
-            const pointIndex = parseInt(idParts[2]);
+            
+            // Fix: The polygon ID is the combination of all parts except the first and last
+            // This handles IDs like 'bridge-polygon-1746057412398-4' correctly
+            const polygonId = idParts.slice(1, idParts.length - 1).join('-');
+            const pointIndex = parseInt(idParts[idParts.length - 1]);
             
             console.log(`Attempting to delete ${markerType} point ${pointIndex} from polygon ${polygonId}`);
             
