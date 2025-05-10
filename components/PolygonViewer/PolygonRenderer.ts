@@ -663,7 +663,9 @@ export default class PolygonRenderer {
                   // Make materials brighter for visibility
                   if (mat instanceof THREE.MeshBasicMaterial || mat instanceof THREE.MeshStandardMaterial) {
                     mat.color.setRGB(1, 0, 0); // Bright red for maximum visibility
-                    mat.emissive = new THREE.Color(0.5, 0, 0); // Add emissive for glow effect
+                    if (mat instanceof THREE.MeshStandardMaterial) {
+                      mat.emissive = new THREE.Color(0.5, 0, 0); // Add emissive for glow effect
+                    }
                   }
                 }
               });
@@ -674,7 +676,9 @@ export default class PolygonRenderer {
               // Make materials brighter for visibility
               if (object.material instanceof THREE.MeshBasicMaterial || object.material instanceof THREE.MeshStandardMaterial) {
                 object.material.color.setRGB(1, 0, 0); // Bright red for maximum visibility
-                object.material.emissive = new THREE.Color(0.5, 0, 0); // Add emissive for glow effect
+                if (object.material instanceof THREE.MeshStandardMaterial) {
+                  object.material.emissive = new THREE.Color(0.5, 0, 0); // Add emissive for glow effect
+                }
               }
             }
           }
