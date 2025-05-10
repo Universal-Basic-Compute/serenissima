@@ -479,6 +479,76 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
       
       <button
         onClick={() => {
+          // Check if buildings are in view
+          if (scene && camera) {
+            console.log('Checking if buildings are in camera view...');
+            
+            // Create a frustum to represent camera's view
+            const frustum = new THREE.Frustum();
+            const matrix = new THREE.Matrix4().multiplyMatrices(
+              camera.projectionMatrix,
+              camera.matrixWorldInverse
+            );
+            frustum.setFromProjectionMatrix(matrix);
+            
+            // Find all buildings in the scene
+            const buildings: THREE.Object3D[] = [];
+            scene.traverse((object) => {
+              if (object.userData && object.userData.buildingId) {
+                buildings.push(object);
+              }
+            });
+            
+            console.log(`Found ${buildings.length} buildings in the scene`);
+            
+            // Check each building against the frustum
+            let visibleCount = 0;
+            buildings.forEach(building => {
+              // Create a bounding box for the building
+              const bbox = new THREE.Box3().setFromObject(building);
+              const isVisible = frustum.intersectsBox(bbox);
+              
+              console.log(`Building ${building.userData.buildingId}: ${isVisible ? 'VISIBLE' : 'NOT VISIBLE'}`);
+              console.log(`  Position: ${building.position.x}, ${building.position.y}, ${building.position.z}`);
+              console.log(`  Bounding box: min(${bbox.min.x}, ${bbox.min.y}, ${bbox.min.z}), max(${bbox.max.x}, ${bbox.max.y}, ${bbox.max.z})`);
+              
+              if (isVisible) {
+                visibleCount++;
+              }
+            });
+            
+            console.log(`${visibleCount} out of ${buildings.length} buildings are visible in camera view`);
+            
+            // If no buildings are visible, log camera details
+            if (visibleCount === 0 && buildings.length > 0) {
+              console.log('Camera details:');
+              console.log(`  Position: ${camera.position.x}, ${camera.position.y}, ${camera.position.z}`);
+              console.log(`  Rotation: ${camera.rotation.x}, ${camera.rotation.y}, ${camera.rotation.z}`);
+              console.log(`  FOV: ${camera.fov}`);
+              console.log(`  Near/Far: ${camera.near}/${camera.far}`);
+              
+              // Try to get the target if it's an orbit camera
+              const controls = camera.userData?.controls;
+              if (controls && controls.target) {
+                console.log(`  Target: ${controls.target.x}, ${controls.target.y}, ${controls.target.z}`);
+              }
+            }
+          } else {
+            console.warn('Scene or camera not available');
+          }
+        }}
+        className="px-4 py-2 bg-indigo-600 text-white rounded-md shadow-md hover:bg-indigo-700 transition-colors flex items-center space-x-2"
+        title="Check if buildings are in camera view"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+          <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
+        </svg>
+        <span>Check Building Visibility</span>
+      </button>
+      
+      <button
+        onClick={() => {
           // Focus camera on the expected building position
           if (camera) {
             // Get the actual camera
