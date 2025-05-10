@@ -77,7 +77,7 @@ class DefaultBuildingRenderer implements IBuildingRenderer {
   }
 
   /**
-   * Get approximate building size based on type
+   * Get approximate building size based on type - to refactor
    */
   private getBuildingSizeByType(type: string): {width: number, height: number, depth: number} {
     switch(type) {
@@ -93,7 +93,7 @@ class DefaultBuildingRenderer implements IBuildingRenderer {
   }
 
   /**
-   * Get building color based on type
+   * Get building color based on type - to delete
    */
   private getBuildingColorByType(type: string): number {
     switch(type) {
