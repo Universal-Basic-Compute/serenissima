@@ -59,21 +59,14 @@ export class BuildingPositionManager {
     const x = (position.lng - this.bounds.centerLng) * scale;
     const z = -(position.lat - this.bounds.centerLat) * scale * latCorrectionFactor;
     
-    // Even after all our checks, if we still get extreme values, clamp them
-    // This is a last resort safety measure
-    const MAX_COORDINATE = 500; // Maximum allowed coordinate value
-    if (Math.abs(x) > MAX_COORDINATE || Math.abs(z) > MAX_COORDINATE) {
+    // Log the calculated position for debugging
+    if (Math.abs(x) > 500 || Math.abs(z) > 500) {
       console.warn(`Large position values calculated: (${x.toFixed(2)}, ${height}, ${z.toFixed(2)})`);
       console.warn(`Input coordinates: lat=${position.lat}, lng=${position.lng}`);
       console.warn(`Using scale: ${scale.toFixed(2)}`);
-      
-      // Clamp to a reasonable range as a last resort
-      const clampedX = Math.max(-MAX_COORDINATE, Math.min(MAX_COORDINATE, x));
-      const clampedZ = Math.max(-MAX_COORDINATE, Math.min(MAX_COORDINATE, z));
-      console.warn(`Clamped position: (${clampedX.toFixed(2)}, ${height}, ${clampedZ.toFixed(2)})`);
-      return new THREE.Vector3(clampedX, height, clampedZ);
     }
     
+    // Return the position without clamping
     return new THREE.Vector3(x, height, z);
   }
 
