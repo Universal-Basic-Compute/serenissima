@@ -479,6 +479,112 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
   }, [activeView, polygons]);
   
   
+  // Add debug helper function for transport markers
+  const debugTransportMarkers = () => {
+    if (!sceneRef.current) {
+      console.log("No scene reference available");
+      return;
+    }
+    
+    console.log("Debugging transport markers...");
+    
+    // First, check if we're in transport view
+    if (activeView !== 'transport') {
+      console.log("Not in transport view! Current view:", activeView);
+      console.log("Switching to transport view...");
+      
+      // Force switch to transport view
+      if (polygonRendererRef.current) {
+        polygonRendererRef.current.updateViewMode('transport');
+      }
+    }
+    
+    // Count all objects in the scene
+    let totalObjects = 0;
+    let meshes = 0;
+    let lines = 0;
+    let visibleObjects = 0;
+    let highYObjects = 0;
+    
+    sceneRef.current.traverse(object => {
+      totalObjects++;
+      if (object instanceof THREE.Mesh) meshes++;
+      if (object instanceof THREE.Line) lines++;
+      if (object.visible) visibleObjects++;
+      if (object.position.y > 5) highYObjects++;
+    });
+    
+    console.log(`Scene statistics:
+      - Total objects: ${totalObjects}
+      - Meshes: ${meshes}
+      - Lines: ${lines}
+      - Visible objects: ${visibleObjects}
+      - Objects with y > 5: ${highYObjects}
+    `);
+    
+    // Now specifically look for transport markers
+    let visibleMarkers = 0;
+    let invisibleMarkers = 0;
+    let potentialMarkers = [];
+    
+    sceneRef.current.traverse(object => {
+      // Check if this is likely a transport marker based on position and render order
+      if ((object instanceof THREE.Mesh || object instanceof THREE.Line) && 
+          object.position.y > 0.5 && object.renderOrder >= 90) {
+        potentialMarkers.push(object);
+        
+        if (object.visible) {
+          visibleMarkers++;
+        } else {
+          invisibleMarkers++;
+          // Force visibility
+          object.visible = true;
+        }
+      }
+    });
+    
+    console.log(`Found ${visibleMarkers} visible markers and ${invisibleMarkers} invisible markers`);
+    console.log(`Forced visibility on ${invisibleMarkers} markers`);
+    
+    if (potentialMarkers.length === 0) {
+      console.log("No transport markers found! Creating emergency markers...");
+      
+      // Create emergency markers that will definitely be visible
+      for (let i = 0; i < 5; i++) {
+        const geometry = new THREE.BoxGeometry(1, 1, 1);
+        const material = new THREE.MeshBasicMaterial({ 
+          color: 0xFF00FF, // Bright magenta
+          transparent: false
+        });
+        
+        const marker = new THREE.Mesh(geometry, material);
+        marker.position.set(i * 20 - 40, 5, 0); // Position high above the center
+        marker.renderOrder = 3000; // Super high render order
+        
+        sceneRef.current.add(marker);
+        console.log(`Created emergency marker at position: ${i * 20 - 40}, 5, 0`);
+      }
+      
+      // Force a scene update
+      if (rendererRef.current) {
+        rendererRef.current.render(sceneRef.current, cameraControllerRef.current.camera);
+      }
+      
+      // If we have a polygon renderer, try to force create transport markers
+      if (polygonRendererRef.current) {
+        console.log("Attempting to force create transport markers...");
+        
+        // Access the createBridgeAndDockPoints method
+        polygonRendererRef.current.createBridgeAndDockPoints();
+      }
+    }
+    
+    // Force a scene update
+    if (rendererRef.current) {
+      rendererRef.current.render(sceneRef.current, cameraControllerRef.current.camera);
+    }
+  };
+  
   // Add effect to listen for tooltip events
   useEffect(() => {
     const handleShowTooltip = (data: any) => {
