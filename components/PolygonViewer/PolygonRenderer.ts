@@ -604,17 +604,15 @@ export default class PolygonRenderer {
           // Force visibility
           object.visible = true;
           
-          // Adjust position to be closer to the land
-          // Lower the y-position to bring buildings closer to the land
-          if (object.position.y > 0.5) {
-            // Store original position if not already stored
-            if (!object.userData.originalY) {
-              object.userData.originalY = object.position.y;
-            }
-            
-            // Lower the building position to be closer to the land
-            object.position.y = 0.2; // Set a lower y value to bring buildings closer to land
+          // Adjust position to be at an appropriate height above the land
+          // Store original position if not already stored
+          if (!object.userData.originalY) {
+            object.userData.originalY = object.position.y;
           }
+          
+          // Set the building position to a more appropriate height
+          // Increase from 0.2 to 1.0 to ensure buildings are visible above the land
+          object.position.y = 1.0; // Increased from 0.2 to 1.0
           
           // Force material update
           if (object.material) {
