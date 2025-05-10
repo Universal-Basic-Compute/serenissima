@@ -175,10 +175,10 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
     });
     const debugSphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
 
-    // Use the exact same position as the building
-    debugSphere.position.set(position.x, position.y + 15, position.z); // Position 15 units above the building
+    // Use the exact same position as the building but 15 units above ground
+    debugSphere.position.set(position.x, 15, position.z); // 15 units above ground
     scene.add(debugSphere);
-    console.log(`Added debug sphere at position: ${JSON.stringify(debugSphere.position)}`);
+    console.log(`Added debug sphere at 15 units above ground: ${JSON.stringify(debugSphere.position)}`);
 
     // Store reference to the debug sphere
     const debugId = `debug_sphere_${id}`;
@@ -189,18 +189,18 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
       new THREE.SphereGeometry(25, 32, 32),
       new THREE.MeshBasicMaterial({ color: 0x00ff00, transparent: true, opacity: 0.9 })
     );
-    debugSphere2.position.set(position.x, position.y + 30, position.z); // 30 units above the building
+    debugSphere2.position.set(position.x, 30, position.z); // 30 units above ground
     scene.add(debugSphere2);
-    console.log(`Added second debug sphere at position: ${JSON.stringify(debugSphere2.position)}`);
+    console.log(`Added second debug sphere at 30 units above ground: ${JSON.stringify(debugSphere2.position)}`);
     buildingMeshesRef.current.set(`debug_sphere2_${id}`, debugSphere2);
 
     const debugSphere3 = new THREE.Mesh(
       new THREE.SphereGeometry(20, 32, 32),
       new THREE.MeshBasicMaterial({ color: 0x0000ff, transparent: true, opacity: 0.9 })
     );
-    debugSphere3.position.set(position.x, position.y + 45, position.z); // 45 units above the building
+    debugSphere3.position.set(position.x, 45, position.z); // 45 units above ground
     scene.add(debugSphere3);
-    console.log(`Added third debug sphere at position: ${JSON.stringify(debugSphere3.position)}`);
+    console.log(`Added third debug sphere at 45 units above ground: ${JSON.stringify(debugSphere3.position)}`);
     buildingMeshesRef.current.set(`debug_sphere3_${id}`, debugSphere3);
     
     // Add a reference sphere at origin (0,0,0)
@@ -246,10 +246,10 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
             const model = gltf.scene;
             
             // Position and rotate the model
-            // Use the exact position values but RAISE the Y coordinate to place above water
-            model.position.set(position.x, 5.0, position.z); // Set Y to 5.0 units above water level
+            // Use the exact position values but place directly on the ground
+            model.position.set(position.x, 0, position.z); // Set Y to 0 to place on the ground
             model.rotation.y = rotation || 0;
-            console.log(`Positioned model at position: x=${position.x}, y=5.0, z=${position.z}`);
+            console.log(`Positioned model at ground level: x=${position.x}, y=0, z=${position.z}`);
             
             // Calculate bounding box to properly scale the model
             const box = new THREE.Box3().setFromObject(model);
@@ -282,9 +282,9 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
             const helperGeometry = new THREE.SphereGeometry(0.5, 16, 16);
             const helperMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
             const helper = new THREE.Mesh(helperGeometry, helperMaterial);
-            helper.position.set(position.x, 5.0, position.z);
+            helper.position.set(position.x, 0, position.z);
             scene.add(helper);
-            console.log(`Added position helper at ${JSON.stringify(helper.position)}`);
+            console.log(`Added position helper at ground level: ${JSON.stringify(helper.position)}`);
             
             // Add to scene
             scene.add(model);
@@ -337,8 +337,8 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
     });
     const fallbackMesh = new THREE.Mesh(geometry, material);
     
-    // Position and rotate the fallback - raise the Y position
-    fallbackMesh.position.set(position.x, 5.0, position.z); // Set Y to 5.0 units above water level
+    // Position and rotate the fallback - place directly on the ground
+    fallbackMesh.position.set(position.x, 0, position.z); // Set Y to 0 to place on the ground
     fallbackMesh.rotation.y = rotation || 0;
     
     // Make the fallback mesh much larger for better visibility
@@ -353,9 +353,9 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
     const helperGeometry = new THREE.SphereGeometry(15, 16, 16); // Much larger helper
     const helperMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
     const helper = new THREE.Mesh(helperGeometry, helperMaterial);
-    helper.position.set(position.x, 5.0, position.z);
+    helper.position.set(position.x, 0, position.z);
     scene.add(helper);
-    console.log(`Added position helper at ${JSON.stringify(helper.position)}`);
+    console.log(`Added position helper at ground level: ${JSON.stringify(helper.position)}`);
     
     // Add to scene
     scene.add(fallbackMesh);
@@ -363,7 +363,7 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
     // Store reference
     buildingMeshesRef.current.set(id, fallbackMesh);
     
-    console.log(`Created fallback mesh for building ${id} at position: x=${position.x}, y=5.0, z=${position.z}`);
+    console.log(`Created fallback mesh for building ${id} at ground level: x=${position.x}, y=0, z=${position.z}`);
   };
   
   // This component doesn't render any UI
