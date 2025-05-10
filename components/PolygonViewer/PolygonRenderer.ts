@@ -1027,6 +1027,11 @@ export default class PolygonRenderer {
    * Update coat of arms for owners
    */
   public updateOwnerCoatOfArms(ownerCoatOfArmsMap: Record<string, string>) {
+    // Only update owner coat of arms in land view
+    if (this.activeView !== 'land') {
+      return;
+    }
+    
     console.log('updateOwnerCoatOfArms called with data:', ownerCoatOfArmsMap);
     
     // Update the coat of arms map
@@ -1047,11 +1052,8 @@ export default class PolygonRenderer {
     
     console.log('Combined coat of arms map now has', Object.keys(this.ownerCoatOfArmsMap).length, 'entries');
     
-    // If we're in land view, update the owner indicators
-    if (this.activeView === 'land') {
-      // Recreate owner indicators with updated coat of arms
-      this.createOwnerIndicators();
-    }
+    // Recreate owner indicators with updated coat of arms
+    this.createOwnerIndicators();
     
     // Set the flag to indicate we've updated coat of arms
     this.hasUpdatedCoatOfArms = true;
@@ -1061,6 +1063,11 @@ export default class PolygonRenderer {
    * Update colors for owners
    */
   public updateOwnerColors(colorMap: Record<string, string>) {
+    // Only update owner colors in land view
+    if (this.activeView !== 'land') {
+      return;
+    }
+    
     console.log('Updating owner colors with data:', colorMap);
     
     // Update the color map
@@ -1079,10 +1086,8 @@ export default class PolygonRenderer {
       }
     });
     
-    // If we're in land view, update the overlays and owner indicators
-    if (this.activeView === 'land') {
-      this.updatePolygonOwnerColors();
-    }
+    // Update the overlays with the new colors
+    this.updatePolygonOwnerColors();
   }
   
   /**
