@@ -2,8 +2,10 @@ const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
 const dotenv = require('dotenv');
+const Airtable = require('airtable');
 
 dotenv.config();
+const base = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY }).base(process.env.AIRTABLE_BASE_ID);
 
 // Define citizen interface
 interface Citizen {
@@ -49,6 +51,56 @@ function saveCitizens(citizens: Citizen[]): void {
     console.log(`Saved ${citizens.length} citizens to ${CITIZENS_DATA_PATH}`);
   } catch (error) {
     console.error('Error saving citizens:', error);
+  }
+}
+
+// Save citizens to Airtable
+async function saveCitizensToAirtable(citizens: Citizen[]): Promise<void> {
+  try {
+    console.log(`Saving ${citizens.length} citizens to Airtable...`);
+    
+    // Prepare records for Airtable
+    const records = citizens.map(citizen => ({
+      fields: {
+        id: citizen.id,
+        socialClass: citizen.socialClass,
+        firstName: citizen.firstName,
+        lastName: citizen.lastName,
+        description: citizen.description,
+        imagePrompt: citizen.imagePrompt,
+        wealth: citizen.wealth,
+        createdAt: citizen.createdAt,
+        imageUrl: citizen.imageUrl || ''
+      }
+    }));
+    
+    // Split records into chunks of 10 (Airtable's limit for batch operations)
+    const chunks = [];
+    for (let i = 0; i < records.length; i += 10) {
+      chunks.push(records.slice(i, i + 10));
+    }
+    
+    // Process each chunk
+    for (const chunk of chunks) {
+      await new Promise((resolve, reject) => {
+        base('CITIZENS').create(chunk, (err: any, records: any) => {
+          if (err) {
+            console.error('Error saving to Airtable:', err);
+            reject(err);
+            return;
+          }
+          console.log(`Saved ${records.length} citizens to Airtable`);
+          resolve(records);
+        });
+      });
+      
+      // Add a small delay between chunks to avoid rate limiting
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+    
+    console.log('Successfully saved all citizens to Airtable');
+  } catch (error) {
+    console.error('Error in saveCitizensToAirtable:', error);
   }
 }
 
@@ -227,6 +279,9 @@ async function generateCitizens(batchCount: number = 1): Promise<void> {
     // Add new citizens to existing ones and save
     const allCitizens = [...existingCitizens, ...newCitizens];
     saveCitizens(allCitizens);
+    
+    // Save new citizens to Airtable
+    await saveCitizensToAirtable(newCitizens);
     
     console.log(`Successfully generated ${newCitizens.length} new citizens`);
     console.log(`Total citizens: ${allCitizens.length}`);
