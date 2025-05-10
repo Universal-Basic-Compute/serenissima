@@ -57,14 +57,14 @@ async function loadCitizensFromAirtable(): Promise<Citizen[]> {
           records.forEach(record => {
             const fields = record.fields;
             citizens.push({
-              id: fields.CitizenId || record.id,
+              id: fields.CitizenId?.toString() || record.id,
               socialClass: fields.SocialClass as 'Patrician' | 'Cittadini' | 'Popolani' | 'Laborer',
-              firstName: fields.FirstName,
-              lastName: fields.LastName,
-              description: fields.Description,
-              imagePrompt: fields.ImagePrompt,
-              wealth: fields.Wealth,
-              createdAt: fields.CreatedAt
+              firstName: fields.FirstName?.toString() || '',
+              lastName: fields.LastName?.toString() || '',
+              description: fields.Description?.toString() || '',
+              imagePrompt: fields.ImagePrompt?.toString() || '',
+              wealth: typeof fields.Wealth === 'number' ? fields.Wealth : 0,
+              createdAt: fields.CreatedAt?.toString() || new Date().toISOString()
             });
           });
           
