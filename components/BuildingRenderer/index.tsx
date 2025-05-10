@@ -246,10 +246,10 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
             const model = gltf.scene;
             
             // Position and rotate the model
-            // Use the exact position values but place directly on the ground
-            model.position.set(position.x, 0, position.z); // Set Y to 0 to place on the ground
+            // Use the exact position values but place slightly above the ground
+            model.position.set(position.x, 0.1, position.z); // Set Y to 0.1 to place slightly above ground
             model.rotation.y = rotation || 0;
-            console.log(`Positioned model at ground level: x=${position.x}, y=0, z=${position.z}`);
+            console.log(`Positioned model slightly above ground level: x=${position.x}, y=0.1, z=${position.z}`);
             
             // Calculate bounding box to properly scale the model
             const box = new THREE.Box3().setFromObject(model);
@@ -269,7 +269,7 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
               console.log(`Model was too small (${maxDimension} units), scaled up by ${scale}`);
             } else {
               // Apply a default scale to make buildings more visible and larger
-              const scale = 2.0; // Dramatically increased from 0.1 to 2.0
+              const scale = 5.0; // Increase scale even more for better visibility
               model.scale.set(scale, scale, scale);
               console.log(`Applied much larger scale of ${scale} to building`);
             }
@@ -337,13 +337,13 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
     });
     const fallbackMesh = new THREE.Mesh(geometry, material);
     
-    // Position and rotate the fallback - place directly on the ground
-    fallbackMesh.position.set(position.x, 0, position.z); // Set Y to 0 to place on the ground
+    // Position and rotate the fallback - place slightly above the ground
+    fallbackMesh.position.set(position.x, 0.1, position.z); // Set Y to 0.1 to place slightly above ground
     fallbackMesh.rotation.y = rotation || 0;
     
     // Make the fallback mesh much larger for better visibility
-    fallbackMesh.scale.set(5.0, 5.0, 5.0); // Dramatically increased from 0.5 to 5.0
-    console.log(`Created much larger fallback mesh for building ${id}`);
+    fallbackMesh.scale.set(10.0, 10.0, 10.0); // Double the scale for better visibility
+    console.log(`Created much larger fallback mesh for building ${id} with scale 10.0`);
     
     // Store the building ID in userData for later reference
     fallbackMesh.userData.buildingId = id;
@@ -363,7 +363,7 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
     // Store reference
     buildingMeshesRef.current.set(id, fallbackMesh);
     
-    console.log(`Created fallback mesh for building ${id} at ground level: x=${position.x}, y=0, z=${position.z}`);
+    console.log(`Created fallback mesh for building ${id} slightly above ground level: x=${position.x}, y=0.1, z=${position.z}`);
   };
   
   // This component doesn't render any UI
