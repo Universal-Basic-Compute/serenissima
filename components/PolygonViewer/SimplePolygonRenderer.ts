@@ -742,7 +742,7 @@ export default class SimplePolygonRenderer {
         sprite.visible = false;
       });
       
-      // CHANGED: Always recreate bridge and dock points when switching to transport view
+      // ALWAYS recreate bridge and dock points when switching to transport view
       console.log(`Creating and showing bridge and dock points in transport view`);
       
       // Clear existing markers first to avoid duplicates
@@ -760,6 +760,29 @@ export default class SimplePolygonRenderer {
       
       // Force a scene update
       this.scene.updateMatrixWorld(true);
+      
+      // Add a delayed check to ensure markers are visible
+      setTimeout(() => {
+        if (this.bridgePointMarkers.length > 0 || this.dockPointMarkers.length > 0) {
+          console.log("Transport markers should be visible now");
+          
+          // Force visibility again after a delay
+          this.bridgePointMarkers.forEach(marker => {
+            marker.visible = true;
+            marker.renderOrder = 2000; // Ensure extremely high render order
+          });
+          this.dockPointMarkers.forEach(marker => {
+            marker.visible = true;
+            if (marker instanceof THREE.Mesh) {
+              marker.renderOrder = 2000; // Ensure extremely high render order
+            } else if (marker instanceof THREE.Line) {
+              marker.renderOrder = 1999; // Slightly lower for lines
+            }
+          });
+        } else {
+          console.warn("No transport markers were created!");
+        }
+      }, 500);
     } else {
       // Hide coat of arms sprites and bridge/dock points in other views
       Object.values(this.coatOfArmsSprites).forEach(sprite => {
@@ -1290,7 +1313,7 @@ export default class SimplePolygonRenderer {
    * Create bridge and dock point markers for transport view
    */
   private createBridgeAndDockPoints() {
-    // Only create markers if they don't exist yet or if we're in transport view
+    // Only create markers if we're in transport view
     if (this.activeView !== 'transport') {
       console.log(`Not in transport view (activeView: ${this.activeView}), skipping bridge/dock point creation`);
       return;
@@ -1334,6 +1357,25 @@ export default class SimplePolygonRenderer {
     // Clear any existing markers first
     this.clearBridgeAndDockMarkers();
     
+    // Create a new material for bridge points - MUCH brighter and more visible
+    const bridgeMaterial = new THREE.MeshBasicMaterial({
+      color: 0xFF0000, // Pure RED for maximum visibility
+      transparent: false,
+      emissive: 0xFF0000,
+      emissiveIntensity: 1.0
+    });
+    
+    // Create materials for dock points - MUCH brighter and more visible
+    const dockEdgeMaterial = new THREE.MeshBasicMaterial({
+      color: 0x00FF00, // Pure GREEN for maximum visibility
+      transparent: false
+    });
+    
+    const dockWaterMaterial = new THREE.MeshBasicMaterial({
+      color: 0x0000FF, // Pure BLUE for maximum visibility
+      transparent: false
+    });
+    
     // Process each polygon
     this.polygons.forEach(polygon => {
       // Skip if polygon has no bridge or dock points
@@ -1351,18 +1393,12 @@ export default class SimplePolygonRenderer {
               this.bounds.latCorrectionFactor
             )[0];
             
-            // CHANGED: Make bridge points MUCH larger and brighter
-            const geometry = new THREE.BoxGeometry(1.5, 1.5, 1.5); // 3x larger
-            const material = new THREE.MeshBasicMaterial({
-              color: 0xFF0000, // Bright RED for bridge points
-              transparent: false,
-              emissive: 0xFF0000,
-              emissiveIntensity: 1.0
-            });
+            // Create a MUCH larger marker for bridge points
+            const geometry = new THREE.BoxGeometry(3, 3, 3); // 10x larger than before
             
-            const marker = new THREE.Mesh(geometry, material);
-            marker.position.set(normalizedCoord.x, 0.5, -normalizedCoord.y); // Position closer to water level (y=0)
-            marker.renderOrder = 1000; // Ensure it renders on top of everything
+            const marker = new THREE.Mesh(geometry, bridgeMaterial);
+            marker.position.set(normalizedCoord.x, 5, -normalizedCoord.y); // Position MUCH higher above water
+            marker.renderOrder = 2000; // Extremely high render order
             
             // Add metadata for tooltips
             marker.userData = {
@@ -1401,16 +1437,12 @@ export default class SimplePolygonRenderer {
               this.bounds.latCorrectionFactor
             )[0];
             
-            // CHANGED: Make dock points MUCH larger and brighter
-            const edgeGeometry = new THREE.BoxGeometry(1.5, 1.5, 1.5); // 3x larger
-            const edgeMaterial = new THREE.MeshBasicMaterial({
-              color: 0x00FF00, // Bright GREEN for dock edge points
-              transparent: false
-            });
+            // Create a MUCH larger marker for dock edge points
+            const edgeGeometry = new THREE.BoxGeometry(3, 3, 3); // 10x larger
             
-            const edgeMarker = new THREE.Mesh(edgeGeometry, edgeMaterial);
-            edgeMarker.position.set(edgeCoord.x, 0.5, -edgeCoord.y); // Position closer to water level (y=0)
-            edgeMarker.renderOrder = 1000; // Ensure it renders on top of everything
+            const edgeMarker = new THREE.Mesh(edgeGeometry, dockEdgeMaterial);
+            edgeMarker.position.set(edgeCoord.x, 5, -edgeCoord.y); // Position MUCH higher above water
+            edgeMarker.renderOrder = 2000; // Extremely high render order
             
             // Add metadata for tooltips
             edgeMarker.userData = {
@@ -1423,35 +1455,31 @@ export default class SimplePolygonRenderer {
             this.scene.add(edgeMarker);
             this.dockPointMarkers.push(edgeMarker);
             
-            // Create a line connecting edge to water - MUCH thicker
+            // Create a MUCH thicker line connecting edge to water
             const lineGeometry = new THREE.BufferGeometry();
             const vertices = new Float32Array([
-              edgeCoord.x, 0.5, -edgeCoord.y,
-              waterCoord.x, 0.5, -waterCoord.y
+              edgeCoord.x, 5, -edgeCoord.y,
+              waterCoord.x, 5, -waterCoord.y
             ]);
             lineGeometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
             
             const lineMaterial = new THREE.LineBasicMaterial({
-              color: 0x00FFFF, // Bright CYAN for connecting lines
-              linewidth: 10 // Much thicker line (note: linewidth may not work in WebGL)
+              color: 0xFFFF00, // Bright YELLOW for connecting lines
+              linewidth: 20 // Much thicker line (note: linewidth may not work in WebGL)
             });
             
             const line = new THREE.Line(lineGeometry, lineMaterial);
-            line.renderOrder = 999; // High render order but below the points
+            line.renderOrder = 1999; // Very high render order
             
             this.scene.add(line);
             this.dockPointMarkers.push(line);
             
-            // Create a marker for the water point - MUCH larger
-            const waterGeometry = new THREE.BoxGeometry(1.2, 1.2, 1.2); // 3x larger
-            const waterMaterial = new THREE.MeshBasicMaterial({
-              color: 0x0000FF, // Bright BLUE for water points
-              transparent: false
-            });
+            // Create a MUCH larger marker for water points
+            const waterGeometry = new THREE.BoxGeometry(2.5, 2.5, 2.5); // Slightly smaller than edge points
             
-            const waterMarker = new THREE.Mesh(waterGeometry, waterMaterial);
-            waterMarker.position.set(waterCoord.x, 0.5, -waterCoord.y); // Position closer to water level (y=0)
-            waterMarker.renderOrder = 1000; // Ensure it renders on top of everything
+            const waterMarker = new THREE.Mesh(waterGeometry, dockWaterMaterial);
+            waterMarker.position.set(waterCoord.x, 5, -waterCoord.y); // Position MUCH higher above water
+            waterMarker.renderOrder = 2000; // Extremely high render order
             
             // Add metadata for tooltips
             waterMarker.userData = {

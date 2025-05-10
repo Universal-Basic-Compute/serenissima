@@ -555,8 +555,38 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
   }, [loadUsers, activeView, users]);
   
   
-  // The handleMouseDown function is already defined above
-  
+  // Add debug helper function for transport markers
+  const debugTransportMarkers = () => {
+    if (!sceneRef.current) return;
+    
+    console.log("Debugging transport markers...");
+    let visibleMarkers = 0;
+    let invisibleMarkers = 0;
+    
+    // Find all mesh objects in the scene
+    sceneRef.current.traverse(object => {
+      if (object instanceof THREE.Mesh || object instanceof THREE.Line) {
+        // Check if this is likely a transport marker based on position and render order
+        if (object.position.y > 3 && object.renderOrder >= 1000) {
+          if (object.visible) {
+            visibleMarkers++;
+          } else {
+            invisibleMarkers++;
+            // Force visibility
+            object.visible = true;
+          }
+        }
+      }
+    });
+    
+    console.log(`Found ${visibleMarkers} visible markers and ${invisibleMarkers} invisible markers`);
+    console.log(`Forced visibility on ${invisibleMarkers} markers`);
+    
+    // Force a scene update
+    if (rendererRef.current) {
+      rendererRef.current.render(sceneRef.current, cameraControllerRef.current.camera);
+    }
+  };
   
   // Update water quality when parent component changes quality mode
   useEffect(() => {
@@ -605,10 +635,16 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
             <div className="w-4 h-4 rounded-full bg-[#0000FF] mr-2"></div>
             <span>Dock Water Points</span>
           </div>
-          <div className="flex items-center">
+          <div className="flex items-center mb-3">
             <div className="w-4 h-4 rounded-full bg-[#FF0000] mr-2"></div>
             <span>Bridge Points</span>
           </div>
+          <button 
+            onClick={debugTransportMarkers}
+            className="px-2 py-1 bg-amber-600 text-white rounded text-sm hover:bg-amber-700"
+          >
+            Debug Markers
+          </button>
         </div>
       )}
       
