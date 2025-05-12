@@ -129,7 +129,14 @@ export class WaterFacade {
     try {
       // For minimal quality, create a very simple blue plane
       if (this.quality === WaterQualityLevel.MINIMAL) {
-        return this.createMinimalWater();
+        // Try to use the minimal water first
+        try {
+          return this.createMinimalWater();
+        } catch (error) {
+          console.warn('Error creating minimal water, falling back to ultra-minimal:', error);
+          // If that fails, fall back to ultra-minimal
+          return this.createUltraMinimalWater();
+        }
       }
       
       // Water geometry with detail level based on quality
@@ -262,6 +269,39 @@ export class WaterFacade {
     water.position.set(this.position.x, 0, this.position.z);
     water.renderOrder = 0;
     
+    // Modify the water material to remove edge artifacts
+    if (water.material instanceof THREE.ShaderMaterial) {
+      // Simplify the shader for minimal quality to remove edge artifacts
+      let fragmentShader = water.material.fragmentShader;
+      
+      // Reduce or eliminate the edge highlights that cause the artifacts
+      fragmentShader = fragmentShader.replace(
+        'gl_FragColor = vec4( color, alpha );',
+        // Darken the edges slightly to reduce artifacts
+        'gl_FragColor = vec4( color * 0.95, alpha );'
+      );
+      
+      // Reduce specular highlights which can cause edge artifacts
+      fragmentShader = fragmentShader.replace(
+        'vec3 specularColor = sunColor * specular;',
+        'vec3 specularColor = sunColor * specular * 0.3;' // Reduce specular by 70%
+      );
+      
+      // Apply the modified shader
+      water.material.fragmentShader = fragmentShader;
+      water.material.needsUpdate = true;
+      
+      // Reduce the normal map influence which can cause edge artifacts
+      if (water.material.uniforms.normalSampler) {
+        water.material.uniforms.normalSampler.value.anisotropy = 1; // Minimum anisotropy
+      }
+      
+      // Reduce distortion to minimum
+      if (water.material.uniforms.distortionScale) {
+        water.material.uniforms.distortionScale.value = 0.05; // Almost no distortion
+      }
+    }
+    
     return water;
   }
 
@@ -270,6 +310,65 @@ export class WaterFacade {
    * @returns Simple water mesh
    * @private
    */
+  /**
+   * Create an ultra-minimal water plane with no shader effects
+   * @returns Simple water mesh that mimics the Water class interface
+   * @private
+   */
+  private createUltraMinimalWater(): Water {
+    console.log('Creating ultra-minimal water plane with no shader effects');
+    
+    // Create a simple plane geometry with minimal segments
+    const waterGeometry = new THREE.PlaneGeometry(this.size, this.size, 1, 1);
+    
+    // Create a simple blue material with no effects
+    const waterMaterial = new THREE.MeshBasicMaterial({
+      color: this.color,
+      transparent: true,
+      opacity: this.opacity,
+      side: THREE.DoubleSide
+    });
+    
+    // Create a mesh with the geometry and material
+    const waterMesh = new THREE.Mesh(waterGeometry, waterMaterial);
+    
+    // Position the water plane
+    waterMesh.rotation.x = -Math.PI / 2;
+    waterMesh.position.set(this.position.x, 0, this.position.z);
+    waterMesh.renderOrder = 0;
+    
+    // We need to return a Water object, so we'll create a minimal one
+    // but replace its material with our basic material
+    const water = new Water(
+      waterGeometry,
+      {
+        textureWidth: 1,
+        textureHeight: 1,
+        waterColor: this.color,
+        distortionScale: 0,
+        fog: false
+      }
+    );
+    
+    // Replace the shader material with our basic material
+    if (water.material) {
+      if (Array.isArray(water.material)) {
+        water.material.forEach(m => m.dispose());
+      } else {
+        water.material.dispose();
+      }
+    }
+    
+    water.material = waterMaterial;
+    
+    // Position water
+    water.rotation.x = -Math.PI / 2;
+    water.position.set(this.position.x, 0, this.position.z);
+    water.renderOrder = 0;
+    
+    return water;
+  }
+
   private createFallbackWater(): Water {
     console.warn('Creating fallback water plane');
     this.fallbackMode = true;
@@ -767,6 +866,36 @@ export class WaterFacade {
       this.water.visible = visible;
     } catch (error) {
       console.warn('Error updating water visibility:', error);
+    }
+  }
+  
+  /**
+   * Switch to ultra-minimal mode to eliminate artifacts
+   * This can be called if artifacts are detected
+   */
+  public switchToUltraMinimal(): void {
+    if (this.isDisposed || !this.water) return;
+    
+    console.log('Switching to ultra-minimal water to eliminate artifacts');
+    
+    try {
+      // Remove current water
+      this.scene.remove(this.water);
+      
+      // Dispose of current water resources
+      if (this.water.material) {
+        if (Array.isArray(this.water.material)) {
+          this.water.material.forEach(m => m.dispose());
+        } else {
+          this.water.material.dispose();
+        }
+      }
+      
+      // Create ultra-minimal water
+      this.water = this.createUltraMinimalWater();
+      this.scene.add(this.water);
+    } catch (error) {
+      console.error('Error switching to ultra-minimal water:', error);
     }
   }
   
