@@ -14,6 +14,11 @@ export default function ViewModeMenu({ activeView, setActiveView }: ViewModeMenu
     // Emit event to notify other components about the view mode change
     eventBus.emit(EventTypes.VIEW_MODE_CHANGED, { viewMode: view });
     
+    // Dispatch an event to close the GuildsPanel if it's open and we're not switching to guilds view
+    if (view !== 'guilds') {
+      window.dispatchEvent(new CustomEvent('closeGuildsPanel'));
+    }
+    
     // If switching to buildings view, dispatch a custom event to ensure buildings are visible
     if (view === 'buildings') {
       console.log('Switching to buildings view, dispatching event');

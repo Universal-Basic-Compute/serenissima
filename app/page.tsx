@@ -97,6 +97,13 @@ export default function SimplePage() {
     }
   }, [pathname, showGovernancePanel, showKnowledgePanel, showLoansPanel, showGuildsPanel]);
   
+  // Close the guilds panel when switching to a different view
+  useEffect(() => {
+    if (activeView !== 'guilds' && showGuildsPanel) {
+      setShowGuildsPanel(false);
+    }
+  }, [activeView, showGuildsPanel]);
+  
   // Since 'land' is the default view, fetch income data on initial load
   useEffect(() => {
     if (activeView === 'land') {
@@ -589,6 +596,7 @@ export default function SimplePage() {
     const handleShowTransferMenu = () => setTransferMenuOpen(true);
     const handleShowWithdrawMenu = () => setWithdrawMenuOpen(true);
     const handleShowUsernamePrompt = () => setShowUsernamePrompt(true);
+    const handleCloseGuildsPanel = () => setShowGuildsPanel(false);
     
     // Add this handler for the land purchase modal
     const handleShowLandPurchaseModal = (event: CustomEvent) => {
@@ -609,6 +617,7 @@ export default function SimplePage() {
     window.addEventListener('showUsernamePrompt', handleShowUsernamePrompt);
     window.addEventListener('showLandPurchaseModal', handleShowLandPurchaseModal as EventListener);
     window.addEventListener('showLoanApplicationModal', handleShowLoanApplicationModal as EventListener);
+    window.addEventListener('closeGuildsPanel', handleCloseGuildsPanel);
     
     return () => {
       window.removeEventListener('showTransferMenu', handleShowTransferMenu);
@@ -616,6 +625,7 @@ export default function SimplePage() {
       window.removeEventListener('showUsernamePrompt', handleShowUsernamePrompt);
       window.removeEventListener('showLandPurchaseModal', handleShowLandPurchaseModal as EventListener);
       window.removeEventListener('showLoanApplicationModal', handleShowLoanApplicationModal as EventListener);
+      window.removeEventListener('closeGuildsPanel', handleCloseGuildsPanel);
     };
   }, []);
 
@@ -830,6 +840,7 @@ export default function SimplePage() {
                   setShowGovernancePanel(false);
                   setShowKnowledgePanel(false);
                   setShowLoansPanel(false);
+                  setShowGuildsPanel(false);
                   setActiveView('citizens');
                   // Update URL without page navigation using replaceState
                   window.history.replaceState(null, '', '/citizens');
@@ -852,6 +863,7 @@ export default function SimplePage() {
                   setShowKnowledgePanel(true);
                   setShowGovernancePanel(false);
                   setShowLoansPanel(false);
+                  setShowGuildsPanel(false);
                   setActiveView('knowledge');
                   // Update URL without page navigation using replaceState
                   window.history.replaceState(null, '', '/knowledge');
@@ -871,6 +883,7 @@ export default function SimplePage() {
                   setShowLoansPanel(true);
                   setShowGovernancePanel(false);
                   setShowKnowledgePanel(false);
+                  setShowGuildsPanel(false);
                   setActiveView('loans');
                   // Update URL without page navigation using replaceState
                   window.history.replaceState(null, '', '/loans');
@@ -891,6 +904,7 @@ export default function SimplePage() {
                 onClick={() => {
                   setActiveView('markets');
                   setMarketPanelVisible(true);
+                  setShowGuildsPanel(false);
                 }}
                 className={`w-full flex items-center p-2 rounded-lg transition-colors ${
                   activeView === 'markets' ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700'
@@ -902,7 +916,10 @@ export default function SimplePage() {
             </li>
             <li>
               <button
-                onClick={() => setActiveView('resources')}
+                onClick={() => {
+                  setActiveView('resources');
+                  setShowGuildsPanel(false);
+                }}
                 className={`w-full flex items-center p-2 rounded-lg transition-colors ${
                   activeView === 'resources' ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700'
                 }`}
@@ -913,7 +930,10 @@ export default function SimplePage() {
             </li>
             <li>
               <button
-                onClick={() => setActiveView('transport')}
+                onClick={() => {
+                  setActiveView('transport');
+                  setShowGuildsPanel(false);
+                }}
                 className={`w-full flex items-center p-2 rounded-lg transition-colors ${
                   activeView === 'transport' ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700'
                 }`}
@@ -926,6 +946,7 @@ export default function SimplePage() {
               <button
                 onClick={() => {
                   setActiveView('buildings');
+                  setShowGuildsPanel(false);
                   // Dispatch an event to refresh buildings
                   eventBus.emit(EventTypes.BUILDING_PLACED, { refresh: true });
                 }}
@@ -939,7 +960,10 @@ export default function SimplePage() {
             </li>
             <li>
               <button
-                onClick={() => setActiveView('land')}
+                onClick={() => {
+                  setActiveView('land');
+                  setShowGuildsPanel(false);
+                }}
                 className={`w-full flex items-center p-2 rounded-lg transition-colors ${
                   activeView === 'land' ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700'
                 }`}
