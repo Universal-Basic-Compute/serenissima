@@ -13,6 +13,25 @@ export interface LandRent {
   historicalName: string | null;
 }
 
+// Interface for guild data
+export interface Guild {
+  guildId: string;
+  guildName: string;
+  createdAt: string;
+  primaryLocation: string;
+  description: string;
+  patronSaint?: string;
+  guildTier?: string;
+  leadershipStructure?: string;
+  entryFee?: number;
+  votingSystem?: string;
+  meetingFrequency?: string;
+  guildHallId?: string;
+  guildEmblem?: string;
+  guildBanner?: string;
+  color?: string;
+}
+
 // Utility functions for Airtable operations
 export const airtableUtils = {
   /**
@@ -76,10 +95,55 @@ export const airtableUtils = {
       console.error('Error transferring compute in Airtable:', error);
       throw error;
     }
+  },
+  
+  /**
+   * Fetch guilds from Airtable
+   * @returns Promise resolving to array of guild data
+   */
+  async fetchGuilds(): Promise<Guild[]> {
+    try {
+      const apiBaseUrl = process.env.NEXT_PUBLIC_BACKEND_BASE_URL || 'http://localhost:10000';
+      const response = await fetch(`${apiBaseUrl}/api/guilds`);
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch guilds: ${response.status} ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      return data.guilds || [];
+    } catch (error) {
+      console.error('Error fetching guilds:', error);
+      return [];
+    }
+  },
+  
+  /**
+   * Get a specific guild by ID
+   * @param guildId The ID of the guild to fetch
+   * @returns Promise resolving to the guild data or null if not found
+   */
+  async getGuildById(guildId: string): Promise<Guild | null> {
+    try {
+      const guilds = await this.fetchGuilds();
+      return guilds.find(guild => guild.guildId === guildId) || null;
+    } catch (error) {
+      console.error(`Error fetching guild with ID ${guildId}:`, error);
+      return null;
+    }
   }
 };
 
 // Export the standalone function for backward compatibility
 export async function transferComputeInAirtable(walletAddress: string, amount: number) {
   return airtableUtils.transferComputeInAirtable(walletAddress, amount);
+}
+
+// Standalone functions for guild operations
+export async function fetchGuilds(): Promise<Guild[]> {
+  return airtableUtils.fetchGuilds();
+}
+
+export async function getGuildById(guildId: string): Promise<Guild | null> {
+  return airtableUtils.getGuildById(guildId);
 }

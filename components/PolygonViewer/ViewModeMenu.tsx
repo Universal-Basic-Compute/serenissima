@@ -35,7 +35,8 @@ export default function ViewModeMenu({ activeView, setActiveView }: ViewModeMenu
     'transport': 'Navigate the network of canals, bridges, and maritime routes that connect the Republic',
     'buildings': 'Explore the architectural marvels, palaces, and structures of Venezia in detail',
     'land': 'View land ownership, property boundaries, and territorial divisions of the Republic',
-    'citizens': 'Meet the citizens of Venice, see where they live and work, and learn about their lives'
+    'citizens': 'Meet the citizens of Venice, see where they live and work, and learn about their lives',
+    'guilds': 'Discover the powerful trade guilds that control commerce and crafts in the Venetian Republic'
   };
 
   return (
@@ -53,6 +54,28 @@ export default function ViewModeMenu({ activeView, setActiveView }: ViewModeMenu
           <path d="M2 20h20M4 20V4h16v16M12 2v4M7 8h10M7 12h10M7 16h10"></path>
         </svg>
         <span className="text-[10px] mt-1">Governance</span>
+      </IconButton>
+      
+      {/* Guilds View */}
+      <IconButton 
+        onClick={() => {
+          if (activeView !== 'guilds') {
+            console.log('ViewModeMenu: Switching to guilds view');
+            // Dispatch a custom event to ensure guilds are loaded
+            window.dispatchEvent(new CustomEvent('loadGuilds'));
+            handleViewModeChange('guilds');
+          }
+        }}
+        active={activeView === 'guilds'}
+        title={viewDescriptions.guilds}
+        activeColor="amber"
+        compact={true}
+        disabled={false}
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+        </svg>
+        <span className="text-[10px] mt-1">Guilds</span>
       </IconButton>
       
       {/* Citizens View */}

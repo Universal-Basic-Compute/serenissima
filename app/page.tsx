@@ -3,6 +3,7 @@
 import dynamic from 'next/dynamic';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import GovernancePanel from '../components/UI/GovernancePanel';
+import GuildsPanel from '../components/UI/GuildsPanel';
 import TechTree from '../components/Knowledge/TechTree';
 import ProjectPresentation from '../components/Knowledge/ProjectPresentation';
 import ResourceTree from '../components/Knowledge/ResourceTree';
@@ -70,7 +71,7 @@ export default function SimplePage() {
   // UI state
   const [showInfo, setShowInfo] = useState(false);
   // Define the view type to ensure consistency with our ActiveViewMode type
-  type ViewType = 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance' | 'loans' | 'knowledge' | 'citizens';
+  type ViewType = 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance' | 'loans' | 'knowledge' | 'citizens' | 'guilds';
   const [activeView, setActiveView] = useState<ViewType>('land');
   const [show3DView, setShow3DView] = useState<boolean>(true);
   const [selectedCitizen, setSelectedCitizen] = useState<any>(null);
@@ -79,6 +80,7 @@ export default function SimplePage() {
   const [showGovernancePanel, setShowGovernancePanel] = useState<boolean>(false);
   const [showKnowledgePanel, setShowKnowledgePanel] = useState<boolean>(false);
   const [showLoansPanel, setShowLoansPanel] = useState<boolean>(false);
+  const [showGuildsPanel, setShowGuildsPanel] = useState<boolean>(false);
   
   // Update activeView based on current pathname or panel visibility
   useEffect(() => {
@@ -90,8 +92,10 @@ export default function SimplePage() {
       setActiveView('knowledge');
     } else if (pathname === '/citizens') {
       setActiveView('citizens');
+    } else if (pathname === '/guilds' || showGuildsPanel) {
+      setActiveView('guilds');
     }
-  }, [pathname, showGovernancePanel, showKnowledgePanel, showLoansPanel]);
+  }, [pathname, showGovernancePanel, showKnowledgePanel, showLoansPanel, showGuildsPanel]);
   
   // Since 'land' is the default view, fetch income data on initial load
   useEffect(() => {
@@ -207,6 +211,9 @@ export default function SimplePage() {
       setActiveView('knowledge');
     } else if (pathname === '/citizens') {
       setActiveView('citizens');
+    } else if (pathname === '/guilds') {
+      setShowGuildsPanel(true);
+      setActiveView('guilds');
     }
     
     // Set up a popstate event listener to handle browser back/forward buttons
@@ -216,26 +223,37 @@ export default function SimplePage() {
         setShowGovernancePanel(true);
         setShowKnowledgePanel(false);
         setShowLoansPanel(false);
+        setShowGuildsPanel(false);
         setActiveView('governance');
       } else if (path === '/loans') {
         setShowGovernancePanel(false);
         setShowKnowledgePanel(false);
         setShowLoansPanel(true);
+        setShowGuildsPanel(false);
         setActiveView('loans');
       } else if (path === '/knowledge') {
         setShowGovernancePanel(false);
         setShowKnowledgePanel(true);
         setShowLoansPanel(false);
+        setShowGuildsPanel(false);
         setActiveView('knowledge');
       } else if (path === '/citizens') {
         setShowGovernancePanel(false);
         setShowKnowledgePanel(false);
         setShowLoansPanel(false);
+        setShowGuildsPanel(false);
         setActiveView('citizens');
+      } else if (path === '/guilds') {
+        setShowGovernancePanel(false);
+        setShowKnowledgePanel(false);
+        setShowLoansPanel(false);
+        setShowGuildsPanel(true);
+        setActiveView('guilds');
       } else if (path === '/') {
         setShowGovernancePanel(false);
         setShowKnowledgePanel(false);
         setShowLoansPanel(false);
+        setShowGuildsPanel(false);
         setActiveView('land');
       }
     };
@@ -730,6 +748,20 @@ export default function SimplePage() {
         </div>
       )}
       
+      {/* Guilds Panel */}
+      {showGuildsPanel && (
+        <GuildsPanel 
+          onClose={() => {
+            setShowGuildsPanel(false);
+            setActiveView('land');
+            // Update URL without page navigation
+            window.history.replaceState(null, '', '/');
+            window.__isClientNavigation = true;
+          }}
+          standalone={false}
+        />
+      )}
+      
       {/* Left Side Menu */}
       <div className="absolute left-0 top-0 bottom-0 bg-black/70 text-white z-20 flex flex-col w-16">
         {/* Logo */}
@@ -746,6 +778,7 @@ export default function SimplePage() {
                   setShowGovernancePanel(true);
                   setShowKnowledgePanel(false);
                   setShowLoansPanel(false);
+                  setShowGuildsPanel(false);
                   setActiveView('governance');
                   // Update URL without page navigation using replaceState
                   window.history.replaceState(null, '', '/governance');
@@ -757,6 +790,28 @@ export default function SimplePage() {
                 title="Governance"
               >
                 <FaLandmark className="mx-auto h-5 w-5" />
+              </button>
+            </li>
+            <li>
+              <button
+                onClick={() => {
+                  setShowGuildsPanel(true);
+                  setShowGovernancePanel(false);
+                  setShowKnowledgePanel(false);
+                  setShowLoansPanel(false);
+                  setActiveView('guilds');
+                  // Update URL without page navigation using replaceState
+                  window.history.replaceState(null, '', '/guilds');
+                  window.__isClientNavigation = true;
+                }}
+                className={`w-full flex items-center p-2 rounded-lg transition-colors ${
+                  activeView === 'guilds' ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700'
+                }`}
+                title="Guilds"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+                </svg>
               </button>
             </li>
             <li>
