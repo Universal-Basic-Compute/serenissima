@@ -47,6 +47,8 @@ export default function GuildsPanel({ onClose, standalone = false }: GuildsPanel
     
     try {
       const date = new Date(dateString);
+      // Subtract 1000 years from the date
+      date.setFullYear(date.getFullYear() - 1000);
       return date.toLocaleDateString('en-US', { 
         year: 'numeric', 
         month: 'long', 
@@ -156,14 +158,9 @@ export default function GuildsPanel({ onClose, standalone = false }: GuildsPanel
                   
                   {/* Guild Details */}
                   <div className="p-4">
-                    <div className="flex justify-between mb-3">
-                      <p className="text-sm text-amber-800">
-                        <span className="font-semibold">Patron Saint:</span> {guild.patronSaint || 'None'}
-                      </p>
-                      <p className="text-sm text-amber-800">
-                        <span className="font-semibold">Tier:</span> {guild.guildTier || 'Minor'}
-                      </p>
-                    </div>
+                    <p className="text-sm text-amber-800 mb-3">
+                      <span className="font-semibold">Patron Saint:</span> {guild.patronSaint || 'None'}
+                    </p>
                     
                     <p className="text-sm text-amber-800 mb-3">
                       <span className="font-semibold">Entry Fee:</span> {guild.entryFee ? `⚜️ ${Number(guild.entryFee).toLocaleString()} ducats` : 'None'}
@@ -265,7 +262,7 @@ function GuildDetails({ guild, onBack, formatDate, getLandName }: GuildDetailsPr
         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6">
           <h2 className="text-3xl font-serif text-white">{guild.guildName}</h2>
           <p className="text-white/80 italic">
-            {guild.guildTier || 'Minor'} Guild • Est. {formatDate(guild.createdAt) || 'Unknown'}
+            Est. {formatDate(guild.createdAt) || 'Unknown'}
           </p>
         </div>
       </div>
@@ -333,6 +330,17 @@ function GuildDetails({ guild, onBack, formatDate, getLandName }: GuildDetailsPr
                   ))}
                 </div>
               )}
+              
+              {/* Apply for Membership button right after members list */}
+              <button 
+                className="mt-4 px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors w-full"
+                onClick={() => {
+                  // This would be where you'd handle joining the guild
+                  alert('Guild membership application will be available soon!');
+                }}
+              >
+                Apply for Membership
+              </button>
             </div>
             
             {/* Make the guild information text smaller */}
@@ -361,17 +369,6 @@ function GuildDetails({ guild, onBack, formatDate, getLandName }: GuildDetailsPr
                 <h4 className="font-semibold text-amber-700 text-sm">Guild Hall</h4>
                 <p>{guild.guildHallId ? 'Located in Venice' : 'No permanent guild hall'}</p>
               </div>
-              
-              {/* Move the Apply for Membership button here */}
-              <button 
-                className="mt-4 px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors w-full"
-                onClick={() => {
-                  // This would be where you'd handle joining the guild
-                  alert('Guild membership application will be available soon!');
-                }}
-              >
-                Apply for Membership
-              </button>
             </div>
           </div>
         </div>
