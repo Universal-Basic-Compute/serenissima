@@ -34,7 +34,10 @@ export async function POST(request: Request) {
     }
     
     // If since is not provided, default to 1 week ago
-    const effectiveSince = since || new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+    // Convert timestamp number to ISO string if it's a number
+    const effectiveSince = since 
+      ? (typeof since === 'number' ? new Date(since).toISOString() : since)
+      : new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
     
     console.log('\x1b[35m%s\x1b[0m', `[DEBUG] Fetching notifications for user: ${user}, since: ${effectiveSince}`);
     
