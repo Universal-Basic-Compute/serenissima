@@ -118,6 +118,22 @@ const HistoricalAccuracyArticle: React.FC<HistoricalAccuracyArticleProps> = ({ o
               <li><strong>Geographic Scale:</strong> Proportionally compressed to maintain authentic urban density</li>
             </ul>
             
+            <h4 className="text-lg font-serif text-amber-800 mt-4 flex items-center">
+              <span className="w-1 h-6 bg-amber-500 inline-block mr-2"></span>
+              Citizen Representation
+            </h4>
+            <p>
+              Each AI citizen in La Serenissima represents approximately 10 working-age people from historical Venice:
+            </p>
+            <ul className="list-disc pl-6 my-3 space-y-1">
+              <li>A single merchant in the game might represent a merchant family with their employees</li>
+              <li>A craftsman represents a master with several journeymen and apprentices</li>
+              <li>A laborer represents multiple workers who might share living quarters</li>
+            </ul>
+            <p>
+              This abstraction allows us to simulate Venice's complex social and economic interactions without overwhelming players with thousands of individual citizens. It also explains why a single citizen can operate a business that would historically require multiple workers.
+            </p>
+            
             <div className="bg-amber-50 p-3 rounded border border-amber-200 mt-4">
               <p className="italic text-amber-800">
                 This compression creates a manageable simulation while preserving Venice's essential character. The slightly lower density per building compared to historical reality (5.9 vs 7-9 residents) actually improves gameplay accessibility while still capturing the compressed urban feeling of Renaissance Venice.
