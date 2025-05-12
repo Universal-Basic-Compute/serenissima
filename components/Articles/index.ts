@@ -7,3 +7,4 @@ export { default as BuildingOwnersGuideArticle } from './BuildingOwnersGuideArti
 export { default as BusinessOwnersGuideArticle } from './BusinessOwnersGuideArticle';
 export { default as HistoricalAccuracyArticle } from './HistoricalAccuracyArticle';
 export { default as VenetianGuildsArticle } from './VenetianGuildsArticle';
+export { default as GuildLeadershipArticle } from './GuildLeadershipArticle';

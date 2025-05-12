@@ -70,7 +70,36 @@ const HistoricalResources: React.FC<HistoricalResourcesProps> = ({ onSelectArtic
           </div>
         </div>
         
-        {/* Venetian Trade Routes */}
+        {/* Guild Leadership */}
+        <div className="bg-white rounded-lg overflow-hidden shadow-md border border-amber-200">
+          <div className="h-48 overflow-hidden">
+            <Image 
+              src="/images/guild-leadership.png" 
+              alt="Guild Leadership" 
+              width={800}
+              height={400}
+              className="w-full h-full object-cover transition-transform hover:scale-105"
+              onError={(e) => {
+                // Fallback if image doesn't exist
+                (e.target as HTMLImageElement).src = 'https://via.placeholder.com/800x400?text=Guild+Leadership';
+              }}
+            />
+          </div>
+          <div className="p-6">
+            <h3 className="text-xl font-serif text-amber-800 mb-2">Guild Leadership Structures</h3>
+            <p className="text-gray-600 mb-4">
+              Understand the leadership hierarchies and governance models of Venetian craft guilds.
+            </p>
+            <button 
+              onClick={() => onSelectArticle("guild-leadership")}
+              className="inline-block px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors"
+            >
+              Read Article
+            </button>
+          </div>
+        </div>
+        
+        {/* Venetian Trade Routes - moved to second row */}
         <div className="bg-white rounded-lg overflow-hidden shadow-md border border-amber-200">
           <div className="h-48 overflow-hidden">
             <Image 
