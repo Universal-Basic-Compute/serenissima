@@ -48,7 +48,7 @@ export default function GuildsPanel({ onClose, standalone = false }: GuildsPanel
     try {
       const date = new Date(dateString);
       // Subtract 1000 years from the date
-      date.setFullYear(date.getFullYear() - 1000);
+      date.setFullYear(date.getFullYear() - 500);
       return date.toLocaleDateString('en-US', { 
         year: 'numeric', 
         month: 'long', 
