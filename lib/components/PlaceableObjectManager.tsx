@@ -7,10 +7,18 @@ import { getDockService } from '../services/DockService';
 // Import BuildingData interface from BuildingService
 import { BuildingData as ServiceBuildingData } from '../services/BuildingService';
 
-// Define the BuildingData interface that matches the service
-interface BuildingData extends ServiceBuildingData {
-  // Any additional properties can be added here if needed
-  // Note: created_by is handled by the server, but we need to include it in the type
+// Define our local BuildingData interface that includes all properties we need
+interface BuildingData {
+  id?: string;
+  type: string;
+  variant?: string;
+  land_id: string;
+  position: {
+    x: number;
+    y: number;
+    z: number;
+  };
+  rotation: number;
   created_by?: string;
 }
 
@@ -309,8 +317,8 @@ const PlaceableObjectManager: React.FC<PlaceableObjectManagerProps> = ({
           created_by: 'current-user' // This will be replaced by the server with the actual user ID
         };
         
-        // Save building - buildingData already matches the expected type
-        placedObject = await buildingServiceRef.current.saveBuilding(buildingData);
+        // Save building - convert to ServiceBuildingData type
+        placedObject = await buildingServiceRef.current.saveBuilding(buildingData as ServiceBuildingData);
       } else if (type === 'dock') {
         // Create dock
         placedObject = await dockServiceRef.current.createDock(
