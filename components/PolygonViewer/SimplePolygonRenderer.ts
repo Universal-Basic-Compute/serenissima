@@ -80,7 +80,7 @@ export default class SimplePolygonRenderer {
   
   // Properties for measurement
   private measurementMarkers: THREE.Mesh[] = [];
-  public measurementPoints: THREE.Vector3[] = [];
+  private measurementPoints: THREE.Vector3[] = [];
   private measurementLine: THREE.Line | null = null;
   private measurementLabel: THREE.Sprite | null = null;
   private measurementCircle: THREE.Mesh | null = null;
@@ -93,6 +93,9 @@ export default class SimplePolygonRenderer {
   private citizenData: any[] = [];
   private hoveredCitizenId: string | null = null;
   private selectedCitizenId: string | null = null;
+  
+  // Property for building point markers
+  private buildingPointMarkers: THREE.Object3D[] = [];
   
   constructor({ 
     scene, 
@@ -2926,9 +2929,9 @@ export default class SimplePolygonRenderer {
   
   // Properties for measurement
   private measurementMarkers: THREE.Mesh[] = [];
-  public measurementPoints: THREE.Vector3[] = [];
+  private measurementPoints: THREE.Vector3[] = [];
   private measurementLine: THREE.Line | null = null;
-  public measurementLabel: THREE.Sprite | null = null;
+  private measurementLabel: THREE.Sprite | null = null;
   private measurementCircle: THREE.Mesh | null = null;
   
   /**
