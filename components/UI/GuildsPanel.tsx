@@ -158,60 +158,58 @@ export default function GuildsPanel({ onClose, standalone = false }: GuildsPanel
                   className="border-2 border-amber-600 rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow cursor-pointer"
                   onClick={() => setSelectedGuild(guild)}
                 >
-                  <div className="flex flex-col md:flex-row">
-                    {/* Guild Banner (2:1 aspect ratio) */}
-                    <div 
-                      className="h-40 md:w-1/3 bg-cover bg-center" 
-                      style={{ 
-                        backgroundColor: guild.color || '#8B4513',
-                        backgroundImage: guild.guildBanner ? `url(${guild.guildBanner})` : 'none',
-                        position: 'relative'
-                      }}
-                    >
-                      {/* Guild Emblem overlay */}
-                      {guild.guildEmblem && (
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <img 
-                            src={guild.guildEmblem} 
-                            alt={`${guild.guildName} emblem`} 
-                            className="h-24 w-24 object-contain"
-                          />
-                        </div>
-                      )}
-                      
-                      {/* Guild Name overlay */}
-                      <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white p-2">
-                        <h3 className="text-xl font-serif">{guild.guildName}</h3>
+                  {/* Guild Banner (full width) */}
+                  <div 
+                    className="h-48 w-full bg-cover bg-center" 
+                    style={{ 
+                      backgroundColor: guild.color || '#8B4513',
+                      backgroundImage: guild.guildBanner ? `url(${guild.guildBanner})` : 'none',
+                      position: 'relative'
+                    }}
+                  >
+                    {/* Guild Emblem overlay */}
+                    {guild.guildEmblem && (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <img 
+                          src={guild.guildEmblem} 
+                          alt={`${guild.guildName} emblem`} 
+                          className="h-24 w-24 object-contain"
+                        />
                       </div>
-                    </div>
+                    )}
                     
-                    {/* Guild Details */}
-                    <div className="p-4 md:w-2/3">
-                      <div className="flex flex-wrap justify-between mb-3">
-                        <p className="text-sm text-amber-800 mr-4">
-                          <span className="font-semibold">Patron Saint:</span> {guild.patronSaint || 'None'}
-                        </p>
-                        
-                        <p className="text-sm text-amber-800">
-                          <span className="font-semibold">Entry Fee:</span> {guild.entryFee ? `⚜️ ${Number(guild.entryFee).toLocaleString()} ducats` : 'None'}
-                        </p>
-                      </div>
-                      
-                      <p className="text-sm text-gray-700 mt-3 line-clamp-6">
-                        {/* Use ShortDescription with more lines visible */}
-                        {guild.shortDescription || guild.description || 'No description available.'}
+                    {/* Guild Name overlay */}
+                    <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white p-2">
+                      <h3 className="text-xl font-serif">{guild.guildName}</h3>
+                    </div>
+                  </div>
+                  
+                  {/* Guild Details */}
+                  <div className="p-4">
+                    <div className="flex flex-wrap justify-between mb-3">
+                      <p className="text-sm text-amber-800 mr-4">
+                        <span className="font-semibold">Patron Saint:</span> {guild.patronSaint || 'None'}
                       </p>
                       
-                      <button 
-                        className="mt-4 px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors w-full"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedGuild(guild);
-                        }}
-                      >
-                        View Details
-                      </button>
+                      <p className="text-sm text-amber-800">
+                        <span className="font-semibold">Entry Fee:</span> {guild.entryFee ? `⚜️ ${Number(guild.entryFee).toLocaleString()} ducats` : 'None'}
+                      </p>
                     </div>
+                    
+                    <p className="text-sm text-gray-700 mt-3 line-clamp-6">
+                      {/* Use ShortDescription with more lines visible */}
+                      {guild.shortDescription || guild.description || 'No description available.'}
+                    </p>
+                    
+                    <button 
+                      className="mt-4 px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors w-full"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedGuild(guild);
+                      }}
+                    >
+                      View Details
+                    </button>
                   </div>
                 </div>
               ))
