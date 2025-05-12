@@ -4,6 +4,19 @@ import { eventBus, EventTypes } from '../eventBus';
 import { BuildingService } from '../services/BuildingService';
 import { getDockService } from '../services/DockService';
 
+// Define the BuildingData interface
+interface BuildingData {
+  type: string;
+  land_id: string;
+  position: {
+    x: number;
+    y: number;
+    z: number;
+  };
+  rotation: number;
+  variant: string;
+}
+
 interface PlaceableObjectManagerProps {
   scene?: THREE.Scene;
   camera?: THREE.PerspectiveCamera;
@@ -286,7 +299,7 @@ const PlaceableObjectManager: React.FC<PlaceableObjectManagerProps> = ({
       // Place object based on type
       if (type === 'building') {
         // Create building data
-        const buildingData = {
+        const buildingData: BuildingData = {
           type: objectData.name,
           land_id: landId,
           position: {
