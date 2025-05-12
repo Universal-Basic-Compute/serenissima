@@ -73,7 +73,7 @@ export async function POST(request: Request) {
     
     // Create a record in Airtable - ensure position is stored as a string
     const record = await new Promise((resolve, reject) => {
-      base('Buildings').create({
+      base('BUILDINGS').create({
         BuildingId: data.id || `building-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
         Type: normalizedType,
         Land: data.land_id,
@@ -81,7 +81,10 @@ export async function POST(request: Request) {
         Position: JSON.stringify(position), // Always stringify to ensure consistent format
         Rotation: data.rotation || 0,
         User: data.owner || data.created_by || 'system',
-        CreatedAt: data.created_at || new Date().toISOString()
+        CreatedAt: data.created_at || new Date().toISOString(),
+        LeaseAmount: data.lease_amount || 0,
+        RentAmount: data.rent_amount || 0,
+        Occupant: data.occupant || ''
       }, function(err, record) {
         if (err) {
           console.error('Error creating record in Airtable:', err);
@@ -104,6 +107,9 @@ export async function POST(request: Request) {
         Rotation?: number;
         User: string;
         CreatedAt: string;
+        LeaseAmount?: number;
+        RentAmount?: number;
+        Occupant?: string;
       };
     }
 
@@ -117,7 +123,10 @@ export async function POST(request: Request) {
       position: JSON.parse(typedRecord.fields.Position), // Parse back to object
       rotation: typedRecord.fields.Rotation || 0,
       owner: typedRecord.fields.User,
-      created_at: typedRecord.fields.CreatedAt
+      created_at: typedRecord.fields.CreatedAt,
+      lease_amount: typedRecord.fields.LeaseAmount,
+      rent_amount: typedRecord.fields.RentAmount,
+      occupant: typedRecord.fields.Occupant
     };
     
     console.log('Successfully created building in Airtable:', building);
@@ -186,7 +195,7 @@ export async function GET(request: Request) {
           selectParams.offset = offset;
         }
         
-        base('Buildings')
+        base('BUILDINGS')
           .select(selectParams)
           .eachPage(
             function page(records, fetchNextPage) {
@@ -236,14 +245,16 @@ export async function GET(request: Request) {
       });
     }
     
-    // Define the Airtable record type
+    // Define the Airtable record type with all the required fields
     interface AirtableRecord {
       id: string;
       fields: {
         BuildingId?: string;
         Type: string;
         Land: string;
+        LeaseAmount?: number;
         Variant?: string;
+        User: string;
         Position: string | {
           lat?: number;
           lng?: number;
@@ -252,8 +263,9 @@ export async function GET(request: Request) {
           z?: number;
         };
         Rotation?: number;
-        User: string;
         CreatedAt: string;
+        RentAmount?: number;
+        Occupant?: string;
         [key: string]: any; // Allow for other fields
       };
     }
@@ -271,6 +283,9 @@ export async function GET(request: Request) {
       rotation: number;
       owner: string;
       created_at: string;
+      lease_amount?: number;
+      rent_amount?: number;
+      occupant?: string;
     }
 
     // Transform Airtable records to our format
@@ -349,6 +364,7 @@ export async function GET(request: Request) {
         } as { lat: number; lng: number };
       }
       
+      // Include all the required fields from the BUILDINGS table
       return {
         id: fields.BuildingId || record.id,
         type: fields.Type,
@@ -357,7 +373,10 @@ export async function GET(request: Request) {
         position: position,
         rotation: fields.Rotation || 0,
         owner: fields.User,
-        created_at: fields.CreatedAt
+        created_at: fields.CreatedAt,
+        lease_amount: fields.LeaseAmount,
+        rent_amount: fields.RentAmount,
+        occupant: fields.Occupant
       };
     });
     
