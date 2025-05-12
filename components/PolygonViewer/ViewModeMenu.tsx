@@ -1,15 +1,15 @@
-import { ViewMode } from './types';
+import { ViewMode, ActiveViewMode } from './types';
 import IconButton from '../UI/IconButton';
 import { eventBus, EventTypes } from '../../lib/eventBus';
 
 interface ViewModeMenuProps {
-  activeView: ViewMode;
-  setActiveView: (view: ViewMode) => void;
+  activeView: ActiveViewMode;
+  setActiveView: (view: ActiveViewMode) => void;
 }
 
 export default function ViewModeMenu({ activeView, setActiveView }: ViewModeMenuProps) {
   // Create a wrapper function to emit the view mode change event
-  const handleViewModeChange = (view: ViewMode) => {
+  const handleViewModeChange = (view: ActiveViewMode) => {
     setActiveView(view);
     // Emit event to notify other components about the view mode change
     eventBus.emit(EventTypes.VIEW_MODE_CHANGED, { viewMode: view });
@@ -23,12 +23,12 @@ export default function ViewModeMenu({ activeView, setActiveView }: ViewModeMenu
   // Helper function to check if a view is disabled
   const isDisabled = (view: ViewMode): boolean => {
     // Only these views are enabled
-    const enabledViews: ViewMode[] = ['buildings', 'land', 'markets', 'citizens', 'resources', 'transport'];
+    const enabledViews: ActiveViewMode[] = ['buildings', 'land', 'markets', 'citizens', 'resources', 'transport', 'guilds'];
     return !enabledViews.includes(view);
   };
 
   // Detailed descriptions for each view mode
-  const viewDescriptions: Record<ViewMode, string> = {
+  const viewDescriptions: Record<ViewMode | 'guilds', string> = {
     'governance': 'Examine political districts, administrative boundaries, and centers of power in the Venetian Republic',
     'markets': 'Explore commercial hubs, trading posts, and economic activity across the Venetian territories',
     'resources': 'Survey natural resources, production centers, and material wealth of La Serenissima',
