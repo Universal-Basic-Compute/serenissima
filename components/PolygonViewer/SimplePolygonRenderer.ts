@@ -68,6 +68,9 @@ export default class SimplePolygonRenderer {
   
   // Properties for bridge, dock, and building points
   private hoveredPointId: string | null = null;
+  private buildingPointMarkers: THREE.Object3D[] = [];
+  private bridgePointMarkers: THREE.Mesh[] = [];
+  private dockPointMarkers: THREE.Object3D[] = [];
   
   // Component managers
   private coatOfArmsRenderer: CoatOfArmsRenderer;
