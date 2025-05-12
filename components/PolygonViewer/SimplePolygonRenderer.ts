@@ -80,8 +80,6 @@ export default class SimplePolygonRenderer {
   
   private measurementLine: THREE.Line | null = null;
   private measurementLabel: THREE.Sprite | null = null;
-  private measurementLine: THREE.Line | null = null;
-  private measurementLabel: THREE.Sprite | null = null;
   
   // Properties for path visualization
   private pathVisualization: THREE.Object3D[] = [];
