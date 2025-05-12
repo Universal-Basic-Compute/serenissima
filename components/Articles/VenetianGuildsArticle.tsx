@@ -99,14 +99,16 @@ const VenetianGuildsArticle: React.FC<VenetianGuildsArticleProps> = ({ onClose }
               </div>
               
               <div className="md:w-1/2">
-                <h5 className="font-bold text-amber-900 mb-2">In-Game Implementation</h5>
+                <h5 className="font-bold text-amber-900 mb-2">Production Techniques</h5>
+                <p className="text-amber-800">
+                  Venetian glassmakers developed revolutionary techniques that set their work apart:
+                </p>
                 <ul className="list-disc pl-5 space-y-1 text-amber-800">
-                  <li>Glassmaking operations must be established on Murano island</li>
-                  <li>Guild membership required to produce and sell glass legally</li>
-                  <li>Strict quality standards enforced through regular inspections</li>
-                  <li>Access to special materials and techniques through guild connections</li>
-                  <li>Progression from apprentice to master through skill development and masterwork creation</li>
-                  <li>Ability to influence glass-related regulations through guild leadership</li>
+                  <li>Cristallo: A nearly colorless, transparent glass achieved through purified raw materials</li>
+                  <li>Lattimo: Milk glass that imitated expensive Chinese porcelain</li>
+                  <li>Calcedonio: Glass resembling chalcedony stone with marbled effects</li>
+                  <li>Millefiori: "Thousand flowers" technique creating intricate multicolored patterns</li>
+                  <li>Aventurine: Glass containing copper crystals that created a sparkling effect</li>
                 </ul>
               </div>
             </div>
@@ -133,14 +135,16 @@ const VenetianGuildsArticle: React.FC<VenetianGuildsArticleProps> = ({ onClose }
               </div>
               
               <div className="md:w-1/2">
-                <h5 className="font-bold text-amber-900 mb-2">In-Game Implementation</h5>
+                <h5 className="font-bold text-amber-900 mb-2">Trade Networks</h5>
+                <p className="text-amber-800">
+                  The silk industry relied on extensive trade networks:
+                </p>
                 <ul className="list-disc pl-5 space-y-1 text-amber-800">
-                  <li>Guild membership grants access to silk import quotas at preferential rates</li>
-                  <li>Pattern books and dyeing techniques unlocked through guild advancement</li>
-                  <li>Quality certification increases the value of your silk products</li>
-                  <li>Specialized workshops with appropriate equipment required for production</li>
-                  <li>Seasonal fashion trends influence demand and pricing</li>
-                  <li>Opportunities to secure contracts with nobility and wealthy merchants</li>
+                  <li>Raw silk imported primarily from Persia, Syria, and later China</li>
+                  <li>Specialized dyes sourced from across the Mediterranean and beyond</li>
+                  <li>Finished products exported throughout Europe, particularly to northern courts</li>
+                  <li>Venetian merchants maintained dedicated warehouses in major trade centers</li>
+                  <li>The guild negotiated favorable trade terms with foreign markets</li>
                 </ul>
               </div>
             </div>
@@ -167,14 +171,16 @@ const VenetianGuildsArticle: React.FC<VenetianGuildsArticleProps> = ({ onClose }
               </div>
               
               <div className="md:w-1/2">
-                <h5 className="font-bold text-amber-900 mb-2">In-Game Implementation</h5>
+                <h5 className="font-bold text-amber-900 mb-2">The Arsenal System</h5>
+                <p className="text-amber-800">
+                  The Arsenal represented one of history's first industrial complexes:
+                </p>
                 <ul className="list-disc pl-5 space-y-1 text-amber-800">
-                  <li>Multiple shipbuilding specializations: war galleys, merchant ships, or gondolas</li>
-                  <li>Access to waterfront properties suitable for shipyards through guild connections</li>
-                  <li>Material supply chains for timber, pitch, canvas, and metal fittings</li>
-                  <li>Government contracts available for Arsenal-affiliated members</li>
-                  <li>Repair and maintenance services as steady income sources</li>
-                  <li>Technological innovations unlocked through guild advancement</li>
+                  <li>Standardized parts and assembly techniques for rapid production</li>
+                  <li>Specialized workers focused on specific components</li>
+                  <li>Massive warehouses storing pre-fabricated ship elements</li>
+                  <li>State-controlled facility employing over 16,000 workers at its peak</li>
+                  <li>Capable of producing a fully equipped war galley in 24 hours</li>
                 </ul>
               </div>
             </div>
@@ -201,14 +207,16 @@ const VenetianGuildsArticle: React.FC<VenetianGuildsArticleProps> = ({ onClose }
               </div>
               
               <div className="md:w-1/2">
-                <h5 className="font-bold text-amber-900 mb-2">In-Game Implementation</h5>
+                <h5 className="font-bold text-amber-900 mb-2">Quality Control</h5>
+                <p className="text-amber-800">
+                  The goldsmiths' guild maintained exceptionally strict quality standards:
+                </p>
                 <ul className="list-disc pl-5 space-y-1 text-amber-800">
-                  <li>Access to precious metal imports at regulated prices</li>
-                  <li>Guild mark certification increases value and legitimacy of products</li>
-                  <li>Workshop location significantly impacts clientele and pricing</li>
-                  <li>Specialized commissions from wealthy patrons and churches</li>
-                  <li>Security concerns and insurance requirements for workshops</li>
-                  <li>Opportunities to create signature styles and build reputation</li>
+                  <li>Required hallmarking of all gold and silver items</li>
+                  <li>Regular assaying to verify precious metal purity</li>
+                  <li>Mandatory inspections of workshops and tools</li>
+                  <li>Severe penalties for fraud, including expulsion and fines</li>
+                  <li>Detailed record-keeping of materials, designs, and transactions</li>
                 </ul>
               </div>
             </div>
@@ -458,129 +466,106 @@ const VenetianGuildsArticle: React.FC<VenetianGuildsArticleProps> = ({ onClose }
             </div>
           </div>
           
-          <h3 className="text-2xl font-serif text-amber-700 mb-4">Guild Gameplay Strategies</h3>
+          <h3 className="text-2xl font-serif text-amber-700 mb-4">Guilds in La Serenissima</h3>
           
           <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
-            <h4 className="text-xl font-serif text-amber-800 mb-2">Strategic Approaches</h4>
+            <h4 className="text-xl font-serif text-amber-800 mb-2">Guild Functions in the Game</h4>
             
-            <div className="grid md:grid-cols-2 gap-6">
+            <p className="mb-4">
+              In La Serenissima, guilds serve as powerful player organizations focused on coordinating members for larger economic and political operations:
+            </p>
+            
+            <div className="grid md:grid-cols-3 gap-4">
               <div className="bg-amber-50 p-3 rounded border border-amber-200">
-                <h5 className="font-bold text-amber-900 mb-1">The Traditionalist</h5>
-                <p className="text-sm mb-2 text-amber-800">
-                  Focus on mastering traditional techniques and building reputation for quality.
-                </p>
-                <ul className="list-disc pl-5 space-y-1 text-sm text-amber-800">
-                  <li><span className="font-medium">Strengths:</span> Higher prices for certified quality goods, steady demand from established clients</li>
-                  <li><span className="font-medium">Challenges:</span> Slower growth, competition from innovators</li>
-                  <li><span className="font-medium">Best For:</span> Players focused on craftsmanship and prestige</li>
-                </ul>
-                <p className="text-sm mt-2 text-amber-800">
-                  <span className="font-bold">Key Strategy:</span> Invest in skill development and quality materials to create premium products that command top prices.
+                <h5 className="font-bold text-amber-900 mb-1">Market Influence</h5>
+                <p className="text-amber-800">
+                  Guilds can coordinate buying and selling activities to drive prices in favorable directions, creating opportunities for collective profit. By timing market entries and exits, guilds can significantly impact resource valuations.
                 </p>
               </div>
               
               <div className="bg-amber-50 p-3 rounded border border-amber-200">
-                <h5 className="font-bold text-amber-900 mb-1">The Innovator</h5>
-                <p className="text-sm mb-2 text-amber-800">
-                  Push boundaries with new techniques and designs while maintaining guild membership.
-                </p>
-                <ul className="list-disc pl-5 space-y-1 text-sm text-amber-800">
-                  <li><span className="font-medium">Strengths:</span> Unique products, potential for market disruption</li>
-                  <li><span className="font-medium">Challenges:</span> Resistance from traditionalists, risk of guild penalties</li>
-                  <li><span className="font-medium">Best For:</span> Creative players seeking to stand out</li>
-                </ul>
-                <p className="text-sm mt-2 text-amber-800">
-                  <span className="font-bold">Key Strategy:</span> Balance innovation with respect for guild traditions, gradually introducing new ideas while building support among influential members.
+                <h5 className="font-bold text-amber-900 mb-1">Resource Monopolization</h5>
+                <p className="text-amber-800">
+                  Through strategic acquisition of key production facilities and resource nodes, guilds can establish control over critical supply chains. This allows for price setting and creating favorable trade terms for guild members.
                 </p>
               </div>
               
               <div className="bg-amber-50 p-3 rounded border border-amber-200">
-                <h5 className="font-bold text-amber-900 mb-1">The Guild Politician</h5>
-                <p className="text-sm mb-2 text-amber-800">
-                  Rise through guild ranks to shape regulations and policies to your advantage.
-                </p>
-                <ul className="list-disc pl-5 space-y-1 text-sm text-amber-800">
-                  <li><span className="font-medium">Strengths:</span> Influence over industry standards, access to government connections</li>
-                  <li><span className="font-medium">Challenges:</span> Time investment in politics, maintaining member support</li>
-                  <li><span className="font-medium">Best For:</span> Players interested in economic policy and regulation</li>
-                </ul>
-                <p className="text-sm mt-2 text-amber-800">
-                  <span className="font-bold">Key Strategy:</span> Build a network of allies within the guild, participate actively in meetings, and propose regulations that benefit your business model.
-                </p>
-              </div>
-              
-              <div className="bg-amber-50 p-3 rounded border border-amber-200">
-                <h5 className="font-bold text-amber-900 mb-1">The Scale Master</h5>
-                <p className="text-sm mb-2 text-amber-800">
-                  Maximize production volume while meeting minimum quality standards.
-                </p>
-                <ul className="list-disc pl-5 space-y-1 text-sm text-amber-800">
-                  <li><span className="font-medium">Strengths:</span> Higher output, economies of scale</li>
-                  <li><span className="font-medium">Challenges:</span> Lower margins per item, quality control issues</li>
-                  <li><span className="font-medium">Best For:</span> Players focused on growth and market share</li>
-                </ul>
-                <p className="text-sm mt-2 text-amber-800">
-                  <span className="font-bold">Key Strategy:</span> Invest in multiple workshops, efficient production methods, and a large workforce while carefully maintaining minimum guild quality standards.
+                <h5 className="font-bold text-amber-900 mb-1">Targeted Economic Actions</h5>
+                <p className="text-amber-800">
+                  Guilds can organize targeted economic actions against competitors, including undercutting prices in specific markets, establishing competing businesses, or creating alternative supply chains to challenge monopolies.
                 </p>
               </div>
             </div>
           </div>
           
           <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
-            <h4 className="text-xl font-serif text-amber-800 mb-2">Advanced Guild Tactics</h4>
+            <h4 className="text-xl font-serif text-amber-800 mb-2">Guild Membership</h4>
             
-            <div className="grid md:grid-cols-2 gap-4">
-              <div>
-                <h5 className="font-bold text-amber-900 mb-1">Cross-Guild Collaboration</h5>
-                <p className="text-sm mb-3 text-amber-800">
-                  Many products require inputs from multiple guilds. Strategic alliances can create powerful synergies:
-                </p>
-                <ul className="list-disc pl-5 space-y-1 text-sm text-amber-800">
-                  <li>Partner with complementary guilds (e.g., goldsmiths and jewelers)</li>
-                  <li>Secure preferential access to materials from supplier guilds</li>
-                  <li>Create integrated production chains across guild boundaries</li>
-                  <li>Form political alliances to influence government policy</li>
-                </ul>
-              </div>
-              
-              <div>
-                <h5 className="font-bold text-amber-900 mb-1">Guild Regulation Arbitrage</h5>
-                <p className="text-sm mb-3 text-amber-800">
-                  Savvy merchants can exploit differences between guild regulations:
-                </p>
-                <ul className="list-disc pl-5 space-y-1 text-sm text-amber-800">
-                  <li>Identify overlapping jurisdictions between guilds</li>
-                  <li>Maintain membership in multiple related guilds</li>
-                  <li>Structure business operations to benefit from the most favorable regulations</li>
-                  <li>Appeal to government when guild regulations conflict</li>
-                </ul>
-              </div>
+            <p className="mb-3">
+              Joining a guild in La Serenissima is a straightforward process:
+            </p>
+            
+            <div className="bg-amber-50 p-3 rounded border border-amber-200 mb-4">
+              <h5 className="font-bold text-amber-900 mb-1">Application Process</h5>
+              <p className="text-amber-800 mb-2">
+                Guild membership requires a simple application and validation process:
+              </p>
+              <ol className="list-decimal pl-5 space-y-1 text-amber-800">
+                <li>Submit an application to the guild of your choice</li>
+                <li>Provide information about your business interests and assets</li>
+                <li>Guild leadership reviews applications based on their criteria</li>
+                <li>Accepted members receive formal invitation to join</li>
+                <li>New members may be subject to probationary periods</li>
+              </ol>
             </div>
             
-            <div className="mt-4 grid md:grid-cols-2 gap-4">
-              <div>
-                <h5 className="font-bold text-amber-900 mb-1">Apprentice Management</h5>
-                <p className="text-sm mb-3 text-amber-800">
-                  Strategic management of apprentices can provide competitive advantages:
+            <div className="bg-amber-50 p-3 rounded border border-amber-200">
+              <h5 className="font-bold text-amber-900 mb-1">Membership Benefits</h5>
+              <p className="text-amber-800 mb-2">
+                Guild membership offers numerous advantages:
+              </p>
+              <ul className="list-disc pl-5 space-y-1 text-amber-800">
+                <li>Access to shared resources and information</li>
+                <li>Preferential trading terms with fellow guild members</li>
+                <li>Collective bargaining power in markets</li>
+                <li>Protection against economic aggression</li>
+                <li>Enhanced voting rights in governance matters</li>
+              </ul>
+            </div>
+          </div>
+          
+          <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
+            <h4 className="text-xl font-serif text-amber-800 mb-2">Guild Governance</h4>
+            
+            <p className="mb-3">
+              Guilds in La Serenissima are free to establish their own internal voting systems:
+            </p>
+            
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="bg-amber-50 p-3 rounded border border-amber-200">
+                <h5 className="font-bold text-amber-900 mb-1">Voting Systems</h5>
+                <p className="text-amber-800 mb-2">
+                  Guilds may implement various voting structures:
                 </p>
-                <ul className="list-disc pl-5 space-y-1 text-sm text-amber-800">
-                  <li>Select apprentices with complementary skills to your own</li>
-                  <li>Develop specialized training programs for your workshop</li>
-                  <li>Balance teaching with productive work assignments</li>
-                  <li>Build loyalty to ensure continued employment after apprenticeship</li>
+                <ul className="list-disc pl-5 space-y-1 text-amber-800">
+                  <li>Democratic one-member-one-vote systems</li>
+                  <li>Wealth-weighted voting based on economic contribution</li>
+                  <li>Meritocratic systems with earned voting rights</li>
+                  <li>Hybrid approaches combining multiple methods</li>
                 </ul>
               </div>
               
-              <div>
-                <h5 className="font-bold text-amber-900 mb-1">Guild Treasury Investment</h5>
-                <p className="text-sm mb-3 text-amber-800">
-                  Guild leaders can direct guild funds toward strategic investments:
+              <div className="bg-amber-50 p-3 rounded border border-amber-200">
+                <h5 className="font-bold text-amber-900 mb-1">Enhanced Governance Rights</h5>
+                <p className="text-amber-800 mb-2">
+                  Guild membership provides enhanced participation in La Serenissima's governance:
                 </p>
-                <ul className="list-disc pl-5 space-y-1 text-sm text-amber-800">
-                  <li>Fund research into new techniques or materials</li>
-                  <li>Purchase property for guild headquarters or workshops</li>
-                  <li>Invest in trade expeditions or shipping ventures</li>
-                  <li>Provide loans to promising members for workshop expansion</li>
+                <ul className="list-disc pl-5 space-y-1 text-amber-800">
+                  <li>Collective voting power on city-wide matters</li>
+                  <li>Proposal rights for consideration in governance decisions</li>
+                  <li>Representation in future governance mechanisms</li>
+                  <li>Influence on economic regulations</li>
                 </ul>
               </div>
             </div>
