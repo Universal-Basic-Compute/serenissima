@@ -54,14 +54,24 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
   const [lastFetchTime, setLastFetchTime] = useState<number>(Date.now());
   const [isMobile, setIsMobile] = useState<boolean>(false);
   const fetchIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const lastFetchRef = useRef<number>(0);
 
   // Fetch notifications
   const fetchNotifications = useCallback(async (forceRefresh = false) => {
     // Skip fetching if the component isn't open to reduce unnecessary API calls
     if (!isOpen && !showNotifications) return;
     
-    // Always update the timestamp when we fetch
+    // Add debounce logic to prevent multiple rapid calls
     const now = Date.now();
+    const minInterval = 5000; // 5 seconds minimum between fetches
+    
+    if (!forceRefresh && now - lastFetchRef.current < minInterval) {
+      console.log('Debouncing notification fetch - too soon since last attempt');
+      return;
+    }
+    
+    // Update the last fetch attempt timestamp
+    lastFetchRef.current = now;
     
     try {
       // Get the current username or use default
@@ -247,10 +257,10 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
       // Fetch notifications immediately when component becomes visible
       fetchNotifications();
       
-      // Set up polling every 5 minutes (300000 ms)
+      // Set up polling every 2 minutes (120000 ms) instead of 5 minutes
       fetchIntervalRef.current = setInterval(() => {
         fetchNotifications();
-      }, 300000);
+      }, 120000);
       
       // Clean up interval on unmount or when component is hidden
       return () => {
