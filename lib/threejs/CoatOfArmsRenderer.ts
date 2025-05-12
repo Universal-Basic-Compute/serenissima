@@ -56,9 +56,12 @@ export class CoatOfArmsRenderer {
       }
 
       // Get the coat of arms URL for the owner
-      const coatOfArmsUrl = this.ownerCoatOfArmsMap[ownerValue];
+      let coatOfArmsUrl = this.ownerCoatOfArmsMap[ownerValue];
+      
+      // If no coat of arms found, generate a default one
       if (!coatOfArmsUrl) {
-        console.log(`No coat of arms found for owner ${ownerValue}`);
+        console.log(`No coat of arms found for owner ${ownerValue}, creating default`);
+        this.createDefaultCoatOfArms(polygon, ownerValue);
         return;
       }
 
@@ -125,10 +128,30 @@ export class CoatOfArmsRenderer {
     plane.userData.isCoatOfArms = true;
     plane.userData.polygonId = polygon.id;
 
-    // Load the texture - handle both external and local URLs
-    const textureUrl = coatOfArmsUrl.startsWith('http')
-      ? coatOfArmsUrl
-      : `${window.location.origin}${coatOfArmsUrl}`;
+    // Properly construct the texture URL
+    let textureUrl = coatOfArmsUrl;
+    
+    // If it's a relative path starting with /coat-of-arms/
+    if (coatOfArmsUrl.startsWith('/coat-of-arms/')) {
+      // Try to load from serenissima.ai first
+      textureUrl = `https://serenissima.ai${coatOfArmsUrl}`;
+      console.log(`Loading coat of arms from: ${textureUrl}`);
+    } 
+    // If it's another relative path
+    else if (coatOfArmsUrl.startsWith('/')) {
+      // Use the current origin
+      textureUrl = `${window.location.origin}${coatOfArmsUrl}`;
+      console.log(`Loading coat of arms from: ${textureUrl}`);
+    }
+    // If it's already a full URL, use it as is
+    else if (coatOfArmsUrl.startsWith('http')) {
+      console.log(`Loading coat of arms from external URL: ${textureUrl}`);
+    }
+    // Otherwise, assume it's a relative path without leading slash
+    else {
+      textureUrl = `${window.location.origin}/${coatOfArmsUrl}`;
+      console.log(`Loading coat of arms from: ${textureUrl}`);
+    }
 
     this.textureLoader.load(
       textureUrl,
@@ -161,10 +184,54 @@ export class CoatOfArmsRenderer {
       },
       undefined,
       (error) => {
-        console.error(`Failed to load coat of arms texture for ${polygon.id}:`, error);
-        // Don't add the plane to the scene at all if texture loading fails
-        planeGeometry.dispose();
-        planeMaterial.dispose();
+        console.error(`Failed to load coat of arms texture for ${polygon.id} from ${textureUrl}:`, error);
+        
+        // If loading from serenissima.ai fails, try from the current origin as fallback
+        if (textureUrl.startsWith('https://serenissima.ai')) {
+          console.log(`Trying fallback URL for coat of arms: ${window.location.origin}${coatOfArmsUrl}`);
+          
+          this.textureLoader.load(
+            `${window.location.origin}${coatOfArmsUrl}`,
+            (texture) => {
+              // Same texture handling as above
+              const circularTexture = this.createCircularTexture(texture, true);
+              
+              if (planeMaterial) {
+                planeMaterial.map = circularTexture;
+                planeMaterial.needsUpdate = true;
+                
+                if (texture.image && texture.image.width && texture.image.height) {
+                  const aspectRatio = texture.image.width / texture.image.height;
+                  const sceneScale = this.bounds.scale;
+                  const baseScale = Math.max(0.19, sceneScale / 2633);
+                  plane.scale.set(baseScale * aspectRatio, baseScale, 1);
+                }
+                
+                this.scene.add(plane);
+                this.coatOfArmsSprites[polygon.id] = plane;
+                this.animateFadeIn(planeMaterial);
+              }
+            },
+            undefined,
+            (fallbackError) => {
+              console.error(`Fallback also failed for ${polygon.id}:`, fallbackError);
+              
+              // If both attempts fail, create a default coat of arms
+              this.createDefaultCoatOfArms(polygon, polygon.owner || polygon.User || "Unknown");
+              
+              // Clean up unused resources
+              planeGeometry.dispose();
+              planeMaterial.dispose();
+            }
+          );
+        } else {
+          // If not loading from serenissima.ai, create a default coat of arms
+          this.createDefaultCoatOfArms(polygon, polygon.owner || polygon.User || "Unknown");
+          
+          // Clean up unused resources
+          planeGeometry.dispose();
+          planeMaterial.dispose();
+        }
       }
     );
   }
@@ -328,6 +395,117 @@ export class CoatOfArmsRenderer {
     Object.values(this.coatOfArmsSprites).forEach(sprite => {
       sprite.visible = visible;
     });
+  }
+
+  private createDefaultCoatOfArms(polygon: any, ownerName: string): void {
+    // Check for all possible position properties, with fallbacks
+    const positionCoord = polygon.coatOfArmsCenter || polygon.center || polygon.centroid;
+
+    if (!positionCoord) {
+      console.warn(`No valid position found for coat of arms on polygon ${polygon.id}`);
+      return;
+    }
+
+    // Convert position to 3D position
+    const normalizedCoord = normalizeCoordinates(
+      [positionCoord],
+      this.bounds.centerLat,
+      this.bounds.centerLng,
+      this.bounds.scale,
+      this.bounds.latCorrectionFactor
+    )[0];
+
+    // Create a plane geometry for the texture
+    const sceneScale = this.bounds.scale;
+    const spriteScale = Math.max(0.75, sceneScale / 667);
+    const planeGeometry = new THREE.PlaneGeometry(spriteScale, spriteScale);
+    const planeMaterial = new THREE.MeshBasicMaterial({
+      map: null, // Will be set when texture is created
+      transparent: true,
+      side: THREE.DoubleSide,
+      depthTest: true,
+      depthWrite: false,
+      opacity: 0 // Start with opacity 0 for fade-in effect
+    });
+
+    // Create mesh and position it
+    const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+    plane.position.set(normalizedCoord.x, 0.2, -normalizedCoord.y);
+    plane.rotation.x = -Math.PI / 2 + Math.PI; // Rotate to lie flat and invert orientation
+    plane.renderOrder = 10; // Ensure it renders on top of land
+
+    // Mark this mesh as a coat of arms
+    plane.userData.isCoatOfArms = true;
+    plane.userData.polygonId = polygon.id;
+
+    // Create a canvas for the default coat of arms
+    const canvas = document.createElement('canvas');
+    const size = 512;
+    canvas.width = size;
+    canvas.height = size;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      console.error('Could not get canvas context');
+      return;
+    }
+
+    // Generate a deterministic color based on the owner name
+    const getColorFromString = (str: string): string => {
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) {
+        hash = str.charCodeAt(i) + ((hash << 5) - hash);
+      }
+      
+      // Generate a hue between 0 and 360
+      const hue = Math.abs(hash) % 360;
+      
+      // Use a fixed saturation and lightness for better visibility
+      return `hsl(${hue}, 70%, 60%)`;
+    };
+
+    // Get a color based on the owner name
+    const baseColor = getColorFromString(ownerName);
+
+    // Draw a circular background
+    ctx.beginPath();
+    ctx.arc(size/2, size/2, size/2 - 4, 0, Math.PI * 2);
+    ctx.fillStyle = baseColor;
+    ctx.fill();
+    
+    // Add a white border
+    ctx.strokeStyle = '#FFFFFF';
+    ctx.lineWidth = 8;
+    ctx.stroke();
+
+    // Add the owner's initials
+    ctx.font = 'bold 160px Arial';
+    ctx.fillStyle = '#FFFFFF';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    
+    // Get the first letter of the owner name
+    const initial = ownerName.charAt(0).toUpperCase();
+    ctx.fillText(initial, size/2, size/2);
+
+    // Create texture from canvas
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.needsUpdate = true;
+
+    // Apply the texture to the plane material
+    planeMaterial.map = texture;
+    planeMaterial.needsUpdate = true;
+
+    // Add to scene
+    this.scene.add(plane);
+
+    // Store reference
+    this.coatOfArmsSprites[polygon.id] = plane;
+
+    // Add fade-in animation
+    this.animateFadeIn(planeMaterial);
+    
+    console.log(`Created default coat of arms for owner ${ownerName} on polygon ${polygon.id}`);
   }
 
   public cleanup(): void {
