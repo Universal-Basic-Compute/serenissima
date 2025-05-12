@@ -333,7 +333,7 @@ class DefaultBuildingRenderer implements IBuildingRenderer {
             },
             (error) => {
               // Check if this is a 404 error
-              if (error.message && error.message.includes('404')) {
+              if (error instanceof Error && error.message && error.message.includes('404')) {
                 console.warn(`Model not found for ${building.id} at ${modelPath} (404) - using fallback`);
               } else {
                 console.error(`Error loading model for ${building.id}:`, error);
