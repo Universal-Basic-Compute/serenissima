@@ -65,6 +65,12 @@ const ResourceDropdowns: React.FC = () => {
       const resources = await resourceService.getResourceCounts(owner);
       logInfo(`Received ${resources.length} resources`);
       
+      // Log sample of resources to debug icon issues
+      logInfo(`Received ${resources.length} resources with the following icons:`);
+      resources.slice(0, 5).forEach(resource => {
+        logInfo(`Resource: ${resource.name}, Icon: ${resource.icon}`);
+      });
+      
       // Group resources by category
       const categoriesMap = new Map<string, ResourceCategory>();
       

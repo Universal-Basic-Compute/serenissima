@@ -113,6 +113,14 @@ export async function GET(request: Request) {
     
     console.log(`Returning ${resourceCounts.length} unique resource types with counts`);
     
+    // Log sample resource data for debugging
+    console.log('Sample resource data being returned:');
+    console.log(resourceCounts.slice(0, 3).map(r => ({
+      name: r.name,
+      icon: r.icon,
+      category: r.category
+    })));
+    
     return NextResponse.json({
       success: true,
       resourceCounts

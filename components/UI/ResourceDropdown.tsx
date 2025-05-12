@@ -215,6 +215,12 @@ const ResourceDropdown: React.FC<ResourceDropdownProps> = ({ category, resources
   const getIconPath = (iconName: string) => {
     console.log(`%c[ResourceDropdown] Processing icon: ${iconName}`, 'color: #22c55e; font-weight: bold;');
     
+    // If icon is missing or undefined, use default
+    if (!iconName) {
+      console.log(`%c[ResourceDropdown] Icon name is empty, using default.png`, 'color: #ef4444;');
+      return `/assets/icons/resources/default.png`;
+    }
+    
     // Check if the icon path already starts with a slash or http
     if (iconName.startsWith('/') || iconName.startsWith('http')) {
       console.log(`%c[ResourceDropdown] Icon path already starts with / or http, returning as-is: ${iconName}`, 'color: #22c55e;');
