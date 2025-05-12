@@ -82,10 +82,16 @@ export async function GET(request: Request) {
       const resourceIcon = record.get('Icon') || 'default.png';
       const resourceRarity = record.get('Rarity') || 'common';
       const resourceDescription = record.get('Description') || '';
-      
+      const resourceOwner = record.get('Owner') || '';
+    
+      // Skip this record if we're filtering by owner and this resource doesn't belong to the specified owner
+      if (owner && resourceOwner !== owner) {
+        return; // Skip this record
+      }
+    
       // Create a unique key for this resource type
       const key = resourceType;
-      
+    
       if (resourceCountMap.has(key)) {
         // If we already have this resource type, increment the count
         const existingResource = resourceCountMap.get(key);
@@ -93,7 +99,7 @@ export async function GET(request: Request) {
       } else {
         // Generate icon filename from resource name
         const iconFromName = getResourceIconFromName(resourceName);
-        
+      
         // Otherwise, add a new entry
         resourceCountMap.set(key, {
           id: resourceId,
@@ -107,6 +113,8 @@ export async function GET(request: Request) {
         });
       }
     });
+  
+    console.log(`Filtered to ${resourceCountMap.size} resource types for owner: ${owner || 'all'}`);
     
     // Convert map to array and sort by category and name
     const resourceCounts = Array.from(resourceCountMap.values())
