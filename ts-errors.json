@@ -1,10 +1,617 @@
 {
-  "totalErrors": 0,
+  "totalErrors": 75,
   "totalWarnings": 0,
-  "exitCode": 0,
-  "timestamp": "2025-05-12T15:53:30.813Z",
-  "errors": [],
-  "rawOutputLines": 1,
-  "firstFewLines": [],
-  "compilerExitCode": 0
+  "exitCode": 2,
+  "timestamp": "2025-05-12T16:48:44.434Z",
+  "errors": [
+    {
+      "filePath": "components/PolygonViewer/SimplePolygonRenderer.ts",
+      "line": 2939,
+      "column": 10,
+      "code": "TS2339",
+      "message": "Property 'measurementMarkers' does not exist on type 'SimplePolygonRenderer'.",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/SimplePolygonRenderer.ts",
+      "line": 2940,
+      "column": 10,
+      "code": "TS2551",
+      "message": "Property 'measurementPoints' does not exist on type 'SimplePolygonRenderer'. Did you mean 'addMeasurementPoint'?",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/SimplePolygonRenderer.ts",
+      "line": 2943,
+      "column": 14,
+      "code": "TS2551",
+      "message": "Property 'measurementPoints' does not exist on type 'SimplePolygonRenderer'. Did you mean 'addMeasurementPoint'?",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/SimplePolygonRenderer.ts",
+      "line": 2951,
+      "column": 14,
+      "code": "TS2551",
+      "message": "Property 'measurementPoints' does not exist on type 'SimplePolygonRenderer'. Did you mean 'addMeasurementPoint'?",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/SimplePolygonRenderer.ts",
+      "line": 2952,
+      "column": 32,
+      "code": "TS2551",
+      "message": "Property 'measurementPoints' does not exist on type 'SimplePolygonRenderer'. Did you mean 'addMeasurementPoint'?",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/SimplePolygonRenderer.ts",
+      "line": 2953,
+      "column": 33,
+      "code": "TS2339",
+      "message": "Property 'measurementMarkers' does not exist on type 'SimplePolygonRenderer'.",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/SimplePolygonRenderer.ts",
+      "line": 2977,
+      "column": 14,
+      "code": "TS2339",
+      "message": "Property 'measurementLine' does not exist on type 'SimplePolygonRenderer'.",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/SimplePolygonRenderer.ts",
+      "line": 2978,
+      "column": 30,
+      "code": "TS2339",
+      "message": "Property 'measurementLine' does not exist on type 'SimplePolygonRenderer'.",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/SimplePolygonRenderer.ts",
+      "line": 2979,
+      "column": 16,
+      "code": "TS2339",
+      "message": "Property 'measurementLine' does not exist on type 'SimplePolygonRenderer'.",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/SimplePolygonRenderer.ts",
+      "line": 2979,
+      "column": 47,
+      "code": "TS2339",
+      "message": "Property 'measurementLine' does not exist on type 'SimplePolygonRenderer'.",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/SimplePolygonRenderer.ts",
+      "line": 2980,
+      "column": 16,
+      "code": "TS2339",
+      "message": "Property 'measurementLine' does not exist on type 'SimplePolygonRenderer'.",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/SimplePolygonRenderer.ts",
+      "line": 2981,
+      "column": 14,
+      "code": "TS2339",
+      "message": "Property 'measurementLine' does not exist on type 'SimplePolygonRenderer'.",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/SimplePolygonRenderer.ts",
+      "line": 2983,
+      "column": 12,
+      "code": "TS2339",
+      "message": "Property 'measurementLine' does not exist on type 'SimplePolygonRenderer'.",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/SimplePolygonRenderer.ts",
+      "line": 2986,
+      "column": 14,
+      "code": "TS2339",
+      "message": "Property 'measurementLabel' does not exist on type 'SimplePolygonRenderer'.",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/SimplePolygonRenderer.ts",
+      "line": 2987,
+      "column": 30,
+      "code": "TS2339",
+      "message": "Property 'measurementLabel' does not exist on type 'SimplePolygonRenderer'.",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/SimplePolygonRenderer.ts",
+      "line": 2988,
+      "column": 16,
+      "code": "TS2339",
+      "message": "Property 'measurementLabel' does not exist on type 'SimplePolygonRenderer'.",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/SimplePolygonRenderer.ts",
+      "line": 2989,
+      "column": 18,
+      "code": "TS2339",
+      "message": "Property 'measurementLabel' does not exist on type 'SimplePolygonRenderer'.",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/SimplePolygonRenderer.ts",
+      "line": 2990,
+      "column": 16,
+      "code": "TS2339",
+      "message": "Property 'measurementLabel' does not exist on type 'SimplePolygonRenderer'.",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/SimplePolygonRenderer.ts",
+      "line": 2992,
+      "column": 14,
+      "code": "TS2339",
+      "message": "Property 'measurementLabel' does not exist on type 'SimplePolygonRenderer'.",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/SimplePolygonRenderer.ts",
+      "line": 2994,
+      "column": 12,
+      "code": "TS2339",
+      "message": "Property 'measurementLabel' does not exist on type 'SimplePolygonRenderer'.",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/SimplePolygonRenderer.ts",
+      "line": 2998,
+      "column": 14,
+      "code": "TS2551",
+      "message": "Property 'measurementPoints' does not exist on type 'SimplePolygonRenderer'. Did you mean 'addMeasurementPoint'?",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/SimplePolygonRenderer.ts",
+      "line": 2999,
+      "column": 26,
+      "code": "TS2551",
+      "message": "Property 'measurementPoints' does not exist on type 'SimplePolygonRenderer'. Did you mean 'addMeasurementPoint'?",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/SimplePolygonRenderer.ts",
+      "line": 3000,
+      "column": 24,
+      "code": "TS2551",
+      "message": "Property 'measurementPoints' does not exist on type 'SimplePolygonRenderer'. Did you mean 'addMeasurementPoint'?",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/SimplePolygonRenderer.ts",
+      "line": 3017,
+      "column": 12,
+      "code": "TS2339",
+      "message": "Property 'measurementLine' does not exist on type 'SimplePolygonRenderer'.",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/SimplePolygonRenderer.ts",
+      "line": 3018,
+      "column": 12,
+      "code": "TS2339",
+      "message": "Property 'measurementLine' does not exist on type 'SimplePolygonRenderer'.",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/SimplePolygonRenderer.ts",
+      "line": 3019,
+      "column": 27,
+      "code": "TS2339",
+      "message": "Property 'measurementLine' does not exist on type 'SimplePolygonRenderer'.",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/SimplePolygonRenderer.ts",
+      "line": 3178,
+      "column": 14,
+      "code": "TS2339",
+      "message": "Property 'measurementLabel' does not exist on type 'SimplePolygonRenderer'.",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/SimplePolygonRenderer.ts",
+      "line": 3186,
+      "column": 14,
+      "code": "TS2339",
+      "message": "Property 'measurementLabel' does not exist on type 'SimplePolygonRenderer'.",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/SimplePolygonRenderer.ts",
+      "line": 3192,
+      "column": 16,
+      "code": "TS2339",
+      "message": "Property 'measurementLabel' does not exist on type 'SimplePolygonRenderer'.",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/SimplePolygonRenderer.ts",
+      "line": 3194,
+      "column": 16,
+      "code": "TS2339",
+      "message": "Property 'measurementLabel' does not exist on type 'SimplePolygonRenderer'.",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/SimplePolygonRenderer.ts",
+      "line": 3197,
+      "column": 14,
+      "code": "TS2339",
+      "message": "Property 'measurementLabel' does not exist on type 'SimplePolygonRenderer'.",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/SimplePolygonRenderer.ts",
+      "line": 3198,
+      "column": 29,
+      "code": "TS2339",
+      "message": "Property 'measurementLabel' does not exist on type 'SimplePolygonRenderer'.",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/SimplePolygonRenderer.ts",
+      "line": 3231,
+      "column": 14,
+      "code": "TS2551",
+      "message": "Property 'measurementPoints' does not exist on type 'SimplePolygonRenderer'. Did you mean 'addMeasurementPoint'?",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/SimplePolygonRenderer.ts",
+      "line": 3234,
+      "column": 24,
+      "code": "TS2551",
+      "message": "Property 'measurementPoints' does not exist on type 'SimplePolygonRenderer'. Did you mean 'addMeasurementPoint'?",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/SimplePolygonRenderer.ts",
+      "line": 3235,
+      "column": 22,
+      "code": "TS2551",
+      "message": "Property 'measurementPoints' does not exist on type 'SimplePolygonRenderer'. Did you mean 'addMeasurementPoint'?",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/SimplePolygonRenderer.ts",
+      "line": 3326,
+      "column": 34,
+      "code": "TS2551",
+      "message": "Property 'measurementPoints' does not exist on type 'SimplePolygonRenderer'. Did you mean 'addMeasurementPoint'?",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/SimplePolygonRenderer.ts",
+      "line": 3326,
+      "column": 61,
+      "code": "TS2551",
+      "message": "Property 'measurementPoints' does not exist on type 'SimplePolygonRenderer'. Did you mean 'addMeasurementPoint'?",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/SimplePolygonRenderer.ts",
+      "line": 3333,
+      "column": 34,
+      "code": "TS2551",
+      "message": "Property 'measurementPoints' does not exist on type 'SimplePolygonRenderer'. Did you mean 'addMeasurementPoint'?",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/SimplePolygonRenderer.ts",
+      "line": 3333,
+      "column": 61,
+      "code": "TS2551",
+      "message": "Property 'measurementPoints' does not exist on type 'SimplePolygonRenderer'. Did you mean 'addMeasurementPoint'?",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/SimplePolygonRenderer.ts",
+      "line": 3352,
+      "column": 36,
+      "code": "TS2551",
+      "message": "Property 'measurementPoints' does not exist on type 'SimplePolygonRenderer'. Did you mean 'addMeasurementPoint'?",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/SimplePolygonRenderer.ts",
+      "line": 3352,
+      "column": 63,
+      "code": "TS2551",
+      "message": "Property 'measurementPoints' does not exist on type 'SimplePolygonRenderer'. Did you mean 'addMeasurementPoint'?",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/SimplePolygonRenderer.ts",
+      "line": 3363,
+      "column": 34,
+      "code": "TS2551",
+      "message": "Property 'measurementPoints' does not exist on type 'SimplePolygonRenderer'. Did you mean 'addMeasurementPoint'?",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/SimplePolygonRenderer.ts",
+      "line": 3363,
+      "column": 61,
+      "code": "TS2551",
+      "message": "Property 'measurementPoints' does not exist on type 'SimplePolygonRenderer'. Did you mean 'addMeasurementPoint'?",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/SimplePolygonRenderer.ts",
+      "line": 3368,
+      "column": 32,
+      "code": "TS2551",
+      "message": "Property 'measurementPoints' does not exist on type 'SimplePolygonRenderer'. Did you mean 'addMeasurementPoint'?",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/SimplePolygonRenderer.ts",
+      "line": 3368,
+      "column": 59,
+      "code": "TS2551",
+      "message": "Property 'measurementPoints' does not exist on type 'SimplePolygonRenderer'. Did you mean 'addMeasurementPoint'?",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/SimplePolygonRenderer.ts",
+      "line": 3411,
+      "column": 32,
+      "code": "TS2551",
+      "message": "Property 'measurementPoints' does not exist on type 'SimplePolygonRenderer'. Did you mean 'addMeasurementPoint'?",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/SimplePolygonRenderer.ts",
+      "line": 3411,
+      "column": 59,
+      "code": "TS2551",
+      "message": "Property 'measurementPoints' does not exist on type 'SimplePolygonRenderer'. Did you mean 'addMeasurementPoint'?",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/SimplePolygonRenderer.ts",
+      "line": 3420,
+      "column": 32,
+      "code": "TS2551",
+      "message": "Property 'measurementPoints' does not exist on type 'SimplePolygonRenderer'. Did you mean 'addMeasurementPoint'?",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/SimplePolygonRenderer.ts",
+      "line": 3420,
+      "column": 59,
+      "code": "TS2551",
+      "message": "Property 'measurementPoints' does not exist on type 'SimplePolygonRenderer'. Did you mean 'addMeasurementPoint'?",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/SimplePolygonRenderer.ts",
+      "line": 3430,
+      "column": 32,
+      "code": "TS2551",
+      "message": "Property 'measurementPoints' does not exist on type 'SimplePolygonRenderer'. Did you mean 'addMeasurementPoint'?",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/SimplePolygonRenderer.ts",
+      "line": 3430,
+      "column": 59,
+      "code": "TS2551",
+      "message": "Property 'measurementPoints' does not exist on type 'SimplePolygonRenderer'. Did you mean 'addMeasurementPoint'?",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/SimplePolygonRenderer.ts",
+      "line": 3442,
+      "column": 32,
+      "code": "TS2551",
+      "message": "Property 'measurementPoints' does not exist on type 'SimplePolygonRenderer'. Did you mean 'addMeasurementPoint'?",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/SimplePolygonRenderer.ts",
+      "line": 3442,
+      "column": 59,
+      "code": "TS2551",
+      "message": "Property 'measurementPoints' does not exist on type 'SimplePolygonRenderer'. Did you mean 'addMeasurementPoint'?",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/SimplePolygonRenderer.ts",
+      "line": 3452,
+      "column": 26,
+      "code": "TS2551",
+      "message": "Property 'measurementPoints' does not exist on type 'SimplePolygonRenderer'. Did you mean 'addMeasurementPoint'?",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/SimplePolygonRenderer.ts",
+      "line": 3499,
+      "column": 26,
+      "code": "TS2551",
+      "message": "Property 'measurementPoints' does not exist on type 'SimplePolygonRenderer'. Did you mean 'addMeasurementPoint'?",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/SimplePolygonRenderer.ts",
+      "line": 4285,
+      "column": 29,
+      "code": "TS2551",
+      "message": "Property 'measurementPoints' does not exist on type 'SimplePolygonRenderer'. Did you mean 'addMeasurementPoint'?",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/SimplePolygonRenderer.ts",
+      "line": 4339,
+      "column": 27,
+      "code": "TS2551",
+      "message": "Property 'measurementPoints' does not exist on type 'SimplePolygonRenderer'. Did you mean 'addMeasurementPoint'?",
+      "type": "error"
+    },
+    {
+      "filePath": "lib/components/BuildingPointManager.ts",
+      "line": 42,
+      "column": 20,
+      "code": "TS2339",
+      "message": "Property 'buildingPoints' does not exist on type 'Polygon'.",
+      "type": "error"
+    },
+    {
+      "filePath": "lib/components/BuildingPointManager.ts",
+      "line": 42,
+      "column": 61,
+      "code": "TS2339",
+      "message": "Property 'buildingPoints' does not exist on type 'Polygon'.",
+      "type": "error"
+    },
+    {
+      "filePath": "lib/components/BuildingPointManager.ts",
+      "line": 43,
+      "column": 9,
+      "code": "TS2339",
+      "message": "Property 'buildingPoints' does not exist on type 'Polygon'.",
+      "type": "error"
+    },
+    {
+      "filePath": "lib/components/BuildingPointManager.ts",
+      "line": 45,
+      "column": 15,
+      "code": "TS2339",
+      "message": "Property 'buildingPoints' does not exist on type 'Polygon'.",
+      "type": "error"
+    },
+    {
+      "filePath": "lib/components/TransportPointManager.ts",
+      "line": 55,
+      "column": 19,
+      "code": "TS2339",
+      "message": "Property 'bridgePoints' does not exist on type 'Polygon'.",
+      "type": "error"
+    },
+    {
+      "filePath": "lib/components/TransportPointManager.ts",
+      "line": 55,
+      "column": 57,
+      "code": "TS2339",
+      "message": "Property 'bridgePoints' does not exist on type 'Polygon'.",
+      "type": "error"
+    },
+    {
+      "filePath": "lib/components/TransportPointManager.ts",
+      "line": 55,
+      "column": 82,
+      "code": "TS2339",
+      "message": "Property 'bridgePoints' does not exist on type 'Polygon'.",
+      "type": "error"
+    },
+    {
+      "filePath": "lib/components/TransportPointManager.ts",
+      "line": 57,
+      "column": 17,
+      "code": "TS2339",
+      "message": "Property 'bridgePoints' does not exist on type 'Polygon'.",
+      "type": "error"
+    },
+    {
+      "filePath": "lib/components/TransportPointManager.ts",
+      "line": 116,
+      "column": 44,
+      "code": "TS2345",
+      "message": "Argument of type 'Line<BufferGeometry<NormalBufferAttributes>, LineBasicMaterial>' is not assignable to parameter of type 'Mesh<BufferGeometry<NormalBufferAttributes>, Material | Material[], Object3DEventMap>'.",
+      "type": "error"
+    },
+    {
+      "filePath": "lib/components/TransportPointManager.ts",
+      "line": 125,
+      "column": 19,
+      "code": "TS2339",
+      "message": "Property 'dockPoints' does not exist on type 'Polygon'.",
+      "type": "error"
+    },
+    {
+      "filePath": "lib/components/TransportPointManager.ts",
+      "line": 125,
+      "column": 55,
+      "code": "TS2339",
+      "message": "Property 'dockPoints' does not exist on type 'Polygon'.",
+      "type": "error"
+    },
+    {
+      "filePath": "lib/components/TransportPointManager.ts",
+      "line": 125,
+      "column": 78,
+      "code": "TS2339",
+      "message": "Property 'dockPoints' does not exist on type 'Polygon'.",
+      "type": "error"
+    },
+    {
+      "filePath": "lib/components/TransportPointManager.ts",
+      "line": 126,
+      "column": 17,
+      "code": "TS2339",
+      "message": "Property 'dockPoints' does not exist on type 'Polygon'.",
+      "type": "error"
+    },
+    {
+      "filePath": "lib/services/NavigationService.ts",
+      "line": 58,
+      "column": 19,
+      "code": "TS2339",
+      "message": "Property 'bridgePoints' does not exist on type 'Polygon'.",
+      "type": "error"
+    },
+    {
+      "filePath": "lib/services/NavigationService.ts",
+      "line": 58,
+      "column": 57,
+      "code": "TS2339",
+      "message": "Property 'bridgePoints' does not exist on type 'Polygon'.",
+      "type": "error"
+    },
+    {
+      "filePath": "lib/services/NavigationService.ts",
+      "line": 59,
+      "column": 17,
+      "code": "TS2339",
+      "message": "Property 'bridgePoints' does not exist on type 'Polygon'.",
+      "type": "error"
+    },
+    {
+      "filePath": "lib/threejs/CoatOfArmsRenderer.ts",
+      "line": 232,
+      "column": 68,
+      "code": "TS2339",
+      "message": "Property 'message' does not exist on type 'unknown'.",
+      "type": "error"
+    },
+    {
+      "filePath": "lib/threejs/MeasurementTools.ts",
+      "line": 135,
+      "column": 29,
+      "code": "TS2448",
+      "message": "Block-scoped variable 'distance' used before its declaration.",
+      "type": "error"
+    }
+  ],
+  "rawOutputLines": 77,
+  "firstFewLines": [
+    "components/PolygonViewer/SimplePolygonRenderer.ts(2939,10): error TS2339: Property 'measurementMarkers' does not exist on type 'SimplePolygonRenderer'.\r",
+    "components/PolygonViewer/SimplePolygonRenderer.ts(2940,10): error TS2551: Property 'measurementPoints' does not exist on type 'SimplePolygonRenderer'. Did you mean 'addMeasurementPoint'?\r",
+    "components/PolygonViewer/SimplePolygonRenderer.ts(2943,14): error TS2551: Property 'measurementPoints' does not exist on type 'SimplePolygonRenderer'. Did you mean 'addMeasurementPoint'?\r",
+    "components/PolygonViewer/SimplePolygonRenderer.ts(2951,14): error TS2551: Property 'measurementPoints' does not exist on type 'SimplePolygonRenderer'. Did you mean 'addMeasurementPoint'?\r",
+    "components/PolygonViewer/SimplePolygonRenderer.ts(2952,32): error TS2551: Property 'measurementPoints' does not exist on type 'SimplePolygonRenderer'. Did you mean 'addMeasurementPoint'?\r"
+  ],
+  "compilerExitCode": 2
 }
