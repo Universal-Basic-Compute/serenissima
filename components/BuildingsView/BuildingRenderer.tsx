@@ -1,10 +1,12 @@
 import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { ThreeDErrorBoundary } from '@/lib/components/ThreeDErrorBoundary';
 import { eventBus } from '@/lib/eventBus';
 import { EventTypes } from '@/lib/eventTypes';
 import { BuildingData } from '@/lib/models/BuildingTypes';
+import { BuildingRendererFactory } from '@/lib/services/BuildingRendererFactory';
+import buildingPositionManager from '@/lib/services/BuildingPositionManager';
+import buildingCacheService from '@/lib/services/BuildingCacheService';
 
 /**
  * BuildingRenderer component handles the 3D rendering of placed buildings
@@ -28,14 +30,31 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
   camera, 
   onBuildingClick 
 }) => {
-  // Refs to track building meshes and loaders
+  // Refs to track building meshes
   const buildingMeshesRef = useRef<Map<string, THREE.Object3D>>(new Map());
-  const gltfLoaderRef = useRef<GLTFLoader>(new GLTFLoader());
+  
+  // Create a renderer factory instance
+  const rendererFactoryRef = useRef<BuildingRendererFactory | null>(null);
+  
+  // Initialize the renderer factory
+  useEffect(() => {
+    if (scene) {
+      rendererFactoryRef.current = new BuildingRendererFactory({
+        scene,
+        positionManager: buildingPositionManager,
+        cacheService: buildingCacheService
+      });
+    }
+    
+    return () => {
+      rendererFactoryRef.current = null;
+    };
+  }, [scene]);
   
   // Effect to handle building rendering and cleanup
   useEffect(() => {
-    // Skip if no scene or buildings
-    if (!scene || !buildings || buildings.length === 0) return;
+    // Skip if no scene or buildings or renderer factory
+    if (!scene || !buildings || buildings.length === 0 || !rendererFactoryRef.current) return;
     
     console.log(`BuildingRenderer: Rendering ${buildings.length} buildings`);
     
@@ -43,7 +62,7 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
     const processedBuildingIds = new Set<string>();
     
     // Process each building
-    buildings.forEach(building => {
+    buildings.forEach(async building => {
       if (!building.id) {
         console.warn('Building without ID:', building);
         return;
@@ -51,14 +70,29 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
       
       processedBuildingIds.add(building.id);
       
+      // Get the appropriate renderer for this building type
+      const renderer = rendererFactoryRef.current!.getRenderer(building.type);
+      
       // Check if we already have a mesh for this building
       if (buildingMeshesRef.current.has(building.id)) {
         // Update existing mesh if needed
         const existingMesh = buildingMeshesRef.current.get(building.id)!;
-        updateBuildingMesh(existingMesh, building);
+        renderer.update(building, existingMesh);
       } else {
-        // Create new mesh for this building
-        createBuildingMesh(building);
+        try {
+          // Create new mesh for this building
+          const mesh = await renderer.render(building);
+          
+          // Store reference to the mesh
+          buildingMeshesRef.current.set(building.id, mesh);
+          
+          // Add click handler if needed
+          if (camera && onBuildingClick) {
+            addClickHandler(mesh, building.id);
+          }
+        } catch (error) {
+          console.error(`Failed to render building ${building.id}:`, error);
+        }
       }
     });
     
@@ -66,8 +100,15 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
     buildingMeshesRef.current.forEach((mesh, id) => {
       if (!processedBuildingIds.has(id)) {
         console.log(`Removing building mesh for ${id}`);
-        scene.remove(mesh);
-        disposeMesh(mesh);
+        
+        // Get the renderer for this building type
+        const buildingType = mesh.userData?.type || 'default';
+        const renderer = rendererFactoryRef.current!.getRenderer(buildingType);
+        
+        // Dispose of the mesh
+        renderer.dispose(mesh);
+        
+        // Remove from our tracking map
         buildingMeshesRef.current.delete(id);
       }
     });
@@ -75,27 +116,47 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
     // Cleanup function
     return () => {
       // Remove all building meshes from scene
-      buildingMeshesRef.current.forEach((mesh, id) => {
-        scene.remove(mesh);
-        disposeMesh(mesh);
-      });
-      buildingMeshesRef.current.clear();
+      if (rendererFactoryRef.current) {
+        buildingMeshesRef.current.forEach((mesh, id) => {
+          const buildingType = mesh.userData?.type || 'default';
+          const renderer = rendererFactoryRef.current!.getRenderer(buildingType);
+          renderer.dispose(mesh);
+        });
+        buildingMeshesRef.current.clear();
+      }
     };
-  }, [scene, buildings]);
+  }, [scene, buildings, camera, onBuildingClick]);
   
   // Effect to handle building placement events
   useEffect(() => {
-    const handleBuildingPlaced = (data: any) => {
+    const handleBuildingPlaced = async (data: any) => {
       // If this is just a refresh event, do nothing (the main effect will handle it)
       if (data.refresh) return;
       
       // Otherwise, create or update the building mesh
-      if (data.building && data.building.id) {
-        if (buildingMeshesRef.current.has(data.building.id)) {
-          const existingMesh = buildingMeshesRef.current.get(data.building.id)!;
-          updateBuildingMesh(existingMesh, data.building);
+      if (data.building && data.building.id && rendererFactoryRef.current) {
+        const building = data.building;
+        const renderer = rendererFactoryRef.current.getRenderer(building.type);
+        
+        if (buildingMeshesRef.current.has(building.id)) {
+          // Update existing mesh
+          const existingMesh = buildingMeshesRef.current.get(building.id)!;
+          renderer.update(building, existingMesh);
         } else {
-          createBuildingMesh(data.building);
+          try {
+            // Create new mesh
+            const mesh = await renderer.render(building);
+            
+            // Store reference to the mesh
+            buildingMeshesRef.current.set(building.id, mesh);
+            
+            // Add click handler if needed
+            if (camera && onBuildingClick) {
+              addClickHandler(mesh, building.id);
+            }
+          } catch (error) {
+            console.error(`Failed to render building ${building.id}:`, error);
+          }
         }
       }
     };
@@ -106,209 +167,36 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
     return () => {
       subscription.unsubscribe();
     };
-  }, [scene]);
+  }, [scene, camera, onBuildingClick]);
   
-  // Function to create a building mesh
-  const createBuildingMesh = async (building: any) => {
-    try {
-      console.log(`Creating building mesh for ${building.id} of type ${building.type}`);
-      
-      // Determine the path to the GLB file based on building type and variant
-      const variant = building.variant || 'model';
-      const modelPath = `/assets/buildings/models/${building.type}/${variant}.glb`;
-      
-      console.log(`Loading model from: ${modelPath}`);
-      
-      // Create a group to hold the model
-      const buildingGroup = new THREE.Group();
-      buildingGroup.userData = {
-        buildingId: building.id,
-        type: building.type,
-        landId: building.land_id,
-        owner: building.owner || building.created_by,
-        position: building.position
-      };
-      
-      // Position the group
-      const position = new THREE.Vector3(
-        building.position.x,
-        building.position.y || 0,
-        building.position.z
-      );
-      
-      buildingGroup.position.copy(position);
-      buildingGroup.rotation.y = building.rotation || 0;
-      
-      // Add to scene immediately so we have something visible
-      scene.add(buildingGroup);
-      
-      // Store reference to the group
-      buildingMeshesRef.current.set(building.id, buildingGroup);
-      
-      try {
-        // Load the GLB model
-        const gltf = await new Promise<any>((resolve, reject) => {
-          gltfLoaderRef.current.load(
-            modelPath,
-            resolve,
-            (xhr) => {
-              console.log(`${building.id} model ${Math.round(xhr.loaded / xhr.total * 100)}% loaded`);
-            },
-            reject
-          );
-        });
-        
-        // Add the loaded model to the group
-        buildingGroup.add(gltf.scene);
-        
-        // Configure model for better rendering
-        gltf.scene.traverse((child: THREE.Object3D) => {
-          if (child instanceof THREE.Mesh) {
-            child.castShadow = true;
-            child.receiveShadow = true;
-            
-            if (child.material instanceof THREE.MeshStandardMaterial) {
-              child.material.needsUpdate = true;
-              child.material.roughness = 0.7;
-              child.material.metalness = 0.3;
-              child.material.emissive.set(0x202020);
-            }
-          }
-        });
-        
-        // Scale the model appropriately
-        buildingGroup.scale.set(0.4, 0.4, 0.4);
-        
-        console.log(`Successfully loaded model for ${building.id}`);
-      } catch (error) {
-        console.error(`Failed to load model for ${building.id}:`, error);
-        
-        // Create a fallback cube if model loading fails
-        const geometry = new THREE.BoxGeometry(2, 2, 2);
-        const material = new THREE.MeshStandardMaterial({ 
-          color: 0xD2B48C,
-          roughness: 0.7,
-          metalness: 0.2
-        });
-        
-        const cube = new THREE.Mesh(geometry, material);
-        cube.castShadow = true;
-        cube.receiveShadow = true;
-        
-        buildingGroup.add(cube);
-        
-        // Add a label with the building type
-        const canvas = document.createElement('canvas');
-        canvas.width = 256;
-        canvas.height = 64;
-        const context = canvas.getContext('2d');
-        
-        if (context) {
-          context.fillStyle = 'rgba(0, 0, 0, 0.8)';
-          context.fillRect(0, 0, 256, 64);
-          context.font = 'bold 24px Arial';
-          context.fillStyle = 'white';
-          context.textAlign = 'center';
-          context.textBaseline = 'middle';
-          context.fillText(building.type, 128, 32);
-          
-          const texture = new THREE.CanvasTexture(canvas);
-          const labelMaterial = new THREE.SpriteMaterial({ 
-            map: texture,
-            transparent: true
-          });
-          
-          const label = new THREE.Sprite(labelMaterial);
-          label.position.set(0, 2, 0);
-          label.scale.set(2, 0.5, 1);
-          
-          buildingGroup.add(label);
-        }
-      }
-      
-      // Add click handler
-      if (camera && onBuildingClick) {
-        const raycaster = new THREE.Raycaster();
-        const mouse = new THREE.Vector2();
-        
-        const handleClick = (event: MouseEvent) => {
-          // Calculate mouse position in normalized device coordinates
-          const rect = (event.target as HTMLElement).getBoundingClientRect();
-          mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-          mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-          
-          // Update the raycaster
-          raycaster.setFromCamera(mouse, camera);
-          
-          // Check for intersections with this building
-          const intersects = raycaster.intersectObject(buildingGroup, true);
-          
-          if (intersects.length > 0) {
-            onBuildingClick(building.id);
-          }
-        };
-        
-        window.addEventListener('click', handleClick);
-        
-        // Store the event listener for cleanup
-        buildingGroup.userData.clickHandler = handleClick;
-      }
-      
-    } catch (error) {
-      console.error(`Error creating building mesh for ${building.id}:`, error);
-    }
-  };
-  
-  // Function to update an existing building mesh
-  const updateBuildingMesh = (mesh: THREE.Object3D, building: any) => {
-    // Update position if needed
-    if (building.position) {
-      mesh.position.set(
-        building.position.x,
-        building.position.y || 0,
-        building.position.z
-      );
-    }
+  // Function to add click handler to a building mesh
+  const addClickHandler = (mesh: THREE.Object3D, buildingId: string) => {
+    if (!camera || !onBuildingClick) return;
     
-    // Update rotation if needed
-    if (building.rotation !== undefined) {
-      mesh.rotation.y = building.rotation;
-    }
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
     
-    // Update metadata
-    mesh.userData = {
-      ...mesh.userData,
-      buildingId: building.id,
-      type: building.type,
-      landId: building.land_id,
-      owner: building.owner || building.created_by,
-      position: building.position
+    const handleClick = (event: MouseEvent) => {
+      // Calculate mouse position in normalized device coordinates
+      const rect = (event.target as HTMLElement).getBoundingClientRect();
+      mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+      
+      // Update the raycaster
+      raycaster.setFromCamera(mouse, camera);
+      
+      // Check for intersections with this building
+      const intersects = raycaster.intersectObject(mesh, true);
+      
+      if (intersects.length > 0) {
+        onBuildingClick(buildingId);
+      }
     };
-  };
-  
-  // Function to dispose of a mesh and its resources
-  const disposeMesh = (mesh: THREE.Object3D) => {
-    // Remove event listeners
-    if (mesh.userData.clickHandler) {
-      window.removeEventListener('click', mesh.userData.clickHandler);
-    }
     
-    // Dispose of geometries and materials
-    mesh.traverse((child) => {
-      if (child instanceof THREE.Mesh) {
-        if (child.geometry) {
-          child.geometry.dispose();
-        }
-        
-        if (child.material) {
-          if (Array.isArray(child.material)) {
-            child.material.forEach(material => material.dispose());
-          } else {
-            child.material.dispose();
-          }
-        }
-      }
-    });
+    window.addEventListener('click', handleClick);
+    
+    // Store the event listener for cleanup
+    mesh.userData.clickHandler = handleClick;
   };
   
   // This component doesn't render anything directly

@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { BuildingData, DockData } from '../models/BuildingTypes';
+import { BuildingData } from '../models/BuildingTypes';
 import buildingPositionManager from './BuildingPositionManager';
 import buildingCacheService from './BuildingCacheService';
 
@@ -24,9 +24,9 @@ export interface IBuildingRenderer {
 }
 
 /**
- * Default building renderer implementation
+ * Universal building renderer implementation
  */
-class DefaultBuildingRenderer implements IBuildingRenderer {
+class UniversalBuildingRenderer implements IBuildingRenderer {
   private gltfLoader: GLTFLoader;
   
   constructor(private options: BuildingRendererOptions) {
@@ -390,7 +390,40 @@ class DefaultBuildingRenderer implements IBuildingRenderer {
               child.material.depthWrite = true;   // Ensure depth is written
             }
           }
+          
+          // Hide any grid objects in the model
+          if (child.name && (child.name.includes('grid') || child.name.includes('Grid'))) {
+            child.visible = false;
+          }
         });
+        
+        // Add connection points if they exist
+        if (building.connectionPoints && building.connectionPoints.length > 0) {
+          building.connectionPoints.forEach((point, index) => {
+            const geometry = new THREE.SphereGeometry(0.2, 8, 8);
+            const material = new THREE.MeshBasicMaterial({ 
+              color: building.type === 'dock' ? 0x00AAFF : 0xFFAA00 
+            });
+            const sphere = new THREE.Mesh(geometry, material);
+            
+            sphere.position.set(point.x, point.y, point.z);
+            sphere.userData = {
+              type: 'connection-point',
+              index
+            };
+            
+            model.add(sphere);
+          });
+        }
+        
+        // Special handling for different building types
+        if (building.type === 'dock') {
+          // Position docks slightly above water level
+          model.position.y += 0.2;
+        } else if (building.type === 'market-stall') {
+          // Position market stalls slightly above ground
+          model.position.y += 0.05;
+        }
         
         // Add to scene
         this.options.scene.add(model);
@@ -435,6 +468,15 @@ class DefaultBuildingRenderer implements IBuildingRenderer {
       }
       
       mesh.position.copy(position);
+      
+      // Special handling for different building types
+      if (building.type === 'dock') {
+        // Position docks slightly above water level
+        mesh.position.y += 0.2;
+      } else if (building.type === 'market-stall') {
+        // Position market stalls slightly above ground
+        mesh.position.y += 0.05;
+      }
     }
     
     // Update rotation if needed
@@ -451,6 +493,42 @@ class DefaultBuildingRenderer implements IBuildingRenderer {
       owner: building.owner || building.created_by,
       position: building.position
     };
+    
+    // Update connection points if they exist
+    if (building.connectionPoints) {
+      // Remove existing connection points
+      mesh.children = mesh.children.filter(child => {
+        if (child.userData && child.userData.type === 'connection-point') {
+          if (child instanceof THREE.Mesh) {
+            child.geometry.dispose();
+            if (child.material instanceof THREE.Material) {
+              child.material.dispose();
+            } else if (Array.isArray(child.material)) {
+              child.material.forEach(m => m.dispose());
+            }
+          }
+          return false;
+        }
+        return true;
+      });
+      
+      // Add updated connection points
+      building.connectionPoints.forEach((point, index) => {
+        const geometry = new THREE.SphereGeometry(0.2, 8, 8);
+        const material = new THREE.MeshBasicMaterial({ 
+          color: building.type === 'dock' ? 0x00AAFF : 0xFFAA00 
+        });
+        const sphere = new THREE.Mesh(geometry, material);
+        
+        sphere.position.set(point.x, point.y, point.z);
+        sphere.userData = {
+          type: 'connection-point',
+          index
+        };
+        
+        mesh.add(sphere);
+      });
+    }
   }
   
   /**
@@ -481,375 +559,14 @@ class DefaultBuildingRenderer implements IBuildingRenderer {
 }
 
 /**
- * Specialized renderer for dock buildings
- */
-class DockRenderer implements IBuildingRenderer {
-  constructor(private options: BuildingRendererOptions) {}
-  
-  /**
-   * Find the ground level at a position using raycasting
-   */
-  private findGroundLevel(position: THREE.Vector3): THREE.Vector3 | null {
-    // Create a raycaster
-    const raycaster = new THREE.Raycaster();
-    
-    // Set the ray origin high above the position
-    const rayOrigin = new THREE.Vector3(position.x, 100, position.z);
-    
-    // Set the ray direction downward
-    const rayDirection = new THREE.Vector3(0, -1, 0);
-    rayDirection.normalize();
-    
-    // Set up the raycaster with increased precision
-    raycaster.set(rayOrigin, rayDirection);
-    
-    // Increase precision for mesh detection
-    raycaster.params.Mesh.threshold = 0.1;
-    
-    // Find all land meshes in the scene
-    const landMeshes: THREE.Object3D[] = [];
-    this.options.scene.traverse(object => {
-      // Include all meshes except those we want to exclude
-      if (object instanceof THREE.Mesh && 
-          !object.userData.buildingId && 
-          !object.userData.isWater &&
-          !object.userData.isCoatOfArms) {
-        landMeshes.push(object);
-      }
-    });
-    
-    // Find intersections with land
-    const intersects = raycaster.intersectObjects(landMeshes, true); // true to check descendants
-    
-    if (intersects.length > 0) {
-      // If we found an intersection, return the point with a small offset
-      const groundPoint = intersects[0].point.clone();
-      // Add a small offset to prevent z-fighting
-      groundPoint.y += 0.01;
-      return groundPoint;
-    }
-    
-    // If no intersection found, return null
-    return null;
-  }
-  
-  /**
-   * Render a dock
-   * @param building Dock data
-   * @returns Promise resolving to THREE.Object3D
-   */
-  public async render(building: BuildingData): Promise<THREE.Object3D> {
-    try {
-      // Load the dock model
-      const model = await this.options.cacheService.getBuildingModel('dock', building.variant);
-      
-      // Set position
-      let position: THREE.Vector3;
-      
-      if ('lat' in building.position && 'lng' in building.position) {
-        position = this.options.positionManager.latLngToScenePosition(building.position);
-      } else {
-        position = new THREE.Vector3(
-          building.position.x,
-          building.position.y || 5,
-          building.position.z
-        );
-      }
-      
-      // For docks, we want them slightly above water level
-      // Find the water level at this position using raycasting
-      const groundPosition = this.findGroundLevel(position);
-      if (groundPosition) {
-        // Use the detected ground height plus a small offset for docks
-        position.y = groundPosition.y + 0.2;
-      } else {
-        // Fallback to default water level if detection fails
-        position.y = 0.2; // Water level is typically at y=0
-      }
-      
-      model.position.copy(position);
-      
-      // Set rotation
-      model.rotation.y = building.rotation || 0;
-      
-      // Add metadata to the model
-      model.userData = {
-        buildingId: building.id,
-        type: building.type,
-        landId: building.land_id,
-        owner: building.owner || building.created_by,
-        position: building.position
-      };
-      
-      // Remove any grid objects from the model
-      model.traverse((child) => {
-        // Check if the object is a grid or has grid in its name
-        if (child.name && (child.name.includes('grid') || child.name.includes('Grid'))) {
-          // Make the grid invisible
-          child.visible = false;
-        }
-        
-        // Enable shadows and configure materials for lighting
-        if (child instanceof THREE.Mesh) {
-          child.castShadow = true;
-          child.receiveShadow = true;
-          
-          if (child.material instanceof THREE.MeshStandardMaterial) {
-            child.material.needsUpdate = true;
-            child.material.roughness = 0.7;
-            child.material.metalness = 0.3;
-            child.material.emissive.set(0x202020);
-            // Ensure materials are properly configured for shadows
-            child.material.transparent = false; // Disable transparency for better shadows
-            child.material.depthWrite = true;   // Ensure depth is written
-          }
-        }
-      });
-      
-      // Add connection points for docks
-      if ((building as DockData).connectionPoints) {
-        const connectionPoints = (building as DockData).connectionPoints;
-        
-        // Create visual indicators for connection points
-        connectionPoints.forEach((point, index) => {
-          const geometry = new THREE.SphereGeometry(0.2, 8, 8);
-          const material = new THREE.MeshBasicMaterial({ color: 0x00AAFF });
-          const sphere = new THREE.Mesh(geometry, material);
-          
-          sphere.position.set(point.x, point.y, point.z);
-          sphere.userData = {
-            type: 'connection-point',
-            index
-          };
-          
-          model.add(sphere);
-        });
-      }
-      
-      // Add to scene
-      this.options.scene.add(model);
-      
-      return model;
-    } catch (error) {
-      console.error(`Error rendering dock ${building.id}:`, error);
-      throw error;
-    }
-  }
-  
-  /**
-   * Update a dock mesh
-   * @param building Updated dock data
-   * @param mesh Mesh to update
-   */
-  public update(building: BuildingData, mesh: THREE.Object3D): void {
-    // Use the default update logic
-    const defaultRenderer = new DefaultBuildingRenderer(this.options);
-    defaultRenderer.update(building, mesh);
-    
-    // Additional dock-specific updates
-    if ((building as DockData).connectionPoints) {
-      // Remove existing connection points
-      mesh.children = mesh.children.filter(child => {
-        if (child.userData && child.userData.type === 'connection-point') {
-          if (child instanceof THREE.Mesh) {
-            child.geometry.dispose();
-            if (child.material instanceof THREE.Material) {
-              child.material.dispose();
-            } else if (Array.isArray(child.material)) {
-              child.material.forEach(m => m.dispose());
-            }
-          }
-          return false;
-        }
-        return true;
-      });
-      
-      // Add updated connection points
-      const connectionPoints = (building as DockData).connectionPoints;
-      
-      connectionPoints.forEach((point, index) => {
-        const geometry = new THREE.SphereGeometry(0.2, 8, 8);
-        const material = new THREE.MeshBasicMaterial({ color: 0x00AAFF });
-        const sphere = new THREE.Mesh(geometry, material);
-        
-        sphere.position.set(point.x, point.y, point.z);
-        sphere.userData = {
-          type: 'connection-point',
-          index
-        };
-        
-        mesh.add(sphere);
-      });
-    }
-  }
-  
-  /**
-   * Dispose of a dock mesh
-   * @param mesh Mesh to dispose
-   */
-  public dispose(mesh: THREE.Object3D): void {
-    // Use the default dispose logic
-    const defaultRenderer = new DefaultBuildingRenderer(this.options);
-    defaultRenderer.dispose(mesh);
-  }
-}
-
-/**
- * Specialized renderer for market stall buildings
- */
-class MarketStallRenderer implements IBuildingRenderer {
-  constructor(private options: BuildingRendererOptions) {}
-  
-  /**
-   * Find the ground level at a position using raycasting
-   */
-  private findGroundLevel(position: THREE.Vector3): THREE.Vector3 | null {
-    // Create a raycaster
-    const raycaster = new THREE.Raycaster();
-    
-    // Set the ray origin high above the position
-    const rayOrigin = new THREE.Vector3(position.x, 100, position.z);
-    
-    // Set the ray direction downward
-    const rayDirection = new THREE.Vector3(0, -1, 0);
-    rayDirection.normalize();
-    
-    // Set up the raycaster with increased precision
-    raycaster.set(rayOrigin, rayDirection);
-    
-    // Increase precision for mesh detection
-    raycaster.params.Mesh.threshold = 0.1;
-    
-    // Find all land meshes in the scene
-    const landMeshes: THREE.Object3D[] = [];
-    this.options.scene.traverse(object => {
-      // Include all meshes except those we want to exclude
-      if (object instanceof THREE.Mesh && 
-          !object.userData.buildingId && 
-          !object.userData.isWater &&
-          !object.userData.isCoatOfArms) {
-        landMeshes.push(object);
-      }
-    });
-    
-    // Find intersections with land
-    const intersects = raycaster.intersectObjects(landMeshes, true); // true to check descendants
-    
-    if (intersects.length > 0) {
-      // If we found an intersection, return the point with a small offset
-      const groundPoint = intersects[0].point.clone();
-      // Add a small offset to prevent z-fighting
-      groundPoint.y += 0.01;
-      return groundPoint;
-    }
-    
-    // If no intersection found, return null
-    return null;
-  }
-  
-  /**
-   * Render a market stall
-   * @param building Market stall data
-   * @returns Promise resolving to THREE.Object3D
-   */
-  public async render(building: BuildingData): Promise<THREE.Object3D> {
-    try {
-      // Load the market stall model
-      const model = await this.options.cacheService.getBuildingModel('market-stall', building.variant);
-      
-      // Set position
-      let position: THREE.Vector3;
-      
-      if ('lat' in building.position && 'lng' in building.position) {
-        position = this.options.positionManager.latLngToScenePosition(building.position);
-      } else {
-        position = new THREE.Vector3(
-          building.position.x,
-          building.position.y || 5,
-          building.position.z
-        );
-      }
-      
-      // Find the ground level at this position using raycasting
-      const groundPosition = this.findGroundLevel(position);
-      if (groundPosition) {
-        // Use the detected ground height plus a small offset for market stalls
-        position.y = groundPosition.y + 0.05;
-      } else {
-        // Fallback to default height if detection fails
-        position.y = 0.05;
-      }
-      
-      model.position.copy(position);
-      
-      // Set rotation
-      model.rotation.y = building.rotation || 0;
-      
-      // Add metadata to the model
-      model.userData = {
-        buildingId: building.id,
-        type: building.type,
-        landId: building.land_id,
-        owner: building.owner || building.created_by,
-        position: building.position
-      };
-      
-      // Remove any grid objects from the model
-      model.traverse((child) => {
-        // Check if the object is a grid or has grid in its name
-        if (child.name && (child.name.includes('grid') || child.name.includes('Grid'))) {
-          // Make the grid invisible
-          child.visible = false;
-        }
-      });
-      
-      // Add to scene
-      this.options.scene.add(model);
-      
-      return model;
-    } catch (error) {
-      console.error(`Error rendering market stall ${building.id}:`, error);
-      throw error;
-    }
-  }
-  
-  /**
-   * Update a market stall mesh
-   * @param building Updated market stall data
-   * @param mesh Mesh to update
-   */
-  public update(building: BuildingData, mesh: THREE.Object3D): void {
-    // Use the default update logic
-    const defaultRenderer = new DefaultBuildingRenderer(this.options);
-    defaultRenderer.update(building, mesh);
-  }
-  
-  /**
-   * Dispose of a market stall mesh
-   * @param mesh Mesh to dispose
-   */
-  public dispose(mesh: THREE.Object3D): void {
-    // Use the default dispose logic
-    const defaultRenderer = new DefaultBuildingRenderer(this.options);
-    defaultRenderer.dispose(mesh);
-  }
-}
-
-/**
  * Factory for creating building renderers
  */
 export class BuildingRendererFactory {
-  private renderers: Map<string, IBuildingRenderer> = new Map();
-  private defaultRenderer: IBuildingRenderer;
+  private universalRenderer: IBuildingRenderer;
   
   constructor(private options: BuildingRendererOptions) {
-    // Create specialized renderers
-    this.renderers.set('dock', new DockRenderer(options));
-    this.renderers.set('market-stall', new MarketStallRenderer(options));
-    // Add more specialized renderers as needed
-    
-    // Create default renderer
-    this.defaultRenderer = new DefaultBuildingRenderer(options);
+    // Create universal renderer that handles all building types
+    this.universalRenderer = new UniversalBuildingRenderer(options);
   }
   
   /**
@@ -858,6 +575,6 @@ export class BuildingRendererFactory {
    * @returns Building renderer
    */
   public getRenderer(buildingType: string): IBuildingRenderer {
-    return this.renderers.get(buildingType) || this.defaultRenderer;
+    return this.universalRenderer;
   }
 }

@@ -58,14 +58,8 @@ export interface BuildingData {
   employmentCapacity?: number;
   owner?: string;
   mesh?: THREE.Object3D; // Reference to the 3D object (not persisted)
-}
-
-/**
- * Specialized dock building data
- */
-export interface DockData extends BuildingData {
-  connectionPoints: {x: number, y: number, z: number}[];
-  waterEdge: {lat: number, lng: number};
+  connectionPoints?: {x: number, y: number, z: number}[]; // Connection points for all building types
+  waterEdge?: {lat: number, lng: number}; // For dock buildings
 }
 
 /**

@@ -1464,6 +1464,18 @@ export default class SimplePolygonRenderer {
     
     console.log(`Created position map with ${buildingPointPositions.size} entries`);
     
+    // Import the BuildingRendererFactory
+    const { BuildingRendererFactory } = await import('../../lib/services/BuildingRendererFactory');
+    const buildingPositionManager = (await import('../../lib/services/BuildingPositionManager')).default;
+    const buildingCacheService = (await import('../../lib/services/BuildingCacheService')).default;
+    
+    // Create a building renderer factory
+    const rendererFactory = new BuildingRendererFactory({
+      scene: this.scene,
+      positionManager: buildingPositionManager,
+      cacheService: buildingCacheService
+    });
+    
     // Fetch buildings in batches of 20
     const batchSize = 20;
     let offset = 0;
@@ -1516,18 +1528,27 @@ export default class SimplePolygonRenderer {
             // Get the scene position and marker
             const pointData = buildingPointPositions.get(posKey);
             
-            // Create a building mesh at this position
-            const mesh = await this.createBuildingMesh(building, pointData.position);
-            if (mesh) {
-              // The ground level is now set in createBuildingMesh
-              console.log(`Building ${building.id} placed at ground level: ${mesh.position.y}`);
-            }
-      
-            // Remove the building point marker
-            this.removeBuildingPointMarker(pointData.marker);
+            // Get the appropriate renderer for this building type
+            const renderer = rendererFactory.getRenderer(building.type);
             
-            // Remove from the map to avoid duplicate processing
-            buildingPointPositions.delete(posKey);
+            try {
+              // Create a building mesh at this position
+              building.position = pointData.position;
+              const mesh = await renderer.render(building);
+              
+              console.log(`Building ${building.id} placed at position: ${mesh.position.x}, ${mesh.position.y}, ${mesh.position.z}`);
+              
+              // Remove the building point marker
+              this.removeBuildingPointMarker(pointData.marker);
+              
+              // Store the new building mesh for cleanup
+              this.buildingPointMarkers.push(mesh);
+              
+              // Remove from the map to avoid duplicate processing
+              buildingPointPositions.delete(posKey);
+            } catch (error) {
+              console.error(`Error rendering building ${building.id}:`, error);
+            }
           }
         }
         
@@ -1541,149 +1562,6 @@ export default class SimplePolygonRenderer {
     }
     
     console.log('Finished replacing building points with buildings');
-  }
-
-  /**
-   * Create a building mesh from building data
-   */
-  private async createBuildingMesh(building: any, position: THREE.Vector3): Promise<THREE.Object3D | null> {
-    try {
-      console.log(`Creating building mesh for ${building.id} of type ${building.type}`);
-      
-      // Create a loader for GLB files
-      const loader = new GLTFLoader();
-      
-      // Determine the path to the GLB file based on building type and variant
-      const variant = building.variant || 'model';
-      const modelPath = `/assets/buildings/models/${building.type}/${variant}.glb`;
-      
-      console.log(`Attempting to load model from: ${modelPath}`);
-      
-      // Create a group to hold the model and any additional elements
-      const buildingGroup = new THREE.Group() as THREE.Object3D;
-      
-      // Position the group
-      buildingGroup.position.copy(position);
-      
-      // Find the ground level at this position using raycasting
-      const groundPosition = this.findGroundLevel(position);
-      if (groundPosition) {
-        // Use the detected ground height
-        console.log(`Found ground at height ${groundPosition.y} for building ${building.id}`);
-        buildingGroup.position.y = groundPosition.y;
-      } else {
-        // Fallback to default ground level if detection fails
-        console.log(`No ground found for building ${building.id}, using default height (0)`);
-        buildingGroup.position.y = 0;
-      }
-      
-      let modelLoaded = false;
-      
-      try {
-        // Load the GLB model
-        const gltf = await new Promise<any>((resolve, reject) => {
-          loader.load(
-            modelPath,
-            resolve,
-            undefined, // onProgress callback not needed
-            reject
-          );
-        });
-        
-        // Add the loaded model to the group
-        buildingGroup.add(gltf.scene);
-      
-        // Apply rotation
-        buildingGroup.rotation.y = building.rotation || 0;
-      
-        // Ensure materials are properly configured for lighting
-        buildingGroup.traverse((child) => {
-          if (child instanceof THREE.Mesh) {
-            // Enable shadows
-            child.castShadow = true;
-            child.receiveShadow = true;
-          
-            // If using MeshStandardMaterial, ensure it has proper settings
-            if (child.material instanceof THREE.MeshStandardMaterial) {
-              child.material.needsUpdate = true;
-            
-              // Adjust material properties for better visibility
-              child.material.roughness = 0.7;  // Less shiny
-              child.material.metalness = 0.3;  // Slightly metallic
-            
-              // Add some emissive color to ensure minimal visibility even without lights
-              child.material.emissive.set(0x202020);  // Very subtle glow
-            }
-          }
-        });
-      
-        console.log(`Successfully loaded model for ${building.id} from ${modelPath}`);
-        modelLoaded = true;
-      } catch (modelError) {
-        console.warn(`Failed to load model from ${modelPath}:`, modelError);
-        
-        // Try a fallback path
-        const fallbackPath = `/models/buildings/${building.type}.glb`;
-        console.log(`Attempting to load from fallback path: ${fallbackPath}`);
-        
-        try {
-          const gltf = await new Promise<any>((resolve, reject) => {
-            loader.load(
-              fallbackPath,
-              resolve,
-              undefined,
-              reject
-            );
-          });
-          
-          // Add the loaded model to the group
-          buildingGroup.add(gltf.scene);
-          
-          // Apply rotation
-          buildingGroup.rotation.y = building.rotation || 0;
-          
-          console.log(`Successfully loaded model from fallback path for ${building.id}`);
-          modelLoaded = true;
-        } catch (fallbackError) {
-          console.warn(`Failed to load model from fallback path:`, fallbackError);
-          
-          // Don't create a fallback cube, just log the error
-          console.log(`No model available for ${building.id}, skipping visual representation`);
-          // We'll return the empty group without any visible mesh
-        }
-      }
-      
-      // Only add metadata and add to scene if we have a model or we want to keep the placeholder
-      if (modelLoaded) {
-        // Add metadata
-        buildingGroup.userData = {
-          buildingId: building.id,
-          type: building.type,
-          variant: building.variant,
-          owner: building.owner || building.created_by,
-          position: building.position
-        };
-        
-        // Add to scene
-        this.scene.add(buildingGroup);
-        
-        // Store in building markers for cleanup
-        this.buildingPointMarkers.push(buildingGroup);
-        
-        console.log(`Created building mesh for ${building.id} at position:`, buildingGroup.position);
-        
-        // Scale down the building to make it 2.5x smaller (20% smaller than before)
-        buildingGroup.scale.set(0.4, 0.4, 0.4);
-        
-        return buildingGroup;
-      } else {
-        // Return null to indicate no visual representation was created
-        return null;
-      }
-    } catch (error) {
-      console.error(`Error creating building mesh for ${building.id}:`, error);
-      return null;
-    }
   }
 
   /**
