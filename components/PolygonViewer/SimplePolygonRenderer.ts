@@ -2287,7 +2287,7 @@ export default class SimplePolygonRenderer {
   /**
    * Clear all building point markers
    */
-  private clearBuildingPointMarkers() {
+  public clearBuildingPointMarkers() {
     this.buildingPointMarkers.forEach(marker => {
       this.scene.remove(marker);
       
