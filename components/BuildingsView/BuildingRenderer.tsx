@@ -4,6 +4,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { ThreeDErrorBoundary } from '@/lib/components/ThreeDErrorBoundary';
 import { eventBus } from '@/lib/eventBus';
 import { EventTypes } from '@/lib/eventTypes';
+import { BuildingData } from '@/lib/models/BuildingTypes';
 
 /**
  * BuildingRenderer component handles the 3D rendering of placed buildings
@@ -16,7 +17,7 @@ import { EventTypes } from '@/lib/eventTypes';
  */
 interface BuildingRendererProps {
   scene: THREE.Scene;
-  buildings: any[];
+  buildings: BuildingData[];
   camera?: THREE.Camera;
   onBuildingClick?: (buildingId: string) => void;
 }

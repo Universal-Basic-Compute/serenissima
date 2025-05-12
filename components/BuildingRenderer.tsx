@@ -7,6 +7,7 @@ import buildingPositionManager from '@/lib/services/BuildingPositionManager';
 import buildingCacheService from '@/lib/services/BuildingCacheService';
 import buildingDataService from '@/lib/services/BuildingDataService';
 import { BuildingRendererFactory } from '@/lib/services/BuildingRendererFactory';
+import { ThreeDErrorBoundary } from '@/lib/components/ThreeDErrorBoundary';
 
 interface BuildingRendererProps {
   active: boolean;

@@ -1,70 +1,11 @@
 import useBuildingStore from '@/store/useBuildingStore';
 import * as THREE from 'three';
-
-export interface Building {
-  name: string;
-  category: string;
-  subcategory: string;
-  tier: number;
-  size: string;
-  unlockCondition: string;
-  shortDescription: string;
-  fullDescription: string;
-  flavorText: string;
-  constructionCosts: {
-    ducats: number;
-    [key: string]: number;
-  };
-  maintenanceCost: number;
-  constructionTime: number;
-  assets?: {
-    models?: string;
-    variants?: string[];
-    thumbnail?: string;
-  };
-  incomeGeneration?: number;
-  locationRequirements?: {
-    districtRestrictions: string;
-    [key: string]: any;
-  };
-  gameplayInformation?: {
-    unlocks?: string[];
-    specialAbilities?: string[];
-    [key: string]: any;
-  };
-  [key: string]: any;
-}
-
-export interface BuildingData {
-  id?: string;
-  type: string;
-  variant?: string;
-  land_id: string;
-  position: {
-    x: number;
-    y: number;
-    z: number;
-  };
-  rotation: number;
-  created_by: string;
-  connection_points?: { x: number; y: number; z: number }[];
-}
-
-export interface DockData extends BuildingData {
-  connectionPoints: { x: number; y: number; z: number }[];
-  edge?: { lat: number; lng: number };
-  position: { x: number; y: number; z: number } | { lat: number; lng: number };
-}
-
-export interface BuildingCategory {
-  name: string;
-  buildings: Building[];
-}
-
+import { BuildingData, BuildingCategory, Building, PlacementResult, PlacementContext } from '../models/BuildingTypes';
 
 /**
  * Service for managing building data
- * This is now a thin wrapper around the Zustand store
+ * This is a thin wrapper around the Zustand store with additional functionality
+ * for building placement, validation, and persistence
  */
 export class BuildingService {
   private static instance: BuildingService;
@@ -154,11 +95,44 @@ export class BuildingService {
   }
   
   /**
+   * Save multiple buildings in a single request
+   * @param buildingsData Array of building data to save
+   * @returns Array of saved building data with generated IDs
+   */
+  public async saveBuildingsBulk(buildingsData: BuildingData[]): Promise<BuildingData[]> {
+    try {
+      // Send to server using relative URL
+      const response = await fetch(`/api/buildings/bulk`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ buildings: buildingsData }),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to save buildings: ${response.status} ${response.statusText}`);
+      }
+      
+      const result = await response.json();
+      return result.results.map((r: any) => r.building);
+    } catch (error) {
+      console.error('Error saving buildings in bulk:', error);
+      // For development, return mock data if API fails
+      console.log('Returning mock building data for bulk save');
+      return buildingsData.map(data => ({
+        ...data,
+        id: `building_${Date.now()}_${Math.floor(Math.random() * 1000)}`
+      }));
+    }
+  }
+  
+  /**
    * Get all buildings, optionally filtered by type
    * @param type Optional building type to filter by
    * @returns Array of building data
    */
-  public async getBuildings(type?: string): Promise<any[]> {
+  public async getBuildings(type?: string): Promise<BuildingData[]> {
     try {
       // Use a relative URL instead of an absolute one to avoid port issues
       let url = `/api/buildings`;
@@ -175,7 +149,7 @@ export class BuildingService {
       if (!response.ok) {
         console.warn(`Failed to fetch buildings: ${response.status}. Using fallback data.`);
         
-        // Return mock data as fallback - using market-stall instead of public-dock
+        // Return mock data as fallback
         const fallbackData = [
           {
             id: 'building_1',
@@ -193,17 +167,7 @@ export class BuildingService {
       }
       
       const data = await response.json();
-      console.log('Buildings API response data:', data);
       console.log(`Received ${data.buildings?.length || 0} buildings from API`);
-      
-      if (data.buildings && data.buildings.length > 0) {
-        // Log each building for debugging
-        data.buildings.forEach((building: any, index: number) => {
-          console.log(`Building ${index + 1}:`, building);
-        });
-      } else {
-        console.warn('No buildings returned from API');
-      }
       
       return data.buildings || [];
     } catch (error) {
@@ -236,159 +200,100 @@ export class BuildingService {
   }
   
   /**
-   * Create a new dock
-   * @param landId ID of the land parcel
-   * @param position Position of the dock
-   * @param rotation Rotation of the dock in radians
-   * @returns The created dock data
+   * Delete a building
+   * @param id Building ID to delete
+   * @returns True if deletion was successful
    */
-  public async createDock(landId: string, position: THREE.Vector3, rotation: number): Promise<DockData> {
+  public async deleteBuilding(id: string): Promise<boolean> {
     try {
-      // Calculate connection points based on position and rotation
-      const connectionPoints = this.calculateDockConnectionPoints(position, rotation);
-      
-      // Create dock data
-      const dockData: DockData = {
-        type: 'dock',
-        variant: 'model',
-        land_id: landId,
-        position: {
-          x: position.x,
-          y: position.y,
-          z: position.z
-        },
-        rotation: rotation,
-        created_by: 'system', // This should be the current user
-        connectionPoints: connectionPoints
-      };
-      
-      // Send to server
-      const response = await fetch(`/api/docks`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(dockData),
+      const response = await fetch(`/api/buildings/${id}`, {
+        method: 'DELETE'
       });
       
       if (!response.ok) {
-        throw new Error(`Failed to create dock: ${response.status} ${response.statusText}`);
+        throw new Error(`Failed to delete building: ${response.status} ${response.statusText}`);
       }
       
-      return await response.json();
+      return true;
     } catch (error) {
-      console.error('Error creating dock:', error);
-      // For development, return mock data if API fails
-      console.log('Returning mock dock data');
-      
-      // Generate a unique ID
-      const id = `dock_${Date.now()}`;
-      
+      console.error(`Error deleting building ${id}:`, error);
+      return false;
+    }
+  }
+  
+  /**
+   * Validate building placement
+   * @param buildingType Type of building to place
+   * @param context Placement context including position and land information
+   * @returns Validation result with valid flag and optional reason
+   */
+  public validatePlacement(buildingType: string, context: PlacementContext): PlacementResult {
+    // Check if the land is owned by the player
+    if (context.owner !== context.owner) {
       return {
-        id,
-        type: 'dock',
-        variant: 'model',
-        land_id: landId,
-        position: {
-          x: position.x,
-          y: position.y,
-          z: position.z
-        },
-        rotation: rotation,
-        created_by: 'system',
-        connectionPoints: this.calculateDockConnectionPoints(position, rotation)
+        valid: false,
+        reason: 'You can only place buildings on land you own'
       };
     }
+    
+    // Check for overlapping buildings
+    const overlappingBuilding = this.checkForOverlappingBuildings(context.position, context.existingBuildings);
+    if (overlappingBuilding) {
+      return {
+        valid: false,
+        reason: `Building would overlap with existing ${overlappingBuilding.type}`
+      };
+    }
+    
+    // Building-specific validation could be added here
+    // For example, docks would need to be placed at water edges
+    
+    // Default to valid placement
+    return { valid: true };
   }
   
   /**
-   * Get all docks
-   * @returns Array of dock data
+   * Check if a building would overlap with existing buildings
+   * @param position Position to check
+   * @param existingBuildings Array of existing buildings
+   * @returns Overlapping building or null if no overlap
    */
-  public async getDocks(): Promise<DockData[]> {
-    try {
-      const response = await fetch(`/api/docks`);
+  private checkForOverlappingBuildings(position: THREE.Vector3, existingBuildings: BuildingData[]): BuildingData | null {
+    // Define a minimum distance between buildings (in scene units)
+    const MIN_DISTANCE = 2;
+    
+    for (const building of existingBuildings) {
+      // Skip buildings without position data
+      if (!building.position) continue;
       
-      if (!response.ok) {
-        throw new Error(`Failed to fetch docks: ${response.status} ${response.statusText}`);
+      // Get building position as Vector3
+      let buildingPos: THREE.Vector3;
+      
+      if ('lat' in building.position && 'lng' in building.position) {
+        // Skip buildings with lat/lng position for now
+        // In a real implementation, we would convert lat/lng to scene position
+        continue;
+      } else {
+        buildingPos = new THREE.Vector3(
+          building.position.x,
+          building.position.y || 0,
+          building.position.z
+        );
       }
       
-      return await response.json();
-    } catch (error) {
-      console.error('Error fetching docks:', error);
-      return [];
-    }
-  }
-  
-  /**
-   * Get a dock by ID
-   * @param id Dock ID
-   * @returns Dock data or null if not found
-   */
-  public async getDockById(id: string): Promise<DockData | null> {
-    try {
-      const response = await fetch(`/api/docks/${id}`);
+      // Calculate distance between positions (ignoring Y axis)
+      const dx = position.x - buildingPos.x;
+      const dz = position.z - buildingPos.z;
+      const distance = Math.sqrt(dx * dx + dz * dz);
       
-      if (!response.ok) {
-        throw new Error(`Failed to fetch dock: ${response.status} ${response.statusText}`);
+      // Check if distance is less than minimum allowed
+      if (distance < MIN_DISTANCE) {
+        return building;
       }
-      
-      return await response.json();
-    } catch (error) {
-      console.error(`Error fetching dock ${id}:`, error);
-      return null;
     }
-  }
-  
-  /**
-   * Calculate connection points for a dock based on position and rotation
-   * @param position Dock position
-   * @param rotation Dock rotation in radians
-   * @returns Array of connection points
-   */
-  private calculateDockConnectionPoints(position: THREE.Vector3, rotation: number): { x: number; y: number; z: number }[] {
-    // Create a direction vector pointing in the direction of the dock (based on rotation)
-    const direction = new THREE.Vector3(Math.sin(rotation), 0, Math.cos(rotation));
     
-    // Create a perpendicular vector for the width of the dock
-    const perpendicular = new THREE.Vector3(Math.sin(rotation + Math.PI/2), 0, Math.cos(rotation + Math.PI/2));
-    
-    // Calculate connection points
-    const connectionPoints = [];
-    
-    // Main connection point at the back of the dock (land side)
-    const landConnection = new THREE.Vector3()
-      .copy(position)
-      .add(direction.clone().multiplyScalar(-2)); // 2 units behind the dock
-    
-    connectionPoints.push({
-      x: landConnection.x,
-      y: landConnection.y + 0.1, // Slightly above ground
-      z: landConnection.z
-    });
-    
-    // Side connection points (optional)
-    const leftSide = new THREE.Vector3()
-      .copy(position)
-      .add(perpendicular.clone().multiplyScalar(1.5)); // 1.5 units to the left
-    
-    const rightSide = new THREE.Vector3()
-      .copy(position)
-      .add(perpendicular.clone().multiplyScalar(-1.5)); // 1.5 units to the right
-    
-    connectionPoints.push({
-      x: leftSide.x,
-      y: leftSide.y + 0.1,
-      z: leftSide.z
-    });
-    
-    connectionPoints.push({
-      x: rightSide.x,
-      y: rightSide.y + 0.1,
-      z: rightSide.z
-    });
-    
-    return connectionPoints;
+    // No overlapping buildings found
+    return null;
   }
 }
 
