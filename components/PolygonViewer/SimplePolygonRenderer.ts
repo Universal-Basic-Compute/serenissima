@@ -78,6 +78,9 @@ export default class SimplePolygonRenderer {
   public transportPointManager: TransportPointManager;
   private measurementTools: MeasurementTools | null = null;
   
+  // Properties for measurement
+  private measurementPoints: THREE.Vector3[] = [];
+  
   // Properties for path visualization
   private pathVisualization: THREE.Object3D[] = [];
   
@@ -2923,7 +2926,7 @@ export default class SimplePolygonRenderer {
   /**
    * Add a measurement point at the specified position
    */
-  private addMeasurementPoint(point: THREE.Vector3): void {
+  public addMeasurementPoint(point: THREE.Vector3): void {
     // Create a marker at the clicked position
     const geometry = new THREE.CircleGeometry(0.3, 32);
     const material = new THREE.MeshBasicMaterial({
