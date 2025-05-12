@@ -476,25 +476,25 @@ export default class SimplePolygonRenderer {
     let skippedNoOwner = 0;
     let skippedNoPosition = 0;
     let skippedNoCoatOfArms = 0;
-    
+  
     this.polygons.forEach(polygon => {
       // Check for both 'owner' and 'User' properties
       const ownerValue = polygon.owner || polygon.User;
-    
+  
       if (!ownerValue) {
         skippedNoOwner++;
         return;
       }
-    
+  
       // Check if polygon has any valid position property
       if (!polygon.coatOfArmsCenter && !polygon.center && !polygon.centroid) {
         console.log(`Polygon ${polygon.id} has owner ${ownerValue} but no position property`);
         skippedNoPosition++;
         return;
       }
-    
+  
       // Process polygon with owner
-    
+  
       // Get the coat of arms URL for the owner
       const coatOfArmsUrl = this.ownerCoatOfArmsMap[ownerValue];
       if (!coatOfArmsUrl) {
@@ -503,7 +503,7 @@ export default class SimplePolygonRenderer {
         skippedNoCoatOfArms++;
         return;
       }
-      
+    
       // Always use circular coat of arms for simplicity and performance
       this.createCircularCoatOfArms(polygon, coatOfArmsUrl);
       createdCount++;
