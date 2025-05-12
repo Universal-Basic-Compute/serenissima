@@ -110,6 +110,12 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
       
       console.log(`%c[DEBUG] Fetching notifications from: ${apiUrl} for user: ${userToFetch}`, 'color: #ff69b4');
       
+      // Only pass the since parameter on refresh requests, not on initial load
+      // This way, initial load will use the default 1-week lookback
+      const requestBody = forceRefresh 
+        ? { user: userToFetch, since: lastFetchTime } 
+        : { user: userToFetch };
+    
       const response = await fetch(
         apiUrl,
         {
@@ -117,10 +123,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            user: userToFetch,
-            since: lastFetchTime
-          })
+          body: JSON.stringify(requestBody)
         }
       );
 

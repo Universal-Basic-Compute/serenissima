@@ -33,20 +33,17 @@ export async function POST(request: Request) {
       );
     }
     
-    console.log('\x1b[35m%s\x1b[0m', `[DEBUG] Fetching notifications for user: ${user}, since: ${since}`);
+    // If since is not provided, default to 1 week ago
+    const effectiveSince = since || new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+    
+    console.log('\x1b[35m%s\x1b[0m', `[DEBUG] Fetching notifications for user: ${user}, since: ${effectiveSince}`);
     
     try {
       // Initialize Airtable
       const base = initAirtable();
       
-      // Build filter formula
-      let filterFormula = `{User} = '${user}'`;
-      
-      // Add since filter if provided
-      if (since) {
-        const sinceDate = new Date(since).toISOString();
-        filterFormula += ` AND {CreatedAt} > '${sinceDate}'`;
-      }
+      // Build filter formula with the effective since date
+      const filterFormula = `{User} = '${user}' AND {CreatedAt} > '${effectiveSince}'`;
       
       console.log('\x1b[35m%s\x1b[0m', `[DEBUG] Airtable filter formula: ${filterFormula}`);
       
@@ -54,7 +51,8 @@ export async function POST(request: Request) {
       const records = await base(AIRTABLE_NOTIFICATIONS_TABLE)
         .select({
           filterByFormula: filterFormula,
-          sort: [{ field: 'CreatedAt', direction: 'desc' }]
+          sort: [{ field: 'CreatedAt', direction: 'desc' }],
+          maxRecords: 100 // Limit to last 100 notifications
         })
         .all();
       
