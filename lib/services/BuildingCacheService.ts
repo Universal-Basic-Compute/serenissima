@@ -238,11 +238,11 @@ export class BuildingCacheService {
           resolve(gltf);
         },
         undefined,
-        (error) => {
+        (error: unknown) => {
           clearTimeout(timeoutId);
           
           // Check if this is a 404 error
-          if (error.message && error.message.includes('404')) {
+          if (error instanceof Error && error.message && error.message.includes('404')) {
             console.warn(`Model not found at ${path} (404) - will use fallback`);
             // Still reject but with a specific error type that can be identified
             reject(new Error(`404: ${path}`));
