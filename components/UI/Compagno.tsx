@@ -61,12 +61,17 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
     // Skip fetching if the component isn't open to reduce unnecessary API calls
     if (!isOpen && !showNotifications) return;
     
+    // Add debug output in pink
+    console.log('%c[DEBUG] Starting notification fetch', 'color: #ff69b4; font-weight: bold');
+    console.log('%c[DEBUG] isOpen:', 'color: #ff69b4', isOpen);
+    console.log('%c[DEBUG] showNotifications:', 'color: #ff69b4', showNotifications);
+    
     // Add debounce logic to prevent multiple rapid calls
     const now = Date.now();
     const minInterval = 5000; // 5 seconds minimum between fetches
     
     if (!forceRefresh && now - lastFetchRef.current < minInterval) {
-      console.log('Debouncing notification fetch - too soon since last attempt');
+      console.log('%c[DEBUG] Debouncing notification fetch - too soon since last attempt', 'color: #ff69b4');
       return;
     }
     
@@ -80,7 +85,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
       // Use the local API endpoint
       const apiUrl = `/api/notifications`;
       
-      console.log(`Fetching notifications from: ${apiUrl}`);
+      console.log(`%c[DEBUG] Fetching notifications from: ${apiUrl} for user: ${userToFetch}`, 'color: #ff69b4');
       
       const response = await fetch(
         apiUrl,
@@ -97,14 +102,16 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
       );
 
       if (!response.ok) {
+        console.log('%c[DEBUG] Fetch response not OK:', 'color: #ff69b4', response.status, response.statusText);
         throw new Error(`Failed to fetch notifications: ${response.status}`);
       }
 
       const data = await response.json();
       
-      console.log('Received notifications data:', data); // Add this for debugging
+      console.log('%c[DEBUG] Received notifications data:', 'color: #ff69b4', data);
       
       if (data.success && data.notifications && Array.isArray(data.notifications)) {
+        console.log('%c[DEBUG] Setting notifications:', 'color: #ff69b4', data.notifications.length);
         // Replace existing notifications instead of combining them
         setNotifications(data.notifications);
         
@@ -112,17 +119,18 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
         const unreadCount = data.notifications.filter((n: Notification) => n.readAt === null).length;
         setUnreadCount(unreadCount);
         
-        console.log(`Set ${data.notifications.length} notifications, ${unreadCount} unread`);
+        console.log(`%c[DEBUG] Set ${data.notifications.length} notifications, ${unreadCount} unread`, 'color: #ff69b4');
       } else {
-        console.error('Invalid notifications data format:', data);
+        console.error('%c[DEBUG] Invalid notifications data format:', 'color: #ff69b4', data);
       }
       
       // Update last fetch time
       setLastFetchTime(now);
     } catch (error) {
-      console.error('Error fetching notifications:', error);
+      console.error('%c[DEBUG] Error fetching notifications:', 'color: #ff69b4', error);
       // Create some dummy notifications for testing if none exist
       if (notifications.length === 0) {
+        console.log('%c[DEBUG] Creating fallback notifications', 'color: #ff69b4');
         const dummyNotifications = [
           {
             notificationId: 'dummy-1',
@@ -143,7 +151,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
         ];
         setNotifications(dummyNotifications);
         setUnreadCount(dummyNotifications.length);
-        console.log('Set fallback notifications:', dummyNotifications);
+        console.log('%c[DEBUG] Set fallback notifications:', 'color: #ff69b4', dummyNotifications);
       }
     }
   }, [username, lastFetchTime, notifications.length, isOpen, showNotifications]);
