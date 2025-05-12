@@ -552,6 +552,29 @@ export default function SimplePage() {
       try {
         const parsedProfile = JSON.parse(savedProfile);
         setUserProfile(parsedProfile);
+        
+        // Check if the profile has preferences
+        if (parsedProfile.preferences) {
+          try {
+            // Parse preferences if it's a string
+            const preferences = typeof parsedProfile.preferences === 'string' 
+              ? JSON.parse(parsedProfile.preferences) 
+              : parsedProfile.preferences;
+            
+            // Load quality settings if they exist
+            if (preferences.qualityMode) {
+              setQualityMode(preferences.qualityMode);
+              localStorage.setItem('qualityMode', preferences.qualityMode);
+            }
+            
+            if (preferences.waterQuality) {
+              setWaterQuality(preferences.waterQuality);
+              localStorage.setItem('waterQuality', preferences.waterQuality);
+            }
+          } catch (error) {
+            console.error('Error parsing user preferences:', error);
+          }
+        }
       } catch (error) {
         console.error('Error parsing saved user profile:', error);
       }

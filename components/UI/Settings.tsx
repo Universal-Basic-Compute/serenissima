@@ -115,7 +115,8 @@ const Settings: React.FC<SettingsProps> = ({ onClose }) => {
           body: JSON.stringify({
             wallet_address: walletAddress,
             settings: {
-              settings_json: JSON.stringify(settings)
+              qualityMode,
+              waterQuality
             }
           }),
         });
