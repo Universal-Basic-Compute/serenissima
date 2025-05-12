@@ -2,6 +2,20 @@ import * as THREE from 'three';
 import { normalizeCoordinates } from '../../components/PolygonViewer/utils';
 import { Polygon } from '../../components/PolygonViewer/types';
 
+// Extend the Polygon interface to include transport points
+interface TransportPolygon extends Polygon {
+  bridgePoints?: Array<{
+    edge: { lat: number; lng: number };
+    connection?: {
+      targetPoint: { lat: number; lng: number };
+    };
+  }>;
+  dockPoints?: Array<{
+    edge: { lat: number; lng: number };
+    water: { lat: number; lng: number };
+  }>;
+}
+
 export interface TransportPointManagerProps {
   scene: THREE.Scene;
   bounds: {
@@ -15,7 +29,7 @@ export interface TransportPointManagerProps {
 export class TransportPointManager {
   private scene: THREE.Scene;
   private bounds: any;
-  private bridgePointMarkers: THREE.Mesh[] = [];
+  private bridgePointMarkers: THREE.Object3D[] = [];
   private dockPointMarkers: THREE.Object3D[] = [];
   private hoveredPointId: string | null = null;
 
@@ -24,7 +38,7 @@ export class TransportPointManager {
     this.bounds = bounds;
   }
 
-  public createTransportPoints(polygons: Polygon[]): void {
+  public createTransportPoints(polygons: TransportPolygon[]): void {
     console.log('Creating bridge and dock points');
 
     // Clear any existing markers first
@@ -211,11 +225,18 @@ ${this.dockPointMarkers.length} dock markers`);
     // Clear bridge markers
     this.bridgePointMarkers.forEach(marker => {
       this.scene.remove(marker);
-      if (marker.geometry) marker.geometry.dispose();
-      if (marker.material instanceof THREE.Material) {
-        marker.material.dispose();
-      } else if (Array.isArray(marker.material)) {
-        marker.material.forEach(m => m.dispose());
+      if (marker instanceof THREE.Mesh) {
+        if (marker.geometry) marker.geometry.dispose();
+        if (marker.material instanceof THREE.Material) {
+          marker.material.dispose();
+        } else if (Array.isArray(marker.material)) {
+          marker.material.forEach(m => m.dispose());
+        }
+      } else if (marker instanceof THREE.Line) {
+        if (marker.geometry) marker.geometry.dispose();
+        if (marker.material instanceof THREE.Material) {
+          marker.material.dispose();
+        }
       }
     });
     this.bridgePointMarkers = [];
@@ -316,7 +337,7 @@ this.hoveredPointId
     }
   }
 
-  public getBridgePointMarkers(): THREE.Mesh[] {
+  public getBridgePointMarkers(): THREE.Object3D[] {
     return this.bridgePointMarkers;
   }
 
