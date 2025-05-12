@@ -35,8 +35,8 @@ import RoadCreator from '../PolygonViewer/RoadCreator';
 import { RoadManager } from '../../lib/threejs/RoadManager';
 import { eventBus, EventTypes } from '../../lib/eventBus';
 
-// Define ActiveViewMode as an alias of ViewMode to ensure type compatibility
-type ActiveViewMode = ViewMode;
+// Define ActiveViewMode as the same type as ViewMode to ensure type compatibility
+type ActiveViewMode = 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance' | 'citizens';
 
 export default function PolygonViewer() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -1667,8 +1667,8 @@ export default function PolygonViewer() {
   // Create memoized components before any conditional returns
   const ViewModeMenuMemo = useMemo(() => (
     <ViewModeMenu 
-      activeView={activeView} 
-      setActiveView={setActiveView} 
+      activeView={activeView as ViewMode} 
+      setActiveView={setActiveView as (view: ViewMode) => void} 
     />
   ), [activeView, setActiveView]);
   
