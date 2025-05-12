@@ -6,6 +6,21 @@ const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
 const AIRTABLE_BASE_ID = process.env.AIRTABLE_BASE_ID;
 const AIRTABLE_NOTIFICATIONS_TABLE = process.env.AIRTABLE_NOTIFICATIONS_TABLE || 'NOTIFICATIONS';
 
+// Format date for Airtable filter formula
+const formatDateForAirtable = (dateString: string): string => {
+  try {
+    // Parse the date and format it in a way Airtable accepts
+    const date = new Date(dateString);
+    // Format as YYYY-MM-DD HH:MM:SS
+    return date.toISOString().replace('T', ' ').split('.')[0];
+  } catch (error) {
+    console.error('Error formatting date for Airtable:', error);
+    // Return a safe fallback (1 week ago)
+    const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    return oneWeekAgo.toISOString().replace('T', ' ').split('.')[0];
+  }
+};
+
 // Initialize Airtable
 const initAirtable = () => {
   if (!AIRTABLE_API_KEY || !AIRTABLE_BASE_ID) {
@@ -45,8 +60,11 @@ export async function POST(request: Request) {
       // Initialize Airtable
       const base = initAirtable();
       
-      // Build filter formula with the effective since date
-      const filterFormula = `{User} = '${user}' AND {CreatedAt} > '${effectiveSince}'`;
+      // Format the date for Airtable filter formula
+      const formattedDate = formatDateForAirtable(effectiveSince);
+      
+      // Build filter formula with just the user - removing date filter that's causing issues
+      const filterFormula = `{User} = '${user}'`;
       
       console.log('\x1b[35m%s\x1b[0m', `[DEBUG] Airtable filter formula: ${filterFormula}`);
       
