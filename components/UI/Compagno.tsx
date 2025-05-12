@@ -50,7 +50,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState<number>(0);
-  const [showNotifications, setShowNotifications] = useState<boolean>(false);
+  const [showNotifications, setShowNotifications] = useState<boolean>(true);
   const [lastFetchTime, setLastFetchTime] = useState<number>(Date.now());
   const [isMobile, setIsMobile] = useState<boolean>(false);
   const fetchIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -571,14 +571,6 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
           {/* Navigation tabs */}
           <div className="bg-amber-100 border-b border-amber-200 flex">
             <button
-              onClick={() => setShowNotifications(false)}
-              className={`flex-1 py-2 text-sm font-medium ${
-                !showNotifications ? 'bg-amber-200 text-amber-800' : 'text-amber-700 hover:bg-amber-50'
-              }`}
-            >
-              Chat
-            </button>
-            <button
               onClick={() => {
                 setShowNotifications(true);
                 // Fetch latest notifications when switching to notifications view
@@ -594,6 +586,14 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
                   {unreadCount}
                 </span>
               )}
+            </button>
+            <button
+              onClick={() => setShowNotifications(false)}
+              className={`flex-1 py-2 text-sm font-medium ${
+                !showNotifications ? 'bg-amber-200 text-amber-800' : 'text-amber-700 hover:bg-amber-50'
+              }`}
+            >
+              Chat
             </button>
           </div>
           
