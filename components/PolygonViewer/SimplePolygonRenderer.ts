@@ -80,6 +80,8 @@ export default class SimplePolygonRenderer {
   
   // Properties for measurement
   private measurementPoints: THREE.Vector3[] = [];
+  private measurementLine: THREE.Line | null = null;
+  private measurementLabel: THREE.Sprite | null = null;
   
   // Properties for path visualization
   private pathVisualization: THREE.Object3D[] = [];
@@ -89,8 +91,6 @@ export default class SimplePolygonRenderer {
   private citizenData: any[] = [];
   private hoveredCitizenId: string | null = null;
   private selectedCitizenId: string | null = null;
-  
-  // This duplicate declaration has been removed
   
   constructor({ 
     scene, 
