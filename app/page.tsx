@@ -71,7 +71,7 @@ export default function SimplePage() {
   const [showInfo, setShowInfo] = useState(false);
   // Define the view type to ensure consistency with our ActiveViewMode type
   type ViewType = 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance' | 'loans' | 'knowledge' | 'citizens';
-  const [activeView, setActiveView] = useState<ViewType>('land');
+  const [activeView, setActiveView] = useState<ViewType>('buildings');
   const [show3DView, setShow3DView] = useState<boolean>(true);
   const [selectedCitizen, setSelectedCitizen] = useState<any>(null);
   
@@ -162,6 +162,21 @@ export default function SimplePage() {
       subscription.unsubscribe();
     };
   }, [activeView]);
+
+  // Ensure buildings are visible on initial load if we're starting in buildings view
+  useEffect(() => {
+    if (activeView === 'buildings') {
+      console.log('Starting in buildings view, dispatching showBuildings event');
+      
+      // Dispatch events to make buildings visible
+      window.dispatchEvent(new CustomEvent('showBuildings'));
+      
+      // Also ensure buildings are visible with a slight delay to allow for initialization
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
+      }, 1000);
+    }
+  }, []); // Empty dependency array means this runs once on mount
 
   // Handle URL changes to show appropriate panels
   useEffect(() => {
