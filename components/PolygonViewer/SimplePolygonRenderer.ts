@@ -2920,9 +2920,9 @@ export default class SimplePolygonRenderer {
   
   // Properties for measurement
   private measurementMarkers: THREE.Mesh[] = [];
-  private measurementPoints: THREE.Vector3[] = [];
+  public measurementPoints: THREE.Vector3[] = [];
   private measurementLine: THREE.Line | null = null;
-  private measurementLabel: THREE.Sprite | null = null;
+  public measurementLabel: THREE.Sprite | null = null;
   private measurementCircle: THREE.Mesh | null = null;
   
   /**
