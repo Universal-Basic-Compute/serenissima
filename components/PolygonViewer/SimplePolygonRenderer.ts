@@ -69,7 +69,7 @@ export default class SimplePolygonRenderer {
   // Properties for bridge, dock, and building points
   private hoveredPointId: string | null = null;
   private buildingPointMarkers: THREE.Object3D[] = [];
-  private bridgePointMarkers: THREE.Mesh[] = [];
+  private bridgePointMarkers: THREE.Object3D[] = []; // Changed from THREE.Mesh[] to THREE.Object3D[]
   private dockPointMarkers: THREE.Object3D[] = [];
   
   // Component managers
@@ -2248,11 +2248,18 @@ export default class SimplePolygonRenderer {
     // Clear bridge markers
     this.bridgePointMarkers.forEach(marker => {
       this.scene.remove(marker);
-      if (marker.geometry) marker.geometry.dispose();
-      if (marker.material instanceof THREE.Material) {
-        marker.material.dispose();
-      } else if (Array.isArray(marker.material)) {
-        marker.material.forEach(m => m.dispose());
+      if (marker instanceof THREE.Mesh) {
+        if (marker.geometry) marker.geometry.dispose();
+        if (marker.material instanceof THREE.Material) {
+          marker.material.dispose();
+        } else if (Array.isArray(marker.material)) {
+          marker.material.forEach(m => m.dispose());
+        }
+      } else if (marker instanceof THREE.Line) {
+        if (marker.geometry) marker.geometry.dispose();
+        if (marker.material instanceof THREE.Material) {
+          marker.material.dispose();
+        }
       }
     });
     this.bridgePointMarkers = [];
