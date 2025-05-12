@@ -155,8 +155,8 @@ export class MeasurementTools {
         this.measurementLabel.position.copy(midpoint);
 
         // Scale sprite based on distance from camera
-        const distance = this.camera.position.distanceTo(midpoint);
-        const scale = Math.max(1, distance / 10); // Scale up as camera gets further away
+        const cameraDistance = this.camera.position.distanceTo(midpoint);
+        const scale = Math.max(1, cameraDistance / 10); // Scale up as camera gets further away
         this.measurementLabel.scale.set(scale, scale * 0.5, 1); // Make height 1/2 of width
 
         this.measurementLabel.renderOrder = 101;
