@@ -1,4 +1,4 @@
-import { ViewMode, ActiveViewMode } from './types';
+import { ViewMode, ActiveViewMode } from '../../lib/threejs/types';
 import IconButton from '../UI/IconButton';
 import { eventBus, EventTypes } from '../../lib/eventBus';
 
@@ -23,12 +23,12 @@ export default function ViewModeMenu({ activeView, setActiveView }: ViewModeMenu
   // Helper function to check if a view is disabled
   const isDisabled = (view: ViewMode): boolean => {
     // Only these views are enabled
-    const enabledViews: ActiveViewMode[] = ['buildings', 'land', 'markets', 'citizens', 'resources', 'transport', 'guilds'];
+    const enabledViews: ActiveViewMode[] = ['buildings', 'land', 'markets', 'citizens', 'transport'];
     return !enabledViews.includes(view as ActiveViewMode);
   };
 
   // Detailed descriptions for each view mode
-  const viewDescriptions: Record<ViewMode | 'guilds', string> = {
+  const viewDescriptions: Record<ViewMode | string, string> = {
     'governance': 'Examine political districts, administrative boundaries, and centers of power in the Venetian Republic',
     'markets': 'Explore commercial hubs, trading posts, and economic activity across the Venetian territories',
     'resources': 'Survey natural resources, production centers, and material wealth of La Serenissima',
@@ -59,14 +59,14 @@ export default function ViewModeMenu({ activeView, setActiveView }: ViewModeMenu
       {/* Guilds View */}
       <IconButton 
         onClick={() => {
-          if (activeView !== 'guilds') {
+          if (activeView !== 'guilds' as any) {
             console.log('ViewModeMenu: Switching to guilds view');
             // Dispatch a custom event to ensure guilds are loaded
             window.dispatchEvent(new CustomEvent('loadGuilds'));
-            handleViewModeChange('guilds' as ActiveViewMode);
+            handleViewModeChange('guilds' as any);
           }
         }}
-        active={activeView === 'guilds'}
+        active={activeView === ('guilds' as any)}
         title={viewDescriptions.guilds}
         activeColor="amber"
         compact={true}
@@ -118,8 +118,8 @@ export default function ViewModeMenu({ activeView, setActiveView }: ViewModeMenu
       
       {/* Resources View - Now Enabled */}
       <IconButton 
-        onClick={() => activeView !== 'resources' ? handleViewModeChange('resources') : null}
-        active={activeView === 'resources'}
+        onClick={() => activeView !== ('resources' as any) ? handleViewModeChange('resources' as any) : null}
+        active={activeView === ('resources' as any)}
         title={viewDescriptions.resources}
         activeColor="amber"
         compact={true}
