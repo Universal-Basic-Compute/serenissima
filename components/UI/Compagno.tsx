@@ -65,6 +65,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
     console.log('%c[DEBUG] Starting notification fetch', 'color: #ff69b4; font-weight: bold');
     console.log('%c[DEBUG] isOpen:', 'color: #ff69b4', isOpen);
     console.log('%c[DEBUG] showNotifications:', 'color: #ff69b4', showNotifications);
+    console.log('%c[DEBUG] Current username:', 'color: #ff69b4', username);
     
     // Add debounce logic to prevent multiple rapid calls
     const now = Date.now();
@@ -79,8 +80,30 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
     lastFetchRef.current = now;
     
     try {
-      // Get the current username or use default
-      const userToFetch = username || DEFAULT_USERNAME;
+      // Get the current username from localStorage if not already set
+      let userToFetch = username;
+      
+      if (!userToFetch || userToFetch === DEFAULT_USERNAME) {
+        // Try to get username from localStorage
+        const savedProfile = localStorage.getItem('userProfile');
+        if (savedProfile) {
+          try {
+            const profile = JSON.parse(savedProfile);
+            if (profile.username) {
+              userToFetch = profile.username;
+              // Update the component state
+              setUsername(profile.username);
+            }
+          } catch (error) {
+            console.error('Error parsing user profile:', error);
+          }
+        }
+      }
+      
+      // If still no username, use the default
+      if (!userToFetch) {
+        userToFetch = DEFAULT_USERNAME;
+      }
       
       // Use the local API endpoint
       const apiUrl = `/api/notifications`;
@@ -240,12 +263,29 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
       try {
         const profile = JSON.parse(savedProfile);
         if (profile.username) {
+          console.log('%c[DEBUG] Found username in localStorage:', 'color: #ff69b4', profile.username);
           setUsername(profile.username);
         }
       } catch (error) {
         console.error('Error parsing user profile:', error);
       }
+    } else {
+      console.log('%c[DEBUG] No user profile found in localStorage, using default username:', 'color: #ff69b4', DEFAULT_USERNAME);
     }
+    
+    // Also listen for profile updates
+    const handleProfileUpdate = (event: CustomEvent) => {
+      if (event.detail && event.detail.username) {
+        console.log('%c[DEBUG] Profile updated, new username:', 'color: #ff69b4', event.detail.username);
+        setUsername(event.detail.username);
+      }
+    };
+    
+    window.addEventListener('userProfileUpdated', handleProfileUpdate as EventListener);
+    
+    return () => {
+      window.removeEventListener('userProfileUpdated', handleProfileUpdate as EventListener);
+    };
   }, []);
 
   // Set up notification polling
