@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import * as THREE from 'three';
 import RoadCreator from '@/components/PolygonViewer/RoadCreator';
-import BuildingRenderer from '@/components/BuildingRenderer';
+import BuildingRenderer from './BuildingRenderer';
 import PlaceableObjectManager from '@/lib/components/PlaceableObjectManager';
 import { useBuildingMenu } from '@/hooks/useBuildingMenu';
 import { eventBus } from '@/lib/eventBus';
