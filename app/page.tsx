@@ -8,7 +8,7 @@ import TechTree from '../components/Knowledge/TechTree';
 import ProjectPresentation from '../components/Knowledge/ProjectPresentation';
 import ResourceTree from '../components/Knowledge/ResourceTree';
 import KnowledgeRepository from '../components/Knowledge/KnowledgeRepository';
-import { StrategiesArticle, BeginnersGuideArticle, EconomicSystemArticle, LandOwnerGuideArticle, DecreesGovernanceArticle, BuildingOwnersGuideArticle, BusinessOwnersGuideArticle, HistoricalAccuracyArticle } from '../components/Articles';
+import { StrategiesArticle, BeginnersGuideArticle, EconomicSystemArticle, LandOwnerGuideArticle, DecreesGovernanceArticle, BuildingOwnersGuideArticle, BusinessOwnersGuideArticle, HistoricalAccuracyArticle, VenetianGuildsArticle, GuildLeadershipArticle } from '../components/Articles';
 import CitizenDetailsPanel from '../components/UI/CitizenDetailsPanel';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
@@ -1505,6 +1505,14 @@ export default function SimplePage() {
       
       {selectedArticle === "historical-accuracy" && (
         <HistoricalAccuracyArticle onClose={() => setSelectedArticle(null)} />
+      )}
+      
+      {selectedArticle === "venetian-guilds" && (
+        <VenetianGuildsArticle onClose={() => setSelectedArticle(null)} />
+      )}
+      
+      {selectedArticle === "guild-leadership" && (
+        <GuildLeadershipArticle onClose={() => setSelectedArticle(null)} />
       )}
       
       {/* Citizen Details Panel */}
