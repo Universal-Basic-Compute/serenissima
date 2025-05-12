@@ -34,10 +34,39 @@ export async function GET(
     // Initialize Airtable
     const base = new Airtable({ apiKey: AIRTABLE_API_KEY }).base(AIRTABLE_BASE_ID);
     
-    // Fetch users who are members of this guild
-    const records = await base('USERS').select({
-      filterByFormula: `{GuildId} = '${guildId}'`
+    // First, get the guild record to find its GuildId field (not the Airtable record ID)
+    const guildRecords = await base('GUILDS').select({
+      filterByFormula: `RECORD_ID() = '${guildId}'`,
+      fields: ['GuildId']
     }).all();
+    
+    if (guildRecords.length === 0) {
+      console.error(`Guild with record ID ${guildId} not found`);
+      return NextResponse.json(
+        { error: 'Guild not found' },
+        { status: 404 }
+      );
+    }
+    
+    // Get the actual GuildId field value from the guild record
+    const actualGuildId = guildRecords[0].get('GuildId') as string;
+    
+    if (!actualGuildId) {
+      console.error(`Guild with record ID ${guildId} has no GuildId field`);
+      return NextResponse.json(
+        { error: 'Guild has no ID field' },
+        { status: 404 }
+      );
+    }
+    
+    console.log(`Found guild with GuildId: ${actualGuildId}`);
+    
+    // Now fetch users who are members of this guild using the actual GuildId
+    const records = await base('USERS').select({
+      filterByFormula: `{GuildId} = '${actualGuildId}'`
+    }).all();
+    
+    console.log(`Found ${records.length} members for guild with GuildId: ${actualGuildId}`);
     
     // Transform Airtable records to our GuildMember interface format
     const members: GuildMember[] = records.map(record => ({
