@@ -60,12 +60,8 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
     // Skip fetching if the component isn't open to reduce unnecessary API calls
     if (!isOpen && !showNotifications) return;
     
-    // Add a timestamp check to prevent fetching too frequently, but bypass if forceRefresh is true
+    // Always update the timestamp when we fetch
     const now = Date.now();
-    if (!forceRefresh && now - lastFetchTime < 10000) { // Don't fetch more than once every 10 seconds unless forced
-      console.log('Skipping notification fetch - too soon since last fetch');
-      return;
-    }
     
     try {
       // Get the current username or use default
