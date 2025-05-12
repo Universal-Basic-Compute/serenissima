@@ -1,5 +1,14 @@
 import * as THREE from 'three';
-import { Polygon } from '../../components/PolygonViewer/types';
+import { Polygon as BasePolygon } from '../../components/PolygonViewer/types';
+
+// Extend the Polygon type to include bridgePoints
+interface Polygon extends BasePolygon {
+  bridgePoints?: Array<{
+    connection?: {
+      targetPolygonId?: string;
+    };
+  }>;
+}
 
 export interface PathNode {
   id: string;
@@ -29,8 +38,8 @@ export class NavigationService {
     return NavigationService.instance;
   }
 
-  public setPolygons(polygons: Polygon[]): void {
-    this.polygons = polygons;
+  public setPolygons(polygons: BasePolygon[]): void {
+    this.polygons = polygons as Polygon[];
     this.buildNavigationGraph();
   }
 
