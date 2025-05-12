@@ -8,6 +8,15 @@ const baseId = process.env.AIRTABLE_BASE_ID;
 // Initialize Airtable base
 const base = new Airtable({ apiKey }).base(baseId);
 
+// Helper function to convert resource name to icon filename
+function getResourceIconFromName(resourceName: string): string {
+  // Convert the resource name to lowercase, replace spaces with underscores
+  const formattedName = resourceName.toLowerCase().replace(/\s+/g, '_');
+  
+  // Return the formatted name with .png extension
+  return `${formattedName}.png`;
+}
+
 export async function GET(request: Request) {
   try {
     // Get URL parameters
@@ -82,13 +91,16 @@ export async function GET(request: Request) {
         const existingResource = resourceCountMap.get(key);
         existingResource.count += resourceCount;
       } else {
+        // Generate icon filename from resource name
+        const iconFromName = getResourceIconFromName(resourceName);
+        
         // Otherwise, add a new entry
         resourceCountMap.set(key, {
           id: resourceId,
           name: resourceName,
           category: resourceCategory,
           subcategory: resourceSubcategory,
-          icon: resourceIcon,
+          icon: iconFromName, // Use the name-based icon
           count: resourceCount,
           rarity: resourceRarity,
           description: resourceDescription
