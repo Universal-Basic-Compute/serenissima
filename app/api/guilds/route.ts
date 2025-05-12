@@ -39,7 +39,7 @@ export async function GET() {
     const base = new Airtable({ apiKey: AIRTABLE_API_KEY }).base(AIRTABLE_BASE_ID);
     
     // Fetch records from the Guilds table
-    const records = await base('Guilds').select().all();
+    const records = await base('GUILDS').select().all();
     
     // Transform Airtable records to our Guild interface format
     const guilds: Guild[] = records.map(record => ({
