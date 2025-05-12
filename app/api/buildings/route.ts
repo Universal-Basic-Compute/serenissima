@@ -466,11 +466,11 @@ export async function GET(request: Request) {
     };
     
     // Add the debug buildings to the beginning of the array to ensure they're processed first
-    buildings.unshift(debugBuilding1);
-    buildings.unshift(debugBuilding2);
-    buildings.unshift(debugBuilding3);
-    buildings.unshift(debugBuilding4);
-    buildings.unshift(debugBuilding5);
+    buildings.unshift(debugBuilding1 as any);
+    buildings.unshift(debugBuilding2 as any);
+    buildings.unshift(debugBuilding3 as any);
+    buildings.unshift(debugBuilding4 as any);
+    buildings.unshift(debugBuilding5 as any);
     
     // Set cache headers to allow browsers to cache the response for a short time
     const headers = new Headers();
