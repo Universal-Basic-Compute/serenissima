@@ -1,5 +1,12 @@
 import { eventBus, EventTypes } from '../eventBus';
 
+// Add the missing event type if it doesn't exist in EventTypes
+declare module '../eventBus' {
+  interface EventTypes {
+    INCOME_DATA_SIMULATED: string;
+  }
+}
+
 export interface IncomeData {
   polygonId: string;
   income: number;
@@ -176,7 +183,7 @@ export class IncomeDataService {
       this.setIncomeData(simulatedData);
       
       // Emit a specific event for simulated data
-      eventBus.emit(EventTypes.INCOME_DATA_SIMULATED, {
+      eventBus.emit(EventTypes.INCOME_DATA_UPDATED, {
         count: simulatedData.length,
         minIncome: this.minIncome,
         maxIncome: this.maxIncome,
@@ -209,7 +216,7 @@ export class IncomeDataService {
         this.setIncomeData(simulatedData);
         
         // Emit a specific event for simulated data
-        eventBus.emit(EventTypes.INCOME_DATA_SIMULATED, {
+        eventBus.emit(EventTypes.INCOME_DATA_UPDATED, {
           count: simulatedData.length,
           minIncome: this.minIncome,
           maxIncome: this.maxIncome,
