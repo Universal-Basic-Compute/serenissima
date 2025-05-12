@@ -68,7 +68,7 @@ export default class SimplePolygonRenderer {
   
   // Properties for bridge, dock, and building points
   private hoveredPointId: string | null = null;
-  public buildingPointMarkers: THREE.Object3D[] = [];
+  private buildingPointMarkers: THREE.Object3D[] = [];
   public bridgePointMarkers: THREE.Object3D[] = [];
   public dockPointMarkers: THREE.Object3D[] = [];
   
@@ -2287,7 +2287,7 @@ export default class SimplePolygonRenderer {
   /**
    * Clear all building point markers
    */
-  public clearBuildingPointMarkers() {
+  public clearBuildingPointMarkers(): void {
     this.buildingPointMarkers.forEach(marker => {
       this.scene.remove(marker);
       
@@ -2321,7 +2321,7 @@ export default class SimplePolygonRenderer {
   /**
    * Force all building markers to be visible
    */
-  public forceShowBuildingMarkers() {
+  public forceShowBuildingMarkers(): void {
     console.log('Force showing building markers');
     
     // Make sure building points are created
@@ -2340,7 +2340,7 @@ export default class SimplePolygonRenderer {
   /**
    * Create building point markers for buildings view
    */
-  public createBuildingPoints() {
+  public createBuildingPoints(): void {
     console.log('Creating building points - START');
     
     // Clear any existing markers first
@@ -2444,7 +2444,7 @@ export default class SimplePolygonRenderer {
   /**
    * Force building points to be visible in transport view
    */
-  public forceBuildingPointsVisible() {
+  public forceBuildingPointsVisible(): void {
     console.log('Forcing building points to be visible');
     
     // If no building points exist, create them
