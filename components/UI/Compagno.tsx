@@ -696,19 +696,11 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
                         }}
                       >
                         <div className="flex justify-between items-start">
-                          <div className="font-medium text-amber-800">
-                            {notification.type}
-                          </div>
                           <div className="text-xs text-gray-500">
-                            {new Date(notification.createdAt).toLocaleString()}
+                            {formatNotificationDate(notification.createdAt)}
                           </div>
                         </div>
-                        <div className="mt-1">{notification.content}</div>
-                        {!notification.readAt && (
-                          <div className="mt-2 text-xs text-amber-600">
-                            Click to mark as read
-                          </div>
-                        )}
+                        <div className="mt-1 text-sm">{notification.content}</div>
                       </div>
                     ))}
                     
