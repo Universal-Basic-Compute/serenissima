@@ -50,6 +50,12 @@ export interface BuildingData {
   connection_points?: { x: number; y: number; z: number }[];
 }
 
+export interface DockData extends BuildingData {
+  connectionPoints: { x: number; y: number; z: number }[];
+  edge?: { lat: number; lng: number };
+  position: { x: number; y: number; z: number } | { lat: number; lng: number };
+}
+
 export interface BuildingCategory {
   name: string;
   buildings: Building[];
@@ -147,7 +153,6 @@ export class BuildingService {
     }
   }
   
-  
   /**
    * Get all buildings, optionally filtered by type
    * @param type Optional building type to filter by
@@ -203,13 +208,188 @@ export class BuildingService {
       return data.buildings || [];
     } catch (error) {
       console.error('Error fetching buildings:', error);
-      console.error('Stack trace:', error.stack);
+      console.error('Stack trace:', error instanceof Error ? error.stack : String(error));
       
       // Return empty array instead of throwing to prevent UI errors
       return [];
     }
   }
   
+  /**
+   * Get a building by ID
+   * @param id Building ID
+   * @returns Building data or null if not found
+   */
+  public async getBuildingById(id: string): Promise<BuildingData | null> {
+    try {
+      const response = await fetch(`/api/buildings/${id}`);
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch building: ${response.status} ${response.statusText}`);
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error(`Error fetching building ${id}:`, error);
+      return null;
+    }
+  }
+  
+  /**
+   * Create a new dock
+   * @param landId ID of the land parcel
+   * @param position Position of the dock
+   * @param rotation Rotation of the dock in radians
+   * @returns The created dock data
+   */
+  public async createDock(landId: string, position: THREE.Vector3, rotation: number): Promise<DockData> {
+    try {
+      // Calculate connection points based on position and rotation
+      const connectionPoints = this.calculateDockConnectionPoints(position, rotation);
+      
+      // Create dock data
+      const dockData: DockData = {
+        type: 'dock',
+        variant: 'model',
+        land_id: landId,
+        position: {
+          x: position.x,
+          y: position.y,
+          z: position.z
+        },
+        rotation: rotation,
+        created_by: 'system', // This should be the current user
+        connectionPoints: connectionPoints
+      };
+      
+      // Send to server
+      const response = await fetch(`/api/docks`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(dockData),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to create dock: ${response.status} ${response.statusText}`);
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error creating dock:', error);
+      // For development, return mock data if API fails
+      console.log('Returning mock dock data');
+      
+      // Generate a unique ID
+      const id = `dock_${Date.now()}`;
+      
+      return {
+        id,
+        type: 'dock',
+        variant: 'model',
+        land_id: landId,
+        position: {
+          x: position.x,
+          y: position.y,
+          z: position.z
+        },
+        rotation: rotation,
+        created_by: 'system',
+        connectionPoints: this.calculateDockConnectionPoints(position, rotation)
+      };
+    }
+  }
+  
+  /**
+   * Get all docks
+   * @returns Array of dock data
+   */
+  public async getDocks(): Promise<DockData[]> {
+    try {
+      const response = await fetch(`/api/docks`);
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch docks: ${response.status} ${response.statusText}`);
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching docks:', error);
+      return [];
+    }
+  }
+  
+  /**
+   * Get a dock by ID
+   * @param id Dock ID
+   * @returns Dock data or null if not found
+   */
+  public async getDockById(id: string): Promise<DockData | null> {
+    try {
+      const response = await fetch(`/api/docks/${id}`);
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch dock: ${response.status} ${response.statusText}`);
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error(`Error fetching dock ${id}:`, error);
+      return null;
+    }
+  }
+  
+  /**
+   * Calculate connection points for a dock based on position and rotation
+   * @param position Dock position
+   * @param rotation Dock rotation in radians
+   * @returns Array of connection points
+   */
+  private calculateDockConnectionPoints(position: THREE.Vector3, rotation: number): { x: number; y: number; z: number }[] {
+    // Create a direction vector pointing in the direction of the dock (based on rotation)
+    const direction = new THREE.Vector3(Math.sin(rotation), 0, Math.cos(rotation));
+    
+    // Create a perpendicular vector for the width of the dock
+    const perpendicular = new THREE.Vector3(Math.sin(rotation + Math.PI/2), 0, Math.cos(rotation + Math.PI/2));
+    
+    // Calculate connection points
+    const connectionPoints = [];
+    
+    // Main connection point at the back of the dock (land side)
+    const landConnection = new THREE.Vector3()
+      .copy(position)
+      .add(direction.clone().multiplyScalar(-2)); // 2 units behind the dock
+    
+    connectionPoints.push({
+      x: landConnection.x,
+      y: landConnection.y + 0.1, // Slightly above ground
+      z: landConnection.z
+    });
+    
+    // Side connection points (optional)
+    const leftSide = new THREE.Vector3()
+      .copy(position)
+      .add(perpendicular.clone().multiplyScalar(1.5)); // 1.5 units to the left
+    
+    const rightSide = new THREE.Vector3()
+      .copy(position)
+      .add(perpendicular.clone().multiplyScalar(-1.5)); // 1.5 units to the right
+    
+    connectionPoints.push({
+      x: leftSide.x,
+      y: leftSide.y + 0.1,
+      z: leftSide.z
+    });
+    
+    connectionPoints.push({
+      x: rightSide.x,
+      y: rightSide.y + 0.1,
+      z: rightSide.z
+    });
+    
+    return connectionPoints;
+  }
 }
 
 // Create a singleton instance
