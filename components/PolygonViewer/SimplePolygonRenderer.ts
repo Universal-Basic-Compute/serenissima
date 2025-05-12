@@ -78,8 +78,8 @@ export default class SimplePolygonRenderer {
   public transportPointManager: TransportPointManager;
   private measurementTools: MeasurementTools | null = null;
   
-  // Properties for measurement
-  private measurementPoints: THREE.Vector3[] = [];
+  private measurementLine: THREE.Line | null = null;
+  private measurementLabel: THREE.Sprite | null = null;
   private measurementLine: THREE.Line | null = null;
   private measurementLabel: THREE.Sprite | null = null;
   
