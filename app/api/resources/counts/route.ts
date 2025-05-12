@@ -25,20 +25,12 @@ export async function GET(request: Request) {
     
     console.log(`Loading resource counts${owner ? ` for owner: ${owner}` : ' (all)'}`);
     
-    // Build filter formula for Airtable query
-    let filterFormula = '';
-    if (owner) {
-      filterFormula = `{Owner} = '${owner}'`;
-      console.log(`Filtering resources by owner: ${owner}`);
-    }
-    
     // Query Airtable directly
     const records = await new Promise((resolve, reject) => {
       const allRecords: any[] = [];
       
       base('RESOURCES')
         .select({
-          filterByFormula: filterFormula || '',
           view: 'Grid view'
         })
         .eachPage(
@@ -59,8 +51,19 @@ export async function GET(request: Request) {
         );
     });
     
-    // Create a map to aggregate resources by type
-    const resourceCountMap = new Map<string, {
+    // Create maps to aggregate resources by type - one for player resources, one for global
+    const playerResourceMap = new Map<string, {
+      id: string;
+      name: string;
+      category: string;
+      subcategory: string;
+      icon: string;
+      count: number;
+      rarity: string;
+      description: string;
+    }>();
+    
+    const globalResourceMap = new Map<string, {
       id: string;
       name: string;
       category: string;
@@ -83,41 +86,56 @@ export async function GET(request: Request) {
       const resourceRarity = record.get('Rarity') || 'common';
       const resourceDescription = record.get('Description') || '';
       const resourceOwner = record.get('Owner') || '';
-    
-      // Skip this record if we're filtering by owner and this resource doesn't belong to the specified owner
-      if (owner && resourceOwner !== owner) {
-        return; // Skip this record
-      }
-    
+      
+      // Generate icon filename from resource name
+      const iconFromName = getResourceIconFromName(resourceName);
+      
       // Create a unique key for this resource type
       const key = resourceType;
-    
-      if (resourceCountMap.has(key)) {
+      
+      // Add to global resource map
+      if (globalResourceMap.has(key)) {
         // If we already have this resource type, increment the count
-        const existingResource = resourceCountMap.get(key);
+        const existingResource = globalResourceMap.get(key);
         existingResource.count += resourceCount;
       } else {
-        // Generate icon filename from resource name
-        const iconFromName = getResourceIconFromName(resourceName);
-      
         // Otherwise, add a new entry
-        resourceCountMap.set(key, {
+        globalResourceMap.set(key, {
           id: resourceId,
           name: resourceName,
           category: resourceCategory,
           subcategory: resourceSubcategory,
-          icon: iconFromName, // Use the name-based icon
+          icon: iconFromName,
           count: resourceCount,
           rarity: resourceRarity,
           description: resourceDescription
         });
       }
+      
+      // Add to player resource map if it belongs to the specified owner
+      if (owner && resourceOwner === owner) {
+        if (playerResourceMap.has(key)) {
+          // If we already have this resource type, increment the count
+          const existingResource = playerResourceMap.get(key);
+          existingResource.count += resourceCount;
+        } else {
+          // Otherwise, add a new entry
+          playerResourceMap.set(key, {
+            id: resourceId,
+            name: resourceName,
+            category: resourceCategory,
+            subcategory: resourceSubcategory,
+            icon: iconFromName,
+            count: resourceCount,
+            rarity: resourceRarity,
+            description: resourceDescription
+          });
+        }
+      }
     });
-  
-    console.log(`Filtered to ${resourceCountMap.size} resource types for owner: ${owner || 'all'}`);
     
-    // Convert map to array and sort by category and name
-    const resourceCounts = Array.from(resourceCountMap.values())
+    // Convert maps to arrays and sort by category and name
+    const globalResourceCounts = Array.from(globalResourceMap.values())
       .sort((a, b) => {
         // First sort by category
         if (a.category !== b.category) {
@@ -131,11 +149,25 @@ export async function GET(request: Request) {
         return a.name.localeCompare(b.name);
       });
     
-    console.log(`Returning ${resourceCounts.length} unique resource types with counts`);
+    const playerResourceCounts = Array.from(playerResourceMap.values())
+      .sort((a, b) => {
+        // First sort by category
+        if (a.category !== b.category) {
+          return a.category.localeCompare(b.category);
+        }
+        // Then by subcategory
+        if (a.subcategory !== b.subcategory) {
+          return a.subcategory.localeCompare(b.subcategory);
+        }
+        // Finally by name
+        return a.name.localeCompare(b.name);
+      });
+    
+    console.log(`Returning ${globalResourceCounts.length} global resource types and ${playerResourceCounts.length} player resource types`);
     
     // Log sample resource data for debugging
-    console.log('Sample resource data being returned:');
-    console.log(resourceCounts.slice(0, 3).map(r => ({
+    console.log('Sample global resource data being returned:');
+    console.log(globalResourceCounts.slice(0, 3).map(r => ({
       name: r.name,
       icon: r.icon,
       category: r.category
@@ -143,7 +175,8 @@ export async function GET(request: Request) {
     
     return NextResponse.json({
       success: true,
-      resourceCounts
+      globalResourceCounts,
+      playerResourceCounts
     });
   } catch (error) {
     console.error('Error loading resource counts:', error);

@@ -55,6 +55,7 @@ interface Resource {
 interface ResourceDropdownProps {
   category: string;
   resources: Resource[];
+  globalResources?: Resource[];
 }
 
 // Function to get the appropriate icon for each category
@@ -81,7 +82,11 @@ const getCategoryIcon = (category: string) => {
   }
 };
 
-const ResourceDropdown: React.FC<ResourceDropdownProps> = ({ category, resources }) => {
+const ResourceDropdown: React.FC<ResourceDropdownProps> = ({ 
+  category, 
+  resources,
+  globalResources = []
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const [groupBySubcategory, setGroupBySubcategory] = useState(true);
   const [selectedResource, setSelectedResource] = useState<Resource | null>(null);
@@ -92,6 +97,15 @@ const ResourceDropdown: React.FC<ResourceDropdownProps> = ({ category, resources
     x: 0,
     y: 0
   });
+
+  // Create a map of global resources by ID for easy lookup
+  const globalResourceMap = React.useMemo(() => {
+    const map = new Map<string, Resource>();
+    globalResources.forEach(resource => {
+      map.set(resource.id, resource);
+    });
+    return map;
+  }, [globalResources]);
 
   // Deduplicate resources by ID to prevent duplicates
   const uniqueResources = React.useMemo(() => {
@@ -286,53 +300,69 @@ const ResourceDropdown: React.FC<ResourceDropdownProps> = ({ category, resources
                     </div>
                   )}
                   <ul className="py-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1">
-                    {subcategoryResources.map(resource => (
-                      <li 
-                        key={resource.id} 
-                        className="px-3 py-2 hover:bg-amber-900/30 transition-colors cursor-pointer relative"
-                        onClick={() => handleResourceClick(resource)}
-                        onMouseEnter={(e) => handleMouseEnter(e, resource)}
-                        onMouseMove={handleMouseMove}
-                        onMouseLeave={handleMouseLeave}
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-2">
-                            <div className="w-4 h-4 flex-shrink-0">
-                              <img 
-                                src={getIconPath(resource.icon)} 
-                                alt={resource.name} 
-                                className="w-4 h-4 object-contain"
-                                onError={(e) => {
-                                  // Log the error
-                                  console.log(`%c[ResourceDropdown] Error loading icon: ${(e.target as HTMLImageElement).src}`, 'color: #ef4444; font-weight: bold;');
-                                  
-                                  // Fallback if image doesn't exist - only set once
-                                  if (!(e.target as HTMLImageElement).dataset.fallback) {
-                                    console.log(`%c[ResourceDropdown] Trying fallback icon: /assets/icons/resources/default.png`, 'color: #22c55e;');
-                                    (e.target as HTMLImageElement).dataset.fallback = "true";
-                                    (e.target as HTMLImageElement).src = `/assets/icons/resources/default.png`;
+                    {subcategoryResources.map(resource => {
+                      // Find the global resource count for this resource
+                      const globalResource = globalResourceMap.get(resource.id);
+                      const globalCount = globalResource ? globalResource.amount : 0;
+                      
+                      return (
+                        <li 
+                          key={resource.id} 
+                          className="px-3 py-2 hover:bg-amber-900/30 transition-colors cursor-pointer relative"
+                          onClick={() => handleResourceClick(resource)}
+                          onMouseEnter={(e) => handleMouseEnter(e, resource)}
+                          onMouseMove={handleMouseMove}
+                          onMouseLeave={handleMouseLeave}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-2">
+                              <div className="w-4 h-4 flex-shrink-0">
+                                <img 
+                                  src={getIconPath(resource.icon)} 
+                                  alt={resource.name} 
+                                  className="w-4 h-4 object-contain"
+                                  onError={(e) => {
+                                    // Log the error
+                                    console.log(`%c[ResourceDropdown] Error loading icon: ${(e.target as HTMLImageElement).src}`, 'color: #ef4444; font-weight: bold;');
                                     
-                                    // If that fails too, use a placeholder
-                                    (e.target as HTMLImageElement).onerror = () => {
-                                      console.log(`%c[ResourceDropdown] Fallback also failed, using placeholder`, 'color: #ef4444;');
-                                      (e.target as HTMLImageElement).src = `https://via.placeholder.com/16?text=${resource.name.charAt(0).toUpperCase()}`;
-                                      (e.target as HTMLImageElement).onerror = null; // Prevent infinite loop
-                                    };
-                                  }
-                                }}
-                              />
+                                    // Fallback if image doesn't exist - only set once
+                                    if (!(e.target as HTMLImageElement).dataset.fallback) {
+                                      console.log(`%c[ResourceDropdown] Trying fallback icon: /assets/icons/resources/default.png`, 'color: #22c55e;');
+                                      (e.target as HTMLImageElement).dataset.fallback = "true";
+                                      (e.target as HTMLImageElement).src = `/assets/icons/resources/default.png`;
+                                      
+                                      // If that fails too, use a placeholder
+                                      (e.target as HTMLImageElement).onerror = () => {
+                                        console.log(`%c[ResourceDropdown] Fallback also failed, using placeholder`, 'color: #ef4444;');
+                                        (e.target as HTMLImageElement).src = `https://via.placeholder.com/16?text=${resource.name.charAt(0).toUpperCase()}`;
+                                        (e.target as HTMLImageElement).onerror = null; // Prevent infinite loop
+                                      };
+                                    }
+                                  }}
+                                />
+                              </div>
+                              <span className="text-amber-200 text-sm truncate max-w-[120px]">{resource.name}</span>
+                              {resource.rarity && resource.rarity !== 'common' && (
+                                <span className={`text-xs px-1.5 py-0.5 rounded ${getRarityColor(resource.rarity)}`}>
+                                  {resource.rarity.charAt(0).toUpperCase() + resource.rarity.slice(1)}
+                                </span>
+                              )}
                             </div>
-                            <span className="text-amber-200 text-sm truncate max-w-[120px]">{resource.name}</span>
-                            {resource.rarity && resource.rarity !== 'common' && (
-                              <span className={`text-xs px-1.5 py-0.5 rounded ${getRarityColor(resource.rarity)}`}>
-                                {resource.rarity.charAt(0).toUpperCase() + resource.rarity.slice(1)}
-                              </span>
-                            )}
+                            <div className="flex items-center space-x-2">
+                              {/* Player count */}
+                              <span className="text-amber-400 text-sm font-medium">{resource.amount}</span>
+                              
+                              {/* Global count (if different from player count) */}
+                              {globalCount > 0 && globalCount !== resource.amount && (
+                                <span className="text-gray-400 text-xs">
+                                  ({globalCount})
+                                </span>
+                              )}
+                            </div>
                           </div>
-                          <span className="text-amber-400 text-sm font-medium">{resource.amount}</span>
-                        </div>
-                      </li>
-                    ))}
+                        </li>
+                      );
+                    })}
                   </ul>
                 </div>
               ))}

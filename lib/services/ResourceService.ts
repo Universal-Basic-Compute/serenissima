@@ -69,6 +69,8 @@ export class ResourceService {
   private static instance: ResourceService;
   private resourcesCache: Resource[] | null = null;
   private categoriesCache: ResourceCategory[] | null = null;
+  private globalResources: Resource[] | null = null;
+  private playerResources: Resource[] | null = null;
   
   public static getInstance(): ResourceService {
     if (!ResourceService.instance) {
@@ -228,6 +230,8 @@ export class ResourceService {
     console.log('Clearing ResourceService cache');
     this.resourcesCache = null;
     this.categoriesCache = null;
+    this.globalResources = null;
+    this.playerResources = null;
   }
   
   /**
@@ -236,11 +240,23 @@ export class ResourceService {
   public async getResourceCounts(owner?: string): Promise<Resource[]> {
     console.log(`%c[ResourceService] Getting resource counts for owner: ${owner || 'none'}`, 'color: #22c55e; font-weight: bold;');
     try {
-      const resourceCounts = await fetchResourceCounts(owner);
-      console.log(`%c[ResourceService] Received ${resourceCounts.length} resource counts`, 'color: #22c55e; font-weight: bold;');
+      const url = owner 
+        ? `/api/resources/counts?owner=${encodeURIComponent(owner)}`
+        : '/api/resources/counts';
       
-      // Convert to Resource objects
-      return resourceCounts.map(resource => ({
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch resource counts: ${response.status} ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      
+      if (!data.success) {
+        throw new Error(data.error || 'Unknown error fetching resource counts');
+      }
+      
+      // Store both global and player resources
+      this.globalResources = (data.globalResourceCounts || []).map(resource => ({
         id: resource.id,
         name: resource.name,
         category: resource.category,
@@ -250,9 +266,39 @@ export class ResourceService {
         icon: resource.icon || 'default.png',
         amount: resource.count
       }));
+      
+      this.playerResources = (data.playerResourceCounts || []).map(resource => ({
+        id: resource.id,
+        name: resource.name,
+        category: resource.category,
+        subcategory: resource.subcategory,
+        description: resource.description,
+        rarity: resource.rarity,
+        icon: resource.icon || 'default.png',
+        amount: resource.count
+      }));
+      
+      console.log(`%c[ResourceService] Received ${this.globalResources.length} global resources and ${this.playerResources.length} player resources`, 'color: #22c55e; font-weight: bold;');
+      
+      // Return player resources if available, otherwise global resources
+      return this.playerResources.length > 0 ? this.playerResources : this.globalResources;
     } catch (error) {
       console.log(`%c[ResourceService] ERROR getting resource counts:`, 'color: #ef4444; font-weight: bold;', error);
       return [];
     }
+  }
+  
+  /**
+   * Get global resources
+   */
+  public getGlobalResources(): Resource[] {
+    return this.globalResources || [];
+  }
+  
+  /**
+   * Get player resources
+   */
+  public getPlayerResources(): Resource[] {
+    return this.playerResources || [];
   }
 }

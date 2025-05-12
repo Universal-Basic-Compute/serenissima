@@ -39,6 +39,7 @@ const ResourceDropdowns: React.FC = () => {
   const [categories, setCategories] = useState<ResourceCategory[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [globalResources, setGlobalResources] = useState<any[]>([]);
   
   // Create a memoized function to load resource categories with counts
   const loadResourceCategories = useCallback(async () => {
@@ -64,6 +65,11 @@ const ResourceDropdowns: React.FC = () => {
       logInfo('Fetching resource counts');
       const resources = await resourceService.getResourceCounts(owner);
       logInfo(`Received ${resources.length} resources`);
+      
+      // Get global resources
+      const allGlobalResources = resourceService.getGlobalResources();
+      setGlobalResources(allGlobalResources);
+      logInfo(`Received ${allGlobalResources.length} global resources`);
       
       // Log sample of resources to debug icon issues
       logInfo(`Received ${resources.length} resources with the following icons:`);
@@ -171,13 +177,21 @@ const ResourceDropdowns: React.FC = () => {
   logInfo(`Rendering ${categories.length} resource categories`);
   return (
     <div className="flex flex-wrap gap-2 relative z-30">
-      {categories.map(category => (
-        <ResourceDropdown 
-          key={category.id}
-          category={category.id}
-          resources={category.resources || []}
-        />
-      ))}
+      {categories.map(category => {
+        // Filter global resources for this category
+        const categoryGlobalResources = globalResources.filter(
+          resource => resource.category === category.id
+        );
+        
+        return (
+          <ResourceDropdown 
+            key={category.id}
+            category={category.id}
+            resources={category.resources || []}
+            globalResources={categoryGlobalResources}
+          />
+        );
+      })}
     </div>
   );
 };
