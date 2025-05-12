@@ -395,69 +395,9 @@ export default class SimplePolygonRenderer {
    * Create coat of arms sprites for all polygons with owners
    */
   public createCoatOfArmsSprites() {
-    // Prevent concurrent or duplicate rendering
-    if (this.isRenderingCoatOfArms) {
-      console.log(`%c[SimplePolygonRenderer] Already rendering coat of arms, skipping duplicate call`, 'color: #0099ff;');
-      return;
-    }
-    
-    // Add explicit check for land view
-    if (this.activeView !== 'land') {
-      console.log(`%c[SimplePolygonRenderer] Not in land view (current: ${this.activeView}), skipping coat of arms creation`, 'color: #0099ff;');
-      return;
-    }
-    
-    console.log(`%c[SimplePolygonRenderer] Creating coat of arms sprites for land view`, 'color: #0099ff; font-weight: bold;');
-    this.isRenderingCoatOfArms = true;
-    
-    // Debug: Log the number of polygons with different position properties
-    let polygonsWithCenter = 0;
-    let polygonsWithCentroid = 0;
-    let polygonsWithCoatOfArmsCenter = 0;
-    let polygonsWithOwner = 0;
-    let polygonsWithCoatOfArms = 0;
-    
-    // Add more detailed logging for the first few polygons
-    const samplePolygons = this.polygons.slice(0, 3);
-    console.log('Sample polygon position properties:');
-    samplePolygons.forEach((polygon, index) => {
-      console.log(`Polygon ${index} (${polygon.id}):`, {
-        hasCenter: !!polygon.center,
-        center: polygon.center,
-        hasCentroid: !!polygon.centroid,
-        centroid: polygon.centroid,
-        hasCoatOfArmsCenter: !!polygon.coatOfArmsCenter,
-        coatOfArmsCenter: polygon.coatOfArmsCenter
-      });
-    });
-    
-    this.polygons.forEach(polygon => {
-      if (polygon.center) polygonsWithCenter++;
-      if (polygon.centroid) polygonsWithCentroid++;
-      if (polygon.coatOfArmsCenter) polygonsWithCoatOfArmsCenter++;
-      if (polygon.owner || polygon.User) polygonsWithOwner++;
-      
-      // Check if this polygon's owner has a coat of arms
-      const ownerValue = polygon.owner || polygon.User;
-      if (ownerValue && this.ownerCoatOfArmsMap[ownerValue]) {
-        polygonsWithCoatOfArms++;
-      }
-    });
-    
-    console.log(`%c[SimplePolygonRenderer] Polygon stats:`, 'color: #0099ff;');
-    console.log(`%c[SimplePolygonRenderer] - With center: ${polygonsWithCenter}`, 'color: #0099ff;');
-    console.log(`%c[SimplePolygonRenderer] - With centroid: ${polygonsWithCentroid}`, 'color: #0099ff;');
-    console.log(`%c[SimplePolygonRenderer] - With owner: ${polygonsWithOwner}`, 'color: #0099ff;');
-    console.log(`%c[SimplePolygonRenderer] - With coat of arms: ${polygonsWithCoatOfArms}`, 'color: #0099ff;');
-    console.log(`%c[SimplePolygonRenderer] - With coatOfArmsCenter: ${polygonsWithCoatOfArmsCenter}`, 'color: #0099ff;');
-    
-    // Remove any existing sprites first
-    this.clearCoatOfArmsSprites();
-    
     // Only create sprites if in land view
     if (this.activeView !== 'land') {
-      console.log('Not in land view, skipping coat of arms sprites');
-      this.isRenderingCoatOfArms = false;
+      console.log(`Not in land view (current: ${this.activeView}), skipping coat of arms creation`);
       return;
     }
     
@@ -471,12 +411,11 @@ export default class SimplePolygonRenderer {
       console.warn('Error getting users from UserService:', error);
     }
     
-    // Update our local ownerCoatOfArmsMap with the latest data
+    // Update coat of arms map with the latest data
     if (serviceUsers && Object.keys(serviceUsers).length > 0) {
       Object.values(serviceUsers).forEach((user: any) => {
         if (user.user_name && user.coat_of_arms_image) {
           this.ownerCoatOfArmsMap[user.user_name] = user.coat_of_arms_image;
-          // Coat of arms found in service
         }
       });
     }
@@ -486,284 +425,17 @@ export default class SimplePolygonRenderer {
       Object.values(this.users).forEach((user: any) => {
         if (user.user_name && user.coat_of_arms_image) {
           this.ownerCoatOfArmsMap[user.user_name] = user.coat_of_arms_image;
-          // Coat of arms found in users prop
         }
       });
     }
     
-    // Track available coat of arms data
+    // Update the coat of arms renderer with the latest data
+    this.coatOfArmsRenderer.updateCoatOfArms(this.ownerCoatOfArmsMap);
     
-    // Count polygons with owners and centroids
-    let polygonsWithOwners = 0;
-    let polygonsWithCentroids = 0;
-    let polygonsWithBoth = 0;
-    let polygonsWithMatchingOwners = 0;
+    // Delegate to the coat of arms renderer
+    this.coatOfArmsRenderer.createCoatOfArmsSprites(this.polygons);
     
-    this.polygons.forEach(polygon => {
-      // Check for both 'owner' and 'User' properties
-      const ownerValue = polygon.owner || polygon.User;
-    
-      if (ownerValue) {
-        polygonsWithOwners++;
-        if (polygon.centroid) {
-          polygonsWithBoth++;
-          if (this.ownerCoatOfArmsMap[ownerValue]) {
-            polygonsWithMatchingOwners++;
-          }
-        }
-      }
-      if (polygon.centroid) {
-        polygonsWithCentroids++;
-      }
-    });
-    
-    // Polygon statistics collected
-    
-    // Process each polygon with an owner
-    let createdCount = 0;
-    let skippedNoOwner = 0;
-    let skippedNoPosition = 0;
-    let skippedNoCoatOfArms = 0;
-  
-    this.polygons.forEach(polygon => {
-      // Check for both 'owner' and 'User' properties
-      const ownerValue = polygon.owner || polygon.User;
-  
-      if (!ownerValue) {
-        skippedNoOwner++;
-        return;
-      }
-  
-      // Check if polygon has any valid position property
-      if (!polygon.coatOfArmsCenter && !polygon.center && !polygon.centroid) {
-        console.log(`Polygon ${polygon.id} has owner ${ownerValue} but no position property`);
-        skippedNoPosition++;
-        return;
-      }
-  
-      // Process polygon with owner
-  
-      // Get the coat of arms URL for the owner
-      const coatOfArmsUrl = this.ownerCoatOfArmsMap[ownerValue];
-      if (!coatOfArmsUrl) {
-        // No coat of arms found for this owner
-        console.log(`No coat of arms found for owner ${ownerValue}`);
-        skippedNoCoatOfArms++;
-        return;
-      }
-    
-      // Always use circular coat of arms for simplicity and performance
-      this.createCircularCoatOfArms(polygon, coatOfArmsUrl);
-      createdCount++;
-    });
-    
-    console.log(`Coat of arms creation stats: created=${createdCount}, skipped (no owner)=${skippedNoOwner}, skipped (no position)=${skippedNoPosition}, skipped (no coat of arms)=${skippedNoCoatOfArms}`);
-    
-    console.log(`%c[SimplePolygonRenderer] Finished creating coat of arms sprites`, 'color: #0099ff; font-weight: bold;');
     this.hasRenderedCoatOfArms = true;
-    this.isRenderingCoatOfArms = false;
-    // Coat of arms sprites created
-  }
-  
-  /**
-   * Clear all coat of arms sprites
-   */
-  private clearCoatOfArmsSprites() {
-    Object.values(this.coatOfArmsSprites).forEach(sprite => {
-      this.scene.remove(sprite);
-      // Check if sprite is a Mesh before accessing material property
-      if (sprite instanceof THREE.Mesh && sprite.material) {
-        if (sprite.material instanceof THREE.MeshBasicMaterial && sprite.material.map) {
-          sprite.material.map.dispose();
-        }
-        sprite.material.dispose();
-      }
-    });
-    this.coatOfArmsSprites = {};
-  }
-  
-  /**
-   * Create a circular coat of arms sprite
-   */
-  private createCircularCoatOfArms(polygon: any, coatOfArmsUrl: string) {
-    // Add detailed logging to check all properties
-    console.log(`Polygon ${polygon.id} properties:`, {
-      hasCoatOfArmsCenter: !!polygon.coatOfArmsCenter,
-      coatOfArmsCenter: polygon.coatOfArmsCenter,
-      hasCenter: !!polygon.center,
-      center: polygon.center,
-      hasCentroid: !!polygon.centroid,
-      centroid: polygon.centroid
-    });
-    
-    // Check for all possible position properties, with fallbacks
-    // First try coatOfArmsCenter (specific for coat of arms)
-    // Then try center (general center)
-    // Finally fall back to centroid (calculated center)
-    const positionCoord = polygon.coatOfArmsCenter || polygon.center || polygon.centroid;
-    
-    if (!positionCoord) {
-      console.warn(`No valid position found for coat of arms on polygon ${polygon.id}`);
-      return;
-    }
-    
-    // Log which property is being used
-    let positionSource = 'unknown';
-    if (polygon.coatOfArmsCenter && positionCoord === polygon.coatOfArmsCenter) {
-      positionSource = 'coatOfArmsCenter';
-    } else if (polygon.center && positionCoord === polygon.center) {
-      positionSource = 'center';
-    } else if (polygon.centroid && positionCoord === polygon.centroid) {
-      positionSource = 'centroid';
-    }
-    
-    console.log(`Creating coat of arms for polygon ${polygon.id} using ${positionSource} at position:`, positionCoord);
-    
-    // Convert position to 3D position
-    const normalizedCoord = normalizeCoordinates(
-      [positionCoord],
-      this.bounds.centerLat,
-      this.bounds.centerLng,
-      this.bounds.scale,
-      this.bounds.latCorrectionFactor
-    )[0];
-    
-    // Create a raycaster to find the exact height of the land
-    const raycaster = new THREE.Raycaster();
-    const direction = new THREE.Vector3(0, -1, 0); // Cast ray downward
-    const origin = new THREE.Vector3(normalizedCoord.x, 10, -normalizedCoord.y); // Start from above
-    raycaster.set(origin, direction);
-    
-    // Find all meshes in the scene that could be land
-    const landMeshes: THREE.Mesh[] = [];
-    this.scene.traverse(object => {
-      if (object instanceof THREE.Mesh && 
-          object.material instanceof THREE.MeshStandardMaterial && 
-          !object.userData.isCoatOfArms) { // Avoid coat of arms meshes
-        landMeshes.push(object);
-      }
-    });
-    
-    // Find the intersection with land
-    const intersects = raycaster.intersectObjects(landMeshes);
-    
-    // Default height if no intersection found
-    let yPosition = 0.2;
-    
-    // If we found an intersection, use that height (plus a small offset)
-    if (intersects.length > 0) {
-      yPosition = intersects[0].point.y + 0.01; // 0.01 units above the land
-      // Land intersection found
-    }
-    
-    // Create a plane geometry for the texture
-    const sceneScale = this.bounds.scale;
-    const spriteScale = Math.max(0.75, sceneScale / 667); // Increased by 50% from Math.max(0.5, sceneScale / 1000)
-    const planeGeometry = new THREE.PlaneGeometry(spriteScale, spriteScale);
-    const planeMaterial = new THREE.MeshBasicMaterial({
-      map: null, // Will be set when texture loads
-      transparent: true,
-      side: THREE.DoubleSide,
-      depthTest: true,
-      depthWrite: false,
-      opacity: 0 // Start with opacity 0 for fade-in effect
-    });
-    
-    // Create mesh and position it with the calculated y position
-    const plane = new THREE.Mesh(planeGeometry, planeMaterial);
-    plane.position.set(normalizedCoord.x, yPosition, -normalizedCoord.y);
-    plane.rotation.x = -Math.PI / 2 + Math.PI; // Rotate to lie flat and invert orientation
-    plane.renderOrder = 10; // Ensure it renders on top of land
-    
-    // Mark this mesh as a coat of arms to avoid raycasting against it
-    plane.userData.isCoatOfArms = true;
-    plane.userData.polygonId = polygon.id;
-    
-    // Load the texture - handle both external and local URLs
-    const textureUrl = coatOfArmsUrl.startsWith('http') 
-      ? coatOfArmsUrl 
-      : `${window.location.origin}${coatOfArmsUrl}`;
-      
-    this.textureLoader.load(
-      textureUrl,
-      (texture) => {
-        // Create a circular texture with inverted orientation
-        const circularTexture = this.createCircularTexture(texture, true); // Added invert parameter
-        
-        // Apply the texture to the plane material
-        if (planeMaterial) {
-          planeMaterial.map = circularTexture;
-          planeMaterial.needsUpdate = true;
-          
-          // Adjust plane scale based on texture aspect ratio and scene scale
-          if (texture.image && texture.image.width && texture.image.height) {
-            const aspectRatio = texture.image.width / texture.image.height;
-            const sceneScale = this.bounds.scale;
-            const baseScale = Math.max(0.19, sceneScale / 2633); // Increased by 50% from 0.12675 and 3950
-            plane.scale.set(baseScale * aspectRatio, baseScale, 1); // Removed the multiplier (2 -> 1)
-          }
-          
-          // NOW add to scene after texture is loaded
-          this.scene.add(plane);
-          
-          // Store reference
-          this.coatOfArmsSprites[polygon.id] = plane;
-          
-          // Add fade-in animation
-          this.animateFadeIn(planeMaterial);
-        }
-      },
-      undefined,
-      (error) => {
-        console.error(`Failed to load coat of arms texture for ${polygon.id}:`, error);
-        // Don't add the plane to the scene at all if texture loading fails
-        // Just clean up the geometry and material
-        planeGeometry.dispose();
-        planeMaterial.dispose();
-      }
-    );
-  }
-  
-  // Add a new method to handle the fade-in animation
-  private animateFadeIn(material: THREE.MeshBasicMaterial): void {
-    // Start with opacity 0
-    material.opacity = 0;
-    
-    // Create a fade-in animation
-    const startTime = performance.now();
-    const duration = 800; // 800ms fade-in duration
-    
-    // Animation function
-    const animate = () => {
-      const currentTime = performance.now();
-      const elapsed = currentTime - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      
-      // Use an ease-in function for smoother appearance
-      material.opacity = progress * progress;
-      material.needsUpdate = true;
-      
-      // Continue animation until complete
-      if (progress < 1) {
-        requestAnimationFrame(animate);
-      } else {
-        material.opacity = 1; // Ensure we end at full opacity
-        material.needsUpdate = true;
-      }
-    };
-    
-    // Start the animation
-    requestAnimationFrame(animate);
-  }
-  
-  /**
-   * Create a coat of arms that follows the polygon shape
-   * This method is kept for reference but is no longer used
-   * All coat of arms are now created using createCircularCoatOfArms for simplicity and performance
-   */
-  private createPolygonShapedCoatOfArms(polygon: any, coatOfArmsUrl: string, ownerName: string) {
-    // Simply delegate to the circular method for consistency
-    this.createCircularCoatOfArms(polygon, coatOfArmsUrl);
   }
   
   /**
@@ -858,133 +530,6 @@ export default class SimplePolygonRenderer {
   }
 
   /**
-   * Create a circular texture from an existing texture
-   */
-  private createCircularTexture(texture: THREE.Texture, invert: boolean = false): THREE.Texture {
-    // Check if texture.image exists
-    if (!texture.image) {
-      console.warn('Texture image is null, creating fallback texture');
-      
-      // Create a canvas for a fallback texture
-      const canvas = document.createElement('canvas');
-      const size = 256;
-      canvas.width = size;
-      canvas.height = size;
-      
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return texture;
-      
-      // Draw a colored circle as fallback
-      ctx.beginPath();
-      ctx.arc(size/2, size/2, size/2 - 4, 0, Math.PI * 2);
-      ctx.fillStyle = '#FFF8E0'; // Much lighter, more yellow sand color
-      ctx.fill();
-      ctx.strokeStyle = '#FFFFFF';
-      ctx.lineWidth = 8;
-      ctx.stroke();
-      
-      // Create a new texture from the canvas
-      const fallbackTexture = new THREE.Texture(canvas);
-      fallbackTexture.needsUpdate = true;
-      return fallbackTexture;
-    }
-    
-    // Create a canvas to draw the circular mask
-    const canvas = document.createElement('canvas');
-    const size = 512; // Increased size for better quality
-    canvas.width = size;
-    canvas.height = size;
-    
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return texture; // Fallback if context creation fails
-    
-    try {
-      // Clear the canvas first
-      ctx.clearRect(0, 0, size, size);
-      
-      // Draw a circular clipping path
-      ctx.beginPath();
-      ctx.arc(size/2, size/2, size/2 - 4, 0, Math.PI * 2);
-      ctx.closePath();
-      
-      // Add a white stroke around the circle
-      ctx.strokeStyle = '#FFFFFF';
-      ctx.lineWidth = 8;
-      ctx.stroke();
-      
-      // Create a new clipping path for the image
-      ctx.save();
-      ctx.beginPath();
-      ctx.arc(size/2, size/2, size/2 - 12, 0, Math.PI * 2);
-      ctx.clip();
-      
-      // Calculate dimensions to maintain aspect ratio
-      let drawWidth = size - 24;
-      let drawHeight = size - 24;
-      let offsetX = 12;
-      let offsetY = 12;
-      
-      if (texture.image.width > texture.image.height) {
-        // Landscape image
-        drawHeight = (texture.image.height / texture.image.width) * (size - 24);
-        offsetY = (size - drawHeight) / 2;
-      } else if (texture.image.height > texture.image.width) {
-        // Portrait image
-        drawWidth = (texture.image.width / texture.image.height) * (size - 24);
-        offsetX = (size - drawWidth) / 2;
-      }
-      
-      // Draw the image with proper aspect ratio and inversion if needed
-      if (texture.image) {
-        if (invert) {
-          // Save context state before transformations
-          ctx.save();
-          
-          // Translate to center of canvas
-          ctx.translate(size/2, size/2);
-          // Scale y by -1 to flip vertically
-          ctx.scale(1, -1);
-          // Translate back
-          ctx.translate(-size/2, -size/2);
-          
-          // Draw the image
-          ctx.drawImage(texture.image, offsetX, offsetY, drawWidth, drawHeight);
-          
-          // Restore context state
-          ctx.restore();
-        } else {
-          // Draw normally without inversion
-          ctx.drawImage(texture.image, offsetX, offsetY, drawWidth, drawHeight);
-        }
-      }
-      
-      ctx.restore();
-      
-      // Create a new texture from the canvas
-      const circularTexture = new THREE.Texture(canvas);
-      circularTexture.needsUpdate = true;
-      
-      return circularTexture;
-    } catch (error) {
-      console.error('Error creating circular texture:', error);
-      
-      // If there's an error, create a simple colored circle
-      ctx.clearRect(0, 0, size, size);
-      ctx.beginPath();
-      ctx.arc(size/2, size/2, size/2 - 4, 0, Math.PI * 2);
-      ctx.fillStyle = '#8B4513'; // Default brown color
-      ctx.fill();
-      ctx.strokeStyle = '#FFFFFF';
-      ctx.lineWidth = 8;
-      ctx.stroke();
-      
-      const fallbackTexture = new THREE.Texture(canvas);
-      fallbackTexture.needsUpdate = true;
-      return fallbackTexture;
-    }
-  }
-
-  /**
    * Update the active view and refresh coat of arms sprites
    */
   public updateViewMode(activeView: string) {
@@ -1015,7 +560,7 @@ export default class SimplePolygonRenderer {
       this.buildingPointManager.setVisible(false);
       
       // Create coat of arms sprites
-      this.coatOfArmsRenderer.createCoatOfArmsSprites(this.polygons);
+      this.createCoatOfArmsSprites();
     } else if (activeView === 'transport') {
       // Hide coat of arms sprites in transport view
       this.coatOfArmsRenderer.setVisible(false);
@@ -1078,11 +623,12 @@ export default class SimplePolygonRenderer {
    */
   public updateCoatOfArms(ownerCoatOfArmsMap: Record<string, string>) {
     console.log(`Updating coat of arms map with ${Object.keys(ownerCoatOfArmsMap).length} entries`);
-    this.coatOfArmsRenderer.updateCoatOfArms(ownerCoatOfArmsMap);
+    this.ownerCoatOfArmsMap = { ...this.ownerCoatOfArmsMap, ...ownerCoatOfArmsMap };
+    this.coatOfArmsRenderer.updateCoatOfArms(this.ownerCoatOfArmsMap);
     
     // Force coat of arms creation if we're in land view
     if (this.activeView === 'land') {
-      this.coatOfArmsRenderer.createCoatOfArmsSprites(this.polygons);
+      this.createCoatOfArmsSprites();
     }
   }
 
@@ -1814,523 +1360,25 @@ export default class SimplePolygonRenderer {
   }
   
   /**
-   * Create bridge and dock point markers for transport view
-   */
-  private createBridgeAndDockPoints() {
-    // REMOVED the check for activeView to ensure points are always created
-    console.log('Creating bridge and dock points');
-    
-    // Clear any existing markers first
-    this.clearBridgeAndDockMarkers();
-    
-    // Add debug logging to see how many polygons have bridge/dock points
-    let polygonsWithBridgePoints = 0;
-    let polygonsWithDockPoints = 0;
-    let totalBridgePoints = 0;
-    let totalDockPoints = 0;
-    
-    // Debug: Log the total number of polygons
-    console.log(`Total polygons to check for bridge/dock points: ${this.polygons.length}`);
-    
-    // Check each polygon for bridge/dock points and count them
-    this.polygons.forEach(polygon => {
-      if (polygon.bridgePoints && Array.isArray(polygon.bridgePoints) && polygon.bridgePoints.length > 0) {
-        polygonsWithBridgePoints++;
-        totalBridgePoints += polygon.bridgePoints.length;
-        console.log(`Polygon ${polygon.id} has ${polygon.bridgePoints.length} bridge points`);
-      }
-      
-      if (polygon.dockPoints && Array.isArray(polygon.dockPoints) && polygon.dockPoints.length > 0) {
-        polygonsWithDockPoints++;
-        totalDockPoints += polygon.dockPoints.length;
-        console.log(`Polygon ${polygon.id} has ${polygon.dockPoints.length} dock points`);
-      }
-    });
-    
-    console.log(`Found ${polygonsWithBridgePoints} polygons with bridge points (${totalBridgePoints} total points)`);
-    console.log(`Found ${polygonsWithDockPoints} polygons with dock points (${totalDockPoints} total points)`);
-    
-    // If no bridge or dock points found, log a warning
-    if (totalBridgePoints === 0 && totalDockPoints === 0) {
-      console.warn('No bridge or dock points found in any polygons. Transport view will be empty.');
-      return;
-    }
-    
-    // Create a new material for bridge points
-    const bridgeMaterial = new THREE.MeshBasicMaterial({
-      color: 0xFF5500,
-      transparent: false
-    });
-    
-    // Create materials for dock points
-    const dockEdgeMaterial = new THREE.MeshBasicMaterial({
-      color: 0x00AAFF,
-      transparent: false
-    });
-    
-    const dockWaterMaterial = new THREE.MeshBasicMaterial({
-      color: 0x0088CC,
-      transparent: false
-    });
-    
-    // Process each polygon
-    this.polygons.forEach(polygon => {
-      // Skip if polygon has no bridge or dock points
-      if (!polygon.bridgePoints && !polygon.dockPoints) return;
-      
-      // Process bridge points
-      if (polygon.bridgePoints && Array.isArray(polygon.bridgePoints) && polygon.bridgePoints.length > 0) {
-        polygon.bridgePoints.forEach((point, index) => {
-          try {
-            const normalizedCoord = normalizeCoordinates(
-              [point.edge],
-              this.bounds.centerLat,
-              this.bounds.centerLng,
-              this.bounds.scale,
-              this.bounds.latCorrectionFactor
-            )[0];
-            
-            // Create a marker for the bridge point
-            const geometry = new THREE.BoxGeometry(0.35, 0.35, 0.35); // Reduced from 0.5 (30% smaller)
-            
-            const marker = new THREE.Mesh(geometry, bridgeMaterial);
-            marker.position.set(normalizedCoord.x, 1, -normalizedCoord.y);
-            marker.renderOrder = 100;
-            
-            // Add metadata for tooltips
-            marker.userData = {
-              id: `bridge-${polygon.id}-${index}`,
-              type: 'bridge',
-              polygonId: polygon.id,
-              position: `${point.edge.lat.toFixed(6)}, ${point.edge.lng.toFixed(6)}`
-            };
-            
-            this.scene.add(marker);
-            this.bridgePointMarkers.push(marker);
-          } catch (error) {
-            console.error(`Error creating bridge point for polygon ${polygon.id}:`, error);
-          }
-        });
-      }
-      
-      // Process dock points
-      if (polygon.dockPoints && Array.isArray(polygon.dockPoints) && polygon.dockPoints.length > 0) {
-        polygon.dockPoints.forEach((point, index) => {
-          try {
-            // Create markers for both edge and water points
-            const edgeCoord = normalizeCoordinates(
-              [point.edge],
-              this.bounds.centerLat,
-              this.bounds.centerLng,
-              this.bounds.scale,
-              this.bounds.latCorrectionFactor
-            )[0];
-            
-            const waterCoord = normalizeCoordinates(
-              [point.water],
-              this.bounds.centerLat,
-              this.bounds.centerLng,
-              this.bounds.scale,
-              this.bounds.latCorrectionFactor
-            )[0];
-            
-            // Create a marker for the dock point (edge)
-            const edgeGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
-            
-            const edgeMarker = new THREE.Mesh(edgeGeometry, dockEdgeMaterial);
-            edgeMarker.position.set(edgeCoord.x, 1, -edgeCoord.y);
-            edgeMarker.renderOrder = 100;
-            
-            // Add metadata for tooltips
-            edgeMarker.userData = {
-              id: `dock-edge-${polygon.id}-${index}`,
-              type: 'dock-edge',
-              polygonId: polygon.id,
-              position: `${point.edge.lat.toFixed(6)}, ${point.edge.lng.toFixed(6)}`
-            };
-            
-            this.scene.add(edgeMarker);
-            this.dockPointMarkers.push(edgeMarker);
-            
-            // Create a line connecting edge to water
-            const lineGeometry = new THREE.BufferGeometry();
-            const vertices = new Float32Array([
-              edgeCoord.x, 1, -edgeCoord.y,
-              waterCoord.x, 1, -waterCoord.y
-            ]);
-            lineGeometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
-            
-            const lineMaterial = new THREE.LineBasicMaterial({
-              color: 0x00CCFF,
-              linewidth: 2
-            });
-            
-            const line = new THREE.Line(lineGeometry, lineMaterial);
-            line.renderOrder = 99;
-            
-            this.scene.add(line);
-            this.dockPointMarkers.push(line);
-            
-            // Create a marker for the water point
-            const waterGeometry = new THREE.BoxGeometry(0.4, 0.4, 0.4);
-            
-            const waterMarker = new THREE.Mesh(waterGeometry, dockWaterMaterial);
-            waterMarker.position.set(waterCoord.x, 1, -waterCoord.y);
-            waterMarker.renderOrder = 100;
-            
-            // Add metadata for tooltips
-            waterMarker.userData = {
-              id: `dock-water-${polygon.id}-${index}`,
-              type: 'dock-water',
-              polygonId: polygon.id,
-              position: `${point.water.lat.toFixed(6)}, ${point.water.lng.toFixed(6)}`
-            };
-            
-            this.scene.add(waterMarker);
-            this.dockPointMarkers.push(waterMarker);
-          } catch (error) {
-            console.error(`Error creating dock point for polygon ${polygon.id}:`, error);
-          }
-        });
-      }
-    });
-    
-    console.log(`Created ${this.bridgePointMarkers.length} bridge markers and ${this.dockPointMarkers.length} dock markers`);
-  }
-  
-  /**
-   * Add a new method that forces creation of bridge and dock points without checking activeView
-   * This method is public so it can be called from outside the class
+   * Force creation of bridge and dock points
    */
   public forceCreateBridgeAndDockPoints() {
     console.log('FORCE Creating bridge and dock points for transport view');
     
-    // Clear existing markers first
-    this.clearBridgeAndDockMarkers();
-    
-    // Check each polygon for bridge/dock points and count them
-    let polygonsWithBridgePoints = 0;
-    let polygonsWithDockPoints = 0;
-    let totalBridgePoints = 0;
-    let totalDockPoints = 0;
-    
-    // Debug: Log the total number of polygons
-    console.log(`Total polygons to check for bridge/dock points: ${this.polygons.length}`);
-    
-    // Count available points
-    this.polygons.forEach(polygon => {
-      if (polygon.bridgePoints && Array.isArray(polygon.bridgePoints) && polygon.bridgePoints.length > 0) {
-        polygonsWithBridgePoints++;
-        totalBridgePoints += polygon.bridgePoints.length;
-      }
-      
-      if (polygon.dockPoints && Array.isArray(polygon.dockPoints) && polygon.dockPoints.length > 0) {
-        polygonsWithDockPoints++;
-        totalDockPoints += polygon.dockPoints.length;
-      }
-    });
-    
-    console.log(`Found ${polygonsWithBridgePoints} polygons with bridge points (${totalBridgePoints} total points)`);
-    console.log(`Found ${polygonsWithDockPoints} polygons with dock points (${totalDockPoints} total points)`);
-    
-    // If no bridge or dock points found, log a warning
-    if (totalBridgePoints === 0 && totalDockPoints === 0) {
-      console.warn('No bridge or dock points found in any polygons. Transport view will be empty.');
-      return;
-    }
-    
-    // Create materials with increased transparency and softer colors
-    const bridgeMaterial = new THREE.MeshBasicMaterial({
-      color: 0xFF5500, // Orange-red for bridges
-      transparent: true,
-      opacity: 0.6 // More transparent (was 0.8)
-    });
-    
-    // Create materials for dock points
-    const dockEdgeMaterial = new THREE.MeshBasicMaterial({
-      color: 0x00AAFF, // Light blue for dock edges
-      transparent: true,
-      opacity: 0.6 // More transparent (was 0.8)
-    });
-    
-    const dockWaterMaterial = new THREE.MeshBasicMaterial({
-      color: 0x0088CC, // Darker blue for dock water points
-      transparent: true,
-      opacity: 0.6 // More transparent (was 0.8)
-    });
-    
-    // Process each polygon
-    this.polygons.forEach(polygon => {
-      // Skip if polygon has no bridge or dock points
-      if (!polygon.bridgePoints && !polygon.dockPoints) return;
-      
-      // Process bridge points
-      if (polygon.bridgePoints && Array.isArray(polygon.bridgePoints) && polygon.bridgePoints.length > 0) {
-        polygon.bridgePoints.forEach((point, index) => {
-          try {
-            const normalizedCoord = normalizeCoordinates(
-              [point.edge],
-              this.bounds.centerLat,
-              this.bounds.centerLng,
-              this.bounds.scale,
-              this.bounds.latCorrectionFactor
-            )[0];
-            
-            // Create a smaller sphere marker for bridge points
-            const geometry = new THREE.SphereGeometry(0.3, 12, 12); // Same size as dock points
-            
-            const marker = new THREE.Mesh(geometry, bridgeMaterial);
-            // CHANGE: Position at ground level (y=0.2) instead of y=5.0
-            marker.position.set(normalizedCoord.x, 0.2, -normalizedCoord.y);
-            marker.renderOrder = 100;
-            
-            // Add metadata for tooltips
-            marker.userData = {
-              id: `bridge-${polygon.id}-${index}`,
-              type: 'bridge',
-              polygonId: polygon.id,
-              position: `${point.edge.lat.toFixed(6)}, ${point.edge.lng.toFixed(6)}`
-            };
-            
-            this.scene.add(marker);
-            this.bridgePointMarkers.push(marker);
-            
-            console.log(`Created bridge marker at position: ${normalizedCoord.x}, 0.2, ${-normalizedCoord.y}`);
-          } catch (error) {
-            if (error instanceof Error) {
-              console.error(`Error creating bridge point for polygon ${polygon.id}:`, error);
-            }
-          }
-        });
-      }
-      
-      // Process dock points
-      if (polygon.dockPoints && Array.isArray(polygon.dockPoints) && polygon.dockPoints.length > 0) {
-        polygon.dockPoints.forEach((point, index) => {
-          try {
-            // Create markers for both edge and water points
-            const edgeCoord = normalizeCoordinates(
-              [point.edge],
-              this.bounds.centerLat,
-              this.bounds.centerLng,
-              this.bounds.scale,
-              this.bounds.latCorrectionFactor
-            )[0];
-            
-            // Create a smaller sphere marker for dock edge points
-            const edgeGeometry = new THREE.SphereGeometry(0.3, 12, 12); // Smaller size (was 0.5) and more segments for smoother spheres
-            
-            const edgeMarker = new THREE.Mesh(edgeGeometry, dockEdgeMaterial);
-            // CHANGE: Position at ground level (y=0.2) instead of y=5.0
-            edgeMarker.position.set(edgeCoord.x, 0.2, -edgeCoord.y);
-            edgeMarker.renderOrder = 100;
-            
-            // Add metadata for tooltips
-            edgeMarker.userData = {
-              id: `dock-edge-${polygon.id}-${index}`,
-              type: 'dock-edge',
-              polygonId: polygon.id,
-              position: `${point.edge.lat.toFixed(6)}, ${point.edge.lng.toFixed(6)}`
-            };
-            
-            this.scene.add(edgeMarker);
-            this.dockPointMarkers.push(edgeMarker);
-            
-            console.log(`Created dock marker at position: ${edgeCoord.x}, 0.2, ${-edgeCoord.y}`);
-          } catch (error) {
-            if (error instanceof Error) {
-              console.error(`Error creating dock point for polygon ${polygon.id}:`, error);
-            }
-          }
-        });
-      }
-    });
-    
-    console.log(`Created ${this.bridgePointMarkers.length} bridge markers and ${this.dockPointMarkers.length} dock markers`);
-    
-    // After creating the bridge point markers, add this code to create connection lines
-    this.polygons.forEach(polygon => {
-      // Skip if polygon has no bridge points
-      if (!polygon.bridgePoints || !Array.isArray(polygon.bridgePoints)) return;
-      
-      // Process each bridge point that has a connection
-      polygon.bridgePoints.forEach((point, index) => {
-        if (point.connection) {
-          try {
-            // Get the normalized coordinates for the source point
-            const sourceCoord = normalizeCoordinates(
-              [point.edge],
-              this.bounds.centerLat,
-              this.bounds.centerLng,
-              this.bounds.scale,
-              this.bounds.latCorrectionFactor
-            )[0];
-            
-            // Get the normalized coordinates for the target point
-            const targetCoord = normalizeCoordinates(
-              [point.connection.targetPoint],
-              this.bounds.centerLat,
-              this.bounds.centerLng,
-              this.bounds.scale,
-              this.bounds.latCorrectionFactor
-            )[0];
-            
-            // Create a line geometry connecting the two points
-            const lineGeometry = new THREE.BufferGeometry();
-            const vertices = new Float32Array([
-              sourceCoord.x, 0.15, -sourceCoord.y,  // Source point, slightly higher than the markers
-              targetCoord.x, 0.15, -targetCoord.y   // Target point
-            ]);
-            lineGeometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
-            
-            // Create a thick, semi-transparent orange line material
-            const lineMaterial = new THREE.LineBasicMaterial({
-              color: 0xFF8800,     // Orange color
-              transparent: true,
-              opacity: 0.8,        // Less transparent for better visibility
-              linewidth: 5         // Even thicker line (note: linewidth may not work in WebGL)
-            });
-            
-            // Create a path from the points, but extend it 20% on each side
-            const direction = new THREE.Vector3().subVectors(
-              new THREE.Vector3(targetCoord.x, 0, -targetCoord.y),
-              new THREE.Vector3(sourceCoord.x, 0, -sourceCoord.y)
-            ).normalize();
-
-            const startPoint = new THREE.Vector3(
-              sourceCoord.x,
-              0.15, // Keep the lower position to be closer to the ground
-              -sourceCoord.y
-            );
-            const endPoint = new THREE.Vector3(
-              targetCoord.x,
-              0.15, // Keep the lower position to be closer to the ground
-              -targetCoord.y
-            );
-
-            // Create the path with extended points
-            const path = new THREE.LineCurve3(startPoint, endPoint);
-
-            // Create a tube geometry along the path
-            const tubeGeometry = new THREE.TubeGeometry(
-              path,
-              1,    // tubularSegments - just 1 for a straight line
-              0.08, // radius - make this larger for thicker lines
-              8,    // radialSegments - more segments for smoother tube
-              false // closed
-            );
-
-            // Create the tube mesh
-            const line = new THREE.Mesh(tubeGeometry, new THREE.MeshBasicMaterial({
-              color: 0xFF8800,
-              transparent: true,
-              opacity: 0.8
-            }));
-            line.renderOrder = 95; // Below the markers but above the land
-            
-            // Add metadata for identification
-            line.userData = {
-              id: `bridge-connection-${polygon.id}-${index}`,
-              type: 'bridge-connection',
-              sourcePolygonId: polygon.id,
-              targetPolygonId: point.connection.targetPolygonId
-            };
-            
-            this.scene.add(line);
-            this.bridgePointMarkers.push(line); // Add to the same array for cleanup
-            
-            console.log(`Created bridge connection line from ${polygon.id} to ${point.connection.targetPolygonId}`);
-          } catch (error) {
-            console.error(`Error creating bridge connection line for polygon ${polygon.id}:`, error);
-          }
-        }
-      });
-    });
+    // Delegate to the TransportPointManager
+    this.transportPointManager.createTransportPoints(this.polygons);
     
     // Force a scene update
     if (this.scene.userData && this.scene.userData.renderer) {
       this.scene.userData.renderer.render(this.scene, this.camera);
     }
   }
-
-  // Add a helper method to clear markers
-  private clearBridgeAndDockMarkers() {
-    // Clear bridge markers
-    this.bridgePointMarkers.forEach(marker => {
-      this.scene.remove(marker);
-      if (marker instanceof THREE.Mesh) {
-        if (marker.geometry) marker.geometry.dispose();
-        if (marker.material instanceof THREE.Material) {
-          marker.material.dispose();
-        } else if (Array.isArray(marker.material)) {
-          marker.material.forEach(m => m.dispose());
-        }
-      } else if (marker instanceof THREE.Line) {
-        if (marker.geometry) marker.geometry.dispose();
-        if (marker.material instanceof THREE.Material) {
-          marker.material.dispose();
-        }
-      }
-    });
-    this.bridgePointMarkers = [];
-    
-    // Clear dock markers
-    this.dockPointMarkers.forEach(marker => {
-      this.scene.remove(marker);
-      if (marker instanceof THREE.Mesh) {
-        if (marker.geometry) marker.geometry.dispose();
-        if (marker.material instanceof THREE.Material) {
-          marker.material.dispose();
-        } else if (Array.isArray(marker.material)) {
-          marker.material.forEach(m => m.dispose());
-        }
-      } else if (marker instanceof THREE.Line) {
-        if (marker.geometry) marker.geometry.dispose();
-        if (marker.material instanceof THREE.Material) {
-          marker.material.dispose();
-        }
-      }
-    });
-    this.dockPointMarkers = [];
-  }
-  
-  /**
-   * Clear all building point markers
-   */
-  public clearBuildingPointMarkers(): void {
-    this.buildingPointMarkers.forEach(marker => {
-      this.scene.remove(marker);
-      
-      // Check if marker is a Mesh before accessing geometry and material
-      if (marker instanceof THREE.Mesh) {
-        if (marker.geometry) marker.geometry.dispose();
-        if (marker.material instanceof THREE.Material) {
-          marker.material.dispose();
-        } else if (Array.isArray(marker.material)) {
-          marker.material.forEach(m => m.dispose());
-        }
-      } else if (marker instanceof THREE.Group) {
-        // Handle Group objects by traversing their children
-        marker.traverse((child) => {
-          if (child instanceof THREE.Mesh) {
-            if (child.geometry) child.geometry.dispose();
-            if (child.material instanceof THREE.Material) {
-              child.material.dispose();
-            } else if (Array.isArray(child.material)) {
-              child.material.forEach(m => m.dispose());
-            }
-          }
-        });
-      }
-    });
-    this.buildingPointMarkers = [];
-  }
   
   /**
    * Get all building point markers
    */
   public getBuildingPointMarkers(): THREE.Object3D[] {
-    return this.buildingPointMarkers;
+    return this.buildingPointManager.getBuildingPointMarkers();
   }
   
   // This method is no longer needed as we've moved the functionality to handleMouseClick
@@ -2358,98 +1406,10 @@ export default class SimplePolygonRenderer {
    * Create building point markers for buildings view
    */
   public createBuildingPoints(): void {
-    console.log('Creating building points - START');
+    console.log('Creating building points - delegating to BuildingPointManager');
     
-    // Clear any existing markers first
-    this.clearBuildingPointMarkers();
-    
-    // Add debug logging to see how many polygons have building points
-    let polygonsWithBuildingPoints = 0;
-    let totalBuildingPoints = 0;
-    
-    // Debug: Log the total number of polygons
-    console.log(`Total polygons to check for building points: ${this.polygons.length}`);
-    
-    // Check each polygon for building points and count them
-    this.polygons.forEach(polygon => {
-      if (polygon.buildingPoints && Array.isArray(polygon.buildingPoints) && polygon.buildingPoints.length > 0) {
-        polygonsWithBuildingPoints++;
-        totalBuildingPoints += polygon.buildingPoints.length;
-        console.log(`Polygon ${polygon.id} has ${polygon.buildingPoints.length} building points`);
-      }
-    });
-    
-    console.log(`Found ${polygonsWithBuildingPoints} polygons with building points (${totalBuildingPoints} total points)`);
-    
-    // If no building points found, log a warning
-    if (totalBuildingPoints === 0) {
-      console.warn('No building points found in any polygons. Buildings view will not show building points.');
-      return;
-    }
-    
-    // Create a material for building points - make them more transparent and smaller
-    const buildingPointMaterial = new THREE.MeshBasicMaterial({
-      color: 0xFFFFFF, // White color for building points
-      transparent: true,
-      opacity: 0.4  // Reduced from 0.8 to 0.4 for more transparency
-    });
-    
-    // Process each polygon
-    this.polygons.forEach(polygon => {
-      // Skip if polygon has no building points
-      if (!polygon.buildingPoints || !Array.isArray(polygon.buildingPoints) || polygon.buildingPoints.length === 0) return;
-      
-      console.log(`Processing ${polygon.buildingPoints.length} building points for polygon ${polygon.id}`);
-      
-      polygon.buildingPoints.forEach((point, index) => {
-        try {
-          console.log(`Building point ${index} data:`, point);
-          
-          const normalizedCoord = normalizeCoordinates(
-            [point],
-            this.bounds.centerLat,
-            this.bounds.centerLng,
-            this.bounds.scale,
-            this.bounds.latCorrectionFactor
-          )[0];
-          
-          console.log(`Normalized coordinates for point ${index}:`, normalizedCoord);
-          
-          // Create a smaller sphere for better visibility
-          const geometry = new THREE.SphereGeometry(0.15, 12, 12); // Reduced from 0.25 to 0.15 for smaller size
-          
-          const marker = new THREE.Mesh(geometry, buildingPointMaterial);
-          // Position closer to the ground level
-          marker.position.set(normalizedCoord.x, 0.05, -normalizedCoord.y);
-          marker.renderOrder = 100;
-          
-          // Add metadata for tooltips
-          marker.userData = {
-            id: `building-point-${polygon.id}-${index}`,
-            type: 'building-point',
-            polygonId: polygon.id,
-            position: `${point.lat.toFixed(6)}, ${point.lng.toFixed(6)}`
-          };
-          
-          this.scene.add(marker);
-          this.buildingPointMarkers.push(marker);
-          
-          console.log(`Created building point marker at position: ${normalizedCoord.x}, 0.05, ${-normalizedCoord.y}`);
-        } catch (error) {
-          console.error(`Error creating building point for polygon ${polygon.id}:`, error);
-        }
-      });
-    });
-    
-    console.log(`Created ${this.buildingPointMarkers.length} building point markers`);
-    
-    // Make sure all markers are visible
-    this.buildingPointMarkers.forEach(marker => {
-      marker.visible = true;
-      console.log(`Set marker visibility to true`);
-    });
-    
-    console.log('Creating building points - END');
+    // Delegate to the BuildingPointManager
+    this.buildingPointManager.createBuildingPoints(this.polygons);
     
     // After creating building points, replace them with actual buildings
     // Use setTimeout to ensure the building points are rendered first
@@ -2465,24 +1425,14 @@ export default class SimplePolygonRenderer {
     console.log('Forcing building points to be visible');
     
     // If no building points exist, create them
-    if (this.buildingPointMarkers.length === 0) {
-      this.createBuildingPoints();
+    if (this.buildingPointManager.getBuildingPointMarkers().length === 0) {
+      this.buildingPointManager.createBuildingPoints(this.polygons);
     }
     
-    // Make all building points visible with high render order
-    this.buildingPointMarkers.forEach(marker => {
-      marker.visible = true;
-      marker.renderOrder = 2000; // High render order to ensure visibility
-      
-      // Ensure consistent appearance
-      if (marker instanceof THREE.Mesh && marker.material instanceof THREE.MeshBasicMaterial) {
-        // Make building points more transparent in transport view
-        marker.material.opacity = 0.4; // Reduced from 0.8 to 0.4 for more transparency
-        marker.material.color.set(0xFFFFFF); // White color for building points
-      }
-    });
+    // Make all building points visible
+    this.buildingPointManager.setVisible(true);
     
-    console.log(`Made ${this.buildingPointMarkers.length} building points visible`);
+    console.log(`Made building points visible`);
   }
   
   /**
