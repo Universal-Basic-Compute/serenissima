@@ -27,7 +27,31 @@ export class CoatOfArmsRenderer {
   }
 
   public updateCoatOfArms(ownerCoatOfArmsMap: Record<string, string>): void {
-    this.ownerCoatOfArmsMap = { ...this.ownerCoatOfArmsMap, ...ownerCoatOfArmsMap };
+    console.log("Updating coat of arms map with:", ownerCoatOfArmsMap);
+    
+    // Create a new map with properly formatted URLs
+    const formattedMap: Record<string, string> = {};
+    
+    // Process each entry to ensure proper URL format
+    Object.entries(ownerCoatOfArmsMap).forEach(([owner, url]) => {
+      if (url) {
+        // If the URL doesn't start with a slash or http, add a leading slash
+        if (!url.startsWith('/') && !url.startsWith('http')) {
+          url = '/' + url;
+        }
+        
+        // If it's a username without a full path, construct the coat of arms path
+        if (!url.includes('/coat-of-arms/') && !url.startsWith('http')) {
+          url = `/coat-of-arms/${owner}.png`;
+        }
+        
+        formattedMap[owner] = url;
+        console.log(`Formatted coat of arms URL for ${owner}: ${url}`);
+      }
+    });
+    
+    this.ownerCoatOfArmsMap = { ...this.ownerCoatOfArmsMap, ...formattedMap };
+    console.log("Updated coat of arms map:", this.ownerCoatOfArmsMap);
   }
 
   public createCoatOfArmsSprites(polygons: any[]): void {
@@ -58,11 +82,13 @@ export class CoatOfArmsRenderer {
       // Get the coat of arms URL for the owner
       let coatOfArmsUrl = this.ownerCoatOfArmsMap[ownerValue];
       
-      // If no coat of arms found, generate a default one
+      // If no coat of arms URL found, try to construct one based on the owner name
       if (!coatOfArmsUrl) {
-        console.log(`No coat of arms found for owner ${ownerValue}, creating default`);
-        this.createDefaultCoatOfArms(polygon, ownerValue);
-        return;
+        coatOfArmsUrl = `/coat-of-arms/${ownerValue}.png`;
+        console.log(`No coat of arms URL found for ${ownerValue}, using constructed URL: ${coatOfArmsUrl}`);
+        
+        // Add to the map for future use
+        this.ownerCoatOfArmsMap[ownerValue] = coatOfArmsUrl;
       }
 
       // Create circular coat of arms
@@ -127,113 +153,86 @@ export class CoatOfArmsRenderer {
     // Mark this mesh as a coat of arms
     plane.userData.isCoatOfArms = true;
     plane.userData.polygonId = polygon.id;
-
-    // Properly construct the texture URL
-    let textureUrl = coatOfArmsUrl;
     
-    // If it's a relative path starting with /coat-of-arms/
-    if (coatOfArmsUrl.startsWith('/coat-of-arms/')) {
-      // Try to load from serenissima.ai first
-      textureUrl = `https://serenissima.ai${coatOfArmsUrl}`;
-      console.log(`Loading coat of arms from: ${textureUrl}`);
-    } 
-    // If it's another relative path
-    else if (coatOfArmsUrl.startsWith('/')) {
-      // Use the current origin
-      textureUrl = `${window.location.origin}${coatOfArmsUrl}`;
-      console.log(`Loading coat of arms from: ${textureUrl}`);
-    }
-    // If it's already a full URL, use it as is
-    else if (coatOfArmsUrl.startsWith('http')) {
-      console.log(`Loading coat of arms from external URL: ${textureUrl}`);
-    }
-    // Otherwise, assume it's a relative path without leading slash
-    else {
-      textureUrl = `${window.location.origin}/${coatOfArmsUrl}`;
-      console.log(`Loading coat of arms from: ${textureUrl}`);
-    }
+    // Get owner value for error handling
+    const ownerValue = polygon.owner || polygon.User || "Unknown";
 
-    this.textureLoader.load(
-      textureUrl,
-      (texture) => {
-        // Create a circular texture with inverted orientation
-        const circularTexture = this.createCircularTexture(texture, true);
+    // Create an array of URLs to try in order
+    const urlsToTry = [
+      // 1. Try the original URL with serenissima.ai domain
+      `https://serenissima.ai${coatOfArmsUrl}`,
+      
+      // 2. Try with current origin
+      `${window.location.origin}${coatOfArmsUrl}`,
+      
+      // 3. Try with just the owner name
+      `https://serenissima.ai/coat-of-arms/${ownerValue}.png`,
+      
+      // 4. Try with current origin and owner name
+      `${window.location.origin}/coat-of-arms/${ownerValue}.png`
+    ];
+    
+    console.log(`Will try these URLs for ${ownerValue}:`, urlsToTry);
 
-        // Apply the texture to the plane material
-        if (planeMaterial) {
-          planeMaterial.map = circularTexture;
-          planeMaterial.needsUpdate = true;
-
-          // Adjust plane scale based on texture aspect ratio and scene scale
-          if (texture.image && texture.image.width && texture.image.height) {
-            const aspectRatio = texture.image.width / texture.image.height;
-            const sceneScale = this.bounds.scale;
-            const baseScale = Math.max(0.19, sceneScale / 2633);
-            plane.scale.set(baseScale * aspectRatio, baseScale, 1);
-          }
-
-          // Add to scene after texture is loaded
-          this.scene.add(plane);
-
-          // Store reference
-          this.coatOfArmsSprites[polygon.id] = plane;
-
-          // Add fade-in animation
-          this.animateFadeIn(planeMaterial);
-        }
-      },
-      undefined,
-      (error) => {
-        console.error(`Failed to load coat of arms texture for ${polygon.id} from ${textureUrl}:`, error);
+    // Function to try loading the next URL in the array
+    const tryNextUrl = (index: number) => {
+      if (index >= urlsToTry.length) {
+        console.error(`All URLs failed for ${ownerValue}, creating default coat of arms`);
+        this.createDefaultCoatOfArms(polygon, ownerValue);
         
-        // If loading from serenissima.ai fails, try from the current origin as fallback
-        if (textureUrl.startsWith('https://serenissima.ai')) {
-          console.log(`Trying fallback URL for coat of arms: ${window.location.origin}${coatOfArmsUrl}`);
-          
-          this.textureLoader.load(
-            `${window.location.origin}${coatOfArmsUrl}`,
-            (texture) => {
-              // Same texture handling as above
-              const circularTexture = this.createCircularTexture(texture, true);
-              
-              if (planeMaterial) {
-                planeMaterial.map = circularTexture;
-                planeMaterial.needsUpdate = true;
-                
-                if (texture.image && texture.image.width && texture.image.height) {
-                  const aspectRatio = texture.image.width / texture.image.height;
-                  const sceneScale = this.bounds.scale;
-                  const baseScale = Math.max(0.19, sceneScale / 2633);
-                  plane.scale.set(baseScale * aspectRatio, baseScale, 1);
-                }
-                
-                this.scene.add(plane);
-                this.coatOfArmsSprites[polygon.id] = plane;
-                this.animateFadeIn(planeMaterial);
-              }
-            },
-            undefined,
-            (fallbackError) => {
-              console.error(`Fallback also failed for ${polygon.id}:`, fallbackError);
-              
-              // If both attempts fail, create a default coat of arms
-              this.createDefaultCoatOfArms(polygon, polygon.owner || polygon.User || "Unknown");
-              
-              // Clean up unused resources
-              planeGeometry.dispose();
-              planeMaterial.dispose();
-            }
-          );
-        } else {
-          // If not loading from serenissima.ai, create a default coat of arms
-          this.createDefaultCoatOfArms(polygon, polygon.owner || polygon.User || "Unknown");
-          
-          // Clean up unused resources
-          planeGeometry.dispose();
-          planeMaterial.dispose();
-        }
+        // Clean up unused resources
+        planeGeometry.dispose();
+        planeMaterial.dispose();
+        return;
       }
-    );
+      
+      const currentUrl = urlsToTry[index];
+      console.log(`Trying URL ${index + 1}/${urlsToTry.length} for ${ownerValue}: ${currentUrl}`);
+      
+      this.textureLoader.load(
+        currentUrl,
+        (texture) => {
+          console.log(`Successfully loaded texture for ${ownerValue} from ${currentUrl}`);
+          // Create a circular texture with inverted orientation
+          const circularTexture = this.createCircularTexture(texture, true);
+
+          // Apply the texture to the plane material
+          if (planeMaterial) {
+            planeMaterial.map = circularTexture;
+            planeMaterial.needsUpdate = true;
+
+            // Adjust plane scale based on texture aspect ratio and scene scale
+            if (texture.image && texture.image.width && texture.image.height) {
+              const aspectRatio = texture.image.width / texture.image.height;
+              const sceneScale = this.bounds.scale;
+              const baseScale = Math.max(0.19, sceneScale / 2633);
+              plane.scale.set(baseScale * aspectRatio, baseScale, 1);
+            }
+
+            // Add to scene after texture is loaded
+            this.scene.add(plane);
+
+            // Store reference
+            this.coatOfArmsSprites[polygon.id] = plane;
+
+            // Add fade-in animation
+            this.animateFadeIn(planeMaterial);
+            
+            // Update the coat of arms map with the successful URL
+            this.ownerCoatOfArmsMap[ownerValue] = currentUrl;
+          }
+        },
+        undefined,
+        (error) => {
+          console.warn(`Failed to load from ${currentUrl}: ${error.message}`);
+          // Try the next URL
+          tryNextUrl(index + 1);
+        }
+      );
+    };
+    
+    // Start trying URLs
+    tryNextUrl(0);
   }
 
   private animateFadeIn(material: THREE.MeshBasicMaterial): void {
