@@ -228,8 +228,9 @@ export class CoatOfArmsRenderer {
           }
         },
         undefined,
-        (error) => {
-          console.warn(`Failed to load from ${currentUrl}: ${error.message}`);
+        (error: unknown) => {
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          console.warn(`Failed to load from ${currentUrl}: ${errorMessage}`);
           // Try the next URL
           tryNextUrl(index + 1);
         }
