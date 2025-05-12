@@ -355,17 +355,19 @@ export default class SimplePolygonRenderer {
   public createCoatOfArmsSprites() {
     // Prevent concurrent or duplicate rendering
     if (this.isRenderingCoatOfArms) {
-      console.log('Already rendering coat of arms, skipping duplicate call');
+      console.log(`%c[SimplePolygonRenderer] Already rendering coat of arms, skipping duplicate call`, 'color: #0099ff;');
       return;
     }
     
-    console.log('Creating coat of arms sprites for land view');
+    console.log(`%c[SimplePolygonRenderer] Creating coat of arms sprites for land view`, 'color: #0099ff; font-weight: bold;');
     this.isRenderingCoatOfArms = true;
     
     // Debug: Log the number of polygons with different position properties
     let polygonsWithCenter = 0;
     let polygonsWithCentroid = 0;
     let polygonsWithCoatOfArmsCenter = 0;
+    let polygonsWithOwner = 0;
+    let polygonsWithCoatOfArms = 0;
     
     // Add more detailed logging for the first few polygons
     const samplePolygons = this.polygons.slice(0, 3);
@@ -385,9 +387,21 @@ export default class SimplePolygonRenderer {
       if (polygon.center) polygonsWithCenter++;
       if (polygon.centroid) polygonsWithCentroid++;
       if (polygon.coatOfArmsCenter) polygonsWithCoatOfArmsCenter++;
+      if (polygon.owner || polygon.User) polygonsWithOwner++;
+      
+      // Check if this polygon's owner has a coat of arms
+      const ownerValue = polygon.owner || polygon.User;
+      if (ownerValue && this.ownerCoatOfArmsMap[ownerValue]) {
+        polygonsWithCoatOfArms++;
+      }
     });
     
-    console.log(`Position properties in polygons: center=${polygonsWithCenter}, centroid=${polygonsWithCentroid}, coatOfArmsCenter=${polygonsWithCoatOfArmsCenter}`);
+    console.log(`%c[SimplePolygonRenderer] Polygon stats:`, 'color: #0099ff;');
+    console.log(`%c[SimplePolygonRenderer] - With center: ${polygonsWithCenter}`, 'color: #0099ff;');
+    console.log(`%c[SimplePolygonRenderer] - With centroid: ${polygonsWithCentroid}`, 'color: #0099ff;');
+    console.log(`%c[SimplePolygonRenderer] - With owner: ${polygonsWithOwner}`, 'color: #0099ff;');
+    console.log(`%c[SimplePolygonRenderer] - With coat of arms: ${polygonsWithCoatOfArms}`, 'color: #0099ff;');
+    console.log(`%c[SimplePolygonRenderer] - With coatOfArmsCenter: ${polygonsWithCoatOfArmsCenter}`, 'color: #0099ff;');
     
     // Remove any existing sprites first
     this.clearCoatOfArmsSprites();
@@ -497,6 +511,7 @@ export default class SimplePolygonRenderer {
     
     console.log(`Coat of arms creation stats: created=${createdCount}, skipped (no owner)=${skippedNoOwner}, skipped (no position)=${skippedNoPosition}, skipped (no coat of arms)=${skippedNoCoatOfArms}`);
     
+    console.log(`%c[SimplePolygonRenderer] Finished creating coat of arms sprites`, 'color: #0099ff; font-weight: bold;');
     this.hasRenderedCoatOfArms = true;
     this.isRenderingCoatOfArms = false;
     // Coat of arms sprites created
@@ -927,7 +942,7 @@ export default class SimplePolygonRenderer {
   public updateViewMode(activeView: string) {
     if (this.activeView === activeView) return;
     
-    console.log(`Changing view mode from ${this.activeView} to ${activeView}`);
+    console.log(`%c[SimplePolygonRenderer] Changing view mode from ${this.activeView} to ${activeView}`, 'color: #0099ff; font-weight: bold;');
     
     // Clear measurement objects when switching away from transport view
     if (this.activeView === 'transport' && activeView !== 'transport') {
@@ -981,6 +996,21 @@ export default class SimplePolygonRenderer {
     }
     
     this.activeView = activeView;
+    
+    // When switching to land view, add detailed logging
+    if (activeView === 'land') {
+      console.log(`%c[SimplePolygonRenderer] Switched to land view, coat of arms state:`, 'color: #0099ff; font-weight: bold;');
+      console.log(`%c[SimplePolygonRenderer] - Has rendered coat of arms: ${this.hasRenderedCoatOfArms}`, 'color: #0099ff;');
+      console.log(`%c[SimplePolygonRenderer] - Is rendering coat of arms: ${this.isRenderingCoatOfArms}`, 'color: #0099ff;');
+      console.log(`%c[SimplePolygonRenderer] - Owner map size: ${Object.keys(this.ownerCoatOfArmsMap).length}`, 'color: #0099ff;');
+      console.log(`%c[SimplePolygonRenderer] - Has sand texture: ${!!this.sandTexture}`, 'color: #0099ff;');
+      
+      // Force coat of arms update when switching to land view
+      setTimeout(() => {
+        console.log(`%c[SimplePolygonRenderer] Forcing coat of arms update after view mode change`, 'color: #0099ff; font-weight: bold;');
+        this.createCoatOfArmsSprites();
+      }, 500);
+    }
     
     // Update coat of arms sprites based on view mode
     if (activeView === 'land') {
@@ -1108,6 +1138,7 @@ export default class SimplePolygonRenderer {
    * Update the coat of arms map with new data
    */
   public updateCoatOfArms(ownerCoatOfArmsMap: Record<string, string>) {
+    console.log(`%c[SimplePolygonRenderer] Updating coat of arms map with ${Object.keys(ownerCoatOfArmsMap).length} entries`, 'color: #0099ff; font-weight: bold;');
     this.ownerCoatOfArmsMap = { ...this.ownerCoatOfArmsMap, ...ownerCoatOfArmsMap };
     
     // Only create coat of arms sprites if we're in land view AND we have owner data
@@ -1116,8 +1147,18 @@ export default class SimplePolygonRenderer {
         Object.keys(this.ownerCoatOfArmsMap).length > 0 && 
         this.sandTexture) {
       
+      console.log(`%c[SimplePolygonRenderer] Conditions met for creating coat of arms:`, 'color: #0099ff;');
+      console.log(`%c[SimplePolygonRenderer] - In land view: true`, 'color: #0099ff;');
+      console.log(`%c[SimplePolygonRenderer] - Has owner data: true (${Object.keys(this.ownerCoatOfArmsMap).length} entries)`, 'color: #0099ff;');
+      console.log(`%c[SimplePolygonRenderer] - Has sand texture: true`, 'color: #0099ff;');
+      
       // Check if we have any polygons with owners before creating sprites
-      const polygonsWithOwners = this.polygons.filter(p => p.owner && this.ownerCoatOfArmsMap[p.owner]);
+      const polygonsWithOwners = this.polygons.filter(p => {
+        const owner = p.owner || p.User;
+        return owner && this.ownerCoatOfArmsMap[owner];
+      });
+      
+      console.log(`%c[SimplePolygonRenderer] Found ${polygonsWithOwners.length} polygons with matching owners`, 'color: #0099ff;');
       
       if (polygonsWithOwners.length > 0) {
         // Reset the rendered flag to force a refresh with new data
@@ -1125,9 +1166,17 @@ export default class SimplePolygonRenderer {
         
         // Add a small delay to ensure textures are fully loaded
         setTimeout(() => {
+          console.log(`%c[SimplePolygonRenderer] Creating coat of arms sprites after delay`, 'color: #0099ff;');
           this.createCoatOfArmsSprites();
         }, 500);
+      } else {
+        console.log(`%c[SimplePolygonRenderer] No polygons with matching owners found, skipping coat of arms creation`, 'color: #0099ff;');
       }
+    } else {
+      console.log(`%c[SimplePolygonRenderer] Conditions NOT met for creating coat of arms:`, 'color: #0099ff;');
+      console.log(`%c[SimplePolygonRenderer] - In land view: ${this.activeView === 'land'}`, 'color: #0099ff;');
+      console.log(`%c[SimplePolygonRenderer] - Has owner data: ${Object.keys(this.ownerCoatOfArmsMap).length > 0} (${Object.keys(this.ownerCoatOfArmsMap).length} entries)`, 'color: #0099ff;');
+      console.log(`%c[SimplePolygonRenderer] - Has sand texture: ${!!this.sandTexture}`, 'color: #0099ff;');
     }
   }
 
