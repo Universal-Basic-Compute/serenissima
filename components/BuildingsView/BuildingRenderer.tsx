@@ -7,15 +7,6 @@ import { BuildingRendererFactory } from '@/lib/services/BuildingRendererFactory'
 import buildingPositionManager from '@/lib/services/BuildingPositionManager';
 import buildingCacheService from '@/lib/services/BuildingCacheService';
 import { useSceneReady } from '@/lib/components/SceneReadyProvider';
-import React, { useEffect, useRef, useState } from 'react';
-import * as THREE from 'three';
-import { ThreeDErrorBoundary } from '@/lib/components/ThreeDErrorBoundary';
-import { eventBus } from '@/lib/eventBus';
-import { EventTypes } from '@/lib/eventTypes';
-import { BuildingRendererFactory } from '@/lib/services/BuildingRendererFactory';
-import buildingPositionManager from '@/lib/services/BuildingPositionManager';
-import buildingCacheService from '@/lib/services/BuildingCacheService';
-import { useSceneReady } from '@/lib/components/SceneReadyProvider';
 
 interface BuildingRendererProps {
   active?: boolean;
