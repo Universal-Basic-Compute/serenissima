@@ -36,7 +36,7 @@ import { RoadManager } from '../../lib/threejs/RoadManager';
 import { eventBus, EventTypes } from '../../lib/eventBus';
 
 // Define ActiveViewMode as the same type as ViewMode to ensure type compatibility
-type ActiveViewMode = 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance' | 'citizens';
+type ActiveViewMode = 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance' | 'citizens' | 'guilds';
 
 export default function PolygonViewer() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
