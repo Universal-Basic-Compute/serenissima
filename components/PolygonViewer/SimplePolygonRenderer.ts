@@ -1897,17 +1897,6 @@ export default class SimplePolygonRenderer {
       this.measurementLine = null;
     }
     
-    if (this.measurementLabel) {
-      this.scene.remove(this.measurementLabel);
-      if (this.measurementLabel.material instanceof THREE.SpriteMaterial) {
-        if (this.measurementLabel.material.map) {
-          this.measurementLabel.material.map.dispose();
-        }
-        this.measurementLabel.material.dispose();
-      }
-      this.measurementLabel = null;
-    }
-    
     // Create a new line between the two points
     if (this.measurementPoints.length >= 2) {
       const start = this.measurementPoints[0];
