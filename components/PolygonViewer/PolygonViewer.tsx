@@ -21,7 +21,7 @@ import { InteractionManager } from '../../lib/threejs/InteractionManager';
 import { ResourceDisplayManager } from '../../lib/threejs/ResourceDisplayManager';
 import { CitizenDisplayManager } from '../../lib/threejs/CitizenDisplayManager';
 import ViewModeMenu from './ViewModeMenu';
-import { ViewMode } from '../../lib/threejs/types';
+// ViewMode is now imported at the top of the file
 import LandDetailsPanel from './LandDetailsPanel';
 import MarketPanel from './MarketPanel';
 import BuildingMenu from './BuildingMenu';
@@ -35,8 +35,10 @@ import RoadCreator from '../PolygonViewer/RoadCreator';
 import { RoadManager } from '../../lib/threejs/RoadManager';
 import { eventBus, EventTypes } from '../../lib/eventBus';
 
-// Define ActiveViewMode as the same type as ViewMode to ensure type compatibility
-type ActiveViewMode = 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance' | 'citizens' | 'guilds';
+// Use the ViewMode type from types.ts
+import { ViewMode } from './types';
+// Define ActiveViewMode as an alias of ViewMode to ensure type compatibility
+type ActiveViewMode = ViewMode;
 
 export default function PolygonViewer() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -1667,8 +1669,8 @@ export default function PolygonViewer() {
   // Create memoized components before any conditional returns
   const ViewModeMenuMemo = useMemo(() => (
     <ViewModeMenu 
-      activeView={activeView as ViewMode} 
-      setActiveView={setActiveView as (view: ViewMode) => void} 
+      activeView={activeView} 
+      setActiveView={setActiveView} 
     />
   ), [activeView, setActiveView]);
   
