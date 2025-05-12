@@ -575,24 +575,23 @@ export class WaterFacade {
       }
       
       console.log('Water quality updated to:', qualityLevel);
+    } catch (error) {
+      console.warn('Error updating water quality:', error);
     }
-  } catch (error) {
-    console.warn('Error updating water quality:', error);
   }
-}
 
-/**
- * Get the current water quality level as a string
- * @returns Current quality level as a string
- */
-public getQualityString(): 'high' | 'medium' | 'low' {
-  switch (this.quality) {
-    case WaterQualityLevel.HIGH: return 'high';
-    case WaterQualityLevel.MEDIUM: return 'medium';
-    case WaterQualityLevel.LOW: return 'low';
-    default: return 'medium';
+  /**
+   * Get the current water quality level as a string
+   * @returns Current quality level as a string
+   */
+  public getQualityString(): 'high' | 'medium' | 'low' {
+    switch (this.quality) {
+      case WaterQualityLevel.HIGH: return 'high';
+      case WaterQualityLevel.MEDIUM: return 'medium';
+      case WaterQualityLevel.LOW: return 'low';
+      default: return 'medium';
+    }
   }
-}
 
   /**
    * Set water color
