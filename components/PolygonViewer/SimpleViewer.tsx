@@ -13,8 +13,9 @@ import { eventBus } from '@/lib/eventBus';
 import { EventTypes } from '@/lib/eventTypes';
 import { getIncomeDataService } from '@/lib/services/IncomeDataService';
 
-export default function SimpleViewer({ qualityMode = 'high', activeView = 'land' }: {
+export default function SimpleViewer({ qualityMode = 'high', waterQuality = 'high', activeView = 'land' }: {
   qualityMode: 'high' | 'performance';
+  waterQuality?: 'high' | 'medium' | 'low';
   activeView: 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance' | 'loans' | 'knowledge';
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -352,10 +353,13 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
     const water = new SimpleWater({
       scene,
       size: waterSize,
-      quality: qualityMode === 'high' ? 'high' : 'medium',
+      quality: waterQuality || (qualityMode === 'high' ? 'high' : 'medium'),
       position: { y: 0 } // Explicitly set y position to 0
     });
     waterRef.current = water;
+    
+    // Log water quality for debugging
+    console.log('Water created with quality:', water.getQualityString());
     
     // Create polygon renderer after water, passing activeView, users, camera, and selection callback
     const polygonRenderer = new SimplePolygonRenderer({
@@ -884,6 +888,23 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
       waterRef.current.setQuality(qualityMode === 'high' ? 'high' : 'medium');
     }
   }, [qualityMode]);
+  
+  
+  // Listen for water quality change events
+  useEffect(() => {
+    const handleWaterQualityChanged = (event: CustomEvent) => {
+      if (event.detail && event.detail.waterQuality && waterRef.current) {
+        console.log('SimpleViewer: Updating water quality to:', event.detail.waterQuality);
+        waterRef.current.setQuality(event.detail.waterQuality, true);
+      }
+    };
+    
+    window.addEventListener('waterQualityChanged', handleWaterQualityChanged as EventListener);
+    
+    return () => {
+      window.removeEventListener('waterQualityChanged', handleWaterQualityChanged as EventListener);
+    };
+  }, []);
   
   
   return (

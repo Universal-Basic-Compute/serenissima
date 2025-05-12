@@ -40,6 +40,9 @@ const Settings: React.FC<SettingsProps> = ({ onClose }) => {
           
           // Apply audio settings immediately
           applyAudioSettings(settings.masterVolume, settings.musicVolume, settings.effectsVolume, settings.isMuted);
+          
+          // Apply water quality settings immediately
+          applyWaterQualitySettings(settings.waterQuality);
         }
       } catch (error) {
         console.error('Error loading settings:', error);
