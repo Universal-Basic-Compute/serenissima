@@ -1,22 +1,10 @@
 {
-  "totalErrors": 1,
+  "totalErrors": 0,
   "totalWarnings": 0,
-  "exitCode": 2,
-  "timestamp": "2025-05-12T15:28:09.561Z",
-  "errors": [
-    {
-      "filePath": "lib/components/PlaceableObjectManager.tsx",
-      "line": 315,
-      "column": 70,
-      "code": "TS2345",
-      "message": "Argument of type 'BuildingData' is not assignable to parameter of type 'import(\"C:/Users/reyno/serenissima/lib/services/BuildingService\").BuildingData'.",
-      "type": "error"
-    }
-  ],
-  "rawOutputLines": 3,
-  "firstFewLines": [
-    "lib/components/PlaceableObjectManager.tsx(315,70): error TS2345: Argument of type 'BuildingData' is not assignable to parameter of type 'import(\"C:/Users/reyno/serenissima/lib/services/BuildingService\").BuildingData'.\r",
-    "  Property 'created_by' is missing in type 'BuildingData' but required in type 'import(\"C:/Users/reyno/serenissima/lib/services/BuildingService\").BuildingData'.\r"
-  ],
-  "compilerExitCode": 2
+  "exitCode": 0,
+  "timestamp": "2025-05-12T15:53:30.813Z",
+  "errors": [],
+  "rawOutputLines": 1,
+  "firstFewLines": [],
+  "compilerExitCode": 0
 }

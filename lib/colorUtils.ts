@@ -33,12 +33,12 @@ export function getIncomeBasedColor(income: number, config: Partial<ColorScaleCo
   const { minIncome, maxIncome, lowIncomeColor, midIncomeColor, highIncomeColor } = fullConfig;
   
   // Add debug logging
-  console.log(`getIncomeBasedColor: income=${income}, minIncome=${minIncome}, maxIncome=${maxIncome}`);
+  //console.log(`getIncomeBasedColor: income=${income}, minIncome=${minIncome}, maxIncome=${maxIncome}`);
   
   // Normalize income to a 0-1 scale
   const normalizedIncome = Math.min(Math.max((income - minIncome) / (maxIncome - minIncome), 0), 1);
   
-  console.log(`Normalized income: ${normalizedIncome}`);
+  //console.log(`Normalized income: ${normalizedIncome}`);
   
   // Map the normalized income to our color scale
   const resultColor = new THREE.Color();
@@ -47,13 +47,13 @@ export function getIncomeBasedColor(income: number, config: Partial<ColorScaleCo
     // Map from yellow to red
     const t = (normalizedIncome - 0.5) * 2; // Scale 0.5-1.0 to 0-1
     const color = resultColor.lerpColors(midIncomeColor, highIncomeColor, t);
-    console.log(`Using yellow to red scale with t=${t}, resulting color:`, color);
+    //console.log(`Using yellow to red scale with t=${t}, resulting color:`, color);
     return color;
   } else {
     // Map from green to yellow
     const t = normalizedIncome * 2; // Scale 0-0.5 to 0-1
     const color = resultColor.lerpColors(lowIncomeColor, midIncomeColor, t);
-    console.log(`Using blue to yellow scale with t=${t}, resulting color:`, color);
+    //console.log(`Using blue to yellow scale with t=${t}, resulting color:`, color);
     return color;
   }
 }

@@ -12,12 +12,12 @@ export function normalizeCoordinates(
   latCorrectionFactor: number
 ): { x: number; y: number }[] {
   // Log the input parameters for debugging
-  console.log(`normalizeCoordinates called with:`, {
+  /**console.log(`normalizeCoordinates called with:`, {
     centerLat,
     centerLng,
     scale,
     latCorrectionFactor
-  });
+  });*/
   
   const result = coordinates.map(coord => {
     // Calculate intermediate values
@@ -25,20 +25,20 @@ export function normalizeCoordinates(
     const latDiff = coord.lat - centerLat;
     
     // Log intermediate calculations
-    console.log(`Coordinate: lat=${coord.lat}, lng=${coord.lng}`);
-    console.log(`Differences: latDiff=${latDiff}, lngDiff=${lngDiff}`);
+    //console.log(`Coordinate: lat=${coord.lat}, lng=${coord.lng}`);
+    //console.log(`Differences: latDiff=${latDiff}, lngDiff=${lngDiff}`);
     
     // Apply scale
     const scaledLngDiff = lngDiff * scale;
     const scaledLatDiff = latDiff * scale;
     
-    console.log(`Scaled differences: scaledLatDiff=${scaledLatDiff}, scaledLngDiff=${scaledLngDiff}`);
+    //console.log(`Scaled differences: scaledLatDiff=${scaledLatDiff}, scaledLngDiff=${scaledLngDiff}`);
     
     // Apply latitude correction to longitude (not latitude)
     const finalX = scaledLngDiff * latCorrectionFactor;
     const finalY = scaledLatDiff;
     
-    console.log(`Final normalized coordinates: x=${finalX}, y=${finalY}`);
+    //console.log(`Final normalized coordinates: x=${finalX}, y=${finalY}`);
     
     return {
       // Apply latitude correction factor to longitude values

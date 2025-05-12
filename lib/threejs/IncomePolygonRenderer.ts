@@ -75,14 +75,14 @@ export class IncomePolygonRenderer {
         const income = lastIncome !== undefined ? lastIncome : serviceIncome;
         
         // Add detailed orange logging for each polygon's income data
-        console.log(
+        /**console.log(
           `%c[IncomePolygonRenderer] Polygon ${polygon.id}: lastIncome=${lastIncome}, serviceIncome=${serviceIncome}, final income=${income}`,
           'color: orange'
-        );
+        );*/
         
         // Skip if no income data
         if (income === undefined) {
-          console.log(`%c[IncomePolygonRenderer] Skipping polygon ${polygon.id} - no income data`, 'color: orange; font-style: italic');
+          //console.log(`%c[IncomePolygonRenderer] Skipping polygon ${polygon.id} - no income data`, 'color: orange; font-style: italic');
           skippedCount++;
           return;
         }
@@ -109,10 +109,10 @@ export class IncomePolygonRenderer {
         const color = getIncomeBasedColor(income, { minIncome, maxIncome });
         
         // Log the calculated color
-        console.log(
+        /**console.log(
           `%c[IncomePolygonRenderer] Polygon ${polygon.id}: income=${income}, color=${color.getHexString()}`,
           'color: orange'
-        );
+        );*/
         
         const material = new THREE.MeshBasicMaterial({
           color: color,
