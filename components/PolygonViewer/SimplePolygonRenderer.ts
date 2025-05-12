@@ -79,7 +79,7 @@ export default class SimplePolygonRenderer {
   private measurementTools: MeasurementTools | null = null;
   
   // Properties for measurement
-  // These properties are already defined in MeasurementTools class
+  private measurementPoints: THREE.Vector3[] = [];
   
   // Properties for path visualization
   private pathVisualization: THREE.Object3D[] = [];
@@ -1898,7 +1898,7 @@ export default class SimplePolygonRenderer {
     }
     
     // Create a new line between the two points
-    if (this.measurementPoints.length >= 2) {
+    if (this.measurementTools && this.measurementPoints.length >= 2) {
       const start = this.measurementPoints[0];
       const end = this.measurementPoints[1];
       
