@@ -3246,12 +3246,11 @@ export default class SimplePolygonRenderer {
    */
   private calculatePath(): void {
     // Only calculate path if we have exactly 2 measurement points
-    if (!this.measurementTools || !this.measurementTools['measurementPoints'] || 
-        this.measurementTools['measurementPoints'].length !== 2) return;
+    if (this.measurementPoints.length !== 2) return;
     
     // Get the start and end points
-    const start = this.measurementTools['measurementPoints'][0];
-    const end = this.measurementTools['measurementPoints'][1];
+    const start = this.measurementPoints[0];
+    const end = this.measurementPoints[1];
     
     // Convert 3D points back to lat/lng
     const startLatLng = {
@@ -3342,9 +3341,8 @@ export default class SimplePolygonRenderer {
       // If both points are not on land, draw a direct path
       if (!startPolygon && !endPolygon) {
         console.warn('Both start and end points are not on land, drawing direct path');
-        if (this.measurementTools && this.measurementTools['measurementPoints'] && 
-            this.measurementTools['measurementPoints'].length >= 2) {
-          this.drawDirectPath(this.measurementTools['measurementPoints'][0], this.measurementTools['measurementPoints'][1]);
+        if (this.measurementPoints.length >= 2) {
+          this.drawDirectPath(this.measurementPoints[0], this.measurementPoints[1]);
         }
         return;
       }
@@ -3352,9 +3350,8 @@ export default class SimplePolygonRenderer {
       // If start and end are in the same polygon, draw a direct path
       if (startPolygon && endPolygon && startPolygon.id === endPolygon.id) {
         console.log('Start and end points are in the same polygon, drawing direct path');
-        if (this.measurementTools && this.measurementTools['measurementPoints'] && 
-            this.measurementTools['measurementPoints'].length >= 2) {
-          this.drawDirectPath(this.measurementTools['measurementPoints'][0], this.measurementTools['measurementPoints'][1]);
+        if (this.measurementPoints.length >= 2) {
+          this.drawDirectPath(this.measurementPoints[0], this.measurementPoints[1]);
         }
         return;
       }
