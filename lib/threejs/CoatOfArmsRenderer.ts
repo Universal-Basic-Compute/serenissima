@@ -45,6 +45,11 @@ export class CoatOfArmsRenderer {
           url = `/coat-of-arms/${owner}.png`;
         }
         
+        // Always use serenissima.ai domain for production
+        if (url.startsWith('/')) {
+          url = `https://serenissima.ai${url}`;
+        }
+        
         formattedMap[owner] = url;
         console.log(`Formatted coat of arms URL for ${owner}: ${url}`);
       }
@@ -157,18 +162,18 @@ export class CoatOfArmsRenderer {
     // Get owner value for error handling
     const ownerValue = polygon.owner || polygon.User || "Unknown";
 
-    // Create an array of URLs to try in order
+    // Create an array of URLs to try in order - prioritize serenissima.ai
     const urlsToTry = [
-      // 1. Try the original URL with serenissima.ai domain
-      `https://serenissima.ai${coatOfArmsUrl}`,
-      
-      // 2. Try with current origin
-      `${window.location.origin}${coatOfArmsUrl}`,
-      
-      // 3. Try with just the owner name
+      // 1. Always try serenissima.ai domain first with the owner name
       `https://serenissima.ai/coat-of-arms/${ownerValue}.png`,
       
-      // 4. Try with current origin and owner name
+      // 2. Try the original URL with serenissima.ai domain
+      `https://serenissima.ai${coatOfArmsUrl}`,
+      
+      // 3. Try with current origin as fallback
+      `${window.location.origin}${coatOfArmsUrl}`,
+      
+      // 4. Try with current origin and owner name as last resort
       `${window.location.origin}/coat-of-arms/${ownerValue}.png`
     ];
     
