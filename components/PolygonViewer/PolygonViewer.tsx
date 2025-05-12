@@ -1667,8 +1667,8 @@ export default function PolygonViewer() {
   // Create memoized components before any conditional returns
   const ViewModeMenuMemo = useMemo(() => (
     <ViewModeMenu 
-      activeView={activeView as ActiveViewMode} 
-      setActiveView={(view: ActiveViewMode) => setActiveView(view as ViewMode)} 
+      activeView={activeView} 
+      setActiveView={setActiveView} 
     />
   ), [activeView, setActiveView]);
   
