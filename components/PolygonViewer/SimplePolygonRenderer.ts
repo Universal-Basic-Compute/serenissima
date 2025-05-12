@@ -6,6 +6,11 @@ import { getUserService } from '../../lib/services/UserService';
 import { NavigationGraphService } from '../../lib/services/NavigationGraphService';
 import { eventBus } from '@/lib/eventBus';
 import { EventTypes } from '@/lib/eventTypes';
+import { BuildingPointManager } from '../../lib/components/BuildingPointManager';
+import { TransportPointManager } from '../../lib/components/TransportPointManager';
+import { NavigationService } from '../../lib/services/NavigationService';
+import { CoatOfArmsRenderer } from '../../lib/threejs/CoatOfArmsRenderer';
+import { MeasurementTools } from '../../lib/threejs/MeasurementTools';
 
 /**
  * Define Polygon interface for type safety
@@ -62,17 +67,13 @@ export default class SimplePolygonRenderer {
   private onLandSelected: ((landId: string) => void) | null = null;
   
   // Properties for bridge, dock, and building points
-  private bridgePointMarkers: THREE.Mesh[] = [];
-  private dockPointMarkers: THREE.Object3D[] = [];
-  private buildingPointMarkers: THREE.Object3D[] = [];
   private hoveredPointId: string | null = null;
   
-  // Properties for distance measurement
-  private measurementPoints: THREE.Vector3[] = [];
-  private measurementMarkers: THREE.Mesh[] = [];
-  private measurementLine: THREE.Line | null = null;
-  private measurementLabel: THREE.Sprite | null = null;
-  private measurementCircle: THREE.Mesh | null = null;
+  // Component managers
+  private coatOfArmsRenderer: CoatOfArmsRenderer;
+  private buildingPointManager: BuildingPointManager;
+  private transportPointManager: TransportPointManager;
+  private measurementTools: MeasurementTools | null = null;
   
   // Properties for path visualization
   private pathVisualization: THREE.Object3D[] = [];
@@ -110,6 +111,34 @@ export default class SimplePolygonRenderer {
     this.textureLoader = new THREE.TextureLoader();
     this.raycaster = new THREE.Raycaster();
     this.mouse = new THREE.Vector2();
+    
+    // Initialize component managers
+    this.coatOfArmsRenderer = new CoatOfArmsRenderer({ scene, bounds });
+    this.buildingPointManager = new BuildingPointManager({ scene, bounds });
+    this.transportPointManager = new TransportPointManager({ scene, bounds });
+    
+    // Only initialize MeasurementTools if camera is a PerspectiveCamera
+    if (camera instanceof THREE.PerspectiveCamera) {
+      this.measurementTools = new MeasurementTools({
+        scene,
+        camera
+      });
+    }
+    
+    // Pass the owner coat of arms data to the renderer
+    if (users) {
+      const ownerCoatOfArmsMap: Record<string, string> = {};
+      Object.values(users).forEach((user: any) => {
+        if (user.user_name && user.coat_of_arms_image) {
+          ownerCoatOfArmsMap[user.user_name] = user.coat_of_arms_image;
+        }
+      });
+      this.coatOfArmsRenderer.updateCoatOfArms(ownerCoatOfArmsMap);
+    }
+    
+    // Initialize NavigationService with polygons
+    const navigationService = NavigationService.getInstance();
+    navigationService.setPolygons(this.polygons);
     
     // Preload the navigation graph
     this.preloadNavigationGraph();
@@ -948,52 +977,11 @@ export default class SimplePolygonRenderer {
   public updateViewMode(activeView: string) {
     if (this.activeView === activeView) return;
     
-    console.log(`%c[SimplePolygonRenderer] Changing view mode from ${this.activeView} to ${activeView}`, 'color: #0099ff; font-weight: bold;');
+    console.log(`Changing view mode from ${this.activeView} to ${activeView}`);
     
     // Clear measurement objects when switching away from transport view
-    if (this.activeView === 'transport' && activeView !== 'transport') {
-      // Clean up measurement objects
-      this.measurementMarkers.forEach(marker => {
-        this.scene.remove(marker);
-        if (marker.geometry) marker.geometry.dispose();
-        if (marker.material instanceof THREE.Material) {
-          marker.material.dispose();
-        } else if (Array.isArray(marker.material)) {
-          marker.material.forEach(m => m.dispose());
-        }
-      });
-      this.measurementMarkers = [];
-      
-      if (this.measurementLine) {
-        this.scene.remove(this.measurementLine);
-        if (this.measurementLine.geometry) this.measurementLine.geometry.dispose();
-        if (this.measurementLine.material instanceof THREE.Material) {
-          this.measurementLine.material.dispose();
-        }
-        this.measurementLine = null;
-      }
-      
-      if (this.measurementLabel) {
-        this.scene.remove(this.measurementLabel);
-        if (this.measurementLabel.material instanceof THREE.SpriteMaterial) {
-          if (this.measurementLabel.material.map) {
-            this.measurementLabel.material.map.dispose();
-          }
-          this.measurementLabel.material.dispose();
-        }
-        this.measurementLabel = null;
-      }
-      
-      if (this.measurementCircle) {
-        this.scene.remove(this.measurementCircle);
-        if (this.measurementCircle.geometry) this.measurementCircle.geometry.dispose();
-        if (this.measurementCircle.material instanceof THREE.Material) {
-          this.measurementCircle.material.dispose();
-        }
-        this.measurementCircle = null;
-      }
-      
-      this.measurementPoints = [];
+    if (this.activeView === 'transport' && activeView !== 'transport' && this.measurementTools) {
+      this.measurementTools.clearMeasurements();
     }
     
     // Clear citizen markers when switching away from citizens view
@@ -1001,111 +989,43 @@ export default class SimplePolygonRenderer {
       this.clearCitizenMarkers();
     }
     
-    // When switching to land view, add detailed logging and force coat of arms creation
-    if (activeView === 'land') {
-      console.log(`%c[SimplePolygonRenderer] Switched to land view, forcing coat of arms creation`, 'color: #0099ff; font-weight: bold;');
-      
-      // Set the active view first so the coat of arms creation knows we're in land view
-      this.activeView = activeView;
-      
-      // Force coat of arms update immediately
-      this.hasRenderedCoatOfArms = false;
-      this.isRenderingCoatOfArms = false;
-      
-      // Log detailed state information
-      console.log(`%c[SimplePolygonRenderer] Coat of arms state:`, 'color: #0099ff; font-weight: bold;');
-      console.log(`%c[SimplePolygonRenderer] - Has rendered coat of arms: ${this.hasRenderedCoatOfArms}`, 'color: #0099ff;');
-      console.log(`%c[SimplePolygonRenderer] - Is rendering coat of arms: ${this.isRenderingCoatOfArms}`, 'color: #0099ff;');
-      console.log(`%c[SimplePolygonRenderer] - Owner map size: ${Object.keys(this.ownerCoatOfArmsMap).length}`, 'color: #0099ff;');
-      console.log(`%c[SimplePolygonRenderer] - Has sand texture: ${!!this.sandTexture}`, 'color: #0099ff;');
-      
-      // Create coat of arms sprites with a small delay to ensure everything is ready
-      setTimeout(() => {
-        console.log(`%c[SimplePolygonRenderer] Creating coat of arms after view change delay`, 'color: #0099ff; font-weight: bold;');
-        this.createCoatOfArmsSprites();
-      }, 500);
-    } else {
-      // For other views, update the active view first
-      this.activeView = activeView;
-    }
+    // Update the active view
+    this.activeView = activeView;
     
-    // Update coat of arms sprites based on view mode
+    // Update visibility based on view mode
     if (activeView === 'land') {
       // Make coat of arms visible
-      Object.values(this.coatOfArmsSprites).forEach(sprite => {
-        sprite.visible = true;
-      });
+      this.coatOfArmsRenderer.setVisible(true);
       
-      // Hide bridge and dock points in land view
-      console.log(`Hiding ${this.bridgePointMarkers.length} bridge markers and ${this.dockPointMarkers.length} dock markers in land view`);
-      this.bridgePointMarkers.forEach(marker => marker.visible = false);
-      this.dockPointMarkers.forEach(marker => marker.visible = false);
-    
-      // Hide building points in land view
-      this.buildingPointMarkers.forEach(marker => marker.visible = false);
+      // Hide bridge, dock, and building points in land view
+      this.transportPointManager.setVisible(false);
+      this.buildingPointManager.setVisible(false);
+      
+      // Create coat of arms sprites
+      this.coatOfArmsRenderer.createCoatOfArmsSprites(this.polygons);
     } else if (activeView === 'transport') {
       // Hide coat of arms sprites in transport view
-      Object.values(this.coatOfArmsSprites).forEach(sprite => {
-        sprite.visible = false;
-      });
-    
-      // IMPORTANT: Always recreate bridge and dock points when switching to transport view
-      console.log(`Creating bridge and dock points for transport view`);
-    
-      // Clear existing markers first to avoid duplicates
-      this.clearBridgeAndDockMarkers();
-    
-      // Create new markers - directly call createBridgeAndDockPoints without checking activeView inside
-      this.forceCreateBridgeAndDockPoints();
-    
-      // Ensure all markers are visible
-      this.bridgePointMarkers.forEach(marker => {
-        marker.visible = true;
-        // Set a very high render order to ensure visibility
-        marker.renderOrder = 2000;
-      });
-      this.dockPointMarkers.forEach(marker => {
-        marker.visible = true;
-        // Set a very high render order to ensure visibility
-        if (marker instanceof THREE.Mesh || marker instanceof THREE.Line) {
-          marker.renderOrder = 2000;
-        }
-      });
-    
-      // IMPORTANT: Always recreate building points in transport view too
-      console.log('Creating building points for transport view');
-      // Clear existing building markers first
-      this.clearBuildingPointMarkers();
-      // Create new building markers
-      this.createBuildingPoints();
-      // Force them to be visible with high render order
-      this.buildingPointMarkers.forEach(marker => {
-        marker.visible = true;
-        marker.renderOrder = 2000; // High render order to ensure visibility
-      });
-    
-      console.log(`Created ${this.bridgePointMarkers.length} bridge markers, ${this.dockPointMarkers.length} dock markers, and ${this.buildingPointMarkers.length} building markers for transport view`);
+      this.coatOfArmsRenderer.setVisible(false);
+      
+      // Create and show transport points
+      this.transportPointManager.createTransportPoints(this.polygons);
+      this.transportPointManager.setVisible(true);
+      
+      // Create and show building points in transport view too
+      this.buildingPointManager.createBuildingPoints(this.polygons);
+      this.buildingPointManager.setVisible(true);
     } else if (activeView === 'buildings') {
       console.log('Switching to buildings view - preparing to show building points');
       
       // Hide coat of arms sprites in buildings view
-      Object.values(this.coatOfArmsSprites).forEach(sprite => {
-        sprite.visible = false;
-      });
+      this.coatOfArmsRenderer.setVisible(false);
       
       // Hide bridge and dock points in buildings view
-      this.bridgePointMarkers.forEach(marker => marker.visible = false);
-      this.dockPointMarkers.forEach(marker => marker.visible = false);
+      this.transportPointManager.setVisible(false);
       
       // Create and show building points
-      console.log('Calling createBuildingPoints() method');
-      this.createBuildingPoints();
-      
-      console.log(`Setting visibility for ${this.buildingPointMarkers.length} building point markers`);
-      this.buildingPointMarkers.forEach(marker => {
-        marker.visible = true;
-        console.log('Set building point marker to visible');
-      });
+      this.buildingPointManager.createBuildingPoints(this.polygons);
+      this.buildingPointManager.setVisible(true);
       
       // Force a scene update if possible
       if (this.scene.userData && this.scene.userData.renderer) {
@@ -1118,20 +1038,13 @@ export default class SimplePolygonRenderer {
         console.log('Dispatching ensureBuildingsVisible event');
         window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
       }
-      
-      console.log(`Created ${this.buildingPointMarkers.length} building point markers for buildings view`);
     } else if (activeView === 'citizens') {
       // Hide coat of arms sprites in citizens view
-      Object.values(this.coatOfArmsSprites).forEach(sprite => {
-        sprite.visible = false;
-      });
+      this.coatOfArmsRenderer.setVisible(false);
       
       // Hide bridge and dock points in citizens view
-      this.bridgePointMarkers.forEach(marker => marker.visible = false);
-      this.dockPointMarkers.forEach(marker => marker.visible = false);
-      
-      // Hide building points in citizens view
-      this.buildingPointMarkers.forEach(marker => marker.visible = false);
+      this.transportPointManager.setVisible(false);
+      this.buildingPointManager.setVisible(false);
       
       // Load citizen data if not already loaded
       if (this.citizenData.length === 0) {
@@ -1141,13 +1054,9 @@ export default class SimplePolygonRenderer {
       }
     } else {
       // Hide coat of arms sprites, bridge/dock points, and building points in other views
-      Object.values(this.coatOfArmsSprites).forEach(sprite => {
-        sprite.visible = false;
-      });
-      this.bridgePointMarkers.forEach(marker => marker.visible = false);
-      this.dockPointMarkers.forEach(marker => marker.visible = false);
-      this.buildingPointMarkers.forEach(marker => marker.visible = false);
-      this.hasRenderedCoatOfArms = false;
+      this.coatOfArmsRenderer.setVisible(false);
+      this.transportPointManager.setVisible(false);
+      this.buildingPointManager.setVisible(false);
     }
   }
 
@@ -1155,48 +1064,12 @@ export default class SimplePolygonRenderer {
    * Update the coat of arms map with new data
    */
   public updateCoatOfArms(ownerCoatOfArmsMap: Record<string, string>) {
-    console.log(`%c[SimplePolygonRenderer] Updating coat of arms map with ${Object.keys(ownerCoatOfArmsMap).length} entries`, 'color: #0099ff; font-weight: bold;');
-    this.ownerCoatOfArmsMap = { ...this.ownerCoatOfArmsMap, ...ownerCoatOfArmsMap };
+    console.log(`Updating coat of arms map with ${Object.keys(ownerCoatOfArmsMap).length} entries`);
+    this.coatOfArmsRenderer.updateCoatOfArms(ownerCoatOfArmsMap);
     
     // Force coat of arms creation if we're in land view
     if (this.activeView === 'land') {
-      console.log(`%c[SimplePolygonRenderer] In land view, forcing coat of arms creation after map update`, 'color: #0099ff; font-weight: bold;');
-      
-      // Reset flags to force recreation
-      this.hasRenderedCoatOfArms = false;
-      this.isRenderingCoatOfArms = false;
-      
-      // Only create coat of arms sprites if we have owner data and textures loaded
-      if (Object.keys(this.ownerCoatOfArmsMap).length > 0 && this.sandTexture) {
-        console.log(`%c[SimplePolygonRenderer] Conditions met for creating coat of arms:`, 'color: #0099ff;');
-        console.log(`%c[SimplePolygonRenderer] - In land view: true`, 'color: #0099ff;');
-        console.log(`%c[SimplePolygonRenderer] - Has owner data: true (${Object.keys(this.ownerCoatOfArmsMap).length} entries)`, 'color: #0099ff;');
-        console.log(`%c[SimplePolygonRenderer] - Has sand texture: true`, 'color: #0099ff;');
-        
-        // Check if we have any polygons with owners before creating sprites
-        const polygonsWithOwners = this.polygons.filter(p => {
-          const owner = p.owner || p.User;
-          return owner && this.ownerCoatOfArmsMap[owner];
-        });
-        
-        console.log(`%c[SimplePolygonRenderer] Found ${polygonsWithOwners.length} polygons with matching owners`, 'color: #0099ff;');
-        
-        if (polygonsWithOwners.length > 0) {
-          // Create with a small delay
-          setTimeout(() => {
-            console.log(`%c[SimplePolygonRenderer] Creating coat of arms sprites after delay`, 'color: #0099ff;');
-            this.createCoatOfArmsSprites();
-          }, 300);
-        } else {
-          console.log(`%c[SimplePolygonRenderer] No polygons with matching owners found, skipping coat of arms creation`, 'color: #0099ff;');
-        }
-      } else {
-        console.log(`%c[SimplePolygonRenderer] Conditions NOT met for creating coat of arms:`, 'color: #0099ff;');
-        console.log(`%c[SimplePolygonRenderer] - Has owner data: ${Object.keys(this.ownerCoatOfArmsMap).length > 0} (${Object.keys(this.ownerCoatOfArmsMap).length} entries)`, 'color: #0099ff;');
-        console.log(`%c[SimplePolygonRenderer] - Has sand texture: ${!!this.sandTexture}`, 'color: #0099ff;');
-      }
-    } else {
-      console.log(`%c[SimplePolygonRenderer] Not in land view (current: ${this.activeView}), skipping coat of arms creation`, 'color: #0099ff;');
+      this.coatOfArmsRenderer.createCoatOfArmsSprites(this.polygons);
     }
   }
 
@@ -1220,8 +1093,6 @@ export default class SimplePolygonRenderer {
             }
           });
           
-          console.log(`Created land owners map with ${Object.keys(landOwnersMap).length} entries`);
-          
           // Apply owners to polygons
           let updatedCount = 0;
           this.polygons.forEach(polygon => {
@@ -1234,37 +1105,16 @@ export default class SimplePolygonRenderer {
           console.log(`Updated ${updatedCount} polygons with owner information`);
           
           // Only create coat of arms sprites if we have owners AND we're in land view
-          // AND we have textures loaded (sandTexture is a good indicator)
           if (updatedCount > 0 && this.activeView === 'land' && this.sandTexture) {
-            // Check if we have any polygons with matching owners before creating sprites
-            const polygonsWithMatchingOwners = this.polygons.filter(p => 
-              p.owner && this.ownerCoatOfArmsMap[p.owner]
-            );
-            
-            if (polygonsWithMatchingOwners.length > 0) {
-              // Now that we have owners, create coat of arms sprites
-              // Add a small delay to ensure textures are fully loaded
-              setTimeout(() => {
-                this.createCoatOfArmsSprites();
-              }, 500);
-            }
-          } else if (updatedCount === 0) {
-            // No owners were found, use default owners
-            this.assignDefaultOwners();
+            // Add a small delay to ensure textures are fully loaded
+            setTimeout(() => {
+              this.coatOfArmsRenderer.createCoatOfArmsSprites(this.polygons);
+            }, 500);
           }
-        } else {
-          // No lands data, use default owners
-          this.assignDefaultOwners();
         }
-      } else {
-        console.error('Failed to fetch land owners:', response.status, response.statusText);
-        // Use default owners as fallback
-        this.assignDefaultOwners();
       }
     } catch (error) {
       console.error('Error fetching land owners:', error);
-      // Use default owners as fallback
-      this.assignDefaultOwners();
     }
   }
   
@@ -1317,18 +1167,18 @@ export default class SimplePolygonRenderer {
     
     // Update the raycaster with increased precision
     this.raycaster.setFromCamera(this.mouse, this.camera);
-    this.raycaster.params.Line.threshold = 0.2; // Increase line detection threshold
-    this.raycaster.params.Points.threshold = 0.2; // Increase point detection threshold
+    this.raycaster.params.Line.threshold = 0.2;
+    this.raycaster.params.Points.threshold = 0.2;
     
     if (this.activeView === 'land') {
       // Land view - handle coat of arms hover
       // Find intersections with coat of arms sprites
-      const coatOfArmsObjects = Object.values(this.coatOfArmsSprites);
-      const intersects = this.raycaster.intersectObjects(coatOfArmsObjects, true); // Add true to check descendants
+      const coatOfArmsObjects = Object.values(this.coatOfArmsRenderer['coatOfArmsSprites']);
+      const intersects = this.raycaster.intersectObjects(coatOfArmsObjects, true);
       
       // Reset hover state
       if (this.hoveredCoatOfArms && this.hoveredCoatOfArms !== this.selectedCoatOfArms) {
-        const prevHovered = this.coatOfArmsSprites[this.hoveredCoatOfArms];
+        const prevHovered = this.coatOfArmsRenderer['coatOfArmsSprites'][this.hoveredCoatOfArms];
         if (prevHovered) {
           this.setCoatOfArmsHighlight(prevHovered, false);
         }
@@ -1338,26 +1188,12 @@ export default class SimplePolygonRenderer {
       
       // Set new hover state if found
       if (intersects.length > 0) {
-        // Find the land ID from the intersected object or its ancestors
-        let landId = null;
-        let currentObj: THREE.Object3D | null = intersects[0].object;
-        
-        // Traverse up the parent chain to find the object with polygonId
-        while (currentObj && !landId) {
-          if (currentObj.userData && currentObj.userData.polygonId) {
-            landId = currentObj.userData.polygonId;
-          }
-          currentObj = currentObj.parent;
-        }
-        
-        // If no polygonId found in the hierarchy, try the direct lookup method
-        if (!landId) {
-          landId = this.findLandIdFromObject(intersects[0].object);
-        }
+        // Find the land ID from the intersected object
+        let landId = this.findLandIdFromObject(intersects[0].object);
         
         if (landId && landId !== this.selectedCoatOfArms) {
           this.hoveredCoatOfArms = landId;
-          const hovered = this.coatOfArmsSprites[landId];
+          const hovered = this.coatOfArmsRenderer['coatOfArmsSprites'][landId];
           this.setCoatOfArmsHighlight(hovered, true);
           document.body.style.cursor = 'pointer';
         }
@@ -1412,174 +1248,67 @@ export default class SimplePolygonRenderer {
       
       return;
     } else if (this.activeView === 'transport') {
-      try {
-        // Transport view - handle bridge and dock point hover
-        // Combine all markers for raycasting (excluding lines)
-        const allMarkers = [...this.bridgePointMarkers, ...this.dockPointMarkers].filter(
-          obj => obj instanceof THREE.Mesh
-        );
-        
-        const intersects = this.raycaster.intersectObjects(allMarkers as THREE.Object3D[]);
-        
-        if (intersects.length > 0) {
-          const intersected = intersects[0].object;
-          const userData = intersected.userData;
+      // Transport view - handle transport point hover
+      this.transportPointManager.handleHover(this.raycaster, (id) => {
+        if (id) {
+          document.body.style.cursor = 'pointer';
           
-          if (userData && userData.id && userData.id !== this.hoveredPointId) {
-            this.hoveredPointId = userData.id;
-            
-            // Highlight the hovered point - Use a new material instance to avoid sharing
-            if (intersected instanceof THREE.Mesh) {
-              const highlightMaterial = new THREE.MeshBasicMaterial({
-                color: userData.type.startsWith('bridge') ? 0xFF8800 : 0x00CCFF,
-                transparent: true,
-                opacity: 1.0
-              });
-            
-              // Store the original material if not already stored
-              if (!intersected.userData.originalMaterial) {
-                intersected.userData.originalMaterial = intersected.material;
-              }
-            
-              // Apply the highlight material
-              intersected.material = highlightMaterial;
-            }
-            
+          // Find the marker to get its userData
+          const marker = [...this.transportPointManager.getBridgePointMarkers(),
+                          ...this.transportPointManager.getDockPointMarkers()].find(
+            m => m.userData && m.userData.id === id
+          );
+          
+          if (marker) {
             // Show tooltip
             eventBus.emit(EventTypes.SHOW_TOOLTIP, {
-              type: userData.type,
-              polygonId: userData.polygonId,
-              position: userData.position,
+              type: marker.userData.type,
+              polygonId: marker.userData.polygonId,
+              position: marker.userData.position,
               screenX: event.clientX,
               screenY: event.clientY
             });
           }
-        } else if (this.hoveredPointId) {
-          // Reset previously hovered point
-          const hoveredPoint = [...this.bridgePointMarkers, ...this.dockPointMarkers].find(
-            marker => marker instanceof THREE.Mesh && marker.userData && marker.userData.id === this.hoveredPointId
-          );
-  
-          if (hoveredPoint && hoveredPoint instanceof THREE.Mesh) {
-            // Restore original material if available
-            if (hoveredPoint.userData.originalMaterial) {
-              hoveredPoint.material = hoveredPoint.userData.originalMaterial;
-              delete hoveredPoint.userData.originalMaterial;
-            } else {
-              // Fallback to creating a new material
-              const isBridge = hoveredPoint.userData.type.startsWith('bridge');
-              const isWater = hoveredPoint.userData.type === 'dock-water';
-          
-              hoveredPoint.material = new THREE.MeshBasicMaterial({
-                color: isBridge ? 0xFF5500 : (isWater ? 0x0088CC : 0x00AAFF),
-                transparent: false
-              });
-            }
-          }
-          
-          this.hoveredPointId = null;
+        } else {
+          document.body.style.cursor = 'default';
           eventBus.emit(EventTypes.HIDE_TOOLTIP);
         }
-      } catch (error) {
-        console.error('Error handling mouse move in transport view:', error);
-        // Reset hover state on error
-        this.hoveredPointId = null;
-        eventBus.emit(EventTypes.HIDE_TOOLTIP);
-      }
-    } else if (this.activeView === 'buildings' || this.activeView === 'transport') {
+      });
+    } else if (this.activeView === 'buildings') {
       // Buildings view - handle building point hover
-      const buildingPointMarkers = this.buildingPointMarkers.filter(
-        obj => obj instanceof THREE.Mesh
-      );
-      
-      const intersects = this.raycaster.intersectObjects(buildingPointMarkers);
-      
-      if (intersects.length > 0) {
-        const intersected = intersects[0].object;
-        const userData = intersected.userData;
-        
-        if (userData && userData.id && userData.id !== this.hoveredPointId) {
-          this.hoveredPointId = userData.id;
+      this.buildingPointManager.handleHover(this.raycaster, (id) => {
+        if (id) {
+          document.body.style.cursor = 'pointer';
           
-          // Highlight the hovered point with enhanced effect
-          if (intersected instanceof THREE.Mesh) {
-            // Create a more prominent highlight effect
-            const highlightMaterial = new THREE.MeshBasicMaterial({
-              color: 0xFFFF00, // Bright yellow highlight
-              transparent: true,
-              opacity: 1.0
-              // MeshBasicMaterial doesn't support emissive properties
-            });
-            
-            // Store the original material if not already stored
-            if (!intersected.userData.originalMaterial) {
-              intersected.userData.originalMaterial = intersected.material;
-            }
-            
-            // Apply the highlight material
-            intersected.material = highlightMaterial;
-            
-            // Scale up the building point slightly for better visibility
-            intersected.scale.set(1.5, 1.5, 1.5);
-            
-            // Increase render order to ensure it's visible
-            intersected.renderOrder = 2500;
-          }
+          // Find the marker to get its userData
+          const marker = this.buildingPointManager.getBuildingPointMarkers().find(
+            m => m.userData && m.userData.id === id
+          );
           
-          // Show tooltip
-          eventBus.emit(EventTypes.SHOW_TOOLTIP, {
-            type: userData.type,
-            polygonId: userData.polygonId,
-            position: userData.position,
-            screenX: event.clientX,
-            screenY: event.clientY
-          });
-        }
-      } else if (this.hoveredPointId) {
-        // Reset previously hovered point
-        const hoveredPoint = this.buildingPointMarkers.find(
-          marker => marker instanceof THREE.Mesh && marker.userData && marker.userData.id === this.hoveredPointId
-        );
-      
-        if (hoveredPoint && hoveredPoint instanceof THREE.Mesh) {
-          // Restore original material if available
-          if (hoveredPoint.userData.originalMaterial) {
-            hoveredPoint.material = hoveredPoint.userData.originalMaterial;
-            delete hoveredPoint.userData.originalMaterial;
-          } else {
-            // Fallback to creating a new material - transparent white
-            hoveredPoint.material = new THREE.MeshBasicMaterial({
-              color: 0xFFFFFF, // White color for building points
-              transparent: true,
-              opacity: 0.6
+          if (marker) {
+            // Show tooltip
+            eventBus.emit(EventTypes.SHOW_TOOLTIP, {
+              type: marker.userData.type,
+              polygonId: marker.userData.polygonId,
+              position: marker.userData.position,
+              screenX: event.clientX,
+              screenY: event.clientY
             });
           }
-          
-          // Reset scale back to normal
-          hoveredPoint.scale.set(1.0, 1.0, 1.0);
-          
-          // Reset render order
-          hoveredPoint.renderOrder = 2000;
+        } else {
+          document.body.style.cursor = 'default';
+          eventBus.emit(EventTypes.HIDE_TOOLTIP);
         }
-        
-        this.hoveredPointId = null;
-        eventBus.emit(EventTypes.HIDE_TOOLTIP);
-      }
+      });
     }
   }
 
   // Handle mouse clicks for selection
   public handleMouseClick(event: MouseEvent, container: HTMLElement) {
-    if (!this.camera) {
-      console.log("Click detected but no camera available");
-      return;
-    }
-    
-    console.log(`Mouse click detected: button=${event.button}, clientX=${event.clientX}, clientY=${event.clientY}`);
+    if (!this.camera) return;
     
     // Check if this is a right-click
     if (event.button === 2) {
-      console.log("Right-click detected, preventing default behavior");
       event.preventDefault();
       return;
     }
@@ -1589,12 +1318,8 @@ export default class SimplePolygonRenderer {
     this.mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
     this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
     
-    console.log(`Normalized mouse coordinates: x=${this.mouse.x.toFixed(4)}, y=${this.mouse.y.toFixed(4)}`);
-    
-    // Update the raycaster with increased precision
+    // Update the raycaster
     this.raycaster.setFromCamera(this.mouse, this.camera);
-    this.raycaster.params.Line.threshold = 0.1; // Increase line detection threshold
-    this.raycaster.params.Points.threshold = 0.1; // Increase point detection threshold
     
     // Handle citizens view clicks
     if (this.activeView === 'citizens') {
@@ -1676,17 +1401,6 @@ export default class SimplePolygonRenderer {
             }
           });
           
-          // Play a selection sound if available
-          if (typeof window !== 'undefined' && window.Audio) {
-            try {
-              const selectSound = new Audio('/sounds/citizen-select.mp3');
-              selectSound.volume = 0.3;
-              selectSound.play().catch(e => console.log('Could not play sound:', e));
-            } catch (e) {
-              console.log('Audio not supported:', e);
-            }
-          }
-          
           return;
         }
       } else {
@@ -1713,34 +1427,25 @@ export default class SimplePolygonRenderer {
       }
     }
     // Handle transport view clicks
-    else if (this.activeView === 'transport') {
-      console.log(`In transport view, checking for marker intersections`);
-      
-      // CHANGE: Prioritize building points for distance measurement in transport view
-      const buildingMarkers = this.buildingPointMarkers.filter(
+    else if (this.activeView === 'transport' && this.measurementTools) {
+      // Check for intersection with building points first
+      const buildingMarkers = this.buildingPointManager.getBuildingPointMarkers().filter(
         obj => obj instanceof THREE.Mesh
       );
       
-      console.log(`Found ${buildingMarkers.length} building markers to check for intersection`);
-      
-      // Check for intersection with building points first
       const buildingIntersects = this.raycaster.intersectObjects(buildingMarkers);
       
       if (buildingIntersects.length > 0) {
         const intersected = buildingIntersects[0].object;
-        const userData = intersected.userData;
-        
-        console.log("Intersected building point userData:", userData);
-        
-        if (userData && userData.id) {
+        if (intersected.userData && intersected.userData.id) {
           // Add measurement point at the building point position
-          this.addMeasurementPoint(intersected.position.clone());
+          this.measurementTools.addMeasurementPoint(intersected.position.clone());
           
           // Show tooltip with building point information
           eventBus.emit(EventTypes.SHOW_TOOLTIP, {
             type: 'building-point',
-            polygonId: userData.polygonId,
-            position: userData.position,
+            polygonId: intersected.userData.polygonId,
+            position: intersected.userData.position,
             screenX: event.clientX,
             screenY: event.clientY
           });
@@ -1754,30 +1459,25 @@ export default class SimplePolygonRenderer {
         }
       }
       
-      // If no building point was clicked, check for bridge and dock markers
-      const transportMarkers = [...this.bridgePointMarkers, ...this.dockPointMarkers].filter(
+      // If no building point was clicked, check for transport markers
+      const transportMarkers = [...this.transportPointManager.getBridgePointMarkers(),
+                               ...this.transportPointManager.getDockPointMarkers()].filter(
         obj => obj instanceof THREE.Mesh
       );
-      
-      console.log(`Found ${transportMarkers.length} transport markers to check for intersection`);
       
       const transportIntersects = this.raycaster.intersectObjects(transportMarkers);
       
       if (transportIntersects.length > 0) {
         const intersected = transportIntersects[0].object;
-        const userData = intersected.userData;
-        
-        console.log("Intersected transport marker userData:", userData);
-        
-        if (userData && userData.id) {
+        if (intersected.userData && intersected.userData.id) {
           // Add measurement point at the transport marker position
-          this.addMeasurementPoint(intersected.position.clone());
+          this.measurementTools.addMeasurementPoint(intersected.position.clone());
           
           // Show tooltip with transport marker information
           eventBus.emit(EventTypes.SHOW_TOOLTIP, {
-            type: userData.type,
-            polygonId: userData.polygonId,
-            position: userData.position,
+            type: intersected.userData.type,
+            polygonId: intersected.userData.polygonId,
+            position: intersected.userData.position,
             screenX: event.clientX,
             screenY: event.clientY
           });
@@ -1799,70 +1499,39 @@ export default class SimplePolygonRenderer {
         const intersectionPoint = landIntersects[0].point;
         
         // Add measurement point
-        this.addMeasurementPoint(intersectionPoint);
+        this.measurementTools.addMeasurementPoint(intersectionPoint);
         return;
       }
-      
-      // Debug: Log raycaster origin and direction
-      console.log("Raycaster origin:", this.raycaster.ray.origin);
-      console.log("Raycaster direction:", this.raycaster.ray.direction);
     }
     
-    // Handle building view clicks
+    // Handle buildings view clicks
     if (this.activeView === 'buildings') {
-      console.log(`In buildings view, checking for marker intersections`);
-      
       // Get all building markers for raycasting
-      const buildingMarkers = this.buildingPointMarkers.filter(
+      const buildingMarkers = this.buildingPointManager.getBuildingPointMarkers().filter(
         obj => obj instanceof THREE.Mesh
       );
       
-      console.log(`Found ${buildingMarkers.length} building markers to check for intersection`);
-      
       const intersects = this.raycaster.intersectObjects(buildingMarkers);
-      
-      console.log(`Found ${intersects.length} intersections`);
       
       if (intersects.length > 0) {
         const intersected = intersects[0].object;
-        const userData = intersected.userData;
-        
-        console.log("Intersected object userData:", userData);
-        
-        if (userData && userData.id) {
-          // Extract information from the marker ID
-          // Format is typically: building-point-{polygonId}-{index}
-          const idParts = userData.id.split('-');
+        if (intersected.userData && intersected.userData.id) {
+          // Show a tooltip with building point information
+          eventBus.emit(EventTypes.SHOW_TOOLTIP, {
+            type: 'building-point',
+            polygonId: intersected.userData.polygonId,
+            position: intersected.userData.position,
+            screenX: event.clientX,
+            screenY: event.clientY
+          });
           
-          console.log(`ID parts: ${idParts.join(', ')}`);
+          // Hide tooltip after a delay
+          setTimeout(() => {
+            eventBus.emit(EventTypes.HIDE_TOOLTIP);
+          }, 2000);
           
-          if (idParts.length >= 4 && idParts[0] === 'building' && idParts[1] === 'point') {
-            // Get polygon ID and point index
-            const polygonId = idParts.slice(2, idParts.length - 1).join('-');
-            const pointIndex = parseInt(idParts[idParts.length - 1]);
-        
-            // Instead of deleting, just show a tooltip with building point information
-            eventBus.emit(EventTypes.SHOW_TOOLTIP, {
-              type: 'building-point',
-              polygonId: polygonId,
-              position: userData.position,
-              screenX: event.clientX,
-              screenY: event.clientY
-            });
-        
-            // Hide tooltip after a delay
-            setTimeout(() => {
-              eventBus.emit(EventTypes.HIDE_TOOLTIP);
-            }, 2000);
-          }
-          
-          // Return early to prevent further processing
           return;
-        } else {
-          console.warn("Intersected object has no ID in userData:", userData);
         }
-      } else {
-        console.log("No intersections found with building markers");
       }
     }
     
@@ -1870,27 +1539,13 @@ export default class SimplePolygonRenderer {
     if (this.activeView !== 'land') return;
     
     // Find intersections with coat of arms sprites
-    const coatOfArmsObjects = Object.values(this.coatOfArmsSprites);
-    const intersects = this.raycaster.intersectObjects(coatOfArmsObjects as THREE.Object3D[], true); // Add true to check descendants
+    const coatOfArmsObjects = Object.values(this.coatOfArmsRenderer['coatOfArmsSprites']);
+    const intersects = this.raycaster.intersectObjects(coatOfArmsObjects, true);
     
     // Handle selection
     if (intersects.length > 0) {
-      // Find the land ID from the intersected object or its ancestors
-      let landId = null;
-      let currentObj: THREE.Object3D | null = intersects[0].object;
-      
-      // Traverse up the parent chain to find the object with polygonId
-      while (currentObj && !landId) {
-        if (currentObj.userData && currentObj.userData.polygonId) {
-          landId = currentObj.userData.polygonId;
-        }
-        currentObj = currentObj.parent;
-      }
-      
-      // If no polygonId found in the hierarchy, try the direct lookup method
-      if (!landId) {
-        landId = this.findLandIdFromObject(intersects[0].object);
-      }
+      // Find the land ID from the intersected object
+      const landId = this.findLandIdFromObject(intersects[0].object);
       
       if (landId) {
         // If already selected, do nothing (keep it selected)
@@ -1900,7 +1555,7 @@ export default class SimplePolygonRenderer {
         
         // Deselect previous selection
         if (this.selectedCoatOfArms) {
-          const prevSelected = this.coatOfArmsSprites[this.selectedCoatOfArms];
+          const prevSelected = this.coatOfArmsRenderer['coatOfArmsSprites'][this.selectedCoatOfArms];
           if (prevSelected) {
             this.setCoatOfArmsHighlight(prevSelected, false);
           }
@@ -1908,7 +1563,7 @@ export default class SimplePolygonRenderer {
         
         // Select new
         this.selectedCoatOfArms = landId;
-        const selected = this.coatOfArmsSprites[landId];
+        const selected = this.coatOfArmsRenderer['coatOfArmsSprites'][landId];
         this.setCoatOfArmsHighlight(selected, true);
         
         // Notify callback
@@ -2071,91 +1726,21 @@ export default class SimplePolygonRenderer {
     this.meshes.forEach(mesh => {
       this.scene.remove(mesh);
       if (mesh.geometry) mesh.geometry.dispose();
-      // Don't dispose individual materials since we're using a shared material
     });
     
     // Clear array
     this.meshes = [];
     
-    // Clear coat of arms sprites
-    this.clearCoatOfArmsSprites();
-    
-    // Clean up bridge and dock point markers
-    this.bridgePointMarkers.forEach(marker => {
-      this.scene.remove(marker);
-      if (marker.geometry) marker.geometry.dispose();
-      if (marker.material instanceof THREE.Material) {
-        marker.material.dispose();
-      } else if (Array.isArray(marker.material)) {
-        marker.material.forEach(m => m.dispose());
-      }
-    });
-    
-    this.dockPointMarkers.forEach(marker => {
-      this.scene.remove(marker);
-      if (marker instanceof THREE.Mesh) {
-        if (marker.geometry) marker.geometry.dispose();
-        if (marker.material instanceof THREE.Material) {
-          marker.material.dispose();
-        } else if (Array.isArray(marker.material)) {
-          marker.material.forEach(m => m.dispose());
-        }
-      } else if (marker instanceof THREE.Line) {
-        if (marker.geometry) marker.geometry.dispose();
-        if (marker.material instanceof THREE.Material) {
-          marker.material.dispose();
-        }
-      }
-    });
-    
-    // Clean up building point markers
-    this.clearBuildingPointMarkers();
+    // Clean up extracted components
+    this.coatOfArmsRenderer.cleanup();
+    this.buildingPointManager.cleanup();
+    this.transportPointManager.cleanup();
+    if (this.measurementTools) {
+      this.measurementTools.cleanup();
+    }
     
     // Clean up citizen markers
     this.clearCitizenMarkers();
-    
-    // Clean up measurement objects
-    this.measurementMarkers.forEach(marker => {
-      this.scene.remove(marker);
-      if (marker.geometry) marker.geometry.dispose();
-      if (marker.material instanceof THREE.Material) {
-        marker.material.dispose();
-      } else if (Array.isArray(marker.material)) {
-        marker.material.forEach(m => m.dispose());
-      }
-    });
-    this.measurementMarkers = [];
-    
-    if (this.measurementLine) {
-      this.scene.remove(this.measurementLine);
-      if (this.measurementLine.geometry) this.measurementLine.geometry.dispose();
-      if (this.measurementLine.material instanceof THREE.Material) {
-        this.measurementLine.material.dispose();
-      }
-      this.measurementLine = null;
-    }
-    
-    if (this.measurementLabel) {
-      this.scene.remove(this.measurementLabel);
-      if (this.measurementLabel.material instanceof THREE.SpriteMaterial) {
-        if (this.measurementLabel.material.map) {
-          this.measurementLabel.material.map.dispose();
-        }
-        this.measurementLabel.material.dispose();
-      }
-      this.measurementLabel = null;
-    }
-    
-    if (this.measurementCircle) {
-      this.scene.remove(this.measurementCircle);
-      if (this.measurementCircle.geometry) this.measurementCircle.geometry.dispose();
-      if (this.measurementCircle.material instanceof THREE.Material) {
-        this.measurementCircle.material.dispose();
-      }
-      this.measurementCircle = null;
-    }
-    
-    this.measurementPoints = [];
     
     // Clean up path visualization
     this.pathVisualization.forEach(object => {
@@ -2176,22 +1761,12 @@ export default class SimplePolygonRenderer {
     });
     this.pathVisualization = [];
     
-    this.bridgePointMarkers = [];
-    this.dockPointMarkers = [];
-    this.buildingPointMarkers = [];
-    this.hoveredPointId = null;
-    
-    // Reset rendering flags
-    this.hasRenderedCoatOfArms = false;
-    this.isRenderingCoatOfArms = false;
-    
-    // Remove the regenerateBuildingMarkers event listener
+    // Remove event listeners
     if (typeof window !== 'undefined') {
       window.removeEventListener('regenerateBuildingMarkers', () => {
         console.log('Removed regenerateBuildingMarkers event listener');
       });
       
-      // Remove the replaceBuildingPointsWithBuildings event listener
       window.removeEventListener('replaceBuildingPointsWithBuildings', () => {
         console.log('Removed replaceBuildingPointsWithBuildings event listener');
       });
