@@ -36,9 +36,7 @@ import { RoadManager } from '../../lib/threejs/RoadManager';
 import { eventBus, EventTypes } from '../../lib/eventBus';
 
 // Use the ViewMode type from types.ts
-import { ViewMode } from './types';
-// Define ActiveViewMode as an alias of ViewMode to ensure type compatibility
-type ActiveViewMode = ViewMode;
+import { ViewMode, ActiveViewMode } from './types';
 
 export default function PolygonViewer() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -1669,8 +1667,8 @@ export default function PolygonViewer() {
   // Create memoized components before any conditional returns
   const ViewModeMenuMemo = useMemo(() => (
     <ViewModeMenu 
-      activeView={activeView as ActiveViewMode} 
-      setActiveView={setActiveView as (view: ActiveViewMode) => void} 
+      activeView={activeView} 
+      setActiveView={setActiveView} 
     />
   ), [activeView, setActiveView]);
   
