@@ -23,7 +23,7 @@ export default function ViewModeMenu({ activeView, setActiveView }: ViewModeMenu
   // Helper function to check if a view is disabled
   const isDisabled = (view: ViewMode): boolean => {
     // Only these views are enabled
-    const enabledViews: ViewMode[] = ['buildings', 'land', 'markets', 'citizens'];
+    const enabledViews: ViewMode[] = ['buildings', 'land', 'markets', 'citizens', 'resources', 'transport'];
     return !enabledViews.includes(view);
   };
 
