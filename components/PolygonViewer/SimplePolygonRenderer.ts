@@ -2929,7 +2929,8 @@ export default class SimplePolygonRenderer {
   
   // Properties for measurement
   private measurementMarkers: THREE.Mesh[] = [];
-  private measurementPoints: THREE.Vector3[] = [];
+  // Define measurementPoints property to fix TypeScript errors
+  public measurementPoints: THREE.Vector3[] = [];
   private measurementLine: THREE.Line | null = null;
   private measurementLabel: THREE.Sprite | null = null;
   private measurementCircle: THREE.Mesh | null = null;
@@ -2957,8 +2958,7 @@ export default class SimplePolygonRenderer {
     this.measurementPoints.push(point.clone());
     
     // If we have two points, create or update the line and distance label
-    if (this.measurementTools && this.measurementTools['measurementPoints'] && 
-        this.measurementTools['measurementPoints'].length === 2) {
+    if (this.measurementPoints.length === 2) {
       this.updateMeasurementLine();
         
       // Calculate path between points
@@ -2966,8 +2966,7 @@ export default class SimplePolygonRenderer {
     }
       
     // If we have more than two points, remove the oldest point and marker
-    if (this.measurementTools && this.measurementTools['measurementPoints'] && 
-        this.measurementTools['measurementPoints'].length > 2) {
+    if (this.measurementPoints.length > 2) {
       const oldestPoint = this.measurementTools['measurementPoints'].shift();
       const oldestMarker = this.measurementMarkers.shift();
       if (oldestMarker) {
@@ -3014,10 +3013,9 @@ export default class SimplePolygonRenderer {
     }
     
     // Create a new line between the two points
-    if (this.measurementTools && this.measurementTools['measurementPoints'] && 
-        this.measurementTools['measurementPoints'].length >= 2) {
-      const start = this.measurementTools['measurementPoints'][0];
-      const end = this.measurementTools['measurementPoints'][1];
+    if (this.measurementPoints.length >= 2) {
+      const start = this.measurementPoints[0];
+      const end = this.measurementPoints[1];
       
       // Create line geometry
       const lineGeometry = new THREE.BufferGeometry();
@@ -3395,9 +3393,8 @@ export default class SimplePolygonRenderer {
     } catch (error) {
       console.error('Error finding path:', error);
       // Fallback to direct path in case of error
-      if (this.measurementTools && this.measurementTools['measurementPoints'] && 
-          this.measurementTools['measurementPoints'].length >= 2) {
-        this.drawDirectPath(this.measurementTools['measurementPoints'][0], this.measurementTools['measurementPoints'][1]);
+      if (this.measurementPoints.length >= 2) {
+        this.drawDirectPath(this.measurementPoints[0], this.measurementPoints[1]);
       }
     }
   }
@@ -4315,9 +4312,8 @@ export default class SimplePolygonRenderer {
     const pathPoints: THREE.Vector3[] = [];
     
     // Add the start point
-    if (this.measurementTools && this.measurementTools['measurementPoints'] && 
-        this.measurementTools['measurementPoints'].length >= 1) {
-      const startPoint = this.measurementTools['measurementPoints'][0];
+    if (this.measurementPoints.length >= 1) {
+      const startPoint = this.measurementPoints[0];
       pathPoints.push(startPoint);
     }
     
@@ -4372,9 +4368,8 @@ export default class SimplePolygonRenderer {
     }
     
     // Add the end point
-    if (this.measurementTools && this.measurementTools['measurementPoints'] && 
-        this.measurementTools['measurementPoints'].length >= 2) {
-      const endPoint = this.measurementTools['measurementPoints'][1];
+    if (this.measurementPoints.length >= 2) {
+      const endPoint = this.measurementPoints[1];
       pathPoints.push(endPoint);
     }
     
