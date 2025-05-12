@@ -2316,6 +2316,13 @@ export default class SimplePolygonRenderer {
     this.buildingPointMarkers = [];
   }
   
+  /**
+   * Get all building point markers
+   */
+  public getBuildingPointMarkers(): THREE.Object3D[] {
+    return this.buildingPointMarkers;
+  }
+  
   // This method is no longer needed as we've moved the functionality to handleMouseClick
 
   /**
