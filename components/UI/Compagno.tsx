@@ -102,31 +102,26 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
 
       const data = await response.json();
       
-      if (data.notifications && Array.isArray(data.notifications)) {
-        // Add new notifications to the existing ones
-        setNotifications(prev => {
-          // Combine existing and new notifications, removing duplicates by ID
-          const combined = [...prev];
-          data.notifications.forEach((newNotif: Notification) => {
-            const existingIndex = combined.findIndex(n => n.notificationId === newNotif.notificationId);
-            if (existingIndex >= 0) {
-              combined[existingIndex] = newNotif; // Update existing
-            } else {
-              combined.push(newNotif); // Add new
-            }
-          });
-          return combined;
-        });
+      console.log('Received notifications data:', data); // Add this for debugging
+      
+      if (data.success && data.notifications && Array.isArray(data.notifications)) {
+        // Replace existing notifications instead of combining them
+        setNotifications(data.notifications);
         
         // Update unread count
-        setUnreadCount(data.notifications.filter((n: Notification) => n.readAt === null).length);
+        const unreadCount = data.notifications.filter((n: Notification) => n.readAt === null).length;
+        setUnreadCount(unreadCount);
+        
+        console.log(`Set ${data.notifications.length} notifications, ${unreadCount} unread`);
+      } else {
+        console.error('Invalid notifications data format:', data);
       }
       
       // Update last fetch time
       setLastFetchTime(now);
     } catch (error) {
       console.error('Error fetching notifications:', error);
-      // Add fallback behavior - create some dummy notifications for testing
+      // Create some dummy notifications for testing if none exist
       if (notifications.length === 0) {
         const dummyNotifications = [
           {
@@ -148,6 +143,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
         ];
         setNotifications(dummyNotifications);
         setUnreadCount(dummyNotifications.length);
+        console.log('Set fallback notifications:', dummyNotifications);
       }
     }
   }, [username, lastFetchTime, notifications.length, isOpen, showNotifications]);

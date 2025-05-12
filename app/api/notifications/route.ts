@@ -31,6 +31,9 @@ export async function POST(request: Request) {
     // Ensure the notifications directory exists
     ensureNotificationsDirExists();
     
+    // Ensure the notifications directory exists
+    ensureNotificationsDirExists();
+    
     // Get the user's notification file path
     const userNotificationsPath = path.join(NOTIFICATIONS_DIR, `${user}.json`);
     
