@@ -48,6 +48,7 @@ export async function GET() {
       createdAt: record.get('CreatedAt') as string,
       primaryLocation: record.get('PrimaryLocation') as string,
       description: record.get('Description') as string,
+      shortDescription: record.get('ShortDescription') as string,
       patronSaint: record.get('PatronSaint') as string,
       guildTier: record.get('GuildTier') as string,
       leadershipStructure: record.get('LeadershipStructure') as string,

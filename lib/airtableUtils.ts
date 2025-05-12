@@ -20,6 +20,7 @@ export interface Guild {
   createdAt: string;
   primaryLocation: string;
   description: string;
+  shortDescription?: string;
   patronSaint?: string;
   guildTier?: string;
   leadershipStructure?: string;

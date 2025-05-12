@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { fetchGuilds, Guild } from '@/lib/airtableUtils';
+import ReactMarkdown from 'react-markdown';
 
 interface GuildsPanelProps {
   onClose: () => void;
@@ -111,7 +112,8 @@ export default function GuildsPanel({ onClose, standalone = false }: GuildsPanel
                       <span className="font-semibold">Entry Fee:</span> {guild.entryFee ? `${guild.entryFee} ducats` : 'None'}
                     </p>
                     <p className="text-sm text-gray-700 mt-3 line-clamp-3">
-                      {guild.description || 'No description available.'}
+                      {/* Use ShortDescription instead of description */}
+                      {guild.shortDescription || guild.description || 'No description available.'}
                     </p>
                     
                     <button 
@@ -183,7 +185,12 @@ function GuildDetails({ guild, onBack }: GuildDetailsProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <h3 className="text-xl font-serif text-amber-800 mb-4">About the Guild</h3>
-            <p className="text-gray-700 mb-4">{guild.description || 'No description available.'}</p>
+            {/* Use ReactMarkdown for the description */}
+            <div className="text-gray-700 mb-4 prose prose-amber max-w-none">
+              <ReactMarkdown>
+                {guild.description || 'No description available.'}
+              </ReactMarkdown>
+            </div>
             
             <h4 className="text-lg font-serif text-amber-700 mt-6 mb-2">Location</h4>
             <p className="text-gray-700">{guild.primaryLocation || 'Various locations throughout Venice'}</p>
@@ -195,29 +202,30 @@ function GuildDetails({ guild, onBack }: GuildDetailsProps) {
           <div className="bg-amber-50 p-4 rounded-lg border border-amber-200">
             <h3 className="text-xl font-serif text-amber-800 mb-4">Guild Information</h3>
             
-            <div className="space-y-3">
+            {/* Make the guild information text smaller */}
+            <div className="space-y-3 text-xs">
               <div>
-                <h4 className="font-semibold text-amber-700">Leadership Structure</h4>
+                <h4 className="font-semibold text-amber-700 text-sm">Leadership Structure</h4>
                 <p>{guild.leadershipStructure || 'Traditional guild structure'}</p>
               </div>
               
               <div>
-                <h4 className="font-semibold text-amber-700">Entry Fee</h4>
+                <h4 className="font-semibold text-amber-700 text-sm">Entry Fee</h4>
                 <p>{guild.entryFee ? `${guild.entryFee} ducats` : 'No fee required'}</p>
               </div>
               
               <div>
-                <h4 className="font-semibold text-amber-700">Voting System</h4>
+                <h4 className="font-semibold text-amber-700 text-sm">Voting System</h4>
                 <p>{guild.votingSystem || 'Standard guild voting'}</p>
               </div>
               
               <div>
-                <h4 className="font-semibold text-amber-700">Meeting Frequency</h4>
+                <h4 className="font-semibold text-amber-700 text-sm">Meeting Frequency</h4>
                 <p>{guild.meetingFrequency || 'As needed'}</p>
               </div>
               
               <div>
-                <h4 className="font-semibold text-amber-700">Guild Hall</h4>
+                <h4 className="font-semibold text-amber-700 text-sm">Guild Hall</h4>
                 <p>{guild.guildHallId ? 'Located in Venice' : 'No permanent guild hall'}</p>
               </div>
             </div>
