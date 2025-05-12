@@ -24,7 +24,7 @@ export default function ViewModeMenu({ activeView, setActiveView }: ViewModeMenu
   const isDisabled = (view: ViewMode): boolean => {
     // Only these views are enabled
     const enabledViews: ActiveViewMode[] = ['buildings', 'land', 'markets', 'citizens', 'resources', 'transport', 'guilds'];
-    return !enabledViews.includes(view);
+    return !enabledViews.includes(view as ActiveViewMode);
   };
 
   // Detailed descriptions for each view mode
@@ -63,7 +63,7 @@ export default function ViewModeMenu({ activeView, setActiveView }: ViewModeMenu
             console.log('ViewModeMenu: Switching to guilds view');
             // Dispatch a custom event to ensure guilds are loaded
             window.dispatchEvent(new CustomEvent('loadGuilds'));
-            handleViewModeChange('guilds');
+            handleViewModeChange('guilds' as ActiveViewMode);
           }
         }}
         active={activeView === 'guilds'}
