@@ -119,7 +119,7 @@ export default function SimplePage() {
     }
   }, []); // Empty dependency array means this runs once on mount
   
-  // Listen for events to hide/show 3D view
+  // Listen for events to hide/show 3D view and handle settings changes
   useEffect(() => {
     const handleHide3DView = () => {
       setShow3DView(false);
@@ -127,6 +127,16 @@ export default function SimplePage() {
     
     const handleShow3DView = () => {
       setShow3DView(true);
+    };
+    
+    const handleWaterQualityChanged = (event: CustomEvent) => {
+      if (event.detail && event.detail.waterQuality) {
+        console.log('Water quality changed to:', event.detail.waterQuality);
+        setWaterQuality(event.detail.waterQuality);
+        
+        // Store the setting in localStorage
+        localStorage.setItem('waterQuality', event.detail.waterQuality);
+      }
     };
     
     const handleBuildingMenuClosed = () => {
@@ -165,6 +175,7 @@ export default function SimplePage() {
     window.addEventListener('show3DView', handleShow3DView);
     window.addEventListener('buildingMenuClosed', handleBuildingMenuClosed);
     window.addEventListener('showBuildings', handleShowBuildings);
+    window.addEventListener('waterQualityChanged', handleWaterQualityChanged as EventListener);
     
     // Subscribe to citizen details event
     const subscription = eventBus.subscribe(EventTypes.SHOW_CITIZEN_DETAILS, handleShowCitizenDetails);
@@ -185,6 +196,7 @@ export default function SimplePage() {
       window.removeEventListener('show3DView', handleShow3DView);
       window.removeEventListener('buildingMenuClosed', handleBuildingMenuClosed);
       window.removeEventListener('showBuildings', handleShowBuildings);
+      window.removeEventListener('waterQualityChanged', handleWaterQualityChanged as EventListener);
       subscription.unsubscribe();
     };
   }, [activeView]);
@@ -271,6 +283,7 @@ export default function SimplePage() {
     };
   }, [pathname]);
   const [qualityMode, setQualityMode] = useState<'high' | 'performance'>('high');
+  const [waterQuality, setWaterQuality] = useState<'high' | 'medium' | 'low'>('high');
   const [marketPanelVisible, setMarketPanelVisible] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -544,7 +557,7 @@ export default function SimplePage() {
       setIsGeneratingImage(false);
     }
   };
-  // Load user profile from localStorage on component mount
+  // Load user profile and settings from localStorage on component mount
   useEffect(() => {
     // Try to load the user profile from localStorage
     const savedProfile = localStorage.getItem('userProfile');
@@ -669,7 +682,11 @@ export default function SimplePage() {
       {show3DView && (
         <SceneReadyProvider>
           <>
-            <SimpleViewer qualityMode={qualityMode} activeView={activeView as 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance'} />
+            <SimpleViewer 
+              qualityMode={qualityMode} 
+              waterQuality={waterQuality}
+              activeView={activeView as 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance'} 
+            />
           </>
         </SceneReadyProvider>
       )}

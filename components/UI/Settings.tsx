@@ -62,6 +62,16 @@ const Settings: React.FC<SettingsProps> = ({ onClose }) => {
     }));
   };
   
+  // Apply water quality settings to the game
+  const applyWaterQualitySettings = (quality: 'high' | 'medium' | 'low') => {
+    // Dispatch custom event for water quality settings
+    window.dispatchEvent(new CustomEvent('waterQualityChanged', {
+      detail: {
+        waterQuality: quality
+      }
+    }));
+  };
+  
   // Save settings to localStorage and backend
   const saveSettings = async () => {
     setIsSaving(true);
@@ -85,6 +95,9 @@ const Settings: React.FC<SettingsProps> = ({ onClose }) => {
       
       // Apply audio settings
       applyAudioSettings(masterVolume, musicVolume, effectsVolume, isMuted);
+      
+      // Apply water quality settings
+      applyWaterQualitySettings(waterQuality);
       
       // Dispatch event for graphics settings
       window.dispatchEvent(new CustomEvent('graphicsSettingsChanged', {
