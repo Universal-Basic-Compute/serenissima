@@ -115,18 +115,30 @@ const Settings: React.FC<SettingsProps> = ({ onClose }) => {
         }
       }));
       
-      // Get wallet address
-      const walletAddress = getWalletAddress();
+      // Get username from localStorage instead of wallet address
+      const username = (() => {
+        try {
+          const savedProfile = localStorage.getItem('userProfile');
+          if (savedProfile) {
+            const profile = JSON.parse(savedProfile);
+            return profile.username;
+          }
+          return null;
+        } catch (error) {
+          console.error('Error getting username from localStorage:', error);
+          return null;
+        }
+      })();
       
-      // If wallet is connected, save to backend
-      if (walletAddress) {
+      // If username is available, save to backend
+      if (username) {
         const response = await fetch('/api/user/settings', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            wallet_address: walletAddress,
+            wallet_address: username, // We're using the wallet_address field to pass the username
             settings: {
               qualityMode,
               waterQuality

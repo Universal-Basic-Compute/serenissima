@@ -37,10 +37,11 @@ export async function POST(request: Request) {
       // Initialize Airtable
       const base = initAirtable();
       
-      // Find the user record by wallet address
+      // Find the user record by Username field instead of wallet_address
+      // We're using the wallet_address as the username in this case
       const records = await base(AIRTABLE_USERS_TABLE)
         .select({
-          filterByFormula: `{wallet_address} = '${wallet_address}'`,
+          filterByFormula: `{Username} = '${wallet_address}'`,
           maxRecords: 1
         })
         .all();
