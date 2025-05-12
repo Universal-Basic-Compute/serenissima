@@ -3263,7 +3263,7 @@ export default class SimplePolygonRenderer {
     let closestMarker: THREE.Object3D | null = null;
     let minDistance = 0.5; // Maximum distance to consider (0.5 units)
       
-    for (const marker of this.buildingPointMarkers) {
+    for (const marker of this.buildingPointManager.getBuildingPointMarkers()) {
       // Check both Mesh objects and other Object3D types (like Group)
       if (marker.userData && marker.userData.id) {
         const distance = position.distanceTo(marker.position);
@@ -4841,7 +4841,7 @@ export default class SimplePolygonRenderer {
    */
   private findBuildingPosition(buildingId: string): THREE.Vector3 | null {
     // First try to find the building in the building point markers
-    for (const marker of this.buildingPointMarkers) {
+    for (const marker of this.buildingPointManager.getBuildingPointMarkers()) {
       if (marker.userData && marker.userData.id === buildingId) {
         return marker.position.clone();
       }
