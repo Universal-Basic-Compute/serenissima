@@ -1,11 +1,11 @@
 # Income Distribution System
 
-This system automatically distributes simulated income from lands to their owners on a daily basis.
+This system automatically distributes last income from lands to their owners on a daily basis.
 
 ## How It Works
 
 1. Every day at 4pm UTC, the `distributeIncome.py` script runs automatically
-2. The script identifies all lands with simulated income
+2. The script identifies all lands with last income
 3. For each land, it transfers the income amount from the ConsiglioDeiDieci treasury to the land owner
 4. Transaction records are created to track all distributions
 5. Detailed logs are kept in `income_distribution.log`
@@ -40,5 +40,5 @@ If income distribution is not working:
 
 1. Check the log files in `income_distribution.log` and `income_distribution_cron.log`
 2. Verify that ConsiglioDeiDieci has sufficient COMPUTE balance
-3. Ensure that lands have simulated income values in their Notes field
+3. Ensure that lands have last income values in their Notes field
 4. Check that all land owners exist in the Users table

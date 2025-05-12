@@ -1,4 +1,4 @@
-import { getApiBaseUrl } from '../apiUtils';
+import { getBackendBaseUrl } from '../apiUtils';
 import { eventBus } from '../eventBus';
 import { log } from '../logUtils';
 import { 
@@ -222,7 +222,7 @@ export class TransactionService {
     }
     
     try {
-      const endpoint = `${getApiBaseUrl()}/api/transaction`;
+      const endpoint = `${getBackendBaseUrl()}/api/transaction`;
       log.debug(`Creating transaction at endpoint: ${endpoint}`);
       
       const response = await fetch(endpoint, {
@@ -322,7 +322,7 @@ export class TransactionService {
     }
     
     try {
-      const endpoint = `${getApiBaseUrl()}/api/transaction/${transactionId}`;
+      const endpoint = `${getBackendBaseUrl()}/api/transaction/${transactionId}`;
       log.debug(`Fetching transaction from endpoint: ${endpoint}`);
       
       const response = await fetch(endpoint);
@@ -391,7 +391,7 @@ export class TransactionService {
     }
     
     try {
-      const endpoint = `${getApiBaseUrl()}/api/transactions/land/${assetId}`;
+      const endpoint = `${getBackendBaseUrl()}/api/transactions/land/${assetId}`;
       log.debug(`Fetching transactions from endpoint: ${endpoint}`);
       
       const response = await fetch(endpoint);
@@ -473,7 +473,7 @@ export class TransactionService {
     try {
       // For now, we'll use the transactions API to get all transactions
       // In the future, this could be a dedicated endpoint
-      const endpoint = `${getApiBaseUrl()}/api/transactions`;
+      const endpoint = `${getBackendBaseUrl()}/api/transactions`;
       log.debug(`Fetching transactions from endpoint: ${endpoint}`);
       
       const response = await fetch(endpoint);
@@ -574,7 +574,7 @@ export class TransactionService {
     }
     
     try {
-      const endpoint = `${getApiBaseUrl()}/api/transaction`;
+      const endpoint = `${getBackendBaseUrl()}/api/transaction`;
       log.debug(`Creating listing at endpoint: ${endpoint}`);
       
       const response = await fetch(endpoint, {
@@ -661,7 +661,7 @@ export class TransactionService {
     }
     
     try {
-      const endpoint = `${getApiBaseUrl()}/api/transaction/${listingId}/cancel`;
+      const endpoint = `${getBackendBaseUrl()}/api/transaction/${listingId}/cancel`;
       log.debug(`Canceling listing at endpoint: ${endpoint}`);
       
       const response = await fetch(endpoint, {
@@ -753,7 +753,7 @@ export class TransactionService {
     }
     
     try {
-      const endpoint = `${getApiBaseUrl()}/api/transaction`;
+      const endpoint = `${getBackendBaseUrl()}/api/transaction`;
       log.debug(`Creating offer at endpoint: ${endpoint}`);
       
       const response = await fetch(endpoint, {
@@ -846,7 +846,7 @@ export class TransactionService {
     }
     
     try {
-      const endpoint = `${getApiBaseUrl()}/api/transaction/${offerId}/cancel`;
+      const endpoint = `${getBackendBaseUrl()}/api/transaction/${offerId}/cancel`;
       log.debug(`Canceling offer at endpoint: ${endpoint}`);
       
       const response = await fetch(endpoint, {
@@ -914,7 +914,7 @@ export class TransactionService {
     }
     
     try {
-      const endpoint = `${getApiBaseUrl()}/api/transaction/${transactionId}/execute`;
+      const endpoint = `${getBackendBaseUrl()}/api/transaction/${transactionId}/execute`;
       log.debug(`Executing transaction at endpoint: ${endpoint}`);
       
       const response = await fetch(endpoint, {

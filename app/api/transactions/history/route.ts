@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getApiBaseUrl } from '@/lib/apiUtils';
+import { getBackendBaseUrl } from '@/lib/apiUtils';
 
 // Cache the transaction history data with a reasonable expiration
 let cachedData: Map<string, {data: any, timestamp: number}> = new Map();

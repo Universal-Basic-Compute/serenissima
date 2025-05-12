@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import * as THREE from 'three';
-import { getApiBaseUrl } from '@/lib/apiUtils';
+import { getBackendBaseUrl } from '@/lib/apiUtils';
 import { useRouter } from 'next/navigation';
 import ActionButton from '../UI/ActionButton';
 import WalletStatus from '../UI/WalletStatus';
@@ -220,8 +220,8 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
     ctx.lineWidth = 2;
     ctx.stroke();
       
-    // If there's a simulated income or income from service, color the polygon accordingly
-    const hasIncome = polygon.simulatedIncome !== undefined || (() => {
+    // If there's a last income or income from service, color the polygon accordingly
+    const hasIncome = polygon.lastIncome !== undefined || (() => {
       try {
         const { getIncomeDataService } = require('../../lib/services/IncomeDataService');
         return getIncomeDataService().getIncome(polygon.id) !== undefined;
@@ -233,8 +233,8 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
     if (hasIncome) {
       try {
         // Get income from polygon or service
-        const income = polygon.simulatedIncome !== undefined 
-          ? polygon.simulatedIncome 
+        const income = polygon.lastIncome !== undefined 
+          ? polygon.lastIncome 
           : (() => {
               const { getIncomeDataService } = require('../../lib/services/IncomeDataService');
               return getIncomeDataService().getIncome(polygon.id);
@@ -287,10 +287,10 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
         console.warn('Error applying income-based coloring:', error);
         
         // Fallback to simple coloring if there's an error
-        if (polygon.simulatedIncome !== undefined) {
+        if (polygon.lastIncome !== undefined) {
           // Normalize income to a 0-1 scale for coloring
           const maxIncome = 1000; // Default max income
-          const normalizedIncome = Math.min(Math.max(polygon.simulatedIncome / maxIncome, 0), 1);
+          const normalizedIncome = Math.min(Math.max(polygon.lastIncome / maxIncome, 0), 1);
           
           // Create a semi-transparent overlay with color based on income
           ctx.globalAlpha = 0.4;
@@ -317,11 +317,11 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
       }
     }
     
-    // If there's a simulated income, color the polygon accordingly
-    if (polygon.simulatedIncome !== undefined) {
+    // If there's a last income, color the polygon accordingly
+    if (polygon.lastIncome !== undefined) {
       // Normalize income to a 0-1 scale for coloring
       const maxIncome = 1000; // Adjust based on your actual data range
-      const normalizedIncome = Math.min(Math.max(polygon.simulatedIncome / maxIncome, 0), 1);
+      const normalizedIncome = Math.min(Math.max(polygon.lastIncome / maxIncome, 0), 1);
       
       // Create a semi-transparent overlay with color based on income
       ctx.globalAlpha = 0.4;
@@ -434,7 +434,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
       // Function to fetch transaction with retry logic
       const fetchTransactionWithRetry = async (retries = 3, delay = 1000) => {
         try {
-          const response = await fetch(`${getApiBaseUrl()}/api/transaction/land/${selectedPolygonId}`);
+          const response = await fetch(`${getBackendBaseUrl()}/api/transaction/land/${selectedPolygonId}`);
 
           if (!response.ok) {
             if (response.status === 404) {
@@ -489,7 +489,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
       // Function to fetch offers with retry logic
       const fetchOffersWithRetry = async (retries = 3, delay = 1000) => {
         try {
-          const response = await fetch(`${getApiBaseUrl()}/api/transactions/land/${selectedPolygonId}`);
+          const response = await fetch(`${getBackendBaseUrl()}/api/transactions/land/${selectedPolygonId}`);
           
           if (!response.ok) {
             if (response.status === 404) {
@@ -606,7 +606,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
           </div>
 
           {/* 2. Income information */}
-          {(selectedPolygon?.simulatedIncome !== undefined || 
+          {(selectedPolygon?.lastIncome !== undefined || 
             (selectedPolygonId && (() => {
               try {
                 const { getIncomeDataService } = require('../../lib/services/IncomeDataService');
@@ -622,16 +622,16 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
                 <span className="font-semibold text-amber-800">
                   {(() => {
                     try {
-                      const income = selectedPolygon?.simulatedIncome !== undefined 
-                        ? selectedPolygon.simulatedIncome 
+                      const income = selectedPolygon?.lastIncome !== undefined 
+                        ? selectedPolygon.lastIncome 
                         : (() => {
                             const { getIncomeDataService } = require('../../lib/services/IncomeDataService');
                             return getIncomeDataService().getIncome(selectedPolygonId!);
                           })();
                       return income !== undefined ? income.toLocaleString() : '0';
                     } catch (error) {
-                      return selectedPolygon?.simulatedIncome !== undefined 
-                        ? selectedPolygon.simulatedIncome.toLocaleString() 
+                      return selectedPolygon?.lastIncome !== undefined 
+                        ? selectedPolygon.lastIncome.toLocaleString() 
                         : '0';
                     }
                   })()} ⚜️ ducats
@@ -647,13 +647,13 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
                       try {
                         const { getIncomeDataService } = require('../../lib/services/IncomeDataService');
                         const incomeService = getIncomeDataService();
-                        const income = selectedPolygon?.simulatedIncome !== undefined 
-                          ? selectedPolygon.simulatedIncome 
+                        const income = selectedPolygon?.lastIncome !== undefined 
+                          ? selectedPolygon.lastIncome 
                           : incomeService.getIncome(selectedPolygonId!);
                         return Math.min(100, Math.max(5, ((income || 0) / incomeService.getMaxIncome()) * 100));
                       } catch (error) {
-                        return selectedPolygon?.simulatedIncome !== undefined 
-                          ? Math.min(100, Math.max(5, (selectedPolygon.simulatedIncome / 1000) * 100))
+                        return selectedPolygon?.lastIncome !== undefined 
+                          ? Math.min(100, Math.max(5, (selectedPolygon.lastIncome / 1000) * 100))
                           : 5;
                       }
                     })()}%`,
@@ -728,7 +728,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
                     
                     try {
                       // Cancel the transaction
-                      const response = await fetch(`${getApiBaseUrl()}/api/transaction/${transaction.id}/cancel`, {
+                      const response = await fetch(`${getBackendBaseUrl()}/api/transaction/${transaction.id}/cancel`, {
                         method: 'POST',
                         headers: {
                           'Content-Type': 'application/json',
@@ -867,7 +867,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
                           
                           try {
                             // Execute the transaction
-                            const response = await fetch(`${getApiBaseUrl()}/api/transaction/${offer.id}/execute`, {
+                            const response = await fetch(`${getBackendBaseUrl()}/api/transaction/${offer.id}/execute`, {
                               method: 'POST',
                               headers: {
                                 'Content-Type': 'application/json',
@@ -918,7 +918,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
                           
                           try {
                             // Cancel the transaction
-                            const response = await fetch(`${getApiBaseUrl()}/api/transaction/${offer.id}/cancel`, {
+                            const response = await fetch(`${getBackendBaseUrl()}/api/transaction/${offer.id}/cancel`, {
                               method: 'POST',
                               headers: {
                                 'Content-Type': 'application/json',

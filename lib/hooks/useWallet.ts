@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { getWalletAddress, setWalletAddress, clearWalletAddress, connectAndPersistWallet, storeWalletInAirtable } from '@/lib/walletUtils';
 import { PhantomWalletAdapter } from '@solana/wallet-adapter-phantom';
 import { WalletReadyState } from '@solana/wallet-adapter-base';
-import { getApiBaseUrl } from '@/lib/apiUtils';
+import { getBackendBaseUrl } from '@/lib/apiUtils';
 
 export function useWallet() {
   const [walletAddress, setWalletAddressState] = useState<string | null>(null);
@@ -38,7 +38,7 @@ export function useWallet() {
       }
       
       // Also fetch user profile data from backend to ensure it's up to date
-      fetch(`${getApiBaseUrl()}/api/wallet/${storedWallet}`)
+      fetch(`${getBackendBaseUrl()}/api/wallet/${storedWallet}`)
         .then(response => {
           if (response.ok) return response.json();
           throw new Error('Failed to fetch user profile');

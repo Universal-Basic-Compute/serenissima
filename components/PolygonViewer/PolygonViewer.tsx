@@ -11,7 +11,7 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import ThreeDErrorBoundary, { ThreeDErrorBoundaryProps } from '../ErrorBoundary/ThreeDErrorBoundary';
 import { log } from '@/lib/logUtils';
-import { getApiBaseUrl } from '@/lib/apiUtils';
+import { getBackendBaseUrl } from '@/lib/apiUtils';
 import * as THREE from 'three';
 import { calculateBounds } from './utils';
 import SceneSetup from './SceneSetup';
@@ -145,7 +145,7 @@ export default function PolygonViewer() {
       }
       
       // Call the backend API to transfer compute
-      const response = await fetch(`${getApiBaseUrl()}/api/transfer-compute`, {
+      const response = await fetch(`${getBackendBaseUrl()}/api/transfer-compute`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -504,7 +504,7 @@ export default function PolygonViewer() {
         const fetchUserData = async (retries = 3, delay = 1000) => {
           try {
             console.log(`Fetching updated user profile for ${currentWallet}, attempt ${4-retries}/3`);
-            const response = await fetch(`${getApiBaseUrl()}/api/wallet/${currentWallet}`);
+            const response = await fetch(`${getBackendBaseUrl()}/api/wallet/${currentWallet}`);
             if (!response.ok) {
               throw new Error(`Failed to fetch updated user profile: ${response.status}`);
             }

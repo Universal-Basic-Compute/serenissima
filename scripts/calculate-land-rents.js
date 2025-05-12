@@ -160,7 +160,7 @@ async function updateAirtableWithRents(landRents) {
             if (records && records.length > 0) {
               const record = records[0];
               table.update(record.id, {
-                "SimulatedIncome": land.dailyRent
+                "LastIncome": land.dailyRent
               }, (updateErr) => {
                 if (updateErr) {
                   reject(updateErr);

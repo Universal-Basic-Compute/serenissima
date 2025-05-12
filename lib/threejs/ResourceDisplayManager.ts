@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { getWalletAddress } from '../walletUtils';
 import { getUsername } from '../userUtils';
-import { getApiBaseUrl } from '../apiUtils';
+import { getBackendBaseUrl } from '../apiUtils';
 import { eventBus, EventTypes } from '../eventBus';
 
 // Add missing event types

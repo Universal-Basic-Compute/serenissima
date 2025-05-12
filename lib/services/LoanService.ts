@@ -38,7 +38,7 @@ export enum LoanPurpose {
   OTHER = 'other'
 }
 
-import { getApiBaseUrl } from '@/lib/apiUtils';
+import { getBackendBaseUrl } from '@/lib/apiUtils';
 
 export class LoanService {
   private static instance: LoanService;
@@ -65,7 +65,7 @@ export class LoanService {
     
     console.log('LoanService: Loading available loans...');
     try {
-      const response = await fetch(`${getApiBaseUrl()}/api/loans/available`);
+      const response = await fetch(`${getBackendBaseUrl()}/api/loans/available`);
       
       console.log('LoanService: API response status:', response.status);
       
@@ -93,7 +93,7 @@ export class LoanService {
    */
   public async getUserLoans(userId: string): Promise<LoanData[]> {
     try {
-      const response = await fetch(`${getApiBaseUrl()}/api/loans/user/${userId}`);
+      const response = await fetch(`${getBackendBaseUrl()}/api/loans/user/${userId}`);
       
       if (!response.ok) {
         throw new Error(`Failed to load user loans: ${response.status} ${response.statusText}`);
@@ -116,7 +116,7 @@ export class LoanService {
     applicationText: string;
   }): Promise<LoanData & { autoApproved?: boolean }> {
     try {
-      const response = await fetch(`${getApiBaseUrl()}/api/loans/apply`, {
+      const response = await fetch(`${getBackendBaseUrl()}/api/loans/apply`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -139,7 +139,7 @@ export class LoanService {
    */
   public async makePayment(loanId: string, amount: number): Promise<LoanData> {
     try {
-      const response = await fetch(`${getApiBaseUrl()}/api/loans/${loanId}/payment`, {
+      const response = await fetch(`${getBackendBaseUrl()}/api/loans/${loanId}/payment`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -170,7 +170,7 @@ export class LoanService {
     loanPurpose?: LoanPurpose;
   }): Promise<LoanData> {
     try {
-      const response = await fetch(`${getApiBaseUrl()}/api/loans/create`, {
+      const response = await fetch(`${getBackendBaseUrl()}/api/loans/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

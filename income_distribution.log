@@ -4,7 +4,7 @@
 2025-05-07 09:30:41,661 - income_distributor - INFO - Testing Airtable connection...
 2025-05-07 09:30:44,766 - income_distributor - INFO - Airtable connection successful. Found 17 test records.
 2025-05-07 09:30:44,918 - income_distributor - INFO - ConsiglioDeiDieci balance: 112300004 COMPUTE
-2025-05-07 09:30:45,239 - income_distributor - INFO - Found 0 lands with simulated income
+2025-05-07 09:30:45,239 - income_distributor - INFO - Found 0 lands with last income
 2025-05-07 09:30:45,239 - income_distributor - INFO - Total income to distribute: 0 COMPUTE
 2025-05-07 09:30:45,240 - income_distributor - INFO - Income distribution completed
 2025-05-07 09:30:45,240 - income_distributor - INFO - Successful distributions: 0
@@ -14,7 +14,7 @@
 2025-05-07 09:33:23,354 - income_distributor - INFO - Testing Airtable connection...
 2025-05-07 09:33:26,652 - income_distributor - INFO - Airtable connection successful. Found 17 test records.
 2025-05-07 09:33:26,803 - income_distributor - INFO - ConsiglioDeiDieci balance: 112300004 COMPUTE
-2025-05-07 09:33:27,150 - income_distributor - INFO - Found 121 lands with simulated income
+2025-05-07 09:33:27,150 - income_distributor - INFO - Found 121 lands with last income
 2025-05-07 09:33:27,151 - income_distributor - INFO - Total income to distribute: 1894627 COMPUTE
 2025-05-07 09:33:27,151 - income_distributor - INFO - Processing land polygon-1746052823189 (Sacca della Misericordia) with income 8247 for owner ConsiglioDeiDieci
 2025-05-07 09:33:27,757 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 112300004 to 112291757
@@ -176,7 +176,7 @@
 2025-05-07 09:34:08,495 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 112207346 to 112226120
 2025-05-07 09:34:08,753 - income_distributor - INFO - Created transaction record recxg4SHrDHwhLHje for 18774 COMPUTE from ConsiglioDeiDieci to ConsiglioDeiDieci
 2025-05-07 09:34:08,753 - income_distributor - INFO - Successfully distributed 18774 COMPUTE to ConsiglioDeiDieci for land polygon-1746055995050
-2025-05-07 09:34:08,753 - income_distributor - INFO - Processing land polygon-1746057412398 (Strada de la Carità) with income 5514 for owner ConsiglioDeiDieci
+2025-05-07 09:34:08,753 - income_distributor - INFO - Processing land polygon-1746057412398 (Strada de la Caritï¿½) with income 5514 for owner ConsiglioDeiDieci
 2025-05-07 09:34:09,341 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 112226120 to 112220606
 2025-05-07 09:34:09,743 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 112220606 to 112226120
 2025-05-07 09:34:10,004 - income_distributor - INFO - Created transaction record reca3SfJV8VfpI3G1 for 5514 COMPUTE from ConsiglioDeiDieci to ConsiglioDeiDieci
@@ -211,7 +211,7 @@
 2025-05-07 09:34:17,241 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 112209776 to 112226120
 2025-05-07 09:34:17,505 - income_distributor - INFO - Created transaction record recLLAHFqhnXBPWp4 for 16344 COMPUTE from ConsiglioDeiDieci to ConsiglioDeiDieci
 2025-05-07 09:34:17,505 - income_distributor - INFO - Successfully distributed 16344 COMPUTE to ConsiglioDeiDieci for land polygon-1746055739112
-2025-05-07 09:34:17,505 - income_distributor - INFO - Processing land polygon-1746072707138 (Calle de San Thomà in Sestier de San Polo) with income 18633 for owner ConsiglioDeiDieci
+2025-05-07 09:34:17,505 - income_distributor - INFO - Processing land polygon-1746072707138 (Calle de San Thomï¿½ in Sestier de San Polo) with income 18633 for owner ConsiglioDeiDieci
 2025-05-07 09:34:18,077 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 112226120 to 112207487
 2025-05-07 09:34:18,500 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 112207487 to 112226120
 2025-05-07 09:34:18,752 - income_distributor - INFO - Created transaction record recCSkLUp4WVLV1B5 for 18633 COMPUTE from ConsiglioDeiDieci to ConsiglioDeiDieci
@@ -286,12 +286,12 @@
 2025-05-07 09:34:36,184 - income_distributor - INFO - Updated compute balance for user recyMBKakWTurCgJd from 0 to 17883
 2025-05-07 09:34:36,452 - income_distributor - INFO - Created transaction record recxuxAemaHbD290o for 17883 COMPUTE from ConsiglioDeiDieci to Feola007
 2025-05-07 09:34:36,452 - income_distributor - INFO - Successfully distributed 17883 COMPUTE to Feola007 for land polygon-1746055825280
-2025-05-07 09:34:36,453 - income_distributor - INFO - Processing land polygon-1746055595653 (Calle del Batelo in Contrada San Moisè, Sestiere San Marco) with income 14649 for owner ConsiglioDeiDieci
+2025-05-07 09:34:36,453 - income_distributor - INFO - Processing land polygon-1746055595653 (Calle del Batelo in Contrada San Moisï¿½, Sestiere San Marco) with income 14649 for owner ConsiglioDeiDieci
 2025-05-07 09:34:37,063 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 112180508 to 112165859
 2025-05-07 09:34:37,493 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 112165859 to 112180508
 2025-05-07 09:34:37,768 - income_distributor - INFO - Created transaction record recXHeZ8p3ie8m94W for 14649 COMPUTE from ConsiglioDeiDieci to ConsiglioDeiDieci
 2025-05-07 09:34:37,768 - income_distributor - INFO - Successfully distributed 14649 COMPUTE to ConsiglioDeiDieci for land polygon-1746055595653
-2025-05-07 09:34:37,768 - income_distributor - INFO - Processing land polygon-1746056790924 (Calle Larga de San Moisè) with income 17954 for owner ConsiglioDeiDieci
+2025-05-07 09:34:37,768 - income_distributor - INFO - Processing land polygon-1746056790924 (Calle Larga de San Moisï¿½) with income 17954 for owner ConsiglioDeiDieci
 2025-05-07 09:34:38,326 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 112180508 to 112162554
 2025-05-07 09:34:38,735 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 112162554 to 112180508
 2025-05-07 09:34:39,003 - income_distributor - INFO - Created transaction record recEoxa15FmsHnmnV for 17954 COMPUTE from ConsiglioDeiDieci to ConsiglioDeiDieci
@@ -341,7 +341,7 @@
 2025-05-07 09:34:49,988 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 112155940 to 112160580
 2025-05-07 09:34:50,250 - income_distributor - INFO - Created transaction record rec4q6gmofk02LDWx for 4640 COMPUTE from ConsiglioDeiDieci to ConsiglioDeiDieci
 2025-05-07 09:34:50,250 - income_distributor - INFO - Successfully distributed 4640 COMPUTE to ConsiglioDeiDieci for land polygon-1746057432046
-2025-05-07 09:34:50,250 - income_distributor - INFO - Processing land polygon-1746055877827 (Fondamenta del Remèr in Sestiere Dorsoduro) with income 18897 for owner Bullitpro0f
+2025-05-07 09:34:50,250 - income_distributor - INFO - Processing land polygon-1746055877827 (Fondamenta del Remï¿½r in Sestiere Dorsoduro) with income 18897 for owner Bullitpro0f
 2025-05-07 09:34:50,855 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 112160580 to 112141683
 2025-05-07 09:34:51,292 - income_distributor - INFO - Updated compute balance for user recHaBnN8oubFFbd0 from 0 to 18897
 2025-05-07 09:34:51,541 - income_distributor - INFO - Created transaction record recIXgJE1CsY7ncML for 18897 COMPUTE from ConsiglioDeiDieci to Bullitpro0f
@@ -491,7 +491,7 @@
 2025-05-07 09:35:28,328 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 112062714 to 112075247
 2025-05-07 09:35:28,585 - income_distributor - INFO - Created transaction record reckUYQzRekZVmWF6 for 12533 COMPUTE from ConsiglioDeiDieci to ConsiglioDeiDieci
 2025-05-07 09:35:28,585 - income_distributor - INFO - Successfully distributed 12533 COMPUTE to ConsiglioDeiDieci for land polygon-1745879206602
-2025-05-07 09:35:28,585 - income_distributor - INFO - Processing land polygon-1746056974299 (Calle de la Fontana in Contrà San Provolo) with income 14553 for owner ConsiglioDeiDieci
+2025-05-07 09:35:28,585 - income_distributor - INFO - Processing land polygon-1746056974299 (Calle de la Fontana in Contrï¿½ San Provolo) with income 14553 for owner ConsiglioDeiDieci
 2025-05-07 09:35:29,171 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 112075247 to 112060694
 2025-05-07 09:35:29,605 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 112060694 to 112075247
 2025-05-07 09:35:29,893 - income_distributor - INFO - Created transaction record recMSTbIaSKCbMavQ for 14553 COMPUTE from ConsiglioDeiDieci to ConsiglioDeiDieci
@@ -566,7 +566,7 @@
 2025-05-07 09:35:47,501 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 112038115 to 112053814
 2025-05-07 09:35:47,831 - income_distributor - INFO - Created transaction record recAv9hbkM8zHhW7O for 15699 COMPUTE from ConsiglioDeiDieci to ConsiglioDeiDieci
 2025-05-07 09:35:47,831 - income_distributor - INFO - Successfully distributed 15699 COMPUTE to ConsiglioDeiDieci for land polygon-1746056675315
-2025-05-07 09:35:47,831 - income_distributor - INFO - Processing land polygon-1746056766342 (Campiello de la Feltrina in Contrà San Moisè) with income 16200 for owner ConsiglioDeiDieci
+2025-05-07 09:35:47,831 - income_distributor - INFO - Processing land polygon-1746056766342 (Campiello de la Feltrina in Contrï¿½ San Moisï¿½) with income 16200 for owner ConsiglioDeiDieci
 2025-05-07 09:35:48,459 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 112053814 to 112037614
 2025-05-07 09:35:48,866 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 112037614 to 112053814
 2025-05-07 09:35:49,134 - income_distributor - INFO - Created transaction record recOYNCjqGM5L3xPP for 16200 COMPUTE from ConsiglioDeiDieci to ConsiglioDeiDieci
@@ -581,7 +581,7 @@
 2025-05-07 09:35:51,371 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 112034672 to 112053814
 2025-05-07 09:35:51,624 - income_distributor - INFO - Created transaction record recGw8kd2c0gA4vS3 for 19142 COMPUTE from ConsiglioDeiDieci to ConsiglioDeiDieci
 2025-05-07 09:35:51,624 - income_distributor - INFO - Successfully distributed 19142 COMPUTE to ConsiglioDeiDieci for land polygon-1746056582235
-2025-05-07 09:35:51,624 - income_distributor - INFO - Processing land polygon-1746056660534 (Calle de le Lezze in Contrada San Moisè, Sestiere di San Marco) with income 17791 for owner ConsiglioDeiDieci
+2025-05-07 09:35:51,624 - income_distributor - INFO - Processing land polygon-1746056660534 (Calle de le Lezze in Contrada San Moisï¿½, Sestiere di San Marco) with income 17791 for owner ConsiglioDeiDieci
 2025-05-07 09:35:52,267 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 112053814 to 112036023
 2025-05-07 09:35:52,688 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 112036023 to 112053814
 2025-05-07 09:35:52,950 - income_distributor - INFO - Created transaction record recOX4IvmdeB9ErCa for 17791 COMPUTE from ConsiglioDeiDieci to ConsiglioDeiDieci
@@ -630,7 +630,7 @@
 2025-05-07 09:39:00,787 - income_distributor - INFO - Testing Airtable connection...
 2025-05-07 09:39:03,836 - income_distributor - INFO - Airtable connection successful. Found 17 test records.
 2025-05-07 09:39:03,998 - income_distributor - INFO - ConsiglioDeiDieci balance: 112053814 COMPUTE
-2025-05-07 09:39:04,316 - income_distributor - INFO - Found 121 lands with simulated income
+2025-05-07 09:39:04,316 - income_distributor - INFO - Found 121 lands with last income
 2025-05-07 09:39:04,317 - income_distributor - INFO - Total income to distribute: 1894627 COMPUTE
 2025-05-07 09:39:04,317 - income_distributor - INFO - Processing land polygon-1746052823189 (Sacca della Misericordia) with income 8247 for owner ConsiglioDeiDieci
 2025-05-07 09:39:04,937 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 112053814 to 112045567
@@ -792,7 +792,7 @@
 2025-05-07 09:39:45,401 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 111961156 to 111979930
 2025-05-07 09:39:45,681 - income_distributor - INFO - Created transaction record recJHQ923bxmFanT2 for 18774 COMPUTE from ConsiglioDeiDieci to ConsiglioDeiDieci
 2025-05-07 09:39:45,682 - income_distributor - INFO - Successfully distributed 18774 COMPUTE to ConsiglioDeiDieci for land polygon-1746055995050
-2025-05-07 09:39:45,682 - income_distributor - INFO - Processing land polygon-1746057412398 (Strada de la Carità) with income 5514 for owner ConsiglioDeiDieci
+2025-05-07 09:39:45,682 - income_distributor - INFO - Processing land polygon-1746057412398 (Strada de la Caritï¿½) with income 5514 for owner ConsiglioDeiDieci
 2025-05-07 09:39:46,267 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 111979930 to 111974416
 2025-05-07 09:39:46,666 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 111974416 to 111979930
 2025-05-07 09:39:46,933 - income_distributor - INFO - Created transaction record recsFkgTgeIhGsN1L for 5514 COMPUTE from ConsiglioDeiDieci to ConsiglioDeiDieci
@@ -827,7 +827,7 @@
 2025-05-07 09:39:54,500 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 111963586 to 111979930
 2025-05-07 09:39:54,760 - income_distributor - INFO - Created transaction record recRNFeGd3Kicy88g for 16344 COMPUTE from ConsiglioDeiDieci to ConsiglioDeiDieci
 2025-05-07 09:39:54,760 - income_distributor - INFO - Successfully distributed 16344 COMPUTE to ConsiglioDeiDieci for land polygon-1746055739112
-2025-05-07 09:39:54,760 - income_distributor - INFO - Processing land polygon-1746072707138 (Calle de San Thomà in Sestier de San Polo) with income 18633 for owner ConsiglioDeiDieci
+2025-05-07 09:39:54,760 - income_distributor - INFO - Processing land polygon-1746072707138 (Calle de San Thomï¿½ in Sestier de San Polo) with income 18633 for owner ConsiglioDeiDieci
 2025-05-07 09:39:55,336 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 111979930 to 111961297
 2025-05-07 09:39:55,821 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 111961297 to 111979930
 2025-05-07 09:39:56,090 - income_distributor - INFO - Created transaction record recEgAs7yXAE0nh2S for 18633 COMPUTE from ConsiglioDeiDieci to ConsiglioDeiDieci
@@ -902,12 +902,12 @@
 2025-05-07 09:40:14,451 - income_distributor - INFO - Updated compute balance for user recyMBKakWTurCgJd from 0 to 17883
 2025-05-07 09:40:14,718 - income_distributor - INFO - Created transaction record reccEvtXGN8DJbuwy for 17883 COMPUTE from ConsiglioDeiDieci to Feola007
 2025-05-07 09:40:14,718 - income_distributor - INFO - Successfully distributed 17883 COMPUTE to Feola007 for land polygon-1746055825280
-2025-05-07 09:40:14,719 - income_distributor - INFO - Processing land polygon-1746055595653 (Calle del Batelo in Contrada San Moisè, Sestiere San Marco) with income 14649 for owner ConsiglioDeiDieci
+2025-05-07 09:40:14,719 - income_distributor - INFO - Processing land polygon-1746055595653 (Calle del Batelo in Contrada San Moisï¿½, Sestiere San Marco) with income 14649 for owner ConsiglioDeiDieci
 2025-05-07 09:40:15,308 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 111934318 to 111919669
 2025-05-07 09:40:15,728 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 111919669 to 111934318
 2025-05-07 09:40:16,003 - income_distributor - INFO - Created transaction record recROKrz8ROM8fNPC for 14649 COMPUTE from ConsiglioDeiDieci to ConsiglioDeiDieci
 2025-05-07 09:40:16,003 - income_distributor - INFO - Successfully distributed 14649 COMPUTE to ConsiglioDeiDieci for land polygon-1746055595653
-2025-05-07 09:40:16,003 - income_distributor - INFO - Processing land polygon-1746056790924 (Calle Larga de San Moisè) with income 17954 for owner ConsiglioDeiDieci
+2025-05-07 09:40:16,003 - income_distributor - INFO - Processing land polygon-1746056790924 (Calle Larga de San Moisï¿½) with income 17954 for owner ConsiglioDeiDieci
 2025-05-07 09:40:16,575 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 111934318 to 111916364
 2025-05-07 09:40:16,994 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 111916364 to 111934318
 2025-05-07 09:40:17,256 - income_distributor - INFO - Created transaction record recnfoYnkZu1s0HSO for 17954 COMPUTE from ConsiglioDeiDieci to ConsiglioDeiDieci
@@ -957,7 +957,7 @@
 2025-05-07 09:40:28,914 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 111909750 to 111914390
 2025-05-07 09:40:29,183 - income_distributor - INFO - Created transaction record rechUShwYTlORZHdg for 4640 COMPUTE from ConsiglioDeiDieci to ConsiglioDeiDieci
 2025-05-07 09:40:29,183 - income_distributor - INFO - Successfully distributed 4640 COMPUTE to ConsiglioDeiDieci for land polygon-1746057432046
-2025-05-07 09:40:29,183 - income_distributor - INFO - Processing land polygon-1746055877827 (Fondamenta del Remèr in Sestiere Dorsoduro) with income 18897 for owner Bullitpro0f
+2025-05-07 09:40:29,183 - income_distributor - INFO - Processing land polygon-1746055877827 (Fondamenta del Remï¿½r in Sestiere Dorsoduro) with income 18897 for owner Bullitpro0f
 2025-05-07 09:40:29,737 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 111914390 to 111895493
 2025-05-07 09:40:30,224 - income_distributor - INFO - Updated compute balance for user recHaBnN8oubFFbd0 from 0 to 18897
 2025-05-07 09:40:30,510 - income_distributor - INFO - Created transaction record recLh5kcbYdTqUonQ for 18897 COMPUTE from ConsiglioDeiDieci to Bullitpro0f
@@ -1107,7 +1107,7 @@
 2025-05-07 09:41:08,397 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 111816524 to 111829057
 2025-05-07 09:41:08,662 - income_distributor - INFO - Created transaction record recyNEWVIHOGtbYov for 12533 COMPUTE from ConsiglioDeiDieci to ConsiglioDeiDieci
 2025-05-07 09:41:08,662 - income_distributor - INFO - Successfully distributed 12533 COMPUTE to ConsiglioDeiDieci for land polygon-1745879206602
-2025-05-07 09:41:08,662 - income_distributor - INFO - Processing land polygon-1746056974299 (Calle de la Fontana in Contrà San Provolo) with income 14553 for owner ConsiglioDeiDieci
+2025-05-07 09:41:08,662 - income_distributor - INFO - Processing land polygon-1746056974299 (Calle de la Fontana in Contrï¿½ San Provolo) with income 14553 for owner ConsiglioDeiDieci
 2025-05-07 09:41:09,261 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 111829057 to 111814504
 2025-05-07 09:41:09,677 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 111814504 to 111829057
 2025-05-07 09:41:09,955 - income_distributor - INFO - Created transaction record recbNNj3V7qxQmkBU for 14553 COMPUTE from ConsiglioDeiDieci to ConsiglioDeiDieci
@@ -1182,7 +1182,7 @@
 2025-05-07 09:41:28,069 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 111791925 to 111807624
 2025-05-07 09:41:28,350 - income_distributor - INFO - Created transaction record reczawTLHz6R24RJR for 15699 COMPUTE from ConsiglioDeiDieci to ConsiglioDeiDieci
 2025-05-07 09:41:28,350 - income_distributor - INFO - Successfully distributed 15699 COMPUTE to ConsiglioDeiDieci for land polygon-1746056675315
-2025-05-07 09:41:28,350 - income_distributor - INFO - Processing land polygon-1746056766342 (Campiello de la Feltrina in Contrà San Moisè) with income 16200 for owner ConsiglioDeiDieci
+2025-05-07 09:41:28,350 - income_distributor - INFO - Processing land polygon-1746056766342 (Campiello de la Feltrina in Contrï¿½ San Moisï¿½) with income 16200 for owner ConsiglioDeiDieci
 2025-05-07 09:41:29,014 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 111807624 to 111791424
 2025-05-07 09:41:29,437 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 111791424 to 111807624
 2025-05-07 09:41:29,729 - income_distributor - INFO - Created transaction record recj0Xax3hT73adft for 16200 COMPUTE from ConsiglioDeiDieci to ConsiglioDeiDieci
@@ -1197,7 +1197,7 @@
 2025-05-07 09:41:32,101 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 111788482 to 111807624
 2025-05-07 09:41:32,366 - income_distributor - INFO - Created transaction record recd6jiP1Pl1MLe8b for 19142 COMPUTE from ConsiglioDeiDieci to ConsiglioDeiDieci
 2025-05-07 09:41:32,366 - income_distributor - INFO - Successfully distributed 19142 COMPUTE to ConsiglioDeiDieci for land polygon-1746056582235
-2025-05-07 09:41:32,366 - income_distributor - INFO - Processing land polygon-1746056660534 (Calle de le Lezze in Contrada San Moisè, Sestiere di San Marco) with income 17791 for owner ConsiglioDeiDieci
+2025-05-07 09:41:32,366 - income_distributor - INFO - Processing land polygon-1746056660534 (Calle de le Lezze in Contrada San Moisï¿½, Sestiere di San Marco) with income 17791 for owner ConsiglioDeiDieci
 2025-05-07 09:41:32,983 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 111807624 to 111789833
 2025-05-07 09:41:33,407 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 111789833 to 111807624
 2025-05-07 09:41:33,691 - income_distributor - INFO - Created transaction record rec61mIa3Rl7lcRME for 17791 COMPUTE from ConsiglioDeiDieci to ConsiglioDeiDieci
@@ -1281,7 +1281,7 @@
 2025-05-07 10:01:39,103 - income_distributor - INFO - Testing Airtable connection...
 2025-05-07 10:01:42,246 - income_distributor - INFO - Airtable connection successful. Found 15 test records.
 2025-05-07 10:01:42,438 - income_distributor - INFO - ConsiglioDeiDieci balance: 111807624 COMPUTE
-2025-05-07 10:01:42,753 - income_distributor - INFO - Found 121 lands with simulated income
+2025-05-07 10:01:42,753 - income_distributor - INFO - Found 121 lands with last income
 2025-05-07 10:01:42,753 - income_distributor - INFO - Total income to distribute: 1894627 COMPUTE
 2025-05-07 10:01:42,753 - income_distributor - INFO - Processing land polygon-1746052823189 (Sacca della Misericordia) with income 8247 for owner ConsiglioDeiDieci
 2025-05-07 10:01:43,355 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 111807624 to 111799377
@@ -1443,7 +1443,7 @@
 2025-05-07 10:02:28,110 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 111714966 to 111733740
 2025-05-07 10:02:28,398 - income_distributor - INFO - Created transaction record recemYzkB4xXZ7Mxa for 18774 COMPUTE from ConsiglioDeiDieci to ConsiglioDeiDieci
 2025-05-07 10:02:28,398 - income_distributor - INFO - Successfully distributed 18774 COMPUTE to ConsiglioDeiDieci for land polygon-1746055995050
-2025-05-07 10:02:28,398 - income_distributor - INFO - Processing land polygon-1746057412398 (Strada de la Carità) with income 5514 for owner ConsiglioDeiDieci
+2025-05-07 10:02:28,398 - income_distributor - INFO - Processing land polygon-1746057412398 (Strada de la Caritï¿½) with income 5514 for owner ConsiglioDeiDieci
 2025-05-07 10:02:29,063 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 111733740 to 111728226
 2025-05-07 10:02:29,507 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 111728226 to 111733740
 2025-05-07 10:02:29,811 - income_distributor - INFO - Created transaction record recsHSgeIx94QhRSA for 5514 COMPUTE from ConsiglioDeiDieci to ConsiglioDeiDieci
@@ -1478,7 +1478,7 @@
 2025-05-07 10:02:38,023 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 111717396 to 111733740
 2025-05-07 10:02:38,343 - income_distributor - INFO - Created transaction record recsPBoliq9ndNciL for 16344 COMPUTE from ConsiglioDeiDieci to ConsiglioDeiDieci
 2025-05-07 10:02:38,344 - income_distributor - INFO - Successfully distributed 16344 COMPUTE to ConsiglioDeiDieci for land polygon-1746055739112
-2025-05-07 10:02:38,344 - income_distributor - INFO - Processing land polygon-1746072707138 (Calle de San Thomà in Sestier de San Polo) with income 18633 for owner ConsiglioDeiDieci
+2025-05-07 10:02:38,344 - income_distributor - INFO - Processing land polygon-1746072707138 (Calle de San Thomï¿½ in Sestier de San Polo) with income 18633 for owner ConsiglioDeiDieci
 2025-05-07 10:02:39,064 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 111733740 to 111715107
 2025-05-07 10:02:39,509 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 111715107 to 111733740
 2025-05-07 10:02:39,788 - income_distributor - INFO - Created transaction record recpVHmMfYgP4mGBq for 18633 COMPUTE from ConsiglioDeiDieci to ConsiglioDeiDieci
@@ -1553,12 +1553,12 @@
 2025-05-07 10:02:58,554 - income_distributor - INFO - Updated compute balance for user recyMBKakWTurCgJd from 0 to 17883
 2025-05-07 10:02:58,858 - income_distributor - INFO - Created transaction record reczDYkMC8l9QYVvk for 17883 COMPUTE from ConsiglioDeiDieci to Feola007
 2025-05-07 10:02:58,858 - income_distributor - INFO - Successfully distributed 17883 COMPUTE to Feola007 for land polygon-1746055825280
-2025-05-07 10:02:58,858 - income_distributor - INFO - Processing land polygon-1746055595653 (Calle del Batelo in Contrada San Moisè, Sestiere San Marco) with income 14649 for owner ConsiglioDeiDieci
+2025-05-07 10:02:58,858 - income_distributor - INFO - Processing land polygon-1746055595653 (Calle del Batelo in Contrada San Moisï¿½, Sestiere San Marco) with income 14649 for owner ConsiglioDeiDieci
 2025-05-07 10:02:59,491 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 111688128 to 111673479
 2025-05-07 10:02:59,899 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 111673479 to 111688128
 2025-05-07 10:03:00,208 - income_distributor - INFO - Created transaction record rec7Vo2h0XQm0LjsS for 14649 COMPUTE from ConsiglioDeiDieci to ConsiglioDeiDieci
 2025-05-07 10:03:00,208 - income_distributor - INFO - Successfully distributed 14649 COMPUTE to ConsiglioDeiDieci for land polygon-1746055595653
-2025-05-07 10:03:00,208 - income_distributor - INFO - Processing land polygon-1746056790924 (Calle Larga de San Moisè) with income 17954 for owner ConsiglioDeiDieci
+2025-05-07 10:03:00,208 - income_distributor - INFO - Processing land polygon-1746056790924 (Calle Larga de San Moisï¿½) with income 17954 for owner ConsiglioDeiDieci
 2025-05-07 10:03:00,842 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 111688128 to 111670174
 2025-05-07 10:03:01,365 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 111670174 to 111688128
 2025-05-07 10:03:01,657 - income_distributor - INFO - Created transaction record recnla3VuKmmnhTb6 for 17954 COMPUTE from ConsiglioDeiDieci to ConsiglioDeiDieci
@@ -1608,7 +1608,7 @@
 2025-05-07 10:03:13,879 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 111663560 to 111668200
 2025-05-07 10:03:14,204 - income_distributor - INFO - Created transaction record rec7D7BsFQQpQNYsr for 4640 COMPUTE from ConsiglioDeiDieci to ConsiglioDeiDieci
 2025-05-07 10:03:14,204 - income_distributor - INFO - Successfully distributed 4640 COMPUTE to ConsiglioDeiDieci for land polygon-1746057432046
-2025-05-07 10:03:14,204 - income_distributor - INFO - Processing land polygon-1746055877827 (Fondamenta del Remèr in Sestiere Dorsoduro) with income 18897 for owner Bullitpro0f
+2025-05-07 10:03:14,204 - income_distributor - INFO - Processing land polygon-1746055877827 (Fondamenta del Remï¿½r in Sestiere Dorsoduro) with income 18897 for owner Bullitpro0f
 2025-05-07 10:03:14,902 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 111668200 to 111649303
 2025-05-07 10:03:15,340 - income_distributor - INFO - Updated compute balance for user recHaBnN8oubFFbd0 from 0 to 18897
 2025-05-07 10:03:15,659 - income_distributor - INFO - Created transaction record rec2MMKyfvXkQlDiu for 18897 COMPUTE from ConsiglioDeiDieci to Bullitpro0f
@@ -1758,7 +1758,7 @@
 2025-05-07 10:04:01,700 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 111570334 to 111582867
 2025-05-07 10:04:01,987 - income_distributor - INFO - Created transaction record recHFZ6A4mPCuviPY for 12533 COMPUTE from ConsiglioDeiDieci to ConsiglioDeiDieci
 2025-05-07 10:04:01,987 - income_distributor - INFO - Successfully distributed 12533 COMPUTE to ConsiglioDeiDieci for land polygon-1745879206602
-2025-05-07 10:04:01,987 - income_distributor - INFO - Processing land polygon-1746056974299 (Calle de la Fontana in Contrà San Provolo) with income 14553 for owner ConsiglioDeiDieci
+2025-05-07 10:04:01,987 - income_distributor - INFO - Processing land polygon-1746056974299 (Calle de la Fontana in Contrï¿½ San Provolo) with income 14553 for owner ConsiglioDeiDieci
 2025-05-07 10:04:02,573 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 111582867 to 111568314
 2025-05-07 10:04:03,019 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 111568314 to 111582867
 2025-05-07 10:04:03,352 - income_distributor - INFO - Created transaction record recvZZRhzDXBJuv4w for 14553 COMPUTE from ConsiglioDeiDieci to ConsiglioDeiDieci
@@ -1833,7 +1833,7 @@
 2025-05-07 10:04:23,440 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 111545735 to 111561434
 2025-05-07 10:04:23,757 - income_distributor - INFO - Created transaction record recx5GIrQbb4YRlEb for 15699 COMPUTE from ConsiglioDeiDieci to ConsiglioDeiDieci
 2025-05-07 10:04:23,757 - income_distributor - INFO - Successfully distributed 15699 COMPUTE to ConsiglioDeiDieci for land polygon-1746056675315
-2025-05-07 10:04:23,757 - income_distributor - INFO - Processing land polygon-1746056766342 (Campiello de la Feltrina in Contrà San Moisè) with income 16200 for owner ConsiglioDeiDieci
+2025-05-07 10:04:23,757 - income_distributor - INFO - Processing land polygon-1746056766342 (Campiello de la Feltrina in Contrï¿½ San Moisï¿½) with income 16200 for owner ConsiglioDeiDieci
 2025-05-07 10:04:24,359 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 111561434 to 111545234
 2025-05-07 10:04:24,837 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 111545234 to 111561434
 2025-05-07 10:04:25,176 - income_distributor - INFO - Created transaction record rec0SjdyHhv30o64r for 16200 COMPUTE from ConsiglioDeiDieci to ConsiglioDeiDieci
@@ -1848,7 +1848,7 @@
 2025-05-07 10:04:27,625 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 111542292 to 111561434
 2025-05-07 10:04:27,914 - income_distributor - INFO - Created transaction record rec4RZL8mrrj4W4nX for 19142 COMPUTE from ConsiglioDeiDieci to ConsiglioDeiDieci
 2025-05-07 10:04:27,915 - income_distributor - INFO - Successfully distributed 19142 COMPUTE to ConsiglioDeiDieci for land polygon-1746056582235
-2025-05-07 10:04:27,915 - income_distributor - INFO - Processing land polygon-1746056660534 (Calle de le Lezze in Contrada San Moisè, Sestiere di San Marco) with income 17791 for owner ConsiglioDeiDieci
+2025-05-07 10:04:27,915 - income_distributor - INFO - Processing land polygon-1746056660534 (Calle de le Lezze in Contrada San Moisï¿½, Sestiere di San Marco) with income 17791 for owner ConsiglioDeiDieci
 2025-05-07 10:04:28,509 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 111561434 to 111543643
 2025-05-07 10:04:28,942 - income_distributor - INFO - Updated compute balance for user recVTR2tdnH6QmCFs from 111543643 to 111561434
 2025-05-07 10:04:29,242 - income_distributor - INFO - Created transaction record rectPUOmdWJD0pBAZ for 17791 COMPUTE from ConsiglioDeiDieci to ConsiglioDeiDieci

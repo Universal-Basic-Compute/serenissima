@@ -3,7 +3,7 @@
  * - Add comprehensive logging
  * - Add unit tests for service methods
  */
-import { getApiBaseUrl } from '../apiUtils';
+import { getBackendBaseUrl } from '../apiUtils';
 import { eventBus, EventTypes } from '../eventBus';
 import { log } from '../logUtils';
 import { 
@@ -217,7 +217,7 @@ export class UserService {
       return this.usersCache!.data;
     }
     
-    const endpoint = `${getApiBaseUrl()}/api/users`;
+    const endpoint = `${getBackendBaseUrl()}/api/users`;
     
     log.info(`Fetching users from endpoint: ${endpoint}`);
     const startTime = performance.now();
@@ -427,7 +427,7 @@ export class UserService {
     }
     
     // Fetch user profile
-    const endpoint = `${getApiBaseUrl()}/api/wallet/${address}`;
+    const endpoint = `${getBackendBaseUrl()}/api/wallet/${address}`;
     log.debug(`Fetching user profile from endpoint: ${endpoint}`);
     
     const startTime = performance.now();
@@ -623,7 +623,7 @@ export class UserService {
       newUsername: profile.username || this.currentUser?.username
     });
     
-    const endpoint = `${getApiBaseUrl()}/api/wallet`;
+    const endpoint = `${getBackendBaseUrl()}/api/wallet`;
     log.debug(`Sending profile update to endpoint: ${endpoint}`);
     
     const startTime = performance.now();

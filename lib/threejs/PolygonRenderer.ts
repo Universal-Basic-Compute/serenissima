@@ -10,5 +10,5 @@ import {
   RenderingErrorType, 
   withErrorHandling 
 } from '../../lib/errorHandling';
-import { getApiBaseUrl } from '../apiUtils';
+import { getBackendBaseUrl } from '../apiUtils';
 import { eventBus, EventTypes } from '../eventBus';

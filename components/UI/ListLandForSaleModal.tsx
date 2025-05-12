@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { getApiBaseUrl } from '@/lib/apiUtils';
+import { getBackendBaseUrl } from '@/lib/apiUtils';
 import { getWalletAddress } from '@/lib/walletUtils';
 import NextImage from 'next/image';
 
@@ -44,7 +44,7 @@ const ListLandForSaleModal: React.FC<ListLandForSaleModalProps> = ({
     setError(null);
     
     try {
-      const response = await fetch(`${getApiBaseUrl()}/api/transaction`, {
+      const response = await fetch(`${getBackendBaseUrl()}/api/transaction`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

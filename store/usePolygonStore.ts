@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { getApiBaseUrl } from '@/lib/apiUtils';
+import { getBackendBaseUrl } from '@/lib/apiUtils';
 import { ViewMode, Polygon } from '@/components/PolygonViewer/types';
 import { eventBus, EventTypes } from '@/lib/eventBus';
 
@@ -467,7 +467,7 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
   
   loadOwnerCoatOfArms: async () => {
     try {
-      const response = await fetch(`${getApiBaseUrl()}/api/users/coat-of-arms`);
+      const response = await fetch(`${getBackendBaseUrl()}/api/users/coat-of-arms`);
       if (!response.ok) {
         throw new Error(`Failed to fetch owner coat of arms: ${response.status}`);
       }

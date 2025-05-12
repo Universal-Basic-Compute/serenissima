@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getApiBaseUrl } from '@/lib/apiUtils';
+import { getBackendBaseUrl } from '@/lib/apiUtils';
 import PlayerProfile from '../UI/PlayerProfile';
 import AnimatedDucats from '../UI/AnimatedDucats';
 import { eventBus, EventTypes } from '../../lib/eventBus';
@@ -19,7 +19,7 @@ const getUsernameFromWallet = async (walletAddress: string): Promise<string | nu
     }
     
     // If not found, fetch from API
-    const response = await fetch(`${getApiBaseUrl()}/api/wallet/${walletAddress}`);
+    const response = await fetch(`${getBackendBaseUrl()}/api/wallet/${walletAddress}`);
     if (response.ok) {
       const data = await response.json();
       return data.user_name || null;

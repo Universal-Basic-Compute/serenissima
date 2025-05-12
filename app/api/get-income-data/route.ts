@@ -43,11 +43,11 @@ export async function GET() {
     // Extract income data from the records
     const incomeData = records
       .filter(record => record.get('LandId') && 
-              (record.get('SimulatedIncome') !== undefined || 
-               record.get('SimulatedIncome') !== null))
+              (record.get('LastIncome') !== undefined || 
+               record.get('LastIncome') !== null))
       .map(record => ({
         polygonId: record.get('LandId'),
-        income: record.get('SimulatedIncome') || 0
+        income: record.get('LastIncome') || 0
       }));
     
     console.log(`Extracted income data for ${incomeData.length} land parcels`);

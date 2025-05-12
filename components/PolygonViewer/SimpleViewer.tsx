@@ -8,7 +8,7 @@ import SimplePolygonRenderer from './SimplePolygonRenderer';
 import { IncomePolygonRenderer } from '../../lib/threejs/IncomePolygonRenderer';
 import { ResourceDisplayManager } from '../../lib/threejs/ResourceDisplayManager';
 import { calculateBounds } from './utils';
-import { getApiBaseUrl } from '@/lib/apiUtils';
+import { getBackendBaseUrl } from '@/lib/apiUtils';
 import LandDetailsPanel from './LandDetailsPanel'; // Import the existing panel
 import { eventBus } from '@/lib/eventBus';
 import { EventTypes } from '@/lib/eventTypes';
@@ -51,8 +51,8 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
   // Define loadUsers as a reusable function
   const loadUsers = useCallback(async () => {
     try {
-      // Add a fallback URL in case getApiBaseUrl() fails
-      const apiUrl = getApiBaseUrl() || window.location.origin;
+      // Add a fallback URL in case getBackendBaseUrl() fails
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
       
       // Try to fetch from the API
       console.log(`Attempting to fetch users from ${apiUrl}/api/users`);

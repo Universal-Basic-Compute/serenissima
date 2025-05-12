@@ -33,7 +33,7 @@ interface PolygonViewerProps {
 }
 
 import { useEffect, useRef, useState, useCallback, MutableRefObject } from 'react';
-import { getApiBaseUrl } from '@/lib/apiUtils';
+import { getBackendBaseUrl } from '@/lib/apiUtils';
 import { PhantomWalletAdapter } from '@solana/wallet-adapter-phantom';
 import { WalletReadyState } from '@solana/wallet-adapter-base';
 import dynamic from 'next/dynamic';
@@ -172,7 +172,7 @@ export default function Home() {
     setIsGeneratingImage(true);
     
     try {
-      const response = await fetch(`${getApiBaseUrl()}/api/generate-coat-of-arms`, {
+      const response = await fetch(`${getBackendBaseUrl()}/api/generate-coat-of-arms`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -291,7 +291,7 @@ export default function Home() {
       }
       
       // Also fetch user profile data from backend to ensure it's up to date
-      fetch(`${getApiBaseUrl()}/api/wallet/${storedWallet}`)
+      fetch(`${getBackendBaseUrl()}/api/wallet/${storedWallet}`)
         .then(response => {
           if (response.ok) return response.json();
           throw new Error('Failed to fetch user profile');
@@ -407,7 +407,7 @@ export default function Home() {
   // Functions to interact with the backend
   const storeWalletInAirtable = async (walletAddress: string) => {
     try {
-      const response = await fetch(`${getApiBaseUrl()}/api/wallet`, {
+      const response = await fetch(`${getBackendBaseUrl()}/api/wallet`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -486,7 +486,7 @@ export default function Home() {
       });
           
       // Update the user record with the username, first name, last name, coat of arms, family motto, and image URL
-      const response = await fetch(`${getApiBaseUrl()}/api/wallet`, {
+      const response = await fetch(`${getBackendBaseUrl()}/api/wallet`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -609,7 +609,7 @@ export default function Home() {
   // Add function to load users data
   const loadUsers = useCallback(async () => {
     try {
-      const response = await fetch(`${getApiBaseUrl()}/api/users`);
+      const response = await fetch(`${getBackendBaseUrl()}/api/users`);
       if (response.ok) {
         const data = await response.json();
         if (data && Array.isArray(data)) {
@@ -645,7 +645,7 @@ export default function Home() {
       incomeService.loadIncomeData().catch(error => {
         console.error('Error loading income data:', error);
         // Generate simulated data as fallback
-        incomeService.generateSimulatedIncomeData(polygons);
+        incomeService.generateLastIncomeData(polygons);
       });
     } catch (error) {
       console.warn('Error initializing income data service:', error);
@@ -794,8 +794,8 @@ export default function Home() {
         // Find the polygon in our data
         const polygon = polygons.find(p => p.id === data.polygonId);
         if (polygon) {
-          // Update the polygon's simulated income
-          polygon.simulatedIncome = data.income;
+          // Update the polygon's last income
+          polygon.lastIncome = data.income;
           
           // Update the income visualization
           incomeRendererRef.current.updateIncomeVisualization();
@@ -910,7 +910,7 @@ export default function Home() {
       }
       
       // Call the backend API to transfer compute using Solana
-      const response = await fetch(`${getApiBaseUrl()}/api/transfer-compute-solana`, {
+      const response = await fetch(`${getBackendBaseUrl()}/api/transfer-compute-solana`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -1013,7 +1013,7 @@ export default function Home() {
       }
       
       // Fall back to the backend API
-      const response = await fetch(`${getApiBaseUrl()}/api/withdraw-compute-solana`, {
+      const response = await fetch(`${getBackendBaseUrl()}/api/withdraw-compute-solana`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

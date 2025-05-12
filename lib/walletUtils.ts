@@ -1,5 +1,5 @@
 // Utility functions for wallet management
-import { getApiBaseUrl } from '@/lib/apiUtils';
+import { getBackendBaseUrl } from '@/lib/apiUtils';
 
 export function getWalletAddress(): string | null {
   if (typeof window === 'undefined') return null;
@@ -74,7 +74,7 @@ export function clearWalletAddress(): void {
  */
 export async function storeWalletInAirtable(walletAddress: string) {
   try {
-    const response = await fetch(`${getApiBaseUrl()}/api/wallet`, {
+    const response = await fetch(`${getBackendBaseUrl()}/api/wallet`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -111,7 +111,7 @@ export async function connectAndPersistWallet(address: string): Promise<any> {
     setWalletAddress(address);
     
     // Then connect it through the API
-    const response = await fetch(`${getApiBaseUrl()}/api/wallet`, {
+    const response = await fetch(`${getBackendBaseUrl()}/api/wallet`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

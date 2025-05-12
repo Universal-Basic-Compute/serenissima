@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getApiBaseUrl } from '@/lib/apiUtils';
+import { getBackendBaseUrl } from '@/lib/apiUtils';
 
 export async function POST(request: NextRequest) {
   try {
@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     }
     
     // Forward the request to the backend API
-    const apiBaseUrl = getApiBaseUrl();
+    const apiBaseUrl = getBackendBaseUrl();
     const response = await fetch(`${apiBaseUrl}/api/loans/apply`, {
       method: 'POST',
       headers: {

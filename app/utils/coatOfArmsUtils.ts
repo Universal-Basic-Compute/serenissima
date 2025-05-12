@@ -1,4 +1,4 @@
-import { getApiBaseUrl } from '@/lib/apiUtils';
+import { getBackendBaseUrl } from '@/lib/apiUtils';
 
 /**
  * Generates a coat of arms image based on a text description

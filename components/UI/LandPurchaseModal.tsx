@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getApiBaseUrl } from '@/lib/apiUtils';
+import { getBackendBaseUrl } from '@/lib/apiUtils';
 
 interface LandPurchaseModalProps {
   visible: boolean;
@@ -13,7 +13,7 @@ interface LandPurchaseModalProps {
 // Add a function to get username from wallet address
 const getUsernameFromWallet = async (walletAddress: string): Promise<string | null> => {
   try {
-    const response = await fetch(`${getApiBaseUrl()}/api/wallet/${walletAddress}`);
+    const response = await fetch(`${getBackendBaseUrl()}/api/wallet/${walletAddress}`);
     if (response.ok) {
       const data = await response.json();
       return data.user_name || null;
@@ -53,7 +53,7 @@ const LandPurchaseModal: React.FC<LandPurchaseModalProps> = ({
       // Get the username for this wallet
       let username = null;
       try {
-        const userResponse = await fetch(`${getApiBaseUrl()}/api/wallet/${walletAddress}`);
+        const userResponse = await fetch(`${getBackendBaseUrl()}/api/wallet/${walletAddress}`);
         if (userResponse.ok) {
           const userData = await userResponse.json();
           username = userData.user_name;
@@ -72,7 +72,7 @@ const LandPurchaseModal: React.FC<LandPurchaseModalProps> = ({
         console.log(`Executing transaction ${transaction.id} via Next.js API route`);
         
         // Call the backend API to execute the transaction
-        const response = await fetch(`${getApiBaseUrl()}/api/transaction/${transaction.id}/execute`, {
+        const response = await fetch(`${getBackendBaseUrl()}/api/transaction/${transaction.id}/execute`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -98,7 +98,7 @@ const LandPurchaseModal: React.FC<LandPurchaseModalProps> = ({
             alert(`This land has already been acquired. The information will be updated.`);
         
             // Fetch updated land data
-            const landResponse = await fetch(`${getApiBaseUrl()}/api/land/${landId}`);
+            const landResponse = await fetch(`${getBackendBaseUrl()}/api/land/${landId}`);
             if (landResponse.ok) {
               const landData = await landResponse.json();
               console.log('Fetched updated land data:', landData);
@@ -286,7 +286,7 @@ const LandPurchaseModal: React.FC<LandPurchaseModalProps> = ({
         while (retryCount < maxRetries && !userDataFetched) {
           try {
             console.log(`Attempt ${retryCount + 1} to fetch updated user data`);
-            const userResponse = await fetch(`${getApiBaseUrl()}/api/wallet/${walletAddress}`);
+            const userResponse = await fetch(`${getBackendBaseUrl()}/api/wallet/${walletAddress}`);
           
             if (userResponse.ok) {
               const userData = await userResponse.json();
@@ -396,7 +396,7 @@ const LandPurchaseModal: React.FC<LandPurchaseModalProps> = ({
             }));
     
             // Fetch updated user data to reflect new compute balance
-            const userResponse = await fetch(`${getApiBaseUrl()}/api/wallet/${walletAddress}`);
+            const userResponse = await fetch(`${getBackendBaseUrl()}/api/wallet/${walletAddress}`);
             if (userResponse.ok) {
               const userData = await userResponse.json();
       

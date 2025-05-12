@@ -25,7 +25,7 @@ import BuildingMenu from '../components/PolygonViewer/BuildingMenu';
 import { LoanMarketplace, LoanManagementDashboard, LoanApplicationModal } from '../components/Loans';
 import Settings from '../components/UI/Settings';
 import ResourceDropdowns from '../components/UI/ResourceDropdowns';
-import { getApiBaseUrl } from '@/lib/apiUtils';
+import { getBackendBaseUrl } from '@/lib/apiUtils';
 import { getWalletAddress } from '@/lib/walletUtils';
 import { transferCompute, withdrawCompute } from '@/lib/computeUtils';
 import { generateCoatOfArmsImage } from '@/app/utils/coatOfArmsUtils';
@@ -338,7 +338,7 @@ export default function SimplePage() {
       });
           
       // Update the user record with the username, first name, last name, coat of arms, family motto, and image URL
-      const response = await fetch(`${getApiBaseUrl()}/api/wallet`, {
+      const response = await fetch(`${getBackendBaseUrl()}/api/wallet`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -1433,7 +1433,7 @@ export default function SimplePage() {
               }
               
               // Execute the transaction
-              const response = await fetch(`${getApiBaseUrl()}/api/transaction/${landPurchaseData.transaction.id}/execute`, {
+              const response = await fetch(`${getBackendBaseUrl()}/api/transaction/${landPurchaseData.transaction.id}/execute`, {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',

@@ -1,5 +1,5 @@
 import { Polygon, Coordinate } from '../../components/PolygonViewer/types';
-import { getApiBaseUrl } from '../apiUtils';
+import { getBackendBaseUrl } from '../apiUtils';
 import { eventBus, EventTypes } from '../eventBus';
 
 /**
@@ -19,7 +19,7 @@ export class PolygonService {
       this.loading = true;
       this.error = null;
       
-      const response = await fetch(`${getApiBaseUrl()}/api/polygons`);
+      const response = await fetch(`${getBackendBaseUrl()}/api/polygons`);
       
       if (!response.ok) {
         throw new Error(`Failed to load polygons: ${response.status}`);
@@ -57,7 +57,7 @@ export class PolygonService {
    */
   public async loadLandOwners(): Promise<Record<string, string>> {
     try {
-      const response = await fetch(`${getApiBaseUrl()}/api/land-owners`);
+      const response = await fetch(`${getBackendBaseUrl()}/api/land-owners`);
       
       if (!response.ok) {
         throw new Error(`Failed to load land owners: ${response.status}`);

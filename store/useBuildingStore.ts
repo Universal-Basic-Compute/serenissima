@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { Building, BuildingCategory } from '@/lib/services/BuildingService';
-import { getApiBaseUrl } from '@/lib/apiUtils';
+import { getBackendBaseUrl } from '@/lib/apiUtils';
 
 interface BuildingState {
   categories: BuildingCategory[];
@@ -50,7 +50,7 @@ const useBuildingStore = create<BuildingState & BuildingActions>((set, get) => (
     
     try {
       const loadedCategories: BuildingCategory[] = [];
-      const apiBaseUrl = getApiBaseUrl();
+      const apiBaseUrl = getBackendBaseUrl();
 
       for (const category of categoryFiles) {
         try {

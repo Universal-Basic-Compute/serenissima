@@ -887,8 +887,8 @@ export default class PolygonRenderer {
         const incomeService = getIncomeDataService();
         
         // Get income for this polygon
-        const income = polygon.simulatedIncome !== undefined 
-          ? polygon.simulatedIncome 
+        const income = polygon.lastIncome !== undefined 
+          ? polygon.lastIncome 
           : incomeService.getIncome(polygon.id);
         
         if (income !== undefined) {
@@ -904,9 +904,9 @@ export default class PolygonRenderer {
       } catch (error) {
         console.warn('Error getting income data service:', error);
         
-        // Fallback to using polygon's simulated income if available
-        if (polygon.simulatedIncome !== undefined) {
-          color = this.getIncomeBasedColor(polygon.simulatedIncome);
+        // Fallback to using polygon's last income if available
+        if (polygon.lastIncome !== undefined) {
+          color = this.getIncomeBasedColor(polygon.lastIncome);
         } else {
           // Default color for land without income data
           color = new THREE.Color(0xf5e9c8);
@@ -1104,7 +1104,7 @@ export default class PolygonRenderer {
   }
   
   /**
-   * Update colors for all polygons based on simulated income
+   * Update colors for all polygons based on last income
    */
   public updatePolygonIncomeColors() {
     console.log('Updating polygon colors based on income data');
@@ -1124,8 +1124,8 @@ export default class PolygonRenderer {
             if (!polygon) return;
             
             // Get income for this polygon
-            const income = polygon.simulatedIncome !== undefined 
-              ? polygon.simulatedIncome 
+            const income = polygon.lastIncome !== undefined 
+              ? polygon.lastIncome 
               : incomeService.getIncome(polygonId);
             
             if (income !== undefined && mesh.material instanceof THREE.MeshBasicMaterial) {
@@ -1606,8 +1606,8 @@ export default class PolygonRenderer {
           try {
             const { getIncomeDataService } = require('../../lib/services/IncomeDataService');
             const incomeService = getIncomeDataService();
-            const income = polygon.simulatedIncome !== undefined 
-              ? polygon.simulatedIncome 
+            const income = polygon.lastIncome !== undefined 
+              ? polygon.lastIncome 
               : incomeService.getIncome(polygon.id);
             
             if (income !== undefined) {

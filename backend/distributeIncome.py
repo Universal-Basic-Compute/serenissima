@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Income Distribution Script
-- Distributes simulated income from lands to their owners
+- Distributes last income from lands to their owners
 - Transfers COMPUTE tokens from ConsiglioDeiDieci to land owners
 - Runs daily via cron job
 """
@@ -82,17 +82,17 @@ def get_consiglio_dei_dieci(users_table):
         return None
 
 def get_lands_with_income(lands_table):
-    """Get all lands with simulated income"""
+    """Get all lands with last income"""
     try:
         # Get all lands
         lands = lands_table.all()
         
-        # Filter lands with simulated income
+        # Filter lands with last income
         lands_with_income = []
         for land in lands:
-            # Check if land has SimulatedIncome field directly
-            if "SimulatedIncome" in land["fields"]:
-                income = land["fields"]["SimulatedIncome"]
+            # Check if land has LastIncome field directly
+            if "LastIncome" in land["fields"]:
+                income = land["fields"]["LastIncome"]
                 if income and income > 0:
                     lands_with_income.append({
                         "id": land["id"],
@@ -102,7 +102,7 @@ def get_lands_with_income(lands_table):
                         "historical_name": land["fields"].get("HistoricalName", "")
                     })
         
-        log.info(f"Found {len(lands_with_income)} lands with simulated income")
+        log.info(f"Found {len(lands_with_income)} lands with last income")
         return lands_with_income
     except Exception as e:
         log.error(f"Error getting lands with income: {str(e)}")

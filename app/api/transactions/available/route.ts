@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
-import { getApiBaseUrl } from '@/lib/apiUtils';
+import { getBackendBaseUrl } from '@/lib/apiUtils';
 
 // Define the path to the transactions directory
 const TRANSACTIONS_DIR = path.join(process.cwd(), 'data', 'transactions');

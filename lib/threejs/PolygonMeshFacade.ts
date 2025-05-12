@@ -49,7 +49,7 @@ export class PolygonMeshFacade implements Poolable {
     this.ownerCoatOfArmsUrl = ownerCoatOfArmsUrl;
     
     // Check if we have income data
-    this.hasIncomeData = polygon.simulatedIncome !== undefined;
+    this.hasIncomeData = polygon.lastIncome !== undefined;
     
     // Create the mesh
     this.createMesh();
@@ -220,8 +220,8 @@ export class PolygonMeshFacade implements Poolable {
         const incomeService = getIncomeDataService();
         
         // Get income for this polygon
-        const income = this.polygon.simulatedIncome !== undefined 
-          ? this.polygon.simulatedIncome 
+        const income = this.polygon.lastIncome !== undefined 
+          ? this.polygon.lastIncome 
           : incomeService.getIncome(this.polygon.id);
         
         if (income !== undefined) {
@@ -233,10 +233,10 @@ export class PolygonMeshFacade implements Poolable {
         }
       } catch (error) {
         console.warn('Error getting income data service:', error);
-        // Fall back to using polygon's simulated income if available
-        if (this.polygon.simulatedIncome !== undefined) {
+        // Fall back to using polygon's last income if available
+        if (this.polygon.lastIncome !== undefined) {
           const { getIncomeBasedColor } = require('../../lib/colorUtils');
-          return getIncomeBasedColor(this.polygon.simulatedIncome);
+          return getIncomeBasedColor(this.polygon.lastIncome);
         }
       }
     }

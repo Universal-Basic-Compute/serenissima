@@ -29,7 +29,7 @@ export class IncomeDataService {
   
   // Methods for data loading and generation
   public async loadIncomeData(): Promise<void> { /* ... */ }
-  public generateSimulatedIncomeData(polygons?: any[]): void { /* ... */ }
+  public generateLastIncomeData(polygons?: any[]): void { /* ... */ }
   
   // Methods for data updates
   public setIncomeData(data: IncomeData[]): void { /* ... */ }
