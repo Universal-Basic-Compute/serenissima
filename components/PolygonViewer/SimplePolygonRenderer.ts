@@ -80,7 +80,7 @@ export default class SimplePolygonRenderer {
   
   // Properties for measurement
   private measurementMarkers: THREE.Mesh[] = [];
-  private measurementPoints: THREE.Vector3[] = [];
+  // Remove duplicate properties that are already in MeasurementTools class
   private measurementLine: THREE.Line | null = null;
   private measurementLabel: THREE.Sprite | null = null;
   private measurementCircle: THREE.Mesh | null = null;
@@ -2957,16 +2957,18 @@ export default class SimplePolygonRenderer {
     this.measurementPoints.push(point.clone());
     
     // If we have two points, create or update the line and distance label
-    if (this.measurementPoints.length === 2) {
+    if (this.measurementTools && this.measurementTools['measurementPoints'] && 
+        this.measurementTools['measurementPoints'].length === 2) {
       this.updateMeasurementLine();
-      
+        
       // Calculate path between points
       this.calculatePath();
     }
-    
+      
     // If we have more than two points, remove the oldest point and marker
-    if (this.measurementPoints.length > 2) {
-      const oldestPoint = this.measurementPoints.shift();
+    if (this.measurementTools && this.measurementTools['measurementPoints'] && 
+        this.measurementTools['measurementPoints'].length > 2) {
+      const oldestPoint = this.measurementTools['measurementPoints'].shift();
       const oldestMarker = this.measurementMarkers.shift();
       if (oldestMarker) {
         this.scene.remove(oldestMarker);
@@ -3012,9 +3014,10 @@ export default class SimplePolygonRenderer {
     }
     
     // Create a new line between the two points
-    if (this.measurementPoints.length >= 2) {
-      const start = this.measurementPoints[0];
-      const end = this.measurementPoints[1];
+    if (this.measurementTools && this.measurementTools['measurementPoints'] && 
+        this.measurementTools['measurementPoints'].length >= 2) {
+      const start = this.measurementTools['measurementPoints'][0];
+      const end = this.measurementTools['measurementPoints'][1];
       
       // Create line geometry
       const lineGeometry = new THREE.BufferGeometry();
@@ -3245,11 +3248,12 @@ export default class SimplePolygonRenderer {
    */
   private calculatePath(): void {
     // Only calculate path if we have exactly 2 measurement points
-    if (this.measurementPoints.length !== 2) return;
+    if (!this.measurementTools || !this.measurementTools['measurementPoints'] || 
+        this.measurementTools['measurementPoints'].length !== 2) return;
     
     // Get the start and end points
-    const start = this.measurementPoints[0];
-    const end = this.measurementPoints[1];
+    const start = this.measurementTools['measurementPoints'][0];
+    const end = this.measurementTools['measurementPoints'][1];
     
     // Convert 3D points back to lat/lng
     const startLatLng = {
@@ -3340,14 +3344,20 @@ export default class SimplePolygonRenderer {
       // If both points are not on land, draw a direct path
       if (!startPolygon && !endPolygon) {
         console.warn('Both start and end points are not on land, drawing direct path');
-        this.drawDirectPath(this.measurementPoints[0], this.measurementPoints[1]);
+        if (this.measurementTools && this.measurementTools['measurementPoints'] && 
+            this.measurementTools['measurementPoints'].length >= 2) {
+          this.drawDirectPath(this.measurementTools['measurementPoints'][0], this.measurementTools['measurementPoints'][1]);
+        }
         return;
       }
       
       // If start and end are in the same polygon, draw a direct path
       if (startPolygon && endPolygon && startPolygon.id === endPolygon.id) {
         console.log('Start and end points are in the same polygon, drawing direct path');
-        this.drawDirectPath(this.measurementPoints[0], this.measurementPoints[1]);
+        if (this.measurementTools && this.measurementTools['measurementPoints'] && 
+            this.measurementTools['measurementPoints'].length >= 2) {
+          this.drawDirectPath(this.measurementTools['measurementPoints'][0], this.measurementTools['measurementPoints'][1]);
+        }
         return;
       }
       
@@ -3377,12 +3387,18 @@ export default class SimplePolygonRenderer {
       } else {
         // One point is on land, one is not - draw direct path
         console.warn('One point is on land, one is not, drawing direct path');
-        this.drawDirectPath(this.measurementPoints[0], this.measurementPoints[1]);
+        if (this.measurementTools && this.measurementTools['measurementPoints'] && 
+            this.measurementTools['measurementPoints'].length >= 2) {
+          this.drawDirectPath(this.measurementTools['measurementPoints'][0], this.measurementTools['measurementPoints'][1]);
+        }
       }
     } catch (error) {
       console.error('Error finding path:', error);
       // Fallback to direct path in case of error
-      this.drawDirectPath(this.measurementPoints[0], this.measurementPoints[1]);
+      if (this.measurementTools && this.measurementTools['measurementPoints'] && 
+          this.measurementTools['measurementPoints'].length >= 2) {
+        this.drawDirectPath(this.measurementTools['measurementPoints'][0], this.measurementTools['measurementPoints'][1]);
+      }
     }
   }
   
@@ -4299,8 +4315,11 @@ export default class SimplePolygonRenderer {
     const pathPoints: THREE.Vector3[] = [];
     
     // Add the start point
-    const startPoint = this.measurementPoints[0];
-    pathPoints.push(startPoint);
+    if (this.measurementTools && this.measurementTools['measurementPoints'] && 
+        this.measurementTools['measurementPoints'].length >= 1) {
+      const startPoint = this.measurementTools['measurementPoints'][0];
+      pathPoints.push(startPoint);
+    }
     
     // Get bridge information for the path using NavigationGraphService
     const navigationGraphService = NavigationGraphService.getInstance();
@@ -4353,8 +4372,11 @@ export default class SimplePolygonRenderer {
     }
     
     // Add the end point
-    const endPoint = this.measurementPoints[1];
-    pathPoints.push(endPoint);
+    if (this.measurementTools && this.measurementTools['measurementPoints'] && 
+        this.measurementTools['measurementPoints'].length >= 2) {
+      const endPoint = this.measurementTools['measurementPoints'][1];
+      pathPoints.push(endPoint);
+    }
     
     console.log(`Path has ${pathPoints.length} points`);
     
