@@ -122,34 +122,10 @@ const Settings: React.FC<SettingsProps> = ({ onClose }) => {
                     <select 
                       className="w-full border border-amber-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-amber-500 focus:border-amber-500"
                     >
-                      <option value="ultra">Ultra</option>
                       <option value="high">High</option>
                       <option value="medium">Medium</option>
                       <option value="low">Low</option>
-                      <option value="minimal">Minimal</option>
                     </select>
-                  </div>
-                  
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      id="shadows"
-                      className="h-4 w-4 text-amber-600 focus:ring-amber-500 border-gray-300 rounded"
-                    />
-                    <label htmlFor="shadows" className="ml-2 block text-sm text-gray-700">
-                      Enable Shadows
-                    </label>
-                  </div>
-                  
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      id="postprocessing"
-                      className="h-4 w-4 text-amber-600 focus:ring-amber-500 border-gray-300 rounded"
-                    />
-                    <label htmlFor="postprocessing" className="ml-2 block text-sm text-gray-700">
-                      Enable Post-Processing Effects
-                    </label>
                   </div>
                 </div>
               </div>
