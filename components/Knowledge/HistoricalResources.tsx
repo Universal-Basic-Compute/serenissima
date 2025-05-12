@@ -41,31 +41,31 @@ const HistoricalResources: React.FC<HistoricalResourcesProps> = ({ onSelectArtic
           </div>
         </div>
         
-        {/* Venetian Architecture */}
+        {/* Venetian Guilds */}
         <div className="bg-white rounded-lg overflow-hidden shadow-md border border-amber-200">
           <div className="h-48 overflow-hidden">
             <Image 
-              src="/images/venetian-architecture.png" 
-              alt="Venetian Architecture" 
+              src="/images/venetian-guilds.png" 
+              alt="Venetian Guilds" 
               width={800}
               height={400}
               className="w-full h-full object-cover transition-transform hover:scale-105"
               onError={(e) => {
                 // Fallback if image doesn't exist
-                (e.target as HTMLImageElement).src = 'https://via.placeholder.com/800x400?text=Venetian+Architecture';
+                (e.target as HTMLImageElement).src = 'https://via.placeholder.com/800x400?text=Venetian+Guilds';
               }}
             />
           </div>
           <div className="p-6">
-            <h3 className="text-xl font-serif text-amber-800 mb-2">Venetian Architecture</h3>
+            <h3 className="text-xl font-serif text-amber-800 mb-2">The Venetian Guild System</h3>
             <p className="text-gray-600 mb-4">
-              Explore the unique architectural styles of Renaissance Venice and their implementation in-game.
+              Explore the powerful craft guilds that regulated trade and production in Renaissance Venice.
             </p>
             <button 
-              className="inline-block px-4 py-2 bg-gray-400 text-white rounded cursor-not-allowed"
-              disabled
+              onClick={() => onSelectArticle("venetian-guilds")}
+              className="inline-block px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors"
             >
-              Coming Soon
+              Read Article
             </button>
           </div>
         </div>
