@@ -4,17 +4,12 @@ import { eventBus, EventTypes } from '../eventBus';
 import { BuildingService } from '../services/BuildingService';
 import { getDockService } from '../services/DockService';
 
-// Define the BuildingData interface
-interface BuildingData {
-  type: string;
-  land_id: string;
-  position: {
-    x: number;
-    y: number;
-    z: number;
-  };
-  rotation: number;
-  variant: string;
+// Import BuildingData interface from BuildingService
+import { BuildingData as ServiceBuildingData } from '../services/BuildingService';
+
+// Define the BuildingData interface that matches the service
+interface BuildingData extends ServiceBuildingData {
+  // Any additional properties can be added here if needed
 }
 
 interface PlaceableObjectManagerProps {
@@ -311,7 +306,7 @@ const PlaceableObjectManager: React.FC<PlaceableObjectManagerProps> = ({
           variant: objectData.variant || 'model'
         };
         
-        // Save building
+        // Save building - buildingData already matches the expected type
         placedObject = await buildingServiceRef.current.saveBuilding(buildingData);
       } else if (type === 'dock') {
         // Create dock
