@@ -1,6 +1,12 @@
 import * as THREE from 'three';
 import { normalizeCoordinates } from '../../components/PolygonViewer/utils';
-import { Polygon } from '../../components/PolygonViewer/types';
+import { Polygon as BasePolygon } from '../../components/PolygonViewer/types';
+import { Coordinate } from '../../components/PolygonViewer/types';
+
+// Extend the Polygon type to include buildingPoints
+interface Polygon extends BasePolygon {
+  buildingPoints?: Coordinate[];
+}
 
 export interface BuildingPointManagerProps {
   scene: THREE.Scene;
