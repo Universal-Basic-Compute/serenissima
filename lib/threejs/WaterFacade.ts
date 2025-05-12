@@ -7,11 +7,9 @@ import { RaycastingUtils } from '../utils/RaycastingUtils';
  * Enum for water quality levels with more granular options
  */
 export enum WaterQualityLevel {
-  ULTRA = 'ultra',
   HIGH = 'high',
   MEDIUM = 'medium',
-  LOW = 'low',
-  MINIMAL = 'minimal'
+  LOW = 'low'
 }
 
 /**
@@ -73,12 +71,10 @@ export class WaterFacade {
     // Convert string quality to enum if needed
     if (typeof options.quality === 'string') {
       switch (options.quality) {
-        case 'ultra': this.quality = WaterQualityLevel.ULTRA; break;
         case 'high': this.quality = WaterQualityLevel.HIGH; break;
         case 'medium': this.quality = WaterQualityLevel.MEDIUM; break;
         case 'low': this.quality = WaterQualityLevel.LOW; break;
-        case 'minimal': this.quality = WaterQualityLevel.MINIMAL; break;
-        default: this.quality = WaterQualityLevel.MEDIUM;
+        default: this.quality = WaterQualityLevel.MEDIUM; // Default to medium
       }
     } else {
       this.quality = options.quality || WaterQualityLevel.MEDIUM;
@@ -110,7 +106,7 @@ export class WaterFacade {
       this.water = this.createWater();
       this.scene.add(this.water);
       
-      console.log('Water created with size:', this.size);
+      console.log('Water created with size:', this.size, 'quality:', this.quality);
     } catch (error) {
       this.errorHandler.handleError({
         type: RenderingErrorType.MESH_CREATION,
@@ -317,9 +313,6 @@ export class WaterFacade {
    */
   private updateQualitySettings(): void {
     switch (this.quality) {
-      case WaterQualityLevel.ULTRA:
-        this.updateInterval = 0; // Update every frame
-        break;
       case WaterQualityLevel.HIGH:
         this.updateInterval = 16; // ~60fps
         break;
@@ -328,9 +321,6 @@ export class WaterFacade {
         break;
       case WaterQualityLevel.LOW:
         this.updateInterval = 66; // ~15fps
-        break;
-      case WaterQualityLevel.MINIMAL:
-        this.updateInterval = 100; // ~10fps
         break;
       default:
         this.updateInterval = 33; // Default to medium
@@ -344,11 +334,9 @@ export class WaterFacade {
    */
   private getTextureSize(): number {
     switch (this.quality) {
-      case WaterQualityLevel.ULTRA: return 2048;
       case WaterQualityLevel.HIGH: return 1024;
       case WaterQualityLevel.MEDIUM: return 512;
       case WaterQualityLevel.LOW: return 256;
-      case WaterQualityLevel.MINIMAL: return 128;
       default: return 512;
     }
   }
@@ -360,12 +348,10 @@ export class WaterFacade {
    */
   private getDefaultDistortionScale(): number {
     switch (this.quality) {
-      case WaterQualityLevel.ULTRA: return 4.0;
       case WaterQualityLevel.HIGH: return 3.5;
-      case WaterQualityLevel.MEDIUM: return 3.0;
-      case WaterQualityLevel.LOW: return 2.0;
-      case WaterQualityLevel.MINIMAL: return 1.0;
-      default: return 3.0;
+      case WaterQualityLevel.MEDIUM: return 2.5;
+      case WaterQualityLevel.LOW: return 1.5;
+      default: return 2.5;
     }
   }
   
@@ -376,11 +362,9 @@ export class WaterFacade {
    */
   private getGeometryDetail(): number {
     switch (this.quality) {
-      case WaterQualityLevel.ULTRA: return 256;
       case WaterQualityLevel.HIGH: return 128;
       case WaterQualityLevel.MEDIUM: return 64;
       case WaterQualityLevel.LOW: return 32;
-      case WaterQualityLevel.MINIMAL: return 16;
       default: return 64;
     }
   }
@@ -392,11 +376,9 @@ export class WaterFacade {
    */
   private getTextureRepeatFactor(): number {
     switch (this.quality) {
-      case WaterQualityLevel.ULTRA: return 6;
       case WaterQualityLevel.HIGH: return 4;
       case WaterQualityLevel.MEDIUM: return 3;
       case WaterQualityLevel.LOW: return 2;
-      case WaterQualityLevel.MINIMAL: return 1;
       default: return 3;
     }
   }
@@ -519,11 +501,9 @@ export class WaterFacade {
    */
   private getAnimationSpeedFactor(): number {
     switch (this.quality) {
-      case WaterQualityLevel.ULTRA: return 1.0;
       case WaterQualityLevel.HIGH: return 1.0;
       case WaterQualityLevel.MEDIUM: return 0.8;
       case WaterQualityLevel.LOW: return 0.6;
-      case WaterQualityLevel.MINIMAL: return 0.4;
       default: return 0.8;
     }
   }
@@ -540,11 +520,9 @@ export class WaterFacade {
     let qualityLevel: WaterQualityLevel;
     if (typeof quality === 'string') {
       switch (quality) {
-        case 'ultra': qualityLevel = WaterQualityLevel.ULTRA; break;
         case 'high': qualityLevel = WaterQualityLevel.HIGH; break;
         case 'medium': qualityLevel = WaterQualityLevel.MEDIUM; break;
         case 'low': qualityLevel = WaterQualityLevel.LOW; break;
-        case 'minimal': qualityLevel = WaterQualityLevel.MINIMAL; break;
         default: qualityLevel = WaterQualityLevel.MEDIUM;
       }
     } else {
@@ -553,6 +531,8 @@ export class WaterFacade {
     
     // Skip if quality hasn't changed
     if (this.quality === qualityLevel) return;
+    
+    console.log(`Changing water quality from ${this.quality} to ${qualityLevel}`);
     
     this.quality = qualityLevel;
     this.updateQualitySettings();
@@ -575,7 +555,9 @@ export class WaterFacade {
         }
         
         this.water = null;
-        this.createWater();
+        this.water = this.createWater();
+        this.scene.add(this.water);
+        console.log('Water recreated with new quality:', qualityLevel);
       } else if (this.water && this.water.material instanceof THREE.ShaderMaterial) {
         // Simple update for minor quality changes
         const uniforms = this.water.material.uniforms;
@@ -591,10 +573,26 @@ export class WaterFacade {
           uniforms.normalSampler.value.repeat.set(repeatFactor, repeatFactor);
         }
       }
-    } catch (error) {
-      console.warn('Error updating water quality:', error);
+      
+      console.log('Water quality updated to:', qualityLevel);
     }
+  } catch (error) {
+    console.warn('Error updating water quality:', error);
   }
+}
+
+/**
+ * Get the current water quality level as a string
+ * @returns Current quality level as a string
+ */
+public getQualityString(): 'high' | 'medium' | 'low' {
+  switch (this.quality) {
+    case WaterQualityLevel.HIGH: return 'high';
+    case WaterQualityLevel.MEDIUM: return 'medium';
+    case WaterQualityLevel.LOW: return 'low';
+    default: return 'medium';
+  }
+}
 
   /**
    * Set water color
