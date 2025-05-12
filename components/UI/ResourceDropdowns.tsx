@@ -15,6 +15,24 @@ const logError = (message: string, error?: any) => {
   console.log(`%c[ResourceDropdowns] ERROR: ${message}`, 'color: #ef4444; font-weight: bold;', error || '');
 };
 
+// Helper function to get username from profile
+const getUsernameFromProfile = () => {
+  try {
+    const profileStr = localStorage.getItem('userProfile');
+    if (profileStr) {
+      const profile = JSON.parse(profileStr);
+      if (profile && profile.username) {
+        logInfo(`Using username from profile: ${profile.username}`);
+        return profile.username;
+      }
+    }
+    return null;
+  } catch (error) {
+    logError('Error parsing user profile:', error);
+    return null;
+  }
+};
+
 const ResourceDropdowns: React.FC = () => {
   logInfo('Component rendering');
   
@@ -35,13 +53,16 @@ const ResourceDropdowns: React.FC = () => {
         resourceService.clearCache();
       }
       
-      // Get the current wallet address
-      const walletAddress = getWalletAddress();
-      logInfo('Current wallet address:', walletAddress);
+      // First try to get username from profile
+      const username = getUsernameFromProfile();
+      
+      // If no username in profile, fall back to wallet address
+      const owner = username || getWalletAddress();
+      logInfo('Current owner identifier:', owner);
       
       // Get resource counts for the current user
       logInfo('Fetching resource counts');
-      const resources = await resourceService.getResourceCounts(walletAddress);
+      const resources = await resourceService.getResourceCounts(owner);
       logInfo(`Received ${resources.length} resources`);
       
       // Group resources by category
