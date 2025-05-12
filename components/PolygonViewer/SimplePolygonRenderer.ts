@@ -1411,6 +1411,9 @@ export default class SimplePolygonRenderer {
     // Delegate to the BuildingPointManager
     this.buildingPointManager.createBuildingPoints(this.polygons);
     
+    // Store reference to building point markers
+    this.buildingPointMarkers = this.buildingPointManager.getBuildingPointMarkers();
+    
     // After creating building points, replace them with actual buildings
     // Use setTimeout to ensure the building points are rendered first
     setTimeout(() => {
@@ -1880,7 +1883,7 @@ export default class SimplePolygonRenderer {
   // Properties for measurement
   private measurementMarkers: THREE.Mesh[] = [];
   // Define measurementPoints property to fix TypeScript errors
-  public measurementPoints: THREE.Vector3[] = [];
+  private measurementPoints: THREE.Vector3[] = [];
   private measurementLine: THREE.Line | null = null;
   private measurementLabel: THREE.Sprite | null = null;
   private measurementCircle: THREE.Mesh | null = null;
@@ -3887,6 +3890,25 @@ export default class SimplePolygonRenderer {
     }
   }
 
+  /**
+   * Clear building point markers
+   */
+  private clearBuildingPointMarkers(): void {
+    this.buildingPointMarkers.forEach(marker => {
+      this.scene.remove(marker);
+      if (marker instanceof THREE.Mesh) {
+        if (marker.geometry) marker.geometry.dispose();
+        if (marker.material instanceof THREE.Material) {
+          marker.material.dispose();
+        } else if (Array.isArray(marker.material)) {
+          marker.material.forEach(m => m.dispose());
+        }
+      }
+    });
+    
+    this.buildingPointMarkers = [];
+  }
+  
   /**
    * Clear citizen markers
    */
