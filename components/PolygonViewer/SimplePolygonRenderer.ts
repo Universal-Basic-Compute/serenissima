@@ -138,15 +138,17 @@ export default class SimplePolygonRenderer {
       });
     }
     
-    // Pass the owner coat of arms data to the renderer
+    // Process users data to extract coat of arms
     if (users) {
-      const ownerCoatOfArmsMap: Record<string, string> = {};
       Object.values(users).forEach((user: any) => {
         if (user.user_name && user.coat_of_arms_image) {
-          ownerCoatOfArmsMap[user.user_name] = user.coat_of_arms_image;
+          this.ownerCoatOfArmsMap[user.user_name] = user.coat_of_arms_image;
+          console.log(`Initialized coat of arms for ${user.user_name}: ${user.coat_of_arms_image}`);
         }
       });
-      this.coatOfArmsRenderer.updateCoatOfArms(ownerCoatOfArmsMap);
+      
+      // Pass the owner coat of arms data to the renderer
+      this.coatOfArmsRenderer.updateCoatOfArms(this.ownerCoatOfArmsMap);
     }
     
     // Initialize NavigationService with polygons
@@ -159,29 +161,15 @@ export default class SimplePolygonRenderer {
     // Setup lights for the scene
     this.setupLights();
     
-    // Process users data to extract coat of arms
-    if (users) {
-      Object.values(users).forEach((user: any) => {
-        if (user.user_name && user.coat_of_arms_image) {
-          this.ownerCoatOfArmsMap[user.user_name] = user.coat_of_arms_image;
-          console.log(`Initialized coat of arms for ${user.user_name}: ${user.coat_of_arms_image}`);
-        }
-      });
-    }
-    
     // Add event listener for regenerating building markers
     if (typeof window !== 'undefined') {
       window.addEventListener('regenerateBuildingMarkers', () => {
         console.log('Received regenerateBuildingMarkers event');
-        // Clear existing building markers
-        this.clearBuildingPointMarkers();
         // Create new building markers
-        this.createBuildingPoints();
+        this.buildingPointManager.createBuildingPoints(this.polygons);
         // Force them to be visible
-        this.buildingPointMarkers.forEach(marker => {
-          marker.visible = true;
-        });
-        console.log(`Regenerated ${this.buildingPointMarkers.length} building markers`);
+        this.buildingPointManager.setVisible(true);
+        console.log(`Regenerated building markers`);
       });
       
       // Add event listener for replacing building points with buildings
@@ -202,6 +190,9 @@ export default class SimplePolygonRenderer {
             console.log(`Initialized coat of arms from service for ${user.user_name}: ${user.coat_of_arms_image}`);
           }
         });
+        
+        // Update the coat of arms renderer with the latest data
+        this.coatOfArmsRenderer.updateCoatOfArms(this.ownerCoatOfArmsMap);
       }
     } catch (error) {
       console.warn('Error getting users from UserService:', error);
@@ -1892,51 +1883,13 @@ export default class SimplePolygonRenderer {
    * Add a measurement point at the specified position
    */
   public addMeasurementPoint(point: THREE.Vector3): void {
-    // Create a marker at the clicked position
-    const geometry = new THREE.CircleGeometry(0.3, 32);
-    const material = new THREE.MeshBasicMaterial({
-      color: 0xFFFF00,
-      transparent: true,
-      opacity: 0.8,
-      side: THREE.DoubleSide
-    });
-    
-    const marker = new THREE.Mesh(geometry, material);
-    marker.position.set(point.x, point.y + 0.05, point.z);
-    marker.rotation.x = -Math.PI / 2; // Make it flat
-    marker.renderOrder = 100;
-    
-    this.scene.add(marker);
-    this.measurementMarkers.push(marker);
-    this.measurementPoints.push(point.clone());
-    
-    // If we have two points, create or update the line and distance label
-    if (this.measurementPoints.length === 2) {
-      this.updateMeasurementLine();
-        
-      // Calculate path between points
-      this.calculatePath();
-    }
+    if (this.measurementTools) {
+      this.measurementTools.addMeasurementPoint(point);
       
-    // If we have more than two points, remove the oldest point and marker
-    if (this.measurementPoints.length > 2) {
-      const oldestPoint = this.measurementTools['measurementPoints'].shift();
-      const oldestMarker = this.measurementMarkers.shift();
-      if (oldestMarker) {
-        this.scene.remove(oldestMarker);
-        if (oldestMarker.geometry) oldestMarker.geometry.dispose();
-        if (oldestMarker.material instanceof THREE.Material) {
-          oldestMarker.material.dispose();
-        } else if (Array.isArray(oldestMarker.material)) {
-          oldestMarker.material.forEach(m => m.dispose());
-        }
+      // Calculate path between points if we have exactly 2 measurement points
+      if (this.measurementPoints.length === 2) {
+        this.calculatePath();
       }
-      
-      // Update the line with the new points
-      this.updateMeasurementLine();
-      
-      // Recalculate path
-      this.calculatePath();
     }
   }
 
