@@ -64,7 +64,7 @@ export class TransportPointManager {
     });
 
     // Process each polygon
-    polygons.forEach(polygon => {
+    polygons.forEach((polygon: TransportPolygon) => {
       // Process bridge points
       if (polygon.bridgePoints && Array.isArray(polygon.bridgePoints) && polygon.bridgePoints.length
 > 0) {
