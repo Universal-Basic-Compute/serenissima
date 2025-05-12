@@ -10,6 +10,8 @@ import { BuildingData as ServiceBuildingData } from '../services/BuildingService
 // Define the BuildingData interface that matches the service
 interface BuildingData extends ServiceBuildingData {
   // Any additional properties can be added here if needed
+  // Note: created_by is handled by the server, but we need to include it in the type
+  created_by?: string;
 }
 
 interface PlaceableObjectManagerProps {
@@ -303,7 +305,8 @@ const PlaceableObjectManager: React.FC<PlaceableObjectManagerProps> = ({
             z: position.z
           },
           rotation: rotation,
-          variant: objectData.variant || 'model'
+          variant: objectData.variant || 'model',
+          created_by: 'current-user' // This will be replaced by the server with the actual user ID
         };
         
         // Save building - buildingData already matches the expected type
