@@ -71,7 +71,7 @@ export default function SimplePage() {
   const [showInfo, setShowInfo] = useState(false);
   // Define the view type to ensure consistency with our ActiveViewMode type
   type ViewType = 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance' | 'loans' | 'knowledge' | 'citizens';
-  const [activeView, setActiveView] = useState<ViewType>('buildings');
+  const [activeView, setActiveView] = useState<ViewType>('land');
   const [show3DView, setShow3DView] = useState<boolean>(true);
   const [selectedCitizen, setSelectedCitizen] = useState<any>(null);
   
