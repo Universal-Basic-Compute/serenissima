@@ -129,11 +129,11 @@ export class IncomeDataService {
   }
   
   /**
-   * Generate simulated income data for testing
+   * Generate last income data for testing
    * @param polygons Optional array of polygons to generate data for
    */
   public generateLastIncomeData(polygons?: any[]): void {
-    console.log(`Generating simulated income data. Polygons provided: ${polygons ? polygons.length : 'none'}`);
+    console.log(`Generating last income data. Polygons provided: ${polygons ? polygons.length : 'none'}`);
     
     // If polygons are provided, generate data for them
     if (polygons && polygons.length > 0) {
