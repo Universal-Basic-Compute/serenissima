@@ -65,6 +65,70 @@ const HistoricalAccuracyArticle: React.FC<HistoricalAccuracyArticleProps> = ({ o
             </p>
           </section>
           
+          {/* Population and Scale Compression Section */}
+          <section className="mb-8">
+            <div className="flex items-center mb-2">
+              <FaUsers className="text-amber-700 mr-2" size={20} />
+              <h3 className="text-xl font-serif text-amber-800 mt-0">Population and Scale Compression</h3>
+            </div>
+            <p>
+              Just as we compress time, we also scale down Venice's population and physical infrastructure to create a manageable gameplay experience while maintaining historical authenticity.
+            </p>
+            
+            <h4 className="text-lg font-serif text-amber-800 mt-4 flex items-center">
+              <span className="w-1 h-6 bg-amber-500 inline-block mr-2"></span>
+              Population and Building Compression
+            </h4>
+            <p>
+              La Serenissima represents a carefully scaled miniaturization of Renaissance Venice:
+            </p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-4">
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                <h5 className="font-bold text-amber-900 mb-2">Historical Venice (circa 1525)</h5>
+                <ul className="list-disc pl-6 space-y-1">
+                  <li><strong>Population:</strong> Approximately 170,000-190,000 residents</li>
+                  <li><strong>Buildings:</strong> Estimated 20,000-25,000 structures</li>
+                  <li><strong>Density:</strong> ~7-9 residents per building on average</li>
+                  <li><strong>Geographic Area:</strong> ~7 square kilometers (main island complex)</li>
+                </ul>
+              </div>
+              
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                <h5 className="font-bold text-amber-900 mb-2">La Serenissima Game World</h5>
+                <ul className="list-disc pl-6 space-y-1">
+                  <li><strong>Population:</strong> Approximately 10,000 citizens</li>
+                  <li><strong>Buildings:</strong> Around 1,700 structures</li>
+                  <li><strong>Density:</strong> ~5.9 residents per building on average</li>
+                  <li><strong>Geographic Area:</strong> Proportionally scaled (~0.4 square kilometers equivalent)</li>
+                </ul>
+              </div>
+            </div>
+            
+            <h4 className="text-lg font-serif text-amber-800 mt-4 flex items-center">
+              <span className="w-1 h-6 bg-amber-500 inline-block mr-2"></span>
+              Compression Ratios
+            </h4>
+            <p>
+              Our game uses the following compression ratios to balance historical authenticity with gameplay:
+            </p>
+            <ul className="list-disc pl-6 my-3 space-y-1">
+              <li><strong>Population:</strong> Approximately 17:1 compression (historical : game)</li>
+              <li><strong>Buildings:</strong> Approximately 13:1 compression (historical : game)</li>
+              <li><strong>Geographic Scale:</strong> Proportionally compressed to maintain authentic urban density</li>
+            </ul>
+            
+            <div className="bg-amber-50 p-3 rounded border border-amber-200 mt-4">
+              <p className="italic text-amber-800">
+                This compression creates a manageable simulation while preserving Venice's essential character. The slightly lower density per building compared to historical reality (5.9 vs 7-9 residents) actually improves gameplay accessibility while still capturing the compressed urban feeling of Renaissance Venice.
+              </p>
+            </div>
+            
+            <p className="mt-4">
+              At this scale, you're effectively experiencing key neighborhoods and districts rather than the entire city—a focus that aligns well with the guild-based gameplay and allows for a more intimate connection with the urban environment than would be possible at full historical scale.
+            </p>
+          </section>
+          
           {/* Economic Simplification Section */}
           <section className="mb-8">
             <div className="flex items-center mb-2">
