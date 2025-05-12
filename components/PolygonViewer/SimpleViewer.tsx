@@ -776,6 +776,64 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
     };
   }, []);
   
+  // Add effect to listen for income data events
+  useEffect(() => {
+    // Handle income data fetching event
+    const handleFetchIncomeData = () => {
+      console.log('Received fetchIncomeData event');
+      if (incomeRendererRef.current) {
+        const incomeService = getIncomeDataService();
+        incomeService.loadIncomeData().then(() => {
+          console.log('Income data loaded successfully');
+          
+          // If we have an income renderer, update it
+          if (incomeRendererRef.current) {
+            incomeRendererRef.current.updateIncomeVisualization();
+          }
+        });
+      }
+    };
+    
+    // Handle showing income visualization event
+    const handleShowIncomeVisualization = () => {
+      console.log('Received showIncomeVisualization event');
+      if (incomeRendererRef.current) {
+        incomeRendererRef.current.setVisible(true);
+      }
+    };
+    
+    // Handle income data updated event from event bus
+    const handleIncomeDataUpdated = (data) => {
+      console.log('Received income data updated event:', data);
+      if (incomeRendererRef.current && activeView === 'land') {
+        incomeRendererRef.current.updateIncomeVisualization();
+      }
+    };
+    
+    window.addEventListener('fetchIncomeData', handleFetchIncomeData);
+    window.addEventListener('showIncomeVisualization', handleShowIncomeVisualization);
+    
+    // Subscribe to income data updated event
+    const incomeDataSubscription = eventBus.subscribe(
+      EventTypes.INCOME_DATA_UPDATED,
+      handleIncomeDataUpdated
+    );
+    
+    // Also fetch income data immediately if we're in land view
+    if (activeView === 'land') {
+      const incomeService = getIncomeDataService();
+      incomeService.loadIncomeData().then(() => {
+        console.log('Income data loaded on initial mount');
+      });
+    }
+    
+    return () => {
+      window.removeEventListener('fetchIncomeData', handleFetchIncomeData);
+      window.removeEventListener('showIncomeVisualization', handleShowIncomeVisualization);
+      incomeDataSubscription.unsubscribe();
+    };
+  }, [activeView]);
+  
   // Add effect to update coat of arms when user data changes
   useEffect(() => {
     const handleUserProfileUpdated = (event: CustomEvent) => {
@@ -885,6 +943,41 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
                 <span>Tools</span>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Land Income View Legend */}
+      {activeView === 'land' && (
+        <div className="absolute bottom-4 right-4 bg-black/70 text-white p-3 rounded-lg shadow-lg">
+          <h3 className="text-lg font-serif mb-2">Land Income</h3>
+          <div className="text-sm space-y-1">
+            <p>Land parcels are colored by income level</p>
+            <p>Click on a parcel to see detailed information</p>
+          </div>
+          <div className="mt-3 pt-2 border-t border-gray-600">
+            <h4 className="text-sm font-bold mb-1">Income Levels:</h4>
+            <div className="flex items-center mt-1">
+              <div className="w-full h-4 rounded bg-gradient-to-r from-green-500 via-yellow-500 to-red-500"></div>
+            </div>
+            <div className="flex justify-between text-xs mt-1">
+              <span>Low</span>
+              <span>Medium</span>
+              <span>High</span>
+            </div>
+            <button 
+              onClick={() => {
+                const incomeService = getIncomeDataService();
+                incomeService.loadIncomeData().then(() => {
+                  if (incomeRendererRef.current) {
+                    incomeRendererRef.current.updateIncomeVisualization();
+                  }
+                });
+              }}
+              className="mt-3 w-full py-1 px-2 bg-amber-600 hover:bg-amber-700 rounded text-sm transition-colors"
+            >
+              Refresh Income Data
+            </button>
           </div>
         </div>
       )}

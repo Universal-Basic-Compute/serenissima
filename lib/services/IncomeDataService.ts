@@ -78,8 +78,12 @@ export class IncomeDataService {
     // Notify listeners that income data has changed
     eventBus.emit(EventTypes.INCOME_DATA_UPDATED, {
       minIncome: this.minIncome,
-      maxIncome: this.maxIncome
+      maxIncome: this.maxIncome,
+      dataCount: this.incomeData.size,
+      timestamp: Date.now()
     });
+    
+    console.log(`Income data updated: ${this.incomeData.size} entries, min=${this.minIncome}, max=${this.maxIncome}`);
   }
   
   /**
@@ -170,6 +174,14 @@ export class IncomeDataService {
       console.log('Sample of generated data:', simulatedData.slice(0, 5));
       
       this.setIncomeData(simulatedData);
+      
+      // Emit a specific event for simulated data
+      eventBus.emit(EventTypes.INCOME_DATA_SIMULATED, {
+        count: simulatedData.length,
+        minIncome: this.minIncome,
+        maxIncome: this.maxIncome,
+        timestamp: Date.now()
+      });
     } else {
       // Otherwise, generate random data for existing polygon IDs
       const simulatedData: IncomeData[] = Array.from(this.incomeData.keys()).map(polygonId => {
@@ -195,6 +207,14 @@ export class IncomeDataService {
         console.log(`Generated ${simulatedData.length} income data points from existing keys`);
         console.log('Sample of generated data:', simulatedData.slice(0, 5));
         this.setIncomeData(simulatedData);
+        
+        // Emit a specific event for simulated data
+        eventBus.emit(EventTypes.INCOME_DATA_SIMULATED, {
+          count: simulatedData.length,
+          minIncome: this.minIncome,
+          maxIncome: this.maxIncome,
+          timestamp: Date.now()
+        });
       } else {
         console.warn('No existing income data keys to generate from');
       }

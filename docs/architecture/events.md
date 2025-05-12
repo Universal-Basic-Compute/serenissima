@@ -78,6 +78,11 @@ export const EventTypes = {
   POLYGONS_LOADED: 'polygonsLoaded',
   POLYGON_DELETED: 'polygonDeleted',
   
+  // Income events
+  INCOME_DATA_UPDATED: 'incomeDataUpdated',
+  INCOME_DATA_SIMULATED: 'incomeDataSimulated',
+  POLYGON_INCOME_UPDATED: 'polygonIncomeUpdated',
+  
   // Loan events
   LOAN_APPLIED: 'loanApplied',
   LOAN_APPROVED: 'loanApproved',
@@ -97,7 +102,9 @@ export const EventTypes = {
   // Rendering events
   OWNER_COLORS_UPDATED: 'ownerColorsUpdated',
   OWNER_COAT_OF_ARMS_UPDATED: 'ownerCoatOfArmsUpdated',
-  POLYGON_OWNER_UPDATED: 'polygonOwnerUpdated'
+  POLYGON_OWNER_UPDATED: 'polygonOwnerUpdated',
+  SHOW_TOOLTIP: 'showTooltip',
+  HIDE_TOOLTIP: 'hideTooltip'
 };
 ```
 

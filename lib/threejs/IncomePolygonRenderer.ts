@@ -207,6 +207,11 @@ export class IncomePolygonRenderer {
       // Load income data first, then update visualization
       incomeService.loadIncomeData().then(() => {
         this.refreshVisualization();
+      }).catch(error => {
+        console.error('Error loading income data:', error);
+        // Generate simulated data as fallback
+        incomeService.generateLastIncomeData(this.polygons);
+        this.refreshVisualization();
       });
     } else {
       // We have data, just refresh the visualization
