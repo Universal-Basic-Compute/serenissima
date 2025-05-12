@@ -213,23 +213,34 @@ const ResourceDropdown: React.FC<ResourceDropdownProps> = ({ category, resources
 
   // Get proper icon path with fallback
   const getIconPath = (iconName: string) => {
+    console.log(`%c[ResourceDropdown] Processing icon: ${iconName}`, 'color: #22c55e; font-weight: bold;');
+    
     // Check if the icon path already starts with a slash or http
     if (iconName.startsWith('/') || iconName.startsWith('http')) {
+      console.log(`%c[ResourceDropdown] Icon path already starts with / or http, returning as-is: ${iconName}`, 'color: #22c55e;');
       return iconName;
     }
     
     // Check if the icon name already includes the directory path
     if (iconName.includes('assets/icons/resources/')) {
-      return `/${iconName}`; // Just add the leading slash
+      const path = `/${iconName}`;
+      console.log(`%c[ResourceDropdown] Icon includes directory path, adding leading slash: ${path}`, 'color: #22c55e;');
+      return path;
     }
     
     // Check if the filename already has an extension
     if (!iconName.endsWith('.png') && !iconName.endsWith('.jpg') && !iconName.endsWith('.svg')) {
-      iconName = `${iconName}.png`; // Add .png extension if missing
+      const newName = `${iconName}.png`;
+      console.log(`%c[ResourceDropdown] Adding .png extension to icon: ${newName}`, 'color: #22c55e;');
+      iconName = newName;
+    } else {
+      console.log(`%c[ResourceDropdown] Icon already has extension: ${iconName}`, 'color: #22c55e;');
     }
     
     // Otherwise, ensure it starts with a slash for public directory
-    return `/assets/icons/resources/${iconName}`;
+    const finalPath = `/assets/icons/resources/${iconName}`;
+    console.log(`%c[ResourceDropdown] Final icon path: ${finalPath}`, 'color: #22c55e;');
+    return finalPath;
   };
 
   return (
@@ -286,12 +297,18 @@ const ResourceDropdown: React.FC<ResourceDropdownProps> = ({ category, resources
                                 alt={resource.name} 
                                 className="w-4 h-4 object-contain"
                                 onError={(e) => {
+                                  // Log the error
+                                  console.log(`%c[ResourceDropdown] Error loading icon: ${(e.target as HTMLImageElement).src}`, 'color: #ef4444; font-weight: bold;');
+                                  
                                   // Fallback if image doesn't exist - only set once
                                   if (!(e.target as HTMLImageElement).dataset.fallback) {
+                                    console.log(`%c[ResourceDropdown] Trying fallback icon: /assets/icons/resources/default.png`, 'color: #22c55e;');
                                     (e.target as HTMLImageElement).dataset.fallback = "true";
                                     (e.target as HTMLImageElement).src = `/assets/icons/resources/default.png`;
+                                    
                                     // If that fails too, use a placeholder
                                     (e.target as HTMLImageElement).onerror = () => {
+                                      console.log(`%c[ResourceDropdown] Fallback also failed, using placeholder`, 'color: #ef4444;');
                                       (e.target as HTMLImageElement).src = `https://via.placeholder.com/16?text=${resource.name.charAt(0).toUpperCase()}`;
                                       (e.target as HTMLImageElement).onerror = null; // Prevent infinite loop
                                     };
