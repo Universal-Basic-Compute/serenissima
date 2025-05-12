@@ -1,4 +1,4 @@
-import { ViewMode, ActiveViewMode } from '../../lib/threejs/types';
+import { ViewMode, ActiveViewMode } from '../PolygonViewer/types';
 import IconButton from '../UI/IconButton';
 import { eventBus, EventTypes } from '../../lib/eventBus';
 
