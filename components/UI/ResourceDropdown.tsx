@@ -218,6 +218,11 @@ const ResourceDropdown: React.FC<ResourceDropdownProps> = ({ category, resources
       return iconName;
     }
     
+    // Check if the icon name already includes the directory path
+    if (iconName.includes('assets/icons/resources/')) {
+      return `/${iconName}`; // Just add the leading slash
+    }
+    
     // Otherwise, ensure it starts with a slash for public directory
     return `/assets/icons/resources/${iconName}`;
   };
