@@ -2332,9 +2332,8 @@ export default class SimplePolygonRenderer {
       } else {
         // One point is on land, one is not - draw direct path
         console.warn('One point is on land, one is not, drawing direct path');
-        if (this.measurementTools && this.measurementTools['measurementPoints'] && 
-            this.measurementTools['measurementPoints'].length >= 2) {
-          this.drawDirectPath(this.measurementTools['measurementPoints'][0], this.measurementTools['measurementPoints'][1]);
+        if (this.measurementTools && this.measurementPoints.length >= 2) {
+          this.drawDirectPath(this.measurementPoints[0], this.measurementPoints[1]);
         }
       }
     } catch (error) {
