@@ -182,7 +182,7 @@ export class CoatOfArmsRenderer {
     // Function to try loading the next URL in the array
     const tryNextUrl = (index: number) => {
       if (index >= urlsToTry.length) {
-        console.error(`All URLs failed for ${ownerValue}, creating default coat of arms`);
+        console.warn(`All URLs failed for ${ownerValue}, creating default coat of arms`);
         this.createDefaultCoatOfArms(polygon, ownerValue);
         
         // Clean up unused resources
