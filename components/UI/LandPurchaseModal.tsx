@@ -98,7 +98,8 @@ const LandPurchaseModal: React.FC<LandPurchaseModalProps> = ({
             alert(`This land has already been acquired. The information will be updated.`);
         
             // Fetch updated land data
-            const landResponse = await fetch(`${getBackendBaseUrl()}/api/land/${landId}`);
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+            const landResponse = await fetch(`${apiUrl}/api/land/${landId}`);
             if (landResponse.ok) {
               const landData = await landResponse.json();
               console.log('Fetched updated land data:', landData);

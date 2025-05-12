@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { getBackendBaseUrl } from '@/lib/apiUtils';
 
 export async function POST(request: Request) {
   try {
@@ -21,8 +20,8 @@ export async function POST(request: Request) {
     
     // Try to update via the backend API
     try {
-      const apiBaseUrl = getBackendBaseUrl();
-      const response = await fetch(`${apiBaseUrl}/api/land`, {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const response = await fetch(`${apiUrl}/api/land`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
