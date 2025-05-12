@@ -138,14 +138,28 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
       
       if (data.success && data.notifications && Array.isArray(data.notifications)) {
         console.log('%c[DEBUG] Setting notifications:', 'color: #ff69b4', data.notifications.length);
-        // Replace existing notifications instead of combining them
+        
+        // Get the unread notification IDs
+        const unreadNotificationIds = data.notifications
+          .filter((n: Notification) => n.readAt === null)
+          .map((n: Notification) => n.notificationId);
+        
+        // Set notifications
         setNotifications(data.notifications);
         
         // Update unread count
-        const unreadCount = data.notifications.filter((n: Notification) => n.readAt === null).length;
+        const unreadCount = unreadNotificationIds.length;
         setUnreadCount(unreadCount);
         
         console.log(`%c[DEBUG] Set ${data.notifications.length} notifications, ${unreadCount} unread`, 'color: #ff69b4');
+        
+        // Automatically mark all as read if there are any unread notifications
+        if (unreadNotificationIds.length > 0) {
+          // Small delay to ensure notifications are displayed before marking as read
+          setTimeout(() => {
+            markNotificationsAsRead(unreadNotificationIds);
+          }, 500);
+        }
       } else {
         console.error('%c[DEBUG] Invalid notifications data format:', 'color: #ff69b4', data);
       }
@@ -709,7 +723,9 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
                       <div 
                         key={notification.notificationId} 
                         className={`mb-3 p-3 rounded-lg border ${
-                          notification.readAt ? 'border-gray-200 bg-white' : 'border-amber-300 bg-amber-50 notification-unread'
+                          notification.readAt 
+                            ? 'border-gray-200 bg-white' 
+                            : 'border-amber-300 bg-amber-50 notification-unread shadow-md'
                         }`}
                         onClick={() => {
                           if (!notification.readAt) {
@@ -718,25 +734,13 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
                         }}
                       >
                         <div className="flex justify-between items-start">
-                          <div className="text-xs text-gray-500">
+                          <div className="text-xs text-gray-400">
                             {formatNotificationDate(notification.createdAt)}
                           </div>
                         </div>
-                        <div className="mt-1 text-sm">{notification.content}</div>
+                        <div className="mt-1 text-xs">{notification.content}</div>
                       </div>
                     ))}
-                    
-                    {/* Mark all as read button */}
-                    {notifications.some(n => !n.readAt) && (
-                      <button
-                        onClick={() => markNotificationsAsRead(
-                          notifications.filter(n => !n.readAt).map(n => n.notificationId)
-                        )}
-                        className="mt-2 w-full py-2 bg-amber-100 hover:bg-amber-200 text-amber-800 rounded text-sm transition-colors"
-                      >
-                        Mark all as read
-                      </button>
-                    )}
                   </>
                 )}
               </>
