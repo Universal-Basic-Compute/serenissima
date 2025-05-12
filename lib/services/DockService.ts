@@ -2,7 +2,6 @@ import * as THREE from 'three';
 import { v4 as uuidv4 } from 'uuid';
 import { eventBus, EventTypes } from '../eventBus';
 import { getWalletAddress } from '../walletUtils';
-import { getBackendBaseUrl as getApiBaseUrl } from '../apiUtils';
 
 /**
  * Interface for dock data
@@ -346,7 +345,7 @@ export class DockService {
    */
   private async saveDockToServer(dockData: DockData): Promise<void> {
     try {
-      const apiUrl = getApiBaseUrl();
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
       const response = await fetch(`${apiUrl}/api/docks`, {
         method: 'POST',
         headers: {
@@ -372,7 +371,7 @@ export class DockService {
    */
   private async deleteDockFromServer(id: string): Promise<void> {
     try {
-      const apiUrl = getApiBaseUrl();
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
       const response = await fetch(`${apiUrl}/api/docks/${id}`, {
         method: 'DELETE'
       });

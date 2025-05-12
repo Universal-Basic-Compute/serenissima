@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { getBackendBaseUrl } from '@/lib/apiUtils';
 
 interface GovernancePanelProps {
   onClose: () => void;
@@ -120,7 +119,6 @@ const GovernancePanel: React.FC<GovernancePanelProps> = ({ onClose, standalone =
     setError(null);
     
     try {
-      // Use relative URL instead of getBackendBaseUrl()
       const response = await fetch('/api/decrees');
       
       if (!response.ok) {

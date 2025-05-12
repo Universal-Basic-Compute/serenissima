@@ -3,8 +3,8 @@
  * - Add comprehensive logging
  * - Add unit tests for service methods
  */
-import { getBackendBaseUrl } from '../apiUtils';
 import { eventBus, EventTypes } from '../eventBus';
+import { getBackendBaseUrl } from '../apiUtils';
 import { log } from '../logUtils';
 import { 
   ApiError, 
@@ -217,7 +217,8 @@ export class UserService {
       return this.usersCache!.data;
     }
     
-    const endpoint = `${getBackendBaseUrl()}/api/users`;
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+    const endpoint = `${apiBaseUrl}/api/users`;
     
     log.info(`Fetching users from endpoint: ${endpoint}`);
     const startTime = performance.now();

@@ -50,7 +50,7 @@ const useBuildingStore = create<BuildingState & BuildingActions>((set, get) => (
     
     try {
       const loadedCategories: BuildingCategory[] = [];
-      const apiBaseUrl = getBackendBaseUrl();
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
       for (const category of categoryFiles) {
         try {

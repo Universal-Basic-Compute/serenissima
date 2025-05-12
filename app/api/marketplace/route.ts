@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getBackendBaseUrl } from '@/lib/apiUtils';
 
 // Cache the marketplace data with a reasonable expiration
 let cachedData: any = null;

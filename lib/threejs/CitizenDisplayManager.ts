@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import { getBackendBaseUrl } from '../apiUtils';
 import { eventBus, EventTypes } from '../eventBus';
 
 export interface CitizenDisplayOptions {
