@@ -111,7 +111,13 @@ export class BuildingCacheService {
         console.log(`Successfully loaded model from: ${modelPath}`);
         return simplifiedModel;
       } catch (error) {
-        console.warn(`Failed to load model from ${modelPath}:`, error);
+        // Check if this is a 404 error and log as warning instead of error
+        if (error instanceof Error && error.message && error.message.includes('404')) {
+          console.warn(`Model not found at ${modelPath} - trying next fallback`);
+        } else {
+          console.warn(`Failed to load model from ${modelPath}:`, error);
+        }
+        
         // Mark this path as failed
         failedPaths.add(modelPath);
         // Continue to next path option
@@ -119,7 +125,7 @@ export class BuildingCacheService {
     }
     
     // If all paths fail, create a fallback cube model and cache it
-    console.error(`All model loading attempts failed for ${type}. Creating fallback.`);
+    console.warn(`All model loading attempts failed for ${type}. Creating fallback.`);
     const fallbackModel = this.createFallbackModel(type);
     
     // Cache the fallback model to prevent future loading attempts
@@ -234,7 +240,15 @@ export class BuildingCacheService {
         undefined,
         (error) => {
           clearTimeout(timeoutId);
-          reject(error);
+          
+          // Check if this is a 404 error
+          if (error.message && error.message.includes('404')) {
+            console.warn(`Model not found at ${path} (404) - will use fallback`);
+            // Still reject but with a specific error type that can be identified
+            reject(new Error(`404: ${path}`));
+          } else {
+            reject(error);
+          }
         }
       );
     });

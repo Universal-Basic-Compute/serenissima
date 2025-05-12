@@ -332,7 +332,12 @@ class DefaultBuildingRenderer implements IBuildingRenderer {
               console.log(`${building.id} model ${Math.round(xhr.loaded / xhr.total * 100)}% loaded`);
             },
             (error) => {
-              console.error(`Error loading model for ${building.id}:`, error);
+              // Check if this is a 404 error
+              if (error.message && error.message.includes('404')) {
+                console.warn(`Model not found for ${building.id} at ${modelPath} (404) - using fallback`);
+              } else {
+                console.error(`Error loading model for ${building.id}:`, error);
+              }
               reject(error);
             }
           );
@@ -393,8 +398,13 @@ class DefaultBuildingRenderer implements IBuildingRenderer {
         console.log(`Successfully loaded and added model for building ${building.id}`);
         return model;
       } catch (error) {
-        console.error(`Failed to load GLB model for ${building.id}, using colored box instead:`, error);
-        
+        // Check if this is a 404 error and log as warning instead of error
+        if (error instanceof Error && error.message && error.message.includes('404')) {
+          console.warn(`Model not found for ${building.id}, using colored box instead`);
+        } else {
+          console.error(`Failed to load GLB model for ${building.id}, using colored box instead:`, error);
+        }
+      
         // If GLB loading fails, create a colored box with a label
         return this.createColoredBoxModel(building, position);
       }
