@@ -549,6 +549,16 @@ export default function SimplePage() {
         console.error('Error parsing saved user profile:', error);
       }
     }
+    
+    // Check if this was a direct navigation from /guilds
+    if (typeof window !== 'undefined' && window.__directNavigation) {
+      // Clear the flag
+      window.__directNavigation = false;
+      
+      // Open the guilds panel
+      setShowGuildsPanel(true);
+      setActiveView('guilds');
+    }
   }, []);
 
   // Prefill form fields when editing a profile
