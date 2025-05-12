@@ -11,7 +11,7 @@ const Settings: React.FC<SettingsProps> = ({ onClose }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [qualityMode, setQualityMode] = useState<'high' | 'performance'>('high');
-  const [waterQuality, setWaterQuality] = useState<'high' | 'medium' | 'low'>('high');
+  const [waterQuality, setWaterQuality] = useState<'high' | 'medium' | 'low' | 'minimal'>('high');
   const [masterVolume, setMasterVolume] = useState<number>(80);
   const [musicVolume, setMusicVolume] = useState<number>(60);
   const [effectsVolume, setEffectsVolume] = useState<number>(70);
@@ -295,12 +295,13 @@ const Settings: React.FC<SettingsProps> = ({ onClose }) => {
                     </label>
                     <select 
                       value={waterQuality}
-                      onChange={(e) => setWaterQuality(e.target.value as 'high' | 'medium' | 'low')}
+                      onChange={(e) => setWaterQuality(e.target.value as 'high' | 'medium' | 'low' | 'minimal')}
                       className="w-full border border-amber-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-amber-500 focus:border-amber-500"
                     >
                       <option value="high">High</option>
                       <option value="medium">Medium</option>
                       <option value="low">Low</option>
+                      <option value="minimal">Minimal (Best Performance)</option>
                     </select>
                   </div>
                 </div>

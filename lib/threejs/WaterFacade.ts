@@ -9,7 +9,8 @@ import { RaycastingUtils } from '../utils/RaycastingUtils';
 export enum WaterQualityLevel {
   HIGH = 'high',
   MEDIUM = 'medium',
-  LOW = 'low'
+  LOW = 'low',
+  MINIMAL = 'minimal'
 }
 
 /**
@@ -74,6 +75,7 @@ export class WaterFacade {
         case 'high': this.quality = WaterQualityLevel.HIGH; break;
         case 'medium': this.quality = WaterQualityLevel.MEDIUM; break;
         case 'low': this.quality = WaterQualityLevel.LOW; break;
+        case 'minimal': this.quality = WaterQualityLevel.MINIMAL; break;
         default: this.quality = WaterQualityLevel.MEDIUM; // Default to medium
       }
     } else {
@@ -125,6 +127,11 @@ export class WaterFacade {
    */
   private createWater(): Water {
     try {
+      // For minimal quality, create a very simple blue plane
+      if (this.quality === WaterQualityLevel.MINIMAL) {
+        return this.createMinimalWater();
+      }
+      
       // Water geometry with detail level based on quality
       const segments = this.getGeometryDetail();
       const waterGeometry = new THREE.PlaneGeometry(this.size, this.size, segments, segments);
@@ -214,6 +221,48 @@ export class WaterFacade {
       // Create a fallback water plane as a last resort
       return this.createFallbackWater();
     }
+  }
+
+  /**
+   * Create a minimal water plane - just a blue plane with simple texture
+   * @returns Simple water mesh
+   * @private
+   */
+  private createMinimalWater(): Water {
+    console.log('Creating minimal water plane - simple blue plane with basic texture');
+    
+    // Create a simple plane geometry with minimal segments
+    const waterGeometry = new THREE.PlaneGeometry(this.size, this.size, 2, 2);
+    
+    // Create a simple blue material with a basic texture
+    const textureLoader = new THREE.TextureLoader();
+    const waterTexture = textureLoader.load('/textures/waternormals.jpg', (texture) => {
+      texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+      texture.repeat.set(1, 1); // Minimal detail
+    });
+    
+    // Create a minimal Water instance
+    const water = new Water(
+      waterGeometry,
+      {
+        textureWidth: 64,
+        textureHeight: 64,
+        waterNormals: waterTexture,
+        sunDirection: new THREE.Vector3(0, 1, 0),
+        sunColor: 0xffffff,
+        waterColor: this.color,
+        distortionScale: 0.1, // Very minimal distortion
+        fog: false,
+        alpha: this.opacity
+      }
+    );
+    
+    // Position water
+    water.rotation.x = -Math.PI / 2;
+    water.position.set(this.position.x, 0, this.position.z);
+    water.renderOrder = 0;
+    
+    return water;
   }
 
   /**
@@ -322,6 +371,9 @@ export class WaterFacade {
       case WaterQualityLevel.LOW:
         this.updateInterval = 66; // ~15fps
         break;
+      case WaterQualityLevel.MINIMAL:
+        this.updateInterval = 100; // ~10fps - very infrequent updates
+        break;
       default:
         this.updateInterval = 33; // Default to medium
     }
@@ -337,6 +389,7 @@ export class WaterFacade {
       case WaterQualityLevel.HIGH: return 1024;
       case WaterQualityLevel.MEDIUM: return 512;
       case WaterQualityLevel.LOW: return 256;
+      case WaterQualityLevel.MINIMAL: return 64;
       default: return 512;
     }
   }
@@ -351,6 +404,7 @@ export class WaterFacade {
       case WaterQualityLevel.HIGH: return 3.5;
       case WaterQualityLevel.MEDIUM: return 2.5;
       case WaterQualityLevel.LOW: return 1.5;
+      case WaterQualityLevel.MINIMAL: return 0.1;
       default: return 2.5;
     }
   }
@@ -365,6 +419,7 @@ export class WaterFacade {
       case WaterQualityLevel.HIGH: return 128;
       case WaterQualityLevel.MEDIUM: return 64;
       case WaterQualityLevel.LOW: return 32;
+      case WaterQualityLevel.MINIMAL: return 4;
       default: return 64;
     }
   }
@@ -379,6 +434,7 @@ export class WaterFacade {
       case WaterQualityLevel.HIGH: return 4;
       case WaterQualityLevel.MEDIUM: return 3;
       case WaterQualityLevel.LOW: return 2;
+      case WaterQualityLevel.MINIMAL: return 1;
       default: return 3;
     }
   }
@@ -504,6 +560,7 @@ export class WaterFacade {
       case WaterQualityLevel.HIGH: return 1.0;
       case WaterQualityLevel.MEDIUM: return 0.8;
       case WaterQualityLevel.LOW: return 0.6;
+      case WaterQualityLevel.MINIMAL: return 0.3;
       default: return 0.8;
     }
   }
@@ -513,7 +570,7 @@ export class WaterFacade {
    * @param quality Quality level
    * @param recreate Whether to recreate the water mesh (more expensive but better quality change)
    */
-  public setQuality(quality: WaterQualityLevel | 'high' | 'medium' | 'low', recreate: boolean = false): void {
+  public setQuality(quality: WaterQualityLevel | 'high' | 'medium' | 'low' | 'minimal', recreate: boolean = false): void {
     if (this.isDisposed || this.fallbackMode) return;
     
     // Convert string quality to enum if needed
@@ -523,6 +580,7 @@ export class WaterFacade {
         case 'high': qualityLevel = WaterQualityLevel.HIGH; break;
         case 'medium': qualityLevel = WaterQualityLevel.MEDIUM; break;
         case 'low': qualityLevel = WaterQualityLevel.LOW; break;
+        case 'minimal': qualityLevel = WaterQualityLevel.MINIMAL; break;
         default: qualityLevel = WaterQualityLevel.MEDIUM;
       }
     } else {
@@ -584,11 +642,12 @@ export class WaterFacade {
    * Get the current water quality level as a string
    * @returns Current quality level as a string
    */
-  public getQualityString(): 'high' | 'medium' | 'low' {
+  public getQualityString(): 'high' | 'medium' | 'low' | 'minimal' {
     switch (this.quality) {
       case WaterQualityLevel.HIGH: return 'high';
       case WaterQualityLevel.MEDIUM: return 'medium';
       case WaterQualityLevel.LOW: return 'low';
+      case WaterQualityLevel.MINIMAL: return 'minimal';
       default: return 'medium';
     }
   }
