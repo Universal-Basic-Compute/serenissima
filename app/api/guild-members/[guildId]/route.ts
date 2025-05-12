@@ -16,11 +16,11 @@ interface GuildMember {
 }
 
 export async function GET(
-  request: NextRequest,
-  { params }: { params: { guildId: string } }
+  request: Request,
+  context: { params: { guildId: string } }
 ) {
+  const { guildId } = context.params;
   try {
-    const guildId = params.guildId;
 
     // Check if Airtable credentials are configured
     if (!AIRTABLE_API_KEY || !AIRTABLE_BASE_ID) {
