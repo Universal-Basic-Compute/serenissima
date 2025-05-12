@@ -115,7 +115,7 @@ export default function GuildsPanel({ onClose, standalone = false }: GuildsPanel
             getLandName={getLandName}
           />
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Guild Cards */}
             {guilds.length === 0 ? (
               <div className="col-span-full text-center py-10">
@@ -156,17 +156,21 @@ export default function GuildsPanel({ onClose, standalone = false }: GuildsPanel
                   
                   {/* Guild Details */}
                   <div className="p-4">
-                    <p className="text-sm text-amber-800 mb-2">
-                      <span className="font-semibold">Patron Saint:</span> {guild.patronSaint || 'None'}
+                    <div className="flex justify-between mb-3">
+                      <p className="text-sm text-amber-800">
+                        <span className="font-semibold">Patron Saint:</span> {guild.patronSaint || 'None'}
+                      </p>
+                      <p className="text-sm text-amber-800">
+                        <span className="font-semibold">Tier:</span> {guild.guildTier || 'Minor'}
+                      </p>
+                    </div>
+                    
+                    <p className="text-sm text-amber-800 mb-3">
+                      <span className="font-semibold">Entry Fee:</span> {guild.entryFee ? `⚜️ ${Number(guild.entryFee).toLocaleString()} ducats` : 'None'}
                     </p>
-                    <p className="text-sm text-amber-800 mb-2">
-                      <span className="font-semibold">Tier:</span> {guild.guildTier || 'Minor'}
-                    </p>
-                    <p className="text-sm text-amber-800 mb-2">
-                      <span className="font-semibold">Entry Fee:</span> {guild.entryFee ? `${guild.entryFee} ducats` : 'None'}
-                    </p>
-                    <p className="text-sm text-gray-700 mt-3 line-clamp-3">
-                      {/* Use ShortDescription instead of description */}
+                    
+                    <p className="text-sm text-gray-700 mt-3 line-clamp-4">
+                      {/* Use ShortDescription instead of description with more lines visible */}
                       {guild.shortDescription || guild.description || 'No description available.'}
                     </p>
                     
@@ -340,7 +344,7 @@ function GuildDetails({ guild, onBack, formatDate, getLandName }: GuildDetailsPr
               
               <div>
                 <h4 className="font-semibold text-amber-700 text-sm">Entry Fee</h4>
-                <p>{guild.entryFee ? `${guild.entryFee} ducats` : 'No fee required'}</p>
+                <p>{guild.entryFee ? `⚜️ ${Number(guild.entryFee).toLocaleString()} ducats` : 'No fee required'}</p>
               </div>
               
               <div>
@@ -357,6 +361,17 @@ function GuildDetails({ guild, onBack, formatDate, getLandName }: GuildDetailsPr
                 <h4 className="font-semibold text-amber-700 text-sm">Guild Hall</h4>
                 <p>{guild.guildHallId ? 'Located in Venice' : 'No permanent guild hall'}</p>
               </div>
+              
+              {/* Move the Apply for Membership button here */}
+              <button 
+                className="mt-4 px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors w-full"
+                onClick={() => {
+                  // This would be where you'd handle joining the guild
+                  alert('Guild membership application will be available soon!');
+                }}
+              >
+                Apply for Membership
+              </button>
             </div>
           </div>
         </div>
@@ -367,18 +382,6 @@ function GuildDetails({ guild, onBack, formatDate, getLandName }: GuildDetailsPr
             The guild organizes regular meetings, training for apprentices, quality control of products, 
             and represents its members' interests before the Venetian government.
           </p>
-          
-          <div className="mt-6 flex justify-end">
-            <button 
-              className="px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors"
-              onClick={() => {
-                // This would be where you'd handle joining the guild
-                alert('Guild membership application will be available soon!');
-              }}
-            >
-              Apply for Membership
-            </button>
-          </div>
         </div>
       </div>
     </div>
