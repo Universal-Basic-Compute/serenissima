@@ -182,6 +182,28 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
     }
   }, [username, lastFetchTime, notifications.length, isOpen, showNotifications]);
 
+  // Format date to be more readable and remove 500 years
+  const formatNotificationDate = (dateString: string): string => {
+    try {
+      const date = new Date(dateString);
+      // Subtract 500 years from the year
+      date.setFullYear(date.getFullYear() - 500);
+      
+      // Format as "Month Day, Year at HH:MM AM/PM"
+      return date.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      });
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return dateString;
+    }
+  };
+
   // Mark notifications as read
   const markNotificationsAsRead = async (notificationIds: string[]) => {
     try {
