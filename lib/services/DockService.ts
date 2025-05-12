@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { v4 as uuidv4 } from 'uuid';
 import { eventBus, EventTypes } from '../eventBus';
 import { getWalletAddress } from '../walletUtils';
+import { getBackendBaseUrl as getApiBaseUrl } from '../apiUtils';
 
 /**
  * Interface for dock data
