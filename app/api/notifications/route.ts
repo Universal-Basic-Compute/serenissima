@@ -20,25 +20,26 @@ export async function POST(request: Request) {
     const { user, since } = await request.json();
     
     if (!user) {
+      console.log('\x1b[35m%s\x1b[0m', '[DEBUG] Error: User is required');
       return NextResponse.json(
         { success: false, error: 'User is required' },
         { status: 400 }
       );
     }
     
-    console.log(`Fetching notifications for user: ${user}, since: ${since}`);
+    console.log('\x1b[35m%s\x1b[0m', `[DEBUG] Fetching notifications for user: ${user}, since: ${since}`);
     
     // Ensure the notifications directory exists
     ensureNotificationsDirExists();
-    
-    // Ensure the notifications directory exists
-    ensureNotificationsDirExists();
+    console.log('\x1b[35m%s\x1b[0m', `[DEBUG] Notifications directory: ${NOTIFICATIONS_DIR}`);
     
     // Get the user's notification file path
     const userNotificationsPath = path.join(NOTIFICATIONS_DIR, `${user}.json`);
+    console.log('\x1b[35m%s\x1b[0m', `[DEBUG] User notifications path: ${userNotificationsPath}`);
     
     // Check if the user has any notifications
     if (!fs.existsSync(userNotificationsPath)) {
+      console.log('\x1b[35m%s\x1b[0m', `[DEBUG] No notifications file found, creating sample notifications`);
       // Create some sample notifications for the user
       const sampleNotifications = [
         {
@@ -69,6 +70,7 @@ export async function POST(request: Request) {
       
       // Save the sample notifications
       fs.writeFileSync(userNotificationsPath, JSON.stringify(sampleNotifications, null, 2));
+      console.log('\x1b[35m%s\x1b[0m', `[DEBUG] Created and saved ${sampleNotifications.length} sample notifications`);
       
       return NextResponse.json({
         success: true,
@@ -79,6 +81,7 @@ export async function POST(request: Request) {
     // Read the user's notifications
     const notificationsData = fs.readFileSync(userNotificationsPath, 'utf8');
     const notifications = JSON.parse(notificationsData);
+    console.log('\x1b[35m%s\x1b[0m', `[DEBUG] Found ${notifications.length} existing notifications`);
     
     // Filter notifications based on the 'since' parameter if provided
     let filteredNotifications = notifications;
@@ -86,15 +89,17 @@ export async function POST(request: Request) {
       filteredNotifications = notifications.filter(
         (notification: any) => new Date(notification.createdAt).getTime() > since
       );
+      console.log('\x1b[35m%s\x1b[0m', `[DEBUG] Filtered to ${filteredNotifications.length} notifications since ${new Date(since).toISOString()}`);
     }
     
+    console.log('\x1b[35m%s\x1b[0m', `[DEBUG] Returning ${filteredNotifications.length} notifications`);
     return NextResponse.json({
       success: true,
       notifications: filteredNotifications
     });
     
   } catch (error) {
-    console.error('Error fetching notifications:', error);
+    console.error('\x1b[35m%s\x1b[0m', '[DEBUG] Error fetching notifications:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to fetch notifications' },
       { status: 500 }
