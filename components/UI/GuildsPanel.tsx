@@ -60,12 +60,25 @@ export default function GuildsPanel({ onClose, standalone = false }: GuildsPanel
     }
   };
 
-  // Helper function to get land name from localStorage
+  // Helper function to get land name from localStorage or polygon data
   const getLandName = (locationId: string): string => {
     if (!locationId) return 'Unknown Location';
     
     try {
-      // Try to get land name from localStorage
+      // First try to get land data from window.__polygonData
+      if (typeof window !== 'undefined' && window.__polygonData) {
+        const polygon = window.__polygonData.find(p => p.id === locationId);
+        if (polygon) {
+          // If both historical and English names exist, show both
+          if (polygon.historicalName && polygon.englishName) {
+            return `${polygon.historicalName} (${polygon.englishName})`;
+          }
+          // Otherwise return whichever one exists
+          return polygon.historicalName || polygon.englishName || locationId;
+        }
+      }
+      
+      // Try to get land name from localStorage as a fallback
       const landData = localStorage.getItem('landNames');
       if (landData) {
         const lands = JSON.parse(landData);
@@ -74,7 +87,22 @@ export default function GuildsPanel({ onClose, standalone = false }: GuildsPanel
         }
       }
       
-      // If we can't find it, return a formatted version of the ID
+      // If we can't find it, check if there's a polygonData item in localStorage
+      const polygonData = localStorage.getItem('polygonData');
+      if (polygonData) {
+        const polygons = JSON.parse(polygonData);
+        const polygon = polygons.find((p: any) => p.id === locationId);
+        if (polygon) {
+          // If both historical and English names exist, show both
+          if (polygon.historicalName && polygon.englishName) {
+            return `${polygon.historicalName} (${polygon.englishName})`;
+          }
+          // Otherwise return whichever one exists
+          return polygon.historicalName || polygon.englishName || locationId;
+        }
+      }
+      
+      // If we still can't find it, return a formatted version of the ID
       return locationId.replace('polygon-', 'Land ');
     } catch (error) {
       console.error('Error getting land name:', error);
