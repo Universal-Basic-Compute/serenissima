@@ -8,6 +8,7 @@ declare global {
   interface Window {
     __isClientNavigation?: boolean;
     __directNavigation?: boolean;
+    __knowledgeDirectNavigation?: boolean; // Add this new property
   }
 }
 
@@ -20,6 +21,8 @@ export default function KnowledgePage() {
     if (typeof window !== 'undefined' && window.location.pathname === '/knowledge' && !window.__isClientNavigation) {
       // Set a flag to indicate this was a direct navigation
       window.__directNavigation = true;
+      // Set a specific flag for knowledge page
+      window.__knowledgeDirectNavigation = true;
       // Remove the shallow option as it's not supported in Next.js App Router
       router.push('/');
     }

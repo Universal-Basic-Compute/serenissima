@@ -557,14 +557,24 @@ export default function SimplePage() {
       }
     }
     
-    // Check if this was a direct navigation from /guilds
+    // Check if this was a direct navigation
     if (typeof window !== 'undefined' && window.__directNavigation) {
       // Clear the flag
       window.__directNavigation = false;
       
-      // Open the guilds panel
-      setShowGuildsPanel(true);
-      setActiveView('guilds');
+      // Check which panel to open based on the specific flag
+      if (window.__knowledgeDirectNavigation) {
+        // Clear the knowledge-specific flag
+        window.__knowledgeDirectNavigation = false;
+        
+        // Open the knowledge panel
+        setShowKnowledgePanel(true);
+        setActiveView('knowledge');
+      } else {
+        // Open the guilds panel (default behavior)
+        setShowGuildsPanel(true);
+        setActiveView('guilds');
+      }
     }
   }, []);
 
