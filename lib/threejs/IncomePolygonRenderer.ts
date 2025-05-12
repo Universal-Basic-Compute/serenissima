@@ -29,7 +29,22 @@ export class IncomePolygonRenderer {
     
     // Render income polygons
     this.renderIncomePolygons();
+    
+    // Add event listener for cache clearing
+    if (typeof window !== 'undefined') {
+      window.addEventListener('cachesCleared', this.handleCacheCleared);
+      window.addEventListener('clearPolygonRendererCaches', this.handleCacheCleared);
+    }
   }
+  
+  // Add this method to the class
+  private handleCacheCleared = (event: CustomEvent) => {
+    console.log('%c[IncomePolygonRenderer] Cache cleared event received', 'color: orange; font-weight: bold');
+    console.log('%cEvent details:', 'color: orange', event.detail);
+    
+    // Re-render income polygons when cache is cleared
+    this.updateIncomeVisualization();
+  };
   
   private renderIncomePolygons() {
     // Get income data service
@@ -37,8 +52,10 @@ export class IncomePolygonRenderer {
     const minIncome = incomeService.getMinIncome();
     const maxIncome = incomeService.getMaxIncome();
     
-    console.log(`IncomePolygonRenderer: minIncome=${minIncome}, maxIncome=${maxIncome}`);
-    console.log(`Total polygons to process: ${this.polygons.length}`);
+    // Add orange log for min/max income values
+    console.log('%c[IncomePolygonRenderer] Min income: ' + minIncome + ', Max income: ' + maxIncome, 'color: orange; font-weight: bold');
+    
+    console.log(`%cTotal polygons to process: ${this.polygons.length}`, 'color: orange');
     
     let processedCount = 0;
     let skippedCount = 0;
@@ -53,18 +70,25 @@ export class IncomePolygonRenderer {
         }
         
         // Get income for this polygon
-        const income = polygon.lastIncome !== undefined 
-          ? polygon.lastIncome 
-          : incomeService.getIncome(polygon.id);
+        const lastIncome = polygon.lastIncome;
+        const serviceIncome = incomeService.getIncome(polygon.id);
+        const income = lastIncome !== undefined ? lastIncome : serviceIncome;
+        
+        // Add detailed orange logging for each polygon's income data
+        console.log(
+          `%c[IncomePolygonRenderer] Polygon ${polygon.id}: lastIncome=${lastIncome}, serviceIncome=${serviceIncome}, final income=${income}`,
+          'color: orange'
+        );
         
         // Skip if no income data
         if (income === undefined) {
+          console.log(`%c[IncomePolygonRenderer] Skipping polygon ${polygon.id} - no income data`, 'color: orange; font-style: italic');
           skippedCount++;
           return;
         }
         
         incomeDataCount++;
-        console.log(`Polygon ${polygon.id}: income=${income}`);
+        processedCount++;
         
         // Normalize coordinates
         const normalizedCoords = normalizeCoordinates(
@@ -83,6 +107,13 @@ export class IncomePolygonRenderer {
         
         // Create material with income-based color
         const color = getIncomeBasedColor(income, { minIncome, maxIncome });
+        
+        // Log the calculated color
+        console.log(
+          `%c[IncomePolygonRenderer] Polygon ${polygon.id}: income=${income}, color=${color.getHexString()}`,
+          'color: orange'
+        );
+        
         const material = new THREE.MeshBasicMaterial({
           color: color,
           transparent: true,
@@ -165,6 +196,8 @@ export class IncomePolygonRenderer {
    * Update income visualization when income data changes
    */
   public updateIncomeVisualization() {
+    console.log('%c[IncomePolygonRenderer] Updating income visualization', 'color: orange; font-weight: bold');
+    
     // Remove existing income meshes
     this.incomeMeshes.forEach(mesh => {
       this.scene.remove(mesh);
@@ -178,6 +211,7 @@ export class IncomePolygonRenderer {
       }
     });
     
+    console.log(`%c[IncomePolygonRenderer] Removed ${this.incomeMeshes.length} existing income meshes`, 'color: orange');
     this.incomeMeshes = [];
     
     // Re-render income polygons
@@ -201,6 +235,12 @@ export class IncomePolygonRenderer {
    */
   public cleanup() {
     if (this.isDisposed) return;
+    
+    // Remove event listeners
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('cachesCleared', this.handleCacheCleared);
+      window.removeEventListener('clearPolygonRendererCaches', this.handleCacheCleared);
+    }
     
     // Remove meshes from scene and dispose resources
     this.incomeMeshes.forEach(mesh => {
