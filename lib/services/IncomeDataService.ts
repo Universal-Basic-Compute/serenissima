@@ -133,23 +133,64 @@ export class IncomeDataService {
    * @param polygons Optional array of polygons to generate data for
    */
   public generateLastIncomeData(polygons?: any[]): void {
+    console.log(`Generating simulated income data. Polygons provided: ${polygons ? polygons.length : 'none'}`);
+    
     // If polygons are provided, generate data for them
     if (polygons && polygons.length > 0) {
-      const simulatedData: IncomeData[] = polygons.map(polygon => ({
-        polygonId: polygon.id,
-        income: Math.random() * 1000 // Random income between 0 and 1000
-      }));
+      const simulatedData: IncomeData[] = polygons.map(polygon => {
+        // Generate a more varied range of incomes for better visualization
+        // Use a distribution that ensures we have low, medium, and high values
+        let income: number;
+        const rand = Math.random();
+        
+        if (rand < 0.3) {
+          // 30% chance of low income (0-300)
+          income = Math.random() * 300;
+        } else if (rand < 0.7) {
+          // 40% chance of medium income (300-700)
+          income = 300 + Math.random() * 400;
+        } else {
+          // 30% chance of high income (700-1000)
+          income = 700 + Math.random() * 300;
+        }
+        
+        return {
+          polygonId: polygon.id,
+          income: income
+        };
+      });
+      
+      console.log(`Generated ${simulatedData.length} income data points`);
+      console.log('Sample of generated data:', simulatedData.slice(0, 5));
       
       this.setIncomeData(simulatedData);
     } else {
       // Otherwise, generate random data for existing polygon IDs
-      const simulatedData: IncomeData[] = Array.from(this.incomeData.keys()).map(polygonId => ({
-        polygonId,
-        income: Math.random() * 1000 // Random income between 0 and 1000
-      }));
+      const simulatedData: IncomeData[] = Array.from(this.incomeData.keys()).map(polygonId => {
+        // Use the same varied distribution as above
+        let income: number;
+        const rand = Math.random();
+        
+        if (rand < 0.3) {
+          income = Math.random() * 300;
+        } else if (rand < 0.7) {
+          income = 300 + Math.random() * 400;
+        } else {
+          income = 700 + Math.random() * 300;
+        }
+        
+        return {
+          polygonId,
+          income: income
+        };
+      });
       
       if (simulatedData.length > 0) {
+        console.log(`Generated ${simulatedData.length} income data points from existing keys`);
+        console.log('Sample of generated data:', simulatedData.slice(0, 5));
         this.setIncomeData(simulatedData);
+      } else {
+        console.warn('No existing income data keys to generate from');
       }
     }
   }
@@ -161,6 +202,7 @@ export class IncomeDataService {
     if (this.incomeData.size === 0) {
       this.minIncome = 0;
       this.maxIncome = 1000;
+      console.log('No income data, using default min/max: 0/1000');
       return;
     }
     
@@ -168,10 +210,21 @@ export class IncomeDataService {
     this.minIncome = Math.min(...incomeValues);
     this.maxIncome = Math.max(...incomeValues);
     
+    console.log(`Calculated min income: ${this.minIncome}, max income: ${this.maxIncome}`);
+    
     // Ensure we have a reasonable range
     if (this.minIncome === this.maxIncome) {
       this.minIncome = Math.max(0, this.minIncome - 100);
       this.maxIncome = this.maxIncome + 100;
+      console.log(`Min equals max, adjusted to: min=${this.minIncome}, max=${this.maxIncome}`);
+    }
+    
+    // Ensure the range isn't too small for effective visualization
+    if (this.maxIncome - this.minIncome < 100) {
+      const midPoint = (this.maxIncome + this.minIncome) / 2;
+      this.minIncome = Math.max(0, midPoint - 50);
+      this.maxIncome = midPoint + 50;
+      console.log(`Range too small, adjusted to: min=${this.minIncome}, max=${this.maxIncome}`);
     }
   }
 }

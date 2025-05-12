@@ -37,10 +37,18 @@ export class IncomePolygonRenderer {
     const minIncome = incomeService.getMinIncome();
     const maxIncome = incomeService.getMaxIncome();
     
+    console.log(`IncomePolygonRenderer: minIncome=${minIncome}, maxIncome=${maxIncome}`);
+    console.log(`Total polygons to process: ${this.polygons.length}`);
+    
+    let processedCount = 0;
+    let skippedCount = 0;
+    let incomeDataCount = 0;
+    
     // Process each polygon
     this.polygons.forEach(polygon => {
       try {
         if (!polygon.coordinates || polygon.coordinates.length < 3) {
+          skippedCount++;
           return;
         }
         
@@ -51,8 +59,12 @@ export class IncomePolygonRenderer {
         
         // Skip if no income data
         if (income === undefined) {
+          skippedCount++;
           return;
         }
+        
+        incomeDataCount++;
+        console.log(`Polygon ${polygon.id}: income=${income}`);
         
         // Normalize coordinates
         const normalizedCoords = normalizeCoordinates(
@@ -132,7 +144,21 @@ export class IncomePolygonRenderer {
       }
     });
     
-    console.log(`Rendered ${this.incomeMeshes.length} income polygons`);
+    console.log(`Rendered ${this.incomeMeshes.length} income polygons (processed: ${processedCount}, skipped: ${skippedCount}, with income data: ${incomeDataCount})`);
+    
+    // Log a sample of the income data for debugging
+    const incomeData = incomeService.getAllIncomeData();
+    console.log(`Total income data entries: ${incomeData.size}`);
+    if (incomeData.size > 0) {
+      console.log('Sample income data:');
+      let count = 0;
+      incomeData.forEach((value, key) => {
+        if (count < 5) { // Log just the first 5 entries
+          console.log(`  ${key}: ${value}`);
+          count++;
+        }
+      });
+    }
   }
   
   /**
