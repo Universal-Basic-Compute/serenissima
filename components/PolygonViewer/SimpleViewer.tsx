@@ -804,7 +804,7 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
     };
     
     // Handle income data updated event from event bus
-    const handleIncomeDataUpdated = (data) => {
+    const handleIncomeDataUpdated = (data: any) => {
       console.log('Received income data updated event:', data);
       if (incomeRendererRef.current && activeView === 'land') {
         incomeRendererRef.current.updateIncomeVisualization();
@@ -814,9 +814,10 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
     window.addEventListener('fetchIncomeData', handleFetchIncomeData);
     window.addEventListener('showIncomeVisualization', handleShowIncomeVisualization);
     
-    // Subscribe to income data updated event
+    // Subscribe to income data updated event using string literal instead of enum
+    // since INCOME_DATA_UPDATED might not be defined in EventTypes
     const incomeDataSubscription = eventBus.subscribe(
-      EventTypes.INCOME_DATA_UPDATED,
+      'INCOME_DATA_UPDATED',
       handleIncomeDataUpdated
     );
     
