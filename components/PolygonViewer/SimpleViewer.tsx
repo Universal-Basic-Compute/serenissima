@@ -155,7 +155,7 @@ export default function SimpleViewer({ qualityMode = 'high', activeView = 'land'
       incomeService.loadIncomeData().catch(error => {
         console.error('Error loading income data:', error);
         // Generate simulated data as fallback
-        incomeService.generateSimulatedIncomeData(polygons);
+        incomeService.generateLastIncomeData(polygons);
       });
     } catch (error) {
       console.warn('Error initializing income data service:', error);
