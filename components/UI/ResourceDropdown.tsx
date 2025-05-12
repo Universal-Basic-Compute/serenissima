@@ -223,6 +223,11 @@ const ResourceDropdown: React.FC<ResourceDropdownProps> = ({ category, resources
       return `/${iconName}`; // Just add the leading slash
     }
     
+    // Check if the filename already has an extension
+    if (!iconName.endsWith('.png') && !iconName.endsWith('.jpg') && !iconName.endsWith('.svg')) {
+      iconName = `${iconName}.png`; // Add .png extension if missing
+    }
+    
     // Otherwise, ensure it starts with a slash for public directory
     return `/assets/icons/resources/${iconName}`;
   };
