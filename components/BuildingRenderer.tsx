@@ -38,38 +38,116 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ active }) => {
     
     console.log('BuildingRenderer: Initializing with main scene');
     
-    // Get scene, camera, and renderer from the main application
-    if (typeof window !== 'undefined' && window.__threeContext) {
-      sceneRef.current = window.__threeContext.scene;
-      cameraRef.current = window.__threeContext.camera;
-      rendererRef.current = window.__threeContext.renderer;
+    // Function to find the scene with retries
+    const findSceneWithRetries = (maxRetries = 5, retryDelay = 500) => {
+      let retryCount = 0;
       
-      console.log('BuildingRenderer: Using main scene from window.__threeContext');
-    } else {
-      // Try to get from canvas element
-      const canvas = document.querySelector('canvas');
-      if (canvas && canvas.__scene && canvas.__camera) {
-        sceneRef.current = canvas.__scene;
-        cameraRef.current = canvas.__camera;
-        console.log('BuildingRenderer: Using main scene from canvas element');
-      } else {
-        console.error('BuildingRenderer: Could not find main scene');
-        return;
+      const attemptToFindScene = () => {
+        // Try to get scene from window.__threeContext
+        if (typeof window !== 'undefined' && window.__threeContext) {
+          sceneRef.current = window.__threeContext.scene;
+          cameraRef.current = window.__threeContext.camera;
+          rendererRef.current = window.__threeContext.renderer;
+          
+          console.log('BuildingRenderer: Using main scene from window.__threeContext');
+          initializeWithScene();
+          return true;
+        } 
+        
+        // Try to get from canvas element
+        const canvas = document.querySelector('canvas');
+        if (canvas && canvas.__scene && canvas.__camera) {
+          sceneRef.current = canvas.__scene;
+          cameraRef.current = canvas.__camera;
+          console.log('BuildingRenderer: Using main scene from canvas element');
+          initializeWithScene();
+          return true;
+        }
+        
+        // If we've reached max retries, create a fallback scene
+        if (retryCount >= maxRetries) {
+          console.warn('BuildingRenderer: Could not find main scene after multiple attempts. Creating fallback scene.');
+          createFallbackScene();
+          return true;
+        }
+        
+        // Otherwise, retry after delay
+        retryCount++;
+        console.log(`BuildingRenderer: Could not find main scene, retrying (${retryCount}/${maxRetries})...`);
+        setTimeout(attemptToFindScene, retryDelay);
+        return false;
+      };
+      
+      return attemptToFindScene();
+    };
+    
+    // Function to initialize with the found scene
+    const initializeWithScene = () => {
+      // Initialize renderer factory with the main scene
+      rendererFactoryRef.current = new BuildingRendererFactory({
+        scene: sceneRef.current,
+        positionManager: buildingPositionManager,
+        cacheService: buildingCacheService
+      });
+      
+      // Load buildings
+      loadBuildingsEfficiently();
+      
+      // Start memory monitoring
+      const stopMemoryMonitoring = startMemoryMonitoring();
+    };
+    
+    // Function to create a fallback scene if we can't find the main scene
+    const createFallbackScene = () => {
+      // Create a new scene
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x87CEEB); // Light sky blue
+      sceneRef.current = scene;
+      
+      // Create camera
+      const camera = new THREE.PerspectiveCamera(
+        60, // Field of view
+        window.innerWidth / window.innerHeight, // Aspect ratio
+        1, // Near clipping plane
+        500 // Far clipping plane
+      );
+      camera.position.set(45, 20, 12);
+      cameraRef.current = camera;
+      
+      // Create a simple ground plane for reference
+      const groundGeometry = new THREE.PlaneGeometry(200, 200);
+      const groundMaterial = new THREE.MeshBasicMaterial({ color: 0xfff0c0 });
+      const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+      ground.rotation.x = -Math.PI / 2;
+      scene.add(ground);
+      
+      // Add ambient light
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+      scene.add(ambientLight);
+      
+      // Initialize renderer factory with the fallback scene
+      rendererFactoryRef.current = new BuildingRendererFactory({
+        scene: scene,
+        positionManager: buildingPositionManager,
+        cacheService: buildingCacheService
+      });
+      
+      // Load buildings
+      loadBuildingsEfficiently();
+      
+      // Start memory monitoring
+      const stopMemoryMonitoring = startMemoryMonitoring();
+      
+      // Expose the scene to window.__threeContext for other components
+      if (typeof window !== 'undefined') {
+        window.__threeContext = window.__threeContext || {};
+        window.__threeContext.scene = scene;
+        window.__threeContext.camera = camera;
       }
-    }
+    };
     
-    // Initialize renderer factory with the main scene
-    rendererFactoryRef.current = new BuildingRendererFactory({
-      scene: sceneRef.current,
-      positionManager: buildingPositionManager,
-      cacheService: buildingCacheService
-    });
-    
-    // Load buildings
-    loadBuildingsEfficiently();
-    
-    // Start memory monitoring
-    const stopMemoryMonitoring = startMemoryMonitoring();
+    // Start the process of finding the scene with retries
+    findSceneWithRetries();
     
     return () => {
       // Clean up buildings
@@ -81,7 +159,13 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({ active }) => {
         }
       }
       
-      stopMemoryMonitoring();
+      // Stop memory monitoring
+      if (typeof startMemoryMonitoring === 'function') {
+        const stopMemoryMonitoring = startMemoryMonitoring();
+        if (typeof stopMemoryMonitoring === 'function') {
+          stopMemoryMonitoring();
+        }
+      }
     };
   }, [isActive]);
   
