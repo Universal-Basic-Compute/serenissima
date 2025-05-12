@@ -68,7 +68,7 @@ export default class SimplePolygonRenderer {
   
   // Properties for bridge, dock, and building points
   private hoveredPointId: string | null = null;
-  private buildingPointMarkers: THREE.Object3D[] = [];
+  public buildingPointMarkers: THREE.Object3D[] = [];
   public bridgePointMarkers: THREE.Object3D[] = [];
   public dockPointMarkers: THREE.Object3D[] = [];
   
@@ -2916,6 +2916,9 @@ export default class SimplePolygonRenderer {
       }, 3000);
     });
   }
+  
+  // Add property for measurement markers
+  private measurementMarkers: THREE.Mesh[] = [];
   
   /**
    * Add a measurement point at the specified position
