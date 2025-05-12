@@ -112,10 +112,10 @@ export class BuildingCacheService {
         return simplifiedModel;
       } catch (error) {
         // Check if this is a 404 error and log as warning instead of error
-        if (error instanceof Error && error.message && error.message.includes('404')) {
+        if (error instanceof Error && error.message.includes('404')) {
           console.warn(`Model not found at ${modelPath} - trying next fallback`);
         } else {
-          console.warn(`Failed to load model from ${modelPath}:`, error);
+          console.warn(`Failed to load model from ${modelPath}:`, error instanceof Error ? error.message : String(error));
         }
         
         // Mark this path as failed
