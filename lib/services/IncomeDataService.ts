@@ -110,6 +110,7 @@ export class IncomeDataService {
     this.isLoading = true;
     
     try {
+      console.log('IncomeDataService: Fetching income data from API...');
       const response = await fetch('/api/get-income-data');
       if (!response.ok) {
         throw new Error(`Failed to load income data: ${response.status} ${response.statusText}`);
@@ -117,7 +118,12 @@ export class IncomeDataService {
       
       const data = await response.json();
       if (data && Array.isArray(data.incomeData)) {
+        console.log(`IncomeDataService: Received ${data.incomeData.length} income data points`);
         this.setIncomeData(data.incomeData);
+      } else {
+        console.warn('IncomeDataService: No income data received from API');
+        // Use simulated data as fallback
+        this.generateLastIncomeData();
       }
     } catch (error) {
       console.error('Error loading income data:', error);

@@ -93,6 +93,21 @@ export default function SimplePage() {
     }
   }, [pathname, showGovernancePanel, showKnowledgePanel, showLoansPanel]);
   
+  // Since 'land' is the default view, fetch income data on initial load
+  useEffect(() => {
+    if (activeView === 'land') {
+      console.log('Initial load with land view, fetching income data...');
+      
+      // Dispatch an event to trigger income data loading
+      const fetchIncomeDataEvent = new CustomEvent('fetchIncomeData');
+      window.dispatchEvent(fetchIncomeDataEvent);
+      
+      // Also dispatch an event to ensure income visualization is shown
+      const showIncomeVisualizationEvent = new CustomEvent('showIncomeVisualization');
+      window.dispatchEvent(showIncomeVisualizationEvent);
+    }
+  }, []); // Empty dependency array means this runs once on mount
+  
   // Listen for events to hide/show 3D view
   useEffect(() => {
     const handleHide3DView = () => {

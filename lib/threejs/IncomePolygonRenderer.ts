@@ -198,6 +198,26 @@ export class IncomePolygonRenderer {
   public updateIncomeVisualization() {
     console.log('%c[IncomePolygonRenderer] Updating income visualization', 'color: orange; font-weight: bold');
     
+    // Get income data service to check if we have data
+    const incomeService = getIncomeDataService();
+    const incomeData = incomeService.getAllIncomeData();
+    
+    if (incomeData.size === 0) {
+      console.log('%c[IncomePolygonRenderer] No income data available, loading data first', 'color: orange');
+      // Load income data first, then update visualization
+      incomeService.loadIncomeData().then(() => {
+        this.refreshVisualization();
+      });
+    } else {
+      // We have data, just refresh the visualization
+      this.refreshVisualization();
+    }
+  }
+  
+  /**
+   * Refresh the visualization with current income data
+   */
+  private refreshVisualization() {
     // Remove existing income meshes
     this.incomeMeshes.forEach(mesh => {
       this.scene.remove(mesh);
