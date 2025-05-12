@@ -7,6 +7,16 @@ interface GuildsPanelProps {
   standalone?: boolean;
 }
 
+// Define the GuildMember interface
+interface GuildMember {
+  userId: string;
+  username: string;
+  firstName: string;
+  lastName: string;
+  coatOfArmsImage: string | null;
+  color: string | null;
+}
+
 export default function GuildsPanel({ onClose, standalone = false }: GuildsPanelProps) {
   const [guilds, setGuilds] = useState<Guild[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -30,6 +40,45 @@ export default function GuildsPanel({ onClose, standalone = false }: GuildsPanel
 
     loadGuilds();
   }, []);
+
+  // Helper function to format date
+  const formatDate = (dateString: string): string => {
+    if (!dateString) return 'Unknown';
+    
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      });
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return dateString;
+    }
+  };
+
+  // Helper function to get land name from localStorage
+  const getLandName = (locationId: string): string => {
+    if (!locationId) return 'Unknown Location';
+    
+    try {
+      // Try to get land name from localStorage
+      const landData = localStorage.getItem('landNames');
+      if (landData) {
+        const lands = JSON.parse(landData);
+        if (lands[locationId]) {
+          return lands[locationId];
+        }
+      }
+      
+      // If we can't find it, return a formatted version of the ID
+      return locationId.replace('polygon-', 'Land ');
+    } catch (error) {
+      console.error('Error getting land name:', error);
+      return locationId;
+    }
+  };
 
   return (
     <div className={`${standalone ? 'p-8' : 'absolute top-20 left-20 right-4 bottom-4 bg-black/30 z-40 rounded-lg p-4 overflow-auto'}`}>
@@ -59,7 +108,12 @@ export default function GuildsPanel({ onClose, standalone = false }: GuildsPanel
             <span className="block sm:inline"> {error}</span>
           </div>
         ) : selectedGuild ? (
-          <GuildDetails guild={selectedGuild} onBack={() => setSelectedGuild(null)} />
+          <GuildDetails 
+            guild={selectedGuild} 
+            onBack={() => setSelectedGuild(null)} 
+            formatDate={formatDate}
+            getLandName={getLandName}
+          />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Guild Cards */}
@@ -139,9 +193,39 @@ export default function GuildsPanel({ onClose, standalone = false }: GuildsPanel
 interface GuildDetailsProps {
   guild: Guild;
   onBack: () => void;
+  formatDate: (dateString: string) => string;
+  getLandName: (locationId: string) => string;
 }
 
-function GuildDetails({ guild, onBack }: GuildDetailsProps) {
+function GuildDetails({ guild, onBack, formatDate, getLandName }: GuildDetailsProps) {
+  const [members, setMembers] = useState<GuildMember[]>([]);
+  const [loadingMembers, setLoadingMembers] = useState<boolean>(true);
+  const [membersError, setMembersError] = useState<string | null>(null);
+
+  // Fetch guild members when the component mounts
+  useEffect(() => {
+    async function fetchGuildMembers() {
+      try {
+        setLoadingMembers(true);
+        const response = await fetch(`/api/guild-members/${guild.guildId}`);
+        
+        if (!response.ok) {
+          throw new Error(`Failed to fetch guild members: ${response.status} ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        setMembers(data.members || []);
+        setMembersError(null);
+      } catch (error) {
+        console.error('Error fetching guild members:', error);
+        setMembersError('Failed to load guild members');
+      } finally {
+        setLoadingMembers(false);
+      }
+    }
+
+    fetchGuildMembers();
+  }, [guild.guildId]);
   return (
     <div className="bg-white rounded-lg shadow-lg overflow-hidden">
       {/* Header with banner image */}
@@ -176,7 +260,9 @@ function GuildDetails({ guild, onBack }: GuildDetailsProps) {
         {/* Guild name overlay */}
         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6">
           <h2 className="text-3xl font-serif text-white">{guild.guildName}</h2>
-          <p className="text-white/80 italic">{guild.guildTier || 'Minor'} Guild • Est. {guild.createdAt || 'Unknown'}</p>
+          <p className="text-white/80 italic">
+            {guild.guildTier || 'Minor'} Guild • Est. {formatDate(guild.createdAt) || 'Unknown'}
+          </p>
         </div>
       </div>
       
@@ -193,7 +279,9 @@ function GuildDetails({ guild, onBack }: GuildDetailsProps) {
             </div>
             
             <h4 className="text-lg font-serif text-amber-700 mt-6 mb-2">Location</h4>
-            <p className="text-gray-700">{guild.primaryLocation || 'Various locations throughout Venice'}</p>
+            <p className="text-gray-700">
+              {getLandName(guild.primaryLocation) || 'Various locations throughout Venice'}
+            </p>
             
             <h4 className="text-lg font-serif text-amber-700 mt-6 mb-2">Patron Saint</h4>
             <p className="text-gray-700">{guild.patronSaint || 'None'}</p>
@@ -201,6 +289,47 @@ function GuildDetails({ guild, onBack }: GuildDetailsProps) {
           
           <div className="bg-amber-50 p-4 rounded-lg border border-amber-200">
             <h3 className="text-xl font-serif text-amber-800 mb-4">Guild Information</h3>
+            
+            {/* Members Section */}
+            <div className="mb-4">
+              <h4 className="font-semibold text-amber-700 text-sm mb-2">Members</h4>
+              
+              {loadingMembers ? (
+                <div className="flex justify-center items-center h-20">
+                  <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-amber-600"></div>
+                </div>
+              ) : membersError ? (
+                <p className="text-xs text-red-600">{membersError}</p>
+              ) : members.length === 0 ? (
+                <p className="text-xs">No members found</p>
+              ) : (
+                <div className="space-y-2 max-h-40 overflow-y-auto">
+                  {members.map(member => (
+                    <div key={member.userId} className="flex items-center space-x-2">
+                      {member.coatOfArmsImage ? (
+                        <img 
+                          src={member.coatOfArmsImage} 
+                          alt={`${member.firstName} ${member.lastName}'s coat of arms`}
+                          className="w-8 h-8 rounded-full object-cover"
+                          style={{ backgroundColor: member.color || '#8B4513' }}
+                        />
+                      ) : (
+                        <div 
+                          className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold"
+                          style={{ backgroundColor: member.color || '#8B4513' }}
+                        >
+                          {member.firstName.charAt(0)}{member.lastName.charAt(0)}
+                        </div>
+                      )}
+                      <div className="text-xs">
+                        <p className="font-medium">{member.username}</p>
+                        <p className="text-gray-600">{member.firstName} {member.lastName}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
             
             {/* Make the guild information text smaller */}
             <div className="space-y-3 text-xs">
