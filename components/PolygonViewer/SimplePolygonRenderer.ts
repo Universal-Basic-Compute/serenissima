@@ -359,6 +359,12 @@ export default class SimplePolygonRenderer {
       return;
     }
     
+    // Add explicit check for land view
+    if (this.activeView !== 'land') {
+      console.log(`%c[SimplePolygonRenderer] Not in land view (current: ${this.activeView}), skipping coat of arms creation`, 'color: #0099ff;');
+      return;
+    }
+    
     console.log(`%c[SimplePolygonRenderer] Creating coat of arms sprites for land view`, 'color: #0099ff; font-weight: bold;');
     this.isRenderingCoatOfArms = true;
     
@@ -995,21 +1001,32 @@ export default class SimplePolygonRenderer {
       this.clearCitizenMarkers();
     }
     
-    this.activeView = activeView;
-    
-    // When switching to land view, add detailed logging
+    // When switching to land view, add detailed logging and force coat of arms creation
     if (activeView === 'land') {
-      console.log(`%c[SimplePolygonRenderer] Switched to land view, coat of arms state:`, 'color: #0099ff; font-weight: bold;');
+      console.log(`%c[SimplePolygonRenderer] Switched to land view, forcing coat of arms creation`, 'color: #0099ff; font-weight: bold;');
+      
+      // Set the active view first so the coat of arms creation knows we're in land view
+      this.activeView = activeView;
+      
+      // Force coat of arms update immediately
+      this.hasRenderedCoatOfArms = false;
+      this.isRenderingCoatOfArms = false;
+      
+      // Log detailed state information
+      console.log(`%c[SimplePolygonRenderer] Coat of arms state:`, 'color: #0099ff; font-weight: bold;');
       console.log(`%c[SimplePolygonRenderer] - Has rendered coat of arms: ${this.hasRenderedCoatOfArms}`, 'color: #0099ff;');
       console.log(`%c[SimplePolygonRenderer] - Is rendering coat of arms: ${this.isRenderingCoatOfArms}`, 'color: #0099ff;');
       console.log(`%c[SimplePolygonRenderer] - Owner map size: ${Object.keys(this.ownerCoatOfArmsMap).length}`, 'color: #0099ff;');
       console.log(`%c[SimplePolygonRenderer] - Has sand texture: ${!!this.sandTexture}`, 'color: #0099ff;');
       
-      // Force coat of arms update when switching to land view
+      // Create coat of arms sprites with a small delay to ensure everything is ready
       setTimeout(() => {
-        console.log(`%c[SimplePolygonRenderer] Forcing coat of arms update after view mode change`, 'color: #0099ff; font-weight: bold;');
+        console.log(`%c[SimplePolygonRenderer] Creating coat of arms after view change delay`, 'color: #0099ff; font-weight: bold;');
         this.createCoatOfArmsSprites();
       }, 500);
+    } else {
+      // For other views, update the active view first
+      this.activeView = activeView;
     }
     
     // Update coat of arms sprites based on view mode
@@ -1141,42 +1158,45 @@ export default class SimplePolygonRenderer {
     console.log(`%c[SimplePolygonRenderer] Updating coat of arms map with ${Object.keys(ownerCoatOfArmsMap).length} entries`, 'color: #0099ff; font-weight: bold;');
     this.ownerCoatOfArmsMap = { ...this.ownerCoatOfArmsMap, ...ownerCoatOfArmsMap };
     
-    // Only create coat of arms sprites if we're in land view AND we have owner data
-    // AND we have textures loaded (sandTexture is a good indicator)
-    if (this.activeView === 'land' && 
-        Object.keys(this.ownerCoatOfArmsMap).length > 0 && 
-        this.sandTexture) {
+    // Force coat of arms creation if we're in land view
+    if (this.activeView === 'land') {
+      console.log(`%c[SimplePolygonRenderer] In land view, forcing coat of arms creation after map update`, 'color: #0099ff; font-weight: bold;');
       
-      console.log(`%c[SimplePolygonRenderer] Conditions met for creating coat of arms:`, 'color: #0099ff;');
-      console.log(`%c[SimplePolygonRenderer] - In land view: true`, 'color: #0099ff;');
-      console.log(`%c[SimplePolygonRenderer] - Has owner data: true (${Object.keys(this.ownerCoatOfArmsMap).length} entries)`, 'color: #0099ff;');
-      console.log(`%c[SimplePolygonRenderer] - Has sand texture: true`, 'color: #0099ff;');
+      // Reset flags to force recreation
+      this.hasRenderedCoatOfArms = false;
+      this.isRenderingCoatOfArms = false;
       
-      // Check if we have any polygons with owners before creating sprites
-      const polygonsWithOwners = this.polygons.filter(p => {
-        const owner = p.owner || p.User;
-        return owner && this.ownerCoatOfArmsMap[owner];
-      });
-      
-      console.log(`%c[SimplePolygonRenderer] Found ${polygonsWithOwners.length} polygons with matching owners`, 'color: #0099ff;');
-      
-      if (polygonsWithOwners.length > 0) {
-        // Reset the rendered flag to force a refresh with new data
-        this.hasRenderedCoatOfArms = false;
+      // Only create coat of arms sprites if we have owner data and textures loaded
+      if (Object.keys(this.ownerCoatOfArmsMap).length > 0 && this.sandTexture) {
+        console.log(`%c[SimplePolygonRenderer] Conditions met for creating coat of arms:`, 'color: #0099ff;');
+        console.log(`%c[SimplePolygonRenderer] - In land view: true`, 'color: #0099ff;');
+        console.log(`%c[SimplePolygonRenderer] - Has owner data: true (${Object.keys(this.ownerCoatOfArmsMap).length} entries)`, 'color: #0099ff;');
+        console.log(`%c[SimplePolygonRenderer] - Has sand texture: true`, 'color: #0099ff;');
         
-        // Add a small delay to ensure textures are fully loaded
-        setTimeout(() => {
-          console.log(`%c[SimplePolygonRenderer] Creating coat of arms sprites after delay`, 'color: #0099ff;');
-          this.createCoatOfArmsSprites();
-        }, 500);
+        // Check if we have any polygons with owners before creating sprites
+        const polygonsWithOwners = this.polygons.filter(p => {
+          const owner = p.owner || p.User;
+          return owner && this.ownerCoatOfArmsMap[owner];
+        });
+        
+        console.log(`%c[SimplePolygonRenderer] Found ${polygonsWithOwners.length} polygons with matching owners`, 'color: #0099ff;');
+        
+        if (polygonsWithOwners.length > 0) {
+          // Create with a small delay
+          setTimeout(() => {
+            console.log(`%c[SimplePolygonRenderer] Creating coat of arms sprites after delay`, 'color: #0099ff;');
+            this.createCoatOfArmsSprites();
+          }, 300);
+        } else {
+          console.log(`%c[SimplePolygonRenderer] No polygons with matching owners found, skipping coat of arms creation`, 'color: #0099ff;');
+        }
       } else {
-        console.log(`%c[SimplePolygonRenderer] No polygons with matching owners found, skipping coat of arms creation`, 'color: #0099ff;');
+        console.log(`%c[SimplePolygonRenderer] Conditions NOT met for creating coat of arms:`, 'color: #0099ff;');
+        console.log(`%c[SimplePolygonRenderer] - Has owner data: ${Object.keys(this.ownerCoatOfArmsMap).length > 0} (${Object.keys(this.ownerCoatOfArmsMap).length} entries)`, 'color: #0099ff;');
+        console.log(`%c[SimplePolygonRenderer] - Has sand texture: ${!!this.sandTexture}`, 'color: #0099ff;');
       }
     } else {
-      console.log(`%c[SimplePolygonRenderer] Conditions NOT met for creating coat of arms:`, 'color: #0099ff;');
-      console.log(`%c[SimplePolygonRenderer] - In land view: ${this.activeView === 'land'}`, 'color: #0099ff;');
-      console.log(`%c[SimplePolygonRenderer] - Has owner data: ${Object.keys(this.ownerCoatOfArmsMap).length > 0} (${Object.keys(this.ownerCoatOfArmsMap).length} entries)`, 'color: #0099ff;');
-      console.log(`%c[SimplePolygonRenderer] - Has sand texture: ${!!this.sandTexture}`, 'color: #0099ff;');
+      console.log(`%c[SimplePolygonRenderer] Not in land view (current: ${this.activeView}), skipping coat of arms creation`, 'color: #0099ff;');
     }
   }
 
