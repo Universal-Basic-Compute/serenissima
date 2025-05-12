@@ -68,7 +68,7 @@ export default class SimplePolygonRenderer {
   
   // Properties for bridge, dock, and building points
   private hoveredPointId: string | null = null;
-  public buildingPointMarkers: THREE.Object3D[] = [];
+  private buildingPointMarkers: THREE.Object3D[] = [];
   public bridgePointMarkers: THREE.Object3D[] = [];
   public dockPointMarkers: THREE.Object3D[] = [];
   
@@ -79,11 +79,7 @@ export default class SimplePolygonRenderer {
   private measurementTools: MeasurementTools | null = null;
   
   // Properties for measurement
-  private measurementMarkers: THREE.Mesh[] = [];
-  // Remove duplicate properties that are already in MeasurementTools class
-  private measurementLine: THREE.Line | null = null;
-  private measurementLabel: THREE.Sprite | null = null;
-  private measurementCircle: THREE.Mesh | null = null;
+  // These properties are already defined in MeasurementTools class
   
   // Properties for path visualization
   private pathVisualization: THREE.Object3D[] = [];
@@ -94,8 +90,7 @@ export default class SimplePolygonRenderer {
   private hoveredCitizenId: string | null = null;
   private selectedCitizenId: string | null = null;
   
-  // Property for building point markers
-  private buildingPointMarkers: THREE.Object3D[] = [];
+  // This duplicate declaration has been removed
   
   constructor({ 
     scene, 
@@ -1872,12 +1867,7 @@ export default class SimplePolygonRenderer {
   }
   
   // Properties for measurement
-  private measurementMarkers: THREE.Mesh[] = [];
-  // Define measurementPoints property to fix TypeScript errors
   private measurementPoints: THREE.Vector3[] = [];
-  private measurementLine: THREE.Line | null = null;
-  private measurementLabel: THREE.Sprite | null = null;
-  private measurementCircle: THREE.Mesh | null = null;
   
   /**
    * Add a measurement point at the specified position
