@@ -21,6 +21,7 @@ import { InteractionManager } from '../../lib/threejs/InteractionManager';
 import { ResourceDisplayManager } from '../../lib/threejs/ResourceDisplayManager';
 import { CitizenDisplayManager } from '../../lib/threejs/CitizenDisplayManager';
 import ViewModeMenu from './ViewModeMenu';
+import { ViewMode } from '../../lib/threejs/types';
 import LandDetailsPanel from './LandDetailsPanel';
 import MarketPanel from './MarketPanel';
 import BuildingMenu from './BuildingMenu';
@@ -33,6 +34,9 @@ import LandPurchaseModal from '../UI/LandPurchaseModal';
 import RoadCreator from '../PolygonViewer/RoadCreator';
 import { RoadManager } from '../../lib/threejs/RoadManager';
 import { eventBus, EventTypes } from '../../lib/eventBus';
+
+// Define ActiveViewMode as an alias of ViewMode to ensure type compatibility
+type ActiveViewMode = ViewMode;
 
 export default function PolygonViewer() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
