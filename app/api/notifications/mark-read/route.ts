@@ -1,9 +1,23 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
+import Airtable from 'airtable';
 
-// Define the directory where notifications will be stored
-const NOTIFICATIONS_DIR = path.join(process.cwd(), 'data', 'notifications');
+// Configure Airtable
+const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
+const AIRTABLE_BASE_ID = process.env.AIRTABLE_BASE_ID;
+const AIRTABLE_NOTIFICATIONS_TABLE = process.env.AIRTABLE_NOTIFICATIONS_TABLE || 'NOTIFICATIONS';
+
+// Initialize Airtable
+const initAirtable = () => {
+  if (!AIRTABLE_API_KEY || !AIRTABLE_BASE_ID) {
+    throw new Error('Airtable credentials not configured');
+  }
+  
+  Airtable.configure({
+    apiKey: AIRTABLE_API_KEY
+  });
+  
+  return Airtable.base(AIRTABLE_BASE_ID);
+};
 
 export async function POST(request: Request) {
   try {
@@ -19,39 +33,35 @@ export async function POST(request: Request) {
     
     console.log(`Marking notifications as read for user: ${user}, notifications: ${notificationIds.join(', ')}`);
     
-    // Get the user's notification file path
-    const userNotificationsPath = path.join(NOTIFICATIONS_DIR, `${user}.json`);
-    
-    // Check if the user has any notifications
-    if (!fs.existsSync(userNotificationsPath)) {
+    try {
+      // Initialize Airtable
+      const base = initAirtable();
+      
+      // Current timestamp for read time
+      const readAt = new Date().toISOString();
+      
+      // Update each notification in Airtable
+      const updatePromises = notificationIds.map(notificationId => {
+        return base(AIRTABLE_NOTIFICATIONS_TABLE).update(notificationId, {
+          'ReadAt': readAt
+        });
+      });
+      
+      // Wait for all updates to complete
+      await Promise.all(updatePromises);
+      
+      return NextResponse.json({
+        success: true,
+        message: 'Notifications marked as read successfully'
+      });
+      
+    } catch (error) {
+      console.error('Error marking notifications as read in Airtable:', error);
       return NextResponse.json(
-        { success: false, error: 'No notifications found for this user' },
-        { status: 404 }
+        { success: false, error: 'Failed to mark notifications as read in Airtable' },
+        { status: 500 }
       );
     }
-    
-    // Read the user's notifications
-    const notificationsData = fs.readFileSync(userNotificationsPath, 'utf8');
-    const notifications = JSON.parse(notificationsData);
-    
-    // Mark the specified notifications as read
-    const updatedNotifications = notifications.map((notification: any) => {
-      if (notificationIds.includes(notification.notificationId) && !notification.readAt) {
-        return {
-          ...notification,
-          readAt: new Date().toISOString()
-        };
-      }
-      return notification;
-    });
-    
-    // Save the updated notifications
-    fs.writeFileSync(userNotificationsPath, JSON.stringify(updatedNotifications, null, 2));
-    
-    return NextResponse.json({
-      success: true,
-      message: 'Notifications marked as read successfully'
-    });
     
   } catch (error) {
     console.error('Error marking notifications as read:', error);

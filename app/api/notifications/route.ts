@@ -1,17 +1,23 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
+import Airtable from 'airtable';
 
-// Define the directory where notifications will be stored
-const NOTIFICATIONS_DIR = path.join(process.cwd(), 'data', 'notifications');
+// Configure Airtable
+const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
+const AIRTABLE_BASE_ID = process.env.AIRTABLE_BASE_ID;
+const AIRTABLE_NOTIFICATIONS_TABLE = process.env.AIRTABLE_NOTIFICATIONS_TABLE || 'NOTIFICATIONS';
 
-// Ensure the notifications directory exists
-function ensureNotificationsDirExists() {
-  if (!fs.existsSync(NOTIFICATIONS_DIR)) {
-    fs.mkdirSync(NOTIFICATIONS_DIR, { recursive: true });
+// Initialize Airtable
+const initAirtable = () => {
+  if (!AIRTABLE_API_KEY || !AIRTABLE_BASE_ID) {
+    throw new Error('Airtable credentials not configured');
   }
-  return NOTIFICATIONS_DIR;
-}
+  
+  Airtable.configure({
+    apiKey: AIRTABLE_API_KEY
+  });
+  
+  return Airtable.base(AIRTABLE_BASE_ID);
+};
 
 // Get notifications for a user
 export async function POST(request: Request) {
@@ -29,18 +35,55 @@ export async function POST(request: Request) {
     
     console.log('\x1b[35m%s\x1b[0m', `[DEBUG] Fetching notifications for user: ${user}, since: ${since}`);
     
-    // Ensure the notifications directory exists
-    ensureNotificationsDirExists();
-    console.log('\x1b[35m%s\x1b[0m', `[DEBUG] Notifications directory: ${NOTIFICATIONS_DIR}`);
-    
-    // Get the user's notification file path
-    const userNotificationsPath = path.join(NOTIFICATIONS_DIR, `${user}.json`);
-    console.log('\x1b[35m%s\x1b[0m', `[DEBUG] User notifications path: ${userNotificationsPath}`);
-    
-    // Check if the user has any notifications
-    if (!fs.existsSync(userNotificationsPath)) {
-      console.log('\x1b[35m%s\x1b[0m', `[DEBUG] No notifications file found, creating sample notifications`);
-      // Create some sample notifications for the user
+    try {
+      // Initialize Airtable
+      const base = initAirtable();
+      
+      // Build filter formula
+      let filterFormula = `{User} = '${user}'`;
+      
+      // Add since filter if provided
+      if (since) {
+        const sinceDate = new Date(since).toISOString();
+        filterFormula += ` AND {CreatedAt} > '${sinceDate}'`;
+      }
+      
+      console.log('\x1b[35m%s\x1b[0m', `[DEBUG] Airtable filter formula: ${filterFormula}`);
+      
+      // Fetch notifications from Airtable
+      const records = await base(AIRTABLE_NOTIFICATIONS_TABLE)
+        .select({
+          filterByFormula: filterFormula,
+          sort: [{ field: 'CreatedAt', direction: 'desc' }]
+        })
+        .all();
+      
+      console.log('\x1b[35m%s\x1b[0m', `[DEBUG] Found ${records.length} notifications in Airtable`);
+      
+      // Transform Airtable records to our notification format
+      const notifications = records.map(record => ({
+        notificationId: record.id,
+        type: record.get('Type') as string,
+        user: record.get('User') as string,
+        content: record.get('Content') as string,
+        details: record.get('Details') ? JSON.parse(record.get('Details') as string) : undefined,
+        createdAt: record.get('CreatedAt') as string,
+        readAt: record.get('ReadAt') as string || null
+      }));
+      
+      console.log('\x1b[35m%s\x1b[0m', `[DEBUG] Returning ${notifications.length} notifications`);
+      
+      return NextResponse.json({
+        success: true,
+        notifications: notifications
+      });
+      
+    } catch (error) {
+      console.error('\x1b[35m%s\x1b[0m', '[DEBUG] Error fetching notifications from Airtable:', error);
+      
+      // Fallback to sample notifications if Airtable fetch fails
+      console.log('\x1b[35m%s\x1b[0m', `[DEBUG] Creating sample notifications as fallback`);
+      
       const sampleNotifications = [
         {
           notificationId: `${user}-notification-1`,
@@ -68,38 +111,14 @@ export async function POST(request: Request) {
         }
       ];
       
-      // Save the sample notifications
-      fs.writeFileSync(userNotificationsPath, JSON.stringify(sampleNotifications, null, 2));
-      console.log('\x1b[35m%s\x1b[0m', `[DEBUG] Created and saved ${sampleNotifications.length} sample notifications`);
-      
       return NextResponse.json({
         success: true,
         notifications: sampleNotifications
       });
     }
     
-    // Read the user's notifications
-    const notificationsData = fs.readFileSync(userNotificationsPath, 'utf8');
-    const notifications = JSON.parse(notificationsData);
-    console.log('\x1b[35m%s\x1b[0m', `[DEBUG] Found ${notifications.length} existing notifications`);
-    
-    // Filter notifications based on the 'since' parameter if provided
-    let filteredNotifications = notifications;
-    if (since) {
-      filteredNotifications = notifications.filter(
-        (notification: any) => new Date(notification.createdAt).getTime() > since
-      );
-      console.log('\x1b[35m%s\x1b[0m', `[DEBUG] Filtered to ${filteredNotifications.length} notifications since ${new Date(since).toISOString()}`);
-    }
-    
-    console.log('\x1b[35m%s\x1b[0m', `[DEBUG] Returning ${filteredNotifications.length} notifications`);
-    return NextResponse.json({
-      success: true,
-      notifications: filteredNotifications
-    });
-    
   } catch (error) {
-    console.error('\x1b[35m%s\x1b[0m', '[DEBUG] Error fetching notifications:', error);
+    console.error('\x1b[35m%s\x1b[0m', '[DEBUG] Error processing notifications request:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to fetch notifications' },
       { status: 500 }
