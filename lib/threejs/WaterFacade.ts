@@ -207,6 +207,11 @@ export class WaterFacade {
         // Apply the modified shader
         water.material.fragmentShader = fragmentShader;
         water.material.needsUpdate = true;
+        
+        // For HIGH quality only, add enhanced shoreline interaction
+        if (this.quality === WaterQualityLevel.HIGH) {
+          this.enhanceWaterShaderForHighQuality(water);
+        }
       }
 
       // Position water
@@ -622,6 +627,11 @@ export class WaterFacade {
         // Update water animation
         this.water.material.uniforms['time'].value += delta * this.flowSpeed * speedFactor;
         
+        // For HIGH quality, update ripple time at a different rate
+        if (this.quality === WaterQualityLevel.HIGH && this.water.material.uniforms.rippleTime) {
+          this.water.material.uniforms.rippleTime.value += delta * this.water.material.uniforms.rippleSpeed.value;
+        }
+        
         // Update flow direction if needed
         if (this.flowDirection.x !== 0 || this.flowDirection.y !== 0) {
           // Some water implementations might have a flowDirection uniform
@@ -635,7 +645,8 @@ export class WaterFacade {
         
         // Update shoreline effect if needed
         if (this.shorelineEffect && this.boundaryPoints.length > 0 && 
-            this.water.material.userData.hasShorelineEffect) {
+            (this.water.material.userData.hasShorelineEffect || 
+             this.water.material.userData.hasEnhancedShorelineEffect)) {
           // Periodically update boundary points to account for any moving land objects
           if (Math.random() < 0.01) { // ~1% chance per frame to update
             this.extractBoundaryPoints();
@@ -690,6 +701,9 @@ export class WaterFacade {
     if (this.quality === qualityLevel) return;
     
     console.log(`Changing water quality from ${this.quality} to ${qualityLevel}`);
+    
+    const wasHighQuality = this.quality === WaterQualityLevel.HIGH;
+    const isNowHighQuality = qualityLevel === WaterQualityLevel.HIGH;
     
     this.quality = qualityLevel;
     this.updateQualitySettings();
@@ -1136,6 +1150,12 @@ export class WaterFacade {
                      '#' + this.color.toString(16).padStart(6, '0'));
         }
         
+        // For HIGH quality, use the enhanced shader instead
+        if (this.quality === WaterQualityLevel.HIGH && !material.userData.hasEnhancedShorelineEffect) {
+          this.enhanceWaterShaderForHighQuality(this.water as Water);
+          return;
+        }
+        
         // Check if we need to modify the shader
         if (!material.userData.hasShorelineEffect) {
           // Add custom uniforms for shoreline effect
@@ -1356,5 +1376,137 @@ if (shoreFactor > 0.01) {
     // Clear references to help garbage collection
     this.water = null;
     this.clock = new THREE.Clock(); // Replace with empty clock instead of null
+  }
+  
+  /**
+   * Enhance water shader with advanced effects for high quality mode
+   * @param water The water object to enhance
+   * @private
+   */
+  private enhanceWaterShaderForHighQuality(water: Water): void {
+    if (!(water.material instanceof THREE.ShaderMaterial)) return;
+    
+    console.log('Enhancing water shader for HIGH quality with advanced shoreline effects');
+    
+    const material = water.material;
+    
+    // Add custom uniforms for enhanced shoreline effects
+    material.uniforms.shorelinePoints = { value: this.boundaryPoints };
+    material.uniforms.shorelineIntensity = { value: this.shorelineIntensity * 1.5 }; // Increase intensity for high quality
+    material.uniforms.shorelineDistance = { value: this.shorelineDistance * 1.2 }; // Increase distance for high quality
+    material.uniforms.rippleTime = { value: 0.0 }; // Separate time for ripple animation
+    material.uniforms.rippleStrength = { value: 0.8 }; // Strength of ripple effect
+    material.uniforms.rippleSpeed = { value: 0.5 }; // Speed of ripple animation
+    
+    // Modify fragment shader to include enhanced shoreline and ripple effects
+    let fragmentShader = material.fragmentShader;
+    
+    // Add uniform declarations
+    fragmentShader = fragmentShader.replace(
+      'uniform float time;',
+      `uniform float time;
+      uniform float rippleTime;
+      uniform float rippleStrength;
+      uniform float rippleSpeed;
+      uniform float shorelineIntensity;
+      uniform float shorelineDistance;
+      uniform vec3 shorelinePoints[${Math.max(this.boundaryPoints.length, 1)}];`
+    );
+    
+    // Add enhanced shoreline calculation function with ripples
+    fragmentShader = fragmentShader.replace(
+      'void main() {',
+      `
+// Function to create circular ripples from a point
+float circularRipple(vec2 center, vec2 position, float time, float wavelength, float amplitude) {
+  float dist = distance(center, position);
+  float ripple = sin(dist * wavelength - time) * amplitude;
+  // Fade ripple with distance
+  ripple *= smoothstep(shorelineDistance * 1.2, 0.0, dist);
+  return ripple;
+}
+
+// Enhanced shoreline calculation with ripples
+float calculateEnhancedShorelineFactor(vec3 position) {
+  float minDist = 1000.0;
+  vec2 closestPoint = vec2(0.0);
+  
+  // Find distance to closest shoreline point and store the point
+  for(int i = 0; i < ${Math.max(this.boundaryPoints.length, 1)}; i++) {
+    vec2 pointXZ = shorelinePoints[i].xz;
+    float dist = distance(position.xz, pointXZ);
+    if (dist < minDist) {
+      minDist = dist;
+      closestPoint = pointXZ;
+    }
+  }
+  
+  // Calculate base shoreline factor with smoother falloff
+  float baseFactor = 1.0 - smoothstep(0.0, shorelineDistance, minDist);
+  
+  // Add noise to the shoreline factor for more natural appearance
+  float noise = sin(position.x * 0.5 + position.z * 0.7 + time * 0.3) * 0.15 + 0.15;
+  
+  // Add ripple effect from closest shoreline point
+  float ripple = 0.0;
+  if (minDist < shorelineDistance * 1.2) {
+    // Create multiple overlapping ripples with different frequencies
+    ripple += circularRipple(closestPoint, position.xz, rippleTime * 0.7, 8.0, 0.04);
+    ripple += circularRipple(closestPoint, position.xz, rippleTime * 1.1, 12.0, 0.03);
+    ripple += circularRipple(closestPoint, position.xz, rippleTime * 0.5, 5.0, 0.05);
+    
+    // Scale ripple by distance from shore (stronger near shore)
+    ripple *= (1.0 - minDist / (shorelineDistance * 1.2));
+  }
+  
+  // Combine base factor with noise and ripple
+  float combinedFactor = baseFactor * (1.0 + noise * baseFactor);
+  
+  // Add ripple effect to the final factor
+  combinedFactor += ripple * rippleStrength * baseFactor;
+  
+  return combinedFactor;
+}
+
+void main() {`
+    );
+    
+    // Replace the standard shoreline calculation with our enhanced version
+    fragmentShader = fragmentShader.replace(
+      'vec4 info = texture2D( mirrorSampler, coords );',
+      `vec4 info = texture2D( mirrorSampler, coords );
+      
+// Apply enhanced shoreline effect with ripples
+// Add more pronounced wave height variation near shore
+float waveVariation = sin(vWorldPosition.x * 2.5 + vWorldPosition.z * 3.2 + time * 1.5) * 0.15 +
+                      cos(vWorldPosition.x * 3.7 + vWorldPosition.z * 1.9 + time * 0.8) * 0.1;
+
+// Apply enhanced shoreline effect
+float shoreFactor = calculateEnhancedShorelineFactor(vWorldPosition) * shorelineIntensity;
+if (shoreFactor > 0.01) {
+  // Increase wave height near shore - significantly enhanced
+  info.r += shoreFactor * 0.8 + shoreFactor * waveVariation * 0.4;
+  
+  // Add much more pronounced foam near shore
+  info.g = mix(info.g, 1.0, shoreFactor * 0.98);
+  
+  // Add wave distortion near shore
+  info.b = mix(info.b, 0.5, shoreFactor * 0.8);
+  
+  // Add stronger color variation near shore for visual emphasis
+  reflectedColor = mix(reflectedColor, vec3(0.95, 0.98, 1.0), shoreFactor * 0.85);
+  
+  // Add additional foam patterns based on position and time - enhanced pattern
+  float foamPattern = sin(vWorldPosition.x * 3.5 + time * 0.8) * sin(vWorldPosition.z * 3.5 + time * 1.0) * 0.5 + 0.5;
+  info.g = mix(info.g, info.g * foamPattern, shoreFactor * 0.6);
+}`
+    );
+    
+    // Apply the modified shader
+    material.fragmentShader = fragmentShader;
+    material.needsUpdate = true;
+    
+    // Mark as having enhanced shoreline effect
+    material.userData.hasEnhancedShorelineEffect = true;
   }
 }
