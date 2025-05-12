@@ -1,4 +1,4 @@
-import { getApiBaseUrl } from '@/lib/apiUtils';
+import { getBackendBaseUrl } from '@/lib/apiUtils';
 import useBuildingStore from '@/store/useBuildingStore';
 import * as THREE from 'three';
 
