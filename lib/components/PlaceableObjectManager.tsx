@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import * as THREE from 'three';
 import { eventBus, EventTypes } from '../eventBus';
-import { getBuildingService } from '../services/BuildingService';
+import { BuildingService } from '../services/BuildingService';
 import { getDockService } from '../services/DockService';
 
 interface PlaceableObjectManagerProps {
@@ -48,7 +48,7 @@ const PlaceableObjectManager: React.FC<PlaceableObjectManagerProps> = ({
   const mouseRef = useRef<THREE.Vector2>(new THREE.Vector2());
   
   // Refs for services
-  const buildingServiceRef = useRef(getBuildingService());
+  const buildingServiceRef = useRef(BuildingService.getInstance());
   const dockServiceRef = useRef(getDockService());
   
   // Initialize placement
