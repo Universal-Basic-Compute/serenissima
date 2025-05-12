@@ -45,8 +45,8 @@ export class IncomePolygonRenderer {
         }
         
         // Get income for this polygon
-        const income = polygon.simulatedIncome !== undefined 
-          ? polygon.simulatedIncome 
+        const income = polygon.lastIncome !== undefined 
+          ? polygon.lastIncome 
           : incomeService.getIncome(polygon.id);
         
         // Skip if no income data

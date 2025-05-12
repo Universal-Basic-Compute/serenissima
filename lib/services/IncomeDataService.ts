@@ -122,7 +122,7 @@ export class IncomeDataService {
     } catch (error) {
       console.error('Error loading income data:', error);
       // Use simulated data as fallback
-      this.generateSimulatedIncomeData();
+      this.generateLastIncomeData();
     } finally {
       this.isLoading = false;
     }
@@ -132,7 +132,7 @@ export class IncomeDataService {
    * Generate simulated income data for testing
    * @param polygons Optional array of polygons to generate data for
    */
-  public generateSimulatedIncomeData(polygons?: any[]): void {
+  public generateLastIncomeData(polygons?: any[]): void {
     // If polygons are provided, generate data for them
     if (polygons && polygons.length > 0) {
       const simulatedData: IncomeData[] = polygons.map(polygon => ({
