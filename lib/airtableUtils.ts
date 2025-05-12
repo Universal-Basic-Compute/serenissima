@@ -103,8 +103,8 @@ export const airtableUtils = {
    */
   async fetchGuilds(): Promise<Guild[]> {
     try {
-      const apiBaseUrl = process.env.NEXT_PUBLIC_BACKEND_BASE_URL || 'http://localhost:10000';
-      const response = await fetch(`${apiBaseUrl}/api/guilds`);
+      // Use relative URL instead of apiBaseUrl
+      const response = await fetch('/api/guilds');
       
       if (!response.ok) {
         throw new Error(`Failed to fetch guilds: ${response.status} ${response.statusText}`);
