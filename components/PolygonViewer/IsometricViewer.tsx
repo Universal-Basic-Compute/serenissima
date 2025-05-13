@@ -12,6 +12,9 @@ interface IsometricViewerProps {
   activeView: 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance' | 'loans' | 'knowledge' | 'citizens' | 'guilds';
 }
 
+// Define a type for all possible view types to use throughout the component
+type ViewType = 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance' | 'loans' | 'knowledge' | 'citizens' | 'guilds';
+
 export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [polygons, setPolygons] = useState<any[]>([]);
@@ -430,7 +433,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     if (activeView === 'citizens') {
       loadCitizens();
     }
-  }, [activeView]);
+  }, [activeView, loadCitizens]);
   
   // Check image paths when citizens are loaded
   const checkImagePaths = async () => {
