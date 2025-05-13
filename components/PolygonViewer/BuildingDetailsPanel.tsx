@@ -5,13 +5,29 @@ import PlayerProfile from '../UI/PlayerProfile';
 // Add this helper function to find and load the building definition file
 const loadBuildingDefinition = async (type: string, variant?: string): Promise<any> => {
   try {
+    console.log(`Looking for building definition for type: ${type}, variant: ${variant || 'none'}`);
+    
+    // Try the new API endpoint first
+    try {
+      const response = await fetch(`/api/building-data/${encodeURIComponent(type)}`);
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Found building definition via API:', data);
+        return data;
+      }
+    } catch (error) {
+      console.log(`API endpoint not available for ${type}, trying other methods`);
+    }
+    
     // Try to find the building definition file in the data structure
     // First, try with the specific variant if provided
     if (variant) {
       try {
         const response = await fetch(`/data/buildings/${type.toLowerCase()}/${variant.toLowerCase()}.json`);
         if (response.ok) {
-          return await response.json();
+          const data = await response.json();
+          console.log('Found building definition with variant:', data);
+          return data;
         }
       } catch (error) {
         console.log(`No specific variant file found for ${type}/${variant}, trying category structure`);
@@ -23,22 +39,39 @@ const loadBuildingDefinition = async (type: string, variant?: string): Promise<a
       // This will search through all categories and subcategories
       const response = await fetch(`/api/building-definition?type=${encodeURIComponent(type)}`);
       if (response.ok) {
-        return await response.json();
+        const data = await response.json();
+        console.log('Found building definition in category structure:', data);
+        return data;
       }
     } catch (error) {
       console.log(`No building definition found in category structure for ${type}`);
+    }
+    
+    // Try the general data API
+    try {
+      const response = await fetch(`/api/data/buildings/${type.toLowerCase()}.json`);
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Found building definition via general data API:', data);
+        return data;
+      }
+    } catch (error) {
+      console.log(`No building definition found via general data API for ${type}`);
     }
     
     // Fallback to direct type file
     try {
       const response = await fetch(`/data/buildings/${type.toLowerCase()}.json`);
       if (response.ok) {
-        return await response.json();
+        const data = await response.json();
+        console.log('Found building definition via direct file:', data);
+        return data;
       }
     } catch (error) {
       console.log(`No direct building definition file found for ${type}`);
     }
     
+    console.log(`No building definition found for ${type}`);
     return null;
   } catch (error) {
     console.error('Error loading building definition:', error);
@@ -122,6 +155,15 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
       setBuildingDefinition(null);
     }
   }, [building]);
+  
+  // Add this useEffect to debug the building definition
+  useEffect(() => {
+    if (buildingDefinition) {
+      console.log('Building definition loaded:', buildingDefinition);
+      console.log('Has maintenance cost:', buildingDefinition.maintenanceCost !== undefined);
+      console.log('Maintenance cost value:', buildingDefinition.maintenanceCost);
+    }
+  }, [buildingDefinition]);
   
   // Function to fetch land data
   const fetchLandData = async (landId: string) => {
@@ -443,28 +485,30 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
                   
                   {buildingDefinition.name && (
                     <div className="mb-2">
-                      <span className="text-gray-700">Name:</span>
+                      <span className="text-gray-700 font-medium">Name:</span>
                       <span className="ml-2 font-serif text-lg font-semibold text-amber-800">{buildingDefinition.name}</span>
                     </div>
                   )}
                   
-                  {buildingDefinition.category && (
-                    <div className="mb-2">
-                      <span className="text-gray-700">Category:</span>
-                      <span className="ml-2 font-medium text-amber-700">{buildingDefinition.category}</span>
-                    </div>
-                  )}
-                  
-                  {buildingDefinition.subcategory && (
-                    <div className="mb-2">
-                      <span className="text-gray-700">Subcategory:</span>
-                      <span className="ml-2 font-medium text-amber-700">{buildingDefinition.subcategory}</span>
-                    </div>
-                  )}
+                  <div className="grid grid-cols-2 gap-2 mt-3">
+                    {buildingDefinition.category && (
+                      <div className="mb-2">
+                        <span className="text-gray-700 font-medium">Category:</span>
+                        <span className="ml-2 text-amber-700">{buildingDefinition.category}</span>
+                      </div>
+                    )}
+                    
+                    {buildingDefinition.subcategory && (
+                      <div className="mb-2">
+                        <span className="text-gray-700 font-medium">Subcategory:</span>
+                        <span className="ml-2 text-amber-700">{buildingDefinition.subcategory}</span>
+                      </div>
+                    )}
+                  </div>
                   
                   {buildingDefinition.maintenanceCost !== undefined && (
-                    <div className="mt-3 flex justify-between items-center">
-                      <span className="text-gray-700">Maintenance Cost:</span>
+                    <div className="mt-3 flex justify-between items-center bg-amber-50 p-2 rounded-lg">
+                      <span className="text-gray-700 font-medium">Maintenance Cost:</span>
                       <span className="font-semibold text-amber-800">
                         {buildingDefinition.maintenanceCost.toLocaleString()} ⚜️ ducats/day
                       </span>
