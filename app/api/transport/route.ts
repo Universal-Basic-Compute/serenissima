@@ -1,7 +1,28 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
-import PriorityQueue from 'priorityqueuejs';
+
+// Simple priority queue implementation
+class PriorityQueue<T> {
+  private items: { element: T, priority: number }[] = [];
+
+  enq(element: T, priority: number): void {
+    this.items.push({ element, priority });
+    // Sort by priority (lower values have higher priority)
+    this.items.sort((a, b) => a.priority - b.priority);
+  }
+
+  deq(): T | undefined {
+    if (this.isEmpty()) {
+      return undefined;
+    }
+    return this.items.shift()?.element;
+  }
+
+  isEmpty(): boolean {
+    return this.items.length === 0;
+  }
+}
 
 // Define types for our graph
 interface Point {
@@ -293,7 +314,7 @@ function findShortestPath(graph: Graph, startNodeId: string, endNodeId: string):
   const visited: Set<string> = new Set();
   
   // Create a priority queue
-  const queue = new PriorityQueue<{ nodeId: string, distance: number }>((a, b) => b.distance - a.distance);
+  const queue = new PriorityQueue<string>();
   
   // Initialize all distances as Infinity
   for (const nodeId in graph.nodes) {
@@ -303,10 +324,11 @@ function findShortestPath(graph: Graph, startNodeId: string, endNodeId: string):
   
   // Distance from start to itself is 0
   distances[startNodeId] = 0;
-  queue.enq({ nodeId: startNodeId, distance: 0 });
+  queue.enq(startNodeId, 0);
   
   while (!queue.isEmpty()) {
-    const { nodeId } = queue.deq();
+    const nodeId = queue.deq();
+    if (!nodeId) break;
     
     // If we've reached the end node, we're done
     if (nodeId === endNodeId) {
@@ -332,7 +354,7 @@ function findShortestPath(graph: Graph, startNodeId: string, endNodeId: string):
       if (distance < distances[neighbor]) {
         distances[neighbor] = distance;
         previous[neighbor] = nodeId;
-        queue.enq({ nodeId: neighbor, distance });
+        queue.enq(neighbor, distance);
       }
     }
   }
