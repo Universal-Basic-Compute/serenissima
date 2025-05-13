@@ -537,9 +537,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       if (showText) {
         polygonsToRender.forEach(({ polygon, centroidX, centroidY }) => {
           if (polygon.historicalName) {
-            // Draw text - adjust font size based on zoom level for better readability
-            const fontSize = Math.min(12, Math.max(8, Math.floor(scale * 1.5)));
-            ctx.font = `${fontSize}px Arial`;
+            // Use a fixed font size regardless of zoom level
+            ctx.font = `10px Arial`;
             ctx.fillStyle = '#000';
             ctx.textAlign = 'center';
             
@@ -640,10 +639,9 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         ctx.fill();
         ctx.stroke();
         
-        // Add a small indicator for the building type
+        // Add a small indicator for the building type with fixed font size
         ctx.fillStyle = '#000';
-        const fontSize = Math.min(14, Math.max(8, Math.floor(scale * 1.2)));
-        ctx.font = `${fontSize}px Arial`;
+        ctx.font = `10px Arial`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         // Use first letter of building type as an indicator
