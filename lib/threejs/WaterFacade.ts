@@ -326,24 +326,7 @@ export class WaterFacade {
     // Create a simple plane geometry with minimal segments
     const waterGeometry = new THREE.PlaneGeometry(this.size, this.size, 1, 1);
     
-    // Create a simple blue material with no effects
-    const waterMaterial = new THREE.MeshBasicMaterial({
-      color: this.color,
-      transparent: true,
-      opacity: this.opacity,
-      side: THREE.DoubleSide
-    });
-    
-    // Create a mesh with the geometry and material
-    const waterMesh = new THREE.Mesh(waterGeometry, waterMaterial);
-    
-    // Position the water plane
-    waterMesh.rotation.x = -Math.PI / 2;
-    waterMesh.position.set(this.position.x, 0, this.position.z);
-    waterMesh.renderOrder = 0;
-    
-    // We need to return a Water object, so we'll create a minimal one
-    // but replace its material with our basic material
+    // Create a minimal Water instance with very basic settings
     const water = new Water(
       waterGeometry,
       {
@@ -351,20 +334,27 @@ export class WaterFacade {
         textureHeight: 1,
         waterColor: this.color,
         distortionScale: 0,
-        fog: false
+        fog: false,
+        alpha: this.opacity
       }
     );
     
-    // Replace the shader material with our basic material
-    if (water.material) {
-      if (Array.isArray(water.material)) {
-        water.material.forEach(m => m.dispose());
-      } else {
-        water.material.dispose();
-      }
+    // Simplify the shader material as much as possible
+    if (water.material instanceof THREE.ShaderMaterial) {
+      // Simplify the shader to absolute minimum
+      water.material.uniforms.distortionScale.value = 0;
+      water.material.uniforms.size.value = 0.1;
+      
+      // Disable any expensive calculations in the shader
+      let fragmentShader = water.material.fragmentShader;
+      fragmentShader = fragmentShader.replace(
+        'vec4 info = texture2D( mirrorSampler, coords );',
+        'vec4 info = vec4(0.0, 0.0, 0.0, 1.0);' // Skip reflection sampling
+      );
+      
+      water.material.fragmentShader = fragmentShader;
+      water.material.needsUpdate = true;
     }
-    
-    water.material = waterMaterial;
     
     // Position water
     water.rotation.x = -Math.PI / 2;
@@ -374,7 +364,7 @@ export class WaterFacade {
     return water;
   }
 
-  private createFallbackWater(): Water | any {
+  private createFallbackWater(): Water {
     console.warn('Creating fallback water plane');
     this.fallbackMode = true;
     
@@ -395,15 +385,7 @@ export class WaterFacade {
       colorObj.multiplyScalar(this.brightness);
       waterMaterial.color = colorObj;
       
-      // Create a mesh with the geometry and material
-      const waterMesh = new THREE.Mesh(waterGeometry, waterMaterial);
-      
-      // Position the water plane
-      waterMesh.rotation.x = -Math.PI / 2;
-      waterMesh.position.set(this.position.x, 0, this.position.z); // Change y position to 0
-      waterMesh.renderOrder = 0;
-      
-      // Create a minimal Water instance with the mesh
+      // Create a minimal Water instance
       const water = new Water(
         waterGeometry,
         {
@@ -423,20 +405,7 @@ export class WaterFacade {
     } catch (error) {
       console.error('Failed to create even fallback water:', error);
       
-      // Create an absolute minimal fallback - just a blue plane
-      const waterGeometry = new THREE.PlaneGeometry(this.size, this.size);
-      const waterMaterial = new THREE.MeshBasicMaterial({
-        color: this.color,
-        transparent: true,
-        opacity: this.opacity, // Use the opacity property
-        side: THREE.DoubleSide
-      });
-      
-      const simpleMesh = new THREE.Mesh(waterGeometry, waterMaterial);
-      simpleMesh.rotation.x = -Math.PI / 2;
-      simpleMesh.position.set(this.position.x, this.position.y, this.position.z);
-      
-      // We need to return a Water object, so we'll create a minimal one
+      // Create an absolute minimal fallback - create a minimal Water object
       const minimalWater = new Water(
         waterGeometry,
         {
