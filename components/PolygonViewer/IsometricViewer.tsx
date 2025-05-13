@@ -655,9 +655,10 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
           
           // Get building size
           const size = getBuildingSize(building.type);
-          const squareSize = Math.max(size.width, size.depth) * scale * 0.6;
+          // Increase the hit area by 20% to make it easier to hover
+          const squareSize = Math.max(size.width, size.depth) * scale * 0.6 * 1.2;
           
-          // Check if mouse is over this building
+          // Check if mouse is over this building using a more generous hit area
           if (
             mouseX >= isoPos.x - squareSize/2 &&
             mouseX <= isoPos.x + squareSize/2 &&
@@ -670,6 +671,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             if (hoveredBuildingId !== building.id) {
               setHoveredBuildingId(building.id);
               canvas.style.cursor = 'pointer';
+              console.log('Hovering over building:', building.id, building.type);
             }
             break;
           }
@@ -813,6 +815,11 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   // Draw the isometric view
   useEffect(() => {
     if (loading || !canvasRef.current || polygons.length === 0) return;
+    
+    // Debug logging for hover state
+    if (hoveredBuildingId) {
+      console.log('Drawing with hoveredBuildingId:', hoveredBuildingId);
+    }
     
     // Reset hover and selection state when switching away from land view
     if (activeView !== 'land') {
@@ -1067,6 +1074,9 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
           ctx.fillStyle = lightenColor(color, 25); // Increased brightness for hover
           ctx.strokeStyle = '#FFCC00'; // Bright yellow for hover
           ctx.lineWidth = 3; // Thicker border
+          
+          // Debug log when drawing a hovered building
+          console.log('Drawing hovered building:', building.id, building.type);
         } else {
           // Normal state
           ctx.fillStyle = color;
