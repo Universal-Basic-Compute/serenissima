@@ -322,6 +322,157 @@ function buildGraph(polygons: Polygon[]): Graph {
   return graph;
 }
 
+// Function to build canal network
+function buildCanalNetwork(polygons: Polygon[]): Record<string, Point[]> {
+  // Create a map of canal segments
+  const canalNetwork: Record<string, Point[]> = {};
+
+  // Extract all canal points
+  const allCanalPoints: {point: Point, id: string, polygonId: string}[] = [];
+
+  // First, collect all canal points
+  for (const polygon of polygons) {
+    if (polygon.canalPoints) {
+      for (const point of polygon.canalPoints) {
+        if (point.edge) {
+          const pointId = point.id || `canal-${point.edge.lat}-${point.edge.lng}`;
+          allCanalPoints.push({
+            point: point.edge,
+            id: pointId,
+            polygonId: polygon.id
+          });
+        }
+      }
+    }
+  }
+
+  // For each polygon, create canal segments
+  for (const polygon of polygons) {
+    if (!polygon.canalPoints || polygon.canalPoints.length < 2) continue;
+
+    // Get all canal points for this polygon
+    const polygonCanalPoints = polygon.canalPoints
+      .filter(p => p.edge)
+      .map(p => ({
+        point: p.edge,
+        id: p.id || `canal-${p.edge.lat}-${p.edge.lng}`
+      }));
+
+    // Create segments between consecutive canal points
+    for (let i = 0; i < polygonCanalPoints.length; i++) {
+      for (let j = i + 1; j < polygonCanalPoints.length; j++) {
+        const point1 = polygonCanalPoints[i];
+        const point2 = polygonCanalPoints[j];
+
+        // Create a unique ID for this canal segment
+        const segmentId = `canal-segment-${point1.id}-${point2.id}`;
+
+        // Create a path between these two points
+        // For now, just a direct line, but could be enhanced with actual canal geometry
+        canalNetwork[segmentId] = [point1.point, point2.point];
+      }
+    }
+
+    // Also connect to nearby canal points in other polygons
+    for (const point1 of polygonCanalPoints) {
+      // Find nearby canal points in other polygons
+      const nearbyPoints = allCanalPoints.filter(p =>
+        p.polygonId !== polygon.id &&
+        calculateDistance(point1.point, p.point) < 100 // 100 meters max distance
+      );
+
+      for (const point2 of nearbyPoints) {
+        // Create a unique ID for this canal segment
+        const segmentId = `canal-segment-${point1.id}-${point2.id}`;
+
+        // Create a path between these two points
+        canalNetwork[segmentId] = [point1.point, point2.point];
+      }
+    }
+  }
+
+  return canalNetwork;
+}
+
+// Function to enhance path with canal segments
+function enhancePathWithCanalSegments(pathPoints: any[], canalNetwork: Record<string, Point[]>): any[] {
+  const enhancedPath: any[] = [];
+
+  // Add the starting point
+  if (pathPoints.length > 0) {
+    enhancedPath.push(pathPoints[0]);
+  }
+
+  // Process each segment of the path
+  for (let i = 0; i < pathPoints.length - 1; i++) {
+    const point1 = pathPoints[i];
+    const point2 = pathPoints[i + 1];
+
+    // If both points are canal points, try to find a canal path between them
+    if (point1.type === 'canal' && point2.type === 'canal' && point1.transportMode === 'gondola') {
+      // Look for a canal segment that connects these points
+      let canalSegmentFound = false;
+
+      for (const [segmentId, segmentPoints] of Object.entries(canalNetwork)) {
+        const startPoint = segmentPoints[0];
+        const endPoint = segmentPoints[segmentPoints.length - 1];
+
+        // Check if this segment connects our points (approximately)
+        const threshold = 0.0001; // Small threshold for floating point comparison
+
+        const startMatches =
+          (Math.abs(startPoint.lat - point1.lat) < threshold &&
+           Math.abs(startPoint.lng - point1.lng) < threshold) ||
+          (Math.abs(startPoint.lat - point2.lat) < threshold &&
+           Math.abs(startPoint.lng - point2.lng) < threshold);
+
+        const endMatches =
+          (Math.abs(endPoint.lat - point1.lat) < threshold &&
+           Math.abs(endPoint.lng - point1.lng) < threshold) ||
+          (Math.abs(endPoint.lat - point2.lat) < threshold &&
+           Math.abs(endPoint.lng - point2.lng) < threshold);
+
+        if (startMatches && endMatches) {
+          // We found a canal segment that connects our points
+          canalSegmentFound = true;
+
+          // Add intermediate points along the canal
+          // For now, we'll just add a midpoint to create a curved path
+          const midpoint = {
+            lat: (point1.lat + point2.lat) / 2 + (Math.random() * 0.0001 - 0.00005),
+            lng: (point1.lng + point2.lng) / 2 + (Math.random() * 0.0001 - 0.00005),
+            type: 'canal',
+            transportMode: 'gondola',
+            isIntermediatePoint: true
+          };
+
+          enhancedPath.push(midpoint);
+          break;
+        }
+      }
+
+      // If no canal segment was found, just add the endpoint directly
+      if (!canalSegmentFound) {
+        // Add a slight curve anyway for visual appeal
+        const midpoint = {
+          lat: (point1.lat + point2.lat) / 2 + (Math.random() * 0.0001 - 0.00005),
+          lng: (point1.lng + point2.lng) / 2 + (Math.random() * 0.0001 - 0.00005),
+          type: 'canal',
+          transportMode: 'gondola',
+          isIntermediatePoint: true
+        };
+
+        enhancedPath.push(midpoint);
+      }
+    }
+
+    // Add the endpoint of this segment
+    enhancedPath.push(point2);
+  }
+
+  return enhancedPath;
+}
+
 // Function to find the closest node to a given point
 function findClosestNode(point: Point, graph: Graph, polygonId?: string): string | null {
   let closestNode: string | null = null;
@@ -450,6 +601,9 @@ async function findPath(startPoint: Point, endPoint: Point): Promise<any> {
     // Build the graph
     const graph = buildGraph(polygons);
     
+    // Build the canal network
+    const canalNetwork = buildCanalNetwork(polygons);
+    
     // Find the polygons containing the start and end points
     const startPolygon = findPolygonContainingPoint(startPoint, polygons);
     const endPolygon = findPolygonContainingPoint(endPoint, polygons);
@@ -506,13 +660,16 @@ async function findPath(startPoint: Point, endPoint: Point): Promise<any> {
       };
     });
     
+    // Enhance the path with canal segments
+    const enhancedPath = enhancePathWithCanalSegments(pathPoints, canalNetwork);
+    
     // Calculate the actual travel time based on distance and mode
     let totalWalkingDistance = 0;
     let totalWaterDistance = 0;
     
-    for (let i = 0; i < pathPoints.length - 1; i++) {
-      const point1 = pathPoints[i];
-      const point2 = pathPoints[i + 1];
+    for (let i = 0; i < enhancedPath.length - 1; i++) {
+      const point1 = enhancedPath[i];
+      const point2 = enhancedPath[i + 1];
       const distance = calculateDistance(point1, point2);
       
       if (point1.transportMode === 'gondola') {
@@ -529,8 +686,8 @@ async function findPath(startPoint: Point, endPoint: Point): Promise<any> {
     
     return {
       success: true,
-      path: pathPoints,
-      distance: result.distance,
+      path: enhancedPath,
+      distance: totalWalkingDistance + totalWaterDistance,
       walkingDistance: totalWalkingDistance,
       waterDistance: totalWaterDistance,
       estimatedTimeMinutes: Math.round(totalTimeMinutes),

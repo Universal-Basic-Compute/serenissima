@@ -169,6 +169,85 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     };
   }, [activeView]);
   
+  // Add useEffect to animate gondolas
+  useEffect(() => {
+    if (transportPath.length > 0 && transportMode) {
+      // Find all gondola segments
+      const gondolaSegments: {start: any, end: any}[] = [];
+
+      for (let i = 0; i < transportPath.length - 1; i++) {
+        if (transportPath[i].transportMode === 'gondola') {
+          gondolaSegments.push({
+            start: transportPath[i],
+            end: transportPath[i + 1]
+          });
+        }
+      }
+
+      if (gondolaSegments.length > 0) {
+        // Initialize gondola positions
+        const initialPositions = gondolaSegments.map(segment => {
+          const x1 = (segment.start.lng - 12.3326) * 20000;
+          const y1 = (segment.start.lat - 45.4371) * 20000;
+          const x2 = (segment.end.lng - 12.3326) * 20000;
+          const y2 = (segment.end.lat - 45.4371) * 20000;
+
+          // Calculate angle
+          const angle = Math.atan2(y2 - y1, x2 - x1);
+
+          return {
+            x: x1,
+            y: y1,
+            targetX: x2,
+            targetY: y2,
+            progress: 0,
+            angle
+          };
+        });
+
+        // Start animation
+        let lastTime = performance.now();
+
+        const animateGondolas = (time: number) => {
+          const deltaTime = time - lastTime;
+          lastTime = time;
+
+          // Update gondola positions
+          const newPositions = initialPositions.map(gondola => {
+            // Update progress
+            gondola.progress += deltaTime * 0.0001; // Adjust speed here
+
+            if (gondola.progress > 1) {
+              gondola.progress = 0;
+            }
+
+            // Calculate new position
+            const x = gondola.x + (gondola.targetX - gondola.x) * gondola.progress;
+            const y = gondola.y + (gondola.targetY - gondola.y) * gondola.progress;
+
+            return {
+              x,
+              y,
+              angle: gondola.angle
+            };
+          });
+
+          setGondolaPositions(newPositions);
+
+          gondolaAnimationRef.current = requestAnimationFrame(animateGondolas);
+        };
+
+        gondolaAnimationRef.current = requestAnimationFrame(animateGondolas);
+
+        return () => {
+          if (gondolaAnimationRef.current) {
+            cancelAnimationFrame(gondolaAnimationRef.current);
+          }
+        };
+      }
+    }
+  }, [transportPath, transportMode]);
+  
   // Fetch income data
   const fetchIncomeData = useCallback(async () => {
     try {
@@ -2227,67 +2306,124 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         if (transportPath.length > 0) {
           // First draw a subtle shadow/glow effect
           ctx.beginPath();
-            
+
           // Start at the first point
           const firstPoint = transportPath[0];
           const firstX = (firstPoint.lng - 12.3326) * 20000;
           const firstY = (firstPoint.lat - 45.4371) * 20000;
-            
+
           ctx.moveTo(isoX(firstX, firstY), isoY(firstX, firstY));
-            
+
           // Connect all points
           for (let i = 1; i < transportPath.length; i++) {
             const point = transportPath[i];
             const x = (point.lng - 12.3326) * 20000;
             const y = (point.lat - 45.4371) * 20000;
-              
+
             ctx.lineTo(isoX(x, y), isoY(x, y));
           }
-            
+
           // Style the path shadow
           ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
           ctx.lineWidth = 6 * scale;
           ctx.stroke();
-            
+
           // Now draw segments with different colors based on transport mode
           for (let i = 0; i < transportPath.length - 1; i++) {
             const point1 = transportPath[i];
             const point2 = transportPath[i + 1];
-              
+
             const x1 = (point1.lng - 12.3326) * 20000;
             const y1 = (point1.lat - 45.4371) * 20000;
             const x2 = (point2.lng - 12.3326) * 20000;
             const y2 = (point2.lat - 45.4371) * 20000;
-              
-            ctx.beginPath();
-            ctx.moveTo(isoX(x1, y1), isoY(x1, y1));
-            ctx.lineTo(isoX(x2, y2), isoY(x2, y2));
-              
-            // Style based on transport mode
+
+            // For gondola paths, draw curved lines
             if (point1.transportMode === 'gondola') {
+              // Draw a curved path for gondolas
+              ctx.beginPath();
+
+              // Start point
+              const startX = isoX(x1, y1);
+              const startY = isoY(x1, y1);
+              ctx.moveTo(startX, startY);
+
+              // End point
+              const endX = isoX(x2, y2);
+              const endY = isoY(x2, y2);
+
+              // If this is an intermediate point, draw a curved line
+              if (point1.isIntermediatePoint || point2.isIntermediatePoint) {
+                // Draw a simple curve
+                ctx.quadraticCurveTo(
+                  (startX + endX) / 2 + (Math.random() * 10 - 5) * scale,
+                  (startY + endY) / 2 + (Math.random() * 10 - 5) * scale,
+                  endX,
+                  endY
+                );
+              } else {
+                // Draw a straight line
+                ctx.lineTo(endX, endY);
+              }
+
               // Venetian blue for water transport
               ctx.strokeStyle = 'rgba(0, 102, 153, 0.8)';
               ctx.lineWidth = 4 * scale;
               ctx.stroke();
-                
+
               // Add a wavy effect for water
               ctx.beginPath();
-              ctx.moveTo(isoX(x1, y1), isoY(x1, y1));
-                
+              ctx.moveTo(startX, startY);
+
               // Add a slight wave effect
               const waveOffset = Math.sin(i * 0.5) * 0.5 * scale;
-              ctx.lineTo(isoX(x2, y2) + waveOffset, isoY(x2, y2) + waveOffset);
-                
+
+              // If this is an intermediate point, draw a curved line with wave effect
+              if (point1.isIntermediatePoint || point2.isIntermediatePoint) {
+                ctx.quadraticCurveTo(
+                  (startX + endX) / 2 + (Math.random() * 10 - 5) * scale + waveOffset,
+                  (startY + endY) / 2 + (Math.random() * 10 - 5) * scale + waveOffset,
+                  endX + waveOffset,
+                  endY + waveOffset
+                );
+              } else {
+                ctx.lineTo(endX + waveOffset, endY + waveOffset);
+              }
+
               // Style the water effect
               ctx.strokeStyle = 'rgba(135, 206, 235, 0.6)'; // Light blue
               ctx.lineWidth = 2 * scale;
               ctx.stroke();
+
+              // Add gondola icon at intermediate points
+              if (point1.isIntermediatePoint) {
+                // Draw a small gondola icon
+                const iconSize = 3 * scale;
+
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                ctx.beginPath();
+                ctx.ellipse(
+                  startX,
+                  startY,
+                  iconSize * 2,
+                  iconSize * 0.7,
+                  Math.atan2(endY - startY, endX - startX),
+                  0,
+                  Math.PI * 2
+                );
+                ctx.fill();
+              }
             } else {
+              // For walking paths, draw straight lines with texture
+              ctx.beginPath();
+              ctx.moveTo(isoX(x1, y1), isoY(x1, y1));
+              ctx.lineTo(isoX(x2, y2), isoY(x2, y2));
+
               // Terracotta for walking paths
               ctx.strokeStyle = 'rgba(204, 85, 0, 0.8)';
               ctx.lineWidth = 4 * scale;
               ctx.stroke();
-                
+
               // Add a subtle texture for walking paths
               ctx.beginPath();
               ctx.setLineDash([2 * scale, 2 * scale]);
@@ -2299,20 +2435,23 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
               ctx.setLineDash([]);
             }
           }
-            
+
           // Draw waypoints with improved styling
-          for (let i = 1; i < transportPath.length - 1; i++) {
+          for (let i = 0; i < transportPath.length; i++) {
+            // Skip intermediate points for cleaner visualization
+            if (transportPath[i].isIntermediatePoint) continue;
+
             const point = transportPath[i];
             const x = (point.lng - 12.3326) * 20000;
             const y = (point.lat - 45.4371) * 20000;
-              
+
             const screenX = isoX(x, y);
             const screenY = isoY(x, y);
-              
+
             // Determine node size based on type
             let nodeSize = 2.5 * scale;
             let nodeColor = 'rgba(218, 165, 32, 0.7)'; // Default gold
-              
+
             // Color and size based on node type
             if (point.type === 'bridge') {
               nodeSize = 3 * scale;
@@ -2327,18 +2466,46 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
               nodeSize = 3 * scale;
               nodeColor = 'rgba(0, 150, 200, 0.8)'; // Bright blue for canal points
             }
-              
+
             // Draw a small circle for each waypoint
             ctx.beginPath();
             ctx.arc(screenX, screenY, nodeSize, 0, Math.PI * 2);
             ctx.fillStyle = nodeColor;
             ctx.fill();
-              
+
             // Add a subtle white border
             ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
             ctx.lineWidth = 0.8;
             ctx.stroke();
           }
+              
+          // Draw gondolas
+          gondolaPositions.forEach(gondola => {
+            const screenX = isoX(gondola.x, gondola.y);
+            const screenY = isoY(gondola.x, gondola.y);
+
+            // Draw gondola
+            ctx.save();
+            ctx.translate(screenX, screenY);
+            ctx.rotate(gondola.angle);
+
+            // Draw gondola body (elongated ellipse)
+            const gondolaLength = 6 * scale;
+            const gondolaWidth = 2 * scale;
+
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+            ctx.beginPath();
+            ctx.ellipse(0, 0, gondolaLength, gondolaWidth, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Draw gondolier
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            ctx.beginPath();
+            ctx.arc(gondolaLength * 0.3, 0, gondolaWidth * 0.6, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.restore();
+          });
             
           // Update the legend to include canal points and transport modes
           if (transportMode && transportPath.length > 0) {
