@@ -620,11 +620,11 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       // Check if mouse is over any building (for buildings view)
       if (activeView === 'buildings') {
         let foundHoveredBuilding = false;
-        
+    
         // Calculate building positions and check if mouse is over any
         for (const building of buildings) {
           if (!building.position) continue;
-          
+      
           let position;
           if (typeof building.position === 'string') {
             try {
@@ -635,7 +635,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
           } else {
             position = building.position;
           }
-          
+      
           // Convert lat/lng to isometric coordinates
           let x, y;
           if ('lat' in position && 'lng' in position) {
@@ -647,17 +647,17 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
           } else {
             continue;
           }
-          
+      
           const isoPos = {
             x: calculateIsoX(x, y, scale, offset, canvas.width),
             y: calculateIsoY(x, y, scale, offset, canvas.height)
           };
-          
+      
           // Get building size
           const size = getBuildingSize(building.type);
           // Increase the hit area by 20% to make it easier to hover
           const squareSize = Math.max(size.width, size.depth) * scale * 0.6 * 1.2;
-          
+      
           // Check if mouse is over this building using a more generous hit area
           if (
             mouseX >= isoPos.x - squareSize/2 &&
@@ -666,17 +666,17 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             mouseY <= isoPos.y + squareSize/2
           ) {
             foundHoveredBuilding = true;
-            
+        
             // Only update state if it's a different building
             if (hoveredBuildingId !== building.id) {
               setHoveredBuildingId(building.id);
               canvas.style.cursor = 'pointer';
               console.log('Hovering over building:', building.id, building.type);
             }
-            break;
+            // Don't break here - continue checking all buildings to ensure we find the one on top
           }
         }
-        
+    
         // If no building is hovered, clear the hover state
         if (!foundHoveredBuilding && hoveredBuildingId !== null) {
           setHoveredBuildingId(null);
