@@ -85,44 +85,44 @@ def get_building_types_info() -> Dict:
     # This could be loaded from a JSON file or database in the future
     return {
         "house": {
-            "income": 10,
-            "maintenance": 2,
-            "description": "Basic housing for citizens"
+            "type": "house",
+            "name": "House",
+            "shortDescription": "Basic housing for citizens"
         },
         "workshop": {
-            "income": 25,
-            "maintenance": 5,
-            "description": "Small production facility for crafts and goods"
+            "type": "workshop",
+            "name": "Workshop",
+            "shortDescription": "Small production facility for crafts and goods"
         },
         "market-stall": {
-            "income": 15,
-            "maintenance": 3,
-            "description": "Small commercial space for selling goods"
+            "type": "market-stall",
+            "name": "Market Stall",
+            "shortDescription": "Small commercial space for selling goods"
         },
         "warehouse": {
-            "income": 20,
-            "maintenance": 4,
-            "description": "Storage facility for goods and resources"
+            "type": "warehouse",
+            "name": "Warehouse",
+            "shortDescription": "Storage facility for goods and resources"
         },
         "tavern": {
-            "income": 30,
-            "maintenance": 6,
-            "description": "Establishment for food, drink, and socializing"
+            "type": "tavern",
+            "name": "Tavern",
+            "shortDescription": "Establishment for food, drink, and socializing"
         },
         "dock": {
-            "income": 40,
-            "maintenance": 8,
-            "description": "Maritime facility for loading/unloading ships"
+            "type": "dock",
+            "name": "Dock",
+            "shortDescription": "Maritime facility for loading/unloading ships"
         },
         "church": {
-            "income": 15,
-            "maintenance": 10,
-            "description": "Religious building that provides community benefits"
+            "type": "church",
+            "name": "Church",
+            "shortDescription": "Religious building that provides community benefits"
         },
         "palace": {
-            "income": 50,
-            "maintenance": 15,
-            "description": "Prestigious building for nobility and governance"
+            "type": "palace",
+            "name": "Palace",
+            "shortDescription": "Prestigious building for nobility and governance"
         }
     }
 
@@ -149,35 +149,17 @@ def get_building_types_from_api() -> Dict:
                 building_types = response_data["buildingTypes"]
                 print(f"Successfully fetched {len(building_types)} building types from API")
                 
-                # Transform the data into the format we need
+                # Transform the data into the format we need - only include type, name, and shortDescription
                 transformed_types = {}
                 for building in building_types:
                     if "type" in building and "name" in building:
                         building_type = building["type"]
                         
-                        # Extract income and maintenance from the building data
-                        income = building.get("income", 0)
-                        maintenance = building.get("maintenanceCost", 0)
-                        
-                        # If income/maintenance aren't directly available, try to get them from constructionCosts
-                        if income == 0 and "constructionCosts" in building:
-                            # Some buildings might have income in their constructionCosts
-                            income = building["constructionCosts"].get("income", 0)
-                        
-                        if maintenance == 0 and "constructionCosts" in building:
-                            # Some buildings might have maintenance in their constructionCosts
-                            maintenance = building["constructionCosts"].get("maintenance", 0)
-                        
-                        # Create an entry for this building type
+                        # Create an entry for this building type with only the required fields
                         transformed_types[building_type] = {
+                            "type": building_type,
                             "name": building["name"],
-                            "income": income,
-                            "maintenance": maintenance,
-                            "description": building.get("description", ""),
-                            "category": building.get("category", ""),
-                            "subcategory": building.get("subcategory", ""),
-                            "tier": building.get("tier", 1),
-                            "constructionCosts": building.get("constructionCosts", {})
+                            "shortDescription": building.get("shortDescription", "")
                         }
                 
                 return transformed_types
