@@ -10,7 +10,7 @@ const BUILDINGS_TABLE = 'Buildings';
 const CITIZENS_TABLE = 'CITIZENS';
 
 // Helper function to format image URLs
-function formatImageUrl(url: string | undefined, citizenId?: string): string {
+function formatImageUrl(url: string | undefined | null, citizenId?: string): string {
   // If no URL is provided, use the CitizenId to construct the path
   if (!url) {
     return `/images/citizens/${citizenId || 'default'}.png`;
@@ -107,8 +107,8 @@ export async function GET(request: Request) {
         SocialClass: record.fields.SocialClass,
         description: record.fields.Description,
         Description: record.fields.Description,
-        profileImage: formatImageUrl(record.fields.ImageUrl as string, record.fields.CitizenId),
-        ImageUrl: formatImageUrl(record.fields.ImageUrl as string, record.fields.CitizenId),
+        profileImage: formatImageUrl(record.fields.ImageUrl?.toString(), record.fields.CitizenId?.toString()),
+        ImageUrl: formatImageUrl(record.fields.ImageUrl?.toString(), record.fields.CitizenId?.toString()),
         position: position, // Use building position if found, otherwise random
         occupation: record.fields.Occupation || 'Citizen',
         wealth: record.fields.Wealth || 'Average',
