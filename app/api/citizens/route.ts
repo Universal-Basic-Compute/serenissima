@@ -14,7 +14,7 @@ const CITIZENS_TABLE = 'CITIZENS';
 function formatImageUrl(url: string | undefined | null, citizenId?: string): string {
   // If no URL is provided, use the CitizenId to construct the path
   if (!url) {
-    return `/images/citizens/${citizenId || 'default'}.png`;
+    return `/images/citizens/${citizenId || 'default'}.jpg`;
   }
   
   // If it's already an absolute URL, return it as is
@@ -30,7 +30,7 @@ function formatImageUrl(url: string | undefined | null, citizenId?: string): str
       url = `/images/citizens/${url.split('/').pop()}`;
     } else {
       // Otherwise use the CitizenId
-      url = `/images/citizens/${citizenId || 'default'}.png`;
+      url = `/images/citizens/${citizenId || 'default'}.jpg`;
     }
   }
   

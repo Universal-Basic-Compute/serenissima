@@ -913,7 +913,7 @@ export class CitizenDisplayManager {
     if (!texture) {
       // Extract citizen ID from URL if possible
       let citizenId = null;
-      const match = imageUrl.match(/\/citizens\/([^\/\.]+)\.png/);
+      const match = imageUrl.match(/\/citizens\/([^\/\.]+)\.(png|jpg)/);
       if (match && match[1]) {
         citizenId = match[1];
       }
@@ -921,11 +921,11 @@ export class CitizenDisplayManager {
       // Create an array of URLs to try in order
       const urlsToTry = [
         imageUrl,
-        citizenId ? `/images/citizens/${citizenId}.png` : null,
+        citizenId ? `/images/citizens/${citizenId}.jpg` : null,
         imageUrl.startsWith('/') ? `https://serenissima.ai${imageUrl}` : null,
         imageUrl.startsWith('/') ? `${window.location.origin}${imageUrl}` : null,
         `/images/citizens/${imageUrl.split('/').pop()}`,
-        `/images/citizens/default.png`
+        `/images/citizens/default.jpg`
       ].filter(Boolean);
       
       console.log(`Will try these URLs for citizen image:`, urlsToTry);
@@ -2263,10 +2263,10 @@ export class CitizenDisplayManager {
     // Create an array of URLs to try in order
     const urlsToTry = [
       imageUrl,
-      `/images/citizens/${primaryCitizen.CitizenId || primaryCitizen.id}.png`,
+      `/images/citizens/${primaryCitizen.CitizenId || primaryCitizen.id}.jpg`,
       imageUrl.startsWith('/') ? `https://serenissima.ai${imageUrl}` : null,
       imageUrl.startsWith('/') ? `${window.location.origin}${imageUrl}` : null,
-      `/images/citizens/default.png`
+      `/images/citizens/default.jpg`
     ].filter(Boolean);
     
     // Function to try loading the next URL in the array
@@ -2343,15 +2343,15 @@ export class CitizenDisplayManager {
     const imageUrl = citizen.profileImage || citizen.ImageUrl || citizen.imageUrl;
     
     if (!imageUrl) {
-      console.warn(`No image URL found for citizen:`, citizen);
+      console.log(`No image URL found for citizen, using ID-based path:`, citizen);
       
-      // If we have a CitizenId, use that to construct the path
+      // If we have a CitizenId, use that to construct the path with .jpg extension
       if (citizen.CitizenId || citizen.id) {
         const citizenId = citizen.CitizenId || citizen.id;
-        return `/images/citizens/${citizenId}.png`;
+        return `/images/citizens/${citizenId}.jpg`;
       }
       
-      return '/images/citizens/default.png';
+      return '/images/citizens/default.jpg';
     }
     
     // If the URL is already absolute, return it as is

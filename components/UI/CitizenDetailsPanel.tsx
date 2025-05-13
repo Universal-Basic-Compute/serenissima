@@ -78,7 +78,7 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
       <div className="flex mb-4">
         {citizen.ImageUrl ? (
           <img 
-            src={citizen.ImageUrl} 
+            src={citizen.ImageUrl.endsWith('.jpg') ? citizen.ImageUrl : `/images/citizens/${citizen.CitizenId}.jpg`} 
             alt={`${citizen.FirstName} ${citizen.LastName}`} 
             className="w-24 h-24 object-cover rounded-lg border-2 border-amber-600"
             onError={(e) => {
@@ -94,11 +94,22 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
             }}
           />
         ) : (
-          <div className="w-24 h-24 bg-amber-200 rounded-lg border-2 border-amber-600 flex items-center justify-center text-amber-800">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
-          </div>
+          <img 
+            src={`/images/citizens/${citizen.CitizenId}.jpg`}
+            alt={`${citizen.FirstName} ${citizen.LastName}`} 
+            className="w-24 h-24 object-cover rounded-lg border-2 border-amber-600"
+            onError={(e) => {
+              // Fallback if image fails to load
+              (e.target as HTMLImageElement).style.display = 'none';
+              (e.target as HTMLImageElement).parentElement!.innerHTML = `
+                <div class="w-24 h-24 bg-amber-200 rounded-lg border-2 border-amber-600 flex items-center justify-center text-amber-800">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </div>
+              `;
+            }}
+          />
         )}
         
         <div className="ml-4">
