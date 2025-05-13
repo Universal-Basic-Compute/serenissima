@@ -8,6 +8,20 @@ import { useBuildingMenu } from '@/hooks/useBuildingMenu';
 import { log } from '@/lib/logUtils';
 import { Building as ImportedBuilding } from '@/lib/models/BuildingModels';
 import PlaceableObjectManager from '@/lib/components/PlaceableObjectManager';
+import { BuildingService } from '@/lib/services/BuildingService';
+import { getWalletAddress } from '@/lib/walletUtils';
+import { eventBus, EventTypes } from '@/lib/eventBus';
+
+// Add global type declaration for the selected building point
+declare global {
+  interface Window {
+    __selectedBuildingPoint?: {
+      pointId: string;
+      polygonId: string;
+      position: any;
+    };
+  }
+}
 
 // Define the Building interface with all required properties
 interface Building extends Partial<ImportedBuilding> {
@@ -38,6 +52,27 @@ interface BuildingCategory {
   name: string;
   buildings: Building[];
 }
+
+// Helper function to calculate building cost
+const calculateBuildingCost = (buildingType: string): number => {
+  // Define costs for different building types
+  const buildingCosts: Record<string, number> = {
+    'market-stall': 100,
+    'house': 200,
+    'workshop': 300,
+    'warehouse': 400,
+    'tavern': 250,
+    'church': 500,
+    'palace': 1000,
+    // Add more building types as needed
+  };
+  
+  // Normalize building type (remove spaces, lowercase)
+  const normalizedType = buildingType.toLowerCase().replace(/\s+/g, '-');
+  
+  // Return cost or default if not found
+  return buildingCosts[normalizedType] || 150; // Default cost is 150
+};
 
 export default function BuildingMenu({ visible, onClose, onBuildingSelect, onBuildingClose }: BuildingMenuProps) {
   // Local state to track if the menu should be shown via custom event
@@ -317,25 +352,93 @@ export default function BuildingMenu({ visible, onClose, onBuildingSelect, onBui
                   
                   <div className="mt-auto">
                     <button
-                      onClick={() => {
-                        // Call handlePlaceBuilding to set up the placeable building
-                        handlePlaceBuilding(selectedBuilding, selectedVariant);
-                        
-                        // Close the detail modal
-                        handleCloseDetailModal();
-                        
-                        // Close the entire building menu
-                        handleClose();
-                        
-                        // If onBuildingClose callback exists, call it
-                        if (onBuildingClose) onBuildingClose();
+                      onClick={async (event) => {
+                        try {
+                          // Get the current wallet address
+                          const walletAddress = getWalletAddress();
+                          
+                          if (!walletAddress) {
+                            alert('Please connect your wallet first');
+                            return;
+                          }
+                          
+                          // Get the selected building point from the event that triggered the menu
+                          const buildingPoint = window.__selectedBuildingPoint;
+                          
+                          if (!buildingPoint) {
+                            alert('No building point selected. Please select a building point first.');
+                            return;
+                          }
+                          
+                          // Get the building cost
+                          const buildingCost = calculateBuildingCost(selectedBuilding.type);
+                          
+                          // Show confirmation dialog
+                          if (!window.confirm(`Confirm building construction: ${selectedBuilding.name}\nCost: ${buildingCost} $COMPUTE`)) {
+                            return;
+                          }
+                          
+                          // Show loading state
+                          const originalButtonText = (event.target as HTMLButtonElement).innerText;
+                          (event.target as HTMLButtonElement).innerText = 'Building...';
+                          (event.target as HTMLButtonElement).disabled = true;
+                          
+                          // Create the building directly via API
+                          const buildingService = BuildingService.getInstance();
+                          const buildingData = {
+                            type: selectedBuilding.name.toLowerCase().replace(/\s+/g, '-'),
+                            land_id: buildingPoint.polygonId,
+                            position: buildingPoint.position,
+                            rotation: 0, // Default rotation
+                            variant: selectedVariant,
+                            created_by: walletAddress,
+                            created_at: new Date().toISOString()
+                          };
+                          
+                          // Call the API to create the building
+                          const result = await buildingService.createBuildingAtPoint(buildingData, buildingCost);
+                          
+                          // Reset button state
+                          (event.target as HTMLButtonElement).innerText = originalButtonText;
+                          (event.target as HTMLButtonElement).disabled = false;
+                          
+                          // Close the detail modal
+                          handleCloseDetailModal();
+                          
+                          // Close the entire building menu
+                          handleClose();
+                          
+                          // If onBuildingClose callback exists, call it
+                          if (onBuildingClose) onBuildingClose();
+                          
+                          // Emit event to place the 3D model without refreshing the map
+                          eventBus.emit(EventTypes.BUILDING_PLACED, {
+                            buildingId: result.id,
+                            type: result.type,
+                            variant: result.variant,
+                            data: result
+                          });
+                          
+                          // Show success message
+                          alert(`Successfully built ${selectedBuilding.name}!`);
+                          
+                        } catch (error) {
+                          console.error('Error building:', error);
+                          alert(`Failed to build: ${error instanceof Error ? error.message : String(error)}`);
+                          
+                          // Reset button state if needed
+                          if ((event.target as HTMLButtonElement).disabled) {
+                            (event.target as HTMLButtonElement).innerText = 'Build Building';
+                            (event.target as HTMLButtonElement).disabled = false;
+                          }
+                        }
                       }}
                       className="w-full py-3 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors flex items-center justify-center"
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                         <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
                       </svg>
-                      Place Building
+                      Build Building
                     </button>
                   </div>
                 </div>

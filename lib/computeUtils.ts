@@ -315,3 +315,92 @@ export async function withdrawCompute(walletAddress: string, amount: number) {
     throw error;
   }
 }
+
+/**
+ * Get compute balance for a wallet address
+ * @param walletAddress The wallet address to check
+ * @returns Promise resolving to the compute balance
+ */
+export async function getComputeBalance(walletAddress: string): Promise<number> {
+  try {
+    if (!walletAddress) {
+      throw new Error('Wallet address is required');
+    }
+    
+    // Try the direct API route first
+    try {
+      const response = await fetch(`/api/wallet/${walletAddress}/balance`);
+      
+      if (response.ok) {
+        const data = await response.json();
+        return data.balance || 0;
+      }
+    } catch (directApiError) {
+      console.warn('Direct API balance check failed, falling back to backend API:', directApiError);
+    }
+    
+    // Fall back to the backend API
+    const response = await fetch(`${getBackendBaseUrl()}/api/wallet/${walletAddress}/balance`);
+    
+    if (!response.ok) {
+      // For development, return a mock balance
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[DEV] Returning mock compute balance of 1000');
+        return 1000;
+      }
+      
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || `Failed to get compute balance: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    return data.balance || 0;
+  } catch (error) {
+    console.error('Error getting compute balance:', error);
+    
+    // For development, return a mock balance
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[DEV] Returning mock compute balance of 1000 after error');
+      return 1000;
+    }
+    
+    throw error;
+  }
+}
+
+/**
+ * Deduct compute from a user's wallet
+ * @param walletAddress The wallet address to deduct from
+ * @param amount The amount to deduct
+ * @returns Promise resolving when the deduction is complete
+ */
+export async function deductCompute(walletAddress: string, amount: number): Promise<void> {
+  try {
+    if (!walletAddress) {
+      throw new Error('Wallet address is required');
+    }
+    
+    const response = await fetch(`${getBackendBaseUrl()}/api/wallet/${walletAddress}/deduct-compute`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ amount }),
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || `Failed to deduct compute: ${response.status}`);
+    }
+  } catch (error) {
+    console.error('Error deducting compute:', error);
+    
+    // For development, just log the deduction
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`[DEV] Would deduct ${amount} compute from ${walletAddress}`);
+      return; // Don't throw in development
+    }
+    
+    throw error;
+  }
+}

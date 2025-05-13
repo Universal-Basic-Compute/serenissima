@@ -214,6 +214,15 @@ this.hoveredPointId
       if (userData && userData.id) {
         console.log('Building point clicked:', userData);
         
+        // Store the selected building point in a global variable
+        if (typeof window !== 'undefined') {
+          window.__selectedBuildingPoint = {
+            pointId: userData.id,
+            polygonId: userData.polygonId,
+            position: userData.position
+          };
+        }
+        
         // Dispatch a custom event for the building point click
         if (typeof window !== 'undefined') {
           window.dispatchEvent(new CustomEvent('buildingPointClick', {

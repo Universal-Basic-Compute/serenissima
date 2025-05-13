@@ -487,6 +487,69 @@ export class BuildingService {
   }
   
   /**
+   * Create a building at a specific building point
+   * 
+   * @param buildingData The building data
+   * @param cost The cost of the building in compute
+   * @returns Promise resolving to the created building
+   */
+  public async createBuildingAtPoint(buildingData: Partial<BuildingData>, cost: number): Promise<BuildingData> {
+    try {
+      // Get the wallet address
+      const walletAddress = getWalletAddress();
+      
+      if (!walletAddress) {
+        throw new Error('Wallet address is required');
+      }
+      
+      // Send to server using relative URL
+      const response = await fetch(`/api/create-building-at-point`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...buildingData,
+          walletAddress,
+          cost
+        }),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `Failed to create building: ${response.status}`);
+      }
+      
+      const result = await response.json();
+      
+      if (!result.success || !result.building) {
+        throw new Error(result.error || 'Failed to create building');
+      }
+      
+      return result.building;
+    } catch (error) {
+      log.error('Error creating building at point:', error);
+      
+      // For development, return mock data if API fails
+      if (process.env.NODE_ENV === 'development') {
+        log.warn('Returning mock building data for development');
+        return {
+          id: `building_${Date.now()}`,
+          type: buildingData.type || 'unknown',
+          land_id: buildingData.land_id || 'unknown',
+          position: buildingData.position || { x: 0, y: 0, z: 0 },
+          rotation: buildingData.rotation || 0,
+          variant: buildingData.variant || 'model',
+          created_by: buildingData.created_by || 'system',
+          created_at: buildingData.created_at || new Date().toISOString()
+        } as BuildingData;
+      }
+      
+      throw error;
+    }
+  }
+
+  /**
    * Update an existing building
    * 
    * @param id Building ID
