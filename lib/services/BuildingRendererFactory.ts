@@ -33,7 +33,7 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
   private gltfLoader: GLTFLoader;
   private loadingQueue: string[] = [];
   private loadingInProgress: Set<string> = new Set();
-  private maxConcurrentLoads: number = 50; // Increased from 3 to 50 to allow more concurrent loads
+  private maxConcurrentLoads: number = 20; // Reduced from 50 to 20 to prevent overwhelming the browser
   private loadingTimeout: number = 15000; // 15 second timeout for model loading
   private modelCache: Map<string, THREE.Object3D> = new Map();
   private pendingBuildings: Map<string, BuildingData> = new Map();

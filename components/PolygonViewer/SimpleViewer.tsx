@@ -336,17 +336,19 @@ export default function SimpleViewer({ qualityMode = 'high', waterQuality = 'hig
       window.__polygonData = polygons;
       
       // IMPORTANT: Dispatch a custom event to signal that the scene is ready
-      window.dispatchEvent(new CustomEvent('sceneReady', {
-        detail: {
-          scene,
-          camera: cameraController.camera
-        }
-      }));
-      console.log('SimpleViewer: Dispatched sceneReady event');
+      // Add a delay to ensure the scene is fully set up
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('sceneReady', {
+          detail: {
+            scene,
+            camera: cameraController.camera
+          }
+        }));
+        console.log('SimpleViewer: Dispatched sceneReady event');
+      }, 500); // Add a 500ms delay
     }
     
-    // Force refresh buildings when the component mounts
-    eventBus.emit(EventTypes.BUILDING_PLACED, { refresh: true });
+    // Don't force refresh buildings immediately - let the initialization sequence handle it
     
     // Log the scene and camera for debugging
     console.log('SimpleViewer scene:', scene);

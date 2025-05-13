@@ -45,31 +45,34 @@ const BuildingRendererManager: React.FC<BuildingRendererManagerProps> = ({
         if (data.waterInitialized && data.landInitialized) {
           // Set scene as initialized
           setSceneInitialized(true);
+    
+          // Initialize the building renderer manager now, but with a delay
+          // to ensure water and land are fully rendered
+          setTimeout(() => {
+            // Add a check to ensure scene is still valid
+            if (scene && scene.isScene) {
+              console.log('BuildingRendererManager: Initializing with scene', scene);
+              buildingRendererManager.initialize(scene);
       
-          // Initialize the building renderer manager now
-          // Add a check to ensure scene is still valid
-          if (scene && scene.isScene) {
-            console.log('BuildingRendererManager: Initializing with scene', scene);
-            buildingRendererManager.initialize(scene);
-        
-            // Initial refresh of buildings with a small delay
-            setTimeout(() => {
-              refreshBuildings();
-          
-              // Check if buildings are visible after a delay
+              // Initial refresh of buildings with a larger delay
               setTimeout(() => {
-                const count = buildingRendererManager.getBuildingMeshes().size;
-                if (count === 0) {
-                  console.warn('BuildingRendererManager: No buildings after initial refresh, trying again...');
-                  refreshBuildings();
-                } else {
-                  console.log(`BuildingRendererManager: ${count} buildings visible after initial refresh`);
-                }
-              }, 2000);
-            }, 500);
-          } else {
-            console.error('BuildingRendererManager: Scene is undefined or invalid when trying to initialize');
-          }
+                refreshBuildings();
+        
+                // Check if buildings are visible after a longer delay
+                setTimeout(() => {
+                  const count = buildingRendererManager.getBuildingMeshes().size;
+                  if (count === 0) {
+                    console.warn('BuildingRendererManager: No buildings after initial refresh, trying again...');
+                    refreshBuildings();
+                  } else {
+                    console.log(`BuildingRendererManager: ${count} buildings visible after initial refresh`);
+                  }
+                }, 3000); // Increase from 2000ms to 3000ms
+              }, 1500); // Increase from 500ms to 1500ms
+            } else {
+              console.error('BuildingRendererManager: Scene is undefined or invalid when trying to initialize');
+            }
+          }, 1000); // Add a 1 second delay before initializing
         }
       }
     );
