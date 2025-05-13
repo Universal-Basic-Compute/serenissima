@@ -103,11 +103,11 @@ const BaseSceneLayer: React.FC<BaseSceneLayerProps> = ({
           
           // Ensure buildings are visible by default
           window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
-        })
-        .catch(error => {
-          console.error('BaseSceneLayer: Error loading buildings:', error);
-        });
-    }, 1000); // Add a 1 second delay to ensure water and land are fully rendered
+          
+          // Check if buildings are visible after a delay
+          setTimeout(() => {
+            const buildingCount = buildingRendererManager.getBuildingMeshes().size;
+            if (buildingCount === 0) {
               console.warn('BaseSceneLayer: No buildings visible after initialization, refreshing again');
               buildingRendererManager.refreshBuildings()
                 .then(() => {
