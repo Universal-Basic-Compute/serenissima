@@ -635,6 +635,14 @@ export default function SimplePage() {
         // Open the knowledge panel
         setShowKnowledgePanel(true);
         setActiveView('knowledge');
+      } else if (pathname === '/citizens') {
+        // Open the citizens view
+        setActiveView('citizens');
+        // Dispatch an event to load citizens after a short delay
+        setTimeout(() => {
+          console.log('Dispatching loadCitizens event after direct navigation');
+          window.dispatchEvent(new CustomEvent('loadCitizens'));
+        }, 500);
       } else {
         // Open the guilds panel (default behavior)
         setShowGuildsPanel(true);
