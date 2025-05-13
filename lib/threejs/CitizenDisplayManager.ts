@@ -246,6 +246,12 @@ export class CitizenDisplayManager {
       console.log('CitizenDisplayManager: Initial citizens load complete:', data);
       // No need to refresh here, we just loaded the data
     });
+    
+    // Add a listener for debug command
+    window.addEventListener('debugCitizenBuildings', () => {
+      console.log('CitizenDisplayManager: Received debugCitizenBuildings event');
+      this.debugBuildingPositions();
+    });
   }
   
   /**
@@ -412,6 +418,15 @@ export class CitizenDisplayManager {
           const imageUrl = citizen.profileImage || citizen.ImageUrl;
           console.log(`Citizen ${index + 1} (${citizen.firstName || ''} ${citizen.lastName || ''}): Image URL = ${imageUrl}`);
         });
+        
+        // Count citizens with home and work buildings
+        const citizensWithHome = this.citizens.filter(c => c.Home).length;
+        const citizensWithWork = this.citizens.filter(c => c.Work).length;
+        const citizensWithBoth = this.citizens.filter(c => c.Home && c.Work).length;
+        
+        console.log(`Citizens with home buildings: ${citizensWithHome}`);
+        console.log(`Citizens with work buildings: ${citizensWithWork}`);
+        console.log(`Citizens with both home and work: ${citizensWithBoth}`);
       }
       
       // Add debug citizens if needed
@@ -1766,6 +1781,7 @@ export class CitizenDisplayManager {
     // Remove event listeners
     window.removeEventListener('mousemove', this.mouseMoveHandler);
     window.removeEventListener('click', this.mouseClickHandler);
+    window.removeEventListener('debugCitizenBuildings', () => {});
     
     // Remove all markers
     this.removeAllMarkers();
@@ -1782,6 +1798,64 @@ export class CitizenDisplayManager {
    */
   public isActiveView(): boolean {
     return this.isActive;
+  }
+  
+  /**
+   * Visualize building positions for debugging
+   */
+  private visualizeBuildingPositions(): void {
+    console.log('Visualizing building positions for debugging');
+    
+    // Get unique building IDs from citizens
+    const buildingIds = new Set<string>();
+    this.citizens.forEach(citizen => {
+      if (citizen.Home) buildingIds.add(citizen.Home);
+      if (citizen.Work) buildingIds.add(citizen.Work);
+    });
+    
+    console.log(`Found ${buildingIds.size} unique building IDs`);
+    
+    // Get polygon data from window global
+    const polygons = typeof window !== 'undefined' ? window.__polygonData || [] : [];
+    
+    // Create a debug marker for each building
+    buildingIds.forEach(buildingId => {
+      const position = this.findBuildingPosition(buildingId, polygons);
+      
+      if (position) {
+        // Convert to scene position
+        const scenePosition = this.latLngToScenePosition(
+          position.lat, 
+          position.lng
+        );
+        
+        // Create a sphere to mark the position
+        const geometry = new THREE.SphereGeometry(0.5, 16, 16);
+        const material = new THREE.MeshBasicMaterial({ 
+          color: 0xFF0000, 
+          wireframe: true,
+          transparent: true,
+          opacity: 0.7
+        });
+        
+        const sphere = new THREE.Mesh(geometry, material);
+        sphere.position.copy(scenePosition);
+        sphere.position.y = 5; // Position above ground
+        sphere.userData = { isDebugMarker: true, buildingId };
+        
+        this.scene.add(sphere);
+        console.log(`Added debug marker for building ${buildingId} at position:`, scenePosition);
+      } else {
+        console.warn(`No position found for building ${buildingId}`);
+      }
+    });
+  }
+  
+  /**
+   * Public method to trigger the visualization
+   */
+  public debugBuildingPositions(): void {
+    this.visualizeBuildingPositions();
   }
   
   /**
@@ -1886,22 +1960,113 @@ export class CitizenDisplayManager {
     
     console.log(`Found ${buildingMap.size} buildings with citizens (home or work)`);
     
+    // Get polygon data from window global
+    const polygons = typeof window !== 'undefined' ? window.__polygonData || [] : [];
+    console.log(`Found ${polygons.length} polygons to search for building locations`);
+    
     // Create markers for each building
     buildingMap.forEach((citizens, buildingId) => {
-      // Find the first citizen with a position (should be the same for all citizens in the building)
-      const citizenWithPosition = citizens.find(c => c.position);
-      if (!citizenWithPosition || !citizenWithPosition.position) {
+      // Find the building's position from the polygon data
+      let position = this.findBuildingPosition(buildingId, polygons);
+      
+      if (!position) {
         console.warn(`No position found for building ${buildingId} with ${citizens.length} citizens`);
-        return;
+        
+        // Try to use the first citizen's position as fallback
+        const citizenWithPosition = citizens.find(c => c.position);
+        if (citizenWithPosition && citizenWithPosition.position) {
+          position = citizenWithPosition.position;
+          console.log(`Using citizen position as fallback for building ${buildingId}:`, position);
+        } else {
+          // Skip this building if we can't find a position
+          return;
+        }
       }
       
-      console.log(`Creating marker for building ${buildingId} with ${citizens.length} citizens at position:`, citizenWithPosition.position);
+      console.log(`Creating marker for building ${buildingId} with ${citizens.length} citizens at position:`, position);
       
       // Create a marker for this building
-      const marker = this.createBuildingCitizenMarker(buildingId, citizens, citizenWithPosition.position);
+      const marker = this.createBuildingCitizenMarker(buildingId, citizens, position);
       this.markers.push(marker);
       this.scene.add(marker);
     });
+  }
+  
+  // Find building position from polygon data
+  private findBuildingPosition(buildingId: string, polygons: any[]): { lat: number, lng: number } | null {
+    // First, try to find the building in the buildingPoints of all polygons
+    for (const polygon of polygons) {
+      if (polygon.buildingPoints && Array.isArray(polygon.buildingPoints)) {
+        const buildingPoint = polygon.buildingPoints.find((bp: any) => 
+          bp.buildingId === buildingId || 
+          bp.id === buildingId || 
+          bp.BuildingId === buildingId
+        );
+        
+        if (buildingPoint) {
+          // Found the building point, return its position
+          console.log(`Found building ${buildingId} in polygon ${polygon.id} buildingPoints`);
+          
+          // Check if the building point has a position property
+          if (buildingPoint.position) {
+            return buildingPoint.position;
+          }
+          
+          // If not, check if it has lat/lng properties
+          if (buildingPoint.lat !== undefined && buildingPoint.lng !== undefined) {
+            return { lat: buildingPoint.lat, lng: buildingPoint.lng };
+          }
+          
+          // If not, check if it has x/z properties (sometimes used instead of lat/lng)
+          if (buildingPoint.x !== undefined && buildingPoint.z !== undefined) {
+            return { lat: buildingPoint.x, lng: buildingPoint.z };
+          }
+        }
+      }
+    }
+    
+    // If we couldn't find the building in buildingPoints, try to use the polygon center
+    // This is a fallback for when buildings don't have explicit positions
+    for (const polygon of polygons) {
+      // Check if this polygon contains the building
+      if (polygon.buildings && Array.isArray(polygon.buildings)) {
+        const building = polygon.buildings.find((b: any) => 
+          b.id === buildingId || 
+          b.buildingId === buildingId || 
+          b.BuildingId === buildingId
+        );
+        
+        if (building) {
+          console.log(`Found building ${buildingId} in polygon ${polygon.id} buildings array`);
+          
+          // Use the polygon's center as the building position
+          if (polygon.center) {
+            return polygon.center;
+          } else if (polygon.centroid) {
+            return polygon.centroid;
+          } else if (polygon.coatOfArmsCenter) {
+            return polygon.coatOfArmsCenter;
+          }
+        }
+      }
+      
+      // Also check if the polygon itself has a buildingId property that matches
+      if (polygon.buildingId === buildingId || polygon.BuildingId === buildingId) {
+        console.log(`Polygon ${polygon.id} itself has buildingId ${buildingId}`);
+        
+        // Use the polygon's center as the building position
+        if (polygon.center) {
+          return polygon.center;
+        } else if (polygon.centroid) {
+          return polygon.centroid;
+        } else if (polygon.coatOfArmsCenter) {
+          return polygon.coatOfArmsCenter;
+        }
+      }
+    }
+    
+    console.warn(`Could not find position for building ${buildingId} in any polygon`);
+    return null;
   }
   
   /**

@@ -80,6 +80,95 @@ export async function GET(request: Request) {
       });
     });
     
+    // Load polygon data to find building positions
+    let polygons = [];
+    try {
+      // Try to load polygons from the API
+      const polygonsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/api/get-polygons`);
+      if (polygonsResponse.ok) {
+        const polygonsData = await polygonsResponse.json();
+        polygons = polygonsData.polygons || [];
+        console.log(`Loaded ${polygons.length} polygons for building position lookup`);
+      }
+    } catch (error) {
+      console.warn('Error loading polygons for building position lookup:', error);
+    }
+    
+    // Helper function to find building positions from polygon data
+    function findBuildingPosition(buildingId: string, polygons: any[]): { lat: number, lng: number } | null {
+      // First, try to find the building in the buildingPoints of all polygons
+      for (const polygon of polygons) {
+        if (polygon.buildingPoints && Array.isArray(polygon.buildingPoints)) {
+          const buildingPoint = polygon.buildingPoints.find((bp: any) => 
+            bp.buildingId === buildingId || 
+            bp.id === buildingId || 
+            bp.BuildingId === buildingId
+          );
+          
+          if (buildingPoint) {
+            // Found the building point, return its position
+            console.log(`API: Found building ${buildingId} in polygon ${polygon.id} buildingPoints`);
+            
+            // Check if the building point has a position property
+            if (buildingPoint.position) {
+              return buildingPoint.position;
+            }
+            
+            // If not, check if it has lat/lng properties
+            if (buildingPoint.lat !== undefined && buildingPoint.lng !== undefined) {
+              return { lat: buildingPoint.lat, lng: buildingPoint.lng };
+            }
+            
+            // If not, check if it has x/z properties (sometimes used instead of lat/lng)
+            if (buildingPoint.x !== undefined && buildingPoint.z !== undefined) {
+              return { lat: buildingPoint.x, lng: buildingPoint.z };
+            }
+          }
+        }
+      }
+      
+      // If we couldn't find the building in buildingPoints, try to use the polygon center
+      for (const polygon of polygons) {
+        // Check if this polygon contains the building
+        if (polygon.buildings && Array.isArray(polygon.buildings)) {
+          const building = polygon.buildings.find((b: any) => 
+            b.id === buildingId || 
+            b.buildingId === buildingId || 
+            b.BuildingId === buildingId
+          );
+          
+          if (building) {
+            console.log(`API: Found building ${buildingId} in polygon ${polygon.id} buildings array`);
+            
+            // Use the polygon's center as the building position
+            if (polygon.center) {
+              return polygon.center;
+            } else if (polygon.centroid) {
+              return polygon.centroid;
+            } else if (polygon.coatOfArmsCenter) {
+              return polygon.coatOfArmsCenter;
+            }
+          }
+        }
+        
+        // Also check if the polygon itself has a buildingId property that matches
+        if (polygon.buildingId === buildingId || polygon.BuildingId === buildingId) {
+          console.log(`API: Polygon ${polygon.id} itself has buildingId ${buildingId}`);
+          
+          // Use the polygon's center as the building position
+          if (polygon.center) {
+            return polygon.center;
+          } else if (polygon.centroid) {
+            return polygon.centroid;
+          } else if (polygon.coatOfArmsCenter) {
+            return polygon.coatOfArmsCenter;
+          }
+        }
+      }
+      
+      return null;
+    }
+    
     // Map buildings to citizens with positions
     const citizens = buildingRecords.map(record => {
       const citizenId = record.fields.Occupant;
@@ -90,15 +179,39 @@ export async function GET(request: Request) {
         return null;
       }
       
-      // Parse position from building
+      // Get building ID
+      const buildingId = record.fields.BuildingId;
+      
+      // Find building position from polygon data
       let position;
-      try {
-        position = typeof record.fields.Position === 'string' 
-          ? JSON.parse(record.fields.Position) 
-          : record.fields.Position;
-      } catch (e) {
-        console.warn(`Invalid position format for building ${record.id}:`, e);
-        position = {};
+      if (buildingId) {
+        position = findBuildingPosition(buildingId, polygons);
+        
+        if (position) {
+          console.log(`Found position for building ${buildingId}:`, position);
+        } else {
+          console.warn(`No position found for building ${buildingId}, trying to parse from record`);
+          
+          // Try to parse position from building record as fallback
+          try {
+            position = typeof record.fields.Position === 'string' 
+              ? JSON.parse(record.fields.Position) 
+              : record.fields.Position;
+          } catch (e) {
+            console.warn(`Invalid position format for building ${record.id}:`, e);
+            position = {};
+          }
+        }
+      } else {
+        // Try to parse position from building record if no buildingId
+        try {
+          position = typeof record.fields.Position === 'string' 
+            ? JSON.parse(record.fields.Position) 
+            : record.fields.Position;
+        } catch (e) {
+          console.warn(`Invalid position format for building ${record.id}:`, e);
+          position = {};
+        }
       }
       
       // Determine if this is a home or work building
