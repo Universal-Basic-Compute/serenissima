@@ -8,10 +8,12 @@ declare module '../eventBus' {
   }
 }
 
+// Import other dependencies
+import { buildingRendererManager } from './BuildingRendererManager';
+
 // Define the SCENE_BASE_RENDERED event type
 // This needs to be after the module augmentation to properly extend the type
 EventTypes.SCENE_BASE_RENDERED = 'SCENE_BASE_RENDERED';
-import { buildingRendererManager } from './BuildingRendererManager';
 
 /**
  * SceneLayerManager
