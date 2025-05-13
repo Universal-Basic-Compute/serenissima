@@ -903,7 +903,7 @@ export class CitizenDisplayManager {
    * Create a sprite for a citizen icon
    */
   private createCitizenSprite(imageUrl: string): THREE.Sprite {
-    console.log(`Attempting to create citizen sprite with image: ${imageUrl}`);
+    console.log(`Creating citizen sprite with image: ${imageUrl}`);
     
     // Try to get from cache first
     let texture = this.textureCache.get(imageUrl);
@@ -916,26 +916,15 @@ export class CitizenDisplayManager {
         citizenId = match[1];
       }
       
-      // Create an array of URLs to try in order - prioritize direct CitizenId path
+      // Create an array of URLs to try in order
       const urlsToTry = [
-        // 1. Try the original URL as provided
         imageUrl,
-        
-        // 2. If we extracted a citizen ID, try the direct path
         citizenId ? `/images/citizens/${citizenId}.png` : null,
-        
-        // 3. Try with serenissima.ai domain if it's a relative path
         imageUrl.startsWith('/') ? `https://serenissima.ai${imageUrl}` : null,
-        
-        // 4. Try with current origin as fallback
         imageUrl.startsWith('/') ? `${window.location.origin}${imageUrl}` : null,
-        
-        // 5. Try just the filename in the citizens folder
         `/images/citizens/${imageUrl.split('/').pop()}`,
-        
-        // 6. Default fallback
         `/images/citizens/default.png`
-      ].filter(Boolean); // Remove null entries
+      ].filter(Boolean);
       
       console.log(`Will try these URLs for citizen image:`, urlsToTry);
 
@@ -944,7 +933,7 @@ export class CitizenDisplayManager {
         if (index >= urlsToTry.length) {
           console.warn(`All URLs failed for citizen image: ${imageUrl}, creating default texture`);
           const defaultTexture = this.createDefaultCitizenTexture();
-          this.textureCache.set(imageUrl, defaultTexture); // Cache the default texture
+          this.textureCache.set(imageUrl, defaultTexture);
           return defaultTexture;
         }
         
@@ -2202,9 +2191,6 @@ export class CitizenDisplayManager {
       group.position.y = 0.1; // Just slightly above zero
       console.log(`Building citizen marker for building ${buildingId} using default height (ground level not found)`);
     }
-    
-    // Rotate the group to face upward (parallel to the ground)
-    group.rotation.x = -Math.PI / 2; // Rotate to lie flat on the ground
     
     // Rotate the group to face upward (parallel to the ground)
     group.rotation.x = -Math.PI / 2; // Rotate to lie flat on the ground

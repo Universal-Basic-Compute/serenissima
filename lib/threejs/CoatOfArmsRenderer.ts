@@ -276,29 +276,7 @@ export class CoatOfArmsRenderer {
     // Check if texture.image exists
     if (!texture.image) {
       console.warn('Texture image is null, creating fallback texture');
-
-      // Create a canvas for a fallback texture
-      const canvas = document.createElement('canvas');
-      const size = 256;
-      canvas.width = size;
-      canvas.height = size;
-
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return texture;
-
-      // Draw a colored circle as fallback
-      ctx.beginPath();
-      ctx.arc(size/2, size/2, size/2 - 4, 0, Math.PI * 2);
-      ctx.fillStyle = '#FFF8E0';
-      ctx.fill();
-      ctx.strokeStyle = '#FFFFFF';
-      ctx.lineWidth = 8;
-      ctx.stroke();
-
-      // Create a new texture from the canvas
-      const fallbackTexture = new THREE.Texture(canvas);
-      fallbackTexture.needsUpdate = true;
-      return fallbackTexture;
+      return this.createDefaultCitizenTexture();
     }
 
     // Create a canvas to draw the circular mask
@@ -346,53 +324,35 @@ export class CoatOfArmsRenderer {
         offsetX = (size - drawWidth) / 2;
       }
 
-      // Draw the image with proper aspect ratio and inversion if needed
-      if (texture.image) {
-        if (invert) {
-          // Save context state before transformations
-          ctx.save();
-
-          // Translate to center of canvas
-          ctx.translate(size/2, size/2);
-          // Scale y by -1 to flip vertically
-          ctx.scale(1, -1);
-          // Translate back
-          ctx.translate(-size/2, -size/2);
-
-          // Draw the image
-          ctx.drawImage(texture.image, offsetX, offsetY, drawWidth, drawHeight);
-
-          // Restore context state
-          ctx.restore();
-        } else {
-          // Draw normally without inversion
-          ctx.drawImage(texture.image, offsetX, offsetY, drawWidth, drawHeight);
-        }
+      // Draw the image with proper aspect ratio
+      if (invert) {
+        // Save context state before transformations
+        ctx.save();
+        // Translate to center of canvas
+        ctx.translate(size/2, size/2);
+        // Scale y by -1 to flip vertically
+        ctx.scale(1, -1);
+        // Translate back
+        ctx.translate(-size/2, -size/2);
+        // Draw the image
+        ctx.drawImage(texture.image, offsetX, offsetY, drawWidth, drawHeight);
+        // Restore context state
+        ctx.restore();
+      } else {
+        // Draw normally without inversion
+        ctx.drawImage(texture.image, offsetX, offsetY, drawWidth, drawHeight);
       }
-
+      
       ctx.restore();
 
       // Create a new texture from the canvas
-      const circularTexture = new THREE.Texture(canvas);
+      const circularTexture = new THREE.CanvasTexture(canvas);
       circularTexture.needsUpdate = true;
 
       return circularTexture;
     } catch (error) {
       console.error('Error creating circular texture:', error);
-
-      // If there's an error, create a simple colored circle
-      ctx.clearRect(0, 0, size, size);
-      ctx.beginPath();
-      ctx.arc(size/2, size/2, size/2 - 4, 0, Math.PI * 2);
-      ctx.fillStyle = '#8B4513'; // Default brown color
-      ctx.fill();
-      ctx.strokeStyle = '#FFFFFF';
-      ctx.lineWidth = 8;
-      ctx.stroke();
-
-      const fallbackTexture = new THREE.Texture(canvas);
-      fallbackTexture.needsUpdate = true;
-      return fallbackTexture;
+      return texture; // Return the original texture as fallback
     }
   }
 
