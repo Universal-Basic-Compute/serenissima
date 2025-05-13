@@ -361,6 +361,76 @@ If you decide not to build anything at this time, return an empty JSON object.
             
             if status == "completed":
                 print(f"Successfully sent building strategy request to AI user {ai_username}")
+                
+                # Get the AI's response
+                messages_url = f"https://api.kinos-engine.ai/v2/blueprints/{blueprint}/kins/{ai_username}/channels/system/messages"
+                messages_response = requests.get(messages_url, headers=headers)
+                
+                if messages_response.status_code == 200:
+                    messages_data = messages_response.json()
+                    
+                    # Find the most recent assistant message
+                    assistant_messages = [
+                        msg for msg in messages_data.get("messages", [])
+                        if msg.get("role") == "assistant"
+                    ]
+                    
+                    if assistant_messages:
+                        # Sort by timestamp (newest first)
+                        assistant_messages.sort(key=lambda x: x.get("timestamp", ""), reverse=True)
+                        latest_message = assistant_messages[0]
+                        
+                        # Log the AI's response
+                        print(f"AI {ai_username} response: {latest_message.get('content')}")
+                        
+                        # Try to extract the JSON decision from the response
+                        try:
+                            content = latest_message.get('content', '')
+                            # Look for JSON block in the response
+                            import re
+                            json_match = re.search(r'```json\s*(.*?)\s*```', content, re.DOTALL)
+                            
+                            if json_match:
+                                json_str = json_match.group(1)
+                                decision = json.loads(json_str)
+                                
+                                # Log the decision
+                                print(f"AI {ai_username} decision: {json.dumps(decision)}")
+                                
+                                # If there's a building decision, create a building
+                                if decision and "building_type" in decision and "land_id" in decision:
+                                    building_type = decision["building_type"]
+                                    land_id = decision["land_id"]
+                                    reason = decision.get("reason", "No reason provided")
+                                    
+                                    print(f"AI {ai_username} wants to build a {building_type} on land {land_id}")
+                                    print(f"Reason: {reason}")
+                                    
+                                    # Get the land to find a building point
+                                    land = next((l for l in data_package["lands"] if l["id"] == land_id), None)
+                                    
+                                    if land:
+                                        # Here we would need to get building points for this land
+                                        # For now, we'll just log that we would create a building
+                                        print(f"Would create a {building_type} building on land {land_id}")
+                                        
+                                        # Include pointType in the log
+                                        point_type = "land"  # Default
+                                        if building_type == "dock":
+                                            point_type = "canal"
+                                        elif building_type == "bridge":
+                                            point_type = "bridge"
+                                            
+                                        print(f"Building point type: {point_type}")
+                                    else:
+                                        print(f"Land {land_id} not found in user's lands")
+                                else:
+                                    print(f"AI {ai_username} decided not to build anything at this time")
+                            else:
+                                print(f"No JSON decision found in AI response")
+                        except Exception as e:
+                            print(f"Error extracting decision from AI response: {str(e)}")
+                
                 return True
             else:
                 print(f"Error processing building strategy request for AI user {ai_username}: {response_data}")
