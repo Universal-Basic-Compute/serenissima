@@ -182,15 +182,19 @@ export async function GET(request: Request) {
     const citizens = buildingRecords.map(record => {
       // Convert Airtable Occupant field to string, ensuring type safety
       const occupant = record.fields.Occupant;
+      
       // Define a type for the Airtable field which can have various formats
       type AirtableField = string | number | boolean | object | readonly any[] | undefined | null;
+      
+      // Define a more specific type for Airtable's field format
+      type AirtableFieldValue = string | number | boolean | object | readonly string[] | undefined | null;
       
       // Explicitly cast the Airtable field to string to fix type error
       const citizenId = occupant ? 
         (typeof occupant === 'string' ? occupant : 
           Array.isArray(occupant) && occupant.length > 0 ? String(occupant[0]) : 
           typeof occupant === 'object' && occupant !== null ? String(Object.values(occupant)[0]) : 
-          String(occupant as AirtableField)) : '';
+          String(occupant as AirtableFieldValue)) : '';
       const citizen = citizenMap.get(citizenId);
       
       if (!citizen) {
