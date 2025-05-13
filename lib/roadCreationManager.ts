@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { DockService, DockData } from './services/DockService';
+import { DockService, DockData } from '../services/DockService';
 
 export class RoadCreationManager {
   private scene: THREE.Scene;
