@@ -380,12 +380,11 @@ If you decide not to build anything at this time, return an empty JSON object.
                 content = response_data.get('content', '')
                 print(f"AI {ai_username} response length: {len(content)} characters")
                 print(f"AI {ai_username} response preview: {content[:200]}...")
-                        
-                        # Try to extract the JSON decision from the response
-                        try:
-                            content = latest_message.get('content', '')
-                            # Look for JSON block in the response
-                            import re
+                
+                # Try to extract the JSON decision from the response
+                try:
+                    # Look for JSON block in the response
+                    import re
                             json_match = re.search(r'```json\s*(.*?)\s*```', content, re.DOTALL)
                             
                             if json_match:
@@ -420,17 +419,6 @@ If you decide not to build anything at this time, return an empty JSON object.
                             print(f"Full response content that caused the error:")
                             print(content)
                             return None
-                    else:
-                        print(f"No assistant messages found for {ai_username}")
-                        print(f"Full messages response: {json.dumps(messages_data)}")
-                        
-                        # Try to get the content directly from the response_data
-                        if "content" in response_data:
-                            print(f"Found content in direct response: {response_data['content']}")
-                        else:
-                            print(f"No content found in direct response either")
-                else:
-                    print(f"Error fetching messages: {messages_response.text}")
                 
                 return None
             else:
@@ -768,8 +756,8 @@ Your response must be a JSON object with:
                         # Try to extract the JSON decision from the response
                         try:
                             content = latest_message.get('content', '')
-                            # Look for JSON block in the response
-                            import re
+                    # Look for JSON block in the response
+                    import re
                             json_match = re.search(r'```json\s*(.*?)\s*```', content, re.DOTALL)
                             
                             if json_match:
@@ -917,11 +905,6 @@ Your response must be a JSON object with:
                             print(f"Exception traceback: {traceback.format_exc()}")
                             print(f"Full response content that caused the error:")
                             print(content)
-                    else:
-                        print(f"No assistant messages found for placement for {ai_username}")
-                else:
-                    print(f"Error fetching placement messages: {messages_response.text}")
-                
                 return False
             else:
                 print(f"Error processing building placement request for AI user {ai_username}: {response_data}")
