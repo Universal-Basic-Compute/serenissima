@@ -87,16 +87,7 @@ const BuildingCard: React.FC<BuildingCardProps> = ({ building, onSelect }) => {
   );
 };
 
-// Add global type declaration for the selected building point
-declare global {
-  interface Window {
-    __selectedBuildingPoint?: {
-      pointId: string;
-      polygonId: string;
-      position: any;
-    };
-  }
-}
+// This declaration is already defined above with the complete type
 
 // Define the Building interface with all required properties
 interface Building extends Partial<ImportedBuilding> {
