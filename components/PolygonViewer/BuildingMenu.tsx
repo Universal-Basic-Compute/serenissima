@@ -4,10 +4,22 @@
 import React, { ErrorInfo, useEffect, useState } from 'react';
 import { Tab } from '@headlessui/react';
 import PlaceableBuilding from './PlaceableBuilding';
-import { Building } from '@/lib/services/BuildingService';
 import ErrorBoundary from '../ErrorBoundary/ErrorBoundary';
 import { useBuildingMenu } from '@/hooks/useBuildingMenu';
 import { log } from '@/lib/logUtils';
+
+// Define the Building interface locally since it's not exported from BuildingService
+interface Building {
+  id: string;
+  name: string;
+  category: string;
+  subcategory: string;
+  description?: string;
+  thumbnail?: string;
+  size?: string;
+  era?: string;
+  variant?: string;
+}
 
 interface BuildingMenuProps {
   visible: boolean;
