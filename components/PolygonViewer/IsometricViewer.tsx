@@ -536,7 +536,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     // Second pass: Draw all polygon names (only in land view)
     if (activeView === 'land') {
       // Only show text if zoom level is above a certain threshold (closer zoom)
-      const showText = scale >= 4.5; // Increased threshold so text only appears when zoomed in closer
+      const showText = scale >= 3.5; // Reduced threshold to allow text to appear at one more zoom level out
         
       if (showText) {
         polygonsToRender.forEach(({ polygon, centroidX, centroidY }) => {
