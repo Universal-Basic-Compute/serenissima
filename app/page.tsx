@@ -1133,6 +1133,12 @@ export default function SimplePage() {
         </div>
         
         <div className="flex space-x-4">
+          <Link 
+            href="/2d"
+            className="px-3 py-1 bg-green-600 hover:bg-green-500 rounded text-white transition-colors font-serif mr-2"
+          >
+            2D View
+          </Link>
           <button 
             onClick={() => setShowSettingsModal(true)}
             className="px-3 py-1 bg-amber-600 hover:bg-amber-500 rounded text-white transition-colors font-serif"
