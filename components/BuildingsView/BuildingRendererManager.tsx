@@ -91,7 +91,7 @@ const BuildingRendererManager: React.FC<BuildingRendererManagerProps> = ({
   const refreshBuildings = () => {
     if (!isSceneReady || !scene) return;
     
-    console.log('BuildingRendererManager: Refreshing buildings');
+    console.log('%c BuildingRendererManager: Refreshing buildings', 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
     
     // First check if we already have buildings
     const currentCount = buildingRendererManager.getBuildingMeshes().size;
@@ -104,7 +104,7 @@ const BuildingRendererManager: React.FC<BuildingRendererManagerProps> = ({
         // Check if buildings were successfully loaded
         const newCount = buildingRendererManager.getBuildingMeshes().size;
         if (newCount === 0 && currentCount > 0) {
-          console.warn('BuildingRendererManager: Buildings disappeared after refresh, trying again...');
+          console.warn('%c BuildingRendererManager: Buildings disappeared after refresh, trying again...', 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
           // Try again with a slight delay
           setTimeout(() => {
             buildingRendererManager.refreshBuildings()
@@ -118,7 +118,7 @@ const BuildingRendererManager: React.FC<BuildingRendererManagerProps> = ({
         
         // If refresh fails, try a more aggressive approach
         setTimeout(() => {
-          console.log('BuildingRendererManager: Trying alternative refresh approach');
+          console.log('%c BuildingRendererManager: Trying alternative refresh approach', 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
           // Force a scene update if possible
           if (scene.userData && scene.userData.renderer) {
             scene.userData.renderer.render(scene, scene.userData.camera);

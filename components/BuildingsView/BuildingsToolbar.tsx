@@ -66,14 +66,14 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
   useEffect(() => {
     const fetchBuildings = async () => {
       try {
-        console.log('BuildingsToolbar: Fetching buildings from: /api/buildings');
+        console.log('%c BuildingsToolbar: Fetching buildings from: /api/buildings', 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
         const response = await fetch('/api/buildings');
         
-        console.log('BuildingsToolbar: API response status:', response.status);
+        console.log('%c BuildingsToolbar: API response status:', 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;', response.status);
         
         if (response.ok) {
           const data = await response.json();
-          console.log(`BuildingsToolbar: Loaded ${data.buildings?.length || 0} buildings`);
+          console.log(`%c BuildingsToolbar: Loaded ${data.buildings?.length || 0} buildings`, 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
           
           // Store buildings in state
           if (data.buildings) {
@@ -83,20 +83,20 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
           // Log each building for debugging
           if (data.buildings && data.buildings.length > 0) {
             data.buildings.forEach((building: any, index: number) => {
-              console.log(`BuildingsToolbar: Building ${index + 1}:`, building);
+              console.log(`%c BuildingsToolbar: Building ${index + 1}:`, 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;', building);
             });
           } else {
-            console.warn('BuildingsToolbar: No buildings returned from API');
+            console.warn('%c BuildingsToolbar: No buildings returned from API', 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
           }
           
           // Dispatch an event to notify the BuildingRenderer to update
-          console.log('BuildingsToolbar: Dispatching BUILDING_PLACED event with refresh=true');
+          console.log('%c BuildingsToolbar: Dispatching BUILDING_PLACED event with refresh=true', 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
           eventBus.emit(EventTypes.BUILDING_PLACED, { refresh: true });
         } else {
-          console.warn(`BuildingsToolbar: Failed to fetch buildings: ${response.status}`);
+          console.warn(`%c BuildingsToolbar: Failed to fetch buildings: ${response.status}`, 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
         }
       } catch (error) {
-        console.error('BuildingsToolbar: Error fetching buildings:', error);
+        console.error('%c BuildingsToolbar: Error fetching buildings:', 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;', error);
         console.error('BuildingsToolbar: Stack trace:', error.stack);
       }
     };

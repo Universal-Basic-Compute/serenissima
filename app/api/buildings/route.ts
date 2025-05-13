@@ -158,12 +158,12 @@ export async function GET(request: Request) {
     const offsetParam = url.searchParams.get('offset');
     const offset = offsetParam ? parseInt(offsetParam) : 0;
     
-    console.log('GET /api/buildings request received');
+    console.log('%c GET /api/buildings request received', 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
     console.log('Query parameters:', { type, limit, offset: offsetParam });
     
     // Check if Airtable configuration is available
     if (!apiKey || !baseId) {
-      console.warn('Airtable configuration missing, returning debug buildings only');
+      console.warn('%c Airtable configuration missing, returning debug buildings only', 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
       return NextResponse.json({ 
         buildings: getDebugBuildings(),
         message: 'Using debug buildings (Airtable configuration missing)'
@@ -380,15 +380,15 @@ export async function GET(request: Request) {
       };
     });
     
-    console.log(`Retrieved ${buildings.length} buildings from Airtable`);
+    console.log(`%c Retrieved ${buildings.length} buildings from Airtable`, 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
     
     // Log each building for debugging
     buildings.forEach((building, index) => {
-      console.log(`Building ${index + 1}:`, building);
+      console.log(`%c Building ${index + 1}:`, 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;', building);
     });
     
     // Always add debug buildings to ensure we have something visible
-    console.log('Adding debug buildings regardless of Airtable data');
+    console.log('%c Adding debug buildings regardless of Airtable data', 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
       
     // Add your specific building for debugging - add multiple copies at different positions
     const debugBuilding1: Building = {
@@ -467,7 +467,7 @@ export async function GET(request: Request) {
     
     // Only add debug buildings in development mode if there are no buildings from Airtable
     if (process.env.NODE_ENV === 'development' && buildings.length === 0) {
-      console.log('No buildings found from Airtable, adding debug buildings for development');
+      console.log('%c No buildings found from Airtable, adding debug buildings for development', 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
       buildings.push(debugBuilding1 as any);
     }
     
@@ -483,7 +483,8 @@ export async function GET(request: Request) {
     console.error('Error fetching buildings:', error);
     console.error('Stack trace:', error instanceof Error ? error.stack : 'No stack trace available');
     
-    // Return debug buildings as fallback even for general errors
+    // Return debug buildings as fallback even for general errors with yellow highlighting
+    console.log('%c Using debug buildings (API error fallback)', 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
     return NextResponse.json({ 
       buildings: getDebugBuildings(),
       message: 'Using debug buildings (API error fallback)'

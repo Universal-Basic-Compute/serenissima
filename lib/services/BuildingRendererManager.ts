@@ -345,7 +345,7 @@ export class BuildingRendererManager {
     }
     
     try {
-      console.log('BuildingRendererManager: Refreshing buildings');
+      console.log('%c BuildingRendererManager: Refreshing buildings', 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
       
       // Fetch buildings from API
       const response = await fetch('/api/buildings');
@@ -357,7 +357,7 @@ export class BuildingRendererManager {
       const data = await response.json();
       const buildings = data.buildings || [];
       
-      console.log(`BuildingRendererManager: Refreshing ${buildings.length} buildings`);
+      console.log(`%c BuildingRendererManager: Refreshing ${buildings.length} buildings`, 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
       
       // Track which buildings we've processed
       const processedBuildingIds = new Set<string>();
@@ -377,9 +377,9 @@ export class BuildingRendererManager {
         }
       }
       
-      console.log('BuildingRendererManager: Buildings refresh complete');
+      console.log('%c BuildingRendererManager: Buildings refresh complete', 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
     } catch (error) {
-      console.error('Error refreshing buildings:', error);
+      console.error('%c Error refreshing buildings:', 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;', error);
     }
   }
   
